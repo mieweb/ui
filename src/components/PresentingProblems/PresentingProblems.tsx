@@ -149,7 +149,7 @@ function RelevanceControl({
               'px-2 py-1 text-xs font-medium transition-colors',
               'border-border border-l first:border-l-0',
               active
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-background text-muted-foreground hover:text-foreground'
             )}
           >
@@ -314,7 +314,7 @@ export const PresentingProblems = React.forwardRef<
           className={cn(
             'border-border/60 flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 border-b px-1 py-2',
             'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-            outOfScope && 'opacity-60',
+            outOfScope && 'opacity-80',
             draggable && 'cursor-grab active:cursor-grabbing',
             draggable && dragIndicatorClasses(drag, concern.concernId)
           )}
