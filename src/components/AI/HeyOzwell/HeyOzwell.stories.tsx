@@ -70,9 +70,11 @@ interface DemoArgs {
   liveTranscript: boolean;
   /** Conversation mode: diarize the clip on "done" and send a speaker-labeled transcript (who said what). */
   conversationMode: boolean;
+  /** Review before send: put the transcript in the box to edit before sending, instead of auto-sending. */
+  reviewBeforeSend: boolean;
 }
 
-function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor, liveTranscript, conversationMode }: DemoArgs) {
+function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor, liveTranscript, conversationMode, reviewBeforeSend }: DemoArgs) {
   // The whole flow now lives in the shipped <HeyOzwell> drop-in — the host only places the octopus in
   // its header and wires where the settings items navigate. (For custom layouts, useHeyOzwell + the
   // parts give the same behavior; see the component source.)
@@ -94,6 +96,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
           requireDoctor={requireDoctor}
           liveTranscript={liveTranscript}
           conversationMode={conversationMode}
+          reviewBeforeSend={reviewBeforeSend}
           size={40}
           chatProps={{ suggestions: suggestedActions, userName: 'Dr. Jane' }}
           // "Your voice" opens the central Voice Manager page (set up / add / rename / remove voices). In a
@@ -123,7 +126,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
  * long-press the octopus for Ozwell settings.
  */
 export const Interactive: StoryObj<DemoArgs> = {
-  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false, liveTranscript: false, conversationMode: false },
+  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false, liveTranscript: false, conversationMode: false, reviewBeforeSend: false },
   argTypes: {
     autoDictateOnWake: {
       name: 'Auto-dictate on wake',
@@ -171,6 +174,13 @@ export const Interactive: StoryObj<DemoArgs> = {
         'ON: on “ozwell I’m done”, diarize the clip and send a speaker-labeled transcript ("Dr. Jane: … / ' +
         'Patient: …") so the assistant knows who said what in a multi-person room. On-device; overrides server ' +
         'transcription. Enroll voices (settings → Your voice) to see real names instead of “Speaker N”.',
+    },
+    reviewBeforeSend: {
+      name: 'Review before send',
+      control: 'boolean',
+      description:
+        'ON: on “done”, drop the transcript into the message box to review/edit before sending, instead of ' +
+        'auto-sending. An accuracy safety net; OFF keeps it fully hands-free.',
     },
   },
   render: (args) => <Demo {...args} />,

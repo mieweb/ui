@@ -39,6 +39,8 @@ interface HandsFreeArgs {
   liveTranscript: boolean;
   /** Diarize the clip on "done" and send a speaker-labeled transcript (who said what). */
   conversationMode: boolean;
+  /** Put the transcript in the box to edit before sending, instead of auto-sending. */
+  reviewBeforeSend: boolean;
 }
 
 /** Say "hey ozwell" to dictate, "ozwell I'm done" to send. Use the Controls panel to configure it. */
@@ -49,6 +51,7 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
     autoDictateOnWake: true,
     liveTranscript: false,
     conversationMode: false,
+    reviewBeforeSend: false,
   },
   argTypes: {
     requireDoctor: {
@@ -84,6 +87,13 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
         'On “done”, diarize the clip and send a speaker-labeled transcript ("Dr. Jane: … / Patient: …") ' +
         'so the assistant knows who said what in a multi-person room. On-device; overrides server transcription.',
     },
+    reviewBeforeSend: {
+      name: 'Review before send',
+      control: 'boolean',
+      description:
+        'On “done”, drop the transcript into the message box to review/edit before sending, instead of ' +
+        'auto-sending. An accuracy safety net; off keeps the flow fully hands-free.',
+    },
   },
   render: (args) => (
     <HandsFreeChat
@@ -94,6 +104,7 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
       autoDictateOnWake={args.autoDictateOnWake}
       liveTranscript={args.liveTranscript}
       conversationMode={args.conversationMode}
+      reviewBeforeSend={args.reviewBeforeSend}
     />
   ),
 };

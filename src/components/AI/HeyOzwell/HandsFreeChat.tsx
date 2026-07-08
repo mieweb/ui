@@ -42,6 +42,9 @@ export interface HandsFreeChatProps {
    *  Patient: …") so the assistant knows who said what in a multi-person room. On-device; overrides server
    *  transcription. Default false. */
   conversationMode?: boolean;
+  /** Review before send — on "done", put the transcript in the message box to edit before sending, instead
+   *  of sending automatically. Default false. */
+  reviewBeforeSend?: boolean;
   /** Auto-dictate — "hey ozwell" starts dictating hands-free. Default true. */
   autoDictateOnWake?: boolean;
 }
@@ -56,6 +59,7 @@ export function HandsFreeChat({
   requireDoctor = true,
   liveTranscript = false,
   conversationMode = false,
+  reviewBeforeSend = false,
   autoDictateOnWake = true,
 }: HandsFreeChatProps) {
   // Props flow straight through — the host (or the Storybook Controls panel) drives them live; there's no
@@ -67,6 +71,7 @@ export function HandsFreeChat({
     transcription,
     liveTranscript,
     conversationMode,
+    reviewBeforeSend,
   });
   const { phase, ready, error } = oz;
 

@@ -90,6 +90,10 @@ export interface UseHeyOzwellOptions {
    * server transcription (diarization needs the audio locally). Default false.
    */
   conversationMode?: boolean;
+  /** Review before send: on "done", drop the transcript into the composer as EDITABLE text (glance / fix a
+   *  mishearing, then press send) instead of sending it automatically. An accuracy safety net for clinical
+   *  use — off by default so the hands-free flow stays hands-free. */
+  reviewBeforeSend?: boolean;
   /** Diarization tuning for conversation mode (threshold, maxSpeakers, minSegmentSeconds, inferRoles). */
   diarizationOptions?: Omit<UseDiarizationOptions, 'enabled'>;
 }
@@ -227,6 +231,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     autoStart = false,
     liveTranscript = false,
     conversationMode = false,
+    reviewBeforeSend = false,
     diarizationOptions,
   } = options;
 
@@ -486,15 +491,20 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
         } else {
           text = stripStopPhrase(await transcribeBlob(blob));
         }
-        if (text) send(text);
-        if (closeChatOnDone) setChatOpen(false);
+        if (text) {
+          // Review-before-send: drop the transcript into the composer for a glance/edit instead of firing
+          // it. The user edits and presses send (→ onSendMessage → send). Otherwise, auto-send.
+          if (reviewBeforeSend) setTyped(text);
+          else send(text);
+        }
+        if (closeChatOnDone && !reviewBeforeSend) setChatOpen(false);
       } catch (e) {
         console.error('[hey-ozwell] transcription failed', e);
       }
       setPhase('listening');
     };
     rec.stop();
-  }, [transcription, conversationMode, closeChatOnDone, send, stopLive]);
+  }, [transcription, conversationMode, reviewBeforeSend, closeChatOnDone, send, stopLive]);
 
   const wake = useWakeWord({
     enabled: active,
