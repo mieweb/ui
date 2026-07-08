@@ -33,3 +33,9 @@ export {
   registerAllergyListFieldType,
   type AllergyListFieldValue,
 } from './esheet-fields/AllergyListField';
+
+// Convenience: register every @mieweb/ui custom field type in one call
+export {
+  registerMieEsheetFields,
+  type RegisterMieEsheetFieldsOptions,
+} from './esheet-fields/registerAll';
