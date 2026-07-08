@@ -19,11 +19,7 @@ import { Card, CardHeader, CardContent } from '../Card/Card';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  ClipboardListIcon,
-} from '../Icons';
+import { ChevronDownIcon, ChevronRightIcon, ClipboardListIcon } from '../Icons';
 import { evaluateDue, normalizeOrders, completedKeys } from './evaluate';
 import type { DueItem, OrderSpec, ProgramsMap } from './evaluate';
 import type { PatientHistory } from './history';
@@ -131,9 +127,7 @@ export const HealthSurveillance = React.forwardRef<
     // label lookup: explicit props, then history entries, then the raw key
     const historyLabels = React.useMemo(() => {
       const m = new Map<string, string>();
-      const scan = (
-        list?: { key?: string; label?: string }[]
-      ) => {
+      const scan = (list?: { key?: string; label?: string }[]) => {
         for (const e of list ?? []) {
           if (e.key && e.label && !m.has(e.key)) m.set(e.key, e.label);
         }
@@ -261,7 +255,9 @@ export const HealthSurveillance = React.forwardRef<
                     key={si}
                     className={cn(level > 0 && 'border-border border-l-2')}
                     style={
-                      level > 0 ? { marginLeft: (level - 1) * 16 + 2 } : undefined
+                      level > 0
+                        ? { marginLeft: (level - 1) * 16 + 2 }
+                        : undefined
                     }
                   >
                     {isAlt && (

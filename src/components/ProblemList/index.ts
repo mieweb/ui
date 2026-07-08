@@ -5,7 +5,6 @@ export {
   currentAssertion,
   concernGroupKey,
   concernHistoryContent,
-  toolbarKeyNav,
   CONCERN_STATUS_LABELS,
   CHANGE_TYPE_LABELS,
   type ProblemListProps,

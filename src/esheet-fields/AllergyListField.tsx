@@ -72,7 +72,9 @@ export function AllergyListField({
   // Default to the ambient provider; `false` forces plain text.
   const ambientCodeLookup = useCodeLookupConfig();
   const effectiveCodeLookup =
-    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+    codeLookup === false
+      ? undefined
+      : (codeLookup ?? ambientCodeLookup ?? undefined);
 
   const value = React.useMemo(() => {
     if (response?.answer) return parseValue(response.answer);
@@ -90,7 +92,8 @@ export function AllergyListField({
         commit({
           allergies,
           // any recorded allergy clears NKA
-          noKnownAllergies: allergies.length > 0 ? undefined : value.noKnownAllergies,
+          noKnownAllergies:
+            allergies.length > 0 ? undefined : value.noKnownAllergies,
         })
       }
       noKnownAllergies={value.noKnownAllergies}

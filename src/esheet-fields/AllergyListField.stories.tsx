@@ -52,6 +52,7 @@ const SAMPLE_FORM = {
 const meta: Meta<typeof EsheetRenderer> = {
   title: 'Components/Forms & Inputs/eSheet/AllergyListField',
   component: EsheetRenderer,
+  tags: ['autodocs'],
   parameters: {
     layout: 'padded',
     docs: {

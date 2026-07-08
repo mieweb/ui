@@ -115,9 +115,7 @@ export const Interactive: StoryObj<typeof AllergyManager> = {
  */
 export const EmptyIntake: StoryObj<typeof AllergyManager> = {
   render: function EmptyIntakeStory() {
-    return (
-      <AllergyManagerWithNka />
-    );
+    return <AllergyManagerWithNka />;
   },
   parameters: {
     docs: {

@@ -16,9 +16,9 @@ import {
 import {
   CodingChips,
   currentAssertion,
-  toolbarKeyNav,
   type ConditionConcern,
 } from '../ProblemList';
+import { toolbarKeyNav } from '../RowActionToolbar';
 import {
   useDragReorder,
   dragIndicatorClasses,
@@ -216,8 +216,7 @@ export const PresentingProblems = React.forwardRef<
     // Precomputed — relevanceOf runs for every patient concern on render;
     // a presenting.find() inside that loop is O(N×M) on large problem lists.
     const relevanceById = React.useMemo(
-      () =>
-        new Map(presenting.map((p) => [p.concernId, p.relevance] as const)),
+      () => new Map(presenting.map((p) => [p.concernId, p.relevance] as const)),
       [presenting]
     );
     const relevanceOf = (concernId: string): ProblemRelevance | null =>

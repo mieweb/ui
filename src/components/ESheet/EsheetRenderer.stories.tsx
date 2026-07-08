@@ -186,7 +186,11 @@ export const MedicalFields: RendererStory = {
           question: 'Presenting medications',
           medications: [
             { id: 'm1', name: 'lisinopril 10 mg tablet', status: 'taking' },
-            { id: 'm2', name: 'metformin 500 mg tablet', status: 'unreconciled' },
+            {
+              id: 'm2',
+              name: 'metformin 500 mg tablet',
+              status: 'unreconciled',
+            },
           ],
         },
         {
@@ -209,4 +213,3 @@ export const MedicalFields: RendererStory = {
   },
   render: (args) => <RendererDemo {...args} />,
 };
-

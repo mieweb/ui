@@ -301,7 +301,9 @@ export function AllergyManager({
   // Default the lookup to the ambient provider; `false` forces plain text.
   const ambientCodeLookup = useCodeLookupConfig();
   const effectiveCodeLookup: CodeLookupConfig | undefined =
-    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+    codeLookup === false
+      ? undefined
+      : (codeLookup ?? ambientCodeLookup ?? undefined);
 
   const [dialog, setDialog] = React.useState<DialogState>(null);
   const [noteDraft, setNoteDraft] = React.useState('');

@@ -193,11 +193,7 @@ function shardUnchanged(
 // Loading
 // =============================================================================
 
-async function load(
-  baseUrl: string,
-  domains?: string[],
-  programsUrl?: string
-) {
+async function load(baseUrl: string, domains?: string[], programsUrl?: string) {
   const dir = await getCacheDir(baseUrl, true);
   const cachedManifest = dir ? await readCachedManifest(dir) : null;
 
@@ -356,10 +352,7 @@ self.onmessage = (e: MessageEvent) => {
         restAll.length === 0
           ? limit
           : Math.max(Math.ceil(limit / 2), limit - restAll.length);
-      results = firstAll
-        .slice(0, firstCap)
-        .concat(restAll)
-        .slice(0, limit);
+      results = firstAll.slice(0, firstCap).concat(restAll).slice(0, limit);
     } else {
       results = searchShards(active, msg.query, limit, collapse, opts);
     }

@@ -62,7 +62,7 @@ const sampleMedications: Medication[] = [
   {
     id: '5',
     name: 'ibuprofen 600 mg tablet',
-    sig: 'As needed pain, not to exceed 4 tablets in 24 hours period',
+    sig: 'As needed pain, not to exceed 4 tablets in a 24-hour period',
     status: 'taking-noncompliant',
     expired: true,
   },
@@ -382,10 +382,7 @@ export const Reconciliation: StoryObj<typeof MedicationReconciliation> = {
   render: () => (
     <MedicationReconciliation
       defaultMedications={sampleMedications}
-      quickAddOptions={[
-        'atorvastatin 20 mg tablet',
-        'metformin 500 mg tablet',
-      ]}
+      quickAddOptions={['atorvastatin 20 mg tablet', 'metformin 500 mg tablet']}
       onChange={(meds) => console.log('medications changed', meds)}
     />
   ),

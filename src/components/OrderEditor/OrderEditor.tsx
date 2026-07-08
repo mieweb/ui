@@ -239,7 +239,9 @@ function BaseOrderEditor({
   // Default the lookup to the ambient provider; `false` forces plain text.
   const ambientCodeLookup = useCodeLookupConfig();
   const effectiveCodeLookup: OrderCodeLookupConfig | undefined =
-    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+    codeLookup === false
+      ? undefined
+      : (codeLookup ?? ambientCodeLookup ?? undefined);
 
   const [draft, setDraft] = React.useState<AssessmentOrder>(
     () =>
@@ -396,9 +398,7 @@ function BaseOrderEditor({
               <Textarea
                 id="ord-detail"
                 value={draft.detail ?? ''}
-                onChange={(e) =>
-                  patch({ detail: e.target.value || undefined })
-                }
+                onChange={(e) => patch({ detail: e.target.value || undefined })}
                 rows={2}
               />
             </div>

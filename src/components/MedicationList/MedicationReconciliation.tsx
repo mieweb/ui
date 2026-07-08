@@ -226,7 +226,9 @@ export function MedicationReconciliation({
   // Default the lookup to the ambient provider; `false` forces plain text.
   const ambientCodeLookup = useCodeLookupConfig();
   const effectiveCodeLookup: CodeLookupConfig | undefined =
-    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+    codeLookup === false
+      ? undefined
+      : (codeLookup ?? ambientCodeLookup ?? undefined);
 
   const [dialog, setDialog] = React.useState<DialogState>(null);
 
@@ -300,7 +302,8 @@ export function MedicationReconciliation({
 
   /** Correct + Add flow through the full NCPDP MedicationEditor. */
   const editorOpen = dialog?.kind === 'correct' || dialog?.kind === 'add';
-  const editorTarget = dialog?.kind === 'correct' ? dialog.medication : undefined;
+  const editorTarget =
+    dialog?.kind === 'correct' ? dialog.medication : undefined;
 
   const handleEditorSave = (med: Medication) => {
     if (dialog?.kind === 'correct') {

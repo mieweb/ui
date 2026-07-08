@@ -197,12 +197,21 @@ const SIG_ROUTES: [RegExp, string][] = [
 const SIG_FREQUENCIES: [RegExp, string][] = [
   [/\bevery other day\b|\bqod\b/, 'Every other day'],
   [/\btwice (a |per )?day\b|\btwice daily\b|\bbid\b/, 'Twice daily'],
-  [/\b(three times|3 times)( a| per)? day\b|\b(three times|3 times) daily\b|\btid\b/, 'Three times daily'],
-  [/\b(four times|4 times)( a| per)? day\b|\b(four times|4 times) daily\b|\bqid\b/, 'Four times daily'],
+  [
+    /\b(three times|3 times)( a| per)? day\b|\b(three times|3 times) daily\b|\btid\b/,
+    'Three times daily',
+  ],
+  [
+    /\b(four times|4 times)( a| per)? day\b|\b(four times|4 times) daily\b|\bqid\b/,
+    'Four times daily',
+  ],
   [/\bevery morning\b|\bqam\b/, 'Every morning'],
   [/\b(at )?bedtime\b|\bqhs\b|\bat night\b/, 'Every bedtime'],
   [/\bweekly\b|\bonce a week\b|\bevery week\b/, 'Weekly'],
-  [/\bonce (a |per )?day\b|\bonce daily\b|\bdaily\b|\bevery day\b|\bqd\b/, 'Once daily'],
+  [
+    /\bonce (a |per )?day\b|\bonce daily\b|\bdaily\b|\bevery day\b|\bqd\b/,
+    'Once daily',
+  ],
 ];
 
 /**
@@ -276,7 +285,9 @@ export function MedicationEditor({
   // Default the lookup to the ambient provider; `false` forces plain text.
   const ambientCodeLookup = useCodeLookupConfig();
   const effectiveCodeLookup: CodeLookupConfig | undefined =
-    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+    codeLookup === false
+      ? undefined
+      : (codeLookup ?? ambientCodeLookup ?? undefined);
 
   const [draft, setDraft] = React.useState<Medication>(
     () =>
@@ -325,199 +336,198 @@ export function MedicationEditor({
       </ModalHeader>
       <ModalBody className="space-y-5">
         <div ref={bodyRef} className="contents">
-        {/* ——— Medication + coding ——— */}
-        <section className="space-y-3" aria-label="Medication">
-          {effectiveCodeLookup ? (
+          {/* ——— Medication + coding ——— */}
+          <section className="space-y-3" aria-label="Medication">
+            {effectiveCodeLookup ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="med-search">Medication</Label>
+                <effectiveCodeLookup.component
+                  indexUrl={effectiveCodeLookup.indexUrl}
+                  locale={effectiveCodeLookup.locale}
+                  domains={['med']}
+                  bare
+                  clearOnSelect={false}
+                  placeholder="Search RxNorm / FDB — e.g. lisinopril"
+                  // Seed the search box with the medication name. Editing an
+                  // uncoded medication also runs the search immediately so the
+                  // closest coded matches are offered (a pick fills coding,
+                  // strength, and dose form); coded ones just show their name.
+                  initialQuery={medication?.name || undefined}
+                  initialSearch={medication ? !medication.code : undefined}
+                  onSelect={handleCodeSelect}
+                  onFreeText={(text) => patch({ name: text, code: undefined })}
+                />
+                <p className="text-muted-foreground text-xs">
+                  {draft.code
+                    ? `Coded: ${draft.code.system} ${draft.code.code}`
+                    : draft.name
+                      ? `Uncoded free text: "${draft.name}" — pick a result to code it`
+                      : 'Pick a result to code the medication, or press Enter for free text'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <Label htmlFor="med-name">Medication</Label>
+                <Input
+                  id="med-name"
+                  value={draft.name}
+                  onChange={(e) => patch({ name: e.target.value })}
+                />
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="med-strength">Strength</Label>
+                <Input
+                  id="med-strength"
+                  value={draft.strength ?? ''}
+                  onChange={(e) => patch({ strength: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="med-form">Dose form</Label>
+                <Input
+                  id="med-form"
+                  value={draft.doseForm ?? ''}
+                  onChange={(e) => {
+                    const doseForm = e.target.value;
+                    const normalized = doseForm.toLowerCase().trim();
+                    // Quantity unit follows the dose form (tablet → tablet,
+                    // solution → milliliter, …)
+                    patch({
+                      doseForm,
+                      quantityUnit:
+                        (FORM_TO_UNIT[normalized] ?? normalized) || undefined,
+                    });
+                  }}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* ——— Dispensing ——— */}
+          <section className="space-y-3" aria-label="Dispensing">
+            <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              Dispensing
+            </h4>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="med-qty">
+                  Quantity
+                  {draft.quantityUnit ? ` (${draft.quantityUnit}s)` : ''}
+                </Label>
+                <Input
+                  id="med-qty"
+                  inputMode="decimal"
+                  value={draft.quantity ?? ''}
+                  onChange={(e) => patch({ quantity: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="med-days">Days supply</Label>
+                <Input
+                  id="med-days"
+                  inputMode="numeric"
+                  value={draft.daysSupply ?? ''}
+                  onChange={(e) => patch({ daysSupply: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="med-refills">Refills</Label>
+                <Input
+                  id="med-refills"
+                  inputMode="numeric"
+                  value={draft.refills ?? ''}
+                  onChange={(e) => patch({ refills: e.target.value })}
+                />
+              </div>
+            </div>
+            <RadioGroup
+              name="med-substitution"
+              label="Substitution"
+              value={draft.substitution ?? '0'}
+              onValueChange={(v) => patch({ substitution: v as '0' | '1' })}
+              orientation="horizontal"
+              size="sm"
+            >
+              <Radio value="0" label="Substitution permitted" />
+              <Radio value="1" label="Dispense as written (DAW)" />
+            </RadioGroup>
+          </section>
+
+          {/* ——— Directions ——— */}
+          <section className="space-y-3" aria-label="Directions">
+            <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              Directions
+            </h4>
             <div className="space-y-1.5">
-              <Label htmlFor="med-search">Medication</Label>
-              <effectiveCodeLookup.component
-                indexUrl={effectiveCodeLookup.indexUrl}
-                locale={effectiveCodeLookup.locale}
-                domains={['med']}
-                bare
-                clearOnSelect={false}
-                placeholder="Search RxNorm / FDB — e.g. lisinopril"
-                // Seed the search box with the medication name. Editing an
-                // uncoded medication also runs the search immediately so the
-                // closest coded matches are offered (a pick fills coding,
-                // strength, and dose form); coded ones just show their name.
-                initialQuery={medication?.name || undefined}
-                initialSearch={medication ? !medication.code : undefined}
-                onSelect={handleCodeSelect}
-                onFreeText={(text) =>
-                  patch({ name: text, code: undefined })
-                }
+              <Label htmlFor="med-sig">Sig (patient directions)</Label>
+              <Textarea
+                id="med-sig"
+                value={draft.sig ?? ''}
+                onChange={(e) => handleSigChange(e.target.value)}
+                rows={2}
               />
-              <p className="text-muted-foreground text-xs">
-                {draft.code
-                  ? `Coded: ${draft.code.system} ${draft.code.code}`
-                  : draft.name
-                    ? `Uncoded free text: "${draft.name}" — pick a result to code it`
-                    : 'Pick a result to code the medication, or press Enter for free text'}
+              <p className="text-muted-foreground text-xs" aria-live="polite">
+                {draft.route || draft.frequency || draft.prn ? (
+                  <>
+                    Derived:{' '}
+                    {[
+                      draft.route && `route ${draft.route}`,
+                      draft.frequency && draft.frequency.toLowerCase(),
+                      draft.prn && 'PRN (as needed)',
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </>
+                ) : (
+                  'Route, frequency, and PRN are derived from the directions'
+                )}
               </p>
             </div>
-          ) : (
-            <div className="space-y-1.5">
-              <Label htmlFor="med-name">Medication</Label>
-              <Input
-                id="med-name"
-                value={draft.name}
-                onChange={(e) => patch({ name: e.target.value })}
-              />
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="med-strength">Strength</Label>
-              <Input
-                id="med-strength"
-                value={draft.strength ?? ''}
-                onChange={(e) => patch({ strength: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="med-form">Dose form</Label>
-              <Input
-                id="med-form"
-                value={draft.doseForm ?? ''}
-                onChange={(e) => {
-                  const doseForm = e.target.value;
-                  const normalized = doseForm.toLowerCase().trim();
-                  // Quantity unit follows the dose form (tablet → tablet,
-                  // solution → milliliter, …)
-                  patch({
-                    doseForm,
-                    quantityUnit:
-                      (FORM_TO_UNIT[normalized] ?? normalized) || undefined,
-                  });
-                }}
-              />
-            </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ——— Dispensing ——— */}
-        <section className="space-y-3" aria-label="Dispensing">
-          <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-            Dispensing
-          </h4>
-          <div className="grid grid-cols-3 gap-3">
+          {/* ——— Dates & context ——— */}
+          <section className="space-y-3" aria-label="Dates and context">
+            <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              Dates &amp; context
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="med-start">Start date</Label>
+                <DateInput
+                  id="med-start"
+                  value={draft.startDate ?? ''}
+                  onChange={(v) => patch({ startDate: v })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="med-end">End date</Label>
+                <DateInput
+                  id="med-end"
+                  value={draft.endDate ?? ''}
+                  onChange={(v) => patch({ endDate: v })}
+                />
+              </div>
+            </div>
             <div className="space-y-1.5">
-              <Label htmlFor="med-qty">
-                Quantity{draft.quantityUnit ? ` (${draft.quantityUnit}s)` : ''}
-              </Label>
+              <Label htmlFor="med-indication">Indication</Label>
               <Input
-                id="med-qty"
-                inputMode="decimal"
-                value={draft.quantity ?? ''}
-                onChange={(e) => patch({ quantity: e.target.value })}
+                id="med-indication"
+                value={draft.indication ?? ''}
+                onChange={(e) => patch({ indication: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="med-days">Days supply</Label>
-              <Input
-                id="med-days"
-                inputMode="numeric"
-                value={draft.daysSupply ?? ''}
-                onChange={(e) => patch({ daysSupply: e.target.value })}
+              <Label htmlFor="med-pharmacy-notes">Pharmacy notes</Label>
+              <Textarea
+                id="med-pharmacy-notes"
+                value={draft.pharmacyNotes ?? ''}
+                onChange={(e) => patch({ pharmacyNotes: e.target.value })}
+                rows={2}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="med-refills">Refills</Label>
-              <Input
-                id="med-refills"
-                inputMode="numeric"
-                value={draft.refills ?? ''}
-                onChange={(e) => patch({ refills: e.target.value })}
-              />
-            </div>
-          </div>
-          <RadioGroup
-            name="med-substitution"
-            label="Substitution"
-            value={draft.substitution ?? '0'}
-            onValueChange={(v) => patch({ substitution: v as '0' | '1' })}
-            orientation="horizontal"
-            size="sm"
-          >
-            <Radio value="0" label="Substitution permitted" />
-            <Radio value="1" label="Dispense as written (DAW)" />
-          </RadioGroup>
-        </section>
-
-        {/* ——— Directions ——— */}
-        <section className="space-y-3" aria-label="Directions">
-          <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-            Directions
-          </h4>
-          <div className="space-y-1.5">
-            <Label htmlFor="med-sig">Sig (patient directions)</Label>
-            <Textarea
-              id="med-sig"
-              value={draft.sig ?? ''}
-              onChange={(e) => handleSigChange(e.target.value)}
-              rows={2}
-            />
-            <p className="text-muted-foreground text-xs" aria-live="polite">
-              {draft.route || draft.frequency || draft.prn ? (
-                <>
-                  Derived:{' '}
-                  {[
-                    draft.route && `route ${draft.route}`,
-                    draft.frequency && draft.frequency.toLowerCase(),
-                    draft.prn && 'PRN (as needed)',
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </>
-              ) : (
-                'Route, frequency, and PRN are derived from the directions'
-              )}
-            </p>
-          </div>
-        </section>
-
-        {/* ——— Dates & context ——— */}
-        <section className="space-y-3" aria-label="Dates and context">
-          <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-            Dates &amp; context
-          </h4>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="med-start">Start date</Label>
-              <DateInput
-                id="med-start"
-                value={draft.startDate ?? ''}
-                onChange={(v) => patch({ startDate: v })}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="med-end">End date</Label>
-              <DateInput
-                id="med-end"
-                value={draft.endDate ?? ''}
-                onChange={(v) => patch({ endDate: v })}
-              />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="med-indication">Indication</Label>
-            <Input
-              id="med-indication"
-              value={draft.indication ?? ''}
-              onChange={(e) => patch({ indication: e.target.value })}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="med-pharmacy-notes">Pharmacy notes</Label>
-            <Textarea
-              id="med-pharmacy-notes"
-              value={draft.pharmacyNotes ?? ''}
-              onChange={(e) => patch({ pharmacyNotes: e.target.value })}
-              rows={2}
-            />
-          </div>
-        </section>
+          </section>
         </div>
       </ModalBody>
       <ModalFooter>

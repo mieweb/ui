@@ -40,7 +40,7 @@ import type { CodeLookupProps } from './CodeLookup';
  * assignment. `CodeLookup` is a function component, so this is exact.
  */
 export type CodeLookupComponent = (
-  props: CodeLookupProps,
+  props: CodeLookupProps
 ) => React.ReactElement | null;
 
 /** Resolved lookup wiring a component consumes (from prop or context). */
@@ -54,7 +54,7 @@ export interface CodeLookupProviderConfig {
 }
 
 const CodeLookupContext = React.createContext<CodeLookupProviderConfig | null>(
-  null,
+  null
 );
 
 export interface CodeLookupProviderProps {
@@ -75,7 +75,7 @@ export function CodeLookupProvider({
 }: CodeLookupProviderProps): React.ReactElement {
   const value = React.useMemo<CodeLookupProviderConfig>(
     () => ({ component, indexUrl, locale }),
-    [component, indexUrl, locale],
+    [component, indexUrl, locale]
   );
   return (
     <CodeLookupContext.Provider value={value}>

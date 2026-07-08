@@ -188,7 +188,11 @@ export function evaluateProgram(
 export function evaluateDue(
   history: PatientHistory,
   programs: ProgramsMap,
-  options?: { enrolledKeys?: string[]; includeNotApplicable?: boolean; now?: Date }
+  options?: {
+    enrolledKeys?: string[];
+    includeNotApplicable?: boolean;
+    now?: Date;
+  }
 ): DueItem[] {
   const enrolled = options?.enrolledKeys ? new Set(options.enrolledKeys) : null;
   const now = options?.now ?? new Date();

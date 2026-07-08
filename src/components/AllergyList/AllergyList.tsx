@@ -367,7 +367,9 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
         }
         if (to < 0 || to >= allergies.length) return;
         [ids[from], ids[to]] = [ids[to], ids[from]];
-        setAnnouncement(`${allergy.allergen} moved ${dir === -1 ? 'up' : 'down'}`);
+        setAnnouncement(
+          `${allergy.allergen} moved ${dir === -1 ? 'up' : 'down'}`
+        );
         onReorder(ids);
       },
       [allergies, onReorder, readOnly, setAnnouncement]

@@ -134,7 +134,7 @@ export function orderTypeForCodetype(codetype: string): OrderType {
  * injected CodeLookup. Used when no explicit `renderOrderSearch` prop is given.
  */
 function contextOrderSearch(ctx: CodeLookupProviderConfig): RenderOrderSearch {
-  return ({
+  const ContextOrderSearch: RenderOrderSearch = ({
     domains,
     preferDomains,
     preferCodetypes,
@@ -167,6 +167,7 @@ function contextOrderSearch(ctx: CodeLookupProviderConfig): RenderOrderSearch {
       />
     );
   };
+  return ContextOrderSearch;
 }
 
 /** Coding systems that represent a diagnosis/problem rather than an order.
@@ -403,10 +404,10 @@ function OrderRow({
 }) {
   const interactive = Boolean(
     controls?.moveWithin ||
-      controls?.moveToProblem ||
-      controls?.edit ||
-      controls?.editStart ||
-      controls?.remove
+    controls?.moveToProblem ||
+    controls?.edit ||
+    controls?.editStart ||
+    controls?.remove
   );
   const canEdit = Boolean(controls?.edit || controls?.editStart);
   const [editing, setEditing] = React.useState<{
@@ -475,7 +476,6 @@ function OrderRow({
   return (
     // Order rows are focus stops so the drag interactions have a full keyboard
     // equivalent: Alt+↑/↓ reorders, Alt+←/→ moves between problems (508).
-    /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
     <li
       data-order-id={order.orderId}
       tabIndex={interactive && !editing ? 0 : undefined}
@@ -498,7 +498,6 @@ function OrderRow({
             : 'shadow-[inset_0_2px_0_0_var(--color-primary-500,#3b82f6)]')
       )}
     >
-      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
       {drag.enabled && !editing && (
         <GripVerticalIcon
           size={12}
@@ -864,7 +863,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       renderOrderSearch === false
         ? undefined
         : (renderOrderSearch ??
-          (ambientCodeLookup ? contextOrderSearch(ambientCodeLookup) : undefined));
+          (ambientCodeLookup
+            ? contextOrderSearch(ambientCodeLookup)
+            : undefined));
 
     const concernById = React.useMemo(
       () => new Map(concerns.map((c) => [c.concernId, c])),

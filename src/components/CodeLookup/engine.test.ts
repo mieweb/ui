@@ -27,9 +27,7 @@ function shardWithCodes(entries: [codetype: string, code: string][]) {
   return {
     docCount: entries.length,
     codetypes,
-    docCodetype: new Uint8Array(
-      entries.map(([ct]) => codetypes.indexOf(ct))
-    ),
+    docCodetype: new Uint8Array(entries.map(([ct]) => codetypes.indexOf(ct))),
     codeBlob: blob,
     codeOffsets: offsets,
   } as unknown as CodifyShard;
@@ -81,9 +79,9 @@ describe('familyTerm', () => {
 
 describe('familyKey', () => {
   it('groups ICD-10 conditions by code root', () => {
-    expect(familyKey('condition', 'Type 2 diabetes w/ foot ulcer', 'E11.621')).toBe(
-      'condition:#E11'
-    );
+    expect(
+      familyKey('condition', 'Type 2 diabetes w/ foot ulcer', 'E11.621')
+    ).toBe('condition:#E11');
     expect(familyKey('condition', 'Type 2 diabetes mellitus', 'E11')).toBe(
       'condition:#E11'
     );
@@ -94,9 +92,9 @@ describe('familyKey', () => {
     );
   });
   it('keys programs and measures by their code, never merging', () => {
-    expect(familyKey('occupational', 'Lead surveillance (general)', '1910.1025')).toBe(
-      'occupational:#1910.1025'
-    );
+    expect(
+      familyKey('occupational', 'Lead surveillance (general)', '1910.1025')
+    ).toBe('occupational:#1910.1025');
     expect(
       familyKey('occupational', 'Lead surveillance (construction)', '1926.62')
     ).not.toBe(
@@ -206,9 +204,7 @@ function makeShard(domain: string, docs: TestDoc[]): CodifyShard {
     codeOffsets: code.offsets,
     fullidBlob: fullid.blob,
     fullidOffsets: fullid.offsets,
-    docCodetype: new Uint8Array(
-      docs.map((d) => codetypes.indexOf(d.codetype))
-    ),
+    docCodetype: new Uint8Array(docs.map((d) => codetypes.indexOf(d.codetype))),
     docLen: new Uint8Array(docTokens.map((t) => Math.min(255, t.length))),
     docPrior,
     tokenPrior,
@@ -250,7 +246,12 @@ describe('searchShards', () => {
 
   it('flags alias matches with viaAlias', () => {
     const meds = makeShard('med', [
-      { label: 'furosemide 40 MG Oral Tablet', code: '310429', codetype: 'RxNORM', aliases: ['lasix'] },
+      {
+        label: 'furosemide 40 MG Oral Tablet',
+        code: '310429',
+        codetype: 'RxNORM',
+        aliases: ['lasix'],
+      },
       { label: 'metoprolol tartrate', code: '866514', codetype: 'RxNORM' },
     ]);
     const r = searchShards([meds], 'lasix');
@@ -269,7 +270,12 @@ describe('searchShards', () => {
   it('ranks frequently-used docs above rare ones with equal text relevance', () => {
     const meds = makeShard('med', [
       { label: 'metoprolol tartrate', code: '866514', codetype: 'RxNORM' },
-      { label: 'metformin hydrochloride', code: '861007', codetype: 'RxNORM', prior: 220 },
+      {
+        label: 'metformin hydrochloride',
+        code: '861007',
+        codetype: 'RxNORM',
+        prior: 220,
+      },
     ]);
     const r = searchShards([meds], 'met');
     expect(r[0].label).toMatch(/metformin/);
@@ -277,8 +283,16 @@ describe('searchShards', () => {
 
   it('collapses family variants to one row, keeping the shortest label', () => {
     const meds = makeShard('med', [
-      { label: 'lisinopril 10 MG Oral Tablet', code: '314076', codetype: 'RxNORM' },
-      { label: 'lisinopril 20 MG Oral Tablet [Zestril]', code: '104377', codetype: 'RxNORM' },
+      {
+        label: 'lisinopril 10 MG Oral Tablet',
+        code: '314076',
+        codetype: 'RxNORM',
+      },
+      {
+        label: 'lisinopril 20 MG Oral Tablet [Zestril]',
+        code: '104377',
+        codetype: 'RxNORM',
+      },
       { label: 'losartan potassium 50 MG', code: '979485', codetype: 'RxNORM' },
     ]);
     const collapsed = searchShards([meds], 'lisinopril', 20, true);

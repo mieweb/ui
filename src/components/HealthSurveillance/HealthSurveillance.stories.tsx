@@ -128,20 +128,48 @@ const HISTORY: PatientHistory = {
     },
   ],
   immunizations: [
-    { key: 'CVX|45', label: 'Hepatitis B vaccine (series)', date: '2015-03-10' },
+    {
+      key: 'CVX|45',
+      label: 'Hepatitis B vaccine (series)',
+      date: '2015-03-10',
+    },
   ],
   observations: [
-    { key: 'LOINC|4548-4', label: 'Hemoglobin A1c', value: '7.2 %', date: '2025-05-01' },
-    { key: 'LOINC|5671-3', label: 'Lead, blood', value: '18 µg/dL', date: '2025-11-02' },
-    { key: 'LOINC|28615-3', label: 'Audiogram', value: 'STS not present', date: '2025-11-02' },
+    {
+      key: 'LOINC|4548-4',
+      label: 'Hemoglobin A1c',
+      value: '7.2 %',
+      date: '2025-05-01',
+    },
+    {
+      key: 'LOINC|5671-3',
+      label: 'Lead, blood',
+      value: '18 µg/dL',
+      date: '2025-11-02',
+    },
+    {
+      key: 'LOINC|28615-3',
+      label: 'Audiogram',
+      value: 'STS not present',
+      date: '2025-11-02',
+    },
   ],
   conditions: [
     { key: 'ICD10|I10', label: 'Essential hypertension', onset: '2019-02-01' },
-    { key: 'ICD10|E11.9', label: 'Type 2 diabetes mellitus', onset: '2021-08-15' },
+    {
+      key: 'ICD10|E11.9',
+      label: 'Type 2 diabetes mellitus',
+      onset: '2021-08-15',
+    },
     { key: 'ICD10|Z57.0', label: 'Occupational exposure to noise' },
   ],
   allergies: [
-    { key: 'RxNORM|7980', label: 'Penicillin', reaction: 'hives', severity: 'moderate' },
+    {
+      key: 'RxNORM|7980',
+      label: 'Penicillin',
+      reaction: 'hives',
+      severity: 'moderate',
+    },
   ],
   medications: [
     { label: 'lisinopril', detail: '10 mg daily' },
@@ -239,33 +267,33 @@ function DueListDemo() {
   const [placed, setPlaced] = useState<SurveillanceOrderPick[]>([]);
   if (!programs) return <div className="text-sm">Loading programs…</div>;
   return (
-      <div className="mx-auto max-w-3xl space-y-3">
-        <HealthSurveillance
-          history={HISTORY}
-          programs={programs}
-          enrolledKeys={ENROLLED}
-          programLabels={PROGRAM_LABELS}
-          orderLabels={ORDER_LABELS}
-          now={NOW}
-          onOrderMany={(picks) => setPlaced((p) => [...p, ...picks])}
-        />
-        {placed.length > 0 && (
-          <Card padding="sm">
-            <div className="text-sm font-semibold">Orders placed this visit</div>
-            <ul className="mt-1 space-y-0.5 text-sm">
-              {placed.map((p, i) => (
-                <li key={i} className="flex items-baseline gap-2">
-                  <span>{p.label}</span>
-                  <span className="text-muted-foreground text-xs">
-                    for {p.programLabel}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        )}
-      </div>
-    );
+    <div className="mx-auto max-w-3xl space-y-3">
+      <HealthSurveillance
+        history={HISTORY}
+        programs={programs}
+        enrolledKeys={ENROLLED}
+        programLabels={PROGRAM_LABELS}
+        orderLabels={ORDER_LABELS}
+        now={NOW}
+        onOrderMany={(picks) => setPlaced((p) => [...p, ...picks])}
+      />
+      {placed.length > 0 && (
+        <Card padding="sm">
+          <div className="text-sm font-semibold">Orders placed this visit</div>
+          <ul className="mt-1 space-y-0.5 text-sm">
+            {placed.map((p, i) => (
+              <li key={i} className="flex items-baseline gap-2">
+                <span>{p.label}</span>
+                <span className="text-muted-foreground text-xs">
+                  for {p.programLabel}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
 }
 
 export const DueList: Story = { render: () => <DueListDemo /> };
@@ -303,133 +331,131 @@ function ChartDemoView() {
       programLabel: r.reason || r.reasonKey,
     }));
   return (
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-3 flex items-baseline gap-3">
-          <span className="text-lg font-semibold">Riley Chen</span>
-          <span className="text-muted-foreground text-sm">
-            55 F · assembly technician · enrolled: noise, lead, BBP
-          </span>
-          <span className="ml-auto flex gap-1">
-            <Button
-              size="sm"
-              variant={view === 'due' ? 'primary' : 'outline'}
-              onClick={() => setView('due')}
-            >
-              Due list
-            </Button>
-            <Button
-              size="sm"
-              variant={view === 'grid' ? 'primary' : 'outline'}
-              onClick={() => setView('grid')}
-            >
-              Encounter orders
-            </Button>
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-          <div className="space-y-3 lg:col-span-2">
-            {view === 'due' ? (
-              <HealthSurveillance
-                history={GRID_HISTORY}
-                programs={programs}
-                enrolledKeys={ENROLLED}
-                programLabels={PROGRAM_LABELS}
-                orderLabels={ORDER_LABELS}
-                now={NOW}
-                onOrderMany={(picks) => setPlaced((p) => [...p, ...picks])}
-              />
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-3 flex items-baseline gap-3">
+        <span className="text-lg font-semibold">Riley Chen</span>
+        <span className="text-muted-foreground text-sm">
+          55 F · assembly technician · enrolled: noise, lead, BBP
+        </span>
+        <span className="ml-auto flex gap-1">
+          <Button
+            size="sm"
+            variant={view === 'due' ? 'primary' : 'outline'}
+            onClick={() => setView('due')}
+          >
+            Due list
+          </Button>
+          <Button
+            size="sm"
+            variant={view === 'grid' ? 'primary' : 'outline'}
+            onClick={() => setView('grid')}
+          >
+            Encounter orders
+          </Button>
+        </span>
+      </div>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="space-y-3 lg:col-span-2">
+          {view === 'due' ? (
+            <HealthSurveillance
+              history={GRID_HISTORY}
+              programs={programs}
+              enrolledKeys={ENROLLED}
+              programLabels={PROGRAM_LABELS}
+              orderLabels={ORDER_LABELS}
+              now={NOW}
+              onOrderMany={(picks) => setPlaced((p) => [...p, ...picks])}
+            />
+          ) : (
+            <EncounterOrdersGrid
+              history={GRID_HISTORY}
+              programs={programs}
+              encounterId={ENCOUNTER_ID}
+              enrolledKeys={ENROLLED}
+              programLabels={PROGRAM_LABELS}
+              orderLabels={ORDER_LABELS}
+              now={NOW}
+              onOrderRows={(rows) =>
+                setPlaced((p) => [...p, ...rowPicks(rows)])
+              }
+            />
+          )}
+          <Panel title={`Orders this visit (${placed.length})`}>
+            {placed.length === 0 ? (
+              <span className="text-muted-foreground text-sm">
+                Expand a due item and add its orders.
+              </span>
             ) : (
-              <EncounterOrdersGrid
-                history={GRID_HISTORY}
-                programs={programs}
-                encounterId={ENCOUNTER_ID}
-                enrolledKeys={ENROLLED}
-                programLabels={PROGRAM_LABELS}
-                orderLabels={ORDER_LABELS}
-                now={NOW}
-                onOrderRows={(rows) =>
-                  setPlaced((p) => [...p, ...rowPicks(rows)])
-                }
-              />
+              <ul className="space-y-0.5 text-sm">
+                {placed.map((p, i) => (
+                  <li key={i} className="flex items-baseline gap-2">
+                    <Badge variant="secondary" size="sm">
+                      order
+                    </Badge>
+                    <span>{p.label}</span>
+                    <span className="text-muted-foreground text-xs">
+                      for {p.programLabel}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             )}
-            <Panel title={`Orders this visit (${placed.length})`}>
-              {placed.length === 0 ? (
-                <span className="text-muted-foreground text-sm">
-                  Expand a due item and add its orders.
-                </span>
-              ) : (
-                <ul className="space-y-0.5 text-sm">
-                  {placed.map((p, i) => (
-                    <li key={i} className="flex items-baseline gap-2">
-                      <Badge variant="secondary" size="sm">
-                        order
-                      </Badge>
-                      <span>{p.label}</span>
-                      <span className="text-muted-foreground text-xs">
-                        for {p.programLabel}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Panel>
-          </div>
-          <div className="space-y-3">
-            <Panel title="Medications">
-              <ul className="space-y-0.5 text-sm">
-                {HISTORY.medications?.map((m) => (
-                  <li key={m.label}>
-                    {m.label}{' '}
-                    <span className="text-muted-foreground text-xs">
-                      {m.detail}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-            <Panel title="Allergies">
-              <ul className="space-y-0.5 text-sm">
-                {HISTORY.allergies?.map((a) => (
-                  <li key={a.label}>
-                    {a.label}{' '}
-                    <span className="text-muted-foreground text-xs">
-                      {a.reaction} ({a.severity})
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-            <Panel title="Conditions">
-              <ul className="space-y-0.5 text-sm">
-                {HISTORY.conditions?.map((c) => (
-                  <li key={c.key} className="flex items-baseline gap-2">
-                    <span>{c.label}</span>
-                    <span className="text-muted-foreground font-mono text-[11px]">
-                      {c.key.split('|')[1]}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-            <Panel title="Lab results">
-              <ul className="space-y-0.5 text-sm">
-                {HISTORY.observations?.map((o) => (
-                  <li key={o.key} className="flex items-baseline gap-2">
-                    <span>{o.label}</span>
-                    <span className="text-foreground font-medium">
-                      {o.value}
-                    </span>
-                    <span className="text-muted-foreground text-xs">
-                      {o.date}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          </div>
+          </Panel>
+        </div>
+        <div className="space-y-3">
+          <Panel title="Medications">
+            <ul className="space-y-0.5 text-sm">
+              {HISTORY.medications?.map((m) => (
+                <li key={m.label}>
+                  {m.label}{' '}
+                  <span className="text-muted-foreground text-xs">
+                    {m.detail}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+          <Panel title="Allergies">
+            <ul className="space-y-0.5 text-sm">
+              {HISTORY.allergies?.map((a) => (
+                <li key={a.label}>
+                  {a.label}{' '}
+                  <span className="text-muted-foreground text-xs">
+                    {a.reaction} ({a.severity})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+          <Panel title="Conditions">
+            <ul className="space-y-0.5 text-sm">
+              {HISTORY.conditions?.map((c) => (
+                <li key={c.key} className="flex items-baseline gap-2">
+                  <span>{c.label}</span>
+                  <span className="text-muted-foreground font-mono text-[11px]">
+                    {c.key.split('|')[1]}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+          <Panel title="Lab results">
+            <ul className="space-y-0.5 text-sm">
+              {HISTORY.observations?.map((o) => (
+                <li key={o.key} className="flex items-baseline gap-2">
+                  <span>{o.label}</span>
+                  <span className="text-foreground font-medium">{o.value}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {o.date}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
         </div>
       </div>
-    );
+    </div>
+  );
 }
 
 export const ChartDemo: Story = { render: () => <ChartDemoView /> };

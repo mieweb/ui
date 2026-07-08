@@ -139,7 +139,9 @@ export function buildChartOrderRows(
   const reasonFields = (item?: DueItem) => ({
     reason: item ? programLabel(item.key) : '',
     reasonKey: item?.key ?? '',
-    kind: item?.program.kind ? (KIND_LABEL[item.program.kind] ?? item.program.kind) : '',
+    kind: item?.program.kind
+      ? (KIND_LABEL[item.program.kind] ?? item.program.kind)
+      : '',
     dueDate: item?.dueDate?.slice(0, 10) ?? '',
   });
 

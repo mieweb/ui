@@ -10,7 +10,4 @@ export {
   type AllergyAction,
 } from './AllergyList';
 
-export {
-  AllergyManager,
-  type AllergyManagerProps,
-} from './AllergyManager';
+export { AllergyManager, type AllergyManagerProps } from './AllergyManager';

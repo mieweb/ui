@@ -6,12 +6,7 @@ import { Button } from '../Button';
 import { CodeLookup } from '../CodeLookup';
 import { DataVisNitroGrid, DataVisNitroSource } from '../DataVisNITRO';
 import { RowActionToolbar, RowIconButton } from '../RowActionToolbar';
-import {
-  StickyNoteIcon,
-  PencilIcon,
-  RefreshIcon,
-  LinkIcon,
-} from '../Icons';
+import { StickyNoteIcon, PencilIcon, RefreshIcon, LinkIcon } from '../Icons';
 import {
   ConditionEditor,
   type ConditionAssertionDraft,

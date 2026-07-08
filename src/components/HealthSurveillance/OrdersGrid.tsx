@@ -208,7 +208,15 @@ export function ChartOrdersGrid({
       includeDue,
     };
     return buildChartOrderRows(history, programs, opts);
-  }, [history, programs, enrolledKeys, now, programLabels, orderLabels, includeDue]);
+  }, [
+    history,
+    programs,
+    enrolledKeys,
+    now,
+    programLabels,
+    orderLabels,
+    includeDue,
+  ]);
 
   return <OrdersGridInner rows={rows} title={title} {...rest} />;
 }
@@ -244,7 +252,15 @@ export function EncounterOrdersGrid({
       orderLabels,
     };
     return buildEncounterOrderRows(history, programs, encounterId, opts);
-  }, [history, programs, encounterId, enrolledKeys, now, programLabels, orderLabels]);
+  }, [
+    history,
+    programs,
+    encounterId,
+    enrolledKeys,
+    now,
+    programLabels,
+    orderLabels,
+  ]);
 
   return <OrdersGridInner rows={rows} title={title} {...rest} />;
 }

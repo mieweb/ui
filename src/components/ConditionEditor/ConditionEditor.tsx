@@ -157,7 +157,11 @@ function systemForCodetype(codetype: string): string {
 function contextConditionCodeSearch(
   ctx: CodeLookupProviderConfig
 ): RenderConditionCodeSearch {
-  return ({ placeholder, onPick, onFreeText }) => {
+  const ContextConditionCodeSearch: RenderConditionCodeSearch = ({
+    placeholder,
+    onPick,
+    onFreeText,
+  }) => {
     const Lookup = ctx.component;
     return (
       <Lookup
@@ -180,6 +184,7 @@ function contextConditionCodeSearch(
       />
     );
   };
+  return ContextConditionCodeSearch;
 }
 
 // =============================================================================
@@ -566,8 +571,8 @@ export function ConditionEditor({
                     onFreeText: (t) => setText(t.trim()),
                   })}
                   <p className="text-muted-foreground text-xs">
-                    Picking a code fills the name and coding together; free
-                    text is fine — codes can be added any time.
+                    Picking a code fills the name and coding together; free text
+                    is fine — codes can be added any time.
                   </p>
                 </div>
               ) : (
@@ -625,15 +630,16 @@ export function ConditionEditor({
                     Add code
                   </Button>
                 </legend>
-                {effectiveRenderCodeSearch && !(mode === 'add' && !text.trim()) && (
-                  <div className="max-w-md">
-                    {effectiveRenderCodeSearch({
-                      placeholder: 'Search codes — ICD-10-CM / SNOMED…',
-                      onPick: handleCodePick,
-                      onFreeText: (t) => setText((prev) => prev || t),
-                    })}
-                  </div>
-                )}
+                {effectiveRenderCodeSearch &&
+                  !(mode === 'add' && !text.trim()) && (
+                    <div className="max-w-md">
+                      {effectiveRenderCodeSearch({
+                        placeholder: 'Search codes — ICD-10-CM / SNOMED…',
+                        onPick: handleCodePick,
+                        onFreeText: (t) => setText((prev) => prev || t),
+                      })}
+                    </div>
+                  )}
                 {coding.length === 0 && (
                   <p className="text-muted-foreground text-xs">
                     Optional — a name-only problem is valid. Codes can be added

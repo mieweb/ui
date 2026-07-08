@@ -173,11 +173,10 @@ describe('evaluateDue', () => {
   });
 
   it('excludes unenrolled occupational programs and not-applicable measures', () => {
-    const items = evaluateDue(
-      { age: 30, sex: 'M', orders: [] },
-      programs,
-      { enrolledKeys: [], now: NOW }
-    );
+    const items = evaluateDue({ age: 30, sex: 'M', orders: [] }, programs, {
+      enrolledKeys: [],
+      now: NOW,
+    });
     // hearing/hepB unenrolled; mammo not applicable (sex/age)
     expect(items).toEqual([]);
   });
@@ -185,10 +184,14 @@ describe('evaluateDue', () => {
 
 describe('dueForOrder', () => {
   it('flags order keys belonging to due programs', () => {
-    const items = evaluateDue(basePatient, { 'OSHA|1910.95': hearing }, {
-      enrolledKeys: ['OSHA|1910.95'],
-      now: NOW,
-    });
+    const items = evaluateDue(
+      basePatient,
+      { 'OSHA|1910.95': hearing },
+      {
+        enrolledKeys: ['OSHA|1910.95'],
+        now: NOW,
+      }
+    );
     expect(dueForOrder('HCPCS|92551', items).map((i) => i.key)).toEqual([
       'OSHA|1910.95',
     ]);

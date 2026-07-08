@@ -20,10 +20,7 @@ const PROGRAMS: ProgramsMap = {
   'OSHA|1910.134': {
     kind: 'fitness',
     periodicityMonths: 12,
-    orders: [
-      'CPT|94010',
-      { key: 'MIE|RMO-FFD', after: ['CPT|94010'] },
-    ],
+    orders: ['CPT|94010', { key: 'MIE|RMO-FFD', after: ['CPT|94010'] }],
   },
 };
 
@@ -125,7 +122,9 @@ describe('buildChartOrderRows', () => {
       includeDue: false,
     });
     expect(rows).toHaveLength(HISTORY.orders.length);
-    expect(rows.every((r) => r.status === 'completed' || r.status === 'pending')).toBe(true);
+    expect(
+      rows.every((r) => r.status === 'completed' || r.status === 'pending')
+    ).toBe(true);
   });
 });
 

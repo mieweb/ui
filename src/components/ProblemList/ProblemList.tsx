@@ -25,16 +25,8 @@ import {
   dragIndicatorClasses,
   type UseDragReorderReturn,
 } from '../../hooks/useDragReorder';
-import {
-  RowActionToolbar,
-  RowIconButton,
-  toolbarKeyNav,
-} from '../RowActionToolbar';
+import { RowActionToolbar, RowIconButton } from '../RowActionToolbar';
 import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
-
-// Re-exported for backwards compatibility — the implementation moved to
-// RowActionToolbar alongside the toolbar it serves.
-export { toolbarKeyNav };
 
 // =============================================================================
 // Types — shared condition (concern/assertion) model
@@ -368,8 +360,9 @@ export function CodingChips({ coding }: { coding?: ConditionCoding[] }) {
       }
     >
       {/* focusable so the coding provenance is reachable by keyboard */}
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-      <span tabIndex={0}
+      <span
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
         className="text-muted-foreground focus-visible:ring-ring rounded text-xs whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none"
       >
         ({label || 'coded'})
@@ -765,7 +758,9 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
     // fires too frequently for a linear concern scan per event.
     const groupById = React.useMemo(
       () =>
-        new Map(concerns.map((c) => [c.concernId, concernGroupKey(c)] as const)),
+        new Map(
+          concerns.map((c) => [c.concernId, concernGroupKey(c)] as const)
+        ),
       [concerns]
     );
     const groupOf = React.useCallback(
@@ -801,8 +796,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
       // at all — an empty Active section next to populated groups would
       // misleadingly read "No problems recorded".
     ].filter(
-      (g) =>
-        g.items.length > 0 || (g.key === 'active' && concerns.length === 0)
+      (g) => g.items.length > 0 || (g.key === 'active' && concerns.length === 0)
     );
 
     return (

@@ -11,6 +11,7 @@ import { Tooltip } from '../Tooltip';
  * buttons, Home/End jump to first/last.
  */
 export function toolbarKeyNav(e: React.KeyboardEvent<HTMLElement>) {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
   if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
   const buttons = Array.from(
     e.currentTarget.querySelectorAll<HTMLButtonElement>(
@@ -148,6 +149,7 @@ export function RowIconButton({
   return (
     <Tooltip content={label}>
       <Button
+        type="button"
         variant="ghost"
         size="icon"
         aria-label={label}
