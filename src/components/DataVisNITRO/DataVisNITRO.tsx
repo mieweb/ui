@@ -31,6 +31,7 @@ interface HttpDataVisNitroSourceProps {
 
 interface LocalDataVisNitroSourceProps {
   type: 'local';
+  varName?: string;
   children?: React.ReactNode;
 }
 
@@ -255,21 +256,28 @@ function mergeTableDef(
 function DataVisNitroSource(props: DataVisNitroSourceProps) {
   const { type, children } = props;
   const url = props.type === 'http' ? props.url : undefined;
+  const varName = props.type === 'local' ? props.varName : undefined;
   const viewRef = useRef<TrackedViewInstance | null>(null);
 
   if (
     viewRef.current === null ||
     viewRef.current._dvType !== type ||
-    viewRef.current._dvUrl !== url
+    viewRef.current._dvUrl !== url ||
+    (viewRef.current as TrackedViewInstance & { _dvVarName?: string })
+      ._dvVarName !== varName
   ) {
     const source =
       props.type === 'http'
         ? new Source({ type, url: props.url })
-        : new Source({ type });
+        : new Source(
+            props.type === 'local' && props.varName
+              ? { type, varName: props.varName }
+              : { type }
+          );
 
     viewRef.current = Object.assign(
       new ComputedView(source) as unknown as ViewInstance,
-      { _dvType: type, _dvUrl: url }
+      { _dvType: type, _dvUrl: url, _dvVarName: varName }
     );
   }
 
