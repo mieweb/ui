@@ -101,15 +101,33 @@ export function VisitScribe({
   });
   const { ready, recording, busy, error, result, liveText, elapsedMs, canReanalyze } = scribe;
 
-  // Stable speaker → colour map, in order of first appearance.
-  const speakerColor = React.useMemo(() => {
+  // User-applied speaker labels (rename / merge), keyed by the ORIGINAL diarized label. Merging two speakers
+  // = giving them the same label. Reset whenever a fresh transcript arrives.
+  const [labels, setLabels] = React.useState<Record<string, string>>({});
+  React.useEffect(() => { setLabels({}); }, [result]);
+  const effective = React.useCallback((sp: string) => labels[sp]?.trim() || sp, [labels]);
+
+  // Distinct original speakers in first-appearance order (the rows of the editor).
+  const speakers = React.useMemo(() => {
+    const seen: string[] = [];
+    result?.forEach((t) => { if (!seen.includes(t.speaker)) seen.push(t.speaker); });
+    return seen;
+  }, [result]);
+
+  // Colour per EFFECTIVE label (so merged speakers share one colour), first-appearance order.
+  const colorByLabel = React.useMemo(() => {
     const map = new Map<string, string>();
     result?.forEach((t) => {
-      if (!map.has(t.speaker)) map.set(t.speaker, SPEAKER_COLORS[map.size % SPEAKER_COLORS.length]);
+      const l = labels[t.speaker]?.trim() || t.speaker;
+      if (!map.has(l)) map.set(l, SPEAKER_COLORS[map.size % SPEAKER_COLORS.length]);
     });
     return map;
-  }, [result]);
-  const speakerCount = speakerColor.size;
+  }, [result, labels]);
+  const speakerCount = colorByLabel.size;
+
+  const rename = (sp: string, name: string) => setLabels((l) => ({ ...l, [sp]: name }));
+  const mergeInto = (sp: string, target: string) => setLabels((l) => ({ ...l, [sp]: l[target]?.trim() || target }));
+  const hasEdits = Object.keys(labels).length > 0;
 
   const status = !ready
     ? 'Loading the speaker model…'
@@ -225,13 +243,60 @@ export function VisitScribe({
         </div>
       )}
 
+      {/* Speaker editor — rename a speaker (applies to all their turns) or merge one into another when the
+          auto labels are wrong. */}
+      {!showLive && result && result.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <span className="text-muted-foreground text-xs">Speakers:</span>
+          {speakers.map((sp) => {
+            const others = speakers.filter((o) => o !== sp);
+            return (
+              <div key={sp} className="flex items-center gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className={cn('inline-block h-2.5 w-2.5 rounded-full bg-current', colorByLabel.get(effective(sp)))}
+                />
+                <input
+                  aria-label={`Rename ${sp}`}
+                  value={labels[sp] ?? sp}
+                  onChange={(e) => rename(sp, e.target.value)}
+                  className="border-border bg-background text-foreground w-28 rounded-md border px-2 py-0.5 text-sm"
+                />
+                {others.length > 0 && (
+                  <select
+                    aria-label={`Merge ${sp} into another speaker`}
+                    value=""
+                    onChange={(e) => { if (e.target.value) mergeInto(sp, e.target.value); }}
+                    className="border-border bg-background text-muted-foreground rounded-md border px-1 py-0.5 text-xs"
+                  >
+                    <option value="">merge…</option>
+                    {others.map((o) => (
+                      <option key={o} value={o}>{effective(o)}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            );
+          })}
+          {hasEdits && (
+            <button
+              type="button"
+              onClick={() => setLabels({})}
+              className="text-muted-foreground hover:text-foreground text-xs underline"
+            >
+              reset
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Final speaker-labeled transcript */}
       {!showLive && result && result.length > 0 && (
         <div className="border-border divide-border divide-y rounded-xl border">
           {result.map((turn, i) => (
             <div key={i} className="p-3">
-              <div className={cn('text-xs font-semibold', speakerColor.get(turn.speaker) ?? 'text-ozwell')}>
-                {turn.speaker}{' '}
+              <div className={cn('text-xs font-semibold', colorByLabel.get(effective(turn.speaker)) ?? 'text-ozwell')}>
+                {effective(turn.speaker)}{' '}
                 <span className="text-muted-foreground font-normal">· {turn.start.toFixed(1)}s</span>
               </div>
               <div className="text-foreground mt-0.5 text-sm">{turn.text}</div>
