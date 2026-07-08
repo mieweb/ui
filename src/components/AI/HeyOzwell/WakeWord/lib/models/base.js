@@ -1,5 +1,4 @@
 /** @module models/base */
-import { sleep } from "../helpers.js";
 import { ONNX } from "../onnx.js";
 import { getModelBytes } from "../opfs.js";
 
@@ -22,6 +21,7 @@ export class ONNXModel {
     ) {
         this.modelPath = modelPath;
         this.session = null;
+        this.loadError = null;
         this.duration = 0.0; // EMA duration
         this.ema = 0.1; // EMA coefficient
         this.lastTime = 0.0; // Last time the model was run
@@ -31,7 +31,12 @@ export class ONNXModel {
         this.wasm = wasm;
         // 0 for default, -1 for low power, 1 for high power
         this.power = power;
-        this.load();
+        // Track the load so failures surface (an unhandled rejection here would leave `session` null and
+        // hang waitUntilLoaded()/run() forever). waitUntilLoaded() awaits this and rethrows the error.
+        this.loadPromise = this.load().catch((e) => {
+            this.loadError = e;
+            console.warn("[ONNXModel] load failed:", e);
+        });
     }
 
     /**
@@ -81,7 +86,9 @@ export class ONNXModel {
      * @see https://onnxruntime.ai/docs/tutorials/web/env-flags-and-session-options.html#session-options
      */
     get sessionOptions() {
-        // TODO: all three other options seem to break, need to investigate
+        // Intentionally wasm-only. The webnn/webgpu/webgl preferences computed in `executionProviders`
+        // broke inference in this pipeline, so they're deliberately NOT applied here (the getter is kept
+        // for reference / future investigation). This is the working configuration, not an oversight.
         return {
             executionProviders: ["wasm"],
         };
@@ -101,9 +108,8 @@ export class ONNXModel {
      * Waits until the model is loaded
      */
     async waitUntilLoaded() {
-        while (this.session === null) {
-            await sleep(1);
-        }
+        await this.loadPromise;
+        if (this.loadError) throw this.loadError; // fail fast instead of spinning forever on a load failure
     }
 
     /**

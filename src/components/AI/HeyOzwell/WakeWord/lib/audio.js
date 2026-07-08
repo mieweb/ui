@@ -64,10 +64,16 @@ export class AudioBatcher {
      */
     push(data) {
         const dataLength = data.length;
-        // Shift the buffer back by this much
-        this.buffer.set(this.buffer.subarray(dataLength));
-        // Append the new data
-        this.buffer.set(data, this.buffer.length - dataLength);
+        if (dataLength >= this.buffer.length) {
+            // Chunk larger than the ring buffer — keep only its most recent samples (a plain shift+append
+            // would compute a negative offset and throw, permanently breaking the detector).
+            this.buffer.set(data.subarray(dataLength - this.buffer.length));
+        } else {
+            // Shift the buffer back by this much
+            this.buffer.set(this.buffer.subarray(dataLength));
+            // Append the new data
+            this.buffer.set(data, this.buffer.length - dataLength);
+        }
         this.batchIntervalCount += dataLength;
         // If we have enough samples, call the callbacks and reset the interval count
         if (this.batchIntervalCount >= this.batchIntervalSamples) {

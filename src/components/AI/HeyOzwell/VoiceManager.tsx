@@ -196,23 +196,27 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
         Voiceprints stay on your device — they’re never uploaded.
       </p>
 
-      <AlertDialog
-        open={!!confirm}
-        onOpenChange={(o) => { if (!o) setConfirm(null); }}
-        variant="destructive"
-        title={confirm?.type === 'clearAll' ? 'Clear all voices?' : `Remove “${confirm?.type === 'remove' ? confirm.label : ''}”?`}
-        description={
-          confirm?.type === 'clearAll'
-            ? 'This deletes every enrolled voice. Ozwell will respond to anyone (no doctor-only gate) until you set up your voice again.'
-            : 'This revokes that voice — Ozwell will no longer respond to them. You can re-enroll later.'
-        }
-        actionLabel={confirm?.type === 'clearAll' ? 'Clear all' : 'Remove'}
-        onAction={() => {
-          if (confirm?.type === 'clearAll') clearAll();
-          else if (confirm?.type === 'remove') remove(confirm.id);
-          setConfirm(null);
-        }}
-      />
+      {/* Only render while there's a pending confirmation, so no empty-label title (Remove “”?) is ever
+          computed into the dialog's DOM/ARIA props. */}
+      {confirm && (
+        <AlertDialog
+          open
+          onOpenChange={(o) => { if (!o) setConfirm(null); }}
+          variant="destructive"
+          title={confirm.type === 'clearAll' ? 'Clear all voices?' : `Remove “${confirm.label}”?`}
+          description={
+            confirm.type === 'clearAll'
+              ? 'This deletes every enrolled voice. Ozwell will respond to anyone (no doctor-only gate) until you set up your voice again.'
+              : 'This revokes that voice — Ozwell will no longer respond to them. You can re-enroll later.'
+          }
+          actionLabel={confirm.type === 'clearAll' ? 'Clear all' : 'Remove'}
+          onAction={() => {
+            if (confirm.type === 'clearAll') clearAll();
+            else remove(confirm.id);
+            setConfirm(null);
+          }}
+        />
+      )}
     </div>
   );
 }

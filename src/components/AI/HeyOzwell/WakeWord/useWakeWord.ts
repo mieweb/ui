@@ -32,6 +32,9 @@ export interface UseWakeWordOpts {
    *  assets (`DEFAULT_ASSET_BASE`). Same shape as the string `window.__ozwellAssets` /
    *  `localStorage['ozwellAssetBase']` override — see AI/MODEL-HOSTING.md. */
   assetBase?: string;
+  /** Auto-register the model-cache service worker (opt-out). Default true. Set false in a host that doesn't
+   *  serve `/ozwell-model-sw.js` (avoids repeated registration failures) — models still load, just uncached. */
+  registerServiceWorker?: boolean;
 }
 
 export interface WakeWordState {
@@ -165,7 +168,7 @@ function ensureOrt(): Promise<void> {
 }
 
 export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWordControls {
-  const { onWake, onUtterance, thresholds, vadThresholds, enabled = true, assetBase } = opts;
+  const { onWake, onUtterance, thresholds, vadThresholds, enabled = true, assetBase, registerServiceWorker = true } = opts;
   const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
   // keep the latest callbacks without re-running the effect
   const onWakeRef = React.useRef(onWake);
@@ -185,7 +188,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
       setState((s) => (s.ready || s.error || s.speech ? { ready: false, error: null, speech: 0, probs: {} } : s));
       return;
     }
-    registerModelServiceWorker(); // SW caches the sherpa runtime + wasm; wake models use OPFS, Whisper uses transformers.js
+    if (registerServiceWorker) registerModelServiceWorker(); // caches sherpa runtime + wasm; opt out if the host doesn't serve the SW
     let cancelled = false;
 
     (async () => {

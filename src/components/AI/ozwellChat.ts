@@ -125,7 +125,13 @@ export interface AskOpts extends Partial<OzwellConfig> {
  */
 function resolveConfig(opts: AskOpts): OzwellConfig {
   const cfg = { ...getOzwellConfig(), ...opts };
-  if (opts.apiKey === 'ollama' && !opts.baseURL) cfg.baseURL = OLLAMA_BASE;
+  // When the caller overrides the apiKey but not the baseURL (and there's no explicit baseURL in the
+  // runtime config either), re-derive the baseURL from the EFFECTIVE apiKey. Otherwise a runtime config
+  // using the 'ollama' sentinel would keep a real key pointed at the Ollama server (and vice-versa). An
+  // explicit baseURL — from opts or the runtime config — is always respected.
+  if (opts.apiKey && !opts.baseURL && !readRaw().baseURL) {
+    cfg.baseURL = cfg.apiKey === 'ollama' ? OLLAMA_BASE : DEFAULT_BASE;
+  }
   return cfg;
 }
 
