@@ -23,6 +23,22 @@ import { useTextRenderContext } from '../render/renderContext';
 import type { SuperChatRenderPlugin } from '../types';
 
 const MERMAID_TAG = 'mermaid-diagram';
+const MERMAID_DECLARATION_RE =
+  /^\s*(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|journey|gantt|pie|mindmap|timeline|gitGraph|quadrantChart|requirementDiagram|block-beta|xychart-beta)\b/;
+
+function normalizeMermaidSource(code: string): string {
+  const lines = code.split(/\r?\n/);
+
+  // Some model outputs accidentally include nested fences or leading prose
+  // inside the mermaid block; keep only the diagram body.
+  const stripped = lines.filter(
+    (line) => !/^\s*```(?:\s*mermaid)?\s*$/.test(line)
+  );
+  const start = stripped.findIndex((line) => MERMAID_DECLARATION_RE.test(line));
+  const normalized = start >= 0 ? stripped.slice(start) : stripped;
+
+  return normalized.join('\n').trim();
+}
 
 // ---------------------------------------------------------------------------
 // rehype transformer: <pre><code class="language-mermaid">…</code></pre>
@@ -129,6 +145,8 @@ function loadMermaid(dark: boolean) {
         startOnLoad: false,
         securityLevel: 'strict',
         theme,
+        flowchart: { useMaxWidth: false },
+        themeVariables: { fontSize: '16px' },
       });
       return mermaid;
     });
@@ -144,7 +162,7 @@ function MermaidDiagram({ code }: { code: string }) {
   const [failed, setFailed] = React.useState(false);
   const idRef = React.useRef(`superchat-mermaid-${(mermaidSeq += 1)}`);
 
-  const source = code.trim();
+  const source = React.useMemo(() => normalizeMermaidSource(code), [code]);
 
   React.useEffect(() => {
     // Don't try to render an incomplete diagram while the message streams.
@@ -179,7 +197,7 @@ function MermaidDiagram({ code }: { code: string }) {
   return (
     <div
       data-slot="superchat-mermaid"
-      className="my-2 overflow-x-auto"
+      className="my-2 overflow-x-auto [&_svg]:h-auto [&_svg]:max-w-none"
       // mermaid renders with securityLevel: 'strict' (labels sanitized, scripts
       // stripped), so the SVG is safe to inject directly.
       dangerouslySetInnerHTML={{ __html: svg }}
