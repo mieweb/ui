@@ -266,34 +266,40 @@ export const HealthSurveillance = React.forwardRef<
                       </div>
                     )}
                     <div className={cn('space-y-1', level > 0 && 'pl-3')}>
-                      {spec.keys.map((o) => (
-                        <Checkbox
-                          key={o}
-                          size="sm"
-                          label={orderLabel(o)}
-                          description={
-                            blocked.length > 0
-                              ? `after ${blocked.map(orderLabel).join(', ')}`
-                              : item.pendingKeys.includes(o)
-                                ? 'already pending'
-                                : undefined
-                          }
-                          disabled={blocked.length > 0}
-                          checked={checked.has(o)}
-                          onChange={(e) => {
-                            const next = new Set(checked);
-                            if (e.target.checked) {
-                              // alternatives are mutually exclusive: checking
-                              // one unchecks its siblings
-                              for (const sib of spec.keys) next.delete(sib);
-                              next.add(o);
-                            } else {
-                              next.delete(o);
+                      {spec.keys.map((o) => {
+                        const isPending = item.pendingKeys.includes(o);
+                        return (
+                          <Checkbox
+                            key={o}
+                            size="sm"
+                            label={orderLabel(o)}
+                            description={
+                              blocked.length > 0
+                                ? `after ${blocked.map(orderLabel).join(', ')}`
+                                : isPending
+                                  ? 'already pending'
+                                  : undefined
                             }
-                            setChecked(next);
-                          }}
-                        />
-                      ))}
+                            // Already-pending orders are in flight; disabling
+                            // them keeps in-flight orders out of "Add N orders"
+                            // so we don't fire duplicate placement requests.
+                            disabled={blocked.length > 0 || isPending}
+                            checked={checked.has(o)}
+                            onChange={(e) => {
+                              const next = new Set(checked);
+                              if (e.target.checked) {
+                                // alternatives are mutually exclusive: checking
+                                // one unchecks its siblings
+                                for (const sib of spec.keys) next.delete(sib);
+                                next.add(o);
+                              } else {
+                                next.delete(o);
+                              }
+                              setChecked(next);
+                            }}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 );
