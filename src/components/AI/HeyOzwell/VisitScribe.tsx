@@ -101,33 +101,45 @@ export function VisitScribe({
   });
   const { ready, recording, busy, error, result, liveText, elapsedMs, canReanalyze } = scribe;
 
-  // User-applied speaker labels (rename / merge), keyed by the ORIGINAL diarized label. Merging two speakers
-  // = giving them the same label. Reset whenever a fresh transcript arrives.
+  // Two layers of user corrections, both reset on a fresh transcript:
+  //  • `labels`     — rename a whole speaker (keyed by the original diarized label). Merge = give two
+  //                   speakers the SAME name (the resolved-label logic below then treats them as one).
+  //  • `turnLabels` — reassign a SINGLE turn to a different speaker (keyed by turn index), for the case
+  //                   where diarization only mislabeled one line.
   const [labels, setLabels] = React.useState<Record<string, string>>({});
-  React.useEffect(() => { setLabels({}); }, [result]);
+  const [turnLabels, setTurnLabels] = React.useState<Record<number, string>>({});
+  React.useEffect(() => { setLabels({}); setTurnLabels({}); }, [result]);
   const effective = React.useCallback((sp: string) => labels[sp]?.trim() || sp, [labels]);
 
-  // Distinct original speakers in first-appearance order (the rows of the editor).
+  // Distinct original speakers in first-appearance order (the rename chips).
   const speakers = React.useMemo(() => {
     const seen: string[] = [];
     result?.forEach((t) => { if (!seen.includes(t.speaker)) seen.push(t.speaker); });
     return seen;
   }, [result]);
 
-  // Colour per EFFECTIVE label (so merged speakers share one colour), first-appearance order.
+  // The resolved label for each turn: a per-turn override wins, else the (possibly renamed) speaker label.
+  const resolved = React.useMemo(
+    () => (result ?? []).map((t, i) => turnLabels[i] || (labels[t.speaker]?.trim() || t.speaker)),
+    [result, labels, turnLabels]
+  );
+  // Distinct current labels (first-appearance) → colours + the per-turn reassign options.
+  const distinctLabels = React.useMemo(() => {
+    const seen: string[] = [];
+    resolved.forEach((l) => { if (!seen.includes(l)) seen.push(l); });
+    return seen;
+  }, [resolved]);
   const colorByLabel = React.useMemo(() => {
-    const map = new Map<string, string>();
-    result?.forEach((t) => {
-      const l = labels[t.speaker]?.trim() || t.speaker;
-      if (!map.has(l)) map.set(l, SPEAKER_COLORS[map.size % SPEAKER_COLORS.length]);
-    });
-    return map;
-  }, [result, labels]);
-  const speakerCount = colorByLabel.size;
+    const m = new Map<string, string>();
+    distinctLabels.forEach((l, idx) => m.set(l, SPEAKER_COLORS[idx % SPEAKER_COLORS.length]));
+    return m;
+  }, [distinctLabels]);
+  const speakerCount = distinctLabels.length;
 
   const rename = (sp: string, name: string) => setLabels((l) => ({ ...l, [sp]: name }));
-  const mergeInto = (sp: string, target: string) => setLabels((l) => ({ ...l, [sp]: l[target]?.trim() || target }));
-  const hasEdits = Object.keys(labels).length > 0;
+  const reassignTurn = (i: number, label: string) => setTurnLabels((t) => ({ ...t, [i]: label }));
+  const resetAll = () => { setLabels({}); setTurnLabels({}); };
+  const hasEdits = Object.keys(labels).length > 0 || Object.keys(turnLabels).length > 0;
 
   const status = !ready
     ? 'Loading the speaker model…'
@@ -243,14 +255,13 @@ export function VisitScribe({
         </div>
       )}
 
-      {/* Speaker editor — rename a speaker (applies to all their turns) or merge one into another when the
-          auto labels are wrong. */}
+      {/* Speaker rename chips — name each speaker (applies to all their turns). To merge two speakers, just
+          give them the same name. To fix a single mislabeled line, use the speaker dropdown on that turn. */}
       {!showLive && result && result.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-          <span className="text-muted-foreground text-xs">Speakers:</span>
-          {speakers.map((sp) => {
-            const others = speakers.filter((o) => o !== sp);
-            return (
+        <div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+            <span className="text-muted-foreground text-xs">Speakers:</span>
+            {speakers.map((sp) => (
               <div key={sp} className="flex items-center gap-1.5">
                 <span
                   aria-hidden="true"
@@ -262,46 +273,51 @@ export function VisitScribe({
                   onChange={(e) => rename(sp, e.target.value)}
                   className="border-border bg-background text-foreground w-28 rounded-md border px-2 py-0.5 text-sm"
                 />
-                {others.length > 0 && (
-                  <select
-                    aria-label={`Merge ${sp} into another speaker`}
-                    value=""
-                    onChange={(e) => { if (e.target.value) mergeInto(sp, e.target.value); }}
-                    className="border-border bg-background text-muted-foreground rounded-md border px-1 py-0.5 text-xs"
-                  >
-                    <option value="">merge…</option>
-                    {others.map((o) => (
-                      <option key={o} value={o}>{effective(o)}</option>
-                    ))}
-                  </select>
-                )}
               </div>
-            );
-          })}
-          {hasEdits && (
-            <button
-              type="button"
-              onClick={() => setLabels({})}
-              className="text-muted-foreground hover:text-foreground text-xs underline"
-            >
-              reset
-            </button>
-          )}
+            ))}
+            {hasEdits && (
+              <button
+                type="button"
+                onClick={resetAll}
+                className="text-muted-foreground hover:text-foreground text-xs underline"
+              >
+                reset
+              </button>
+            )}
+          </div>
+          <p className="text-muted-foreground mt-1.5 text-xs">
+            Rename a speaker, or give two the same name to merge them. Click a line’s speaker to reassign just that line.
+          </p>
         </div>
       )}
 
-      {/* Final speaker-labeled transcript */}
+      {/* Final speaker-labeled transcript — each line's speaker is a dropdown to reassign that one turn. */}
       {!showLive && result && result.length > 0 && (
         <div className="border-border divide-border divide-y rounded-xl border">
-          {result.map((turn, i) => (
-            <div key={i} className="p-3">
-              <div className={cn('text-xs font-semibold', colorByLabel.get(effective(turn.speaker)) ?? 'text-ozwell')}>
-                {effective(turn.speaker)}{' '}
-                <span className="text-muted-foreground font-normal">· {turn.start.toFixed(1)}s</span>
+          {result.map((turn, i) => {
+            const label = resolved[i];
+            return (
+              <div key={i} className="p-3">
+                <div className="text-xs font-semibold">
+                  <select
+                    aria-label={`Speaker for the line at ${turn.start.toFixed(1)}s`}
+                    value={label}
+                    onChange={(e) => reassignTurn(i, e.target.value)}
+                    className={cn(
+                      'cursor-pointer border-none bg-transparent p-0 text-xs font-semibold focus:outline-none',
+                      colorByLabel.get(label) ?? 'text-ozwell'
+                    )}
+                  >
+                    {distinctLabels.map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                  <span className="text-muted-foreground font-normal"> · {turn.start.toFixed(1)}s</span>
+                </div>
+                <div className="text-foreground mt-0.5 text-sm">{turn.text}</div>
               </div>
-              <div className="text-foreground mt-0.5 text-sm">{turn.text}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       {!showLive && result && result.length === 0 && !busy && (
