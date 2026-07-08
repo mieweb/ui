@@ -36,6 +36,11 @@ import {
   reorderIds,
 } from '../../hooks/useDragReorder';
 import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
+import {
+  useCodeLookupConfig,
+  type CodeLookupProviderConfig,
+} from '../CodeLookup/context';
+import type { CodifyDomain } from '../CodeLookup/CodeLookup';
 
 // =============================================================================
 // Types
@@ -93,6 +98,26 @@ export interface AssessmentAddPick {
   code?: { fullid: string; codetype: string; fullcode: string };
 }
 
+/**
+ * Render-prop that draws the add-order / add-problem code search. `domains`
+ * reflects the user's order-type filter ('auto' = undefined = search
+ * everything) and `placeholder` is context-specific; call `onPick` with the
+ * chosen code (or `onFreeText` when free text is supported).
+ */
+export type RenderOrderSearch = (args: {
+  domains?: string[];
+  /** Rank results from these domains first (auto mode: concerns before orders) */
+  preferDomains?: string[];
+  /** Boost these coding systems (assessments prefer ICD-10 over SNOMED) */
+  preferCodetypes?: string[];
+  /** Restrict condition results to billable (leaf) ICD-10 codes */
+  billableOnly?: boolean;
+  placeholder: string;
+  onPick: (pick: OrderCodePick) => void;
+  /** Present when free-text entry is supported in this context */
+  onFreeText?: (text: string) => void;
+}) => React.ReactNode;
+
 /** Infer the order type from the picked code's coding system. */
 export function orderTypeForCodetype(codetype: string): OrderType {
   const ct = codetype.toUpperCase();
@@ -101,6 +126,47 @@ export function orderTypeForCodetype(codetype: string): OrderType {
   }
   if (ct.startsWith('LOINC') || ct.endsWith('ORDER')) return 'lab';
   return 'procedure'; // HCPCS, ICD10PCS, … (imaging is a manual choice)
+}
+
+/**
+ * Default order/problem search built from an ambient `CodeLookupProvider`: a
+ * bare lookup that forwards the caller's domain/preference hints to the
+ * injected CodeLookup. Used when no explicit `renderOrderSearch` prop is given.
+ */
+function contextOrderSearch(ctx: CodeLookupProviderConfig): RenderOrderSearch {
+  return ({
+    domains,
+    preferDomains,
+    preferCodetypes,
+    billableOnly,
+    placeholder,
+    onPick,
+    onFreeText,
+  }) => {
+    const Lookup = ctx.component;
+    return (
+      <Lookup
+        indexUrl={ctx.indexUrl}
+        locale={ctx.locale}
+        domains={domains as CodifyDomain[] | undefined}
+        preferDomains={preferDomains as CodifyDomain[] | undefined}
+        preferCodetypes={preferCodetypes}
+        billableOnly={billableOnly}
+        bare
+        clearOnSelect
+        placeholder={placeholder}
+        onSelect={(result) =>
+          onPick({
+            fullid: result.fullid,
+            label: result.label,
+            codetype: result.codetype,
+            fullcode: result.fullcode,
+          })
+        }
+        onFreeText={onFreeText}
+      />
+    );
+  };
 }
 
 /** Coding systems that represent a diagnosis/problem rather than an order.
@@ -185,24 +251,11 @@ export interface AssessmentProps extends Omit<
   /**
    * Render a code-lookup search for the add-order / add-problem forms
    * (dependency-injected so the library build doesn't bundle the lookup's
-   * worker — pass e.g. a CodeLookup wired to your index). `domains` reflects
-   * the user's order-type filter ('auto' = undefined = search everything) and
-   * `placeholder` is context-specific; call `onPick` with the chosen code.
-   * Omit to fall back to free-text order entry.
+   * worker — pass e.g. a CodeLookup wired to your index). Defaults to the
+   * ambient `CodeLookupProvider`; pass `false` to fall back to free-text
+   * order entry.
    */
-  renderOrderSearch?: (args: {
-    domains?: string[];
-    /** Rank results from these domains first (auto mode: concerns before orders) */
-    preferDomains?: string[];
-    /** Boost these coding systems (assessments prefer ICD-10 over SNOMED) */
-    preferCodetypes?: string[];
-    /** Restrict condition results to billable (leaf) ICD-10 codes */
-    billableOnly?: boolean;
-    placeholder: string;
-    onPick: (pick: OrderCodePick) => void;
-    /** Present when free-text entry is supported in this context */
-    onFreeText?: (text: string) => void;
-  }) => React.ReactNode;
+  renderOrderSearch?: RenderOrderSearch | false;
   /** Called when an unlinked order is linked to a problem — also used when an
    * order is dragged onto another problem (re-link = move) */
   onLinkOrder?: (order: AssessmentOrder, concernId: string) => void;
@@ -805,6 +858,14 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     // clears-then-sets so repeated identical messages re-announce
     const [announcement, setAnnouncement] = useLiveAnnouncement();
 
+    // Default the code search to the ambient provider; `false` forces free text.
+    const ambientCodeLookup = useCodeLookupConfig();
+    const effectiveRenderOrderSearch: RenderOrderSearch | undefined =
+      renderOrderSearch === false
+        ? undefined
+        : (renderOrderSearch ??
+          (ambientCodeLookup ? contextOrderSearch(ambientCodeLookup) : undefined));
+
     const concernById = React.useMemo(
       () => new Map(concerns.map((c) => [c.concernId, c])),
       [concerns]
@@ -1205,7 +1266,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                       problemText={assertion.text}
                       onSubmit={(order) => onAddOrder(item, order)}
                       onCancel={() => setAddingFor(null)}
-                      renderSearch={renderOrderSearch}
+                      renderSearch={effectiveRenderOrderSearch}
                     />
                   )}
                 </li>
@@ -1217,7 +1278,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               adds an (unlinked) order — auto-detected from the coding system,
               or forced via the mode dropdown. Free text asks (in auto mode). */}
           {!readOnly &&
-            renderOrderSearch &&
+            effectiveRenderOrderSearch &&
             (onAddAssessment || onAddOrder) && (
               <div
                 role="form"
@@ -1243,7 +1304,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   {onAddOrder && <option value="order">Add order</option>}
                 </select>
                 <div className="min-w-64 flex-1">
-                  {renderOrderSearch({
+                  {effectiveRenderOrderSearch({
                     domains:
                       addMode === 'problem'
                         ? ['condition', 'occupational']

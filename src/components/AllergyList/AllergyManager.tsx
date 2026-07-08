@@ -35,6 +35,7 @@ import { Select } from '../Select';
 import { RadioGroup, Radio } from '../Radio';
 import { DateInput } from '../DateInput';
 import type { CodeLookupConfig } from '../MedicationList';
+import { useCodeLookupConfig } from '../CodeLookup/context';
 
 // =============================================================================
 // Types
@@ -55,9 +56,10 @@ export interface AllergyManagerProps {
   title?: string | null;
   /**
    * CodeLookup wiring for allergen search (drug shard). Enables both the
-   * inline add bar and coded allergens in the editor. Omit for plain text.
+   * inline add bar and coded allergens in the editor. Defaults to the ambient
+   * `CodeLookupProvider`; pass `false` to force plain text.
    */
-  codeLookup?: CodeLookupConfig;
+  codeLookup?: CodeLookupConfig | false;
   /** Render an inline allergen search bar in the add section (requires codeLookup) */
   inlineAddSearch?: boolean;
   /** Hide all action affordances (display only) */
@@ -296,6 +298,11 @@ export function AllergyManager({
   );
   const allergies = isControlled ? controlled : internal;
 
+  // Default the lookup to the ambient provider; `false` forces plain text.
+  const ambientCodeLookup = useCodeLookupConfig();
+  const effectiveCodeLookup: CodeLookupConfig | undefined =
+    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+
   const [dialog, setDialog] = React.useState<DialogState>(null);
   const [noteDraft, setNoteDraft] = React.useState('');
 
@@ -324,10 +331,10 @@ export function AllergyManager({
   };
 
   const addSearch =
-    inlineAddSearch && codeLookup && !readOnly ? (
-      <codeLookup.component
-        indexUrl={codeLookup.indexUrl}
-        locale={codeLookup.locale}
+    inlineAddSearch && effectiveCodeLookup && !readOnly ? (
+      <effectiveCodeLookup.component
+        indexUrl={effectiveCodeLookup.indexUrl}
+        locale={effectiveCodeLookup.locale}
         domains={['med']}
         bare
         clearOnSelect
@@ -379,7 +386,7 @@ export function AllergyManager({
         <AllergyEditor
           key={dialog.kind === 'correct' ? dialog.allergy.id : 'add'}
           allergy={dialog.kind === 'correct' ? dialog.allergy : undefined}
-          codeLookup={codeLookup}
+          codeLookup={effectiveCodeLookup}
           onClose={() => setDialog(null)}
           onSave={(saved) => {
             if (dialog.kind === 'correct') {

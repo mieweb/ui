@@ -49,9 +49,11 @@ import {
   MedicationEditor,
   labelToMedicationFields,
   parseSig,
+  type CodeLookupConfig,
   type Medication,
 } from '../MedicationList';
 import type { AssessmentOrder, OrderType } from '../Assessment';
+import { useCodeLookupConfig } from '../CodeLookup/context';
 
 // =============================================================================
 // Types — CodeLookup injection (structural, same pattern as MedicationEditor)
@@ -103,8 +105,11 @@ export interface OrderEditorProps {
   order?: AssessmentOrder;
   /** Order type used in add mode (edit mode follows `order.type`) */
   defaultType?: OrderType;
-  /** Codify shard location; omit to fall back to a plain name input */
-  codeLookup?: OrderCodeLookupConfig;
+  /**
+   * Codify shard location for coded order search. Defaults to the ambient
+   * `CodeLookupProvider`; pass `false` to force a plain name input.
+   */
+  codeLookup?: OrderCodeLookupConfig | false;
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete order on save */
@@ -230,6 +235,12 @@ function BaseOrderEditor({
   onSave,
 }: TypedOrderEditorProps & { type: Exclude<OrderType, 'medication'> }) {
   const config = TYPE_CONFIG[type];
+
+  // Default the lookup to the ambient provider; `false` forces plain text.
+  const ambientCodeLookup = useCodeLookupConfig();
+  const effectiveCodeLookup: OrderCodeLookupConfig | undefined =
+    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+
   const [draft, setDraft] = React.useState<AssessmentOrder>(
     () =>
       order ?? {
@@ -265,12 +276,12 @@ function BaseOrderEditor({
         <div ref={bodyRef} className="contents">
           {/* ——— Order + coding ——— */}
           <section className="space-y-3" aria-label="Order">
-            {codeLookup ? (
+            {effectiveCodeLookup ? (
               <div className="space-y-1.5">
                 <Label htmlFor="ord-search">Order</Label>
-                <codeLookup.component
-                  indexUrl={codeLookup.indexUrl}
-                  locale={codeLookup.locale}
+                <effectiveCodeLookup.component
+                  indexUrl={effectiveCodeLookup.indexUrl}
+                  locale={effectiveCodeLookup.locale}
                   domains={config.domains}
                   bare
                   clearOnSelect={false}
@@ -490,16 +501,17 @@ export function OrderEditor({
         open={open}
         medication={order ? orderToMedication(order) : undefined}
         codeLookup={
-          codeLookup && {
-            // MedicationLookupProps narrows OrderLookupProps (domains ['med']
-            // ⊂ OrderSearchDomain[]), so the same component fits — but
-            // ComponentType is invariant over props, hence the cast.
-            component: codeLookup.component as React.ComponentType<
-              import('../MedicationList/MedicationEditor').MedicationLookupProps
-            >,
-            indexUrl: codeLookup.indexUrl,
-            locale: codeLookup.locale,
-          }
+          codeLookup === false
+            ? false
+            : codeLookup &&
+              // MedicationLookupProps is a narrowing of OrderLookupProps
+              // (domains ['med'] ⊂ OrderSearchDomain[]) — the same CodeLookup
+              // component fits; the cast bridges the two structural prop types.
+              ({
+                component: codeLookup.component,
+                indexUrl: codeLookup.indexUrl,
+                locale: codeLookup.locale,
+              } as CodeLookupConfig)
         }
         onClose={onClose}
         onSave={(med) => onSave(medicationToOrder(med, base))}

@@ -17,6 +17,7 @@ import type { FieldComponentProps } from '@esheet/core';
 import { registerCustomFieldTypes } from '@esheet/fields';
 import { AllergyManager, type Allergy } from '../components/AllergyList';
 import type { CodeLookupConfig } from '../components/MedicationList';
+import { useCodeLookupConfig } from '../components/CodeLookup/context';
 
 // =============================================================================
 // Response (de)serialization
@@ -61,12 +62,17 @@ export function AllergyListField({
   codeLookup,
 }: FieldComponentProps & {
   /** CodeLookup wiring — supplied via registerAllergyListFieldType() */
-  codeLookup?: CodeLookupConfig;
+  codeLookup?: CodeLookupConfig | false;
 }): React.JSX.Element {
   const definition = field.definition as {
     question?: string;
     allergies?: Allergy[];
   };
+
+  // Default to the ambient provider; `false` forces plain text.
+  const ambientCodeLookup = useCodeLookupConfig();
+  const effectiveCodeLookup =
+    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
 
   const value = React.useMemo(() => {
     if (response?.answer) return parseValue(response.answer);
@@ -93,7 +99,7 @@ export function AllergyListField({
       }
       title={definition.question ?? 'Allergies'}
       codeLookup={codeLookup}
-      inlineAddSearch={Boolean(codeLookup)}
+      inlineAddSearch={Boolean(effectiveCodeLookup)}
       readOnly={!(isPreview && isEnabled)}
     />
   );
@@ -108,7 +114,7 @@ export function AllergyListField({
  * Call once before rendering EsheetBuilder or EsheetRenderer.
  */
 export function registerAllergyListFieldType(options?: {
-  codeLookup?: CodeLookupConfig;
+  codeLookup?: CodeLookupConfig | false;
 }): void {
   const Field = (props: FieldComponentProps) => (
     <AllergyListField {...props} codeLookup={options?.codeLookup} />

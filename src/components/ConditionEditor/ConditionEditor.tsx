@@ -31,6 +31,10 @@ import {
   type UncertainConditionField,
   type VerificationStatus,
 } from '../ProblemList';
+import {
+  useCodeLookupConfig,
+  type CodeLookupProviderConfig,
+} from '../CodeLookup/context';
 
 // =============================================================================
 // Types
@@ -55,6 +59,17 @@ export interface ConditionCodePick {
   fullcode: string;
 }
 
+/**
+ * Render-prop that draws the coding-section code search. Picking a result
+ * calls `onPick` (appends a coding row, fills an empty name); free text calls
+ * `onFreeText` (fills the name).
+ */
+export type RenderConditionCodeSearch = (args: {
+  placeholder: string;
+  onPick: (pick: ConditionCodePick) => void;
+  onFreeText: (text: string) => void;
+}) => React.ReactNode;
+
 export interface ConditionEditorProps {
   /** Editor operation */
   mode: ConditionEditorMode;
@@ -77,14 +92,11 @@ export interface ConditionEditorProps {
    * so the library build doesn't bundle the lookup's worker — pass e.g. a
    * `CodeLookup` wired to your index, the same pattern as Assessment's
    * `renderOrderSearch`). Picking a result appends a coding row and fills an
-   * empty problem name; free text fills the problem name. Omit for manual
-   * code entry only.
+   * empty problem name; free text fills the problem name. Defaults to the
+   * ambient `CodeLookupProvider` (condition shard, ICD-10 preferred); pass
+   * `false` for manual code entry only.
    */
-  renderCodeSearch?: (args: {
-    placeholder: string;
-    onPick: (pick: ConditionCodePick) => void;
-    onFreeText: (text: string) => void;
-  }) => React.ReactNode;
+  renderCodeSearch?: RenderConditionCodeSearch | false;
   /** Additional CSS classes for the dialog content */
   className?: string;
   /** Test ID for testing */
@@ -135,6 +147,39 @@ function systemForCodetype(codetype: string): string {
   if (ct === 'ICD11') return 'ICD-11';
   if (ct === 'SNOMED' || ct === 'SNOMEDCT') return 'SNOMED';
   return codetype;
+}
+
+/**
+ * Default code search built from an ambient `CodeLookupProvider`: a bare
+ * condition-shard lookup (ICD-10 preferred) wired to the editor's onPick /
+ * onFreeText. Used when no explicit `renderCodeSearch` prop is given.
+ */
+function contextConditionCodeSearch(
+  ctx: CodeLookupProviderConfig
+): RenderConditionCodeSearch {
+  return ({ placeholder, onPick, onFreeText }) => {
+    const Lookup = ctx.component;
+    return (
+      <Lookup
+        indexUrl={ctx.indexUrl}
+        locale={ctx.locale}
+        domains={['condition']}
+        preferCodetypes={['ICD10']}
+        bare
+        clearOnSelect={false}
+        placeholder={placeholder}
+        onSelect={(result) =>
+          onPick({
+            fullid: result.fullid,
+            label: result.label,
+            codetype: result.codetype,
+            fullcode: result.fullcode,
+          })
+        }
+        onFreeText={onFreeText}
+      />
+    );
+  };
 }
 
 // =============================================================================
@@ -274,6 +319,17 @@ export function ConditionEditor({
   'data-testid': dataTestId,
 }: ConditionEditorProps) {
   const prior = concern ? currentAssertion(concern) : undefined;
+
+  // Default the code search to the ambient provider; `false` forces manual
+  // code entry only.
+  const ambientCodeLookup = useCodeLookupConfig();
+  const effectiveRenderCodeSearch: RenderConditionCodeSearch | undefined =
+    renderCodeSearch === false
+      ? undefined
+      : (renderCodeSearch ??
+        (ambientCodeLookup
+          ? contextConditionCodeSearch(ambientCodeLookup)
+          : undefined));
 
   const [text, setText] = React.useState('');
   const [coding, setCoding] = React.useState<ConditionCoding[]>([]);
@@ -495,7 +551,7 @@ export function ConditionEditor({
               {/* Capture-first: name is the only required field. In add mode
                   with an injected lookup, name + coding are ONE input — pick
                   a code (sets both) or enter free text (name only). */}
-              {mode === 'add' && renderCodeSearch && !text.trim() ? (
+              {mode === 'add' && effectiveRenderCodeSearch && !text.trim() ? (
                 <div className="space-y-1">
                   <span className="text-foreground block text-sm font-medium">
                     Problem name
@@ -503,7 +559,7 @@ export function ConditionEditor({
                       *
                     </span>
                   </span>
-                  {renderCodeSearch({
+                  {effectiveRenderCodeSearch({
                     placeholder:
                       'Search conditions — or type a name and press Enter…',
                     onPick: handleCodePick,
@@ -569,9 +625,9 @@ export function ConditionEditor({
                     Add code
                   </Button>
                 </legend>
-                {renderCodeSearch && !(mode === 'add' && !text.trim()) && (
+                {effectiveRenderCodeSearch && !(mode === 'add' && !text.trim()) && (
                   <div className="max-w-md">
-                    {renderCodeSearch({
+                    {effectiveRenderCodeSearch({
                       placeholder: 'Search codes — ICD-10-CM / SNOMED…',
                       onPick: handleCodePick,
                       onFreeText: (t) => setText((prev) => prev || t),

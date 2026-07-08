@@ -53,6 +53,7 @@ import { Label } from '../Label';
 import { RadioGroup, Radio } from '../Radio';
 import { DateInput } from '../DateInput';
 import type { Medication } from './MedicationList';
+import { useCodeLookupConfig } from '../CodeLookup/context';
 
 // =============================================================================
 // Types
@@ -98,8 +99,11 @@ export interface MedicationEditorProps {
   open: boolean;
   /** Medication being edited — omit for "add" mode */
   medication?: Medication;
-  /** Codify shard location; omit to fall back to a plain name input */
-  codeLookup?: CodeLookupConfig;
+  /**
+   * Codify shard location for RxNorm/FDB coding. Defaults to the ambient
+   * `CodeLookupProvider`; pass `false` to force a plain name input.
+   */
+  codeLookup?: CodeLookupConfig | false;
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete medication on save */
@@ -269,6 +273,11 @@ export function MedicationEditor({
   onClose,
   onSave,
 }: MedicationEditorProps): React.JSX.Element | null {
+  // Default the lookup to the ambient provider; `false` forces plain text.
+  const ambientCodeLookup = useCodeLookupConfig();
+  const effectiveCodeLookup: CodeLookupConfig | undefined =
+    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+
   const [draft, setDraft] = React.useState<Medication>(
     () =>
       medication ?? {
@@ -318,12 +327,12 @@ export function MedicationEditor({
         <div ref={bodyRef} className="contents">
         {/* ——— Medication + coding ——— */}
         <section className="space-y-3" aria-label="Medication">
-          {codeLookup ? (
+          {effectiveCodeLookup ? (
             <div className="space-y-1.5">
               <Label htmlFor="med-search">Medication</Label>
-              <codeLookup.component
-                indexUrl={codeLookup.indexUrl}
-                locale={codeLookup.locale}
+              <effectiveCodeLookup.component
+                indexUrl={effectiveCodeLookup.indexUrl}
+                locale={effectiveCodeLookup.locale}
                 domains={['med']}
                 bare
                 clearOnSelect={false}

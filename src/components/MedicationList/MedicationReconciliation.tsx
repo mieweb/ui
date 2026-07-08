@@ -34,6 +34,7 @@ import {
   lookupToMedicationFields,
   type CodeLookupConfig,
 } from './MedicationEditor';
+import { useCodeLookupConfig } from '../CodeLookup/context';
 
 // =============================================================================
 // Types
@@ -67,14 +68,15 @@ export interface MedicationReconciliationProps {
   /**
    * CodeLookup wiring for the medication editor (Correct / Add Medication):
    * pass the CodeLookup component + shard location to enable RxNorm/FDB
-   * coding. Omit for a plain-text medication name input.
+   * coding. Defaults to the ambient `CodeLookupProvider` when one is mounted;
+   * pass `false` to force a plain-text medication name input.
    *
    * ```tsx
    * import { CodeLookup } from '@mieweb/ui/…/CodeLookup';
    * <MedicationReconciliation codeLookup={{ component: CodeLookup, indexUrl: '/codify' }} … />
    * ```
    */
-  codeLookup?: CodeLookupConfig;
+  codeLookup?: CodeLookupConfig | false;
   /**
    * Render an inline CodeLookup search bar in the add-medication section
    * (requires `codeLookup`). Picks add immediately as Unreconciled — the
@@ -221,6 +223,11 @@ export function MedicationReconciliation({
   );
   const medications = isControlled ? controlledMedications : internal;
 
+  // Default the lookup to the ambient provider; `false` forces plain text.
+  const ambientCodeLookup = useCodeLookupConfig();
+  const effectiveCodeLookup: CodeLookupConfig | undefined =
+    codeLookup === false ? undefined : (codeLookup ?? ambientCodeLookup ?? undefined);
+
   const [dialog, setDialog] = React.useState<DialogState>(null);
 
   const commit = (next: Medication[]) => {
@@ -305,10 +312,10 @@ export function MedicationReconciliation({
 
   /** Inline CodeLookup add bar — picks/free text land in Unreconciled. */
   const addSearch =
-    inlineAddSearch && codeLookup && !readOnly ? (
-      <codeLookup.component
-        indexUrl={codeLookup.indexUrl}
-        locale={codeLookup.locale}
+    inlineAddSearch && effectiveCodeLookup && !readOnly ? (
+      <effectiveCodeLookup.component
+        indexUrl={effectiveCodeLookup.indexUrl}
+        locale={effectiveCodeLookup.locale}
         domains={['med']}
         bare
         clearOnSelect
@@ -366,7 +373,7 @@ export function MedicationReconciliation({
           key={editorTarget?.id ?? 'add'}
           open
           medication={editorTarget}
-          codeLookup={codeLookup}
+          codeLookup={codeLookup === false ? false : effectiveCodeLookup}
           onClose={() => setDialog(null)}
           onSave={handleEditorSave}
         />

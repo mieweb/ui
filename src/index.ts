@@ -27,6 +27,10 @@ export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/Card';
 export * from './components/Checkbox';
+// CodeLookup itself ships a module worker and is NOT exported here (apps import
+// it from their own bundler). Only its worker-free provider/context is safe to
+// ship in the main entry — it distributes an app-injected CodeLookup.
+export * from './components/CodeLookup/context';
 export * from './components/ConditionEditor';
 export * from './components/CheckrIntegration';
 export * from './components/Collapsible';

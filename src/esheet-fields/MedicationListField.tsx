@@ -69,7 +69,7 @@ export function MedicationListField({
   codeLookup,
 }: FieldComponentProps & {
   /** CodeLookup wiring — supplied via registerMedicationListFieldType() */
-  codeLookup?: CodeLookupConfig;
+  codeLookup?: CodeLookupConfig | false;
 }): React.JSX.Element {
   const definition = field.definition as {
     question?: string;
@@ -115,7 +115,7 @@ export function MedicationListField({
  * ```
  */
 export function registerMedicationListFieldType(options?: {
-  codeLookup?: CodeLookupConfig;
+  codeLookup?: CodeLookupConfig | false;
 }): void {
   const Field = (props: FieldComponentProps) => (
     <MedicationListField {...props} codeLookup={options?.codeLookup} />
