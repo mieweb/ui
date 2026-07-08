@@ -70,6 +70,10 @@ export function OzwellSettingsMenu({
   React.useEffect(() => {
     updateHasMore();
   }, [modelsOpen, open, modelStatus, updateHasMore]);
+  // Collapse the "Models & versions" section when the menu closes, so it doesn't reopen expanded (and tall).
+  React.useEffect(() => {
+    if (!open) setModelsOpen(false);
+  }, [open]);
 
   // Closing the menu after an action keeps parity with the old hand-rolled menu.
   const act = (fn?: () => void) => () => {

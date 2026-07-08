@@ -2,11 +2,12 @@
 /**
  * Ozwell model cache — service worker.
  *
- * WHY: transformers.js caches the Whisper turbo model as a ZERO-byte entry because HuggingFace's
- * newer "Xet" storage returns those files as a REDIRECTED, no-content-length stream. transformers.js's
- * own cache, AND a naive service-worker cache.put(), both fail to store that — so every app open
- * re-downloads ~200MB. (Files on classic LFS — e.g. your jlocala/ozwell-voice-assets wake+speaker
- * models — send a size and aren't redirected, so they cache fine. Proof the mechanism works.)
+ * WHAT IT CACHES: only the speaker-verify runtime (the sherpa WASM + .data under /sv-runtime/) and
+ * onnxruntime-web's wasm (see isModelAsset). It does NOT touch the Whisper weights — transformers.js caches
+ * those into the Cache API itself (from Cloudflare R2). Wake-word .onnx are handled by OPFS, not this SW.
+ *
+ * WHY: some of these runtime assets arrive as a REDIRECTED, no-content-length stream (e.g. from HuggingFace's
+ * "Xet" storage), which a naive service-worker cache.put() can't store — so they'd re-download every open.
  *
  * FIX: for model assets only, fetch the full response, READ IT ALL into a buffer, and rebuild a clean
  * Response from that buffer. That (a) materializes a no-content-length stream and (b) strips the

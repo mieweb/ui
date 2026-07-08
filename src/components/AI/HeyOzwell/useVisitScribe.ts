@@ -46,7 +46,8 @@ export interface UseVisitScribeResult {
   /** Re-run diarization on the LAST recording with the current options (e.g. after changing threshold /
    *  maxSpeakers) — tune without re-recording. No-op if there's no stored clip. */
   reanalyze: () => void;
-  /** Clear the last transcript (e.g. to start a fresh visit). */
+  /** Reset the local take state (timer, live text, error, stored clip). NOTE: the last diarized `result`
+   *  stays until the next recording overwrites it — starting a new visit is the clean way to clear it. */
   reset: () => void;
 }
 
@@ -163,6 +164,7 @@ export function useVisitScribe(options: UseVisitScribeOptions = {}): UseVisitScr
       if (fresh < acc.sampleRate * LIVE_CHUNK_SECONDS) return; // wait for a full window
       const window = acc.snapshotFrom(liveCursorRef.current);
       liveCursorRef.current += window.length;
+      acc.discardBefore(liveCursorRef.current); // free the transcribed audio so memory stays bounded
       liveBusyRef.current = true;
       try {
         const text = (await transcribeSamples(window, acc.sampleRate)).trim();

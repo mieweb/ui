@@ -437,6 +437,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
           if (tail.length >= acc.sampleRate * 8 && t) {
             liveCommittedRef.current = committed ? `${committed} ${t}` : t;
             liveCursorRef.current += tail.length;
+            acc.discardBefore(liveCursorRef.current); // free committed audio so memory stays bounded
           }
         } catch {
           /* transient — keep the last caption */

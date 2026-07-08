@@ -14,9 +14,9 @@ Storybook demo ran self-contained. **Before this branch can merge upstream into
 `mieweb/ui`, those binaries had to move out of the repo** (now done). This note records the
 state and the plan so the cutover was a deliberate, testable step — not a scramble.
 
-## Current state (on `feat/ozwell-voice`)
+## Historical — the pre-cutover state (these binaries have since been removed; see the note above)
 
-Committed binaries, ~57 MB total:
+Before the cutover, committed binaries, ~57 MB total:
 
 | Path | Size | What |
 |---|---|---|

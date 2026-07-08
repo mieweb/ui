@@ -14,6 +14,10 @@ export interface RollingRecorder {
   /** Copy only the samples from absolute index `startSample` to the end — O(new audio), not O(total).
    *  Lets a live loop read just the fresh tail each tick instead of the whole accumulator (avoids O(n²)). */
   snapshotFrom: (startSample: number) => Float32Array;
+  /** Free already-processed audio: drop whole chunks entirely before `sampleIndex`. Callers that read
+   *  forward via a cursor (live caption/transcript) call this to keep an unbounded accumulator from growing
+   *  without bound. Absolute indices are preserved (snapshotFrom/totalSamples still use them). */
+  discardBefore: (sampleIndex: number) => void;
   /** Tear down the audio graph + context. */
   close: () => void;
 }
@@ -32,16 +36,21 @@ export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): Rollin
   const proc = ctx.createScriptProcessor(4096, 1, 1);
   const sink = ctx.createGain();
   sink.gain.value = 0;
-  // `maxSeconds = Infinity` → an unbounded accumulator (keeps the whole utterance, e.g. for live captions).
+  // `maxSeconds = Infinity` → an accumulator (keeps everything not explicitly discarded, e.g. for live
+  // captions — callers free processed audio via discardBefore). Bounded mode keeps only the last maxSeconds.
   const max = maxSeconds === Infinity ? Infinity : Math.round(ctx.sampleRate * maxSeconds);
   let chunks: Float32Array[] = [];
-  let total = 0;
+  let base = 0;   // absolute index of the first retained sample (advances as chunks are evicted/discarded)
+  let pushed = 0; // absolute index just past the last sample ever pushed
   proc.onaudioprocess = (e) => {
-    chunks.push(Float32Array.from(e.inputBuffer.getChannelData(0)));
-    total += e.inputBuffer.length;
-    while (total > max && chunks.length > 1) {
-      total -= chunks[0].length;
-      chunks.shift();
+    const d = Float32Array.from(e.inputBuffer.getChannelData(0));
+    chunks.push(d);
+    pushed += d.length;
+    if (max !== Infinity) {
+      while (pushed - base > max && chunks.length > 1) {
+        base += chunks[0].length;
+        chunks.shift();
+      }
     }
   };
   src.connect(proc);
@@ -50,7 +59,7 @@ export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): Rollin
   return {
     sampleRate: ctx.sampleRate,
     snapshot: () => {
-      const s = new Float32Array(total);
+      const s = new Float32Array(pushed - base);
       let o = 0;
       for (const c of chunks) {
         s.set(c, o);
@@ -58,11 +67,11 @@ export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): Rollin
       }
       return s;
     },
-    totalSamples: () => total,
+    totalSamples: () => pushed,
     snapshotFrom: (startSample: number) => {
-      const start = Math.max(0, Math.min(startSample, total));
-      const out = new Float32Array(total - start);
-      let pos = 0; // absolute sample index at the start of the current chunk
+      const start = Math.max(base, Math.min(startSample, pushed));
+      const out = new Float32Array(pushed - start);
+      let pos = base; // absolute sample index at the start of the current chunk
       let o = 0;
       for (const c of chunks) {
         const chunkEnd = pos + c.length;
@@ -75,6 +84,12 @@ export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): Rollin
         pos = chunkEnd;
       }
       return out;
+    },
+    discardBefore: (sampleIndex: number) => {
+      while (chunks.length > 0 && base + chunks[0].length <= sampleIndex) {
+        base += chunks[0].length;
+        chunks.shift();
+      }
     },
     close: () => {
       try {

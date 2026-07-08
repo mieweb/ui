@@ -74,8 +74,15 @@ export async function getVoiceprints<T>(key: string, migrateLegacy?: (raw: strin
       let raw: string | null = null;
       try { raw = localStorage.getItem(key); } catch { /* ignore */ }
       if (raw != null) {
-        const migrated = migrateLegacy(raw);
-        await idbSet(key, migrated);
+        let migrated: T;
+        try {
+          migrated = migrateLegacy(raw);
+        } catch {
+          // Corrupt legacy value — drop it so we don't retry the failing migration on every load.
+          try { localStorage.removeItem(key); } catch { /* ignore */ }
+          return undefined;
+        }
+        try { await idbSet(key, migrated); } catch { /* persist is best-effort; still return the migrated value */ }
         try { localStorage.removeItem(key); } catch { /* ignore */ }
         return migrated;
       }
@@ -104,7 +111,8 @@ const WHAT_KEY = 'ozwellWhatPrints';
 // Legacy localStorage format: JSON `{ phrase: number[][] }`. New IndexedDB format stores Float32Array[]
 // natively, so migration just rehydrates the number arrays once.
 function parseLegacyWhat(raw: string): Record<string, Float32Array[]> {
-  const o = JSON.parse(raw || '{}') as Record<string, number[][]>;
+  let o: Record<string, number[][]>;
+  try { o = (JSON.parse(raw || '{}') || {}) as Record<string, number[][]>; } catch { return {}; }
   const out: Record<string, Float32Array[]> = {};
   for (const k in o) out[k] = (o[k] || []).map((a) => Float32Array.from(a));
   return out;
