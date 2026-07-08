@@ -92,6 +92,40 @@ export function lastMessageByTime(
   return latest;
 }
 
+function parseHexColor(value: string): [number, number, number] | null {
+  const hex = value.trim();
+  if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) return null;
+  const normalized =
+    hex.length === 4
+      ? '#' + [...hex.slice(1)].map((char) => char + char).join('')
+      : hex;
+  return [1, 3, 5].map((start) => parseInt(normalized.slice(start, start + 2), 16)) as [number, number, number];
+}
+
+function relativeLuminanceChannel(channel: number): number {
+  const normalized = channel / 255;
+  return normalized <= 0.03928
+    ? normalized / 12.92
+    : ((normalized + 0.055) / 1.055) ** 2.4;
+}
+
+function contrastRatioAgainstWhite(value: string): number | null {
+  const rgb = parseHexColor(value);
+  if (!rgb) return null;
+  const [red, green, blue] = rgb;
+  const luminance =
+    0.2126 * relativeLuminanceChannel(red) +
+    0.7152 * relativeLuminanceChannel(green) +
+    0.0722 * relativeLuminanceChannel(blue);
+  return (1.05 / (luminance + 0.05));
+}
+
+function accessibleAccentTextColor(value?: string): string | undefined {
+  if (!value) return undefined;
+  const contrast = contrastRatioAgainstWhite(value);
+  return contrast !== null && contrast < 4.5 ? undefined : value;
+}
+
 // ============================================================================
 // Avatar
 // ============================================================================
@@ -450,6 +484,7 @@ export const MessageRow = React.memo(function MessageRow({
   }
 
   const accent = participant?.color;
+  const accentTextColor = accessibleAccentTextColor(accent);
   const authorName = participant?.name ?? 'Unknown';
 
   // Inline editing applies only to the local user's own plain-text messages
@@ -565,22 +600,22 @@ export const MessageRow = React.memo(function MessageRow({
         >
           <span
             className="text-xs font-medium"
-            style={accent ? { color: accent } : undefined}
+            style={accentTextColor ? { color: accentTextColor } : undefined}
           >
             {authorName}
           </span>
           {participant?.role && (
-            <span className="text-[10px] text-neutral-400">
+            <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
               {participant.role}
             </span>
           )}
-          <span className="text-[10px] text-neutral-400">
+          <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
             {formatTime(message.time)}
           </span>
           {message.editedAt && (
             <span
               data-slot="superchat-edited-indicator"
-              className="text-[10px] text-neutral-400"
+              className="text-[10px] text-neutral-500 dark:text-neutral-400"
               title={`Edited ${formatTime(message.editedAt)}`}
             >
               (edited)

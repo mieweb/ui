@@ -50,6 +50,7 @@ function CopyablePre({
       <pre
         {...props}
         ref={ref}
+        tabIndex={0}
         className={cn(
           'overflow-x-auto rounded-lg bg-neutral-900 p-3 text-sm text-neutral-100 dark:bg-neutral-950',
           props.className

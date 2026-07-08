@@ -154,7 +154,7 @@ function baseComponents(): Components {
       <a
         {...props}
         className={cn(
-          'text-primary-700 hover:text-primary-800 dark:text-primary-300 underline underline-offset-2',
+          'text-primary-800 hover:text-primary-900 dark:text-primary-300 underline underline-offset-2',
           props.className
         )}
         // External model output: open links safely.
@@ -167,6 +167,7 @@ function baseComponents(): Components {
     pre: ({ node: _node, ...props }) => (
       <pre
         {...props}
+        tabIndex={0}
         className={cn(
           'overflow-x-auto rounded-lg bg-neutral-900 p-3 text-sm text-neutral-100 dark:bg-neutral-950',
           props.className
@@ -182,11 +183,22 @@ function baseComponents(): Components {
           {...props}
           className={cn(
             !isBlock &&
-              'rounded bg-neutral-200 px-1 py-0.5 text-[0.85em] dark:bg-neutral-700',
+              'rounded bg-neutral-200 px-1 py-0.5 text-[0.85em] text-neutral-800 dark:bg-neutral-700 dark:text-neutral-100',
             props.className
           )}
         />
       );
+    },
+    input: ({ node: _node, ...props }) => {
+      if (props.type === 'checkbox') {
+        return (
+          <input
+            {...props}
+            aria-label={props.checked ? 'Completed task' : 'Incomplete task'}
+          />
+        );
+      }
+      return <input {...props} />;
     },
     table: ({ node: _node, ...props }) => (
       <div className="my-2 overflow-x-auto">
