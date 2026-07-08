@@ -145,7 +145,8 @@ function minimumContrastRatio(
 function accessibleAccentTextColor(value?: string): string | undefined {
   if (!value) return undefined;
   const contrast = minimumContrastRatio(value, ['#f5f5f5', '#262626']);
-  return contrast !== null && contrast < 4.5 ? undefined : value;
+  if (contrast === null) return value;
+  return contrast < 4.5 ? undefined : value;
 }
 
 // ============================================================================
