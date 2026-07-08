@@ -2,7 +2,19 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EmployerList } from './EmployerList';
 
 function placeholderLogo(label: string): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#dbeafe"/><text x="20" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#2563eb">${label}</text></svg>`;
+  const escapeXml = (value: string) =>
+    value.replace(/[&<>"']/g, (ch) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      } as Record<string, string>)[ch] ?? ch
+    );
+
+  const safeLabel = escapeXml(label);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#dbeafe"/><text x="20" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#2563eb">${safeLabel}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
