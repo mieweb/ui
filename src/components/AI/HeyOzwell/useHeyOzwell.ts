@@ -23,6 +23,7 @@ import {
   transcribeServer,
   transcribeSamples,
   stripStopPhrase,
+  trimTrailingStopPhrase,
   warmWhisper,
   subscribeDictationLoad,
   getDictationLoad,
@@ -133,8 +134,9 @@ export interface UseHeyOzwellResult {
   send: (text: string) => void;
   /** Start recording dictation into the active turn (e.g. wire to a mic button). */
   startDictation: () => void;
-  /** Stop dictation → transcribe → send (the "ozwell I'm done" action, also callable directly). */
-  stopDictation: () => void;
+  /** Stop dictation → transcribe → send. Pass `true` only for a spoken "ozwell i'm done" stop (it trims the
+   *  phrase off the audio); a manual/button stop should call it with no argument. */
+  stopDictation: (viaPhrase?: boolean) => void;
   /** Doctor-only gate is on AND a voiceprint is enrolled, so only the enrolled doctor is acted on. */
   locked: boolean;
   /** Live-caption text recognized so far during dictation (empty unless `liveTranscript` is on). Host can
@@ -431,25 +433,32 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     }
   }, [liveTranscript, transcription]);
 
-  const stopDictation = React.useCallback(() => {
+  // `viaPhrase` = stopped by the spoken "ozwell i'm done" wake (vs the mic button). Only then do we cut the
+  // phrase off the AUDIO before transcribing — Whisper mishears it differently every time, so text-stripping
+  // alone leaks it; a button stop has no phrase, so trimming would clip real speech.
+  const stopDictation = React.useCallback((viaPhrase = false) => {
     const rec = recRef.current;
     if (!rec) return;
     stopLive(); // tear down the live-caption loop; the final full-clip transcription follows
     setPhase('transcribing');
     rec.onstop = async () => {
-      const blob = new Blob(chunksRef.current, {
+      let blob = new Blob(chunksRef.current, {
         type: rec.mimeType || 'audio/webm',
       });
       recRef.current = null;
       try {
+        // Cut the spoken stop phrase off the audio (silence-snapped) so it never reaches ASR — covers the
+        // on-device, server, AND diarization paths at once. Best-effort: keep the original clip on failure.
+        if (viaPhrase) {
+          try { blob = await trimTrailingStopPhrase(blob); } catch { /* keep original */ }
+        }
         let text: string;
         if (conversationMode && diarRef.current.ready) {
           // Conversation mode: diarize the clip → labeled turns ("Dr. Jane: … / Patient: …") so the
-          // assistant gets who-said-what. Strip the trailing stop phrase off the joined transcript; fall
-          // back to plain transcription if diarization yields nothing.
+          // assistant gets who-said-what. Fall back to plain transcription if diarization yields nothing.
           const turns = await diarRef.current.diarize(blob);
           const joined = turns.map((t) => `${t.speaker}: ${t.text}`).join('\n');
-          text = stripStopPhrase(joined) || stripStopPhrase(await transcribeBlob(blob, 1.0));
+          text = stripStopPhrase(joined) || stripStopPhrase(await transcribeBlob(blob));
         } else if (transcription === 'server') {
           // Server mode posts the audio off-device; if it fails (no ASR endpoint, e.g. Ollama) fall
           // back to on-device so the flow still works.
@@ -458,12 +467,11 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
             raw = await transcribeServer(blob);
           } catch (e) {
             console.warn('[hey-ozwell] server ASR failed → on-device fallback', e);
-            raw = await transcribeBlob(blob, 1.0);
+            raw = await transcribeBlob(blob);
           }
           text = stripStopPhrase(raw);
         } else {
-          // Browser mode trims the spoken stop phrase.
-          text = stripStopPhrase(await transcribeBlob(blob, 1.0));
+          text = stripStopPhrase(await transcribeBlob(blob));
         }
         if (text) send(text);
         if (closeChatOnDone) setChatOpen(false);
@@ -488,8 +496,9 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       } else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') {
         // Stop immediately on the verified stop-wake. (A transcribe-confirm gate was tried, but Whisper
         // mishears "done" often enough — e.g. "…all was well" — that it rejected real stops and trapped
-        // dictation. The WHAT phrase-print check in verified() is the false-stop guard.)
-        if (verified("ozwell-i'm-done")) stopDictation();
+        // dictation. The WHAT phrase-print check in verified() is the false-stop guard.) `true` = trim the
+        // phrase off the audio before transcribing.
+        if (verified("ozwell-i'm-done")) stopDictation(true);
       }
     },
   });

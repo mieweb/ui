@@ -285,6 +285,76 @@ export async function decodeTo16kMono(blob: Blob): Promise<Float32Array> {
   }
 }
 
+/** Encode 16 kHz mono Float32 samples as a 16-bit PCM WAV blob, so a trimmed clip can flow back through the
+ *  existing blob-based transcribe/diarize/server paths (which decode it). */
+function encodeWav16kMono(samples: Float32Array): Blob {
+  const sr = 16000;
+  const buf = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buf);
+  const str = (o: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); str(8, 'WAVE');
+  str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, sr, true); view.setUint32(28, sr * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  str(36, 'data'); view.setUint32(40, samples.length * 2, true);
+  let o = 44;
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    o += 2;
+  }
+  return new Blob([buf], { type: 'audio/wav' });
+}
+
+/**
+ * Trim the spoken "ozwell i'm done" off the END of a clip BEFORE it reaches ASR. Whisper mishears the phrase
+ * differently every time ("all was well" / "I was long done" / …), so stripping the transcript text can
+ * never catch them all — the reliable fix is to cut the audio so the phrase is never transcribed. The wake
+ * fires at the phrase's end, so it's the last ~1–1.5 s; we snap the cut to the natural pause before it (a
+ * short-time-energy scan) so we don't clip a real trailing word, and cap the trim so we never remove too
+ * much. Returns a trimmed WAV blob (or the original on any failure / nothing sensible to cut). Only call on
+ * a PHRASE-triggered stop — not a manual button stop, where there's no phrase to remove.
+ */
+export async function trimTrailingStopPhrase(blob: Blob): Promise<Blob> {
+  let samples: Float32Array;
+  try { samples = await decodeTo16kMono(blob); } catch { return blob; }
+  const SR = 16000;
+  const n = samples.length;
+  if (n < SR * 0.8) return blob; // too short to safely trim
+
+  // Short-time energy (RMS) per 30 ms frame.
+  const fr = Math.round(SR * 0.03);
+  const nf = Math.ceil(n / fr);
+  const e = new Float32Array(nf);
+  let peak = 0;
+  for (let f = 0; f < nf; f++) {
+    const a = f * fr, b = Math.min(n, a + fr);
+    let s = 0;
+    for (let i = a; i < b; i++) s += samples[i] * samples[i];
+    e[f] = Math.sqrt(s / (b - a));
+    if (e[f] > peak) peak = e[f];
+  }
+  const sil = Math.max(0.008, peak * 0.15);             // "silence" threshold, adaptive to the clip's level
+  const minGap = Math.max(1, Math.round((0.15 * SR) / fr)); // a real pause = >= ~150 ms of silence
+  const maxTrim = Math.round((1.8 * SR) / fr);           // never cut more than ~1.8 s
+  const floor = Math.max(0, nf - maxTrim);
+
+  let k = nf - 1;
+  while (k >= floor && e[k] < sil) k--;                  // skip any trailing quiet after "done"
+  let cutFrame = -1;
+  while (k >= floor) {
+    if (e[k] < sil) {
+      let m = k;
+      while (m >= floor && e[m] < sil) m--;              // measure this silence run
+      if (k - m >= minGap) { cutFrame = k + 1; break; }  // sustained pause → the phrase starts after it
+      k = m;                                             // micro-pause inside the phrase → keep going back
+    } else k--;
+  }
+  // No clean pause within the window → conservative fixed trim (~1.1 s) instead of the full cap.
+  const cutSample = cutFrame >= 0 ? cutFrame * fr : Math.max(0, n - Math.round(1.1 * SR));
+  if (cutSample < SR * 0.2) return blob;                 // would leave almost nothing — bail (text-strip covers it)
+  return encodeWav16kMono(samples.subarray(0, cutSample));
+}
+
 export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<string> {
   let samples = await decodeTo16kMono(blob);
   if (trimEndSeconds > 0) {

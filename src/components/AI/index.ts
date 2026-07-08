@@ -118,6 +118,7 @@ export {
   transcribeBlob,
   transcribeSamples,
   transcribeSegments,
+  trimTrailingStopPhrase,
   decodeTo16kMono,
   transcribeServer,
   transcribeGate,
