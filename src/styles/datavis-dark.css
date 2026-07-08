@@ -205,9 +205,10 @@
  * can scope these overrides to the graph without leaking into the page.
  * ---------------------------------------------------------------------- */
 
-/* Outer container — mirrors the grid's `.wcdv-grid` background so the
- * raised `.wcdv-title-bar` (styled by the global rule above as
- * `--color-card`) reads with the same header/body contrast. */
+/* GraphView's outer `section` element (within the `.wcdv-graph` wrapper)
+ * — mirrors the grid's `.wcdv-grid` background so the raised
+ * `.wcdv-title-bar` (styled by the global rule above as `--color-card`)
+ * reads with the same header/body contrast. */
 .dark .wcdv-graph section,
 [data-theme='dark'] .wcdv-graph section {
   background-color: var(--color-background) !important;
