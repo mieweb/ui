@@ -291,7 +291,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 
 | Term               | Element / role          | Accessible name         | Purpose                                                             |
 | ------------------ | ----------------------- | ----------------------- | ------------------------------------------------------------------- |
-| **Message input**  | `textarea` · `combobox` | `Message`               | Draft input; `aria-autocomplete="list"`, wired to the mention menu. |
+| **Message input**  | `textarea`              | `Message`               | Draft input; mention suggestions appear in the adjacent listbox.      |
 | **Mention menu**   | `ul` · `listbox`        | `Mention`               | `@`-mention autocomplete (keyboard: ↑/↓, Enter/Tab, Esc).           |
 | **Mention option** | `button` · `option`     | participant name        | A single suggestion; `aria-selected` tracks the highlight.          |
 | **Send button**    | `button`                | `Send message`          | Submits the draft (also Enter, without Shift).                      |

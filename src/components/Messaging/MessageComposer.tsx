@@ -794,14 +794,11 @@ const MessageComposer = React.forwardRef<
                 aria-describedby={showCharacterCount ? 'char-count' : undefined}
                 {...(mentionsEnabled
                   ? {
-                      role: 'combobox' as const,
-                      'aria-expanded': mentionMenuOpen,
                       'aria-controls': mentionMenuOpen
                         ? mentionListId
                         : undefined,
                       'aria-activedescendant': activeMentionOptionId,
                       'aria-autocomplete': 'list' as const,
-                      'aria-haspopup': 'listbox' as const,
                     }
                   : {})}
               />
