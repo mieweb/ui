@@ -58,7 +58,7 @@ export interface MedicationReconciliationProps {
   title?: string | null;
   /** Common medication names for the quick-add list (omit to hide) */
   quickAddOptions?: string[];
-  /** Row actions to show (default: correct, add-task, note, remove, move-up, move-down) */
+  /** Row actions to show (default: correct, add-task, note, remove) */
   actions?: MedicationAction[];
   /**
    * Called for host-specific actions this component does not manage

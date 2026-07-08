@@ -36,7 +36,7 @@ into \`packages/codify/\` (gitignored) and run its build scripts — see the Cod
 for the exact commands.
 
 📖 Full architecture documentation — build pipeline, .mcdx binary format, scoring, priors,
-aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/healthcare-clinical-components/src/components/CodeLookup/README.md).
+aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/main/src/components/CodeLookup/README.md).
         `,
       },
     },

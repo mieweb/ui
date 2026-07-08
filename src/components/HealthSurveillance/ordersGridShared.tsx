@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Shared internals for the NITRO-backed orders grids
  * (ChartOrdersGrid / EncounterOrdersGrid).
