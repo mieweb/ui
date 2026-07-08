@@ -237,18 +237,18 @@ function mergeTableDef(
   }
 
   const { rowMode, ...featureFlags } = features ?? {};
+  const mergedFeatures =
+    Object.keys(featureFlags).length > 0
+      ? ({
+          ...(tableDef?.features ?? {}),
+          ...featureFlags,
+        } as GridTableDef['features'])
+      : undefined;
 
   return {
     ...tableDef,
     ...(rowMode !== undefined ? { rowMode } : {}),
-    ...(Object.keys(featureFlags).length > 0
-      ? {
-          features: {
-            ...(tableDef?.features ?? {}),
-            ...featureFlags,
-          },
-        }
-      : {}),
+    ...(mergedFeatures ? { features: mergedFeatures } : {}),
   };
 }
 
