@@ -7,14 +7,18 @@ function avatarDataUri(
   foreground = '#1d4ed8'
 ): string {
   const escapeXml = (value: string) =>
-    value.replace(/[&<>"']/g, (ch) =>
-      ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      } as Record<string, string>)[ch] ?? ch
+    value.replace(
+      /[&<>"']/g,
+      (ch) =>
+        (
+          ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+          }) as Record<string, string>
+        )[ch] ?? ch
     );
 
   const safeLabel = escapeXml(label);
