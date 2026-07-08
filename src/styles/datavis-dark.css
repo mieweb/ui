@@ -238,7 +238,9 @@
 .dark .wcdv-graph .text-gray-500,
 [data-theme='dark'] .wcdv-graph .text-gray-600,
 [data-theme='dark'] .wcdv-graph .text-gray-500 {
-  color: var(--color-muted-foreground) !important;
+  /* a11y token (not --color-muted-foreground) so brand overrides can't
+   * drop these labels below WCAG AA contrast. */
+  color: var(--color-datavis-a11y-text) !important;
 }
 
 /* Recharts: grid lines */
@@ -252,7 +254,8 @@
 .dark .wcdv-graph .recharts-cartesian-axis-tick-value tspan,
 [data-theme='dark'] .wcdv-graph .recharts-cartesian-axis-tick-value,
 [data-theme='dark'] .wcdv-graph .recharts-cartesian-axis-tick-value tspan {
-  fill: var(--color-muted-foreground) !important;
+  /* a11y token keeps ticks readable regardless of brand overrides. */
+  fill: var(--color-datavis-a11y-text) !important;
 }
 
 /* Recharts: legend labels */
