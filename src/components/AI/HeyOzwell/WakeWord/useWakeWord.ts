@@ -53,6 +53,9 @@ export interface WakeWordControls {
   getLastEmbedding: () => Float32Array | null;
   /** The peak fire confidence (probability) of the last wake — frozen at the fire, so not stale. */
   getLastProb: () => number;
+  /** Approx spoken duration (seconds) of the last wake phrase, from its detection run — used to trim the
+   *  phrase off the recorded audio without needing a pause before it. 0 if unknown. */
+  getLastWakeDuration: () => number;
   /** Store / check / clear a phrase's enrolled phrase-print templates (the WHAT gate). */
   setVoiceprint: (name: string, vectors: Float32Array[]) => void;
   hasVoiceprint: (name: string) => boolean;
@@ -276,6 +279,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
     getStream: () => hbRef.current?.batcher?.stream ?? null,
     getLastEmbedding: () => (hbRef.current?.lastWakeEmbedding ? Float32Array.from(hbRef.current.lastWakeEmbedding) : null),
     getLastProb: () => hbRef.current?.lastWakeProb ?? 0,
+    getLastWakeDuration: () => hbRef.current?.lastWakeDurationSec ?? 0,
     setVoiceprint: (name, vectors) => hbRef.current?.setVoiceprint(name, vectors),
     hasVoiceprint: (name) => hbRef.current?.hasVoiceprint(name) ?? false,
     clearVoiceprint: (name) => hbRef.current?.clearVoiceprint(name),
@@ -316,6 +320,7 @@ interface HeyBuddyInstance {
   vad?: { speechVadThreshold: number; silenceVadThreshold: number };        // VAD speech/silence gate (live)
   lastWakeEmbedding: Float32Array | null;        // frozen fire-frame embedding (the WHAT-gate input)
   lastWakeProb: number;                          // frozen peak fire confidence (the base level)
+  lastWakeDurationSec: number;                   // approx spoken duration of the last wake phrase (detection run)
   voiceprints: Record<string, Float32Array[]>;   // per-phrase enrolled phrase-print templates
   setVoiceprint(name: string, vectors: Float32Array[]): void;
   hasVoiceprint(name: string): boolean;

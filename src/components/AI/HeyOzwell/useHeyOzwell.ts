@@ -46,6 +46,15 @@ export type HeyOzwellPhase = 'listening' | 'dictating' | 'transcribing';
 const WHAT_THRESHOLDS: Record<string, number> = { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.75 };
 const whatThr = (name: string) => WHAT_THRESHOLDS[name] ?? 0.8;
 
+// The wake detector's run-length underestimates the full phrase (it only counts frames where the phrase was
+// already recognized — the lead-in before that isn't detected), so add a margin when trimming the phrase off
+// the audio. Overridable via `window.__ozwellStopLeadIn` for tuning on real speech.
+function stopTrimLeadIn(): number {
+  if (typeof window === 'undefined') return 0.35;
+  const v = (window as unknown as { __ozwellStopLeadIn?: number }).__ozwellStopLeadIn;
+  return typeof v === 'number' ? v : 0.35;
+}
+
 export interface UseHeyOzwellOptions {
   /** ON: "hey ozwell" opens the chat AND starts dictating. OFF: it just opens the chat and waits. */
   autoDictateOnWake?: boolean;
@@ -447,10 +456,14 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       });
       recRef.current = null;
       try {
-        // Cut the spoken stop phrase off the audio (silence-snapped) so it never reaches ASR — covers the
-        // on-device, server, AND diarization paths at once. Best-effort: keep the original clip on failure.
+        // Cut the spoken stop phrase off the audio so it never reaches ASR — covers the on-device, server,
+        // AND diarization paths at once. Anchor the cut with the wake detector's measured phrase length (so
+        // it works even with no pause before the phrase), snapped to a nearby pause. Best-effort: keep the
+        // original clip on failure.
         if (viaPhrase) {
-          try { blob = await trimTrailingStopPhrase(blob); } catch { /* keep original */ }
+          const dur = wakeRef.current?.getLastWakeDuration() ?? 0;
+          const hint = dur > 0 ? dur + stopTrimLeadIn() : 0;
+          try { blob = await trimTrailingStopPhrase(blob, hint); } catch { /* keep original */ }
         }
         let text: string;
         if (conversationMode && diarRef.current.ready) {

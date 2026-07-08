@@ -308,13 +308,16 @@ function encodeWav16kMono(samples: Float32Array): Blob {
 /**
  * Trim the spoken "ozwell i'm done" off the END of a clip BEFORE it reaches ASR. Whisper mishears the phrase
  * differently every time ("all was well" / "I was long done" / …), so stripping the transcript text can
- * never catch them all — the reliable fix is to cut the audio so the phrase is never transcribed. The wake
- * fires at the phrase's end, so it's the last ~1–1.5 s; we snap the cut to the natural pause before it (a
- * short-time-energy scan) so we don't clip a real trailing word, and cap the trim so we never remove too
- * much. Returns a trimmed WAV blob (or the original on any failure / nothing sensible to cut). Only call on
- * a PHRASE-triggered stop — not a manual button stop, where there's no phrase to remove.
+ * never catch them all — the reliable fix is to cut the audio so the phrase is never transcribed.
+ *
+ * `phraseHintSec` (from the wake detector's detection run) is an estimate of the phrase's length. When
+ * given, the cut is anchored at `end - phraseHintSec` and snapped to the nearest pause within ~0.35 s — so
+ * it works whether or not the speaker paused (the pause-independent case that pure energy can't handle).
+ * Without a hint, it walks back from the end to the last natural pause (energy only). Capped so it never
+ * removes too much. Returns a trimmed WAV blob (or the original on failure / nothing sensible to cut). Only
+ * call on a PHRASE-triggered stop — not a manual button stop, where there's no phrase to remove.
  */
-export async function trimTrailingStopPhrase(blob: Blob): Promise<Blob> {
+export async function trimTrailingStopPhrase(blob: Blob, phraseHintSec = 0): Promise<Blob> {
   let samples: Float32Array;
   try { samples = await decodeTo16kMono(blob); } catch { return blob; }
   const SR = 16000;
@@ -335,22 +338,38 @@ export async function trimTrailingStopPhrase(blob: Blob): Promise<Blob> {
   }
   const sil = Math.max(0.008, peak * 0.15);             // "silence" threshold, adaptive to the clip's level
   const minGap = Math.max(1, Math.round((0.15 * SR) / fr)); // a real pause = >= ~150 ms of silence
-  const maxTrim = Math.round((1.8 * SR) / fr);           // never cut more than ~1.8 s
-  const floor = Math.max(0, nf - maxTrim);
+  const maxTrimFrames = Math.round((2.2 * SR) / fr);     // never cut more than ~2.2 s
+  const floor = Math.max(0, nf - maxTrimFrames);
 
-  let k = nf - 1;
-  while (k >= floor && e[k] < sil) k--;                  // skip any trailing quiet after "done"
-  let cutFrame = -1;
-  while (k >= floor) {
-    if (e[k] < sil) {
-      let m = k;
-      while (m >= floor && e[m] < sil) m--;              // measure this silence run
-      if (k - m >= minGap) { cutFrame = k + 1; break; }  // sustained pause → the phrase starts after it
-      k = m;                                             // micro-pause inside the phrase → keep going back
-    } else k--;
+  let cutFrame: number;
+  if (phraseHintSec > 0.2) {
+    // Detector-anchored: the phrase is the last ~phraseHintSec. Snap to the nearest quiet frame within a
+    // window of that anchor (catches the pause/word-boundary before the phrase even when it's very brief);
+    // if none is near, cut at the anchor itself. Pause-independent.
+    const anchor = Math.max(0, nf - Math.round((phraseHintSec * SR) / fr));
+    const win = Math.round((0.35 * SR) / fr);
+    let best = -1, bestDist = Infinity;
+    for (let f = Math.max(0, anchor - win); f <= Math.min(nf - 1, anchor + win); f++) {
+      if (e[f] < sil) { const dist = Math.abs(f - anchor); if (dist < bestDist) { bestDist = dist; best = f; } }
+    }
+    cutFrame = best >= 0 ? best : anchor;
+  } else {
+    // Energy-only fallback: walk back from the end to the last sustained pause.
+    let k = nf - 1;
+    while (k >= floor && e[k] < sil) k--;                // skip any trailing quiet after "done"
+    cutFrame = -1;
+    while (k >= floor) {
+      if (e[k] < sil) {
+        let m = k;
+        while (m >= floor && e[m] < sil) m--;            // measure this silence run
+        if (k - m >= minGap) { cutFrame = k + 1; break; } // sustained pause → the phrase starts after it
+        k = m;                                           // micro-pause inside the phrase → keep going back
+      } else k--;
+    }
+    if (cutFrame < 0) cutFrame = Math.max(0, nf - Math.round((1.1 * SR) / fr)); // no pause → conservative fixed trim
   }
-  // No clean pause within the window → conservative fixed trim (~1.1 s) instead of the full cap.
-  const cutSample = cutFrame >= 0 ? cutFrame * fr : Math.max(0, n - Math.round(1.1 * SR));
+  cutFrame = Math.max(cutFrame, floor);                  // enforce the max-trim cap
+  const cutSample = Math.min(n, cutFrame * fr);
   if (cutSample < SR * 0.2) return blob;                 // would leave almost nothing — bail (text-strip covers it)
   return encodeWav16kMono(samples.subarray(0, cutSample));
 }

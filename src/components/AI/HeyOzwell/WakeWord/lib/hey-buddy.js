@@ -323,6 +323,13 @@ export class HeyBuddy {
         }
         this.recording = true;
         this.wakeWordTimes[name] = now;
+        // How long the phrase was, from its detection run. `_consec[name]` = consecutive detected frames up
+        // to this fire; each frame is one batch interval (~120ms), so this ≈ the spoken phrase's duration.
+        // Purely additive readout (detection logic unchanged) — consumers use it to trim the phrase off the
+        // recorded audio without relying on a silent pause before it.
+        const frameSec = (this.batcher && this.batcher.batchIntervalSamples && this.batcher.targetSampleRate)
+            ? this.batcher.batchIntervalSamples / this.batcher.targetSampleRate : 0.12;
+        this.lastWakeDurationSec = (this._consec[name] || 0) * frameSec;
         // FREEZE the wake embedding at THIS fire moment = the peak of the current detection run up to the
         // fire. Captured ONCE per fire (this runs after the interval guard above), so it can't drift to
         // later low-confidence frames during the recording tail — that drift collapsed the gate/enrollment
