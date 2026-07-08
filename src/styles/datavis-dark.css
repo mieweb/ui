@@ -219,9 +219,10 @@
   border-color: var(--color-border) !important;
 }
 
-/* Title bar background (reuses the grid's .wcdv-title-bar token) */
-.dark .wcdv-graph .bg-gray-50,
-[data-theme='dark'] .wcdv-graph .bg-gray-50 {
+/* Title bar background — GraphView tags this row with the same
+ * `.wcdv-title-bar` marker class the grid uses. */
+.dark .wcdv-graph .wcdv-title-bar,
+[data-theme='dark'] .wcdv-graph .wcdv-title-bar {
   background-color: var(--color-muted) !important;
 }
 
