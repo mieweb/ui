@@ -200,6 +200,7 @@ function baseComponents(): Components {
               (props['aria-labelledby'] ? undefined : 'Task list item')
             }
           />
+        );
       }
       return <input {...props} />;
     },
