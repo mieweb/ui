@@ -196,3 +196,83 @@
     var(--color-border)
   ) !important;
 }
+
+/* ── Graph (GraphView) ───────────────────────────────────────────────────
+ *
+ * GraphView ships hardcoded light Tailwind classes (bg-white, text-gray-*,
+ * border-gray-*), inline tooltip styles, and recharts SVG defaults. The
+ * wrapper (<DataVisNitroGraph>) tags its container with `.wcdv-graph` so we
+ * can scope these overrides to the graph without leaking into the page.
+ * ---------------------------------------------------------------------- */
+
+/* Outer card container */
+.dark .wcdv-graph section,
+[data-theme='dark'] .wcdv-graph section {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-foreground) !important;
+}
+
+/* Section dividers (title bar, controls row) */
+.dark .wcdv-graph .border-gray-200,
+[data-theme='dark'] .wcdv-graph .border-gray-200 {
+  border-color: var(--color-border) !important;
+}
+
+/* Title bar background (reuses the grid's .wcdv-title-bar token) */
+.dark .wcdv-graph .bg-gray-50,
+[data-theme='dark'] .wcdv-graph .bg-gray-50 {
+  background-color: var(--color-muted) !important;
+}
+
+/* Text: title, control labels, stacked toggle, empty state */
+.dark .wcdv-graph .text-gray-800,
+.dark .wcdv-graph .text-gray-700,
+[data-theme='dark'] .wcdv-graph .text-gray-800,
+[data-theme='dark'] .wcdv-graph .text-gray-700 {
+  color: var(--color-foreground) !important;
+}
+
+.dark .wcdv-graph .text-gray-600,
+.dark .wcdv-graph .text-gray-500,
+[data-theme='dark'] .wcdv-graph .text-gray-600,
+[data-theme='dark'] .wcdv-graph .text-gray-500 {
+  color: var(--color-muted-foreground) !important;
+}
+
+/* Recharts: grid lines */
+.dark .wcdv-graph .recharts-cartesian-grid line,
+[data-theme='dark'] .wcdv-graph .recharts-cartesian-grid line {
+  stroke: var(--color-border) !important;
+}
+
+/* Recharts: axis tick labels */
+.dark .wcdv-graph .recharts-cartesian-axis-tick-value,
+.dark .wcdv-graph .recharts-cartesian-axis-tick-value tspan,
+[data-theme='dark'] .wcdv-graph .recharts-cartesian-axis-tick-value,
+[data-theme='dark'] .wcdv-graph .recharts-cartesian-axis-tick-value tspan {
+  fill: var(--color-muted-foreground) !important;
+}
+
+/* Recharts: legend labels */
+.dark .wcdv-graph .recharts-legend-item-text,
+[data-theme='dark'] .wcdv-graph .recharts-legend-item-text {
+  color: var(--color-foreground) !important;
+}
+
+/* Recharts: tooltip (inline contentStyle uses light colors) */
+.dark .wcdv-graph .recharts-default-tooltip,
+.dark .wcdv-graph .recharts-tooltip-wrapper .recharts-default-tooltip,
+[data-theme='dark'] .wcdv-graph .recharts-default-tooltip,
+[data-theme='dark'] .wcdv-graph .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-foreground) !important;
+}
+
+.dark .wcdv-graph .recharts-tooltip-label,
+.dark .wcdv-graph .recharts-tooltip-item,
+[data-theme='dark'] .wcdv-graph .recharts-tooltip-label,
+[data-theme='dark'] .wcdv-graph .recharts-tooltip-item {
+  color: var(--color-foreground) !important;
+}

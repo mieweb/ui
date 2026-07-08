@@ -186,7 +186,7 @@ function DataVisNitroGraphInner({
   );
 
   return (
-    <div style={height ? { height } : undefined}>
+    <div className="wcdv-graph" style={height ? { height } : undefined}>
       <GraphView
         viewData={viewState.data}
         columns={resolvedColumns}
