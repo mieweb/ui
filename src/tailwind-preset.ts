@@ -80,6 +80,8 @@ export const miewebUISafelist = [
   'opacity-0',
   'group-hover:opacity-100',
   'focus:opacity-100',
+  'has-[[data-slot=superchat-nitro-table]]:w-full',
+  'has-[[data-slot=superchat-nitro-table]]:max-w-full',
   // Markdown SurveyBlock
   'accent-primary-500',
   // Opacity-modifier variants for semantic colors used by components

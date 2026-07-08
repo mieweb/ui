@@ -295,6 +295,7 @@ const preview: Preview = {
   },
   parameters: {
     a11y: {
+      test: 'error',
       config: {
         rules: [
           // These rules fire on every story because Storybook renders components
