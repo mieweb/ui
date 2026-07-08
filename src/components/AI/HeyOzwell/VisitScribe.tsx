@@ -101,29 +101,33 @@ export function VisitScribe({
   });
   const { ready, recording, busy, error, result, liveText, elapsedMs, canReanalyze } = scribe;
 
-  // Two layers of user corrections, both reset on a fresh transcript:
-  //  • `labels`     — rename a whole speaker (keyed by the original diarized label). Merge = give two
-  //                   speakers the SAME name (the resolved-label logic below then treats them as one).
-  //  • `turnLabels` — reassign a SINGLE turn to a different speaker (keyed by turn index), for the case
-  //                   where diarization only mislabeled one line.
+  // Corrections, both keyed so renames always propagate, both reset on a fresh transcript:
+  //  • `labels`      — rename a speaker (keyed by the ORIGINAL diarized label). Merge = give two speakers
+  //                    the same name.
+  //  • `turnSpeaker` — reassign one line to a different ORIGINAL speaker (keyed by turn index), for when
+  //                    diarization mislabeled a single line.
+  // Everything resolves through `effective(originalSpeaker)`, so renaming a speaker updates every line —
+  // including reassigned ones. An "Edit speakers" toggle keeps the default transcript view clean.
   const [labels, setLabels] = React.useState<Record<string, string>>({});
-  const [turnLabels, setTurnLabels] = React.useState<Record<number, string>>({});
-  React.useEffect(() => { setLabels({}); setTurnLabels({}); }, [result]);
+  const [turnSpeaker, setTurnSpeaker] = React.useState<Record<number, string>>({});
+  const [editing, setEditing] = React.useState(false);
+  React.useEffect(() => { setLabels({}); setTurnSpeaker({}); setEditing(false); }, [result]);
   const effective = React.useCallback((sp: string) => labels[sp]?.trim() || sp, [labels]);
 
-  // Distinct original speakers in first-appearance order (the rename chips).
+  // Distinct original speakers in first-appearance order (rename chips + per-line reassign options).
   const speakers = React.useMemo(() => {
     const seen: string[] = [];
     result?.forEach((t) => { if (!seen.includes(t.speaker)) seen.push(t.speaker); });
     return seen;
   }, [result]);
 
-  // The resolved label for each turn: a per-turn override wins, else the (possibly renamed) speaker label.
+  // The original speaker for each line (a reassignment wins), then its resolved display label.
+  const origOf = React.useCallback((i: number) => turnSpeaker[i] ?? (result?.[i]?.speaker ?? ''), [turnSpeaker, result]);
   const resolved = React.useMemo(
-    () => (result ?? []).map((t, i) => turnLabels[i] || (labels[t.speaker]?.trim() || t.speaker)),
-    [result, labels, turnLabels]
+    () => (result ?? []).map((t, i) => effective(turnSpeaker[i] ?? t.speaker)),
+    [result, turnSpeaker, effective]
   );
-  // Distinct current labels (first-appearance) → colours + the per-turn reassign options.
+  // Distinct current labels (first-appearance) → colours.
   const distinctLabels = React.useMemo(() => {
     const seen: string[] = [];
     resolved.forEach((l) => { if (!seen.includes(l)) seen.push(l); });
@@ -137,9 +141,9 @@ export function VisitScribe({
   const speakerCount = distinctLabels.length;
 
   const rename = (sp: string, name: string) => setLabels((l) => ({ ...l, [sp]: name }));
-  const reassignTurn = (i: number, label: string) => setTurnLabels((t) => ({ ...t, [i]: label }));
-  const resetAll = () => { setLabels({}); setTurnLabels({}); };
-  const hasEdits = Object.keys(labels).length > 0 || Object.keys(turnLabels).length > 0;
+  const reassignTurn = (i: number, origSp: string) => setTurnSpeaker((t) => ({ ...t, [i]: origSp }));
+  const resetAll = () => { setLabels({}); setTurnSpeaker({}); };
+  const hasEdits = Object.keys(labels).length > 0 || Object.keys(turnSpeaker).length > 0;
 
   const status = !ready
     ? 'Loading the speaker model…'
@@ -255,9 +259,26 @@ export function VisitScribe({
         </div>
       )}
 
-      {/* Speaker rename chips — name each speaker (applies to all their turns). To merge two speakers, just
-          give them the same name. To fix a single mislabeled line, use the speaker dropdown on that turn. */}
+      {/* "Edit speakers" — reveals the correction tools. Off by default so the transcript reads clean. */}
       {!showLive && result && result.length > 0 && (
+        <div className="flex items-center gap-3 text-xs">
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            className="text-muted-foreground hover:text-foreground underline"
+          >
+            {editing ? 'Done' : 'Edit speakers'}
+          </button>
+          {editing && hasEdits && (
+            <button type="button" onClick={resetAll} className="text-muted-foreground hover:text-foreground underline">
+              reset
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Rename chips (editing only) — name each speaker; give two the same name to merge them. */}
+      {editing && !showLive && result && result.length > 0 && (
         <div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
             <span className="text-muted-foreground text-xs">Speakers:</span>
@@ -275,49 +296,43 @@ export function VisitScribe({
                 />
               </div>
             ))}
-            {hasEdits && (
-              <button
-                type="button"
-                onClick={resetAll}
-                className="text-muted-foreground hover:text-foreground text-xs underline"
-              >
-                reset
-              </button>
-            )}
           </div>
           <p className="text-muted-foreground mt-1.5 text-xs">
-            Rename a speaker, or give two the same name to merge them. Click a line’s speaker to reassign just that line.
+            Rename a speaker (updates all their lines), or give two the same name to merge. Use a line’s dropdown
+            to reassign just that line.
           </p>
         </div>
       )}
 
-      {/* Final speaker-labeled transcript — each line's speaker is a dropdown to reassign that one turn. */}
+      {/* Final speaker-labeled transcript. When editing, each line's speaker becomes a dropdown that reassigns
+          THAT line to a different speaker; renames still propagate because it resolves through the speaker. */}
       {!showLive && result && result.length > 0 && (
         <div className="border-border divide-border divide-y rounded-xl border">
-          {result.map((turn, i) => {
-            const label = resolved[i];
-            return (
-              <div key={i} className="p-3">
-                <div className="text-xs font-semibold">
+          {result.map((turn, i) => (
+            <div key={i} className="p-3">
+              <div className="text-xs font-semibold">
+                {editing ? (
                   <select
                     aria-label={`Speaker for the line at ${turn.start.toFixed(1)}s`}
-                    value={label}
+                    value={origOf(i)}
                     onChange={(e) => reassignTurn(i, e.target.value)}
                     className={cn(
                       'cursor-pointer border-none bg-transparent p-0 text-xs font-semibold focus:outline-none',
-                      colorByLabel.get(label) ?? 'text-ozwell'
+                      colorByLabel.get(resolved[i]) ?? 'text-ozwell'
                     )}
                   >
-                    {distinctLabels.map((l) => (
-                      <option key={l} value={l}>{l}</option>
+                    {speakers.map((sp) => (
+                      <option key={sp} value={sp}>{effective(sp)}</option>
                     ))}
                   </select>
-                  <span className="text-muted-foreground font-normal"> · {turn.start.toFixed(1)}s</span>
-                </div>
-                <div className="text-foreground mt-0.5 text-sm">{turn.text}</div>
+                ) : (
+                  <span className={cn(colorByLabel.get(resolved[i]) ?? 'text-ozwell')}>{resolved[i]}</span>
+                )}
+                <span className="text-muted-foreground font-normal"> · {turn.start.toFixed(1)}s</span>
               </div>
-            );
-          })}
+              <div className="text-foreground mt-0.5 text-sm">{turn.text}</div>
+            </div>
+          ))}
         </div>
       )}
       {!showLive && result && result.length === 0 && !busy && (
