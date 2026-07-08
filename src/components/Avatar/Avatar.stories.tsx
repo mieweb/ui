@@ -6,7 +6,19 @@ function avatarDataUri(
   background = '#dbeafe',
   foreground = '#1d4ed8'
 ): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="${background}"/><text x="50" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="${foreground}">${label}</text></svg>`;
+  const escapeXml = (value: string) =>
+    value.replace(/[&<>"']/g, (ch) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      } as Record<string, string>)[ch] ?? ch
+    );
+
+  const safeLabel = escapeXml(label);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="${background}"/><text x="50" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="${foreground}">${safeLabel}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
