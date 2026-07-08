@@ -109,20 +109,38 @@ function relativeLuminanceChannel(channel: number): number {
     : ((normalized + 0.055) / 1.055) ** 2.4;
 }
 
-function contrastRatioAgainstWhite(value: string): number | null {
+function relativeLuminance(value: string): number | null {
   const rgb = parseHexColor(value);
   if (!rgb) return null;
   const [red, green, blue] = rgb;
-  const luminance =
+  return (
     0.2126 * relativeLuminanceChannel(red) +
     0.7152 * relativeLuminanceChannel(green) +
-    0.0722 * relativeLuminanceChannel(blue);
-  return (1.05 / (luminance + 0.05));
+    0.0722 * relativeLuminanceChannel(blue)
+  );
+}
+
+function contrastRatio(foreground: string, background: string): number | null {
+  const foregroundLuminance = relativeLuminance(foreground);
+  const backgroundLuminance = relativeLuminance(background);
+  if (foregroundLuminance === null || backgroundLuminance === null) return null;
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function minimumContrastRatio(value: string, backgrounds: string[]): number | null {
+  const contrasts = backgrounds
+    .map((background) => contrastRatio(value, background))
+    .filter((contrast): contrast is number => contrast !== null);
+  if (contrasts.length !== backgrounds.length) return null;
+  return Math.min(...contrasts);
 }
 
 function accessibleAccentTextColor(value?: string): string | undefined {
   if (!value) return undefined;
-  const contrast = contrastRatioAgainstWhite(value);
+  const contrast =
+    minimumContrastRatio(value, ['#f5f5f5', '#262626']);
   return contrast !== null && contrast < 4.5 ? undefined : value;
 }
 

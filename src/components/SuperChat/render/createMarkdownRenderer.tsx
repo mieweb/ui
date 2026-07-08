@@ -167,6 +167,7 @@ function baseComponents(): Components {
     pre: ({ node: _node, ...props }) => (
       <pre
         {...props}
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable code blocks need keyboard focus for horizontal scrolling
         tabIndex={0}
         className={cn(
           'overflow-x-auto rounded-lg bg-neutral-900 p-3 text-sm text-neutral-100 dark:bg-neutral-950',
@@ -194,7 +195,7 @@ function baseComponents(): Components {
         return (
           <input
             {...props}
-            aria-label={props.checked ? 'Completed task' : 'Incomplete task'}
+            aria-label={props['aria-label'] ?? 'Task list item'}
           />
         );
       }
