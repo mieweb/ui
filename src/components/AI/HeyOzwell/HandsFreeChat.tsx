@@ -68,7 +68,7 @@ export function HandsFreeChat({
     liveTranscript,
     conversationMode,
   });
-  const { phase, ready, error, locked } = oz;
+  const { phase, ready, error } = oz;
 
   const [voicesOpen, setVoicesOpen] = React.useState(false);
 
@@ -78,7 +78,7 @@ export function HandsFreeChat({
     ? 'Ozwell is off — tap the octopus to listen'
     : phase === 'listening'
       ? ready
-        ? `Say “hey ozwell”, or type…${locked ? '  ·  🔒 your voice only' : ''}`
+        ? 'Say “hey ozwell”, or type…'
         : error
           ? `⚠️ ${error}`
           : '… loading models'
