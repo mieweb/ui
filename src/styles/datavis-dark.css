@@ -264,7 +264,10 @@
 .dark .wcdv-graph .recharts-default-tooltip,
 .dark .wcdv-graph .recharts-tooltip-wrapper .recharts-default-tooltip,
 [data-theme='dark'] .wcdv-graph .recharts-default-tooltip,
-[data-theme='dark'] .wcdv-graph .recharts-tooltip-wrapper .recharts-default-tooltip {
+[data-theme='dark']
+  .wcdv-graph
+  .recharts-tooltip-wrapper
+  .recharts-default-tooltip {
   background-color: var(--color-card) !important;
   border-color: var(--color-border) !important;
   color: var(--color-foreground) !important;
