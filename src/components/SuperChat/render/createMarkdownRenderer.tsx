@@ -195,9 +195,11 @@ function baseComponents(): Components {
         return (
           <input
             {...props}
-            aria-label={props['aria-label'] ?? 'Task list item'}
+            aria-label={
+              props['aria-label'] ??
+              (props['aria-labelledby'] ? undefined : 'Task list item')
+            }
           />
-        );
       }
       return <input {...props} />;
     },
