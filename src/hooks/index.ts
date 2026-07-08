@@ -22,3 +22,12 @@ export {
   type UseScrollSpyOptions,
   type UseScrollSpyReturn,
 } from './useScrollSpy';
+export {
+  useDragReorder,
+  reorderIds,
+  dragIndicatorClasses,
+  type UseDragReorderOptions,
+  type UseDragReorderReturn,
+  type DragOverState,
+} from './useDragReorder';
+export { useLiveAnnouncement } from './useLiveAnnouncement';

@@ -10,6 +10,7 @@ export default defineConfig({
       '**/node_modules/**',
       'dist/**',
       'packages/esheet/**',
+      'artipod-sync/**',
       'tests/visual/**',
       '**/*.spec.ts'
     ],

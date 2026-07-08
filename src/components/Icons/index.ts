@@ -58,6 +58,12 @@ export {
   Share as ShareIcon,
   Save as SaveIcon,
   RefreshCw as RefreshIcon,
+  ThumbsUp as ThumbsUpIcon,
+  ThumbsDown as ThumbsDownIcon,
+  Ban as BanIcon,
+  ArrowUpDown as ArrowUpDownIcon,
+  GripVertical as GripVerticalIcon,
+  StickyNote as StickyNoteIcon,
 } from 'lucide-react';
 
 // Status & Feedback
@@ -113,6 +119,7 @@ export {
 // Time & Calendar
 export {
   Calendar as CalendarIcon,
+  CalendarCheck as CalendarCheckIcon,
   Clock as ClockIcon,
   Timer as TimerIcon,
   History as HistoryIcon,
