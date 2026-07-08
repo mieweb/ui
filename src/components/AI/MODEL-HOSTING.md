@@ -47,7 +47,8 @@ URLs) — fully under our control, no LFS. Avoid jsDelivr for the 40 MB `.data`
 ### Step 2 (parameterize the asset base) — ✅ DONE
 
 The code no longer hardcodes the Storybook paths. Both loaders resolve a configurable base,
-**defaulting to the current local paths so the demo is unchanged**, overridable by one global:
+**defaulting to the hosted HuggingFace base (`DEFAULT_ASSET_BASE`) so a fresh clone works with no config**,
+overridable by one global:
 
 ```js
 // a single base URL — wakeword/ and sv-runtime/ are expected directly under it:

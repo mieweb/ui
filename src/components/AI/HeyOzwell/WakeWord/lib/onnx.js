@@ -14,10 +14,13 @@ if (typeof ort !== "undefined") {
     import("onnxruntime-web").then((module) => {
         try {
             // The engine's .wasm files aren't served by the bundler, so fetch them from the CDN
-            // matching the installed version. Force single-threaded — localhost has no COOP/COEP
-            // headers, so the threaded build (SharedArrayBuffer) can't load.
-            const v = (module.env && module.env.versions && module.env.versions.web) || "";
-            module.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web" + (v ? "@" + v : "") + "/dist/";
+            // matching the installed version — but ONLY if a host hasn't already configured wasmPaths
+            // (so a strict-CSP / self-hosting host can point it at its own copy). Force single-threaded —
+            // localhost has no COOP/COEP headers, so the threaded build (SharedArrayBuffer) can't load.
+            if (!module.env.wasm.wasmPaths) {
+                const v = (module.env && module.env.versions && module.env.versions.web) || "";
+                module.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web" + (v ? "@" + v : "") + "/dist/";
+            }
             module.env.wasm.numThreads = 1;
         } catch (e) { /* fall back to engine defaults */ }
         initialized = true;

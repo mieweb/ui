@@ -25,7 +25,7 @@ const PHRASES = [
 const REPS = 3;
 const TIMEOUT_MS = 5000;
 const VP_CAP = 18;
-const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
+const delay = (ms: number) => new Promise((r) => setTimeout(r, ms)); // global setTimeout — safe to import in SSR/Node
 
 export interface UseVoiceSetupOptions {
   /** Start directly in "add a voice" (append) mode instead of a fresh enroll — for the settings menu's
