@@ -84,12 +84,10 @@ export class SileroVAD extends ONNXModel {
     }
 
     /**
-     * Determines if speech is present in the audio with debouncing logic
-     * also, if someone speaks, then is quiet for sometime and speaks more
-     * that doesn't mean there was no speech in the middle
-     * like that whole thing needs to be considered as speech
-     * we do this alot lol
-     * 
+     * Determines if speech is present in the audio, with debouncing logic so a brief pause between
+     * words doesn't split one utterance into two: if speech is followed by a short silence and then
+     * more speech, the whole span (including the gap) is still treated as speech.
+     *
      * @param {Float32Array} audio - Audio data to check for speech
      * @returns {Promise<Object>} - Promise that resolves with an object containing:
      *   - isSpeaking: boolean - true if speech is detected, false otherwise
