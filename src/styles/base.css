@@ -6,6 +6,15 @@
 
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
+/* Apply hover: styles unconditionally. Tailwind v4 gates the built-in hover
+ * variant behind @media (hover: hover); browsers in VMs, remote desktops, and
+ * some touchscreen laptops misreport pointer capability as hover-incapable,
+ * which silently disables every hover style while :hover itself still matches
+ * mouse movement. MIE apps are mouse-first, so opt out of the capability gate
+ * (the tradeoff is the standard pre-v4 behavior: hover styles can linger
+ * after a tap on touch devices). */
+@custom-variant hover (&:hover);
+
 /* Hide DataVis slider from layout when closed to prevent horizontal overflow */
 .wcdv-slider[aria-hidden='true'] {
   display: none;
