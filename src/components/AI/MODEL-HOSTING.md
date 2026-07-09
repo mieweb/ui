@@ -116,8 +116,9 @@ model file. (To repoint to a mieweb-owned bucket for the PR: change `R2_HOST` + 
   more accurate, but trades the on-device/PHI-stays-local story. This is a deliberate architecture choice,
   not a fix for something broken: the on-device + R2 setup **works** and is fine for the demo.
 
-## Not required for the local demo
+## Local demo
 
-The Storybook demo runs fine as-is with the committed assets. This work is purely
-to make the branch **mergeable upstream** — sequence it with the PR, after the
-team review and Doug's go-ahead, not before.
+The Storybook demo runs with no setup: both loaders default to the hosted HuggingFace
+asset base (see the cutover note at the top), so a fresh clone fetches wake, speaker, and
+Whisper models at runtime — no binaries in the repo. To point at a different host, set
+`window.__ozwellAssets` before the components mount.

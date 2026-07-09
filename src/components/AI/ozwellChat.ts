@@ -67,8 +67,13 @@ export function getOzwellConfig(): OzwellConfig {
     model: c.model || DEFAULTS.model,
     system: c.system ?? DEFAULTS.system,
     // Coerce: temperature set via console/localStorage often arrives as a string; a string in the request
-    // body can be rejected by OpenAI-compatible servers. Fall back to the default if it's not a real number.
-    temperature: Number.isFinite(Number(c.temperature)) ? Number(c.temperature) : DEFAULTS.temperature,
+    // body can be rejected by OpenAI-compatible servers. Fall back to the default if it's not a real number —
+    // and guard the empty/whitespace string explicitly, since Number('') is 0 (a valid-looking temperature)
+    // and would silently pin sampling to 0 instead of using the default.
+    temperature:
+      c.temperature != null && String(c.temperature).trim() !== '' && Number.isFinite(Number(c.temperature))
+        ? Number(c.temperature)
+        : DEFAULTS.temperature,
   };
 }
 
@@ -163,24 +168,30 @@ export async function askOzwellStream(
   const decoder = new TextDecoder();
   let buf = '';
   let full = '';
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-    const events = buf.split(/\r?\n\r?\n/); // SSE events are separated by a blank line (handle CRLF too)
-    buf = events.pop() || ''; // keep the trailing partial event for the next chunk
-    for (const ev of events) {
-      for (const line of ev.split(/\r?\n/)) {
-        if (!line.startsWith('data:')) continue;
-        const payload = line.slice(5).trim();
-        if (payload === '[DONE]') return full;
-        try {
-          const json = JSON.parse(payload);
-          const delta: string = json?.choices?.[0]?.delta?.content || '';
-          if (delta) { full += delta; onToken(delta, full); }
-        } catch { /* keep-alive / partial line — ignore */ }
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const events = buf.split(/\r?\n\r?\n/); // SSE events are separated by a blank line (handle CRLF too)
+      buf = events.pop() || ''; // keep the trailing partial event for the next chunk
+      for (const ev of events) {
+        for (const line of ev.split(/\r?\n/)) {
+          if (!line.startsWith('data:')) continue;
+          const payload = line.slice(5).trim();
+          if (payload === '[DONE]') return full;
+          try {
+            const json = JSON.parse(payload);
+            const delta: string = json?.choices?.[0]?.delta?.content || '';
+            if (delta) { full += delta; onToken(delta, full); }
+          } catch { /* keep-alive / partial line — ignore */ }
+        }
       }
     }
+  } finally {
+    // Release the connection promptly on BOTH normal completion and the early `[DONE]` return, so we
+    // don't hold the socket open or fight a caller's AbortController. cancel() also releases the lock.
+    try { await reader.cancel(); } catch { /* stream already closed/errored — nothing to release */ }
   }
   return full;
 }
