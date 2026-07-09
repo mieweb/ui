@@ -82,16 +82,29 @@ export class ScreenCapture implements RecordingCapture {
     let audioCaptured = false;
 
     if (audioTracks.length > 0) {
-      const audioContext = new AudioContext();
-      this.audioContext = audioContext;
-      const destination = audioContext.createMediaStreamDestination();
-      for (const track of audioTracks) {
-        audioContext
-          .createMediaStreamSource(new MediaStream([track]))
-          .connect(destination);
+      try {
+        const audioContext = new AudioContext();
+        this.audioContext = audioContext;
+        const destination = audioContext.createMediaStreamDestination();
+        for (const track of audioTracks) {
+          audioContext
+            .createMediaStreamSource(new MediaStream([track]))
+            .connect(destination);
+        }
+        const mixedAudioTracks = destination.stream.getAudioTracks();
+        if (mixedAudioTracks.length > 0) {
+          outputTracks.push(...mixedAudioTracks);
+          audioCaptured = true;
+        }
+      } catch {
+        // Audio mixing failed — release the partial AudioContext and continue
+        // with video only rather than dropping the already-granted screen
+        // capture. start() still resolves, so the caller owns and can stop it.
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+          void this.audioContext.close();
+        }
+        this.audioContext = null;
       }
-      outputTracks.push(...destination.stream.getAudioTracks());
-      audioCaptured = true;
     }
 
     // 4. Combine into a single stream (video-only when no audio was granted).

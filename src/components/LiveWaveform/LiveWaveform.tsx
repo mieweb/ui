@@ -98,8 +98,9 @@ export const LiveWaveform: React.FC<LiveWaveformProps> = ({
       canvas.height = Math.round(h * dpr);
     };
     resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas);
+    const ro =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null;
+    ro?.observe(canvas);
 
     const draw = () => {
       const ctx = canvas.getContext('2d');
@@ -140,7 +141,7 @@ export const LiveWaveform: React.FC<LiveWaveformProps> = ({
 
     return () => {
       cancelAnimationFrame(raf);
-      ro.disconnect();
+      ro?.disconnect();
       source.disconnect();
       void audioCtx.close();
     };
