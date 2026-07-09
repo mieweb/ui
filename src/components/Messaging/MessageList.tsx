@@ -220,7 +220,7 @@ function DateSeparator({ label, className }: DateSeparatorProps) {
       <span
         className={cn(
           'rounded-full px-3 py-1 text-xs font-medium',
-          'bg-neutral-100 text-neutral-500',
+          'bg-neutral-100 text-neutral-600',
           'dark:bg-neutral-800 dark:text-neutral-400'
         )}
       >

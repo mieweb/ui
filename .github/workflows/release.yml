@@ -32,8 +32,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Pinned to 20 to match ci.yml.
-          node-version: '20'
+          # Node 22 (Maintenance LTS as of 2026). Node 20 is deprecated on
+          # GitHub runners, so we run on a current supported LTS and use its
+          # bundled npm (already supports --provenance / OIDC publishing).
+          # 22 over 24 (Active LTS) as a conservative, supported floor.
+          node-version: '22'
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
@@ -43,12 +46,6 @@ jobs:
           node -v
           npm -v
           pnpm -v
-
-      - name: Upgrade npm
-        run: npm install -g npm@latest
-
-      - name: Show npm version after upgrade
-        run: npm -v
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
