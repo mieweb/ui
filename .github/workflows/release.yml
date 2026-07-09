@@ -32,8 +32,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Pinned to 20 to match ci.yml.
-          node-version: '20'
+          # Node 22 LTS: npm@latest (>=12) dropped Node 20 support.
+          node-version: '22'
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
@@ -43,12 +43,6 @@ jobs:
           node -v
           npm -v
           pnpm -v
-
-      - name: Upgrade npm
-        run: npm install -g npm@latest
-
-      - name: Show npm version after upgrade
-        run: npm -v
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
