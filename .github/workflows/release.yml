@@ -32,10 +32,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Node 22 (Maintenance LTS as of 2026). Node 20 is deprecated on
-          # GitHub runners; npm@latest (>=12, installed below) also requires
-          # Node >=22. 22 over 24 (Active LTS) as a conservative floor.
-          node-version: '22'
+          # Node 24 (Active LTS "Krypton"). Its BUNDLED npm is 11.x (>=11.5.1),
+          # which supports tokenless OIDC Trusted Publishing for the provenance
+          # publish step below. Using the bundled npm (rather than a global
+          # `npm install -g npm@latest`) keeps npm's dependency tree intact —
+          # the global upgrade on the runner produced a broken tree missing
+          # `sigstore`, which broke `npm publish --provenance`.
+          node-version: '24'
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
@@ -45,15 +48,6 @@ jobs:
           node -v
           npm -v
           pnpm -v
-
-      # npm's bundled version on Node 22 (10.x) cannot do tokenless OIDC
-      # Trusted Publishing; that needs npm >=11.5.1. Upgrade to npm@latest
-      # so the tokenless `npm publish --provenance` step below can authenticate.
-      - name: Upgrade npm
-        run: npm install -g npm@latest
-
-      - name: Show npm version after upgrade
-        run: npm -v
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
