@@ -29,6 +29,7 @@ export default defineConfig({
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
+    'components/LiveWaveform/index': 'src/components/LiveWaveform/index.ts',
     'components/Markdown/index': 'src/components/Markdown/index.ts',
     'components/Modal/index': 'src/components/Modal/index.ts',
     'components/Pagination/index': 'src/components/Pagination/index.ts',

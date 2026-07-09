@@ -70,6 +70,7 @@ export * from './components/InvoicePaymentPage';
 // InvoiceView exports InvoiceLineItem which conflicts with InvoicePaymentPage
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
+export * from './components/LiveWaveform';
 export * from './components/LoadingPage';
 export * from './components/Markdown';
 export * from './components/Messaging';
@@ -173,6 +174,9 @@ export {
   type ReportDatePickerProps,
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
+
+// Media capture (microphone / screen recording strategies)
+export * from './media/capture';
 
 // Hooks
 export * from './hooks';
