@@ -29,6 +29,7 @@ export function toCaptureError(
   genericMessage: string
 ): Error {
   if (
+    typeof DOMException !== 'undefined' &&
     err instanceof DOMException &&
     (err.name === 'NotAllowedError' || err.name === 'SecurityError')
   ) {
