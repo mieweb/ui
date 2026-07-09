@@ -32,9 +32,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Node 22 (Maintenance LTS as of 2026): minimum supported by
-          # npm@latest (>=12), which dropped Node 20. Node 24 is Active LTS
-          # but 22 is a safe, supported floor for publishing.
+          # Node 22 (Maintenance LTS as of 2026). Node 20 is deprecated on
+          # GitHub runners, so we run on a current supported LTS and use its
+          # bundled npm (already supports --provenance / OIDC publishing).
+          # 22 over 24 (Active LTS) as a conservative, supported floor.
           node-version: '22'
           check-latest: true
           cache: 'pnpm'
