@@ -231,7 +231,7 @@ function SpeakerVerifyDemo({ cosineThreshold, znormThreshold, useAsnorm }: SVArg
 /** Dev diagnostic: enroll once, then talk — live colour-coded base/WHO/WHAT readout per wake. The WHO-gate
  *  thresholds are live Controls; changes apply on the next wake. */
 export const Verify: StoryObj<SVArgs> = {
-  args: { cosineThreshold: 0.45, znormThreshold: 1.5, useAsnorm: false },
+  args: { cosineThreshold: 0.45, znormThreshold: 1.5, useAsnorm: true },
   argTypes: {
     cosineThreshold: {
       name: 'Cosine threshold (WHO)',
