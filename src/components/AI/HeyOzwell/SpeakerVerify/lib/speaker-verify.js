@@ -166,9 +166,11 @@
     isLoaded: () => handle !== 0,
     threshold: DEFAULT_THRESHOLD,
     // AS-norm (score normalization): normalize the raw cosine against a crowd of other voices, so the
-    // threshold stays stable when a room/mic drags scores down. SHADOW by default — we compute & expose the
-    // z-score but still gate on raw cosine until znormThreshold is set from a real second-speaker test.
-    useAsnorm: false,
+    // threshold stays stable when a room/mic drags scores down. PRIMARY gate when a cohort is loaded (znorm
+    // != null); falls back to raw cosine only when there's no cohort. Turned on after live diagnostics showed
+    // the genuine speaker scoring z 2–3.4 (well clear of 1.5) while raw cosine sat at 0.33–0.43 — i.e. raw
+    // cosine was rejecting the real speaker in a room/mic that differed from enrollment, and AS-norm fixes it.
+    useAsnorm: true,
     znormThreshold: 1.5,   // "at least N std above the crowd"; tune from genuine vs real-impostor z-scores
     cohortSize: () => cohort.length,
     embeddingDim: () => dim,
