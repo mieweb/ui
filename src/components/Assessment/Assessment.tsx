@@ -1,0 +1,1470 @@
+'use client';
+
+import * as React from 'react';
+import { cn } from '../../utils/cn';
+import { Badge } from '../Badge/Badge';
+import { Button } from '../Button';
+import { Tooltip } from '../Tooltip';
+import { Card, CardHeader, CardContent } from '../Card/Card';
+import {
+  PencilIcon,
+  RefreshIcon,
+  LinkIcon,
+  PlusIcon,
+  PillIcon,
+  TestTubeIcon,
+  ScanIcon,
+  StethoscopeIcon,
+  SendIcon,
+  AlertCircleIcon,
+  GripVerticalIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MoreVerticalIcon,
+  TrashIcon,
+} from '../Icons';
+import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
+import { RowActionToolbar, RowIconButton } from '../RowActionToolbar';
+import {
+  CodingChips,
+  type ConditionAssertion,
+  type ConditionConcern,
+} from '../ProblemList';
+import {
+  useDragReorder,
+  dragIndicatorClasses,
+  reorderIds,
+} from '../../hooks/useDragReorder';
+import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
+import {
+  useCodeLookupConfig,
+  type CodeLookupProviderConfig,
+} from '../CodeLookup/context';
+import type { CodifyDomain } from '../CodeLookup/CodeLookup';
+
+// =============================================================================
+// Types
+// =============================================================================
+
+/** Order categories that can nest under an assessed problem. */
+export type OrderType =
+  | 'medication'
+  | 'lab'
+  | 'imaging'
+  | 'procedure'
+  | 'referral';
+
+/**
+ * An order placed this visit. Links to a problem via concernId (durable
+ * IndicationLink) — orders without a concernId collect in the unlinked bucket.
+ */
+export interface AssessmentOrder {
+  orderId: string;
+  type: OrderType;
+  /** Display text, e.g. "insulin glargine 10 units qhs" */
+  display: string;
+  /** Durable link to the problem this order is for */
+  concernId?: string;
+  /** Secondary display text, e.g. status or sig */
+  detail?: string;
+  /** Coding from the code lookup, when the order was picked from it */
+  code?: { fullid: string; codetype: string; fullcode: string };
+  /** Urgency — routine when omitted */
+  priority?: 'routine' | 'urgent' | 'stat';
+  /** When to perform/collect, e.g. 'in 3 months', 'next visit' */
+  timing?: string;
+  /** Why the order is placed (diagnosis / reason) */
+  indication?: string;
+  /** Notes to the performing party (lab, radiology, consultant) */
+  notes?: string;
+  /** Imaging/procedure: body site, e.g. 'chest, PA and lateral', 'left knee' */
+  bodySite?: string;
+  /** Referral: target specialty or provider */
+  referTo?: string;
+}
+
+/** A code picked from a lookup (structurally matches CodifyResult). */
+export interface OrderCodePick {
+  fullid: string;
+  label: string;
+  codetype: string;
+  fullcode: string;
+}
+
+/** What the unified add row hands back: a coded pick or free text. */
+export interface AssessmentAddPick {
+  label: string;
+  /** Absent for free-text entries */
+  code?: { fullid: string; codetype: string; fullcode: string };
+}
+
+/**
+ * Render-prop that draws the add-order / add-problem code search. `domains`
+ * reflects the user's order-type filter ('auto' = undefined = search
+ * everything) and `placeholder` is context-specific; call `onPick` with the
+ * chosen code (or `onFreeText` when free text is supported).
+ */
+export type RenderOrderSearch = (args: {
+  domains?: string[];
+  /** Rank results from these domains first (auto mode: concerns before orders) */
+  preferDomains?: string[];
+  /** Boost these coding systems (assessments prefer ICD-10 over SNOMED) */
+  preferCodetypes?: string[];
+  /** Restrict condition results to billable (leaf) ICD-10 codes */
+  billableOnly?: boolean;
+  placeholder: string;
+  onPick: (pick: OrderCodePick) => void;
+  /** Present when free-text entry is supported in this context */
+  onFreeText?: (text: string) => void;
+}) => React.ReactNode;
+
+/** Infer the order type from the picked code's coding system. */
+export function orderTypeForCodetype(codetype: string): OrderType {
+  const ct = codetype.toUpperCase();
+  if (['RXNORM', 'FDB', 'FDB MEDNAME', 'NDC', 'CVX'].includes(ct)) {
+    return 'medication';
+  }
+  if (ct.startsWith('LOINC') || ct.endsWith('ORDER')) return 'lab';
+  return 'procedure'; // HCPCS, ICD10PCS, … (imaging is a manual choice)
+}
+
+/**
+ * Default order/problem search built from an ambient `CodeLookupProvider`: a
+ * bare lookup that forwards the caller's domain/preference hints to the
+ * injected CodeLookup. Used when no explicit `renderOrderSearch` prop is given.
+ */
+function contextOrderSearch(ctx: CodeLookupProviderConfig): RenderOrderSearch {
+  const ContextOrderSearch: RenderOrderSearch = ({
+    domains,
+    preferDomains,
+    preferCodetypes,
+    billableOnly,
+    placeholder,
+    onPick,
+    onFreeText,
+  }) => {
+    const Lookup = ctx.component;
+    return (
+      <Lookup
+        indexUrl={ctx.indexUrl}
+        locale={ctx.locale}
+        domains={domains as CodifyDomain[] | undefined}
+        preferDomains={preferDomains as CodifyDomain[] | undefined}
+        preferCodetypes={preferCodetypes}
+        billableOnly={billableOnly}
+        bare
+        clearOnSelect
+        placeholder={placeholder}
+        onSelect={(result) =>
+          onPick({
+            fullid: result.fullid,
+            label: result.label,
+            codetype: result.codetype,
+            fullcode: result.fullcode,
+          })
+        }
+        onFreeText={onFreeText}
+      />
+    );
+  };
+  return ContextOrderSearch;
+}
+
+/** Coding systems that represent a diagnosis/problem rather than an order.
+ * Occupational surveillance programs (OSHA/FMCSA/NFPA/FAA) are concerns too —
+ * a program joins the problem list and its required orders link under it. */
+export function isConditionCodetype(codetype: string): boolean {
+  const ct = codetype.toUpperCase();
+  return (
+    ct === 'ICD10' ||
+    ct === 'ICD9' ||
+    ct === 'SNOMED US' ||
+    ct === 'OSHA' ||
+    ct === 'FMCSA' ||
+    ct === 'NFPA' ||
+    ct === 'FAA'
+  );
+}
+
+/** Code-lookup domains to search for an order-type filter. */
+export const ORDER_TYPE_SEARCH_DOMAINS: Record<OrderType, string[]> = {
+  medication: ['med', 'vaccine'],
+  lab: ['lab'],
+  imaging: ['procedure'],
+  procedure: ['procedure'],
+  referral: ['procedure'],
+};
+
+/** Context-specific search placeholder per order-type filter. */
+const ORDER_TYPE_PLACEHOLDERS: Record<'auto' | OrderType, string> = {
+  auto: 'Search medications, labs, imaging, procedures…',
+  medication: 'Search medications… (try "lasix")',
+  lab: 'Search labs… (try "a1c")',
+  imaging: 'Search imaging… (try "chest x")',
+  procedure: 'Search procedures…',
+  referral: 'Search referrals & consults…',
+};
+
+/** One assessed problem this visit. */
+export interface AssessmentItem {
+  concernId: string;
+  /** Today's assertion for the concern (even a no-change "addressed today" one) */
+  assertionId: string;
+  note?: string;
+}
+
+/** Row actions on an assessed problem. */
+export type AssessmentAction = 'refine' | 'revise' | 'add-order';
+
+export interface AssessmentProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'className' | 'title'
+> {
+  /** Concerns addressed this visit (with their assertion history) */
+  concerns: ConditionConcern[];
+  /** Assessment entries — one per assessed concern (controlled) */
+  items: AssessmentItem[];
+  /** Orders placed this visit */
+  orders?: AssessmentOrder[];
+  /** Header title (pass null to hide) */
+  title?: string | null;
+  /** Show the plan (orders nested under each problem). Default true. */
+  showPlan?: boolean;
+  /** Called when the plan toggle changes (omit to hide the toggle) */
+  onShowPlanChange?: (show: boolean) => void;
+  /** Called when a row action is clicked */
+  onAction?: (item: AssessmentItem, action: AssessmentAction) => void;
+  /**
+   * Called when a new order is created from the inline order form.
+   * Enables the "Add order" affordances — `item` is null when the order is
+   * added from the unlinked bucket. The new order should come back in via
+   * `orders` (with `concernId` set to the item's concern when linked).
+   */
+  onAddOrder?: (
+    item: AssessmentItem | null,
+    order: { type: OrderType; display: string; code?: AssessmentOrder['code'] }
+  ) => void;
+  /**
+   * Called when a diagnosis (coded or free text) is added as a new problem
+   * via the unified add row. Enables it together with renderOrderSearch.
+   */
+  onAddAssessment?: (pick: AssessmentAddPick) => void;
+  /**
+   * Render a code-lookup search for the add-order / add-problem forms
+   * (dependency-injected so the library build doesn't bundle the lookup's
+   * worker — pass e.g. a CodeLookup wired to your index). Defaults to the
+   * ambient `CodeLookupProvider`; pass `false` to fall back to free-text
+   * order entry.
+   */
+  renderOrderSearch?: RenderOrderSearch | false;
+  /** Called when an unlinked order is linked to a problem — also used when an
+   * order is dragged onto another problem (re-link = move) */
+  onLinkOrder?: (order: AssessmentOrder, concernId: string) => void;
+  /**
+   * Called when the user chooses Edit on an order, before the built-in
+   * inline form opens. Return true to take over editing — e.g. open a
+   * `MedicationEditor` for medication orders — and feed the change back in
+   * via `orders`. Anything falsy falls through to the inline display/detail
+   * form (when `onEditOrder` is set).
+   */
+  onEditOrderStart?: (order: AssessmentOrder) => boolean | void;
+  /**
+   * Called with the edited display/detail when an order's inline edit is
+   * saved — enables the Edit action on every order row (any type).
+   * Persist and feed the change back in via `orders`.
+   */
+  onEditOrder?: (
+    order: AssessmentOrder,
+    changes: { display: string; detail?: string }
+  ) => void;
+  /** Called when an order is removed — enables the Remove action on order rows */
+  onRemoveOrder?: (order: AssessmentOrder) => void;
+  /**
+   * Called with the full new order-id sequence after an order is dragged to a
+   * new position — enables drag & drop reordering of orders within a plan.
+   * Orders render in `orders` array order per problem; persist and feed back.
+   */
+  onReorderOrders?: (orderIds: string[]) => void;
+  /**
+   * Called with the new concernId order after a problem block is dragged —
+   * enables drag & drop reordering of the assessment. The list renders in
+   * `items` order; persist and feed the order back in.
+   */
+  onReorderItems?: (concernIds: string[]) => void;
+  /** Hide all controls (display only) */
+  readOnly?: boolean;
+  /**
+   * Restrict concern searches to billable (leaf) ICD-10 codes — category
+   * roots (E11) and SNOMED synonyms are dropped. Forwarded to
+   * renderOrderSearch as `billableOnly`.
+   */
+  billableOnly?: boolean;
+  /** Additional CSS classes */
+  className?: string;
+  /** Test ID for testing */
+  'data-testid'?: string;
+}
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+export const ORDER_TYPE_META: Record<
+  OrderType,
+  { label: string; icon: React.ComponentType<{ size?: number | string }> }
+> = {
+  medication: { label: 'Medication', icon: PillIcon },
+  lab: { label: 'Lab', icon: TestTubeIcon },
+  imaging: { label: 'Imaging', icon: ScanIcon },
+  procedure: { label: 'Procedure', icon: StethoscopeIcon },
+  referral: { label: 'Referral', icon: SendIcon },
+};
+
+const ACTION_META: Record<
+  AssessmentAction,
+  { label: string; icon: React.ComponentType<{ size?: number | string }> }
+> = {
+  refine: { label: 'Refine (more specific)', icon: PencilIcon },
+  revise: { label: 'Revise (prior was wrong)', icon: RefreshIcon },
+  'add-order': { label: 'Add order', icon: PlusIcon },
+};
+
+// =============================================================================
+// Sub-components
+// =============================================================================
+
+function OrderContent({ order }: { order: AssessmentOrder }) {
+  const meta = ORDER_TYPE_META[order.type];
+  const Icon = meta.icon;
+  return (
+    <span className="text-muted-foreground flex items-center gap-2 text-sm">
+      <Tooltip content={meta.label}>
+        <Icon size={14} />
+      </Tooltip>
+      {/* the tooltip is pointer-only — give non-pointer users the label */}
+      <span className="sr-only">{meta.label}</span>
+      <span className="text-foreground">{order.display}</span>
+      {order.priority && order.priority !== 'routine' && (
+        <Badge
+          variant={order.priority === 'stat' ? 'danger' : 'warning'}
+          size="sm"
+        >
+          {order.priority}
+        </Badge>
+      )}
+      {order.detail && <span className="text-xs">{order.detail}</span>}
+      {order.timing && <span className="text-xs">{order.timing}</span>}
+    </span>
+  );
+}
+
+/** Drag state shared by the order rows and the problem-block drop targets. */
+interface OrderDrag {
+  draggingId: string | null;
+  over:
+    | { type: 'order'; id: string; after: boolean }
+    | { type: 'concern'; concernId: string }
+    | null;
+  rowProps: (order: AssessmentOrder) => React.HTMLAttributes<HTMLElement>;
+  enabled: boolean;
+}
+
+/** Keyboard + menu controls for an order row (the non-pointer path for DnD). */
+interface OrderControls {
+  /** Reorder within the current plan (Alt+↑/↓, menu) */
+  moveWithin?: (order: AssessmentOrder, dir: -1 | 1) => void;
+  /** Re-link to another problem (Alt+←/→, menu) */
+  moveToProblem?: (order: AssessmentOrder, concernId: string) => void;
+  /** Take over editing before the inline form opens (returns true = handled) */
+  editStart?: (order: AssessmentOrder) => boolean | void;
+  /** Save an inline edit of the order's display/detail (menu: Edit) */
+  edit?: (
+    order: AssessmentOrder,
+    changes: { display: string; detail?: string }
+  ) => void;
+  /** Remove the order (menu: Remove) */
+  remove?: (order: AssessmentOrder) => void;
+  /** The problem before/after the order's current one, if any */
+  adjacentProblem: (
+    order: AssessmentOrder,
+    dir: -1 | 1
+  ) => { concernId: string; label: string } | null;
+  /** All problems (for the Move to… menu) */
+  targets: { concernId: string; label: string }[];
+}
+
+function OrderRow({
+  order,
+  drag,
+  controls,
+}: {
+  order: AssessmentOrder;
+  drag: OrderDrag;
+  controls?: OrderControls;
+}) {
+  const interactive = Boolean(
+    controls?.moveWithin ||
+    controls?.moveToProblem ||
+    controls?.edit ||
+    controls?.editStart ||
+    controls?.remove
+  );
+  const canEdit = Boolean(controls?.edit || controls?.editStart);
+  const [editing, setEditing] = React.useState<{
+    display: string;
+    detail: string;
+  } | null>(null);
+  // Controlled so picking an item closes the menu (it otherwise only closes
+  // on outside click/Escape — it would linger behind an editor modal).
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  const pick = (fn: () => void) => () => {
+    setMenuOpen(false);
+    fn();
+  };
+
+  const beginEdit = () => {
+    // A takeover handler (e.g. MedicationEditor for medication orders) wins;
+    // otherwise fall back to the inline display/detail form.
+    if (controls?.editStart?.(order)) return;
+    if (controls?.edit) {
+      setEditing({ display: order.display, detail: order.detail ?? '' });
+    }
+  };
+
+  const saveEdit = () => {
+    if (!editing) return;
+    const display = editing.display.trim();
+    if (display) {
+      controls?.edit?.(order, {
+        display,
+        detail: editing.detail.trim() || undefined,
+      });
+    }
+    setEditing(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget || !controls) return;
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      controls.moveWithin?.(order, e.key === 'ArrowUp' ? -1 : 1);
+    } else if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      const adj = controls.adjacentProblem(
+        order,
+        e.key === 'ArrowLeft' ? -1 : 1
+      );
+      if (adj) controls.moveToProblem?.(order, adj.concernId);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      // Roving focus between order rows in the same plan
+      e.preventDefault();
+      const list = e.currentTarget.closest('ul');
+      if (!list) return;
+      const rows = Array.from(
+        list.querySelectorAll<HTMLElement>('li[data-order-id]')
+      );
+      const i = rows.indexOf(e.currentTarget as HTMLElement);
+      rows[
+        e.key === 'ArrowUp'
+          ? Math.max(0, i - 1)
+          : Math.min(rows.length - 1, i + 1)
+      ]?.focus();
+    }
+  };
+
+  return (
+    // Order rows are focus stops so the drag interactions have a full keyboard
+    // equivalent: Alt+↑/↓ reorders, Alt+←/→ moves between problems (508).
+    <li
+      data-order-id={order.orderId}
+      tabIndex={interactive && !editing ? 0 : undefined}
+      onKeyDown={interactive && !editing ? handleKeyDown : undefined}
+      aria-label={
+        interactive && !editing
+          ? `${order.display}. Alt plus up or down to reorder; Alt plus left or right to move to another problem.`
+          : undefined
+      }
+      {...(editing ? {} : drag.rowProps(order))}
+      className={cn(
+        'group/order relative flex items-center gap-1.5 py-1',
+        'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none',
+        drag.enabled && !editing && 'cursor-grab active:cursor-grabbing',
+        drag.draggingId === order.orderId && 'opacity-40',
+        drag.over?.type === 'order' &&
+          drag.over.id === order.orderId &&
+          (drag.over.after
+            ? 'shadow-[inset_0_-2px_0_0_var(--color-primary-500,#3b82f6)]'
+            : 'shadow-[inset_0_2px_0_0_var(--color-primary-500,#3b82f6)]')
+      )}
+    >
+      {drag.enabled && !editing && (
+        <GripVerticalIcon
+          size={12}
+          aria-hidden
+          className="text-muted-foreground/40 shrink-0"
+        />
+      )}
+      {editing ? (
+        <div
+          role="form"
+          aria-label={`Edit order ${order.display}`}
+          className="flex flex-1 flex-wrap items-center gap-1.5"
+        >
+          <input
+            type="text"
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            value={editing.display}
+            onChange={(e) =>
+              setEditing((prev) =>
+                prev ? { ...prev, display: e.target.value } : prev
+              )
+            }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveEdit();
+              else if (e.key === 'Escape') setEditing(null);
+            }}
+            aria-label="Order description"
+            className={cn(
+              'border-border bg-background text-foreground',
+              'h-7 min-w-40 flex-1 rounded-md border px-2 text-sm',
+              'focus:ring-ring focus:ring-2 focus:outline-none'
+            )}
+          />
+          <input
+            type="text"
+            value={editing.detail}
+            onChange={(e) =>
+              setEditing((prev) =>
+                prev ? { ...prev, detail: e.target.value } : prev
+              )
+            }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveEdit();
+              else if (e.key === 'Escape') setEditing(null);
+            }}
+            placeholder="detail (sig, timing…)"
+            aria-label="Order detail"
+            className={cn(
+              'border-border bg-background text-foreground placeholder:text-muted-foreground',
+              'h-7 w-40 rounded-md border px-2 text-xs',
+              'focus:ring-ring focus:ring-2 focus:outline-none'
+            )}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={saveEdit}
+            disabled={!editing.display.trim()}
+            className="h-7 text-xs"
+          >
+            Save
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditing(null)}
+            className="h-7 text-xs"
+          >
+            Cancel
+          </Button>
+        </div>
+      ) : (
+        <>
+          <OrderContent order={order} />
+          {interactive && (
+            <RowActionToolbar
+              label={`Actions for ${order.display}`}
+              group="order"
+            >
+              {canEdit && (
+                <RowIconButton
+                  label="Edit"
+                  icon={PencilIcon}
+                  size="sm"
+                  onClick={beginEdit}
+                />
+              )}
+              {(controls?.moveWithin ||
+                (controls?.moveToProblem &&
+                  controls.targets.some(
+                    (t) => t.concernId !== order.concernId
+                  ))) && (
+                <Dropdown
+                  open={menuOpen}
+                  onOpenChange={setMenuOpen}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Move ${order.display}`}
+                      className="h-7 w-7 shrink-0"
+                    >
+                      <MoreVerticalIcon size={14} />
+                    </Button>
+                  }
+                  placement="bottom-end"
+                >
+                  {controls?.moveWithin && (
+                    <>
+                      <DropdownItem
+                        icon={<ChevronUpIcon size={14} />}
+                        onClick={pick(() => controls.moveWithin?.(order, -1))}
+                      >
+                        Move up
+                      </DropdownItem>
+                      <DropdownItem
+                        icon={<ChevronDownIcon size={14} />}
+                        onClick={pick(() => controls.moveWithin?.(order, 1))}
+                      >
+                        Move down
+                      </DropdownItem>
+                    </>
+                  )}
+                  {controls?.moveToProblem &&
+                    controls.targets.some(
+                      (t) => t.concernId !== order.concernId
+                    ) && (
+                      <>
+                        {controls.moveWithin && <DropdownSeparator />}
+                        {controls.targets
+                          .filter((t) => t.concernId !== order.concernId)
+                          .map((t) => (
+                            <DropdownItem
+                              key={t.concernId}
+                              icon={<LinkIcon size={14} />}
+                              onClick={pick(() =>
+                                controls.moveToProblem?.(order, t.concernId)
+                              )}
+                            >
+                              Move to: {t.label}
+                            </DropdownItem>
+                          ))}
+                      </>
+                    )}
+                </Dropdown>
+              )}
+              {controls?.remove && (
+                <RowIconButton
+                  label="Remove"
+                  icon={TrashIcon}
+                  size="sm"
+                  onClick={() => controls.remove?.(order)}
+                />
+              )}
+            </RowActionToolbar>
+          )}
+        </>
+      )}
+    </li>
+  );
+}
+
+/** Inline per-problem order entry: type filter + code lookup (or free text). */
+function AddOrderForm({
+  problemText,
+  onSubmit,
+  onCancel,
+  renderSearch,
+}: {
+  problemText: string;
+  onSubmit: (order: {
+    type: OrderType;
+    display: string;
+    code?: AssessmentOrder['code'];
+  }) => void;
+  onCancel: () => void;
+  renderSearch?: AssessmentProps['renderOrderSearch'];
+}) {
+  const [type, setType] = React.useState<'auto' | OrderType>(
+    renderSearch ? 'auto' : 'medication'
+  );
+  const [display, setDisplay] = React.useState('');
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const submit = () => {
+    const text = display.trim();
+    if (!text) return;
+    onSubmit({ type: type === 'auto' ? 'procedure' : type, display: text });
+    setDisplay('');
+    inputRef.current?.focus();
+  };
+
+  const handlePick = (pick: OrderCodePick) => {
+    onSubmit({
+      type: type === 'auto' ? orderTypeForCodetype(pick.codetype) : type,
+      display: pick.label,
+      code: {
+        fullid: pick.fullid,
+        codetype: pick.codetype,
+        fullcode: pick.fullcode,
+      },
+    });
+  };
+
+  return (
+    <div
+      role="form"
+      aria-label={`Add order for ${problemText}`}
+      className="border-border bg-muted/40 mt-1.5 ml-2.5 flex flex-wrap items-center gap-1.5 rounded-md border border-dashed p-2"
+    >
+      <select
+        aria-label="Order type filter"
+        value={type}
+        onChange={(e) => setType(e.target.value as 'auto' | OrderType)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onCancel();
+        }}
+        className={cn(
+          'border-border bg-background text-foreground rounded-md border px-1.5 text-sm',
+          renderSearch ? 'h-10' : 'h-8',
+          'focus:ring-ring focus:ring-2 focus:outline-none'
+        )}
+      >
+        {renderSearch && <option value="auto">Auto</option>}
+        {(Object.keys(ORDER_TYPE_META) as OrderType[]).map((t) => (
+          <option key={t} value={t}>
+            {ORDER_TYPE_META[t].label}
+          </option>
+        ))}
+      </select>
+
+      {renderSearch ? (
+        <div className="min-w-64 flex-1">
+          {renderSearch({
+            domains:
+              type === 'auto' ? undefined : ORDER_TYPE_SEARCH_DOMAINS[type],
+            placeholder: ORDER_TYPE_PLACEHOLDERS[type],
+            onPick: handlePick,
+            onFreeText: (text) => {
+              const t = text.trim();
+              if (!t) return;
+              onSubmit({
+                type: type === 'auto' ? 'procedure' : type,
+                display: t,
+              });
+            },
+          })}
+        </div>
+      ) : (
+        <>
+          <input
+            ref={inputRef}
+            type="text"
+            value={display}
+            onChange={(e) => setDisplay(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submit();
+              else if (e.key === 'Escape') onCancel();
+            }}
+            placeholder="e.g. lisinopril 10 mg tablet — 1 po daily"
+            aria-label="Order description"
+            className={cn(
+              'border-border bg-background text-foreground placeholder:text-muted-foreground',
+              'h-8 min-w-48 flex-1 rounded-md border px-2.5 text-sm',
+              'focus:ring-ring focus:ring-2 focus:outline-none'
+            )}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={submit}
+            disabled={!display.trim()}
+            leftIcon={<PlusIcon size={12} />}
+            className="h-8"
+          >
+            Add
+          </Button>
+        </>
+      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onCancel}
+        className={renderSearch ? 'h-10' : 'h-8'}
+      >
+        Done
+      </Button>
+    </div>
+  );
+}
+
+// =============================================================================
+// Assessment
+// =============================================================================
+
+/**
+ * Visit-specific Assessment (& Plan). One block per assessed problem showing
+ * today's assertion; with the plan enabled, orders linked to the problem (via
+ * concernId — the durable IndicationLink) render indented under it. Orders
+ * without a problem link collect in an unlinked bucket with a one-click link
+ * affordance.
+ *
+ * Controlled component: concerns, items and orders come in via props; every
+ * user interaction is reported through callbacks.
+ *
+ * @example
+ * ```tsx
+ * <Assessment
+ *   concerns={touchedConcerns}
+ *   items={assessment}
+ *   orders={orders}
+ *   onAction={(item, action) => handleAction(item, action)}
+ *   onLinkOrder={(order, concernId) => linkOrder(order.orderId, concernId)}
+ * />
+ * ```
+ */
+export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
+  (
+    {
+      concerns,
+      items,
+      orders = [],
+      title = 'Assessment & plan',
+      showPlan = true,
+      onShowPlanChange,
+      onAction,
+      onAddOrder,
+      onAddAssessment,
+      onLinkOrder,
+      onEditOrderStart,
+      onEditOrder,
+      onRemoveOrder,
+      onReorderItems,
+      onReorderOrders,
+      renderOrderSearch,
+      readOnly = false,
+      billableOnly = false,
+      className,
+      'data-testid': dataTestId,
+      ...props
+    },
+    ref
+  ) => {
+    const [addingFor, setAddingFor] = React.useState<string | null>(null);
+    const [addMode, setAddMode] = React.useState<'auto' | 'problem' | 'order'>(
+      'auto'
+    );
+    /** Free text typed in auto mode — we must ask what it is before adding */
+    const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(
+      null
+    );
+    // clears-then-sets so repeated identical messages re-announce
+    const [announcement, setAnnouncement] = useLiveAnnouncement();
+
+    // Default the code search to the ambient provider; `false` forces free text.
+    const ambientCodeLookup = useCodeLookupConfig();
+    const effectiveRenderOrderSearch: RenderOrderSearch | undefined =
+      renderOrderSearch === false
+        ? undefined
+        : (renderOrderSearch ??
+          (ambientCodeLookup
+            ? contextOrderSearch(ambientCodeLookup)
+            : undefined));
+
+    const concernById = React.useMemo(
+      () => new Map(concerns.map((c) => [c.concernId, c])),
+      [concerns]
+    );
+
+    const assertionOf = (
+      item: AssessmentItem
+    ): ConditionAssertion | undefined =>
+      concernById
+        .get(item.concernId)
+        ?.assertions.find((a) => a.id === item.assertionId);
+
+    const unlinkedOrders = orders.filter(
+      (o) => !o.concernId || !items.some((i) => i.concernId === o.concernId)
+    );
+
+    const drag = useDragReorder({
+      ids: items.map((i) => i.concernId),
+      onReorder:
+        readOnly || !onReorderItems
+          ? undefined
+          : (ids) => {
+              setAnnouncement('Assessment concerns reordered');
+              onReorderItems(ids);
+            },
+    });
+
+    // ---- Keyboard + menu equivalents for order drag & drop (508) ----
+    const problemLabel = React.useCallback(
+      (concernId: string) =>
+        concernById
+          .get(concernId)
+          ?.assertions.find((a) =>
+            items.some(
+              (i) => i.concernId === concernId && i.assertionId === a.id
+            )
+          )?.text ?? concernId,
+      [concernById, items]
+    );
+
+    const orderControls: OrderControls | undefined = readOnly
+      ? undefined
+      : {
+          moveWithin: onReorderOrders
+            ? (order, dir) => {
+                const planIds = orders
+                  .filter((o) => o.concernId === order.concernId)
+                  .map((o) => o.orderId);
+                const i = planIds.indexOf(order.orderId);
+                const target = planIds[i + dir];
+                if (!target) return;
+                onReorderOrders(
+                  reorderIds(
+                    orders.map((o) => o.orderId),
+                    order.orderId,
+                    target,
+                    dir === 1
+                  )
+                );
+                setAnnouncement(
+                  `${order.display} moved ${dir === -1 ? 'up' : 'down'}`
+                );
+              }
+            : undefined,
+          moveToProblem: onLinkOrder
+            ? (order, concernId) => {
+                onLinkOrder(order, concernId);
+                setAnnouncement(
+                  `${order.display} moved to ${problemLabel(concernId)}`
+                );
+              }
+            : undefined,
+          edit: onEditOrder
+            ? (order, changes) => {
+                onEditOrder(order, changes);
+                setAnnouncement(`${changes.display} updated`);
+              }
+            : undefined,
+          editStart: onEditOrderStart,
+          remove: onRemoveOrder
+            ? (order) => {
+                onRemoveOrder(order);
+                setAnnouncement(`${order.display} removed`);
+              }
+            : undefined,
+          adjacentProblem: (order, dir) => {
+            const i = items.findIndex((it) => it.concernId === order.concernId);
+            const adj = items[i + dir];
+            return adj
+              ? { concernId: adj.concernId, label: problemLabel(adj.concernId) }
+              : null;
+          },
+          targets: items.map((it) => ({
+            concernId: it.concernId,
+            label: problemLabel(it.concernId),
+          })),
+        };
+
+    // ---- Order-level drag & drop: reorder within a plan, or move to another
+    // problem by dropping on its block (re-link) or between its orders. ----
+    const orderDragEnabled =
+      !readOnly && Boolean(onReorderOrders || onLinkOrder);
+    const [draggingOrderId, setDraggingOrderId] = React.useState<string | null>(
+      null
+    );
+    // dragover/drop can fire before the dragstart state update is visible, so
+    // the authoritative dragged id lives in a ref (set synchronously)
+    const draggingOrderRef = React.useRef<string | null>(null);
+    const [orderOver, setOrderOver] = React.useState<OrderDrag['over']>(null);
+
+    const resetOrderDrag = () => {
+      draggingOrderRef.current = null;
+      setDraggingOrderId(null);
+      setOrderOver(null);
+    };
+
+    /** Drop `dragged` relative to `target` (another order row). */
+    const dropOnOrder = (
+      dragged: AssessmentOrder,
+      target: AssessmentOrder,
+      after: boolean
+    ) => {
+      if (dragged.concernId !== target.concernId && target.concernId) {
+        onLinkOrder?.(dragged, target.concernId); // move to the other problem
+        setAnnouncement(
+          `${dragged.display} moved to ${problemLabel(target.concernId)}`
+        );
+      } else {
+        setAnnouncement(`${dragged.display} reordered`);
+      }
+      onReorderOrders?.(
+        reorderIds(
+          orders.map((o) => o.orderId),
+          dragged.orderId,
+          target.orderId,
+          after
+        )
+      );
+    };
+
+    const orderDrag: OrderDrag = {
+      enabled: orderDragEnabled,
+      draggingId: draggingOrderId,
+      over: orderOver,
+      rowProps: (order) =>
+        orderDragEnabled
+          ? {
+              draggable: true,
+              onDragStart: (e) => {
+                e.stopPropagation(); // don't start a problem-block drag
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', order.orderId);
+                draggingOrderRef.current = order.orderId;
+                setDraggingOrderId(order.orderId);
+              },
+              onDragEnd: (e) => {
+                e.stopPropagation();
+                resetOrderDrag();
+              },
+              onDragOver: (e) => {
+                const dragged = draggingOrderRef.current;
+                if (!dragged || dragged === order.orderId) return;
+                e.preventDefault();
+                e.stopPropagation();
+                e.dataTransfer.dropEffect = 'move';
+                const r = e.currentTarget.getBoundingClientRect();
+                const after = e.clientY > r.top + r.height / 2;
+                setOrderOver({ type: 'order', id: order.orderId, after });
+              },
+              onDrop: (e) => {
+                const draggedId =
+                  draggingOrderRef.current ??
+                  e.dataTransfer.getData('text/plain');
+                const dragged = orders.find((o) => o.orderId === draggedId);
+                if (!dragged || dragged.orderId === order.orderId) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const r = e.currentTarget.getBoundingClientRect();
+                const after = e.clientY > r.top + r.height / 2;
+                dropOnOrder(dragged, order, after);
+                resetOrderDrag();
+              },
+            }
+          : {},
+    };
+
+    /** Problem blocks double as drop targets for orders (move-to-problem). */
+    const blockProps = (
+      concernId: string
+    ): React.HTMLAttributes<HTMLElement> => {
+      const itemProps = drag.rowProps(concernId);
+      if (!orderDragEnabled) return itemProps;
+      return {
+        ...itemProps,
+        onDragOver: (e) => {
+          const draggingOrder = draggingOrderRef.current;
+          if (draggingOrder) {
+            const dragged = orders.find((o) => o.orderId === draggingOrder);
+            if (dragged?.concernId === concernId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            setOrderOver({ type: 'concern', concernId });
+            return;
+          }
+          itemProps.onDragOver?.(e);
+        },
+        onDragLeave: (e) => {
+          if (draggingOrderRef.current) {
+            setOrderOver((prev) =>
+              prev?.type === 'concern' && prev.concernId === concernId
+                ? null
+                : prev
+            );
+            return;
+          }
+          itemProps.onDragLeave?.(e);
+        },
+        onDrop: (e) => {
+          // An order drop on the block moves the order to this problem; any
+          // other payload (a problem-block drag) falls through to item reorder.
+          const payload =
+            draggingOrderRef.current ?? e.dataTransfer.getData('text/plain');
+          const dragged = orders.find((o) => o.orderId === payload);
+          if (dragged) {
+            e.preventDefault();
+            if (dragged.concernId !== concernId) {
+              onLinkOrder?.(dragged, concernId);
+              setAnnouncement(
+                `${dragged.display} moved to ${problemLabel(concernId)}`
+              );
+            }
+            resetOrderDrag();
+            return;
+          }
+          itemProps.onDrop?.(e);
+        },
+      };
+    };
+
+    return (
+      <Card
+        ref={ref}
+        padding="none"
+        className={cn('w-full', className)}
+        data-testid={dataTestId}
+        {...props}
+      >
+        {title !== null && (
+          <CardHeader className="border-border bg-muted/50 flex flex-row items-center justify-between border-b px-4 py-3">
+            <h3 className="text-foreground text-sm font-semibold tracking-wide uppercase">
+              {title}
+            </h3>
+            {onShowPlanChange && (
+              <label className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+                <input
+                  type="checkbox"
+                  checked={showPlan}
+                  onChange={(e) => onShowPlanChange(e.target.checked)}
+                  className="accent-primary-600 h-3.5 w-3.5"
+                />
+                Show plan
+              </label>
+            )}
+          </CardHeader>
+        )}
+
+        <CardContent className="space-y-4 px-4 py-4">
+          {items.length === 0 && (
+            <p className="text-muted-foreground text-sm">
+              No problems assessed this visit.
+            </p>
+          )}
+
+          <ol className="space-y-3">
+            {items.map((item, index) => {
+              const assertion = assertionOf(item);
+              if (!assertion) return null;
+              const linkedOrders = orders.filter(
+                (o) => o.concernId === item.concernId
+              );
+              const bp = blockProps(item.concernId);
+              const formOpen = addingFor === item.concernId;
+              return (
+                <li
+                  key={item.concernId}
+                  data-concern-id={item.concernId}
+                  {...bp}
+                  // While the add-order form is open the block body must yield
+                  // to text selection/editing — the header row (below) stays a
+                  // drag handle so the block can still be moved.
+                  draggable={drag.enabled && !formOpen}
+                  className={cn(
+                    'group border-border/60 relative rounded-md border px-3 py-2',
+                    drag.enabled &&
+                      !formOpen &&
+                      'cursor-grab active:cursor-grabbing',
+                    dragIndicatorClasses(drag, item.concernId),
+                    orderOver?.type === 'concern' &&
+                      orderOver.concernId === item.concernId &&
+                      'ring-primary-400 bg-primary-50/50 dark:bg-primary-950/50 ring-2'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'flex flex-wrap items-center gap-x-2 gap-y-1',
+                      drag.enabled &&
+                        formOpen &&
+                        'cursor-grab active:cursor-grabbing'
+                    )}
+                    // Header row remains a drag source while the form is open
+                    draggable={drag.enabled && formOpen}
+                    onDragStart={formOpen ? bp.onDragStart : undefined}
+                    onDragEnd={formOpen ? bp.onDragEnd : undefined}
+                  >
+                    {drag.enabled && (
+                      <GripVerticalIcon
+                        size={14}
+                        aria-hidden
+                        className="text-muted-foreground/50 shrink-0"
+                      />
+                    )}
+                    <span className="text-muted-foreground text-sm font-semibold tabular-nums">
+                      {index + 1}.
+                    </span>
+                    <span className="text-foreground font-medium">
+                      {assertion.text}
+                    </span>
+                    {assertion.verificationStatus !== 'confirmed' && (
+                      <Badge variant="warning" size="sm">
+                        {assertion.verificationStatus}
+                      </Badge>
+                    )}
+                    <CodingChips coding={assertion.coding} />
+
+                    {!readOnly && (
+                      <RowActionToolbar
+                        label={`Actions for ${assertion.text}`}
+                        align="top"
+                      >
+                        {(Object.keys(ACTION_META) as AssessmentAction[]).map(
+                          (action) => {
+                            const meta = ACTION_META[action];
+                            if (
+                              action === 'add-order' &&
+                              !onAddOrder &&
+                              !onAction
+                            )
+                              return null;
+                            return (
+                              <RowIconButton
+                                key={action}
+                                label={meta.label}
+                                icon={meta.icon}
+                                size="sm"
+                                onClick={() => {
+                                  if (action === 'add-order' && onAddOrder) {
+                                    setAddingFor((prev) =>
+                                      prev === item.concernId
+                                        ? null
+                                        : item.concernId
+                                    );
+                                  } else {
+                                    onAction?.(item, action);
+                                  }
+                                }}
+                              />
+                            );
+                          }
+                        )}
+                      </RowActionToolbar>
+                    )}
+                  </div>
+
+                  {item.note && (
+                    <p className="text-muted-foreground mt-1 pl-6 text-sm">
+                      {item.note}
+                    </p>
+                  )}
+
+                  {showPlan && linkedOrders.length > 0 && (
+                    <ul
+                      aria-label={`Plan for ${assertion.text}`}
+                      className="border-border mt-1.5 ml-2.5 border-l pl-4"
+                    >
+                      {linkedOrders.map((order) => (
+                        <OrderRow
+                          key={order.orderId}
+                          order={order}
+                          drag={orderDrag}
+                          controls={orderControls}
+                        />
+                      ))}
+                    </ul>
+                  )}
+
+                  {!readOnly && onAddOrder && addingFor === item.concernId && (
+                    <AddOrderForm
+                      problemText={assertion.text}
+                      onSubmit={(order) => onAddOrder(item, order)}
+                      onCancel={() => setAddingFor(null)}
+                      renderSearch={effectiveRenderOrderSearch}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+
+          {/* Unified add row: a dx/program pick adds a concern, anything else
+              adds an (unlinked) order — auto-detected from the coding system,
+              or forced via the mode dropdown. Free text asks (in auto mode). */}
+          {!readOnly &&
+            effectiveRenderOrderSearch &&
+            (onAddAssessment || onAddOrder) && (
+              <div
+                role="form"
+                aria-label="Add concern or order"
+                className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
+              >
+                <select
+                  aria-label="What to add"
+                  value={addMode}
+                  onChange={(e) => {
+                    setAddMode(e.target.value as typeof addMode);
+                    setPendingFreeText(null);
+                  }}
+                  className={cn(
+                    'border-border bg-background text-foreground h-10 rounded-md border px-1.5 text-sm',
+                    'focus:ring-ring focus:ring-2 focus:outline-none'
+                  )}
+                >
+                  <option value="auto">Add (auto)</option>
+                  {onAddAssessment && (
+                    <option value="problem">Add concern</option>
+                  )}
+                  {onAddOrder && <option value="order">Add order</option>}
+                </select>
+                <div className="min-w-64 flex-1">
+                  {effectiveRenderOrderSearch({
+                    domains:
+                      addMode === 'problem'
+                        ? ['condition', 'occupational']
+                        : addMode === 'order'
+                          ? ['med', 'lab', 'procedure', 'vaccine']
+                          : undefined, // auto: everything — the pick decides
+                    // auto: concerns rank ahead of orders — surveillance
+                    // programs first (rare, high-value hits like "dot" or
+                    // "hearing"), then diagnoses, then meds/labs/procedures.
+                    // concern mode: programs still lead the diagnoses.
+                    preferDomains:
+                      addMode === 'auto'
+                        ? ['occupational', 'condition']
+                        : addMode === 'problem'
+                          ? ['occupational']
+                          : undefined,
+                    // assessments code in ICD-10: boost it over SNOMED
+                    preferCodetypes:
+                      addMode !== 'order' ? ['ICD10'] : undefined,
+                    billableOnly: addMode !== 'order' && billableOnly,
+                    placeholder:
+                      addMode === 'problem'
+                        ? 'Search diagnoses & programs… (try "chf" or "hearing conservation")'
+                        : addMode === 'order'
+                          ? 'Search medications, labs, imaging, procedures…'
+                          : 'Add concern or order… (a diagnosis or surveillance program becomes a concern; meds, labs & imaging become orders)',
+                    onPick: (pick) => {
+                      const asProblem =
+                        addMode === 'problem' ||
+                        (addMode === 'auto' &&
+                          isConditionCodetype(pick.codetype) &&
+                          Boolean(onAddAssessment));
+                      if (asProblem) {
+                        onAddAssessment?.({
+                          label: pick.label,
+                          code: {
+                            fullid: pick.fullid,
+                            codetype: pick.codetype,
+                            fullcode: pick.fullcode,
+                          },
+                        });
+                      } else {
+                        onAddOrder?.(null, {
+                          type: orderTypeForCodetype(pick.codetype),
+                          display: pick.label,
+                          code: {
+                            fullid: pick.fullid,
+                            codetype: pick.codetype,
+                            fullcode: pick.fullcode,
+                          },
+                        });
+                      }
+                    },
+                    onFreeText: (text) => {
+                      if (addMode === 'problem') {
+                        onAddAssessment?.({ label: text });
+                      } else if (addMode === 'order') {
+                        onAddOrder?.(null, {
+                          type: 'procedure',
+                          display: text,
+                        });
+                      } else {
+                        setPendingFreeText(text); // auto: we have to ask
+                      }
+                    },
+                  })}
+                </div>
+
+                {/* Free text in auto mode: ask what it is */}
+                {pendingFreeText !== null && (
+                  <div
+                    role="group"
+                    aria-label={`Add "${pendingFreeText}" as`}
+                    className="flex w-full flex-wrap items-center gap-1.5 pl-1"
+                  >
+                    <span className="text-muted-foreground text-sm">
+                      Add{' '}
+                      <span className="text-foreground font-medium">
+                        “{pendingFreeText}”
+                      </span>{' '}
+                      as:
+                    </span>
+                    {onAddAssessment && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          onAddAssessment({ label: pendingFreeText });
+                          setPendingFreeText(null);
+                        }}
+                      >
+                        Concern
+                      </Button>
+                    )}
+                    {onAddOrder && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          onAddOrder(null, {
+                            type: 'procedure',
+                            display: pendingFreeText,
+                          });
+                          setPendingFreeText(null);
+                        }}
+                      >
+                        Order
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setPendingFreeText(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+          {/* Unlinked orders bucket — only takes space once something is in it */}
+          {showPlan && unlinkedOrders.length > 0 && (
+            <section
+              aria-label="Orders not linked to a concern"
+              className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-950"
+            >
+              <h4 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900 dark:text-amber-200">
+                <AlertCircleIcon size={14} />
+                Orders not linked to a concern
+              </h4>
+              <ul className="mt-1">
+                {unlinkedOrders.map((order) => (
+                  // Same row component as linked orders: focusable, Alt+arrow
+                  // keyboard moves, and the Move menu (508 parity with drag)
+                  <OrderRow
+                    key={order.orderId}
+                    order={order}
+                    drag={orderDrag}
+                    controls={orderControls}
+                  />
+                ))}
+              </ul>
+            </section>
+          )}
+        </CardContent>
+
+        {/* Move/reorder announcements for screen readers */}
+        <div aria-live="polite" className="sr-only">
+          {announcement}
+        </div>
+      </Card>
+    );
+  }
+);
+
+Assessment.displayName = 'Assessment';
+
+export default Assessment;

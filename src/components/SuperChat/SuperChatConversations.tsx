@@ -108,7 +108,7 @@ export function SuperChatConversations({
                 <span className="flex-1 truncate">
                   <span className="block truncate font-medium">{c.title}</span>
                   {last?.text && (
-                    <span className="block truncate text-xs text-neutral-400">
+                    <span className="block truncate text-xs text-neutral-600 dark:text-neutral-400">
                       {last.text}
                     </span>
                   )}

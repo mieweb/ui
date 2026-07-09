@@ -2,10 +2,18 @@ import { useRef, useState, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   EsheetRenderer,
+  registerMieEsheetFields,
   type EsheetRendererProps,
   type EsheetRendererHandle,
   type FormDefinition,
 } from '../../esheet';
+import { CodeLookup } from '../CodeLookup';
+
+// Register the @mieweb/ui custom field types (medicationList + allergyList)
+// once, before any story renders.
+registerMieEsheetFields({
+  codeLookup: { component: CodeLookup, indexUrl: '/codify' },
+});
 
 // ============================================================================
 // Sample Form Definition
@@ -152,10 +160,56 @@ export const PreFilled: RendererStory = {
   args: {
     formDataInput: SAMPLE_FORM,
     initialResponses: {
-      name: 'Jane Doe',
-      email: 'jane@example.com',
-      reason: 'Follow-up',
+      name: { answer: 'Jane Doe' },
+      email: { answer: 'jane@example.com' },
+      reason: { selected: { id: 'r2', value: 'Follow-up' } },
     },
+  },
+  render: (args) => <RendererDemo {...args} />,
+};
+
+/**
+ * Renderer with the @mieweb/ui medical custom field types — medication
+ * reconciliation and the allergy list — as form questions.
+ *
+ * Both are registered at module load via `registerMieEsheetFields()`.
+ */
+export const MedicalFields: RendererStory = {
+  args: {
+    formDataInput: {
+      id: 'medical-demo',
+      title: 'Encounter — Medications & Allergies',
+      fields: [
+        {
+          id: 'meds',
+          fieldType: 'medicationList',
+          question: 'Presenting medications',
+          medications: [
+            { id: 'm1', name: 'lisinopril 10 mg tablet', status: 'taking' },
+            {
+              id: 'm2',
+              name: 'metformin 500 mg tablet',
+              status: 'unreconciled',
+            },
+          ],
+        },
+        {
+          id: 'allergies',
+          fieldType: 'allergyList',
+          question: 'Allergies',
+          allergies: [
+            {
+              id: 'a1',
+              allergen: 'penicillin',
+              type: 'drug',
+              reaction: 'hives',
+              severity: 'moderate',
+            },
+          ],
+        },
+      ],
+    } as unknown as FormDefinition,
+    strict: false,
   },
   render: (args) => <RendererDemo {...args} />,
 };

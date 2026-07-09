@@ -5,8 +5,8 @@
  * table actually renders — this keeps the heavy `datavis` / `datavis-ace`
  * dependencies out of the SuperChat (and Markdown core) bundle.
  *
- * Data is handed to {@link DataVisNitroSource} through a short-lived object-URL
- * `http` source carrying the `{ typeInfo, data }` shape the engine expects.
+ * Data is handed to {@link DataVisNitroSource} through a short-lived local
+ * source so Storybook never pauses in the intermediate "Waiting…" state.
  */
 
 import * as React from 'react';
@@ -20,23 +20,26 @@ export interface NitroTableGridProps {
 }
 
 export default function NitroTableGrid({ headers, rows }: NitroTableGridProps) {
-  const url = React.useMemo(() => {
-    const payload = {
+  const varName = React.useMemo(() => {
+    const nextVarName = `__superchat_nitro_table_${Math.random().toString(36).slice(2)}`;
+    (window as unknown as Record<string, unknown>)[nextVarName] = {
       typeInfo: headers.map((field) => ({ field, type: 'string' })),
       data: rows,
     };
-    const blob = new Blob([JSON.stringify(payload)], {
-      type: 'application/json',
-    });
-    return URL.createObjectURL(blob);
+    return nextVarName;
   }, [headers, rows]);
 
-  React.useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  React.useEffect(
+    () => () => {
+      delete (window as unknown as Record<string, unknown>)[varName];
+    },
+    [varName]
+  );
 
   return (
     <div data-slot="superchat-nitro-table" className="my-2">
-      <DataVisNitroSource type="http" url={url}>
-        <DataVisNitroGrid columns={headers} minimalMode className="max-h-80" />
+      <DataVisNitroSource type="local" varName={varName}>
+        <DataVisNitroGrid columns={headers} className="max-h-80" />
       </DataVisNitroSource>
     </div>
   );

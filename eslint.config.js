@@ -91,6 +91,20 @@ export default [
         // Encoding APIs
         atob: 'readonly',
         btoa: 'readonly',
+        TextDecoder: 'readonly',
+        TextEncoder: 'readonly',
+        // Workers / fetch / binary
+        Worker: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
+        DecompressionStream: 'readonly',
+        MessageEvent: 'readonly',
+        self: 'readonly',
+        performance: 'readonly',
+        DataView: 'readonly',
+        Uint32Array: 'readonly',
+        Float32Array: 'readonly',
+        Int32Array: 'readonly',
         // Observer APIs
         IntersectionObserver: 'readonly',
         IntersectionObserverEntry: 'readonly',
