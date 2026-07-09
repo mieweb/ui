@@ -126,7 +126,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
  * long-press the octopus for Ozwell settings.
  */
 export const Interactive: StoryObj<DemoArgs> = {
-  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false, liveTranscript: false, conversationMode: false, reviewBeforeSend: false },
+  args: { autoDictateOnWake: true, closeChatOnDone: false, transcription: 'browser', requireDoctor: true, liveTranscript: false, conversationMode: false, reviewBeforeSend: false },
   argTypes: {
     autoDictateOnWake: {
       name: 'Auto-dictate on wake',
