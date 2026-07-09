@@ -25,6 +25,7 @@ export * from './components/Breadcrumb';
 export * from './components/BusinessHours';
 export * from './components/BusinessHoursEditor';
 export * from './components/Button';
+export * from './components/ButtonLink';
 export * from './components/Card';
 export * from './components/Checkbox';
 // CodeLookup itself ships a module worker and is NOT exported here (apps import
