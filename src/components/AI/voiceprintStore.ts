@@ -113,8 +113,9 @@ const WHAT_KEY = 'ozwellWhatPrints';
 function parseLegacyWhat(raw: string): Record<string, Float32Array[]> {
   let o: Record<string, number[][]>;
   try { o = (JSON.parse(raw || '{}') || {}) as Record<string, number[][]>; } catch { return {}; }
-  const out: Record<string, Float32Array[]> = {};
-  for (const k in o) out[k] = (o[k] || []).map((a) => Float32Array.from(a));
+  // Null-prototype output + Object.keys so a legacy `__proto__` key can't pollute Object.prototype.
+  const out: Record<string, Float32Array[]> = Object.create(null);
+  for (const k of Object.keys(o)) out[k] = (o[k] || []).map((a) => Float32Array.from(a));
   return out;
 }
 

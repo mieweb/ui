@@ -163,7 +163,7 @@ export default [
     files: [
       'src/components/AI/whisperTranscribe.ts',
       'src/components/AI/modelCache.ts',
-      'src/components/AI/HeyOzwell/**/*.{ts,tsx}',
+      'src/components/AI/HeyOzwell/**/*.{ts,tsx,js}',
     ],
     rules: {
       'no-console': 'off',

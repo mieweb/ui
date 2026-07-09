@@ -70,53 +70,58 @@ export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptio
   if (n === 0) return [];
   if (n === 1) return [0];
 
-  // pairwise cosine SIMILARITY (symmetric) between points
-  const sim: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+  // Cluster-distance matrix D (average-linkage cosine DISTANCE), updated incrementally on each merge via
+  // the Lance-Williams recurrence. This produces results IDENTICAL to recomputing average linkage from
+  // scratch, but drops the per-merge point-pair rescan that made the old routine ~O(n³) — the part that
+  // could hang the tab on a long visit (Whisper emits many segments). Now: O(n²) memory, scalar updates.
+  const D: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      const s = cosine(embeddings[i], embeddings[j]);
-      sim[i][j] = s;
-      sim[j][i] = s;
+      const d = 1 - cosine(embeddings[i], embeddings[j]);
+      D[i][j] = d;
+      D[j][i] = d;
     }
   }
 
-  // clusters as lists of point indices
-  let clusters: number[][] = embeddings.map((_, i) => [i]);
-  // average-linkage cosine DISTANCE between two clusters
-  const clusterDist = (a: number[], b: number[]): number => {
-    let sum = 0;
-    for (const x of a) for (const y of b) sum += sim[x][y];
-    return 1 - sum / (a.length * b.length);
-  };
+  const active = new Array<boolean>(n).fill(true); // false once a cluster is merged away
+  const size = new Array<number>(n).fill(1); // cluster sizes (for the average-linkage weighting)
+  const members: number[][] = embeddings.map((_, i) => [i]);
+  let count = n;
 
-  for (;;) {
-    if (clusters.length <= 1) break;
-    // find the closest pair
-    let bi = 0;
-    let bj = 1;
+  while (count > 1) {
+    // closest active pair (scalar lookups into D — no point-pair recompute)
+    let bi = -1;
+    let bj = -1;
     let best = Infinity;
-    for (let i = 0; i < clusters.length; i++) {
-      for (let j = i + 1; j < clusters.length; j++) {
-        const d = clusterDist(clusters[i], clusters[j]);
-        if (d < best) {
-          best = d;
-          bi = i;
-          bj = j;
-        }
+    for (let i = 0; i < n; i++) {
+      if (!active[i]) continue;
+      for (let j = i + 1; j < n; j++) {
+        if (!active[j]) continue;
+        if (D[i][j] < best) { best = D[i][j]; bi = i; bj = j; }
       }
     }
+    if (bi < 0) break;
     // merge while under threshold, or while still above the speaker cap
-    if (best <= threshold || clusters.length > maxSpeakers) {
-      clusters[bi] = clusters[bi].concat(clusters[bj]);
-      clusters.splice(bj, 1);
-    } else {
-      break;
+    if (!(best <= threshold || count > maxSpeakers)) break;
+    // fold bj into bi; Lance-Williams average-linkage update of bi's distance to every other cluster
+    const ni = size[bi];
+    const nj = size[bj];
+    for (let k = 0; k < n; k++) {
+      if (!active[k] || k === bi || k === bj) continue;
+      const d = (ni * D[bi][k] + nj * D[bj][k]) / (ni + nj);
+      D[bi][k] = d;
+      D[k][bi] = d;
     }
+    members[bi] = members[bi].concat(members[bj]);
+    size[bi] = ni + nj;
+    active[bj] = false;
+    count--;
   }
 
   // assign cluster ids in first-appearance order (stable, readable labels)
   const labelOf = new Array<number>(n).fill(-1);
-  clusters
+  members
+    .filter((_, i) => active[i])
     .map((c) => ({ c, first: Math.min(...c) }))
     .sort((a, b) => a.first - b.first)
     .forEach(({ c }, id) => c.forEach((idx) => (labelOf[idx] = id)));
@@ -182,7 +187,13 @@ export async function inferSpeakerRoles(
   const toLabel = [...new Set(segments.map((s) => s.speaker))].filter(isGeneric);
   if (!toLabel.length) return segments;
 
-  const transcript = segments.map((s) => `${s.speaker}: ${s.text}`).join('\n');
+  // Bound the transcript so a long visit can't blow past the model's context (or make the call slow /
+  // fail). Roles are inferable from a representative sample, so if there are many turns we evenly
+  // downsample across the whole visit rather than sending everything or just the tail.
+  const MAX_PROMPT_LINES = 160;
+  const allLines = segments.map((s) => `${s.speaker}: ${s.text}`);
+  const stride = Math.ceil(allLines.length / MAX_PROMPT_LINES);
+  const transcript = (stride > 1 ? allLines.filter((_, i) => i % stride === 0) : allLines).join('\n');
   const prompt =
     `You are labeling speakers in a medical-visit transcript. For EACH of these speaker tags: ` +
     `${toLabel.join(', ')} — infer the most likely role from: ${roles.join(', ')}. ` +

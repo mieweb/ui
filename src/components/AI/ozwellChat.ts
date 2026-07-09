@@ -168,6 +168,20 @@ export async function askOzwellStream(
   const decoder = new TextDecoder();
   let buf = '';
   let full = '';
+  // Process one SSE event's `data:` lines; returns true once the terminal [DONE] frame is seen.
+  const processEvent = (ev: string): boolean => {
+    for (const line of ev.split(/\r?\n/)) {
+      if (!line.startsWith('data:')) continue;
+      const payload = line.slice(5).trim();
+      if (payload === '[DONE]') return true;
+      try {
+        const json = JSON.parse(payload);
+        const delta: string = json?.choices?.[0]?.delta?.content || '';
+        if (delta) { full += delta; onToken(delta, full); }
+      } catch { /* keep-alive / partial line — ignore */ }
+    }
+    return false;
+  };
   try {
     for (;;) {
       const { done, value } = await reader.read();
@@ -175,19 +189,11 @@ export async function askOzwellStream(
       buf += decoder.decode(value, { stream: true });
       const events = buf.split(/\r?\n\r?\n/); // SSE events are separated by a blank line (handle CRLF too)
       buf = events.pop() || ''; // keep the trailing partial event for the next chunk
-      for (const ev of events) {
-        for (const line of ev.split(/\r?\n/)) {
-          if (!line.startsWith('data:')) continue;
-          const payload = line.slice(5).trim();
-          if (payload === '[DONE]') return full;
-          try {
-            const json = JSON.parse(payload);
-            const delta: string = json?.choices?.[0]?.delta?.content || '';
-            if (delta) { full += delta; onToken(delta, full); }
-          } catch { /* keep-alive / partial line — ignore */ }
-        }
-      }
+      for (const ev of events) if (processEvent(ev)) return full;
     }
+    // Stream ended: flush any final event that arrived WITHOUT a trailing blank line, so the last
+    // token(s) aren't dropped when the server closes right after the data frame.
+    if (buf.trim()) processEvent(buf);
   } finally {
     // Release the connection promptly on BOTH normal completion and the early `[DONE]` return, so we
     // don't hold the socket open or fight a caller's AbortController. cancel() also releases the lock.
