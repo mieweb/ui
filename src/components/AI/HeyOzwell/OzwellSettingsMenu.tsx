@@ -94,7 +94,7 @@ export function OzwellSettingsMenu({
       className="overflow-hidden"
     >
       {/* scroll container (height-capped) + a bottom fade overlay so it's clear there's more below */}
-      <div ref={scrollRef} onScroll={updateHasMore} className="max-h-[392px] overflow-x-hidden overflow-y-auto">
+      <div ref={scrollRef} role="presentation" onScroll={updateHasMore} className="max-h-[392px] overflow-x-hidden overflow-y-auto">
       <DropdownHeader title="⚙ Ozwell settings" />
       {onManageVoices && (
         <DropdownItem onClick={act(onManageVoices)}>

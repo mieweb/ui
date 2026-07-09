@@ -171,7 +171,11 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
   };
 
   const start = React.useCallback(async () => {
-    if (!bothReady || phase !== 'intro' || !recRef.current) return;
+    if (!bothReady || phase !== 'intro') return;
+    // recRef is initialized asynchronously in an effect; if the user clicks the instant `ready` flips
+    // true, the recorder may not exist yet. Wait briefly rather than silently no-op.
+    for (let i = 0; i < 20 && !recRef.current; i++) await delay(50);
+    if (!recRef.current) return;
     abortRef.current = false;
     const append = adding;
     let overall = 0;
@@ -229,8 +233,8 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
     resolveRef.current?.('__cancelled__'); // unblock a pending awaitWake so the loop sees the abort
     setPhase('intro');
     setStep(0);
-    setAdding(false);
-  }, []);
+    setAdding(startAdding); // reset to the hook's initial mode, not hardcoded replace-mode
+  }, [startAdding]);
 
   return {
     ready: bothReady,

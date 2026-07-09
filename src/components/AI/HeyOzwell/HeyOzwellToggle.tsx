@@ -155,6 +155,8 @@ export function HeyOzwellToggle({
     if (!onOpenSettings) return;
     e.preventDefault();
     cancelPress();
+    // A long-press can fire the timer AND then a contextmenu (common on mobile) — don't open twice.
+    if (longFiredRef.current) { longFiredRef.current = false; return; }
     onOpenSettings();
   };
 

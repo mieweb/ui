@@ -72,7 +72,7 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
             ? 'Got it!'
             : phase === 'deny'
               ? `Say “${phrase}” clearly`
-              : 'Ozwell now responds only to your voice.';
+              : 'You’re all set — Ozwell is ready.'; // accurate for both fresh enroll and add-a-voice
   const wrapAnim =
     phase === 'gotit' ? 'oz-bounce .6s ease' : phase === 'deny' ? 'oz-shake .5s ease' : 'oz-float 4s ease-in-out infinite';
 
