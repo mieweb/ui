@@ -153,6 +153,12 @@ export function PortalShell({
   contentClassName,
   contentMaxWidth = '7xl',
 }: PortalShellProps): React.JSX.Element {
+  const activeGroup = navGroups.find(
+    (group) =>
+      group.label &&
+      group.items.some((item) => !item.hidden && isItemActive(item))
+  )?.label;
+
   const handleActivate = (item: PortalNavItem) => {
     if (item.onClick) item.onClick();
     else if (onNavigate) onNavigate(item);
@@ -173,7 +179,10 @@ export function PortalShell({
   };
 
   return (
-    <SidebarProvider storageKey={storageKey}>
+    <SidebarProvider
+      storageKey={storageKey}
+      defaultExpandedGroup={activeGroup ?? null}
+    >
       <div className="flex h-screen overflow-hidden bg-background text-foreground">
         {/* Keyboard skip link — first focusable element so keyboard/AT users
          *  can jump past the sidebar straight to the page content. */}
@@ -202,6 +211,7 @@ export function PortalShell({
                     key={group.label}
                     label={group.label}
                     icon={group.icon}
+                    groupId={group.label}
                   >
                     {visibleItems.map(renderItem)}
                   </SidebarNavGroup>

@@ -90,6 +90,10 @@ export function SidebarProvider({
     defaultExpandedGroup
   );
 
+  useEffect(() => {
+    setExpandedGroup(defaultExpandedGroup);
+  }, [defaultExpandedGroup]);
+
   // Persist collapsed state
   useEffect(() => {
     if (persistCollapsed && typeof window !== 'undefined') {
