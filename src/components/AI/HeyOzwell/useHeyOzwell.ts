@@ -191,6 +191,7 @@ function useRoomLevel(getStream: () => MediaStream | null, ready: boolean): numb
         (window as unknown as { webkitAudioContext: typeof AudioContext })
           .webkitAudioContext;
       ctx = new Ctx();
+      void ctx.resume().catch(() => {}); // may start suspended under autoplay → analyser reads zeros (no pulse)
       const src = ctx.createMediaStreamSource(stream);
       const an = ctx.createAnalyser();
       an.fftSize = 512;

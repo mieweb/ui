@@ -119,6 +119,7 @@ export class AudioBatcher {
             }
         });
         this.audioContext = new AudioContext();
+        this.audioContext.resume().catch(() => {}); // may start suspended under autoplay policy
         this.sourceNode = new MediaStreamAudioSourceNode(
             this.audioContext,
             { mediaStream: this.stream }

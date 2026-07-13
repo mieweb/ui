@@ -157,8 +157,13 @@ function parseJsonMap(reply: string): Record<string, string> {
   if (!match) return {};
   try {
     const obj = JSON.parse(match[0]) as Record<string, unknown>;
-    const out: Record<string, string> = {};
-    for (const k in obj) if (typeof obj[k] === 'string') out[k] = obj[k] as string;
+    // Null-prototype output + own-keys only, skipping dangerous names, so an LLM reply containing
+    // "__proto__"/"constructor"/"prototype" can't pollute Object.prototype.
+    const out: Record<string, string> = Object.create(null);
+    for (const k of Object.keys(obj)) {
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+      if (typeof obj[k] === 'string') out[k] = obj[k] as string;
+    }
     return out;
   } catch {
     return {};

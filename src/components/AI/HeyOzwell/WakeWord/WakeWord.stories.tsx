@@ -175,6 +175,7 @@ function MicTest() {
       if (cancelled) { s.getTracks().forEach((t) => t.stop()); return; }
       stream = s;
       ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      void ctx.resume().catch(() => {}); // may start suspended under autoplay → analyser reads zeros
       const src = ctx.createMediaStreamSource(s);
       const an = ctx.createAnalyser(); an.fftSize = 1024;
       src.connect(an);

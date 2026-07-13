@@ -106,6 +106,7 @@
       const r = run(tx.objectStore(IDB_STORE));
       tx.oncomplete = () => { resolve(r && r.result); db.close(); };
       tx.onerror = () => { reject(tx.error); db.close(); };
+      tx.onabort = () => { reject(tx.error); db.close(); }; // else an aborted tx leaves the promise pending
     }));
   }
   const idbGet = (key) => idbReq("readonly", (s) => s.get(key));

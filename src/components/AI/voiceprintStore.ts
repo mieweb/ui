@@ -48,6 +48,7 @@ function idbSet(key: string, value: unknown): Promise<void> {
         tx.objectStore(STORE).put(value, key);
         tx.oncomplete = () => { resolve(); db.close(); };
         tx.onerror = () => { reject(tx.error); db.close(); };
+        tx.onabort = () => { reject(tx.error); db.close(); }; // else an aborted tx leaves the promise pending
       }),
   );
 }
@@ -60,6 +61,7 @@ function idbDel(key: string): Promise<void> {
         tx.objectStore(STORE).delete(key);
         tx.oncomplete = () => { resolve(); db.close(); };
         tx.onerror = () => { reject(tx.error); db.close(); };
+        tx.onabort = () => { reject(tx.error); db.close(); }; // else an aborted tx leaves the promise pending
       }),
   );
 }

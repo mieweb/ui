@@ -114,6 +114,7 @@ export function chime(freq: number, ms = 170): void {
       window.AudioContext ||
       (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new Ctx();
+    void ctx.resume().catch(() => {}); // may start suspended under autoplay policy → chime wouldn't play
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.frequency.value = freq;

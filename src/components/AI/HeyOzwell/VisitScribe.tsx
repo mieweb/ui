@@ -62,7 +62,7 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="text-muted-foreground flex items-center gap-2 text-sm focus:outline-none"
+      className="text-muted-foreground focus-visible:ring-ozwell flex items-center gap-2 rounded text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
     >
       <span
         aria-hidden="true"

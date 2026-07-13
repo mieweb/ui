@@ -191,8 +191,9 @@ export async function askOzwellStream(
       buf = events.pop() || ''; // keep the trailing partial event for the next chunk
       for (const ev of events) if (processEvent(ev)) return full;
     }
-    // Stream ended: flush any final event that arrived WITHOUT a trailing blank line, so the last
-    // token(s) aren't dropped when the server closes right after the data frame.
+    // Stream ended: flush the decoder (a final multi-byte UTF-8 char can be split across chunks) and
+    // process any trailing event that arrived WITHOUT a blank line, so the last token(s) aren't dropped.
+    buf += decoder.decode();
     if (buf.trim()) processEvent(buf);
   } finally {
     // Release the connection promptly on BOTH normal completion and the early `[DONE]` return, so we
