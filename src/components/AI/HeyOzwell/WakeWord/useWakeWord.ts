@@ -251,10 +251,22 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
     // (re-getUserMedia, no re-prompt after the first grant). Mirrors the ozwellai-api landing-page toggle.
     return () => {
       cancelled = true;
-      const b = hbRef.current?.batcher;
-      try { b?.stream?.getTracks().forEach((t) => t.stop()); } catch { /* ignore */ }
-      try { void b?.audioContext?.close(); } catch { /* ignore */ }
+      const hb = hbRef.current;
       hbRef.current = null;
+      // Stop the mic + tear down the graph. If teardown lands WHILE HeyBuddy's getUserMedia is still
+      // pending, batcher.stream isn't set yet — so poll briefly and release it once it appears, rather
+      // than leaking a live mic stream (and the OS recording indicator) after disable/unmount.
+      const release = () => {
+        const b = hb?.batcher;
+        if (!b?.stream) return false;
+        try { b.stream.getTracks().forEach((t) => t.stop()); } catch { /* ignore */ }
+        try { void b.audioContext?.close(); } catch { /* ignore */ }
+        return true;
+      };
+      if (!release()) {
+        let tries = 0;
+        const iv = setInterval(() => { if (release() || ++tries > 50) clearInterval(iv); }, 100);
+      }
     };
   }, [enabled, assetBase]); // eslint-disable-line react-hooks/exhaustive-deps
 

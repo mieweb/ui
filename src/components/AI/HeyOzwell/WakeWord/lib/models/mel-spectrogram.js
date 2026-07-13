@@ -74,10 +74,10 @@ export class MelSpectrogram extends ONNXModel {
             [1, input.length]
         );
         const output = await this.session.run({ input: inputTensor });
-        return await ONNX.createTensor(
-            "float32",
-            output.output.data.map((datum) => datum / 10.0 + 2.0),
-            output.output.dims
-        );
+        // Rescale in place — this runs every frame on the wake pipeline, so mutate the output buffer
+        // instead of allocating a new array per call (.map).
+        const data = output.output.data;
+        for (let i = 0; i < data.length; i++) data[i] = data[i] / 10.0 + 2.0;
+        return await ONNX.createTensor("float32", data, output.output.dims);
     }
 }

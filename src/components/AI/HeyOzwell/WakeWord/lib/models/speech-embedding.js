@@ -50,7 +50,7 @@ export class SpeechEmbedding extends ONNXModel {
     async test(debug = false) {
         const melTensor = await ONNX.createTensor(
             "float32",
-            new Float32Array(new Array(100 * 32).fill(0)),
+            new Float32Array(100 * 32), // already zero-initialized
             [100, 32]
         );
         let result = await this.run(melTensor);
