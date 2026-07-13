@@ -122,7 +122,8 @@ export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptio
   const labelOf = new Array<number>(n).fill(-1);
   members
     .filter((_, i) => active[i])
-    .map((c) => ({ c, first: Math.min(...c) }))
+    // reduce, not Math.min(...c): spreading a large cluster throws RangeError on long transcripts
+    .map((c) => ({ c, first: c.reduce((m, x) => (x < m ? x : m), Infinity) }))
     .sort((a, b) => a.first - b.first)
     .forEach(({ c }, id) => c.forEach((idx) => (labelOf[idx] = id)));
   return labelOf;
@@ -133,7 +134,8 @@ export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptio
  * otherwise a generic "Speaker N". Returns an array indexed by cluster id.
  */
 export function labelClusters(clusters: number[], names: Record<number, string> = {}): string[] {
-  const count = clusters.length ? Math.max(...clusters) + 1 : 0;
+  // reduce, not Math.max(...clusters): spreading a large array throws RangeError on long transcripts
+  const count = clusters.length ? clusters.reduce((m, x) => (x > m ? x : m), -Infinity) + 1 : 0;
   const labels: string[] = [];
   for (let id = 0; id < count; id++) labels[id] = names[id] ?? `Speaker ${id + 1}`;
   return labels;

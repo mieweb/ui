@@ -117,7 +117,8 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
         }
 
         // 4. anchor each cluster to an enrolled voice (identify the longest segment in the cluster)
-        const clusterCount = Math.max(0, ...clusterOf) + 1;
+        // reduce, not Math.max(0, ...clusterOf): spreading a large array throws RangeError on long visits
+        const clusterCount = clusterOf.reduce((m, x) => (x > m ? x : m), 0) + 1;
         const names: Record<number, string> = {};
         for (let c = 0; c < clusterCount; c++) {
           // longest embedded segment in this cluster = the most reliable to identify
