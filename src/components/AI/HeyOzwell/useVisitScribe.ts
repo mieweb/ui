@@ -184,11 +184,16 @@ export function useVisitScribe(options: UseVisitScribeOptions = {}): UseVisitScr
     stopLive();
     setRecording(false);
     try {
-      recRef.current?.stop(); // fires onstop → diarize
+      recRef.current?.stop(); // fires onstop → diarize (+ stops the mic tracks)
     } catch {
       /* already stopped */
     }
     recRef.current = null;
+    // Safety net: onstop normally stops the mic tracks, but if rec.stop() threw or onstop never fires
+    // (invalid state / browser quirk), stop them here too so the mic indicator can't get stuck on
+    // (stopping twice is harmless).
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
   }, [clearTimer, stopLive]);
 
   const reanalyze = React.useCallback(() => {
