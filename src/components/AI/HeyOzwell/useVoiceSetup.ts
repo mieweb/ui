@@ -123,6 +123,9 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       ctx = new Ctx();
+      // May start suspended under autoplay policy → the analyser loop would read all zeros (dead pulse).
+      // Best-effort resume; ignore if it rejects.
+      void ctx.resume().catch(() => {});
       const src = ctx.createMediaStreamSource(stream);
       const an = ctx.createAnalyser();
       an.fftSize = 512;

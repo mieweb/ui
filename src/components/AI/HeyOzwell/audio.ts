@@ -32,6 +32,9 @@ export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): Rollin
     window.AudioContext ||
     (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctx();
+  // A context created under an autoplay restriction can start suspended, which would starve the
+  // ScriptProcessor callbacks (silent recording). Best-effort resume; ignore if it rejects.
+  void ctx.resume().catch(() => {});
   const src = ctx.createMediaStreamSource(stream);
   const proc = ctx.createScriptProcessor(4096, 1, 1);
   const sink = ctx.createGain();

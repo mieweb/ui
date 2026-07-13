@@ -139,8 +139,12 @@ export function HeyOzwellToggle({
   const longFiredRef = React.useRef(false);
   React.useEffect(() => () => { if (pressTimer.current) window.clearTimeout(pressTimer.current); }, []);
 
-  const startPress = () => {
+  const startPress = (e: React.PointerEvent) => {
     if (!onOpenSettings) return;
+    // Long-press is a TOUCH affordance; mouse users open settings via right-click (contextmenu). Arming
+    // the timer for a mouse press would open settings on a long left-click hold, which the UX copy
+    // ("right-click / long-press") doesn't intend.
+    if (e.pointerType === 'mouse') return;
     longFiredRef.current = false;
     pressTimer.current = window.setTimeout(() => { longFiredRef.current = true; onOpenSettings(); }, longPressMs);
   };
@@ -172,7 +176,7 @@ export function HeyOzwellToggle({
       title={(loading ? 'Getting Ozwell ready' : active ? 'Ozwell is listening — click to turn off' : 'Activate Ozwell') + loadHint + settingsHint}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
-      onPointerDown={startPress}
+      onPointerDown={(e) => startPress(e)}
       onPointerUp={cancelPress}
       onPointerLeave={cancelPress}
       onPointerCancel={cancelPress}

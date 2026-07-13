@@ -23,6 +23,9 @@ function openDb(): Promise<IDBDatabase> {
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
+    // If another tab holds an open connection during a version upgrade, the open stays "blocked" and
+    // would otherwise hang forever — surface it instead so callers hit their catch/fallback paths.
+    req.onblocked = () => reject(new Error('IndexedDB open blocked (another tab holds an upgrade lock)'));
   });
 }
 
