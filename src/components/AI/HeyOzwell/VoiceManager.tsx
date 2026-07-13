@@ -92,7 +92,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
   };
 
   return (
-    <div className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center p-6 text-center">
+    <div className="bg-background text-foreground flex min-h-full flex-col items-center justify-center p-6 text-center">
       <img
         src={logoSrc ?? '/ozwell/icon.svg'}
         alt=""

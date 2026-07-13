@@ -80,7 +80,7 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
 
   return (
     <div
-      className="bg-background relative flex min-h-screen flex-col items-center justify-center overflow-hidden text-center"
+      className="bg-background relative flex min-h-full flex-col items-center justify-center overflow-hidden text-center"
       style={{
         color: FG,
         // subtle Ozwell-tinted radial over the themeable background (works in light + dark)
