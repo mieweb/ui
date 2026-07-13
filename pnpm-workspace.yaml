@@ -1,0 +1,22 @@
+# pnpm v10 reads overrides and peerDependencyRules from here instead of the
+# package.json "pnpm" field. See https://pnpm.io/settings
+# Keep packages empty so the git-submodule packages (esheet/ychart) are not
+# pulled in as workspace members — this stays a single-package install.
+packages: []
+
+overrides:
+  datavis-ace: "=4.1.0"
+  "esbuild@<0.28.1": "0.28.1"
+  "axios@>=1.0.0 <1.16.0": "1.16.0"
+  "minimatch@>=10.0.0 <10.2.3": "10.2.3"
+  "minimatch@>=9.0.0 <9.0.7": "9.0.7"
+  "flatted@<3.4.2": "3.4.2"
+  "picomatch@>=4.0.0 <4.0.4": "4.0.4"
+  "uuid@<11.1.1": "11.1.1"
+  "dompurify@<3.4.0": "3.4.0"
+
+peerDependencyRules:
+  # @mieweb/datavis bundles a published @mieweb/ui dev snapshot whose peer pins
+  # an older datavis; allow the version this repo actually depends on.
+  allowedVersions:
+    "@mieweb/ui>@mieweb/datavis": "1.2.0"

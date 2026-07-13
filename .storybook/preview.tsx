@@ -14,6 +14,8 @@ import { ozwellBrand } from '../src/brands/ozwell';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
+import { CodeLookup } from '../src/components/CodeLookup';
+import { CodeLookupProvider } from '../src/components/CodeLookup/context';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -243,11 +245,25 @@ const withBrand: Decorator = (Story, context) => {
   );
 };
 
+// Provides an ambient CodeLookup so the healthcare components' default (no
+// explicit `codeLookup` / `renderCodeSearch` prop) demonstrates offline coded
+// search. Stories that inject their own config still win (explicit overrides
+// context); pass `codeLookup={false}` in a story to demo the plain-text opt-out.
+const withCodeLookup: Decorator = (Story, context) => {
+  const locale = (context.globals.locale as string) || 'en';
+  return (
+    <CodeLookupProvider component={CodeLookup} indexUrl="/codify" locale={locale}>
+      <Story />
+    </CodeLookupProvider>
+  );
+};
+
 const preview: Preview = {
   initialGlobals: {
     brand: 'bluehive',
     theme: 'light',
     density: 'standard',
+    locale: 'en',
   },
   globalTypes: {
     brand: {
@@ -292,9 +308,22 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    locale: {
+      name: 'Language',
+      description: 'Locale for locale-aware components (e.g. CodeLookup shards)',
+      toolbar: {
+        icon: 'globe',
+        items: [
+          { value: 'en', title: '🇺🇸 English' },
+          { value: 'es', title: '🇪🇸 Español (sample)' },
+        ],
+        dynamicTitle: true,
+      },
+    },
   },
   parameters: {
     a11y: {
+      test: 'error',
       config: {
         rules: [
           // These rules fire on every story because Storybook renders components
@@ -347,7 +376,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withGitHubSource, withBrand],
+  decorators: [withGitHubSource, withBrand, withCodeLookup],
 };
 
 export default preview;

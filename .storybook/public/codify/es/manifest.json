@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "locale": "es",
+  "builtAt": "2026-07-04T16:05:03.607Z",
+  "shards": [
+    {
+      "domain": "condition",
+      "file": "condition.mcdx",
+      "bytes": 10461,
+      "docCount": 170,
+      "tokenCount": 369
+    },
+    {
+      "domain": "med",
+      "file": "med.mcdx",
+      "bytes": 8018,
+      "docCount": 269,
+      "tokenCount": 146
+    },
+    {
+      "domain": "lab",
+      "file": "lab.mcdx",
+      "bytes": 4844,
+      "docCount": 143,
+      "tokenCount": 107
+    }
+  ]
+}

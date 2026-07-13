@@ -1,6 +1,31 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Avatar, AvatarGroup } from './Avatar';
 
+function avatarDataUri(
+  label: string,
+  background = '#dbeafe',
+  foreground = '#1d4ed8'
+): string {
+  const escapeXml = (value: string) =>
+    value.replace(
+      /[&<>"']/g,
+      (ch) =>
+        (
+          ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+          }) as Record<string, string>
+        )[ch] ?? ch
+    );
+
+  const safeLabel = escapeXml(label);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="${background}"/><text x="50" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="${foreground}">${safeLabel}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 const meta: Meta<typeof Avatar> = {
   title: 'Components/Text & Data Display/Avatar',
   component: Avatar,
@@ -48,7 +73,7 @@ export const Default: Story = {
 
 export const WithImage: Story = {
   args: {
-    src: 'https://i.imgur.com/8Km9tLL.jpg',
+    src: avatarDataUri('SO', '#bae6fd', '#0c4a6e'),
     alt: 'Sea Otter',
     name: 'Sea Otter',
   },
@@ -56,7 +81,7 @@ export const WithImage: Story = {
 
 export const BrokenImage: Story = {
   args: {
-    src: 'https://broken-image-url.com/image.jpg',
+    src: 'data:image/svg+xml;base64,broken',
     alt: 'John Doe',
     name: 'John Doe',
   },
@@ -161,16 +186,13 @@ export const GroupSizes: Story = {
 export const GroupWithImages: Story = {
   render: () => (
     <AvatarGroup max={4}>
+      <Avatar src={avatarDataUri('JD')} name="John Doe" />
       <Avatar
-        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-        name="John Doe"
-      />
-      <Avatar
-        src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face"
+        src={avatarDataUri('JS', '#fde68a', '#92400e')}
         name="Jane Smith"
       />
       <Avatar
-        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
+        src={avatarDataUri('BW', '#dcfce7', '#166534')}
         name="Bob Wilson"
       />
       <Avatar name="Alice Brown" />

@@ -1,0 +1,162 @@
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
+import { CodeLookup, type CodifyDomain } from './CodeLookup';
+import type { CodifyResult } from './engine';
+
+const meta: Meta<typeof CodeLookup> = {
+  title: 'Healthcare/CodeLookup',
+  component: CodeLookup,
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: `
+**Offline medical-code autocomplete (proof of concept)** over the full MedicalCodify_search
+dataset (~770K entries: ICD-10, SNOMED, RxNorm, FDB, LOINC, HCPCS, ICD-10-PCS, CVX,
+Quest/LabCorp orders).
+
+- Pre-built binary index shards are fetched once and searched **entirely in a Web Worker** —
+  no server round-trips per keystroke, works offline.
+- **Every token is a word prefix**: \`con hea fa\` → *Congestive heart failure*.
+- **Aliases** are indexed on the documents at build time: \`chf\`, \`lvhf\`, \`lasix\` ↔
+  \`furosemide\`, \`a1c\` ↔ \`hba1c\`, \`tylenol\` ↔ \`acetaminophen\`…
+- **Typo fallback**: a token that matches nothing retries with edit-distance-1 candidates
+  (\`congestve\`, \`furosemid\`).
+- **Usage priors**: frequently used codes (top-200 meds/diagnoses/procedures sample) rank
+  above rare ones with equal text relevance.
+- **Locales**: shards are built per locale under \`/codify/{locale}/\`; use the 🌐 Language
+  toolbar to switch. The \`es\` set is a curated sample (common diagnoses + med ingredients —
+  try *insuficiencia card*, *hta*, *paracetamol*).
+- **OPFS persistence**: shards are cached in the browser's origin-private file system and
+  refetched only when the served manifest changes.
+
+Shards are committed via git-lfs and served from \`.storybook/public/codify/{locale}/\`;
+to rebuild them, clone the external \`codify\` pipeline repo (private / not yet published)
+into \`packages/codify/\` (gitignored) and run its build scripts — see the CodeLookup README
+for the exact commands.
+
+📖 Full architecture documentation — build pipeline, .mcdx binary format, scoring, priors,
+aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/main/src/components/CodeLookup/README.md).
+        `,
+      },
+    },
+  },
+  tags: ['autodocs'],
+};
+
+export default meta;
+type Story = StoryObj<typeof CodeLookup>;
+
+function Template({
+  domains,
+  searchDomains,
+  locale,
+}: {
+  domains?: CodifyDomain[];
+  searchDomains?: CodifyDomain[];
+  locale?: string;
+}) {
+  const [selected, setSelected] = useState<CodifyResult | null>(null);
+  return (
+    <div className="mx-auto max-w-2xl space-y-3">
+      <CodeLookup
+        indexUrl="/codify"
+        locale={locale}
+        domains={domains}
+        searchDomains={searchDomains}
+        onSelect={setSelected}
+      />
+      {selected && (
+        <pre className="bg-muted overflow-auto rounded-md p-3 text-xs">
+          {JSON.stringify(selected, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+/** All domains (~81 MB of shards — loads in the background, then searches in ms). */
+export const AllDomains: Story = {
+  render: (_args, { globals }) => <Template locale={globals.locale} />,
+};
+
+/** Conditions only (ICD-10 + SNOMED, ~14 MB). Try "con hea fa", "chf", "lvhf".
+ * Results collapse to one row per condition family (ICD-10 code root); → lists
+ * the specific billable codes. Planned: the drill-down will also surface
+ * suggested orders (labs/procedures) for the condition. */
+export const ConditionsOnly: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['condition']} locale={globals.locale} />
+  ),
+};
+
+/** Medications only. Try "lasix" (shows furosemide too) or "tylenol". */
+export const MedsOnly: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['med']} locale={globals.locale} />
+  ),
+};
+
+/** Labs only. Try "a1c" or "cbc". Results collapse per analyte family; → lists
+ * the specimen/property variants. */
+export const LabsOnly: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['lab']} locale={globals.locale} />
+  ),
+};
+
+/** Procedures only (ICD-10-PCS + HCPCS). Try "bypass coronary" or "mri". */
+export const ProceduresOnly: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['procedure']} locale={globals.locale} />
+  ),
+};
+
+/** Immunizations (CVX vaccine codes). Try "covid", "influenza", "mmr". */
+export const Immunizations: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['vaccine']} locale={globals.locale} />
+  ),
+};
+
+/** Allergy entry — searches medications as allergens (drug allergies). Food &
+ * environmental allergens are not in the dataset yet; pair with `onFreeText`
+ * for those. Try "penicillin", "sulfa", "codeine". */
+export const Allergies: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['med']} locale={globals.locale} />
+  ),
+};
+
+/** Occupational medicine — OSHA medical surveillance programs plus DOT/FMCSA,
+ * NFPA 1582 and FAA exams. Searches only the `occupational` domain, but loads
+ * lab/procedure/vaccine shards too so the → drill-down can resolve each
+ * program's **required orders** (curated in codify's order-sets.json — blood
+ * lead & ZPP for 1910.1025, audiometry for 1910.95, HepB vaccine + titer for
+ * 1910.1030…). Programs can join the Assessment tool as concerns, with their
+ * orders linked under them. Try "osha", "lead", "hearing", "silica", "dot". */
+export const MedicalSurveillance: Story = {
+  render: (_args, { globals }) => (
+    <Template
+      domains={['occupational', 'lab', 'procedure', 'vaccine']}
+      searchDomains={['occupational']}
+      locale={globals.locale}
+    />
+  ),
+};
+
+/** CMS eCQM quality measures — the other half of the **health surveillance**
+ * umbrella (occupational programs + quality measures share the programs.json
+ * metadata: kind, periodicity, age/sex gates, satisfying orders). The →
+ * drill-down resolves each measure's orders (mammography for CMS125,
+ * colonoscopy/FIT for CMS130, flu vaccine for CMS147…). Try "breast",
+ * "colorectal", "a1c", "flu". */
+export const QualityMeasures: Story = {
+  render: (_args, { globals }) => (
+    <Template
+      domains={['quality', 'lab', 'procedure', 'vaccine']}
+      searchDomains={['quality']}
+      locale={globals.locale}
+    />
+  ),
+};

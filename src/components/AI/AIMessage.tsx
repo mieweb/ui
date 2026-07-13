@@ -15,6 +15,7 @@ import type {
 } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
 import { SparklesIcon, ChevronIcon } from './icons';
+import { AudioPlayer } from '../AudioPlayer';
 
 // ============================================================================
 // Avatar Component
@@ -265,6 +266,42 @@ function ContentBlock({
           {content.text}
         </code>
       </pre>
+    );
+  }
+
+  if (content.type === 'audio' && content.audioUrl) {
+    // Guard against `javascript:` URLs, mirroring the image/file blocks.
+    if (/^\s*javascript:/i.test(content.audioUrl)) {
+      return null;
+    }
+    return (
+      <AudioPlayer
+        src={content.audioUrl}
+        title={content.text || 'Audio recording'}
+        variant="waveform"
+        showTime
+        showPlaybackRate
+        fallbackDuration={content.duration}
+      />
+    );
+  }
+
+  if (content.type === 'video' && content.videoUrl) {
+    // Guard against `javascript:` URLs, mirroring the audio/image/file blocks.
+    if (/^\s*javascript:/i.test(content.videoUrl)) {
+      return null;
+    }
+    return (
+      <video
+        src={content.videoUrl}
+        controls
+        preload="metadata"
+        aria-label={content.text || 'Video recording'}
+        className="my-1 max-h-80 w-full rounded-lg bg-black"
+      >
+        {/* Recorded clips carry no caption track; present for a11y compliance. */}
+        <track kind="captions" />
+      </video>
     );
   }
 
