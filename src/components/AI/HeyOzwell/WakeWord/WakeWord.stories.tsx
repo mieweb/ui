@@ -81,7 +81,7 @@ function Meter({
         style={{
           width: 34,
           fontSize: 12,
-          color: '#94a3b8',
+          color: '#64748b',
           fontVariantNumeric: 'tabular-nums',
         }}
       >
@@ -135,8 +135,8 @@ function WakeWordDemo({
     status === 'error'
       ? '#dc2626'
       : status === 'listening'
-        ? '#16a34a'
-        : '#d97706';
+        ? '#15803d'
+        : '#b45309';
 
   return (
     <div
@@ -149,7 +149,7 @@ function WakeWordDemo({
         borderRadius: 16,
         boxShadow: '0 1px 3px rgba(0,0,0,.06)',
         padding: 24,
-        outline: flash ? '2px solid #16a34a' : '2px solid transparent',
+        outline: flash ? '2px solid #15803d' : '2px solid transparent',
         transition: 'outline-color .2s',
       }}
     >
@@ -192,7 +192,7 @@ function WakeWordDemo({
             key={n}
             label={LABELS[n]}
             value={st.probs[n] || 0}
-            accent="#16a34a"
+            accent="#15803d"
           />
         ))}
       </div>
@@ -207,7 +207,7 @@ function WakeWordDemo({
         <div
           style={{
             fontSize: 12,
-            color: '#94a3b8',
+            color: '#64748b',
             textTransform: 'uppercase',
             letterSpacing: 0.5,
             marginBottom: 8,
@@ -216,7 +216,7 @@ function WakeWordDemo({
           Detections
         </div>
         {log.length === 0 ? (
-          <div style={{ color: '#cbd5e1', fontSize: 13 }}>
+          <div style={{ color: '#64748b', fontSize: 13 }}>
             none yet — say a phrase
           </div>
         ) : (
@@ -236,7 +236,7 @@ function WakeWordDemo({
                 }}
               >
                 🔔 <b>{LABELS[d.name] || d.name}</b>
-                <span style={{ color: '#94a3b8' }}>{d.t}</span>
+                <span style={{ color: '#64748b' }}>{d.t}</span>
               </span>
             ))}
           </div>
@@ -362,7 +362,7 @@ function MicTest() {
           <div
             style={{
               fontSize: 12,
-              color: '#94a3b8',
+              color: '#64748b',
               marginTop: 8,
               fontVariantNumeric: 'tabular-nums',
             }}

@@ -236,7 +236,7 @@ function TogglePlaygroundDemo(args: HeyOzwellToggleProps) {
       <span
         style={{
           fontSize: 12,
-          color: pinged ? '#0BA0E0' : '#94a3b8',
+          color: pinged ? '#0BA0E0' : '#64748b',
           transition: 'color .2s',
         }}
       >
@@ -330,7 +330,7 @@ function Labelled({
       <span
         style={{
           fontSize: 12,
-          color: '#94a3b8',
+          color: '#64748b',
           textAlign: 'center',
           maxWidth: 90,
         }}

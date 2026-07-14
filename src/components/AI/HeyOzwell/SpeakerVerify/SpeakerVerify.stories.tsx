@@ -315,7 +315,7 @@ function SpeakerVerifyDemo({
     borderRadius: '50%',
     marginRight: 4,
     background:
-      state === 'pass' ? '#16a34a' : state === 'fail' ? '#dc2626' : '#9ca3af',
+      state === 'pass' ? '#15803d' : state === 'fail' ? '#dc2626' : '#6b7280',
   });
   const lbl = (n: string) => PHRASES.find((p) => p.key === n)?.label || n;
 
@@ -329,7 +329,7 @@ function SpeakerVerifyDemo({
     >
       <h3 style={{ marginBottom: 2 }}>
         Two-gate verify{' '}
-        <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 400 }}>
+        <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 400 }}>
           · dev diagnostic
         </span>
       </h3>
@@ -346,8 +346,8 @@ function SpeakerVerifyDemo({
             sv.error || wake.error
               ? '#dc2626'
               : bothReady
-                ? '#16a34a'
-                : '#d97706',
+                ? '#15803d'
+                : '#b45309',
           marginBottom: 10,
         }}
       >
@@ -443,7 +443,7 @@ function SpeakerVerifyDemo({
       <div style={{ font: '13px monospace', color: '#475569', minHeight: 18 }}>
         {status}
       </div>
-      <div style={{ font: '11px monospace', color: '#94a3b8' }}>
+      <div style={{ font: '11px monospace', color: '#64748b' }}>
         WHAT prints stored — hey ozwell:{' '}
         {wake.hasVoiceprint('hey-ozwell') ? '✓' : '✗'} · ozwell I’m done:{' '}
         {wake.hasVoiceprint("ozwell-i'm-done") ? '✓' : '✗'}
@@ -455,7 +455,7 @@ function SpeakerVerifyDemo({
         <div
           style={{
             fontSize: 11,
-            color: '#94a3b8',
+            color: '#64748b',
             textTransform: 'uppercase',
             letterSpacing: 0.5,
             marginBottom: 6,
@@ -464,7 +464,7 @@ function SpeakerVerifyDemo({
           Live gate readout
         </div>
         {log.length === 0 ? (
-          <div style={{ color: '#cbd5e1', fontSize: 13 }}>
+          <div style={{ color: '#64748b', fontSize: 13 }}>
             {enrolled ? 'say a phrase…' : 'enroll first, then talk'}
           </div>
         ) : (
