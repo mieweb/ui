@@ -632,19 +632,28 @@ export async function transcribeGate(
  *  "I am done") including the bare word alone. Bare "as well" is NOT stripped (too common) unless joined
  *  to "i'm done". */
 export function stripStopPhrase(text: string): string {
-  // All whitespace quantifiers are BOUNDED ({0,4}/{1,4}) — with unbounded \s*/\s+ around the optional
-  // groups, a transcript like "all\t\t\t…" makes the engine rescan the same whitespace run at every split
-  // (polynomial backtracking; CodeQL js/polynomial-redos). Words in a transcript are never separated by
-  // more than a couple of spaces, so the bound changes nothing real — it just caps the backtracking.
+  // All whitespace quantifiers are BOUNDED ({0,4}/{1,4}) so backtracking through the optional groups
+  // stays constant — ReDoS hardening (transcript words are never separated by more than a couple of
+  // spaces, so behavior is unchanged). The trailing-junk trim below uses a linear char walk for the
+  // same reason (see trimTrailingPunct — the actual CodeQL js/polynomial-redos finding).
   const tail =
-    /(?:\b(?:oz\s{0,4}well|all(?:['’]?s|\s{1,4}was)?\s{0,4}well|as\s{0,4}well|also|oswald)\b[\s,]{0,6}i(?:['’]?m|\s{1,4}am)\s{1,4}done\b|\b(?:oz\s{0,4}well|all(?:['’]?s|\s{1,4}was)?\s{0,4}well|oswald)\b|\bi(?:['’]?m|\s{1,4}am)\s{1,4}done\b|\b(?:that\s{1,4}was\s{1,4}|was\s{1,4})?well\s{1,4}done\b|\bthat['’]?s?\s{1,4}(?:was\s{1,4})?all\b|\bthank(?:s|\s{1,4}you)(?:\s{1,4}for\s{1,4}watching)?\b|\bbye\b)[\s.,!?-]*$/i;
+    /(?:\b(?:oz\s{0,4}well|all(?:['’]?s|\s{1,4}was)?\s{0,4}well|as\s{0,4}well|also|oswald)\b[\s,]{0,6}i(?:['’]?m|\s{1,4}am)\s{1,4}done\b|\b(?:oz\s{0,4}well|all(?:['’]?s|\s{1,4}was)?\s{0,4}well|oswald)\b|\bi(?:['’]?m|\s{1,4}am)\s{1,4}done\b|\b(?:that\s{1,4}was\s{1,4}|was\s{1,4})?well\s{1,4}done\b|\bthat['’]?s?\s{1,4}(?:was\s{1,4})?all\b|\bthank(?:s|\s{1,4}you)(?:\s{1,4}for\s{1,4}watching)?\b|\bbye\b)[\s.,!?-]{0,24}$/i;
   let prev: string | null = null;
   let t = text;
   while (t !== prev && t) {
     prev = t;
-    t = t.replace(tail, '').replace(/[\s.,!?-]+$/, '');
+    t = trimTrailingPunct(t.replace(tail, ''));
   }
   return t.trim();
+}
+
+/** Strip trailing whitespace/punctuation with a linear char walk. The regex form `/[\s.,!?-]+$/` restarts
+ *  its scan at every position of a long trailing run (quadratic on adversarial input — the CodeQL
+ *  js/polynomial-redos finding on stripStopPhrase). Testing one char at a time can't backtrack. */
+function trimTrailingPunct(s: string): string {
+  let end = s.length;
+  while (end > 0 && /[\s.,!?-]/.test(s[end - 1])) end--;
+  return end === s.length ? s : s.slice(0, end);
 }
 
 /** True if a transcript ENDS with a clear "done" stop ("…done" / "…I'm done" / "…all done" / "…well done"),
@@ -653,7 +662,7 @@ export function stripStopPhrase(text: string): string {
  *  match. Favors precision: a missed real stop just means "say it again"; a false stop loses dictation. */
 export function endsWithDone(text: string): boolean {
   // Whitespace bounded for the same polynomial-backtracking reason as stripStopPhrase's tail regex.
-  return /\b(?:i(?:['’]?m|\s{1,4}am)\s{1,4}|all\s{1,4}|well\s{1,4})?done\b[\s.,!?-]*$/i.test(
+  return /\b(?:i(?:['’]?m|\s{1,4}am)\s{1,4}|all\s{1,4}|well\s{1,4})?done\b[\s.,!?-]{0,24}$/i.test(
     text
   );
 }
