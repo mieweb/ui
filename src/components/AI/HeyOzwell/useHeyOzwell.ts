@@ -103,7 +103,9 @@ export interface HeyOzwellToggleBindings {
   active: boolean;
   level: number;
   loading: boolean;
-  loadProgress: number;
+  /** Determinate ring fill 0..1. Omitted (undefined) during the live-detector cold-start, where there's
+   *  no byte progress to show — the ring falls back to an indeterminate spin. */
+  loadProgress?: number;
   warmActive: boolean;
   warmProgress: number;
   loadLabel?: string;
@@ -164,14 +166,24 @@ export interface UseHeyOzwellResult {
  * we attach a second analyser to `getStream()` rather than opening another `getUserMedia` (which
  * would silence the detector). Mirrors the Voice Setup pulse.
  */
-function useRoomLevel(getStream: () => MediaStream | null, ready: boolean): number {
+function useRoomLevel(
+  getStream: () => MediaStream | null,
+  ready: boolean
+): { level: number; listening: boolean } {
   const [level, setLevel] = React.useState(0);
+  // `listening` = the mic meter is actually LIVE: the stream is acquired and the analyser loop is running,
+  // so the octopus can pulse and the user can talk. This is strictly LATER than `ready` (the wake MODEL
+  // being loaded) — after ready we still have to acquire the stream (which can retry) and build the
+  // AudioContext/analyser. Gating the "ready" ring on this (not on `ready`) removes the gap where the ring
+  // had completed but nothing was pulsing yet.
+  const [listening, setListening] = React.useState(false);
   const getStreamRef = React.useRef(getStream);
   getStreamRef.current = getStream;
 
   React.useEffect(() => {
     if (!ready) {
       setLevel(0);
+      setListening(false);
       return;
     }
     let raf = 0;
@@ -197,6 +209,7 @@ function useRoomLevel(getStream: () => MediaStream | null, ready: boolean): numb
       an.fftSize = 512;
       src.connect(an);
       const data = new Float32Array(an.fftSize);
+      setListening(true); // analyser attached + loop about to run → mic is live, octopus can pulse NOW
       const tick = () => {
         an.getFloatTimeDomainData(data);
         let peak = 0;
@@ -215,10 +228,11 @@ function useRoomLevel(getStream: () => MediaStream | null, ready: boolean): numb
       cancelled = true;
       if (raf) cancelAnimationFrame(raf);
       void ctx?.close();
+      setListening(false);
     };
   }, [ready]);
 
-  return level;
+  return { level, listening };
 }
 
 export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellResult {
@@ -528,7 +542,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     },
   });
   wakeRef.current = wake;
-  const level = useRoomLevel(wake.getStream, wake.ready);
+  const { level, listening } = useRoomLevel(wake.getStream, wake.ready);
 
   // Doctor-only gate plumbing: once the detector is listening, restore enrolled WHAT prints into it and
   // open the rolling recorder (2nd consumer of the shared stream) so the WHO check has audio to verify.
@@ -557,8 +571,26 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
 
   // Header octopus load state, split into two rings so the slow transcription warm-up never makes
   // the octopus look unavailable (primary ring = wake pre-warm; secondary arc = transcription).
-  const ozLoading = wakeWarm.active;
-  const ozProgress = wakeWarm.done ? 1 : wakeWarm.progress;
+  // The primary ring stays up until the octopus can ACTUALLY be talked to — i.e. the mic meter is live and
+  // pulsing (`listening`), NOT merely when the wake model finished loading (`wake.ready`). Two milestones:
+  //   1) mount-time file prefetch (wakeWarm) — determinate, we have byte progress.
+  //   2) after turn-on, the LIVE detector cold-starts: getUserMedia + ONNX session + first inference
+  //      (→ wake.ready), and THEN useRoomLevel acquires the stream + builds the analyser (→ listening).
+  // Gating on `listening` (not `wake.ready`) closes the gap the user hit: the ring used to complete when the
+  // model was ready but the pulse hadn't started yet. Now the green completion coincides exactly with the
+  // octopus going live and pulsing — "ring done" == "you can talk now". No progress signal during (2), so
+  // the ring spins (synthetic sweep in the toggle).
+  // Latch: once the mic has gone live (`listening`) during this activation, keep the ring COMPLETE. Don't
+  // let a transient `listening` flip (e.g. the wake detector re-initialising, or the AudioContext cycling)
+  // re-open the ring and flicker it back to a loading state — that flicker was the "glitching" the user saw.
+  // Reset when Ozwell is turned off.
+  const hasListenedRef = React.useRef(false);
+  React.useEffect(() => { if (listening) hasListenedRef.current = true; }, [listening]);
+  React.useEffect(() => { if (!active) hasListenedRef.current = false; }, [active]);
+
+  const coldStarting = active && !listening && !hasListenedRef.current;
+  const ozLoading = wakeWarm.active || coldStarting;
+  const ozProgress = coldStarting ? undefined : wakeWarm.done ? 1 : wakeWarm.progress;
   const ozWarm = dictLoad.active && !dictLoad.done;
   const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress); // hold at 99 until compile done
   const ozLoadLabel = ozWarm
@@ -582,8 +614,9 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     void warmWakeModels(assetBase);
   }, [assetBase]);
 
-  // Warm the heavy (~1.3 GB) transcription model only once Ozwell is turned ON — in the background,
-  // OFF the critical wake-start path. Activation must never be gated on the transcription download.
+  // Warm the heavy (~1.3 GB) transcription model once Ozwell is turned ON — in the background, so both the
+  // wake ring and the transcription arc start loading right away. Activation is never gated on it; the
+  // recorded audio buffers and catches up once the model is ready.
   React.useEffect(() => {
     if (active) warmWhisper();
   }, [active]);

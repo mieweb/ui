@@ -18,7 +18,8 @@ import { cn } from '../../../utils/cn';
 
 /** Ozwell octopus blue — the `ozwell` brand token (themeable; falls back to the octopus blue). */
 const OZ = 'var(--mieweb-ozwell, #0BA0E0)';
-/** Ready-green — the design-system success token; flashes the moment loading completes. */
+/** Ready-green — the design-system success token; the inner ring completes to this the moment wake
+ *  detection is ready (you can talk NOW — before Whisper finishes). */
 const READY_GREEN = 'var(--mieweb-success, #10B981)';
 /** Ozwell accent at `pct` opacity (glows/shadows) — themeable + dark-mode safe via color-mix. */
 const ozA = (pct: number) => `color-mix(in srgb, ${OZ} ${pct}%, transparent)`;
@@ -91,13 +92,14 @@ export function HeyOzwellToggle({
   const glowOpacity = active ? 0.4 + Math.min(0.55, lv * 4) : 0;
   const glowScale = 1 + Math.min(0.7, lv * 3);
 
-  // Flash a full green ring for a beat when loading finishes, so the user gets a clear "ready" signal.
+  // Complete the ring (full circle) for a brief beat when loading finishes, so "ready" is legible before
+  // the ring gives way to the audio-reactive octopus.
   const [doneFlash, setDoneFlash] = React.useState(false);
   const wasLoading = React.useRef(loading);
   React.useEffect(() => {
     if (wasLoading.current && !loading) {
       setDoneFlash(true);
-      const t = window.setTimeout(() => setDoneFlash(false), 1500);
+      const t = window.setTimeout(() => setDoneFlash(false), 700);
       wasLoading.current = loading;
       return () => window.clearTimeout(t);
     }
@@ -125,6 +127,20 @@ export function HeyOzwellToggle({
   const ringC = 2 * Math.PI * ringR;
   const hasProgress = typeof loadProgress === 'number';
   const p = hasProgress ? Math.max(0, Math.min(1, loadProgress as number)) : 0;
+
+  // Cold-start sweep: when the ring is up but there's no real byte progress (the live detector's
+  // getUserMedia + ONNX session + first inference report none), drive a synthetic determinate fill so the
+  // ring VISIBLY travels. It eases toward 0.82 and STOPS there — deliberately leaving an open gap ("white
+  // space") so the circle never looks finished until it truly is. Only `loading→false` (mic live +
+  // pulsing) closes the gap to a full circle. See the ring render below.
+  const [synthP, setSynthP] = React.useState(0);
+  React.useEffect(() => {
+    if (!(loading && !hasProgress)) { setSynthP(0); return; }
+    setSynthP(0.08); // start visibly non-zero so the ring appears at once
+    const id = window.setInterval(() => setSynthP((s) => s + (0.82 - s) * 0.12), 60);
+    return () => window.clearInterval(id);
+  }, [loading, hasProgress]);
+  const ringProgress = hasProgress ? p : synthP;
 
   // Secondary arc — thinner + muted, sits just OUTSIDE the primary, tracks the background transcription warm.
   const warmBox = size + 12; // inset -6
@@ -189,43 +205,35 @@ export function HeyOzwellToggle({
       )}
       style={{ width: size, height: size }}
     >
-      {/* Loading ring — a determinate fill while models load, then a green "ready" flash.
-          Falls back to an indeterminate spin if no progress is supplied. */}
-      {loading && hasProgress && (
+      {/* Listening ring — ONE continuous GREEN ring (never blue). While starting up it fills clockwise but
+          DELIBERATELY stops short (ringFill capped < 1) so an open gap / "white space" stays visible — the
+          circle must never look finished until the mic is actually live and pulsing. The instant that lands
+          (loading→false) it closes the gap to a full circle, holds for the completion beat, then fades as
+          the octopus takes over. Rendered only while `active`, and it stays mounted so the fill + fade
+          animate smoothly instead of hard-swapping elements (which is what looked like a glitch). */}
+      {active && (
         <svg
           aria-hidden="true"
           width={ringBox} height={ringBox} viewBox={`0 0 ${ringBox} ${ringBox}`}
-          style={{ position: 'absolute', inset: -3, pointerEvents: 'none', transform: 'rotate(-90deg)' }}
+          style={{
+            position: 'absolute', inset: -3, pointerEvents: 'none', transform: 'rotate(-90deg)',
+            opacity: loading || doneFlash ? 1 : 0, transition: 'opacity .5s ease',
+          }}
         >
+          {/* faint track = the visible "white space" the arc fills into */}
           <circle
             cx={ringBox / 2} cy={ringBox / 2} r={ringR}
-            fill="none" stroke={OZ} strokeWidth={ringStroke} strokeLinecap="round"
-            strokeDasharray={ringC} strokeDashoffset={ringC * (1 - p)}
-            style={{ transition: 'stroke-dashoffset .2s linear' }}
+            fill="none" stroke={READY_GREEN} strokeWidth={ringStroke}
+            style={{ opacity: 0.15 }}
+          />
+          <circle
+            cx={ringBox / 2} cy={ringBox / 2} r={ringR}
+            fill="none" stroke={READY_GREEN} strokeWidth={ringStroke} strokeLinecap="round"
+            strokeDasharray={ringC}
+            strokeDashoffset={ringC * (1 - (loading ? Math.min(ringProgress, 0.85) : 1))}
+            style={{ transition: 'stroke-dashoffset .3s ease' }}
           />
         </svg>
-      )}
-      {loading && !hasProgress && (
-        <span
-          aria-hidden="true"
-          className="animate-spin"
-          style={{
-            position: 'absolute', inset: -3, borderRadius: '50%',
-            border: '2px solid transparent', borderTopColor: OZ,
-            pointerEvents: 'none',
-          }}
-        />
-      )}
-      {/* Ready flash — full green ring for a beat once the (wake) loading completes. */}
-      {!loading && doneFlash && (
-        <span
-          aria-hidden="true"
-          style={{
-            position: 'absolute', inset: -3, borderRadius: '50%',
-            border: `2.5px solid ${READY_GREEN}`, pointerEvents: 'none',
-            opacity: 0.95, transition: 'opacity .4s ease',
-          }}
-        />
       )}
       {/* Secondary arc — thin + muted, OUTSIDE the primary ring. Background transcription warm only;
           the octopus is already usable, so this never implies "not ready". */}
@@ -266,18 +274,34 @@ export function HeyOzwellToggle({
           transition: 'opacity .15s linear', pointerEvents: 'none',
         }}
       />
-      <img
-        src={logoSrc}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
+      {/* One-shot "wake up" pop: a single scale bounce the instant wake detection is ready (doneFlash), so
+          the octopus visibly comes alive AT wake-ready — before Whisper — even in a silent room where the
+          volume vibration has nothing to react to yet. The wrapper owns the pop transform; the img owns the
+          volume scale, so the two compose without fighting. Honors prefers-reduced-motion. */}
+      <style>{`
+        @keyframes heyozwell-wake { 0%{transform:scale(1)} 35%{transform:scale(1.18)} 70%{transform:scale(0.97)} 100%{transform:scale(1)} }
+        @media (prefers-reduced-motion: reduce){ [data-oz-wake]{animation:none!important} }
+      `}</style>
+      <span
+        data-oz-wake={doneFlash ? '' : undefined}
         style={{
-          position: 'relative', width: size, height: size, userSelect: 'none',
-          transform: `scale(${octoScale.toFixed(3)})`,
-          transition: 'transform .08s linear, filter .3s ease',
-          filter: active ? `drop-shadow(0 2px 8px ${ozA(40)})` : 'grayscale(1) opacity(0.45)',
+          position: 'relative', display: 'inline-flex',
+          animation: doneFlash ? 'heyozwell-wake .5s ease-out' : undefined,
         }}
-      />
+      >
+        <img
+          src={logoSrc}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          style={{
+            width: size, height: size, userSelect: 'none',
+            transform: `scale(${octoScale.toFixed(3)})`,
+            transition: 'transform .08s linear, filter .3s ease',
+            filter: active ? `drop-shadow(0 2px 8px ${ozA(40)})` : 'grayscale(1) opacity(0.45)',
+          }}
+        />
+      </span>
     </button>
   );
 }
