@@ -632,8 +632,12 @@ export async function transcribeGate(
  *  "I am done") including the bare word alone. Bare "as well" is NOT stripped (too common) unless joined
  *  to "i'm done". */
 export function stripStopPhrase(text: string): string {
+  // All whitespace quantifiers are BOUNDED ({0,4}/{1,4}) — with unbounded \s*/\s+ around the optional
+  // groups, a transcript like "all\t\t\t…" makes the engine rescan the same whitespace run at every split
+  // (polynomial backtracking; CodeQL js/polynomial-redos). Words in a transcript are never separated by
+  // more than a couple of spaces, so the bound changes nothing real — it just caps the backtracking.
   const tail =
-    /(?:\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|as\s*well|also|oswald)\b[\s,]*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
+    /(?:\b(?:oz\s{0,4}well|all(?:['’]?s|\s{1,4}was)?\s{0,4}well|as\s{0,4}well|also|oswald)\b[\s,]{0,6}i(?:['’]?m|\s{1,4}am)\s{1,4}done\b|\b(?:oz\s{0,4}well|all(?:['’]?s|\s{1,4}was)?\s{0,4}well|oswald)\b|\bi(?:['’]?m|\s{1,4}am)\s{1,4}done\b|\b(?:that\s{1,4}was\s{1,4}|was\s{1,4})?well\s{1,4}done\b|\bthat['’]?s?\s{1,4}(?:was\s{1,4})?all\b|\bthank(?:s|\s{1,4}you)(?:\s{1,4}for\s{1,4}watching)?\b|\bbye\b)[\s.,!?-]*$/i;
   let prev: string | null = null;
   let t = text;
   while (t !== prev && t) {
@@ -648,7 +652,8 @@ export function stripStopPhrase(text: string): string {
  *  NOT fire on a bare "ozwell" or a mid-sentence "done" — "we're almost done here" ends on "here", so no
  *  match. Favors precision: a missed real stop just means "say it again"; a false stop loses dictation. */
 export function endsWithDone(text: string): boolean {
-  return /\b(?:i(?:['’]?m|\s+am)\s+|all\s+|well\s+)?done\b[\s.,!?-]*$/i.test(
+  // Whitespace bounded for the same polynomial-backtracking reason as stripStopPhrase's tail regex.
+  return /\b(?:i(?:['’]?m|\s{1,4}am)\s{1,4}|all\s{1,4}|well\s{1,4})?done\b[\s.,!?-]*$/i.test(
     text
   );
 }

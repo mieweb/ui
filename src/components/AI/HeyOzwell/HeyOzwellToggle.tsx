@@ -15,6 +15,7 @@
 
 import * as React from 'react';
 import { cn } from '../../../utils/cn';
+import { OzwellLogo } from './OzwellLogo';
 
 /** Ozwell octopus blue — the `ozwell` brand token (themeable; falls back to the octopus blue). */
 const OZ = 'var(--mieweb-ozwell, #0BA0E0)';
@@ -365,14 +366,11 @@ export function HeyOzwellToggle({
           animation: doneFlash ? 'heyozwell-wake .5s ease-out' : undefined,
         }}
       >
-        <img
+        <OzwellLogo
           src={logoSrc}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
+          width={size}
+          height={size}
           style={{
-            width: size,
-            height: size,
             userSelect: 'none',
             transform: `scale(${octoScale.toFixed(3)})`,
             transition: 'transform .08s linear, filter .3s ease',

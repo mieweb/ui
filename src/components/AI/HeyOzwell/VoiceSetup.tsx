@@ -12,6 +12,7 @@
 import * as React from 'react';
 import { Button } from '../../Button';
 import { useVoiceSetup } from './useVoiceSetup';
+import { OzwellLogo } from './OzwellLogo';
 
 const OZ = 'var(--mieweb-ozwell, #0BA0E0)';
 const FG = 'var(--mieweb-foreground, hsl(222.2 84% 4.9%))';
@@ -189,14 +190,11 @@ export function VoiceSetup({
                 : undefined
             }
           />
-          <img
+          <OzwellLogo
             src={logoSrc}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
+            width={120}
+            height={122}
             style={{
-              width: 120,
-              height: 122,
               filter: `drop-shadow(0 8px 24px ${ozA(33)})`,
               transform: `scale(${octoScale.toFixed(3)})`,
               transition: 'transform .08s linear',

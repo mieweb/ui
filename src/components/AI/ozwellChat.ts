@@ -55,14 +55,28 @@ function readWindowGlobal(): Partial<OzwellConfig> {
   };
   return get(window) || get(window.parent) || get(window.top) || {};
 }
+// Copy only safe, own keys from parsed/external config (drop __proto__/constructor/prototype). Object
+// spread alone can't pollute Object.prototype (CreateDataProperty semantics), but the rest of this PR's
+// config parsers (voiceprintStore, diarize) filter dangerous keys — keep this one consistent.
+function sanitizeConfig(o: unknown): Partial<OzwellConfig> {
+  if (!o || typeof o !== 'object') return {};
+  const out: Record<string, unknown> = {};
+  for (const k of Object.keys(o)) {
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+    out[k] = (o as Record<string, unknown>)[k];
+  }
+  return out as Partial<OzwellConfig>;
+}
 function readRaw(): Partial<OzwellConfig> {
   let stored: Partial<OzwellConfig> = {};
   try {
-    stored = JSON.parse(localStorage.getItem('ozwellConfig') || '{}');
+    stored = sanitizeConfig(
+      JSON.parse(localStorage.getItem('ozwellConfig') || '{}')
+    );
   } catch {
     /* ignore bad JSON */
   }
-  return { ...stored, ...readWindowGlobal() }; // window override wins over localStorage
+  return { ...stored, ...sanitizeConfig(readWindowGlobal()) }; // window override wins over localStorage
 }
 
 /** Resolve the effective config from runtime sources + defaults. */

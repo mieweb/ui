@@ -18,6 +18,7 @@ import { AlertDialog } from '../../AlertDialog';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
 import { clearWhatPrints } from '../voiceprintStore';
 import { VoiceSetup } from './VoiceSetup';
+import { OzwellLogo, DEFAULT_LOGO_SRC } from './OzwellLogo';
 
 const OZ = 'var(--mieweb-ozwell, #0BA0E0)';
 /** Ozwell-accent fill for <Button> (overrides the primary variant's bg/text via tailwind-merge). */
@@ -98,12 +99,11 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
 
   return (
     <div className="bg-background text-foreground flex min-h-full flex-col items-center justify-center p-6 text-center">
-      <img
-        src={logoSrc ?? '/ozwell/icon.svg'}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="mb-[18px] h-[86px] w-[84px]"
+      <OzwellLogo
+        src={logoSrc ?? DEFAULT_LOGO_SRC}
+        width={84}
+        height={86}
+        className="mb-[18px]"
         style={{
           filter: `drop-shadow(0 8px 24px color-mix(in srgb, ${OZ} 33%, transparent))`,
         }}

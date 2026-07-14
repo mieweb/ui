@@ -311,6 +311,34 @@ export function useWakeWord(
 
         console.log('[wake] models ready');
         setState((s) => ({ ...s, ready: true }));
+
+        // Mic watchdog (Copilot review): models-ready is NOT mic-ready — the detector's getUserMedia
+        // happens async inside HeyBuddy, so a permission denial isn't caught by this try/catch and
+        // `ready` above would otherwise report a listener that can't hear. If no mic stream (and no
+        // processed audio) materializes within ~8s, surface an error instead of a silent dead octopus.
+        const t0 = Date.now();
+        const watchdog = window.setInterval(() => {
+          if (cancelled) {
+            window.clearInterval(watchdog);
+            return;
+          }
+          if (hbRef.current?.batcher?.stream) {
+            window.clearInterval(watchdog); // mic is live — all good
+            return;
+          }
+          if (Date.now() - t0 > 8000) {
+            window.clearInterval(watchdog);
+            setState((s) =>
+              s.error
+                ? s
+                : {
+                    ...s,
+                    error:
+                      'Microphone unavailable — check the mic permission for this site.',
+                  }
+            );
+          }
+        }, 500);
       } catch (e) {
         if (!cancelled)
           setState((s) => ({

@@ -59,6 +59,8 @@ export function OzwellSettingsMenu({
   onManageVoices,
 }: OzwellSettingsMenuProps) {
   const [modelsOpen, setModelsOpen] = React.useState(false);
+  // Ties aria-expanded to the disclosure's content region for screen readers (aria-controls).
+  const modelsRegionId = React.useId();
   const scrollRef = React.useRef<HTMLDivElement>(null);
   // Show a bottom fade while there's more to scroll (the menu is height-capped so the expanded "Models &
   // versions" list is otherwise cut off with no hint). Recompute on scroll + when the content grows.
@@ -116,6 +118,7 @@ export function OzwellSettingsMenu({
           type="button"
           role="menuitem"
           aria-expanded={modelsOpen}
+          aria-controls={modelsRegionId}
           onClick={() => setModelsOpen((v) => !v)}
           className={itemClasses}
         >
@@ -131,7 +134,11 @@ export function OzwellSettingsMenu({
             ▸
           </span>
         </button>
-        {modelsOpen && <ModelInfoList status={modelStatus} />}
+        {modelsOpen && (
+          <div id={modelsRegionId}>
+            <ModelInfoList status={modelStatus} />
+          </div>
+        )}
       </div>
       {/* bottom fade — only while more content sits below the fold (cleared once scrolled to the end) */}
       <div
