@@ -73,7 +73,10 @@ export {
   type HeyOzwellToggleBindings,
   type HeyOzwellChatBindings,
 } from './HeyOzwell/useHeyOzwell';
-export { ModelInfoList, type ModelInfoListProps } from './HeyOzwell/ModelInfoList';
+export {
+  ModelInfoList,
+  type ModelInfoListProps,
+} from './HeyOzwell/ModelInfoList';
 export {
   MODEL_MANIFEST,
   type ModelInfo,
@@ -83,7 +86,10 @@ export {
 
 // Hands-free chat surface + voice enrollment (full inline-chat composition; enrollment builds the
 // WHO + WHAT prints). Both build on the primitives below.
-export { HandsFreeChat, type HandsFreeChatProps } from './HeyOzwell/HandsFreeChat';
+export {
+  HandsFreeChat,
+  type HandsFreeChatProps,
+} from './HeyOzwell/HandsFreeChat';
 export { VoiceSetup, type VoiceSetupProps } from './HeyOzwell/VoiceSetup';
 export { VoiceManager, type VoiceManagerProps } from './HeyOzwell/VoiceManager';
 export {
@@ -177,7 +183,11 @@ export {
   saveWhatPrints,
   clearWhatPrints,
 } from './voiceprintStore';
-export { openRollingRecorder, chime, type RollingRecorder } from './HeyOzwell/audio';
+export {
+  openRollingRecorder,
+  chime,
+  type RollingRecorder,
+} from './HeyOzwell/audio';
 
 // AI Chat Modal
 export {

@@ -53,7 +53,9 @@ export interface UseVisitScribeResult {
 
 const LIVE_CHUNK_SECONDS = 7; // transcribe a new window once this much fresh audio has accumulated
 
-export function useVisitScribe(options: UseVisitScribeOptions = {}): UseVisitScribeResult {
+export function useVisitScribe(
+  options: UseVisitScribeOptions = {}
+): UseVisitScribeResult {
   const { liveTranscript = false, ...diarOptions } = options;
   const diar = useDiarization(diarOptions);
   const diarRef = React.useRef(diar);
@@ -121,7 +123,9 @@ export function useVisitScribe(options: UseVisitScribeOptions = {}): UseVisitScr
     rec.onstop = () => {
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
-      const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' });
+      const blob = new Blob(chunksRef.current, {
+        type: rec.mimeType || 'audio/webm',
+      });
       // Empty take (immediate stop) — nothing to diarize.
       if (blob.size > 0) {
         lastBlobRef.current = blob; // keep it so settings can be re-applied without re-recording
@@ -135,7 +139,10 @@ export function useVisitScribe(options: UseVisitScribeOptions = {}): UseVisitScr
     startedAtRef.current = Date.now();
     setElapsedMs(0);
     clearTimer();
-    timerRef.current = window.setInterval(() => setElapsedMs(Date.now() - startedAtRef.current), 250);
+    timerRef.current = window.setInterval(
+      () => setElapsedMs(Date.now() - startedAtRef.current),
+      250
+    );
 
     // Live transcript: accumulate raw PCM off the SAME stream (2nd consumer, not a 2nd getUserMedia) and
     // transcribe each new ~7s window as it fills, appending. The accumulator is opened LAZILY — only while
@@ -168,7 +175,8 @@ export function useVisitScribe(options: UseVisitScribeOptions = {}): UseVisitScr
       liveBusyRef.current = true;
       try {
         const text = (await transcribeSamples(window, acc.sampleRate)).trim();
-        if (text && liveRecRef.current) setLiveText((prev) => (prev ? `${prev} ${text}` : text));
+        if (text && liveRecRef.current)
+          setLiveText((prev) => (prev ? `${prev} ${text}` : text));
       } catch {
         /* transient — the final diarized pass still covers this audio */
       } finally {

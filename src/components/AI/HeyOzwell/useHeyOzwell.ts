@@ -43,7 +43,10 @@ export type HeyOzwellPhase = 'listening' | 'dictating' | 'transcribing';
 // Per-phrase WHAT (phrase-print cosine) gate. Stop is a touch looser (0.75): the run-on
 // "…ozwell I'm done" at the dictation tail embeds slightly differently from the isolated enrolled
 // one, so it lands lower than the clean start phrase. Mirrors the hands-free gate.
-const WHAT_THRESHOLDS: Record<string, number> = { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.75 };
+const WHAT_THRESHOLDS: Record<string, number> = {
+  'hey-ozwell': 0.8,
+  "ozwell-i'm-done": 0.75,
+};
 const whatThr = (name: string) => WHAT_THRESHOLDS[name] ?? 0.8;
 
 // The wake detector's run-length underestimates the full phrase (it only counts frames where the phrase was
@@ -51,7 +54,8 @@ const whatThr = (name: string) => WHAT_THRESHOLDS[name] ?? 0.8;
 // the audio. Overridable via `window.__ozwellStopLeadIn` for tuning on real speech.
 function stopTrimLeadIn(): number {
   if (typeof window === 'undefined') return 0.35;
-  const v = (window as unknown as { __ozwellStopLeadIn?: number }).__ozwellStopLeadIn;
+  const v = (window as unknown as { __ozwellStopLeadIn?: number })
+    .__ozwellStopLeadIn;
   return typeof v === 'number' ? v : 0.35;
 }
 
@@ -235,7 +239,9 @@ function useRoomLevel(
   return { level, listening };
 }
 
-export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellResult {
+export function useHeyOzwell(
+  options: UseHeyOzwellOptions = {}
+): UseHeyOzwellResult {
   const {
     autoDictateOnWake = false,
     closeChatOnDone = false,
@@ -257,7 +263,10 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   const [generating, setGenerating] = React.useState(false);
   const [phase, setPhase] = React.useState<HeyOzwellPhase>('listening');
   const [typed, setTyped] = React.useState(''); // controlled composer text, so live caption can fill the box
-  const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
+  const dictLoad = React.useSyncExternalStore(
+    subscribeDictationLoad,
+    getDictationLoad
+  ); // transcription model load
   const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
 
   const counterRef = React.useRef(0);
@@ -312,7 +321,10 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
 
   // Conversation mode: diarize the dictation clip on send. Loads the speaker runtime only when on
   // (shares the window.SpeakerVerify singleton with the doctor gate, so no double-load).
-  const diar = useDiarization({ ...diarizationOptions, enabled: conversationMode });
+  const diar = useDiarization({
+    ...diarizationOptions,
+    enabled: conversationMode,
+  });
   const diarRef = React.useRef(diar);
   diarRef.current = diar;
 
@@ -320,22 +332,28 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   // WHAT stops a false fire on the doctor's own non-phrase speech, since WHO can't tell the phrase from
   // not-the-phrase in the same voice). Open (returns true) when the gate is off or nothing is enrolled;
   // enrolled-but-can't-capture fails closed. Mirrors the hands-free gate.
-  const verified = React.useCallback((name: string): boolean => {
-    if (!requireDoctor) return true;
-    const svh = svRef.current;
-    const enrolled = svh.conditionCount(name) > 0;
-    if (!enrolled) return true;
-    const roll = rollRef.current;
-    if (!roll || !wakeRef.current) return false;
-    const who = svh.verify(name, roll.snapshot(), roll.sampleRate);
-    const what = wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
-    const thr = whatThr(name);
-    const ok = (who?.pass ?? false) && (what == null || what >= thr);
-    console.log(
-      `[hey-ozwell] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} (≥${thr}) → ${ok ? 'ACT' : 'ignore'}`
-    );
-    return ok;
-  }, [requireDoctor]);
+  const verified = React.useCallback(
+    (name: string): boolean => {
+      if (!requireDoctor) return true;
+      const svh = svRef.current;
+      const enrolled = svh.conditionCount(name) > 0;
+      if (!enrolled) return true;
+      const roll = rollRef.current;
+      if (!roll || !wakeRef.current) return false;
+      const who = svh.verify(name, roll.snapshot(), roll.sampleRate);
+      const what = wakeRef.current.phraseCosine(
+        name,
+        wakeRef.current.getLastEmbedding()
+      );
+      const thr = whatThr(name);
+      const ok = (who?.pass ?? false) && (what == null || what >= thr);
+      console.log(
+        `[hey-ozwell] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} (≥${thr}) → ${ok ? 'ACT' : 'ignore'}`
+      );
+      return ok;
+    },
+    [requireDoctor]
+  );
 
   // Send a (typed or dictated) message — append the user turn, then either a host-provided send, a
   // canned keyless reply, or a streamed Ozwell response.
@@ -396,7 +414,9 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       streamAbortRef.current?.abort();
       const ac = new AbortController();
       streamAbortRef.current = ac;
-      askOzwellStream(history, (_d, full) => patch(full, 'streaming'), { signal: ac.signal })
+      askOzwellStream(history, (_d, full) => patch(full, 'streaming'), {
+        signal: ac.signal,
+      })
         .then((full) => patch(full || '(no response)', 'complete'))
         .catch((e) => {
           if ((e as Error)?.name === 'AbortError') return; // superseded/cancelled — not an error to show
@@ -466,61 +486,82 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   // `viaPhrase` = stopped by the spoken "ozwell i'm done" wake (vs the mic button). Only then do we cut the
   // phrase off the AUDIO before transcribing — Whisper mishears it differently every time, so text-stripping
   // alone leaks it; a button stop has no phrase, so trimming would clip real speech.
-  const stopDictation = React.useCallback((viaPhrase = false) => {
-    const rec = recRef.current;
-    if (!rec) return;
-    stopLive(); // tear down the live-caption loop; the final full-clip transcription follows
-    setPhase('transcribing');
-    rec.onstop = async () => {
-      let blob = new Blob(chunksRef.current, {
-        type: rec.mimeType || 'audio/webm',
-      });
-      recRef.current = null;
-      try {
-        // Cut the spoken stop phrase off the audio so it never reaches ASR — covers the on-device, server,
-        // AND diarization paths at once. Anchor the cut with the wake detector's measured phrase length (so
-        // it works even with no pause before the phrase), snapped to a nearby pause. Best-effort: keep the
-        // original clip on failure.
-        if (viaPhrase) {
-          const dur = wakeRef.current?.getLastWakeDuration() ?? 0;
-          const hint = dur > 0 ? dur + stopTrimLeadIn() : 0;
-          try { blob = await trimTrailingStopPhrase(blob, hint); } catch { /* keep original */ }
-        }
-        let text: string;
-        if (conversationMode && diarRef.current.ready) {
-          // Conversation mode: diarize the clip → labeled turns ("Dr. Jane: … / Patient: …") so the
-          // assistant gets who-said-what. Fall back to plain transcription if diarization yields nothing.
-          const turns = await diarRef.current.diarize(blob);
-          const joined = turns.map((t) => `${t.speaker}: ${t.text}`).join('\n');
-          text = stripStopPhrase(joined) || stripStopPhrase(await transcribeBlob(blob));
-        } else if (transcription === 'server') {
-          // Server mode posts the audio off-device; if it fails (no ASR endpoint, e.g. Ollama) fall
-          // back to on-device so the flow still works.
-          let raw: string;
-          try {
-            raw = await transcribeServer(blob);
-          } catch (e) {
-            console.warn('[hey-ozwell] server ASR failed → on-device fallback', e);
-            raw = await transcribeBlob(blob);
+  const stopDictation = React.useCallback(
+    (viaPhrase = false) => {
+      const rec = recRef.current;
+      if (!rec) return;
+      stopLive(); // tear down the live-caption loop; the final full-clip transcription follows
+      setPhase('transcribing');
+      rec.onstop = async () => {
+        let blob = new Blob(chunksRef.current, {
+          type: rec.mimeType || 'audio/webm',
+        });
+        recRef.current = null;
+        try {
+          // Cut the spoken stop phrase off the audio so it never reaches ASR — covers the on-device, server,
+          // AND diarization paths at once. Anchor the cut with the wake detector's measured phrase length (so
+          // it works even with no pause before the phrase), snapped to a nearby pause. Best-effort: keep the
+          // original clip on failure.
+          if (viaPhrase) {
+            const dur = wakeRef.current?.getLastWakeDuration() ?? 0;
+            const hint = dur > 0 ? dur + stopTrimLeadIn() : 0;
+            try {
+              blob = await trimTrailingStopPhrase(blob, hint);
+            } catch {
+              /* keep original */
+            }
           }
-          text = stripStopPhrase(raw);
-        } else {
-          text = stripStopPhrase(await transcribeBlob(blob));
+          let text: string;
+          if (conversationMode && diarRef.current.ready) {
+            // Conversation mode: diarize the clip → labeled turns ("Dr. Jane: … / Patient: …") so the
+            // assistant gets who-said-what. Fall back to plain transcription if diarization yields nothing.
+            const turns = await diarRef.current.diarize(blob);
+            const joined = turns
+              .map((t) => `${t.speaker}: ${t.text}`)
+              .join('\n');
+            text =
+              stripStopPhrase(joined) ||
+              stripStopPhrase(await transcribeBlob(blob));
+          } else if (transcription === 'server') {
+            // Server mode posts the audio off-device; if it fails (no ASR endpoint, e.g. Ollama) fall
+            // back to on-device so the flow still works.
+            let raw: string;
+            try {
+              raw = await transcribeServer(blob);
+            } catch (e) {
+              console.warn(
+                '[hey-ozwell] server ASR failed → on-device fallback',
+                e
+              );
+              raw = await transcribeBlob(blob);
+            }
+            text = stripStopPhrase(raw);
+          } else {
+            text = stripStopPhrase(await transcribeBlob(blob));
+          }
+          if (text) {
+            // Review-before-send: drop the transcript into the composer for a glance/edit instead of firing
+            // it. The user edits and presses send (→ onSendMessage → send). Otherwise, auto-send.
+            if (reviewBeforeSend) setTyped(text);
+            else send(text);
+          }
+          if (closeChatOnDone && !reviewBeforeSend) setChatOpen(false);
+        } catch (e) {
+          console.error('[hey-ozwell] transcription failed', e);
         }
-        if (text) {
-          // Review-before-send: drop the transcript into the composer for a glance/edit instead of firing
-          // it. The user edits and presses send (→ onSendMessage → send). Otherwise, auto-send.
-          if (reviewBeforeSend) setTyped(text);
-          else send(text);
-        }
-        if (closeChatOnDone && !reviewBeforeSend) setChatOpen(false);
-      } catch (e) {
-        console.error('[hey-ozwell] transcription failed', e);
-      }
-      setPhase('listening');
-    };
-    rec.stop();
-  }, [transcription, conversationMode, reviewBeforeSend, closeChatOnDone, send, stopLive]);
+        setPhase('listening');
+      };
+      rec.stop();
+    },
+    [
+      transcription,
+      conversationMode,
+      reviewBeforeSend,
+      closeChatOnDone,
+      send,
+      stopLive,
+    ]
+  );
 
   const wake = useWakeWord({
     enabled: active,
@@ -532,7 +573,10 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
         // open and wait — the experiment surface for more specific wake-word directions.
         setChatOpen(true);
         if (autoDictateOnWake) startDictation();
-      } else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') {
+      } else if (
+        name === "ozwell-i'm-done" &&
+        phaseRef.current === 'dictating'
+      ) {
         // Stop immediately on the verified stop-wake. (A transcribe-confirm gate was tried, but Whisper
         // mishears "done" often enough — e.g. "…all was well" — that it rejected real stops and trapped
         // dictation. The WHAT phrase-print check in verified() is the false-stop guard.) `true` = trim the
@@ -585,12 +629,20 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   // re-open the ring and flicker it back to a loading state — that flicker was the "glitching" the user saw.
   // Reset when Ozwell is turned off.
   const hasListenedRef = React.useRef(false);
-  React.useEffect(() => { if (listening) hasListenedRef.current = true; }, [listening]);
-  React.useEffect(() => { if (!active) hasListenedRef.current = false; }, [active]);
+  React.useEffect(() => {
+    if (listening) hasListenedRef.current = true;
+  }, [listening]);
+  React.useEffect(() => {
+    if (!active) hasListenedRef.current = false;
+  }, [active]);
 
   const coldStarting = active && !listening && !hasListenedRef.current;
   const ozLoading = wakeWarm.active || coldStarting;
-  const ozProgress = coldStarting ? undefined : wakeWarm.done ? 1 : wakeWarm.progress;
+  const ozProgress = coldStarting
+    ? undefined
+    : wakeWarm.done
+      ? 1
+      : wakeWarm.progress;
   const ozWarm = dictLoad.active && !dictLoad.done;
   const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress); // hold at 99 until compile done
   const ozLoadLabel = ozWarm
@@ -600,12 +652,18 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       : undefined;
 
   // Doctor-only and a voiceprint is enrolled → only the enrolled doctor is acted on.
-  const locked = requireDoctor && sv.ready && sv.conditionCount('hey-ozwell') > 0;
+  const locked =
+    requireDoctor && sv.ready && sv.conditionCount('hey-ozwell') > 0;
 
   // Live readiness for the "Models & versions" readout in the settings menu.
   const modelStatus: Partial<Record<ModelStatusKey, ModelStatus>> = {
-    wake: wakeWarm.done || wake.ready ? 'ready' : ozLoading ? 'loading' : 'idle',
-    transcription: dictLoad.done ? 'ready' : dictLoad.active ? 'loading' : 'idle',
+    wake:
+      wakeWarm.done || wake.ready ? 'ready' : ozLoading ? 'loading' : 'idle',
+    transcription: dictLoad.done
+      ? 'ready'
+      : dictLoad.active
+        ? 'loading'
+        : 'idle',
   };
 
   // Pre-load the small wake model FILES on mount (mic stays off) so the octopus is ready to listen
@@ -621,29 +679,33 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     if (active) warmWhisper();
   }, [active]);
 
-  const toggle = React.useCallback((next: boolean) => {
-    setActive(next);
-    if (!next) {
-      // Turning off: stop any dictation, abort an in-flight reply, close + reset.
-      try {
-        recRef.current?.stop();
-      } catch {
-        /* ignore */
+  const toggle = React.useCallback(
+    (next: boolean) => {
+      setActive(next);
+      if (!next) {
+        // Turning off: stop any dictation, abort an in-flight reply, close + reset.
+        try {
+          recRef.current?.stop();
+        } catch {
+          /* ignore */
+        }
+        recRef.current = null;
+        stopLive();
+        streamAbortRef.current?.abort();
+        streamAbortRef.current = null;
+        setGenerating(false);
+        setChatOpen(false);
+        setSettingsOpen(false);
+        setPhase('listening');
       }
-      recRef.current = null;
-      stopLive();
-      streamAbortRef.current?.abort();
-      streamAbortRef.current = null;
-      setGenerating(false);
-      setChatOpen(false);
-      setSettingsOpen(false);
-      setPhase('listening');
-    }
-  }, [stopLive]);
+    },
+    [stopLive]
+  );
 
   // Controlled composer value: fill the box with the live caption while dictating (browser + liveTranscript);
   // otherwise the user's typed text. Typing is ignored during the live overlay (hands-free dictation).
-  const dictatingLive = phase === 'dictating' && liveTranscript && transcription === 'browser';
+  const dictatingLive =
+    phase === 'dictating' && liveTranscript && transcription === 'browser';
   const composerValue = dictatingLive ? liveText : typed;
 
   const inputPlaceholder =

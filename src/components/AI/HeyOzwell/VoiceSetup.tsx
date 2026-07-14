@@ -19,7 +19,8 @@ const MUTED = 'var(--mieweb-muted-foreground, hsl(215.4 16.3% 46.9%))';
 const SUCCESS = 'var(--mieweb-success, hsl(142.1 76.2% 36.3%))';
 /** Ozwell accent at `pct` opacity (for glows/rings) — themeable + dark-mode safe via color-mix. */
 const ozA = (pct: number) => `color-mix(in srgb, ${OZ} ${pct}%, transparent)`;
-const ozBtn = 'bg-ozwell hover:bg-ozwell active:bg-ozwell text-ozwell-foreground hover:brightness-95 active:brightness-90';
+const ozBtn =
+  'bg-ozwell hover:bg-ozwell active:bg-ozwell text-ozwell-foreground hover:brightness-95 active:brightness-90';
 
 export interface VoiceSetupProps {
   /**
@@ -41,7 +42,14 @@ export interface VoiceSetupProps {
 }
 
 /** On-device voice enrollment — tap the octopus, it pulses as you talk. Brand-aligned. */
-export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell/icon.svg', onDone, onCancel }: VoiceSetupProps) {
+export function VoiceSetup({
+  mode = 'enroll',
+  voiceId,
+  label,
+  logoSrc = '/ozwell/icon.svg',
+  onDone,
+  onCancel,
+}: VoiceSetupProps) {
   const oz = useVoiceSetup({ startAdding: mode === 'add', voiceId, label });
   const { phase, phrase, step, total, adding, level, ready, error } = oz;
 
@@ -74,7 +82,11 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
               ? `Say “${phrase}” clearly`
               : 'You’re all set — Ozwell is ready.'; // accurate for both fresh enroll and add-a-voice
   const wrapAnim =
-    phase === 'gotit' ? 'oz-bounce .6s ease' : phase === 'deny' ? 'oz-shake .5s ease' : 'oz-float 4s ease-in-out infinite';
+    phase === 'gotit'
+      ? 'oz-bounce .6s ease'
+      : phase === 'deny'
+        ? 'oz-shake .5s ease'
+        : 'oz-float 4s ease-in-out infinite';
 
   const canStart = phase === 'intro' && ready;
 
@@ -100,7 +112,7 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground absolute left-4 top-4"
+          className="text-muted-foreground absolute top-4 left-4"
           onClick={() => {
             oz.cancel();
             onCancel();
@@ -165,7 +177,18 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
             animation: wrapAnim,
           }}
         >
-          <div style={canStart ? { position: 'absolute', inset: 0, borderRadius: '50%', animation: 'oz-invite 2s infinite' } : undefined} />
+          <div
+            style={
+              canStart
+                ? {
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    animation: 'oz-invite 2s infinite',
+                  }
+                : undefined
+            }
+          />
           <img
             src={logoSrc}
             alt=""
@@ -200,10 +223,32 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
         </button>
       </div>
 
-      <div key={big} style={{ fontSize: 32, fontWeight: 700, letterSpacing: -0.5, animation: 'oz-fade .35s ease', minHeight: 40, color: FG }}>
+      <div
+        key={big}
+        style={{
+          fontSize: 32,
+          fontWeight: 700,
+          letterSpacing: -0.5,
+          animation: 'oz-fade .35s ease',
+          minHeight: 40,
+          color: FG,
+        }}
+      >
         {big}
       </div>
-      <div style={{ fontSize: 15.5, color: MUTED, maxWidth: 430, marginTop: 10, lineHeight: 1.55, minHeight: 48, padding: '0 20px' }}>{small}</div>
+      <div
+        style={{
+          fontSize: 15.5,
+          color: MUTED,
+          maxWidth: 430,
+          marginTop: 10,
+          lineHeight: 1.55,
+          minHeight: 48,
+          padding: '0 20px',
+        }}
+      >
+        {small}
+      </div>
 
       {phase !== 'intro' && phase !== 'done' && (
         <div style={{ display: 'flex', gap: 8, marginTop: 26 }}>
@@ -215,7 +260,10 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
                 height: 8,
                 borderRadius: '50%',
                 transition: 'all .3s',
-                background: i < step ? OZ : `color-mix(in srgb, ${MUTED} 40%, transparent)`,
+                background:
+                  i < step
+                    ? OZ
+                    : `color-mix(in srgb, ${MUTED} 40%, transparent)`,
                 transform: i === step ? 'scale(1.4)' : 'none',
               }}
             />
@@ -226,13 +274,21 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
       <div style={{ marginTop: 34, minHeight: 48 }}>
         {phase === 'intro' &&
           (error ? (
-            <div className="text-destructive text-[13px]">couldn’t load models — check console</div>
+            <div className="text-destructive text-[13px]">
+              couldn’t load models — check console
+            </div>
           ) : !ready ? (
-            <div style={{ color: MUTED }} className="font-mono text-[13px]">loading…</div>
+            <div style={{ color: MUTED }} className="font-mono text-[13px]">
+              loading…
+            </div>
           ) : null)}
         {phase === 'done' && (
           <div className="flex justify-center gap-3">
-            <Button variant="outline" className="border-ozwell text-ozwell" onClick={oz.addAnotherSpot}>
+            <Button
+              variant="outline"
+              className="border-ozwell text-ozwell"
+              onClick={oz.addAnotherSpot}
+            >
               Add another spot
             </Button>
             <Button className={ozBtn} onClick={onDone}>

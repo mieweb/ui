@@ -10,7 +10,11 @@
  */
 import * as React from 'react';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
-import { transcribeSegments, decodeTo16kMono, warmWhisper } from '../whisperTranscribe';
+import {
+  transcribeSegments,
+  decodeTo16kMono,
+  warmWhisper,
+} from '../whisperTranscribe';
 import { askOzwell, isOzwellConfigured } from '../ozwellChat';
 import {
   clusterEmbeddings,
@@ -57,14 +61,28 @@ export interface UseDiarizationResult {
 }
 
 /** Slice the [start,end] second window out of 16 kHz samples (clamped). */
-function windowFor(samples: Float32Array, start: number, end: number): Float32Array {
+function windowFor(
+  samples: Float32Array,
+  start: number,
+  end: number
+): Float32Array {
   const a = Math.max(0, Math.floor(start * SR));
   const b = Math.min(samples.length, Math.ceil(end * SR));
   return b > a ? samples.subarray(a, b) : samples.subarray(0, 0);
 }
 
-export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizationResult {
-  const { threshold = 0.65, maxSpeakers, identifyThreshold = 0.45, merge = true, inferRoles = false, enabled = true, minSegmentSeconds = 1.0 } = options;
+export function useDiarization(
+  options: UseDiarizationOptions = {}
+): UseDiarizationResult {
+  const {
+    threshold = 0.65,
+    maxSpeakers,
+    identifyThreshold = 0.45,
+    merge = true,
+    inferRoles = false,
+    enabled = true,
+    minSegmentSeconds = 1.0,
+  } = options;
   const sv = useSpeakerVerify({ enabled }); // loads the TitaNet runtime (only when enabled)
   const svRef = React.useRef(sv);
   svRef.current = sv;
@@ -86,7 +104,10 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
       try {
         const svh = svRef.current;
         // 1. transcript segments (Whisper timestamps) + the raw 16k samples to embed windows from
-        const [segments, samples] = await Promise.all([transcribeSegments(blob), decodeTo16kMono(blob)]);
+        const [segments, samples] = await Promise.all([
+          transcribeSegments(blob),
+          decodeTo16kMono(blob),
+        ]);
         if (!segments.length) {
           setResult([]);
           return [];
@@ -97,13 +118,20 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
         const windows = segments.map((s) => windowFor(samples, s.start, s.end));
         const embedded: { idx: number; emb: Float32Array }[] = [];
         for (let i = 0; i < segments.length; i++) {
-          const emb = windows[i].length >= SR * minSegmentSeconds ? svh.embed(windows[i], SR) : null;
+          const emb =
+            windows[i].length >= SR * minSegmentSeconds
+              ? svh.embed(windows[i], SR)
+              : null;
           if (emb) embedded.push({ idx: i, emb });
         }
-        if (!embedded.length) throw new Error('no embeddable segments (runtime not ready?)');
+        if (!embedded.length)
+          throw new Error('no embeddable segments (runtime not ready?)');
 
         // 3. cluster the embedded segments
-        const clusterOf = clusterEmbeddings(embedded.map((e) => e.emb), { threshold, maxSpeakers });
+        const clusterOf = clusterEmbeddings(
+          embedded.map((e) => e.emb),
+          { threshold, maxSpeakers }
+        );
         // map: original segment index → cluster id (nearest kept segment for dropped ones)
         const segCluster = new Array<number>(segments.length).fill(-1);
         embedded.forEach((e, k) => (segCluster[e.idx] = clusterOf[k]));
@@ -112,8 +140,14 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
           // borrow the previous (or next) embedded segment's cluster for continuity
           let j = i - 1;
           while (j >= 0 && segCluster[j] === -1) j--;
-          if (j < 0) { j = i + 1; while (j < segments.length && segCluster[j] === -1) j++; }
-          segCluster[i] = j >= 0 && j < segments.length && segCluster[j] !== -1 ? segCluster[j] : 0;
+          if (j < 0) {
+            j = i + 1;
+            while (j < segments.length && segCluster[j] === -1) j++;
+          }
+          segCluster[i] =
+            j >= 0 && j < segments.length && segCluster[j] !== -1
+              ? segCluster[j]
+              : 0;
         }
 
         // 4. anchor each cluster to an enrolled voice (identify the longest segment in the cluster)
@@ -127,7 +161,10 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
           embedded.forEach((e, k) => {
             if (clusterOf[k] !== c) return;
             const len = windows[e.idx].length;
-            if (len > repLen) { repLen = len; repIdx = e.idx; }
+            if (len > repLen) {
+              repLen = len;
+              repIdx = e.idx;
+            }
           });
           if (repIdx < 0) continue;
           const match = svh.identify(windows[repIdx], SR);
@@ -155,7 +192,14 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
         setBusy(false);
       }
     },
-    [threshold, maxSpeakers, identifyThreshold, merge, inferRoles, minSegmentSeconds]
+    [
+      threshold,
+      maxSpeakers,
+      identifyThreshold,
+      merge,
+      inferRoles,
+      minSegmentSeconds,
+    ]
   );
 
   return { ready: sv.ready, busy, error, result, diarize };

@@ -19,13 +19,17 @@ function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains(STORE)) req.result.createObjectStore(STORE);
+      if (!req.result.objectStoreNames.contains(STORE))
+        req.result.createObjectStore(STORE);
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
     // If another tab holds an open connection during a version upgrade, the open stays "blocked" and
     // would otherwise hang forever — surface it instead so callers hit their catch/fallback paths.
-    req.onblocked = () => reject(new Error('IndexedDB open blocked (another tab holds an upgrade lock)'));
+    req.onblocked = () =>
+      reject(
+        new Error('IndexedDB open blocked (another tab holds an upgrade lock)')
+      );
   });
 }
 
@@ -33,10 +37,19 @@ function idbGet<T>(key: string): Promise<T | undefined> {
   return openDb().then(
     (db) =>
       new Promise<T | undefined>((resolve, reject) => {
-        const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(key);
-        req.onsuccess = () => { resolve(req.result as T | undefined); db.close(); };
-        req.onerror = () => { reject(req.error); db.close(); };
-      }),
+        const req = db
+          .transaction(STORE, 'readonly')
+          .objectStore(STORE)
+          .get(key);
+        req.onsuccess = () => {
+          resolve(req.result as T | undefined);
+          db.close();
+        };
+        req.onerror = () => {
+          reject(req.error);
+          db.close();
+        };
+      })
   );
 }
 
@@ -46,10 +59,19 @@ function idbSet(key: string, value: unknown): Promise<void> {
       new Promise<void>((resolve, reject) => {
         const tx = db.transaction(STORE, 'readwrite');
         tx.objectStore(STORE).put(value, key);
-        tx.oncomplete = () => { resolve(); db.close(); };
-        tx.onerror = () => { reject(tx.error); db.close(); };
-        tx.onabort = () => { reject(tx.error); db.close(); }; // else an aborted tx leaves the promise pending
-      }),
+        tx.oncomplete = () => {
+          resolve();
+          db.close();
+        };
+        tx.onerror = () => {
+          reject(tx.error);
+          db.close();
+        };
+        tx.onabort = () => {
+          reject(tx.error);
+          db.close();
+        }; // else an aborted tx leaves the promise pending
+      })
   );
 }
 
@@ -59,10 +81,19 @@ function idbDel(key: string): Promise<void> {
       new Promise<void>((resolve, reject) => {
         const tx = db.transaction(STORE, 'readwrite');
         tx.objectStore(STORE).delete(key);
-        tx.oncomplete = () => { resolve(); db.close(); };
-        tx.onerror = () => { reject(tx.error); db.close(); };
-        tx.onabort = () => { reject(tx.error); db.close(); }; // else an aborted tx leaves the promise pending
-      }),
+        tx.oncomplete = () => {
+          resolve();
+          db.close();
+        };
+        tx.onerror = () => {
+          reject(tx.error);
+          db.close();
+        };
+        tx.onabort = () => {
+          reject(tx.error);
+          db.close();
+        }; // else an aborted tx leaves the promise pending
+      })
   );
 }
 
@@ -71,24 +102,43 @@ function idbDel(key: string): Promise<void> {
  * `migrateLegacy` (parse the old JSON string → the new shape), persist it to IndexedDB, and clear the
  * localStorage copy. Returns `undefined` if neither has it. Never throws (best-effort storage).
  */
-export async function getVoiceprints<T>(key: string, migrateLegacy?: (raw: string) => T): Promise<T | undefined> {
+export async function getVoiceprints<T>(
+  key: string,
+  migrateLegacy?: (raw: string) => T
+): Promise<T | undefined> {
   try {
     const existing = await idbGet<T>(key);
     if (existing !== undefined) return existing;
     if (migrateLegacy) {
       let raw: string | null = null;
-      try { raw = localStorage.getItem(key); } catch { /* ignore */ }
+      try {
+        raw = localStorage.getItem(key);
+      } catch {
+        /* ignore */
+      }
       if (raw != null) {
         let migrated: T;
         try {
           migrated = migrateLegacy(raw);
         } catch {
           // Corrupt legacy value — drop it so we don't retry the failing migration on every load.
-          try { localStorage.removeItem(key); } catch { /* ignore */ }
+          try {
+            localStorage.removeItem(key);
+          } catch {
+            /* ignore */
+          }
           return undefined;
         }
-        try { await idbSet(key, migrated); } catch { /* persist is best-effort; still return the migrated value */ }
-        try { localStorage.removeItem(key); } catch { /* ignore */ }
+        try {
+          await idbSet(key, migrated);
+        } catch {
+          /* persist is best-effort; still return the migrated value */
+        }
+        try {
+          localStorage.removeItem(key);
+        } catch {
+          /* ignore */
+        }
         return migrated;
       }
     }
@@ -99,14 +149,29 @@ export async function getVoiceprints<T>(key: string, migrateLegacy?: (raw: strin
 }
 
 /** Persist a voiceprint record (Float32Arrays stored natively). Best-effort — resolves even on failure. */
-export async function setVoiceprints(key: string, value: unknown): Promise<void> {
-  try { await idbSet(key, value); } catch { /* best-effort */ }
+export async function setVoiceprints(
+  key: string,
+  value: unknown
+): Promise<void> {
+  try {
+    await idbSet(key, value);
+  } catch {
+    /* best-effort */
+  }
 }
 
 /** Remove a voiceprint record (and any stale localStorage copy). */
 export async function clearVoiceprints(key: string): Promise<void> {
-  try { await idbDel(key); } catch { /* ignore */ }
-  try { localStorage.removeItem(key); } catch { /* ignore */ }
+  try {
+    await idbDel(key);
+  } catch {
+    /* ignore */
+  }
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
 }
 
 // --- WHAT phrase-prints: per-phrase wake-embedding templates (the WHAT gate). Previously each story kept
@@ -117,18 +182,28 @@ const WHAT_KEY = 'ozwellWhatPrints';
 // natively, so migration just rehydrates the number arrays once.
 function parseLegacyWhat(raw: string): Record<string, Float32Array[]> {
   let o: Record<string, number[][]>;
-  try { o = (JSON.parse(raw || '{}') || {}) as Record<string, number[][]>; } catch { return {}; }
+  try {
+    o = (JSON.parse(raw || '{}') || {}) as Record<string, number[][]>;
+  } catch {
+    return {};
+  }
   // Null-prototype output + Object.keys so a legacy `__proto__` key can't pollute Object.prototype.
   const out: Record<string, Float32Array[]> = Object.create(null);
-  for (const k of Object.keys(o)) out[k] = (o[k] || []).map((a) => Float32Array.from(a));
+  for (const k of Object.keys(o))
+    out[k] = (o[k] || []).map((a) => Float32Array.from(a));
   return out;
 }
 
 export function loadWhatPrints(): Promise<Record<string, Float32Array[]>> {
-  return getVoiceprints<Record<string, Float32Array[]>>(WHAT_KEY, parseLegacyWhat).then((v) => v ?? {});
+  return getVoiceprints<Record<string, Float32Array[]>>(
+    WHAT_KEY,
+    parseLegacyWhat
+  ).then((v) => v ?? {});
 }
 
-export function saveWhatPrints(map: Record<string, Float32Array[]>): Promise<void> {
+export function saveWhatPrints(
+  map: Record<string, Float32Array[]>
+): Promise<void> {
   return setVoiceprints(WHAT_KEY, map);
 }
 

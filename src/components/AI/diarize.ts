@@ -64,7 +64,10 @@ export function centroid(vectors: Float32Array[]): Float32Array {
  * threshold (+ optional hard `maxSpeakers` cap). Returns a cluster id (0-based, in first-appearance order)
  * per input embedding.
  */
-export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptions = {}): number[] {
+export function clusterEmbeddings(
+  embeddings: Float32Array[],
+  opts: ClusterOptions = {}
+): number[] {
   const { threshold = 0.65, maxSpeakers = Infinity } = opts;
   const n = embeddings.length;
   if (n === 0) return [];
@@ -74,7 +77,9 @@ export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptio
   // the Lance-Williams recurrence. This produces results IDENTICAL to recomputing average linkage from
   // scratch, but drops the per-merge point-pair rescan that made the old routine ~O(n³) — the part that
   // could hang the tab on a long visit (Whisper emits many segments). Now: O(n²) memory, scalar updates.
-  const D: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+  const D: number[][] = Array.from({ length: n }, () =>
+    new Array<number>(n).fill(0)
+  );
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const d = 1 - cosine(embeddings[i], embeddings[j]);
@@ -97,7 +102,11 @@ export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptio
       if (!active[i]) continue;
       for (let j = i + 1; j < n; j++) {
         if (!active[j]) continue;
-        if (D[i][j] < best) { best = D[i][j]; bi = i; bj = j; }
+        if (D[i][j] < best) {
+          best = D[i][j];
+          bi = i;
+          bj = j;
+        }
       }
     }
     if (bi < 0) break;
@@ -133,11 +142,17 @@ export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptio
  * Human labels per cluster id. `names[clusterId]` (from voiceprint anchoring / LLM / manual) wins;
  * otherwise a generic "Speaker N". Returns an array indexed by cluster id.
  */
-export function labelClusters(clusters: number[], names: Record<number, string> = {}): string[] {
+export function labelClusters(
+  clusters: number[],
+  names: Record<number, string> = {}
+): string[] {
   // reduce, not Math.max(...clusters): spreading a large array throws RangeError on long transcripts
-  const count = clusters.length ? clusters.reduce((m, x) => (x > m ? x : m), -Infinity) + 1 : 0;
+  const count = clusters.length
+    ? clusters.reduce((m, x) => (x > m ? x : m), -Infinity) + 1
+    : 0;
   const labels: string[] = [];
-  for (let id = 0; id < count; id++) labels[id] = names[id] ?? `Speaker ${id + 1}`;
+  for (let id = 0; id < count; id++)
+    labels[id] = names[id] ?? `Speaker ${id + 1}`;
   return labels;
 }
 
@@ -149,7 +164,11 @@ export function attributeSegments(
 ): DiarizedSegment[] {
   return segments.map((seg, i) => {
     const cluster = clusters[i] ?? 0;
-    return { ...seg, cluster, speaker: labels[cluster] ?? `Speaker ${cluster + 1}` };
+    return {
+      ...seg,
+      cluster,
+      speaker: labels[cluster] ?? `Speaker ${cluster + 1}`,
+    };
   });
 }
 
@@ -163,7 +182,8 @@ function parseJsonMap(reply: string): Record<string, string> {
     // "__proto__"/"constructor"/"prototype" can't pollute Object.prototype.
     const out: Record<string, string> = Object.create(null);
     for (const k of Object.keys(obj)) {
-      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype')
+        continue;
       if (typeof obj[k] === 'string') out[k] = obj[k] as string;
     }
     return out;
@@ -189,9 +209,17 @@ export async function inferSpeakerRoles(
   ask: (prompt: string) => Promise<string>,
   opts: RoleInferenceOptions = {}
 ): Promise<DiarizedSegment[]> {
-  const roles = opts.roles ?? ['Patient', 'Clinician', 'Caregiver', 'Nurse', 'Unknown'];
+  const roles = opts.roles ?? [
+    'Patient',
+    'Clinician',
+    'Caregiver',
+    'Nurse',
+    'Unknown',
+  ];
   const isGeneric = opts.isGeneric ?? ((s) => /^Speaker \d+$/.test(s));
-  const toLabel = [...new Set(segments.map((s) => s.speaker))].filter(isGeneric);
+  const toLabel = [...new Set(segments.map((s) => s.speaker))].filter(
+    isGeneric
+  );
   if (!toLabel.length) return segments;
 
   // Bound the transcript so a long visit can't blow past the model's context (or make the call slow /
@@ -200,7 +228,9 @@ export async function inferSpeakerRoles(
   const MAX_PROMPT_LINES = 160;
   const allLines = segments.map((s) => `${s.speaker}: ${s.text}`);
   const stride = Math.ceil(allLines.length / MAX_PROMPT_LINES);
-  const transcript = (stride > 1 ? allLines.filter((_, i) => i % stride === 0) : allLines).join('\n');
+  const transcript = (
+    stride > 1 ? allLines.filter((_, i) => i % stride === 0) : allLines
+  ).join('\n');
   const prompt =
     `You are labeling speakers in a medical-visit transcript. For EACH of these speaker tags: ` +
     `${toLabel.join(', ')} — infer the most likely role from: ${roles.join(', ')}. ` +
@@ -213,7 +243,11 @@ export async function inferSpeakerRoles(
   } catch {
     return segments;
   }
-  return segments.map((s) => (isGeneric(s.speaker) && map[s.speaker] ? { ...s, speaker: map[s.speaker] } : s));
+  return segments.map((s) =>
+    isGeneric(s.speaker) && map[s.speaker]
+      ? { ...s, speaker: map[s.speaker] }
+      : s
+  );
 }
 
 /** Collapse consecutive same-speaker segments into turns — nicer for a scribe note. */

@@ -94,36 +94,44 @@ export function OzwellSettingsMenu({
       className="overflow-hidden"
     >
       {/* scroll container (height-capped) + a bottom fade overlay so it's clear there's more below */}
-      <div ref={scrollRef} role="presentation" onScroll={updateHasMore} className="max-h-[392px] overflow-x-hidden overflow-y-auto">
-      <DropdownHeader title="⚙ Ozwell settings" />
-      {onManageVoices && (
-        <DropdownItem onClick={act(onManageVoices)}>
-          <ItemLabel label="Your voice" sub="Set up, add, or manage authorized voices" />
-        </DropdownItem>
-      )}
-      {/* Models & versions — collapsible readout of what's running, per model (Doug). A custom row
+      <div
+        ref={scrollRef}
+        role="presentation"
+        onScroll={updateHasMore}
+        className="max-h-[392px] overflow-x-hidden overflow-y-auto"
+      >
+        <DropdownHeader title="⚙ Ozwell settings" />
+        {onManageVoices && (
+          <DropdownItem onClick={act(onManageVoices)}>
+            <ItemLabel
+              label="Your voice"
+              sub="Set up, add, or manage authorized voices"
+            />
+          </DropdownItem>
+        )}
+        {/* Models & versions — collapsible readout of what's running, per model (Doug). A custom row
           (not DropdownItem) so the chevron can right-align; kept open on click so expanding it
           doesn't dismiss the whole menu. */}
-      <button
-        type="button"
-        role="menuitem"
-        aria-expanded={modelsOpen}
-        onClick={() => setModelsOpen((v) => !v)}
-        className={itemClasses}
-      >
-        <ItemLabel
-          label="Models & versions"
-          sub="What you’re running · where it loads from"
-        />
-        <span
-          aria-hidden="true"
-          className="text-muted-foreground text-xs transition-transform duration-150"
-          style={{ transform: modelsOpen ? 'rotate(90deg)' : 'none' }}
+        <button
+          type="button"
+          role="menuitem"
+          aria-expanded={modelsOpen}
+          onClick={() => setModelsOpen((v) => !v)}
+          className={itemClasses}
         >
-          ▸
-        </span>
-      </button>
-      {modelsOpen && <ModelInfoList status={modelStatus} />}
+          <ItemLabel
+            label="Models & versions"
+            sub="What you’re running · where it loads from"
+          />
+          <span
+            aria-hidden="true"
+            className="text-muted-foreground text-xs transition-transform duration-150"
+            style={{ transform: modelsOpen ? 'rotate(90deg)' : 'none' }}
+          >
+            ▸
+          </span>
+        </button>
+        {modelsOpen && <ModelInfoList status={modelStatus} />}
       </div>
       {/* bottom fade — only while more content sits below the fold (cleared once scrolled to the end) */}
       <div

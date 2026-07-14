@@ -36,7 +36,8 @@ const DEFAULT_BASE = 'https://api.ozwell.ai';
 const OLLAMA_BASE = 'http://localhost:11434';
 const DEFAULTS = {
   model: 'gpt-4o-mini',
-  system: 'You are Ozwell, a concise and helpful clinical assistant. Answer briefly and clearly.',
+  system:
+    'You are Ozwell, a concise and helpful clinical assistant. Answer briefly and clearly.',
   temperature: 0.7,
 };
 
@@ -46,13 +47,21 @@ const DEFAULTS = {
 function readWindowGlobal(): Partial<OzwellConfig> {
   if (typeof window === 'undefined') return {}; // SSR / Node — no window
   const get = (w?: Window | null): Partial<OzwellConfig> | undefined => {
-    try { return (w as unknown as { __ozwell?: Partial<OzwellConfig> })?.__ozwell; } catch { return undefined; }
+    try {
+      return (w as unknown as { __ozwell?: Partial<OzwellConfig> })?.__ozwell;
+    } catch {
+      return undefined;
+    }
   };
   return get(window) || get(window.parent) || get(window.top) || {};
 }
 function readRaw(): Partial<OzwellConfig> {
   let stored: Partial<OzwellConfig> = {};
-  try { stored = JSON.parse(localStorage.getItem('ozwellConfig') || '{}'); } catch { /* ignore bad JSON */ }
+  try {
+    stored = JSON.parse(localStorage.getItem('ozwellConfig') || '{}');
+  } catch {
+    /* ignore bad JSON */
+  }
   return { ...stored, ...readWindowGlobal() }; // window override wins over localStorage
 }
 
@@ -60,7 +69,8 @@ function readRaw(): Partial<OzwellConfig> {
 export function getOzwellConfig(): OzwellConfig {
   const c = readRaw();
   const apiKey = c.apiKey || '';
-  const baseURL = c.baseURL || (apiKey === 'ollama' ? OLLAMA_BASE : DEFAULT_BASE);
+  const baseURL =
+    c.baseURL || (apiKey === 'ollama' ? OLLAMA_BASE : DEFAULT_BASE);
   return {
     baseURL,
     apiKey,
@@ -71,7 +81,9 @@ export function getOzwellConfig(): OzwellConfig {
     // and guard the empty/whitespace string explicitly, since Number('') is 0 (a valid-looking temperature)
     // and would silently pin sampling to 0 instead of using the default.
     temperature:
-      c.temperature != null && String(c.temperature).trim() !== '' && Number.isFinite(Number(c.temperature))
+      c.temperature != null &&
+      String(c.temperature).trim() !== '' &&
+      Number.isFinite(Number(c.temperature))
         ? Number(c.temperature)
         : DEFAULTS.temperature,
   };
@@ -84,31 +96,46 @@ export function isOzwellConfigured(): boolean {
 
 /** Map AIChat's message blocks to the API's role/content shape (user+assistant text only) for multi-turn. */
 export function toOzwellMessages(
-  msgs: { role: string; content: { type?: string; text?: string }[] }[],
+  msgs: { role: string; content: { type?: string; text?: string }[] }[]
 ): OzwellMessage[] {
   const out: OzwellMessage[] = [];
   for (const m of msgs) {
     if (m.role !== 'user' && m.role !== 'assistant') continue;
-    const text = (m.content || []).map((c) => c.text || '').join(' ').trim();
+    const text = (m.content || [])
+      .map((c) => c.text || '')
+      .join(' ')
+      .trim();
     if (text) out.push({ role: m.role, content: text });
   }
   return out;
 }
 
-function withSystem(messages: OzwellMessage[], system: string): OzwellMessage[] {
+function withSystem(
+  messages: OzwellMessage[],
+  system: string
+): OzwellMessage[] {
   if (!system || messages.some((m) => m.role === 'system')) return messages;
   return [{ role: 'system', content: system }, ...messages];
 }
 
-function buildRequest(messages: OzwellMessage[] | string, cfg: OzwellConfig, stream: boolean) {
-  const msgs = typeof messages === 'string' ? [{ role: 'user' as const, content: messages }] : messages;
+function buildRequest(
+  messages: OzwellMessage[] | string,
+  cfg: OzwellConfig,
+  stream: boolean
+) {
+  const msgs =
+    typeof messages === 'string'
+      ? [{ role: 'user' as const, content: messages }]
+      : messages;
   return {
     url: `${cfg.baseURL.replace(/\/$/, '')}/v1/chat/completions`,
     headers: {
       'Content-Type': 'application/json',
       // 'ollama' is a sentinel that points baseURL at the local Ollama server, not a real credential —
       // don't send it as a Bearer token (some local OpenAI-compatible servers reject unexpected auth).
-      ...(cfg.apiKey && cfg.apiKey !== 'ollama' ? { Authorization: `Bearer ${cfg.apiKey}` } : {}),
+      ...(cfg.apiKey && cfg.apiKey !== 'ollama'
+        ? { Authorization: `Bearer ${cfg.apiKey}` }
+        : {}),
     } as Record<string, string>,
     body: JSON.stringify({
       model: cfg.model,
@@ -141,10 +168,18 @@ function resolveConfig(opts: AskOpts): OzwellConfig {
 }
 
 /** One-shot (non-streaming) completion → the answer text. Throws on HTTP error. */
-export async function askOzwell(messages: OzwellMessage[] | string, opts: AskOpts = {}): Promise<string> {
+export async function askOzwell(
+  messages: OzwellMessage[] | string,
+  opts: AskOpts = {}
+): Promise<string> {
   const cfg = resolveConfig(opts);
   const req = buildRequest(messages, cfg, false);
-  const res = await fetch(req.url, { method: 'POST', headers: req.headers, body: req.body, signal: opts.signal });
+  const res = await fetch(req.url, {
+    method: 'POST',
+    headers: req.headers,
+    body: req.body,
+    signal: opts.signal,
+  });
   if (!res.ok) throw new Error(`Ozwell API ${res.status}: ${res.statusText}`);
   const data = await res.json();
   return (data?.choices?.[0]?.message?.content ?? '').trim();
@@ -157,12 +192,18 @@ export async function askOzwell(messages: OzwellMessage[] | string, opts: AskOpt
 export async function askOzwellStream(
   messages: OzwellMessage[] | string,
   onToken: (delta: string, full: string) => void,
-  opts: AskOpts = {},
+  opts: AskOpts = {}
 ): Promise<string> {
   const cfg = resolveConfig(opts);
   const req = buildRequest(messages, cfg, true);
-  const res = await fetch(req.url, { method: 'POST', headers: req.headers, body: req.body, signal: opts.signal });
-  if (!res.ok || !res.body) throw new Error(`Ozwell API ${res.status}: ${res.statusText}`);
+  const res = await fetch(req.url, {
+    method: 'POST',
+    headers: req.headers,
+    body: req.body,
+    signal: opts.signal,
+  });
+  if (!res.ok || !res.body)
+    throw new Error(`Ozwell API ${res.status}: ${res.statusText}`);
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -177,8 +218,13 @@ export async function askOzwellStream(
       try {
         const json = JSON.parse(payload);
         const delta: string = json?.choices?.[0]?.delta?.content || '';
-        if (delta) { full += delta; onToken(delta, full); }
-      } catch { /* keep-alive / partial line — ignore */ }
+        if (delta) {
+          full += delta;
+          onToken(delta, full);
+        }
+      } catch {
+        /* keep-alive / partial line — ignore */
+      }
     }
     return false;
   };
@@ -198,7 +244,11 @@ export async function askOzwellStream(
   } finally {
     // Release the connection promptly on BOTH normal completion and the early `[DONE]` return, so we
     // don't hold the socket open or fight a caller's AbortController. cancel() also releases the lock.
-    try { await reader.cancel(); } catch { /* stream already closed/errored — nothing to release */ }
+    try {
+      await reader.cancel();
+    } catch {
+      /* stream already closed/errored — nothing to release */
+    }
   }
   return full;
 }

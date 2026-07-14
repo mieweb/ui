@@ -6,8 +6,9 @@ import * as HeyOzwellStories from './HeyOzwell.stories';
 # Hey Ozwell
 
 Hey Ozwell is the **voice entry point** for the assistant. Everything runs
-**on-device** — wake-word detection, speaker verification, and dictation all
-happen in the browser, and **audio never leaves the page**.
+**on-device** — wake-word detection, speaker verification, dictation, and
+ambient-visit scribing (diarization) all happen in the browser, and **audio
+never leaves the page**.
 
 This page documents how the UX works (issue #287). The controls below are live —
 click the octopus.
@@ -36,10 +37,20 @@ Ozwell is active in the header.
   into transcription.
 - **Close chat on "I'm done"** (Controls panel) — after "ozwell I'm done" sends, also
   close the chat popup, or leave it open to read the reply.
-- **Transcription** (Controls panel) — **browser** runs Whisper on-device (audio never
-  leaves the page — the PHI-safe default); **server** POSTs the audio to the OpenAI-compatible
-  `/v1/audio/transcriptions` endpoint (audio leaves the browser; falls back to on-device if
-  it fails). An experiment toggle for comparing the two.
+- **Transcription** (Controls panel) — **browser** runs Whisper **on-device, in a Web Worker**
+  (audio never leaves the page — the PHI-safe default; the worker keeps the heavy model load and
+  inference off the main thread, so the wake word stays responsive while it loads); **server** POSTs
+  the audio to the OpenAI-compatible `/v1/audio/transcriptions` endpoint (audio leaves the browser;
+  falls back to on-device if it fails). An experiment toggle for comparing the two.
+- **Require doctor** (Controls panel) — the speaker-verify gate: only the **enrolled clinician's
+  voice** triggers the wake word and dictation (an invisible WHO + WHAT check on every fire). Off,
+  anyone's "hey ozwell" works.
+- **Conversation mode** (Controls panel) — diarize the dictated clip on send so the assistant gets
+  **who-said-what** ("Dr. Jane: … / Patient: …") instead of a flat transcript.
+- **Live caption** (Controls panel) — show a rough real-time transcript in the composer as you
+  speak; the clean final text still re-transcribes the whole clip on send.
+- **Review before send** (Controls panel) — drop the finished transcript into the composer to
+  **glance/edit before it sends**, instead of auto-firing.
 - **Ozwell settings** — **right-click or long-press** the octopus to open a settings
   menu that links back to Voice enrollment (set up / re-enroll / add a condition) and
   the wake-word / speaker-verify diagnostics.
@@ -98,10 +109,36 @@ function stopDictation() {
 )}
 ```
 
+Transcription runs in a **Web Worker** (see `whisperTranscribe.ts`), so loading the ~1.3 GB Whisper
+model never blocks the main thread where the wake detector does its own on-device inference — "hey
+ozwell" keeps responding while the model loads. Same model and output as before; the public API is
+unchanged, so every surface (dictation, live caption, Visit Scribe, diarization) gets it for free.
+
+## Visit Scribe (ambient scribe)
+
+A second surface, for **multi-person encounters** — no wake word, no dictation turns. Just record the
+room, stop, and get an **on-device, speaker-labeled transcript** (Doctor / Patient / Nurse).
+Attribution comes from `useDiarization`: Whisper timestamps + TitaNet speaker embeddings clustered
+into turns, anchored to enrolled voiceprints, with optional LLM role inference. You can **rename,
+merge, and reassign speakers** afterward, and optionally show a rough **live transcript** while
+recording. Same guarantee as everything else here — audio never leaves the page.
+
 ## Related
 
 - **Voice Setup** — one-time speaker enrollment; the octopus-pulse pattern reused here.
 - **Wake Word** — the on-device "hey ozwell" detector that drives the pulse and wake.
 - **Hands-Free Chat** — the voice conversation flow.
+- **Visit Scribe** — the ambient multi-person scribe described above.
 
 All live under *Product / Feature Modules / AI* in this sidebar.
+
+### Integration & backend
+
+- **Backend wiring** (`OZWELL-BACKEND.md`) — the assistant's reply is an OpenAI-compatible
+  `POST /v1/chat/completions` (ozwellai-api by default, or local Ollama via the `apiKey: 'ollama'`
+  sentinel). A host overrides it with the **`onSend`** prop or an `ozwellConfig` **`baseURL`** — the
+  component is backend-agnostic. Only the chat reply (and the opt-in server transcription) touch a
+  network; wake, speaker verify, Whisper, and diarization are all on-device.
+- **Model hosting** (`MODEL-HOSTING.md`) — wake / speaker / Whisper models are fetched at runtime
+  from an asset host so the repo stays code-only; every host is runtime-overridable via config
+  (`window.__ozwellAssets`, `window.__ozwellWhisperHost`, `window.__ozwellTransformersUrl`).

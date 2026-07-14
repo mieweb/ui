@@ -13,7 +13,12 @@ import {
 const f = (...xs: number[]) => Float32Array.from(xs);
 
 // two clearly-separated speaker groups: group A dominated by dim 0, group B by dim 1.
-const A = [f(1, 0, 0, 0), f(1, 0, 0.05, 0), f(0.98, 0, 0, 0.05), f(1, 0.02, 0, 0.03)];
+const A = [
+  f(1, 0, 0, 0),
+  f(1, 0, 0.05, 0),
+  f(0.98, 0, 0, 0.05),
+  f(1, 0.02, 0, 0.03),
+];
 const B = [f(0, 1, 0, 0), f(0, 0.98, 0.04, 0), f(0.03, 1, 0, 0)];
 
 describe('cosine / centroid', () => {
@@ -46,7 +51,10 @@ describe('clusterEmbeddings', () => {
   });
 
   it('respects the maxSpeakers hard cap', () => {
-    const labels = clusterEmbeddings([...A, ...B], { threshold: 0.5, maxSpeakers: 1 });
+    const labels = clusterEmbeddings([...A, ...B], {
+      threshold: 0.5,
+      maxSpeakers: 1,
+    });
     expect(new Set(labels).size).toBe(1);
   });
 
@@ -55,7 +63,9 @@ describe('clusterEmbeddings', () => {
     const v1 = f(1, 0);
     const v2 = f(0.4, Math.sqrt(1 - 0.16));
     // the old 0.5 default left them as two "speakers" (0.6 > 0.5) — the over-splitting bug.
-    expect(new Set(clusterEmbeddings([v1, v2], { threshold: 0.5 })).size).toBe(2);
+    expect(new Set(clusterEmbeddings([v1, v2], { threshold: 0.5 })).size).toBe(
+      2
+    );
     // the current default (0.65) merges them back into one (0.6 ≤ 0.65).
     expect(new Set(clusterEmbeddings([v1, v2])).size).toBe(1);
   });
@@ -80,25 +90,56 @@ describe('labelClusters / attributeSegments / mergeTurns', () => {
     ];
     const clusters = [0, 0, 1];
     const labels = labelClusters(clusters, { 0: 'Doctor' });
-    const attributed: DiarizedSegment[] = attributeSegments(segments, clusters, labels);
-    expect(attributed.map((s) => s.speaker)).toEqual(['Doctor', 'Doctor', 'Speaker 2']);
+    const attributed: DiarizedSegment[] = attributeSegments(
+      segments,
+      clusters,
+      labels
+    );
+    expect(attributed.map((s) => s.speaker)).toEqual([
+      'Doctor',
+      'Doctor',
+      'Speaker 2',
+    ]);
 
     const turns = mergeTurns(attributed);
     expect(turns).toHaveLength(2);
-    expect(turns[0]).toMatchObject({ speaker: 'Doctor', text: 'hello how are you', start: 0, end: 2 });
-    expect(turns[1]).toMatchObject({ speaker: 'Speaker 2', text: 'fine thanks' });
+    expect(turns[0]).toMatchObject({
+      speaker: 'Doctor',
+      text: 'hello how are you',
+      start: 0,
+      end: 2,
+    });
+    expect(turns[1]).toMatchObject({
+      speaker: 'Speaker 2',
+      text: 'fine thanks',
+    });
   });
 });
 
 describe('inferSpeakerRoles', () => {
   const segs: DiarizedSegment[] = [
-    { start: 0, end: 1, text: 'what brings you in?', cluster: 0, speaker: 'Dr. Smith' },
-    { start: 1, end: 2, text: 'my knee has been hurting', cluster: 1, speaker: 'Speaker 2' },
+    {
+      start: 0,
+      end: 1,
+      text: 'what brings you in?',
+      cluster: 0,
+      speaker: 'Dr. Smith',
+    },
+    {
+      start: 1,
+      end: 2,
+      text: 'my knee has been hurting',
+      cluster: 1,
+      speaker: 'Speaker 2',
+    },
   ];
 
   it('relabels generic speakers, leaves named ones', async () => {
     let called = 0;
-    const ask = async () => { called++; return '{"Speaker 2":"Patient"}'; };
+    const ask = async () => {
+      called++;
+      return '{"Speaker 2":"Patient"}';
+    };
     const out = await inferSpeakerRoles(segs, ask);
     expect(called).toBe(1);
     expect(out.map((s) => s.speaker)).toEqual(['Dr. Smith', 'Patient']);
@@ -118,7 +159,10 @@ describe('inferSpeakerRoles', () => {
   it('does not call the LLM when every speaker is already named', async () => {
     let called = 0;
     const named = segs.map((s) => ({ ...s, speaker: 'Dr. Smith' }));
-    await inferSpeakerRoles(named, async () => { called++; return '{}'; });
+    await inferSpeakerRoles(named, async () => {
+      called++;
+      return '{}';
+    });
     expect(called).toBe(0);
   });
 });

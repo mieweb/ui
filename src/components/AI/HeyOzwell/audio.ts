@@ -27,10 +27,14 @@ export interface RollingRecorder {
  * detector's `getStream()`) — never a second getUserMedia, which would silence the detector. Used to
  * capture the wake-utterance audio for the speaker-verify (WHO) gate and for enrollment.
  */
-export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): RollingRecorder {
+export function openRollingRecorder(
+  stream: MediaStream,
+  maxSeconds = 2
+): RollingRecorder {
   const Ctx =
     window.AudioContext ||
-    (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    (window as unknown as { webkitAudioContext: typeof AudioContext })
+      .webkitAudioContext;
   const ctx = new Ctx();
   // A context created under an autoplay restriction can start suspended, which would starve the
   // ScriptProcessor callbacks (silent recording). Best-effort resume; ignore if it rejects.
@@ -41,9 +45,12 @@ export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): Rollin
   sink.gain.value = 0;
   // `maxSeconds = Infinity` → an accumulator (keeps everything not explicitly discarded, e.g. for live
   // captions — callers free processed audio via discardBefore). Bounded mode keeps only the last maxSeconds.
-  const max = maxSeconds === Infinity ? Infinity : Math.round(ctx.sampleRate * maxSeconds);
+  const max =
+    maxSeconds === Infinity
+      ? Infinity
+      : Math.round(ctx.sampleRate * maxSeconds);
   let chunks: Float32Array[] = [];
-  let base = 0;   // absolute index of the first retained sample (advances as chunks are evicted/discarded)
+  let base = 0; // absolute index of the first retained sample (advances as chunks are evicted/discarded)
   let pushed = 0; // absolute index just past the last sample ever pushed
   proc.onaudioprocess = (e) => {
     const d = Float32Array.from(e.inputBuffer.getChannelData(0));
@@ -112,7 +119,8 @@ export function chime(freq: number, ms = 170): void {
   try {
     const Ctx =
       window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
     const ctx = new Ctx();
     void ctx.resume().catch(() => {}); // may start suspended under autoplay policy → chime wouldn't play
     const o = ctx.createOscillator();

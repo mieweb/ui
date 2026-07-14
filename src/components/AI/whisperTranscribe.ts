@@ -32,21 +32,33 @@ const R2_HOST = 'https://pub-64db68afc2cb4e108ff06e7e583f09d1.r2.dev';
 function whisperHost(): string {
   if (typeof window === 'undefined') return R2_HOST;
   const fromWin = (w?: Window | null): string | undefined => {
-    try { return (w as unknown as { __ozwellWhisperHost?: string })?.__ozwellWhisperHost; } catch { return undefined; }
+    try {
+      return (w as unknown as { __ozwellWhisperHost?: string })
+        ?.__ozwellWhisperHost;
+    } catch {
+      return undefined;
+    }
   };
   const win = fromWin(window) || fromWin(window.parent) || fromWin(window.top);
   if (win) return win.replace(/\/$/, '');
   try {
-    const h = JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisperHost;
+    const h = JSON.parse(
+      localStorage.getItem('ozwellConfig') || '{}'
+    ).whisperHost;
     if (h) return String(h).replace(/\/$/, '');
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return R2_HOST;
 }
 
 const SMALL_MODELS: Record<string, string> = {
-  tiny: 'Xenova/whisper-tiny.en', 'tiny.en': 'Xenova/whisper-tiny.en',
-  base: 'Xenova/whisper-base.en', 'base.en': 'Xenova/whisper-base.en',
-  small: 'Xenova/whisper-small.en', 'small.en': 'Xenova/whisper-small.en',
+  tiny: 'Xenova/whisper-tiny.en',
+  'tiny.en': 'Xenova/whisper-tiny.en',
+  base: 'Xenova/whisper-base.en',
+  'base.en': 'Xenova/whisper-base.en',
+  small: 'Xenova/whisper-small.en',
+  'small.en': 'Xenova/whisper-small.en',
 };
 const GATE_MODEL = 'Xenova/whisper-base.en'; // stop-confirm: fast + reliable on the single word "done"
 
@@ -58,24 +70,39 @@ const GATE_MODEL = 'Xenova/whisper-base.en'; // stop-confirm: fast + reliable on
 function whisperPref(): string | null {
   if (typeof window === 'undefined') return null; // SSR / Node — no window/localStorage
   const fromWin = (w?: Window | null): string | undefined => {
-    try { return (w as unknown as { __ozwell?: { whisper?: string } })?.__ozwell?.whisper; } catch { return undefined; }
+    try {
+      return (w as unknown as { __ozwell?: { whisper?: string } })?.__ozwell
+        ?.whisper;
+    } catch {
+      return undefined;
+    }
   };
   const win = fromWin(window) || fromWin(window.parent) || fromWin(window.top);
   if (win) return win;
-  try { return JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisper || null; } catch { return null; }
+  try {
+    return (
+      JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisper || null
+    );
+  } catch {
+    return null;
+  }
 }
 
 // Pinned to an EXACT validated version (a floating `@3` lets jsDelivr serve newer 3.x that can break at
 // runtime). Override the ESM URL for strict-CSP / offline / self-hosted setups via
 // `window.__ozwellTransformersUrl` or `localStorage['ozwellTransformersUrl']`.
-const DEFAULT_TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
+const DEFAULT_TRANSFORMERS_URL =
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
 function transformersUrl(): string {
   try {
-    const w = (window as unknown as { __ozwellTransformersUrl?: string }).__ozwellTransformersUrl;
+    const w = (window as unknown as { __ozwellTransformersUrl?: string })
+      .__ozwellTransformersUrl;
     if (w) return w;
     const ls = localStorage.getItem('ozwellTransformersUrl');
     if (ls) return ls;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return DEFAULT_TRANSFORMERS_URL;
 }
 
@@ -85,19 +112,27 @@ export interface WhisperLoadState {
   /** Overall fraction 0..1 (averaged over the model's files). */ progress: number;
   /** The model is loaded. */ done: boolean;
 }
-let dictationLoad: WhisperLoadState = { active: false, progress: 0, done: false };
+let dictationLoad: WhisperLoadState = {
+  active: false,
+  progress: 0,
+  done: false,
+};
 const loadListeners = new Set<() => void>();
 function setDictationLoad(patch: Partial<WhisperLoadState>): void {
   dictationLoad = { ...dictationLoad, ...patch };
   loadListeners.forEach((l) => l());
 }
 /** Current dictation-model load state (for a progress indicator). */
-export function getDictationLoad(): WhisperLoadState { return dictationLoad; }
+export function getDictationLoad(): WhisperLoadState {
+  return dictationLoad;
+}
 /** Subscribe to dictation-model load changes; returns an unsubscribe. Pair with getDictationLoad in
  *  React.useSyncExternalStore. */
 export function subscribeDictationLoad(cb: () => void): () => void {
   loadListeners.add(cb);
-  return () => { loadListeners.delete(cb); };
+  return () => {
+    loadListeners.delete(cb);
+  };
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -227,10 +262,16 @@ self.onmessage = async (e) => {
 };
 `;
 
-type WorkerResult = { text: string; chunks: { timestamp: [number, number | null]; text?: string }[] | null };
+type WorkerResult = {
+  text: string;
+  chunks: { timestamp: [number, number | null]; text?: string }[] | null;
+};
 let worker: Worker | null = null;
 let reqId = 0;
-const pending = new Map<number, { resolve: (r: WorkerResult) => void; reject: (e: Error) => void }>();
+const pending = new Map<
+  number,
+  { resolve: (r: WorkerResult) => void; reject: (e: Error) => void }
+>();
 
 function buildWorkerCfg() {
   return {
@@ -247,28 +288,44 @@ function buildWorkerCfg() {
 function getWorker(): Worker {
   if (worker) return worker;
   registerModelServiceWorker(); // main-thread SW registration (caches the wake/sherpa models)
-  const url = URL.createObjectURL(new Blob([WORKER_SRC], { type: 'application/javascript' }));
+  const url = URL.createObjectURL(
+    new Blob([WORKER_SRC], { type: 'application/javascript' })
+  );
   const w = new Worker(url, { type: 'module' });
   w.onmessage = (e: MessageEvent) => {
     const m = e.data;
     if (!m) return;
-    if (m.type === 'loadState') { setDictationLoad(m.patch); return; }
-    if (m.type === 'progress') { setDictationLoad({ progress: m.frac }); return; }
+    if (m.type === 'loadState') {
+      setDictationLoad(m.patch);
+      return;
+    }
+    if (m.type === 'progress') {
+      setDictationLoad({ progress: m.frac });
+      return;
+    }
     if (m.type === 'result') {
       const p = pending.get(m.id);
-      if (p) { pending.delete(m.id); p.resolve({ text: m.text, chunks: m.chunks }); }
+      if (p) {
+        pending.delete(m.id);
+        p.resolve({ text: m.text, chunks: m.chunks });
+      }
       return;
     }
     if (m.type === 'error') {
       const p = pending.get(m.id);
-      if (p) { pending.delete(m.id); p.reject(new Error(m.message)); }
+      if (p) {
+        pending.delete(m.id);
+        p.reject(new Error(m.message));
+      }
       return;
     }
   };
   w.onerror = (e) => {
     // A worker-level failure (e.g. the transformers.js import blocked by CSP) — fail any in-flight calls so
     // callers fall back instead of hanging, and reset the load indicator.
-    const err = new Error(`whisper worker error: ${e.message || 'failed to load'}`);
+    const err = new Error(
+      `whisper worker error: ${e.message || 'failed to load'}`
+    );
     pending.forEach((p) => p.reject(err));
     pending.clear();
     setDictationLoad({ active: false });
@@ -280,7 +337,10 @@ function getWorker(): Worker {
 
 // Post a transcribe request to the worker; the 16 kHz mono samples are TRANSFERRED (zero-copy). Resolves
 // with the worker's { text, chunks }.
-function callWorker(want: 'text' | 'segments' | 'gate', samples: Float32Array): Promise<WorkerResult> {
+function callWorker(
+  want: 'text' | 'segments' | 'gate',
+  samples: Float32Array
+): Promise<WorkerResult> {
   const w = getWorker();
   const id = ++reqId;
   return new Promise<WorkerResult>((resolve, reject) => {
@@ -321,7 +381,10 @@ function downmixToMono(audio: AudioBuffer): Float32Array {
 
 // Linear-resample mono audio to 16 kHz (what Whisper wants). Shared by the blob + raw-samples paths. Always
 // returns a fresh, standalone Float32Array (safe to transfer to the worker).
-function resampleTo16kMono(src: Float32Array, sampleRate: number): Float32Array {
+function resampleTo16kMono(
+  src: Float32Array,
+  sampleRate: number
+): Float32Array {
   const ratio = 16000 / sampleRate;
   const n = Math.round(src.length * ratio);
   const out = new Float32Array(n);
@@ -338,7 +401,10 @@ function resampleTo16kMono(src: Float32Array, sampleRate: number): Float32Array 
 // main thread (no AudioContext in workers), but it's cheap; the heavy inference is what moved off-thread.
 // try/finally so a failed decode still closes the AudioContext (they'd otherwise leak across retries).
 export async function decodeTo16kMono(blob: Blob): Promise<Float32Array> {
-  const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  const Ctx =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext: typeof AudioContext })
+      .webkitAudioContext;
   const ctx = new Ctx();
   try {
     const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
@@ -354,11 +420,22 @@ function encodeWav16kMono(samples: Float32Array): Blob {
   const sr = 16000;
   const buf = new ArrayBuffer(44 + samples.length * 2);
   const view = new DataView(buf);
-  const str = (o: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
-  str(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); str(8, 'WAVE');
-  str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
-  view.setUint32(24, sr, true); view.setUint32(28, sr * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
-  str(36, 'data'); view.setUint32(40, samples.length * 2, true);
+  const str = (o: number, s: string) => {
+    for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i));
+  };
+  str(0, 'RIFF');
+  view.setUint32(4, 36 + samples.length * 2, true);
+  str(8, 'WAVE');
+  str(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sr, true);
+  view.setUint32(28, sr * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  str(36, 'data');
+  view.setUint32(40, samples.length * 2, true);
   let o = 44;
   for (let i = 0; i < samples.length; i++) {
     const s = Math.max(-1, Math.min(1, samples[i]));
@@ -380,9 +457,16 @@ function encodeWav16kMono(samples: Float32Array): Blob {
  * removes too much. Returns a trimmed WAV blob (or the original on failure / nothing sensible to cut). Only
  * call on a PHRASE-triggered stop — not a manual button stop, where there's no phrase to remove.
  */
-export async function trimTrailingStopPhrase(blob: Blob, phraseHintSec = 0): Promise<Blob> {
+export async function trimTrailingStopPhrase(
+  blob: Blob,
+  phraseHintSec = 0
+): Promise<Blob> {
   let samples: Float32Array;
-  try { samples = await decodeTo16kMono(blob); } catch { return blob; }
+  try {
+    samples = await decodeTo16kMono(blob);
+  } catch {
+    return blob;
+  }
   const SR = 16000;
   const n = samples.length;
   if (n < SR * 0.8) return blob; // too short to safely trim
@@ -393,15 +477,16 @@ export async function trimTrailingStopPhrase(blob: Blob, phraseHintSec = 0): Pro
   const e = new Float32Array(nf);
   let peak = 0;
   for (let f = 0; f < nf; f++) {
-    const a = f * fr, b = Math.min(n, a + fr);
+    const a = f * fr,
+      b = Math.min(n, a + fr);
     let s = 0;
     for (let i = a; i < b; i++) s += samples[i] * samples[i];
     e[f] = Math.sqrt(s / (b - a));
     if (e[f] > peak) peak = e[f];
   }
-  const sil = Math.max(0.008, peak * 0.15);             // "silence" threshold, adaptive to the clip's level
+  const sil = Math.max(0.008, peak * 0.15); // "silence" threshold, adaptive to the clip's level
   const minGap = Math.max(1, Math.round((0.15 * SR) / fr)); // a real pause = >= ~150 ms of silence
-  const maxTrimFrames = Math.round((2.2 * SR) / fr);     // never cut more than ~2.2 s
+  const maxTrimFrames = Math.round((2.2 * SR) / fr); // never cut more than ~2.2 s
   const floor = Math.max(0, nf - maxTrimFrames);
 
   let cutFrame: number;
@@ -411,37 +496,55 @@ export async function trimTrailingStopPhrase(blob: Blob, phraseHintSec = 0): Pro
     // if none is near, cut at the anchor itself. Pause-independent.
     const anchor = Math.max(0, nf - Math.round((phraseHintSec * SR) / fr));
     const win = Math.round((0.35 * SR) / fr);
-    let best = -1, bestDist = Infinity;
-    for (let f = Math.max(0, anchor - win); f <= Math.min(nf - 1, anchor + win); f++) {
-      if (e[f] < sil) { const dist = Math.abs(f - anchor); if (dist < bestDist) { bestDist = dist; best = f; } }
+    let best = -1,
+      bestDist = Infinity;
+    for (
+      let f = Math.max(0, anchor - win);
+      f <= Math.min(nf - 1, anchor + win);
+      f++
+    ) {
+      if (e[f] < sil) {
+        const dist = Math.abs(f - anchor);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = f;
+        }
+      }
     }
     cutFrame = best >= 0 ? best : anchor;
   } else {
     // Energy-only fallback: walk back from the end to the last sustained pause.
     let k = nf - 1;
-    while (k >= floor && e[k] < sil) k--;                // skip any trailing quiet after "done"
+    while (k >= floor && e[k] < sil) k--; // skip any trailing quiet after "done"
     cutFrame = -1;
     while (k >= floor) {
       if (e[k] < sil) {
         let m = k;
-        while (m >= floor && e[m] < sil) m--;            // measure this silence run
-        if (k - m >= minGap) { cutFrame = k + 1; break; } // sustained pause → the phrase starts after it
-        k = m;                                           // micro-pause inside the phrase → keep going back
+        while (m >= floor && e[m] < sil) m--; // measure this silence run
+        if (k - m >= minGap) {
+          cutFrame = k + 1;
+          break;
+        } // sustained pause → the phrase starts after it
+        k = m; // micro-pause inside the phrase → keep going back
       } else k--;
     }
     if (cutFrame < 0) cutFrame = Math.max(0, nf - Math.round((1.1 * SR) / fr)); // no pause → conservative fixed trim
   }
-  cutFrame = Math.max(cutFrame, floor);                  // enforce the max-trim cap
+  cutFrame = Math.max(cutFrame, floor); // enforce the max-trim cap
   const cutSample = Math.min(n, cutFrame * fr);
-  if (cutSample < SR * 0.2) return blob;                 // would leave almost nothing — bail (text-strip covers it)
+  if (cutSample < SR * 0.2) return blob; // would leave almost nothing — bail (text-strip covers it)
   return encodeWav16kMono(samples.subarray(0, cutSample));
 }
 
-export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<string> {
+export async function transcribeBlob(
+  blob: Blob,
+  trimEndSeconds = 0
+): Promise<string> {
   let samples = await decodeTo16kMono(blob);
   if (trimEndSeconds > 0) {
     const cut = Math.round(trimEndSeconds * 16000);
-    if (samples.length > cut + 16000) samples = samples.slice(0, samples.length - cut); // keep >=1s (slice = standalone buffer)
+    if (samples.length > cut + 16000)
+      samples = samples.slice(0, samples.length - cut); // keep >=1s (slice = standalone buffer)
   }
   const out = await callWorker('text', samples);
   return (out.text ?? '').trim();
@@ -449,14 +552,19 @@ export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<st
 
 /** Transcribe raw mono samples (any sample rate) → text. For the live dictation caption, where we re-run
  *  the growing utterance every couple seconds; the FINAL send still uses transcribeBlob. */
-export async function transcribeSamples(samples: Float32Array, sampleRate: number): Promise<string> {
+export async function transcribeSamples(
+  samples: Float32Array,
+  sampleRate: number
+): Promise<string> {
   const out = await callWorker('text', resampleTo16kMono(samples, sampleRate));
   return (out.text ?? '').trim();
 }
 
 /** Transcribe with timestamps → segments `[{ start, end, text }]`, for diarization (align speaker turns to
  *  text). Returns 16 kHz-relative seconds. See `useDiarization`. */
-export async function transcribeSegments(blob: Blob): Promise<TranscriptSegment[]> {
+export async function transcribeSegments(
+  blob: Blob
+): Promise<TranscriptSegment[]> {
   const samples = await decodeTo16kMono(blob);
   const out = await callWorker('segments', samples);
   const chunks = out.chunks ?? [];
@@ -472,7 +580,14 @@ export async function transcribeSegments(blob: Blob): Promise<TranscriptSegment[
 // Server-ASR model id (override via localStorage ozwellConfig.serverWhisper); defaults to the
 // OpenAI-compatible 'whisper-1'.
 function serverAsrModel(): string {
-  try { return JSON.parse(localStorage.getItem('ozwellConfig') || '{}').serverWhisper || 'whisper-1'; } catch { return 'whisper-1'; }
+  try {
+    return (
+      JSON.parse(localStorage.getItem('ozwellConfig') || '{}').serverWhisper ||
+      'whisper-1'
+    );
+  } catch {
+    return 'whisper-1';
+  }
 }
 
 /** Server-side transcription: POST the recorded audio to the OpenAI-compatible /v1/audio/transcriptions
@@ -486,13 +601,16 @@ export async function transcribeServer(blob: Blob): Promise<string> {
   form.append('model', serverAsrModel());
   const url = `${cfg.baseURL.replace(/\/$/, '')}/v1/audio/transcriptions`;
   const headers: Record<string, string> = {};
-  if (cfg.apiKey && cfg.apiKey !== 'ollama') headers.Authorization = `Bearer ${cfg.apiKey}`;
+  if (cfg.apiKey && cfg.apiKey !== 'ollama')
+    headers.Authorization = `Bearer ${cfg.apiKey}`;
   const res = await fetch(url, { method: 'POST', headers, body: form });
   if (!res.ok) {
     // statusText is often empty — include a short body snippet so the failure is actionable (the caller
     // still catches this and falls back to on-device transcription).
     const body = await res.text().catch(() => '');
-    throw new Error(`Server ASR ${res.status}: ${res.statusText || body.slice(0, 200) || 'request failed'}`);
+    throw new Error(
+      `Server ASR ${res.status}: ${res.statusText || body.slice(0, 200) || 'request failed'}`
+    );
   }
   const data = await res.json();
   return (typeof data?.text === 'string' ? data.text : '').trim();
@@ -501,7 +619,10 @@ export async function transcribeServer(blob: Blob): Promise<string> {
 /** Stop-confirm gate: transcribe a short raw-sample window (e.g. the rolling recorder's last ~2s) with the
  *  FAST model and return the text. Used to verify a "ozwell i'm done" wake actually ended with "done"
  *  before committing the stop. Cheap — accuracy on the lone word "done" is all it needs. */
-export async function transcribeGate(samples: Float32Array, sampleRate: number): Promise<string> {
+export async function transcribeGate(
+  samples: Float32Array,
+  sampleRate: number
+): Promise<string> {
   const out = await callWorker('gate', resampleTo16kMono(samples, sampleRate));
   return (out.text ?? '').trim();
 }
@@ -511,10 +632,14 @@ export async function transcribeGate(samples: Float32Array, sampleRate: number):
  *  "I am done") including the bare word alone. Bare "as well" is NOT stripped (too common) unless joined
  *  to "i'm done". */
 export function stripStopPhrase(text: string): string {
-  const tail = /(?:\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|as\s*well|also|oswald)\b\s*,?\s*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
+  const tail =
+    /(?:\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|as\s*well|also|oswald)\b[\s,]*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
   let prev: string | null = null;
   let t = text;
-  while (t !== prev && t) { prev = t; t = t.replace(tail, '').replace(/[\s.,!?-]+$/, ''); }
+  while (t !== prev && t) {
+    prev = t;
+    t = t.replace(tail, '').replace(/[\s.,!?-]+$/, '');
+  }
   return t.trim();
 }
 
@@ -523,5 +648,7 @@ export function stripStopPhrase(text: string): string {
  *  NOT fire on a bare "ozwell" or a mid-sentence "done" — "we're almost done here" ends on "here", so no
  *  match. Favors precision: a missed real stop just means "say it again"; a false stop loses dictation. */
 export function endsWithDone(text: string): boolean {
-  return /\b(?:i(?:['’]?m|\s+am)\s+|all\s+|well\s+)?done\b[\s.,!?-]*$/i.test(text);
+  return /\b(?:i(?:['’]?m|\s+am)\s+|all\s+|well\s+)?done\b[\s.,!?-]*$/i.test(
+    text
+  );
 }

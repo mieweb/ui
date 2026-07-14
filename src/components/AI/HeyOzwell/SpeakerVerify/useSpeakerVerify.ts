@@ -13,8 +13,8 @@
 import * as React from 'react';
 
 export interface VerifyResult {
-  score: number;            // raw cosine to the enrolled centroid (max over voices × conditions)
-  znorm: number | null;     // z-score vs the cohort (channel-invariant); null if cohort absent
+  score: number; // raw cosine to the enrolled centroid (max over voices × conditions)
+  znorm: number | null; // z-score vs the cohort (channel-invariant); null if cohort absent
   pass: boolean;
   enrolled: boolean;
 }
@@ -23,8 +23,8 @@ export interface VerifyResult {
 export interface VoiceInfo {
   id: string;
   label: string;
-  createdAt: number;        // ms epoch; 0 for migrated legacy enrollments
-  conditions: number;       // how many condition-centroids this voice has
+  createdAt: number; // ms epoch; 0 for migrated legacy enrollments
+  conditions: number; // how many condition-centroids this voice has
 }
 
 /** Best-matching enrolled voice for an utterance (from `identify`). */
@@ -48,9 +48,17 @@ export interface SpeakerVerifyHandle {
   ready: boolean;
   error: string | null;
   /** Build/append a voiceprint for a phrase from recorded utterances (Float32 samples + their sample rate). */
-  enroll: (phrase: string, utterances: { samples: Float32Array; sampleRate: number }[], opts?: EnrollOpts) => { n: number; conditions: number; voiceId: string } | null;
+  enroll: (
+    phrase: string,
+    utterances: { samples: Float32Array; sampleRate: number }[],
+    opts?: EnrollOpts
+  ) => { n: number; conditions: number; voiceId: string } | null;
   /** Verify a live utterance against the enrolled voiceprints (passes if ANY enrolled voice matches). */
-  verify: (phrase: string, samples: Float32Array, sampleRate: number) => VerifyResult | null;
+  verify: (
+    phrase: string,
+    samples: Float32Array,
+    sampleRate: number
+  ) => VerifyResult | null;
   conditionCount: (phrase: string) => number;
   /** TitaNet speaker embedding for a raw utterance — for diarization/clustering. Null if not ready. */
   embed: (samples: Float32Array, sampleRate: number) => Float32Array | null;
@@ -66,12 +74,20 @@ export interface SpeakerVerifyHandle {
   clear: () => void;
   /** Tune the WHO gate live (read at verify-time): `cosine` threshold, `znorm` (AS-norm) threshold, and
    *  `useAsnorm` = gate on the z-score vs the raw cosine. */
-  setGates: (g: { cosine?: number; znorm?: number; useAsnorm?: boolean }) => void;
+  setGates: (g: {
+    cosine?: number;
+    znorm?: number;
+    useAsnorm?: boolean;
+  }) => void;
 }
 
 interface SVApi {
   ready: () => Promise<unknown>;
-  enroll: (phrase: string, u: { samples: Float32Array; sampleRate: number }[], opts?: EnrollOpts) => { n: number; conditions: number; voiceId: string };
+  enroll: (
+    phrase: string,
+    u: { samples: Float32Array; sampleRate: number }[],
+    opts?: EnrollOpts
+  ) => { n: number; conditions: number; voiceId: string };
   verify: (phrase: string, s: Float32Array, sr: number) => VerifyResult;
   conditionCount: (phrase: string) => number;
   embed: (samples: Float32Array, sampleRate: number) => Float32Array | null;
@@ -80,9 +96,9 @@ interface SVApi {
   removeVoice: (voiceId: string) => void;
   renameVoice: (voiceId: string, label: string) => void;
   clearEnrollment: () => void;
-  threshold: number;        // raw-cosine gate (default 0.45)
-  znormThreshold: number;   // z-score (AS-norm) gate (default 1.5)
-  useAsnorm: boolean;       // gate on z-score instead of raw cosine
+  threshold: number; // raw-cosine gate (default 0.45)
+  znormThreshold: number; // z-score (AS-norm) gate (default 1.5)
+  useAsnorm: boolean; // gate on z-score instead of raw cosine
 }
 
 export interface UseSpeakerVerifyOpts {
@@ -91,7 +107,9 @@ export interface UseSpeakerVerifyOpts {
   enabled?: boolean;
 }
 
-export function useSpeakerVerify(opts: UseSpeakerVerifyOpts = {}): SpeakerVerifyHandle {
+export function useSpeakerVerify(
+  opts: UseSpeakerVerifyOpts = {}
+): SpeakerVerifyHandle {
   const { enabled = true } = opts;
   const [ready, setReady] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -104,7 +122,8 @@ export function useSpeakerVerify(opts: UseSpeakerVerifyOpts = {}): SpeakerVerify
       try {
         // running the vendored IIFE sets window.SpeakerVerify and kicks off loading the sherpa WASM
         await import('./lib/speaker-verify.js');
-        const sv = (window as unknown as { SpeakerVerify?: SVApi }).SpeakerVerify;
+        const sv = (window as unknown as { SpeakerVerify?: SVApi })
+          .SpeakerVerify;
         if (!sv) throw new Error('SpeakerVerify failed to initialize');
         await sv.ready();
         if (cancelled) return;
@@ -115,17 +134,23 @@ export function useSpeakerVerify(opts: UseSpeakerVerifyOpts = {}): SpeakerVerify
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [enabled]);
 
   return {
     ready,
     error,
-    enroll: (phrase, utterances, opts) => svRef.current?.enroll(phrase, utterances, opts) ?? null,
-    verify: (phrase, samples, sampleRate) => svRef.current?.verify(phrase, samples, sampleRate) ?? null,
+    enroll: (phrase, utterances, opts) =>
+      svRef.current?.enroll(phrase, utterances, opts) ?? null,
+    verify: (phrase, samples, sampleRate) =>
+      svRef.current?.verify(phrase, samples, sampleRate) ?? null,
     conditionCount: (phrase) => svRef.current?.conditionCount(phrase) ?? 0,
-    embed: (samples, sampleRate) => svRef.current?.embed(samples, sampleRate) ?? null,
-    identify: (samples, sampleRate) => svRef.current?.identify(samples, sampleRate) ?? null,
+    embed: (samples, sampleRate) =>
+      svRef.current?.embed(samples, sampleRate) ?? null,
+    identify: (samples, sampleRate) =>
+      svRef.current?.identify(samples, sampleRate) ?? null,
     listVoices: () => svRef.current?.listVoices() ?? [],
     removeVoice: (voiceId) => svRef.current?.removeVoice(voiceId),
     renameVoice: (voiceId, label) => svRef.current?.renameVoice(voiceId, label),

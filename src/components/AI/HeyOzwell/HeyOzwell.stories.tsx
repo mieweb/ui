@@ -74,12 +74,24 @@ interface DemoArgs {
   reviewBeforeSend: boolean;
 }
 
-function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor, liveTranscript, conversationMode, reviewBeforeSend }: DemoArgs) {
+function Demo({
+  autoDictateOnWake,
+  closeChatOnDone,
+  transcription,
+  requireDoctor,
+  liveTranscript,
+  conversationMode,
+  reviewBeforeSend,
+}: DemoArgs) {
   // The whole flow now lives in the shipped <HeyOzwell> drop-in — the host only places the octopus in
   // its header and wires where the settings items navigate. (For custom layouts, useHeyOzwell + the
   // parts give the same behavior; see the component source.)
   return (
-    <div data-hey-ozwell-demo className="bg-background relative" style={{ height: 460 }}>
+    <div
+      data-hey-ozwell-demo
+      className="bg-background relative"
+      style={{ height: 460 }}
+    >
       {/* Pointer cursor on the floating chat trigger — scoped to THIS demo only (AIChatTrigger is a shared
           library component, so we don't change it globally). FloatingAIChat doesn't forward a className to
           its trigger, so target its data-slot within this wrapper. */}
@@ -87,7 +99,9 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
 
       {/* Header bar — app name + the drop-in Hey Ozwell (octopus toggle + settings menu + floating chat) */}
       <div className="border-border bg-background flex items-center border-b px-[22px] py-3">
-        <strong className="text-foreground text-[15px] font-bold">BlueHive EHR</strong>
+        <strong className="text-foreground text-[15px] font-bold">
+          BlueHive EHR
+        </strong>
         <span className="flex-1" />
         <HeyOzwell
           autoDictateOnWake={autoDictateOnWake}
@@ -114,7 +128,8 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
           <b className="text-foreground">“hey ozwell”</b>.
         </p>
         <p className="text-muted-foreground mt-3.5 text-[12.5px]">
-          Tip: <b>right-click</b> (or long-press) the octopus for Ozwell settings.
+          Tip: <b>right-click</b> (or long-press) the octopus for Ozwell
+          settings.
         </p>
       </div>
     </div>
@@ -126,7 +141,15 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
  * long-press the octopus for Ozwell settings.
  */
 export const Interactive: StoryObj<DemoArgs> = {
-  args: { autoDictateOnWake: true, closeChatOnDone: false, transcription: 'browser', requireDoctor: true, liveTranscript: false, conversationMode: false, reviewBeforeSend: false },
+  args: {
+    autoDictateOnWake: true,
+    closeChatOnDone: false,
+    transcription: 'browser',
+    requireDoctor: true,
+    liveTranscript: false,
+    conversationMode: false,
+    reviewBeforeSend: false,
+  },
   argTypes: {
     autoDictateOnWake: {
       name: 'Auto-dictate on wake',

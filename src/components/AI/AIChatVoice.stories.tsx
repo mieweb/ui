@@ -18,7 +18,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { AIChat } from './AIChat';
 import type { AIMessage } from './types';
-import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from './ozwellChat';
+import {
+  askOzwellStream,
+  isOzwellConfigured,
+  toOzwellMessages,
+} from './ozwellChat';
 import { transcribeBlob, warmWhisper } from './whisperTranscribe';
 
 const meta: Meta<typeof AIChat> = {
@@ -62,7 +66,9 @@ function VoiceAIChat() {
 
   // preload Whisper as soon as the story opens, so it's loading in the background while you read/talk
   // instead of waiting for the first mic tap — the first transcription is then fast.
-  React.useEffect(() => { warmWhisper(); }, []);
+  React.useEffect(() => {
+    warmWhisper();
+  }, []);
 
   const send = React.useCallback((text: string) => {
     const t = text.trim();
@@ -73,22 +79,49 @@ function VoiceAIChat() {
     // Configure with `window.__ozwell = { apiKey: '…' }` (or localStorage['ozwellConfig']).
     if (!isOzwellConfigured()) {
       window.setTimeout(
-        () => setMessages((m) => [...m, mkMsg('assistant', `Heard: “${t}”. Wire me to the Ozwell backend and I'd answer.`)]),
-        350,
+        () =>
+          setMessages((m) => [
+            ...m,
+            mkMsg(
+              'assistant',
+              `Heard: “${t}”. Wire me to the Ozwell backend and I'd answer.`
+            ),
+          ]),
+        350
       );
       return;
     }
 
     // Real Ozwell call — streamed token-by-token into one assistant message (multi-turn: pass history).
-    const history = [...toOzwellMessages(messagesRef.current), { role: 'user' as const, content: t }];
+    const history = [
+      ...toOzwellMessages(messagesRef.current),
+      { role: 'user' as const, content: t },
+    ];
     const id = `assistant-${++counter}`;
-    setMessages((m) => [...m, { id, role: 'assistant', content: [{ type: 'text', text: '' }], timestamp: new Date(), status: 'streaming' }]);
+    setMessages((m) => [
+      ...m,
+      {
+        id,
+        role: 'assistant',
+        content: [{ type: 'text', text: '' }],
+        timestamp: new Date(),
+        status: 'streaming',
+      },
+    ]);
     setGenerating(true);
     const patch = (txt: string, status: AIMessage['status']) =>
-      setMessages((m) => m.map((msg) => (msg.id === id ? { ...msg, content: [{ type: 'text', text: txt }], status } : msg)));
+      setMessages((m) =>
+        m.map((msg) =>
+          msg.id === id
+            ? { ...msg, content: [{ type: 'text', text: txt }], status }
+            : msg
+        )
+      );
     askOzwellStream(history, (_d, full) => patch(full, 'streaming'))
       .then((full) => patch(full || '(no response)', 'complete'))
-      .catch((e) => patch(`⚠️ ${e instanceof Error ? e.message : String(e)}`, 'error'))
+      .catch((e) =>
+        patch(`⚠️ ${e instanceof Error ? e.message : String(e)}`, 'error')
+      )
       .finally(() => setGenerating(false));
   }, []);
 
@@ -100,7 +133,9 @@ function VoiceAIChat() {
         talkToText
         isGenerating={generating}
         title="Ozwell Assistant"
-        inputPlaceholder={transcribing ? 'Transcribing on-device…' : 'Speak or type…'}
+        inputPlaceholder={
+          transcribing ? 'Transcribing on-device…' : 'Speak or type…'
+        }
         onSendMessage={send}
         onRecordingComplete={async (blob) => {
           setTranscribing(true);

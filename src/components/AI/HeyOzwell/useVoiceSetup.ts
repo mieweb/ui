@@ -16,7 +16,13 @@ import { warmWhisper } from '../whisperTranscribe';
 import { loadWhatPrints, saveWhatPrints } from '../voiceprintStore';
 import { openRollingRecorder, chime, type RollingRecorder } from './audio';
 
-export type VoiceSetupPhase = 'intro' | 'getready' | 'speak' | 'gotit' | 'deny' | 'done';
+export type VoiceSetupPhase =
+  | 'intro'
+  | 'getready'
+  | 'speak'
+  | 'gotit'
+  | 'deny'
+  | 'done';
 
 const PHRASES = [
   { key: 'hey-ozwell', label: 'hey ozwell' },
@@ -61,11 +67,17 @@ export interface UseVoiceSetupResult {
   cancel: () => void;
 }
 
-export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetupResult {
+export function useVoiceSetup(
+  options: UseVoiceSetupOptions = {}
+): UseVoiceSetupResult {
   const { startAdding = false, voiceId, label } = options;
   // Resolve the voice id once: the caller's, else "you" for a fresh enroll, else a fresh id (add mode).
   const [enrollVoiceId] = React.useState(
-    () => voiceId || (startAdding ? `voice-${Date.now()}-${Math.floor(Math.random() * 1e4)}` : 'you')
+    () =>
+      voiceId ||
+      (startAdding
+        ? `voice-${Date.now()}-${Math.floor(Math.random() * 1e4)}`
+        : 'you')
   );
   const sv = useSpeakerVerify();
   const expectRef = React.useRef<string | null>(null);
@@ -121,7 +133,8 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
       if (!recRef.current) recRef.current = openRollingRecorder(stream);
       const Ctx =
         window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
       ctx = new Ctx();
       // May start suspended under autoplay policy → the analyser loop would read all zeros (dead pulse).
       // Best-effort resume; ignore if it rejects.
@@ -154,7 +167,9 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
     };
   }, [wake.ready]);
 
-  const awaitWake = (expect: string): Promise<{ fired?: string; timeout?: boolean }> => {
+  const awaitWake = (
+    expect: string
+  ): Promise<{ fired?: string; timeout?: boolean }> => {
     expectRef.current = expect;
     return new Promise((resolve) => {
       const t = window.setTimeout(() => {

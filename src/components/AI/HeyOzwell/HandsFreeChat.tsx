@@ -16,7 +16,13 @@
 import * as React from 'react';
 import { AIChat } from '../AIChat';
 import { RecordButton } from '../../RecordButton';
-import { Modal, ModalHeader, ModalTitle, ModalClose, ModalBody } from '../../Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalClose,
+  ModalBody,
+} from '../../Modal';
 import { HeyOzwellToggle } from './HeyOzwellToggle';
 import { OzwellSettingsMenu } from './OzwellSettingsMenu';
 import { VoiceManager } from './VoiceManager';
@@ -97,7 +103,13 @@ export function HandsFreeChat({
             slot, so it's a positioned overlay. */}
         <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
           <OzwellSettingsMenu
-            trigger={<HeyOzwellToggle {...oz.toggleProps} logoSrc={logoSrc} size={34} />}
+            trigger={
+              <HeyOzwellToggle
+                {...oz.toggleProps}
+                logoSrc={logoSrc}
+                size={34}
+              />
+            }
             open={oz.settingsOpen}
             onOpenChange={oz.setSettingsOpen}
             modelStatus={oz.modelStatus}
@@ -133,7 +145,13 @@ export function HandsFreeChat({
                   size="sm"
                   showWaveform
                   showPulse={phase === 'dictating'}
-                  state={phase === 'dictating' ? 'recording' : phase === 'transcribing' ? 'processing' : 'idle'}
+                  state={
+                    phase === 'dictating'
+                      ? 'recording'
+                      : phase === 'transcribing'
+                        ? 'processing'
+                        : 'idle'
+                  }
                 />
               </span>
             ),

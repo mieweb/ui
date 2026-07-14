@@ -71,7 +71,8 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
     autoDictateOnWake: {
       name: 'Auto-dictate on wake',
       control: 'boolean',
-      description: 'ON: “hey ozwell” starts dictating hands-free. OFF: it just focuses the chat.',
+      description:
+        'ON: “hey ozwell” starts dictating hands-free. OFF: it just focuses the chat.',
     },
     liveTranscript: {
       name: 'Live caption',

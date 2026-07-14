@@ -135,9 +135,15 @@ export function HeyOzwellToggle({
   // pulsing) closes the gap to a full circle. See the ring render below.
   const [synthP, setSynthP] = React.useState(0);
   React.useEffect(() => {
-    if (!(loading && !hasProgress)) { setSynthP(0); return; }
+    if (!(loading && !hasProgress)) {
+      setSynthP(0);
+      return;
+    }
     setSynthP(0.08); // start visibly non-zero so the ring appears at once
-    const id = window.setInterval(() => setSynthP((s) => s + (0.82 - s) * 0.12), 60);
+    const id = window.setInterval(
+      () => setSynthP((s) => s + (0.82 - s) * 0.12),
+      60
+    );
     return () => window.clearInterval(id);
   }, [loading, hasProgress]);
   const ringProgress = hasProgress ? p : synthP;
@@ -147,13 +153,21 @@ export function HeyOzwellToggle({
   const warmStroke = 1.5;
   const warmR = (warmBox - warmStroke) / 2;
   const warmC = 2 * Math.PI * warmR;
-  const wp = typeof warmProgress === 'number' ? Math.max(0, Math.min(1, warmProgress)) : 0;
+  const wp =
+    typeof warmProgress === 'number'
+      ? Math.max(0, Math.min(1, warmProgress))
+      : 0;
 
   // Long-press / right-click → settings. A fired long-press sets a flag so the click on press-release
   // doesn't ALSO toggle. Pointer events cover mouse + touch; contextmenu covers right-click.
   const pressTimer = React.useRef<number | undefined>(undefined);
   const longFiredRef = React.useRef(false);
-  React.useEffect(() => () => { if (pressTimer.current) window.clearTimeout(pressTimer.current); }, []);
+  React.useEffect(
+    () => () => {
+      if (pressTimer.current) window.clearTimeout(pressTimer.current);
+    },
+    []
+  );
 
   const startPress = (e: React.PointerEvent) => {
     if (!onOpenSettings) return;
@@ -162,13 +176,22 @@ export function HeyOzwellToggle({
     // ("right-click / long-press") doesn't intend.
     if (e.pointerType === 'mouse') return;
     longFiredRef.current = false;
-    pressTimer.current = window.setTimeout(() => { longFiredRef.current = true; onOpenSettings(); }, longPressMs);
+    pressTimer.current = window.setTimeout(() => {
+      longFiredRef.current = true;
+      onOpenSettings();
+    }, longPressMs);
   };
   const cancelPress = () => {
-    if (pressTimer.current) { window.clearTimeout(pressTimer.current); pressTimer.current = undefined; }
+    if (pressTimer.current) {
+      window.clearTimeout(pressTimer.current);
+      pressTimer.current = undefined;
+    }
   };
   const handleClick = () => {
-    if (longFiredRef.current) { longFiredRef.current = false; return; } // long-press already opened settings
+    if (longFiredRef.current) {
+      longFiredRef.current = false;
+      return;
+    } // long-press already opened settings
     onToggle?.(!active);
   };
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -176,7 +199,10 @@ export function HeyOzwellToggle({
     e.preventDefault();
     cancelPress();
     // A long-press can fire the timer AND then a contextmenu (common on mobile) — don't open twice.
-    if (longFiredRef.current) { longFiredRef.current = false; return; }
+    if (longFiredRef.current) {
+      longFiredRef.current = false;
+      return;
+    }
     onOpenSettings();
   };
 
@@ -188,8 +214,18 @@ export function HeyOzwellToggle({
       type="button"
       data-slot="hey-ozwell-toggle"
       aria-pressed={active}
-      aria-label={active ? 'Hey Ozwell active — click to turn off' : 'Activate Hey Ozwell'}
-      title={(loading ? 'Getting Ozwell ready' : active ? 'Ozwell is listening — click to turn off' : 'Activate Ozwell') + loadHint + settingsHint}
+      aria-label={
+        active ? 'Hey Ozwell active — click to turn off' : 'Activate Hey Ozwell'
+      }
+      title={
+        (loading
+          ? 'Getting Ozwell ready'
+          : active
+            ? 'Ozwell is listening — click to turn off'
+            : 'Activate Ozwell') +
+        loadHint +
+        settingsHint
+      }
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       onPointerDown={(e) => startPress(e)}
@@ -199,7 +235,7 @@ export function HeyOzwellToggle({
       className={cn(
         'relative inline-flex cursor-pointer items-center justify-center rounded-full',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
+        'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         'dark:focus-visible:ring-offset-neutral-900',
         className
       )}
@@ -214,23 +250,40 @@ export function HeyOzwellToggle({
       {active && (
         <svg
           aria-hidden="true"
-          width={ringBox} height={ringBox} viewBox={`0 0 ${ringBox} ${ringBox}`}
+          width={ringBox}
+          height={ringBox}
+          viewBox={`0 0 ${ringBox} ${ringBox}`}
           style={{
-            position: 'absolute', inset: -3, pointerEvents: 'none', transform: 'rotate(-90deg)',
-            opacity: loading || doneFlash ? 1 : 0, transition: 'opacity .5s ease',
+            position: 'absolute',
+            inset: -3,
+            pointerEvents: 'none',
+            transform: 'rotate(-90deg)',
+            opacity: loading || doneFlash ? 1 : 0,
+            transition: 'opacity .5s ease',
           }}
         >
           {/* faint track = the visible "white space" the arc fills into */}
           <circle
-            cx={ringBox / 2} cy={ringBox / 2} r={ringR}
-            fill="none" stroke={READY_GREEN} strokeWidth={ringStroke}
+            cx={ringBox / 2}
+            cy={ringBox / 2}
+            r={ringR}
+            fill="none"
+            stroke={READY_GREEN}
+            strokeWidth={ringStroke}
             style={{ opacity: 0.15 }}
           />
           <circle
-            cx={ringBox / 2} cy={ringBox / 2} r={ringR}
-            fill="none" stroke={READY_GREEN} strokeWidth={ringStroke} strokeLinecap="round"
+            cx={ringBox / 2}
+            cy={ringBox / 2}
+            r={ringR}
+            fill="none"
+            stroke={READY_GREEN}
+            strokeWidth={ringStroke}
+            strokeLinecap="round"
             strokeDasharray={ringC}
-            strokeDashoffset={ringC * (1 - (loading ? Math.min(ringProgress, 0.85) : 1))}
+            strokeDashoffset={
+              ringC * (1 - (loading ? Math.min(ringProgress, 0.85) : 1))
+            }
             style={{ transition: 'stroke-dashoffset .3s ease' }}
           />
         </svg>
@@ -240,23 +293,40 @@ export function HeyOzwellToggle({
       {(warmActive || warmFade) && (
         <svg
           aria-hidden="true"
-          width={warmBox} height={warmBox} viewBox={`0 0 ${warmBox} ${warmBox}`}
+          width={warmBox}
+          height={warmBox}
+          viewBox={`0 0 ${warmBox} ${warmBox}`}
           style={{
-            position: 'absolute', inset: -6, pointerEvents: 'none', transform: 'rotate(-90deg)',
+            position: 'absolute',
+            inset: -6,
+            pointerEvents: 'none',
+            transform: 'rotate(-90deg)',
             // Stays mounted from active → fade so the opacity transition actually fires (soft completion).
-            opacity: warmActive ? 1 : 0, transition: 'opacity .5s ease',
+            opacity: warmActive ? 1 : 0,
+            transition: 'opacity .5s ease',
           }}
         >
           {/* faint full track so the arc reads as a ring, not a stray mark */}
           <circle
-            cx={warmBox / 2} cy={warmBox / 2} r={warmR}
-            fill="none" stroke={OZ} strokeWidth={warmStroke} strokeLinecap="round"
+            cx={warmBox / 2}
+            cy={warmBox / 2}
+            r={warmR}
+            fill="none"
+            stroke={OZ}
+            strokeWidth={warmStroke}
+            strokeLinecap="round"
             style={{ opacity: 0.12 }}
           />
           <circle
-            cx={warmBox / 2} cy={warmBox / 2} r={warmR}
-            fill="none" stroke={OZ} strokeWidth={warmStroke} strokeLinecap="round"
-            strokeDasharray={warmC} strokeDashoffset={warmC * (1 - (warmActive ? wp : 1))}
+            cx={warmBox / 2}
+            cy={warmBox / 2}
+            r={warmR}
+            fill="none"
+            stroke={OZ}
+            strokeWidth={warmStroke}
+            strokeLinecap="round"
+            strokeDasharray={warmC}
+            strokeDashoffset={warmC * (1 - (warmActive ? wp : 1))}
             style={{ opacity: 0.4, transition: 'stroke-dashoffset .2s linear' }}
           />
         </svg>
@@ -265,13 +335,18 @@ export function HeyOzwellToggle({
       <span
         aria-hidden="true"
         style={{
-          position: 'absolute', left: '50%', top: '50%',
-          width: size * 1.7, height: size * 1.7,
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          width: size * 1.7,
+          height: size * 1.7,
           transform: `translate(-50%, -50%) scale(${glowScale.toFixed(3)})`,
           borderRadius: '50%',
           background: `radial-gradient(circle, ${ozA(53)}, transparent 68%)`,
-          filter: 'blur(8px)', opacity: glowOpacity,
-          transition: 'opacity .15s linear', pointerEvents: 'none',
+          filter: 'blur(8px)',
+          opacity: glowOpacity,
+          transition: 'opacity .15s linear',
+          pointerEvents: 'none',
         }}
       />
       {/* One-shot "wake up" pop: a single scale bounce the instant wake detection is ready (doneFlash), so
@@ -285,7 +360,8 @@ export function HeyOzwellToggle({
       <span
         data-oz-wake={doneFlash ? '' : undefined}
         style={{
-          position: 'relative', display: 'inline-flex',
+          position: 'relative',
+          display: 'inline-flex',
           animation: doneFlash ? 'heyozwell-wake .5s ease-out' : undefined,
         }}
       >
@@ -295,10 +371,14 @@ export function HeyOzwellToggle({
           aria-hidden="true"
           draggable={false}
           style={{
-            width: size, height: size, userSelect: 'none',
+            width: size,
+            height: size,
+            userSelect: 'none',
             transform: `scale(${octoScale.toFixed(3)})`,
             transition: 'transform .08s linear, filter .3s ease',
-            filter: active ? `drop-shadow(0 2px 8px ${ozA(40)})` : 'grayscale(1) opacity(0.45)',
+            filter: active
+              ? `drop-shadow(0 2px 8px ${ozA(40)})`
+              : 'grayscale(1) opacity(0.45)',
           }}
         />
       </span>
