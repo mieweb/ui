@@ -1,0 +1,143 @@
+/**
+ * Shared on-device audio helpers for Hey Ozwell — previously copy-pasted across the enrollment,
+ * hands-free, and diagnostic stories. Centralized so all surfaces use one implementation.
+ */
+
+export interface RollingRecorder {
+  /** The AudioContext sample rate the snapshot is captured at. */
+  sampleRate: number;
+  /** The last ~2s of mono audio as Float32 samples (copies the whole retained buffer). */
+  snapshot: () => Float32Array;
+  /** Total samples captured so far (cheap; no copy). For an unbounded accumulator this grows with the
+   *  recording — pair with `snapshotFrom` to read only new audio without re-copying everything. */
+  totalSamples: () => number;
+  /** Copy only the samples from absolute index `startSample` to the end — O(new audio), not O(total).
+   *  Lets a live loop read just the fresh tail each tick instead of the whole accumulator (avoids O(n²)). */
+  snapshotFrom: (startSample: number) => Float32Array;
+  /** Free already-processed audio: drop whole chunks entirely before `sampleIndex`. Callers that read
+   *  forward via a cursor (live caption/transcript) call this to keep an unbounded accumulator from growing
+   *  without bound. Absolute indices are preserved (snapshotFrom/totalSamples still use them). */
+  discardBefore: (sampleIndex: number) => void;
+  /** Tear down the audio graph + context. */
+  close: () => void;
+}
+
+/**
+ * Open a rolling ~2s recorder as a SECOND consumer of an existing mic stream (e.g. the wake-word
+ * detector's `getStream()`) — never a second getUserMedia, which would silence the detector. Used to
+ * capture the wake-utterance audio for the speaker-verify (WHO) gate and for enrollment.
+ */
+export function openRollingRecorder(
+  stream: MediaStream,
+  maxSeconds = 2
+): RollingRecorder {
+  const Ctx =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext: typeof AudioContext })
+      .webkitAudioContext;
+  const ctx = new Ctx();
+  // A context created under an autoplay restriction can start suspended, which would starve the
+  // ScriptProcessor callbacks (silent recording). Best-effort resume; ignore if it rejects.
+  void ctx.resume().catch(() => {});
+  const src = ctx.createMediaStreamSource(stream);
+  const proc = ctx.createScriptProcessor(4096, 1, 1);
+  const sink = ctx.createGain();
+  sink.gain.value = 0;
+  // `maxSeconds = Infinity` → an accumulator (keeps everything not explicitly discarded, e.g. for live
+  // captions — callers free processed audio via discardBefore). Bounded mode keeps only the last maxSeconds.
+  const max =
+    maxSeconds === Infinity
+      ? Infinity
+      : Math.round(ctx.sampleRate * maxSeconds);
+  let chunks: Float32Array[] = [];
+  let base = 0; // absolute index of the first retained sample (advances as chunks are evicted/discarded)
+  let pushed = 0; // absolute index just past the last sample ever pushed
+  proc.onaudioprocess = (e) => {
+    const d = Float32Array.from(e.inputBuffer.getChannelData(0));
+    chunks.push(d);
+    pushed += d.length;
+    if (max !== Infinity) {
+      while (pushed - base > max && chunks.length > 1) {
+        base += chunks[0].length;
+        chunks.shift();
+      }
+    }
+  };
+  src.connect(proc);
+  proc.connect(sink);
+  sink.connect(ctx.destination);
+  return {
+    sampleRate: ctx.sampleRate,
+    snapshot: () => {
+      const s = new Float32Array(pushed - base);
+      let o = 0;
+      for (const c of chunks) {
+        s.set(c, o);
+        o += c.length;
+      }
+      return s;
+    },
+    totalSamples: () => pushed,
+    snapshotFrom: (startSample: number) => {
+      const start = Math.max(base, Math.min(startSample, pushed));
+      const out = new Float32Array(pushed - start);
+      let pos = base; // absolute sample index at the start of the current chunk
+      let o = 0;
+      for (const c of chunks) {
+        const chunkEnd = pos + c.length;
+        if (chunkEnd > start) {
+          const from = Math.max(0, start - pos);
+          const slice = from === 0 ? c : c.subarray(from);
+          out.set(slice, o);
+          o += slice.length;
+        }
+        pos = chunkEnd;
+      }
+      return out;
+    },
+    discardBefore: (sampleIndex: number) => {
+      while (chunks.length > 0 && base + chunks[0].length <= sampleIndex) {
+        base += chunks[0].length;
+        chunks.shift();
+      }
+    },
+    close: () => {
+      try {
+        proc.disconnect();
+        src.disconnect();
+        sink.disconnect();
+      } catch {
+        /* ignore */
+      }
+      void ctx.close();
+    },
+  };
+}
+
+/** A short sine-wave feedback tone (enrollment "get ready" / "got it" cues). Best-effort; no-ops if audio out is unavailable. */
+export function chime(freq: number, ms = 170): void {
+  try {
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    const ctx = new Ctx();
+    void ctx.resume().catch(() => {}); // may start suspended under autoplay policy → chime wouldn't play
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.frequency.value = freq;
+    o.type = 'sine';
+    o.connect(g);
+    g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + ms / 1000);
+    o.start();
+    o.stop(ctx.currentTime + ms / 1000 + 0.02);
+    window.setTimeout(() => {
+      void ctx.close();
+    }, ms + 120);
+  } catch {
+    /* no audio out */
+  }
+}

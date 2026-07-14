@@ -55,6 +55,14 @@ export const miewebUISafelist = [
   'bg-warning',
   'bg-destructive',
   'bg-info',
+  // Ozwell brand accent (Hey Ozwell voice components)
+  'bg-ozwell',
+  'hover:bg-ozwell',
+  'active:bg-ozwell',
+  'text-ozwell',
+  'text-ozwell-foreground',
+  'border-ozwell',
+  'focus-visible:ring-ozwell',
   'text-foreground',
   'text-card-foreground',
   'text-muted-foreground',
@@ -425,6 +433,11 @@ export const miewebUIPreset: MiewebUIPreset = {
           900: 'var(--mieweb-primary-900, #086285)',
           950: 'var(--mieweb-primary-950, #00506e)',
           foreground: 'var(--mieweb-primary-foreground, hsl(210 40% 98%))',
+        },
+        // Ozwell brand accent (the "Hey Ozwell" octopus blue) — distinct from the host app primary.
+        ozwell: {
+          DEFAULT: 'var(--mieweb-ozwell, #0BA0E0)',
+          foreground: 'var(--mieweb-ozwell-foreground, hsl(0 0% 100%))',
         },
         // Secondary color scale
         secondary: {

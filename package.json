@@ -326,6 +326,7 @@
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
     "marked": "^17.0.3",
+    "onnxruntime-web": "1.19.0",
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
