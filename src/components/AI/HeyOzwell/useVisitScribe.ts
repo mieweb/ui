@@ -99,13 +99,21 @@ export function useVisitScribe(
     liveBusyRef.current = false;
   }, []);
 
+  // Re-entrancy guard (Copilot review): `start()` awaits getUserMedia BEFORE recRef/recording are set, so
+  // a fast double-click on "Start visit" could open a second mic stream and orphan the first (mic indicator
+  // stuck on). A synchronous ref set at entry closes that async window; recRef covers the steady state.
+  const startingRef = React.useRef(false);
+
   const start = React.useCallback(async () => {
+    if (startingRef.current || recRef.current) return; // already starting/recording — ignore the extra call
+    startingRef.current = true;
     setStartError(null);
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
       setStartError(e instanceof Error ? e.message : 'Microphone unavailable');
+      startingRef.current = false;
       return;
     }
     let rec: MediaRecorder;
@@ -114,6 +122,7 @@ export function useVisitScribe(
     } catch (e) {
       stream.getTracks().forEach((t) => t.stop());
       setStartError(e instanceof Error ? e.message : 'Recording unsupported');
+      startingRef.current = false;
       return;
     }
     chunksRef.current = [];
@@ -185,6 +194,7 @@ export function useVisitScribe(
     }, 2000);
 
     setRecording(true);
+    startingRef.current = false; // recRef now guards; release so a future take can start
   }, [clearTimer]);
 
   const stop = React.useCallback(() => {
