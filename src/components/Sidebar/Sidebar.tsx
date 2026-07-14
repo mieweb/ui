@@ -447,14 +447,31 @@ export function SidebarNavItem({
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
 
-  const handleClick = useCallback(() => {
-    if (disabled) return;
-    onClick?.();
-    // Close mobile sidebar on navigation
-    if (isMobileViewport) {
-      closeMobile();
-    }
-  }, [disabled, onClick, isMobileViewport, closeMobile]);
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      if (disabled) return;
+
+      const isModifiedClick =
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey;
+
+      if (href && onClick && isModifiedClick) return;
+
+      if (href && onClick) {
+        event.preventDefault();
+      }
+
+      onClick?.();
+      // Close mobile sidebar on navigation
+      if (isMobileViewport) {
+        closeMobile();
+      }
+    },
+    [disabled, href, onClick, isMobileViewport, closeMobile]
+  );
 
   const content = (
     <>
