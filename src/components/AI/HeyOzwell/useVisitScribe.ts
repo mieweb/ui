@@ -142,7 +142,18 @@ export function useVisitScribe(
         void diarRef.current.diarize(blob).catch(() => {});
       }
     };
-    rec.start();
+    // start() can throw (invalid state / unsupported config) — without this, the stream would be left
+    // open and startingRef stuck true, permanently blocking future takes (Copilot review).
+    try {
+      rec.start();
+    } catch (e) {
+      stream.getTracks().forEach((t) => t.stop());
+      setStartError(
+        e instanceof Error ? e.message : 'Recording failed to start'
+      );
+      startingRef.current = false;
+      return;
+    }
     recRef.current = rec;
     streamRef.current = stream;
     startedAtRef.current = Date.now();
