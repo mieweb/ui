@@ -15,6 +15,7 @@ import { useWakeWord } from './useWakeWord';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Wake Word',
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     docs: {
