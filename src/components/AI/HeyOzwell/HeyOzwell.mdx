@@ -6,7 +6,7 @@ import * as HeyOzwellStories from './HeyOzwell.stories';
 # Hey Ozwell
 
 Hey Ozwell is the **voice entry point** for the assistant: wake word, speaker
-verification, dictation, hands-free chat, and ambient visit scribing — all
+verification, dictation, hands-free chat, and ambient visit scribing, all
 running **on-device, in the browser**. **Audio never leaves the page.** The
 only network dependency is the assistant's text reply (any OpenAI-compatible
 endpoint), which makes the stack PHI-safe by default.
@@ -16,12 +16,12 @@ endpoint), which makes the stack PHI-safe by default.
 ```tsx
 import { HeyOzwell } from '@mieweb/ui';
 
-// Drop the octopus into your header — that's the whole integration.
+// Drop the octopus into your header. That's the whole integration.
 <HeyOzwell chatProps={{ userName: 'Dr. Jane' }} />;
 ```
 
 Click the octopus to turn Ozwell on, say **"hey ozwell"** to dictate, and
-**"ozwell I'm done"** to transcribe + send. For custom layouts, use the
+**"ozwell I'm done"** to transcribe and send. For custom layouts, use the
 headless hook and compose the parts yourself:
 
 ```tsx
@@ -35,17 +35,17 @@ const oz = useHeyOzwell({ autoDictateOnWake: true, requireDoctor: true });
 ## The flow
 
 1. **The octopus lives in the top bar.** Off, it sits gray and muted.
-2. **Click to activate.** A ring fills while the wake detector starts; it
-   completes **green the moment the mic is live** — ring done means "you can
+2. **Click to activate.** A ring fills while the wake detector starts, and it
+   completes **green the moment the mic is live**: ring done means "you can
    talk now". The heavier transcription model keeps loading on a thin outer
-   arc, but it never gates you: audio buffers and the transcript catches up.
+   arc, but it never gates you. Audio buffers and the transcript catches up.
 3. **Say "hey ozwell".** The chat opens and (with auto-dictate) starts
    recording. The octopus pulses with the room volume.
-4. **Say "ozwell I'm done".** The clip is trimmed (so the stop phrase never
-   reaches the transcript), transcribed on-device, and sent. The reply streams
+4. **Say "ozwell I'm done".** The clip is trimmed so the stop phrase never
+   reaches the transcript, transcribed on-device, and sent. The reply streams
    into the floating chat.
-5. **Turn Ozwell off** and the mic is released — gray octopus means the mic is
-   genuinely off.
+5. **Turn Ozwell off** and the mic is released. A gray octopus means the mic
+   is genuinely off.
 
 <Canvas of={HeyOzwellStories.Interactive} />
 
@@ -60,74 +60,89 @@ Off (gray) → active and quiet → active and hearing speech:
 All options are props on `<HeyOzwell>` / `useHeyOzwell` (live in the Demo's
 Controls panel):
 
-| Option              | What it does                                                                                                                                                                                                          |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `autoDictateOnWake` | ON: "hey ozwell" opens the chat **and** starts dictating. OFF: it just opens the chat and waits.                                                                                                                      |
-| `requireDoctor`     | The speaker-verify gate: every wake is checked invisibly against the **enrolled clinician's voiceprint** (WHO) _and_ a phrase-print (WHAT) — anyone else is ignored. Open until a voice is enrolled.                  |
-| `transcription`     | `'browser'` (default) runs Whisper on-device in a **Web Worker**; `'server'` POSTs audio to an OpenAI-compatible `/v1/audio/transcriptions` endpoint (audio leaves the browser — falls back to on-device on failure). |
-| `conversationMode`  | On "done", **diarize** the clip and send who-said-what ("Dr. Jane: … / Patient: …") instead of a flat transcript.                                                                                                     |
-| `liveTranscript`    | Show a rough real-time caption in the composer while dictating; the final send still re-transcribes the full clip.                                                                                                    |
-| `reviewBeforeSend`  | Drop the finished transcript into the composer to glance/edit before sending, instead of auto-firing.                                                                                                                 |
-| `closeChatOnDone`   | Close the chat popup after the dictated message sends.                                                                                                                                                                |
-| `onSend`            | Route sends to your own backend/message store instead of the built-in client.                                                                                                                                         |
-| `assetBase`         | Override where the wake/speaker models load from.                                                                                                                                                                     |
+- **`autoDictateOnWake`**: ON, "hey ozwell" opens the chat **and** starts
+  dictating. OFF, it just opens the chat and waits.
+- **`requireDoctor`**: the speaker-verify gate. Every wake is checked
+  invisibly against the **enrolled clinician's voiceprint** (WHO) and a
+  phrase-print (WHAT); anyone else is ignored. Stays open until a voice is
+  enrolled.
+- **`transcription`**: `'browser'` (default) runs Whisper on-device in a
+  **Web Worker**. `'server'` POSTs audio to an OpenAI-compatible
+  `/v1/audio/transcriptions` endpoint (audio leaves the browser; falls back
+  to on-device on failure).
+- **`conversationMode`**: on "done", **diarize** the clip and send
+  who-said-what ("Dr. Jane: … / Patient: …") instead of a flat transcript.
+- **`liveTranscript`**: show a rough real-time caption in the composer while
+  dictating. The final send still re-transcribes the full clip.
+- **`reviewBeforeSend`**: drop the finished transcript into the composer to
+  glance and edit before sending, instead of auto-firing.
+- **`closeChatOnDone`**: close the chat popup after the dictated message
+  sends.
+- **`onSend`**: route sends to your own backend or message store instead of
+  the built-in client.
+- **`assetBase`**: override where the wake/speaker models load from.
 
-Right-click (or long-press) the octopus for **Ozwell settings** — voice
+Right-click (or long-press) the octopus for **Ozwell settings**: voice
 enrollment and the live "Models & versions" readout.
 
 ## Visit Scribe (ambient scribe)
 
-The second surface, for **multi-person encounters** — no wake word, no turns.
-Record the room, stop, and get an **on-device speaker-labeled transcript**
-(Doctor / Patient / Nurse): Whisper timestamps + TitaNet speaker embeddings →
-clustering → anchored to enrolled voiceprints, with optional LLM role
-inference. Rename, merge, and reassign speakers afterward; optionally show a
-rough live transcript while recording. Same guarantee — audio never leaves
-the page. See _Visit Scribe_ in this section.
+The second surface, for **multi-person encounters**. No wake word, no turns:
+record the room, stop, and get an **on-device speaker-labeled transcript**
+(Doctor / Patient / Nurse). Under the hood it's Whisper timestamps plus
+TitaNet speaker embeddings, clustered into turns and anchored to enrolled
+voiceprints, with optional LLM role inference. Rename, merge, and reassign
+speakers afterward, and optionally show a rough live transcript while
+recording. Same guarantee: audio never leaves the page. See _Visit Scribe_
+in this section.
 
-## How it works — what runs where
+## How it works: what runs where
 
 One shared mic: the wake detector opens `getUserMedia` once and every other
 consumer (dictation recorder, volume meter, verification buffer) reads from
-`getStream()` — a second `getUserMedia` would silence the detector.
+`getStream()`. A second `getUserMedia` would silence the detector.
 
-| Stage                                                                | Tech                                           | Where it runs  |
-| -------------------------------------------------------------------- | ---------------------------------------------- | -------------- |
-| Mic capture + 16 kHz resample                                        | AudioWorklet                                   | Audio thread   |
-| Wake word ("hey ozwell" / "ozwell i'm done")                         | ONNX (onnxruntime-web, ~6 MB models)           | Main thread    |
-| Speaker verification (WHO gate, AS-norm)                             | sherpa-onnx + TitaNet (~50 MB)                 | Main thread    |
-| Transcription (Whisper turbo ~1.3 GB, WebGPU; base.en WASM fallback) | transformers.js                                | **Web Worker** |
-| Diarization clustering                                               | Whisper timestamps + TitaNet embeddings        | Worker + main  |
-| Assistant reply                                                      | OpenAI-compatible `/v1/chat/completions` (SSE) | Network        |
+- **Mic capture + 16 kHz resample**: AudioWorklet, on the audio thread.
+- **Wake word** ("hey ozwell" / "ozwell i'm done"): ONNX via onnxruntime-web
+  (~6 MB of models), on the main thread.
+- **Speaker verification** (the WHO gate, AS-norm scoring): sherpa-onnx +
+  TitaNet (~50 MB), on the main thread.
+- **Transcription**: Whisper turbo (~1.3 GB, WebGPU; base.en WASM fallback)
+  via transformers.js, in a **Web Worker**.
+- **Diarization**: Whisper timestamps + TitaNet embeddings, worker + main.
+- **Assistant reply**: OpenAI-compatible `/v1/chat/completions` (SSE
+  streaming). This is the only network stage.
 
-Transcription lives in a Web Worker so downloading/compiling the 1.3 GB model
-never starves the main-thread wake detector — **"hey ozwell" responds while
-Whisper is still loading**, and the buffered audio catches up.
+Transcription lives in a Web Worker so downloading and compiling the 1.3 GB
+model never starves the main-thread wake detector. **"Hey ozwell" responds
+while Whisper is still loading**, and the buffered audio catches up.
 
 ### Models, caching, hosting
 
-| Asset                        | Cache                                   | Runtime override                           |
-| ---------------------------- | --------------------------------------- | ------------------------------------------ |
-| Wake models (~6 MB)          | OPFS (pre-fetched on mount)             | `assetBase` prop / `window.__ozwellAssets` |
-| Speaker runtime (~50 MB)     | Cache API (service worker)              | `window.__ozwellAssets`                    |
-| Whisper weights              | Cache API (streamed by transformers.js) | `window.__ozwellWhisperHost`               |
-| transformers.js ESM (pinned) | browser cache                           | `window.__ozwellTransformersUrl`           |
+- **Wake models** (~6 MB): cached in OPFS, pre-fetched on mount. Override
+  with the `assetBase` prop or `window.__ozwellAssets`.
+- **Speaker runtime** (~50 MB): cached via the Cache API (service worker).
+  Override with `window.__ozwellAssets`.
+- **Whisper weights**: streamed into the Cache API by transformers.js.
+  Override with `window.__ozwellWhisperHost`.
+- **transformers.js ESM** (pinned version): browser cache. Override with
+  `window.__ozwellTransformersUrl`.
 
 Voiceprints persist in **IndexedDB**; `localStorage` holds config only. Every
-host is config-swappable — no source edits to repoint models.
+host is config-swappable, so repointing models requires no source edits.
 
 ## Backend integration
 
 The component is backend-agnostic. Two seams:
 
-- **`onSend` prop** — the hook hands you the final text; call whatever backend
+- **`onSend` prop**: the hook hands you the final text. Call whatever backend
   you like and render the reply yourself.
-- **`ozwellConfig`** — leave `onSend` off and the built-in client streams from
-  any OpenAI-compatible endpoint: `localStorage.ozwellConfig` /
-  `window.__ozwell` with `{ apiKey, baseURL, model, system, temperature }`.
+- **`ozwellConfig`**: leave `onSend` off and the built-in client streams from
+  any OpenAI-compatible endpoint. Configure via `localStorage.ozwellConfig`
+  or `window.__ozwell` with `{ apiKey, baseURL, model, system, temperature }`.
   The sentinel `apiKey: 'ollama'` targets a local Ollama server (no auth
-  header). With no key configured, the demo falls back to a canned reply — no
-  secret is ever committed.
+  header). With no key configured, the demo falls back to a canned reply, so
+  no secret is ever committed.
 
 > ⚠️ A browser-held Bearer key is visible to anyone with the page. For public
 > deploys, proxy the key server-side and point `baseURL` at the proxy. See
@@ -135,26 +150,26 @@ The component is backend-agnostic. Two seams:
 
 ## Troubleshooting
 
-- **Octopus ring never completes** — mic permission denied or no input
-  device; the toggle surfaces "Microphone unavailable" after ~8 s.
-- **First activation is slow** — the Whisper download (up to ~1.3 GB) happens
+- **Octopus ring never completes**: mic permission denied or no input
+  device. The toggle surfaces "Microphone unavailable" after ~8 s.
+- **First activation is slow**: the Whisper download (up to ~1.3 GB) happens
   once, then it's served from the Cache API. The wake word works during the
   download; only transcription waits.
-- **Strict CSP hosts** — the worker needs `worker-src blob:`, plus the model
+- **Strict CSP hosts**: the worker needs `worker-src blob:`, plus the model
   CDN allowances (or self-host everything via the overrides above).
-- **"hey ozwell" ignored with the doctor gate on** — re-enroll in conditions
-  matching real use (same mic/room); the WHO gate is tunable via
+- **"hey ozwell" ignored with the doctor gate on**: re-enroll in conditions
+  matching real use (same mic, same room). The WHO gate is tunable via
   `window.SpeakerVerify` thresholds.
-- **Console `[W:onnxruntime …]` messages during model load** — harmless ONNX
+- **Console `[W:onnxruntime …]` messages during model load**: harmless ONNX
   runtime warnings about CPU-assigned graph nodes, logged at error level.
 
 ## Related
 
-- **Voice Setup** — one-time speaker enrollment (the octopus-pulse pattern).
-- **Voice Manager** — manage / rename / remove enrolled voices.
-- **Wake Word** — the on-device detector primitive.
-- **Hands-Free Chat** — the voice conversation composition.
-- **Visit Scribe** — the ambient multi-person scribe.
+- **Voice Setup**: one-time speaker enrollment (the octopus-pulse pattern).
+- **Voice Manager**: manage, rename, and remove enrolled voices.
+- **Wake Word**: the on-device detector primitive.
+- **Hands-Free Chat**: the voice conversation composition.
+- **Visit Scribe**: the ambient multi-person scribe.
 
 Deeper docs in the repo: `MODEL-HOSTING.md` (asset hosting + cutover),
 `OZWELL-BACKEND.md` (chat wiring), `DIARIZATION.md` (speaker attribution).
