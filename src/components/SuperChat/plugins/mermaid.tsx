@@ -176,10 +176,43 @@ function loadMermaid(dark: boolean) {
   return mermaidReady;
 }
 
+/** Read the current dark-mode state from the document root. */
+function isDarkMode(): boolean {
+  if (typeof document === 'undefined') return false;
+  const root = document.documentElement;
+  return root.classList.contains('dark') || root.getAttribute('data-theme') === 'dark';
+}
+
+/**
+ * Track dark mode reactively. Mermaid bakes theme colors into the rendered SVG,
+ * so diagrams must re-render when the user toggles light/dark — a CSS swap is
+ * not enough. Observes the `class`/`data-theme` attributes the theme sets on
+ * the document root.
+ */
+function useIsDarkMode(): boolean {
+  const [dark, setDark] = React.useState(isDarkMode);
+
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    const update = () => setDark(isDarkMode());
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return dark;
+}
+
 let mermaidSeq = 0;
 
 function MermaidDiagram({ code }: { code: string }) {
   const { streaming } = useTextRenderContext();
+  const dark = useIsDarkMode();
   const [svg, setSvg] = React.useState<string | null>(null);
   const [failed, setFailed] = React.useState(false);
   const idRef = React.useRef(`superchat-mermaid-${(mermaidSeq += 1)}`);
@@ -192,9 +225,6 @@ function MermaidDiagram({ code }: { code: string }) {
     let active = true;
     setSvg(null);
     setFailed(false);
-    const dark =
-      typeof document !== 'undefined' &&
-      document.documentElement.classList.contains('dark');
     void loadMermaid(dark)
       .then((mermaid) => renderMermaidWithRecovery(mermaid, idRef.current, source))
       .then(({ svg: rendered }) => {
@@ -206,7 +236,7 @@ function MermaidDiagram({ code }: { code: string }) {
     return () => {
       active = false;
     };
-  }, [source, streaming]);
+  }, [source, streaming, dark]);
 
   if (!source && !streaming) return <InertFallback raw={code} />;
 
