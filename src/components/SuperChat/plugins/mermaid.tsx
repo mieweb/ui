@@ -25,17 +25,38 @@ import type { SuperChatRenderPlugin } from '../types';
 const MERMAID_TAG = 'mermaid-diagram';
 const MERMAID_DECLARATION_RE =
   /^\s*(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|journey|gantt|pie|mindmap|timeline|gitGraph|quadrantChart|requirementDiagram|block-beta|xychart-beta)\b/;
+/** Any triple-backtick fence line (```lang or bare ```) that leaks into a
+ * mermaid block from model output. */
+const FENCE_LINE_RE = /^\s*```[\w-]*\s*$/;
+/** Mermaid init directives / comments that must be preserved above the
+ * declaration (e.g. `%%{init: {...}}%%`, `%% comment`). */
+const MERMAID_DIRECTIVE_RE = /^\s*%%/;
 
-function normalizeMermaidSource(code: string): string {
+/**
+ * Normalize a mermaid source block. Model outputs occasionally include nested
+ * code fences or leading prose; strip those but preserve mermaid init
+ * directives and comment lines that legally precede the diagram declaration.
+ */
+export function normalizeMermaidSource(code: string): string {
   const lines = code.split(/\r?\n/);
 
-  // Some model outputs accidentally include nested fences or leading prose
-  // inside the mermaid block; keep only the diagram body.
-  const stripped = lines.filter((line) => !/^\s*```(?:\s*mermaid)?\s*$/.test(line));
-  const start = stripped.findIndex((line) => MERMAID_DECLARATION_RE.test(line));
-  const normalized = start >= 0 ? stripped.slice(start) : stripped;
+  // Drop any nested code-fence lines (```lang / bare ```), regardless of language.
+  const stripped = lines.filter((line) => !FENCE_LINE_RE.test(line));
 
-  return normalized.join('\n').trim();
+  const declarationIdx = stripped.findIndex((line) =>
+    MERMAID_DECLARATION_RE.test(line)
+  );
+  if (declarationIdx < 0) return stripped.join('\n').trim();
+
+  // Preserve init directives / `%%` comment lines that appear above the
+  // declaration; drop any other leading prose.
+  const preamble: string[] = [];
+  for (let i = 0; i < declarationIdx; i += 1) {
+    const line = stripped[i];
+    if (MERMAID_DIRECTIVE_RE.test(line)) preamble.push(line);
+  }
+
+  return [...preamble, ...stripped.slice(declarationIdx)].join('\n').trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -131,7 +152,7 @@ function InertFallback({ raw }: { raw: string }) {
 let mermaidReady: Promise<typeof import('mermaid').default> | null = null;
 let mermaidTheme: 'dark' | 'default' | null = null;
 
-async function renderMermaidWithRecovery(
+export async function renderMermaidWithRecovery(
   mermaid: typeof import('mermaid').default,
   id: string,
   source: string
@@ -140,19 +161,25 @@ async function renderMermaidWithRecovery(
   let lastError: unknown;
 
   // If a model adds prose after a valid diagram, progressively trim trailing
-  // lines and render the first parseable candidate.
+  // lines and render the first parseable candidate. `mermaid.render()` throws
+  // when the source doesn't parse, so we rely on it directly and avoid an
+  // extra `mermaid.parse()` on the success path.
   for (let end = lines.length; end >= 1; end -= 1) {
     const candidate = lines.slice(0, end).join('\n').trim();
     if (!candidate) continue;
     try {
-      await mermaid.parse(candidate);
       return await mermaid.render(id, candidate);
     } catch (error) {
       lastError = error;
     }
   }
 
-  throw lastError ?? new Error('Failed to parse mermaid diagram');
+  if (lastError instanceof Error) throw lastError;
+  throw new Error(
+    typeof lastError === 'string'
+      ? lastError
+      : `Failed to parse mermaid diagram: ${String(lastError)}`
+  );
 }
 
 /** Load + initialize mermaid once, shared across all diagrams. */
@@ -215,7 +242,13 @@ function MermaidDiagram({ code }: { code: string }) {
   const dark = useIsDarkMode();
   const [svg, setSvg] = React.useState<string | null>(null);
   const [failed, setFailed] = React.useState(false);
-  const idRef = React.useRef(`superchat-mermaid-${(mermaidSeq += 1)}`);
+  // Lazy init so the id counter increments once per instance, not per render.
+  const idRef = React.useRef<string | null>(null);
+  if (idRef.current === null) {
+    mermaidSeq += 1;
+    idRef.current = `superchat-mermaid-${mermaidSeq}`;
+  }
+  const id = idRef.current;
 
   const source = React.useMemo(() => normalizeMermaidSource(code), [code]);
 
@@ -226,7 +259,7 @@ function MermaidDiagram({ code }: { code: string }) {
     setSvg(null);
     setFailed(false);
     void loadMermaid(dark)
-      .then((mermaid) => renderMermaidWithRecovery(mermaid, idRef.current, source))
+      .then((mermaid) => renderMermaidWithRecovery(mermaid, id, source))
       .then(({ svg: rendered }) => {
         if (active) setSvg(rendered);
       })
@@ -236,7 +269,7 @@ function MermaidDiagram({ code }: { code: string }) {
     return () => {
       active = false;
     };
-  }, [source, streaming, dark]);
+  }, [source, streaming, dark, id]);
 
   if (!source && !streaming) return <InertFallback raw={code} />;
 
