@@ -31,9 +31,7 @@ function normalizeMermaidSource(code: string): string {
 
   // Some model outputs accidentally include nested fences or leading prose
   // inside the mermaid block; keep only the diagram body.
-  const stripped = lines.filter(
-    (line) => !/^\s*```(?:\s*mermaid)?\s*$/.test(line)
-  );
+  const stripped = lines.filter((line) => !/^\s*```(?:\s*mermaid)?\s*$/.test(line));
   const start = stripped.findIndex((line) => MERMAID_DECLARATION_RE.test(line));
   const normalized = start >= 0 ? stripped.slice(start) : stripped;
 
@@ -133,6 +131,30 @@ function InertFallback({ raw }: { raw: string }) {
 let mermaidReady: Promise<typeof import('mermaid').default> | null = null;
 let mermaidTheme: 'dark' | 'default' | null = null;
 
+async function renderMermaidWithRecovery(
+  mermaid: typeof import('mermaid').default,
+  id: string,
+  source: string
+) {
+  const lines = source.split(/\r?\n/).map((line) => line.trimEnd());
+  let lastError: unknown;
+
+  // If a model adds prose after a valid diagram, progressively trim trailing
+  // lines and render the first parseable candidate.
+  for (let end = lines.length; end >= 1; end -= 1) {
+    const candidate = lines.slice(0, end).join('\n').trim();
+    if (!candidate) continue;
+    try {
+      await mermaid.parse(candidate);
+      return await mermaid.render(id, candidate);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error('Failed to parse mermaid diagram');
+}
+
 /** Load + initialize mermaid once, shared across all diagrams. */
 function loadMermaid(dark: boolean) {
   const theme: 'dark' | 'default' = dark ? 'dark' : 'default';
@@ -174,7 +196,7 @@ function MermaidDiagram({ code }: { code: string }) {
       typeof document !== 'undefined' &&
       document.documentElement.classList.contains('dark');
     void loadMermaid(dark)
-      .then((mermaid) => mermaid.render(idRef.current, source))
+      .then((mermaid) => renderMermaidWithRecovery(mermaid, idRef.current, source))
       .then(({ svg: rendered }) => {
         if (active) setSvg(rendered);
       })
