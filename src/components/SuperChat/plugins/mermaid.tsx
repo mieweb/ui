@@ -207,7 +207,10 @@ function loadMermaid(dark: boolean) {
 function isDarkMode(): boolean {
   if (typeof document === 'undefined') return false;
   const root = document.documentElement;
-  return root.classList.contains('dark') || root.getAttribute('data-theme') === 'dark';
+  return (
+    root.classList.contains('dark') ||
+    root.getAttribute('data-theme') === 'dark'
+  );
 }
 
 /**
