@@ -10,6 +10,7 @@ import { VisitScribe } from './VisitScribe';
 const meta: Meta<typeof VisitScribe> = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Visit Scribe',
   component: VisitScribe,
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {

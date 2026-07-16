@@ -10,6 +10,8 @@ import { suggestedActions } from '../storyData';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Hands-Free Chat',
+  component: HandsFreeChat,
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {
