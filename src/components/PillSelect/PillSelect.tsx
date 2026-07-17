@@ -49,7 +49,7 @@ export function PillSelect({
   useEscapeKey(() => setExpanded(false), expanded);
 
   function handleSelect(option: PillSelectOption) {
-    if (option.disabled) return;
+    if (disabled || option.disabled) return;
     if (controlledValue === undefined) setInternalValue(option.value);
     onValueChange?.(option.value);
     setExpanded(false);
@@ -74,7 +74,7 @@ export function PillSelect({
               <button
                 key={option.value}
                 type="button"
-                disabled={option.disabled}
+                disabled={disabled || option.disabled}
                 onClick={() => handleSelect(option)}
                 aria-pressed={selected}
                 className={cn(
@@ -82,7 +82,7 @@ export function PillSelect({
                   selected
                     ? 'bg-background text-foreground font-semibold shadow-sm'
                     : 'text-muted-foreground hover:text-foreground font-normal',
-                  option.disabled && 'cursor-not-allowed opacity-40'
+                  (disabled || option.disabled) && 'cursor-not-allowed opacity-40'
                 )}
               >
                 {option.label}
