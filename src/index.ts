@@ -81,6 +81,7 @@ export * from './components/LanguageSelector';
 export * from './components/LoadingPage';
 export * from './components/Markdown';
 export * from './components/MedicationList';
+export * from './components/MediaPlayer';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NotificationCenter';
