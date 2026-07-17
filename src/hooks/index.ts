@@ -31,3 +31,9 @@ export {
   type DragOverState,
 } from './useDragReorder';
 export { useLiveAnnouncement } from './useLiveAnnouncement';
+export {
+  useMediaTransport,
+  type MediaTransportState,
+  type UseMediaTransportOptions,
+  type UseMediaTransportReturn,
+} from './useMediaTransport';
