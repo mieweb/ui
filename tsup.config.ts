@@ -57,6 +57,7 @@ export default defineConfig({
     'components/ThemeProvider/index': 'src/components/ThemeProvider/index.ts',
     'components/Toggle/index': 'src/components/Toggle/index.ts',
     'components/Tooltip/index': 'src/components/Tooltip/index.ts',
+    'components/TranscriptView/index': 'src/components/TranscriptView/index.ts',
     'components/VisuallyHidden/index': 'src/components/VisuallyHidden/index.ts',
     // Brand system entries for tree-shaking
     'brands/index': 'src/brands/index.ts',
