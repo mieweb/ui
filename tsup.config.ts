@@ -30,6 +30,7 @@ export default defineConfig({
     'components/Input/index': 'src/components/Input/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
     'components/Markdown/index': 'src/components/Markdown/index.ts',
+    'components/MediaEditor/index': 'src/components/MediaEditor/index.ts',
     'components/MediaPlayer/index': 'src/components/MediaPlayer/index.ts',
     'components/Modal/index': 'src/components/Modal/index.ts',
     'components/Pagination/index': 'src/components/Pagination/index.ts',
