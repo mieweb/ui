@@ -797,7 +797,7 @@ export function MCPToolCallDisplay({
           density={compact ? 'condensed' : 'standard'}
           defaultOpen={!effectiveDefaultCollapsed}
           pillClassName={statusPillClasses[toolCall.status]}
-          title="Show details"
+          title="Toggle details"
         >
           {box}
         </CollapsiblePill>
