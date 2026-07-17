@@ -19,21 +19,8 @@ const meta: Meta<typeof MCPToolCallDisplay> = {
     layout: 'padded',
     docs: {
       description: {
-        component: [
-          '`MCPToolCallDisplay` renders a single **Model Context Protocol (MCP) tool invocation**',
-          'inside an AI conversation — for example, an assistant calling a `create_patient` tool.',
-          '',
-          'It shows a friendly, human-readable summary by default (tool name, status, duration, and',
-          'any resulting resource link), and hides the technical parameter/JSON details behind a',
-          '_Show details_ toggle so non-technical users are not overwhelmed.',
-          '',
-          '### Status states',
-          '`pending` · `running` · `success` · `error` · `cancelled` — each renders a distinct icon and color.',
-          '',
-          '### When to use',
-          'Embed it inside an `AIMessage` content block of type `tool_use`, or render it standalone to',
-          'visualize an in-progress or completed tool call. Inside `AIChat` this happens automatically.',
-        ].join('\n'),
+        component:
+          'Renders an MCP tool invocation as a status pill with an optional detail box for results, errors, and parameters.',
       },
     },
   },
@@ -53,14 +40,14 @@ const meta: Meta<typeof MCPToolCallDisplay> = {
     collapsible: {
       control: 'boolean',
       description:
-        'Whether the raw parameters can be collapsed/expanded (the "Show details" toggle inside the box).',
+        'Whether clicking the pill toggles the entire detail box open/closed.',
       table: { defaultValue: { summary: 'true' } },
     },
     defaultCollapsed: {
       control: 'boolean',
       description:
-        'Initial state. `true` shows only the pill; the box (result + params) opens when the pill is clicked.',
-      table: { defaultValue: { summary: 'true' } },
+        'Initial detail-box state. When omitted, completed tool calls start expanded and in-progress calls start collapsed.',
+      table: { defaultValue: { summary: 'status-based' } },
     },
     compact: {
       control: 'boolean',
@@ -103,7 +90,6 @@ export const Running: Story = {
 export const Success: Story = {
   args: {
     toolCall: successToolCall,
-    defaultCollapsed: false,
   },
 };
 
@@ -111,7 +97,6 @@ export const Success: Story = {
 export const Error: Story = {
   args: {
     toolCall: errorToolCall,
-    defaultCollapsed: false,
   },
 };
 
@@ -132,7 +117,6 @@ export const Compact: Story = {
 export const PillOnly: Story = {
   args: {
     toolCall: pendingToolCall,
-    defaultCollapsed: true,
   },
 };
 

@@ -31,6 +31,7 @@ export function CollapsiblePill({
   const isControlled = controlledOpen !== undefined;
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
   const isOpen = isControlled ? controlledOpen : internalOpen;
+  const contentId = React.useId();
 
   const toggle = () => {
     const next = !isOpen;
@@ -45,6 +46,7 @@ export function CollapsiblePill({
         type="button"
         onClick={toggle}
         aria-expanded={isOpen}
+        aria-controls={children ? contentId : undefined}
         title={title}
         className={cn(
           'inline-flex items-center gap-1.5 border font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
@@ -67,6 +69,9 @@ export function CollapsiblePill({
       </button>
       {children && (
         <div
+          id={contentId}
+          aria-hidden={!isOpen}
+          inert={!isOpen || undefined}
           className={cn(
             'overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
             isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
