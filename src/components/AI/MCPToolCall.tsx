@@ -656,11 +656,11 @@ export interface MCPToolCallDisplayProps {
   toolCall: MCPToolCall;
   /** Compact (condensed) sizing — tighter pill and box */
   compact?: boolean;
-  /** Whether to show the raw parameters ("Show details") inside the box */
+  /** Whether to include raw parameters inside the detail box */
   showParameters?: boolean;
-  /** Whether the raw parameters can be collapsed/expanded inside the box */
+  /** Whether clicking the pill can expand/collapse the entire detail box */
   collapsible?: boolean;
-  /** Default collapsed state (true = pill only, box hidden until clicked) */
+  /** Default collapsed state. By default, completed tool calls start expanded. */
   defaultCollapsed?: boolean;
   /** Hide the whole tool-call display (mirrors Ozwell's debug flag) */
   hidden?: boolean;
@@ -678,7 +678,7 @@ export function MCPToolCallDisplay({
   toolCall,
   showParameters = true,
   collapsible = true,
-  defaultCollapsed = true,
+  defaultCollapsed,
   compact,
   hidden = false,
   onLinkClick,
@@ -708,6 +708,9 @@ export function MCPToolCallDisplay({
 
   const hasParams = showParameters && toolCall.parameters.length > 0;
   const hasBoxContent = Boolean(toolCall.result || toolCall.error || hasParams);
+  const isCompleted =
+    toolCall.status === 'success' || toolCall.status === 'error';
+  const effectiveDefaultCollapsed = defaultCollapsed ?? !isCompleted;
 
   if (hidden) return null;
 
@@ -792,7 +795,7 @@ export function MCPToolCallDisplay({
           label={pillLabel}
           leadingIcon={<ToolStatusIcon status={toolCall.status} />}
           density={compact ? 'condensed' : 'standard'}
-          defaultOpen={!defaultCollapsed}
+          defaultOpen={!effectiveDefaultCollapsed}
           pillClassName={statusPillClasses[toolCall.status]}
           title="Show details"
         >
