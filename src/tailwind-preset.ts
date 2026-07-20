@@ -414,6 +414,8 @@ export const miewebUISafelist = [
   'max-h-[500px]',
   'transition-[max-height,opacity]',
   'overflow-y-auto',
+  'focus-visible:ring-ring',
+  'focus-visible:ring-offset-1',
   // ThinkingBlock (violet reasoning pill)
   'bg-violet-50',
   'bg-violet-500',

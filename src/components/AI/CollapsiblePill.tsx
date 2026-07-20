@@ -49,7 +49,7 @@ export function CollapsiblePill({
         aria-controls={children ? contentId : undefined}
         title={title}
         className={cn(
-          'inline-flex items-center gap-1.5 border font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
+          'focus-visible:ring-ring inline-flex items-center gap-1.5 border font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
           density === 'condensed'
             ? 'rounded-[8px] px-2 py-0.5 text-[10px]'
             : 'rounded-[10px] px-[11px] py-1 text-[11px]',
