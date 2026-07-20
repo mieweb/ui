@@ -23,6 +23,41 @@ import { useTextRenderContext } from '../render/renderContext';
 import type { SuperChatRenderPlugin } from '../types';
 
 const MERMAID_TAG = 'mermaid-diagram';
+const MERMAID_DECLARATION_RE =
+  /^\s*(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|journey|gantt|pie|mindmap|timeline|gitGraph|quadrantChart|requirementDiagram|block-beta|xychart-beta)\b/;
+/** Any triple-backtick fence line (```lang or bare ```) that leaks into a
+ * mermaid block from model output. */
+const FENCE_LINE_RE = /^\s*```[\w-]*\s*$/;
+/** Mermaid init directives / comments that must be preserved above the
+ * declaration (e.g. `%%{init: {...}}%%`, `%% comment`). */
+const MERMAID_DIRECTIVE_RE = /^\s*%%/;
+
+/**
+ * Normalize a mermaid source block. Model outputs occasionally include nested
+ * code fences or leading prose; strip those but preserve mermaid init
+ * directives and comment lines that legally precede the diagram declaration.
+ */
+export function normalizeMermaidSource(code: string): string {
+  const lines = code.split(/\r?\n/);
+
+  // Drop any nested code-fence lines (```lang / bare ```), regardless of language.
+  const stripped = lines.filter((line) => !FENCE_LINE_RE.test(line));
+
+  const declarationIdx = stripped.findIndex((line) =>
+    MERMAID_DECLARATION_RE.test(line)
+  );
+  if (declarationIdx < 0) return stripped.join('\n').trim();
+
+  // Preserve init directives / `%%` comment lines that appear above the
+  // declaration; drop any other leading prose.
+  const preamble: string[] = [];
+  for (let i = 0; i < declarationIdx; i += 1) {
+    const line = stripped[i];
+    if (MERMAID_DIRECTIVE_RE.test(line)) preamble.push(line);
+  }
+
+  return [...preamble, ...stripped.slice(declarationIdx)].join('\n').trim();
+}
 
 // ---------------------------------------------------------------------------
 // rehype transformer: <pre><code class="language-mermaid">…</code></pre>
@@ -117,6 +152,36 @@ function InertFallback({ raw }: { raw: string }) {
 let mermaidReady: Promise<typeof import('mermaid').default> | null = null;
 let mermaidTheme: 'dark' | 'default' | null = null;
 
+export async function renderMermaidWithRecovery(
+  mermaid: typeof import('mermaid').default,
+  id: string,
+  source: string
+) {
+  const lines = source.split(/\r?\n/).map((line) => line.trimEnd());
+  let lastError: unknown;
+
+  // If a model adds prose after a valid diagram, progressively trim trailing
+  // lines and render the first parseable candidate. `mermaid.render()` throws
+  // when the source doesn't parse, so we rely on it directly and avoid an
+  // extra `mermaid.parse()` on the success path.
+  for (let end = lines.length; end >= 1; end -= 1) {
+    const candidate = lines.slice(0, end).join('\n').trim();
+    if (!candidate) continue;
+    try {
+      return await mermaid.render(id, candidate);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError instanceof Error) throw lastError;
+  throw new Error(
+    typeof lastError === 'string'
+      ? lastError
+      : `Failed to parse mermaid diagram: ${String(lastError)}`
+  );
+}
+
 /** Load + initialize mermaid once, shared across all diagrams. */
 function loadMermaid(dark: boolean) {
   const theme: 'dark' | 'default' = dark ? 'dark' : 'default';
@@ -129,6 +194,8 @@ function loadMermaid(dark: boolean) {
         startOnLoad: false,
         securityLevel: 'strict',
         theme,
+        flowchart: { useMaxWidth: false },
+        themeVariables: { fontSize: '16px' },
       });
       return mermaid;
     });
@@ -136,15 +203,57 @@ function loadMermaid(dark: boolean) {
   return mermaidReady;
 }
 
+/** Read the current dark-mode state from the document root. */
+function isDarkMode(): boolean {
+  if (typeof document === 'undefined') return false;
+  const root = document.documentElement;
+  return (
+    root.classList.contains('dark') ||
+    root.getAttribute('data-theme') === 'dark'
+  );
+}
+
+/**
+ * Track dark mode reactively. Mermaid bakes theme colors into the rendered SVG,
+ * so diagrams must re-render when the user toggles light/dark — a CSS swap is
+ * not enough. Observes the `class`/`data-theme` attributes the theme sets on
+ * the document root.
+ */
+function useIsDarkMode(): boolean {
+  const [dark, setDark] = React.useState(isDarkMode);
+
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    const update = () => setDark(isDarkMode());
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return dark;
+}
+
 let mermaidSeq = 0;
 
 function MermaidDiagram({ code }: { code: string }) {
   const { streaming } = useTextRenderContext();
+  const dark = useIsDarkMode();
   const [svg, setSvg] = React.useState<string | null>(null);
   const [failed, setFailed] = React.useState(false);
-  const idRef = React.useRef(`superchat-mermaid-${(mermaidSeq += 1)}`);
+  // Lazy init so the id counter increments once per instance, not per render.
+  const idRef = React.useRef<string | null>(null);
+  if (idRef.current === null) {
+    mermaidSeq += 1;
+    idRef.current = `superchat-mermaid-${mermaidSeq}`;
+  }
+  const id = idRef.current;
 
-  const source = code.trim();
+  const source = React.useMemo(() => normalizeMermaidSource(code), [code]);
 
   React.useEffect(() => {
     // Don't try to render an incomplete diagram while the message streams.
@@ -152,11 +261,8 @@ function MermaidDiagram({ code }: { code: string }) {
     let active = true;
     setSvg(null);
     setFailed(false);
-    const dark =
-      typeof document !== 'undefined' &&
-      document.documentElement.classList.contains('dark');
     void loadMermaid(dark)
-      .then((mermaid) => mermaid.render(idRef.current, source))
+      .then((mermaid) => renderMermaidWithRecovery(mermaid, id, source))
       .then(({ svg: rendered }) => {
         if (active) setSvg(rendered);
       })
@@ -166,7 +272,7 @@ function MermaidDiagram({ code }: { code: string }) {
     return () => {
       active = false;
     };
-  }, [source, streaming]);
+  }, [source, streaming, dark, id]);
 
   if (!source && !streaming) return <InertFallback raw={code} />;
 
@@ -179,7 +285,7 @@ function MermaidDiagram({ code }: { code: string }) {
   return (
     <div
       data-slot="superchat-mermaid"
-      className="my-2 overflow-x-auto"
+      className="my-2 overflow-x-auto [&_svg]:h-auto [&_svg]:max-w-none"
       // mermaid renders with securityLevel: 'strict' (labels sanitized, scripts
       // stripped), so the SVG is safe to inject directly.
       dangerouslySetInnerHTML={{ __html: svg }}

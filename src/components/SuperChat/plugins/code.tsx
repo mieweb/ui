@@ -43,7 +43,7 @@ function CopyablePre({
         type="button"
         onClick={onCopy}
         aria-label={copied ? 'Copied' : 'Copy code'}
-        className="absolute top-2 right-2 rounded-md bg-neutral-700/80 px-2 py-1 text-xs text-neutral-100 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-600 focus-visible:opacity-100"
+        className="absolute top-2 right-2 rounded-md border border-neutral-300 bg-white/80 px-2 py-1 text-xs text-neutral-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-neutral-100 focus-visible:opacity-100 dark:border-neutral-600 dark:bg-neutral-700/80 dark:text-neutral-100 dark:hover:bg-neutral-600"
       >
         {copied ? 'Copied' : 'Copy'}
       </button>
@@ -53,7 +53,9 @@ function CopyablePre({
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable code blocks need keyboard focus for horizontal scrolling
         tabIndex={0}
         className={cn(
-          'overflow-x-auto rounded-lg bg-neutral-900 p-3 text-sm text-neutral-100 dark:bg-neutral-950',
+          // Background/text follow the theme so light mode matches the
+          // atom-one-light hljs palette (dark background looked out of place).
+          'overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-800 dark:border-transparent dark:bg-neutral-900 dark:text-neutral-100',
           props.className
         )}
       />

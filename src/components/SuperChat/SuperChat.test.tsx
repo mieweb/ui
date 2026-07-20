@@ -4,7 +4,11 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import { createCodePlugin } from './plugins/code';
 import { createGenUIPlugin } from './plugins/genui';
-import { createMermaidPlugin } from './plugins/mermaid';
+import {
+  createMermaidPlugin,
+  normalizeMermaidSource,
+  renderMermaidWithRecovery,
+} from './plugins/mermaid';
 import { createImagePlugin } from './plugins/image';
 import {
   createAttachmentPlugin,
@@ -269,6 +273,67 @@ describe('mermaid plugin', () => {
     expect(
       container.querySelector('[data-slot="superchat-mermaid-fallback"]')
     ).not.toBeNull();
+  });
+});
+
+describe('normalizeMermaidSource', () => {
+  it('preserves %%{init}%% directives and %% comments above the declaration', () => {
+    const source = [
+      '%%{init: {"theme":"dark"} }%%',
+      '%% a leading comment',
+      'graph TD; A-->B;',
+    ].join('\n');
+    const out = normalizeMermaidSource(source);
+    expect(out).toBe(source);
+  });
+
+  it('drops leading prose but keeps directives when both are present', () => {
+    const source = [
+      'Here is a diagram:',
+      '%%{init: {"theme":"dark"} }%%',
+      'graph TD; A-->B;',
+    ].join('\n');
+    expect(normalizeMermaidSource(source)).toBe(
+      '%%{init: {"theme":"dark"} }%%\ngraph TD; A-->B;'
+    );
+  });
+
+  it('strips nested code-fence lines of any language, not just ```mermaid', () => {
+    // Fence lines themselves are stripped; leftover prose between them is
+    // trimmed by renderMermaidWithRecovery at render time.
+    const source = ['```mermaid', 'graph TD; A-->B;', '```json', '```'].join(
+      '\n'
+    );
+    expect(normalizeMermaidSource(source)).toBe('graph TD; A-->B;');
+  });
+});
+
+describe('renderMermaidWithRecovery', () => {
+  it('trims trailing prose lines until the diagram parses', async () => {
+    // Fake mermaid: succeeds only when the source is exactly the diagram body.
+    const valid = 'graph TD; A-->B;';
+    const mermaid = {
+      render: vi.fn(async (_id: string, source: string) => {
+        if (source.trim() === valid) return { svg: '<svg/>' };
+        throw new Error('parse error');
+      }),
+    } as unknown as typeof import('mermaid').default;
+
+    const noisy = [valid, 'This is an explanation.', 'More prose.'].join('\n');
+    const { svg } = await renderMermaidWithRecovery(mermaid, 'id-1', noisy);
+    expect(svg).toBe('<svg/>');
+  });
+
+  it('rethrows non-Error rejections wrapped in an Error', async () => {
+    const mermaid = {
+      render: vi.fn(async () => {
+        throw 'boom';
+      }),
+    } as unknown as typeof import('mermaid').default;
+
+    await expect(
+      renderMermaidWithRecovery(mermaid, 'id-2', 'graph TD; A-->B;')
+    ).rejects.toBeInstanceOf(Error);
   });
 });
 
