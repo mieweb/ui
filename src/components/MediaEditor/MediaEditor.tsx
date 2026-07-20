@@ -138,7 +138,7 @@ function wordClassName(s: WordVisualState): string {
   if (s.isAnchor) {
     parts.push('bg-warning/40 outline outline-2 outline-warning');
   } else if (s.isActive) {
-    parts.push('bg-primary-600 font-medium text-white');
+    parts.push('bg-primary-800 font-medium text-white');
   } else if (s.isSelected && s.isFocused) {
     parts.push('bg-primary-500/40');
   } else if (s.isDeleted) {
