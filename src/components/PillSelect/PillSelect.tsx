@@ -77,6 +77,7 @@ export function PillSelect({
                 disabled={disabled || option.disabled}
                 onClick={() => handleSelect(option)}
                 aria-pressed={selected}
+                autoFocus={selected}
                 className={cn(
                   'focus-visible:ring-ring rounded-full px-3 py-0.5 text-sm transition-colors focus:outline-none focus-visible:ring-2',
                   selected
