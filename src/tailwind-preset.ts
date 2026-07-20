@@ -423,6 +423,8 @@ export const miewebUISafelist = [
   'text-violet-600',
   'hover:bg-violet-100',
   'focus-visible:ring-violet-500',
+  'animate-pulse',
+  'text-[13px]',
   'dark:bg-violet-400',
   'dark:bg-violet-950/30',
   'dark:border-violet-700',

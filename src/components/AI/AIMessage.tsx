@@ -195,14 +195,12 @@ function ThinkingBlock({
   const dot = streaming ? (
     <span
       aria-hidden="true"
-      className="inline-block h-1.5 w-1.5 rounded-full bg-violet-500 dark:bg-violet-400"
-      style={{ animation: 'thinking-pulse 1.2s ease-in-out infinite' }}
+      className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-violet-500 dark:bg-violet-400"
     />
   ) : null;
 
   return (
     <div data-slot="ai-message-thinking">
-      <style>{`@keyframes thinking-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }`}</style>
       <CollapsiblePill
         label={label}
         leadingIcon={dot}
