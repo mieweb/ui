@@ -27,6 +27,10 @@ export function CollapsiblePill({
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
   const contentId = React.useId();
 
+  React.useEffect(() => {
+    setIsOpen(defaultOpen);
+  }, [defaultOpen]);
+
   const toggle = () => {
     setIsOpen((open) => !open);
   };
