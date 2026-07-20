@@ -65,25 +65,25 @@ export function PillSelect({
       {expanded ? (
         <div
           role="group"
-          aria-label={label}
+          aria-label={label ? `${label} options` : 'Options'}
           className="border-border bg-muted inline-flex items-center rounded-full border p-0.5"
         >
           {options.map((option) => {
             const selected = option.value === value;
+            const optionDisabled = disabled || option.disabled;
             return (
               <button
                 key={option.value}
                 type="button"
-                disabled={disabled || option.disabled}
+                disabled={optionDisabled}
                 onClick={() => handleSelect(option)}
                 aria-pressed={selected}
-                autoFocus={selected}
                 className={cn(
                   'focus-visible:ring-ring rounded-full px-3 py-0.5 text-sm transition-colors focus:outline-none focus-visible:ring-2',
                   selected
                     ? 'bg-background text-foreground font-semibold shadow-sm'
                     : 'text-muted-foreground hover:text-foreground font-normal',
-                  (disabled || option.disabled) && 'cursor-not-allowed opacity-40'
+                  optionDisabled && 'cursor-not-allowed opacity-40'
                 )}
               >
                 {option.label}
