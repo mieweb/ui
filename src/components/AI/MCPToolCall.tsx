@@ -648,7 +648,7 @@ const statusPillClasses: Record<MCPToolStatus, string> = {
   error:
     'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
   cancelled:
-    'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700',
+    'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
 };
 
 export interface MCPToolCallDisplayProps {
