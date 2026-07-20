@@ -24,6 +24,7 @@ export function CollapsiblePill({
   title,
   children,
 }: CollapsiblePillProps) {
+  const hasContent = Boolean(children);
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
   const contentId = React.useId();
 
@@ -39,10 +40,11 @@ export function CollapsiblePill({
     <div data-slot="collapsible-pill" className={className}>
       <button
         type="button"
-        onClick={toggle}
-        aria-expanded={isOpen}
-        aria-controls={children ? contentId : undefined}
+        onClick={hasContent ? toggle : undefined}
+        aria-expanded={hasContent ? isOpen : undefined}
+        aria-controls={hasContent ? contentId : undefined}
         title={title}
+        disabled={!hasContent}
         className={cn(
           'focus-visible:ring-ring inline-flex items-center gap-1.5 border font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
           density === 'condensed'
@@ -53,16 +55,18 @@ export function CollapsiblePill({
       >
         {leadingIcon}
         <span>{label}</span>
-        <ChevronIcon
-          direction={isOpen ? 'down' : 'right'}
-          className={
-            density === 'condensed'
-              ? 'h-2.5 w-2.5 opacity-60'
-              : 'h-3 w-3 opacity-60'
-          }
-        />
+        {hasContent && (
+          <ChevronIcon
+            direction={isOpen ? 'down' : 'right'}
+            className={
+              density === 'condensed'
+                ? 'h-2.5 w-2.5 opacity-60'
+                : 'h-3 w-3 opacity-60'
+            }
+          />
+        )}
       </button>
-      {children && (
+      {hasContent && (
         <div
           id={contentId}
           aria-hidden={!isOpen}

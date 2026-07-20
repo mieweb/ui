@@ -4,6 +4,16 @@ import { renderWithTheme } from '../../test/test-utils';
 import { CollapsiblePill } from './CollapsiblePill';
 
 describe('CollapsiblePill', () => {
+  it('renders as a plain pill when there is no content to expand', () => {
+    renderWithTheme(<CollapsiblePill label="Tool" />);
+
+    const button = screen.getByRole('button', { name: /tool/i });
+    expect(button).toBeDisabled();
+    expect(button).not.toHaveAttribute('aria-expanded');
+    expect(button).not.toHaveAttribute('aria-controls');
+    expect(button.querySelector('svg')).not.toBeInTheDocument();
+  });
+
   it('syncs open state when defaultOpen changes', () => {
     const { rerender } = renderWithTheme(
       <CollapsiblePill label="Tool" defaultOpen={false}>
