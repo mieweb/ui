@@ -202,6 +202,9 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
     return (
       <div className={mediaPlayerVariants({ variant, className })}>
         {resolvedKind === 'video' ? (
+          // Generic media surface: caption tracks belong to the consumer's media
+          // resource and are supplied via children, not this transport component.
+          // eslint-disable-next-line jsx-a11y/media-has-caption
           <video
             ref={setElement as React.Ref<HTMLVideoElement>}
             playsInline
@@ -209,6 +212,7 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
             {...sharedMediaProps}
           />
         ) : (
+          // eslint-disable-next-line jsx-a11y/media-has-caption
           <audio
             ref={setElement as React.Ref<HTMLAudioElement>}
             className="my-4 w-[90%] max-w-lg"

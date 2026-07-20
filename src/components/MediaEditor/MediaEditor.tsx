@@ -908,6 +908,9 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       }${!isAnchor && !isDeleted ? ' (right-click to set speed marker)' : ''}`;
 
       return (
+        // Keyboard interaction is owned by the parent listbox via roving focus
+        // (aria-activedescendant); options are pointer affordances only.
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
         <span
           key={`${ew.originalIndex}-${index}`}
           id={`word-${index}`}
@@ -1094,7 +1097,6 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           )}
 
           {/* Editable transcript */}
-          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <div
             ref={contentRef}
             className={`min-h-0 flex-1 overflow-y-auto p-3 text-sm leading-relaxed focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${

@@ -104,32 +104,35 @@ export const ErrorState: Story = {
   ),
 };
 
+const ImperativeControlsDemo = () => {
+  const ref = React.useRef<MediaPlayerRef>(null);
+  return (
+    <div className="flex w-[28rem] flex-col gap-3">
+      <MediaPlayer ref={ref} src={getSampleAudio()} kind="audio" />
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" onClick={() => ref.current?.play()}>
+          Play
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => ref.current?.pause()}>
+          Pause
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => ref.current?.seekToMs(5000)}>
+          Seek 5s
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => ref.current?.setPlaybackRate(1.5)}
+        >
+          1.5×
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export const ImperativeControls: Story = {
   name: 'Imperative ref (ms)',
-  render: () => {
-    const ref = React.useRef<MediaPlayerRef>(null);
-    return (
-      <div className="flex w-[28rem] flex-col gap-3">
-        <MediaPlayer ref={ref} src={getSampleAudio()} kind="audio" />
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => ref.current?.play()}>
-            Play
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => ref.current?.pause()}>
-            Pause
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => ref.current?.seekToMs(5000)}>
-            Seek 5s
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => ref.current?.setPlaybackRate(1.5)}
-          >
-            1.5×
-          </Button>
-        </div>
-      </div>
-    );
-  },
+  render: () => <ImperativeControlsDemo />,
 };
+

@@ -102,26 +102,28 @@ export const Vertical: Story = {
 };
 
 /** Surfaces the edit state emitted through `onEditorStateChange`. */
-export const WithEditTracking: Story = {
-  render: (args) => {
-    const [edits, setEdits] = React.useState<EditableWord[] | null>(null);
-    const activeCount = edits?.filter((w) => !w.deleted && (w.word.wordType ?? 'word') === 'word').length;
+const WithEditTrackingDemo = (args: React.ComponentProps<typeof MediaEditor>) => {
+  const [edits, setEdits] = React.useState<EditableWord[] | null>(null);
+  const activeCount = edits?.filter((w) => !w.deleted && (w.word.wordType ?? 'word') === 'word').length;
 
-    return (
-      <Frame>
-        <div className="flex h-full flex-col gap-2">
-          <p className="text-sm text-muted-foreground">
-            {edits === null
-              ? 'Delete or edit a word to see the edited timeline update.'
-              : `Active spoken words: ${activeCount} of ${args.transcript.words.length}`}
-          </p>
-          <div className="min-h-0 flex-1">
-            <MediaEditor {...args} onEditorStateChange={(next) => setEdits(next)} />
-          </div>
+  return (
+    <Frame>
+      <div className="flex h-full flex-col gap-2">
+        <p className="text-sm text-muted-foreground">
+          {edits === null
+            ? 'Delete or edit a word to see the edited timeline update.'
+            : `Active spoken words: ${activeCount} of ${args.transcript.words.length}`}
+        </p>
+        <div className="min-h-0 flex-1">
+          <MediaEditor {...args} onEditorStateChange={(next) => setEdits(next)} />
         </div>
-      </Frame>
-    );
-  },
+      </div>
+    </Frame>
+  );
+};
+
+export const WithEditTracking: Story = {
+  render: (args) => <WithEditTrackingDemo {...args} />,
   args: {
     src: getSampleAudio(),
     kind: 'audio',
