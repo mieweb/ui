@@ -10,6 +10,16 @@ const meta: Meta<typeof DateInput> = {
   },
   tags: ['autodocs'],
   argTypes: {
+    inputType: {
+      control: 'select',
+      options: ['date', 'datetime-local', 'month', 'year'],
+      description: 'Date value format and picker control',
+    },
+    timeFormat: {
+      control: 'select',
+      options: ['12-hour', '24-hour'],
+      description: 'Time picker display format for datetime values',
+    },
     mode: {
       control: 'select',
       options: ['default', 'dob', 'expiration', 'past', 'future'],
@@ -59,6 +69,39 @@ export const WithCalendarPreFilled: Story = {
     showCalendar: true,
     width: 'fixed',
     value: '06/15/2026',
+  },
+};
+
+export const DateTime: Story = {
+  args: {
+    label: 'Appointment Time',
+    inputType: 'datetime-local',
+    value: '2026-07-21T09:30',
+  },
+};
+
+export const DateTimeTwelveHour: Story = {
+  args: {
+    label: 'Appointment Time',
+    inputType: 'datetime-local',
+    timeFormat: '12-hour',
+    value: '2026-07-21T21:30',
+  },
+};
+
+export const Month: Story = {
+  args: {
+    label: 'Billing Month',
+    inputType: 'month',
+    value: '2026-07',
+  },
+};
+
+export const Year: Story = {
+  args: {
+    label: 'Graduation Year',
+    inputType: 'year',
+    value: '2026',
   },
 };
 
