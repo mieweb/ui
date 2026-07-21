@@ -91,11 +91,15 @@ const mediaPlayerVariants = cva(
 // Helpers
 // ============================================================================
 
-const VIDEO_EXTENSIONS = /\.(mp4|mov|avi|webm|mkv|m4v)(\?.*)?$/i;
+const VIDEO_EXTENSIONS = /\.(mp4|mov|avi|webm|mkv|m4v)$/i;
 
 /** Infer media kind from a URL's file extension; defaults to audio. */
 export function inferMediaKind(src: string): MediaKind {
-  return VIDEO_EXTENSIONS.test(src) ? 'video' : 'audio';
+  // Strip any query string / fragment before matching. Testing the extension
+  // against the full URL required a trailing `.*`, which backtracks
+  // polynomially on crafted inputs (ReDoS); splitting first is linear.
+  const path = src.split(/[?#]/, 1)[0];
+  return VIDEO_EXTENSIONS.test(path) ? 'video' : 'audio';
 }
 
 // ============================================================================
