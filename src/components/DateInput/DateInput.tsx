@@ -82,10 +82,20 @@ function parsePickerDate(
   return { month: month - 1, year, day };
 }
 
-function formatPickerValue(value: string, inputType: DateInputType): string {
+function formatPickerValue(
+  value: string,
+  inputType: DateInputType,
+  timeFormat: DateInputTimeFormat
+): string {
   if (inputType === 'datetime-local') {
     const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})$/.exec(value);
     if (!match) return '';
+    if (timeFormat === '12-hour') {
+      const [hour, minute] = match[4].split(':').map(Number);
+      const displayHour = hour % 12 || 12;
+      const meridiem = hour >= 12 ? 'PM' : 'AM';
+      return `${match[2]}/${match[3]}/${match[1]} ${displayHour}:${String(minute).padStart(2, '0')} ${meridiem}`;
+    }
     return `${match[2]}/${match[3]}/${match[1]} ${match[4]}`;
   }
 
@@ -412,14 +422,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
 
     const handleMeridiemChange = (meridiem: 'AM' | 'PM') => {
       const [hour] = selectedTime.split(':').map(Number);
-      const nextHour =
-        meridiem === 'AM'
-          ? hour === 12
-            ? 0
-            : hour
-          : hour === 12
-            ? 12
-            : hour + 12;
+      const nextHour = (hour % 12) + (meridiem === 'PM' ? 12 : 0);
       handleTimeChange('hour', String(nextHour).padStart(2, '0'));
     };
 
@@ -762,7 +765,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               inputMode={inputType === 'date' ? 'numeric' : undefined}
               autoComplete={autoComplete}
               placeholder={inputType === 'month' ? 'Select month' : placeholder}
-              value={formatPickerValue(displayValue, inputType)}
+              value={formatPickerValue(displayValue, inputType, timeFormat)}
               onChange={handleChange}
               onBlur={handleBlur}
               onClick={(event) => {

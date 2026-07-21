@@ -21,3 +21,4 @@ packages/codify/
 #code-graph
 .adaptive-codegraph/
 .fastembed_cache/
+.vscode/
