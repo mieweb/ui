@@ -59,8 +59,16 @@ type Status =
   | { phase: 'ready'; mode: 'word' | 'segment'; wordCount: number; seconds: number }
   | { phase: 'error'; message: string };
 
+/** Inference device choices — WebGPU is fast but on software/broken adapters it can silently
+ *  produce garbage tokens; CPU (wasm) is slower but always correct. */
+const DEVICE_OPTIONS = [
+  { value: 'auto', label: 'Compute: Auto (WebGPU)' },
+  { value: 'wasm', label: 'Compute: CPU (always correct)' },
+];
+
 const LiveDemo: React.FC = () => {
   const [model, setModel] = React.useState('base.en');
+  const [device, setDevice] = React.useState('auto');
   const [modelLocked, setModelLocked] = React.useState(false);
   const [status, setStatus] = React.useState<Status>({ phase: 'idle' });
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
@@ -82,6 +90,7 @@ const LiveDemo: React.FC = () => {
     (window as unknown as { __ozwell?: { whisper?: string } }).__ozwell = {
       ...(window as unknown as { __ozwell?: object }).__ozwell,
       whisper: model,
+      ...(device === 'wasm' ? { whisperDevice: 'wasm' } : {}),
     };
     setModelLocked(true);
     setTranscript(null);
@@ -154,6 +163,16 @@ const LiveDemo: React.FC = () => {
           hideLabel
           disabled={modelLocked || isWhisperLoaded()}
           className="w-64"
+        />
+        <Select
+          options={DEVICE_OPTIONS}
+          value={device}
+          onValueChange={setDevice}
+          size="sm"
+          label="Inference device"
+          hideLabel
+          disabled={modelLocked || isWhisperLoaded()}
+          className="w-56"
         />
         <Button size="sm" onClick={() => inputRef.current?.click()} disabled={working}>
           Choose audio or video…
