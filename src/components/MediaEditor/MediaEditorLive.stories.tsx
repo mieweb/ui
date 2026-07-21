@@ -8,8 +8,9 @@ import { Select } from '../Select';
 import { Progress } from '../Progress';
 import { Alert } from '../Alert';
 import {
-  transcribeWords,
-  transcribeSegments,
+  decodeTo16kMono,
+  transcribeWordsFromSamples,
+  transcribeSegmentsFromSamples,
   getDictationLoad,
   subscribeDictationLoad,
   isWhisperLoaded,
@@ -110,9 +111,26 @@ const LiveDemo: React.FC = () => {
         el.src = url;
       });
 
+      // Decode first, with a watchdog: decodeAudioData can hang forever on codecs the
+      // browser can't handle (some .mov/HEVC containers) — surface that as an error
+      // instead of an eternal spinner.
+      setStatus({ phase: 'working', note: `Decoding audio from ${file.name}…` });
+      const samples = await Promise.race([
+        decodeTo16kMono(file),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error(
+              `Could not decode "${file.name}" within 60s — the browser may not support this codec. Try a shorter clip or convert it (e.g. to mp4/wav).`
+            )),
+            60_000
+          )
+        ),
+      ]);
+
       setStatus({ phase: 'working', note: 'Transcribing on-device (word-level)…' });
       let mode: 'word' | 'segment' = 'word';
-      let segments = await transcribeWords(file).catch(() => []);
+      // Samples are transferred to the worker — keep copies for the retry path.
+      let segments = await transcribeWordsFromSamples(samples.slice()).catch(() => []);
       // Word-level alignment can silently produce token salad on some model builds / noisy audio.
       // Treat implausible output (impossible word rate, timestamps past the end) as a failed
       // alignment and fall back to segment timestamps.
@@ -124,7 +142,7 @@ const LiveDemo: React.FC = () => {
       if (implausible) {
         mode = 'segment';
         setStatus({ phase: 'working', note: 'Word alignment unusable — falling back to segments…' });
-        segments = await transcribeSegments(file);
+        segments = await transcribeSegmentsFromSamples(samples.slice());
       }
       if (segments.length === 0) {
         throw new Error('No speech detected in this file.');

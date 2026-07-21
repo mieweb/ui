@@ -619,8 +619,24 @@ export async function transcribeSegments(
 export async function transcribeWords(
   blob: Blob
 ): Promise<TranscriptSegment[]> {
-  const samples = await decodeTo16kMono(blob);
+  return transcribeWordsFromSamples(await decodeTo16kMono(blob));
+}
+
+/** Word-level transcription from already-decoded 16 kHz mono samples. Lets callers decode once (with
+ *  their own status/timeout handling) and retry/fall back without re-decoding. NOTE: samples are
+ *  transferred to the worker — pass a copy (`samples.slice()`) if you need them again. */
+export async function transcribeWordsFromSamples(
+  samples: Float32Array
+): Promise<TranscriptSegment[]> {
   const out = await callWorker('words', samples);
+  return chunksToSegments(out.chunks);
+}
+
+/** Segment-level transcription from already-decoded 16 kHz mono samples (see transcribeWordsFromSamples). */
+export async function transcribeSegmentsFromSamples(
+  samples: Float32Array
+): Promise<TranscriptSegment[]> {
+  const out = await callWorker('segments', samples);
   return chunksToSegments(out.chunks);
 }
 
