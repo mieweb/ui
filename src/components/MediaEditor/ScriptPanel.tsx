@@ -202,11 +202,17 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
           <Button size="sm" onClick={handleApply} disabled={!dirty}>
             Apply
           </Button>
-          <Button variant="ghost" size="sm" onClick={handleReset} disabled={!dirty}>
-            Reset
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            disabled={!dirty}
+            title="Throw away unapplied typing and re-sync from the editor"
+          >
+            Discard
           </Button>
           <span className="text-[10px] text-muted-foreground">
-            Edits apply back into the editor (undo-safe)
+            Apply pushes into the editor &mdash; revert an applied change with Undo
           </span>
         </div>
       )}
