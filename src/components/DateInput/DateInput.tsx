@@ -57,6 +57,16 @@ interface PickerDate {
   day: number | null;
 }
 
+function isValidPickerDate(year: number, month: number, day: number): boolean {
+  return (
+    Number.isFinite(year) &&
+    month >= 1 &&
+    month <= 12 &&
+    day >= 1 &&
+    day <= new Date(year, month, 0).getDate()
+  );
+}
+
 function parsePickerDate(
   value: string,
   inputType: DateInputType
@@ -64,17 +74,27 @@ function parsePickerDate(
   if (inputType === 'datetime-local') {
     const match = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}$/.exec(value);
     if (!match) return undefined;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const [hour, minute] = value.slice(-5).split(':').map(Number);
+    if (!isValidPickerDate(year, month, day) || hour > 23 || minute > 59) {
+      return undefined;
+    }
     return {
-      year: Number(match[1]),
-      month: Number(match[2]) - 1,
-      day: Number(match[3]),
+      year,
+      month: month - 1,
+      day,
     };
   }
 
   if (inputType === 'month') {
     const match = /^(\d{4})-(\d{2})$/.exec(value);
     if (!match) return undefined;
-    return { year: Number(match[1]), month: Number(match[2]) - 1, day: null };
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    if (!Number.isFinite(year) || month < 1 || month > 12) return undefined;
+    return { year, month: month - 1, day: null };
   }
 
   if (!isValidDate(value)) return undefined;
@@ -717,9 +737,12 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           pattern={inputType === 'year' ? '[0-9]{4}' : undefined}
           maxLength={inputType === 'year' ? 4 : undefined}
           placeholder={inputType === 'year' ? 'YYYY' : undefined}
-          value={value}
-          onChange={(event) => onChange?.(event.target.value)}
+          value={value.replace(/\D/g, '').slice(0, 4)}
+          onChange={(event) =>
+            onChange?.(event.target.value.replace(/\D/g, '').slice(0, 4))
+          }
           onBlur={onBlur}
+          onClick={onClick}
           hasError={hasError}
           error={error}
           className={cn(widthClasses[width], className)}
@@ -770,10 +793,16 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               type="text"
               inputMode={inputType === 'date' ? 'numeric' : undefined}
               autoComplete={autoComplete}
-              placeholder={inputType === 'month' ? 'Select month' : placeholder}
+              placeholder={
+                inputType === 'month'
+                  ? 'Select month'
+                  : inputType === 'datetime-local'
+                    ? 'Select date and time'
+                    : placeholder
+              }
               value={formatPickerValue(displayValue, inputType, timeFormat)}
               onChange={handleChange}
-              onBlur={handleBlur}
+              onBlur={inputType === 'date' ? handleBlur : onBlur}
               onClick={(event) => {
                 onClick?.(event);
                 setIsCalendarOpen(true);
