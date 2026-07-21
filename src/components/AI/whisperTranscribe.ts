@@ -383,6 +383,21 @@ export function isWhisperLoaded(): boolean {
   return getDictationLoad().done;
 }
 
+/** Terminate the whisper worker so the next call spawns a fresh one with current config
+ *  (model pref / device / hosts re-read from window+localStorage). Model weights stay in the
+ *  browser Cache API, so a respawn re-instantiates in seconds rather than re-downloading.
+ *  Lets callers switch models/devices at runtime or recover from a bad pipeline (e.g. WebGPU
+ *  computing garbage on a broken adapter). In-flight requests are rejected. */
+export function resetWhisperWorker(): void {
+  if (!worker) return;
+  const err = new Error('whisper worker reset');
+  pending.forEach((p) => p.reject(err));
+  pending.clear();
+  worker.terminate();
+  worker = null;
+  setDictationLoad({ active: false, progress: 0, done: false });
+}
+
 /** Start loading the dictation model NOW (in the worker) so the first dictation doesn't pay the load. */
 export function warmWhisper(): void {
   getWorker().postMessage({ type: 'warm' });

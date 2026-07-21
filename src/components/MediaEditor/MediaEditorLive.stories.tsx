@@ -13,7 +13,7 @@ import {
   transcribeSegmentsFromSamples,
   getDictationLoad,
   subscribeDictationLoad,
-  isWhisperLoaded,
+  resetWhisperWorker,
 } from '../AI/whisperTranscribe';
 
 // ============================================================================
@@ -60,17 +60,19 @@ type Status =
   | { phase: 'ready'; mode: 'word' | 'segment'; wordCount: number; seconds: number }
   | { phase: 'error'; message: string };
 
-/** Inference device choices — WebGPU is fast but on software/broken adapters it can silently
- *  produce garbage tokens; CPU (wasm) is slower but always correct. */
+/** Inference device choices. CPU (wasm) is the default: WebGPU is faster where it works, but
+ *  on many Chrome/adapter combos it silently computes garbage tokens with the q8 models — the
+ *  demo auto-falls back to CPU when it detects that, so WebGPU is safe to try. */
 const DEVICE_OPTIONS = [
-  { value: 'auto', label: 'Compute: Auto (WebGPU)' },
-  { value: 'wasm', label: 'Compute: CPU (always correct)' },
+  { value: 'wasm', label: 'Compute: CPU (recommended)' },
+  { value: 'auto', label: 'Compute: WebGPU (fast, experimental)' },
 ];
 
 const LiveDemo: React.FC = () => {
   const [model, setModel] = React.useState('base.en');
-  const [device, setDevice] = React.useState('auto');
-  const [modelLocked, setModelLocked] = React.useState(false);
+  const [device, setDevice] = React.useState('wasm');
+  // The worker keeps its pipeline until reset; remember what it loaded so we only reset on change.
+  const loadedCfg = React.useRef<{ model: string; device: string } | null>(null);
   const [status, setStatus] = React.useState<Status>({ phase: 'idle' });
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
   const [mediaKind, setMediaKind] = React.useState<'audio' | 'video'>('audio');
@@ -84,16 +86,22 @@ const LiveDemo: React.FC = () => {
     getDictationLoad
   );
 
+  /** Point the worker config at a model+device; reset the worker if it already loaded something else. */
+  const configureWorker = (nextModel: string, nextDevice: string) => {
+    (window as unknown as { __ozwell?: object }).__ozwell = {
+      ...(window as unknown as { __ozwell?: object }).__ozwell,
+      whisper: nextModel,
+      whisperDevice: nextDevice === 'wasm' ? 'wasm' : undefined,
+    };
+    if (loadedCfg.current && (loadedCfg.current.model !== nextModel || loadedCfg.current.device !== nextDevice)) {
+      resetWhisperWorker();
+    }
+    loadedCfg.current = { model: nextModel, device: nextDevice };
+  };
+
   const handleFile = async (file: File) => {
     if (!file) return;
-    // The worker resolves its model from window.__ozwell.whisper at first load; after that the
-    // pipeline is cached for the page's lifetime, so lock the picker (reload the story to switch).
-    (window as unknown as { __ozwell?: { whisper?: string } }).__ozwell = {
-      ...(window as unknown as { __ozwell?: object }).__ozwell,
-      whisper: model,
-      ...(device === 'wasm' ? { whisperDevice: 'wasm' } : {}),
-    };
-    setModelLocked(true);
+    configureWorker(model, device);
     setTranscript(null);
     if (mediaUrl) URL.revokeObjectURL(mediaUrl);
     const url = URL.createObjectURL(file);
@@ -127,19 +135,30 @@ const LiveDemo: React.FC = () => {
         ),
       ]);
 
+      // Implausible output (impossible word rate, timestamps past the end) means the pipeline
+      // is producing token salad — a broken WebGPU adapter or failed word alignment.
+      const implausible = (segs: { end: number }[]) => {
+        const lastEnd = segs.length ? segs[segs.length - 1].end : 0;
+        return (
+          segs.length === 0 ||
+          (durationSec > 0 && (segs.length / durationSec > 8 || lastEnd > durationSec * 1.5))
+        );
+      };
+
       setStatus({ phase: 'working', note: 'Transcribing on-device (word-level)…' });
       let mode: 'word' | 'segment' = 'word';
-      // Samples are transferred to the worker — keep copies for the retry path.
+      // Samples are transferred to the worker — keep copies for the retry paths.
       let segments = await transcribeWordsFromSamples(samples.slice()).catch(() => []);
-      // Word-level alignment can silently produce token salad on some model builds / noisy audio.
-      // Treat implausible output (impossible word rate, timestamps past the end) as a failed
-      // alignment and fall back to segment timestamps.
-      const lastEnd = segments.length ? segments[segments.length - 1].end : 0;
-      const implausible =
-        segments.length === 0 ||
-        (durationSec > 0 &&
-          (segments.length / durationSec > 8 || lastEnd > durationSec * 1.5));
-      if (implausible) {
+
+      // Garbage on WebGPU → automatically redo the whole thing on CPU (always correct).
+      if (implausible(segments) && device !== 'wasm') {
+        setStatus({ phase: 'working', note: 'WebGPU output unusable on this machine — retrying on CPU…' });
+        configureWorker(model, 'wasm');
+        setDevice('wasm');
+        segments = await transcribeWordsFromSamples(samples.slice()).catch(() => []);
+      }
+      // Word alignment itself unusable → fall back to segment timestamps.
+      if (implausible(segments)) {
         mode = 'segment';
         setStatus({ phase: 'working', note: 'Word alignment unusable — falling back to segments…' });
         segments = await transcribeSegmentsFromSamples(samples.slice());
@@ -179,7 +198,7 @@ const LiveDemo: React.FC = () => {
           size="sm"
           label="Whisper model"
           hideLabel
-          disabled={modelLocked || isWhisperLoaded()}
+          disabled={working}
           className="w-64"
         />
         <Select
@@ -189,7 +208,7 @@ const LiveDemo: React.FC = () => {
           size="sm"
           label="Inference device"
           hideLabel
-          disabled={modelLocked || isWhisperLoaded()}
+          disabled={working}
           className="w-56"
         />
         <Button size="sm" onClick={() => inputRef.current?.click()} disabled={working}>
@@ -206,11 +225,6 @@ const LiveDemo: React.FC = () => {
             if (f) void handleFile(f);
           }}
         />
-        {modelLocked && (
-          <span className="text-xs text-muted-foreground">
-            Model locked for this session — reload the story to switch.
-          </span>
-        )}
         {status.phase === 'ready' && (
           <span className="text-xs text-muted-foreground">
             {status.mode === 'word' ? 'Word-level' : 'Segment-level'} · {status.wordCount} entries ·{' '}
