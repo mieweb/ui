@@ -708,7 +708,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           ref={ref}
           type={inputType === 'year' ? 'text' : inputType}
           inputMode={inputType === 'year' ? 'numeric' : undefined}
-          pattern={inputType === 'year' ? '\d{4}' : undefined}
+          pattern={inputType === 'year' ? '[0-9]{4}' : undefined}
           maxLength={inputType === 'year' ? 4 : undefined}
           placeholder={inputType === 'year' ? 'YYYY' : undefined}
           value={value}
