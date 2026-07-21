@@ -548,9 +548,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 }
               }}
               className="hover:bg-muted rounded-md p-1 transition-colors"
-              aria-label={
-                inputType === 'month' ? 'Next year' : 'Next month'
-              }
+              aria-label={inputType === 'month' ? 'Next year' : 'Next month'}
             >
               <ChevronRightIcon />
             </button>
