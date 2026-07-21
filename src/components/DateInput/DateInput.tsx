@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import {
   formatDateValue,
@@ -17,7 +18,11 @@ export type DateInputMode =
   | 'past'
   | 'future';
 
+export type DateInputType = 'date' | 'datetime-local' | 'month' | 'year';
+
 export type DateInputWidth = 'full' | 'fit' | 'fixed';
+
+export type DateInputTimeFormat = '12-hour' | '24-hour';
 
 const widthClasses: Record<DateInputWidth, string> = {
   full: 'w-full',
@@ -31,14 +36,79 @@ const sizeClasses = {
   lg: 'h-12 text-lg',
 } as const;
 
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+interface PickerDate {
+  month: number;
+  year: number;
+  day: number | null;
+}
+
+function parsePickerDate(
+  value: string,
+  inputType: DateInputType
+): PickerDate | undefined {
+  if (inputType === 'datetime-local') {
+    const match = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}$/.exec(value);
+    if (!match) return undefined;
+    return {
+      year: Number(match[1]),
+      month: Number(match[2]) - 1,
+      day: Number(match[3]),
+    };
+  }
+
+  if (inputType === 'month') {
+    const match = /^(\d{4})-(\d{2})$/.exec(value);
+    if (!match) return undefined;
+    return { year: Number(match[1]), month: Number(match[2]) - 1, day: null };
+  }
+
+  if (!isValidDate(value)) return undefined;
+  const [month, day, year] = value.split('/').map(Number);
+  return { month: month - 1, year, day };
+}
+
+function formatPickerValue(value: string, inputType: DateInputType): string {
+  if (inputType === 'datetime-local') {
+    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})$/.exec(value);
+    if (!match) return '';
+    return `${match[2]}/${match[3]}/${match[1]} ${match[4]}`;
+  }
+
+  if (inputType === 'month') {
+    const date = parsePickerDate(value, inputType);
+    return date ? `${MONTH_NAMES[date.month]} ${date.year}` : '';
+  }
+
+  return value;
+}
+
 export interface DateInputProps extends Omit<
   InputProps,
   'type' | 'onChange' | 'value'
 > {
-  /** The date value in MM/DD/YYYY format */
+  /** The value for the selected input type. Dates use MM/DD/YYYY format. */
   value?: string;
   /** Callback fired when the value changes */
   onChange?: (value: string) => void;
+  /** Date value format and picker control. */
+  inputType?: DateInputType;
+  /** Time picker display format for datetime values. */
+  timeFormat?: DateInputTimeFormat;
   /** Validation mode for the date input */
   mode?: DateInputMode;
   /** Minimum age for DOB validation (default: 0) */
@@ -135,6 +205,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     {
       value = '',
       onChange,
+      inputType = 'date',
+      timeFormat = '24-hour',
       mode = 'default',
       minAge,
       maxAge,
@@ -143,21 +215,23 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       width = 'full',
       className,
       onBlur,
+      onClick,
       hasError,
       error,
       ...props
     },
     ref
   ) => {
+    const isFormattedDate = inputType === 'date';
     const [displayValue, setDisplayValue] = React.useState(() =>
-      formatDateValue(value)
+      isFormattedDate ? formatDateValue(value) : value
     );
     const [localError, setLocalError] = React.useState<string | undefined>();
 
     // Sync external value changes
     React.useEffect(() => {
-      setDisplayValue(formatDateValue(value));
-    }, [value]);
+      setDisplayValue(isFormattedDate ? formatDateValue(value) : value);
+    }, [isFormattedDate, value]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const formatted = formatDateValue(e.target.value);
@@ -195,31 +269,64 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
     const calendarRef = React.useRef<HTMLDivElement>(null);
     const buttonRef = React.useRef<HTMLButtonElement>(null);
+    const [calendarStyle, setCalendarStyle] =
+      React.useState<React.CSSProperties>();
+
+    const updateCalendarPosition = React.useCallback(() => {
+      if (!buttonRef.current) return;
+
+      const rect = buttonRef.current.getBoundingClientRect();
+      setCalendarStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: Math.max(8, rect.right - 288),
+        zIndex: 9999,
+      });
+    }, []);
+
+    React.useEffect(() => {
+      if (!isCalendarOpen) return;
+
+      updateCalendarPosition();
+      window.addEventListener('scroll', updateCalendarPosition, true);
+      window.addEventListener('resize', updateCalendarPosition);
+      return () => {
+        window.removeEventListener('scroll', updateCalendarPosition, true);
+        window.removeEventListener('resize', updateCalendarPosition);
+      };
+    }, [isCalendarOpen, updateCalendarPosition]);
 
     // Parse current value into date parts for calendar
     const parsedDate = React.useMemo(() => {
-      if (!displayValue || !isValidDate(displayValue)) {
-        return {
-          month: new Date().getMonth(),
-          year: new Date().getFullYear(),
+      const fallback = new Date();
+      return (
+        parsePickerDate(displayValue, inputType) ?? {
+          month: fallback.getMonth(),
+          year: fallback.getFullYear(),
           day: null,
-        };
-      }
-      const [month, day, year] = displayValue.split('/').map(Number);
-      return { month: month - 1, year, day };
-    }, [displayValue]);
+        }
+      );
+    }, [displayValue, inputType]);
 
     const [calendarMonth, setCalendarMonth] = React.useState(parsedDate.month);
     const [calendarYear, setCalendarYear] = React.useState(parsedDate.year);
+    const [selectedTime, setSelectedTime] = React.useState(() =>
+      inputType === 'datetime-local' &&
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)
+        ? value.slice(-5)
+        : '00:00'
+    );
 
     // Update calendar view when value changes
     React.useEffect(() => {
-      if (displayValue && isValidDate(displayValue)) {
-        const [month, , year] = displayValue.split('/').map(Number);
-        setCalendarMonth(month - 1);
-        setCalendarYear(year);
+      const date = parsePickerDate(displayValue, inputType);
+      if (!date) return;
+      setCalendarMonth(date.month);
+      setCalendarYear(date.year);
+      if (inputType === 'datetime-local') {
+        setSelectedTime(displayValue.slice(-5));
       }
-    }, [displayValue]);
+    }, [displayValue, inputType]);
 
     // Close calendar on click outside
     React.useEffect(() => {
@@ -260,13 +367,18 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       const month = String(calendarMonth + 1).padStart(2, '0');
       const dayStr = String(day).padStart(2, '0');
       const year = String(calendarYear);
-      const formatted = `${month}/${dayStr}/${year}`;
+      const formatted =
+        inputType === 'datetime-local'
+          ? `${year}-${month}-${dayStr}T${selectedTime}`
+          : `${month}/${dayStr}/${year}`;
       setDisplayValue(formatted);
       onChange?.(formatted);
-      setIsCalendarOpen(false);
+      if (inputType === 'date') {
+        setIsCalendarOpen(false);
+      }
 
       // Validate if needed
-      if (validateOnBlur) {
+      if (inputType === 'date' && validateOnBlur) {
         const validationError = getValidationError(
           formatted,
           mode,
@@ -275,6 +387,40 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         );
         setLocalError(validationError);
       }
+    };
+
+    const handleMonthSelect = (month: number) => {
+      const formatted = `${calendarYear}-${String(month + 1).padStart(2, '0')}`;
+      setDisplayValue(formatted);
+      onChange?.(formatted);
+      setIsCalendarOpen(false);
+    };
+
+    const handleTimeChange = (part: 'hour' | 'minute', nextValue: string) => {
+      const [hour, minute] = selectedTime.split(':');
+      const nextTime =
+        part === 'hour' ? `${nextValue}:${minute}` : `${hour}:${nextValue}`;
+      setSelectedTime(nextTime);
+
+      if (parsedDate.day === null) return;
+      const month = String(calendarMonth + 1).padStart(2, '0');
+      const day = String(parsedDate.day).padStart(2, '0');
+      const formatted = `${calendarYear}-${month}-${day}T${nextTime}`;
+      setDisplayValue(formatted);
+      onChange?.(formatted);
+    };
+
+    const handleMeridiemChange = (meridiem: 'AM' | 'PM') => {
+      const [hour] = selectedTime.split(':').map(Number);
+      const nextHour =
+        meridiem === 'AM'
+          ? hour === 12
+            ? 0
+            : hour
+          : hour === 12
+            ? 12
+            : hour + 12;
+      handleTimeChange('hour', String(nextHour).padStart(2, '0'));
     };
 
     const getDaysInMonth = (month: number, year: number) => {
@@ -300,21 +446,6 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         days.push(i);
       }
 
-      const monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
-
       const isSelectedDay = (day: number) => {
         return (
           parsedDate.day === day &&
@@ -336,10 +467,10 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         <div
           ref={calendarRef}
           className={cn(
-            'absolute top-full left-0 z-50 mt-1',
             'bg-background border-border rounded-lg border shadow-lg',
             'w-72 p-3'
           )}
+          style={calendarStyle}
           role="dialog"
           aria-label="Choose date"
         >
@@ -348,7 +479,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             <button
               type="button"
               onClick={() => {
-                if (calendarMonth === 0) {
+                if (inputType === 'month') {
+                  setCalendarYear(calendarYear - 1);
+                } else if (calendarMonth === 0) {
                   setCalendarMonth(11);
                   setCalendarYear(calendarYear - 1);
                 } else {
@@ -361,18 +494,20 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               <ChevronLeftIcon />
             </button>
             <div className="flex items-center gap-2">
-              <select
-                value={calendarMonth}
-                onChange={(e) => setCalendarMonth(Number(e.target.value))}
-                className="bg-background border-border rounded border px-2 py-1 text-sm"
-                aria-label="Select month"
-              >
-                {monthNames.map((name, i) => (
-                  <option key={name} value={i}>
-                    {name}
-                  </option>
-                ))}
-              </select>
+              {inputType !== 'month' && (
+                <select
+                  value={calendarMonth}
+                  onChange={(e) => setCalendarMonth(Number(e.target.value))}
+                  className="bg-background border-border rounded border px-2 py-1 text-sm"
+                  aria-label="Select month"
+                >
+                  {MONTH_NAMES.map((name, i) => (
+                    <option key={name} value={i}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              )}
               <select
                 value={calendarYear}
                 onChange={(e) => setCalendarYear(Number(e.target.value))}
@@ -392,7 +527,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             <button
               type="button"
               onClick={() => {
-                if (calendarMonth === 11) {
+                if (inputType === 'month') {
+                  setCalendarYear(calendarYear + 1);
+                } else if (calendarMonth === 11) {
                   setCalendarMonth(0);
                   setCalendarYear(calendarYear + 1);
                 } else {
@@ -406,63 +543,183 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             </button>
           </div>
 
-          {/* Day headers */}
-          <div className="mb-1 grid grid-cols-7 gap-1">
-            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-              <div
-                key={day}
-                className="text-muted-foreground py-1 text-center text-xs font-medium"
-              >
-                {day}
+          {inputType === 'month' ? (
+            <div className="grid grid-cols-3 gap-1">
+              {MONTH_NAMES.map((name, month) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => handleMonthSelect(month)}
+                  className={cn(
+                    'rounded-md px-2 py-2 text-sm transition-colors',
+                    'focus:ring-ring focus:ring-2 focus:outline-none',
+                    'hover:bg-muted',
+                    parsedDate.month === month &&
+                      parsedDate.year === calendarYear &&
+                      'bg-primary-800 hover:bg-primary-900 text-white'
+                  )}
+                >
+                  {name.slice(0, 3)}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="mb-1 grid grid-cols-7 gap-1">
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+                  <div
+                    key={day}
+                    className="text-muted-foreground py-1 text-center text-xs font-medium"
+                  >
+                    {day}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+              <div className="grid grid-cols-7 gap-1">
+                {days.map((day, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    disabled={day === null}
+                    onClick={() => day && handleDateSelect(day)}
+                    className={cn(
+                      'h-8 w-8 rounded-md text-sm transition-colors',
+                      'focus:ring-ring focus:ring-2 focus:outline-none',
+                      day === null && 'invisible',
+                      day !== null && 'hover:bg-muted',
+                      isSelectedDay(day!) &&
+                        'bg-primary-800 hover:bg-primary-900 text-white',
+                      isToday(day!) &&
+                        !isSelectedDay(day!) &&
+                        'border-primary-800 text-primary-800 border'
+                    )}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {days.map((day, index) => (
-              <button
-                key={index}
-                type="button"
-                disabled={day === null}
-                onClick={() => day && handleDateSelect(day)}
-                className={cn(
-                  'h-8 w-8 rounded-md text-sm transition-colors',
-                  'focus:ring-ring focus:ring-2 focus:outline-none',
-                  day === null && 'invisible',
-                  day !== null && 'hover:bg-muted',
-                  isSelectedDay(day!) &&
-                    'bg-primary-800 hover:bg-primary-900 text-white',
-                  isToday(day!) &&
-                    !isSelectedDay(day!) &&
-                    'border-primary-800 text-primary-800 border'
-                )}
+          {inputType === 'datetime-local' && (
+            <div className="border-border mt-3 flex items-center gap-2 border-t pt-3">
+              <select
+                value={
+                  timeFormat === '12-hour'
+                    ? String(
+                        Number(selectedTime.slice(0, 2)) % 12 || 12
+                      ).padStart(2, '0')
+                    : selectedTime.slice(0, 2)
+                }
+                onChange={(event) => {
+                  const hour = Number(event.target.value);
+                  const isPm = Number(selectedTime.slice(0, 2)) >= 12;
+                  handleTimeChange(
+                    'hour',
+                    String(
+                      timeFormat === '12-hour' && isPm
+                        ? hour === 12
+                          ? 12
+                          : hour + 12
+                        : hour
+                    ).padStart(2, '0')
+                  );
+                }}
+                className="bg-background border-border rounded border px-2 py-1 text-sm"
+                aria-label="Select hour"
               >
-                {day}
-              </button>
-            ))}
-          </div>
+                {Array.from(
+                  { length: timeFormat === '12-hour' ? 12 : 24 },
+                  (_, index) => (timeFormat === '12-hour' ? index + 1 : index)
+                ).map((hour) => (
+                  <option key={hour} value={String(hour).padStart(2, '0')}>
+                    {String(hour).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+              <span aria-hidden="true">:</span>
+              <select
+                value={selectedTime.slice(3)}
+                onChange={(event) =>
+                  handleTimeChange('minute', event.target.value)
+                }
+                className="bg-background border-border rounded border px-2 py-1 text-sm"
+                aria-label="Select minute"
+              >
+                {Array.from({ length: 60 }, (_, minute) => (
+                  <option key={minute} value={String(minute).padStart(2, '0')}>
+                    {String(minute).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+              {timeFormat === '12-hour' && (
+                <select
+                  value={Number(selectedTime.slice(0, 2)) >= 12 ? 'PM' : 'AM'}
+                  onChange={(event) =>
+                    handleMeridiemChange(event.target.value as 'AM' | 'PM')
+                  }
+                  className="bg-background border-border rounded border px-2 py-1 text-sm"
+                  aria-label="Select AM or PM"
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              )}
+            </div>
+          )}
 
-          {/* Today button */}
-          <div className="border-border mt-3 border-t pt-3">
+          <div className="border-border mt-3 flex gap-2 border-t pt-3">
             <button
               type="button"
               onClick={() => {
                 const today = new Date();
                 setCalendarMonth(today.getMonth());
                 setCalendarYear(today.getFullYear());
-                handleDateSelect(today.getDate());
+                if (inputType === 'month') {
+                  handleMonthSelect(today.getMonth());
+                } else {
+                  handleDateSelect(today.getDate());
+                }
               }}
-              className="text-primary-800 w-full text-sm hover:underline"
+              className="text-primary-800 flex-1 text-sm hover:underline"
             >
               Today
             </button>
+            {inputType === 'datetime-local' && (
+              <button
+                type="button"
+                onClick={() => setIsCalendarOpen(false)}
+                className="text-primary-800 flex-1 text-sm hover:underline"
+              >
+                Done
+              </button>
+            )}
           </div>
         </div>
       );
     };
 
-    if (showCalendar) {
+    if (inputType === 'year') {
+      return (
+        <Input
+          ref={ref}
+          type={inputType === 'year' ? 'text' : inputType}
+          inputMode={inputType === 'year' ? 'numeric' : undefined}
+          pattern={inputType === 'year' ? '\d{4}' : undefined}
+          maxLength={inputType === 'year' ? 4 : undefined}
+          placeholder={inputType === 'year' ? 'YYYY' : undefined}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
+          onBlur={onBlur}
+          hasError={hasError}
+          error={error}
+          className={cn(widthClasses[width], className)}
+          {...props}
+        />
+      );
+    }
+
+    if (showCalendar || inputType !== 'date') {
       // Extract label/error/helper and component-specific props to handle positioning correctly
       // Filter out Input component props that aren't valid HTML input attributes
       const { label, helperText, hideLabel, required, size, ...inputProps } =
@@ -502,12 +759,17 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               ref={ref}
               id={inputId}
               type="text"
-              inputMode="numeric"
+              inputMode={inputType === 'date' ? 'numeric' : undefined}
               autoComplete={autoComplete}
-              placeholder={placeholder}
-              value={displayValue}
+              placeholder={inputType === 'month' ? 'Select month' : placeholder}
+              value={formatPickerValue(displayValue, inputType)}
               onChange={handleChange}
               onBlur={handleBlur}
+              onClick={(event) => {
+                onClick?.(event);
+                setIsCalendarOpen(true);
+              }}
+              readOnly={!isFormattedDate}
               aria-invalid={showError}
               aria-describedby={
                 [errorMessage ? errorId : null, helperText ? helperId : null]
@@ -547,8 +809,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             >
               <Calendar size={18} />
             </button>
-            {isCalendarOpen && renderCalendar()}
           </div>
+          {isCalendarOpen && createPortal(renderCalendar(), document.body)}
           {errorMessage && (
             <p
               id={errorId}

@@ -17,3 +17,7 @@ RESTORE-OZWELL.local.md
 # The codify build pipeline lives in a separate (not-yet-published) repo and is
 # kept locally here without being tracked in this repo.
 packages/codify/
+
+#code-graph
+.adaptive-codegraph/
+.fastembed_cache/
