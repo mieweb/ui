@@ -1099,7 +1099,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           {/* Editable transcript */}
           <div
             ref={contentRef}
-            className={`min-h-0 flex-1 overflow-y-auto p-3 text-sm leading-relaxed focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+            className={`min-h-0 flex-1 select-none overflow-y-auto p-3 text-sm leading-relaxed focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
               isFocused ? 'bg-muted/20' : ''
             }`}
             tabIndex={0}
