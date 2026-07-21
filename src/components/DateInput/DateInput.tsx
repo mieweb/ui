@@ -413,9 +413,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       setSelectedTime(nextTime);
 
       if (parsedDate.day === null) return;
-      const month = String(calendarMonth + 1).padStart(2, '0');
+      const month = String(parsedDate.month + 1).padStart(2, '0');
       const day = String(parsedDate.day).padStart(2, '0');
-      const formatted = `${calendarYear}-${month}-${day}T${nextTime}`;
+      const formatted = `${parsedDate.year}-${month}-${day}T${nextTime}`;
       setDisplayValue(formatted);
       onChange?.(formatted);
     };
@@ -475,7 +475,13 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           )}
           style={calendarStyle}
           role="dialog"
-          aria-label="Choose date"
+          aria-label={
+            inputType === 'month'
+              ? 'Choose month'
+              : inputType === 'datetime-local'
+                ? 'Choose date and time'
+                : 'Choose date'
+          }
         >
           {/* Header with month/year navigation */}
           <div className="mb-3 flex items-center justify-between">
@@ -492,7 +498,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 }
               }}
               className="hover:bg-muted rounded-md p-1 transition-colors"
-              aria-label="Previous month"
+              aria-label={
+                inputType === 'month' ? 'Previous year' : 'Previous month'
+              }
             >
               <ChevronLeftIcon />
             </button>
@@ -540,7 +548,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 }
               }}
               className="hover:bg-muted rounded-md p-1 transition-colors"
-              aria-label="Next month"
+              aria-label={
+                inputType === 'month' ? 'Next year' : 'Next month'
+              }
             >
               <ChevronRightIcon />
             </button>
@@ -620,10 +630,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   handleTimeChange(
                     'hour',
                     String(
-                      timeFormat === '12-hour' && isPm
-                        ? hour === 12
-                          ? 12
-                          : hour + 12
+                      timeFormat === '12-hour'
+                        ? (hour % 12) + (isPm ? 12 : 0)
                         : hour
                     ).padStart(2, '0')
                   );
