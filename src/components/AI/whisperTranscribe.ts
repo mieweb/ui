@@ -115,6 +115,32 @@ function whisperDevice(): string | null {
   }
 }
 
+// Optional dtype override for the small English models' WebGPU attempt (default 'q8'). The q8 WebGPU
+// kernels miscompute on some Chrome/driver combos while fp16/fp32 work (turbo's fp16/q4 path is fine on
+// the same machines) — set `window.__ozwell.whisperDtype = 'fp16'` to trade a larger download for
+// correct GPU inference. The wasm fallback always uses q8 (CPU arithmetic is deterministic).
+function whisperDtype(): string | null {
+  if (typeof window === 'undefined') return null;
+  const fromWin = (w?: Window | null): string | undefined => {
+    try {
+      return (w as unknown as { __ozwell?: { whisperDtype?: string } })
+        ?.__ozwell?.whisperDtype;
+    } catch {
+      return undefined;
+    }
+  };
+  const win = fromWin(window) || fromWin(window.parent) || fromWin(window.top);
+  if (win) return win;
+  try {
+    return (
+      JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisperDtype ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
 // Pinned to an EXACT validated version (a floating `@3` lets jsDelivr serve newer 3.x that can break at
 // runtime). Override the ESM URL for strict-CSP / offline / self-hosted setups via
 // `window.__ozwellTransformersUrl` or `localStorage['ozwellTransformersUrl']`.
@@ -211,8 +237,9 @@ async function buildEnglish(modelId) {
   mod.env.remotePathTemplate = cfg.hfPath;
   if ((cfg.whisperDevice || '').toLowerCase() !== 'wasm') {
     try {
-      const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8', progress_callback: progressCb() });
-      console.log('[whisper] ready (' + modelId + ' / WebGPU, worker)');
+      const gpuDtype = cfg.whisperDtype || 'q8';
+      const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: gpuDtype, progress_callback: progressCb() });
+      console.log('[whisper] ready (' + modelId + ' / WebGPU ' + gpuDtype + ', worker)');
       return pipe;
     } catch (e) { /* fall through to wasm */ }
   }
@@ -307,6 +334,7 @@ function buildWorkerCfg() {
     whisperHost: whisperHost(),
     whisperPref: whisperPref(),
     whisperDevice: whisperDevice(),
+    whisperDtype: whisperDtype(),
     hfHost: HF_HOST,
     hfPath: HF_PATH,
     smallModels: SMALL_MODELS,
