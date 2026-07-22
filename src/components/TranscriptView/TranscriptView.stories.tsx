@@ -149,7 +149,9 @@ export const WithActions: Story = {
 };
 
 /** Drives `currentTimeMs` on a timer and highlights + follows the active row. */
-const FollowPlaybackDemo = (args: React.ComponentProps<typeof TranscriptView>) => {
+const FollowPlaybackDemo = (
+  args: React.ComponentProps<typeof TranscriptView>
+) => {
   const [timeMs, setTimeMs] = React.useState(0);
 
   React.useEffect(() => {
@@ -161,10 +163,14 @@ const FollowPlaybackDemo = (args: React.ComponentProps<typeof TranscriptView>) =
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Simulated playback position: {(timeMs / 1000).toFixed(1)}s
       </p>
-      <TranscriptView {...args} currentTimeMs={timeMs} onSeek={(ms) => setTimeMs(ms)} />
+      <TranscriptView
+        {...args}
+        currentTimeMs={timeMs}
+        onSeek={(ms) => setTimeMs(ms)}
+      />
     </div>
   );
 };
@@ -184,7 +190,7 @@ const ClickToSeekDemo = (args: React.ComponentProps<typeof TranscriptView>) => {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {lastSeek === null
           ? 'Click any word or segment to seek.'
           : `Requested seek to ${(lastSeek / 1000).toFixed(1)}s`}

@@ -75,7 +75,9 @@ export interface PlaybackSegment {
 export type PlaybackSpeed = 0.5 | 0.75 | 1 | 1.25 | 1.5 | 1.75 | 2;
 
 /** Array of all available speed options for dropdowns */
-export const PLAYBACK_SPEEDS: PlaybackSpeed[] = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+export const PLAYBACK_SPEEDS: PlaybackSpeed[] = [
+  0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,
+];
 
 /**
  * A speed marker applied to a word in the transcript.

@@ -2,7 +2,11 @@ import { createRef } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { MediaPlayer, inferMediaKind, type MediaPlayerRef } from './MediaPlayer';
+import {
+  MediaPlayer,
+  inferMediaKind,
+  type MediaPlayerRef,
+} from './MediaPlayer';
 
 beforeAll(() => {
   // jsdom does not implement play/pause.

@@ -22,8 +22,20 @@ const segmentTranscript: Transcript = {
     { text: 'better', startMs: 3400, endMs: 4000, speakerId: 'spk_1' },
   ],
   segments: [
-    { text: 'Good morning', startMs: 0, endMs: 900, speakerId: 'spk_0', words: [] },
-    { text: 'Feeling better', startMs: 3400, endMs: 4000, speakerId: 'spk_1', words: [] },
+    {
+      text: 'Good morning',
+      startMs: 0,
+      endMs: 900,
+      speakerId: 'spk_0',
+      words: [],
+    },
+    {
+      text: 'Feeling better',
+      startMs: 3400,
+      endMs: 4000,
+      speakerId: 'spk_1',
+      words: [],
+    },
   ],
 };
 
@@ -76,8 +88,20 @@ describe('TranscriptView', () => {
       speakers: [{ id: 'spk_0', name: 'Clinician' }],
       words: [],
       segments: [
-        { text: 'Hello', startMs: 0, endMs: 500, speakerId: 'spk_0', words: [] },
-        { text: 'there', startMs: 500, endMs: 1000, speakerId: 'spk_0', words: [] },
+        {
+          text: 'Hello',
+          startMs: 0,
+          endMs: 500,
+          speakerId: 'spk_0',
+          words: [],
+        },
+        {
+          text: 'there',
+          startMs: 500,
+          endMs: 1000,
+          speakerId: 'spk_0',
+          words: [],
+        },
       ],
     };
     render(<TranscriptView transcript={merged} mergeSameSpeaker />);
@@ -85,10 +109,14 @@ describe('TranscriptView', () => {
   });
 
   it('shows timestamps by default and hides them when showTimestamps is false', () => {
-    const { rerender } = render(<TranscriptView transcript={segmentTranscript} />);
+    const { rerender } = render(
+      <TranscriptView transcript={segmentTranscript} />
+    );
     expect(screen.getByText('0:00')).toBeInTheDocument();
 
-    rerender(<TranscriptView transcript={segmentTranscript} showTimestamps={false} />);
+    rerender(
+      <TranscriptView transcript={segmentTranscript} showTimestamps={false} />
+    );
     expect(screen.queryByText('0:00')).not.toBeInTheDocument();
   });
 
@@ -101,7 +129,13 @@ describe('TranscriptView', () => {
 
   it('renders word granularity and seeks on word click', () => {
     const onSeek = vi.fn();
-    render(<TranscriptView transcript={wordTranscript} granularity="word" onSeek={onSeek} />);
+    render(
+      <TranscriptView
+        transcript={wordTranscript}
+        granularity="word"
+        onSeek={onSeek}
+      />
+    );
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('quick'));
     expect(onSeek).toHaveBeenCalledWith(300);
@@ -109,7 +143,11 @@ describe('TranscriptView', () => {
 
   it('marks the active item with aria-current based on currentTimeMs', () => {
     render(
-      <TranscriptView transcript={wordTranscript} granularity="word" currentTimeMs={400} />
+      <TranscriptView
+        transcript={wordTranscript}
+        granularity="word"
+        currentTimeMs={400}
+      />
     );
     const active = screen.getByText('quick').closest('[data-transcript-index]');
     expect(active).toHaveAttribute('aria-current', 'true');
@@ -117,7 +155,13 @@ describe('TranscriptView', () => {
 
   it('activates on Enter/Space keyboard press', () => {
     const onSeek = vi.fn();
-    render(<TranscriptView transcript={wordTranscript} granularity="word" onSeek={onSeek} />);
+    render(
+      <TranscriptView
+        transcript={wordTranscript}
+        granularity="word"
+        onSeek={onSeek}
+      />
+    );
     const word = screen.getByText('fox');
     fireEvent.keyDown(word, { key: 'Enter' });
     expect(onSeek).toHaveBeenCalledWith(700);
@@ -134,7 +178,9 @@ describe('TranscriptView', () => {
   });
 
   it('uses a custom aria-label for the transcript container', () => {
-    render(<TranscriptView transcript={segmentTranscript} aria-label="Visit notes" />);
+    render(
+      <TranscriptView transcript={segmentTranscript} aria-label="Visit notes" />
+    );
     expect(screen.getByLabelText('Visit notes')).toBeInTheDocument();
   });
 });

@@ -24,7 +24,11 @@ import type {
 } from '../TranscriptView/transcript';
 import { PLAYBACK_SPEEDS } from '../TranscriptView/transcript';
 import { useTranscriptEdits } from '../../hooks/useTranscriptEdits';
-import { MediaPlayer, type MediaPlayerRef, type MediaKind } from '../MediaPlayer/MediaPlayer';
+import {
+  MediaPlayer,
+  type MediaPlayerRef,
+  type MediaKind,
+} from '../MediaPlayer/MediaPlayer';
 import { FillerWordsModal } from './FillerWordsModal';
 import { WordEditorModal } from './WordEditorModal';
 import { SilenceSettingsModal } from './SilenceSettingsModal';
@@ -35,7 +39,9 @@ import { ScriptPanel } from './ScriptPanel';
 // Types & Interfaces
 // ============================================================================
 
-export interface MediaEditorProps extends VariantProps<typeof mediaEditorVariants> {
+export interface MediaEditorProps extends VariantProps<
+  typeof mediaEditorVariants
+> {
   /** Media URL */
   src: string;
   /** Force the media kind; inferred from the src extension when omitted */
@@ -47,7 +53,10 @@ export interface MediaEditorProps extends VariantProps<typeof mediaEditorVariant
   /** Initial undo stack (from saved edits) */
   initialUndoStack?: EditableWord[][];
   /** Fired after every edit mutation (for persistence) */
-  onEditorStateChange?: (editedWords: EditableWord[], undoStack: EditableWord[][]) => void;
+  onEditorStateChange?: (
+    editedWords: EditableWord[],
+    undoStack: EditableWord[][]
+  ) => void;
   /** Fired when the hasEdits flag changes */
   onHasEditsChange?: (hasEdits: boolean) => void;
   /** Fired when the cursor moves (start time of the cursor word in ms, or null) */
@@ -129,7 +138,9 @@ interface WordVisualState {
  * inserted > silence) so token utilities never conflict.
  */
 function wordClassName(s: WordVisualState): string {
-  const parts = ['relative cursor-pointer rounded-sm px-1 py-0.5 transition-colors duration-150'];
+  const parts = [
+    'relative cursor-pointer rounded-sm px-1 py-0.5 transition-colors duration-150',
+  ];
 
   if (s.isSilence) {
     parts.push('text-xs font-medium italic tracking-wide');
@@ -145,19 +156,26 @@ function wordClassName(s: WordVisualState): string {
   } else if (s.isSelected && s.isFocused) {
     parts.push('bg-primary-500/40');
   } else if (s.isDeleted) {
-    parts.push('bg-destructive/10 text-destructive line-through opacity-40 hover:bg-destructive/20 hover:opacity-70');
+    parts.push(
+      'bg-destructive/10 text-destructive line-through opacity-40 hover:bg-destructive/20 hover:opacity-70'
+    );
   } else if (s.isInserted) {
     parts.push('bg-success/15 text-success hover:bg-success/25');
   } else if (s.isSilenceNewline) {
     parts.push('text-primary-500 hover:bg-primary-500/15');
   } else if (s.isSilence) {
-    parts.push('border border-dashed border-border bg-muted text-muted-foreground hover:bg-muted/70');
+    parts.push(
+      'border border-dashed border-border bg-muted text-muted-foreground hover:bg-muted/70'
+    );
   } else {
     parts.push('hover:bg-primary-500/30');
   }
 
   // Keep the strikethrough visible when a deleted word is also active/selected/anchored
-  if (s.isDeleted && (s.isActive || (s.isSelected && s.isFocused) || s.isAnchor)) {
+  if (
+    s.isDeleted &&
+    (s.isActive || (s.isSelected && s.isFocused) || s.isAnchor)
+  ) {
     parts.push('line-through opacity-60');
   }
 
@@ -183,7 +201,7 @@ function wordClassName(s: WordVisualState): string {
 const Caret: React.FC<{ side: 'before' | 'after' }> = ({ side }) => (
   <span
     aria-hidden="true"
-    className={`absolute bottom-0.5 top-0.5 w-0.5 bg-primary-500 motion-safe:animate-pulse ${
+    className={`bg-primary-500 absolute top-0.5 bottom-0.5 w-0.5 motion-safe:animate-pulse ${
       side === 'before' ? '-left-px' : 'right-0.5'
     }`}
   />
@@ -262,30 +280,53 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     } = edits;
 
     // -- UI state --
-    const [activeWordIndex, setActiveWordIndex] = React.useState<number | null>(null);
+    const [activeWordIndex, setActiveWordIndex] = React.useState<number | null>(
+      null
+    );
     const [cursorIndex, setCursorIndex] = React.useState<number>(0);
     // 'before' = caret before the cursor word; 'after' = after the last word
-    const [cursorPosition, setCursorPosition] = React.useState<'before' | 'after'>('before');
-    const [selectionAnchor, setSelectionAnchor] = React.useState<number | null>(null);
-    const [selection, setSelection] = React.useState<SelectionRange | null>(null);
-    const [doubleClickAnchor, setDoubleClickAnchor] = React.useState<number | null>(null);
+    const [cursorPosition, setCursorPosition] = React.useState<
+      'before' | 'after'
+    >('before');
+    const [selectionAnchor, setSelectionAnchor] = React.useState<number | null>(
+      null
+    );
+    const [selection, setSelection] = React.useState<SelectionRange | null>(
+      null
+    );
+    const [doubleClickAnchor, setDoubleClickAnchor] = React.useState<
+      number | null
+    >(null);
     const [isPlayingSequence, setIsPlayingSequence] = React.useState(false);
     const [isFocused, setIsFocused] = React.useState(false);
     const [showFillerModal, setShowFillerModal] = React.useState(false);
     const [showSilenceModal, setShowSilenceModal] = React.useState(false);
     const [showScriptPanel, setShowScriptPanel] = React.useState(false);
-    const [editorWordIndex, setEditorWordIndex] = React.useState<number | null>(null);
-    const [speedMenuWordIndex, setSpeedMenuWordIndex] = React.useState<number | null>(null);
-    const [speedMenuPosition, setSpeedMenuPosition] = React.useState<{ x: number; y: number } | null>(null);
+    const [editorWordIndex, setEditorWordIndex] = React.useState<number | null>(
+      null
+    );
+    const [speedMenuWordIndex, setSpeedMenuWordIndex] = React.useState<
+      number | null
+    >(null);
+    const [speedMenuPosition, setSpeedMenuPosition] = React.useState<{
+      x: number;
+      y: number;
+    } | null>(null);
 
     // -- Refs --
     const playerRef = React.useRef<MediaPlayerRef>(null);
     // Mirror the internal player handle to the host-provided ref, if any
-    React.useImperativeHandle(externalPlayerRef, () => playerRef.current as MediaPlayerRef, []);
+    React.useImperativeHandle(
+      externalPlayerRef,
+      () => playerRef.current as MediaPlayerRef,
+      []
+    );
     const contentRef = React.useRef<HTMLDivElement>(null);
     const userSetCursor = React.useRef<number | null>(null);
     const isDragging = React.useRef<boolean>(false);
-    const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(
+      null
+    );
     const longPressTriggered = React.useRef<boolean>(false);
     const wordPlaybackStartMs = React.useRef<number | null>(null);
     const wordPlaybackEndMs = React.useRef<number | null>(null);
@@ -353,7 +394,9 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     // Auto-scroll the active word into view during playback
     React.useEffect(() => {
       if (activeWordIndex === null) return;
-      const el = contentRef.current?.querySelector(`[data-word-index="${activeWordIndex}"]`);
+      const el = contentRef.current?.querySelector(
+        `[data-word-index="${activeWordIndex}"]`
+      );
       el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }, [activeWordIndex]);
 
@@ -368,9 +411,13 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       if (!player) return;
       const timeMs = player.getCurrentTimeMs();
       const currentWordIndex = editedWords.findIndex(
-        (ew) => !ew.deleted && timeMs >= ew.word.startMs && timeMs < ew.word.endMs
+        (ew) =>
+          !ew.deleted && timeMs >= ew.word.startMs && timeMs < ew.word.endMs
       );
-      const targetSpeed = currentWordIndex >= 0 ? getSpeedAtIndex(currentWordIndex) : defaultSpeed;
+      const targetSpeed =
+        currentWordIndex >= 0
+          ? getSpeedAtIndex(currentWordIndex)
+          : defaultSpeed;
       player.setPlaybackRate(targetSpeed);
     }, [defaultSpeed, speedMarkers, editedWords, getSpeedAtIndex]);
 
@@ -385,7 +432,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       // Segment-based playback of the edited timeline (jumps over deletions
       // and honors reordered/pasted words)
       if (isPlayingSequence && sequenceSegments.current.length > 0) {
-        const currentSeg = sequenceSegments.current[currentSegmentIndex.current];
+        const currentSeg =
+          sequenceSegments.current[currentSegmentIndex.current];
         if (currentSeg && timeMs >= currentSeg.endMs) {
           const nextIndex = currentSegmentIndex.current + 1;
           if (nextIndex < sequenceSegments.current.length) {
@@ -402,7 +450,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       } else if (hasEdits && !player.isPaused()) {
         // During normal playback with edits, skip over deleted words
         const inDeletedWord = editedWords.some(
-          (ew) => ew.deleted && timeMs >= ew.word.startMs && timeMs < ew.word.endMs
+          (ew) =>
+            ew.deleted && timeMs >= ew.word.startMs && timeMs < ew.word.endMs
         );
         if (inDeletedWord) {
           const nextNonDeleted = editedWords.find(
@@ -415,7 +464,10 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       }
 
       // Stop playback at the end of single-word playback, reseek to its start
-      if (wordPlaybackEndMs.current !== null && timeMs >= wordPlaybackEndMs.current) {
+      if (
+        wordPlaybackEndMs.current !== null &&
+        timeMs >= wordPlaybackEndMs.current
+      ) {
         player.pause();
         if (wordPlaybackStartMs.current !== null) {
           player.seekToMs(wordPlaybackStartMs.current);
@@ -429,11 +481,17 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       // timing); otherwise fall back to a time-based lookup.
       let editedIndex = -1;
       if (isPlayingSequence && sequenceSegments.current.length > 0) {
-        const currentSeg = sequenceSegments.current[currentSegmentIndex.current];
+        const currentSeg =
+          sequenceSegments.current[currentSegmentIndex.current];
         if (currentSeg) {
           for (const idx of currentSeg.editedIndices) {
             const ew = editedWords[idx];
-            if (ew && !ew.deleted && timeMs >= ew.word.startMs && timeMs < ew.word.endMs) {
+            if (
+              ew &&
+              !ew.deleted &&
+              timeMs >= ew.word.startMs &&
+              timeMs < ew.word.endMs
+            ) {
               editedIndex = idx;
               break;
             }
@@ -442,7 +500,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       }
       if (editedIndex === -1) {
         editedIndex = editedWords.findIndex(
-          (ew) => !ew.deleted && timeMs >= ew.word.startMs && timeMs < ew.word.endMs
+          (ew) =>
+            !ew.deleted && timeMs >= ew.word.startMs && timeMs < ew.word.endMs
         );
       }
 
@@ -504,7 +563,13 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       } else {
         toggleWordDeleted(cursorIndex);
       }
-    }, [selection, selectionAnchor, cursorIndex, deleteRange, toggleWordDeleted]);
+    }, [
+      selection,
+      selectionAnchor,
+      cursorIndex,
+      deleteRange,
+      toggleWordDeleted,
+    ]);
 
     // Copy: put plain text on the system clipboard + fill the internal clipboard
     const handleCopy = React.useCallback(
@@ -566,7 +631,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     // Mouse interactions
     // ------------------------------------------------------------------
 
-    const handleWordClick = (word: TranscriptWord, index: number, e: React.MouseEvent) => {
+    const handleWordClick = (
+      word: TranscriptWord,
+      index: number,
+      e: React.MouseEvent
+    ) => {
       setCursorIndex(index);
       setCursorPosition('before');
       userSetCursor.current = index;
@@ -577,7 +646,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           start: Math.min(selectionAnchor, index),
           end: Math.max(selectionAnchor, index),
         });
-      } else if (doubleClickAnchor !== null && doubleClickAnchor !== index && !isDragging.current) {
+      } else if (
+        doubleClickAnchor !== null &&
+        doubleClickAnchor !== index &&
+        !isDragging.current
+      ) {
         // A double-click anchor exists and a different word was clicked: select the range
         const start = Math.min(doubleClickAnchor, index);
         const end = Math.max(doubleClickAnchor, index);
@@ -736,7 +809,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
             let bestDistance = Infinity;
             let targetRowTop: number | null = null;
 
-            for (let i = cursorIndex + direction; i >= 0 && i < wordCount; i += direction) {
+            for (
+              let i = cursorIndex + direction;
+              i >= 0 && i < wordCount;
+              i += direction
+            ) {
               const el = contentRef.current?.querySelector(
                 `[data-word-index="${i}"]`
               ) as HTMLElement | null;
@@ -841,7 +918,9 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           }
 
           // Scroll the cursor into view
-          const wordElement = contentRef.current?.querySelector(`[data-word-index="${newIndex}"]`);
+          const wordElement = contentRef.current?.querySelector(
+            `[data-word-index="${newIndex}"]`
+          );
           wordElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
       },
@@ -876,12 +955,16 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       const isSelected = isWordSelected(index);
       const isDeleted = ew.deleted;
       const isInserted = ew.inserted ?? false;
-      const isSilence = ew.word.wordType === 'silence' || ew.word.wordType === 'silence-newline';
+      const isSilence =
+        ew.word.wordType === 'silence' ||
+        ew.word.wordType === 'silence-newline';
       const isSilenceNewline = ew.word.wordType === 'silence-newline';
       const isAnchor = index === doubleClickAnchor;
       const showCursorBefore = isCursor && cursorPosition === 'before';
       const showCursorAfter =
-        isCursor && cursorPosition === 'after' && index === editedWords.length - 1;
+        isCursor &&
+        cursorPosition === 'after' &&
+        index === editedWords.length - 1;
       const speedMarker = getSpeedMarkerAtIndex(index);
       const hasSpeedMarker = !!speedMarker;
 
@@ -944,198 +1027,209 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           {showCursorBefore && isFocused && <Caret side="before" />}
           {hasSpeedMarker && (
             <span
-              className="mr-1 inline-block rounded-sm border border-warning/50 bg-warning/20 px-0.5 align-middle text-[9px] font-semibold leading-snug text-warning-foreground"
+              className="border-warning/50 bg-warning/20 text-warning-foreground mr-1 inline-block rounded-sm border px-0.5 align-middle text-[9px] leading-snug font-semibold"
               title={`Speed: ${speedMarker.speed}x from here`}
             >
               {speedMarker.speed}x
             </span>
           )}
-          {displayText}{' '}
-          {showCursorAfter && isFocused && <Caret side="after" />}
+          {displayText} {showCursorAfter && isFocused && <Caret side="after" />}
         </span>
       );
     };
 
-    const showEditBar = hasEdits || doubleClickAnchor !== null || selection !== null;
+    const showEditBar =
+      hasEdits || doubleClickAnchor !== null || selection !== null;
 
     return (
-      <div ref={ref} className={mediaEditorVariants({ splitLayout, className })}>
+      <div
+        ref={ref}
+        className={mediaEditorVariants({ splitLayout, className })}
+      >
         <div
           className={`flex min-h-0 min-w-0 flex-1 ${
             splitLayout === 'vertical' ? 'flex-col md:flex-row' : 'flex-col'
           }`}
         >
-        {/* Media surface */}
-        <div
-          className={`min-h-0 shrink-0 border-border bg-background ${
-            splitLayout === 'vertical' ? 'md:w-1/2 md:border-r' : 'max-h-[50%] border-b'
-          }`}
-        >
-          <MediaPlayer
-            ref={playerRef}
-            src={src}
-            kind={kind}
-            aria-label="Media player"
-            onTimeUpdate={handleTimeUpdate}
-            onEnded={stopSequencePlayback}
-          />
-        </div>
+          {/* Media surface */}
+          <div
+            className={`border-border bg-background min-h-0 shrink-0 ${
+              splitLayout === 'vertical'
+                ? 'md:w-1/2 md:border-r'
+                : 'max-h-[50%] border-b'
+            }`}
+          >
+            <MediaPlayer
+              ref={playerRef}
+              src={src}
+              kind={kind}
+              aria-label="Media player"
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={stopSequencePlayback}
+            />
+          </div>
 
-        {/* Transcript editor */}
-        <div className={`flex min-h-0 flex-1 flex-col ${splitLayout === 'vertical' ? 'md:w-1/2' : ''}`}>
-          {/* Toolbar */}
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2">
-            <div className="flex items-center gap-2">
-              {hasEdits && (
-                <span className="rounded bg-warning/20 px-1.5 py-0.5 text-xs font-semibold text-warning-foreground">
-                  Edited
-                </span>
-              )}
-              <label
-                className="text-xs text-muted-foreground"
-                htmlFor="media-editor-default-speed"
-              >
-                Speed:
-              </label>
-              <div className="w-20">
-                <Select
-                  id="media-editor-default-speed"
-                  size="sm"
-                  options={PLAYBACK_SPEEDS.map((speed) => ({
-                    value: String(speed),
-                    label: `${speed}x`,
-                  }))}
-                  value={String(defaultSpeed)}
-                  onValueChange={(value) =>
-                    setDefaultSpeed(parseFloat(value) as PlaybackSpeed)
-                  }
-                  aria-label="Default playback speed"
-                />
-              </div>
-              {speedMarkers.length > 0 && (
-                <span
-                  className="text-xs text-muted-foreground"
-                  title={`${speedMarkers.length} speed marker(s) set. Right-click on a word to add/remove speed markers.`}
+          {/* Transcript editor */}
+          <div
+            className={`flex min-h-0 flex-1 flex-col ${splitLayout === 'vertical' ? 'md:w-1/2' : ''}`}
+          >
+            {/* Toolbar */}
+            <div className="border-border flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
+              <div className="flex items-center gap-2">
+                {hasEdits && (
+                  <span className="bg-warning/20 text-warning-foreground rounded px-1.5 py-0.5 text-xs font-semibold">
+                    Edited
+                  </span>
+                )}
+                <label
+                  className="text-muted-foreground text-xs"
+                  htmlFor="media-editor-default-speed"
                 >
-                  {speedMarkers.length} marker{speedMarkers.length !== 1 ? 's' : ''}
-                </span>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFillerModal(true)}
-                aria-label="Remove filler words"
-                title="Remove filler words"
-              >
-                ✂️
-              </Button>
-              {undoStack.length > 0 && (
+                  Speed:
+                </label>
+                <div className="w-20">
+                  <Select
+                    id="media-editor-default-speed"
+                    size="sm"
+                    options={PLAYBACK_SPEEDS.map((speed) => ({
+                      value: String(speed),
+                      label: `${speed}x`,
+                    }))}
+                    value={String(defaultSpeed)}
+                    onValueChange={(value) =>
+                      setDefaultSpeed(parseFloat(value) as PlaybackSpeed)
+                    }
+                    aria-label="Default playback speed"
+                  />
+                </div>
+                {speedMarkers.length > 0 && (
+                  <span
+                    className="text-muted-foreground text-xs"
+                    title={`${speedMarkers.length} speed marker(s) set. Right-click on a word to add/remove speed markers.`}
+                  >
+                    {speedMarkers.length} marker
+                    {speedMarkers.length !== 1 ? 's' : ''}
+                  </span>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={undo}
-                  aria-label={`Undo (${undoStack.length} available)`}
-                  title="Undo (⌘Z)"
+                  onClick={() => setShowFillerModal(true)}
+                  aria-label="Remove filler words"
+                  title="Remove filler words"
                 >
-                  Undo ({undoStack.length})
+                  ✂️
                 </Button>
-              )}
+                {undoStack.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={undo}
+                    aria-label={`Undo (${undoStack.length} available)`}
+                    title="Undo (⌘Z)"
+                  >
+                    Undo ({undoStack.length})
+                  </Button>
+                )}
+              </div>
+
+              <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowScriptPanel((v) => !v)}
+                  aria-pressed={showScriptPanel}
+                  aria-label="Show script"
+                  title="Show the transcript script (editable YAML/JSON)"
+                >
+                  Script
+                </Button>
+                <span>{stats.activeWordCount} words</span>
+                <button
+                  type="button"
+                  className="hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded px-1 underline decoration-dotted transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                  onClick={() => setShowSilenceModal(true)}
+                  title={
+                    stats.activeSilenceCount > 0
+                      ? `Click to configure silence detection (currently ≥${(silenceThresholds.minSilenceMs / 1000).toFixed(1)}s)`
+                      : `No silences detected (threshold: ${(silenceThresholds.minSilenceMs / 1000).toFixed(1)}s). Click to configure.`
+                  }
+                  aria-label="Configure silence detection"
+                >
+                  {stats.activeSilenceCount} silences
+                </button>
+                {(stats.deletedWordCount > 0 ||
+                  stats.deletedSilenceCount > 0) && (
+                  <span className="text-destructive">
+                    {stats.deletedWordCount + stats.deletedSilenceCount} deleted
+                  </span>
+                )}
+                {transcript.speakers && (
+                  <span>{transcript.speakers.length} speakers</span>
+                )}
+                <span>{formatDuration(stats.editedDurationMs)}</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowScriptPanel((v) => !v)}
-                aria-pressed={showScriptPanel}
-                aria-label="Show script"
-                title="Show the transcript script (editable YAML/JSON)"
-              >
-                Script
-              </Button>
-              <span>{stats.activeWordCount} words</span>
-              <button
-                type="button"
-                className="rounded px-1 underline decoration-dotted transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                onClick={() => setShowSilenceModal(true)}
-                title={
-                  stats.activeSilenceCount > 0
-                    ? `Click to configure silence detection (currently ≥${(silenceThresholds.minSilenceMs / 1000).toFixed(1)}s)`
-                    : `No silences detected (threshold: ${(silenceThresholds.minSilenceMs / 1000).toFixed(1)}s). Click to configure.`
-                }
-                aria-label="Configure silence detection"
-              >
-                {stats.activeSilenceCount} silences
-              </button>
-              {(stats.deletedWordCount > 0 || stats.deletedSilenceCount > 0) && (
-                <span className="text-destructive">
-                  {stats.deletedWordCount + stats.deletedSilenceCount} deleted
-                </span>
-              )}
-              {transcript.speakers && <span>{transcript.speakers.length} speakers</span>}
-              <span>{formatDuration(stats.editedDurationMs)}</span>
+            {/* Contextual edit actions */}
+            {showEditBar && (
+              <div className="border-border bg-muted/40 flex shrink-0 items-center gap-1 border-b px-3 py-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openWordEditor(cursorIndex)}
+                  title="Edit selected word (Enter)"
+                >
+                  Edit <kbd className="text-[10px] opacity-60">↵</kbd>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDeleteToggle}
+                  title="Delete selected word (Del)"
+                >
+                  Del <kbd className="text-[10px] opacity-60">⌫</kbd>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCut}
+                  title="Cut selection (⌘X)"
+                >
+                  Cut <kbd className="text-[10px] opacity-60">⌘X</kbd>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePaste}
+                  disabled={!clipboard}
+                  title="Paste (⌘V)"
+                >
+                  Paste <kbd className="text-[10px] opacity-60">⌘V</kbd>
+                </Button>
+              </div>
+            )}
+
+            {/* Editable transcript */}
+            <div
+              ref={contentRef}
+              className={`focus-visible:ring-ring min-h-0 flex-1 overflow-y-auto p-3 text-sm leading-relaxed select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-inset ${
+                isFocused ? 'bg-muted/20' : ''
+              }`}
+              tabIndex={0}
+              onKeyDown={handleKeyDown}
+              onCopy={handleCopy}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              role="listbox"
+              aria-label="Transcript words"
+              aria-activedescendant={`word-${cursorIndex}`}
+            >
+              {editedWords.map(renderWord)}
             </div>
           </div>
-
-          {/* Contextual edit actions */}
-          {showEditBar && (
-            <div className="flex shrink-0 items-center gap-1 border-b border-border bg-muted/40 px-3 py-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => openWordEditor(cursorIndex)}
-                title="Edit selected word (Enter)"
-              >
-                Edit <kbd className="text-[10px] opacity-60">↵</kbd>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDeleteToggle}
-                title="Delete selected word (Del)"
-              >
-                Del <kbd className="text-[10px] opacity-60">⌫</kbd>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCut}
-                title="Cut selection (⌘X)"
-              >
-                Cut <kbd className="text-[10px] opacity-60">⌘X</kbd>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handlePaste}
-                disabled={!clipboard}
-                title="Paste (⌘V)"
-              >
-                Paste <kbd className="text-[10px] opacity-60">⌘V</kbd>
-              </Button>
-            </div>
-          )}
-
-          {/* Editable transcript */}
-          <div
-            ref={contentRef}
-            className={`min-h-0 flex-1 select-none overflow-y-auto p-3 text-sm leading-relaxed focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
-              isFocused ? 'bg-muted/20' : ''
-            }`}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            onCopy={handleCopy}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            role="listbox"
-            aria-label="Transcript words"
-            aria-activedescendant={`word-${cursorIndex}`}
-          >
-            {editedWords.map(renderWord)}
-          </div>
-        </div>
         </div>
 
         {showScriptPanel && (
@@ -1168,7 +1262,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
 
         <WordEditorModal
           isOpen={editorWordIndex !== null}
-          editableWord={editorWordIndex !== null ? editedWords[editorWordIndex] ?? null : null}
+          editableWord={
+            editorWordIndex !== null
+              ? (editedWords[editorWordIndex] ?? null)
+              : null
+          }
           onClose={closeWordEditor}
           onSave={handleEditorSave}
           onSplitSilence={handleEditorSplitSilence}
@@ -1180,7 +1278,9 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           position={speedMenuPosition}
           wordIndex={speedMenuWordIndex}
           currentMarker={
-            speedMenuWordIndex !== null ? getSpeedMarkerAtIndex(speedMenuWordIndex) : undefined
+            speedMenuWordIndex !== null
+              ? getSpeedMarkerAtIndex(speedMenuWordIndex)
+              : undefined
           }
           defaultSpeed={defaultSpeed}
           onSetSpeed={(speed) => {

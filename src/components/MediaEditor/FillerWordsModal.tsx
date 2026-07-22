@@ -26,7 +26,10 @@ export interface FillerWordsModalProps {
   isOpen: boolean;
   onClose: () => void;
   /** Apply removal: selected filler words + optional silence threshold (seconds) */
-  onApply: (fillerWords: string[], removeSilenceAboveSec: number | null) => void;
+  onApply: (
+    fillerWords: string[],
+    removeSilenceAboveSec: number | null
+  ) => void;
   /** Occurrence count per normalized word */
   matchingCounts: Map<string, number>;
   /** Total duration (ms) per filler word */
@@ -111,13 +114,19 @@ export const FillerWordsModal: React.FC<FillerWordsModalProps> = ({
 
   // Count and duration of silences that would be removed at the current threshold
   const silenceData = removeSilence
-    ? silenceCounts.find((s) => s.threshold === silenceThreshold) || { count: 0, durationMs: 0 }
+    ? silenceCounts.find((s) => s.threshold === silenceThreshold) || {
+        count: 0,
+        durationMs: 0,
+      }
     : { count: 0, durationMs: 0 };
   const silenceRemovalCount = silenceData.count;
   const silenceDurationMs = silenceData.durationMs;
 
   const handleApply = () => {
-    onApply(Array.from(selectedFillers), removeSilence ? silenceThreshold : null);
+    onApply(
+      Array.from(selectedFillers),
+      removeSilence ? silenceThreshold : null
+    );
     onClose();
   };
 
@@ -149,7 +158,7 @@ export const FillerWordsModal: React.FC<FillerWordsModalProps> = ({
     return (
       <label
         key={word}
-        className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-sm transition-colors hover:bg-muted"
+        className="hover:bg-muted flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-sm transition-colors"
       >
         <Checkbox
           size="sm"
@@ -157,12 +166,14 @@ export const FillerWordsModal: React.FC<FillerWordsModalProps> = ({
           onChange={() => toggleFiller(word)}
           aria-label={`Remove "${word}"`}
         />
-        <span className="min-w-0 flex-1 truncate text-foreground">{word}</span>
-        {count > 0 && <span className="text-xs text-muted-foreground">({count})</span>}
+        <span className="text-foreground min-w-0 flex-1 truncate">{word}</span>
+        {count > 0 && (
+          <span className="text-muted-foreground text-xs">({count})</span>
+        )}
         {isCustom && (
           <button
             type="button"
-            className="rounded px-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-ring rounded px-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             onClick={(e) => {
               e.preventDefault();
               setSelectedFillers((prev) => {
@@ -212,7 +223,7 @@ export const FillerWordsModal: React.FC<FillerWordsModalProps> = ({
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+        <div className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2">
           <Checkbox
             size="sm"
             label="Remove silences greater than"
@@ -233,13 +244,13 @@ export const FillerWordsModal: React.FC<FillerWordsModalProps> = ({
             />
           </div>
           {removeSilence && silenceRemovalCount > 0 && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               ({silenceRemovalCount} silences)
             </span>
           )}
         </div>
 
-        <div className="grid max-h-56 grid-cols-2 gap-x-3 gap-y-0.5 overflow-y-auto rounded-lg border border-border p-2 sm:grid-cols-3">
+        <div className="border-border grid max-h-56 grid-cols-2 gap-x-3 gap-y-0.5 overflow-y-auto rounded-lg border p-2 sm:grid-cols-3">
           {filteredFillers.map((word) => renderFillerItem(word, false))}
           {customFillers.map((word) => renderFillerItem(word, true))}
         </div>
@@ -259,14 +270,19 @@ export const FillerWordsModal: React.FC<FillerWordsModalProps> = ({
             }}
             aria-label="Add custom filler word"
           />
-          <Button variant="secondary" size="sm" onClick={handleAddCustom} disabled={!customWord.trim()}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleAddCustom}
+            disabled={!customWord.trim()}
+          >
             Add
           </Button>
         </div>
       </ModalBody>
 
       <ModalFooter className="justify-between">
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {totalMatches} items • saves {formatDuration(totalTimeSavedMs)} →{' '}
           {formatDuration(newDurationMs)}
         </span>
@@ -274,7 +290,12 @@ export const FillerWordsModal: React.FC<FillerWordsModalProps> = ({
           <Button variant="secondary" size="sm" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" size="sm" onClick={handleApply} disabled={totalMatches === 0}>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleApply}
+            disabled={totalMatches === 0}
+          >
             Mark as Deleted ({totalMatches})
           </Button>
         </div>

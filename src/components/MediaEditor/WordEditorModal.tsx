@@ -54,7 +54,9 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const isSilence = editableWord?.word.wordType === 'silence';
-  const durationMs = editableWord ? editableWord.word.endMs - editableWord.word.startMs : 0;
+  const durationMs = editableWord
+    ? editableWord.word.endMs - editableWord.word.startMs
+    : 0;
   const durationSec = durationMs / 1000;
 
   // Reset input when the modal opens
@@ -83,7 +85,11 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
     for (const part of parts) {
       const num = parseFloat(part);
       if (isNaN(num) || num <= 0) {
-        return { durations: [], remainder: 0, error: `Invalid number: "${part}"` };
+        return {
+          durations: [],
+          remainder: 0,
+          error: `Invalid number: "${part}"`,
+        };
       }
       durations.push(num);
       total += num;
@@ -134,7 +140,10 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
   const preview = isSilence ? parseSilenceSplit(inputValue) : null;
 
   const applyDisabled = isSilence
-    ? !inputValue.trim() || !!preview?.error || !preview || preview.durations.length === 0
+    ? !inputValue.trim() ||
+      !!preview?.error ||
+      !preview ||
+      preview.durations.length === 0
     : !inputValue.trim();
 
   return (
@@ -153,12 +162,15 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
       <ModalBody className="flex flex-col gap-2">
         {isSilence ? (
           <>
-            <p className="m-0 text-sm text-foreground">
+            <p className="text-foreground m-0 text-sm">
               Silence duration:{' '}
-              <strong className="font-semibold">{durationSec.toFixed(1)}s</strong>
+              <strong className="font-semibold">
+                {durationSec.toFixed(1)}s
+              </strong>
             </p>
-            <p className="m-0 text-xs text-muted-foreground">
-              Enter space-separated durations to split (e.g., &quot;1 1 4 1&quot;)
+            <p className="text-muted-foreground m-0 text-xs">
+              Enter space-separated durations to split (e.g., &quot;1 1 4
+              1&quot;)
             </p>
             <Input
               ref={inputRef}
@@ -173,27 +185,30 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
               aria-label="Split durations"
             />
             {error && (
-              <p className="m-0 text-sm text-destructive" role="alert">
+              <p className="text-destructive m-0 text-sm" role="alert">
                 {error}
               </p>
             )}
-            {preview && !preview.error && preview.durations.length > 0 && !error && (
-              <p className="m-0 text-sm text-muted-foreground">
-                Preview:{' '}
-                {[...preview.durations, preview.remainder]
-                  .map((d) => `[${d.toFixed(1)}s]`)
-                  .join(' ')}
-              </p>
-            )}
+            {preview &&
+              !preview.error &&
+              preview.durations.length > 0 &&
+              !error && (
+                <p className="text-muted-foreground m-0 text-sm">
+                  Preview:{' '}
+                  {[...preview.durations, preview.remainder]
+                    .map((d) => `[${d.toFixed(1)}s]`)
+                    .join(' ')}
+                </p>
+              )}
             {preview?.error && !error && (
-              <p className="m-0 text-sm text-destructive" role="alert">
+              <p className="text-destructive m-0 text-sm" role="alert">
                 {preview.error}
               </p>
             )}
           </>
         ) : (
           <>
-            <p className="m-0 text-sm text-foreground">Edit the word text:</p>
+            <p className="text-foreground m-0 text-sm">Edit the word text:</p>
             <Input
               ref={inputRef}
               type="text"
@@ -218,7 +233,12 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
           <Button variant="secondary" size="sm" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" size="sm" onClick={handleApply} disabled={applyDisabled}>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleApply}
+            disabled={applyDisabled}
+          >
             {isSilence ? 'Split' : 'Save'}
           </Button>
         </div>

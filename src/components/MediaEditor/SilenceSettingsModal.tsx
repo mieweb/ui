@@ -90,7 +90,7 @@ export const SilenceSettingsModal: React.FC<SilenceSettingsModalProps> = ({
             formatValue={formatSeconds}
             aria-label="Minimum silence duration"
           />
-          <p className="m-0 text-xs text-muted-foreground">
+          <p className="text-muted-foreground m-0 text-xs">
             Gaps shorter than this will not be shown as silences.
           </p>
         </div>
@@ -107,7 +107,7 @@ export const SilenceSettingsModal: React.FC<SilenceSettingsModalProps> = ({
             formatValue={formatSeconds}
             aria-label="Paragraph break threshold"
           />
-          <p className="m-0 text-xs text-muted-foreground">
+          <p className="text-muted-foreground m-0 text-xs">
             Silences longer than this will create paragraph breaks.
           </p>
         </div>

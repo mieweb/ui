@@ -58,7 +58,10 @@ function VideoSample(
       active = false;
     };
   }, []);
-  if (!src) return <p className="text-sm text-muted-foreground">Generating sample video…</p>;
+  if (!src)
+    return (
+      <p className="text-muted-foreground text-sm">Generating sample video…</p>
+    );
   return <MediaPlayer {...props} src={src} />;
 }
 
@@ -86,7 +89,12 @@ export const CardVariant: Story = {
   name: 'Card variant',
   render: (args) => (
     <div className="w-[28rem]">
-      <MediaPlayer {...args} src={getSampleAudio()} kind="audio" variant="card" />
+      <MediaPlayer
+        {...args}
+        src={getSampleAudio()}
+        kind="audio"
+        variant="card"
+      />
     </div>
   ),
 };
@@ -113,10 +121,18 @@ const ImperativeControlsDemo = () => {
         <Button size="sm" onClick={() => ref.current?.play()}>
           Play
         </Button>
-        <Button size="sm" variant="outline" onClick={() => ref.current?.pause()}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => ref.current?.pause()}
+        >
           Pause
         </Button>
-        <Button size="sm" variant="outline" onClick={() => ref.current?.seekToMs(5000)}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => ref.current?.seekToMs(5000)}
+        >
           Seek 5s
         </Button>
         <Button
@@ -135,4 +151,3 @@ export const ImperativeControls: Story = {
   name: 'Imperative ref (ms)',
   render: () => <ImperativeControlsDemo />,
 };
-
