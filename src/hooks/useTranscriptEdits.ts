@@ -278,6 +278,8 @@ export interface UseTranscriptEditsResult {
   splitSilence: (index: number, durationsSec: number[]) => void;
   /** Toggle the word at the index deleted (editor "delete" action) */
   deleteWord: (index: number) => void;
+  /** Replace the entire edit state from an external source (e.g. an editable script view); undo-safe */
+  replaceEditedWords: (next: EditableWord[]) => void;
   /** Mark matching filler words (and silences above the given seconds threshold) deleted */
   removeFillers: (fillerWords: string[], removeSilenceAboveSec: number | null) => void;
 
@@ -538,6 +540,14 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
     toggleWordDeleted(index);
   }, [toggleWordDeleted]);
 
+  // Replace the entire edit state from an external source (e.g. the editable
+  // script/YAML panel). Undo-safe: the previous state is pushed first.
+  const replaceEditedWords = useCallback((next: EditableWord[]) => {
+    pushUndo();
+    setEditedWords(next);
+    setHasEdits(true);
+  }, [pushUndo]);
+
   // Mark filler words (and optionally silences above threshold) deleted
   const removeFillers = useCallback((fillerWords: string[], removeSilenceAboveSec: number | null) => {
     const fillerSet = new Set(fillerWords.map(f => f.toLowerCase()));
@@ -735,6 +745,7 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
     setWordText,
     splitSilence,
     deleteWord,
+    replaceEditedWords,
     removeFillers,
     setSilenceThresholds,
     silenceThresholds: { minSilenceMs, nlSilenceMs },

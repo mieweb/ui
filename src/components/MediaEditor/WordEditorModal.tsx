@@ -158,7 +158,7 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
               <strong className="font-semibold">{durationSec.toFixed(1)}s</strong>
             </p>
             <p className="m-0 text-xs text-muted-foreground">
-              Enter space-separated durations to split (e.g., "1 1 4 1")
+              Enter space-separated durations to split (e.g., &quot;1 1 4 1&quot;)
             </p>
             <Input
               ref={inputRef}

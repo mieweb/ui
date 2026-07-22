@@ -29,6 +29,7 @@ import { FillerWordsModal } from './FillerWordsModal';
 import { WordEditorModal } from './WordEditorModal';
 import { SilenceSettingsModal } from './SilenceSettingsModal';
 import { SpeedMarkerMenu } from './SpeedMarkerMenu';
+import { ScriptPanel } from './ScriptPanel';
 
 // ============================================================================
 // Types & Interfaces
@@ -74,12 +75,14 @@ interface SelectionRange {
 // ============================================================================
 
 const mediaEditorVariants = cva(
+  // Root is always a row so the ScriptPanel can dock on the right; the
+  // media/transcript split direction lives on the inner wrapper below.
   'flex h-full min-h-0 w-full overflow-hidden rounded-xl border border-border bg-card text-card-foreground',
   {
     variants: {
       splitLayout: {
-        horizontal: 'flex-col',
-        vertical: 'flex-col md:flex-row',
+        horizontal: '',
+        vertical: '',
       },
     },
     defaultVariants: {
@@ -138,7 +141,7 @@ function wordClassName(s: WordVisualState): string {
   if (s.isAnchor) {
     parts.push('bg-warning/40 outline outline-2 outline-warning');
   } else if (s.isActive) {
-    parts.push('bg-primary-600 font-medium text-white');
+    parts.push('bg-primary-800 font-medium text-white');
   } else if (s.isSelected && s.isFocused) {
     parts.push('bg-primary-500/40');
   } else if (s.isDeleted) {
@@ -242,6 +245,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       setWordText,
       splitSilence,
       deleteWord,
+      replaceEditedWords,
       removeFillers,
       setSilenceThresholds,
       silenceThresholds,
@@ -269,6 +273,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     const [isFocused, setIsFocused] = React.useState(false);
     const [showFillerModal, setShowFillerModal] = React.useState(false);
     const [showSilenceModal, setShowSilenceModal] = React.useState(false);
+    const [showScriptPanel, setShowScriptPanel] = React.useState(false);
     const [editorWordIndex, setEditorWordIndex] = React.useState<number | null>(null);
     const [speedMenuWordIndex, setSpeedMenuWordIndex] = React.useState<number | null>(null);
     const [speedMenuPosition, setSpeedMenuPosition] = React.useState<{ x: number; y: number } | null>(null);
@@ -908,6 +913,9 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       }${!isAnchor && !isDeleted ? ' (right-click to set speed marker)' : ''}`;
 
       return (
+        // Keyboard interaction is owned by the parent listbox via roving focus
+        // (aria-activedescendant); options are pointer affordances only.
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
         <span
           key={`${ew.originalIndex}-${index}`}
           id={`word-${index}`}
@@ -952,6 +960,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
 
     return (
       <div ref={ref} className={mediaEditorVariants({ splitLayout, className })}>
+        <div
+          className={`flex min-h-0 min-w-0 flex-1 ${
+            splitLayout === 'vertical' ? 'flex-col md:flex-row' : 'flex-col'
+          }`}
+        >
         {/* Media surface */}
         <div
           className={`min-h-0 shrink-0 border-border bg-background ${
@@ -1030,6 +1043,16 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
             </div>
 
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowScriptPanel((v) => !v)}
+                aria-pressed={showScriptPanel}
+                aria-label="Show script"
+                title="Show the transcript script (editable YAML/JSON)"
+              >
+                Script
+              </Button>
               <span>{stats.activeWordCount} words</span>
               <button
                 type="button"
@@ -1094,10 +1117,9 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           )}
 
           {/* Editable transcript */}
-          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <div
             ref={contentRef}
-            className={`min-h-0 flex-1 overflow-y-auto p-3 text-sm leading-relaxed focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+            className={`min-h-0 flex-1 select-none overflow-y-auto p-3 text-sm leading-relaxed focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
               isFocused ? 'bg-muted/20' : ''
             }`}
             tabIndex={0}
@@ -1114,6 +1136,16 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
             {editedWords.map(renderWord)}
           </div>
         </div>
+        </div>
+
+        {showScriptPanel && (
+          <ScriptPanel
+            transcript={transcript}
+            editedWords={editedWords}
+            onApply={replaceEditedWords}
+            onClose={() => setShowScriptPanel(false)}
+          />
+        )}
 
         {/* Modals & menus */}
         <FillerWordsModal
