@@ -1,4 +1,10 @@
 export { useTheme, type Theme, type ResolvedTheme } from './useTheme';
+export {
+  useDirection,
+  isRtlLocale,
+  RTL_LOCALES,
+  type Direction,
+} from './useDirection';
 export { usePrefersReducedMotion } from './usePrefersReducedMotion';
 export { useClickOutside } from './useClickOutside';
 export { useEscapeKey } from './useEscapeKey';

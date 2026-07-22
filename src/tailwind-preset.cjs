@@ -62,6 +62,16 @@ module.exports = {
     'translate-x-4',
     'translate-x-5',
     'translate-x-7',
+    // RTL logical properties + mirrored Switch thumb travel
+    'me-1',
+    'ms-0.5',
+    'ms-1',
+    'text-start',
+    'text-end',
+    'rtl:-translate-x-0.5',
+    'rtl:data-[state=checked]:-translate-x-4',
+    'rtl:data-[state=checked]:-translate-x-5',
+    'rtl:data-[state=checked]:-translate-x-7',
     // SchedulePicker / overflow handling
     'overflow-x-auto',
     'overflow-hidden',
@@ -104,7 +114,8 @@ module.exports = {
           foreground: 'var(--mieweb-muted-foreground, hsl(215.4 16.3% 46.9%))',
         },
         destructive: {
-          DEFAULT: 'var(--mieweb-destructive, var(--mieweb-destructive-500, hsl(0 72.2% 50.6%)))',
+          DEFAULT:
+            'var(--mieweb-destructive, var(--mieweb-destructive-500, hsl(0 72.2% 50.6%)))',
           foreground: 'var(--mieweb-destructive-foreground, hsl(210 40% 98%))',
         },
         success: {

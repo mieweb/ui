@@ -28,9 +28,9 @@ const textVariants = cva('', {
       bold: 'font-bold',
     },
     align: {
-      left: 'text-left',
+      left: 'text-start',
       center: 'text-center',
-      right: 'text-right',
+      right: 'text-end',
     },
   },
   defaultVariants: {
