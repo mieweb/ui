@@ -402,6 +402,10 @@ export const miewebUISafelist = [
   'focus:border-primary-500',
   'focus:ring-primary-500',
   'text-[10px]',
+  // SuperChat mermaid diagram wrapper — arbitrary variants applied to the
+  // injected <svg> so the diagram sizes naturally instead of collapsing.
+  '[&_svg]:h-auto',
+  '[&_svg]:max-w-none',
 ];
 
 export interface MiewebUIPreset {
