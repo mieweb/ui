@@ -24,8 +24,10 @@ const BASELINE_PATH = join(root, 'scripts', 'rtl-baseline.json');
 
 // Physical-direction utilities (with optional variant prefixes like `hover:`,
 // `md:` and optional negative `-`). Logical equivalents in comments.
+// Note: a leading boundary group is matched (not a lookbehind) to keep the
+// pattern portable and obvious; the utility token itself is capture group 2.
 const PHYSICAL_UTILITIES = new RegExp(
-  '(?<=^|[\\s\'"`{:])-?(?:[a-z-]+:)*(' +
+  '(^|[\\s\'"`{:])-?(?:[a-z-]+:)*(' +
     [
       '(?:scroll-)?m[lr]-[^\\s\'"`]+', // ml-/mr- → ms-/me-
       '(?:scroll-)?p[lr]-[^\\s\'"`]+', // pl-/pr- → ps-/pe-
@@ -61,7 +63,7 @@ function scan() {
     lines.forEach((text, i) => {
       for (const match of text.matchAll(PHYSICAL_UTILITIES)) {
         if (!results.has(rel)) results.set(rel, []);
-        results.get(rel).push({ line: i + 1, token: match[1] });
+        results.get(rel).push({ line: i + 1, token: match[2] });
       }
     });
   }
