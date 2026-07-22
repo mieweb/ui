@@ -110,15 +110,6 @@ const LiveDemo: React.FC = () => {
 
     const startedAt = performance.now();
     try {
-      // Media duration (for a word-rate plausibility check on word-level alignment output).
-      const durationSec = await new Promise<number>((resolve) => {
-        const el = document.createElement('video');
-        el.preload = 'metadata';
-        el.onloadedmetadata = () => resolve(el.duration || 0);
-        el.onerror = () => resolve(0);
-        el.src = url;
-      });
-
       // Decode first, with a watchdog: decodeAudioData can hang forever on codecs the
       // browser can't handle (some .mov/HEVC containers) — surface that as an error
       // instead of an eternal spinner.
@@ -134,6 +125,9 @@ const LiveDemo: React.FC = () => {
           )
         ),
       ]);
+
+      // Duration straight from the decoded audio (16 kHz mono) — no probe element needed.
+      const durationSec = samples.length / 16000;
 
       // Implausible output (impossible word rate, timestamps past the end) means the pipeline
       // is producing token salad — a broken WebGPU adapter or failed word alignment.
