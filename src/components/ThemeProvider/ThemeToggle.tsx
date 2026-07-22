@@ -228,14 +228,34 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
     };
 
     const getCurrentIcon = () => {
-      if (mode === 'three-way' && theme === 'system') {
+      if (mode === 'three-way') {
+        // Preview the NEXT theme in the cycle, matching the tooltip — the icon
+        // always shows what a click gives you (light → dark → system → light).
+        // Previously dark showed a sun (implying light) while the click gave
+        // system, and system showed the current state instead of the next.
+        if (theme === 'light') {
+          return (
+            lightIcon || (
+              <MoonIcon className={themeToggleIconVariants({ size })} />
+            )
+          );
+        }
+        if (theme === 'dark') {
+          return (
+            darkIcon || (
+              <SystemIcon className={themeToggleIconVariants({ size })} />
+            )
+          );
+        }
         return (
           systemIcon || (
-            <SystemIcon className={themeToggleIconVariants({ size })} />
+            <SunIcon className={themeToggleIconVariants({ size })} />
           )
         );
       }
 
+      // Two-way keeps the classic convention: sun while dark ("click for
+      // light"), moon while light ("click for dark").
       if (resolvedTheme === 'dark') {
         return (
           darkIcon || <SunIcon className={themeToggleIconVariants({ size })} />
