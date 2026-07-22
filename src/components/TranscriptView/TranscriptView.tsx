@@ -283,7 +283,7 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
               </span>
             )}
             {speaker && (
-              <span className="w-24 shrink-0 font-semibold text-primary-600">{speaker}:</span>
+              <span className="w-24 shrink-0 font-semibold text-primary-900">{speaker}:</span>
             )}
             <span className="text-foreground">{row.text}</span>
           </button>

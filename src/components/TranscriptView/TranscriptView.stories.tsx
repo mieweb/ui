@@ -149,26 +149,28 @@ export const WithActions: Story = {
 };
 
 /** Drives `currentTimeMs` on a timer and highlights + follows the active row. */
+const FollowPlaybackDemo = (args: React.ComponentProps<typeof TranscriptView>) => {
+  const [timeMs, setTimeMs] = React.useState(0);
+
+  React.useEffect(() => {
+    const id = window.setInterval(() => {
+      setTimeMs((t) => (t + 200) % (args.transcript.durationMs || 1));
+    }, 200);
+    return () => window.clearInterval(id);
+  }, [args.transcript.durationMs]);
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        Simulated playback position: {(timeMs / 1000).toFixed(1)}s
+      </p>
+      <TranscriptView {...args} currentTimeMs={timeMs} onSeek={(ms) => setTimeMs(ms)} />
+    </div>
+  );
+};
+
 export const FollowPlayback: Story = {
-  render: (args) => {
-    const [timeMs, setTimeMs] = React.useState(0);
-
-    React.useEffect(() => {
-      const id = window.setInterval(() => {
-        setTimeMs((t) => (t + 200) % (args.transcript.durationMs || 1));
-      }, 200);
-      return () => window.clearInterval(id);
-    }, [args.transcript.durationMs]);
-
-    return (
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Simulated playback position: {(timeMs / 1000).toFixed(1)}s
-        </p>
-        <TranscriptView {...args} currentTimeMs={timeMs} onSeek={(ms) => setTimeMs(ms)} />
-      </div>
-    );
-  },
+  render: (args) => <FollowPlaybackDemo {...args} />,
   args: {
     transcript: sampleTranscript,
     granularity: 'segment',
@@ -177,25 +179,27 @@ export const FollowPlayback: Story = {
 };
 
 /** Clicking a word/segment reports its start time through `onSeek`. */
-export const ClickToSeek: Story = {
-  render: (args) => {
-    const [lastSeek, setLastSeek] = React.useState<number | null>(null);
+const ClickToSeekDemo = (args: React.ComponentProps<typeof TranscriptView>) => {
+  const [lastSeek, setLastSeek] = React.useState<number | null>(null);
 
-    return (
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          {lastSeek === null
-            ? 'Click any word or segment to seek.'
-            : `Requested seek to ${(lastSeek / 1000).toFixed(1)}s`}
-        </p>
-        <TranscriptView
-          {...args}
-          currentTimeMs={lastSeek ?? undefined}
-          onSeek={(ms) => setLastSeek(ms)}
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        {lastSeek === null
+          ? 'Click any word or segment to seek.'
+          : `Requested seek to ${(lastSeek / 1000).toFixed(1)}s`}
+      </p>
+      <TranscriptView
+        {...args}
+        currentTimeMs={lastSeek ?? undefined}
+        onSeek={(ms) => setLastSeek(ms)}
+      />
+    </div>
+  );
+};
+
+export const ClickToSeek: Story = {
+  render: (args) => <ClickToSeekDemo {...args} />,
   args: {
     transcript: sampleTranscript,
     granularity: 'word',

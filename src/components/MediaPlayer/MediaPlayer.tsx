@@ -91,11 +91,15 @@ const mediaPlayerVariants = cva(
 // Helpers
 // ============================================================================
 
-const VIDEO_EXTENSIONS = /\.(mp4|mov|avi|webm|mkv|m4v)(\?.*)?$/i;
+const VIDEO_EXTENSIONS = /\.(mp4|mov|avi|webm|mkv|m4v)$/i;
 
 /** Infer media kind from a URL's file extension; defaults to audio. */
 export function inferMediaKind(src: string): MediaKind {
-  return VIDEO_EXTENSIONS.test(src) ? 'video' : 'audio';
+  // Strip any query string / fragment before matching. Testing the extension
+  // against the full URL required a trailing `.*`, which backtracks
+  // polynomially on crafted inputs (ReDoS); splitting first is linear.
+  const path = src.split(/[?#]/, 1)[0];
+  return VIDEO_EXTENSIONS.test(path) ? 'video' : 'audio';
 }
 
 // ============================================================================
@@ -202,6 +206,9 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
     return (
       <div className={mediaPlayerVariants({ variant, className })}>
         {resolvedKind === 'video' ? (
+          // Generic media surface: caption tracks belong to the consumer's media
+          // resource and are supplied via children, not this transport component.
+          // eslint-disable-next-line jsx-a11y/media-has-caption
           <video
             ref={setElement as React.Ref<HTMLVideoElement>}
             playsInline
@@ -209,6 +216,7 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
             {...sharedMediaProps}
           />
         ) : (
+          // eslint-disable-next-line jsx-a11y/media-has-caption
           <audio
             ref={setElement as React.Ref<HTMLAudioElement>}
             className="my-4 w-[90%] max-w-lg"

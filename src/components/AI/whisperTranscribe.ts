@@ -88,6 +88,59 @@ function whisperPref(): string | null {
   }
 }
 
+// Optional inference-device override for the small English models: set
+// `window.__ozwell.whisperDevice = 'wasm'` (or `ozwellConfig.whisperDevice` in localStorage) to skip the
+// WebGPU attempt. WebGPU on software/broken adapters (headless & automation browsers, some VMs) can
+// "succeed" while computing garbage tokens — wasm is slower but always correct. Same window→parent→top→
+// localStorage resolution as the model pref.
+function whisperDevice(): string | null {
+  if (typeof window === 'undefined') return null;
+  const fromWin = (w?: Window | null): string | undefined => {
+    try {
+      return (w as unknown as { __ozwell?: { whisperDevice?: string } })
+        ?.__ozwell?.whisperDevice;
+    } catch {
+      return undefined;
+    }
+  };
+  const win = fromWin(window) || fromWin(window.parent) || fromWin(window.top);
+  if (win) return win;
+  try {
+    return (
+      JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisperDevice ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
+// Optional dtype override for the small English models' WebGPU attempt (default 'q8'). The q8 WebGPU
+// kernels miscompute on some Chrome/driver combos while fp16/fp32 work (turbo's fp16/q4 path is fine on
+// the same machines) — set `window.__ozwell.whisperDtype = 'fp16'` to trade a larger download for
+// correct GPU inference. The wasm fallback always uses q8 (CPU arithmetic is deterministic).
+function whisperDtype(): string | null {
+  if (typeof window === 'undefined') return null;
+  const fromWin = (w?: Window | null): string | undefined => {
+    try {
+      return (w as unknown as { __ozwell?: { whisperDtype?: string } })
+        ?.__ozwell?.whisperDtype;
+    } catch {
+      return undefined;
+    }
+  };
+  const win = fromWin(window) || fromWin(window.parent) || fromWin(window.top);
+  if (win) return win;
+  try {
+    return (
+      JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisperDtype ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
 // Pinned to an EXACT validated version (a floating `@3` lets jsDelivr serve newer 3.x that can break at
 // runtime). Override the ESM URL for strict-CSP / offline / self-hosted setups via
 // `window.__ozwellTransformersUrl` or `localStorage['ozwellTransformersUrl']`.
@@ -182,15 +235,17 @@ async function buildEnglish(modelId) {
   const mod = await getMod();
   mod.env.remoteHost = cfg.hfHost;
   mod.env.remotePathTemplate = cfg.hfPath;
-  try {
-    const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8', progress_callback: progressCb() });
-    console.log('[whisper] ready (' + modelId + ' / WebGPU, worker)');
-    return pipe;
-  } catch (e) {
-    const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { dtype: 'q8', progress_callback: progressCb() });
-    console.log('[whisper] ready (' + modelId + ' / wasm, worker)');
-    return pipe;
+  if ((cfg.whisperDevice || '').toLowerCase() !== 'wasm') {
+    try {
+      const gpuDtype = cfg.whisperDtype || 'q8';
+      const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: gpuDtype, progress_callback: progressCb() });
+      console.log('[whisper] ready (' + modelId + ' / WebGPU ' + gpuDtype + ', worker)');
+      return pipe;
+    } catch (e) { /* fall through to wasm */ }
   }
+  const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { dtype: 'q8', progress_callback: progressCb() });
+  console.log('[whisper] ready (' + modelId + ' / wasm, worker)');
+  return pipe;
 }
 
 async function buildTurbo() {
@@ -250,7 +305,7 @@ self.onmessage = async (e) => {
       if (m.want === 'gate') { pipe = await loadGate(); opts = { chunk_length_s: 30 }; }
       else {
         pipe = await loadWhisper();
-        if (m.want === 'segments') opts = Object.assign({ chunk_length_s: 30, return_timestamps: true }, isMulti ? { language: 'english', task: 'transcribe' } : {});
+        if (m.want === 'segments' || m.want === 'words') opts = Object.assign({ chunk_length_s: 30, return_timestamps: m.want === 'words' ? 'word' : true }, isMulti ? { language: 'english', task: 'transcribe' } : {});
         else opts = isMulti ? { chunk_length_s: 30, language: 'english', task: 'transcribe' } : { chunk_length_s: 30 };
       }
       const out = await pipe(m.samples, opts);
@@ -278,6 +333,8 @@ function buildWorkerCfg() {
     transformersUrl: transformersUrl(),
     whisperHost: whisperHost(),
     whisperPref: whisperPref(),
+    whisperDevice: whisperDevice(),
+    whisperDtype: whisperDtype(),
     hfHost: HF_HOST,
     hfPath: HF_PATH,
     smallModels: SMALL_MODELS,
@@ -338,7 +395,7 @@ function getWorker(): Worker {
 // Post a transcribe request to the worker; the 16 kHz mono samples are TRANSFERRED (zero-copy). Resolves
 // with the worker's { text, chunks }.
 function callWorker(
-  want: 'text' | 'segments' | 'gate',
+  want: 'text' | 'segments' | 'words' | 'gate',
   samples: Float32Array
 ): Promise<WorkerResult> {
   const w = getWorker();
@@ -352,6 +409,21 @@ function callWorker(
 /** True only once the dictation model has actually finished loading (not merely started, not rejected). */
 export function isWhisperLoaded(): boolean {
   return getDictationLoad().done;
+}
+
+/** Terminate the whisper worker so the next call spawns a fresh one with current config
+ *  (model pref / device / hosts re-read from window+localStorage). Model weights stay in the
+ *  browser Cache API, so a respawn re-instantiates in seconds rather than re-downloading.
+ *  Lets callers switch models/devices at runtime or recover from a bad pipeline (e.g. WebGPU
+ *  computing garbage on a broken adapter). In-flight requests are rejected. */
+export function resetWhisperWorker(): void {
+  if (!worker) return;
+  const err = new Error('whisper worker reset');
+  pending.forEach((p) => p.reject(err));
+  pending.clear();
+  worker.terminate();
+  worker = null;
+  setDictationLoad({ active: false, progress: 0, done: false });
 }
 
 /** Start loading the dictation model NOW (in the worker) so the first dictation doesn't pay the load. */
@@ -560,6 +632,19 @@ export async function transcribeSamples(
   return (out.text ?? '').trim();
 }
 
+/** Map raw worker chunks (`{ timestamp: [s, e], text }`) to TranscriptSegments in seconds. */
+function chunksToSegments(
+  chunks: WorkerResult['chunks']
+): TranscriptSegment[] {
+  return (chunks ?? [])
+    .map((c) => ({
+      start: c.timestamp?.[0] ?? 0,
+      end: c.timestamp?.[1] ?? c.timestamp?.[0] ?? 0,
+      text: (c.text ?? '').trim(),
+    }))
+    .filter((s) => s.text);
+}
+
 /** Transcribe with timestamps → segments `[{ start, end, text }]`, for diarization (align speaker turns to
  *  text). Returns 16 kHz-relative seconds. See `useDiarization`. */
 export async function transcribeSegments(
@@ -567,14 +652,35 @@ export async function transcribeSegments(
 ): Promise<TranscriptSegment[]> {
   const samples = await decodeTo16kMono(blob);
   const out = await callWorker('segments', samples);
-  const chunks = out.chunks ?? [];
-  return chunks
-    .map((c) => ({
-      start: c.timestamp?.[0] ?? 0,
-      end: c.timestamp?.[1] ?? c.timestamp?.[0] ?? 0,
-      text: (c.text ?? '').trim(),
-    }))
-    .filter((s) => s.text);
+  return chunksToSegments(out.chunks);
+}
+
+/** Transcribe with WORD-level timestamps → `[{ start, end, text }]` (seconds), one entry per word — the
+ *  shape word-level editors (MediaEditor) need. Uses transformers.js `return_timestamps: 'word'`
+ *  (cross-attention alignment). Some models/runtimes reject word-level alignment — callers should catch
+ *  and fall back to `transcribeSegments`. */
+export async function transcribeWords(
+  blob: Blob
+): Promise<TranscriptSegment[]> {
+  return transcribeWordsFromSamples(await decodeTo16kMono(blob));
+}
+
+/** Word-level transcription from already-decoded 16 kHz mono samples. Lets callers decode once (with
+ *  their own status/timeout handling) and retry/fall back without re-decoding. NOTE: samples are
+ *  transferred to the worker — pass a copy (`samples.slice()`) if you need them again. */
+export async function transcribeWordsFromSamples(
+  samples: Float32Array
+): Promise<TranscriptSegment[]> {
+  const out = await callWorker('words', samples);
+  return chunksToSegments(out.chunks);
+}
+
+/** Segment-level transcription from already-decoded 16 kHz mono samples (see transcribeWordsFromSamples). */
+export async function transcribeSegmentsFromSamples(
+  samples: Float32Array
+): Promise<TranscriptSegment[]> {
+  const out = await callWorker('segments', samples);
+  return chunksToSegments(out.chunks);
 }
 
 // Server-ASR model id (override via localStorage ozwellConfig.serverWhisper); defaults to the
