@@ -14,7 +14,11 @@
 
 import * as React from 'react';
 import { Button } from '../Button';
-import type { Transcript, EditableWord, TranscriptWord } from '../TranscriptView/transcript';
+import type {
+  Transcript,
+  EditableWord,
+  TranscriptWord,
+} from '../TranscriptView/transcript';
 
 let yamlPromise: Promise<typeof import('js-yaml')> | null = null;
 function loadYaml() {
@@ -38,7 +42,10 @@ type ScriptSource = 'editor' | 'original';
 type ScriptFormat = 'yaml' | 'json';
 
 /** Parse + validate script text into EditableWord[]; throws with a readable message. */
-async function parseScript(text: string, format: ScriptFormat): Promise<EditableWord[]> {
+async function parseScript(
+  text: string,
+  format: ScriptFormat
+): Promise<EditableWord[]> {
   let data: unknown;
   if (format === 'json') {
     data = JSON.parse(text);
@@ -50,7 +57,12 @@ async function parseScript(text: string, format: ScriptFormat): Promise<Editable
     throw new Error('Script must be a list of word entries.');
   }
   return data.map((raw, i) => {
-    const ew = raw as { originalIndex?: unknown; deleted?: unknown; inserted?: unknown; word?: Record<string, unknown> };
+    const ew = raw as {
+      originalIndex?: unknown;
+      deleted?: unknown;
+      inserted?: unknown;
+      word?: Record<string, unknown>;
+    };
     const w = ew.word;
     if (
       !w ||
@@ -58,7 +70,9 @@ async function parseScript(text: string, format: ScriptFormat): Promise<Editable
       typeof w.startMs !== 'number' ||
       typeof w.endMs !== 'number'
     ) {
-      throw new Error(`Entry ${i + 1}: each entry needs word.text, word.startMs and word.endMs.`);
+      throw new Error(
+        `Entry ${i + 1}: each entry needs word.text, word.startMs and word.endMs.`
+      );
     }
     const word: TranscriptWord = {
       text: w.text,
@@ -70,7 +84,8 @@ async function parseScript(text: string, format: ScriptFormat): Promise<Editable
       ...(typeof w.speakerId === 'string' ? { speakerId: w.speakerId } : {}),
     };
     return {
-      originalIndex: typeof ew.originalIndex === 'number' ? ew.originalIndex : -1,
+      originalIndex:
+        typeof ew.originalIndex === 'number' ? ew.originalIndex : -1,
       deleted: Boolean(ew.deleted),
       ...(ew.inserted !== undefined ? { inserted: Boolean(ew.inserted) } : {}),
       word,
@@ -120,7 +135,9 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
       setDirty(false);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not parse the script.');
+      setError(
+        err instanceof Error ? err.message : 'Could not parse the script.'
+      );
     }
   };
 
@@ -138,7 +155,7 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
         setError(null);
       }}
       aria-pressed={source === value}
-      className={`rounded px-1.5 py-0.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+      className={`focus-visible:ring-ring rounded px-1.5 py-0.5 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none ${
         source === value
           ? 'bg-primary-800 font-medium text-white'
           : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -150,15 +167,15 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
 
   return (
     <aside
-      className={`flex w-80 shrink-0 flex-col border-l border-border bg-card lg:w-96 ${className ?? ''}`}
+      className={`border-border bg-card flex w-80 shrink-0 flex-col border-l lg:w-96 ${className ?? ''}`}
       aria-label="Transcript script"
     >
-      <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-border px-3 py-2">
-        <span className="text-xs font-semibold text-foreground">Script</span>
-        <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+      <div className="border-border flex shrink-0 flex-wrap items-center gap-1.5 border-b px-3 py-2">
+        <span className="text-foreground text-xs font-semibold">Script</span>
+        <span className="bg-border mx-1 h-4 w-px" aria-hidden="true" />
         {sourceButton('editor', 'Editor')}
         {sourceButton('original', 'Original')}
-        <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+        <span className="bg-border mx-1 h-4 w-px" aria-hidden="true" />
         <button
           type="button"
           onClick={() => {
@@ -166,15 +183,20 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
             setDirty(false);
             setError(null);
           }}
-          className="rounded px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded px-1.5 py-0.5 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
           title="Toggle YAML / JSON"
         >
           {format.toUpperCase()}
         </button>
-        <span className="ml-auto text-[10px] text-muted-foreground">
+        <span className="text-muted-foreground ml-auto text-[10px]">
           {readOnly ? 'read-only' : dirty ? 'edited' : 'live'}
         </span>
-        <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close script panel">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          aria-label="Close script panel"
+        >
           ✕
         </Button>
       </div>
@@ -187,18 +209,21 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
           setText(e.target.value);
           setDirty(true);
         }}
-        className="min-h-0 flex-1 resize-none bg-transparent p-3 font-mono text-xs leading-relaxed text-foreground focus:outline-none"
+        className="text-foreground min-h-0 flex-1 resize-none bg-transparent p-3 font-mono text-xs leading-relaxed focus:outline-none"
         aria-label={`Script source (${source}, ${format.toUpperCase()})`}
       />
 
       {error && (
-        <p className="m-0 shrink-0 border-t border-border px-3 py-2 text-xs text-destructive" role="alert">
+        <p
+          className="border-border text-destructive m-0 shrink-0 border-t px-3 py-2 text-xs"
+          role="alert"
+        >
           {error}
         </p>
       )}
 
       {!readOnly && (
-        <div className="flex shrink-0 items-center gap-2 border-t border-border px-3 py-2">
+        <div className="border-border flex shrink-0 items-center gap-2 border-t px-3 py-2">
           <Button size="sm" onClick={handleApply} disabled={!dirty}>
             Apply
           </Button>
@@ -211,8 +236,9 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
           >
             Discard
           </Button>
-          <span className="text-[10px] text-muted-foreground">
-            Apply pushes into the editor &mdash; revert an applied change with Undo
+          <span className="text-muted-foreground text-[10px]">
+            Apply pushes into the editor &mdash; revert an applied change with
+            Undo
           </span>
         </div>
       )}

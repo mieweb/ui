@@ -41,8 +41,9 @@ export interface MediaPlayerRef {
   mediaElement: HTMLVideoElement | HTMLAudioElement | null;
 }
 
-export interface MediaPlayerProps
-  extends VariantProps<typeof mediaPlayerVariants> {
+export interface MediaPlayerProps extends VariantProps<
+  typeof mediaPlayerVariants
+> {
   /** Media source URL. */
   src: string;
   /** Force the media kind; when omitted it is inferred from the src extension. */
@@ -192,9 +193,9 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
         <div className={mediaPlayerVariants({ variant, className })}>
           <div
             role="alert"
-            className="flex min-h-36 flex-col items-center justify-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-8 text-center"
+            className="border-destructive/30 bg-destructive/10 flex min-h-36 flex-col items-center justify-center gap-3 rounded-lg border p-8 text-center"
           >
-            <p className="m-0 text-sm text-destructive">{error}</p>
+            <p className="text-destructive m-0 text-sm">{error}</p>
             <Button variant="outline" size="sm" onClick={handleRetry}>
               Retry
             </Button>

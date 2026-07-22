@@ -53,7 +53,11 @@ describe('insertSilences', () => {
   });
 
   it('inserts a leading silence when the first word starts after the threshold', () => {
-    const result = insertSilences([{ text: 'A', startMs: 600, endMs: 1000 }], 400, 1500);
+    const result = insertSilences(
+      [{ text: 'A', startMs: 600, endMs: 1000 }],
+      400,
+      1500
+    );
     expect(result[0].wordType).toBe('silence');
     expect(result[0].startMs).toBe(0);
     expect(result[0].endMs).toBe(600);
@@ -90,7 +94,10 @@ describe('buildPlaybackSegments', () => {
   });
 
   it('returns no segments when everything is deleted', () => {
-    const editable = initEditableWords(packed).map((w) => ({ ...w, deleted: true }));
+    const editable = initEditableWords(packed).map((w) => ({
+      ...w,
+      deleted: true,
+    }));
     expect(buildPlaybackSegments(editable)).toEqual([]);
   });
 });
@@ -118,13 +125,17 @@ describe('getSpeedAtIndex', () => {
 
 describe('useTranscriptEdits', () => {
   it('initializes the edited timeline from the transcript', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
     expect(result.current.editedWords).toHaveLength(3);
     expect(result.current.hasEdits).toBe(false);
   });
 
   it('toggles a word deleted and flags edits, then restores via undo', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
 
     act(() => result.current.toggleWordDeleted(1));
     expect(result.current.editedWords[1].deleted).toBe(true);
@@ -136,20 +147,26 @@ describe('useTranscriptEdits', () => {
   });
 
   it('deletes a range anchored on the first index', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
     act(() => result.current.deleteRange([0, 1, 2]));
     expect(result.current.editedWords.every((w) => w.deleted)).toBe(true);
   });
 
   it('cuts words into the clipboard and marks them deleted', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
     act(() => result.current.cut([0]));
     expect(result.current.clipboard?.operation).toBe('cut');
     expect(result.current.editedWords[0].deleted).toBe(true);
   });
 
   it('copies without mutating and pastes an inserted copy', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
 
     act(() => result.current.copy([0]));
     expect(result.current.clipboard?.operation).toBe('copy');
@@ -163,7 +180,9 @@ describe('useTranscriptEdits', () => {
   });
 
   it('replaces a word text', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
     act(() => result.current.setWordText(0, 'Hi'));
     expect(result.current.editedWords[0].word.text).toBe('Hi');
     expect(result.current.hasEdits).toBe(true);
@@ -171,14 +190,18 @@ describe('useTranscriptEdits', () => {
 
   it('removes filler words', () => {
     expect(DEFAULT_FILLER_WORDS).toContain('um');
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
     act(() => result.current.removeFillers(['um'], null));
     const um = result.current.editedWords.find((w) => w.word.text === 'um');
     expect(um?.deleted).toBe(true);
   });
 
   it('toggles a speed marker and reports the effective speed', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
 
     act(() => result.current.toggleSpeedMarker(1, 1.5));
     expect(result.current.speedMarkers).toEqual([{ wordIndex: 1, speed: 1.5 }]);
@@ -190,7 +213,9 @@ describe('useTranscriptEdits', () => {
   });
 
   it('reports stats for the active timeline', () => {
-    const { result } = renderHook(() => useTranscriptEdits({ transcript: packed }));
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
     expect(result.current.stats.activeWordCount).toBe(3);
     act(() => result.current.toggleWordDeleted(0));
     expect(result.current.stats.activeWordCount).toBe(2);

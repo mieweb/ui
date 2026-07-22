@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { Transcript, TranscriptSegment, TranscriptWord } from './transcript';
+import type {
+  Transcript,
+  TranscriptSegment,
+  TranscriptWord,
+} from './transcript';
 
 // ============================================================================
 // Types & Interfaces
@@ -8,7 +12,9 @@ import type { Transcript, TranscriptSegment, TranscriptWord } from './transcript
 
 export type TranscriptGranularity = 'word' | 'segment';
 
-export interface TranscriptViewProps extends VariantProps<typeof transcriptViewVariants> {
+export interface TranscriptViewProps extends VariantProps<
+  typeof transcriptViewVariants
+> {
   /** The transcript to render */
   transcript: Transcript;
   /**
@@ -93,7 +99,10 @@ interface SegmentRow {
  * Build segment display rows, optionally merging consecutive same-speaker
  * segments (osheet formatTranscriptText behavior). Empty segments are skipped.
  */
-function buildSegmentRows(segments: TranscriptSegment[], merge: boolean): SegmentRow[] {
+function buildSegmentRows(
+  segments: TranscriptSegment[],
+  merge: boolean
+): SegmentRow[] {
   const rows: SegmentRow[] = [];
   for (const segment of segments) {
     const text = segment.text.trim();
@@ -120,7 +129,9 @@ function findActiveIndex(
   timeMs: number | undefined
 ): number {
   if (timeMs === undefined) return -1;
-  return items.findIndex((item) => timeMs >= item.startMs && timeMs < item.endMs);
+  return items.findIndex(
+    (item) => timeMs >= item.startMs && timeMs < item.endMs
+  );
 }
 
 /** Run onActivate for click and Enter/Space keyboard activation */
@@ -150,7 +161,10 @@ function activationProps(onActivate: () => void) {
  * UX (timestamp | speaker | text, click to seek + play). Editing lives in
  * MediaEditor, not here.
  */
-export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewProps>(
+export const TranscriptView = React.forwardRef<
+  HTMLDivElement,
+  TranscriptViewProps
+>(
   (
     {
       transcript,
@@ -172,7 +186,10 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
     const isHoveringRef = React.useRef(false);
 
     const resolvedGranularity: TranscriptGranularity =
-      granularity ?? (transcript.segments && transcript.segments.length > 0 ? 'segment' : 'word');
+      granularity ??
+      (transcript.segments && transcript.segments.length > 0
+        ? 'segment'
+        : 'word');
 
     const segmentRows = React.useMemo(
       () =>
@@ -190,7 +207,9 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
     // Auto-scroll the active item into view, unless the user is hovering
     React.useEffect(() => {
       if (!followPlayback || activeIndex < 0 || isHoveringRef.current) return;
-      const el = contentRef.current?.querySelector(`[data-transcript-index="${activeIndex}"]`);
+      const el = contentRef.current?.querySelector(
+        `[data-transcript-index="${activeIndex}"]`
+      );
       el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }, [followPlayback, activeIndex]);
 
@@ -214,7 +233,7 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
             tabIndex={0}
             aria-current={isActive ? 'true' : undefined}
             aria-label={`Silence, ${durationSec} seconds`}
-            className={`block h-3 cursor-pointer rounded transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            className={`hover:bg-muted focus-visible:ring-ring block h-3 cursor-pointer rounded transition-colors focus-visible:ring-2 focus-visible:outline-none ${
               isActive ? 'bg-primary-500/20' : ''
             }`}
             {...activationProps(() => seekTo(word.startMs))}
@@ -232,7 +251,7 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
             tabIndex={0}
             aria-current={isActive ? 'true' : undefined}
             aria-label={`Silence, ${durationSec} seconds`}
-            className={`cursor-pointer rounded px-0.5 text-muted-foreground/60 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            className={`text-muted-foreground/60 hover:bg-muted focus-visible:ring-ring cursor-pointer rounded px-0.5 transition-colors focus-visible:ring-2 focus-visible:outline-none ${
               isActive ? 'bg-primary-500/20' : ''
             }`}
             {...activationProps(() => seekTo(word.startMs))}
@@ -249,7 +268,7 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
           role="button"
           tabIndex={0}
           aria-current={isActive ? 'true' : undefined}
-          className={`cursor-pointer rounded px-0.5 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          className={`hover:bg-muted focus-visible:ring-ring cursor-pointer rounded px-0.5 transition-colors focus-visible:ring-2 focus-visible:outline-none ${
             isActive ? 'bg-primary-500/20 text-foreground' : ''
           }`}
           {...activationProps(() => seekTo(word.startMs))}
@@ -264,7 +283,11 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
     // ------------------------------------------------------------------
     const renderSegmentRow = (row: SegmentRow, index: number) => {
       const isActive = index === activeIndex;
-      const speaker = resolveSpeakerLabel(row.speakerId, speakerLabels, transcript);
+      const speaker = resolveSpeakerLabel(
+        row.speakerId,
+        speakerLabels,
+        transcript
+      );
 
       return (
         <div key={index} role="listitem">
@@ -272,18 +295,20 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
             type="button"
             data-transcript-index={index}
             aria-current={isActive ? 'true' : undefined}
-            className={`flex w-full gap-3 rounded px-2 py-1 text-left text-sm cursor-pointer transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            className={`hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer gap-3 rounded px-2 py-1 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
               isActive ? 'bg-primary-500/20' : ''
             }`}
             {...activationProps(() => seekTo(row.startMs))}
           >
             {showTimestamps && (
-              <span className="w-12 shrink-0 font-mono text-muted-foreground">
+              <span className="text-muted-foreground w-12 shrink-0 font-mono">
                 {formatTimestampMs(row.startMs)}
               </span>
             )}
             {speaker && (
-              <span className="w-24 shrink-0 font-semibold text-primary-900">{speaker}:</span>
+              <span className="text-primary-900 w-24 shrink-0 font-semibold">
+                {speaker}:
+              </span>
             )}
             <span className="text-foreground">{row.text}</span>
           </button>
@@ -294,7 +319,7 @@ export const TranscriptView = React.forwardRef<HTMLDivElement, TranscriptViewPro
     return (
       <div ref={ref} className={transcriptViewVariants({ variant, className })}>
         {actions && (
-          <div className="mb-2 flex items-center justify-end gap-2 border-b border-border pb-2">
+          <div className="border-border mb-2 flex items-center justify-end gap-2 border-b pb-2">
             {actions}
           </div>
         )}

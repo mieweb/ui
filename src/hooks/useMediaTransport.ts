@@ -159,13 +159,10 @@ export function useMediaTransport(
     });
   }, []);
 
-  const setMediaElement = useCallback(
-    (el: HTMLMediaElement | null) => {
-      elementRef.current = el;
-      setElementState(el);
-    },
-    []
-  );
+  const setMediaElement = useCallback((el: HTMLMediaElement | null) => {
+    elementRef.current = el;
+    setElementState(el);
+  }, []);
 
   // Attach native transport listeners whenever an element mounts.
   useEffect(() => {

@@ -9,7 +9,9 @@ import { useMediaTransport } from './useMediaTransport';
  */
 function makeMediaElement(): HTMLMediaElement {
   const el = document.createElement('audio');
-  el.play = vi.fn().mockResolvedValue(undefined) as unknown as HTMLMediaElement['play'];
+  el.play = vi
+    .fn()
+    .mockResolvedValue(undefined) as unknown as HTMLMediaElement['play'];
   el.pause = vi.fn() as unknown as HTMLMediaElement['pause'];
   let paused = true;
   Object.defineProperty(el, 'paused', {

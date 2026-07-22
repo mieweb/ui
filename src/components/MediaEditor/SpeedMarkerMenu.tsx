@@ -60,12 +60,12 @@ export const SpeedMarkerMenu: React.FC<SpeedMarkerMenuProps> = ({
   return (
     <div
       ref={menuRef}
-      className="fixed z-50 min-w-36 overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-lg"
+      className="border-border bg-card text-card-foreground fixed z-50 min-w-36 overflow-hidden rounded-lg border shadow-lg"
       style={{ left: position.x, top: position.y }}
       role="menu"
       aria-label="Set speed marker"
     >
-      <div className="border-b border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+      <div className="border-border text-muted-foreground border-b px-3 py-1.5 text-xs font-semibold">
         Set Speed Marker
       </div>
       <div className="flex flex-col p-1">
@@ -76,7 +76,7 @@ export const SpeedMarkerMenu: React.FC<SpeedMarkerMenuProps> = ({
             <button
               key={speed}
               type="button"
-              className={`flex items-center justify-between gap-2 rounded-md px-2.5 py-1 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`focus-visible:ring-ring flex items-center justify-between gap-2 rounded-md px-2.5 py-1 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
                 isActive
                   ? 'bg-primary-600 font-medium text-white'
                   : 'text-foreground hover:bg-muted'
@@ -89,7 +89,7 @@ export const SpeedMarkerMenu: React.FC<SpeedMarkerMenuProps> = ({
             >
               {speed}x
               {isDefault && (
-                <span className="text-xs text-muted-foreground">default</span>
+                <span className="text-muted-foreground text-xs">default</span>
               )}
             </button>
           );
@@ -98,7 +98,7 @@ export const SpeedMarkerMenu: React.FC<SpeedMarkerMenuProps> = ({
       {currentMarker && (
         <button
           type="button"
-          className="w-full border-t border-border px-2.5 py-1.5 text-left text-sm text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="border-border text-destructive hover:bg-destructive/10 focus-visible:ring-ring w-full border-t px-2.5 py-1.5 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
           onClick={() => {
             onRemoveMarker();
             onClose();

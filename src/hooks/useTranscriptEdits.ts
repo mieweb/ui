@@ -23,10 +23,32 @@ import type {
 
 /** Default filler words offered for removal */
 export const DEFAULT_FILLER_WORDS = [
-  'um', 'uh', 'umm', 'uhh', 'uh-huh', 'mm-hmm', 'hmm', 'hm',
-  'er', 'err', 'ah', 'ahh', 'eh', 'oh', 'ooh',
-  'like', 'you know', 'i mean', 'so', 'well', 'actually',
-  'basically', 'literally', 'right', 'okay', 'ok',
+  'um',
+  'uh',
+  'umm',
+  'uhh',
+  'uh-huh',
+  'mm-hmm',
+  'hmm',
+  'hm',
+  'er',
+  'err',
+  'ah',
+  'ahh',
+  'eh',
+  'oh',
+  'ooh',
+  'like',
+  'you know',
+  'i mean',
+  'so',
+  'well',
+  'actually',
+  'basically',
+  'literally',
+  'right',
+  'okay',
+  'ok',
 ];
 
 /** Default minimum silence duration in milliseconds to detect and insert */
@@ -56,8 +78,10 @@ export interface SilenceThresholdCount {
  * Consecutive words in original order are merged into single segments.
  * Inserted (pasted) words each get their own segment since they may be duplicates.
  */
-export function buildPlaybackSegments(editedWords: EditableWord[]): PlaybackSegment[] {
-  const activeWords = editedWords.filter(w => !w.deleted);
+export function buildPlaybackSegments(
+  editedWords: EditableWord[]
+): PlaybackSegment[] {
+  const activeWords = editedWords.filter((w) => !w.deleted);
   if (activeWords.length === 0) return [];
 
   const segments: PlaybackSegment[] = [];
@@ -71,7 +95,10 @@ export function buildPlaybackSegments(editedWords: EditableWord[]): PlaybackSegm
 
     // Check if this word is consecutive to the previous in the original
     // Inserted words always start a new segment (they might be duplicates)
-    const isConsecutive = !ew.inserted && !lastWasInserted && ew.originalIndex === lastOriginalIndex + 1;
+    const isConsecutive =
+      !ew.inserted &&
+      !lastWasInserted &&
+      ew.originalIndex === lastOriginalIndex + 1;
 
     if (currentSegment && isConsecutive) {
       // Extend current segment
@@ -111,7 +138,9 @@ export function getSpeedAtIndex(
   defaultSpeed: PlaybackSpeed
 ): PlaybackSpeed {
   // Sort markers by word index (should already be sorted, but be safe)
-  const sortedMarkers = [...speedMarkers].sort((a, b) => a.wordIndex - b.wordIndex);
+  const sortedMarkers = [...speedMarkers].sort(
+    (a, b) => a.wordIndex - b.wordIndex
+  );
 
   // Find the last marker at or before this word index
   let effectiveSpeed = defaultSpeed;
@@ -183,7 +212,11 @@ export function initEditableWords(
   nlSilenceMs: number = DEFAULT_NL_SILENCE_MS
 ): EditableWord[] {
   // First insert silences between the original words
-  const wordsWithSilences = insertSilences(transcript.words, minSilenceMs, nlSilenceMs);
+  const wordsWithSilences = insertSilences(
+    transcript.words,
+    minSilenceMs,
+    nlSilenceMs
+  );
 
   return wordsWithSilences.map((word, index) => ({
     originalIndex: index,
@@ -281,7 +314,10 @@ export interface UseTranscriptEditsResult {
   /** Replace the entire edit state from an external source (e.g. an editable script view); undo-safe */
   replaceEditedWords: (next: EditableWord[]) => void;
   /** Mark matching filler words (and silences above the given seconds threshold) deleted */
-  removeFillers: (fillerWords: string[], removeSilenceAboveSec: number | null) => void;
+  removeFillers: (
+    fillerWords: string[],
+    removeSilenceAboveSec: number | null
+  ) => void;
 
   // -- Silence thresholds --
   /** Rebuild silence detection with new thresholds, preserving word deletions */
@@ -322,7 +358,9 @@ export interface UseTranscriptEditsResult {
  * markers and silence-threshold changes are NOT part of the undo stack
  * (matching the source component).
  */
-export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTranscriptEditsResult {
+export function useTranscriptEdits(
+  options: UseTranscriptEditsOptions
+): UseTranscriptEditsResult {
   const {
     transcript,
     initialEditedWords,
@@ -335,15 +373,19 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
   // Track if we've initialized from saved state (skip first onChange notification)
   const initializedFromSaved = useRef(false);
 
-  const [editedWords, setEditedWords] = useState<EditableWord[]>(() =>
-    initialEditedWords || initEditableWords(transcript, initialMinSilenceMs, initialNlSilenceMs)
+  const [editedWords, setEditedWords] = useState<EditableWord[]>(
+    () =>
+      initialEditedWords ||
+      initEditableWords(transcript, initialMinSilenceMs, initialNlSilenceMs)
   );
-  const [undoStack, setUndoStack] = useState<EditableWord[][]>(initialUndoStack || []);
+  const [undoStack, setUndoStack] = useState<EditableWord[][]>(
+    initialUndoStack || []
+  );
   const [clipboard, setClipboard] = useState<TranscriptClipboard | null>(null);
   const [hasEdits, setHasEdits] = useState(() => {
     // Check if initial state has edits
     if (initialEditedWords) {
-      return initialEditedWords.some(ew => ew.deleted || ew.inserted);
+      return initialEditedWords.some((ew) => ew.deleted || ew.inserted);
     }
     return false;
   });
@@ -354,7 +396,7 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
 
   // Helper to save current state to undo stack before making changes
   const pushUndo = useCallback(() => {
-    setUndoStack(prev => [...prev, editedWords]);
+    setUndoStack((prev) => [...prev, editedWords]);
   }, [editedWords]);
 
   // Track previous transcript to detect changes
@@ -394,279 +436,360 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
   const undo = useCallback(() => {
     if (undoStack.length === 0) return;
     const previousState = undoStack[undoStack.length - 1];
-    setUndoStack(prev => prev.slice(0, -1));
+    setUndoStack((prev) => prev.slice(0, -1));
     setEditedWords(previousState);
-    const isOriginal = previousState.every((ew, i) =>
-      ew.originalIndex === i && !ew.deleted
-    ) && previousState.length === transcript.words.length;
+    const isOriginal =
+      previousState.every((ew, i) => ew.originalIndex === i && !ew.deleted) &&
+      previousState.length === transcript.words.length;
     setHasEdits(!isOriginal);
   }, [undoStack, transcript.words.length]);
 
   // Toggle deleted state on a single word
-  const toggleWordDeleted = useCallback((index: number) => {
-    const ew = editedWords[index];
-    if (!ew) return;
+  const toggleWordDeleted = useCallback(
+    (index: number) => {
+      const ew = editedWords[index];
+      if (!ew) return;
 
-    pushUndo();
-    const newEditedWords = [...editedWords];
-    newEditedWords[index] = { ...ew, deleted: !ew.deleted };
-    setEditedWords(newEditedWords);
-    setHasEdits(true);
-  }, [editedWords, pushUndo]);
+      pushUndo();
+      const newEditedWords = [...editedWords];
+      newEditedWords[index] = { ...ew, deleted: !ew.deleted };
+      setEditedWords(newEditedWords);
+      setHasEdits(true);
+    },
+    [editedWords, pushUndo]
+  );
 
   // Toggle deleted state for a range; the first index acts as the anchor
-  const deleteRange = useCallback((indices: number[]) => {
-    if (indices.length === 0) return;
-    const anchor = editedWords[indices[0]];
-    if (!anchor) return;
+  const deleteRange = useCallback(
+    (indices: number[]) => {
+      if (indices.length === 0) return;
+      const anchor = editedWords[indices[0]];
+      if (!anchor) return;
 
-    pushUndo();
-    // The anchor word's state determines the action for all words:
-    // if anchor is not deleted, delete all; if anchor is deleted, restore all
-    const targetDeletedState = !anchor.deleted;
-    setEditedWords(prev => {
-      const updated = [...prev];
-      for (const i of indices) {
-        if (updated[i]) {
-          updated[i] = { ...updated[i], deleted: targetDeletedState };
+      pushUndo();
+      // The anchor word's state determines the action for all words:
+      // if anchor is not deleted, delete all; if anchor is deleted, restore all
+      const targetDeletedState = !anchor.deleted;
+      setEditedWords((prev) => {
+        const updated = [...prev];
+        for (const i of indices) {
+          if (updated[i]) {
+            updated[i] = { ...updated[i], deleted: targetDeletedState };
+          }
         }
-      }
-      return updated;
-    });
-    setHasEdits(true);
-  }, [editedWords, pushUndo]);
+        return updated;
+      });
+      setHasEdits(true);
+    },
+    [editedWords, pushUndo]
+  );
 
   // Cut words at the given indices into the clipboard
-  const cut = useCallback((indices: number[]) => {
-    if (indices.length === 0) return;
-    const cutWords = indices
-      .map(i => editedWords[i])
-      .filter((ew): ew is EditableWord => ew !== undefined);
-    if (cutWords.length === 0) return;
+  const cut = useCallback(
+    (indices: number[]) => {
+      if (indices.length === 0) return;
+      const cutWords = indices
+        .map((i) => editedWords[i])
+        .filter((ew): ew is EditableWord => ew !== undefined);
+      if (cutWords.length === 0) return;
 
-    pushUndo();
-    setClipboard({ words: cutWords, operation: 'cut' });
-    setEditedWords(prev => {
-      const updated = [...prev];
-      for (const i of indices) {
-        if (updated[i]) {
-          updated[i] = { ...updated[i], deleted: true };
+      pushUndo();
+      setClipboard({ words: cutWords, operation: 'cut' });
+      setEditedWords((prev) => {
+        const updated = [...prev];
+        for (const i of indices) {
+          if (updated[i]) {
+            updated[i] = { ...updated[i], deleted: true };
+          }
         }
-      }
-      return updated;
-    });
-    setHasEdits(true);
-  }, [editedWords, pushUndo]);
+        return updated;
+      });
+      setHasEdits(true);
+    },
+    [editedWords, pushUndo]
+  );
 
   // Copy non-deleted words at the given indices into the clipboard (no mutation)
-  const copy = useCallback((indices: number[]) => {
-    const selectedWords = indices
-      .map(i => editedWords[i])
-      .filter((ew): ew is EditableWord => ew !== undefined && !ew.deleted);
-    if (selectedWords.length === 0) return;
-    setClipboard({ words: selectedWords, operation: 'copy' });
-  }, [editedWords]);
+  const copy = useCallback(
+    (indices: number[]) => {
+      const selectedWords = indices
+        .map((i) => editedWords[i])
+        .filter((ew): ew is EditableWord => ew !== undefined && !ew.deleted);
+      if (selectedWords.length === 0) return;
+      setClipboard({ words: selectedWords, operation: 'copy' });
+    },
+    [editedWords]
+  );
 
   // Paste from clipboard at a word index
-  const paste = useCallback((atIndex: number, before: boolean = true): number | null => {
-    if (!clipboard) return null;
-    pushUndo();
-    const insertIndex = before ? atIndex : atIndex + 1;
-    setEditedWords(prev => {
-      const updated = [...prev];
-      const wordsToInsert = clipboard.words.map(w => ({ ...w, deleted: false, inserted: true }));
-      updated.splice(insertIndex, 0, ...wordsToInsert);
-      return updated;
-    });
-    setHasEdits(true);
-    return insertIndex;
-  }, [clipboard, pushUndo]);
+  const paste = useCallback(
+    (atIndex: number, before: boolean = true): number | null => {
+      if (!clipboard) return null;
+      pushUndo();
+      const insertIndex = before ? atIndex : atIndex + 1;
+      setEditedWords((prev) => {
+        const updated = [...prev];
+        const wordsToInsert = clipboard.words.map((w) => ({
+          ...w,
+          deleted: false,
+          inserted: true,
+        }));
+        updated.splice(insertIndex, 0, ...wordsToInsert);
+        return updated;
+      });
+      setHasEdits(true);
+      return insertIndex;
+    },
+    [clipboard, pushUndo]
+  );
 
   // Replace a word's text
-  const setWordText = useCallback((index: number, text: string) => {
-    const ew = editedWords[index];
-    if (!ew || text === ew.word.text) return;
+  const setWordText = useCallback(
+    (index: number, text: string) => {
+      const ew = editedWords[index];
+      if (!ew || text === ew.word.text) return;
 
-    pushUndo();
-    const newEditedWords = [...editedWords];
-    newEditedWords[index] = {
-      ...ew,
-      word: { ...ew.word, text },
-    };
-    setEditedWords(newEditedWords);
-    setHasEdits(true);
-  }, [editedWords, pushUndo]);
+      pushUndo();
+      const newEditedWords = [...editedWords];
+      newEditedWords[index] = {
+        ...ew,
+        word: { ...ew.word, text },
+      };
+      setEditedWords(newEditedWords);
+      setHasEdits(true);
+    },
+    [editedWords, pushUndo]
+  );
 
   // Split a silence into multiple segments
-  const splitSilence = useCallback((index: number, durationsSec: number[]) => {
-    const ew = editedWords[index];
-    if (!ew || ew.word.wordType !== 'silence') return;
+  const splitSilence = useCallback(
+    (index: number, durationsSec: number[]) => {
+      const ew = editedWords[index];
+      if (!ew || ew.word.wordType !== 'silence') return;
 
-    pushUndo();
+      pushUndo();
 
-    // Create new silence segments from the durations
-    const silenceStart = ew.word.startMs;
-    const newSilences: EditableWord[] = [];
-    let currentMs = silenceStart;
+      // Create new silence segments from the durations
+      const silenceStart = ew.word.startMs;
+      const newSilences: EditableWord[] = [];
+      let currentMs = silenceStart;
 
-    for (let i = 0; i < durationsSec.length; i++) {
-      const durationMs = Math.round(durationsSec[i] * 1000);
-      const endMs = currentMs + durationMs;
+      for (let i = 0; i < durationsSec.length; i++) {
+        const durationMs = Math.round(durationsSec[i] * 1000);
+        const endMs = currentMs + durationMs;
 
-      newSilences.push({
-        originalIndex: -1, // Negative indicates a split/inserted silence
-        word: {
-          text: `[${durationsSec[i].toFixed(1)}s]`,
-          startMs: currentMs,
-          endMs: endMs,
-          wordType: 'silence',
-        },
-        deleted: false,
-        inserted: true,
-      });
+        newSilences.push({
+          originalIndex: -1, // Negative indicates a split/inserted silence
+          word: {
+            text: `[${durationsSec[i].toFixed(1)}s]`,
+            startMs: currentMs,
+            endMs: endMs,
+            wordType: 'silence',
+          },
+          deleted: false,
+          inserted: true,
+        });
 
-      currentMs = endMs;
-    }
+        currentMs = endMs;
+      }
 
-    // Replace the original silence with the new segments
-    const newEditedWords = [...editedWords];
-    newEditedWords.splice(index, 1, ...newSilences);
-    setEditedWords(newEditedWords);
-    setHasEdits(true);
-  }, [editedWords, pushUndo]);
+      // Replace the original silence with the new segments
+      const newEditedWords = [...editedWords];
+      newEditedWords.splice(index, 1, ...newSilences);
+      setEditedWords(newEditedWords);
+      setHasEdits(true);
+    },
+    [editedWords, pushUndo]
+  );
 
   // Editor "delete" action: toggles the word's deleted state
-  const deleteWord = useCallback((index: number) => {
-    toggleWordDeleted(index);
-  }, [toggleWordDeleted]);
+  const deleteWord = useCallback(
+    (index: number) => {
+      toggleWordDeleted(index);
+    },
+    [toggleWordDeleted]
+  );
 
   // Replace the entire edit state from an external source (e.g. the editable
   // script/YAML panel). Undo-safe: the previous state is pushed first.
-  const replaceEditedWords = useCallback((next: EditableWord[]) => {
-    pushUndo();
-    setEditedWords(next);
-    setHasEdits(true);
-  }, [pushUndo]);
+  const replaceEditedWords = useCallback(
+    (next: EditableWord[]) => {
+      pushUndo();
+      setEditedWords(next);
+      setHasEdits(true);
+    },
+    [pushUndo]
+  );
 
   // Mark filler words (and optionally silences above threshold) deleted
-  const removeFillers = useCallback((fillerWords: string[], removeSilenceAboveSec: number | null) => {
-    const fillerSet = new Set(fillerWords.map(f => f.toLowerCase()));
-    const silenceThresholdMs = removeSilenceAboveSec !== null ? removeSilenceAboveSec * 1000 : null;
+  const removeFillers = useCallback(
+    (fillerWords: string[], removeSilenceAboveSec: number | null) => {
+      const fillerSet = new Set(fillerWords.map((f) => f.toLowerCase()));
+      const silenceThresholdMs =
+        removeSilenceAboveSec !== null ? removeSilenceAboveSec * 1000 : null;
 
-    const newEditedWords = editedWords.map(ew => {
-      if (ew.deleted) return ew;
+      const newEditedWords = editedWords.map((ew) => {
+        if (ew.deleted) return ew;
 
-      // Check if it's a silence that should be removed
-      if ((ew.word.wordType === 'silence' || ew.word.wordType === 'silence-newline') && silenceThresholdMs !== null) {
-        const durationMs = ew.word.endMs - ew.word.startMs;
-        if (durationMs > silenceThresholdMs) {
-          return { ...ew, deleted: true };
+        // Check if it's a silence that should be removed
+        if (
+          (ew.word.wordType === 'silence' ||
+            ew.word.wordType === 'silence-newline') &&
+          silenceThresholdMs !== null
+        ) {
+          const durationMs = ew.word.endMs - ew.word.startMs;
+          if (durationMs > silenceThresholdMs) {
+            return { ...ew, deleted: true };
+          }
+          return ew;
         }
+
+        // Check if it's a filler word that should be removed
+        if (
+          ew.word.wordType !== 'silence' &&
+          ew.word.wordType !== 'silence-newline'
+        ) {
+          const wordText = normalizeWordText(ew.word.text);
+          if (fillerSet.has(wordText)) {
+            return { ...ew, deleted: true };
+          }
+        }
+
         return ew;
+      });
+
+      const deletedCount = newEditedWords.filter(
+        (ew, i) => ew.deleted && !editedWords[i].deleted
+      ).length;
+
+      if (deletedCount > 0) {
+        pushUndo();
+        setEditedWords(newEditedWords);
+        setHasEdits(true);
       }
-
-      // Check if it's a filler word that should be removed
-      if (ew.word.wordType !== 'silence' && ew.word.wordType !== 'silence-newline') {
-        const wordText = normalizeWordText(ew.word.text);
-        if (fillerSet.has(wordText)) {
-          return { ...ew, deleted: true };
-        }
-      }
-
-      return ew;
-    });
-
-    const deletedCount = newEditedWords.filter((ew, i) =>
-      ew.deleted && !editedWords[i].deleted
-    ).length;
-
-    if (deletedCount > 0) {
-      pushUndo();
-      setEditedWords(newEditedWords);
-      setHasEdits(true);
-    }
-  }, [editedWords, pushUndo]);
+    },
+    [editedWords, pushUndo]
+  );
 
   // Apply new silence thresholds, rebuilding silences while preserving word deletions
-  const setSilenceThresholds = useCallback((newMinSilenceMs: number, newNlSilenceMs: number) => {
-    setMinSilenceMs(newMinSilenceMs);
-    setNlSilenceMs(newNlSilenceMs);
-    // Rebuild the editable words with new silence detection
-    // Preserve deleted status for actual words (not silences)
-    const wordDeletedStatus = new Map<number, boolean>();
-    editedWords.forEach(ew => {
-      if (ew.word.wordType !== 'silence' && ew.word.wordType !== 'silence-newline' && ew.originalIndex >= 0) {
-        // Map original word index to deleted status
-        wordDeletedStatus.set(ew.originalIndex, ew.deleted);
-      }
-    });
+  const setSilenceThresholds = useCallback(
+    (newMinSilenceMs: number, newNlSilenceMs: number) => {
+      setMinSilenceMs(newMinSilenceMs);
+      setNlSilenceMs(newNlSilenceMs);
+      // Rebuild the editable words with new silence detection
+      // Preserve deleted status for actual words (not silences)
+      const wordDeletedStatus = new Map<number, boolean>();
+      editedWords.forEach((ew) => {
+        if (
+          ew.word.wordType !== 'silence' &&
+          ew.word.wordType !== 'silence-newline' &&
+          ew.originalIndex >= 0
+        ) {
+          // Map original word index to deleted status
+          wordDeletedStatus.set(ew.originalIndex, ew.deleted);
+        }
+      });
 
-    // Re-initialize with new thresholds
-    const newEditedWords = initEditableWords(transcript, newMinSilenceMs, newNlSilenceMs);
+      // Re-initialize with new thresholds
+      const newEditedWords = initEditableWords(
+        transcript,
+        newMinSilenceMs,
+        newNlSilenceMs
+      );
 
-    // Restore deleted status for words
-    let wordIdx = 0;
-    const restoredWords = newEditedWords.map(ew => {
-      if (ew.word.wordType !== 'silence' && ew.word.wordType !== 'silence-newline') {
-        const wasDeleted = wordDeletedStatus.get(wordIdx) ?? false;
-        wordIdx++;
-        return { ...ew, deleted: wasDeleted };
-      }
-      return ew;
-    });
+      // Restore deleted status for words
+      let wordIdx = 0;
+      const restoredWords = newEditedWords.map((ew) => {
+        if (
+          ew.word.wordType !== 'silence' &&
+          ew.word.wordType !== 'silence-newline'
+        ) {
+          const wasDeleted = wordDeletedStatus.get(wordIdx) ?? false;
+          wordIdx++;
+          return { ...ew, deleted: wasDeleted };
+        }
+        return ew;
+      });
 
-    setEditedWords(restoredWords);
-  }, [editedWords, transcript]);
+      setEditedWords(restoredWords);
+    },
+    [editedWords, transcript]
+  );
 
   // Get the speed marker at a specific word index (if any)
-  const getSpeedMarkerAtIndex = useCallback((wordIndex: number): SpeedMarker | undefined => {
-    return speedMarkers.find(m => m.wordIndex === wordIndex);
-  }, [speedMarkers]);
+  const getSpeedMarkerAtIndex = useCallback(
+    (wordIndex: number): SpeedMarker | undefined => {
+      return speedMarkers.find((m) => m.wordIndex === wordIndex);
+    },
+    [speedMarkers]
+  );
 
   // Toggle a speed marker at a word index
-  const toggleSpeedMarker = useCallback((wordIndex: number, speed: PlaybackSpeed) => {
-    setSpeedMarkers(prev => {
-      const existingIdx = prev.findIndex(m => m.wordIndex === wordIndex);
-      if (existingIdx >= 0) {
-        // If marker exists with same speed, remove it
-        if (prev[existingIdx].speed === speed) {
-          return prev.filter((_, i) => i !== existingIdx);
+  const toggleSpeedMarker = useCallback(
+    (wordIndex: number, speed: PlaybackSpeed) => {
+      setSpeedMarkers((prev) => {
+        const existingIdx = prev.findIndex((m) => m.wordIndex === wordIndex);
+        if (existingIdx >= 0) {
+          // If marker exists with same speed, remove it
+          if (prev[existingIdx].speed === speed) {
+            return prev.filter((_, i) => i !== existingIdx);
+          }
+          // If marker exists with different speed, update it
+          const updated = [...prev];
+          updated[existingIdx] = { wordIndex, speed };
+          return updated;
         }
-        // If marker exists with different speed, update it
-        const updated = [...prev];
-        updated[existingIdx] = { wordIndex, speed };
-        return updated;
-      }
-      // Add new marker
-      return [...prev, { wordIndex, speed }].sort((a, b) => a.wordIndex - b.wordIndex);
-    });
-    setHasEdits(true);
-  }, []);
+        // Add new marker
+        return [...prev, { wordIndex, speed }].sort(
+          (a, b) => a.wordIndex - b.wordIndex
+        );
+      });
+      setHasEdits(true);
+    },
+    []
+  );
 
   // Remove a speed marker at a word index
-  const removeSpeedMarker = useCallback((wordIndex: number) => {
-    const filtered = speedMarkers.filter(m => m.wordIndex !== wordIndex);
-    if (filtered.length !== speedMarkers.length) {
-      setSpeedMarkers(filtered);
-      setHasEdits(true);
-    }
-  }, [speedMarkers]);
+  const removeSpeedMarker = useCallback(
+    (wordIndex: number) => {
+      const filtered = speedMarkers.filter((m) => m.wordIndex !== wordIndex);
+      if (filtered.length !== speedMarkers.length) {
+        setSpeedMarkers(filtered);
+        setHasEdits(true);
+      }
+    },
+    [speedMarkers]
+  );
 
   // Effective playback speed at a word index (bound to current markers + default)
-  const getSpeedAtIndexBound = useCallback((index: number): PlaybackSpeed => {
-    return getSpeedAtIndex(index, speedMarkers, defaultSpeed);
-  }, [speedMarkers, defaultSpeed]);
+  const getSpeedAtIndexBound = useCallback(
+    (index: number): PlaybackSpeed => {
+      return getSpeedAtIndex(index, speedMarkers, defaultSpeed);
+    },
+    [speedMarkers, defaultSpeed]
+  );
 
   // -- Derived data --
 
-  const playbackSegments = useMemo(() => buildPlaybackSegments(editedWords), [editedWords]);
+  const playbackSegments = useMemo(
+    () => buildPlaybackSegments(editedWords),
+    [editedWords]
+  );
 
   const stats = useMemo<TranscriptEditStats>(() => {
     // Count active (non-deleted) words (excluding silences for word count)
-    const activeWordCount = editedWords.filter(ew => !ew.deleted && ew.word.wordType !== 'silence').length;
-    const activeSilenceCount = editedWords.filter(ew => !ew.deleted && ew.word.wordType === 'silence').length;
-    const deletedWordCount = editedWords.filter(ew => ew.deleted && ew.word.wordType !== 'silence').length;
-    const deletedSilenceCount = editedWords.filter(ew => ew.deleted && ew.word.wordType === 'silence').length;
+    const activeWordCount = editedWords.filter(
+      (ew) => !ew.deleted && ew.word.wordType !== 'silence'
+    ).length;
+    const activeSilenceCount = editedWords.filter(
+      (ew) => !ew.deleted && ew.word.wordType === 'silence'
+    ).length;
+    const deletedWordCount = editedWords.filter(
+      (ew) => ew.deleted && ew.word.wordType !== 'silence'
+    ).length;
+    const deletedSilenceCount = editedWords.filter(
+      (ew) => ew.deleted && ew.word.wordType === 'silence'
+    ).length;
 
     // Calculate edited duration (sum of non-deleted words/silences, adjusted for speed markers)
     const editedDurationMs = editedWords.reduce((sum, ew, index) => {
@@ -674,10 +797,16 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
       const wordDuration = ew.word.endMs - ew.word.startMs;
       const speed = getSpeedAtIndex(index, speedMarkers, defaultSpeed);
       // Duration is divided by speed (2x speed = half the time)
-      return sum + (wordDuration / speed);
+      return sum + wordDuration / speed;
     }, 0);
 
-    return { activeWordCount, activeSilenceCount, deletedWordCount, deletedSilenceCount, editedDurationMs };
+    return {
+      activeWordCount,
+      activeSilenceCount,
+      deletedWordCount,
+      deletedSilenceCount,
+      editedDurationMs,
+    };
   }, [editedWords, speedMarkers, defaultSpeed]);
 
   const fillerAnalysis = useMemo<FillerAnalysis>(() => {
@@ -698,7 +827,12 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
     // Total duration per filler word type
     const durations = new Map<string, number>();
     for (const ew of editedWords) {
-      if (ew.deleted || ew.word.wordType === 'silence' || ew.word.wordType === 'silence-newline') continue;
+      if (
+        ew.deleted ||
+        ew.word.wordType === 'silence' ||
+        ew.word.wordType === 'silence-newline'
+      )
+        continue;
       const wordText = normalizeWordText(ew.word.text);
       const wordDuration = ew.word.endMs - ew.word.startMs;
       for (const filler of DEFAULT_FILLER_WORDS) {
@@ -711,13 +845,17 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
     }
 
     // Silence counts and durations at various thresholds
-    const silenceCounts = SILENCE_ANALYSIS_THRESHOLDS.map(threshold => {
+    const silenceCounts = SILENCE_ANALYSIS_THRESHOLDS.map((threshold) => {
       const thresholdMs = threshold * 1000;
       let count = 0;
       let durationMs = 0;
       for (const ew of editedWords) {
         if (ew.deleted) continue;
-        if (ew.word.wordType !== 'silence' && ew.word.wordType !== 'silence-newline') continue;
+        if (
+          ew.word.wordType !== 'silence' &&
+          ew.word.wordType !== 'silence-newline'
+        )
+          continue;
         const silenceDuration = ew.word.endMs - ew.word.startMs;
         if (silenceDuration > thresholdMs) {
           count++;
@@ -727,7 +865,12 @@ export function useTranscriptEdits(options: UseTranscriptEditsOptions): UseTrans
       return { threshold, count, durationMs };
     });
 
-    return { matchCounts, durations, silenceCounts, defaultFillerWords: DEFAULT_FILLER_WORDS };
+    return {
+      matchCounts,
+      durations,
+      silenceCounts,
+      defaultFillerWords: DEFAULT_FILLER_WORDS,
+    };
   }, [editedWords]);
 
   return {

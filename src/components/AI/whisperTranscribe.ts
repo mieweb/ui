@@ -633,9 +633,7 @@ export async function transcribeSamples(
 }
 
 /** Map raw worker chunks (`{ timestamp: [s, e], text }`) to TranscriptSegments in seconds. */
-function chunksToSegments(
-  chunks: WorkerResult['chunks']
-): TranscriptSegment[] {
+function chunksToSegments(chunks: WorkerResult['chunks']): TranscriptSegment[] {
   return (chunks ?? [])
     .map((c) => ({
       start: c.timestamp?.[0] ?? 0,

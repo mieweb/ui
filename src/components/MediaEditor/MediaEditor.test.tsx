@@ -7,7 +7,9 @@ import type { Transcript } from '../TranscriptView/transcript';
 
 // jsdom does not implement media playback or scrollIntoView
 beforeAll(() => {
-  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(async () => {});
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(
+    async () => {}
+  );
   vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
   vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
   Element.prototype.scrollIntoView = vi.fn();
@@ -27,7 +29,9 @@ describe('MediaEditor', () => {
     render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
 
     expect(screen.getByLabelText('Media player')).toBeInTheDocument();
-    expect(screen.getByRole('listbox', { name: 'Transcript words' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('listbox', { name: 'Transcript words' })
+    ).toBeInTheDocument();
     expect(screen.getByText('Hello')).toBeInTheDocument();
     expect(screen.getByText('brave')).toBeInTheDocument();
     expect(screen.getByText('world')).toBeInTheDocument();

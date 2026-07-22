@@ -57,7 +57,12 @@ const MODEL_OPTIONS = [
 type Status =
   | { phase: 'idle' }
   | { phase: 'working'; note: string }
-  | { phase: 'ready'; mode: 'word' | 'segment'; wordCount: number; seconds: number }
+  | {
+      phase: 'ready';
+      mode: 'word' | 'segment';
+      wordCount: number;
+      seconds: number;
+    }
   | { phase: 'error'; message: string };
 
 /** Inference device choices. CPU (wasm) is the default: WebGPU is faster where it works, but
@@ -72,7 +77,9 @@ const LiveDemo: React.FC = () => {
   const [model, setModel] = React.useState('base.en');
   const [device, setDevice] = React.useState('wasm');
   // The worker keeps its pipeline until reset; remember what it loaded so we only reset on change.
-  const loadedCfg = React.useRef<{ model: string; device: string } | null>(null);
+  const loadedCfg = React.useRef<{ model: string; device: string } | null>(
+    null
+  );
   const [status, setStatus] = React.useState<Status>({ phase: 'idle' });
   const [mediaUrl, setMediaUrl] = React.useState<string | null>(null);
   const [mediaKind, setMediaKind] = React.useState<'audio' | 'video'>('audio');
@@ -93,7 +100,11 @@ const LiveDemo: React.FC = () => {
       whisper: nextModel,
       whisperDevice: nextDevice === 'wasm' ? 'wasm' : undefined,
     };
-    if (loadedCfg.current && (loadedCfg.current.model !== nextModel || loadedCfg.current.device !== nextDevice)) {
+    if (
+      loadedCfg.current &&
+      (loadedCfg.current.model !== nextModel ||
+        loadedCfg.current.device !== nextDevice)
+    ) {
       resetWhisperWorker();
     }
     loadedCfg.current = { model: nextModel, device: nextDevice };
@@ -113,14 +124,20 @@ const LiveDemo: React.FC = () => {
       // Decode first, with a watchdog: decodeAudioData can hang forever on codecs the
       // browser can't handle (some .mov/HEVC containers) — surface that as an error
       // instead of an eternal spinner.
-      setStatus({ phase: 'working', note: `Decoding audio from ${file.name}…` });
+      setStatus({
+        phase: 'working',
+        note: `Decoding audio from ${file.name}…`,
+      });
       const samples = await Promise.race([
         decodeTo16kMono(file),
         new Promise<never>((_, reject) =>
           setTimeout(
-            () => reject(new Error(
-              `Could not decode "${file.name}" within 60s — the browser may not support this codec. Try a shorter clip or convert it (e.g. to mp4/wav).`
-            )),
+            () =>
+              reject(
+                new Error(
+                  `Could not decode "${file.name}" within 60s — the browser may not support this codec. Try a shorter clip or convert it (e.g. to mp4/wav).`
+                )
+              ),
             60_000
           )
         ),
@@ -135,26 +152,40 @@ const LiveDemo: React.FC = () => {
         const lastEnd = segs.length ? segs[segs.length - 1].end : 0;
         return (
           segs.length === 0 ||
-          (durationSec > 0 && (segs.length / durationSec > 8 || lastEnd > durationSec * 1.5))
+          (durationSec > 0 &&
+            (segs.length / durationSec > 8 || lastEnd > durationSec * 1.5))
         );
       };
 
-      setStatus({ phase: 'working', note: 'Transcribing on-device (word-level)…' });
+      setStatus({
+        phase: 'working',
+        note: 'Transcribing on-device (word-level)…',
+      });
       let mode: 'word' | 'segment' = 'word';
       // Samples are transferred to the worker — keep copies for the retry paths.
-      let segments = await transcribeWordsFromSamples(samples.slice()).catch(() => []);
+      let segments = await transcribeWordsFromSamples(samples.slice()).catch(
+        () => []
+      );
 
       // Garbage on WebGPU → automatically redo the whole thing on CPU (always correct).
       if (implausible(segments) && device !== 'wasm') {
-        setStatus({ phase: 'working', note: 'WebGPU output unusable on this machine — retrying on CPU…' });
+        setStatus({
+          phase: 'working',
+          note: 'WebGPU output unusable on this machine — retrying on CPU…',
+        });
         configureWorker(model, 'wasm');
         setDevice('wasm');
-        segments = await transcribeWordsFromSamples(samples.slice()).catch(() => []);
+        segments = await transcribeWordsFromSamples(samples.slice()).catch(
+          () => []
+        );
       }
       // Word alignment itself unusable → fall back to segment timestamps.
       if (implausible(segments)) {
         mode = 'segment';
-        setStatus({ phase: 'working', note: 'Word alignment unusable — falling back to segments…' });
+        setStatus({
+          phase: 'working',
+          note: 'Word alignment unusable — falling back to segments…',
+        });
         segments = await transcribeSegmentsFromSamples(samples.slice());
       }
       if (segments.length === 0) {
@@ -205,7 +236,11 @@ const LiveDemo: React.FC = () => {
           disabled={working}
           className="w-56"
         />
-        <Button size="sm" onClick={() => inputRef.current?.click()} disabled={working}>
+        <Button
+          size="sm"
+          onClick={() => inputRef.current?.click()}
+          disabled={working}
+        >
           Choose audio or video…
         </Button>
         <input
@@ -220,9 +255,9 @@ const LiveDemo: React.FC = () => {
           }}
         />
         {status.phase === 'ready' && (
-          <span className="text-xs text-muted-foreground">
-            {status.mode === 'word' ? 'Word-level' : 'Segment-level'} · {status.wordCount} entries ·{' '}
-            {status.seconds.toFixed(1)}s on-device
+          <span className="text-muted-foreground text-xs">
+            {status.mode === 'word' ? 'Word-level' : 'Segment-level'} ·{' '}
+            {status.wordCount} entries · {status.seconds.toFixed(1)}s on-device
           </span>
         )}
       </div>
@@ -235,20 +270,28 @@ const LiveDemo: React.FC = () => {
         />
       )}
       {working && (
-        <p className="m-0 text-sm text-muted-foreground" role="status">
+        <p className="text-muted-foreground m-0 text-sm" role="status">
           {status.note}
         </p>
       )}
-      {status.phase === 'error' && <Alert variant="danger">{status.message}</Alert>}
+      {status.phase === 'error' && (
+        <Alert variant="danger">{status.message}</Alert>
+      )}
 
       {mediaUrl && transcript ? (
         <div className="min-h-0 flex-1">
-          <MediaEditor src={mediaUrl} kind={mediaKind} transcript={transcript} />
+          <MediaEditor
+            src={mediaUrl}
+            kind={mediaKind}
+            transcript={transcript}
+          />
         </div>
       ) : (
         <div
           className={`flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed text-center transition-colors ${
-            isDragging ? 'border-primary-600 bg-primary-50 dark:bg-primary-950' : 'border-border'
+            isDragging
+              ? 'border-primary-600 bg-primary-50 dark:bg-primary-950'
+              : 'border-border'
           }`}
           onDragOver={(e) => {
             e.preventDefault();
@@ -262,8 +305,10 @@ const LiveDemo: React.FC = () => {
             if (f && !working) void handleFile(f);
           }}
         >
-          <p className="m-0 font-medium text-foreground">Drop an audio or video file here</p>
-          <p className="m-0 text-sm text-muted-foreground">
+          <p className="text-foreground m-0 font-medium">
+            Drop an audio or video file here
+          </p>
+          <p className="text-muted-foreground m-0 text-sm">
             Transcribed entirely in your browser — nothing is uploaded anywhere.
           </p>
         </div>
