@@ -189,6 +189,14 @@ export {
   type RollingRecorder,
 } from './HeyOzwell/audio';
 
+// Composer model selector
+export {
+  ComposerModelSelector,
+  type ComposerModelSelectorProps,
+  type ProviderModelOption,
+  type ProviderModelValue,
+} from './ComposerModelSelector';
+
 // AI Chat Modal
 export {
   AIChatModal,
