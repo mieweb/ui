@@ -53,7 +53,7 @@ const cardVariants = cva(
   }
 );
 
-const cardAccentVariants = cva('absolute left-0 top-0 bottom-0 w-1', {
+const cardAccentVariants = cva('absolute start-0 top-0 bottom-0 w-1', {
   variants: {
     color: {
       primary: 'bg-primary-800',
@@ -71,7 +71,7 @@ export interface CardProps
     VariantProps<typeof cardVariants> {
   /** Semantic HTML element to render as */
   as?: 'div' | 'article' | 'section' | 'aside';
-  /** Accent color bar on the left side */
+  /** Accent color bar on the start (reading-direction) side */
   accent?: 'primary' | 'success' | 'warning' | 'destructive' | 'info';
   /** Loading state - shows skeleton overlay */
   loading?: boolean;
@@ -118,7 +118,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             selected,
             orientation,
           }),
-          accent && 'pl-4',
+          accent && 'ps-4',
           className
         )}
         data-slot="card"
@@ -297,7 +297,15 @@ export interface CardBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /** Badge color variant */
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'destructive';
   /** Position of the badge */
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  position?:
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'top-start'
+    | 'top-end'
+    | 'bottom-start'
+    | 'bottom-end';
 }
 
 const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
@@ -319,11 +327,17 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
       destructive: 'bg-destructive text-destructive-foreground',
     };
 
+    // Direction-aware (logical) positions: `left`/`right` are aliases for
+    // `start`/`end` and mirror in RTL documents.
     const positionClasses = {
-      'top-left': 'top-2 left-2',
-      'top-right': 'top-2 right-2',
-      'bottom-left': 'bottom-2 left-2',
-      'bottom-right': 'bottom-2 right-2',
+      'top-left': 'top-2 start-2',
+      'top-right': 'top-2 end-2',
+      'bottom-left': 'bottom-2 start-2',
+      'bottom-right': 'bottom-2 end-2',
+      'top-start': 'top-2 start-2',
+      'top-end': 'top-2 end-2',
+      'bottom-start': 'bottom-2 start-2',
+      'bottom-end': 'bottom-2 end-2',
     };
 
     return (

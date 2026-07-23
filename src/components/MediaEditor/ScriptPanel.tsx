@@ -167,7 +167,7 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
 
   return (
     <aside
-      className={`border-border bg-card flex w-80 shrink-0 flex-col border-l lg:w-96 ${className ?? ''}`}
+      className={`border-border bg-card flex w-80 shrink-0 flex-col border-s lg:w-96 ${className ?? ''}`}
       aria-label="Transcript script"
     >
       <div className="border-border flex shrink-0 flex-wrap items-center gap-1.5 border-b px-3 py-2">
@@ -188,7 +188,7 @@ export const ScriptPanel: React.FC<ScriptPanelProps> = ({
         >
           {format.toUpperCase()}
         </button>
-        <span className="text-muted-foreground ml-auto text-[10px]">
+        <span className="text-muted-foreground ms-auto text-[10px]">
           {readOnly ? 'read-only' : dirty ? 'edited' : 'live'}
         </span>
         <Button

@@ -38,6 +38,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: RTL guard (no new physical-direction classes)
+        run: pnpm rtl:scan
+
       - name: Type check
         run: pnpm typecheck
 

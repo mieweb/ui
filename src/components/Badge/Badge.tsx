@@ -63,7 +63,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
         className={cn(badgeVariants({ variant, size }), className)}
         {...props}
       >
-        {icon && <span className="mr-1 shrink-0">{icon}</span>}
+        {icon && <span className="me-1 shrink-0">{icon}</span>}
         {children}
       </span>
     );

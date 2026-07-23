@@ -295,7 +295,7 @@ export const TranscriptView = React.forwardRef<
             type="button"
             data-transcript-index={index}
             aria-current={isActive ? 'true' : undefined}
-            className={`hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer gap-3 rounded px-2 py-1 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+            className={`hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer gap-3 rounded px-2 py-1 text-start text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
               isActive ? 'bg-primary-500/20' : ''
             }`}
             {...activationProps(() => seekTo(row.startMs))}

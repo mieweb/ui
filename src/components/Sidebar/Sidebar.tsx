@@ -156,12 +156,14 @@ export function Sidebar({
         data-testid={testId}
         className={cn(
           'flex h-screen flex-col',
-          'border-r border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
+          'border-e border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
           'transition-all duration-300 ease-in-out',
-          // Mobile positioning
-          isMobileViewport && 'fixed top-0 left-0 z-50',
+          // Mobile positioning (start-pinned; off-canvas direction flips in RTL)
+          isMobileViewport && 'fixed start-0 top-0 z-50',
           isMobileViewport &&
-            (isMobileOpen ? 'translate-x-0' : '-translate-x-full'),
+            (isMobileOpen
+              ? 'translate-x-0'
+              : '-translate-x-full rtl:translate-x-full'),
           // Desktop positioning
           !isMobileViewport && 'relative',
           className
@@ -219,7 +221,7 @@ export function SidebarHeader({
       {showMobileClose && isMobileViewport && (
         <button
           onClick={closeMobile}
-          className="-mr-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800"
+          className="-me-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800"
           aria-label="Close navigation"
         >
           <XIcon />
@@ -370,7 +372,7 @@ export function SidebarNavGroup({
           <span
             className={cn(
               'text-muted-foreground h-5 w-5 flex-shrink-0',
-              !showCollapsed && 'mr-3'
+              !showCollapsed && 'me-3'
             )}
           >
             {icon}
@@ -378,10 +380,10 @@ export function SidebarNavGroup({
         )}
         {!showCollapsed && (
           <>
-            <span className="flex-1 truncate text-left">{label}</span>
+            <span className="flex-1 truncate text-start">{label}</span>
             <span
               className={cn(
-                'ml-2 flex-shrink-0 transition-transform duration-200',
+                'ms-2 flex-shrink-0 transition-transform duration-200',
                 effectiveExpanded && 'rotate-180'
               )}
             >
@@ -401,7 +403,7 @@ export function SidebarNavGroup({
               : 'max-h-0 opacity-0'
           )}
         >
-          <div className="pl-2">{children}</div>
+          <div className="ps-2">{children}</div>
         </div>
       )}
     </div>
@@ -465,7 +467,7 @@ export function SidebarNavItem({
             isActive
               ? 'text-primary-800 dark:text-primary-400'
               : 'text-muted-foreground',
-            !showCollapsed && 'mr-3'
+            !showCollapsed && 'me-3'
           )}
         >
           {icon}
@@ -473,11 +475,11 @@ export function SidebarNavItem({
       )}
       {!showCollapsed && (
         <>
-          <span className="flex-1 truncate text-left">{label}</span>
+          <span className="flex-1 truncate text-start">{label}</span>
           {badge && (
             <span
               className={cn(
-                'ml-2 rounded-full px-2 py-0.5 text-xs font-medium',
+                'ms-2 rounded-full px-2 py-0.5 text-xs font-medium',
                 isActive
                   ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
                   : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
@@ -569,7 +571,7 @@ export function SidebarToggle({
 
   if (position === 'floating') {
     return (
-      <div className="absolute top-6 -right-3 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="absolute -end-3 top-6 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900">
         {button}
       </div>
     );
@@ -679,7 +681,7 @@ export function SidebarSearch({
   return (
     <div data-slot="sidebar-search" className={cn('px-3 py-2', className)}>
       <div className="relative">
-        <div className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400">
+        <div className="absolute start-3 top-1/2 -translate-y-1/2 text-neutral-400">
           <SearchIcon />
         </div>
         <input
@@ -690,7 +692,7 @@ export function SidebarSearch({
           placeholder={`${placeholder} (${shortcutHint})`}
           data-testid={testId}
           className={cn(
-            'w-full rounded-lg py-2 pr-4 pl-10 text-sm',
+            'w-full rounded-lg py-2 ps-10 pe-4 text-sm',
             'border-transparent bg-neutral-100 dark:bg-neutral-800',
             'text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500',
             'focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-neutral-700',
