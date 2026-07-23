@@ -17,6 +17,7 @@ import {
 } from '../Modal';
 import { Button } from '../Button';
 import { Input } from '../Input';
+import { isSilenceType } from '../TranscriptView/transcript';
 import type { EditableWord } from '../TranscriptView/transcript';
 
 export interface WordEditorModalProps {
@@ -53,7 +54,7 @@ export const WordEditorModal: React.FC<WordEditorModalProps> = ({
   const [error, setError] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const isSilence = editableWord?.word.wordType === 'silence';
+  const isSilence = isSilenceType(editableWord?.word.wordType);
   const durationMs = editableWord
     ? editableWord.word.endMs - editableWord.word.startMs
     : 0;

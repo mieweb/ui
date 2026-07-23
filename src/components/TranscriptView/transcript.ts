@@ -11,6 +11,14 @@
 /** Type of transcript word - 'word' for spoken content, 'silence' for detected gaps, 'silence-newline' for longer pauses */
 export type WordType = 'word' | 'silence' | 'silence-newline';
 
+/** True for BOTH silence pseudo-word types ('silence' and 'silence-newline').
+ *  Use this instead of comparing against 'silence' directly — checking only one
+ *  of the two types is the root cause of a whole family of review findings
+ *  (stats, splitting, filler analysis, clipboard copy). */
+export function isSilenceType(wordType: WordType | undefined): boolean {
+  return wordType === 'silence' || wordType === 'silence-newline';
+}
+
 export interface TranscriptWord {
   text: string;
   startMs: number;
