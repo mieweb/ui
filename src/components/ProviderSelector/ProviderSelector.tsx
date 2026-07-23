@@ -4,6 +4,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useClickOutside } from '../../hooks/useClickOutside';
 
 export interface ProviderOption {
   /** Unique identifier */
@@ -75,20 +76,11 @@ export function ProviderSelector({
   >({ open: isOpen, matchWidth: true });
 
   // Close on click outside
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        !floatingRef.current?.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [floatingRef]);
+  const outsideRefs = React.useMemo(
+    () => [containerRef, floatingRef],
+    [floatingRef]
+  );
+  useClickOutside(outsideRefs, () => setIsOpen(false), isOpen);
 
   // Close on escape
   React.useEffect(() => {

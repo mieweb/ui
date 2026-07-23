@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useClickOutside } from '../../hooks/useClickOutside';
 
 // =============================================================================
 // Types
@@ -150,20 +151,11 @@ export function LanguageSelector({
   const selectedLanguage = languages.find((l) => l.code === value);
 
   // Close on click outside
-  React.useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node) &&
-        !floatingRef.current?.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [floatingRef]);
+  const outsideRefs = React.useMemo(
+    () => [containerRef, floatingRef],
+    [floatingRef]
+  );
+  useClickOutside(outsideRefs, () => setIsOpen(false), isOpen);
 
   // Close on escape
   React.useEffect(() => {

@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import {
   MoreHorizontalIcon,
   ShareIcon,
@@ -211,21 +212,8 @@ function RowActionMenu({
   const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   // Close on outside click
-  React.useEffect(() => {
-    if (!open) return;
-    function handleClick(e: MouseEvent) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
+  const outsideRefs = React.useMemo(() => [menuRef, buttonRef], []);
+  useClickOutside(outsideRefs, () => setOpen(false), open);
 
   // Close on Escape
   React.useEffect(() => {
@@ -489,20 +477,11 @@ function ViewModalActions({
   });
 
   // Close share dropdown on outside click
-  React.useEffect(() => {
-    if (!shareOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (
-        shareRef.current &&
-        !shareRef.current.contains(e.target as Node) &&
-        !shareFloatingRef.current?.contains(e.target as Node)
-      ) {
-        setShareOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [shareOpen, shareFloatingRef]);
+  const shareOutsideRefs = React.useMemo(
+    () => [shareRef, shareFloatingRef],
+    [shareFloatingRef]
+  );
+  useClickOutside(shareOutsideRefs, () => setShareOpen(false), shareOpen);
 
   return (
     <div className="mb-4 flex items-center gap-1 border-b border-neutral-200 pb-3 dark:border-neutral-700">
@@ -698,21 +677,11 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
     });
 
     // Close on click outside
-    React.useEffect(() => {
-      if (!open) return;
-      const handleClickOutside = (e: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(e.target as Node) &&
-          !floatingRef.current?.contains(e.target as Node)
-        ) {
-          setOpen(false);
-        }
-      };
-      document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
-    }, [open, floatingRef]);
+    const outsideRefs = React.useMemo(
+      () => [containerRef, floatingRef],
+      [floatingRef]
+    );
+    useClickOutside(outsideRefs, () => setOpen(false), open);
 
     // Close on Escape
     React.useEffect(() => {
