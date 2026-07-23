@@ -27,10 +27,6 @@ export interface ComposerModelSelectorProps {
   placeholder?: string;
 }
 
-type MenuStyle = React.CSSProperties & {
-  '--composer-model-list-max-height'?: string;
-};
-
 function optionKey(option: ProviderModelValue) {
   return `${option.provider}\u0000${option.model}`;
 }
@@ -72,12 +68,13 @@ export function ComposerModelSelector({
   const [internalProviderFilter, setInternalProviderFilter] =
     React.useState<string>('any');
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
-  const [menuStyle, setMenuStyle] = React.useState<MenuStyle>({});
+  const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
 
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
   const menuId = React.useId();
+  const [listMaxHeight, setListMaxHeight] = React.useState(272);
 
   const activeProviderFilter = providerFilter ?? internalProviderFilter;
   const selectedKey = value ? optionKey(value) : null;
@@ -108,6 +105,10 @@ export function ComposerModelSelector({
   const groupedModels = React.useMemo(
     () => groupByProvider(filteredModels),
     [filteredModels]
+  );
+  const renderedModels = React.useMemo(
+    () => groupedModels.flatMap((group) => group.options),
+    [groupedModels]
   );
 
   const setProvider = React.useCallback(
@@ -166,9 +167,9 @@ export function ComposerModelSelector({
       ...(openAbove
         ? { bottom: window.innerHeight - rect.top + gap }
         : { top: rect.bottom + gap }),
-      '--composer-model-list-max-height': `${listMaxHeight}px`,
       zIndex: 9999,
     });
+    setListMaxHeight(listMaxHeight);
   }, [boundaryRef]);
 
   React.useEffect(() => {
@@ -229,17 +230,17 @@ export function ComposerModelSelector({
   };
 
   const handleMenuKeyDown = (event: React.KeyboardEvent) => {
-    if (filteredModels.length === 0) return;
+    if (renderedModels.length === 0) return;
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      setHighlightedIndex((current) => (current + 1) % filteredModels.length);
+      setHighlightedIndex((current) => (current + 1) % renderedModels.length);
     }
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       setHighlightedIndex(
         (current) =>
-          (current - 1 + filteredModels.length) % filteredModels.length
+          (current - 1 + renderedModels.length) % renderedModels.length
       );
     }
     if (event.key === 'Home') {
@@ -248,11 +249,11 @@ export function ComposerModelSelector({
     }
     if (event.key === 'End') {
       event.preventDefault();
-      setHighlightedIndex(filteredModels.length - 1);
+      setHighlightedIndex(renderedModels.length - 1);
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      selectModel(filteredModels[highlightedIndex]);
+      selectModel(renderedModels[highlightedIndex]);
     }
   };
 
@@ -335,7 +336,8 @@ export function ComposerModelSelector({
               aria-label="Model"
               tabIndex={-1}
               onKeyDown={handleMenuKeyDown}
-              className="max-h-[var(--composer-model-list-max-height)] overflow-y-auto p-1"
+              style={{ maxHeight: listMaxHeight }}
+              className="overflow-y-auto p-1"
             >
               {groupedModels.length === 0 ? (
                 <div className="text-muted-foreground px-3 py-4 text-center text-sm">
@@ -354,7 +356,7 @@ export function ComposerModelSelector({
                       {providerLabels.get(group.provider) ?? group.provider}
                     </div>
                     {group.options.map((model) => {
-                      const index = filteredModels.findIndex(
+                      const index = renderedModels.findIndex(
                         (item) => optionKey(item) === optionKey(model)
                       );
                       const selected = optionKey(model) === selectedKey;
