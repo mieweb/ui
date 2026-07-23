@@ -114,6 +114,24 @@ const SystemIcon: React.FC<IconProps> = ({ className }) => (
 );
 
 // ============================================================================
+// Three-way cycle (single source of truth)
+// ============================================================================
+
+/** The three-way cycle order: light → dark → system → light. Click handler,
+ *  tooltip label, and default icon are all derived from this one map. */
+const THREE_WAY_NEXT: Record<Theme, Theme> = {
+  light: 'dark',
+  dark: 'system',
+  system: 'light',
+};
+
+const THEME_LABELS: Record<Theme, string> = {
+  light: 'Switch to light mode',
+  dark: 'Switch to dark mode',
+  system: 'Switch to system theme',
+};
+
+// ============================================================================
 // ThemeToggle Component
 // ============================================================================
 
@@ -202,13 +220,7 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
         // Simple toggle between light and dark
         setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
       } else {
-        // Three-way cycle: light → dark → system
-        const nextTheme: Record<Theme, Theme> = {
-          light: 'dark',
-          dark: 'system',
-          system: 'light',
-        };
-        setTheme(nextTheme[theme]);
+        setTheme(THREE_WAY_NEXT[theme]);
       }
     }, [mode, theme, resolvedTheme, setTheme]);
 
@@ -218,33 +230,39 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
           ? 'Switch to light mode'
           : 'Switch to dark mode';
       }
-      // Three-way mode - show what the next theme will be
-      const nextThemeLabels: Record<Theme, string> = {
-        light: 'Switch to dark mode',
-        dark: 'Switch to system theme',
-        system: 'Switch to light mode',
-      };
-      return nextThemeLabels[theme];
+      // Three-way mode - name the next stop in the cycle
+      return THEME_LABELS[THREE_WAY_NEXT[theme]];
     };
 
     const getCurrentIcon = () => {
-      if (mode === 'three-way' && theme === 'system') {
-        return (
-          systemIcon || (
-            <SystemIcon className={themeToggleIconVariants({ size })} />
-          )
-        );
+      const iconClass = themeToggleIconVariants({ size });
+      if (mode === 'three-way') {
+        // The DEFAULT icon previews the next theme in the cycle, matching the
+        // tooltip (previously dark showed a sun while the click gave system,
+        // and system showed the current state instead of the next). The
+        // lightIcon/darkIcon/systemIcon overrides are keyed by the CURRENT
+        // theme — they replace the icon shown while in that theme.
+        const override = {
+          light: lightIcon,
+          dark: darkIcon,
+          system: systemIcon,
+        }[theme];
+        if (override) return override;
+        const defaultIcons: Record<Theme, React.ReactNode> = {
+          light: <SunIcon className={iconClass} />,
+          dark: <MoonIcon className={iconClass} />,
+          system: <SystemIcon className={iconClass} />,
+        };
+        return defaultIcons[THREE_WAY_NEXT[theme]];
       }
 
+      // Two-way keeps the classic convention: sun while dark ("click for
+      // light"), moon while light ("click for dark").
       if (resolvedTheme === 'dark') {
-        return (
-          darkIcon || <SunIcon className={themeToggleIconVariants({ size })} />
-        );
+        return darkIcon || <SunIcon className={iconClass} />;
       }
 
-      return (
-        lightIcon || <MoonIcon className={themeToggleIconVariants({ size })} />
-      );
+      return lightIcon || <MoonIcon className={iconClass} />;
     };
 
     const label = getLabel();
