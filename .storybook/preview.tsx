@@ -14,8 +14,123 @@ import { ozwellBrand } from '../src/brands/ozwell';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
-import { CodeLookup } from '../src/components/CodeLookup';
-import { CodeLookupProvider } from '../src/components/CodeLookup/context';
+import { collectLocoKeysFromElement, postLocoTextnodes } from '../src/utils/loco-live';
+import locoI18nPack from '../src/i18n/i18n-translations.json';
+
+const postedLiveSyncSignatures = new Set<string>();
+const locoScriptLoaders = new Map<string, Promise<void>>();
+
+// The exported Loco pack is also served statically (see staticDirs in main.ts)
+// so the Loco runtime can consume it in file mode. The runtime itself is
+// vendored from the Loco repo (public/loco.min.js) so package mode works
+// fully offline — no Loco server required.
+const LOCO_PACK_URL = '/i18n/i18n-translations.json';
+const LOCO_RUNTIME_URL = '/i18n/loco.min.js';
+const locoPackLanguages: string[] = Array.isArray((locoI18nPack as { languages?: string[] }).languages)
+  ? (locoI18nPack as { languages: string[] }).languages
+  : [];
+
+type LocoRuntime = {
+  init?: (config: { apiUrl?: string; apiKey?: string; file?: string }) => Promise<unknown> | unknown;
+  apply?: (lang: string) => Promise<unknown> | unknown;
+  restore?: () => Promise<unknown> | unknown;
+  languages?: () => Promise<unknown> | unknown;
+};
+
+// The Loco runtime is a singleton that can be initialized either in “file”
+// (package) mode or “API” (live) mode — not both. Track which mode we
+// initialized so switching modes triggers a clean reload of the preview iframe.
+let locoInitializedMode: 'package' | 'live' | null = null;
+let locoInitPromise: Promise<LocoRuntime | null> | null = null;
+
+async function ensureLocoRuntimeLoaded(
+  scriptUrl: string
+): Promise<LocoRuntime | null> {
+  if (typeof window === 'undefined') return null;
+
+  const runtime = (window as any).Loco as LocoRuntime | undefined;
+  if (runtime?.init) return runtime;
+
+  const scriptId = `loco-runtime-${scriptUrl}`;
+
+  let loader = locoScriptLoaders.get(scriptId);
+  if (!loader) {
+    loader = new Promise<void>((resolve, reject) => {
+      const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => reject(new Error('Failed to load Loco runtime script.')), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = scriptUrl;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Unable to load ${script.src}`));
+      document.head.appendChild(script);
+    });
+    locoScriptLoaders.set(scriptId, loader);
+  }
+
+  await loader;
+  return ((window as any).Loco as LocoRuntime | undefined) ?? null;
+}
+
+async function ensureLocoInitialized(
+  mode: 'package' | 'live',
+  serverUrl: string,
+  apiKey?: string,
+): Promise<LocoRuntime | null> {
+  // Runtime already initialized in a different mode — reload the preview iframe
+  // so the singleton starts fresh in the requested mode.
+  if (locoInitializedMode && locoInitializedMode !== mode) {
+    window.location.reload();
+    return null;
+  }
+
+  if (locoInitPromise) return locoInitPromise;
+
+  locoInitPromise = (async () => {
+    // Package mode uses the locally vendored runtime (fully offline);
+    // live mode loads the runtime from the Loco server it syncs with.
+    const scriptUrl =
+      mode === 'package'
+        ? LOCO_RUNTIME_URL
+        : `${serverUrl.replace(/\/$/, '')}/cdn/loco.js`;
+    const runtime = await ensureLocoRuntimeLoaded(scriptUrl);
+    if (!runtime?.init) return runtime ?? null;
+
+    if (mode === 'package') {
+      // File mode: translations come from the exported pack committed to this
+      // repo — no Loco server round-trip needed to render translations.
+      await Promise.resolve(runtime.init({ file: LOCO_PACK_URL }));
+      // languages() resolves once the pack file is loaded — use it as a
+      // readiness barrier before the first apply().
+      if (runtime.languages) {
+        await Promise.resolve(runtime.languages()).catch(() => undefined);
+      }
+    } else {
+      await Promise.resolve(
+        runtime.init({
+          apiUrl: serverUrl.replace(/\/$/, ''),
+          apiKey,
+        }),
+      );
+    }
+
+    locoInitializedMode = mode;
+    return runtime;
+  })();
+
+  try {
+    return await locoInitPromise;
+  } catch (error) {
+    locoInitPromise = null;
+    throw error;
+  }
+}
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -151,6 +266,12 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
+// Default Loco configuration from environment variables.
+// Falls back to the shared hosted Loco instance when env values are absent.
+const defaultLocoServer = (import.meta.env.VITE_LOCO_SERVER_URL as string | undefined)?.trim() || 'https://loco.os.mieweb.org';
+const defaultLocoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || '84ad26c4d9934e638f206ae8';
+const isLocoDisabled = (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
+
 // Appends a "View source on GitHub" link below each story, derived from the
 // story file's absolute path on disk (context.parameters.fileName).
 const withGitHubSource: Decorator = (Story, context) => {
@@ -245,16 +366,89 @@ const withBrand: Decorator = (Story, context) => {
   );
 };
 
-// Provides an ambient CodeLookup so the healthcare components' default (no
-// explicit `codeLookup` / `renderCodeSearch` prop) demonstrates offline coded
-// search. Stories that inject their own config still win (explicit overrides
-// context); pass `codeLookup={false}` in a story to demo the plain-text opt-out.
-const withCodeLookup: Decorator = (Story, context) => {
-  const locale = (context.globals.locale as string) || 'en';
+const withLocoLiveSync: Decorator = (Story, context) => {
+  const locoMode = String(context.globals?.locoMode || 'package');
+  const locale = String(context.globals?.locale || 'en');
+  const configuredServer = String(context.globals?.locoServer || '').trim();
+  const configuredApiKey = String(context.globals?.locoApiKey || '').trim();
+  const serverUrl = configuredServer || defaultLocoServer;
+  const apiKey = configuredApiKey || defaultLocoApiKey || undefined;
+
+  useEffect(() => {
+    if (locoMode !== 'live' || isLocoDisabled) return;
+
+    const root = document.querySelector('[data-loco-scan-root="true"]') as HTMLElement | null;
+    if (!root) return;
+
+    const keys = collectLocoKeysFromElement(root);
+    if (keys.length === 0) return;
+
+    const signature = `${context.id}:${serverUrl}:${keys.map((entry) => entry.key).join('|')}`;
+    if (postedLiveSyncSignatures.has(signature)) return;
+    postedLiveSyncSignatures.add(signature);
+
+    void postLocoTextnodes({
+      serverUrl,
+      keys,
+      pageUrl: window.location.href,
+      apiKey,
+    }).catch((error) => {
+      console.warn(
+        '[loco-live-sync] Unable to post phrases to Loco. Check VITE_LOCO_SERVER_URL and VITE_LOCO_API_KEY.',
+        error,
+      );
+    });
+  }, [locoMode, serverUrl, apiKey, context.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // Disabled: undo any runtime translations and do nothing else.
+    if (locoMode === 'disable' || isLocoDisabled) {
+      const runtime = (window as any).Loco as LocoRuntime | undefined;
+      if (runtime?.restore) {
+        void Promise.resolve(runtime.restore()).catch(() => undefined);
+      }
+      return;
+    }
+
+    void (async () => {
+      const mode = locoMode === 'live' ? 'live' : 'package';
+
+      // In package mode only apply languages present in the exported pack;
+      // English (the source language) means “show originals”.
+      const shouldRestore =
+        locale === 'en' || (mode === 'package' && !locoPackLanguages.includes(locale));
+
+      // Nothing to undo yet — don't load the runtime just to restore originals.
+      if (shouldRestore && !(window as any).Loco) return;
+
+      const runtime = await ensureLocoInitialized(mode, serverUrl, apiKey);
+      if (!runtime || cancelled) return;
+
+      if (shouldRestore) {
+        if (runtime.restore) {
+          await Promise.resolve(runtime.restore());
+        }
+        return;
+      }
+
+      if (runtime.apply) {
+        await Promise.resolve(runtime.apply(locale));
+      }
+    })().catch((error) => {
+      console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locoMode, locale, serverUrl, apiKey, context.id]);
+
   return (
-    <CodeLookupProvider component={CodeLookup} indexUrl="/codify" locale={locale}>
+    <div data-loco-scan-root="true">
       <Story />
-    </CodeLookupProvider>
+    </div>
   );
 };
 
@@ -264,6 +458,9 @@ const preview: Preview = {
     theme: 'light',
     density: 'standard',
     locale: 'en',
+    locoMode: 'package',
+    locoServer: defaultLocoServer,
+    locoApiKey: defaultLocoApiKey,
   },
   globalTypes: {
     brand: {
@@ -309,13 +506,28 @@ const preview: Preview = {
       },
     },
     locale: {
-      name: 'Language',
-      description: 'Locale for locale-aware components (e.g. CodeLookup shards)',
+      name: 'Locale',
+      description: 'Locale used by i18n integration stories',
       toolbar: {
         icon: 'globe',
         items: [
-          { value: 'en', title: '🇺🇸 English' },
-          { value: 'es', title: '🇪🇸 Español (sample)' },
+          { value: 'en', title: 'English (en)' },
+          { value: 'fr', title: 'French (fr)' },
+          { value: 'zh-Hans', title: 'Chinese (zh-Hans)' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+    locoMode: {
+      name: 'Loco i18n',
+      description:
+        'Use Loco i18n package for preview, Loco Sync Text to post discovered phrases to Loco pending list, or disable Loco.',
+      toolbar: {
+        icon: 'transfer',
+        items: [
+          { value: 'package', title: 'Loco i18n' },
+          { value: 'live', title: 'Loco Sync Text' },
+          { value: 'disable', title: 'Disable' },
         ],
         dynamicTitle: true,
       },
@@ -376,7 +588,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withGitHubSource, withBrand, withCodeLookup],
+  decorators: [withGitHubSource, withBrand, withLocoLiveSync],
 };
 
 export default preview;

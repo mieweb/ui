@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { Badge } from './Badge';
+import locoSamplePack from '../../i18n/i18n-translations.json';
+import { createLocoTranslator } from '../../utils/i18n';
 import {
   CheckIcon,
   AlertCircleIcon,
@@ -42,6 +44,13 @@ const iconMap: Record<string, LucideIcon | undefined> = {
 type BadgeStoryArgs = React.ComponentProps<typeof Badge> & {
   iconName?: keyof typeof iconMap;
 };
+
+function getTranslator(context: { globals?: Record<string, unknown> }) {
+  const locale = String(context.globals?.locale || 'en');
+  return createLocoTranslator(locoSamplePack, locale, {
+    fallbackLanguage: 'en',
+  });
+}
 
 const meta: Meta<typeof Badge> = {
   title: 'Components/Text & Data Display/Badge',
@@ -91,49 +100,70 @@ export default meta;
 type Story = StoryObj<BadgeStoryArgs>;
 
 export const Default: Story = {
-  args: {
-    children: 'Badge',
+  render: (args, context) => {
+    const t = getTranslator(context);
+    return <Badge {...args}>{t('ui.badge.single')}</Badge>;
   },
 };
 
 export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-wrap gap-2">
-      <Badge variant="default">Default</Badge>
-      <Badge variant="secondary">Secondary</Badge>
-      <Badge variant="success">Success</Badge>
-      <Badge variant="warning">Warning</Badge>
-      <Badge variant="danger">Danger</Badge>
-      <Badge variant="outline">Outline</Badge>
-    </div>
-  ),
+  render: (_, context) => {
+    const t = getTranslator(context);
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Badge variant="default">{t('ui.badge.variants.default')}</Badge>
+        <Badge variant="secondary">{t('ui.badge.variants.secondary')}</Badge>
+        <Badge variant="success">{t('ui.badge.variants.success')}</Badge>
+        <Badge variant="warning">{t('ui.badge.variants.warning')}</Badge>
+        <Badge variant="danger">{t('ui.badge.variants.danger')}</Badge>
+        <Badge variant="outline">{t('ui.badge.variants.outline')}</Badge>
+      </div>
+    );
+  },
 };
 
 export const AllSizes: Story = {
-  render: () => (
-    <div className="flex items-center gap-2">
-      <Badge size="sm">Small</Badge>
-      <Badge size="md">Medium</Badge>
-      <Badge size="lg">Large</Badge>
-    </div>
-  ),
+  render: (_, context) => {
+    const t = getTranslator(context);
+    return (
+      <div className="flex items-center gap-2">
+        <Badge size="sm">{t('ui.badge.sizes.small')}</Badge>
+        <Badge size="md">{t('ui.badge.sizes.medium')}</Badge>
+        <Badge size="lg">{t('ui.badge.sizes.large')}</Badge>
+      </div>
+    );
+  },
 };
 
 export const WithIcon: Story = {
+  render: (args, context) => {
+    const t = getTranslator(context);
+    const IconComponent = args.iconName ? iconMap[args.iconName] : undefined;
+    return (
+      <Badge
+        {...args}
+        icon={IconComponent ? <IconComponent size={12} /> : undefined}
+      >
+        {t('ui.badge.examples.new')}
+      </Badge>
+    );
+  },
   args: {
-    children: 'New',
     iconName: 'sparkles',
     variant: 'success',
   },
 };
 
 export const StatusExamples: Story = {
-  render: () => (
-    <div className="flex flex-wrap gap-2">
-      <Badge variant="success">Active</Badge>
-      <Badge variant="warning">Pending</Badge>
-      <Badge variant="danger">Expired</Badge>
-      <Badge variant="secondary">Draft</Badge>
-    </div>
-  ),
+  render: (_, context) => {
+    const t = getTranslator(context);
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Badge variant="success">{t('ui.badge.examples.active')}</Badge>
+        <Badge variant="warning">{t('ui.badge.examples.pending')}</Badge>
+        <Badge variant="danger">{t('ui.badge.examples.expired')}</Badge>
+        <Badge variant="secondary">{t('ui.badge.examples.draft')}</Badge>
+      </div>
+    );
+  },
 };

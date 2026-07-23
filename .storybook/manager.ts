@@ -437,6 +437,55 @@ addons.register('mieweb-brand-sync', (api) => {
   });
 });
 
+// Hide the locale switcher while Loco is disabled — switching languages has no
+// effect in that mode. The button is matched by the stable aria-label derived
+// from the `locale` globalType description in preview.tsx.
+const localeVisibilityStyleId = 'mieweb-loco-locale-visibility';
+
+function setLocaleSwitcherHidden(hidden: boolean) {
+  const existing = document.getElementById(localeVisibilityStyleId);
+  if (!hidden) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+  const style = document.createElement('style');
+  style.id = localeVisibilityStyleId;
+  style.textContent = `
+    [role="toolbar"] button[aria-label^="Locale used by i18n"] {
+      display: none !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+addons.register('mieweb-loco-locale-visibility', (api) => {
+  let previousLocoMode: unknown = api.getGlobals()?.locoMode;
+  setLocaleSwitcherHidden(previousLocoMode === 'disable');
+
+  const onGlobalsChanged = (globals?: Record<string, unknown>) => {
+    const locoMode = globals?.locoMode;
+    setLocaleSwitcherHidden(locoMode === 'disable');
+
+    // Changing the Loco mode resets the locale to English so every mode
+    // starts from the untranslated baseline.
+    if (previousLocoMode !== undefined && locoMode !== previousLocoMode && globals?.locale !== 'en') {
+      api.updateGlobals({ locale: 'en' });
+    }
+    previousLocoMode = locoMode;
+  };
+
+  // 'setGlobals' fires once when the preview boots with the initial globals
+  // (from the URL); 'globalsUpdated' fires on every toolbar change.
+  api.on('setGlobals', ({ globals }: { globals?: Record<string, unknown> }) => {
+    previousLocoMode = globals?.locoMode;
+    setLocaleSwitcherHidden(globals?.locoMode === 'disable');
+  });
+  api.on('globalsUpdated', ({ globals }) => {
+    onGlobalsChanged(globals);
+  });
+});
+
 // Redirect old/broken story bookmarks to the Introduction page
 addons.register('mieweb-404-redirect', (api) => {
   const FALLBACK_ID = 'introduction--docs';
