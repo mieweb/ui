@@ -148,6 +148,10 @@ function Select({
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const typeaheadRef = React.useRef<{ query: string; timer: number | null }>({
+    query: '',
+    timer: null,
+  });
 
   const generatedId = React.useId();
   const selectId = id || generatedId;
@@ -303,6 +307,64 @@ function Select({
   // Handle keyboard navigation
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
+      // Typeahead (native-select style): when not using the dedicated search
+      // input, typing printable characters jumps to the first option whose
+      // label starts with the typed string. Repeating the same key cycles
+      // through matches. The buffer clears after a short pause.
+      if (
+        !searchable &&
+        e.key.length === 1 &&
+        e.key !== ' ' &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        e.preventDefault();
+        if (!isOpen) setIsOpen(true);
+
+        const hadPendingQuery = typeaheadRef.current.query !== '';
+        if (typeaheadRef.current.timer !== null) {
+          window.clearTimeout(typeaheadRef.current.timer);
+        }
+        const query = (typeaheadRef.current.query + e.key).toLowerCase();
+        typeaheadRef.current.query = query;
+        typeaheadRef.current.timer = window.setTimeout(() => {
+          typeaheadRef.current.query = '';
+          typeaheadRef.current.timer = null;
+        }, 600);
+
+        const len = filteredFlatOptions.length;
+        if (len > 0) {
+          const allSameChar = query.split('').every((c) => c === query[0]);
+          const needle = allSameChar ? query[0] : query;
+          const matches = (opt: SelectOption) =>
+            opt.label.toLowerCase().startsWith(needle);
+
+          // A fresh keystroke (or refining a multi-char query) searches from
+          // the current option inclusive so typing "car" stays on "Cardiology";
+          // repeating the same key cycles to the next match.
+          const startInclusive = !hadPendingQuery || !allSameChar;
+          const base = startInclusive
+            ? Math.max(highlightedIndex, 0)
+            : highlightedIndex + 1;
+
+          for (let i = 0; i < len; i++) {
+            const idx = (base + i) % len;
+            if (matches(filteredFlatOptions[idx])) {
+              setHighlightedIndex(idx);
+              break;
+            }
+          }
+        }
+        return;
+      }
+
+      // Let Space type normally in the search input (e.g. "new york")
+      // instead of being captured by the open/select handler below.
+      if (e.key === ' ' && e.target === searchInputRef.current) {
+        return;
+      }
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -343,7 +405,13 @@ function Select({
           break;
       }
     },
-    [isOpen, highlightedIndex, filteredFlatOptions, handleValueChange]
+    [
+      isOpen,
+      highlightedIndex,
+      filteredFlatOptions,
+      handleValueChange,
+      searchable,
+    ]
   );
 
   // Focus search input when dropdown opens
@@ -357,6 +425,42 @@ function Select({
   React.useEffect(() => {
     setHighlightedIndex(filteredFlatOptions.length > 0 ? 0 : -1);
   }, [searchQuery, filteredFlatOptions.length]);
+
+  // Keep the highlighted option visible within the listbox during keyboard
+  // navigation. We adjust only the list's own scrollTop instead of calling the
+  // native scrollIntoView: the dropdown is portaled to <body> with
+  // position: fixed, and scrollIntoView would also scroll ancestor/window,
+  // yanking the whole page.
+  React.useEffect(() => {
+    if (!isOpen || highlightedIndex < 0) return;
+    const list = listRef.current;
+    const el = list?.querySelector<HTMLElement>('[data-highlighted="true"]');
+    if (!list || !el) return;
+    const listRect = list.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    if (elRect.top < listRect.top) {
+      list.scrollTop -= listRect.top - elRect.top;
+    } else if (elRect.bottom > listRect.bottom) {
+      list.scrollTop += elRect.bottom - listRect.bottom;
+    }
+  }, [highlightedIndex, isOpen]);
+
+  // Reset the typeahead buffer whenever the dropdown closes (Escape, click
+  // outside, selection) so a stale query doesn't carry over on a quick reopen,
+  // and clear any pending timer on unmount.
+  const resetTypeahead = React.useCallback(() => {
+    if (typeaheadRef.current.timer !== null) {
+      window.clearTimeout(typeaheadRef.current.timer);
+      typeaheadRef.current.timer = null;
+    }
+    typeaheadRef.current.query = '';
+  }, []);
+
+  React.useEffect(() => {
+    if (!isOpen) resetTypeahead();
+  }, [isOpen, resetTypeahead]);
+
+  React.useEffect(() => resetTypeahead, [resetTypeahead]);
 
   // Build aria-describedby
   const describedByIds = [
