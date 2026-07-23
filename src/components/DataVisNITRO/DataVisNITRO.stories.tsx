@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DataVisNitroGrid, DataVisNitroSource } from './DataVisNITRO';
+import { GridAssistant, type GridAssistantColumn } from '@mieweb/datavis';
+import {
+  DataVisNitroContext,
+  DataVisNitroGrid,
+  DataVisNitroSource,
+} from './DataVisNITRO';
 
 const meta: Meta<typeof DataVisNitroGrid> = {
   title: 'Components/Text & Data Display/DataVis NITRO',
@@ -241,6 +246,59 @@ export const TitleActions: Story = {
           </>
         }
       />
+    </DataVisNitroSource>
+  ),
+};
+
+const ASSISTANT_COLUMNS: GridAssistantColumn[] = EMPLOYEE_COLUMNS.map(
+  (field) => ({
+    field,
+    header: field,
+    type: field === 'id' ? 'number' : 'string',
+  })
+);
+
+/** Reads the shared view from DataVisNitroContext and connects the assistant to it. */
+const ConnectedGridAssistant = () => {
+  const view = useContext(DataVisNitroContext);
+  if (!view) return null;
+
+  return (
+    <GridAssistant
+      view={view}
+      columns={ASSISTANT_COLUMNS}
+      height="480px"
+      className="self-start"
+    />
+  );
+};
+
+export const OzwellAssistant: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'New in `@mieweb/datavis` 1.6.0. `<GridAssistant>` is a "Hey Ozwell" chat panel that controls the grid in natural language — sorting, filtering, grouping, pivoting, aggregates, global search, and perspectives — and answers questions about the data ("how many rows are there?", "what is the average of X for department Y?") with exact results computed from the visible rows. It shares the view from `<DataVisNitroSource>` via `DataVisNitroContext`. Requires an Ozwell backend: set `window.__ozwell = { apiKey: "…", baseURL: "…" }` (or `localStorage["ozwellConfig"]`) in the browser console before chatting.',
+      },
+    },
+  },
+  render: () => (
+    <DataVisNitroSource type="http" url="/sample-data.json">
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) 24rem',
+          gap: '1rem',
+        }}
+      >
+        <DataVisNitroGrid
+          title="Employees"
+          columns={EMPLOYEE_COLUMNS}
+          showControls
+          height="480px"
+        />
+        <ConnectedGridAssistant />
+      </div>
     </DataVisNitroSource>
   ),
 };
