@@ -134,6 +134,13 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
     ref
   ) => {
     const [error, setError] = React.useState<string | null>(null);
+
+    // A failed load must not outlive its src: clearing on change lets a host
+    // swap in a corrected URL without being trapped on the error surface
+    // (which unmounts the media element, so the new src would never load).
+    React.useEffect(() => {
+      setError(null);
+    }, [src]);
     const resolvedKind = kind ?? inferMediaKind(src);
 
     const transport = useMediaTransport({

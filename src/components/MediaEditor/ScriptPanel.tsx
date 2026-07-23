@@ -74,6 +74,16 @@ async function parseScript(
         `Entry ${i + 1}: each entry needs word.text, word.startMs and word.endMs.`
       );
     }
+    if (
+      w.wordType !== undefined &&
+      w.wordType !== 'word' &&
+      w.wordType !== 'silence' &&
+      w.wordType !== 'silence-newline'
+    ) {
+      throw new Error(
+        `Entry ${i + 1}: wordType must be 'word', 'silence' or 'silence-newline'.`
+      );
+    }
     const word: TranscriptWord = {
       text: w.text,
       startMs: w.startMs,
