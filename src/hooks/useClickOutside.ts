@@ -22,7 +22,7 @@ import { useEffect, type RefObject } from 'react';
  * ```
  */
 export function useClickOutside<T extends HTMLElement>(
-  ref: RefObject<T | null> | Array<RefObject<HTMLElement | null>>,
+  ref: RefObject<T | null> | ReadonlyArray<RefObject<HTMLElement | null>>,
   callback: () => void,
   enabled: boolean = true
 ): void {
