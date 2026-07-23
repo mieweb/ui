@@ -359,6 +359,12 @@ function Select({
         return;
       }
 
+      // Let Space type normally in the search input (e.g. "new york")
+      // instead of being captured by the open/select handler below.
+      if (e.key === ' ' && e.target === searchInputRef.current) {
+        return;
+      }
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();

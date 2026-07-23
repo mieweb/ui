@@ -141,6 +141,23 @@ describe('Select typeahead', () => {
     expect(options[0]).toHaveTextContent('Family Care Clinic');
   });
 
+  it('allows typing spaces in the search input (multi-word queries)', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Select aria-label="Location Type" searchable options={LOCATION_TYPES} />
+    );
+
+    await user.click(screen.getByRole('combobox'));
+    const search = screen.getByRole('textbox', { name: 'Search options' });
+    await user.type(search, 'collection site');
+
+    expect(search).toHaveValue('collection site');
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveTextContent('Collection Site');
+  });
+
   it('never calls native scrollIntoView (which would scroll the whole page)', async () => {
     const user = userEvent.setup();
     // The dropdown is portaled to <body> with position: fixed, so calling
