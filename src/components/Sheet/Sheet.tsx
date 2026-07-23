@@ -21,11 +21,15 @@ const sheetContentVariants = cva(
   ],
   {
     variants: {
+      // `left`/`right` are direction-aware aliases for `start`/`end` and
+      // mirror in RTL documents.
       side: {
         top: 'inset-x-0 top-0 border-b max-h-dvh',
         bottom: 'inset-x-0 bottom-0 border-t max-h-dvh',
-        left: 'inset-y-0 left-0 h-full border-r w-3/4 sm:max-w-sm',
-        right: 'inset-y-0 right-0 h-full border-l w-3/4 sm:max-w-sm',
+        left: 'inset-y-0 start-0 h-full border-e w-3/4 sm:max-w-sm',
+        right: 'inset-y-0 end-0 h-full border-s w-3/4 sm:max-w-sm',
+        start: 'inset-y-0 start-0 h-full border-e w-3/4 sm:max-w-sm',
+        end: 'inset-y-0 end-0 h-full border-s w-3/4 sm:max-w-sm',
       },
     },
     defaultVariants: {
