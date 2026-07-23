@@ -445,18 +445,14 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
 interface ToolResultDisplayProps {
   result: MCPToolResult;
   onLinkClick?: (link: MCPResourceLink) => void;
-  showRawData?: boolean;
   className?: string;
 }
 
 function ToolResultDisplay({
   result,
   onLinkClick,
-  showRawData = false,
   className,
 }: ToolResultDisplayProps) {
-  const [showJson, setShowJson] = React.useState(false);
-
   if (result.type === 'error') {
     return (
       <div
@@ -473,9 +469,6 @@ function ToolResultDisplay({
       </div>
     );
   }
-
-  const hasRawData =
-    result.type === 'json' && result.data !== undefined && result.data !== null;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -500,40 +493,6 @@ function ToolResultDisplay({
               onClick={onLinkClick}
             />
           ))}
-        </div>
-      )}
-
-      {/* Raw JSON data - hidden by default */}
-      {hasRawData && showRawData && (
-        <div className="mt-2">
-          <button
-            onClick={() => setShowJson(!showJson)}
-            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
-          >
-            <svg
-              aria-hidden="true"
-              className={cn(
-                'h-3 w-3 transition-transform',
-                showJson && 'rotate-90'
-              )}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-            {showJson ? 'Hide' : 'Show'} raw data
-          </button>
-          {showJson && (
-            <pre className="mt-2 max-h-40 overflow-auto rounded-md bg-neutral-100 p-2 text-xs dark:bg-neutral-800">
-              {JSON.stringify(result.data, null, 2)}
-            </pre>
-          )}
         </div>
       )}
     </div>

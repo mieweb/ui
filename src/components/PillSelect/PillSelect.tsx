@@ -44,9 +44,10 @@ export function PillSelect({
 
   const value = controlledValue !== undefined ? controlledValue : internalValue;
   const selectedOption = options.find((o) => o.value === value);
+  const close = React.useCallback(() => setExpanded(false), []);
 
-  useClickOutside(ref, () => setExpanded(false), expanded);
-  useEscapeKey(() => setExpanded(false), expanded);
+  useClickOutside(ref, close, expanded);
+  useEscapeKey(close, expanded);
 
   function handleSelect(option: PillSelectOption) {
     if (disabled || option.disabled) return;
