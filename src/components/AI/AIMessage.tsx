@@ -14,7 +14,8 @@ import type {
   MCPResourceLink,
 } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
-import { SparklesIcon, ChevronIcon } from './icons';
+import { SparklesIcon } from './icons';
+import { CollapsiblePill } from './CollapsiblePill';
 import { AudioPlayer } from '../AudioPlayer';
 
 // ============================================================================
@@ -162,6 +163,59 @@ function AITypingIndicator({ className }: { className?: string }) {
 }
 
 // ============================================================================
+// Thinking Block
+// ============================================================================
+
+function ThinkingBlock({
+  text,
+  streaming,
+  defaultCollapsed = false,
+}: {
+  text: string;
+  streaming: boolean;
+  defaultCollapsed?: boolean;
+}) {
+  const startedAt = React.useRef(Date.now());
+  const [elapsed, setElapsed] = React.useState<number | null>(null);
+  const prevStreaming = React.useRef(streaming);
+
+  React.useEffect(() => {
+    if (prevStreaming.current && !streaming) {
+      setElapsed(Math.round((Date.now() - startedAt.current) / 1000));
+    }
+    prevStreaming.current = streaming;
+  }, [streaming]);
+
+  const label = streaming
+    ? 'Thinking'
+    : elapsed !== null && elapsed > 0
+      ? `Thought for ${elapsed}s`
+      : 'Thought';
+
+  const dot = streaming ? (
+    <span
+      aria-hidden="true"
+      className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-violet-500 dark:bg-violet-400"
+    />
+  ) : null;
+
+  return (
+    <div data-slot="ai-message-thinking">
+      <CollapsiblePill
+        label={label}
+        leadingIcon={dot}
+        defaultOpen={!defaultCollapsed}
+        pillClassName="bg-violet-50 border-violet-200 text-violet-600 hover:bg-violet-100 dark:bg-violet-950/30 dark:border-violet-800 dark:text-violet-400 dark:hover:bg-violet-950/50 focus-visible:ring-violet-500"
+      >
+        <div className="border-l-2 border-violet-200 pl-3 text-[13px] leading-relaxed text-neutral-600 italic dark:border-violet-700 dark:text-neutral-400">
+          {text}
+        </div>
+      </CollapsiblePill>
+    </div>
+  );
+}
+
+// ============================================================================
 // Content Block Renderer
 // ============================================================================
 
@@ -182,10 +236,6 @@ function ContentBlock({
   role,
   renderTextContent,
 }: ContentBlockProps) {
-  const [isCollapsed, setIsCollapsed] = React.useState(
-    content.collapsed ?? false
-  );
-
   if (content.type === 'text' && content.text) {
     if (renderTextContent) {
       return (
@@ -213,44 +263,11 @@ function ContentBlock({
 
   if (content.type === 'thinking' && content.text) {
     return (
-      <div
-        data-slot="ai-message-thinking"
-        className="rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50"
-      >
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex w-full items-center justify-between px-3 py-2 text-left"
-        >
-          <span className="text-muted-foreground flex items-center gap-2 text-sm">
-            <svg
-              aria-hidden="true"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-              />
-            </svg>
-            Thinking...
-          </span>
-          <ChevronIcon
-            direction={isCollapsed ? 'right' : 'down'}
-            className="text-neutral-400"
-          />
-        </button>
-        {!isCollapsed && (
-          <div className="border-t border-neutral-200 px-3 py-2 dark:border-neutral-700">
-            <p className="text-sm text-neutral-600 italic dark:text-neutral-400">
-              {content.text}
-            </p>
-          </div>
-        )}
-      </div>
+      <ThinkingBlock
+        text={content.text}
+        streaming={streaming}
+        defaultCollapsed={content.collapsed ?? false}
+      />
     );
   }
 

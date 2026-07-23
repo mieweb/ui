@@ -139,6 +139,7 @@ export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
 export * from './components/ScrollArea';
 export * from './components/Select';
+export * from './components/PillSelect';
 export * from './components/ServiceAccordion';
 export * from './components/ServiceBadge';
 export * from './components/ServiceCard';

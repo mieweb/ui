@@ -5,8 +5,9 @@
  */
 
 import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { CollapsiblePill } from './CollapsiblePill';
 import type {
   MCPToolCall,
   MCPToolStatus,
@@ -444,18 +445,14 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
 interface ToolResultDisplayProps {
   result: MCPToolResult;
   onLinkClick?: (link: MCPResourceLink) => void;
-  showRawData?: boolean;
   className?: string;
 }
 
 function ToolResultDisplay({
   result,
   onLinkClick,
-  showRawData = false,
   className,
 }: ToolResultDisplayProps) {
-  const [showJson, setShowJson] = React.useState(false);
-
   if (result.type === 'error') {
     return (
       <div
@@ -472,9 +469,6 @@ function ToolResultDisplay({
       </div>
     );
   }
-
-  const hasRawData =
-    result.type === 'json' && result.data !== undefined && result.data !== null;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -501,40 +495,6 @@ function ToolResultDisplay({
           ))}
         </div>
       )}
-
-      {/* Raw JSON data - hidden by default */}
-      {hasRawData && showRawData && (
-        <div className="mt-2">
-          <button
-            onClick={() => setShowJson(!showJson)}
-            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
-          >
-            <svg
-              aria-hidden="true"
-              className={cn(
-                'h-3 w-3 transition-transform',
-                showJson && 'rotate-90'
-              )}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-            {showJson ? 'Hide' : 'Show'} raw data
-          </button>
-          {showJson && (
-            <pre className="mt-2 max-h-40 overflow-auto rounded-md bg-neutral-100 p-2 text-xs dark:bg-neutral-800">
-              {JSON.stringify(result.data, null, 2)}
-            </pre>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -542,34 +502,6 @@ function ToolResultDisplay({
 // ============================================================================
 // MCP Tool Call Component
 // ============================================================================
-
-const toolCallVariants = cva(
-  ['rounded-lg border', 'overflow-hidden', 'transition-all duration-200'],
-  {
-    variants: {
-      status: {
-        pending:
-          'border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50',
-        running:
-          'border-primary-200 bg-primary-50/50 dark:border-primary-800 dark:bg-primary-900/20',
-        success:
-          'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/20',
-        error:
-          'border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-900/20',
-        cancelled:
-          'border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50 opacity-60',
-      },
-      compact: {
-        true: 'p-2',
-        false: 'p-3',
-      },
-    },
-    defaultVariants: {
-      status: 'pending',
-      compact: false,
-    },
-  }
-);
 
 // Human-readable tool names
 const TOOL_FRIENDLY_NAMES: Record<string, string> = {
@@ -664,17 +596,33 @@ function getParameterSummary(
   return null;
 }
 
-export interface MCPToolCallDisplayProps extends VariantProps<
-  typeof toolCallVariants
-> {
+// Pill header colors per status (Ozwell-style status pill)
+const statusPillClasses: Record<MCPToolStatus, string> = {
+  pending:
+    'bg-neutral-100 border-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
+  running:
+    'bg-primary-50 border-primary-200 text-primary-800 dark:bg-primary-900/20 dark:border-primary-800 dark:text-primary-300',
+  success:
+    'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300',
+  error:
+    'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
+  cancelled:
+    'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
+};
+
+export interface MCPToolCallDisplayProps {
   /** The tool call to display */
   toolCall: MCPToolCall;
-  /** Whether to show parameters (in detailed view) */
+  /** Compact (condensed) sizing — tighter pill and box */
+  compact?: boolean;
+  /** Whether to include raw parameters inside the detail box */
   showParameters?: boolean;
-  /** Whether the component is collapsible to show details */
+  /** Whether clicking the pill can expand/collapse the entire detail box */
   collapsible?: boolean;
-  /** Default collapsed state (true = hide details) */
+  /** Default collapsed state. By default, completed tool calls start expanded. */
   defaultCollapsed?: boolean;
+  /** Hide the whole tool-call display (mirrors Ozwell's debug flag) */
+  hidden?: boolean;
   /** Callback when a resource link is clicked */
   onLinkClick?: (link: MCPResourceLink) => void;
   /** Additional class name */
@@ -689,13 +637,12 @@ export function MCPToolCallDisplay({
   toolCall,
   showParameters = true,
   collapsible = true,
-  defaultCollapsed = true,
+  defaultCollapsed,
   compact,
+  hidden = false,
   onLinkClick,
   className,
 }: MCPToolCallDisplayProps) {
-  const [showDetails, setShowDetails] = React.useState(!defaultCollapsed);
-
   const formatDuration = (ms?: number) => {
     if (!ms) return null;
     if (ms < 1000) return `${ms}ms`;
@@ -703,128 +650,123 @@ export function MCPToolCallDisplay({
   };
 
   const friendlyName = getToolFriendlyName(toolCall.toolName, toolCall.status);
+  const durationLabel = formatDuration(toolCall.duration);
   const paramSummary = getParameterSummary(
     toolCall.toolName,
     toolCall.parameters
   );
 
-  return (
+  // While running, show the input summary in the pill (e.g. "Creating patient
+  // · John Smith"). On success the name already appears as the result link, so
+  // show the duration instead to avoid duplication.
+  const detailBit =
+    toolCall.status === 'success'
+      ? durationLabel
+      : (paramSummary ?? durationLabel);
+  const pillLabel = detailBit ? `${friendlyName} · ${detailBit}` : friendlyName;
+
+  const hasParams = showParameters && toolCall.parameters.length > 0;
+  const hasBoxContent = Boolean(toolCall.result || toolCall.error || hasParams);
+  const isCompleted =
+    toolCall.status === 'success' || toolCall.status === 'error';
+  const effectiveDefaultCollapsed = defaultCollapsed ?? !isCompleted;
+
+  if (hidden) return null;
+
+  // Everything the pill reveals in one click: result, links, and raw params.
+  const box = (
     <div
-      data-slot="ai-tool-call"
       className={cn(
-        toolCallVariants({ status: toolCall.status, compact }),
-        className
+        'w-full max-w-md space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50',
+        compact ? 'p-2' : 'p-3'
       )}
     >
-      {/* Main Content - Always Visible */}
-      <div className="flex items-start gap-3">
-        {/* Tool Icon */}
+      {/* Result Summary & Links */}
+      {toolCall.result && (
+        <div data-slot="ai-tool-result">
+          <ToolResultDisplay
+            result={toolCall.result}
+            onLinkClick={onLinkClick}
+          />
+        </div>
+      )}
+
+      {/* Error */}
+      {toolCall.error && (
+        <div className="rounded-md bg-red-100 p-2 dark:bg-red-900/30">
+          <p className="text-sm text-red-700 dark:text-red-300">
+            {toolCall.error}
+          </p>
+        </div>
+      )}
+
+      {/* Raw parameters — revealed together with the box */}
+      {hasParams && (
         <div
-          data-slot="ai-tool-icon"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400"
+          data-slot="ai-tool-parameters"
+          className="rounded-md bg-neutral-100 p-2 dark:bg-neutral-800"
         >
-          {getToolIcon(toolCall.toolName)}
-        </div>
-
-        {/* Content */}
-        <div data-slot="ai-tool-content" className="min-w-0 flex-1">
-          {/* Friendly Status Line */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-neutral-900 dark:text-white">
-              {friendlyName}
-            </span>
-            <ToolStatusIcon status={toolCall.status} />
-            {toolCall.duration && (
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">
-                {formatDuration(toolCall.duration)}
-              </span>
-            )}
-          </div>
-
-          {/* Parameter Summary (user-friendly) */}
-          {paramSummary && toolCall.status !== 'success' && (
-            <p className="text-muted-foreground mt-0.5 text-sm">
-              {paramSummary}
-            </p>
-          )}
-
-          {/* Result Summary & Links */}
-          {toolCall.result && (
-            <div data-slot="ai-tool-result" className="mt-2">
-              <ToolResultDisplay
-                result={toolCall.result}
-                onLinkClick={onLinkClick}
-                showRawData={showDetails}
-              />
-            </div>
-          )}
-
-          {/* Error */}
-          {toolCall.error && (
-            <div className="mt-2 rounded-md bg-red-100 p-2 dark:bg-red-900/30">
-              <p className="text-sm text-red-700 dark:text-red-300">
-                {toolCall.error}
-              </p>
-            </div>
-          )}
-
-          {/* Show Details Toggle */}
-          {collapsible && showParameters && toolCall.parameters.length > 0 && (
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="mt-2 flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
-            >
-              <svg
-                aria-hidden="true"
-                className={cn(
-                  'h-3 w-3 transition-transform',
-                  showDetails && 'rotate-90'
-                )}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-              {showDetails ? 'Hide' : 'Show'} details
-            </button>
-          )}
-
-          {/* Technical Details (collapsed by default) */}
-          {showDetails && showParameters && toolCall.parameters.length > 0 && (
-            <div
-              data-slot="ai-tool-parameters"
-              className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800"
-            >
-              <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-600 uppercase dark:text-neutral-400">
-                Parameters
-              </h4>
-              <div className="space-y-0.5">
-                {toolCall.parameters.map((param) => (
-                  <div
-                    key={param.name}
-                    className="flex items-start gap-2 text-xs"
-                  >
-                    <span className="font-mono text-neutral-600 dark:text-neutral-400">
-                      {param.name}:
-                    </span>
-                    <span className="font-mono text-neutral-700 dark:text-neutral-300">
-                      {typeof param.value === 'string'
-                        ? param.value
-                        : JSON.stringify(param.value)}
-                    </span>
-                  </div>
-                ))}
+          <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-600 uppercase dark:text-neutral-400">
+            Parameters
+          </h4>
+          <div className="space-y-0.5">
+            {toolCall.parameters.map((param) => (
+              <div key={param.name} className="flex items-start gap-2 text-xs">
+                <span className="font-mono text-neutral-600 dark:text-neutral-400">
+                  {param.name}:
+                </span>
+                <span className="font-mono text-neutral-700 dark:text-neutral-300">
+                  {typeof param.value === 'string'
+                    ? param.value
+                    : JSON.stringify(param.value)}
+                </span>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+    </div>
+  );
+
+  const staticPill = (
+    <span
+      data-slot="ai-tool-pill"
+      className={cn(
+        'inline-flex items-center gap-1.5 border font-medium',
+        compact
+          ? 'rounded-[8px] px-2 py-0.5 text-[10px]'
+          : 'rounded-[10px] px-[11px] py-1 text-[11px]',
+        statusPillClasses[toolCall.status]
+      )}
+    >
+      <ToolStatusIcon status={toolCall.status} />
+      <span>{pillLabel}</span>
+    </span>
+  );
+
+  return (
+    <div data-slot="ai-tool-call" className={className}>
+      {!hasBoxContent ? (
+        staticPill
+      ) : collapsible ? (
+        // Pill click reveals the whole box (result + params) in one go.
+        <CollapsiblePill
+          label={pillLabel}
+          leadingIcon={<ToolStatusIcon status={toolCall.status} />}
+          density={compact ? 'condensed' : 'standard'}
+          defaultOpen={!effectiveDefaultCollapsed}
+          pillClassName={statusPillClasses[toolCall.status]}
+          title="Toggle details"
+        >
+          {box}
+        </CollapsiblePill>
+      ) : (
+        // Non-collapsible: pill + box always visible.
+        <div className="space-y-1.5">
+          {staticPill}
+          {box}
+        </div>
+      )}
     </div>
   );
 }
