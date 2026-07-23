@@ -1,0 +1,84 @@
+- generic [ref=e3]:
+  - banner [ref=e7]:
+    - heading "Storybook" [level=1] [ref=e8]
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - link "Skip to content" [ref=e15] [cursor=pointer]:
+            - /url: "#storybook-preview-wrapper"
+          - link "MIE Web UI • BlueHive" [ref=e17] [cursor=pointer]:
+            - /url: https://github.com/mieweb/ui
+            - img "MIE Web UI • BlueHive"
+          - switch "Settings" [ref=e18] [cursor=pointer]
+        - generic [ref=e24]:
+          - generic [ref=e26] [cursor=pointer]:
+            - button "Open onboarding guide" [ref=e30]:
+              - strong [ref=e34]: Get started
+            - generic [ref=e35]:
+              - button "Collapse onboarding checklist" [expanded] [ref=e36]
+              - button "28% completed" [ref=e39]:
+                - generic [ref=e45]: 28%
+          - list [ref=e48]:
+            - listitem [ref=e49]:
+              - button "Open onboarding guide for Render your first component" [ref=e50] [cursor=pointer]:
+                - generic [ref=e54]: Render your first component
+            - listitem [ref=e56]:
+              - button "Open onboarding guide for Change a story with Controls" [ref=e57] [cursor=pointer]:
+                - generic [ref=e61]: Change a story with Controls
+            - listitem [ref=e63]:
+              - button "Open onboarding guide for Install Vitest addon" [ref=e64] [cursor=pointer]:
+                - generic [ref=e68]: Install Vitest addon
+      - generic [ref=e70]: Search for components
+      - search [ref=e71]:
+        - combobox [ref=e72]:
+          - searchbox "Search for components" [ref=e73]
+          - code:
+            - generic: ⌘
+            - text: K
+          - button "Tag filters" [ref=e75] [cursor=pointer]
+        - button "Create a new story" [ref=e78] [cursor=pointer]
+      - navigation [ref=e82]:
+        - heading "Stories" [level=2] [ref=e83]
+        - generic [ref=e85]:
+          - link [ref=e87] [cursor=pointer]:
+            - /url: /?path=/docs/introduction--docs
+          - link [ref=e92] [cursor=pointer]:
+            - /url: /?path=/docs/branding--docs
+          - generic [ref=e96]:
+            - button "Collapse" [expanded] [ref=e97] [cursor=pointer]: Foundations
+            - button "Expand all" [ref=e101] [cursor=pointer]
+          - link [ref=e105] [cursor=pointer]:
+            - /url: /?path=/story/foundations-colors--colors
+          - button [ref=e110] [cursor=pointer]
+          - button [ref=e118] [cursor=pointer]
+          - button [ref=e126] [cursor=pointer]
+          - button [ref=e134] [cursor=pointer]
+          - button [ref=e142] [cursor=pointer]
+          - generic [ref=e149]:
+            - button "Collapse" [expanded] [ref=e150] [cursor=pointer]: Product
+            - button "Expand all" [ref=e154] [cursor=pointer]
+          - button [ref=e158] [cursor=pointer]
+          - button [ref=e166] [cursor=pointer]
+          - generic [ref=e173]:
+            - button "Collapse" [expanded] [ref=e174] [cursor=pointer]: Components
+            - button "Expand all" [ref=e178] [cursor=pointer]
+          - button [ref=e182] [cursor=pointer]
+          - button [ref=e190] [cursor=pointer]
+          - button [ref=e198] [cursor=pointer]
+          - button [ref=e206] [cursor=pointer]
+          - button [ref=e214] [cursor=pointer]
+          - button [ref=e222] [cursor=pointer]
+          - button [ref=e230] [cursor=pointer]
+          - button [ref=e238] [cursor=pointer]
+          - button [ref=e246] [cursor=pointer]
+          - button [ref=e254] [cursor=pointer]
+          - button [ref=e262] [cursor=pointer]
+  - generic [ref=e270]:
+    - region [ref=e271]:
+      - heading "Toolbar" [level=2] [ref=e272]
+      - toolbar [ref=e273]
+    - main [ref=e274]:
+      - heading "Main preview area" [level=2] [ref=e275]
+      - generic [ref=e276]:
+        - progressbar "Content is loading..." [ref=e278]
+        - iframe [ref=e283]

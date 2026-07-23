@@ -17,7 +17,7 @@ function printHelp() {
   console.log(`Usage: node scripts/sync-loco-pack.mjs [options]
 
 Options:
-  --server=<url>         Loco server URL (default: http://10.3.37.116:6199/loco)
+  --server=<url>         Loco server URL (default: https://loco.os.mieweb.org)
   --apiKey=<key>         Loco API key (or set LOCO_API_KEY)
   --out=<path>           Output file path (default: src/i18n/i18n-translations.json)
   --format=<name>        Export format (default: i18next-nested)
@@ -36,7 +36,7 @@ async function main() {
     printHelp();
     return;
   }
-  const server = (args.server || process.env.LOCO_SERVER_URL || 'http://10.3.37.116:6199/loco').replace(/\/$/, '');
+  const server = (args.server || process.env.LOCO_SERVER_URL || 'https://loco.os.mieweb.org').replace(/\/$/, '');
   const apiKey = args.apiKey || process.env.LOCO_API_KEY || '';
   const outPath = args.out || 'src/i18n/i18n-translations.json';
   const format = args.format || 'i18next-nested';
