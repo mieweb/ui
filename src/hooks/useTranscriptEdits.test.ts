@@ -312,6 +312,24 @@ describe('ui#323 regressions', () => {
     expect(result.current.hasEdits).toBe(false);
   });
 
+  it('drops stale undo snapshots on a threshold rebuild (#327 review)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    const betaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    act(() => result.current.toggleWordDeleted(betaIdx));
+    expect(result.current.undoStack).toHaveLength(1);
+    // The snapshot in the stack was captured against the old silence layout
+    act(() => result.current.setSilenceThresholds(100, 5000));
+    expect(result.current.undoStack).toHaveLength(0);
+    // undo() is a no-op instead of restoring a stale-layout timeline
+    const before = result.current.editedWords;
+    act(() => result.current.undo());
+    expect(result.current.editedWords).toBe(before);
+  });
+
   it('initializes hasEdits=true for saved text-only edits (finding 13)', () => {
     const baseline = initEditableWords(packed);
     const withTextEdit: EditableWord[] = baseline.map((ew, i) =>

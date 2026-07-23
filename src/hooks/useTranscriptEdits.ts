@@ -317,7 +317,8 @@ export interface UseTranscriptEditsResult {
   ) => void;
 
   // -- Silence thresholds --
-  /** Rebuild silence detection with new thresholds, preserving word deletions */
+  /** Rebuild silence detection with new thresholds, preserving word deletions.
+   *  Not undoable — clears the undo stack (prior snapshots reference the old silence layout). */
   setSilenceThresholds: (minMs: number, nlMs: number) => void;
   /** Current silence detection thresholds (ms) */
   silenceThresholds: { minSilenceMs: number; nlSilenceMs: number };
@@ -726,6 +727,11 @@ export function useTranscriptEdits(
       });
 
       setEditedWords(restoredWords);
+      // Undo snapshots were captured against the previous silence layout;
+      // restoring one after a rebuild would resurrect silence chips that no
+      // longer match the current thresholds. Threshold changes are not
+      // undoable, so drop the stale history rather than restore it.
+      setUndoStack([]);
     },
     [editedWords, transcript]
   );
