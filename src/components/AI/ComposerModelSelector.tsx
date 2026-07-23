@@ -110,6 +110,19 @@ export function ComposerModelSelector({
     () => groupedModels.flatMap((group) => group.options),
     [groupedModels]
   );
+  const renderedModelIndexes = React.useMemo(
+    () =>
+      new Map(renderedModels.map((model, index) => [optionKey(model), index])),
+    [renderedModels]
+  );
+  const getOptionId = React.useCallback(
+    (index: number) => `${menuId}-option-${index}`,
+    [menuId]
+  );
+  const activeOptionId =
+    open && renderedModels[highlightedIndex]
+      ? getOptionId(highlightedIndex)
+      : undefined;
 
   const setProvider = React.useCallback(
     (provider: string | 'any') => {
@@ -149,7 +162,7 @@ export function ComposerModelSelector({
       height: window.innerHeight,
     };
     const gap = 6;
-    const menuWidth = Math.min(320, Math.max(248, boundary.width - 16));
+    const menuWidth = Math.min(320, Math.max(boundary.width - 16, 0));
     const spaceAbove = rect.top - boundary.top - gap;
     const spaceBelow = boundary.bottom - rect.bottom - gap;
     const openAbove = spaceBelow < 260 && spaceAbove > spaceBelow;
@@ -197,7 +210,7 @@ export function ComposerModelSelector({
       ) {
         return;
       }
-      setOpen(false);
+      close();
     };
 
     document.addEventListener('mousedown', handlePointerDown);
@@ -206,7 +219,7 @@ export function ComposerModelSelector({
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('touchstart', handlePointerDown);
     };
-  }, [open]);
+  }, [close, open]);
 
   useEscapeKey(close, open);
 
@@ -334,6 +347,7 @@ export function ComposerModelSelector({
               id={menuId}
               role="listbox"
               aria-label="Model"
+              aria-activedescendant={activeOptionId}
               tabIndex={-1}
               onKeyDown={handleMenuKeyDown}
               style={{ maxHeight: listMaxHeight }}
@@ -356,15 +370,16 @@ export function ComposerModelSelector({
                       {providerLabels.get(group.provider) ?? group.provider}
                     </div>
                     {group.options.map((model) => {
-                      const index = renderedModels.findIndex(
-                        (item) => optionKey(item) === optionKey(model)
-                      );
+                      const index = renderedModelIndexes.get(optionKey(model));
+                      if (index === undefined) return null;
+
                       const selected = optionKey(model) === selectedKey;
                       const highlighted = index === highlightedIndex;
 
                       return (
                         <button
                           key={model.id ?? optionKey(model)}
+                          id={getOptionId(index)}
                           type="button"
                           role="option"
                           aria-selected={selected}
