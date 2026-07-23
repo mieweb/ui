@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { isStorybookDocsMode } from '../../utils/environment';
 
 // =============================================================================
@@ -151,18 +153,26 @@ export function ServiceSelect({
   const [isOpen, setIsOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
+  // Portal + fixed positioning so the dropdown escapes overflow-hidden
+  // ancestors (the dialog itself scrolls/clips).
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open: isOpen, matchWidth: true, maxHeight: 240 });
+
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target as Node) &&
+        !floatingRef.current?.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [floatingRef]);
 
   const toggleService = (serviceSlug: string) => {
     if (selectedServices.includes(serviceSlug)) {
@@ -178,7 +188,10 @@ export function ServiceSelect({
 
   return (
     <div
-      ref={dropdownRef}
+      ref={(node) => {
+        dropdownRef.current = node;
+        anchorRef.current = node;
+      }}
       className={cn('relative', className)}
       data-slot="service-select"
     >
@@ -218,33 +231,37 @@ export function ServiceSelect({
         />
       </button>
 
-      {isOpen && (
-        <div
-          className="border-border bg-card absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border shadow-lg"
-          data-slot="service-select-dropdown"
-        >
-          {services.map((service) => (
-            <label
-              key={service.slug}
-              data-slot="service-select-option"
-              className="hover:bg-muted flex cursor-pointer items-center gap-3 px-4 py-3"
-            >
-              <input
-                type="checkbox"
-                checked={selectedServices.includes(service.slug)}
-                onChange={() => toggleService(service.slug)}
-                className="text-primary-800 focus:ring-primary-500 border-input h-4 w-4 rounded"
-              />
-              <span className="text-foreground">{service.name}</span>
-            </label>
-          ))}
-          {services.length === 0 && (
-            <div className="text-muted-foreground px-4 py-3 text-center">
-              No services available
-            </div>
-          )}
-        </div>
-      )}
+      {isOpen &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            className="border-border bg-card overflow-auto rounded-lg border shadow-lg"
+            data-slot="service-select-dropdown"
+          >
+            {services.map((service) => (
+              <label
+                key={service.slug}
+                data-slot="service-select-option"
+                className="hover:bg-muted flex cursor-pointer items-center gap-3 px-4 py-3"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedServices.includes(service.slug)}
+                  onChange={() => toggleService(service.slug)}
+                  className="text-primary-800 focus:ring-primary-500 border-input h-4 w-4 rounded"
+                />
+                <span className="text-foreground">{service.name}</span>
+              </label>
+            ))}
+            {services.length === 0 && (
+              <div className="text-muted-foreground px-4 py-3 text-center">
+                No services available
+              </div>
+            )}
+          </div>,
+          document.body
+        )}
 
       {error && (
         <p

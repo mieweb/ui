@@ -1,8 +1,10 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { isStorybookDocsMode } from '../../utils/environment';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
@@ -383,11 +385,25 @@ export function DateRangePicker({
 
   // Close calendar on click outside (supports touch via hook)
   const wrapperRef = React.useRef<HTMLDivElement>(null);
-  useClickOutside(wrapperRef, () => {
+  const outsideRefs = React.useMemo(
+    () => [wrapperRef, calendarRef],
+    [calendarRef]
+  );
+  useClickOutside(outsideRefs, () => {
     if (isCalendarOpen) {
       setIsCalendarOpen(false);
       setSelectingEnd(false);
     }
+  });
+
+  // Portal + fixed positioning for the desktop popup so it escapes
+  // overflow-hidden ancestors.
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({
+    open: !isMobileVariant && isCalendarOpen,
+    placement: resolvedAlign === 'end' ? 'bottom-end' : 'bottom-start',
   });
 
   // Close on Escape and restore focus to trigger
@@ -681,7 +697,10 @@ export function DateRangePicker({
 
   return (
     <div
-      ref={wrapperRef}
+      ref={(node) => {
+        wrapperRef.current = node;
+        anchorRef.current = node;
+      }}
       className={cn('relative inline-block', className)}
       data-slot="date-range-picker"
     >
@@ -808,127 +827,134 @@ export function DateRangePicker({
       )}
 
       {/* Desktop / Responsive popup */}
-      {!isMobileVariant && isCalendarOpen && (
-        <div
-          ref={calendarRef}
-          className={cn(
-            'absolute top-full z-50 mt-1',
-            resolvedAlign === 'end' ? 'right-0' : 'left-0',
-            'bg-background border-border rounded-lg border shadow-lg'
-          )}
-          role="dialog"
-          aria-label="Choose date range"
-          data-slot="date-range-popup"
-        >
-          <div className="flex">
-            {/* Preset sidebar — hidden on small screens in responsive mode */}
-            {showPresets && (
-              <div
-                className={cn(
-                  'border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3',
-                  isResponsive && 'hidden md:flex'
-                )}
-                data-slot="date-range-presets"
-              >
-                {finalPresets.map((preset) => (
-                  <button
-                    key={preset.key}
-                    type="button"
-                    onClick={() => handlePresetSelect(preset.key)}
-                    data-slot="date-range-preset"
-                    className={cn(
-                      'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
-                      'hover:bg-muted',
-                      activePreset === preset.key && 'bg-primary-800 text-white'
-                    )}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
+      {!isMobileVariant &&
+        isCalendarOpen &&
+        createPortal(
+          <div
+            ref={(node) => {
+              calendarRef.current = node;
+              floatingRef.current = node;
+            }}
+            style={style}
+            className={cn(
+              'overflow-auto',
+              'bg-background border-border rounded-lg border shadow-lg'
             )}
-
-            {/* Calendar panel */}
-            <div className="p-4" data-slot="date-range-calendar">
-              {/* Subtitle */}
-              <p
-                className="text-muted-foreground mb-4 text-sm"
-                data-slot="date-range-subtitle"
-              >
-                Select a start and end date from the calendar.
-              </p>
-
-              <div
-                className="flex gap-8"
-                onMouseLeave={() => setHoverDate(null)}
-                data-slot="date-range-calendars"
-              >
-                {/* Left month */}
-                <div>
-                  <div
-                    className="mb-3 flex items-center"
-                    data-slot="date-range-month-header"
-                  >
+            role="dialog"
+            aria-label="Choose date range"
+            data-slot="date-range-popup"
+          >
+            <div className="flex">
+              {/* Preset sidebar — hidden on small screens in responsive mode */}
+              {showPresets && (
+                <div
+                  className={cn(
+                    'border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3',
+                    isResponsive && 'hidden md:flex'
+                  )}
+                  data-slot="date-range-presets"
+                >
+                  {finalPresets.map((preset) => (
                     <button
+                      key={preset.key}
                       type="button"
-                      onClick={goToPrevMonth}
-                      className="hover:bg-muted rounded-md p-1 transition-colors"
-                      aria-label="Previous month"
-                      data-slot="date-range-nav"
+                      onClick={() => handlePresetSelect(preset.key)}
+                      data-slot="date-range-preset"
+                      className={cn(
+                        'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
+                        'hover:bg-muted',
+                        activePreset === preset.key &&
+                          'bg-primary-800 text-white'
+                      )}
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      {preset.label}
                     </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Calendar panel */}
+              <div className="p-4" data-slot="date-range-calendar">
+                {/* Subtitle */}
+                <p
+                  className="text-muted-foreground mb-4 text-sm"
+                  data-slot="date-range-subtitle"
+                >
+                  Select a start and end date from the calendar.
+                </p>
+
+                <div
+                  className="flex gap-8"
+                  onMouseLeave={() => setHoverDate(null)}
+                  data-slot="date-range-calendars"
+                >
+                  {/* Left month */}
+                  <div>
                     <div
-                      className="flex-1 text-center text-sm font-medium"
-                      data-slot="date-range-month-label"
+                      className="mb-3 flex items-center"
+                      data-slot="date-range-month-header"
                     >
-                      {monthNames[leftMonth]} {leftYear}
+                      <button
+                        type="button"
+                        onClick={goToPrevMonth}
+                        className="hover:bg-muted rounded-md p-1 transition-colors"
+                        aria-label="Previous month"
+                        data-slot="date-range-nav"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      <div
+                        className="flex-1 text-center text-sm font-medium"
+                        data-slot="date-range-month-label"
+                      >
+                        {monthNames[leftMonth]} {leftYear}
+                      </div>
+                      {/* Show right chevron on left month in responsive single-cal mode */}
+                      {isResponsive && (
+                        <button
+                          type="button"
+                          onClick={goToNextMonth}
+                          className="hover:bg-muted rounded-md p-1 transition-colors md:hidden"
+                          aria-label="Next month"
+                          data-slot="date-range-nav"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
-                    {/* Show right chevron on left month in responsive single-cal mode */}
-                    {isResponsive && (
+                    {renderMonthGrid(leftMonth, leftYear)}
+                  </div>
+
+                  {/* Right month — hidden on small screens in responsive mode */}
+                  <div className={cn(isResponsive && 'hidden md:block')}>
+                    <div
+                      className="mb-3 flex items-center"
+                      data-slot="date-range-month-header"
+                    >
+                      <div
+                        className="flex-1 text-center text-sm font-medium"
+                        data-slot="date-range-month-label"
+                      >
+                        {monthNames[rightMonth]} {rightYear}
+                      </div>
                       <button
                         type="button"
                         onClick={goToNextMonth}
-                        className="hover:bg-muted rounded-md p-1 transition-colors md:hidden"
+                        className="hover:bg-muted rounded-md p-1 transition-colors"
                         aria-label="Next month"
                         data-slot="date-range-nav"
                       >
                         <ChevronRight className="h-4 w-4" />
                       </button>
-                    )}
-                  </div>
-                  {renderMonthGrid(leftMonth, leftYear)}
-                </div>
-
-                {/* Right month — hidden on small screens in responsive mode */}
-                <div className={cn(isResponsive && 'hidden md:block')}>
-                  <div
-                    className="mb-3 flex items-center"
-                    data-slot="date-range-month-header"
-                  >
-                    <div
-                      className="flex-1 text-center text-sm font-medium"
-                      data-slot="date-range-month-label"
-                    >
-                      {monthNames[rightMonth]} {rightYear}
                     </div>
-                    <button
-                      type="button"
-                      onClick={goToNextMonth}
-                      className="hover:bg-muted rounded-md p-1 transition-colors"
-                      aria-label="Next month"
-                      data-slot="date-range-nav"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
+                    {renderMonthGrid(rightMonth, rightYear)}
                   </div>
-                  {renderMonthGrid(rightMonth, rightYear)}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

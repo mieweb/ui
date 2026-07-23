@@ -9,7 +9,9 @@
  */
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { Card, CardContent } from '../Card/Card';
 import {
   SearchIcon,
@@ -453,8 +455,15 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         list.length > 0 ||
         Boolean(onFreeText && query.trim() !== ''));
 
+    // Portal + fixed positioning so the dropdown escapes overflow-hidden
+    // ancestors (Cards, scroll containers, …).
+    const { anchorRef, floatingRef, style } = useAnchoredPosition<
+      HTMLDivElement,
+      HTMLDivElement
+    >({ open: dropdownOpen, matchWidth: true });
+
     const searchBox = (
-      <div className="relative">
+      <div className="relative" ref={anchorRef}>
         <SearchIcon
           size={16}
           className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
@@ -488,132 +497,140 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           )}
         />
 
-        {/* floating dropdown */}
-        {dropdownOpen && (
-          <div
-            role="presentation"
-            className={cn(
-              'bg-card border-border absolute top-11 right-0 left-0 z-20',
-              'overflow-hidden rounded-md border shadow-lg'
-            )}
-            // keep input focus when clicking inside the dropdown
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            {drill && (
-              <div className="border-border bg-muted/50 flex items-center gap-1.5 border-b px-2 py-1.5">
-                <button
-                  type="button"
-                  onClick={closeDrill}
-                  aria-label="Back to search results"
-                  className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
-                >
-                  <ChevronLeftIcon size={14} />
-                  Back
-                </button>
-                <span className="text-foreground text-xs font-semibold">
-                  {drill.parent.label}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  — {DETAIL_NOUN[drill.parent.domain] ?? 'related codes'}
-                  {drill.results === null ? '…' : ` (${drill.results.length})`}
-                </span>
-              </div>
-            )}
-
-            <ul
-              id={resultsId}
-              role="listbox"
-              aria-label={
-                drill
-                  ? `${DETAIL_NOUN[drill.parent.domain] ?? 'related codes'} of ${drill.parent.label}`
-                  : 'Code search results'
-              }
-              className="divide-border max-h-80 divide-y overflow-y-auto"
+        {/* floating dropdown — portaled so no ancestor can clip it */}
+        {dropdownOpen &&
+          createPortal(
+            <div
+              ref={floatingRef}
+              style={style}
+              role="presentation"
+              className={cn(
+                'bg-card border-border flex flex-col',
+                'overflow-hidden rounded-md border shadow-lg'
+              )}
+              // keep input focus when clicking inside the dropdown
+              onMouseDown={(e) => e.preventDefault()}
             >
-              {list.map((r, i) => (
-                <li
-                  key={r.fullid}
-                  role="presentation"
-                  className="flex items-stretch"
-                >
+              {drill && (
+                <div className="border-border bg-muted/50 flex items-center gap-1.5 border-b px-2 py-1.5">
                   <button
                     type="button"
-                    id={optionId(i)}
-                    role="option"
-                    aria-selected={i === activeIndex}
-                    // focus stays on the input (aria-activedescendant); a
-                    // tabbable option would be unmounted by the input's
-                    // onBlur closing the dropdown, dropping focus
-                    tabIndex={-1}
-                    onClick={() => pick(r)}
-                    onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
-                    className={cn(
-                      'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-left text-sm',
-                      'hover:bg-muted/60 focus:bg-muted/60 focus:outline-none',
-                      i === activeIndex && 'bg-muted/60'
-                    )}
+                    onClick={closeDrill}
+                    aria-label="Back to search results"
+                    className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
                   >
-                    <span className="text-foreground min-w-0 flex-1 truncate">
-                      {r.label}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-muted-foreground shrink-0 text-[11px] whitespace-nowrap',
-                        DOMAIN_TEXT[r.domain]
-                      )}
-                    >
-                      {r.codetype}{' '}
-                      <span className="font-mono">{r.fullcode}</span>
-                    </span>
+                    <ChevronLeftIcon size={14} />
+                    Back
                   </button>
-                  {!drill && isDrillable(r) && (
+                  <span className="text-foreground text-xs font-semibold">
+                    {drill.parent.label}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    — {DETAIL_NOUN[drill.parent.domain] ?? 'related codes'}
+                    {drill.results === null
+                      ? '…'
+                      : ` (${drill.results.length})`}
+                  </span>
+                </div>
+              )}
+
+              <ul
+                id={resultsId}
+                role="listbox"
+                aria-label={
+                  drill
+                    ? `${DETAIL_NOUN[drill.parent.domain] ?? 'related codes'} of ${drill.parent.label}`
+                    : 'Code search results'
+                }
+                className="divide-border max-h-80 min-h-0 divide-y overflow-y-auto"
+              >
+                {list.map((r, i) => (
+                  <li
+                    key={r.fullid}
+                    role="presentation"
+                    className="flex items-stretch"
+                  >
                     <button
                       type="button"
+                      id={optionId(i)}
+                      role="option"
+                      aria-selected={i === activeIndex}
+                      // focus stays on the input (aria-activedescendant); a
+                      // tabbable option would be unmounted by the input's
+                      // onBlur closing the dropdown, dropping focus
                       tabIndex={-1}
-                      aria-label={`Show ${DETAIL_NOUN[r.domain] ?? 'related codes'} of ${r.label}`}
-                      title={`${DETAIL_NOUN[r.domain] ?? 'Related codes'} (→)`}
-                      onClick={() => openDrill(r)}
+                      onClick={() => pick(r)}
                       onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
                       className={cn(
-                        'text-muted-foreground hover:text-foreground shrink-0 px-1.5',
-                        'hover:bg-muted/60 focus:outline-none',
-                        i === activeIndex
-                          ? 'bg-muted/60 opacity-100'
-                          : 'opacity-40'
+                        'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-left text-sm',
+                        'hover:bg-muted/60 focus:bg-muted/60 focus:outline-none',
+                        i === activeIndex && 'bg-muted/60'
                       )}
                     >
-                      <ChevronRightIcon size={14} />
+                      <span className="text-foreground min-w-0 flex-1 truncate">
+                        {r.label}
+                      </span>
+                      <span
+                        className={cn(
+                          'text-muted-foreground shrink-0 text-[11px] whitespace-nowrap',
+                          DOMAIN_TEXT[r.domain]
+                        )}
+                      >
+                        {r.codetype}{' '}
+                        <span className="font-mono">{r.fullcode}</span>
+                      </span>
                     </button>
+                    {!drill && isDrillable(r) && (
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-label={`Show ${DETAIL_NOUN[r.domain] ?? 'related codes'} of ${r.label}`}
+                        title={`${DETAIL_NOUN[r.domain] ?? 'Related codes'} (→)`}
+                        onClick={() => openDrill(r)}
+                        onMouseMove={() =>
+                          activeIndex !== i && setActiveIndex(i)
+                        }
+                        className={cn(
+                          'text-muted-foreground hover:text-foreground shrink-0 px-1.5',
+                          'hover:bg-muted/60 focus:outline-none',
+                          i === activeIndex
+                            ? 'bg-muted/60 opacity-100'
+                            : 'opacity-40'
+                        )}
+                      >
+                        <ChevronRightIcon size={14} />
+                      </button>
+                    )}
+                  </li>
+                ))}
+                {drill &&
+                  drill.results !== null &&
+                  drill.results.length === 0 && (
+                    <li className="text-muted-foreground px-3 py-2 text-sm">
+                      No related entries found — press ← to go back.
+                    </li>
                   )}
-                </li>
-              ))}
-              {drill &&
-                drill.results !== null &&
-                drill.results.length === 0 && (
-                  <li className="text-muted-foreground px-3 py-2 text-sm">
-                    No related entries found — press ← to go back.
+                {!drill && onFreeText && query.trim() !== '' && (
+                  <li role="presentation" className="border-border border-t">
+                    <button
+                      type="button"
+                      // outside the tab order for the same reason as the
+                      // options — focus is managed on the input
+                      tabIndex={-1}
+                      onClick={submitFreeText}
+                      className={cn(
+                        'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
+                        'focus:bg-muted/60 focus:outline-none'
+                      )}
+                    >
+                      Use “{query.trim()}” as free text…
+                    </button>
                   </li>
                 )}
-              {!drill && onFreeText && query.trim() !== '' && (
-                <li role="presentation" className="border-border border-t">
-                  <button
-                    type="button"
-                    // outside the tab order for the same reason as the
-                    // options — focus is managed on the input
-                    tabIndex={-1}
-                    onClick={submitFreeText}
-                    className={cn(
-                      'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
-                      'focus:bg-muted/60 focus:outline-none'
-                    )}
-                  >
-                    Use “{query.trim()}” as free text…
-                  </button>
-                </li>
-              )}
-            </ul>
-          </div>
-        )}
+              </ul>
+            </div>,
+            document.body
+          )}
       </div>
     );
 

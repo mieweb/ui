@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 // ============================================================================
 // Types
@@ -238,53 +239,15 @@ function Select({
   }, isOpen);
 
   // Track trigger position for portal dropdown
-  const [dropdownStyle, setDropdownStyle] = React.useState<React.CSSProperties>(
-    {}
-  );
-
-  const updateDropdownPosition = React.useCallback(() => {
-    if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const isCondensed = document.body.classList.contains('condensed');
-    const optionHeight = isCondensed ? 28 : 40;
-    const estimatedDropdownHeight = Math.min(
-      flatOptions.length * optionHeight + 16,
-      300
-    );
-    const openAbove =
-      spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow;
-
-    setDropdownStyle({
-      position: 'fixed',
-      ...(openAbove
-        ? { bottom: window.innerHeight - rect.top + 4 }
-        : { top: rect.bottom + 4 }),
-      left: rect.left,
-      width: rect.width,
-      maxHeight: Math.max(
-        Math.min(openAbove ? spaceAbove - 8 : spaceBelow - 8, 300),
-        0
-      ),
-      display: 'flex',
-      flexDirection: 'column' as const,
-      overflow: 'hidden',
-      zIndex: 9999,
-    });
-  }, [flatOptions.length]);
-
-  React.useEffect(() => {
-    if (!isOpen) return;
-    updateDropdownPosition();
-
-    window.addEventListener('scroll', updateDropdownPosition, true);
-    window.addEventListener('resize', updateDropdownPosition);
-    return () => {
-      window.removeEventListener('scroll', updateDropdownPosition, true);
-      window.removeEventListener('resize', updateDropdownPosition);
-    };
-  }, [isOpen, updateDropdownPosition]);
+  const {
+    anchorRef,
+    floatingRef,
+    style: dropdownStyle,
+  } = useAnchoredPosition<HTMLButtonElement, HTMLDivElement>({
+    open: isOpen,
+    matchWidth: true,
+    maxHeight: 300,
+  });
 
   // Handle value change
   const handleValueChange = React.useCallback(
@@ -388,7 +351,10 @@ function Select({
         {/* Trigger Button */}
         <button
           data-slot="select-trigger"
-          ref={triggerRef}
+          ref={(node) => {
+            triggerRef.current = node;
+            anchorRef.current = node;
+          }}
           id={selectId}
           type="button"
           role="combobox"
@@ -426,10 +392,14 @@ function Select({
           createPortal(
             <div
               data-slot="select-dropdown"
-              ref={dropdownRef}
+              ref={(node) => {
+                dropdownRef.current = node;
+                floatingRef.current = node;
+              }}
               style={dropdownStyle}
               className={cn(
                 'border-border bg-card rounded-lg border shadow-lg',
+                'flex flex-col overflow-hidden',
                 'animate-in fade-in zoom-in-95 duration-100'
               )}
             >

@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import type { AttachmentType, NewMessage } from './types';
 import {
   AttachmentPicker,
@@ -423,6 +425,18 @@ const MessageComposer = React.forwardRef<
 
     const mentionMenuOpen =
       mentionsEnabled && mention !== null && mentionSuggestions.length > 0;
+
+    // Portal + fixed positioning so the mention menu escapes overflow-hidden
+    // ancestors.
+    const {
+      anchorRef: mentionAnchorRef,
+      floatingRef: mentionFloatingRef,
+      style: mentionStyle,
+    } = useAnchoredPosition<HTMLDivElement, HTMLUListElement>({
+      open: mentionMenuOpen,
+      placement: 'top-start',
+      maxHeight: 224,
+    });
     // Clamp the highlight to the current suggestion range so the active option
     // never points at a stale/out-of-range index (the list can shrink while the
     // menu is open as the query narrows). The same clamped index drives
@@ -711,54 +725,62 @@ const MessageComposer = React.forwardRef<
             )}
 
             {/* Text input */}
-            <div data-slot="composer-input-wrapper" className="relative flex-1">
-              {mentionMenuOpen && (
-                <ul
-                  id={mentionListId}
-                  role="listbox"
-                  aria-label="Mention"
-                  data-slot="composer-mention-list"
-                  className="absolute bottom-full left-0 z-10 mb-1 max-h-56 w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
-                >
-                  {mentionSuggestions.map((option, i) => (
-                    <li key={option.id}>
-                      <button
-                        type="button"
-                        id={mentionOptionId(i)}
-                        role="option"
-                        aria-selected={i === clampedMentionHighlight}
-                        // onMouseDown (not onClick) so the textarea keeps focus.
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          insertMention(option);
-                        }}
-                        onMouseEnter={() => setMentionHighlight(i)}
-                        className={cn(
-                          'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
-                          i === clampedMentionHighlight
-                            ? 'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-100'
-                            : 'text-neutral-700 dark:text-neutral-200'
-                        )}
-                      >
-                        {option.icon}
-                        <span className="min-w-0 flex-1 truncate">
-                          <span className="font-medium">{option.label}</span>
-                          {option.description && (
-                            <span className="ml-1 text-xs text-neutral-400">
-                              {option.description}
+            <div
+              data-slot="composer-input-wrapper"
+              className="relative flex-1"
+              ref={mentionAnchorRef}
+            >
+              {mentionMenuOpen &&
+                createPortal(
+                  <ul
+                    ref={mentionFloatingRef}
+                    style={mentionStyle}
+                    id={mentionListId}
+                    role="listbox"
+                    aria-label="Mention"
+                    data-slot="composer-mention-list"
+                    className="w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+                  >
+                    {mentionSuggestions.map((option, i) => (
+                      <li key={option.id}>
+                        <button
+                          type="button"
+                          id={mentionOptionId(i)}
+                          role="option"
+                          aria-selected={i === clampedMentionHighlight}
+                          // onMouseDown (not onClick) so the textarea keeps focus.
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            insertMention(option);
+                          }}
+                          onMouseEnter={() => setMentionHighlight(i)}
+                          className={cn(
+                            'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                            i === clampedMentionHighlight
+                              ? 'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-100'
+                              : 'text-neutral-700 dark:text-neutral-200'
+                          )}
+                        >
+                          {option.icon}
+                          <span className="min-w-0 flex-1 truncate">
+                            <span className="font-medium">{option.label}</span>
+                            {option.description && (
+                              <span className="ml-1 text-xs text-neutral-400">
+                                {option.description}
+                              </span>
+                            )}
+                          </span>
+                          {option.meta && (
+                            <span className="text-[10px] text-neutral-400">
+                              {option.meta}
                             </span>
                           )}
-                        </span>
-                        {option.meta && (
-                          <span className="text-[10px] text-neutral-400">
-                            {option.meta}
-                          </span>
-                        )}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>,
+                  document.body
+                )}
               <textarea
                 ref={textareaRef}
                 data-slot="composer-input"

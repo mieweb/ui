@@ -1,8 +1,10 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 // ============================================================================
 // Types
@@ -324,19 +326,26 @@ export function ServiceMultiSelect({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listboxId = React.useId();
 
+  // Portal + fixed positioning so the panel escapes overflow-hidden ancestors.
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open: isOpen, matchWidth: true, maxHeight: 240 });
+
   // Close dropdown when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(event.target as Node) &&
+        !floatingRef.current?.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [floatingRef]);
 
   // Filter services based on search
   const filteredServices = React.useMemo(() => {
@@ -388,7 +397,10 @@ export function ServiceMultiSelect({
 
   return (
     <div
-      ref={containerRef}
+      ref={(node) => {
+        containerRef.current = node;
+        anchorRef.current = node;
+      }}
       className="relative"
       data-slot="provider-service-select"
     >
@@ -431,113 +443,119 @@ export function ServiceMultiSelect({
       </div>
 
       {/* Dropdown panel */}
-      {isOpen && (
-        <div
-          className={cn(
-            'absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg',
-            'dark:border-neutral-700 dark:bg-neutral-800',
-            'max-h-60 overflow-auto'
-          )}
-          role="listbox"
-          id={listboxId}
-          aria-multiselectable="true"
-        >
-          {/* Search input */}
-          <div className="sticky top-0 border-b border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-800">
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search services..."
-              className={cn(inputVariants({ hasIcon: true }), 'pl-8')}
-              // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus
-            />
-            <SearchIcon className="absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400" />
-          </div>
+      {isOpen &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            className={cn(
+              'rounded-md border border-neutral-200 bg-white shadow-lg',
+              'dark:border-neutral-700 dark:bg-neutral-800',
+              'overflow-auto'
+            )}
+            role="listbox"
+            id={listboxId}
+            aria-multiselectable="true"
+          >
+            {/* Search input */}
+            <div className="sticky top-0 border-b border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-800">
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search services..."
+                className={cn(inputVariants({ hasIcon: true }), 'pl-8')}
+                // eslint-disable-next-line jsx-a11y/no-autofocus
+                autoFocus
+              />
+              <SearchIcon className="absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400" />
+            </div>
 
-          {/* Service options */}
-          {Object.entries(groupedServices).length > 0 ? (
-            Object.entries(groupedServices).map(
-              ([category, categoryServices]) => (
-                <div key={category}>
-                  {services.some((s) => s.category) && (
-                    <div className="bg-neutral-50 px-3 py-2 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:bg-neutral-900 dark:text-neutral-400">
-                      {category}
-                    </div>
-                  )}
-                  {categoryServices.map((service) => {
-                    const isSelected = selectedServices.includes(service.value);
-                    return (
-                      <button
-                        key={service.value}
-                        type="button"
-                        role="option"
-                        aria-selected={isSelected}
-                        onClick={() => handleToggleService(service.value)}
-                        className={cn(
-                          'flex w-full items-center justify-between px-3 py-2 text-left text-sm',
-                          'hover:bg-neutral-100 dark:hover:bg-neutral-700',
-                          isSelected && 'bg-primary-50 dark:bg-primary-900/20'
-                        )}
-                      >
-                        <span className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              'flex h-4 w-4 items-center justify-center rounded border',
-                              isSelected
-                                ? 'bg-primary-800 border-primary-500 text-white'
-                                : 'border-neutral-300 dark:border-neutral-600'
-                            )}
-                          >
-                            {isSelected && (
-                              <svg
-                                aria-hidden="true"
-                                className="h-3 w-3"
-                                viewBox="0 0 12 12"
-                                fill="currentColor"
-                              >
-                                <path d="M10.28 2.28L4.75 7.81 1.72 4.78a.75.75 0 00-1.06 1.06l3.75 3.75a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06z" />
-                              </svg>
-                            )}
+            {/* Service options */}
+            {Object.entries(groupedServices).length > 0 ? (
+              Object.entries(groupedServices).map(
+                ([category, categoryServices]) => (
+                  <div key={category}>
+                    {services.some((s) => s.category) && (
+                      <div className="bg-neutral-50 px-3 py-2 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:bg-neutral-900 dark:text-neutral-400">
+                        {category}
+                      </div>
+                    )}
+                    {categoryServices.map((service) => {
+                      const isSelected = selectedServices.includes(
+                        service.value
+                      );
+                      return (
+                        <button
+                          key={service.value}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => handleToggleService(service.value)}
+                          className={cn(
+                            'flex w-full items-center justify-between px-3 py-2 text-left text-sm',
+                            'hover:bg-neutral-100 dark:hover:bg-neutral-700',
+                            isSelected && 'bg-primary-50 dark:bg-primary-900/20'
+                          )}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                'flex h-4 w-4 items-center justify-center rounded border',
+                                isSelected
+                                  ? 'bg-primary-800 border-primary-500 text-white'
+                                  : 'border-neutral-300 dark:border-neutral-600'
+                              )}
+                            >
+                              {isSelected && (
+                                <svg
+                                  aria-hidden="true"
+                                  className="h-3 w-3"
+                                  viewBox="0 0 12 12"
+                                  fill="currentColor"
+                                >
+                                  <path d="M10.28 2.28L4.75 7.81 1.72 4.78a.75.75 0 00-1.06 1.06l3.75 3.75a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06z" />
+                                </svg>
+                              )}
+                            </span>
+                            {service.label}
                           </span>
-                          {service.label}
-                        </span>
-                        {showCounts && service.count !== undefined && (
-                          <span className="text-xs text-neutral-400">
-                            ({service.count})
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+                          {showCounts && service.count !== undefined && (
+                            <span className="text-xs text-neutral-400">
+                              ({service.count})
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )
               )
-            )
-          ) : (
-            <div className="text-muted-foreground px-3 py-4 text-center text-sm">
-              No services found
-            </div>
-          )}
+            ) : (
+              <div className="text-muted-foreground px-3 py-4 text-center text-sm">
+                No services found
+              </div>
+            )}
 
-          {/* Clear selection */}
-          {selectedServices.length > 0 && (
-            <div className="sticky bottom-0 border-t border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-800">
-              <button
-                type="button"
-                onClick={() => onSelectionChange([])}
-                className={cn(
-                  'w-full rounded-md px-3 py-2 text-center text-sm',
-                  'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
-                )}
-              >
-                Clear selection
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+            {/* Clear selection */}
+            {selectedServices.length > 0 && (
+              <div className="sticky bottom-0 border-t border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-800">
+                <button
+                  type="button"
+                  onClick={() => onSelectionChange([])}
+                  className={cn(
+                    'w-full rounded-md px-3 py-2 text-center text-sm',
+                    'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
+                  )}
+                >
+                  Clear selection
+                </button>
+              </div>
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

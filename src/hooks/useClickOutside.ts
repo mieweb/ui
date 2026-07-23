@@ -22,7 +22,7 @@ import { useEffect, type RefObject } from 'react';
  * ```
  */
 export function useClickOutside<T extends HTMLElement>(
-  ref: RefObject<T | null>,
+  ref: RefObject<T | null> | Array<RefObject<HTMLElement | null>>,
   callback: () => void,
   enabled: boolean = true
 ): void {
@@ -30,10 +30,10 @@ export function useClickOutside<T extends HTMLElement>(
     if (!enabled) return;
 
     const handleClick = (event: Event) => {
-      if (
-        ref.current &&
-        !ref.current.contains(event.target as globalThis.Node)
-      ) {
+      const refs = Array.isArray(ref) ? ref : [ref];
+      const target = event.target as globalThis.Node;
+      const inside = refs.some((r) => r.current && r.current.contains(target));
+      if (refs.some((r) => r.current) && !inside) {
         callback();
       }
     };
