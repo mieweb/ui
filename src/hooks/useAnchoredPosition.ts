@@ -116,7 +116,11 @@ export function useAnchoredPosition<
       floating.scrollHeight,
       maxHeight ?? Infinity
     );
-    const floatingWidth = matchWidth ? rect.width : floating.offsetWidth;
+    // With matchMinWidth the rendered width is at least the anchor's width,
+    // even if offsetWidth was measured before minWidth applied.
+    const floatingWidth = matchWidth
+      ? rect.width
+      : Math.max(floating.offsetWidth, matchMinWidth ? rect.width : 0);
 
     // --- Vertical: preferred side, flip when out of space -------------------
     const spaceBelow = viewportHeight - rect.bottom - offset - viewportPadding;
