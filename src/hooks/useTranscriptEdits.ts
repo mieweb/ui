@@ -138,14 +138,10 @@ export function getSpeedAtIndex(
   speedMarkers: SpeedMarker[],
   defaultSpeed: PlaybackSpeed
 ): PlaybackSpeed {
-  // Sort markers by word index (should already be sorted, but be safe)
-  const sortedMarkers = [...speedMarkers].sort(
-    (a, b) => a.wordIndex - b.wordIndex
-  );
-
-  // Find the last marker at or before this word index
+  // Markers are kept sorted at insert (toggleSpeedMarker) — scanning without
+  // a per-call copy+sort matters because stats calls this once per word.
   let effectiveSpeed = defaultSpeed;
-  for (const marker of sortedMarkers) {
+  for (const marker of speedMarkers) {
     if (marker.wordIndex <= wordIndex) {
       effectiveSpeed = marker.speed;
     } else {

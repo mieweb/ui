@@ -58,7 +58,10 @@ export interface Transcript {
  * Used in the edited timeline to track deletions and reordering.
  */
 export interface EditableWord {
-  /** Reference to original word in transcript.words */
+  /** Index into the SILENCE-INSERTED baseline timeline (transcript.words
+   *  with detected silence pseudo-words interleaved) — NOT into
+   *  transcript.words. -1 for split/inserted entries with no baseline slot.
+   *  Consumers persisting edits should key by this timeline. */
   originalIndex: number;
   /** The word data (from original transcript) */
   word: TranscriptWord;
