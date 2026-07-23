@@ -59,8 +59,8 @@ function groupByProvider(models: ProviderModelOption[]) {
 
 function getProviderLabel(models: ProviderModelOption[], provider: string) {
   return (
-    models.find((model) => model.provider === provider)?.providerLabel ??
-    provider
+    models.find((model) => model.provider === provider && model.providerLabel)
+      ?.providerLabel ?? provider
   );
 }
 
@@ -146,9 +146,11 @@ export function ComposerModelSelector({
     [onProviderFilterChange, providerFilter]
   );
 
-  const close = React.useCallback(() => {
+  const close = React.useCallback((restoreFocus = true) => {
     setOpen(false);
-    triggerRef.current?.focus({ preventScroll: true });
+    if (restoreFocus) {
+      triggerRef.current?.focus({ preventScroll: true });
+    }
   }, []);
 
   const selectModel = React.useCallback(
@@ -177,8 +179,8 @@ export function ComposerModelSelector({
     const spaceAbove = rect.top - boundary.top - gap;
     const spaceBelow = boundary.bottom - rect.bottom - gap;
     const openAbove = spaceBelow < 260 && spaceAbove > spaceBelow;
-    const availableHeight = Math.max(openAbove ? spaceAbove : spaceBelow, 120);
-    const listMaxHeight = Math.max(Math.min(availableHeight - 49, 272), 72);
+    const availableHeight = Math.max(openAbove ? spaceAbove : spaceBelow, 0);
+    const nextListMaxHeight = Math.max(Math.min(availableHeight - 49, 272), 0);
     const left = Math.min(
       Math.max(rect.left, boundary.left + 8),
       boundary.right - menuWidth - 8
@@ -188,12 +190,13 @@ export function ComposerModelSelector({
       position: 'fixed',
       left,
       width: menuWidth,
+      maxHeight: availableHeight,
       ...(openAbove
         ? { bottom: window.innerHeight - rect.top + gap }
         : { top: rect.bottom + gap }),
       zIndex: 9999,
     });
-    setListMaxHeight(listMaxHeight);
+    setListMaxHeight(nextListMaxHeight);
   }, [boundaryRef]);
 
   React.useEffect(() => {
@@ -221,7 +224,7 @@ export function ComposerModelSelector({
       ) {
         return;
       }
-      close();
+      close(false);
     };
 
     document.addEventListener('mousedown', handlePointerDown);
