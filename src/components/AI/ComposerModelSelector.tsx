@@ -15,17 +15,28 @@ export type ProviderModelOption = ProviderModelValue & {
   id?: string;
 };
 
-export interface ComposerModelSelectorProps {
+type ComposerModelSelectorBaseProps = {
   models: ProviderModelOption[];
   value: ProviderModelValue | null;
-  providerFilter?: string | 'any';
-  onProviderFilterChange?: (provider: string | 'any') => void;
   onChange: (value: ProviderModelValue) => void;
   disabled?: boolean;
   className?: string;
   boundaryRef?: React.RefObject<HTMLElement | null>;
   placeholder?: string;
-}
+};
+
+type ControlledProviderFilterProps = {
+  providerFilter: string | 'any';
+  onProviderFilterChange: (provider: string | 'any') => void;
+};
+
+type UncontrolledProviderFilterProps = {
+  providerFilter?: undefined;
+  onProviderFilterChange?: (provider: string | 'any') => void;
+};
+
+export type ComposerModelSelectorProps = ComposerModelSelectorBaseProps &
+  (ControlledProviderFilterProps | UncontrolledProviderFilterProps);
 
 function optionKey(option: ProviderModelValue) {
   return `${option.provider}\u0000${option.model}`;
@@ -230,6 +241,13 @@ export function ComposerModelSelector({
 
   React.useEffect(() => {
     if (!open) return;
+    setHighlightedIndex((current) =>
+      Math.min(current, Math.max(renderedModels.length - 1, 0))
+    );
+  }, [open, renderedModels.length]);
+
+  React.useEffect(() => {
+    if (!open) return;
     requestAnimationFrame(() =>
       listRef.current?.focus({ preventScroll: true })
     );
@@ -266,7 +284,10 @@ export function ComposerModelSelector({
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      selectModel(renderedModels[highlightedIndex]);
+      const highlightedModel = renderedModels[highlightedIndex];
+      if (highlightedModel) {
+        selectModel(highlightedModel);
+      }
     }
   };
 
