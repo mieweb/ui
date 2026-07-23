@@ -89,4 +89,30 @@ describe('Select typeahead', () => {
     expect(options).toHaveLength(1);
     expect(options[0]).toHaveTextContent('Family Care Clinic');
   });
+
+  it('never calls native scrollIntoView (which would scroll the whole page)', async () => {
+    const user = userEvent.setup();
+    // The dropdown is portaled to <body> with position: fixed, so calling
+    // Element.scrollIntoView would scroll the window. Guard against it.
+    const proto = Element.prototype as unknown as {
+      scrollIntoView?: () => void;
+    };
+    const original = proto.scrollIntoView;
+    const spy = vi.fn();
+    proto.scrollIntoView = spy;
+
+    try {
+      renderWithTheme(
+        <Select aria-label="Location Type" options={LOCATION_TYPES} />
+      );
+
+      await user.click(screen.getByRole('combobox'));
+      await user.keyboard('{ArrowDown}{ArrowDown}{End}');
+      await user.keyboard('der');
+
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      proto.scrollIntoView = original;
+    }
+  });
 });

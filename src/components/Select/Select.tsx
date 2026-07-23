@@ -419,13 +419,23 @@ function Select({
     setHighlightedIndex(filteredFlatOptions.length > 0 ? 0 : -1);
   }, [searchQuery, filteredFlatOptions.length]);
 
-  // Keep the highlighted option scrolled into view during keyboard navigation.
+  // Keep the highlighted option visible within the listbox during keyboard
+  // navigation. We adjust only the list's own scrollTop instead of calling the
+  // native scrollIntoView: the dropdown is portaled to <body> with
+  // position: fixed, and scrollIntoView would also scroll ancestor/window,
+  // yanking the whole page.
   React.useEffect(() => {
     if (!isOpen || highlightedIndex < 0) return;
-    const el = listRef.current?.querySelector<HTMLElement>(
-      '[data-highlighted="true"]'
-    );
-    el?.scrollIntoView({ block: 'nearest' });
+    const list = listRef.current;
+    const el = list?.querySelector<HTMLElement>('[data-highlighted="true"]');
+    if (!list || !el) return;
+    const listRect = list.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    if (elRect.top < listRect.top) {
+      list.scrollTop -= listRect.top - elRect.top;
+    } else if (elRect.bottom > listRect.bottom) {
+      list.scrollTop += elRect.bottom - listRect.bottom;
+    }
   }, [highlightedIndex, isOpen]);
 
   // Clear any pending typeahead timer on unmount.
