@@ -1,8 +1,8 @@
 @import 'tailwindcss';
-@source "../../node_modules/@mieweb/datavis/dist";
 @import './condensed-view.css';
 @import './datavis-dark.css';
 @import './datavis-overrides.css';
+@source "../../node_modules/@mieweb/datavis/dist";
 
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
@@ -35,6 +35,11 @@
   --color-primary-900: var(--mieweb-primary-900);
   --color-primary-950: var(--mieweb-primary-950);
   --color-primary-foreground: var(--mieweb-primary-foreground, #ffffff);
+
+  /* ── Ozwell brand accent (the "Hey Ozwell" octopus blue) ───────────── */
+  /* A sub-brand color distinct from the host app's primary; themeable via --mieweb-ozwell. */
+  --color-ozwell: var(--mieweb-ozwell, #0ba0e0);
+  --color-ozwell-foreground: var(--mieweb-ozwell-foreground, #ffffff);
 
   /* ── Secondary Color Scale ─────────────────────────────────────────── */
   --color-secondary: var(--mieweb-secondary-500, #6366f1);

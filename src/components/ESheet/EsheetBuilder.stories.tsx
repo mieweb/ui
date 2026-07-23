@@ -2,15 +2,25 @@ import { useState, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   EsheetBuilder,
+  registerMieEsheetFields,
   type EsheetBuilderProps,
   type FormDefinition,
 } from '../../esheet';
+import { CodeLookup } from '../CodeLookup';
+
+// Register the @mieweb/ui custom field types (medicationList + allergyList)
+// once, before any story renders, so they appear in the builder palette.
+registerMieEsheetFields({
+  codeLookup: { component: CodeLookup, indexUrl: '/codify' },
+});
 
 // ============================================================================
 // Sample Form Definition
 // ============================================================================
 
-const SAMPLE_FORM: FormDefinition = {
+// Cast: the sample includes the medicationList/allergyList custom field types,
+// which aren't part of @esheet/core's built-in fieldType union.
+const SAMPLE_FORM = {
   id: 'storybook-demo',
   title: 'Patient Intake Form',
   fields: [
@@ -35,8 +45,18 @@ const SAMPLE_FORM: FormDefinition = {
         { id: 'r3', value: 'Referral' },
       ],
     },
+    {
+      id: 'meds',
+      fieldType: 'medicationList',
+      question: 'Presenting medications',
+    },
+    {
+      id: 'allergies',
+      fieldType: 'allergyList',
+      question: 'Allergies',
+    },
   ],
-};
+} as unknown as FormDefinition;
 
 // ============================================================================
 // Builder Stories

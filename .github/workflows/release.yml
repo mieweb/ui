@@ -32,8 +32,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Pinned to 20 to match ci.yml.
-          node-version: '20'
+          # Node 24 (Active LTS "Krypton"). Its BUNDLED npm is 11.x (>=11.5.1),
+          # which supports tokenless OIDC Trusted Publishing for the provenance
+          # publish step below. Using the bundled npm (rather than a global
+          # `npm install -g npm@latest`) keeps npm's dependency tree intact —
+          # the global upgrade on the runner produced a broken tree missing
+          # `sigstore`, which broke `npm publish --provenance`.
+          node-version: '24'
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
@@ -43,12 +48,6 @@ jobs:
           node -v
           npm -v
           pnpm -v
-
-      - name: Upgrade npm
-        run: npm install -g npm@latest
-
-      - name: Show npm version after upgrade
-        run: npm -v
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

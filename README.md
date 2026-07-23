@@ -246,6 +246,26 @@ npm run build-storybook
 
 The output will be in the `storybook-static` directory.
 
+### Configuring the Ozwell API (AI stories)
+
+The AI stories (AIChat, Hands-Free Chat, and the DataVis NITRO **Ozwell Assistant**
+story) call the real Ozwell backend when a key is configured and fall back to a
+canned reply when it isn't. Set the key and endpoint from the browser console:
+
+```js
+// Recommended — survives reloads and is shared with the story iframe:
+localStorage.setItem(
+  'ozwellConfig',
+  JSON.stringify({ apiKey: 'YOUR_KEY', baseURL: 'https://your-ozwell-host' })
+);
+```
+
+`baseURL` is optional (defaults to `https://api.ozwell.ai`); other optional keys are
+`model`, `system`, and `temperature`. Never commit a key — see
+[src/components/AI/OZWELL-BACKEND.md](src/components/AI/OZWELL-BACKEND.md) for full
+details, including why `window.__ozwell` is unreliable inside Storybook iframes and
+how to proxy the key for public deploys.
+
 ## Using in Other Projects
 
 ### Method 1: NPM Package (Recommended)

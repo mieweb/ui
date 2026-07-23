@@ -69,15 +69,30 @@ export default [
         google: 'readonly',
         // Audio/Media APIs
         Blob: 'readonly',
+        BlobPart: 'readonly',
         URL: 'readonly',
         navigator: 'readonly',
         MediaRecorder: 'readonly',
         MediaStream: 'readonly',
         MediaStreamConstraints: 'readonly',
+        HTMLMediaElement: 'readonly',
+        HTMLVideoElement: 'readonly',
+        HTMLAudioElement: 'readonly',
         AudioContext: 'readonly',
+        AudioBuffer: 'readonly',
         AnalyserNode: 'readonly',
         Uint8Array: 'readonly',
+        Float32Array: 'readonly',
         ArrayBuffer: 'readonly',
+        // Network / async / misc browser globals
+        Window: 'readonly',
+        fetch: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
+        TextDecoder: 'readonly',
+        FormData: 'readonly',
+        performance: 'readonly',
+        requestIdleCallback: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         queueMicrotask: 'readonly',
@@ -89,6 +104,20 @@ export default [
         // Encoding APIs
         atob: 'readonly',
         btoa: 'readonly',
+        TextDecoder: 'readonly',
+        TextEncoder: 'readonly',
+        // Workers / fetch / binary
+        Worker: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
+        DecompressionStream: 'readonly',
+        MessageEvent: 'readonly',
+        self: 'readonly',
+        performance: 'readonly',
+        DataView: 'readonly',
+        Uint32Array: 'readonly',
+        Float32Array: 'readonly',
+        Int32Array: 'readonly',
         // Observer APIs
         IntersectionObserver: 'readonly',
         IntersectionObserverEntry: 'readonly',
@@ -140,6 +169,19 @@ export default [
   // Allow console logs in Storybook stories for development/testing
   {
     files: ['src/**/*.stories.{ts,tsx}'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  // The Hey Ozwell voice pipeline logs model-loading progress (which model, from where, how long) — it
+  // streams ~1.3 GB of on-device models, so these are operational logs, not stray debugging. Mirrors the
+  // stories override above.
+  {
+    files: [
+      'src/components/AI/whisperTranscribe.ts',
+      'src/components/AI/modelCache.ts',
+      'src/components/AI/HeyOzwell/**/*.{ts,tsx,js}',
+    ],
     rules: {
       'no-console': 'off',
     },

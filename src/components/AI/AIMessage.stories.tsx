@@ -6,6 +6,8 @@ import {
   type AIRenderTextContent,
 } from './index';
 import { successToolCall } from './storyData';
+import { getSampleAudio } from '../AudioPlayer/sampleAudio';
+import { getSampleVideo } from '../AudioPlayer/sampleVideo';
 
 // ============================================================================
 // AI Message Stories
@@ -32,6 +34,8 @@ const meta: Meta<typeof AIMessageDisplay> = {
           '| `code` | A syntax-styled code block |',
           '| `image` | A clickable image thumbnail |',
           '| `file` | A document card with icon, filename & size |',
+          '| `audio` | An inline waveform `AudioPlayer` for recorded clips |',
+          '| `video` | An inline native `<video>` player for screen/video recordings |',
           '',
           '### Rich content: Markdown, images & Mermaid',
           'Text blocks are plain text by default. To render **Markdown, images, or Mermaid diagrams**,',
@@ -276,4 +280,101 @@ export const WithFileBlock: Story = {
     };
     return <AIMessageDisplay message={message} />;
   },
+};
+
+/**
+ * A user turn carrying a recorded audio clip, rendered inline as a waveform
+ * `AudioPlayer`. This is how a captured dictation plays back next to its
+ * transcription. `duration` (seconds) is passed through as the player's
+ * `fallbackDuration` so the time shows before audio metadata loads.
+ */
+export const WithAudioBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '9',
+      role: 'user',
+      content: [
+        {
+          type: 'audio',
+          audioUrl: getSampleAudio(),
+          text: 'Voice recording',
+          mimeType: 'audio/wav',
+          duration: 10,
+        },
+        {
+          type: 'text',
+          text: 'Patient reports mild headache for the past two days.',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} userName="Dr. Jane" />;
+  },
+};
+
+/**
+ * A user turn carrying a recorded screen/video clip, rendered inline as a native
+ * `<video>` player. This is how a captured screen recording plays back next to
+ * its transcription. The sample clip is generated locally via canvas +
+ * `MediaRecorder`, so the demo shows a brief loading state while it renders.
+ */
+const VideoBlockDemo: React.FC = () => {
+  const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let active = true;
+    void getSampleVideo().then(
+      (url) => {
+        if (active) setVideoUrl(url);
+      },
+      (err: unknown) => {
+        if (active) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Failed to generate sample video.'
+          );
+        }
+      }
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (error) {
+    return <p className="text-destructive text-sm">{error}</p>;
+  }
+
+  if (!videoUrl) {
+    return (
+      <p className="text-muted-foreground text-sm">Generating sample video…</p>
+    );
+  }
+
+  const message: AIMessage = {
+    id: '10',
+    role: 'user',
+    content: [
+      {
+        type: 'video',
+        videoUrl,
+        text: 'Screen recording',
+        mimeType: 'video/webm',
+      },
+      {
+        type: 'text',
+        text: 'Walkthrough of the reported issue on the dashboard.',
+      },
+    ],
+    timestamp: new Date(),
+    status: 'complete',
+  };
+  return <AIMessageDisplay message={message} userName="Dr. Jane" />;
+};
+
+export const WithVideoBlock: Story = {
+  render: () => <VideoBlockDemo />,
 };

@@ -55,6 +55,14 @@ export const miewebUISafelist = [
   'bg-warning',
   'bg-destructive',
   'bg-info',
+  // Ozwell brand accent (Hey Ozwell voice components)
+  'bg-ozwell',
+  'hover:bg-ozwell',
+  'active:bg-ozwell',
+  'text-ozwell',
+  'text-ozwell-foreground',
+  'border-ozwell',
+  'focus-visible:ring-ozwell',
   'text-foreground',
   'text-card-foreground',
   'text-muted-foreground',
@@ -78,8 +86,56 @@ export const miewebUISafelist = [
   'focus:ring-success/20',
   'focus:ring-destructive/20',
   'opacity-0',
+  // Drag & drop (useDragReorder / dragIndicatorClasses)
+  'opacity-40',
+  'cursor-grab',
+  'active:cursor-grabbing',
+  'shadow-[inset_0_2px_0_0_var(--color-primary-500,#3b82f6)]',
+  'shadow-[inset_0_-2px_0_0_var(--color-primary-500,#3b82f6)]',
   'group-hover:opacity-100',
   'focus:opacity-100',
+  'has-[[data-slot=superchat-nitro-table]]:w-full',
+  'has-[[data-slot=superchat-nitro-table]]:max-w-full',
+  // RowActionToolbar (per-row action toolbars) reveal/overlay. These use the
+  // built-in `pointer-fine` variant, named `group/order` scope, and the
+  // `.wcdv-tr` (datavis grid row) arbitrary variant — none of which TW3
+  // consumers scan from node_modules, so the toolbar would stay hidden
+  // without safelisting them.
+  'pointer-fine:absolute',
+  'pointer-fine:top-1/2',
+  'pointer-fine:right-0',
+  'pointer-fine:-translate-y-1/2',
+  'pointer-fine:top-1.5',
+  'pointer-fine:right-1.5',
+  'pointer-fine:bg-card',
+  'pointer-fine:border-border',
+  'pointer-fine:rounded-md',
+  'pointer-fine:border',
+  'pointer-fine:p-0.5',
+  'pointer-fine:shadow-sm',
+  'pointer-fine:pointer-events-none',
+  'pointer-fine:opacity-0',
+  'rounded-md',
+  'border',
+  'p-0.5',
+  'shadow-sm',
+  'focus-within:pointer-events-auto',
+  'focus-within:opacity-100',
+  'group-hover:pointer-events-auto',
+  'group-focus-within:pointer-events-auto',
+  'group-focus-within:opacity-100',
+  'group-focus:pointer-events-auto',
+  'group-focus:opacity-100',
+  'group-hover/order:pointer-events-auto',
+  'group-hover/order:opacity-100',
+  'group-focus-within/order:pointer-events-auto',
+  'group-focus-within/order:opacity-100',
+  'group-focus/order:pointer-events-auto',
+  'group-focus/order:opacity-100',
+  '[.wcdv-tr:hover_&]:pointer-events-auto',
+  '[.wcdv-tr:hover_&]:opacity-100',
+  '[.wcdv-tr:focus-within_&]:pointer-events-auto',
+  '[.wcdv-tr:focus-within_&]:opacity-100',
   // Markdown SurveyBlock
   'accent-primary-500',
   // Opacity-modifier variants for semantic colors used by components
@@ -346,6 +402,10 @@ export const miewebUISafelist = [
   'focus:border-primary-500',
   'focus:ring-primary-500',
   'text-[10px]',
+  // SuperChat mermaid diagram wrapper — arbitrary variants applied to the
+  // injected <svg> so the diagram sizes naturally instead of collapsing.
+  '[&_svg]:h-auto',
+  '[&_svg]:max-w-none',
 ];
 
 export interface MiewebUIPreset {
@@ -377,6 +437,11 @@ export const miewebUIPreset: MiewebUIPreset = {
           900: 'var(--mieweb-primary-900, #086285)',
           950: 'var(--mieweb-primary-950, #00506e)',
           foreground: 'var(--mieweb-primary-foreground, hsl(210 40% 98%))',
+        },
+        // Ozwell brand accent (the "Hey Ozwell" octopus blue) — distinct from the host app primary.
+        ozwell: {
+          DEFAULT: 'var(--mieweb-ozwell, #0BA0E0)',
+          foreground: 'var(--mieweb-ozwell-foreground, hsl(0 0% 100%))',
         },
         // Secondary color scale
         secondary: {

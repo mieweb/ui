@@ -84,6 +84,12 @@ module.exports = {
           900: 'var(--mieweb-primary-900, #124f6f)',
           950: 'var(--mieweb-primary-950, #0c334a)',
         },
+        // Ozwell brand accent (the "Hey Ozwell" octopus blue) — a sub-brand color distinct from the host
+        // app's primary. Themeable via --mieweb-ozwell; falls back to the octopus blue.
+        ozwell: {
+          DEFAULT: 'var(--mieweb-ozwell, #0BA0E0)',
+          foreground: 'var(--mieweb-ozwell-foreground, hsl(0 0% 100%))',
+        },
         border: 'var(--mieweb-border, hsl(214.3 31.8% 91.4%))',
         input: 'var(--mieweb-input, hsl(214.3 31.8% 91.4%))',
         ring: 'var(--mieweb-ring, hsl(221.2 83.2% 53.3%))',

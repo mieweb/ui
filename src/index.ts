@@ -11,7 +11,9 @@ export * from './components/Address';
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AlertDialog';
+export * from './components/AllergyList';
 export * from './components/AppHeader';
+export * from './components/Assessment';
 export * from './components/AudioPlayer';
 export * from './components/AudioRecorder';
 export * from './components/AuthDialog';
@@ -25,6 +27,11 @@ export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/Card';
 export * from './components/Checkbox';
+// CodeLookup itself ships a module worker and is NOT exported here (apps import
+// it from their own bundler). Only its worker-free provider/context is safe to
+// ship in the main entry — it distributes an app-injected CodeLookup.
+export * from './components/CodeLookup/context';
+export * from './components/ConditionEditor';
 export * from './components/CheckrIntegration';
 export * from './components/Collapsible';
 export * from './components/CommandPalette';
@@ -59,6 +66,7 @@ export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
 export * from './components/FloatingWindow';
+export * from './components/HealthSurveillance';
 export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
 export * from './components/Input';
@@ -72,6 +80,9 @@ export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
 export * from './components/LoadingPage';
 export * from './components/Markdown';
+export * from './components/MedicationList';
+export * from './components/MediaEditor';
+export * from './components/MediaPlayer';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NotificationCenter';
@@ -85,6 +96,7 @@ export {
   type OrderListProps,
   type OrderListTab,
 } from './components/OrderList';
+export * from './components/OrderEditor';
 export * from './components/OrderLookupForm';
 export * from './components/OrderSidebar';
 export * from './components/PageHeader';
@@ -95,6 +107,8 @@ export * from './components/PaymentMethod';
 export * from './components/PendingClaimsTable';
 export * from './components/PermissionsEditor';
 export * from './components/PhoneInput';
+export * from './components/PresentingProblems';
+export * from './components/ProblemList';
 export * from './components/ProductVersion';
 export * from './components/Progress';
 export * from './components/ProviderCard';
@@ -120,6 +134,7 @@ export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
 export * from './components/RichTextEditor';
+export * from './components/RowActionToolbar';
 export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
 export * from './components/ScrollArea';
@@ -160,6 +175,12 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
+export * from './components/TranscriptView';
+// `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
+// TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
+// type at the root barrel; import the media-schema type from the subpath
+// `@mieweb/ui/components/TranscriptView` when needed.
+export type { TranscriptSegment } from './components/AI';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
