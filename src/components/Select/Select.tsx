@@ -148,6 +148,10 @@ function Select({
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const typeaheadRef = React.useRef<{ query: string; timer: number | null }>({
+    query: '',
+    timer: null,
+  });
 
   const generatedId = React.useId();
   const selectId = id || generatedId;
@@ -303,6 +307,57 @@ function Select({
   // Handle keyboard navigation
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
+      // Typeahead (native-select style): when not using the dedicated search
+      // input, typing printable characters jumps to the first option whose
+      // label starts with the typed string. Repeating the same key cycles
+      // through matches. The buffer clears after a short pause.
+      if (
+        !searchable &&
+        e.key.length === 1 &&
+        e.key !== ' ' &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        e.preventDefault();
+        if (!isOpen) setIsOpen(true);
+
+        const hadPendingQuery = typeaheadRef.current.query !== '';
+        if (typeaheadRef.current.timer) {
+          window.clearTimeout(typeaheadRef.current.timer);
+        }
+        const query = (typeaheadRef.current.query + e.key).toLowerCase();
+        typeaheadRef.current.query = query;
+        typeaheadRef.current.timer = window.setTimeout(() => {
+          typeaheadRef.current.query = '';
+        }, 600);
+
+        const len = filteredFlatOptions.length;
+        if (len > 0) {
+          const allSameChar = query.split('').every((c) => c === query[0]);
+          const needle = allSameChar ? query[0] : query;
+          const matches = (opt: SelectOption) =>
+            opt.label.toLowerCase().startsWith(needle);
+
+          // A fresh keystroke (or refining a multi-char query) searches from
+          // the current option inclusive so typing "car" stays on "Cardiology";
+          // repeating the same key cycles to the next match.
+          const startInclusive = !hadPendingQuery || !allSameChar;
+          const base = startInclusive
+            ? Math.max(highlightedIndex, 0)
+            : highlightedIndex + 1;
+
+          for (let i = 0; i < len; i++) {
+            const idx = (base + i) % len;
+            if (matches(filteredFlatOptions[idx])) {
+              setHighlightedIndex(idx);
+              break;
+            }
+          }
+        }
+        return;
+      }
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -343,7 +398,13 @@ function Select({
           break;
       }
     },
-    [isOpen, highlightedIndex, filteredFlatOptions, handleValueChange]
+    [
+      isOpen,
+      highlightedIndex,
+      filteredFlatOptions,
+      handleValueChange,
+      searchable,
+    ]
   );
 
   // Focus search input when dropdown opens
@@ -357,6 +418,25 @@ function Select({
   React.useEffect(() => {
     setHighlightedIndex(filteredFlatOptions.length > 0 ? 0 : -1);
   }, [searchQuery, filteredFlatOptions.length]);
+
+  // Keep the highlighted option scrolled into view during keyboard navigation.
+  React.useEffect(() => {
+    if (!isOpen || highlightedIndex < 0) return;
+    const el = listRef.current?.querySelector<HTMLElement>(
+      '[data-highlighted="true"]'
+    );
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedIndex, isOpen]);
+
+  // Clear any pending typeahead timer on unmount.
+  React.useEffect(
+    () => () => {
+      if (typeaheadRef.current.timer) {
+        window.clearTimeout(typeaheadRef.current.timer);
+      }
+    },
+    []
+  );
 
   // Build aria-describedby
   const describedByIds = [
