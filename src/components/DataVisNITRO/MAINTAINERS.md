@@ -36,6 +36,11 @@ back here later.
 
 ## Gotchas
 
+- **Ozwell Assistant story.** The `OzwellAssistant` story wires `GridAssistant`
+  (from `@mieweb/datavis`) to the grid's shared view. It needs an Ozwell API key +
+  base URL at runtime — set `localStorage['ozwellConfig']` as described in
+  [../AI/OZWELL-BACKEND.md](../AI/OZWELL-BACKEND.md); without it the chat falls
+  back to a "not configured" reply.
 - **CJS/ESM interop.** `@mieweb/datavis` ships CJS, so
   [.storybook/main.ts](../../../.storybook/main.ts) force pre-bundles it (and its
   deps) via `optimizeDeps` and aliases them from the pnpm virtual store so
