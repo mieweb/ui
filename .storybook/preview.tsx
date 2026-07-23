@@ -21,8 +21,11 @@ const postedLiveSyncSignatures = new Set<string>();
 const locoScriptLoaders = new Map<string, Promise<void>>();
 
 // The exported Loco pack is also served statically (see staticDirs in main.ts)
-// so the Loco runtime can consume it in file mode.
+// so the Loco runtime can consume it in file mode. The runtime itself is
+// vendored from the Loco repo (public/loco.min.js) so package mode works
+// fully offline — no Loco server required.
 const LOCO_PACK_URL = '/i18n/i18n-translations.json';
+const LOCO_RUNTIME_URL = '/i18n/loco.min.js';
 const locoPackLanguages: string[] = Array.isArray((locoI18nPack as { languages?: string[] }).languages)
   ? (locoI18nPack as { languages: string[] }).languages
   : [];
@@ -40,14 +43,15 @@ type LocoRuntime = {
 let locoInitializedMode: 'package' | 'live' | null = null;
 let locoInitPromise: Promise<LocoRuntime | null> | null = null;
 
-async function ensureLocoRuntimeLoaded(serverUrl: string): Promise<LocoRuntime | null> {
+async function ensureLocoRuntimeLoaded(
+  scriptUrl: string
+): Promise<LocoRuntime | null> {
   if (typeof window === 'undefined') return null;
 
   const runtime = (window as any).Loco as LocoRuntime | undefined;
   if (runtime?.init) return runtime;
 
-  const serverBase = serverUrl.replace(/\/$/, '');
-  const scriptId = `loco-runtime-${serverBase}`;
+  const scriptId = `loco-runtime-${scriptUrl}`;
 
   let loader = locoScriptLoaders.get(scriptId);
   if (!loader) {
@@ -61,7 +65,7 @@ async function ensureLocoRuntimeLoaded(serverUrl: string): Promise<LocoRuntime |
 
       const script = document.createElement('script');
       script.id = scriptId;
-      script.src = `${serverBase}/cdn/loco.js`;
+      script.src = scriptUrl;
       script.async = true;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error(`Unable to load ${script.src}`));
@@ -89,7 +93,13 @@ async function ensureLocoInitialized(
   if (locoInitPromise) return locoInitPromise;
 
   locoInitPromise = (async () => {
-    const runtime = await ensureLocoRuntimeLoaded(serverUrl);
+    // Package mode uses the locally vendored runtime (fully offline);
+    // live mode loads the runtime from the Loco server it syncs with.
+    const scriptUrl =
+      mode === 'package'
+        ? LOCO_RUNTIME_URL
+        : `${serverUrl.replace(/\/$/, '')}/cdn/loco.js`;
+    const runtime = await ensureLocoRuntimeLoaded(scriptUrl);
     if (!runtime?.init) return runtime ?? null;
 
     if (mode === 'package') {
