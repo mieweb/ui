@@ -488,7 +488,7 @@ function Dropdown({
               style={{ ...style, ...widthStyle }}
               data-slot="dropdown-menu"
               className={cn(
-                'min-w-[12rem] overflow-auto',
+                'flex min-w-[12rem] flex-col overflow-hidden',
                 'rounded-xl border border-neutral-200 bg-white shadow-lg',
                 'dark:border-neutral-700 dark:bg-neutral-800',
                 'animate-in fade-in zoom-in-95 duration-100',
@@ -497,7 +497,7 @@ function Dropdown({
             >
               {searchable && (
                 <div
-                  className="border-b border-neutral-200 p-2 dark:border-neutral-700"
+                  className="shrink-0 border-b border-neutral-200 p-2 dark:border-neutral-700"
                   data-slot="dropdown-search"
                 >
                   <input
@@ -518,7 +518,7 @@ function Dropdown({
                   />
                 </div>
               )}
-              <div id={menuId} role="menu">
+              <div id={menuId} role="menu" className="min-h-0 overflow-y-auto">
                 {multiSelect &&
                   showSelectAll &&
                   visibleSelectableValues.length > 0 && (
