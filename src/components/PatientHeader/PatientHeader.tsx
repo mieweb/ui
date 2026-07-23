@@ -328,7 +328,8 @@ function PatientOverflowMenu({
   );
   useClickOutside(
     outsideRefs,
-    React.useCallback(() => setOpen(false), [])
+    React.useCallback(() => setOpen(false), []),
+    open
   );
   useEscapeKey(
     React.useCallback(() => setOpen(false), []),

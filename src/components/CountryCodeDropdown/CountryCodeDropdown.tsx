@@ -250,7 +250,7 @@ function CountryCodeDropdown({
     () => [containerRef, floatingRef],
     [containerRef, floatingRef]
   );
-  useClickOutside(outsideRefs, close);
+  useClickOutside(outsideRefs, close, isOpen);
   useEscapeKey(close, isOpen);
 
   // Focus search input when opening

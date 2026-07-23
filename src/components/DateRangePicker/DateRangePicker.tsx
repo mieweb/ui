@@ -389,12 +389,14 @@ export function DateRangePicker({
     () => [wrapperRef, calendarRef],
     [calendarRef]
   );
-  useClickOutside(outsideRefs, () => {
-    if (isCalendarOpen) {
+  useClickOutside(
+    outsideRefs,
+    () => {
       setIsCalendarOpen(false);
       setSelectingEnd(false);
-    }
-  });
+    },
+    isCalendarOpen
+  );
 
   // Portal + fixed positioning for the desktop popup so it escapes
   // overflow-hidden ancestors.
