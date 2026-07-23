@@ -195,19 +195,31 @@ export function useAnchoredPosition<
   React.useEffect(() => {
     if (!open) return;
 
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
+    // Coalesce bursts (scroll/resize fire per event) into one layout
+    // read + state update per frame.
+    let frame = 0;
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
+
+    window.addEventListener('scroll', scheduleUpdate, true);
+    window.addEventListener('resize', scheduleUpdate);
 
     let resizeObserver: globalThis.ResizeObserver | undefined;
     if (typeof globalThis.ResizeObserver !== 'undefined') {
-      resizeObserver = new globalThis.ResizeObserver(update);
+      resizeObserver = new globalThis.ResizeObserver(scheduleUpdate);
       if (anchorRef.current) resizeObserver.observe(anchorRef.current);
       if (floatingRef.current) resizeObserver.observe(floatingRef.current);
     }
 
     return () => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', scheduleUpdate, true);
+      window.removeEventListener('resize', scheduleUpdate);
       resizeObserver?.disconnect();
     };
   }, [open, update]);
