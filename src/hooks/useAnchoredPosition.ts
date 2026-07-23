@@ -23,7 +23,11 @@ export interface UseAnchoredPositionOptions {
   matchMinWidth?: boolean;
   /** Minimum distance from the viewport edges, in px */
   viewportPadding?: number;
-  /** Cap the floating element's height, in px */
+  /**
+   * Additional cap on the floating element's height, in px. The height is
+   * always clamped to the available viewport space; this only lowers that
+   * limit further (omitting it does not remove the viewport constraint).
+   */
   maxHeight?: number;
 }
 
