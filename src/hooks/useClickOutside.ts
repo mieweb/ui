@@ -31,9 +31,12 @@ export function useClickOutside<T extends HTMLElement>(
 
     const handleClick = (event: Event) => {
       const refs = Array.isArray(ref) ? ref : [ref];
-      const target = event.target as globalThis.Node;
-      const inside = refs.some((r) => r.current && r.current.contains(target));
-      if (refs.some((r) => r.current) && !inside) {
+      const target = event.target;
+      if (!(target instanceof globalThis.Node)) return;
+      const attachedRefs = refs.filter((r) => r.current !== null);
+      if (attachedRefs.length === 0) return;
+      const inside = attachedRefs.some((r) => r.current?.contains(target));
+      if (!inside) {
         callback();
       }
     };
