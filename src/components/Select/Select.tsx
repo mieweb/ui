@@ -323,13 +323,14 @@ function Select({
         if (!isOpen) setIsOpen(true);
 
         const hadPendingQuery = typeaheadRef.current.query !== '';
-        if (typeaheadRef.current.timer) {
+        if (typeaheadRef.current.timer !== null) {
           window.clearTimeout(typeaheadRef.current.timer);
         }
         const query = (typeaheadRef.current.query + e.key).toLowerCase();
         typeaheadRef.current.query = query;
         typeaheadRef.current.timer = window.setTimeout(() => {
           typeaheadRef.current.query = '';
+          typeaheadRef.current.timer = null;
         }, 600);
 
         const len = filteredFlatOptions.length;
@@ -438,15 +439,22 @@ function Select({
     }
   }, [highlightedIndex, isOpen]);
 
-  // Clear any pending typeahead timer on unmount.
-  React.useEffect(
-    () => () => {
-      if (typeaheadRef.current.timer) {
-        window.clearTimeout(typeaheadRef.current.timer);
-      }
-    },
-    []
-  );
+  // Reset the typeahead buffer whenever the dropdown closes (Escape, click
+  // outside, selection) so a stale query doesn't carry over on a quick reopen,
+  // and clear any pending timer on unmount.
+  const resetTypeahead = React.useCallback(() => {
+    if (typeaheadRef.current.timer !== null) {
+      window.clearTimeout(typeaheadRef.current.timer);
+      typeaheadRef.current.timer = null;
+    }
+    typeaheadRef.current.query = '';
+  }, []);
+
+  React.useEffect(() => {
+    if (!isOpen) resetTypeahead();
+  }, [isOpen, resetTypeahead]);
+
+  React.useEffect(() => resetTypeahead, [resetTypeahead]);
 
   // Build aria-describedby
   const describedByIds = [

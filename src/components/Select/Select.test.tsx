@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Select, type SelectOption } from './Select';
@@ -62,6 +61,58 @@ describe('Select typeahead', () => {
 
     await user.keyboard('c');
     expect(screen.getByRole('option', { name: 'Clinic' })).toHaveAttribute(
+      'data-highlighted',
+      'true'
+    );
+  });
+
+  it('clears the typeahead buffer after a pause (~600ms)', () => {
+    vi.useFakeTimers();
+
+    try {
+      renderWithTheme(
+        <Select aria-label="Location Type" options={LOCATION_TYPES} />
+      );
+
+      fireEvent.click(screen.getByRole('combobox'));
+
+      fireEvent.keyDown(screen.getByRole('combobox'), { key: 'c' });
+      expect(
+        screen.getByRole('option', { name: 'Cardiology' })
+      ).toHaveAttribute('data-highlighted', 'true');
+
+      // After the buffer clears, "d" starts a fresh query and matches
+      // "Dermatology"; a stale "cd" buffer would match nothing.
+      vi.advanceTimersByTime(700);
+      fireEvent.keyDown(screen.getByRole('combobox'), { key: 'd' });
+      expect(
+        screen.getByRole('option', { name: 'Dermatology' })
+      ).toHaveAttribute('data-highlighted', 'true');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('clears the typeahead buffer when the dropdown closes', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Select aria-label="Location Type" options={LOCATION_TYPES} />
+    );
+
+    await user.click(screen.getByRole('combobox'));
+    await user.keyboard('c');
+    expect(screen.getByRole('option', { name: 'Cardiology' })).toHaveAttribute(
+      'data-highlighted',
+      'true'
+    );
+
+    // Close and quickly reopen: the buffer must reset, so "c" is a fresh
+    // query landing on the first match instead of cycling to the next one.
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('combobox'));
+    await user.keyboard('c');
+    expect(screen.getByRole('option', { name: 'Cardiology' })).toHaveAttribute(
       'data-highlighted',
       'true'
     );
