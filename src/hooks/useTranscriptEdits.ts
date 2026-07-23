@@ -20,6 +20,7 @@ import type {
   PlaybackSpeed,
   SpeedMarker,
 } from '../components/TranscriptView/transcript';
+import { isSilenceType } from '../components/TranscriptView/transcript';
 
 /** Default filler words offered for removal */
 export const DEFAULT_FILLER_WORDS = [
@@ -565,7 +566,7 @@ export function useTranscriptEdits(
   const splitSilence = useCallback(
     (index: number, durationsSec: number[]) => {
       const ew = editedWords[index];
-      if (!ew || ew.word.wordType !== 'silence') return;
+      if (!ew || !isSilenceType(ew.word.wordType)) return;
 
       pushUndo();
 
@@ -632,11 +633,7 @@ export function useTranscriptEdits(
         if (ew.deleted) return ew;
 
         // Check if it's a silence that should be removed
-        if (
-          (ew.word.wordType === 'silence' ||
-            ew.word.wordType === 'silence-newline') &&
-          silenceThresholdMs !== null
-        ) {
+        if (isSilenceType(ew.word.wordType) && silenceThresholdMs !== null) {
           const durationMs = ew.word.endMs - ew.word.startMs;
           if (durationMs > silenceThresholdMs) {
             return { ...ew, deleted: true };
@@ -645,10 +642,7 @@ export function useTranscriptEdits(
         }
 
         // Check if it's a filler word that should be removed
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline'
-        ) {
+        if (!isSilenceType(ew.word.wordType)) {
           const wordText = normalizeWordText(ew.word.text);
           if (fillerSet.has(wordText)) {
             return { ...ew, deleted: true };
@@ -779,16 +773,16 @@ export function useTranscriptEdits(
   const stats = useMemo<TranscriptEditStats>(() => {
     // Count active (non-deleted) words (excluding silences for word count)
     const activeWordCount = editedWords.filter(
-      (ew) => !ew.deleted && ew.word.wordType !== 'silence'
+      (ew) => !ew.deleted && !isSilenceType(ew.word.wordType)
     ).length;
     const activeSilenceCount = editedWords.filter(
-      (ew) => !ew.deleted && ew.word.wordType === 'silence'
+      (ew) => !ew.deleted && isSilenceType(ew.word.wordType)
     ).length;
     const deletedWordCount = editedWords.filter(
-      (ew) => ew.deleted && ew.word.wordType !== 'silence'
+      (ew) => ew.deleted && !isSilenceType(ew.word.wordType)
     ).length;
     const deletedSilenceCount = editedWords.filter(
-      (ew) => ew.deleted && ew.word.wordType === 'silence'
+      (ew) => ew.deleted && isSilenceType(ew.word.wordType)
     ).length;
 
     // Calculate edited duration (sum of non-deleted words/silences, adjusted for speed markers)
@@ -813,34 +807,21 @@ export function useTranscriptEdits(
     // Occurrence counts per filler (and every active word, for custom fillers)
     const matchCounts = new Map<string, number>();
     for (const ew of editedWords) {
-      if (ew.deleted || ew.word.wordType === 'silence') continue;
+      if (ew.deleted || isSilenceType(ew.word.wordType)) continue;
       const wordText = normalizeWordText(ew.word.text);
-      for (const filler of DEFAULT_FILLER_WORDS) {
-        if (wordText === filler) {
-          matchCounts.set(filler, (matchCounts.get(filler) || 0) + 1);
-        }
-      }
-      // Also check for the exact word in case it's a custom filler
+      // One increment per occurrence — DEFAULT_FILLER_WORDS entries were
+      // previously counted twice (once in a defaults loop, once here).
       matchCounts.set(wordText, (matchCounts.get(wordText) || 0) + 1);
     }
 
     // Total duration per filler word type
     const durations = new Map<string, number>();
     for (const ew of editedWords) {
-      if (
-        ew.deleted ||
-        ew.word.wordType === 'silence' ||
-        ew.word.wordType === 'silence-newline'
-      )
-        continue;
+      if (ew.deleted || isSilenceType(ew.word.wordType)) continue;
       const wordText = normalizeWordText(ew.word.text);
       const wordDuration = ew.word.endMs - ew.word.startMs;
-      for (const filler of DEFAULT_FILLER_WORDS) {
-        if (wordText === filler) {
-          durations.set(filler, (durations.get(filler) || 0) + wordDuration);
-        }
-      }
-      // Also track duration for the exact word in case it's a custom filler
+      // One accumulation per occurrence — DEFAULT_FILLER_WORDS entries were
+      // previously accumulated twice, inflating time-saved estimates 2x.
       durations.set(wordText, (durations.get(wordText) || 0) + wordDuration);
     }
 
@@ -851,11 +832,7 @@ export function useTranscriptEdits(
       let durationMs = 0;
       for (const ew of editedWords) {
         if (ew.deleted) continue;
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline'
-        )
-          continue;
+        if (!isSilenceType(ew.word.wordType)) continue;
         const silenceDuration = ew.word.endMs - ew.word.startMs;
         if (silenceDuration > thresholdMs) {
           count++;

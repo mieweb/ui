@@ -22,7 +22,10 @@ import type {
   PlaybackSegment,
   PlaybackSpeed,
 } from '../TranscriptView/transcript';
-import { PLAYBACK_SPEEDS } from '../TranscriptView/transcript';
+import {
+  PLAYBACK_SPEEDS,
+  isSilenceType,
+} from '../TranscriptView/transcript';
 import { useTranscriptEdits } from '../../hooks/useTranscriptEdits';
 import {
   MediaPlayer,
@@ -580,7 +583,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           .filter((ew): ew is EditableWord => ew !== undefined && !ew.deleted);
         if (selectedWords.length === 0) return;
         const selectedText = selectedWords
-          .filter((ew) => ew.word.wordType !== 'silence')
+          .filter((ew) => !isSilenceType(ew.word.wordType))
           .map((ew) => ew.word.text)
           .join(' ');
         e.preventDefault();
