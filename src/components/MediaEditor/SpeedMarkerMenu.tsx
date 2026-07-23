@@ -76,7 +76,7 @@ export const SpeedMarkerMenu: React.FC<SpeedMarkerMenuProps> = ({
             <button
               key={speed}
               type="button"
-              className={`focus-visible:ring-ring flex items-center justify-between gap-2 rounded-md px-2.5 py-1 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+              className={`focus-visible:ring-ring flex items-center justify-between gap-2 rounded-md px-2.5 py-1 text-start text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
                 isActive
                   ? 'bg-primary-600 font-medium text-white'
                   : 'text-foreground hover:bg-muted'
@@ -98,7 +98,7 @@ export const SpeedMarkerMenu: React.FC<SpeedMarkerMenuProps> = ({
       {currentMarker && (
         <button
           type="button"
-          className="border-border text-destructive hover:bg-destructive/10 focus-visible:ring-ring w-full border-t px-2.5 py-1.5 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          className="border-border text-destructive hover:bg-destructive/10 focus-visible:ring-ring w-full border-t px-2.5 py-1.5 text-start text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
           onClick={() => {
             onRemoveMarker();
             onClose();

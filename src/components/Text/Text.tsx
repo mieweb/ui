@@ -28,9 +28,18 @@ const textVariants = cva('', {
       bold: 'font-bold',
     },
     align: {
+      /**
+       * Alignment is direction-aware (logical): `left`/`start` align to the
+       * reading start and `right`/`end` to the reading end, so layouts mirror
+       * correctly in RTL. Prefer `start`/`end`; `left`/`right` are kept as
+       * aliases. For physical alignment regardless of direction, pass the
+       * physical Tailwind alignment utility via `className` instead.
+       */
       left: 'text-start',
+      start: 'text-start',
       center: 'text-center',
       right: 'text-end',
+      end: 'text-end',
     },
   },
   defaultVariants: {

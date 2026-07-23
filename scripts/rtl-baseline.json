@@ -35,7 +35,7 @@
   "src/components/CreateInvoiceModal/CreateInvoiceModal.tsx": 3,
   "src/components/CreateReferralModal/CreateReferralModal.tsx": 4,
   "src/components/DashboardWidget/DashboardWidget.tsx": 9,
-  "src/components/DateInput/DateInput.tsx": 4,
+  "src/components/DateInput/DateInput.tsx": 3,
   "src/components/DateRangePicker/DateRangePicker.tsx": 11,
   "src/components/DocumentScanner/DocumentDetectionOverlay.tsx": 16,
   "src/components/DocumentScanner/FilePreview.tsx": 1,
