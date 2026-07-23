@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { isStorybookDocsMode } from '../../utils/environment';
 
 // =============================================================================
@@ -160,19 +161,11 @@ export function ServiceSelect({
     HTMLDivElement
   >({ open: isOpen, matchWidth: true, maxHeight: 240 });
 
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        !floatingRef.current?.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [floatingRef]);
+  const outsideRefs = React.useMemo(
+    () => [dropdownRef, floatingRef],
+    [floatingRef]
+  );
+  useClickOutside(outsideRefs, () => setIsOpen(false), isOpen);
 
   const toggleService = (serviceSlug: string) => {
     if (selectedServices.includes(serviceSlug)) {

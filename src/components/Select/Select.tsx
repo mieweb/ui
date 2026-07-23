@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 // ============================================================================
@@ -218,22 +219,8 @@ function Select({
   const selectedOption = flatOptions.find((opt) => opt.value === value);
 
   // Close dropdown on click outside (handles both container and portaled dropdown)
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(target) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  const outsideRefs = React.useMemo(() => [containerRef, dropdownRef], []);
+  useClickOutside(outsideRefs, () => setIsOpen(false), isOpen);
 
   useEscapeKey(() => {
     if (isOpen) {

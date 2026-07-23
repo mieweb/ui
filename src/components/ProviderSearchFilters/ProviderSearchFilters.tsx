@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useClickOutside } from '../../hooks/useClickOutside';
 
 // ============================================================================
 // Types
@@ -333,19 +334,11 @@ export function ServiceMultiSelect({
   >({ open: isOpen, matchWidth: true, maxHeight: 240 });
 
   // Close dropdown when clicking outside
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        !floatingRef.current?.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [floatingRef]);
+  const outsideRefs = React.useMemo(
+    () => [containerRef, floatingRef],
+    [floatingRef]
+  );
+  useClickOutside(outsideRefs, () => setIsOpen(false), isOpen);
 
   // Filter services based on search
   const filteredServices = React.useMemo(() => {
