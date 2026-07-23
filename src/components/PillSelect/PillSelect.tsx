@@ -58,7 +58,9 @@ export function PillSelect({
   const hasOptions = options.length > 0;
   const valuePart = selectedOption?.label ?? value;
   const collapsedLabel =
-    label && valuePart ? `${label}: ${valuePart}` : label || valuePart;
+    label && valuePart
+      ? `${label}: ${valuePart}`
+      : label || valuePart || 'No options';
 
   return (
     <div ref={ref} className={cn('inline-flex', className)}>
