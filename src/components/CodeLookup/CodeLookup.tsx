@@ -512,7 +512,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
               onMouseDown={(e) => e.preventDefault()}
             >
               {drill && (
-                <div className="border-border bg-muted/50 flex items-center gap-1.5 border-b px-2 py-1.5">
+                <div className="border-border bg-muted/50 flex shrink-0 items-center gap-1.5 border-b px-2 py-1.5">
                   <button
                     type="button"
                     onClick={closeDrill}

@@ -371,7 +371,7 @@ function CountryCodeDropdown({
             tabIndex={-1}
             onKeyDown={handleKeyDown}
             className={cn(
-              'flex w-72 flex-col',
+              'flex w-72 flex-col overflow-hidden',
               'rounded-xl border border-neutral-200 bg-white shadow-lg',
               'dark:border-neutral-700 dark:bg-neutral-800',
               'animate-in fade-in zoom-in-95 duration-100'
@@ -380,7 +380,7 @@ function CountryCodeDropdown({
             {/* Search input */}
             <div
               data-slot="country-dropdown-search"
-              className="border-b border-neutral-200 p-2 dark:border-neutral-700"
+              className="shrink-0 border-b border-neutral-200 p-2 dark:border-neutral-700"
             >
               <input
                 ref={searchInputRef}

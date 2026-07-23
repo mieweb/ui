@@ -361,7 +361,7 @@ function HoverMenu({
       className={cn(
         'w-[320px] rounded-lg border border-neutral-200 bg-white shadow-xl',
         'dark:border-neutral-700 dark:bg-neutral-800',
-        'flex flex-col',
+        'flex flex-col overflow-hidden',
         'animate-in fade-in slide-in-from-top-1 duration-150'
       )}
       // Prevent click-outside handler from immediately closing when interacting
@@ -370,7 +370,7 @@ function HoverMenu({
       {/* Header */}
       <div
         className={cn(
-          'rounded-t-lg border-b border-neutral-200 px-3 py-2 dark:border-neutral-700',
+          'shrink-0 rounded-t-lg border-b border-neutral-200 px-3 py-2 dark:border-neutral-700',
           headerBg[variant ?? 'default']
         )}
       >
