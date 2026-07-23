@@ -1,7 +1,9 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 export interface ProviderOption {
   /** Unique identifier */
@@ -65,12 +67,20 @@ export function ProviderSelector({
   const [searchQuery, setSearchQuery] = React.useState('');
   const containerRef = React.useRef<HTMLDivElement>(null);
 
+  // Portal + fixed positioning so the dropdown escapes overflow-hidden
+  // ancestors.
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open: isOpen, matchWidth: true });
+
   // Close on click outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(event.target as Node) &&
+        !floatingRef.current?.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -78,7 +88,7 @@ export function ProviderSelector({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [floatingRef]);
 
   // Close on escape
   React.useEffect(() => {
@@ -134,7 +144,10 @@ export function ProviderSelector({
     <div
       data-slot="provider-selector"
       className={cn('relative', className)}
-      ref={containerRef}
+      ref={(node) => {
+        containerRef.current = node;
+        anchorRef.current = node;
+      }}
     >
       {label && (
         <label
@@ -246,139 +259,143 @@ export function ProviderSelector({
       </button>
 
       {/* Dropdown */}
-      {isOpen && (
-        <div
-          data-slot="provider-selector-dropdown"
-          className="border-border bg-card absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg"
-        >
-          {/* Search */}
-          {searchable && (
-            <div className="border-border border-b p-2">
-              <div className="relative">
-                <svg
-                  aria-hidden="true"
-                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <input
-                  type="text"
-                  data-slot="provider-selector-search"
-                  placeholder={searchPlaceholder}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-1 focus:outline-none"
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
-                  autoFocus
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Options list */}
-          <div className="max-h-64 overflow-y-auto">
-            {filteredProviders.length === 0 ? (
-              <div className="text-muted-foreground px-4 py-6 text-center">
-                No providers found
-              </div>
-            ) : (
-              filteredProviders.map((provider) => (
-                <button
-                  key={provider.id}
-                  type="button"
-                  data-slot="provider-selector-option"
-                  onClick={() => handleSelect(provider)}
-                  className={cn(
-                    'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
-                    'hover:bg-muted',
-                    selectedProvider?.id === provider.id && 'bg-primary/10'
-                  )}
-                >
-                  {/* Provider avatar/logo */}
-                  {provider.logoUrl ? (
-                    <img
-                      data-slot="provider-selector-option-avatar"
-                      src={provider.logoUrl}
-                      alt={provider.name}
-                      className="h-8 w-8 rounded object-cover"
+      {isOpen &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            data-slot="provider-selector-dropdown"
+            className="border-border bg-card flex flex-col overflow-hidden rounded-lg border shadow-lg"
+          >
+            {/* Search */}
+            {searchable && (
+              <div className="border-border border-b p-2">
+                <div className="relative">
+                  <svg
+                    aria-hidden="true"
+                    className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
-                  ) : (
-                    <div
-                      data-slot="provider-selector-option-avatar"
-                      className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded text-sm font-medium"
-                    >
-                      {getInitials(provider.name)}
-                    </div>
-                  )}
+                  </svg>
+                  <input
+                    type="text"
+                    data-slot="provider-selector-search"
+                    placeholder={searchPlaceholder}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-1 focus:outline-none"
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
+                    autoFocus
+                  />
+                </div>
+              </div>
+            )}
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span
-                        data-slot="provider-selector-option-name"
-                        className="text-foreground font-medium"
-                      >
-                        {provider.name}
-                      </span>
-                      {provider.code && (
-                        <span
-                          data-slot="provider-selector-option-code"
-                          className="text-xs text-neutral-600 dark:text-neutral-400"
-                        >
-                          ({provider.code})
-                        </span>
-                      )}
-                      {provider.isActive === false && (
-                        <span
-                          data-slot="provider-selector-option-badge"
-                          className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400"
-                        >
-                          Inactive
-                        </span>
-                      )}
-                    </div>
-                    {(provider.location || provider.type) && (
+            {/* Options list */}
+            <div className="max-h-64 overflow-y-auto">
+              {filteredProviders.length === 0 ? (
+                <div className="text-muted-foreground px-4 py-6 text-center">
+                  No providers found
+                </div>
+              ) : (
+                filteredProviders.map((provider) => (
+                  <button
+                    key={provider.id}
+                    type="button"
+                    data-slot="provider-selector-option"
+                    onClick={() => handleSelect(provider)}
+                    className={cn(
+                      'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+                      'hover:bg-muted',
+                      selectedProvider?.id === provider.id && 'bg-primary/10'
+                    )}
+                  >
+                    {/* Provider avatar/logo */}
+                    {provider.logoUrl ? (
+                      <img
+                        data-slot="provider-selector-option-avatar"
+                        src={provider.logoUrl}
+                        alt={provider.name}
+                        className="h-8 w-8 rounded object-cover"
+                      />
+                    ) : (
                       <div
-                        data-slot="provider-selector-option-detail"
-                        className="text-muted-foreground truncate text-sm"
+                        data-slot="provider-selector-option-avatar"
+                        className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded text-sm font-medium"
                       >
-                        {[provider.type, provider.location]
-                          .filter(Boolean)
-                          .join(' • ')}
+                        {getInitials(provider.name)}
                       </div>
                     )}
-                  </div>
 
-                  {/* Selected checkmark */}
-                  {selectedProvider?.id === provider.id && (
-                    <svg
-                      aria-hidden="true"
-                      className="text-primary-800 dark:text-primary-400 h-5 w-5 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  )}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span
+                          data-slot="provider-selector-option-name"
+                          className="text-foreground font-medium"
+                        >
+                          {provider.name}
+                        </span>
+                        {provider.code && (
+                          <span
+                            data-slot="provider-selector-option-code"
+                            className="text-xs text-neutral-600 dark:text-neutral-400"
+                          >
+                            ({provider.code})
+                          </span>
+                        )}
+                        {provider.isActive === false && (
+                          <span
+                            data-slot="provider-selector-option-badge"
+                            className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400"
+                          >
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      {(provider.location || provider.type) && (
+                        <div
+                          data-slot="provider-selector-option-detail"
+                          className="text-muted-foreground truncate text-sm"
+                        >
+                          {[provider.type, provider.location]
+                            .filter(Boolean)
+                            .join(' • ')}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Selected checkmark */}
+                    {selectedProvider?.id === provider.id && (
+                      <svg
+                        aria-hidden="true"
+                        className="text-primary-800 dark:text-primary-400 h-5 w-5 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

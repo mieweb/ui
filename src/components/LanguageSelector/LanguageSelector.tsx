@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 // =============================================================================
 // Types
@@ -137,6 +139,13 @@ export function LanguageSelector({
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
+  // Portal + fixed positioning so the dropdown escapes overflow-hidden
+  // ancestors (headers, cards, …).
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open: isOpen, matchMinWidth: true, maxHeight: 240 });
+
   // Find selected language
   const selectedLanguage = languages.find((l) => l.code === value);
 
@@ -145,7 +154,8 @@ export function LanguageSelector({
     const handleClickOutside = (e: MouseEvent) => {
       if (
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !containerRef.current.contains(e.target as Node) &&
+        !floatingRef.current?.contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -153,7 +163,7 @@ export function LanguageSelector({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [floatingRef]);
 
   // Close on escape
   React.useEffect(() => {
@@ -172,7 +182,10 @@ export function LanguageSelector({
 
   return (
     <div
-      ref={containerRef}
+      ref={(node) => {
+        containerRef.current = node;
+        anchorRef.current = node;
+      }}
       data-slot="language-selector"
       className={cn(selectorVariants({ size }), className)}
     >
@@ -210,47 +223,47 @@ export function LanguageSelector({
       </button>
 
       {/* Dropdown */}
-      {isOpen && (
-        <div
-          data-slot="language-selector-dropdown"
-          className={cn(
-            'absolute z-50 mt-1 w-full min-w-[180px] rounded-lg border border-gray-200 bg-white shadow-lg',
-            'dark:border-gray-700 dark:bg-gray-800',
-            'animate-in fade-in slide-in-from-top-1 duration-150'
-          )}
-        >
-          <ul
-            role="listbox"
-            aria-label={label}
-            className="max-h-60 overflow-auto py-1"
+      {isOpen &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            data-slot="language-selector-dropdown"
+            className={cn(
+              'min-w-[180px] overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg',
+              'dark:border-gray-700 dark:bg-gray-800',
+              'animate-in fade-in slide-in-from-top-1 duration-150'
+            )}
           >
-            {languages.map((language) => (
-              <li
-                key={language.code}
-                role="option"
-                aria-selected={language.code === value}
-                onClick={() => handleSelect(language)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSelect(language)}
-                data-slot="language-selector-option"
-                className={cn(
-                  'flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors',
-                  language.code === value
-                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
-                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
-                )}
-              >
-                {showFlags && language.flag && (
-                  <span className="text-base">{language.flag}</span>
-                )}
-                <span className="flex-1">{language.name}</span>
-                {language.code === value && (
-                  <CheckIcon className="text-primary-800 dark:text-primary-400 h-4 w-4" />
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+            <ul role="listbox" aria-label={label} className="py-1">
+              {languages.map((language) => (
+                <li
+                  key={language.code}
+                  role="option"
+                  aria-selected={language.code === value}
+                  onClick={() => handleSelect(language)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSelect(language)}
+                  data-slot="language-selector-option"
+                  className={cn(
+                    'flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors',
+                    language.code === value
+                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
+                  )}
+                >
+                  {showFlags && language.flag && (
+                    <span className="text-base">{language.flag}</span>
+                  )}
+                  <span className="flex-1">{language.name}</span>
+                  {language.code === value && (
+                    <CheckIcon className="text-primary-800 dark:text-primary-400 h-4 w-4" />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

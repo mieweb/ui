@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useCallback } from 'react';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import { Dropdown, DropdownItem } from '../Dropdown';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -226,36 +227,34 @@ export function BusinessHoursEditor({
               </h4>
               <div className="flex items-center gap-2">
                 {hours.length > 0 && (
-                  <div className="group relative">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
+                  <Dropdown
+                    placement="bottom-end"
+                    trigger={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={disabled}
+                        className="text-xs"
+                      >
+                        <CopyIcon className="mr-1 h-3 w-3" />
+                        Copy
+                      </Button>
+                    }
+                  >
+                    <DropdownItem
+                      onClick={() => handleCopyToAll(dayIndex)}
                       disabled={disabled}
-                      className="text-xs"
                     >
-                      <CopyIcon className="mr-1 h-3 w-3" />
-                      Copy
-                    </Button>
-                    <div className="invisible absolute top-full right-0 z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800">
-                      <button
-                        type="button"
-                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
-                        onClick={() => handleCopyToAll(dayIndex)}
-                        disabled={disabled}
-                      >
-                        Copy to all days
-                      </button>
-                      <button
-                        type="button"
-                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
-                        onClick={() => handleCopyToWeekdays(dayIndex)}
-                        disabled={disabled}
-                      >
-                        Copy to weekdays
-                      </button>
-                    </div>
-                  </div>
+                      Copy to all days
+                    </DropdownItem>
+                    <DropdownItem
+                      onClick={() => handleCopyToWeekdays(dayIndex)}
+                      disabled={disabled}
+                    >
+                      Copy to weekdays
+                    </DropdownItem>
+                  </Dropdown>
                 )}
                 <Button
                   type="button"
