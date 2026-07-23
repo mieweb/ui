@@ -80,24 +80,24 @@ export const PackageTranslatedHeader: Story = {
       <div className="min-h-[180px] bg-[var(--mieweb-background)] p-0">
         <AppHeader className="w-full">
           <AppHeaderSection align="left">
-            <AppHeaderBrand>{t('ui.appHeader.brand')}</AppHeaderBrand>
+            <AppHeaderBrand>{t('AddContactModal')}</AppHeaderBrand>
             <AppHeaderDivider />
             <AppHeaderTitle
-              subtitle={t('ui.appHeader.subtitle')}
+              subtitle={t('Description')}
               className={`transition-all duration-300 ${isLocaleChanging ? 'opacity-70 translate-y-[1px]' : 'opacity-100 translate-y-0'}`}
             >
-              {t('ui.appHeader.title')}
+              {t('Edit Contact')}
             </AppHeaderTitle>
           </AppHeaderSection>
 
           <AppHeaderSection align="right">
             <AppHeaderActions>
-              <AppHeaderSearch placeholder={t('ui.appHeader.searchPlaceholder')} />
-              <AppHeaderIconButton icon={<MessageIcon />} label={t('ui.appHeader.a11y.messages')} />
-              <AppHeaderIconButton icon={<BellIcon />} label={t('ui.appHeader.a11y.notifications')} badge={3} />
-              <AppHeaderIconButton icon={<CogIcon />} label={t('ui.appHeader.a11y.settings')} />
+              <AppHeaderSearch placeholder={t('Address')} />
+              <AppHeaderIconButton icon={<MessageIcon />} label={t('Email')} />
+              <AppHeaderIconButton icon={<BellIcon />} label={t('City')} badge={3} />
+              <AppHeaderIconButton icon={<CogIcon />} label={t('Degree')} />
               <button className="bg-primary-800 hover:bg-primary-900 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors">
-                {t('ui.appHeader.actions.addProvider')}
+                {t('Add Contact')}
               </button>
               <AppHeaderUserMenu name="Dr. Jamie Rivera" email="jamie.rivera@bluehive.com" />
             </AppHeaderActions>

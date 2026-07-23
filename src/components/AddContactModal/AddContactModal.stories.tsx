@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useEffect, useState } from 'react';
 import { AddContactModal, ContactFormData } from './AddContactModal';
 import { Button } from '../Button/Button';
+import locoSamplePack from '../../i18n/i18n-translations.json';
+import { createLocoTranslator } from '../../utils/i18n';
 
 const meta: Meta<typeof AddContactModal> = {
   title: 'Components/Forms & Inputs/AddContactModal',
@@ -210,6 +212,65 @@ export const Mobile: Story = {
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
+    },
+  },
+};
+
+/**
+ * Demonstrates i18n integration with Loco package translations.
+ * Change the Locale toolbar value to see the modal title translate to French or Chinese.
+ */
+export const I18nTranslated: Story = {
+  render: (_, context) => {
+    const locale = String(context.globals.locale || 'en');
+    const [open, setOpen] = useState(true);
+    const [savedContact, setSavedContact] = useState<ContactFormData | null>(null);
+
+    const t = createLocoTranslator(locoSamplePack, locale, {
+      fallbackLanguage: 'en',
+    });
+
+    const handleSave = (contact: ContactFormData) => {
+      setSavedContact(contact);
+      setOpen(false);
+    };
+
+    return (
+      <div className="relative min-h-[700px] w-full">
+        {!open && (
+          <div className="space-y-4 p-4">
+            <Button onClick={() => setOpen(true)}>
+              {t('Add Contact')}
+            </Button>
+            {savedContact && (
+              <div className="mt-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+                <h4 className="mb-2 font-medium">{t('Add Contact')}:</h4>
+                <pre className="overflow-auto text-sm">
+                  {JSON.stringify(savedContact, null, 2)}
+                </pre>
+              </div>
+            )}
+          </div>
+        )}
+        <AddContactModal
+          open={open}
+          title={t('Add Contact')}
+          showAddress={true}
+          showCustomFields={true}
+          showPhone={true}
+          isSaving={false}
+          onOpenChange={setOpen}
+          onSave={handleSave}
+        />
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates i18n integration. Change the Locale toolbar to "Chinese (zh-Hans)" to see the modal title translate to Chinese "添加联系人".',
+      },
     },
   },
 };
