@@ -22,6 +22,7 @@ import {
 
 const meta: Meta = {
   title: 'Components/Images & Media/MediaEditor Live Demo',
+  component: MediaEditor,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
