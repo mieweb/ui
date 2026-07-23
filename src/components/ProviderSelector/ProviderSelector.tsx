@@ -269,7 +269,7 @@ export function ProviderSelector({
           >
             {/* Search */}
             {searchable && (
-              <div className="border-border border-b p-2">
+              <div className="border-border shrink-0 border-b p-2">
                 <div className="relative">
                   <svg
                     aria-hidden="true"
@@ -300,7 +300,7 @@ export function ProviderSelector({
             )}
 
             {/* Options list */}
-            <div className="max-h-64 overflow-y-auto">
+            <div className="max-h-64 min-h-0 overflow-y-auto">
               {filteredProviders.length === 0 ? (
                 <div className="text-muted-foreground px-4 py-6 text-center">
                   No providers found
