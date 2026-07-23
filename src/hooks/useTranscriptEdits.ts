@@ -384,9 +384,25 @@ export function useTranscriptEdits(
   );
   const [clipboard, setClipboard] = useState<TranscriptClipboard | null>(null);
   const [hasEdits, setHasEdits] = useState(() => {
-    // Check if initial state has edits
+    // Compare saved state against the derived baseline: deletions, insertions,
+    // length changes, AND text edits (text-only edits previously initialized
+    // hasEdits=false, which also suppressed onChange persistence).
     if (initialEditedWords) {
-      return initialEditedWords.some((ew) => ew.deleted || ew.inserted);
+      const baseline = initEditableWords(
+        transcript,
+        initialMinSilenceMs,
+        initialNlSilenceMs
+      );
+      return (
+        initialEditedWords.length !== baseline.length ||
+        initialEditedWords.some(
+          (ew, i) =>
+            ew.deleted ||
+            ew.inserted ||
+            ew.originalIndex !== i ||
+            ew.word.text !== baseline[i].word.text
+        )
+      );
     }
     return false;
   });
@@ -439,11 +455,21 @@ export function useTranscriptEdits(
     const previousState = undoStack[undoStack.length - 1];
     setUndoStack((prev) => prev.slice(0, -1));
     setEditedWords(previousState);
+    // Compare against the silence-inserted baseline (what the editor actually
+    // starts from), not raw transcript.words — with any detected silence the
+    // lengths never matched and hasEdits stayed true after undoing everything.
+    const baseline = initEditableWords(transcript, minSilenceMs, nlSilenceMs);
     const isOriginal =
-      previousState.every((ew, i) => ew.originalIndex === i && !ew.deleted) &&
-      previousState.length === transcript.words.length;
+      previousState.length === baseline.length &&
+      previousState.every(
+        (ew, i) =>
+          ew.originalIndex === i &&
+          !ew.deleted &&
+          !ew.inserted &&
+          ew.word.text === baseline[i].word.text
+      );
     setHasEdits(!isOriginal);
-  }, [undoStack, transcript.words.length]);
+  }, [undoStack, transcript, minSilenceMs, nlSilenceMs]);
 
   // Toggle deleted state on a single word
   const toggleWordDeleted = useCallback(
@@ -670,17 +696,18 @@ export function useTranscriptEdits(
     (newMinSilenceMs: number, newNlSilenceMs: number) => {
       setMinSilenceMs(newMinSilenceMs);
       setNlSilenceMs(newNlSilenceMs);
-      // Rebuild the editable words with new silence detection
-      // Preserve deleted status for actual words (not silences)
+      // Rebuild the editable words with new silence detection.
+      // Preserve deleted status for actual words (not silences), keyed by the
+      // word's ORDINAL among non-silence words — the same key the restore loop
+      // below uses. (Keying by originalIndex — a position in the old
+      // silence-inserted array — mismatched the restore counter and applied
+      // deletions to the wrong words after a threshold change.)
       const wordDeletedStatus = new Map<number, boolean>();
+      let saveIdx = 0;
       editedWords.forEach((ew) => {
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline' &&
-          ew.originalIndex >= 0
-        ) {
-          // Map original word index to deleted status
-          wordDeletedStatus.set(ew.originalIndex, ew.deleted);
+        if (!isSilenceType(ew.word.wordType) && ew.originalIndex >= 0) {
+          wordDeletedStatus.set(saveIdx, ew.deleted);
+          saveIdx++;
         }
       });
 
@@ -691,13 +718,10 @@ export function useTranscriptEdits(
         newNlSilenceMs
       );
 
-      // Restore deleted status for words
+      // Restore deleted status for words (same ordinal keyspace as the save)
       let wordIdx = 0;
       const restoredWords = newEditedWords.map((ew) => {
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline'
-        ) {
+        if (!isSilenceType(ew.word.wordType)) {
           const wasDeleted = wordDeletedStatus.get(wordIdx) ?? false;
           wordIdx++;
           return { ...ew, deleted: wasDeleted };
