@@ -37,3 +37,25 @@ export {
   type DragOverState,
 } from './useDragReorder';
 export { useLiveAnnouncement } from './useLiveAnnouncement';
+export {
+  useMediaTransport,
+  type MediaTransportState,
+  type UseMediaTransportOptions,
+  type UseMediaTransportReturn,
+} from './useMediaTransport';
+export {
+  useTranscriptEdits,
+  insertSilences,
+  initEditableWords,
+  buildPlaybackSegments,
+  getSpeedAtIndex,
+  DEFAULT_FILLER_WORDS,
+  DEFAULT_MIN_SILENCE_MS,
+  DEFAULT_NL_SILENCE_MS,
+  type UseTranscriptEditsOptions,
+  type UseTranscriptEditsResult,
+  type TranscriptEditStats,
+  type TranscriptClipboard,
+  type FillerAnalysis,
+  type SilenceThresholdCount,
+} from './useTranscriptEdits';
