@@ -233,3 +233,96 @@ describe('useTranscriptEdits', () => {
     expect((words as EditableWord[])[0].deleted).toBe(true);
   });
 });
+
+// ============================================================================
+// Regression tests for the ui#323 review findings
+// ============================================================================
+
+// A transcript with a leading pause and an inter-word gap, so the derived
+// timeline interleaves silence pseudo-words: [sil, A, sil-nl, B]
+const gappy: Transcript = {
+  durationMs: 4600,
+  words: [
+    { text: 'Alpha', startMs: 600, endMs: 1000 },
+    { text: 'Beta', startMs: 3000, endMs: 3500 },
+  ],
+};
+
+describe('ui#323 regressions', () => {
+  it('counts silence-newline entries as silences, not words (finding 3)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    // Timeline: [silence 0-600][Alpha][silence-newline 1000-3000][Beta]
+    expect(result.current.stats.activeWordCount).toBe(2);
+    expect(result.current.stats.activeSilenceCount).toBe(2);
+  });
+
+  it('counts default filler words exactly once (findings 4/5)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    expect(result.current.fillerAnalysis.matchCounts.get('um')).toBe(1);
+    expect(result.current.fillerAnalysis.durations.get('um')).toBe(300);
+  });
+
+  it('can split a silence-newline entry (finding 6)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    const nlIndex = result.current.editedWords.findIndex(
+      (ew) => ew.word.wordType === 'silence-newline'
+    );
+    expect(nlIndex).toBeGreaterThan(-1);
+    act(() => result.current.splitSilence(nlIndex, [1, 1]));
+    // The 2s newline silence is replaced by two 1s segments
+    expect(result.current.editedWords.filter((ew) => ew.inserted)).toHaveLength(
+      2
+    );
+  });
+
+  it('keeps deletions on the SAME words across a threshold rebuild (finding 2)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    // Delete 'Beta' (the second non-silence word)
+    const betaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    act(() => result.current.toggleWordDeleted(betaIdx));
+    // Change thresholds so the silence layout changes entirely
+    act(() => result.current.setSilenceThresholds(100, 5000));
+    const beta = result.current.editedWords.find(
+      (ew) => ew.word.text === 'Beta'
+    );
+    const alpha = result.current.editedWords.find(
+      (ew) => ew.word.text === 'Alpha'
+    );
+    expect(beta?.deleted).toBe(true);
+    expect(alpha?.deleted).toBe(false);
+  });
+
+  it('clears hasEdits after undoing back to baseline with silences present (finding 1)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    act(() => result.current.toggleWordDeleted(1));
+    expect(result.current.hasEdits).toBe(true);
+    act(() => result.current.undo());
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('initializes hasEdits=true for saved text-only edits (finding 13)', () => {
+    const baseline = initEditableWords(packed);
+    const withTextEdit: EditableWord[] = baseline.map((ew, i) =>
+      i === 0 ? { ...ew, word: { ...ew.word, text: 'Howdy' } } : ew
+    );
+    const { result } = renderHook(() =>
+      useTranscriptEdits({
+        transcript: packed,
+        initialEditedWords: withTextEdit,
+      })
+    );
+    expect(result.current.hasEdits).toBe(true);
+  });
+});
