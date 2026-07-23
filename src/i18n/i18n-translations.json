@@ -1,0 +1,138 @@
+{
+  "format": "i18next-nested",
+  "contextMode": "ignore",
+  "languages": [
+    "zh-Hans"
+  ],
+  "languageNames": {
+    "zh-Hans": "Chinese (Simplified)"
+  },
+  "resources": {
+    "zh-Hans": {
+      "translation": {
+        "\"Add Contact\"": "添加联系人",
+        "(contact: ContactFormData) => void": "(contact: ContactFormData) => void",
+        "(open: boolean) => void": "（open：布尔值）=> void",
+        "A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields": "用于添加或编辑医疗服务提供者/雇主联系人的模态框，包含姓名、性别、职位、学位、电子邮箱、地址以及自定义字段等字段。",
+        "Add Contact": "添加联系人",
+        "Add Field": "添加字段",
+        "AddContactModal": "添加联系人弹窗",
+        "Additional CSS classes": "附加 CSS 类",
+        "Address": "地址",
+        "Apt, Suite, etc": {
+          " (optional)": "公寓、套房等（可选）"
+        },
+        "Callback when contact is saved": "联系人已保存时回拨",
+        "Callback when modal open state changes": "当模态框打开状态发生变化时回调",
+        "Cancel": "取消",
+        "City": "城市",
+        "Click Save to see validation errors": "单击“保存”以查看验证错误",
+        "ContactFormData": "联系表单数据",
+        "Control": "控制",
+        "Custom Fields": "自定义字段",
+        "Decorators documentation": "装饰器文档",
+        "Default": "默认",
+        "Degree": "学位",
+        "Description": "描述",
+        "Edit Contact": "编辑联系人",
+        "Edit Mode": "编辑模式",
+        "Email": "电子邮件",
+        "Email{{text:0}}": "电子邮件{{text:0}}",
+        "Environment Variables documentation": "环境变量文档",
+        "Existing contact data for editing": "现有联系人数据可供编辑",
+        "False": "假",
+        "Field name": "字段名称",
+        "First Name": "名字",
+        "First Name{{text:0}}": "名字{{text:0}}",
+        "First name": "名字",
+        "If the problem persists, check the browser console, or the terminal you've run Storybook from": "如果问题仍然存在，请检查浏览器控制台，或你运行 Storybook 的终端。",
+        "Last Name": "姓",
+        "Last Name{{text:0}}": "姓氏{{text:0}}",
+        "Last name": "姓氏",
+        "Minimal Fields": "最少字段",
+        "Misconfigured Webpack or Vite": "Webpack 或 Vite 配置不当",
+        "Missing Context/Providers": "缺少上下文/提供方",
+        "Missing Environment Variables": "缺少环境变量",
+        "Mobile": "移动端",
+        "Modal title": "模态标题",
+        "Name": "姓名",
+        "No Preview": "无预览",
+        "No custom fields added": {
+          " Click \"Add Field\" to add custom information": "未添加任何自定义字段。点击“添加字段”以添加自定义信息。"
+        },
+        "Phone": "电话",
+        "Please check the Storybook config": "请检查 Storybook 配置。",
+        "Position Title": "职位名称",
+        "Provider Contact": "提供者联系方式",
+        "Save Contact": "保存联系人",
+        "Saving State": "保存状态",
+        "Saving": "正在保存...",
+        "Select": "选择...",
+        "Set object": "设置对象",
+        "Set string": "设置字符串",
+        "Sex": "性别",
+        "Show code": "显示代码",
+        "Sorry, but you either have no stories or none are selected somehow": "抱歉，但你要么没有任何故事，要么不知为何没有选中任何故事。",
+        "State": "州",
+        "Stories": "故事",
+        "Street Address": "街道地址",
+        "The component failed to render properly, likely due to a configuration issue in Storybook": {
+          " Here are some common causes and how you can address them:": "该组件未能正确渲染，可能是由于 Storybook 中的配置问题。以下是一些常见原因以及你可以如何解决它们："
+        },
+        "This is a short description": "这是一个简短的描述",
+        "True": "真",
+        "Try reloading the page": "尝试重新加载页面。",
+        "Value": "值",
+        "View source on GitHub ↗": "在 GitHub 上查看源代码 ↗",
+        "Vite": "Vite",
+        "Webpack": "Webpack",
+        "Whether save is in progress": "保存是否正在进行中",
+        "Whether the modal is open": "无论模态框是否打开",
+        "Whether to show address fields": "是否显示地址字段",
+        "Whether to show custom fields section": "是否显示自定义字段部分",
+        "Whether to show phone field": "是否显示电话字段",
+        "With Phone Only": "仅限手机",
+        "With Validation Errors": "含验证错误",
+        "ZIP": "邮政编码",
+        "boolean": "布尔值",
+        "className": "className",
+        "contact": "联系",
+        "defaultValue": "defaultValue",
+        "e": {
+          "g": {
+            ", MD, RN, PA": "例如：MD、RN、PA",
+            ", Office Manager": "例如，办公室经理"
+          }
+        },
+        "email@example": {
+          "com": "email@example.com"
+        },
+        "false": "假‬",
+        "isSaving": "正在保存",
+        "null": "null",
+        "onOpenChange": "onOpenChange",
+        "onSave": "保存时",
+        "open": "打开",
+        "propertyName": "propertyName",
+        "showAddress": "显示地址",
+        "showCustomFields": "showCustomFields",
+        "showPhone": "显示电话",
+        "string": "字符串",
+        "summary": "摘要",
+        "title": "标题",
+        "true": "true",
+        "{{text:0}}: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters": {
+          " You can find step-by-step guides for configuring{{text:1}}or{{text:2}}with Storybook": "{{text:0}}: 验证 Storybook 已获取加载器、插件以及其他相关参数所需的全部设置。你可以找到关于使用 Storybook 配置 {{text:1}} 或 {{text:2}} 的分步指南。"
+        },
+        "{{text:0}}: You can use decorators to supply specific contexts or providers, which are sometimes necessary for components to render correctly": {
+          " For detailed instructions on using decorators, please visit the{{text:1}}": "{{text:0}}: 您可以使用装饰器来提供特定的上下文或提供程序，这在某些情况下是组件正确渲染所必需的。有关使用装饰器的详细说明，请访问{{text:1}}。"
+        },
+        "{{text:0}}: Your Storybook may require specific environment variables to function as intended": {
+          " You can set up custom environment variables as outlined in the{{text:1}}": "{{text:0}}: 您的 Storybook 可能需要特定的环境变量才能按预期运行。您可以按照 {{text:1}} 中所述设置自定义环境变量。"
+        }
+      }
+    }
+  },
+  "timestamp": 1784830460005,
+  "source": "loco-export"
+}

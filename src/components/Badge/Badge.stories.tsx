@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { Badge } from './Badge';
-import locoSamplePack from '../../i18n/loco-sample-pack.json';
+import locoSamplePack from '../../i18n/i18n-translations.json';
 import { createLocoTranslator } from '../../utils/i18n';
 import {
   CheckIcon,

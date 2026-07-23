@@ -212,6 +212,11 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
+// Default Loco configuration from environment variables
+const defaultLocoServer = (import.meta.env.VITE_LOCO_SERVER_URL as string | undefined)?.trim() || 'http://10.3.37.116:6199/loco';
+const defaultLocoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || '82b6c1a44ec247dcb6c96fe0';
+const isLocoDisabled = (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
+
 // Appends a "View source on GitHub" link below each story, derived from the
 // story file's absolute path on disk (context.parameters.fileName).
 const withGitHubSource: Decorator = (Story, context) => {
@@ -313,7 +318,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
   const configuredApiKey = String(context.globals?.locoApiKey || '').trim();
   const serverFromEnv =
     (import.meta.env?.VITE_LOCO_SERVER_URL as string | undefined)?.trim() ||
-    'http://localhost:6101';
+    'http://10.3.37.116:6199';
   const serverUrl = configuredServer || serverFromEnv;
   const apiKey =
     configuredApiKey ||
@@ -321,7 +326,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     undefined;
 
   useEffect(() => {
-    if (locoMode !== 'live') return;
+    if (locoMode !== 'live' || isLocoDisabled) return;
 
     const root = document.querySelector('[data-loco-scan-root="true"]') as HTMLElement | null;
     if (!root) return;
@@ -349,8 +354,8 @@ const withLocoLiveSync: Decorator = (Story, context) => {
   useEffect(() => {
     let cancelled = false;
 
-    // If switching back to package mode, undo live runtime translations.
-    if (locoMode !== 'live') {
+    // If Loco is disabled or switching back to package mode, undo live runtime translations.
+    if (locoMode !== 'live' || isLocoDisabled) {
       const runtime = (window as any).Loco as LocoRuntime | undefined;
       if (runtime?.restore) {
         void Promise.resolve(runtime.restore()).catch(() => undefined);
@@ -395,9 +400,9 @@ const preview: Preview = {
     theme: 'light',
     density: 'standard',
     locale: 'en',
-    locoMode: 'package',
-    locoServer: 'http://localhost:6101',
-    locoApiKey: '82b6c1a44ec247dcb6c96fe0',
+    locoMode: 'live',
+    locoServer: defaultLocoServer,
+    locoApiKey: defaultLocoApiKey,
   },
   globalTypes: {
     brand: {
@@ -458,12 +463,13 @@ const preview: Preview = {
     locoMode: {
       name: 'Loco i18n',
       description:
-        'Use Loco i18n package for preview or Loco Sync Text to post discovered phrases to Loco pending list.',
+        'Use Loco i18n package for preview, Loco Sync Text to post discovered phrases to Loco pending list, or disable Loco.',
       toolbar: {
         icon: 'transfer',
         items: [
           { value: 'package', title: 'Loco i18n' },
           { value: 'live', title: 'Loco Sync Text' },
+          { value: 'disable', title: 'Disable' },
         ],
         dynamicTitle: true,
       },

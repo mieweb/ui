@@ -11,7 +11,7 @@ import {
   AppHeaderTitle,
   AppHeaderUserMenu,
 } from './index';
-import locoSamplePack from '../../i18n/loco-sample-pack.json';
+import locoSamplePack from '../../i18n/i18n-translations.json';
 import { createLocoTranslator } from '../../utils/i18n';
 
 const BellIcon = () => (
