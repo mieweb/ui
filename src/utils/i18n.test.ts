@@ -43,18 +43,46 @@ describe('loco i18n utils', () => {
   });
 
   it('resolves dotted keys for active language', () => {
-    expect(resolveLocoTranslation(samplePack, 'fr', 'ui.actions.save')).toBe('Enregistrer');
+    expect(resolveLocoTranslation(samplePack, 'fr', 'ui.actions.save')).toBe(
+      'Enregistrer'
+    );
   });
 
   it('falls back to fallback language when missing', () => {
-    expect(resolveLocoTranslation(samplePack, 'fr', 'ui.missing', 'en')).toBeUndefined();
-    expect(resolveLocoTranslation(samplePack, 'fr', 'ui.title', 'en')).toBe('Parametres');
+    expect(
+      resolveLocoTranslation(samplePack, 'fr', 'ui.missing', 'en')
+    ).toBeUndefined();
+    expect(resolveLocoTranslation(samplePack, 'fr', 'ui.title', 'en')).toBe(
+      'Parametres'
+    );
   });
 
   it('creates translator with key fallback behavior', () => {
-    const t = createLocoTranslator(samplePack, 'fr', { fallbackLanguage: 'en' });
+    const t = createLocoTranslator(samplePack, 'fr', {
+      fallbackLanguage: 'en',
+    });
     expect(t('ui.actions.save')).toBe('Enregistrer');
     expect(t('ui.does.not.exist')).toBe('ui.does.not.exist');
     expect(t('ui.does.not.exist', 'Default text')).toBe('Default text');
+  });
+
+  it('supports the native loco export format', () => {
+    const locoPack: LocoI18nPackage = {
+      languages: ['zh-Hans'],
+      translations: {
+        'zh-Hans': [
+          { key: 'Save', context: '', value: '保存' },
+          { key: 'Cancel', context: '', value: '取消' },
+        ],
+      },
+    };
+
+    expect(getLocoDictionary(locoPack, 'zh-Hans')).toEqual({
+      Save: '保存',
+      Cancel: '取消',
+    });
+    const t = createLocoTranslator(locoPack, 'zh-Hans');
+    expect(t('Save')).toBe('保存');
+    expect(t('Untranslated phrase')).toBe('Untranslated phrase');
   });
 });

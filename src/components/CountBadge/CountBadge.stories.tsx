@@ -41,7 +41,9 @@ type Story = StoryObj<typeof CountBadge>;
 
 function getTranslator(context: { globals?: Record<string, unknown> }) {
   const locale = String(context.globals?.locale || 'en');
-  return createLocoTranslator(locoSamplePack, locale, { fallbackLanguage: 'en' });
+  return createLocoTranslator(locoSamplePack, locale, {
+    fallbackLanguage: 'en',
+  });
 }
 
 /** Default gray variant. */

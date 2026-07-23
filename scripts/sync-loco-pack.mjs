@@ -20,7 +20,8 @@ Options:
   --server=<url>         Loco server URL (default: https://loco.os.mieweb.org)
   --apiKey=<key>         Loco API key (or set LOCO_API_KEY)
   --out=<path>           Output file path (default: src/i18n/i18n-translations.json)
-  --format=<name>        Export format (default: i18next-nested)
+  --format=<name>        Export format (default: loco — consumable by both the
+                         Loco runtime file mode and createLocoTranslator)
   --contextMode=<mode>   Context mode (default: ignore)
   --help                 Show this message
 
@@ -39,7 +40,7 @@ async function main() {
   const server = (args.server || process.env.LOCO_SERVER_URL || 'https://loco.os.mieweb.org').replace(/\/$/, '');
   const apiKey = args.apiKey || process.env.LOCO_API_KEY || '';
   const outPath = args.out || 'src/i18n/i18n-translations.json';
-  const format = args.format || 'i18next-nested';
+  const format = args.format || 'loco';
   const contextMode = args.contextMode || 'ignore';
 
   const exportUrl = new URL(`${server}/api/export`);

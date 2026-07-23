@@ -50,14 +50,19 @@ export function collectLocoKeysFromElement(root: HTMLElement): LocoKeyEntry[] {
     const parent = textNode.parentElement;
     if (parent) {
       const tagName = parent.tagName;
-      if (!SKIP_TAGS.has(tagName) && !parent.closest('[data-loco-ignore="true"]')) {
+      if (
+        !SKIP_TAGS.has(tagName) &&
+        !parent.closest('[data-loco-ignore="true"]')
+      ) {
         addPhrase(textNode.nodeValue || '');
       }
     }
     node = walker.nextNode();
   }
 
-  const attrNodes = root.querySelectorAll<HTMLElement>('[aria-label], [title], [placeholder]');
+  const attrNodes = root.querySelectorAll<HTMLElement>(
+    '[aria-label], [title], [placeholder]'
+  );
   for (const el of attrNodes) {
     if (el.closest('[data-loco-ignore="true"]')) continue;
     const ariaLabel = el.getAttribute('aria-label');

@@ -15,16 +15,30 @@ import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
 import { collectLocoKeysFromElement, postLocoTextnodes } from '../src/utils/loco-live';
+import locoI18nPack from '../src/i18n/i18n-translations.json';
 
 const postedLiveSyncSignatures = new Set<string>();
 const locoScriptLoaders = new Map<string, Promise<void>>();
-const locoLiveInitKeys = new Set<string>();
+
+// The exported Loco pack is also served statically (see staticDirs in main.ts)
+// so the Loco runtime can consume it in file mode.
+const LOCO_PACK_URL = '/i18n/i18n-translations.json';
+const locoPackLanguages: string[] = Array.isArray((locoI18nPack as { languages?: string[] }).languages)
+  ? (locoI18nPack as { languages: string[] }).languages
+  : [];
 
 type LocoRuntime = {
-  init?: (config: { apiUrl: string; apiKey?: string }) => Promise<unknown> | unknown;
+  init?: (config: { apiUrl?: string; apiKey?: string; file?: string }) => Promise<unknown> | unknown;
   apply?: (lang: string) => Promise<unknown> | unknown;
   restore?: () => Promise<unknown> | unknown;
+  languages?: () => Promise<unknown> | unknown;
 };
+
+// The Loco runtime is a singleton that can be initialized either in “file”
+// (package) mode or “API” (live) mode — not both. Track which mode we
+// initialized so switching modes triggers a clean reload of the preview iframe.
+let locoInitializedMode: 'package' | 'live' | null = null;
+let locoInitPromise: Promise<LocoRuntime | null> | null = null;
 
 async function ensureLocoRuntimeLoaded(serverUrl: string): Promise<LocoRuntime | null> {
   if (typeof window === 'undefined') return null;
@@ -60,22 +74,52 @@ async function ensureLocoRuntimeLoaded(serverUrl: string): Promise<LocoRuntime |
   return ((window as any).Loco as LocoRuntime | undefined) ?? null;
 }
 
-async function ensureLocoLiveInitialized(serverUrl: string, apiKey?: string): Promise<LocoRuntime | null> {
-  const runtime = await ensureLocoRuntimeLoaded(serverUrl);
-  if (!runtime?.init) return runtime;
+async function ensureLocoInitialized(
+  mode: 'package' | 'live',
+  serverUrl: string,
+  apiKey?: string,
+): Promise<LocoRuntime | null> {
+  // Runtime already initialized in a different mode — reload the preview iframe
+  // so the singleton starts fresh in the requested mode.
+  if (locoInitializedMode && locoInitializedMode !== mode) {
+    window.location.reload();
+    return null;
+  }
 
-  const serverBase = serverUrl.replace(/\/$/, '');
-  const initKey = `${serverBase}|${apiKey || ''}`;
-  if (locoLiveInitKeys.has(initKey)) return runtime;
+  if (locoInitPromise) return locoInitPromise;
 
-  await Promise.resolve(
-    runtime.init({
-      apiUrl: serverBase,
-      apiKey,
-    }),
-  );
-  locoLiveInitKeys.add(initKey);
-  return runtime;
+  locoInitPromise = (async () => {
+    const runtime = await ensureLocoRuntimeLoaded(serverUrl);
+    if (!runtime?.init) return runtime ?? null;
+
+    if (mode === 'package') {
+      // File mode: translations come from the exported pack committed to this
+      // repo — no Loco server round-trip needed to render translations.
+      await Promise.resolve(runtime.init({ file: LOCO_PACK_URL }));
+      // languages() resolves once the pack file is loaded — use it as a
+      // readiness barrier before the first apply().
+      if (runtime.languages) {
+        await Promise.resolve(runtime.languages()).catch(() => undefined);
+      }
+    } else {
+      await Promise.resolve(
+        runtime.init({
+          apiUrl: serverUrl.replace(/\/$/, ''),
+          apiKey,
+        }),
+      );
+    }
+
+    locoInitializedMode = mode;
+    return runtime;
+  })();
+
+  try {
+    return await locoInitPromise;
+  } catch (error) {
+    locoInitPromise = null;
+    throw error;
+  }
 }
 
 // Map of available brands
@@ -212,7 +256,8 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
-// Default Loco configuration from environment variables
+// Default Loco configuration from environment variables.
+// Falls back to the shared hosted Loco instance when env values are absent.
 const defaultLocoServer = (import.meta.env.VITE_LOCO_SERVER_URL as string | undefined)?.trim() || 'https://loco.os.mieweb.org';
 const defaultLocoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || '84ad26c4d9934e638f206ae8';
 const isLocoDisabled = (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
@@ -316,14 +361,8 @@ const withLocoLiveSync: Decorator = (Story, context) => {
   const locale = String(context.globals?.locale || 'en');
   const configuredServer = String(context.globals?.locoServer || '').trim();
   const configuredApiKey = String(context.globals?.locoApiKey || '').trim();
-  const serverFromEnv =
-    (import.meta.env?.VITE_LOCO_SERVER_URL as string | undefined)?.trim() ||
-    'http://10.3.37.116:6199';
-  const serverUrl = configuredServer || serverFromEnv;
-  const apiKey =
-    configuredApiKey ||
-    (import.meta.env?.VITE_LOCO_API_KEY as string | undefined)?.trim() ||
-    undefined;
+  const serverUrl = configuredServer || defaultLocoServer;
+  const apiKey = configuredApiKey || defaultLocoApiKey || undefined;
 
   useEffect(() => {
     if (locoMode !== 'live' || isLocoDisabled) return;
@@ -354,8 +393,8 @@ const withLocoLiveSync: Decorator = (Story, context) => {
   useEffect(() => {
     let cancelled = false;
 
-    // If Loco is disabled or switching back to package mode, undo live runtime translations.
-    if (locoMode !== 'live' || isLocoDisabled) {
+    // Disabled: undo any runtime translations and do nothing else.
+    if (locoMode === 'disable' || isLocoDisabled) {
       const runtime = (window as any).Loco as LocoRuntime | undefined;
       if (runtime?.restore) {
         void Promise.resolve(runtime.restore()).catch(() => undefined);
@@ -364,11 +403,20 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     }
 
     void (async () => {
-      const runtime = await ensureLocoLiveInitialized(serverUrl, apiKey);
+      const mode = locoMode === 'live' ? 'live' : 'package';
+
+      // In package mode only apply languages present in the exported pack;
+      // English (the source language) means “show originals”.
+      const shouldRestore =
+        locale === 'en' || (mode === 'package' && !locoPackLanguages.includes(locale));
+
+      // Nothing to undo yet — don't load the runtime just to restore originals.
+      if (shouldRestore && !(window as any).Loco) return;
+
+      const runtime = await ensureLocoInitialized(mode, serverUrl, apiKey);
       if (!runtime || cancelled) return;
 
-      // Keep English as the baseline original text in Storybook.
-      if (locale === 'en') {
+      if (shouldRestore) {
         if (runtime.restore) {
           await Promise.resolve(runtime.restore());
         }
@@ -379,7 +427,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
         await Promise.resolve(runtime.apply(locale));
       }
     })().catch((error) => {
-      console.warn('[loco-live-sync] Unable to apply live locale with Loco runtime.', error);
+      console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
     });
 
     return () => {
@@ -400,7 +448,7 @@ const preview: Preview = {
     theme: 'light',
     density: 'standard',
     locale: 'en',
-    locoMode: 'live',
+    locoMode: 'package',
     locoServer: defaultLocoServer,
     locoApiKey: defaultLocoApiKey,
   },

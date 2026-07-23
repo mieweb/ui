@@ -222,7 +222,7 @@
     "test:watch": "vitest",
     "prestorybook": "npm run build:esheet",
     "storybook": "storybook dev -p 6006",
-    "loco:pack:sync": "node scripts/sync-loco-pack.mjs",
+    "loco:pack:sync": "node --env-file-if-exists=.env.local scripts/sync-loco-pack.mjs",
     "build-storybook": "npm run build:esheet && storybook build",
     "test:coverage": "vitest run --coverage",
     "playwright:install": "playwright install --with-deps",

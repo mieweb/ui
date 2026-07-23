@@ -15,7 +15,13 @@ import locoSamplePack from '../../i18n/i18n-translations.json';
 import { createLocoTranslator } from '../../utils/i18n';
 
 const BellIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -25,7 +31,13 @@ const BellIcon = () => (
 );
 
 const MessageIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -35,7 +47,13 @@ const MessageIcon = () => (
 );
 
 const CogIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -61,49 +79,61 @@ export default meta;
 
 type Story = StoryObj;
 
+const PackageTranslatedHeaderDemo = ({ locale }: { locale: string }) => {
+  const [isLocaleChanging, setIsLocaleChanging] = useState(false);
+
+  useEffect(() => {
+    setIsLocaleChanging(true);
+    const timer = window.setTimeout(() => setIsLocaleChanging(false), 260);
+    return () => window.clearTimeout(timer);
+  }, [locale]);
+
+  const t = createLocoTranslator(locoSamplePack, locale, {
+    fallbackLanguage: 'en',
+  });
+
+  return (
+    <div className="min-h-[180px] bg-[var(--mieweb-background)] p-0">
+      <AppHeader className="w-full">
+        <AppHeaderSection align="left">
+          <AppHeaderBrand>{t('AddContactModal')}</AppHeaderBrand>
+          <AppHeaderDivider />
+          <AppHeaderTitle
+            subtitle={t('Description')}
+            className={`transition-all duration-300 ${isLocaleChanging ? 'translate-y-[1px] opacity-70' : 'translate-y-0 opacity-100'}`}
+          >
+            {t('Edit Contact')}
+          </AppHeaderTitle>
+        </AppHeaderSection>
+
+        <AppHeaderSection align="right">
+          <AppHeaderActions>
+            <AppHeaderSearch placeholder={t('Address')} />
+            <AppHeaderIconButton icon={<MessageIcon />} label={t('Email')} />
+            <AppHeaderIconButton
+              icon={<BellIcon />}
+              label={t('City')}
+              badge={3}
+            />
+            <AppHeaderIconButton icon={<CogIcon />} label={t('Degree')} />
+            <button className="bg-primary-800 hover:bg-primary-900 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors">
+              {t('Add Contact')}
+            </button>
+            <AppHeaderUserMenu
+              name="Dr. Jamie Rivera"
+              email="jamie.rivera@bluehive.com"
+            />
+          </AppHeaderActions>
+        </AppHeaderSection>
+      </AppHeader>
+    </div>
+  );
+};
+
 export const PackageTranslatedHeader: Story = {
-  render: (_, context) => {
-    const locale = String(context.globals.locale || 'en');
-    const [isLocaleChanging, setIsLocaleChanging] = useState(false);
-
-    useEffect(() => {
-      setIsLocaleChanging(true);
-      const timer = window.setTimeout(() => setIsLocaleChanging(false), 260);
-      return () => window.clearTimeout(timer);
-    }, [locale]);
-
-    const t = createLocoTranslator(locoSamplePack, locale, {
-      fallbackLanguage: 'en',
-    });
-
-    return (
-      <div className="min-h-[180px] bg-[var(--mieweb-background)] p-0">
-        <AppHeader className="w-full">
-          <AppHeaderSection align="left">
-            <AppHeaderBrand>{t('AddContactModal')}</AppHeaderBrand>
-            <AppHeaderDivider />
-            <AppHeaderTitle
-              subtitle={t('Description')}
-              className={`transition-all duration-300 ${isLocaleChanging ? 'opacity-70 translate-y-[1px]' : 'opacity-100 translate-y-0'}`}
-            >
-              {t('Edit Contact')}
-            </AppHeaderTitle>
-          </AppHeaderSection>
-
-          <AppHeaderSection align="right">
-            <AppHeaderActions>
-              <AppHeaderSearch placeholder={t('Address')} />
-              <AppHeaderIconButton icon={<MessageIcon />} label={t('Email')} />
-              <AppHeaderIconButton icon={<BellIcon />} label={t('City')} badge={3} />
-              <AppHeaderIconButton icon={<CogIcon />} label={t('Degree')} />
-              <button className="bg-primary-800 hover:bg-primary-900 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors">
-                {t('Add Contact')}
-              </button>
-              <AppHeaderUserMenu name="Dr. Jamie Rivera" email="jamie.rivera@bluehive.com" />
-            </AppHeaderActions>
-          </AppHeaderSection>
-        </AppHeader>
-      </div>
-    );
-  },
+  render: (_, context) => (
+    <PackageTranslatedHeaderDemo
+      locale={String(context.globals.locale || 'en')}
+    />
+  ),
 };

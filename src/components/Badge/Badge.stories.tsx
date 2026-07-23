@@ -47,7 +47,9 @@ type BadgeStoryArgs = React.ComponentProps<typeof Badge> & {
 
 function getTranslator(context: { globals?: Record<string, unknown> }) {
   const locale = String(context.globals?.locale || 'en');
-  return createLocoTranslator(locoSamplePack, locale, { fallbackLanguage: 'en' });
+  return createLocoTranslator(locoSamplePack, locale, {
+    fallbackLanguage: 'en',
+  });
 }
 
 const meta: Meta<typeof Badge> = {
