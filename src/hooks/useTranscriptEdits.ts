@@ -138,14 +138,16 @@ export function getSpeedAtIndex(
   speedMarkers: SpeedMarker[],
   defaultSpeed: PlaybackSpeed
 ): PlaybackSpeed {
-  // Markers are kept sorted at insert (toggleSpeedMarker) — scanning without
-  // a per-call copy+sort matters because stats calls this once per word.
+  // Single O(n) pass that takes the marker with the greatest wordIndex at or
+  // before the target. This avoids the per-call copy+sort (stats calls this
+  // once per word) without assuming callers pass sorted markers — it is a
+  // public helper, so arbitrary order must still yield the right answer.
   let effectiveSpeed = defaultSpeed;
+  let nearest = -1;
   for (const marker of speedMarkers) {
-    if (marker.wordIndex <= wordIndex) {
+    if (marker.wordIndex <= wordIndex && marker.wordIndex > nearest) {
+      nearest = marker.wordIndex;
       effectiveSpeed = marker.speed;
-    } else {
-      break;
     }
   }
   return effectiveSpeed;

@@ -117,6 +117,19 @@ describe('getSpeedAtIndex', () => {
     expect(getSpeedAtIndex(2, markers, 1)).toBe(1.5);
     expect(getSpeedAtIndex(3, markers, 1)).toBe(2);
   });
+
+  it('is order-independent for external callers (#327 review)', () => {
+    // Public helper: callers may pass markers in arbitrary order.
+    const unsorted: SpeedMarker[] = [
+      { wordIndex: 5, speed: 2 },
+      { wordIndex: 1, speed: 1.5 },
+      { wordIndex: 3, speed: 0.5 },
+    ];
+    expect(getSpeedAtIndex(0, unsorted, 1)).toBe(1);
+    expect(getSpeedAtIndex(1, unsorted, 1)).toBe(1.5);
+    expect(getSpeedAtIndex(4, unsorted, 1)).toBe(0.5);
+    expect(getSpeedAtIndex(9, unsorted, 1)).toBe(2);
+  });
 });
 
 // ============================================================================
