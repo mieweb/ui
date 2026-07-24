@@ -253,10 +253,16 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       ? preferCodetypes.join(',')
       : null;
     // coding-system filter: the user's segmented-control pick (when
-    // codetypeOptions is rendered) overrides the searchCodetypes prop
+    // codetypeOptions is rendered) overrides the searchCodetypes prop. Guard
+    // against an empty options array (falls back to searchCodetypes) and an
+    // index left past the end when the options shrink.
     const [codetypeIdx, setCodetypeIdx] = React.useState(0);
-    const activeCodetypes = codetypeOptions
-      ? codetypeOptions[codetypeIdx]?.codetypes
+    const hasCodetypeOptions = (codetypeOptions?.length ?? 0) > 0;
+    const activeCodetypeIdx = hasCodetypeOptions
+      ? Math.min(codetypeIdx, codetypeOptions!.length - 1)
+      : 0;
+    const activeCodetypes = hasCodetypeOptions
+      ? codetypeOptions![activeCodetypeIdx]?.codetypes
       : searchCodetypes;
     const codetypesKey = activeCodetypes ? activeCodetypes.join(',') : null;
     /** active codetypes for the stable openDrill callback */
@@ -500,18 +506,18 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     >({ open: dropdownOpen, matchWidth: true });
 
     // user-facing coding-system filter (e.g. All | ICD-10 | SNOMED)
-    const codetypeToggle = codetypeOptions && codetypeOptions.length > 0 && (
+    const codetypeToggle = hasCodetypeOptions && (
       <div
         role="radiogroup"
         aria-label="Coding system"
         className="flex flex-wrap items-center gap-1"
       >
-        {codetypeOptions.map((opt, i) => (
+        {codetypeOptions!.map((opt, i) => (
           <button
             key={opt.label}
             type="button"
             role="radio"
-            aria-checked={i === codetypeIdx}
+            aria-checked={i === activeCodetypeIdx}
             onClick={() => {
               setCodetypeIdx(i);
               setDrill(null);
@@ -519,8 +525,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             className={cn(
               'rounded-full border px-2.5 py-0.5 text-xs transition-colors',
               'focus:ring-ring focus:ring-2 focus:outline-none',
-              i === codetypeIdx
-                ? 'border-primary-600 bg-primary-600 dark:border-primary-400 dark:bg-primary-400 dark:text-primary-950 text-white'
+              i === activeCodetypeIdx
+                ? 'border-primary-800 bg-primary-800 dark:border-primary-400 dark:bg-primary-400 dark:text-primary-950 text-white'
                 : 'border-border text-muted-foreground hover:text-foreground'
             )}
           >
@@ -532,7 +538,6 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
 
     const searchBox = (
       <div className="relative" ref={anchorRef}>
-        {' '}
         <SearchIcon
           size={16}
           className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
