@@ -20,6 +20,7 @@ import type {
   PlaybackSpeed,
   SpeedMarker,
 } from '../components/TranscriptView/transcript';
+import { isSilenceType } from '../components/TranscriptView/transcript';
 
 /** Default filler words offered for removal */
 export const DEFAULT_FILLER_WORDS = [
@@ -137,18 +138,16 @@ export function getSpeedAtIndex(
   speedMarkers: SpeedMarker[],
   defaultSpeed: PlaybackSpeed
 ): PlaybackSpeed {
-  // Sort markers by word index (should already be sorted, but be safe)
-  const sortedMarkers = [...speedMarkers].sort(
-    (a, b) => a.wordIndex - b.wordIndex
-  );
-
-  // Find the last marker at or before this word index
+  // Single O(n) pass that takes the marker with the greatest wordIndex at or
+  // before the target. This avoids the per-call copy+sort (stats calls this
+  // once per word) without assuming callers pass sorted markers — it is a
+  // public helper, so arbitrary order must still yield the right answer.
   let effectiveSpeed = defaultSpeed;
-  for (const marker of sortedMarkers) {
-    if (marker.wordIndex <= wordIndex) {
+  let nearest = -1;
+  for (const marker of speedMarkers) {
+    if (marker.wordIndex <= wordIndex && marker.wordIndex > nearest) {
+      nearest = marker.wordIndex;
       effectiveSpeed = marker.speed;
-    } else {
-      break;
     }
   }
   return effectiveSpeed;
@@ -320,7 +319,8 @@ export interface UseTranscriptEditsResult {
   ) => void;
 
   // -- Silence thresholds --
-  /** Rebuild silence detection with new thresholds, preserving word deletions */
+  /** Rebuild silence detection with new thresholds, preserving word deletions.
+   *  Not undoable — clears the undo stack (prior snapshots reference the old silence layout). */
   setSilenceThresholds: (minMs: number, nlMs: number) => void;
   /** Current silence detection thresholds (ms) */
   silenceThresholds: { minSilenceMs: number; nlSilenceMs: number };
@@ -383,9 +383,25 @@ export function useTranscriptEdits(
   );
   const [clipboard, setClipboard] = useState<TranscriptClipboard | null>(null);
   const [hasEdits, setHasEdits] = useState(() => {
-    // Check if initial state has edits
+    // Compare saved state against the derived baseline: deletions, insertions,
+    // length changes, AND text edits (text-only edits previously initialized
+    // hasEdits=false, which also suppressed onChange persistence).
     if (initialEditedWords) {
-      return initialEditedWords.some((ew) => ew.deleted || ew.inserted);
+      const baseline = initEditableWords(
+        transcript,
+        initialMinSilenceMs,
+        initialNlSilenceMs
+      );
+      return (
+        initialEditedWords.length !== baseline.length ||
+        initialEditedWords.some(
+          (ew, i) =>
+            ew.deleted ||
+            ew.inserted ||
+            ew.originalIndex !== i ||
+            ew.word.text !== baseline[i].word.text
+        )
+      );
     }
     return false;
   });
@@ -438,11 +454,21 @@ export function useTranscriptEdits(
     const previousState = undoStack[undoStack.length - 1];
     setUndoStack((prev) => prev.slice(0, -1));
     setEditedWords(previousState);
+    // Compare against the silence-inserted baseline (what the editor actually
+    // starts from), not raw transcript.words — with any detected silence the
+    // lengths never matched and hasEdits stayed true after undoing everything.
+    const baseline = initEditableWords(transcript, minSilenceMs, nlSilenceMs);
     const isOriginal =
-      previousState.every((ew, i) => ew.originalIndex === i && !ew.deleted) &&
-      previousState.length === transcript.words.length;
+      previousState.length === baseline.length &&
+      previousState.every(
+        (ew, i) =>
+          ew.originalIndex === i &&
+          !ew.deleted &&
+          !ew.inserted &&
+          ew.word.text === baseline[i].word.text
+      );
     setHasEdits(!isOriginal);
-  }, [undoStack, transcript.words.length]);
+  }, [undoStack, transcript, minSilenceMs, nlSilenceMs]);
 
   // Toggle deleted state on a single word
   const toggleWordDeleted = useCallback(
@@ -565,7 +591,7 @@ export function useTranscriptEdits(
   const splitSilence = useCallback(
     (index: number, durationsSec: number[]) => {
       const ew = editedWords[index];
-      if (!ew || ew.word.wordType !== 'silence') return;
+      if (!ew || !isSilenceType(ew.word.wordType)) return;
 
       pushUndo();
 
@@ -632,11 +658,7 @@ export function useTranscriptEdits(
         if (ew.deleted) return ew;
 
         // Check if it's a silence that should be removed
-        if (
-          (ew.word.wordType === 'silence' ||
-            ew.word.wordType === 'silence-newline') &&
-          silenceThresholdMs !== null
-        ) {
+        if (isSilenceType(ew.word.wordType) && silenceThresholdMs !== null) {
           const durationMs = ew.word.endMs - ew.word.startMs;
           if (durationMs > silenceThresholdMs) {
             return { ...ew, deleted: true };
@@ -645,10 +667,7 @@ export function useTranscriptEdits(
         }
 
         // Check if it's a filler word that should be removed
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline'
-        ) {
+        if (!isSilenceType(ew.word.wordType)) {
           const wordText = normalizeWordText(ew.word.text);
           if (fillerSet.has(wordText)) {
             return { ...ew, deleted: true };
@@ -676,17 +695,18 @@ export function useTranscriptEdits(
     (newMinSilenceMs: number, newNlSilenceMs: number) => {
       setMinSilenceMs(newMinSilenceMs);
       setNlSilenceMs(newNlSilenceMs);
-      // Rebuild the editable words with new silence detection
-      // Preserve deleted status for actual words (not silences)
+      // Rebuild the editable words with new silence detection.
+      // Preserve deleted status for actual words (not silences), keyed by the
+      // word's ORDINAL among non-silence words — the same key the restore loop
+      // below uses. (Keying by originalIndex — a position in the old
+      // silence-inserted array — mismatched the restore counter and applied
+      // deletions to the wrong words after a threshold change.)
       const wordDeletedStatus = new Map<number, boolean>();
+      let saveIdx = 0;
       editedWords.forEach((ew) => {
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline' &&
-          ew.originalIndex >= 0
-        ) {
-          // Map original word index to deleted status
-          wordDeletedStatus.set(ew.originalIndex, ew.deleted);
+        if (!isSilenceType(ew.word.wordType) && ew.originalIndex >= 0) {
+          wordDeletedStatus.set(saveIdx, ew.deleted);
+          saveIdx++;
         }
       });
 
@@ -697,13 +717,10 @@ export function useTranscriptEdits(
         newNlSilenceMs
       );
 
-      // Restore deleted status for words
+      // Restore deleted status for words (same ordinal keyspace as the save)
       let wordIdx = 0;
       const restoredWords = newEditedWords.map((ew) => {
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline'
-        ) {
+        if (!isSilenceType(ew.word.wordType)) {
           const wasDeleted = wordDeletedStatus.get(wordIdx) ?? false;
           wordIdx++;
           return { ...ew, deleted: wasDeleted };
@@ -712,6 +729,11 @@ export function useTranscriptEdits(
       });
 
       setEditedWords(restoredWords);
+      // Undo snapshots were captured against the previous silence layout;
+      // restoring one after a rebuild would resurrect silence chips that no
+      // longer match the current thresholds. Threshold changes are not
+      // undoable, so drop the stale history rather than restore it.
+      setUndoStack([]);
     },
     [editedWords, transcript]
   );
@@ -779,16 +801,16 @@ export function useTranscriptEdits(
   const stats = useMemo<TranscriptEditStats>(() => {
     // Count active (non-deleted) words (excluding silences for word count)
     const activeWordCount = editedWords.filter(
-      (ew) => !ew.deleted && ew.word.wordType !== 'silence'
+      (ew) => !ew.deleted && !isSilenceType(ew.word.wordType)
     ).length;
     const activeSilenceCount = editedWords.filter(
-      (ew) => !ew.deleted && ew.word.wordType === 'silence'
+      (ew) => !ew.deleted && isSilenceType(ew.word.wordType)
     ).length;
     const deletedWordCount = editedWords.filter(
-      (ew) => ew.deleted && ew.word.wordType !== 'silence'
+      (ew) => ew.deleted && !isSilenceType(ew.word.wordType)
     ).length;
     const deletedSilenceCount = editedWords.filter(
-      (ew) => ew.deleted && ew.word.wordType === 'silence'
+      (ew) => ew.deleted && isSilenceType(ew.word.wordType)
     ).length;
 
     // Calculate edited duration (sum of non-deleted words/silences, adjusted for speed markers)
@@ -813,34 +835,21 @@ export function useTranscriptEdits(
     // Occurrence counts per filler (and every active word, for custom fillers)
     const matchCounts = new Map<string, number>();
     for (const ew of editedWords) {
-      if (ew.deleted || ew.word.wordType === 'silence') continue;
+      if (ew.deleted || isSilenceType(ew.word.wordType)) continue;
       const wordText = normalizeWordText(ew.word.text);
-      for (const filler of DEFAULT_FILLER_WORDS) {
-        if (wordText === filler) {
-          matchCounts.set(filler, (matchCounts.get(filler) || 0) + 1);
-        }
-      }
-      // Also check for the exact word in case it's a custom filler
+      // One increment per occurrence — DEFAULT_FILLER_WORDS entries were
+      // previously counted twice (once in a defaults loop, once here).
       matchCounts.set(wordText, (matchCounts.get(wordText) || 0) + 1);
     }
 
     // Total duration per filler word type
     const durations = new Map<string, number>();
     for (const ew of editedWords) {
-      if (
-        ew.deleted ||
-        ew.word.wordType === 'silence' ||
-        ew.word.wordType === 'silence-newline'
-      )
-        continue;
+      if (ew.deleted || isSilenceType(ew.word.wordType)) continue;
       const wordText = normalizeWordText(ew.word.text);
       const wordDuration = ew.word.endMs - ew.word.startMs;
-      for (const filler of DEFAULT_FILLER_WORDS) {
-        if (wordText === filler) {
-          durations.set(filler, (durations.get(filler) || 0) + wordDuration);
-        }
-      }
-      // Also track duration for the exact word in case it's a custom filler
+      // One accumulation per occurrence — DEFAULT_FILLER_WORDS entries were
+      // previously accumulated twice, inflating time-saved estimates 2x.
       durations.set(wordText, (durations.get(wordText) || 0) + wordDuration);
     }
 
@@ -851,11 +860,7 @@ export function useTranscriptEdits(
       let durationMs = 0;
       for (const ew of editedWords) {
         if (ew.deleted) continue;
-        if (
-          ew.word.wordType !== 'silence' &&
-          ew.word.wordType !== 'silence-newline'
-        )
-          continue;
+        if (!isSilenceType(ew.word.wordType)) continue;
         const silenceDuration = ew.word.endMs - ew.word.startMs;
         if (silenceDuration > thresholdMs) {
           count++;
