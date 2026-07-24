@@ -269,9 +269,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       ? (memory.serverUrl ?? providerConfig?.memory?.serverUrl)
       : undefined;
     const memLimit = (memory && memory.limit) || 8;
-    const [memoryEntries, setMemoryEntries] = React.useState<MemoryEntry[]>(
-      []
-    );
+    const [memoryEntries, setMemoryEntries] = React.useState<MemoryEntry[]>([]);
     /** Mirror for effects that must not re-run when entries refresh. */
     const memoryCountRef = React.useRef(0);
     memoryCountRef.current = memoryEntries.length;

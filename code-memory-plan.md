@@ -79,9 +79,9 @@ flushed count deltas. Off by default — enabled via a single `memory` prop.
 
 ## Milestone 4 — story + docs
 
-- [ ] `WithMemory` story in `CodeLookup.stories.tsx`: alice/bob user toggle × orders/presenting context toggle demonstrating isolation; stubbed `fetch` for `serverUrl` (or omit serverUrl and demo local-only)
-- [ ] `README.md`: document prop, scope semantics (user + context), sync protocol, storage, disable, multi-user
-- [ ] Manual pass in Storybook (http://localhost:6006): pick codes → refocus shows count-ordered picklist; user/context switch isolates; page reload persists
+- [x] `WithMemory` story in `CodeLookup.stories.tsx`: alice/bob user toggle × orders/presenting context toggle demonstrating isolation; stubbed `fetch` for `serverUrl` (or omit serverUrl and demo local-only)
+- [x] `README.md`: document prop, scope semantics (user + context), sync protocol, storage, disable, multi-user
+- [x] Manual pass in Storybook (http://localhost:6006): pick codes → refocus shows count-ordered picklist; user/context switch isolates; page reload persists
 
 **Commit:** `docs(CodeLookup): memory picklist story and README`
 

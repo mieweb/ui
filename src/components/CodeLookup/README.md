@@ -237,6 +237,49 @@ In Storybook, the 🌐 **Language** toolbar global switches the locale for the
 > `new Worker(new URL(...))` pattern needs bundler configuration in the tsup
 > build. Storybook (Vite) handles it natively; see `Healthcare/CodeLookup`.
 
+### Memory — "Frequently used" picklist (`memory` prop)
+
+Off by default. With a config, focusing the **empty** search box lists the
+user's most-picked codes for that context (count desc, most-recent tiebreak):
+
+```tsx
+<CodeLookup
+  indexUrl="/codify"
+  memory={{
+    context: 'med-orders',      // required — scopes the counts per use-site
+    userId: currentUser.id,     // default: provider `memory.userId`, then 'anonymous'
+    serverUrl: '/api/code-memory', // optional count sync; provider default fallback
+    limit: 8,                   // picklist size (default 8)
+  }}
+  onSelect={…}
+/>
+```
+
+- **Scope = (userId, context)** — buckets never mix across users sharing a
+  browser or across contexts (`med-orders` vs `presenting-meds`). Rows carry
+  `viaMemory: true`.
+- **Storage** — IndexedDB (`mieweb-codelookup-memory` / `usage` store), keyed
+  `userId|context|fullid`, with full display fields so no shard rehydration is
+  needed. Persists across reloads; no IndexedDB (SSR) degrades to no-ops.
+- **Server sync (optional)** — with `serverUrl`:
+  - seed once per scope per session:
+    `GET {serverUrl}?user={userId}&context={context}` →
+    `[{fullid, label, codetype, fullcode, domain, count}]`, merged with
+    `max(localCount, serverCount)`;
+  - picks accumulate deltas flushed lazily:
+    `POST {serverUrl}` body
+    `{user, context, deltas: [{fullid, label, codetype, fullcode, domain, delta}]}`
+    (debounced; `navigator.sendBeacon` on `pagehide`). Failed flushes keep
+    their deltas for the next attempt.
+- **Provider defaults** — `CodeLookupProvider` accepts
+  `memory={{ userId, serverUrl }}` so apps set identity/sync once; each
+  instance still opts in with its own `context`.
+- **Disable / reset** — omit the prop (or pass `false`) to disable;
+  `clearMemory({ userId, context })` (exported from the component barrel)
+  empties one bucket.
+- Typing anything switches to normal search — memory only fills the
+  empty-query dropdown (personal ranking boost while typing is phase 2).
+
 ## 6. Health surveillance — programs.json
 
 The **occupational** (OSHA/FMCSA/NFPA/FAA/OPM/USCG/MSHA/NIOSH/NRC/DOE/USCIS/

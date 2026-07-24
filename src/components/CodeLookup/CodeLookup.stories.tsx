@@ -160,3 +160,64 @@ export const QualityMeasures: Story = {
     />
   ),
 };
+
+function MemoryTemplate({ locale }: { locale?: string }) {
+  const [userId, setUserId] = useState('alice');
+  const [context, setContext] = useState('med-orders');
+  const [selected, setSelected] = useState<CodifyResult | null>(null);
+  const toggle = (
+    label: string,
+    value: string,
+    options: string[],
+    onChange: (v: string) => void
+  ) => (
+    <label className="flex items-center gap-1.5 text-sm">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="border-border bg-background rounded border px-1.5 py-0.5 text-sm"
+      >
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+    </label>
+  );
+  return (
+    <div className="mx-auto max-w-2xl space-y-3">
+      <div className="flex gap-4">
+        {toggle('User', userId, ['alice', 'bob'], setUserId)}
+        {toggle(
+          'Context',
+          context,
+          ['med-orders', 'presenting-meds'],
+          setContext
+        )}
+      </div>
+      <CodeLookup
+        // remount on scope change so seeded input state can't linger
+        key={`${userId}|${context}`}
+        indexUrl="/codify"
+        locale={locale}
+        domains={['med']}
+        memory={{ context, userId }}
+        onSelect={setSelected}
+      />
+      {selected && (
+        <pre className="bg-muted overflow-auto rounded-md p-3 text-xs">
+          {JSON.stringify(selected, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+/** Personal "Frequently used" picklist (the `memory` prop). Pick a few meds,
+ * clear/refocus the empty box — your most-picked codes appear first, counts
+ * persisted in IndexedDB. Switch the **user** or **context** toggles to see
+ * bucket isolation (alice/med-orders never sees bob's picks, nor alice's
+ * presenting-meds picks). Local-only here; add `serverUrl` to seed + sync. */
+export const WithMemory: Story = {
+  render: (_args, { globals }) => <MemoryTemplate locale={globals.locale} />,
+};

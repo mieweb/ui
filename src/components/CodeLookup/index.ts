@@ -7,11 +7,7 @@ export {
   type CodifyDomain,
   type CodeLookupMemoryConfig,
 } from './CodeLookup';
-export {
-  clearMemory,
-  type MemoryEntry,
-  type MemoryScope,
-} from './memoryStore';
+export { clearMemory, type MemoryEntry, type MemoryScope } from './memoryStore';
 export {
   searchShards,
   parseShard,
