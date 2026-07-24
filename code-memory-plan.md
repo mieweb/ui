@@ -87,10 +87,10 @@ flushed count deltas. Off by default — enabled via a single `memory` prop.
 
 ## Milestone 5 — final checks
 
-- [ ] `pnpm typecheck`
-- [ ] `pnpm lint`
-- [ ] `pnpm format:fix`
-- [ ] Full `pnpm vitest run src/components/CodeLookup/`
+- [x] `pnpm typecheck`
+- [x] `pnpm lint`
+- [x] `pnpm format:fix`
+- [x] Full `pnpm vitest run src/components/CodeLookup/`
 - [ ] Open PR
 
 ---
