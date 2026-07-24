@@ -45,20 +45,22 @@ const PackageDrivenTranslationsDemo = ({ locale }: { locale: string }) => {
         weight="bold"
         className={`transition-all duration-300 ${isLocaleChanging ? 'translate-y-[1px] opacity-60' : 'translate-y-0 opacity-100'}`}
       >
-        {t('ui.page.title')}
+        {t('Edit Contact', 'Edit Contact')}
       </Text>
       <Text
         variant="muted"
         className={`transition-opacity duration-300 ${isLocaleChanging ? 'opacity-70' : 'opacity-100'}`}
       >
-        {t('ui.page.subtitle')}
+        {t('Description', 'Description')}
       </Text>
 
       <div className="space-y-1 border-t border-[var(--mieweb-border)] pt-2">
-        <Text size="sm">ui.actions.save =&gt; {t('ui.actions.save')}</Text>
-        <Text size="sm">ui.actions.cancel =&gt; {t('ui.actions.cancel')}</Text>
-        <Text size="sm">ui.status.ready =&gt; {t('ui.status.ready')}</Text>
-        <Text size="sm">ui.unknown.key =&gt; {t('ui.unknown.key')}</Text>
+        <Text size="sm">Add Contact =&gt; {t('Add Contact', 'Add Contact')}</Text>
+        <Text size="sm">Cancel =&gt; {t('Cancel', 'Cancel')}</Text>
+        <Text size="sm">Email =&gt; {t('Email', 'Email')}</Text>
+        <Text size="sm">
+          Missing Phrase =&gt; {t('ui.unknown.key', 'Fallback text')}
+        </Text>
       </div>
     </div>
   );

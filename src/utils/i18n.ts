@@ -93,7 +93,7 @@ export function resolveLocoTranslation(
   if (typeof direct === 'string') return direct;
 
   const nested = resolveDottedValue(dictionary, key);
-  if (nested) return nested;
+  if (nested !== undefined) return nested;
 
   if (fallbackLanguage && fallbackLanguage !== language) {
     const fallbackDictionary = getLocoDictionary(i18nPackage, fallbackLanguage);

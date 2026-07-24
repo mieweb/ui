@@ -66,6 +66,33 @@ describe('loco i18n utils', () => {
     expect(t('ui.does.not.exist', 'Default text')).toBe('Default text');
   });
 
+  it('preserves empty-string translations without falling back', () => {
+    const packWithEmpty: LocoI18nPackage = {
+      ...samplePack,
+      resources: {
+        ...samplePack.resources,
+        fr: {
+          translation: {
+            ui: {
+              actions: {
+                save: '',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    expect(
+      resolveLocoTranslation(packWithEmpty, 'fr', 'ui.actions.save', 'en')
+    ).toBe('');
+
+    const t = createLocoTranslator(packWithEmpty, 'fr', {
+      fallbackLanguage: 'en',
+    });
+    expect(t('ui.actions.save')).toBe('');
+  });
+
   it('supports the native loco export format', () => {
     const locoPack: LocoI18nPackage = {
       languages: ['zh-Hans'],

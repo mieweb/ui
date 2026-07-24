@@ -30,10 +30,16 @@ function isUsefulPhrase(value: string): boolean {
   if (!value) return false;
   if (value.length < 2 || value.length > 180) return false;
   if (/^[\d\s.,:%+-/()]+$/.test(value)) return false;
+  if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(value)) return false;
+  if (/(https?:\/\/|www\.)/i.test(value)) return false;
   return true;
 }
 
 export function collectLocoKeysFromElement(root: HTMLElement): LocoKeyEntry[] {
+  const doc = root.ownerDocument;
+  const nodeFilter = doc?.defaultView?.NodeFilter;
+  if (!doc || !nodeFilter) return [];
+
   const collected = new Map<string, LocoKeyEntry>();
 
   const addPhrase = (raw: string) => {
@@ -43,7 +49,7 @@ export function collectLocoKeysFromElement(root: HTMLElement): LocoKeyEntry[] {
     collected.set(phrase, { key: phrase, context: '' });
   };
 
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const walker = doc.createTreeWalker(root, nodeFilter.SHOW_TEXT);
   let node = walker.nextNode();
   while (node) {
     const textNode = node as Text;

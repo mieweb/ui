@@ -391,7 +391,7 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
 // Default Loco configuration from environment variables.
 // Falls back to the shared hosted Loco instance when env values are absent.
 const defaultLocoServer = (import.meta.env.VITE_LOCO_SERVER_URL as string | undefined)?.trim() || 'https://loco.os.mieweb.org';
-const defaultLocoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || '84ad26c4d9934e638f206ae8';
+const defaultLocoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || '';
 const isLocoDisabled = (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
 
 // Appends a "View source on GitHub" link below each story, derived from the

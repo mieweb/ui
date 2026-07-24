@@ -102,7 +102,7 @@ type Story = StoryObj<BadgeStoryArgs>;
 export const Default: Story = {
   render: (args, context) => {
     const t = getTranslator(context);
-    return <Badge {...args}>{t('ui.badge.single')}</Badge>;
+    return <Badge {...args}>{t('ui.badge.single', 'Badge')}</Badge>;
   },
 };
 
@@ -111,12 +111,12 @@ export const AllVariants: Story = {
     const t = getTranslator(context);
     return (
       <div className="flex flex-wrap gap-2">
-        <Badge variant="default">{t('ui.badge.variants.default')}</Badge>
-        <Badge variant="secondary">{t('ui.badge.variants.secondary')}</Badge>
-        <Badge variant="success">{t('ui.badge.variants.success')}</Badge>
-        <Badge variant="warning">{t('ui.badge.variants.warning')}</Badge>
-        <Badge variant="danger">{t('ui.badge.variants.danger')}</Badge>
-        <Badge variant="outline">{t('ui.badge.variants.outline')}</Badge>
+        <Badge variant="default">{t('ui.badge.variants.default', 'Default')}</Badge>
+        <Badge variant="secondary">{t('ui.badge.variants.secondary', 'Secondary')}</Badge>
+        <Badge variant="success">{t('ui.badge.variants.success', 'Success')}</Badge>
+        <Badge variant="warning">{t('ui.badge.variants.warning', 'Warning')}</Badge>
+        <Badge variant="danger">{t('ui.badge.variants.danger', 'Danger')}</Badge>
+        <Badge variant="outline">{t('ui.badge.variants.outline', 'Outline')}</Badge>
       </div>
     );
   },
@@ -127,9 +127,9 @@ export const AllSizes: Story = {
     const t = getTranslator(context);
     return (
       <div className="flex items-center gap-2">
-        <Badge size="sm">{t('ui.badge.sizes.small')}</Badge>
-        <Badge size="md">{t('ui.badge.sizes.medium')}</Badge>
-        <Badge size="lg">{t('ui.badge.sizes.large')}</Badge>
+        <Badge size="sm">{t('ui.badge.sizes.small', 'Small')}</Badge>
+        <Badge size="md">{t('ui.badge.sizes.medium', 'Medium')}</Badge>
+        <Badge size="lg">{t('ui.badge.sizes.large', 'Large')}</Badge>
       </div>
     );
   },
@@ -144,7 +144,7 @@ export const WithIcon: Story = {
         {...args}
         icon={IconComponent ? <IconComponent size={12} /> : undefined}
       >
-        {t('ui.badge.examples.new')}
+        {t('ui.badge.examples.new', 'New')}
       </Badge>
     );
   },
@@ -159,10 +159,10 @@ export const StatusExamples: Story = {
     const t = getTranslator(context);
     return (
       <div className="flex flex-wrap gap-2">
-        <Badge variant="success">{t('ui.badge.examples.active')}</Badge>
-        <Badge variant="warning">{t('ui.badge.examples.pending')}</Badge>
-        <Badge variant="danger">{t('ui.badge.examples.expired')}</Badge>
-        <Badge variant="secondary">{t('ui.badge.examples.draft')}</Badge>
+        <Badge variant="success">{t('ui.badge.examples.active', 'Active')}</Badge>
+        <Badge variant="warning">{t('ui.badge.examples.pending', 'Pending')}</Badge>
+        <Badge variant="danger">{t('ui.badge.examples.expired', 'Expired')}</Badge>
+        <Badge variant="secondary">{t('ui.badge.examples.draft', 'Draft')}</Badge>
       </div>
     );
   },
