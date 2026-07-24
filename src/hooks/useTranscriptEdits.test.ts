@@ -343,6 +343,31 @@ describe('ui#323 regressions', () => {
     expect(result.current.editedWords).toBe(before);
   });
 
+  it('keeps deletions on the right words across a threshold rebuild with pasted words (#327 review)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    // Copy 'Hello' and paste the copy before 'world'. The pasted word keeps
+    // its source originalIndex, but the rebuild re-inits from the original
+    // transcript (dropping inserts) — so it must not occupy a slot in the
+    // deletion keyspace, or every word after it shifts.
+    act(() => result.current.copy([0]));
+    act(() => result.current.paste(2, true));
+    const worldIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'world'
+    );
+    act(() => result.current.toggleWordDeleted(worldIdx));
+
+    act(() => result.current.setSilenceThresholds(100, 5000));
+
+    // The rebuild drops the pasted copy; 'world' must still be the deleted one
+    expect(result.current.editedWords).toHaveLength(3);
+    const [hello, um, world] = result.current.editedWords;
+    expect(world.deleted).toBe(true);
+    expect(hello.deleted).toBe(false);
+    expect(um.deleted).toBe(false);
+  });
+
   it('initializes hasEdits=true for saved text-only edits (finding 13)', () => {
     const baseline = initEditableWords(packed);
     const withTextEdit: EditableWord[] = baseline.map((ew, i) =>
