@@ -506,6 +506,41 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     >({ open: dropdownOpen, matchWidth: true });
 
     // user-facing coding-system filter (e.g. All | ICD-10 | SNOMED)
+    const codetypeBtnRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+    const selectCodetype = (i: number) => {
+      setCodetypeIdx(i);
+      setDrill(null);
+    };
+    // ARIA radiogroup keyboard model: arrows/Home/End move selection and
+    // focus (roving tabIndex); only the checked radio is in the tab order.
+    const onCodetypeKeyDown = (
+      e: React.KeyboardEvent<HTMLButtonElement>,
+      i: number
+    ) => {
+      const n = codetypeOptions!.length;
+      let next: number;
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          next = (i + 1) % n;
+          break;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          next = (i - 1 + n) % n;
+          break;
+        case 'Home':
+          next = 0;
+          break;
+        case 'End':
+          next = n - 1;
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      selectCodetype(next);
+      codetypeBtnRefs.current[next]?.focus();
+    };
     const codetypeToggle = hasCodetypeOptions && (
       <div
         role="radiogroup"
@@ -514,14 +549,16 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       >
         {codetypeOptions!.map((opt, i) => (
           <button
-            key={opt.label}
+            key={i}
+            ref={(el) => {
+              codetypeBtnRefs.current[i] = el;
+            }}
             type="button"
             role="radio"
             aria-checked={i === activeCodetypeIdx}
-            onClick={() => {
-              setCodetypeIdx(i);
-              setDrill(null);
-            }}
+            tabIndex={i === activeCodetypeIdx ? 0 : -1}
+            onClick={() => selectCodetype(i)}
+            onKeyDown={(e) => onCodetypeKeyDown(e, i)}
             className={cn(
               'rounded-full border px-2.5 py-0.5 text-xs transition-colors',
               'focus:ring-ring focus:ring-2 focus:outline-none',
