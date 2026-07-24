@@ -580,6 +580,19 @@ export function searchShards(
       if (!prev || r.score > prev.score) best.set(r.fullid, r);
     }
     results = [...best.values()];
+    if (collapse) {
+      // label hits were collapsed per family inside searchShard, but code
+      // hits are flat — collapse the merged list so a family never shows
+      // twice. Highest score represents (an exact code beats its family's
+      // label row); members stay reachable through the drill-down.
+      const fams = new Map<string, CodifyResult>();
+      for (const r of results) {
+        const key = familyKey(r.domain, r.label, r.fullcode);
+        const prev = fams.get(key);
+        if (!prev || r.score > prev.score) fams.set(key, r);
+      }
+      results = [...fams.values()];
+    }
   }
   results.sort((a, b) => b.score - a.score);
   return results.slice(0, limit);

@@ -369,5 +369,23 @@ describe('searchShards', () => {
       const r = searchShards([shard], 'b12');
       expect(r).toHaveLength(1);
     });
+
+    it('collapse keeps one row per family across label and code hits', () => {
+      const shard = makeShard('condition', [
+        { label: 'Type 2 diabetes mellitus', code: 'E11', codetype: 'ICD10' },
+        {
+          label: 'Type 2 diabetes w/ foot ulcer',
+          code: 'E11.621',
+          codetype: 'ICD10',
+        },
+        { label: 'E11 review encounter', code: 'Z09.1', codetype: 'ICD10' },
+      ]);
+      const r = searchShards([shard], 'e11', 20, true);
+      // one row for the #E11 code family (exact code represents), one for
+      // the label-matched Z09 family
+      expect(r).toHaveLength(2);
+      expect(r[0].fullcode).toBe('E11');
+      expect(r[0].viaCode).toBe(true);
+    });
   });
 });
