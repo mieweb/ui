@@ -261,7 +261,7 @@ const gappy: Transcript = {
   ],
 };
 
-describe('ui#323 regressions', () => {
+describe('ui#323 / #327-review regressions', () => {
   it('counts silence-newline entries as silences, not words (finding 3)', () => {
     const { result } = renderHook(() =>
       useTranscriptEdits({ transcript: gappy })
