@@ -1,5 +1,8 @@
-import { addons } from 'storybook/manager-api';
+import React from 'react';
+import { addons, types } from 'storybook/manager-api';
 import { create } from 'storybook/theming/create';
+import { IconButton } from 'storybook/internal/components';
+import { ShareAltIcon } from '@storybook/icons';
 
 // Brand theme configurations for the Storybook manager UI
 const brandThemes = {
@@ -473,4 +476,47 @@ addons.register('mieweb-404-redirect', (api) => {
       selectFallbackIfAvailable();
     }
   }, POLL_INTERVAL_MS);
+});
+
+// Storybook 10 moved "Open canvas in new tab" into the Share menu; restore a
+// one-click toolbar button that opens the bare story iframe (current globals
+// preserved) in a new tab.
+addons.register('mieweb-open-in-new-tab', (api) => {
+  addons.add('mieweb-open-in-new-tab/tool', {
+    type: types.TOOLEXTRA,
+    title: 'Open canvas in new tab',
+    match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
+    render: () =>
+      React.createElement(
+        IconButton,
+        {
+          key: 'mieweb-open-in-new-tab',
+          title: 'Open canvas in new tab',
+          'aria-label': 'Open canvas in new tab',
+          onClick: () => {
+            const { storyId } = api.getUrlState();
+            if (!storyId) return;
+            const url = new URL('iframe.html', window.location.href);
+            url.searchParams.set('id', storyId);
+            url.searchParams.set('viewMode', 'story');
+            // Canvas-inspection tools (measure/outline) shouldn't follow the
+            // story into the popped-out tab; object-valued globals (viewport,
+            // backgrounds, …) don't survive `key:value` URL encoding, so only
+            // primitive globals are forwarded.
+            const EXCLUDED_GLOBALS = new Set(['measureEnabled', 'outline']);
+            const globalsParam = Object.entries(api.getGlobals() ?? {})
+              .filter(
+                ([key, value]) =>
+                  !EXCLUDED_GLOBALS.has(key) &&
+                  ['string', 'number', 'boolean'].includes(typeof value)
+              )
+              .map(([key, value]) => `${key}:${value}`)
+              .join(';');
+            if (globalsParam) url.searchParams.set('globals', globalsParam);
+            window.open(url.toString(), '_blank', 'noopener,noreferrer');
+          },
+        },
+        React.createElement(ShareAltIcon)
+      ),
+  });
 });
