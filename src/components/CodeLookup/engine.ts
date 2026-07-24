@@ -491,6 +491,12 @@ function codeIndex(s: CodifyShard): { keys: string[]; docs: Uint32Array } {
   return s.codeIndex;
 }
 
+/** Cap on code-index entries scanned per shard per query — a short ambiguous
+ * prefix ("e1", "99") stops early instead of walking thousands of codes. The
+ * scan starts at the exact match, so the skipped tail is only ever the
+ * longest (lowest-scoring) extensions. */
+const MAX_CODE_SCAN = 1000;
+
 function searchShardCodes(
   s: CodifyShard,
   q: string,
@@ -509,10 +515,22 @@ function searchShardCodes(
   }
   const billable =
     opts?.billableOnly && s.domain === 'condition' ? billableMask(s) : null;
-  for (let i = lo; i < keys.length && keys[i].startsWith(q); i++) {
+  // codetype boost — same contract as searchShard (see SearchOptions)
+  let boostIdx: Set<number> | null = null;
+  if (opts?.boostCodetypes) {
+    const idx = opts.boostCodetypes
+      .map((ct) => s.codetypes.indexOf(ct))
+      .filter((i) => i >= 0);
+    if (idx.length > 0) boostIdx = new Set(idx);
+  }
+  const end = Math.min(keys.length, lo + MAX_CODE_SCAN);
+  for (let i = lo; i < end && keys[i].startsWith(q); i++) {
     const d = docs[i];
     if (billable && billable[d] !== 1) continue;
-    const score = CODE_MATCH_BASE * (q.length / keys[i].length);
+    const score =
+      CODE_MATCH_BASE *
+      (q.length / keys[i].length) *
+      (boostIdx && boostIdx.has(s.docCodetype[d]) ? CODETYPE_BOOST : 1);
     pushResult(out, s, d, score, false, false, limit * 3, true);
   }
 }

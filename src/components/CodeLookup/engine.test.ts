@@ -387,5 +387,30 @@ describe('searchShards', () => {
       expect(r[0].fullcode).toBe('E11');
       expect(r[0].viaCode).toBe(true);
     });
+
+    it('applies boostCodetypes to code matches', () => {
+      const shard = makeShard('condition', [
+        { label: 'Other disorder', code: 'E11.8', codetype: 'SNOMED US' },
+        { label: 'Type 2 diabetes, unspec', code: 'E11.9', codetype: 'ICD10' },
+      ]);
+      const r = searchShards([shard], 'e11', 20, false, {
+        boostCodetypes: ['ICD10'],
+      });
+      // equal key lengths — the boosted ICD-10 code must rank first
+      expect(r[0].fullcode).toBe('E11.9');
+    });
+
+    it('still finds the exact code among many prefix matches (scan cap)', () => {
+      // 1500 codes share the prefix — beyond MAX_CODE_SCAN — but the exact
+      // match sits at the start of the sorted range and is always scanned
+      const docs: TestDoc[] = Array.from({ length: 1500 }, (_, i) => ({
+        label: `filler ${i}`,
+        code: `90.${String(i).padStart(4, '0')}`,
+        codetype: 'ICD10',
+      }));
+      docs.push({ label: 'Exact hit', code: '90', codetype: 'ICD10' });
+      const r = searchShards([makeShard('condition', docs)], '90');
+      expect(r[0].label).toBe('Exact hit');
+    });
   });
 });
