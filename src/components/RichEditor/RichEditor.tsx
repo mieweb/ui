@@ -4,6 +4,10 @@ import { CoreEditor } from '@kerebron/editor';
 import { AdvancedEditorKit } from '@kerebron/editor-kits/AdvancedEditorKit';
 import { createAssetLoad } from '@kerebron/wasm/web';
 
+import { createCollabEditorKits, type CollabConfig } from './collabKits';
+
+export type { CollabConfig } from './collabKits';
+
 export interface RichEditorProps {
   /** Initial markdown content to load into the editor. */
   value?: string;
@@ -11,12 +15,20 @@ export interface RichEditorProps {
   onChange?: (value: string) => void;
   /** Whether to render the live markdown output preview. Defaults to `false`. */
   showPreview?: boolean;
+  /**
+   * Enable live collaborative editing (Yjs) for the given room. When set, the
+   * editor connects to the `/yjs` websocket relay and every peer in the same
+   * `room` co-edits one shared document. Uncontrolled like `value` — remount via
+   * `key` to switch rooms.
+   */
+  collab?: CollabConfig;
 }
 
 const RichEditor: React.FC<RichEditorProps> = ({
   value = '',
   onChange,
   showPreview = false,
+  collab,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstance = useRef<CoreEditor | null>(null);
@@ -28,12 +40,15 @@ const RichEditor: React.FC<RichEditorProps> = ({
   useEffect(() => {
     if (!editorRef.current) return;
 
-    // Initialize the editor
+    // Initialize the editor. In collaborative mode swap the default kits for
+    // the Yjs kits (advanced editing minus `history`, plus the CRDT sync).
     const editor = CoreEditor.create({
       element: editorRef.current,
       uri: 'file:///untitled.md',
       assetLoad: createAssetLoad('/kerebron-wasm'),
-      editorKits: [new AdvancedEditorKit()],
+      editorKits: collab
+        ? createCollabEditorKits(collab)
+        : [new AdvancedEditorKit()],
     });
 
     editorInstance.current = editor;
@@ -56,13 +71,29 @@ const RichEditor: React.FC<RichEditorProps> = ({
     editor.addEventListener('transaction', onTransaction);
 
     // Seed initial content, then populate the preview once on mount.
+    //
+    // In collaborative mode we still load the local markdown first, then join
+    // the room: the Yjs binding seeds an *empty* shared document from this
+    // content on the first join, and overwrites the editor with the shared
+    // content when the room already has edits — so the stored markdown is the
+    // starting point without ever double-inserting.
+    const joinRoom = () => {
+      if (collab) {
+        (editor.run as Record<string, (...args: unknown[]) => boolean>).changeRoom?.(
+          collab.room,
+        );
+      }
+    };
+
     if (value) {
       editor
         .loadDocumentText('text/x-markdown', value)
         .then(() => onTransaction())
+        .then(joinRoom)
         .catch((err) => console.error('Failed to load markdown:', err));
     } else {
       void onTransaction();
+      joinRoom();
     }
 
     // Cleanup on unmount
@@ -70,7 +101,8 @@ const RichEditor: React.FC<RichEditorProps> = ({
       editor.removeEventListener('transaction', onTransaction);
       editor.destroy();
     };
-    // Initial `value` is intentionally only applied on mount (uncontrolled).
+    // Initial `value`/`collab` are intentionally only applied on mount
+    // (uncontrolled). Remount via `key` to switch rooms.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
