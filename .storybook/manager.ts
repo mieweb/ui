@@ -510,8 +510,15 @@ addons.register('mieweb-open-in-new-tab', (api) => {
               'locale',
             ]);
             const globalsParam = Object.entries(api.getGlobals() ?? {})
-              .filter(([key]) => FORWARDED_GLOBALS.has(key))
-              .map(([key, value]) => `${key}:${value}`)
+              .filter(([key, value]) => {
+                if (!FORWARDED_GLOBALS.has(key)) return false;
+                return (
+                  typeof value === 'string' ||
+                  typeof value === 'number' ||
+                  typeof value === 'boolean'
+                );
+              })
+              .map(([key, value]) => `${key}:${String(value)}`)
               .join(';');
             if (globalsParam) url.searchParams.set('globals', globalsParam);
             window.open(url.toString(), '_blank', 'noopener,noreferrer');
