@@ -20,12 +20,16 @@ import {
 // Meta
 // ============================================================================
 
-const meta: Meta = {
+const meta: Meta<typeof MediaEditor> = {
   title: 'Components/Images & Media/MediaEditor Live Demo',
   component: MediaEditor,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
+    // The story renders the LiveDemo harness, not <MediaEditor {...args}/>,
+    // so generated controls would not drive it; MediaEditor's own autodocs
+    // page carries the interactive props table.
+    controls: { disable: true },
     docs: {
       description: {
         component:
