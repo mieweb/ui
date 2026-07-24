@@ -21,7 +21,15 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language }) => {
 
   return (
     <FenceBlock code={code} language={language}>
-      <pre className="m-0 overflow-x-auto !bg-transparent p-3 text-sm">
+      {/* Focusable so keyboard users can horizontally scroll long lines
+          (axe: scrollable-region-focusable). */}
+      <pre
+        className="m-0 overflow-x-auto !bg-transparent p-3 text-sm"
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable code needs keyboard focus
+        tabIndex={0}
+        role="region"
+        aria-label={language ? `${language} code` : 'Code'}
+      >
         <code
           className="hljs bg-transparent p-0"
           dangerouslySetInnerHTML={{ __html: html }}
