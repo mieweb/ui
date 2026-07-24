@@ -11,7 +11,10 @@
 /* Layout (theme-agnostic) */
 pre code.hljs {
   display: block;
-  overflow-x: auto;
+  /* No own scrollbar — the parent <pre> (focusable, tabIndex=0) is the single
+   * scroll container. A scrollable but unfocusable <code> fails axe's
+   * scrollable-region-focusable rule. */
+  overflow-x: visible;
   padding: 1em;
   /* Transparent so the parent container's background is the single source of truth */
   background: transparent;

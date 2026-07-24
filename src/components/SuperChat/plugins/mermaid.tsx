@@ -286,6 +286,12 @@ function MermaidDiagram({ code }: { code: string }) {
     <div
       data-slot="superchat-mermaid"
       className="my-2 overflow-x-auto [&_svg]:h-auto [&_svg]:max-w-none"
+      // Wide diagrams scroll horizontally; keyboard users need focus to scroll
+      // (axe: scrollable-region-focusable).
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+      tabIndex={0}
+      role="region"
+      aria-label="Diagram"
       // mermaid renders with securityLevel: 'strict' (labels sanitized, scripts
       // stripped), so the SVG is safe to inject directly.
       dangerouslySetInnerHTML={{ __html: svg }}
