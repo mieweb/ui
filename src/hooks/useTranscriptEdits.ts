@@ -701,10 +701,16 @@ export function useTranscriptEdits(
       // below uses. (Keying by originalIndex — a position in the old
       // silence-inserted array — mismatched the restore counter and applied
       // deletions to the wrong words after a threshold change.)
+      // Pasted words keep their source originalIndex but are dropped by the
+      // rebuild, so they must not occupy a slot in this keyspace either.
       const wordDeletedStatus = new Map<number, boolean>();
       let saveIdx = 0;
       editedWords.forEach((ew) => {
-        if (!isSilenceType(ew.word.wordType) && ew.originalIndex >= 0) {
+        if (
+          !isSilenceType(ew.word.wordType) &&
+          ew.originalIndex >= 0 &&
+          !ew.inserted
+        ) {
           wordDeletedStatus.set(saveIdx, ew.deleted);
           saveIdx++;
         }
