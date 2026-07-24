@@ -556,17 +556,20 @@ describe('SuperChat', () => {
     const remove = await screen.findByLabelText('Remove shot.png');
     expect(remove).toBeInTheDocument();
     await user.click(screen.getByLabelText('Send message'));
-    expect(onMessageSent).toHaveBeenCalledWith(
-      '',
-      expect.objectContaining({
-        attachments: [
-          expect.objectContaining({
-            name: 'shot.png',
-            type: 'image/png',
-            dataUrl: expect.stringMatching(/^data:image\/png/),
-          }),
-        ],
-      })
+    // Sending converts attachments via FileReader, so the callback is async.
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({
+              name: 'shot.png',
+              type: 'image/png',
+              dataUrl: expect.stringMatching(/^data:image\/png/),
+            }),
+          ],
+        })
+      )
     );
   });
 
@@ -590,17 +593,20 @@ describe('SuperChat', () => {
     const remove = await screen.findByLabelText('Remove picked.png');
     expect(remove).toBeInTheDocument();
     await user.click(screen.getByLabelText('Send message'));
-    expect(onMessageSent).toHaveBeenCalledWith(
-      '',
-      expect.objectContaining({
-        attachments: [
-          expect.objectContaining({
-            name: 'picked.png',
-            type: 'image/png',
-            dataUrl: expect.stringMatching(/^data:image\/png/),
-          }),
-        ],
-      })
+    // Sending converts attachments via FileReader, so the callback is async.
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({
+              name: 'picked.png',
+              type: 'image/png',
+              dataUrl: expect.stringMatching(/^data:image\/png/),
+            }),
+          ],
+        })
+      )
     );
   });
 
@@ -627,16 +633,19 @@ describe('SuperChat', () => {
     expect(remove).toBeInTheDocument();
     expect(screen.queryByRole('img', { name: 'report.pdf' })).toBeNull();
     await user.click(screen.getByLabelText('Send message'));
-    expect(onMessageSent).toHaveBeenCalledWith(
-      '',
-      expect.objectContaining({
-        attachments: [
-          expect.objectContaining({
-            name: 'report.pdf',
-            type: 'application/pdf',
-          }),
-        ],
-      })
+    // Sending converts attachments via FileReader, so the callback is async.
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({
+              name: 'report.pdf',
+              type: 'application/pdf',
+            }),
+          ],
+        })
+      )
     );
   });
 

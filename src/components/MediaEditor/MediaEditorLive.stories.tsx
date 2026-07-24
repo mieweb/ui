@@ -20,10 +20,16 @@ import {
 // Meta
 // ============================================================================
 
-const meta: Meta = {
+const meta: Meta<typeof MediaEditor> = {
   title: 'Components/Images & Media/MediaEditor Live Demo',
+  component: MediaEditor,
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
+    // The story renders the LiveDemo harness, not <MediaEditor {...args}/>,
+    // so generated controls would not drive it; MediaEditor's own autodocs
+    // page carries the interactive props table.
+    controls: { disable: true },
     docs: {
       description: {
         component:
@@ -33,7 +39,10 @@ const meta: Meta = {
           'Whisper model before the first transcription; base.en is the recommended ' +
           'default (it preserves inter-word silence gaps, which the silence-editing ' +
           'features depend on). Word-level timestamps are requested first, with a ' +
-          'fallback to segment-level if the model rejects word alignment.',
+          'fallback to segment-level if the model rejects word alignment. The ' +
+          'toolbar Script button docks the ScriptPanel: the live edit state as an ' +
+          'editable YAML/JSON script (Apply pushes changes back through the ' +
+          'undo-safe replaceEditedWords), alongside the read-only original.',
       },
     },
   },

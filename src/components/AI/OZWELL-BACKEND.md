@@ -27,10 +27,13 @@ Read at runtime from either source (the browser console is easiest for local tes
 
 ```js
 // RECOMMENDED in Storybook — survives reloads AND is shared across the story iframe:
-localStorage.setItem('ozwellConfig', JSON.stringify({ apiKey: 'YOUR_KEY' }));
+localStorage.setItem(
+  'ozwellConfig',
+  JSON.stringify({ apiKey: 'YOUR_KEY', baseURL: 'https://your-ozwell-host' })
+);
 
 // also works (the loader checks current → parent → top frame):
-window.__ozwell = { apiKey: 'YOUR_KEY' };
+window.__ozwell = { apiKey: 'YOUR_KEY', baseURL: 'https://your-ozwell-host' };
 ```
 
 > Storybook renders each story inside an **iframe**. A console-set `window.__ozwell` lands on the
@@ -38,8 +41,12 @@ window.__ozwell = { apiKey: 'YOUR_KEY' };
 > **localStorage form is the reliable one** because localStorage is shared across same-origin frames.
 > Reload the tab after setting it.
 
-Optional overrides in the same object: `baseURL`, `model` (default `gpt-4o-mini`), `system`,
-`temperature`. Convenience: `apiKey: 'ollama'` points `baseURL` at `http://localhost:11434`.
+Optional overrides in the same object: `baseURL` (default `https://api.ozwell.ai`),
+`model` (default `gpt-4o-mini`), `system`, `temperature`. Convenience: `apiKey: 'ollama'`
+points `baseURL` at `http://localhost:11434`.
+
+This same config drives every Ozwell consumer in Storybook, including the DataVis NITRO
+**Ozwell Assistant** story (`@mieweb/datavis`'s `GridAssistant`).
 
 ## ⚠️ Public deploy = proxy the key
 

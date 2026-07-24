@@ -195,8 +195,19 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
             role="alert"
             className="border-destructive/30 bg-destructive/10 flex min-h-36 flex-col items-center justify-center gap-3 rounded-lg border p-8 text-center"
           >
-            <p className="text-destructive m-0 text-sm">{error}</p>
-            <Button variant="outline" size="sm" onClick={handleRetry}>
+            {/* destructive-700/300 instead of the base token: #dc2626 on the
+                destructive/10 tint is 4.14:1 — below WCAG AA (axe: color-contrast). */}
+            <p className="text-destructive-700 dark:text-destructive-300 m-0 text-sm">
+              {error}
+            </p>
+            {/* bg-background: the outline button is transparent, and its text on
+                the destructive/10 tint sits exactly at the 4.5:1 AA boundary. */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-background"
+              onClick={handleRetry}
+            >
               Retry
             </Button>
           </div>

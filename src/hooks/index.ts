@@ -7,6 +7,12 @@ export {
 } from './useDirection';
 export { usePrefersReducedMotion } from './usePrefersReducedMotion';
 export { useClickOutside } from './useClickOutside';
+export {
+  useAnchoredPosition,
+  type AnchoredPlacement,
+  type UseAnchoredPositionOptions,
+  type UseAnchoredPositionReturn,
+} from './useAnchoredPosition';
 export { useEscapeKey } from './useEscapeKey';
 export { useFocusTrap } from './useFocusTrap';
 export {
