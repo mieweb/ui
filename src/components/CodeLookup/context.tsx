@@ -43,6 +43,18 @@ export type CodeLookupComponent = (
   props: CodeLookupProps
 ) => React.ReactElement | null;
 
+/**
+ * App-wide defaults for the CodeLookup memory picklist. Instances still opt
+ * in per-use with the `memory` prop (its `context` is always per-instance);
+ * these only fill in the identity/sync fields.
+ */
+export interface CodeLookupMemoryDefaults {
+  /** Default user id for memory scoping (per-instance prop wins). */
+  userId?: string;
+  /** Default count-sync endpoint (per-instance prop wins). */
+  serverUrl?: string;
+}
+
 /** Resolved lookup wiring a component consumes (from prop or context). */
 export interface CodeLookupProviderConfig {
   /** The injected CodeLookup component (worker-capable, from the app bundle). */
@@ -51,6 +63,8 @@ export interface CodeLookupProviderConfig {
   indexUrl: string;
   /** Shard-set locale (default 'en'). */
   locale?: string;
+  /** Defaults for the memory picklist (see `CodeLookupMemoryDefaults`). */
+  memory?: CodeLookupMemoryDefaults;
 }
 
 const CodeLookupContext = React.createContext<CodeLookupProviderConfig | null>(
@@ -64,6 +78,8 @@ export interface CodeLookupProviderProps {
   indexUrl?: string;
   /** Shard-set locale (default 'en'). */
   locale?: string;
+  /** Defaults for the memory picklist (see `CodeLookupMemoryDefaults`). */
+  memory?: CodeLookupMemoryDefaults;
   children: React.ReactNode;
 }
 
@@ -71,11 +87,12 @@ export function CodeLookupProvider({
   component,
   indexUrl = '/codify',
   locale = 'en',
+  memory,
   children,
 }: CodeLookupProviderProps): React.ReactElement {
   const value = React.useMemo<CodeLookupProviderConfig>(
-    () => ({ component, indexUrl, locale }),
-    [component, indexUrl, locale]
+    () => ({ component, indexUrl, locale, memory }),
+    [component, indexUrl, locale, memory]
   );
   return (
     <CodeLookupContext.Provider value={value}>

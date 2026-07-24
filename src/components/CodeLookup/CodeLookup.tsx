@@ -22,6 +22,14 @@ import {
 } from '../Icons';
 import type { CodifyResult } from './engine';
 import { familyKey, familyTerm } from './engine';
+import { useCodeLookupConfig } from './context';
+import {
+  recordUse,
+  scheduleFlush,
+  seedFromServer,
+  getTopCodes,
+  type MemoryEntry,
+} from './memoryStore';
 
 // =============================================================================
 // Types
@@ -35,6 +43,22 @@ export type CodifyDomain =
   | 'vaccine'
   | 'occupational'
   | 'quality';
+
+/**
+ * Opt-in config for the "Frequently used" memory picklist: focusing the
+ * empty search box lists the user's most-picked codes for this context,
+ * persisted in IndexedDB and optionally synced to `serverUrl`.
+ */
+export interface CodeLookupMemoryConfig {
+  /** Usage context the counts are scoped to (e.g. 'med-orders'). Required. */
+  context: string;
+  /** User id for scoping; falls back to the provider default, then 'anonymous'. */
+  userId?: string;
+  /** Count-sync endpoint (GET seed + POST deltas); provider default fallback. */
+  serverUrl?: string;
+  /** Max entries in the picklist (default 8). */
+  limit?: number;
+}
 
 export interface CodeLookupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -111,6 +135,11 @@ export interface CodeLookupProps extends Omit<
    * immediately (defaults to true in bare mode, false otherwise).
    */
   clearOnSelect?: boolean;
+  /**
+   * Remember picked codes per (user, context) and offer a "Frequently used"
+   * picklist when the empty search box is focused. Off by default.
+   */
+  memory?: false | CodeLookupMemoryConfig;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -182,6 +211,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
       clearOnSelect,
+      memory = false,
       className,
       'data-testid': dataTestId,
       ...props
@@ -228,6 +258,40 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const preferCodetypesKey = preferCodetypes
       ? preferCodetypes.join(',')
       : null;
+
+    // ---- memory picklist ("Frequently used" on empty-query focus) ----
+    const providerConfig = useCodeLookupConfig();
+    const memUserId = memory
+      ? (memory.userId ?? providerConfig?.memory?.userId ?? 'anonymous')
+      : null;
+    const memContext = memory ? memory.context : null;
+    const memServerUrl = memory
+      ? (memory.serverUrl ?? providerConfig?.memory?.serverUrl)
+      : undefined;
+    const memLimit = (memory && memory.limit) || 8;
+    const [memoryEntries, setMemoryEntries] = React.useState<MemoryEntry[]>(
+      []
+    );
+    /** Mirror for effects that must not re-run when entries refresh. */
+    const memoryCountRef = React.useRef(0);
+    memoryCountRef.current = memoryEntries.length;
+
+    React.useEffect(() => {
+      if (!memUserId || !memContext) {
+        setMemoryEntries([]);
+        return;
+      }
+      let cancelled = false;
+      const scope = { userId: memUserId, context: memContext };
+      void (async () => {
+        if (memServerUrl) await seedFromServer(scope, memServerUrl);
+        const top = await getTopCodes(scope, memLimit);
+        if (!cancelled) setMemoryEntries(top);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [memUserId, memContext, memServerUrl, memLimit]);
 
     React.useEffect(() => {
       // A new worker starts from scratch — reset all search state so a stale
@@ -311,8 +375,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       if (!q) {
         setResults([]);
         setTookMs(null);
-        setOpen(false);
         setDrill(null);
+        // With memory entries the empty-query dropdown shows the "Frequently
+        // used" picklist instead of closing (open stays as-is: focus opens it).
+        if (memoryCountRef.current === 0) setOpen(false);
         return;
       }
       const t = setTimeout(() => {
@@ -379,9 +445,38 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       setActiveIndex(-1);
     };
 
-    const list: CodifyResult[] = drill ? (drill.results ?? []) : results;
+    /** Frequently-used picklist rows, shown for a true empty-query dropdown. */
+    const memoryResults = React.useMemo<CodifyResult[]>(
+      () =>
+        memoryEntries.map((e) => ({
+          fullid: e.fullid,
+          label: e.label,
+          codetype: e.codetype,
+          fullcode: e.fullcode,
+          domain: e.domain,
+          score: e.count,
+          viaAlias: false,
+          viaMemory: true,
+        })),
+      [memoryEntries]
+    );
+    const showMemory =
+      !drill && query.trim() === '' && memoryResults.length > 0;
+
+    const list: CodifyResult[] = drill
+      ? (drill.results ?? [])
+      : showMemory
+        ? memoryResults
+        : results;
 
     const pick = (r: CodifyResult) => {
+      if (memUserId && memContext) {
+        const scope = { userId: memUserId, context: memContext };
+        void recordUse(scope, r).then(() => {
+          if (memServerUrl) scheduleFlush(scope, memServerUrl);
+          return getTopCodes(scope, memLimit).then(setMemoryEntries);
+        });
+      }
       onSelect?.(r);
       setOpen(false);
       setDrill(null);
@@ -540,10 +635,20 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 aria-label={
                   drill
                     ? `${DETAIL_NOUN[drill.parent.domain] ?? 'related codes'} of ${drill.parent.label}`
-                    : 'Code search results'
+                    : showMemory
+                      ? 'Frequently used codes'
+                      : 'Code search results'
                 }
                 className="divide-border max-h-80 min-h-0 divide-y overflow-y-auto"
               >
+                {showMemory && (
+                  <li
+                    role="presentation"
+                    className="text-muted-foreground bg-muted/50 px-3 py-1 text-[11px] font-semibold tracking-wide uppercase"
+                  >
+                    Frequently used
+                  </li>
+                )}
                 {list.map((r, i) => (
                   <li
                     key={r.fullid}

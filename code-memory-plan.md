@@ -66,13 +66,13 @@ flushed count deltas. Off by default — enabled via a single `memory` prop.
 
 `src/components/CodeLookup/CodeLookup.tsx` + `context.tsx` + `index.ts`.
 
-- [ ] `memory` prop; resolve scope from prop + provider defaults (`context.tsx`: add `memory` defaults to `CodeLookupProviderConfig`, instance prop wins)
-- [ ] On mount / scope change: `seedFromServer` (if `serverUrl`) then load `getTopCodes` into state
-- [ ] Empty-query branch (`!q` in the debounced search effect): show memory entries flagged `viaMemory` instead of clearing/closing; `onFocus` opens when entries exist; `dropdownOpen` gains memory disjunct
-- [ ] "Frequently used" group header row (aria-labelled listbox group); existing keyboard-nav machinery reused unchanged
-- [ ] `pick(r)`: `recordUse` + `scheduleFlush` + refresh cached top list
-- [ ] Respect `initialQuery`/`skipSearchRef` seeded path — menu only on true empty-query focus
-- [ ] Export `CodeLookupMemoryConfig`, `MemoryEntry`, `clearMemory` from the component barrel (`index.ts`) — NOT `src/index.ts` (worker bundling constraint)
+- [x] `memory` prop; resolve scope from prop + provider defaults (`context.tsx`: add `memory` defaults to `CodeLookupProviderConfig`, instance prop wins)
+- [x] On mount / scope change: `seedFromServer` (if `serverUrl`) then load `getTopCodes` into state
+- [x] Empty-query branch (`!q` in the debounced search effect): show memory entries flagged `viaMemory` instead of clearing/closing; `onFocus` opens when entries exist; `dropdownOpen` gains memory disjunct
+- [x] "Frequently used" group header row (aria-labelled listbox group); existing keyboard-nav machinery reused unchanged
+- [x] `pick(r)`: `recordUse` + `scheduleFlush` + refresh cached top list
+- [x] Respect `initialQuery`/`skipSearchRef` seeded path — menu only on true empty-query focus
+- [x] Export `CodeLookupMemoryConfig`, `MemoryEntry`, `clearMemory` from the component barrel (`index.ts`) — NOT `src/index.ts` (worker bundling constraint)
 
 **Verify:** `pnpm vitest run src/components/CodeLookup/engine.test.ts` (no regressions) + typecheck
 **Commit:** `feat(CodeLookup): memory picklist — frequently-used codes menu on empty-query focus`
