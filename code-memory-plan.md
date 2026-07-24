@@ -52,12 +52,12 @@ flushed count deltas. Off by default — enabled via a single `memory` prop.
 
 `src/components/CodeLookup/memoryStore.test.ts` (vitest + `fake-indexeddb`, already a devDep).
 
-- [ ] record → getTopCodes ordering (count desc, lastUsed tiebreak, limit)
-- [ ] multi-user isolation (alice vs bob, same browser/db)
-- [ ] context isolation (`med-orders` vs `presenting-meds`, same user)
-- [ ] seed merge (server counts vs local counts → max wins; new entries added)
-- [ ] delta flush: mocked fetch receives correct payload; `pendingDelta` reset; failure keeps deltas
-- [ ] IDB-unavailable → all APIs resolve as no-ops (no throw)
+- [x] record → getTopCodes ordering (count desc, lastUsed tiebreak, limit)
+- [x] multi-user isolation (alice vs bob, same browser/db)
+- [x] context isolation (`med-orders` vs `presenting-meds`, same user)
+- [x] seed merge (server counts vs local counts → max wins; new entries added)
+- [x] delta flush: mocked fetch receives correct payload; `pendingDelta` reset; failure keeps deltas
+- [x] IDB-unavailable → all APIs resolve as no-ops (no throw)
 
 **Verify:** `pnpm vitest run src/components/CodeLookup/memoryStore.test.ts`
 **Commit:** `test(CodeLookup): memory store coverage — isolation, seed merge, delta flush`
