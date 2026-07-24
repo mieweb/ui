@@ -1,7 +1,9 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { inputVariants } from '../Input';
 
 export interface AutocompleteProps<T> extends Pick<
@@ -120,15 +122,7 @@ function Autocomplete<T>({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const listId = React.useId();
 
-  useClickOutside(containerRef, () => setOpen(false), open);
-
-  const setQuery = React.useCallback(
-    (next: string) => {
-      if (!isControlled) setUncontrolledValue(next);
-      onValueChange?.(next);
-    },
-    [isControlled, onValueChange]
-  );
+  const meetsMinLength = query.length >= minQueryLength;
 
   const filteredItems = React.useMemo(() => {
     if (!filter) return items;
@@ -149,10 +143,30 @@ function Autocomplete<T>({
     return itemRows;
   }, [filteredItems, showCreate, getItemKey]);
 
-  const meetsMinLength = query.length >= minQueryLength;
   const hasContent =
     rows.length > 0 || (meetsMinLength && emptyMessage != null);
   const isOpen = open && meetsMinLength && hasContent;
+
+  // Portal + fixed positioning so the listbox escapes overflow-hidden
+  // ancestors (cards, dialogs, scroll containers, …).
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open: isOpen, matchWidth: true, maxHeight: 300 });
+
+  const outsideRefs = React.useMemo(
+    () => [containerRef, floatingRef],
+    [floatingRef]
+  );
+  useClickOutside(outsideRefs, () => setOpen(false), open);
+
+  const setQuery = React.useCallback(
+    (next: string) => {
+      if (!isControlled) setUncontrolledValue(next);
+      onValueChange?.(next);
+    },
+    [isControlled, onValueChange]
+  );
 
   React.useEffect(() => {
     if (!isOpen) setActiveIndex(-1);
@@ -207,7 +221,10 @@ function Autocomplete<T>({
 
   return (
     <div
-      ref={containerRef}
+      ref={(node) => {
+        containerRef.current = node;
+        anchorRef.current = node;
+      }}
       data-slot="autocomplete"
       className={cn('relative', className)}
     >
@@ -234,60 +251,66 @@ function Autocomplete<T>({
         {...inputProps}
       />
 
-      {isOpen && (
-        <div
-          id={listId}
-          role="listbox"
-          data-slot="autocomplete-list"
-          className={cn(
-            'border-border absolute z-50 mt-1 w-full overflow-auto rounded-md border',
-            'bg-card text-card-foreground max-h-[300px] shadow-lg'
-          )}
-        >
-          {rows.length === 0
-            ? emptyMessage != null && (
-                <div
-                  data-slot="autocomplete-empty"
-                  className="text-muted-foreground px-4 py-3 text-sm"
-                >
-                  {emptyMessage}
-                </div>
-              )
-            : rows.map((row, index) => {
-                const isActive = index === activeIndex;
-                const optionId = `${listId}-opt-${row.key}`;
-                return (
-                  <button
-                    key={row.key}
-                    id={optionId}
-                    type="button"
-                    role="option"
-                    aria-selected={isActive}
-                    data-slot={
-                      row.kind === 'create'
-                        ? 'autocomplete-create'
-                        : 'autocomplete-option'
-                    }
-                    onMouseEnter={() => setActiveIndex(index)}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => commitRow(row)}
-                    className={cn(
-                      'w-full px-4 py-3 text-left text-sm transition-colors',
-                      'border-border border-b last:border-b-0',
-                      'focus:outline-none',
-                      isActive ? 'bg-muted text-foreground' : 'hover:bg-muted',
-                      row.kind === 'create' &&
-                        'text-primary-800 flex items-center gap-2 font-medium'
-                    )}
+      {isOpen &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            id={listId}
+            role="listbox"
+            data-slot="autocomplete-list"
+            className={cn(
+              'border-border overflow-auto rounded-md border',
+              'bg-card text-card-foreground shadow-lg'
+            )}
+          >
+            {rows.length === 0
+              ? emptyMessage != null && (
+                  <div
+                    data-slot="autocomplete-empty"
+                    className="text-muted-foreground px-4 py-3 text-sm"
                   >
-                    {row.kind === 'create'
-                      ? createLabel!(query)
-                      : renderItem(row.item)}
-                  </button>
-                );
-              })}
-        </div>
-      )}
+                    {emptyMessage}
+                  </div>
+                )
+              : rows.map((row, index) => {
+                  const isActive = index === activeIndex;
+                  const optionId = `${listId}-opt-${row.key}`;
+                  return (
+                    <button
+                      key={row.key}
+                      id={optionId}
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      data-slot={
+                        row.kind === 'create'
+                          ? 'autocomplete-create'
+                          : 'autocomplete-option'
+                      }
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => commitRow(row)}
+                      className={cn(
+                        'w-full px-4 py-3 text-left text-sm transition-colors',
+                        'border-border border-b last:border-b-0',
+                        'focus:outline-none',
+                        isActive
+                          ? 'bg-muted text-foreground'
+                          : 'hover:bg-muted',
+                        row.kind === 'create' &&
+                          'text-primary-800 flex items-center gap-2 font-medium'
+                      )}
+                    >
+                      {row.kind === 'create'
+                        ? createLabel!(query)
+                        : renderItem(row.item)}
+                    </button>
+                  );
+                })}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
