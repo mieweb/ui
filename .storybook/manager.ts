@@ -1,7 +1,7 @@
 import React from 'react';
 import { addons, types } from 'storybook/manager-api';
 import { create } from 'storybook/theming/create';
-import { IconButton } from 'storybook/components';
+import { IconButton } from 'storybook/internal/components';
 import { ShareAltIcon } from '@storybook/icons';
 
 // Brand theme configurations for the Storybook manager UI
