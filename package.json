@@ -371,6 +371,7 @@
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
+    "axe-playwright": "^2.2.2",
     "bootstrap": "^5.3.8",
     "codemirror": "^6.0.2",
     "d3": "^7.9.0",
