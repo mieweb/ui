@@ -49,6 +49,8 @@ export interface CodifyShard {
   touched: Uint32Array;
   /** Lazy cache: 1 = billable (leaf) ICD-10 code; see billableMask() */
   billable?: Uint8Array;
+  /** Lazy cache: sorted normalized code keys + doc ids; see codeIndex() */
+  codeIndex?: { keys: string[]; docs: Uint32Array };
 }
 
 export interface CodifyResult {
@@ -62,6 +64,8 @@ export interface CodifyResult {
   viaAlias: boolean;
   /** true when the match came (partly) from the edit-distance typo fallback */
   viaFuzzy?: boolean;
+  /** true when the match came from the code itself (query looked like a code) */
+  viaCode?: boolean;
 }
 
 // =============================================================================
@@ -443,6 +447,76 @@ export interface SearchOptions {
  * ICD-10 code outranks a shorter, leading-matched SNOMED synonym. */
 const CODETYPE_BOOST = 3;
 
+// =============================================================================
+// Code search — only label/alias words are tokenized in the shards, so a
+// typed code ("I50.9", "2345-7", "73211009") is matched by prefix against a
+// lazily built sorted index of the shard's codes.
+// =============================================================================
+
+/** Base score for direct code matches — far above any label match, decaying
+ * with the unmatched suffix so exact codes rank above their extensions. */
+const CODE_MATCH_BASE = 1000;
+
+/** Strip a code (or code-shaped query) to lowercase alphanumerics, so
+ * "I50.9" matches "i509" regardless of dot/dash formatting. */
+function codeKey(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+/** A query "looks like a code" when it is a single word containing a digit
+ * (e.g. "I50.9", "j45", "2345-7"). Returns the normalized key, else null. */
+function codeQueryKey(query: string): string | null {
+  const trimmed = query.trim();
+  if (trimmed === '' || /\s/.test(trimmed)) return null;
+  const key = codeKey(trimmed);
+  return key.length >= 2 && key.length <= 18 && /\d/.test(key) ? key : null;
+}
+
+/** Lazily built code index: normalized code keys sorted ascending, with
+ * their doc ids in parallel. Cached on the shard like `billable`. */
+function codeIndex(s: CodifyShard): { keys: string[]; docs: Uint32Array } {
+  if (s.codeIndex) return s.codeIndex;
+  const pairs: { key: string; d: number }[] = [];
+  for (let d = 0; d < s.docCount; d++) {
+    const key = codeKey(
+      td.decode(s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1]))
+    );
+    if (key) pairs.push({ key, d });
+  }
+  pairs.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+  s.codeIndex = {
+    keys: pairs.map((p) => p.key),
+    docs: new Uint32Array(pairs.map((p) => p.d)),
+  };
+  return s.codeIndex;
+}
+
+function searchShardCodes(
+  s: CodifyShard,
+  q: string,
+  out: CodifyResult[],
+  limit: number,
+  opts?: SearchOptions
+) {
+  const { keys, docs } = codeIndex(s);
+  // first key >= q (binary search)
+  let lo = 0;
+  let hi = keys.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (keys[mid] < q) lo = mid + 1;
+    else hi = mid;
+  }
+  const billable =
+    opts?.billableOnly && s.domain === 'condition' ? billableMask(s) : null;
+  for (let i = lo; i < keys.length && keys[i].startsWith(q); i++) {
+    const d = docs[i];
+    if (billable && billable[d] !== 1) continue;
+    const score = CODE_MATCH_BASE * (q.length / keys[i].length);
+    pushResult(out, s, d, score, false, false, limit * 3, true);
+  }
+}
+
 /**
  * Lazily computed billable mask for a condition shard: an ICD-10 code is
  * treated as billable when no other ICD-10 code extends it (leaf = valid at
@@ -489,11 +563,23 @@ export function searchShards(
     .split(' ')
     .filter(Boolean)
     .slice(0, MAX_QUERY_TOKENS);
-  if (qTokens.length === 0) return [];
-  const results: CodifyResult[] = [];
+  const codeQ = codeQueryKey(query);
+  if (qTokens.length === 0 && !codeQ) return [];
+  let results: CodifyResult[] = [];
 
   for (const s of shards) {
-    searchShard(s, qTokens, results, limit, collapse, opts);
+    if (qTokens.length > 0)
+      searchShard(s, qTokens, results, limit, collapse, opts);
+    if (codeQ) searchShardCodes(s, codeQ, results, limit, opts);
+  }
+  if (codeQ) {
+    // a doc can match by both label and code — keep the higher-scoring hit
+    const best = new Map<string, CodifyResult>();
+    for (const r of results) {
+      const prev = best.get(r.fullid);
+      if (!prev || r.score > prev.score) best.set(r.fullid, r);
+    }
+    results = [...best.values()];
   }
   results.sort((a, b) => b.score - a.score);
   return results.slice(0, limit);
@@ -684,7 +770,8 @@ function pushResult(
   score: number,
   viaAlias: boolean,
   viaFuzzy: boolean,
-  cap: number
+  cap: number,
+  viaCode = false
 ) {
   // keep the array bounded: replace the current minimum once at capacity
   if (out.length >= cap) {
@@ -710,5 +797,6 @@ function pushResult(
     score,
     viaAlias,
     viaFuzzy,
+    viaCode,
   });
 }

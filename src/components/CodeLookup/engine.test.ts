@@ -315,4 +315,59 @@ describe('searchShards', () => {
     expect(r.length).toBeGreaterThan(0);
     expect(r[0].label).toBe('z150drug');
   });
+
+  describe('code search', () => {
+    it('finds an entry by its exact code, punctuation-insensitive', () => {
+      const r = searchShards([conditions], 'I50.9');
+      expect(r.length).toBeGreaterThan(0);
+      expect(r[0].label).toBe('Congestive heart failure');
+      expect(r[0].viaCode).toBe(true);
+      // dot optional
+      expect(searchShards([conditions], 'i509')[0].label).toBe(
+        'Congestive heart failure'
+      );
+    });
+
+    it('matches by code prefix, exact code ranking first', () => {
+      const shard = makeShard('condition', [
+        { label: 'Type 2 diabetes mellitus', code: 'E11', codetype: 'ICD10' },
+        {
+          label: 'Type 2 diabetes w/ foot ulcer',
+          code: 'E11.621',
+          codetype: 'ICD10',
+        },
+      ]);
+      const r = searchShards([shard], 'e11');
+      expect(r).toHaveLength(2);
+      expect(r[0].fullcode).toBe('E11');
+      expect(r[1].fullcode).toBe('E11.621');
+    });
+
+    it('code matches outrank label matches for a code-shaped query', () => {
+      const shard = makeShard('condition', [
+        { label: 'Z94 syndrome variant', code: 'Q99.9', codetype: 'ICD10' },
+        { label: 'Heart transplant status', code: 'Z94.1', codetype: 'ICD10' },
+      ]);
+      const r = searchShards([shard], 'z94');
+      expect(r[0].fullcode).toBe('Z94.1');
+      expect(r[0].viaCode).toBe(true);
+    });
+
+    it('does not code-search queries without digits or with spaces', () => {
+      // "zzz" is no code prefix and no label token — nothing comes back
+      expect(searchShards([conditions], 'zzz')).toHaveLength(0);
+      // multi-word queries keep pure label semantics
+      const r = searchShards([conditions], 'heart failure');
+      expect(r).toHaveLength(1);
+      expect(r[0].viaCode).toBeFalsy();
+    });
+
+    it('dedupes a doc matched by both label and code', () => {
+      const shard = makeShard('condition', [
+        { label: 'B12 deficiency anemia', code: 'D51.9', codetype: 'ICD10' },
+      ]);
+      const r = searchShards([shard], 'b12');
+      expect(r).toHaveLength(1);
+    });
+  });
 });
