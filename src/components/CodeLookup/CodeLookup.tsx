@@ -36,6 +36,14 @@ export type CodifyDomain =
   | 'occupational'
   | 'quality';
 
+/** One choice in the user-facing coding-system filter (`codetypeOptions`). */
+export interface CodetypeOption {
+  /** User-visible label (externalize/translate in the consumer), e.g. 'ICD-10' */
+  label: string;
+  /** Coding systems this option restricts to (e.g. ['ICD10']); omit for "all" */
+  codetypes?: string[];
+}
+
 export interface CodeLookupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   'className' | 'onSelect'
@@ -78,6 +86,20 @@ export interface CodeLookupProps extends Omit<
    * and SNOMED entries are dropped. Other domains are unaffected.
    */
   billableOnly?: boolean;
+  /**
+   * Restrict results to these coding systems at query time (e.g. ['ICD10']
+   * for an ICD-10-only picker; ['ICD11'] once the shards carry ICD-11 rows).
+   * Applies to the drill-down too. Ignored while `codetypeOptions` is
+   * rendered — the user's pick wins.
+   */
+  searchCodetypes?: string[];
+  /**
+   * Let the user pick the coding-system filter: renders a segmented control
+   * above the search box. The first option is selected initially — give it
+   * no `codetypes` for "all systems". E.g.
+   * `[{ label: 'All' }, { label: 'ICD-10', codetypes: ['ICD10'] }]`.
+   */
+  codetypeOptions?: CodetypeOption[];
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /**
@@ -173,6 +195,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       preferDomains,
       preferCodetypes,
       billableOnly = false,
+      searchCodetypes,
+      codetypeOptions,
       programsUrl,
       onSelect,
       onFreeText,
@@ -228,6 +252,16 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const preferCodetypesKey = preferCodetypes
       ? preferCodetypes.join(',')
       : null;
+    // coding-system filter: the user's segmented-control pick (when
+    // codetypeOptions is rendered) overrides the searchCodetypes prop
+    const [codetypeIdx, setCodetypeIdx] = React.useState(0);
+    const activeCodetypes = codetypeOptions
+      ? codetypeOptions[codetypeIdx]?.codetypes
+      : searchCodetypes;
+    const codetypesKey = activeCodetypes ? activeCodetypes.join(',') : null;
+    /** active codetypes for the stable openDrill callback */
+    const codetypesRef = React.useRef(activeCodetypes);
+    codetypesRef.current = activeCodetypes;
 
     React.useEffect(() => {
       // A new worker starts from scratch — reset all search state so a stale
@@ -325,6 +359,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           domains: keyToDomains(searchDomainsKey),
           prefer: keyToDomains(preferDomainsKey),
           boostCodetypes: keyToDomains(preferCodetypesKey),
+          codetypes: keyToDomains(codetypesKey),
           billableOnly,
           // one row per med family; variants live in the → drill-down
           collapse: true,
@@ -338,6 +373,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       searchDomainsKey,
       preferDomainsKey,
       preferCodetypesKey,
+      codetypesKey,
       billableOnly,
     ]);
 
@@ -370,6 +406,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         query: familyTerm(parent.domain, parent.label) || parent.label,
         limit: 300,
         domains: [parent.domain],
+        codetypes: codetypesRef.current,
         billableOnly: billableOnlyRef.current,
       });
     }, []);
@@ -462,8 +499,40 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       HTMLDivElement
     >({ open: dropdownOpen, matchWidth: true });
 
+    // user-facing coding-system filter (e.g. All | ICD-10 | SNOMED)
+    const codetypeToggle = codetypeOptions && codetypeOptions.length > 0 && (
+      <div
+        role="radiogroup"
+        aria-label="Coding system"
+        className="flex flex-wrap items-center gap-1"
+      >
+        {codetypeOptions.map((opt, i) => (
+          <button
+            key={opt.label}
+            type="button"
+            role="radio"
+            aria-checked={i === codetypeIdx}
+            onClick={() => {
+              setCodetypeIdx(i);
+              setDrill(null);
+            }}
+            className={cn(
+              'rounded-full border px-2.5 py-0.5 text-xs transition-colors',
+              'focus:ring-ring focus:ring-2 focus:outline-none',
+              i === codetypeIdx
+                ? 'border-primary-600 bg-primary-600 dark:border-primary-400 dark:bg-primary-400 dark:text-primary-950 text-white'
+                : 'border-border text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    );
+
     const searchBox = (
       <div className="relative" ref={anchorRef}>
+        {' '}
         <SearchIcon
           size={16}
           className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
@@ -496,7 +565,6 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             'focus:ring-ring focus:ring-2 focus:outline-none'
           )}
         />
-
         {/* floating dropdown — portaled so no ancestor can clip it */}
         {dropdownOpen &&
           createPortal(
@@ -638,10 +706,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       return (
         <div
           ref={ref}
-          className={cn('w-full', className)}
+          className={cn('w-full space-y-2', className)}
           data-testid={dataTestId}
           {...props}
         >
+          {codetypeToggle}
           {searchBox}
         </div>
       );
@@ -657,6 +726,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         {...props}
       >
         <CardContent className="space-y-2 px-4 py-4">
+          {codetypeToggle}
           {searchBox}
 
           {/* status line */}

@@ -400,6 +400,33 @@ describe('searchShards', () => {
       expect(r[0].fullcode).toBe('E11.9');
     });
 
+    it('restricts label and code matches to opts.codetypes', () => {
+      const shard = makeShard('condition', [
+        { label: 'Heart failure', code: 'I50.9', codetype: 'ICD10' },
+        {
+          label: 'Heart failure (disorder)',
+          code: '84114007',
+          codetype: 'SNOMED US',
+        },
+      ]);
+      // label search
+      const labels = searchShards([shard], 'heart failure', 20, false, {
+        codetypes: ['ICD10'],
+      });
+      expect(labels).toHaveLength(1);
+      expect(labels[0].codetype).toBe('ICD10');
+      // code search
+      expect(
+        searchShards([shard], '8411', 20, false, { codetypes: ['ICD10'] })
+      ).toHaveLength(0);
+      // a shard with none of the requested systems yields nothing
+      expect(
+        searchShards([shard], 'heart failure', 20, false, {
+          codetypes: ['ICD11'],
+        })
+      ).toHaveLength(0);
+    });
+
     it('still finds the exact code among many prefix matches (scan cap)', () => {
       // 1500 codes share the prefix — beyond MAX_CODE_SCAN — but the exact
       // match sits at the start of the sorted range and is always scanned
