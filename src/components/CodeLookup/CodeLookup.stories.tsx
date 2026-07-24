@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { CodeLookup, type CodifyDomain } from './CodeLookup';
+import {
+  CodeLookup,
+  type CodifyDomain,
+  type CodetypeOption,
+} from './CodeLookup';
 import type { CodifyResult } from './engine';
 
 const meta: Meta<typeof CodeLookup> = {
@@ -50,10 +54,14 @@ type Story = StoryObj<typeof CodeLookup>;
 function Template({
   domains,
   searchDomains,
+  searchCodetypes,
+  codetypeOptions,
   locale,
 }: {
   domains?: CodifyDomain[];
   searchDomains?: CodifyDomain[];
+  searchCodetypes?: string[];
+  codetypeOptions?: CodetypeOption[];
   locale?: string;
 }) {
   const [selected, setSelected] = useState<CodifyResult | null>(null);
@@ -64,6 +72,8 @@ function Template({
         locale={locale}
         domains={domains}
         searchDomains={searchDomains}
+        searchCodetypes={searchCodetypes}
+        codetypeOptions={codetypeOptions}
         onSelect={setSelected}
       />
       {selected && (
@@ -82,11 +92,38 @@ export const AllDomains: Story = {
 
 /** Conditions only (ICD-10 + SNOMED, ~14 MB). Try "con hea fa", "chf", "lvhf".
  * Results collapse to one row per condition family (ICD-10 code root); → lists
- * the specific billable codes. Planned: the drill-down will also surface
- * suggested orders (labs/procedures) for the condition. */
+ * the specific billable codes. The segmented control lets the user restrict
+ * the coding system (`codetypeOptions`); a fixed programmer-set filter is the
+ * `searchCodetypes` prop instead (see "Conditions ICD-10 Only"). An ICD-11
+ * option is one `{ label: 'ICD-11', codetypes: ['ICD11'] }` away once the
+ * shards carry ICD-11 rows (the source dataset has none yet). Planned: the
+ * drill-down will also surface suggested orders (labs/procedures) for the
+ * condition. */
 export const ConditionsOnly: Story = {
   render: (_args, { globals }) => (
-    <Template domains={['condition']} locale={globals.locale} />
+    <Template
+      domains={['condition']}
+      codetypeOptions={[
+        { label: 'All' },
+        { label: 'ICD-10', codetypes: ['ICD10'] },
+        { label: 'SNOMED', codetypes: ['SNOMED US'] },
+      ]}
+      locale={globals.locale}
+    />
+  ),
+};
+
+/** Programmer-fixed coding system: `searchCodetypes={['ICD10']}` — SNOMED
+ * synonyms never appear, no user toggle. Swap in `['ICD11']` when the shards
+ * include ICD-11. */
+export const ConditionsIcd10Only: Story = {
+  name: 'Conditions ICD-10 Only',
+  render: (_args, { globals }) => (
+    <Template
+      domains={['condition']}
+      searchCodetypes={['ICD10']}
+      locale={globals.locale}
+    />
   ),
 };
 
