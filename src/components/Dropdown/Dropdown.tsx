@@ -1,16 +1,15 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import {
+  useAnchoredPosition,
+  type AnchoredPlacement,
+} from '../../hooks/useAnchoredPosition';
 import { inputVariants } from '../Input';
 
-export type DropdownPlacement =
-  | 'bottom-start'
-  | 'bottom-end'
-  | 'bottom'
-  | 'top-start'
-  | 'top-end'
-  | 'top';
+export type DropdownPlacement = AnchoredPlacement;
 
 export interface DropdownProps {
   /** The trigger element (usually a button) */
@@ -57,14 +56,7 @@ export interface DropdownProps {
   selectAllLabel?: React.ReactNode;
 }
 
-const placementStyles: Record<DropdownPlacement, string> = {
-  'bottom-start': 'top-full left-0 mt-2',
-  'bottom-end': 'top-full right-0 mt-2',
-  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-  'top-start': 'bottom-full left-0 mb-2',
-  'top-end': 'bottom-full right-0 mb-2',
-  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-};
+const placementOffset = 8; // matches the previous mt-2/mb-2 gap
 
 interface DropdownContextValue {
   multiSelect: boolean;
@@ -399,8 +391,24 @@ function Dropdown({
     [multiSelect, selectedValues, toggleSelectedValue]
   );
 
-  useClickOutside(containerRef, handleClose, isOpen);
   useEscapeKey(handleClose, isOpen);
+
+  // Portal + fixed positioning so the menu escapes overflow-hidden ancestors.
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({
+    open: isOpen,
+    placement,
+    offset: placementOffset,
+    matchMinWidth: width === 'trigger',
+  });
+
+  const outsideRefs = React.useMemo(
+    () => [containerRef, floatingRef],
+    [floatingRef]
+  );
+  useClickOutside(outsideRefs, handleClose, isOpen);
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -422,12 +430,7 @@ function Dropdown({
     disabled: disabled || trigger.props.disabled,
   });
 
-  const widthStyle =
-    typeof width === 'number'
-      ? { width: `${width}px` }
-      : width === 'trigger'
-        ? { minWidth: '100%' }
-        : {};
+  const widthStyle = typeof width === 'number' ? { width: `${width}px` } : {};
 
   const filteredChildren = React.useMemo(
     () => filterDropdownChildren(children, searchQuery),
@@ -470,80 +473,88 @@ function Dropdown({
 
   return (
     <DropdownContext.Provider value={dropdownContext}>
-      <div ref={containerRef} className="relative inline-flex">
+      <div
+        ref={(node) => {
+          containerRef.current = node;
+          anchorRef.current = node;
+        }}
+        className="relative inline-flex"
+      >
         {triggerElement}
-        {isOpen && (
-          <div
-            style={widthStyle}
-            data-slot="dropdown-menu"
-            className={cn(
-              'absolute z-50 min-w-[12rem]',
-              'rounded-xl border border-neutral-200 bg-white shadow-lg',
-              'dark:border-neutral-700 dark:bg-neutral-800',
-              'animate-in fade-in zoom-in-95 duration-100',
-              placementStyles[placement],
-              className
-            )}
-          >
-            {searchable && (
-              <div
-                className="border-b border-neutral-200 p-2 dark:border-neutral-700"
-                data-slot="dropdown-search"
-              >
-                <input
-                  ref={searchInputRef}
-                  type="search"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder={searchPlaceholder}
-                  aria-label={searchAriaLabel}
-                  aria-controls={menuId}
-                  aria-autocomplete="list"
-                  data-slot="dropdown-search-input"
-                  className={cn(
-                    inputVariants({ size: 'sm' }),
-                    'text-sm',
-                    'dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100'
-                  )}
-                />
-              </div>
-            )}
-            <div id={menuId} role="menu">
-              {multiSelect &&
-                showSelectAll &&
-                visibleSelectableValues.length > 0 && (
-                  <>
-                    <div className="p-2" data-slot="dropdown-select-all">
-                      <DropdownItem
-                        checked={allVisibleSelected}
-                        indeterminate={
-                          !allVisibleSelected && someVisibleSelected
-                        }
-                        onClick={handleSelectAll}
-                      >
-                        {selectAllLabel}
-                      </DropdownItem>
-                    </div>
-                    <DropdownSeparator />
-                  </>
-                )}
-              {searchable ? (
-                hasSearchResults ? (
-                  filteredChildren
-                ) : (
-                  <div
-                    className="text-muted-foreground px-3 py-4 text-center text-sm"
-                    data-slot="dropdown-empty"
-                  >
-                    {searchEmptyState}
-                  </div>
-                )
-              ) : (
-                children
+        {isOpen &&
+          createPortal(
+            <div
+              ref={floatingRef}
+              style={{ ...style, ...widthStyle }}
+              data-slot="dropdown-menu"
+              className={cn(
+                'flex min-w-[12rem] flex-col overflow-hidden',
+                'rounded-xl border border-neutral-200 bg-white shadow-lg',
+                'dark:border-neutral-700 dark:bg-neutral-800',
+                'animate-in fade-in zoom-in-95 duration-100',
+                className
               )}
-            </div>
-          </div>
-        )}
+            >
+              {searchable && (
+                <div
+                  className="shrink-0 border-b border-neutral-200 p-2 dark:border-neutral-700"
+                  data-slot="dropdown-search"
+                >
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder={searchPlaceholder}
+                    aria-label={searchAriaLabel}
+                    aria-controls={menuId}
+                    aria-autocomplete="list"
+                    data-slot="dropdown-search-input"
+                    className={cn(
+                      inputVariants({ size: 'sm' }),
+                      'text-sm',
+                      'dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100'
+                    )}
+                  />
+                </div>
+              )}
+              <div id={menuId} role="menu" className="min-h-0 overflow-y-auto">
+                {multiSelect &&
+                  showSelectAll &&
+                  visibleSelectableValues.length > 0 && (
+                    <>
+                      <div className="p-2" data-slot="dropdown-select-all">
+                        <DropdownItem
+                          checked={allVisibleSelected}
+                          indeterminate={
+                            !allVisibleSelected && someVisibleSelected
+                          }
+                          onClick={handleSelectAll}
+                        >
+                          {selectAllLabel}
+                        </DropdownItem>
+                      </div>
+                      <DropdownSeparator />
+                    </>
+                  )}
+                {searchable ? (
+                  hasSearchResults ? (
+                    filteredChildren
+                  ) : (
+                    <div
+                      className="text-muted-foreground px-3 py-4 text-center text-sm"
+                      data-slot="dropdown-empty"
+                    >
+                      {searchEmptyState}
+                    </div>
+                  )
+                ) : (
+                  children
+                )}
+              </div>
+            </div>,
+            document.body
+          )}
       </div>
     </DropdownContext.Provider>
   );
