@@ -26,9 +26,131 @@ const locoScriptLoaders = new Map<string, Promise<void>>();
 // fully offline — no Loco server required.
 const LOCO_PACK_URL = '/i18n/i18n-translations.json';
 const LOCO_RUNTIME_URL = '/i18n/loco.min.js';
+const LOCO_LIVE_LANG_CACHE_KEY = 'mieweb:loco:languages';
+const LOCO_LIVE_LANG_RELOAD_FLAG = 'mieweb:loco:languages:reloaded';
+const DEFAULT_LOCALE = 'en';
 const locoPackLanguages: string[] = Array.isArray((locoI18nPack as { languages?: string[] }).languages)
   ? (locoI18nPack as { languages: string[] }).languages
   : [];
+const locoPackLanguageNames =
+  (locoI18nPack as { languageNames?: Record<string, string> }).languageNames || {};
+
+type LocoLanguageInfo = {
+  code: string;
+  name?: string;
+  dir?: 'ltr' | 'rtl';
+};
+
+const localeNameFallbacks: Record<string, string> = {
+  en: 'English',
+  fr: 'French',
+  'zh-Hans': 'Chinese (Simplified)',
+  'zh-Hant': 'Chinese (Traditional)',
+};
+
+function parseCachedLiveLanguages(): LocoLanguageInfo[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(LOCO_LIVE_LANG_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((entry) => entry && typeof entry.code === 'string')
+      .map((entry) => ({
+        code: String(entry.code),
+        name: typeof entry.name === 'string' ? entry.name : undefined,
+        dir: entry.dir === 'rtl' ? 'rtl' : 'ltr',
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function resolveLocaleTitle(code: string, explicitName?: string): string {
+  if (explicitName?.trim()) return explicitName.trim();
+
+  const normalized = code.trim();
+  if (localeNameFallbacks[normalized]) {
+    return localeNameFallbacks[normalized];
+  }
+
+  if (typeof Intl !== 'undefined' && 'DisplayNames' in Intl) {
+    try {
+      const formatter = new Intl.DisplayNames([DEFAULT_LOCALE], {
+        type: 'language',
+      });
+      const label = formatter.of(normalized);
+      if (label && label !== normalized) return label;
+    } catch {
+      // Ignore unsupported locale code formatting.
+    }
+  }
+
+  return normalized;
+}
+
+function buildLocaleToolbarItems(): Array<{ value: string; title: string }> {
+  const merged = new Map<string, string>();
+  merged.set(DEFAULT_LOCALE, localeNameFallbacks[DEFAULT_LOCALE] || 'English');
+
+  for (const code of locoPackLanguages) {
+    if (!code) continue;
+    merged.set(code, locoPackLanguageNames[code] || merged.get(code) || code);
+  }
+
+  for (const liveLang of parseCachedLiveLanguages()) {
+    if (!liveLang.code) continue;
+    merged.set(
+      liveLang.code,
+      liveLang.name || locoPackLanguageNames[liveLang.code] || merged.get(liveLang.code) || liveLang.code
+    );
+  }
+
+  const items = Array.from(merged.entries()).map(([value, name]) => ({
+    value,
+    title: `${resolveLocaleTitle(value, name)} (${value})`,
+  }));
+
+  items.sort((a, b) => {
+    if (a.value === DEFAULT_LOCALE) return -1;
+    if (b.value === DEFAULT_LOCALE) return 1;
+    return a.title.localeCompare(b.title);
+  });
+
+  return items;
+}
+
+const localeToolbarItems = buildLocaleToolbarItems();
+
+async function fetchLiveLocoLanguages(
+  serverUrl: string,
+  apiKey?: string,
+): Promise<LocoLanguageInfo[]> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (apiKey) headers['x-api-key'] = apiKey;
+
+  const response = await fetch(`${serverUrl.replace(/\/$/, '')}/api/languages`, {
+    method: 'GET',
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error(`Loco languages fetch failed (${response.status})`);
+  }
+
+  const payload = await response.json();
+  if (!Array.isArray(payload)) return [];
+
+  return payload
+    .filter((entry) => entry && typeof entry.code === 'string')
+    .map((entry) => ({
+      code: String(entry.code),
+      name: typeof entry.name === 'string' ? entry.name : undefined,
+      dir: entry.dir === 'rtl' ? 'rtl' : 'ltr',
+    }));
+}
 
 type LocoRuntime = {
   init?: (config: { apiUrl?: string; apiKey?: string; file?: string }) => Promise<unknown> | unknown;
@@ -369,10 +491,58 @@ const withBrand: Decorator = (Story, context) => {
 const withLocoLiveSync: Decorator = (Story, context) => {
   const locoMode = String(context.globals?.locoMode || 'package');
   const locale = String(context.globals?.locale || 'en');
+  const queryParams =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : null;
+  const queryLocoServer = queryParams?.get('locoServerUrl')?.trim() || '';
+  const queryLocoApiKey = queryParams?.get('locoApiKey')?.trim() || '';
   const configuredServer = String(context.globals?.locoServer || '').trim();
   const configuredApiKey = String(context.globals?.locoApiKey || '').trim();
-  const serverUrl = configuredServer || defaultLocoServer;
-  const apiKey = configuredApiKey || defaultLocoApiKey || undefined;
+  const serverUrl = queryLocoServer || configuredServer || defaultLocoServer;
+  const apiKey = queryLocoApiKey || configuredApiKey || defaultLocoApiKey || undefined;
+
+  useEffect(() => {
+    if (locoMode !== 'live' || isLocoDisabled || typeof window === 'undefined') {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      const languages = await fetchLiveLocoLanguages(serverUrl, apiKey);
+      if (cancelled || languages.length === 0) return;
+
+      const stableLanguages = [...languages].sort((a, b) =>
+        a.code.localeCompare(b.code)
+      );
+      const nextCodes = new Set(stableLanguages.map((item) => item.code));
+      const hasNewLanguage = stableLanguages.some(
+        (item) => !localeToolbarItems.some((localeItem) => localeItem.value === item.code)
+      );
+
+      window.localStorage.setItem(
+        LOCO_LIVE_LANG_CACHE_KEY,
+        JSON.stringify(stableLanguages)
+      );
+
+      // Storybook global toolbar options are defined statically at module load.
+      // Refresh once per tab when live mode discovers additional languages.
+      if (hasNewLanguage && typeof window.sessionStorage !== 'undefined') {
+        const wasReloaded = window.sessionStorage.getItem(LOCO_LIVE_LANG_RELOAD_FLAG);
+        if (!wasReloaded && nextCodes.size > 0) {
+          window.sessionStorage.setItem(LOCO_LIVE_LANG_RELOAD_FLAG, '1');
+          window.location.reload();
+        }
+      }
+    })().catch((error) => {
+      console.warn('[loco-live] Unable to fetch live language list.', error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locoMode, serverUrl, apiKey]);
 
   useEffect(() => {
     if (locoMode !== 'live' || isLocoDisabled) return;
@@ -510,11 +680,7 @@ const preview: Preview = {
       description: 'Locale used by i18n integration stories',
       toolbar: {
         icon: 'globe',
-        items: [
-          { value: 'en', title: 'English (en)' },
-          { value: 'fr', title: 'French (fr)' },
-          { value: 'zh-Hans', title: 'Chinese (zh-Hans)' },
-        ],
+        items: localeToolbarItems,
         dynamicTitle: true,
       },
     },
