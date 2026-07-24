@@ -499,17 +499,18 @@ addons.register('mieweb-open-in-new-tab', (api) => {
             const url = new URL('iframe.html', window.location.href);
             url.searchParams.set('id', storyId);
             url.searchParams.set('viewMode', 'story');
-            // Canvas-inspection tools (measure/outline) shouldn't follow the
-            // story into the popped-out tab; object-valued globals (viewport,
-            // backgrounds, …) don't survive `key:value` URL encoding, so only
-            // primitive globals are forwarded.
-            const EXCLUDED_GLOBALS = new Set(['measureEnabled', 'outline']);
+            // Only forward this project's toolbar globals (see preview.tsx
+            // globalTypes); tool globals (measure/outline) and object-valued
+            // globals (viewport, backgrounds, a11y) must not follow the story
+            // into the popped-out tab.
+            const FORWARDED_GLOBALS = new Set([
+              'brand',
+              'theme',
+              'density',
+              'locale',
+            ]);
             const globalsParam = Object.entries(api.getGlobals() ?? {})
-              .filter(
-                ([key, value]) =>
-                  !EXCLUDED_GLOBALS.has(key) &&
-                  ['string', 'number', 'boolean'].includes(typeof value)
-              )
+              .filter(([key]) => FORWARDED_GLOBALS.has(key))
               .map(([key, value]) => `${key}:${value}`)
               .join(';');
             if (globalsParam) url.searchParams.set('globals', globalsParam);
