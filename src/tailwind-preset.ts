@@ -48,7 +48,7 @@ export const miewebUISafelist = [
   'bg-success/15',
   'bg-warning/20',
   'bg-warning/40',
-  'border-l-warning',
+  'border-s-warning',
   'border-primary-600',
   'border-warning/50',
   'dark:bg-primary-950',
