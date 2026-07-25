@@ -95,6 +95,11 @@ module.exports = {
     'ps-10',
     'rtl:translate-x-full',
     '[&:has([role=checkbox])]:pe-0',
+    // Codemod batches (feature modules)
+    'start-4',
+    'end-4',
+    'md:end-4',
+    'md:start-auto',
     'data-[state=checked]:translate-x-4',
     'data-[state=checked]:translate-x-5',
     'data-[state=checked]:translate-x-7',

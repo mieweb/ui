@@ -296,7 +296,12 @@ CardMedia.displayName = 'CardMedia';
 export interface CardBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /** Badge color variant */
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'destructive';
-  /** Position of the badge */
+  /**
+   * Position of the badge. All values are direction-aware (logical):
+   * `*-left`/`*-right` are aliases for `*-start`/`*-end` and mirror in RTL
+   * documents. Prefer `start`/`end` values for clarity; pass a physical
+   * inset via `className` if fixed positioning is required.
+   */
   position?:
     | 'top-left'
     | 'top-right'
