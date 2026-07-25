@@ -59,14 +59,6 @@ type LocoProjectInfo = {
 function getCurrentLocoModeFromUrl(): 'package' | 'live' | 'disable' {
   if (typeof window === 'undefined') return 'package';
   try {
-    const storedMode = window.sessionStorage.getItem(LOCO_TOOLBAR_MODE_KEY);
-    if (storedMode === 'live' || storedMode === 'disable' || storedMode === 'package') {
-      return storedMode;
-    }
-  } catch {
-    // Ignore storage access errors.
-  }
-  try {
     const params = new URLSearchParams(window.location.search);
     const globalsParam = params.get('globals') || '';
     const entries = globalsParam.split(';');
