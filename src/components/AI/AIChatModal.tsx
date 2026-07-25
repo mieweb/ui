@@ -40,10 +40,10 @@ export function AIChatTrigger({
   className,
 }: AIChatTriggerProps) {
   const positionClasses = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
-    'top-right': 'top-4 right-4',
-    'top-left': 'top-4 left-4',
+    'bottom-right': 'bottom-4 end-4',
+    'bottom-left': 'bottom-4 start-4',
+    'top-right': 'top-4 end-4',
+    'top-left': 'top-4 start-4',
   };
 
   return (
@@ -72,7 +72,7 @@ export function AIChatTrigger({
       {badge && badge > 0 && (
         <span
           data-slot="ai-chat-trigger-badge"
-          className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold"
+          className="absolute -top-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold"
         >
           {badge > 9 ? '9+' : badge}
         </span>
@@ -129,8 +129,8 @@ export function AIChatModal({
   if (!open) return null;
 
   const positionClasses = {
-    'bottom-right': 'bottom-20 right-4',
-    'bottom-left': 'bottom-20 left-4',
+    'bottom-right': 'bottom-20 end-4',
+    'bottom-left': 'bottom-20 start-4',
     center: 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
   };
 

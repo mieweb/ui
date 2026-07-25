@@ -66,17 +66,17 @@ function CameraViewfinder({
           {/* Corner guides */}
           <div className="absolute inset-8 rounded-lg border-2 border-white/30">
             {/* Top-left corner */}
-            <div className="absolute -top-0.5 -left-0.5 h-6 w-6 rounded-tl-lg border-t-4 border-l-4 border-white" />
+            <div className="absolute -top-0.5 -start-0.5 h-6 w-6 rounded-ss-lg border-t-4 border-s-4 border-white" />
             {/* Top-right corner */}
-            <div className="absolute -top-0.5 -right-0.5 h-6 w-6 rounded-tr-lg border-t-4 border-r-4 border-white" />
+            <div className="absolute -top-0.5 -end-0.5 h-6 w-6 rounded-se-lg border-t-4 border-e-4 border-white" />
             {/* Bottom-left corner */}
-            <div className="absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-lg border-b-4 border-l-4 border-white" />
+            <div className="absolute -bottom-0.5 -start-0.5 h-6 w-6 rounded-es-lg border-b-4 border-s-4 border-white" />
             {/* Bottom-right corner */}
-            <div className="absolute -right-0.5 -bottom-0.5 h-6 w-6 rounded-br-lg border-r-4 border-b-4 border-white" />
+            <div className="absolute -end-0.5 -bottom-0.5 h-6 w-6 rounded-ee-lg border-e-4 border-b-4 border-white" />
           </div>
 
           {/* Center hint text */}
-          <div className="absolute right-0 bottom-4 left-0 text-center">
+          <div className="absolute end-0 bottom-4 start-0 text-center">
             <span className="rounded-full bg-black/50 px-3 py-1 text-sm text-white">
               Position document within the frame
             </span>
@@ -106,7 +106,7 @@ function PermissionDeniedMessage({ onRetry }: { onRetry: () => void }) {
         <p className="text-muted-foreground text-sm">
           To enable camera access:
         </p>
-        <ol className="text-muted-foreground list-inside list-decimal space-y-1 text-left text-sm">
+        <ol className="text-muted-foreground list-inside list-decimal space-y-1 text-start text-sm">
           <li>Click the camera/lock icon in your browser&apos;s address bar</li>
           <li>Allow camera access for this site</li>
           <li>Click the button below to try again</li>

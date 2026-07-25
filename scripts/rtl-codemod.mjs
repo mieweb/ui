@@ -80,13 +80,18 @@ function mapToken(token) {
 }
 
 // Same detection pattern as rtl-scan.mjs: leading boundary group, optional
-// negative sign, variant prefixes, then the physical utility token (group 2).
+// negative sign, variant prefixes, then the physical utility token (group 3).
+// Spacing/inset suffixes are restricted to real Tailwind values (numbers,
+// fractions, px, auto, full, arbitrary [..]) so prose like "right-click" in
+// comments and copy is never rewritten.
+const VALUE =
+  '(?:\\d+/\\d+|\\d+(?:\\.\\d+)?|px|auto|full|\\[[^\\]\\s]+\\])(?![-\\w])';
 const PHYSICAL_UTILITIES = new RegExp(
   '(^|[\\s\'"`{:])(-?(?:[a-z-]+:)*)(' +
     [
-      '(?:scroll-)?m[lr]-[^\\s\'"`]+',
-      '(?:scroll-)?p[lr]-[^\\s\'"`]+',
-      '(?:left|right)-[^\\s\'"`]+',
+      '(?:scroll-)?m[lr]-' + VALUE,
+      '(?:scroll-)?p[lr]-' + VALUE,
+      '(?:left|right)-' + VALUE,
       'text-(?:left|right)(?![-\\w])',
       'rounded-(?:[lr]|[tb][lr])(?:-[^\\s\'"`]+)?(?![-\\w])',
       'border-[lr](?:-[^\\s\'"`]+)?(?![-\\w])',
@@ -95,10 +100,28 @@ const PHYSICAL_UTILITIES = new RegExp(
   'g'
 );
 
+// `left-1/2` (or `right-1/2`) paired with `translate-x-1/2` on the same line
+// is the physical centering idiom: a centered element renders identically in
+// LTR and RTL, so it is skipped (rtl-scan.mjs exempts it for the same reason).
+function isCenteringIdiom(token, lineText) {
+  return (
+    /^(?:left|right)-1\/2$/.test(token) && lineText.includes('translate-x-1/2')
+  );
+}
+
 const NEEDS_MANUAL = new RegExp(
-  '(^|[\\s\'"`{:])-?(?:[a-z-]+:)*((?:space-x|divide-x)(?:-[^\\s\'"`]+)?)',
+  '(^|[\\s\'"`{:])-?(?:[a-z-]+:)*((?:space-x|divide-x)(?:-(?!reverse)[^\\s\'"`]+)?)',
   'g'
 );
+
+// A `space-x-*`/`divide-x-*` utility accompanied by its rtl:*-reverse remedy
+// on the same line is already RTL-correct — no manual attention needed.
+function isHandledReverse(token, lineText) {
+  return (
+    (/^space-x-/.test(token) && lineText.includes('rtl:space-x-reverse')) ||
+    (/^divide-x/.test(token) && lineText.includes('rtl:divide-x-reverse'))
+  );
+}
 
 function walk(path, files = []) {
   if (statSync(path).isFile()) {
@@ -144,6 +167,7 @@ for (const file of paths.flatMap((p) => walk(join(root, p)))) {
       let updated = text.replace(
         PHYSICAL_UTILITIES,
         (full, boundary, variants, token) => {
+          if (isCenteringIdiom(token, text)) return full;
           const mapped = mapToken(token);
           if (!mapped) return full;
           replacements.push({
@@ -155,6 +179,7 @@ for (const file of paths.flatMap((p) => walk(join(root, p)))) {
         }
       );
       for (const m of updated.matchAll(NEEDS_MANUAL)) {
+        if (isHandledReverse(m[2], updated)) continue;
         manual.push({ line: i + 1, token: m[2] });
       }
       return updated;

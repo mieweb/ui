@@ -411,7 +411,7 @@ function ReconciliationProposalRow({
             {proposal.label}
             {proposal.required && (
               <span
-                className="text-muted-foreground ml-1 text-xs font-normal"
+                className="text-muted-foreground ms-1 text-xs font-normal"
                 aria-label="required"
               >
                 (required)

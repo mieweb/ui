@@ -26,21 +26,44 @@ const BASELINE_PATH = join(root, 'scripts', 'rtl-baseline.json');
 // `md:` and optional negative `-`). Logical equivalents in comments.
 // Note: a leading boundary group is matched (not a lookbehind) to keep the
 // pattern portable and obvious; the utility token itself is capture group 2.
+// Spacing/inset suffixes are restricted to real Tailwind values (numbers,
+// fractions, px, auto, full, arbitrary [..]) so prose like "right-click" or
+// "left-border" in comments and copy is not flagged.
+const VALUE =
+  '(?:\\d+/\\d+|\\d+(?:\\.\\d+)?|px|auto|full|\\[[^\\]\\s]+\\])(?![-\\w])';
 const PHYSICAL_UTILITIES = new RegExp(
   '(^|[\\s\'"`{:])-?(?:[a-z-]+:)*(' +
     [
-      '(?:scroll-)?m[lr]-[^\\s\'"`]+', // ml-/mr- → ms-/me-
-      '(?:scroll-)?p[lr]-[^\\s\'"`]+', // pl-/pr- → ps-/pe-
-      '(?:left|right)-[^\\s\'"`]+', // left-/right- → start-/end-
+      '(?:scroll-)?m[lr]-' + VALUE, // ml-/mr- → ms-/me-
+      '(?:scroll-)?p[lr]-' + VALUE, // pl-/pr- → ps-/pe-
+      '(?:left|right)-' + VALUE, // left-/right- → start-/end-
       'text-(?:left|right)(?![-\\w])', // → text-start/text-end
       'rounded-(?:[lr]|[tb][lr])(?:-[^\\s\'"`]+)?(?![-\\w])', // → rounded-s/e/ss/se/es/ee
       'border-[lr](?:-[^\\s\'"`]+)?(?![-\\w])', // → border-s/border-e
-      'space-x-[^\\s\'"`]+', // → gap- (or rtl:space-x-reverse)
-      'divide-x(?:-[^\\s\'"`]+)?(?![-\\w])', // needs rtl:divide-x-reverse
+      'space-x-(?!reverse)[^\\s\'"`]+', // → gap- (or rtl:space-x-reverse)
+      'divide-x(?:-(?!reverse)[^\\s\'"`]+)?(?![-\\w])', // needs rtl:divide-x-reverse
     ].join('|') +
     ')',
   'g'
 );
+
+// A `space-x-*`/`divide-x-*` utility accompanied by its rtl:*-reverse remedy
+// on the same line is already RTL-correct.
+function isHandledReverse(token, lineText) {
+  return (
+    (/^space-x-/.test(token) && lineText.includes('rtl:space-x-reverse')) ||
+    (/^divide-x/.test(token) && lineText.includes('rtl:divide-x-reverse'))
+  );
+}
+
+// `left-1/2` (or `right-1/2`) paired with `translate-x-1/2` on the same line
+// is the physical centering idiom — a centered element renders identically in
+// LTR and RTL, so it is direction-neutral and exempt from the guard.
+function isCenteringIdiom(token, lineText) {
+  return (
+    /^(?:left|right)-1\/2$/.test(token) && lineText.includes('translate-x-1/2')
+  );
+}
 
 function walk(dir, files = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -62,6 +85,8 @@ function scan() {
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((text, i) => {
       for (const match of text.matchAll(PHYSICAL_UTILITIES)) {
+        if (isCenteringIdiom(match[2], text)) continue;
+        if (isHandledReverse(match[2], text)) continue;
         if (!results.has(rel)) results.set(rel, []);
         results.get(rel).push({ line: i + 1, token: match[2] });
       }

@@ -231,7 +231,7 @@ function AttachmentPreviewItem({
         type="button"
         onClick={onRemove}
         className={cn(
-          'absolute -top-1 -right-1 z-10',
+          'absolute -top-1 -end-1 z-10',
           'rounded-full p-1',
           'bg-neutral-900 text-white',
           'opacity-0 group-hover:opacity-100',
@@ -259,7 +259,7 @@ function AttachmentPreviewItem({
       {/* File name tooltip on hover */}
       <div
         className={cn(
-          'absolute right-0 bottom-0 left-0',
+          'absolute end-0 bottom-0 start-0',
           'bg-black/70 px-1 py-0.5',
           'opacity-0 group-hover:opacity-100',
           'transition-opacity'
