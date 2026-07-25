@@ -74,7 +74,7 @@ function LightboxModal({ attachment, onClose }: LightboxModalProps) {
         type="button"
         onClick={onClose}
         className={cn(
-          'absolute top-4 end-4 z-10',
+          'absolute end-4 top-4 z-10',
           'rounded-full p-2',
           'bg-white/10 text-white',
           'hover:bg-white/20',

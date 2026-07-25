@@ -134,9 +134,9 @@ export function DocumentDetectionOverlay({
         className={`absolute inset-4 rounded-lg border-4 transition-colors duration-300 ${borderColor}`}
       >
         {/* Corner accents */}
-        <div className="absolute -top-1 -start-1 h-6 w-6 rounded-ss border-t-4 border-s-4 border-current" />
-        <div className="absolute -top-1 -end-1 h-6 w-6 rounded-se border-t-4 border-e-4 border-current" />
-        <div className="absolute -bottom-1 -start-1 h-6 w-6 rounded-es border-b-4 border-s-4 border-current" />
+        <div className="absolute -start-1 -top-1 h-6 w-6 rounded-ss border-s-4 border-t-4 border-current" />
+        <div className="absolute -end-1 -top-1 h-6 w-6 rounded-se border-e-4 border-t-4 border-current" />
+        <div className="absolute -start-1 -bottom-1 h-6 w-6 rounded-es border-s-4 border-b-4 border-current" />
         <div className="absolute -end-1 -bottom-1 h-6 w-6 rounded-ee border-e-4 border-b-4 border-current" />
       </div>
 
@@ -144,7 +144,7 @@ export function DocumentDetectionOverlay({
       <CountdownDisplay seconds={captureCountdown} />
 
       {/* Status indicators */}
-      <div className="absolute top-3 end-3 start-3">
+      <div className="absolute start-3 end-3 top-3">
         {/* Main status message */}
         <div
           className={`mb-2 rounded-lg px-4 py-2 text-center backdrop-blur-sm ${
@@ -187,7 +187,7 @@ export function DocumentDetectionOverlay({
 
       {/* Detailed metrics (bottom) */}
       {showDetailedMetrics && (
-        <div className="absolute end-3 bottom-3 start-3">
+        <div className="absolute start-3 end-3 bottom-3">
           <div className="flex flex-wrap justify-center gap-2 rounded-lg bg-black/60 p-2 backdrop-blur-sm">
             <StatusPill label="Focus" isOk={isInFocus} value={focusScore} />
             <StatusPill

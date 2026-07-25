@@ -803,7 +803,7 @@ const MessageComposer = React.forwardRef<
                 rows={1}
                 className={cn(
                   'w-full resize-none rounded-2xl py-2.5',
-                  inputTrailing ? 'pe-10 ps-4' : 'px-4',
+                  inputTrailing ? 'ps-4 pe-10' : 'px-4',
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
@@ -829,7 +829,7 @@ const MessageComposer = React.forwardRef<
               {inputTrailing && (
                 <div
                   data-slot="composer-input-trailing"
-                  className="pointer-events-none absolute top-0 end-1 flex h-[44px] items-center [&>*]:pointer-events-auto"
+                  className="pointer-events-none absolute end-1 top-0 flex h-[44px] items-center [&>*]:pointer-events-auto"
                 >
                   {inputTrailing}
                 </div>

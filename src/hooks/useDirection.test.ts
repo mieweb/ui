@@ -113,4 +113,25 @@ describe('useDirection', () => {
 
     container.remove();
   });
+
+  it('re-syncs when the ref points at a different element on re-render', () => {
+    const ltrEl = document.createElement('div');
+    const rtlEl = document.createElement('div');
+    document.body.append(ltrEl, rtlEl);
+    setDir(rtlEl, 'rtl');
+    const ref = createRef<HTMLElement | null>();
+    ref.current = ltrEl;
+
+    const { result, rerender } = renderHook(() => useDirection(ref));
+    expect(result.current).toBe('ltr');
+
+    // Swap the referenced node without any dir attribute mutation — only the
+    // per-render sync effect can catch this.
+    ref.current = rtlEl;
+    rerender();
+    expect(result.current).toBe('rtl');
+
+    ltrEl.remove();
+    rtlEl.remove();
+  });
 });

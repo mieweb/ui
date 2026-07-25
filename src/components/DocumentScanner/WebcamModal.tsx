@@ -66,17 +66,17 @@ function CameraViewfinder({
           {/* Corner guides */}
           <div className="absolute inset-8 rounded-lg border-2 border-white/30">
             {/* Top-left corner */}
-            <div className="absolute -top-0.5 -start-0.5 h-6 w-6 rounded-ss-lg border-t-4 border-s-4 border-white" />
+            <div className="absolute -start-0.5 -top-0.5 h-6 w-6 rounded-ss-lg border-s-4 border-t-4 border-white" />
             {/* Top-right corner */}
-            <div className="absolute -top-0.5 -end-0.5 h-6 w-6 rounded-se-lg border-t-4 border-e-4 border-white" />
+            <div className="absolute -end-0.5 -top-0.5 h-6 w-6 rounded-se-lg border-e-4 border-t-4 border-white" />
             {/* Bottom-left corner */}
-            <div className="absolute -bottom-0.5 -start-0.5 h-6 w-6 rounded-es-lg border-b-4 border-s-4 border-white" />
+            <div className="absolute -start-0.5 -bottom-0.5 h-6 w-6 rounded-es-lg border-s-4 border-b-4 border-white" />
             {/* Bottom-right corner */}
             <div className="absolute -end-0.5 -bottom-0.5 h-6 w-6 rounded-ee-lg border-e-4 border-b-4 border-white" />
           </div>
 
           {/* Center hint text */}
-          <div className="absolute end-0 bottom-4 start-0 text-center">
+          <div className="absolute start-0 end-0 bottom-4 text-center">
             <span className="rounded-full bg-black/50 px-3 py-1 text-sm text-white">
               Position document within the frame
             </span>

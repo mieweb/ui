@@ -84,7 +84,7 @@ function FilePreviewItem({ file, onRemove, disabled }: FilePreviewItemProps) {
         {/* Source badge */}
         <span
           className={cn(
-            'absolute bottom-2 start-2 px-2 py-0.5',
+            'absolute start-2 bottom-2 px-2 py-0.5',
             'rounded-full text-xs font-medium',
             'bg-black/50 text-white',
             'capitalize'

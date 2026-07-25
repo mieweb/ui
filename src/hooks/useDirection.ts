@@ -59,5 +59,13 @@ export function useDirection(
     return () => observer.disconnect();
   }, [elementRef]);
 
+  // Re-sync when a re-render points elementRef.current at a different node:
+  // the MutationObserver only fires on `dir` attribute mutations, so a swapped
+  // ref target with a different inherited direction would otherwise go stale.
+  const currentElement = elementRef?.current ?? null;
+  useEffect(() => {
+    setDirection(resolveDirection(currentElement));
+  }, [currentElement]);
+
   return direction;
 }
