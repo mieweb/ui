@@ -123,19 +123,21 @@ function isHandledReverse(token, lineText) {
   );
 }
 
+// Component sources only: .tsx, excluding stories and tests — applied to both
+// walked directory entries and explicitly-passed file paths.
+function isComponentSource(name) {
+  return /\.tsx$/.test(name) && !/\.(stories|test)\.tsx$/.test(name);
+}
+
 function walk(path, files = []) {
   if (statSync(path).isFile()) {
-    files.push(path);
+    if (isComponentSource(path)) files.push(path);
     return files;
   }
   for (const entry of readdirSync(path, { withFileTypes: true })) {
     const p = join(path, entry.name);
     if (entry.isDirectory()) walk(p, files);
-    else if (
-      /\.tsx$/.test(entry.name) &&
-      !/\.(stories|test)\.tsx$/.test(entry.name)
-    )
-      files.push(p);
+    else if (isComponentSource(entry.name)) files.push(p);
   }
   return files;
 }

@@ -69,6 +69,12 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
   // Apply text direction (RTL preview) at the document level so CSS logical
   // properties and `rtl:` variants respond everywhere, including docs pages.
   document.documentElement.setAttribute('dir', resolveGlobalDirection(globals));
+  // Keep the document language in sync with the locale global so screen
+  // readers and locale-sensitive text shaping reflect the selected locale.
+  document.documentElement.setAttribute(
+    'lang',
+    (globals?.locale as string) || 'en'
+  );
 
   document.body.style.backgroundColor = semanticColors.background;
   document.body.style.color = semanticColors.foreground;
