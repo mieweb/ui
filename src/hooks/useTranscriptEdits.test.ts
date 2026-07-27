@@ -382,3 +382,95 @@ describe('ui#323 / #327-review regressions', () => {
     expect(result.current.hasEdits).toBe(true);
   });
 });
+
+// ============================================================================
+// Speed edits: range apply + undo coverage
+// ============================================================================
+
+describe('speed range + undo', () => {
+  it('setSpeedForRange marks the range and restores the prior speed after it', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 2);
+    });
+    expect(result.current.speedMarkers).toEqual([
+      { wordIndex: 0, speed: 2 },
+      { wordIndex: 2, speed: 1 },
+    ]);
+    expect(result.current.getSpeedAtIndex(0)).toBe(2);
+    expect(result.current.getSpeedAtIndex(1)).toBe(2);
+    // The word after the range keeps its previous effective speed
+    expect(result.current.getSpeedAtIndex(2)).toBe(1);
+    expect(result.current.hasEdits).toBe(true);
+  });
+
+  it('setSpeedForRange clears markers inside the range', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleSpeedMarker(1, 0.5);
+    });
+    act(() => {
+      result.current.setSpeedForRange(0, 2, 1.5);
+    });
+    // The 0.5 marker inside the range must not fragment the new region;
+    // range reaches the final word, so no restore marker is added
+    expect(result.current.speedMarkers).toEqual([{ wordIndex: 0, speed: 1.5 }]);
+  });
+
+  it('undo reverts a speed marker set via toggleSpeedMarker', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleSpeedMarker(1, 2);
+    });
+    expect(result.current.speedMarkers).toHaveLength(1);
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('undo reverts a default-speed change and a range apply as single steps', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.setDefaultSpeed(1.5);
+    });
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 2);
+    });
+    act(() => {
+      result.current.undo();
+    });
+    // Range apply undone in one step; default-speed change still applied
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.defaultSpeed).toBe(1.5);
+    expect(result.current.hasEdits).toBe(true);
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.defaultSpeed).toBe(1);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('undo still restores words when speed was untouched', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleWordDeleted(0);
+    });
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.editedWords[0].deleted).toBe(false);
+    expect(result.current.hasEdits).toBe(false);
+  });
+});

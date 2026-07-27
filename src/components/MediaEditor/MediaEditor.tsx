@@ -144,6 +144,8 @@ interface WordVisualState {
   isAnchor: boolean;
   isFocused: boolean;
   hasSpeedMarker: boolean;
+  /** Word plays at a speed differing from the default — the whole region is marked */
+  isSped: boolean;
 }
 
 /**
@@ -206,6 +208,14 @@ function wordClassName(s: WordVisualState): string {
 
   if (s.hasSpeedMarker) {
     parts.push('ml-0.5 border-l-[3px] border-l-warning pl-1.5');
+  }
+
+  // A dotted warning underline spans every word of a re-timed region, so the
+  // affected range reads at a glance (the badge only sits on the first word)
+  if (s.isSped) {
+    parts.push(
+      'underline decoration-warning decoration-dotted decoration-2 underline-offset-4'
+    );
   }
 
   return parts.join(' ');
@@ -290,6 +300,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       defaultSpeed,
       setDefaultSpeed,
       toggleSpeedMarker,
+      setSpeedForRange,
       removeSpeedMarker,
       getSpeedAtIndex,
       getSpeedMarkerAtIndex,
@@ -1244,6 +1255,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
             isAnchor,
             isFocused,
             hasSpeedMarker,
+            isSped: effectiveSpeed !== defaultSpeed,
           })}
           onClick={(e) => handleWordClick(ew.word, index, e)}
           onDoubleClick={(e) => handleWordDoubleClick(index, e)}
@@ -1513,7 +1525,12 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           }
           defaultSpeed={defaultSpeed}
           onSetSpeed={(speed) => {
-            if (speedMenuWordIndex !== null) {
+            if (speedMenuWordIndex === null) return;
+            // With an active selection the speed applies to the whole range
+            // (and only the range); otherwise the classic from-here-on marker
+            if (selection) {
+              setSpeedForRange(selection.start, selection.end, speed);
+            } else {
               toggleSpeedMarker(speedMenuWordIndex, speed);
             }
           }}
