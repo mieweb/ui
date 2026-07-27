@@ -343,6 +343,15 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       null
     );
     const longPressTriggered = React.useRef<boolean>(false);
+    // Drag selection: document-level listeners and the auto-scroll frame read
+    // these refs because they outlive the render that attached them
+    const selectionAnchorRef = React.useRef<number | null>(null);
+    const dragPointer = React.useRef<{ x: number; y: number } | null>(null);
+    const dragScrollFrame = React.useRef<number | null>(null);
+    const dragListeners = React.useRef<{
+      move: (e: MouseEvent) => void;
+      up: () => void;
+    } | null>(null);
     const wordPlaybackStartMs = React.useRef<number | null>(null);
     const wordPlaybackEndMs = React.useRef<number | null>(null);
     // Edited-timeline sequence playback
@@ -703,6 +712,161 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       }
     };
 
+    const AUTOSCROLL_EDGE_PX = 24;
+    const AUTOSCROLL_MAX_STEP_PX = 24;
+
+    const extendDragSelection = (index: number) => {
+      const anchor = selectionAnchorRef.current;
+      if (!isDragging.current || anchor === null) return;
+      setSelection({
+        start: Math.min(anchor, index),
+        end: Math.max(anchor, index),
+      });
+      setCursorIndex(index);
+    };
+
+    /** Word index under a viewport point, or null when the point misses every span */
+    const wordIndexAtPoint = (x: number, y: number): number | null => {
+      const span = document
+        .elementFromPoint?.(x, y)
+        ?.closest?.('[data-word-index]');
+      if (!span) return null;
+      const parsed = Number((span as HTMLElement).dataset.wordIndex);
+      return Number.isInteger(parsed) ? parsed : null;
+    };
+
+    /**
+     * Extends the selection to the word nearest the held pointer, clamping a
+     * pointer that has left the pane back inside it. Extra probe points cover
+     * padding and end-of-line whitespace, where the pointer misses every span
+     * and per-word mouseenter would never fire.
+     */
+    const extendSelectionToPointer = () => {
+      const container = contentRef.current;
+      const pointer = dragPointer.current;
+      if (!container || !pointer) return;
+
+      const rect = container.getBoundingClientRect();
+      const y = Math.min(Math.max(pointer.y, rect.top + 2), rect.bottom - 2);
+      const x = Math.min(Math.max(pointer.x, rect.left + 2), rect.right - 2);
+      for (const probeX of [x, rect.left + rect.width / 2, rect.left + 16]) {
+        const index = wordIndexAtPoint(probeX, y);
+        if (index !== null) {
+          extendDragSelection(index);
+          return;
+        }
+      }
+    };
+
+    /** Scrolls the pane while the held pointer sits at or beyond its edge */
+    const stepDragAutoScroll = () => {
+      dragScrollFrame.current = null;
+      const container = contentRef.current;
+      const pointer = dragPointer.current;
+      if (!isDragging.current || !container || !pointer) return;
+
+      const rect = container.getBoundingClientRect();
+      let step = 0;
+      if (pointer.y < rect.top + AUTOSCROLL_EDGE_PX) {
+        step = Math.max(
+          (pointer.y - (rect.top + AUTOSCROLL_EDGE_PX)) / 3,
+          -AUTOSCROLL_MAX_STEP_PX
+        );
+      } else if (pointer.y > rect.bottom - AUTOSCROLL_EDGE_PX) {
+        step = Math.min(
+          (pointer.y - (rect.bottom - AUTOSCROLL_EDGE_PX)) / 3,
+          AUTOSCROLL_MAX_STEP_PX
+        );
+      }
+      if (step !== 0) {
+        container.scrollTop += step;
+        extendSelectionToPointer();
+      }
+      dragScrollFrame.current = requestAnimationFrame(stepDragAutoScroll);
+    };
+
+    const detachDragListeners = () => {
+      if (dragListeners.current) {
+        document.removeEventListener('mousemove', dragListeners.current.move);
+        document.removeEventListener('mouseup', dragListeners.current.up);
+        dragListeners.current = null;
+      }
+      if (dragScrollFrame.current !== null) {
+        cancelAnimationFrame(dragScrollFrame.current);
+        dragScrollFrame.current = null;
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+      if (isDragging.current) {
+        isDragging.current = false;
+      }
+      detachDragListeners();
+    };
+
+    /**
+     * Document-level tracking for the lifetime of one drag, so the selection
+     * keeps following after the pointer leaves the pane and the pane scrolls
+     * itself when held at an edge. The exact handler pair is kept in a ref so
+     * detaching survives re-renders.
+     */
+    const beginDragTracking = () => {
+      detachDragListeners();
+
+      const up = () => handleMouseUp();
+      const move = (e: MouseEvent) => {
+        if (!isDragging.current) return;
+        // Button released outside the window: no mouseup will arrive
+        if (e.buttons === 0) {
+          up();
+          return;
+        }
+        dragPointer.current = { x: e.clientX, y: e.clientY };
+
+        // Leaving the pane cancels the pending long press (it used to cancel
+        // the whole drag), but the selection keeps tracking the pointer
+        const container = contentRef.current;
+        if (container && longPressTimer.current) {
+          const rect = container.getBoundingClientRect();
+          const outside =
+            e.clientX < rect.left ||
+            e.clientX > rect.right ||
+            e.clientY < rect.top ||
+            e.clientY > rect.bottom;
+          if (outside) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+          }
+        }
+        extendSelectionToPointer();
+      };
+
+      dragListeners.current = { move, up };
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+      dragScrollFrame.current = requestAnimationFrame(stepDragAutoScroll);
+    };
+
+    // Never leave document listeners or the scroll frame behind on unmount
+    React.useEffect(
+      () => () => {
+        if (dragListeners.current) {
+          document.removeEventListener('mousemove', dragListeners.current.move);
+          document.removeEventListener('mouseup', dragListeners.current.up);
+          dragListeners.current = null;
+        }
+        if (dragScrollFrame.current !== null) {
+          cancelAnimationFrame(dragScrollFrame.current);
+          dragScrollFrame.current = null;
+        }
+      },
+      []
+    );
+
     const handleWordMouseDown = (index: number, e: React.MouseEvent) => {
       if (e.button !== 0) return;
 
@@ -714,10 +878,13 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       }, 500);
 
       isDragging.current = true;
+      selectionAnchorRef.current = index;
+      dragPointer.current = { x: e.clientX, y: e.clientY };
       setSelectionAnchor(index);
       setCursorIndex(index);
       setCursorPosition('before');
       setSelection(null);
+      beginDragTracking();
     };
 
     const handleWordMouseEnter = (index: number) => {
@@ -727,23 +894,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         longPressTimer.current = null;
       }
 
-      if (!isDragging.current || selectionAnchor === null) return;
-
-      setSelection({
-        start: Math.min(selectionAnchor, index),
-        end: Math.max(selectionAnchor, index),
-      });
-      setCursorIndex(index);
-    };
-
-    const handleMouseUp = () => {
-      if (longPressTimer.current) {
-        clearTimeout(longPressTimer.current);
-        longPressTimer.current = null;
-      }
-      if (isDragging.current) {
-        isDragging.current = false;
-      }
+      extendDragSelection(index);
     };
 
     const handleWordContextMenu = (index: number, e: React.MouseEvent) => {
@@ -1237,7 +1388,6 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
               role="listbox"
               aria-label="Transcript words"
               aria-activedescendant={`word-${cursorIndex}`}
