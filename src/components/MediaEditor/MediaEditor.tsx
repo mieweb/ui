@@ -756,7 +756,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       if (bottom <= top || right <= left) return;
       const y = Math.min(Math.max(pointer.y, top + 2), bottom - 2);
       const x = Math.min(Math.max(pointer.x, left + 2), right - 2);
-      for (const probeX of [x, left + (right - left) / 2, left + 16]) {
+      for (const rawX of [x, left + (right - left) / 2, left + 16]) {
+        const probeX = Math.min(Math.max(rawX, left + 2), right - 2);
         const index = wordIndexAtPoint(probeX, y);
         if (index !== null) {
           extendDragSelection(index);
@@ -777,6 +778,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           return;
         }
       }
+      // The point sits above every span (top padding): extend to the first word
+      if (spans.length > 0) {
+        const parsed = Number(spans[0].dataset.wordIndex);
+        if (Number.isInteger(parsed)) extendDragSelection(parsed);
+      }
     };
 
     /** Scrolls the pane while the held pointer sits at or beyond its edge */
@@ -791,6 +797,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       const rect = container.getBoundingClientRect();
       const top = Math.max(rect.top, 0);
       const bottom = Math.min(rect.bottom, window.innerHeight);
+      // Pane fully offscreen: keep the loop alive but never scroll it
+      if (bottom <= top) {
+        dragScrollFrame.current = requestAnimationFrame(stepDragAutoScroll);
+        return;
+      }
       let step = 0;
       if (pointer.y < top + AUTOSCROLL_EDGE_PX) {
         step = Math.max(
@@ -876,7 +887,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       dragScrollFrame.current = requestAnimationFrame(stepDragAutoScroll);
     };
 
-    // Never leave document listeners or the scroll frame behind on unmount
+    // Never leave document listeners, the scroll frame, or a pending
+    // long-press timer behind on unmount
     React.useEffect(
       () => () => {
         if (dragListeners.current) {
@@ -887,6 +899,10 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         if (dragScrollFrame.current !== null) {
           cancelAnimationFrame(dragScrollFrame.current);
           dragScrollFrame.current = null;
+        }
+        if (longPressTimer.current) {
+          clearTimeout(longPressTimer.current);
+          longPressTimer.current = null;
         }
       },
       []
