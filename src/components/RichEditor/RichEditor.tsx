@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { CoreEditor } from '@kerebron/editor';
-import { AdvancedEditorKit } from '@kerebron/editor-kits/AdvancedEditorKit';
 import { createAssetLoad } from '@kerebron/wasm/web';
 
-import { createCollabEditorKits, type CollabConfig } from './collabKits';
+import { createEditorKits, type CollabConfig } from './editorKits';
 
-export type { CollabConfig } from './collabKits';
+export type { CollabConfig } from './editorKits';
 
 export interface RichEditorProps {
   /** Initial markdown content to load into the editor. */
@@ -40,15 +39,14 @@ const RichEditor: React.FC<RichEditorProps> = ({
   useEffect(() => {
     if (!editorRef.current) return;
 
-    // Initialize the editor. In collaborative mode swap the default kits for
-    // the Yjs kits (advanced editing minus `history`, plus the CRDT sync).
+    // Initialize the editor. Both modes drop the teardown-unsafe extensions;
+    // collaborative mode additionally swaps `history` for the Yjs CRDT sync.
+    // See `editorKits.ts` for why.
     const editor = CoreEditor.create({
       element: editorRef.current,
       uri: 'file:///untitled.md',
       assetLoad: createAssetLoad('/kerebron-wasm'),
-      editorKits: collab
-        ? createCollabEditorKits(collab)
-        : [new AdvancedEditorKit()],
+      editorKits: createEditorKits(collab),
     });
 
     editorInstance.current = editor;

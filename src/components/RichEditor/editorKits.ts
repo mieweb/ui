@@ -1,12 +1,10 @@
 /**
- * Collaborative (Yjs) editor kit assembly for {@link RichEditor}.
+ * Editor kit assembly for {@link RichEditor}, for both plain and collaborative
+ * (Yjs) mode.
  *
- * The default {@link AdvancedEditorKit} bundles `ExtensionHistory` (undo/redo).
- * `ExtensionYjs` provides its own CRDT-aware history and therefore *conflicts*
- * with the `history` extension — the editor throws
- * `Extension conflict: yjs vs history` if both are present. So for collaborative
- * mode we reuse every advanced extension **except** `history`, then add the Yjs
- * pieces on top.
+ * Both modes start from {@link AdvancedEditorKit} and drop the extensions that
+ * are unsafe for our usage — see {@link unsafeExtensions} — then collaborative
+ * mode adds the Yjs pieces on top.
  *
  * We deliberately do not use `@kerebron/editor-kits`' own `YjsEditorKit`: it
  * constructs the `WebsocketProvider` with no query params, leaving no way to
@@ -41,28 +39,42 @@ function defaultWsUrl(): string {
   return `${protocol}//${host}/yjs`;
 }
 
-/** Advanced editing extensions minus `history`, `autocomplete`, and `hover`.
+/**
+ * Extensions dropped from {@link AdvancedEditorKit}, and why.
  *
- * `history` conflicts with ExtensionYjs (which supplies its own CRDT-aware
- * undo/redo). `autocomplete` and `hover` both store stale node references in
- * debounced callbacks; when a Yjs remote update replaces the document tree,
- * their deferred `dispatchMeta` calls crash with `null.matchesNode()` inside
- * ProseMirror's `EditorView.updateStateInner`, leaving the view in a
- * permanently broken state that blocks further sync. Removing them in collab
- * mode has no functional cost — autocomplete popups and node-hover tooltips are
- * compositor conveniences, not required for collaborative text editing.
+ * `autocomplete` and `hover` debounce their DOM handlers (200ms) and then call
+ * `dispatchMeta`, which reads `this.editor.state` with no guard that the editor
+ * is still alive. Any teardown or document swap inside that debounce window
+ * lands the deferred call on a dead view and throws
+ * `null.matchesNode()` inside ProseMirror's `EditorView.updateStateInner`,
+ * leaving the view permanently broken. Two ways to hit it:
+ *   - remount (e.g. a `key` change) while the pointer is over the editor, which
+ *     fires the debounced `onMouseLeave` after the view is destroyed;
+ *   - a Yjs remote update replacing the document tree under a pending callback.
+ * The first applies to *every* editor, so both extensions come out in both
+ * modes. No functional cost — autocomplete popups and node-hover tooltips are
+ * compositor conveniences, not required for editing.
+ *
+ * `history` is collab-only: ExtensionYjs supplies its own CRDT-aware undo/redo
+ * and the editor throws `Extension conflict: yjs vs history` if both are
+ * present. Plain mode keeps it, so undo/redo still works there.
  */
-class CollabAdvancedEditorKit implements EditorKit {
+const unsafeExtensions = ['autocomplete', 'hover'] as const;
+
+/** {@link AdvancedEditorKit} minus {@link unsafeExtensions} (and, for collab
+ * mode, minus `history`). */
+class SafeAdvancedEditorKit implements EditorKit {
   name = 'advanced-editor';
+  constructor(private readonly forCollab: boolean) {}
+
   getExtensions() {
+    const dropped: string[] = [...unsafeExtensions];
+    if (this.forCollab) dropped.push('history');
+
     return new AdvancedEditorKit()
       .getExtensions()
       .filter(
-        (extension) =>
-          !('name' in extension &&
-            (extension.name === 'history' ||
-              extension.name === 'autocomplete' ||
-              extension.name === 'hover')),
+        (extension) => !('name' in extension && dropped.includes(extension.name)),
       );
   }
 }
@@ -98,11 +110,16 @@ class HuddleYjsKit implements EditorKit {
   }
 }
 
-/** Build the editor kits for a collaborative session. */
-export function createCollabEditorKits(config: CollabConfig): EditorKit[] {
+/**
+ * Build the editor kits for a session. Pass `config` to join a collaborative
+ * room; omit it for a plain local editor.
+ */
+export function createEditorKits(config?: CollabConfig): EditorKit[] {
+  if (!config) return [new SafeAdvancedEditorKit(false)];
+
   const url = config.wsUrl ?? defaultWsUrl();
   return [
-    new CollabAdvancedEditorKit(),
+    new SafeAdvancedEditorKit(true),
     new HuddleYjsKit(url, config.params ?? {}),
   ];
 }
