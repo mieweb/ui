@@ -177,13 +177,15 @@ function getValidationError(
   const selectedDate = parseDateValue(value);
   const minimumDate = minDate ? parseDateValue(minDate) : null;
   const maximumDate = maxDate ? parseDateValue(maxDate) : null;
+  const minimumDateLabel = minDate ? formatDateValue(minDate) : '';
+  const maximumDateLabel = maxDate ? formatDateValue(maxDate) : '';
 
   if (selectedDate && minimumDate && selectedDate < minimumDate) {
-    return `Date must be on or after ${minDate}`;
+    return `Date must be on or after ${minimumDateLabel}`;
   }
 
   if (selectedDate && maximumDate && selectedDate > maximumDate) {
-    return `Date must be on or before ${maxDate}`;
+    return `Date must be on or before ${maximumDateLabel}`;
   }
 
   switch (mode) {
