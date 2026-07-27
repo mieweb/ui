@@ -369,33 +369,48 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         ? value.slice(-5)
         : '00:00'
     );
-    const minimumDate = minDate ? parseDateValue(minDate) : null;
-    const maximumDate = maxDate ? parseDateValue(maxDate) : null;
+    const minimumDate = React.useMemo(
+      () => (minDate ? parseDateValue(minDate) : null),
+      [minDate]
+    );
+    const maximumDate = React.useMemo(
+      () => (maxDate ? parseDateValue(maxDate) : null),
+      [maxDate]
+    );
 
-const isDateInRange = (date: Date) => {
-  const candidate = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate()
-  );
-  return (
-    (!minimumDate || candidate >= minimumDate) &&
-    (!maximumDate || candidate <= maximumDate)
-  );
-};
+    const isDateInRange = React.useCallback(
+      (date: Date) => {
+        const candidate = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate()
+        );
+        return (
+          (!minimumDate || candidate >= minimumDate) &&
+          (!maximumDate || candidate <= maximumDate)
+        );
+      },
+      [maximumDate, minimumDate]
+    );
 
-    const isCalendarDateInRange = (day: number) => {
-      return isDateInRange(new Date(calendarYear, calendarMonth, day));
-    };
+    const isCalendarDateInRange = React.useCallback(
+      (day: number) => {
+        return isDateInRange(new Date(calendarYear, calendarMonth, day));
+      },
+      [calendarMonth, calendarYear, isDateInRange]
+    );
 
-    const isCalendarMonthInRange = (month: number, year: number) => {
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      return (
-        (!minimumDate || lastDay >= minimumDate) &&
-        (!maximumDate || firstDay <= maximumDate)
-      );
-    };
+    const isCalendarMonthInRange = React.useCallback(
+      (month: number, year: number) => {
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        return (
+          (!minimumDate || lastDay >= minimumDate) &&
+          (!maximumDate || firstDay <= maximumDate)
+        );
+      },
+      [maximumDate, minimumDate]
+    );
 
     const firstCalendarYear = minimumDate
       ? minimumDate.getFullYear()
@@ -441,7 +456,7 @@ const isDateInRange = (date: Date) => {
 
       setCalendarMonth(closestAllowedDate.getMonth());
       setCalendarYear(closestAllowedDate.getFullYear());
-    }, [calendarMonth, calendarYear, minimumDate, maximumDate]);
+    }, [calendarMonth, calendarYear, isCalendarMonthInRange, maximumDate, minimumDate]);
 
     // Close calendar on click outside
     React.useEffect(() => {
