@@ -532,6 +532,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     };
 
     const handleMonthSelect = (month: number) => {
+      if (!isCalendarMonthInRange(month, calendarYear)) return;
+
       const formatted = `${calendarYear}-${String(month + 1).padStart(2, '0')}`;
       setDisplayValue(formatted);
       onChange?.(formatted);
@@ -840,7 +842,14 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   handleDateSelect(today.getDate());
                 }
               }}
-              disabled={!isDateInRange(new Date())}
+              disabled={
+                inputType === 'month'
+                  ? !isCalendarMonthInRange(
+                      new Date().getMonth(),
+                      new Date().getFullYear()
+                    )
+                  : !isDateInRange(new Date())
+              }
               className="text-primary-800 flex-1 text-sm hover:underline disabled:cursor-not-allowed disabled:opacity-50"
             >
               Today
