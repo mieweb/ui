@@ -763,6 +763,20 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           return;
         }
       }
+
+      // Every probe missed: the point sits in empty pane space (below the
+      // last line of a short or fully scrolled transcript, or above the
+      // first). Standard editor behavior: extend to the nearest end.
+      const spans =
+        container.querySelectorAll<HTMLElement>('[data-word-index]');
+      for (let i = spans.length - 1; i >= 0; i--) {
+        const spanRect = spans[i].getBoundingClientRect();
+        if (spanRect.top <= y) {
+          const parsed = Number(spans[i].dataset.wordIndex);
+          if (Number.isInteger(parsed)) extendDragSelection(parsed);
+          return;
+        }
+      }
     };
 
     /** Scrolls the pane while the held pointer sits at or beyond its edge */

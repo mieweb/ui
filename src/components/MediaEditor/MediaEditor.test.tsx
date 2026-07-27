@@ -84,7 +84,7 @@ describe('MediaEditor drag selection beyond the pane', () => {
       x: 0,
       y: 0,
       toJSON: () => ({}),
-    } as DOMRect);
+    } as unknown as ReturnType<Element['getBoundingClientRect']>);
 
     fireEvent.mouseDown(options[0], { button: 0, clientX: 10, clientY: 10 });
 
