@@ -41,13 +41,29 @@ function defaultWsUrl(): string {
   return `${protocol}//${host}/yjs`;
 }
 
-/** Advanced editing extensions minus `history` (yjs supplies its own). */
+/** Advanced editing extensions minus `history`, `autocomplete`, and `hover`.
+ *
+ * `history` conflicts with ExtensionYjs (which supplies its own CRDT-aware
+ * undo/redo). `autocomplete` and `hover` both store stale node references in
+ * debounced callbacks; when a Yjs remote update replaces the document tree,
+ * their deferred `dispatchMeta` calls crash with `null.matchesNode()` inside
+ * ProseMirror's `EditorView.updateStateInner`, leaving the view in a
+ * permanently broken state that blocks further sync. Removing them in collab
+ * mode has no functional cost — autocomplete popups and node-hover tooltips are
+ * compositor conveniences, not required for collaborative text editing.
+ */
 class CollabAdvancedEditorKit implements EditorKit {
   name = 'advanced-editor';
   getExtensions() {
     return new AdvancedEditorKit()
       .getExtensions()
-      .filter((extension) => !('name' in extension && extension.name === 'history'));
+      .filter(
+        (extension) =>
+          !('name' in extension &&
+            (extension.name === 'history' ||
+              extension.name === 'autocomplete' ||
+              extension.name === 'hover')),
+      );
   }
 }
 
