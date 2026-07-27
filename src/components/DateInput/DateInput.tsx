@@ -372,12 +372,17 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     const minimumDate = minDate ? parseDateValue(minDate) : null;
     const maximumDate = maxDate ? parseDateValue(maxDate) : null;
 
-    const isDateInRange = (date: Date) => {
-      return (
-        (!minimumDate || date >= minimumDate) &&
-        (!maximumDate || date <= maximumDate)
-      );
-    };
+const isDateInRange = (date: Date) => {
+  const candidate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+  return (
+    (!minimumDate || candidate >= minimumDate) &&
+    (!maximumDate || candidate <= maximumDate)
+  );
+};
 
     const isCalendarDateInRange = (day: number) => {
       return isDateInRange(new Date(calendarYear, calendarMonth, day));
