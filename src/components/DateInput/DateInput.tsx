@@ -634,7 +634,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 }
               }}
               disabled={!canGoToPreviousCalendar}
-              className="hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="enabled:hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={
                 inputType === 'month' ? 'Previous year' : 'Previous month'
               }
