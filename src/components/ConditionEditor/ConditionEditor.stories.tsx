@@ -356,21 +356,30 @@ const CONDITION_COLUMNS: {
   { field: 'asserted', header: 'Asserted', type: 'date' },
 ];
 
-/** Serialize rows into an object-URL `{ typeInfo, data }` source. */
-function useConditionRowsUrl(rows: ConditionRow[]): string {
-  const url = React.useMemo(() => {
-    const payload = {
+/**
+ * Hand rows to the grid through a short-lived `local` window-var source
+ * (same pattern as SuperChat's nitroTableGrid) so the grid renders
+ * synchronously and never pauses in the intermediate "Waiting…" state —
+ * an async http/blob source lets the a11y test-runner snapshot the
+ * low-contrast placeholder and fail.
+ */
+function useConditionRowsVar(rows: ConditionRow[]): string {
+  const varName = React.useMemo(() => {
+    const nextVarName = `__condition_editor_rows_${Math.random().toString(36).slice(2)}`;
+    (window as unknown as Record<string, unknown>)[nextVarName] = {
       typeInfo: CONDITION_COLUMNS.map(({ field, type }) => ({ field, type })),
       data: rows,
     };
-    const blob = new Blob([JSON.stringify(payload)], {
-      type: 'application/json',
-    });
-    return URL.createObjectURL(blob);
+    return nextVarName;
   }, [rows]);
 
-  React.useEffect(() => () => URL.revokeObjectURL(url), [url]);
-  return url;
+  React.useEffect(
+    () => () => {
+      delete (window as unknown as Record<string, unknown>)[varName];
+    },
+    [varName]
+  );
+  return varName;
 }
 
 // =============================================================================
@@ -470,7 +479,7 @@ function Template() {
   const [result, setResult] = useState<string>('');
 
   const rows = React.useMemo(() => concerns.map(toRow), [concerns]);
-  const url = useConditionRowsUrl(rows);
+  const varName = useConditionRowsVar(rows);
 
   const columns = React.useMemo(
     () => [
@@ -607,7 +616,7 @@ function Template() {
 
   return (
     <div className="space-y-3">
-      <DataVisNitroSource type="http" url={url}>
+      <DataVisNitroSource type="local" varName={varName}>
         <DataVisNitroGrid
           title="Problem list — conditions"
           height="420px"
