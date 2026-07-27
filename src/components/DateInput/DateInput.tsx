@@ -4,6 +4,7 @@ import { cn } from '../../utils/cn';
 import {
   formatDateValue,
   isValidDate,
+  parseDateValue,
   isDateInPast,
   isDateInFuture,
   calculateAge,
@@ -145,6 +146,10 @@ export interface DateInputProps extends Omit<
   minAge?: number;
   /** Maximum age for DOB validation */
   maxAge?: number;
+  /** Earliest allowed date in MM/DD/YYYY format. */
+  minDate?: string;
+  /** Latest allowed date in MM/DD/YYYY format. */
+  maxDate?: string;
   /** Whether to validate on blur */
   validateOnBlur?: boolean;
   /** Whether to show a calendar picker button */
@@ -157,7 +162,9 @@ function getValidationError(
   value: string,
   mode: DateInputMode,
   minAge?: number,
-  maxAge?: number
+  maxAge?: number,
+  minDate?: string,
+  maxDate?: string
 ): string | undefined {
   if (!value || value.replace(/\D/g, '').length === 0) {
     return undefined;
@@ -165,6 +172,18 @@ function getValidationError(
 
   if (!isValidDate(value)) {
     return 'Please enter a valid date (MM/DD/YYYY)';
+  }
+
+  const selectedDate = parseDateValue(value);
+  const minimumDate = minDate ? parseDateValue(minDate) : null;
+  const maximumDate = maxDate ? parseDateValue(maxDate) : null;
+
+  if (selectedDate && minimumDate && selectedDate < minimumDate) {
+    return `Date must be on or after ${minDate}`;
+  }
+
+  if (selectedDate && maximumDate && selectedDate > maximumDate) {
+    return `Date must be on or before ${maxDate}`;
   }
 
   switch (mode) {
@@ -240,6 +259,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       mode = 'default',
       minAge,
       maxAge,
+      minDate,
+      maxDate,
       validateOnBlur,
       showCalendar = false,
       width = 'full',
@@ -282,7 +303,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           displayValue,
           mode,
           minAge,
-          maxAge
+          maxAge,
+          minDate,
+          maxDate
         );
         setLocalError(validationError);
       }
@@ -346,6 +369,53 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         ? value.slice(-5)
         : '00:00'
     );
+    const minimumDate = minDate ? parseDateValue(minDate) : null;
+    const maximumDate = maxDate ? parseDateValue(maxDate) : null;
+
+    const isDateInRange = (date: Date) => {
+      return (
+        (!minimumDate || date >= minimumDate) &&
+        (!maximumDate || date <= maximumDate)
+      );
+    };
+
+    const isCalendarDateInRange = (day: number) => {
+      return isDateInRange(new Date(calendarYear, calendarMonth, day));
+    };
+
+    const isCalendarMonthInRange = (month: number, year: number) => {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      return (
+        (!minimumDate || lastDay >= minimumDate) &&
+        (!maximumDate || firstDay <= maximumDate)
+      );
+    };
+
+    const firstCalendarYear = minimumDate
+      ? minimumDate.getFullYear()
+      : new Date().getFullYear() - 100;
+    const lastCalendarYear = maximumDate
+      ? maximumDate.getFullYear()
+      : new Date().getFullYear() + 49;
+    const calendarYears = Array.from(
+      { length: Math.max(0, lastCalendarYear - firstCalendarYear + 1) },
+      (_, index) => firstCalendarYear + index
+    );
+    const previousCalendarMonth = calendarMonth === 0 ? 11 : calendarMonth - 1;
+    const previousCalendarYear =
+      calendarMonth === 0 ? calendarYear - 1 : calendarYear;
+    const nextCalendarMonth = calendarMonth === 11 ? 0 : calendarMonth + 1;
+    const nextCalendarYear =
+      calendarMonth === 11 ? calendarYear + 1 : calendarYear;
+    const canGoToPreviousCalendar =
+      inputType === 'month'
+        ? !minimumDate || calendarYear > minimumDate.getFullYear()
+        : isCalendarMonthInRange(previousCalendarMonth, previousCalendarYear);
+    const canGoToNextCalendar =
+      inputType === 'month'
+        ? !maximumDate || calendarYear < maximumDate.getFullYear()
+        : isCalendarMonthInRange(nextCalendarMonth, nextCalendarYear);
 
     // Update calendar view when value changes
     React.useEffect(() => {
@@ -357,6 +427,16 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         setSelectedTime(displayValue.slice(-5));
       }
     }, [displayValue, inputType]);
+
+    React.useEffect(() => {
+      if (isCalendarMonthInRange(calendarMonth, calendarYear)) return;
+
+      const closestAllowedDate = minimumDate ?? maximumDate;
+      if (!closestAllowedDate) return;
+
+      setCalendarMonth(closestAllowedDate.getMonth());
+      setCalendarYear(closestAllowedDate.getFullYear());
+    }, [calendarMonth, calendarYear, minimumDate, maximumDate]);
 
     // Close calendar on click outside
     React.useEffect(() => {
@@ -394,6 +474,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     }, [isCalendarOpen]);
 
     const handleDateSelect = (day: number) => {
+      if (!isCalendarDateInRange(day)) return;
+
       const month = String(calendarMonth + 1).padStart(2, '0');
       const dayStr = String(day).padStart(2, '0');
       const year = String(calendarYear);
@@ -413,7 +495,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           formatted,
           mode,
           minAge,
-          maxAge
+          maxAge,
+          minDate,
+          maxDate
         );
         setLocalError(validationError);
       }
@@ -424,6 +508,18 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       setDisplayValue(formatted);
       onChange?.(formatted);
       setIsCalendarOpen(false);
+    };
+
+    const handleCalendarYearChange = (year: number) => {
+      setCalendarYear(year);
+      if (isCalendarMonthInRange(calendarMonth, year)) return;
+
+      const firstAvailableMonth = MONTH_NAMES.findIndex((_, month) =>
+        isCalendarMonthInRange(month, year)
+      );
+      if (firstAvailableMonth !== -1) {
+        setCalendarMonth(firstAvailableMonth);
+      }
     };
 
     const handleTimeChange = (part: 'hour' | 'minute', nextValue: string) => {
@@ -517,7 +613,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   setCalendarMonth(calendarMonth - 1);
                 }
               }}
-              className="hover:bg-muted rounded-md p-1 transition-colors"
+              disabled={!canGoToPreviousCalendar}
+              className="hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={
                 inputType === 'month' ? 'Previous year' : 'Previous month'
               }
@@ -532,23 +629,24 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   className="bg-background border-border rounded border px-2 py-1 text-sm"
                   aria-label="Select month"
                 >
-                  {MONTH_NAMES.map((name, i) => (
-                    <option key={name} value={i}>
-                      {name}
-                    </option>
-                  ))}
+                  {MONTH_NAMES.map((name, month) =>
+                    isCalendarMonthInRange(month, calendarYear) ? (
+                      <option key={name} value={month}>
+                        {name}
+                      </option>
+                    ) : null
+                  )}
                 </select>
               )}
               <select
                 value={calendarYear}
-                onChange={(e) => setCalendarYear(Number(e.target.value))}
+                onChange={(e) =>
+                  handleCalendarYearChange(Number(e.target.value))
+                }
                 className="bg-background border-border rounded border px-2 py-1 text-sm"
                 aria-label="Select year"
               >
-                {Array.from(
-                  { length: 150 },
-                  (_, i) => new Date().getFullYear() - 100 + i
-                ).map((year) => (
+                {calendarYears.map((year) => (
                   <option key={year} value={year}>
                     {year}
                   </option>
@@ -567,7 +665,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   setCalendarMonth(calendarMonth + 1);
                 }
               }}
-              className="hover:bg-muted rounded-md p-1 transition-colors"
+              disabled={!canGoToNextCalendar}
+              className="hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={inputType === 'month' ? 'Next year' : 'Next month'}
             >
               <ChevronRightIcon />
@@ -611,13 +710,16 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   <button
                     key={index}
                     type="button"
-                    disabled={day === null}
+                    disabled={day === null || !isCalendarDateInRange(day)}
                     onClick={() => day && handleDateSelect(day)}
                     className={cn(
                       'h-8 w-8 rounded-md text-sm transition-colors',
                       'focus:ring-ring focus:ring-2 focus:outline-none',
                       day === null && 'invisible',
                       day !== null && 'hover:bg-muted',
+                      day !== null &&
+                        !isCalendarDateInRange(day) &&
+                        'cursor-not-allowed opacity-50',
                       isSelectedDay(day!) &&
                         'bg-primary-800 hover:bg-primary-900 text-white',
                       isToday(day!) &&
@@ -710,7 +812,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   handleDateSelect(today.getDate());
                 }
               }}
-              className="text-primary-800 flex-1 text-sm hover:underline"
+              disabled={!isDateInRange(new Date())}
+              className="text-primary-800 flex-1 text-sm hover:underline disabled:cursor-not-allowed disabled:opacity-50"
             >
               Today
             </button>
