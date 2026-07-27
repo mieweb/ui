@@ -458,7 +458,13 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
 
       setCalendarMonth(closestAllowedDate.getMonth());
       setCalendarYear(closestAllowedDate.getFullYear());
-    }, [calendarMonth, calendarYear, isCalendarMonthInRange, maximumDate, minimumDate]);
+    }, [
+      calendarMonth,
+      calendarYear,
+      isCalendarMonthInRange,
+      maximumDate,
+      minimumDate,
+    ]);
 
     // Close calendar on click outside
     React.useEffect(() => {
