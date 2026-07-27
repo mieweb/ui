@@ -71,6 +71,21 @@ describe('MediaEditor drag selection beyond the pane', () => {
     render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
     const options = screen.getAllByRole('option');
 
+    // jsdom has no layout (all rects are zero-size); give the pane a real
+    // shape so the visible-area clamping has something to clamp into
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    vi.spyOn(listbox, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      bottom: 400,
+      left: 0,
+      right: 600,
+      width: 600,
+      height: 400,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
     fireEvent.mouseDown(options[0], { button: 0, clientX: 10, clientY: 10 });
 
     // Pointer far below the pane: document-level tracking clamps the point

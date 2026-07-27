@@ -746,10 +746,17 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       const pointer = dragPointer.current;
       if (!container || !pointer) return;
 
+      // Clamp into the VISIBLE part of the pane: elementFromPoint only
+      // resolves inside the viewport, and the pane can extend beyond it
       const rect = container.getBoundingClientRect();
-      const y = Math.min(Math.max(pointer.y, rect.top + 2), rect.bottom - 2);
-      const x = Math.min(Math.max(pointer.x, rect.left + 2), rect.right - 2);
-      for (const probeX of [x, rect.left + rect.width / 2, rect.left + 16]) {
+      const top = Math.max(rect.top, 0);
+      const bottom = Math.min(rect.bottom, window.innerHeight);
+      const left = Math.max(rect.left, 0);
+      const right = Math.min(rect.right, window.innerWidth);
+      if (bottom <= top || right <= left) return;
+      const y = Math.min(Math.max(pointer.y, top + 2), bottom - 2);
+      const x = Math.min(Math.max(pointer.x, left + 2), right - 2);
+      for (const probeX of [x, left + (right - left) / 2, left + 16]) {
         const index = wordIndexAtPoint(probeX, y);
         if (index !== null) {
           extendDragSelection(index);
@@ -765,16 +772,20 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       const pointer = dragPointer.current;
       if (!isDragging.current || !container || !pointer) return;
 
+      // Edge zones measured on the VISIBLE part of the pane, since its own
+      // bounds can extend past the viewport
       const rect = container.getBoundingClientRect();
+      const top = Math.max(rect.top, 0);
+      const bottom = Math.min(rect.bottom, window.innerHeight);
       let step = 0;
-      if (pointer.y < rect.top + AUTOSCROLL_EDGE_PX) {
+      if (pointer.y < top + AUTOSCROLL_EDGE_PX) {
         step = Math.max(
-          (pointer.y - (rect.top + AUTOSCROLL_EDGE_PX)) / 3,
+          (pointer.y - (top + AUTOSCROLL_EDGE_PX)) / 3,
           -AUTOSCROLL_MAX_STEP_PX
         );
-      } else if (pointer.y > rect.bottom - AUTOSCROLL_EDGE_PX) {
+      } else if (pointer.y > bottom - AUTOSCROLL_EDGE_PX) {
         step = Math.min(
-          (pointer.y - (rect.bottom - AUTOSCROLL_EDGE_PX)) / 3,
+          (pointer.y - (bottom - AUTOSCROLL_EDGE_PX)) / 3,
           AUTOSCROLL_MAX_STEP_PX
         );
       }
