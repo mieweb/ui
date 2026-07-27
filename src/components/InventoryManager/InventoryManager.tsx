@@ -175,16 +175,16 @@ export function InventoryManager({
           <table className="w-full">
             <thead>
               <tr className="border-border border-b">
-                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
+                <th className="text-muted-foreground py-2 text-start text-xs font-medium tracking-wider uppercase">
                   Date
                 </th>
-                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
+                <th className="text-muted-foreground py-2 text-start text-xs font-medium tracking-wider uppercase">
                   User
                 </th>
-                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
+                <th className="text-muted-foreground py-2 text-start text-xs font-medium tracking-wider uppercase">
                   Change
                 </th>
-                <th className="text-muted-foreground py-2 text-right text-xs font-medium tracking-wider uppercase">
+                <th className="text-muted-foreground py-2 text-end text-xs font-medium tracking-wider uppercase">
                   Quantity
                 </th>
               </tr>
@@ -205,7 +205,7 @@ export function InventoryManager({
                     <td className="text-muted-foreground py-2 text-sm">
                       {entry.type === 'credit' ? 'Added' : 'Removed'}
                     </td>
-                    <td className="py-2 text-right text-sm">
+                    <td className="py-2 text-end text-sm">
                       <span
                         className={`inline-flex items-center gap-1 ${
                           entry.type === 'credit'
@@ -250,7 +250,7 @@ export function InventoryManager({
                   </tr>
                   {entry.memo && (
                     <tr className="bg-muted/50">
-                      <td colSpan={4} className="px-2 py-1 text-right">
+                      <td colSpan={4} className="px-2 py-1 text-end">
                         <span className="text-muted-foreground text-xs italic">
                           Memo: {entry.memo}
                         </span>
@@ -313,7 +313,7 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('debit')}
-              className={`rounded-l-md border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-s-md border px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'debit'
                   ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
@@ -321,7 +321,7 @@ export function InventoryManager({
             >
               <svg
                 aria-hidden="true"
-                className="mr-1 inline-block h-4 w-4"
+                className="me-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -338,7 +338,7 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('credit')}
-              className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-e-md border-e border-t border-b px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'credit'
                   ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
@@ -346,7 +346,7 @@ export function InventoryManager({
             >
               <svg
                 aria-hidden="true"
-                className="mr-1 inline-block h-4 w-4"
+                className="me-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
