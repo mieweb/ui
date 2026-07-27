@@ -65,6 +65,7 @@ describe('MediaEditor', () => {
 
   it('rehydrates speed state and reports it via onSpeedStateChange', () => {
     const onSpeedStateChange = vi.fn();
+    const onHasEditsChange = vi.fn();
     render(
       <MediaEditor
         src="clip.mp3"
@@ -73,12 +74,45 @@ describe('MediaEditor', () => {
         initialSpeedMarkers={[{ wordIndex: 1, speed: 1.5 }]}
         initialDefaultSpeed={2}
         onSpeedStateChange={onSpeedStateChange}
+        onHasEditsChange={onHasEditsChange}
       />
     );
     expect(onSpeedStateChange).toHaveBeenCalledWith(
       [{ wordIndex: 1, speed: 1.5 }],
       2
     );
+    // Rehydrated speed counts as an edit, same as setting a marker live
+    expect(onHasEditsChange).toHaveBeenCalledWith(true);
+  });
+
+  it('resets speed state when the transcript changes', () => {
+    const onSpeedStateChange = vi.fn();
+    const { rerender } = render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        initialSpeedMarkers={[{ wordIndex: 1, speed: 1.5 }]}
+        onSpeedStateChange={onSpeedStateChange}
+      />
+    );
+    onSpeedStateChange.mockClear();
+
+    const retranscribed: Transcript = {
+      durationMs: 1000,
+      words: [{ text: 'Different', startMs: 0, endMs: 1000 }],
+    };
+    rerender(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={retranscribed}
+        initialSpeedMarkers={[{ wordIndex: 1, speed: 1.5 }]}
+        onSpeedStateChange={onSpeedStateChange}
+      />
+    );
+    // Markers indexed the old transcript's words: they must not survive
+    expect(onSpeedStateChange).toHaveBeenCalledWith([], 1);
   });
 });
 

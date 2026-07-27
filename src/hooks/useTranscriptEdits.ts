@@ -389,6 +389,14 @@ export function useTranscriptEdits(
   );
   const [clipboard, setClipboard] = useState<TranscriptClipboard | null>(null);
   const [hasEdits, setHasEdits] = useState(() => {
+    // Rehydrated speed state counts as an edit, matching the live setters
+    // (toggleSpeedMarker sets hasEdits) and this flag's documented contract
+    if (
+      (initialSpeedMarkers && initialSpeedMarkers.length > 0) ||
+      (initialDefaultSpeed !== undefined && initialDefaultSpeed !== 1)
+    ) {
+      return true;
+    }
     // Compare saved state against the derived baseline: deletions, insertions,
     // length changes, AND text edits (text-only edits previously initialized
     // hasEdits=false, which also suppressed onChange persistence).
@@ -440,6 +448,10 @@ export function useTranscriptEdits(
     setUndoStack([]);
     setHasEdits(false);
     setClipboard(null);
+    // Speed markers index into the old transcript's word list; keeping them
+    // would apply stale rates to arbitrary words of the new transcript
+    setSpeedMarkers([]);
+    setDefaultSpeed(1);
     initializedFromSaved.current = false;
   }, [transcript, minSilenceMs, nlSilenceMs]);
 
