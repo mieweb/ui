@@ -21,6 +21,7 @@ import type {
   EditableWord,
   PlaybackSegment,
   PlaybackSpeed,
+  SpeedMarker,
 } from '../TranscriptView/transcript';
 import { PLAYBACK_SPEEDS, isSilenceType } from '../TranscriptView/transcript';
 import { useTranscriptEdits } from '../../hooks/useTranscriptEdits';
@@ -52,6 +53,19 @@ export interface MediaEditorProps extends VariantProps<
   initialEditedWords?: EditableWord[];
   /** Initial undo stack (from saved edits) */
   initialUndoStack?: EditableWord[][];
+  /** Initial speed markers (from saved edits) */
+  initialSpeedMarkers?: SpeedMarker[];
+  /** Initial default playback speed (from saved edits) */
+  initialDefaultSpeed?: PlaybackSpeed;
+  /**
+   * Fired when speed markers or the default speed change (including once on
+   * mount with the initial values) — lets the host persist and bake speed
+   * into exports alongside the edit list.
+   */
+  onSpeedStateChange?: (
+    speedMarkers: SpeedMarker[],
+    defaultSpeed: PlaybackSpeed
+  ) => void;
   /** Fired after every edit mutation (for persistence) */
   onEditorStateChange?: (
     editedWords: EditableWord[],
@@ -232,10 +246,13 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       transcript,
       initialEditedWords,
       initialUndoStack,
+      initialSpeedMarkers,
+      initialDefaultSpeed,
       onEditorStateChange,
       onHasEditsChange,
       onCursorTimestampChange,
       onEditedWordsRender,
+      onSpeedStateChange,
       playerRef: externalPlayerRef,
       className,
       splitLayout,
@@ -247,6 +264,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       transcript,
       initialEditedWords,
       initialUndoStack,
+      initialSpeedMarkers,
+      initialDefaultSpeed,
       onChange: onEditorStateChange,
     });
     const {
@@ -369,6 +388,10 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     React.useEffect(() => {
       onEditedWordsRender?.(editedWords);
     }, [editedWords, onEditedWordsRender]);
+
+    React.useEffect(() => {
+      onSpeedStateChange?.(speedMarkers, defaultSpeed);
+    }, [speedMarkers, defaultSpeed, onSpeedStateChange]);
 
     // Report cursor timestamp changes to the parent
     React.useEffect(() => {

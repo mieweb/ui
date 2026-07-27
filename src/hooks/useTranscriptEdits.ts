@@ -242,6 +242,10 @@ export interface UseTranscriptEditsOptions {
   minSilenceMs?: number;
   /** Threshold (ms) for "newline" silences (paragraph breaks). Default 1500 */
   nlSilenceMs?: number;
+  /** Initial speed markers (from saved edits) */
+  initialSpeedMarkers?: SpeedMarker[];
+  /** Initial default playback speed (from saved edits). Default 1 */
+  initialDefaultSpeed?: PlaybackSpeed;
 }
 
 export interface TranscriptEditStats {
@@ -368,6 +372,8 @@ export function useTranscriptEdits(
     onChange,
     minSilenceMs: initialMinSilenceMs = DEFAULT_MIN_SILENCE_MS,
     nlSilenceMs: initialNlSilenceMs = DEFAULT_NL_SILENCE_MS,
+    initialSpeedMarkers,
+    initialDefaultSpeed,
   } = options;
 
   // Track if we've initialized from saved state (skip first onChange notification)
@@ -407,8 +413,12 @@ export function useTranscriptEdits(
   });
   const [minSilenceMs, setMinSilenceMs] = useState(initialMinSilenceMs);
   const [nlSilenceMs, setNlSilenceMs] = useState(initialNlSilenceMs);
-  const [defaultSpeed, setDefaultSpeed] = useState<PlaybackSpeed>(1);
-  const [speedMarkers, setSpeedMarkers] = useState<SpeedMarker[]>([]);
+  const [defaultSpeed, setDefaultSpeed] = useState<PlaybackSpeed>(
+    initialDefaultSpeed ?? 1
+  );
+  const [speedMarkers, setSpeedMarkers] = useState<SpeedMarker[]>(
+    initialSpeedMarkers ?? []
+  );
 
   // Helper to save current state to undo stack before making changes
   const pushUndo = useCallback(() => {

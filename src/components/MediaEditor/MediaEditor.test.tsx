@@ -62,6 +62,24 @@ describe('MediaEditor', () => {
     render(<MediaEditor src="clip.mp3" transcript={transcript} />);
     expect(screen.getByLabelText('Media player').tagName).toBe('AUDIO');
   });
+
+  it('rehydrates speed state and reports it via onSpeedStateChange', () => {
+    const onSpeedStateChange = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        initialSpeedMarkers={[{ wordIndex: 1, speed: 1.5 }]}
+        initialDefaultSpeed={2}
+        onSpeedStateChange={onSpeedStateChange}
+      />
+    );
+    expect(onSpeedStateChange).toHaveBeenCalledWith(
+      [{ wordIndex: 1, speed: 1.5 }],
+      2
+    );
+  });
 });
 
 // Regression suite: dragging used to cancel on mouseleave and the selection
