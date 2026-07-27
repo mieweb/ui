@@ -107,7 +107,7 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
           data-slot="dashboard-widget-header"
           className={cn(
             'border-border flex flex-row items-center justify-between gap-2 border-b px-4 py-3 pb-3',
-            accent && 'pl-6'
+            accent && 'ps-6'
           )}
         >
           <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
         {/* Body */}
         <CardContent
           data-slot="dashboard-widget-body"
-          className={cn('px-4 py-3', accent && 'pl-6')}
+          className={cn('px-4 py-3', accent && 'ps-6')}
         >
           {children}
         </CardContent>
@@ -163,7 +163,7 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
         {footer && (
           <div
             data-slot="dashboard-widget-footer"
-            className={cn('border-border border-t px-4 py-2', accent && 'pl-6')}
+            className={cn('border-border border-t px-4 py-2', accent && 'ps-6')}
           >
             {footer}
           </div>
@@ -377,7 +377,7 @@ function DashboardWidgetTableInner<T extends Record<string, unknown>>(
                   key={col.key}
                   className={cn(
                     'px-4 text-xs',
-                    col.align === 'right' && 'text-right',
+                    col.align === 'right' && 'text-end',
                     col.align === 'center' && 'text-center',
                     col.className
                   )}
@@ -408,7 +408,7 @@ function DashboardWidgetTableInner<T extends Record<string, unknown>>(
                   key={col.key}
                   className={cn(
                     'px-4 py-2 text-sm',
-                    col.align === 'right' && 'text-right',
+                    col.align === 'right' && 'text-end',
                     col.align === 'center' && 'text-center',
                     col.className
                   )}
@@ -419,7 +419,7 @@ function DashboardWidgetTableInner<T extends Record<string, unknown>>(
                 </TableCell>
               ))}
               {actions && actions.length > 0 && (
-                <TableCell className="w-0 px-2 py-2 text-right">
+                <TableCell className="w-0 px-2 py-2 text-end">
                   <WidgetRowActionMenu
                     row={row}
                     rowIndex={rowIndex}
@@ -547,7 +547,7 @@ function WidgetRowActionMenu<T extends Record<string, unknown>>({
                 role="menuitem"
                 type="button"
                 className={cn(
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs',
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-start text-xs',
                   'transition-colors duration-100',
                   action.variant === 'danger'
                     ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
@@ -681,7 +681,7 @@ const DashboardWidgetActions = React.forwardRef<
         );
 
         const sharedClasses = cn(
-          'flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-left transition-colors',
+          'flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-start transition-colors',
           'hover:bg-muted/60 hover:border-primary-200 dark:hover:border-primary-800',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
           action.disabled && 'opacity-50 cursor-not-allowed pointer-events-none'
@@ -778,7 +778,7 @@ const DashboardWidgetDataCards = React.forwardRef<
             <dd className="text-foreground mt-0.5 text-sm font-semibold">
               {item.value}
               {item.unit && (
-                <span className="text-muted-foreground ml-0.5 text-xs font-normal">
+                <span className="text-muted-foreground ms-0.5 text-xs font-normal">
                   {item.unit}
                 </span>
               )}

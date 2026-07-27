@@ -116,7 +116,7 @@ function PermissionItem({
   };
 
   return (
-    <div className={cn('py-1', level > 0 && 'ml-4')} data-slot="perm-item">
+    <div className={cn('py-1', level > 0 && 'ms-4')} data-slot="perm-item">
       <div className="flex items-center gap-2" data-slot="perm-item-row">
         {hasChildren && (
           <button
@@ -312,14 +312,14 @@ export function PermissionsEditor({
           )}
         </div>
 
-        <div className="space-y-4 pl-2" data-slot="perm-groups">
+        <div className="space-y-4 ps-2" data-slot="perm-groups">
           {groups.map((group, groupIndex) => (
             <div key={group.id}>
               {/* Group Header */}
               <button
                 type="button"
                 onClick={() => toggleGroup(group.id)}
-                className="hover:bg-muted/50 -ml-2 flex w-full items-center gap-2 rounded py-2 pl-2 text-left"
+                className="hover:bg-muted/50 -ms-2 flex w-full items-center gap-2 rounded py-2 ps-2 text-start"
                 data-slot="perm-group-header"
               >
                 {expandedGroups.has(group.id) ? (
@@ -335,7 +335,7 @@ export function PermissionsEditor({
               {/* Group Permissions */}
               {expandedGroups.has(group.id) && (
                 <div
-                  className="mt-2 ml-6 border-l pl-4"
+                  className="ms-6 mt-2 border-s ps-4"
                   data-slot="perm-group-list"
                 >
                   {group.permissions.map((permission) => (
@@ -389,7 +389,7 @@ export function PermissionsEditor({
           </div>
 
           <div
-            className="max-h-60 space-y-2 overflow-y-auto pl-2"
+            className="max-h-60 space-y-2 overflow-y-auto ps-2"
             data-slot="perm-employer-list"
           >
             {employers.map((employer) => (
@@ -413,7 +413,7 @@ export function PermissionsEditor({
                   </span>
                   {employer.address && (
                     <span
-                      className="text-muted-foreground ml-2"
+                      className="text-muted-foreground ms-2"
                       data-slot="perm-employer-addr"
                     >
                       | {employer.address.street1} - {employer.address.city},{' '}

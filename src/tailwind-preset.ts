@@ -453,6 +453,15 @@ export const miewebUISafelist = [
   'border-s-0',
   'border-s-2',
   'sm:text-end',
+  // Batch C: SiteHeader / PermissionsEditor / CommandPalette / ResultsEntryForm /
+  // InvoiceList / DashboardWidget / AuthDialog / SetupServiceModal / PaymentHistoryTable
+  'ms-6',
+  'pe-12',
+  'ps-12',
+  'end-12',
+  'border-e-0',
+  'rounded-s-none',
+  'ps-6',
   'rtl:space-x-reverse',
   'data-[state=checked]:translate-x-4',
   'data-[state=checked]:translate-x-5',
