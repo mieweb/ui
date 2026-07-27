@@ -3,9 +3,9 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'  # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
+      - 'v*' # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
     branches:
-      - main   # Auto dev-prerelease on every main push
+      - main # Auto dev-prerelease on every main push
     paths-ignore:
       - '*.md'
       - '.github/**'
@@ -13,7 +13,11 @@ on:
 
 permissions:
   contents: write
-  id-token: write  # Required for npm Trusted Publishing (OIDC)
+  id-token: write # Required for npm Trusted Publishing (OIDC)
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -86,7 +90,25 @@ jobs:
           else
             # Branch push — auto dev prerelease
             BASE_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
-            VERSION="${BASE_VERSION}-dev.${GITHUB_RUN_NUMBER}"
+            PACKAGE_NAME=$(node -p "require('./package.json').name")
+            DEV_NUMBER=$(npm view "$PACKAGE_NAME" versions --json 2>/dev/null | node -e '
+              let versions = "";
+              process.stdin.on("data", (chunk) => { versions += chunk; });
+              process.stdin.on("end", () => {
+                const baseVersion = process.argv[1];
+                try {
+                  const publishedVersions = JSON.parse(versions || "[]");
+                  const devVersions = (Array.isArray(publishedVersions) ? publishedVersions : [publishedVersions])
+                    .map((version) => new RegExp(`^${baseVersion.replace(/\./g, "\\.")}-dev\\.(\\d+)$`).exec(version))
+                    .filter(Boolean)
+                    .map((match) => Number(match[1]));
+                  console.log(devVersions.length === 0 ? 0 : Math.max(...devVersions) + 1);
+                } catch {
+                  console.log(0);
+                }
+              });
+            ' "$BASE_VERSION")
+            VERSION="${BASE_VERSION}-dev.${DEV_NUMBER}"
             IS_TAG=false
             NPM_TAG=next
             IS_PRERELEASE=true
