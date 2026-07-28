@@ -114,6 +114,32 @@ describe('MediaEditor', () => {
     // Markers indexed the old transcript's words: they must not survive
     expect(onSpeedStateChange).toHaveBeenCalledWith([], 1);
   });
+
+  it('does not re-notify speed state when only the callback identity changes', () => {
+    const first = vi.fn();
+    const { rerender } = render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        onSpeedStateChange={first}
+      />
+    );
+    expect(first).toHaveBeenCalledTimes(1);
+
+    // Hosts passing inline handlers re-create the callback every render;
+    // unchanged speed state must not produce a duplicate notification
+    const second = vi.fn();
+    rerender(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        onSpeedStateChange={second}
+      />
+    );
+    expect(second).not.toHaveBeenCalled();
+  });
 });
 
 // Regression suite: dragging used to cancel on mouseleave and the selection

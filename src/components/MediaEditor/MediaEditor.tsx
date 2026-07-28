@@ -400,9 +400,16 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       onEditedWordsRender?.(editedWords);
     }, [editedWords, onEditedWordsRender]);
 
+    // Documented to fire only on mount and on real speed-state changes —
+    // hosts persist on it — so the callback rides a ref: a new function
+    // identity per render must not re-notify unchanged state.
+    const onSpeedStateChangeRef = React.useRef(onSpeedStateChange);
     React.useEffect(() => {
-      onSpeedStateChange?.(speedMarkers, defaultSpeed);
-    }, [speedMarkers, defaultSpeed, onSpeedStateChange]);
+      onSpeedStateChangeRef.current = onSpeedStateChange;
+    });
+    React.useEffect(() => {
+      onSpeedStateChangeRef.current?.(speedMarkers, defaultSpeed);
+    }, [speedMarkers, defaultSpeed]);
 
     // Report cursor timestamp changes to the parent
     React.useEffect(() => {
@@ -804,6 +811,15 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       // first). Standard editor behavior: extend to the nearest end.
       const spans =
         container.querySelectorAll<HTMLElement>('[data-word-index]');
+      if (spans.length === 0) return;
+      // Above every span (top padding): extend to the first word without
+      // scanning — the backward walk below would touch every span. Below
+      // the last line is already O(1): the walk's first probe matches.
+      if (spans[0].getBoundingClientRect().top > y) {
+        const parsed = Number(spans[0].dataset.wordIndex);
+        if (Number.isInteger(parsed)) extendDragSelection(parsed);
+        return;
+      }
       for (let i = spans.length - 1; i >= 0; i--) {
         const spanRect = spans[i].getBoundingClientRect();
         if (spanRect.top <= y) {
@@ -811,11 +827,6 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           if (Number.isInteger(parsed)) extendDragSelection(parsed);
           return;
         }
-      }
-      // The point sits above every span (top padding): extend to the first word
-      if (spans.length > 0) {
-        const parsed = Number(spans[0].dataset.wordIndex);
-        if (Number.isInteger(parsed)) extendDragSelection(parsed);
       }
     };
 
@@ -849,8 +860,14 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         );
       }
       if (step !== 0) {
+        // Re-extend only when the pane actually moved: held at a clamped
+        // top/bottom nothing shifts under the pointer, and mousemove already
+        // covers pointer motion
+        const before = container.scrollTop;
         container.scrollTop += step;
-        extendSelectionToPointer();
+        if (container.scrollTop !== before) {
+          extendSelectionToPointer();
+        }
       }
       dragScrollFrame.current = requestAnimationFrame(stepDragAutoScroll);
     };

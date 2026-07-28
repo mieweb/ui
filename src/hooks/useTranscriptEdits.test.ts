@@ -473,4 +473,25 @@ describe('speed range + undo', () => {
     expect(result.current.editedWords[0].deleted).toBe(false);
     expect(result.current.hasEdits).toBe(false);
   });
+
+  it('re-anchors speed markers to the same words across a threshold rebuild (#343 review)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    const betaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    act(() => result.current.toggleSpeedMarker(betaIdx, 2));
+    // Raising the min threshold removes the leading silence, shifting every
+    // index — the marker must follow 'Beta', not its old position
+    act(() => result.current.setSilenceThresholds(700, 5000));
+    const newBetaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    expect(newBetaIdx).not.toBe(betaIdx);
+    expect(result.current.speedMarkers).toEqual([
+      { wordIndex: newBetaIdx, speed: 2 },
+    ]);
+    expect(result.current.getSpeedAtIndex(newBetaIdx)).toBe(2);
+  });
 });

@@ -792,13 +792,59 @@ export function useTranscriptEdits(
       });
 
       setEditedWords(restoredWords);
+
+      // Speed markers index into the silence-inserted array, so the rebuild
+      // shifts them too. Re-anchor each marker to the first rebuild-surviving
+      // word at or after it — the same ordinal keyspace as the deletion
+      // restore above. Markers with no surviving word left are dropped;
+      // markers that collapse onto the same word keep the later speed (it
+      // governed the words from that point on).
+      if (speedMarkers.length > 0) {
+        const survivorPrefix: number[] = [];
+        let survivors = 0;
+        editedWords.forEach((ew) => {
+          survivorPrefix.push(survivors);
+          if (
+            !isSilenceType(ew.word.wordType) &&
+            ew.originalIndex >= 0 &&
+            !ew.inserted
+          ) {
+            survivors++;
+          }
+        });
+        survivorPrefix.push(survivors);
+        const newIndexByOrdinal: number[] = [];
+        restoredWords.forEach((ew, i) => {
+          if (!isSilenceType(ew.word.wordType)) newIndexByOrdinal.push(i);
+        });
+        const remapped: SpeedMarker[] = [];
+        speedMarkers.forEach((m) => {
+          const ordinal =
+            survivorPrefix[Math.min(m.wordIndex, editedWords.length)];
+          const newIndex = newIndexByOrdinal[ordinal];
+          if (newIndex === undefined) return;
+          const last = remapped[remapped.length - 1];
+          if (last && last.wordIndex === newIndex) {
+            remapped[remapped.length - 1] = {
+              wordIndex: newIndex,
+              speed: m.speed,
+            };
+          } else {
+            remapped.push({ wordIndex: newIndex, speed: m.speed });
+          }
+        });
+        setSpeedMarkers(remapped);
+      }
+
       // Undo snapshots were captured against the previous silence layout;
       // restoring one after a rebuild would resurrect silence chips that no
       // longer match the current thresholds. Threshold changes are not
-      // undoable, so drop the stale history rather than restore it.
+      // undoable, so drop the stale history rather than restore it — the
+      // speed stack rides along or the two stacks drift out of alignment.
       setUndoStack([]);
+      setSpeedUndoStack([]);
     },
-    [editedWords, transcript]
+    [editedWords, transcript, speedMarkers]
   );
 
   // Get the speed marker at a specific word index (if any)
