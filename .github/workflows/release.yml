@@ -91,7 +91,16 @@ jobs:
             # Branch push — auto dev prerelease
             BASE_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
             PACKAGE_NAME=$(node -p "require('./package.json').name")
-            DEV_NUMBER=$(npm view "$PACKAGE_NAME" versions --json 2>/dev/null | node -e '
+            PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json 2>&1) || {
+              if [[ "$PUBLISHED_VERSIONS" == *"E404"* ]]; then
+                PUBLISHED_VERSIONS='[]'
+              else
+                echo "Failed to query published versions for $PACKAGE_NAME:" >&2
+                echo "$PUBLISHED_VERSIONS" >&2
+                exit 1
+              fi
+            }
+            DEV_NUMBER=$(printf '%s' "$PUBLISHED_VERSIONS" | node -e '
               let versions = "";
               process.stdin.on("data", (chunk) => { versions += chunk; });
               process.stdin.on("end", () => {
@@ -103,8 +112,9 @@ jobs:
                     .filter(Boolean)
                     .map((match) => Number(match[1]));
                   console.log(devVersions.length === 0 ? 0 : Math.max(...devVersions) + 1);
-                } catch {
-                  console.log(0);
+                } catch (error) {
+                  console.error(`Unable to parse published versions: ${error.message}`);
+                  process.exitCode = 1;
                 }
               });
             ' "$BASE_VERSION")
