@@ -271,7 +271,7 @@ export function ScheduleCalendar({
               {weekDates.map((date, i) => (
                 <div
                   key={i}
-                  className={`flex-1 border-l border-gray-200 p-2 text-center dark:border-gray-700 ${
+                  className={`flex-1 border-s border-gray-200 p-2 text-center dark:border-gray-700 ${
                     isSameDay(date, new Date())
                       ? 'bg-blue-50 dark:bg-blue-900/20'
                       : ''
@@ -306,7 +306,7 @@ export function ScheduleCalendar({
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="text-muted-foreground h-16 pr-2 text-right text-xs"
+                  className="text-muted-foreground h-16 pe-2 text-end text-xs"
                 >
                   {new Date(2000, 0, 1, hour).toLocaleTimeString('en-US', {
                     hour: 'numeric',
@@ -323,7 +323,7 @@ export function ScheduleCalendar({
               return (
                 <div
                   key={dayIndex}
-                  className={`relative flex-1 border-l border-gray-200 dark:border-gray-700 ${
+                  className={`relative flex-1 border-s border-gray-200 dark:border-gray-700 ${
                     view === 'week' && isSameDay(date, new Date())
                       ? 'bg-blue-50/50 dark:bg-blue-900/10'
                       : ''
@@ -372,7 +372,7 @@ export function ScheduleCalendar({
                         role="button"
                         tabIndex={0}
                         aria-label={`${appointment.patientName || appointment.title}, ${formatTime(appointment.startTime)}`}
-                        className={`absolute right-1 left-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
+                        className={`absolute start-1 end-1 cursor-pointer overflow-hidden rounded border-s-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
                         style={{
                           top: position.top,
                           height: position.height,

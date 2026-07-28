@@ -319,7 +319,7 @@ export function CheckrIntegration({
               <p className="text-muted-foreground text-sm">
                 {account.name}
                 {account.plan && (
-                  <span className="ml-2 text-xs">({account.plan})</span>
+                  <span className="ms-2 text-xs">({account.plan})</span>
                 )}
               </p>
             )}
@@ -334,7 +334,7 @@ export function CheckrIntegration({
           <Button variant="primary" onClick={onConnect}>
             <svg
               aria-hidden="true"
-              className="mr-2 h-4 w-4"
+              className="me-2 h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -359,7 +359,7 @@ export function CheckrIntegration({
         >
           <svg
             aria-hidden="true"
-            className="mr-2 inline-block h-4 w-4"
+            className="me-2 inline-block h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -407,7 +407,7 @@ export function CheckrIntegration({
             <Button variant="primary" onClick={() => setShowInviteModal(true)}>
               <svg
                 aria-hidden="true"
-                className="mr-2 h-4 w-4"
+                className="me-2 h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -424,7 +424,7 @@ export function CheckrIntegration({
             <Button variant="outline" onClick={onRefresh}>
               <svg
                 aria-hidden="true"
-                className="mr-2 h-4 w-4"
+                className="me-2 h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -517,7 +517,7 @@ export function CheckrIntegration({
                       </div>
 
                       {/* Status & Date */}
-                      <div className="text-right">
+                      <div className="text-end">
                         <span
                           className={cn(
                             'inline-block rounded-full border px-3 py-0.5 text-xs font-medium',
@@ -626,7 +626,7 @@ export function CheckrIntegration({
           <Button variant="primary" onClick={onConnect}>
             <svg
               aria-hidden="true"
-              className="mr-2 h-4 w-4"
+              className="me-2 h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

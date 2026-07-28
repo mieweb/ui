@@ -144,7 +144,7 @@ export function OnboardingWizard({
                 />
               )}
               <div
-                className="ml-3 hidden flex-col lg:flex"
+                className="ms-3 hidden flex-col lg:flex"
                 data-slot="onboarding-header-brand"
               >
                 <span className="text-lg font-semibold">{brandName}</span>
@@ -335,7 +335,7 @@ export function OnboardingStepQuestion({
               onClick={() => onSelect?.(option.id)}
               className="rounded-full"
             >
-              {option.icon && <i className={cn(option.icon, 'mr-2')} />}
+              {option.icon && <i className={cn(option.icon, 'me-2')} />}
               {option.label}
             </Button>
           ))}
@@ -378,7 +378,7 @@ export function OnboardingCompletion({
             className="text-foreground mb-0 text-2xl"
             data-slot="onboarding-completion-title"
           >
-            <i className="fas fa-check-circle mr-2 text-green-500" />
+            <i className="fas fa-check-circle me-2 text-green-500" />
             Setup complete!
           </p>
           <p
@@ -395,15 +395,15 @@ export function OnboardingCompletion({
           data-slot="onboarding-completion-actions"
         >
           <Button variant="primary" onClick={onStartOrder}>
-            <i className="fas fa-shopping-cart mr-2" />
+            <i className="fas fa-shopping-cart me-2" />
             Start your first order
           </Button>
           <Button variant="outline" onClick={onGoToDashboard}>
-            <i className="fas fa-tachometer-alt mr-2" />
+            <i className="fas fa-tachometer-alt me-2" />
             Go to Dashboard
           </Button>
           <Button variant="outline" onClick={onGoToEmployees}>
-            <i className="fas fa-users mr-2" />
+            <i className="fas fa-users me-2" />
             Go to Employees
           </Button>
         </div>

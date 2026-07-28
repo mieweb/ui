@@ -259,10 +259,10 @@ export function ServicePricingManager({
                 {/* Desktop header */}
                 <div className="text-muted-foreground hidden gap-4 py-3 text-xs font-medium uppercase md:grid md:grid-cols-6">
                   <div className="col-span-2">Service</div>
-                  <div className="text-right">Base Price</div>
-                  <div className="text-right">Employer Price</div>
+                  <div className="text-end">Base Price</div>
+                  <div className="text-end">Employer Price</div>
                   <div className="text-center">Status</div>
-                  <div className="text-right">Actions</div>
+                  <div className="text-end">Actions</div>
                 </div>
 
                 {filteredServices.map((service) => (
@@ -291,7 +291,7 @@ export function ServicePricingManager({
                       <span className="text-muted-foreground text-sm md:hidden">
                         Base:
                       </span>
-                      <p className="text-right font-semibold text-gray-900 dark:text-white">
+                      <p className="text-end font-semibold text-gray-900 dark:text-white">
                         {formatCurrency(service.basePrice)}
                       </p>
                     </div>
@@ -301,7 +301,7 @@ export function ServicePricingManager({
                       <span className="text-muted-foreground text-sm md:hidden">
                         Employer:
                       </span>
-                      <p className="text-muted-foreground text-right">
+                      <p className="text-muted-foreground text-end">
                         {service.employerPrice
                           ? formatCurrency(service.employerPrice)
                           : '—'}
@@ -310,7 +310,7 @@ export function ServicePricingManager({
 
                     {/* Status */}
                     <div className="mb-2 flex items-center md:mb-0 md:justify-center">
-                      <span className="text-muted-foreground mr-2 text-sm md:hidden">
+                      <span className="text-muted-foreground me-2 text-sm md:hidden">
                         Status:
                       </span>
                       <Badge
