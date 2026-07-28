@@ -421,6 +421,28 @@ describe('speed range + undo', () => {
     expect(result.current.speedMarkers).toEqual([{ wordIndex: 0, speed: 1.5 }]);
   });
 
+  it('setSpeedForRange adds no marker when the speed is already in effect', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    // Applying the default speed (1x) to a fresh range must not persist a no-op marker
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 1);
+    });
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.getSpeedAtIndex(0)).toBe(1);
+
+    // And when a preceding marker already sets the range's speed, re-applying it is a no-op
+    act(() => {
+      result.current.toggleSpeedMarker(0, 2);
+    });
+    act(() => {
+      result.current.setSpeedForRange(1, 2, 2);
+    });
+    expect(result.current.speedMarkers).toEqual([{ wordIndex: 0, speed: 2 }]);
+    expect(result.current.getSpeedAtIndex(2)).toBe(2);
+  });
+
   it('undo reverts a speed marker set via toggleSpeedMarker', () => {
     const { result } = renderHook(() =>
       useTranscriptEdits({ transcript: packed })

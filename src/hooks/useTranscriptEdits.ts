@@ -922,7 +922,14 @@ export function useTranscriptEdits(
       const kept = speedMarkers.filter(
         (m) => m.wordIndex < startIndex || m.wordIndex > endIndex
       );
-      const next = [...kept, { wordIndex: startIndex, speed }];
+      // Only pin the range start when it changes the effective speed there.
+      // Applying the speed already in effect (e.g. 1x under a 1x default, or a
+      // preceding marker's speed) would persist a no-op marker into saves/exports.
+      const speedAtStart = getSpeedAtIndex(startIndex, kept, defaultSpeed);
+      const next =
+        speedAtStart === speed
+          ? [...kept]
+          : [...kept, { wordIndex: startIndex, speed }];
       if (
         afterIndex < editedWords.length &&
         speedAfter !== speed &&
