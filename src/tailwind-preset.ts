@@ -467,6 +467,9 @@ export const miewebUISafelist = [
   'data-[state=checked]:translate-x-5',
   'data-[state=checked]:translate-x-7',
   'rtl:-translate-x-0.5',
+  // Sidebar off-canvas transforms (LTR pair for rtl:translate-x-full)
+  'translate-x-0',
+  '-translate-x-full',
   'rtl:data-[state=checked]:-translate-x-4',
   'rtl:data-[state=checked]:-translate-x-5',
   'rtl:data-[state=checked]:-translate-x-7',
