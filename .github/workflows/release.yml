@@ -91,15 +91,20 @@ jobs:
             # Branch push — auto dev prerelease
             BASE_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
             PACKAGE_NAME=$(node -p "require('./package.json').name")
-            PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json 2>&1) || {
-              if [[ "$PUBLISHED_VERSIONS" == *"E404"* ]]; then
+            NPM_ERROR_FILE=$(mktemp)
+            if ! PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json 2>"$NPM_ERROR_FILE"); then
+              NPM_ERROR=$(<"$NPM_ERROR_FILE")
+              rm -f "$NPM_ERROR_FILE"
+              if [[ "$NPM_ERROR" == *"E404"* ]]; then
                 PUBLISHED_VERSIONS='[]'
               else
                 echo "Failed to query published versions for $PACKAGE_NAME:" >&2
-                echo "$PUBLISHED_VERSIONS" >&2
+                echo "$NPM_ERROR" >&2
                 exit 1
               fi
-            }
+            else
+              rm -f "$NPM_ERROR_FILE"
+            fi
             DEV_NUMBER=$(printf '%s' "$PUBLISHED_VERSIONS" | node -e '
               let versions = "";
               process.stdin.on("data", (chunk) => { versions += chunk; });
