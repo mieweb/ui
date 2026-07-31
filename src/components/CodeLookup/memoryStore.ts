@@ -141,14 +141,14 @@ function idbSet(key: string, value: MemoryEntry): Promise<void> {
   );
 }
 
-function idbGetScope(scope: MemoryScope): Promise<MemoryEntry[]> {
+function idbGetAll(range?: IDBKeyRange): Promise<MemoryEntry[]> {
   return openDb().then(
     (db) =>
       new Promise<MemoryEntry[]>((resolve, reject) => {
         const req = db
           .transaction(STORE, 'readonly')
           .objectStore(STORE)
-          .getAll(scopeRange(scope));
+          .getAll(range);
         req.onsuccess = () => {
           resolve((req.result ?? []) as MemoryEntry[]);
           db.close();
@@ -181,6 +181,10 @@ function idbDeleteScope(scope: MemoryScope): Promise<void> {
         };
       })
   );
+}
+
+function idbGetScope(scope: MemoryScope): Promise<MemoryEntry[]> {
+  return idbGetAll(scopeRange(scope));
 }
 
 // =============================================================================
@@ -242,6 +246,55 @@ export async function getTopCodes(
 const seededScopes = new Set<string>();
 
 /**
+ * Every stored entry, for one bucket or (no scope) all of them. Resolves `[]`
+ * without IDB.
+ */
+export async function getAllEntries(
+  scope?: MemoryScope
+): Promise<MemoryEntry[]> {
+  if (!hasIndexedDB()) return [];
+  try {
+    return scope ? await idbGetScope(scope) : await idbGetAll();
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Merge entries into the store: `count` and `lastUsed` take the larger value,
+ * local `pendingDelta` is preserved. `override` retargets every entry into one
+ * bucket (importing a curated set for the current user). Returns the number
+ * merged; best-effort.
+ */
+export async function mergeEntries(
+  entries: readonly MemoryEntry[],
+  override?: MemoryScope
+): Promise<number> {
+  if (!hasIndexedDB()) return 0;
+  let merged = 0;
+  for (const e of entries) {
+    try {
+      const scope = override ?? { userId: e.userId, context: e.context };
+      const key = entryKey(scope, e.fullid);
+      const prev = await idbGet(key);
+      await idbSet(key, {
+        ...e,
+        userId: scope.userId,
+        context: scope.context,
+        label: e.label || (prev?.label ?? ''),
+        count: Math.max(prev?.count ?? 0, e.count),
+        lastUsed: Math.max(prev?.lastUsed ?? 0, e.lastUsed),
+        pendingDelta: prev?.pendingDelta ?? 0,
+      });
+      merged++;
+    } catch {
+      /* skip the bad row, keep going */
+    }
+  }
+  return merged;
+}
+
+/**
  * Seed the scope from the server once per session:
  * `GET {serverUrl}?user=…&context=…` → `ServerCount[]`, merged with
  * `max(localCount, serverCount)`; unknown codes are added. Best-effort.
@@ -260,24 +313,23 @@ export async function seedFromServer(
     if (!res.ok) throw new Error(`seed fetch failed: ${res.status}`);
     const rows = (await res.json()) as ServerCount[];
     if (!Array.isArray(rows)) return;
-    for (const row of rows) {
-      if (!row || typeof row.fullid !== 'string') continue;
-      const key = entryKey(scope, row.fullid);
-      const prev = await idbGet(key);
-      const serverCount = typeof row.count === 'number' ? row.count : 0;
-      await idbSet(key, {
-        userId: scope.userId,
-        context: scope.context,
-        fullid: row.fullid,
-        label: prev?.label ?? row.label ?? '',
-        codetype: prev?.codetype ?? row.codetype ?? '',
-        fullcode: prev?.fullcode ?? row.fullcode ?? '',
-        domain: prev?.domain ?? row.domain ?? '',
-        count: Math.max(prev?.count ?? 0, serverCount),
-        lastUsed: prev?.lastUsed ?? 0,
-        pendingDelta: prev?.pendingDelta ?? 0,
-      });
-    }
+    await mergeEntries(
+      rows
+        .filter((row) => row && typeof row.fullid === 'string')
+        .map((row) => ({
+          userId: scope.userId,
+          context: scope.context,
+          fullid: row.fullid,
+          label: row.label ?? '',
+          codetype: row.codetype ?? '',
+          fullcode: row.fullcode ?? '',
+          domain: row.domain ?? '',
+          count: typeof row.count === 'number' ? row.count : 0,
+          lastUsed: 0,
+          pendingDelta: 0,
+        })),
+      scope
+    );
   } catch {
     // Failed seeds may retry next session; keep the local counts as-is.
   }

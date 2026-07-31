@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { CodeLookup, type CodifyDomain } from './CodeLookup';
 import type { CodifyResult } from './engine';
+import { exportMemoryYaml, importMemoryYaml } from './memoryYaml';
+import { Button } from '../Button';
 
 const meta: Meta<typeof CodeLookup> = {
   title: 'Healthcare/CodeLookup',
@@ -165,6 +167,10 @@ function MemoryTemplate({ locale }: { locale?: string }) {
   const [userId, setUserId] = useState('alice');
   const [context, setContext] = useState('med-orders');
   const [selected, setSelected] = useState<CodifyResult | null>(null);
+  const [yamlText, setYamlText] = useState('');
+  const [yamlNote, setYamlNote] = useState('');
+  // bump to remount CodeLookup so an import shows up in the picklist
+  const [reloadKey, setReloadKey] = useState(0);
   const toggle = (
     label: string,
     value: string,
@@ -197,7 +203,7 @@ function MemoryTemplate({ locale }: { locale?: string }) {
       </div>
       <CodeLookup
         // remount on scope change so seeded input state can't linger
-        key={`${userId}|${context}`}
+        key={`${userId}|${context}|${reloadKey}`}
         indexUrl="/codify"
         locale={locale}
         domains={['med']}
@@ -209,6 +215,60 @@ function MemoryTemplate({ locale }: { locale?: string }) {
           {JSON.stringify(selected, null, 2)}
         </pre>
       )}
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={async () => {
+              setYamlText(await exportMemoryYaml({ userId, context }));
+              setYamlNote(`Exported ${userId} / ${context}`);
+            }}
+          >
+            Export YAML
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={async () => {
+              setYamlText(await exportMemoryYaml());
+              setYamlNote('Exported all buckets');
+            }}
+          >
+            Export all
+          </Button>
+          <Button
+            size="sm"
+            onClick={async () => {
+              try {
+                const r = await importMemoryYaml(yamlText, {
+                  scope: { userId, context },
+                });
+                setYamlNote(
+                  `Imported ${r.imported} codes into ${userId} / ${context}` +
+                    (r.skipped ? ` (${r.skipped} skipped)` : '')
+                );
+                setReloadKey((k) => k + 1);
+              } catch (err) {
+                setYamlNote(`Import failed: ${(err as Error).message}`);
+              }
+            }}
+          >
+            Import into this bucket
+          </Button>
+          <span className="text-muted-foreground text-xs" aria-live="polite">
+            {yamlNote}
+          </span>
+        </div>
+        <textarea
+          value={yamlText}
+          onChange={(e) => setYamlText(e.target.value)}
+          aria-label="Memory YAML"
+          placeholder="Export writes YAML here; paste a memory export to import it."
+          className="border-border bg-background h-40 w-full rounded-md border p-2 font-mono text-xs"
+        />
+      </div>
     </div>
   );
 }
@@ -219,7 +279,12 @@ function MemoryTemplate({ locale }: { locale?: string }) {
  * above the index hits, marked ☆ with their pick count. Switch the **user**
  * or **context** toggles to see bucket isolation (alice/med-orders never sees
  * bob's picks, nor alice's presenting-meds picks). Local-only here; add
- * `serverUrl` to seed + sync. */
+ * `serverUrl` to seed + sync.
+ *
+ * **Export/Import YAML** below the box: dump a bucket (or all of them) to
+ * YAML, edit it, and merge it back — into the *currently selected* bucket, so
+ * you can hand alice's list to bob or seed a context from a curated starter
+ * set. Counts merge by max, so importing twice changes nothing. */
 export const WithMemory: Story = {
   render: (_args, { globals }) => <MemoryTemplate locale={globals.locale} />,
 };

@@ -9,6 +9,13 @@ export {
 } from './CodeLookup';
 export { clearMemory, type MemoryEntry, type MemoryScope } from './memoryStore';
 export {
+  exportMemoryYaml,
+  importMemoryYaml,
+  MEMORY_YAML_VERSION,
+  type ImportMemoryOptions,
+  type ImportMemoryResult,
+} from './memoryYaml';
+export {
   searchShards,
   parseShard,
   normalize,

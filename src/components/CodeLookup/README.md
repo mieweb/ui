@@ -282,6 +282,45 @@ user's most-picked codes for that context (count desc, most-recent tiebreak):
   their pick count, so typing `f` keeps *Flonase* on top instead of dropping
   it for the generic matches.
 
+#### Import / export (`memoryYaml.ts`)
+
+Buckets round-trip through YAML — back up a picklist, move it between
+machines, or ship a curated starter set for a context:
+
+```ts
+import { exportMemoryYaml, importMemoryYaml } from '…/CodeLookup';
+
+const yaml = await exportMemoryYaml({ userId: 'alice', context: 'med-orders' });
+await exportMemoryYaml();                       // every bucket in this browser
+await importMemoryYaml(yaml);                   // into the buckets it names
+await importMemoryYaml(yaml, { scope });        // …or all into one bucket
+```
+
+```yaml
+version: 1
+exported: 2026-07-31T19:00:00.000Z
+buckets:
+  - user: alice
+    context: med-orders
+    codes:
+      - fullid: FDBMEDNAME3722
+        label: Lasix
+        codetype: FDB MEDNAME
+        fullcode: '3722'
+        domain: med
+        count: 3
+        lastUsed: 2026-07-31T18:00:00.000Z
+```
+
+- Import **merges**: `count`/`lastUsed` keep the larger value and pending
+  server deltas are untouched, so re-importing the same file is a no-op and
+  local usage is never lost. `{ scope }` retargets every bucket into one.
+- Only `fullid` is required per code (`count` defaults to 1) — a hand-written
+  starter list is a valid import. Unusable rows are skipped and counted in the
+  result; a document without a `buckets` list, or a newer `version`, throws.
+- `js-yaml` is an **optional peer dependency**, imported lazily on first use,
+  so apps that never import/export don't pay for it.
+
 ## 6. Health surveillance — programs.json
 
 The **occupational** (OSHA/FMCSA/NFPA/FAA/OPM/USCG/MSHA/NIOSH/NRC/DOE/USCIS/
