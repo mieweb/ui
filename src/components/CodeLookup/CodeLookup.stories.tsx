@@ -215,9 +215,11 @@ function MemoryTemplate({ locale }: { locale?: string }) {
 
 /** Personal "Frequently used" picklist (the `memory` prop). Pick a few meds,
  * clear/refocus the empty box — your most-picked codes appear first, counts
- * persisted in IndexedDB. Switch the **user** or **context** toggles to see
- * bucket isolation (alice/med-orders never sees bob's picks, nor alice's
- * presenting-meds picks). Local-only here; add `serverUrl` to seed + sync. */
+ * persisted in IndexedDB. Keep typing and your remembered codes stay pinned
+ * above the index hits, marked ☆ with their pick count. Switch the **user**
+ * or **context** toggles to see bucket isolation (alice/med-orders never sees
+ * bob's picks, nor alice's presenting-meds picks). Local-only here; add
+ * `serverUrl` to seed + sync. */
 export const WithMemory: Story = {
   render: (_args, { globals }) => <MemoryTemplate locale={globals.locale} />,
 };

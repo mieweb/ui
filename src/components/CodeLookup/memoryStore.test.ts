@@ -6,6 +6,8 @@ import {
   seedFromServer,
   scheduleFlush,
   clearMemory,
+  matchMemory,
+  type MemoryEntry,
   type MemoryScope,
 } from './memoryStore';
 
@@ -196,6 +198,45 @@ describe('memoryStore', () => {
     await clearMemory(alice);
     expect(await getTopCodes(alice)).toEqual([]);
     expect(await getTopCodes(bob)).toHaveLength(1);
+  });
+});
+
+describe('matchMemory', () => {
+  const entry = (label: string): MemoryEntry => ({
+    userId: 'alice',
+    context: 'c',
+    fullid: label,
+    label,
+    codetype: 'FDB',
+    fullcode: '1',
+    domain: 'med',
+    count: 1,
+    lastUsed: 0,
+    pendingDelta: 0,
+  });
+  const entries = [
+    entry('Flonase'),
+    entry('furosemide'),
+    entry('Childrens Tylenol'),
+  ];
+
+  it('matches every token as a word prefix', () => {
+    expect(matchMemory(entries, 'f').map((e) => e.label)).toEqual([
+      'Flonase',
+      'furosemide',
+    ]);
+    expect(matchMemory(entries, 'tyl').map((e) => e.label)).toEqual([
+      'Childrens Tylenol',
+    ]);
+    expect(matchMemory(entries, 'chi tyl').map((e) => e.label)).toEqual([
+      'Childrens Tylenol',
+    ]);
+  });
+
+  it('ignores case, accents and punctuation, and empty queries', () => {
+    expect(matchMemory(entries, 'FLO')).toHaveLength(1);
+    expect(matchMemory(entries, '   ')).toEqual([]);
+    expect(matchMemory(entries, 'zzz')).toEqual([]);
   });
 });
 

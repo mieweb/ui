@@ -277,8 +277,10 @@ user's most-picked codes for that context (count desc, most-recent tiebreak):
 - **Disable / reset** — omit the prop (or pass `false`) to disable;
   `clearMemory({ userId, context })` (exported from the component barrel)
   empties one bucket.
-- Typing anything switches to normal search — memory only fills the
-  empty-query dropdown (personal ranking boost while typing is phase 2).
+- **While typing** — remembered codes matching the query (same word-prefix
+  rule as the index) are pinned above the index hits and marked with a ☆ and
+  their pick count, so typing `f` keeps *Flonase* on top instead of dropping
+  it for the generic matches.
 
 ## 6. Health surveillance — programs.json
 

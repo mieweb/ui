@@ -98,5 +98,7 @@ flushed count deltas. Off by default — enabled via a single `memory` prop.
 ## Phase 2 (explicitly deferred — do not build now)
 
 - Personal-count boost in `searchShards` ranking while typing (compose with population `docPrior`)
+  — *partially delivered*: matching remembered codes are merged ahead of index hits in the
+  component (`matchMemory`); in-engine score composition is still deferred.
 - Wrapper components (MedicationEditor, OrderEditor, AllergyManager, esheet fields) forwarding `memory` contexts through their `codeLookup` configs
 - Reference server endpoint implementation

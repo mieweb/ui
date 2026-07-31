@@ -19,6 +19,7 @@ import {
   AlertCircleIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
+  StarIcon,
 } from '../Icons';
 import type { CodifyResult } from './engine';
 import { familyKey, familyTerm } from './engine';
@@ -28,6 +29,7 @@ import {
   scheduleFlush,
   seedFromServer,
   getTopCodes,
+  matchMemory,
   type MemoryEntry,
 } from './memoryStore';
 
@@ -179,6 +181,20 @@ const DETAIL_NOUN: Record<string, string> = {
 
 /** Domains whose drill-down resolves a curated program order set. */
 const PROGRAM_DOMAINS = new Set(['occupational', 'quality']);
+
+/** A remembered entry as a result row (`score` carries the pick count). */
+function toMemoryResult(e: MemoryEntry): CodifyResult {
+  return {
+    fullid: e.fullid,
+    label: e.label,
+    codetype: e.codetype,
+    fullcode: e.fullcode,
+    domain: e.domain,
+    score: e.count,
+    viaAlias: false,
+    viaMemory: true,
+  };
+}
 
 // =============================================================================
 // CodeLookup
@@ -445,27 +461,28 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
 
     /** Frequently-used picklist rows, shown for a true empty-query dropdown. */
     const memoryResults = React.useMemo<CodifyResult[]>(
-      () =>
-        memoryEntries.map((e) => ({
-          fullid: e.fullid,
-          label: e.label,
-          codetype: e.codetype,
-          fullcode: e.fullcode,
-          domain: e.domain,
-          score: e.count,
-          viaAlias: false,
-          viaMemory: true,
-        })),
+      () => memoryEntries.map(toMemoryResult),
       [memoryEntries]
     );
     const showMemory =
       !drill && query.trim() === '' && memoryResults.length > 0;
 
+    /** While typing, matching remembered codes rank ahead of index hits. */
+    const rankedResults = React.useMemo<CodifyResult[]>(() => {
+      const matches = matchMemory(memoryEntries, query.trim());
+      if (matches.length === 0) return results;
+      const seen = new Set(matches.map((m) => m.fullid));
+      return [
+        ...matches.map(toMemoryResult),
+        ...results.filter((r) => !seen.has(r.fullid)),
+      ];
+    }, [memoryEntries, query, results]);
+
     const list: CodifyResult[] = drill
       ? (drill.results ?? [])
       : showMemory
         ? memoryResults
-        : results;
+        : rankedResults;
 
     const pick = (r: CodifyResult) => {
       if (memUserId && memContext) {
@@ -673,6 +690,18 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       <span className="text-foreground min-w-0 flex-1 truncate">
                         {r.label}
                       </span>
+                      {r.viaMemory && !showMemory && (
+                        <span
+                          className="text-primary-600 dark:text-primary-400 flex shrink-0 items-center gap-0.5 text-[11px]"
+                          title={`You've used this ${r.score} time${r.score === 1 ? '' : 's'}`}
+                        >
+                          <StarIcon size={11} aria-hidden="true" />
+                          {r.score}
+                          <span className="sr-only">
+                            frequently used, {r.score} picks
+                          </span>
+                        </span>
+                      )}
                       <span
                         className={cn(
                           'text-muted-foreground shrink-0 text-[11px] whitespace-nowrap',
@@ -781,7 +810,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             )}
             {status.state === 'ready' && tookMs !== null && (
               <>
-                {results.length} results in {tookMs.toFixed(1)} ms (local) · ↑↓
+                {list.length} results in {tookMs.toFixed(1)} ms (local) · ↑↓
                 navigate · → drill into a row · Enter selects
               </>
             )}

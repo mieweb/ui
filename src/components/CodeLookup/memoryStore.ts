@@ -15,6 +15,7 @@
  */
 
 import type { CodifyResult } from './engine';
+import { normalize } from './engine';
 
 // =============================================================================
 // Types
@@ -400,6 +401,23 @@ export function scheduleFlush(
       void flushNow(scope, serverUrl);
     }, debounceMs)
   );
+}
+
+/**
+ * Remembered entries whose label matches `query` under the same word-prefix
+ * rule as the index search ("met for" → *metformin*), preserving the caller's
+ * order (`getTopCodes` — count desc). Empty query → no matches.
+ */
+export function matchMemory(
+  entries: MemoryEntry[],
+  query: string
+): MemoryEntry[] {
+  const tokens = normalize(query).split(' ').filter(Boolean);
+  if (tokens.length === 0) return [];
+  return entries.filter((e) => {
+    const words = normalize(e.label).split(' ').filter(Boolean);
+    return tokens.every((t) => words.some((w) => w.startsWith(t)));
+  });
 }
 
 /** Reset one (user, context) bucket entirely. Best-effort. */
