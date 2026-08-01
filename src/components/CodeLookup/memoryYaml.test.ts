@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   recordUse,
   getTopCodes,
@@ -61,6 +61,24 @@ describe('memory YAML export/import', () => {
     const yaml = await exportMemoryYaml();
     expect(yaml).toContain('user: alice');
     expect(yaml).toContain('user: bob');
+  });
+
+  it('breaks count ties by most recent, like the picklist', async () => {
+    const scope = freshScope();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+      await recordUse(scope, code('a', 'Amoxicillin'));
+      vi.setSystemTime(new Date('2026-01-02T00:00:00Z'));
+      await recordUse(scope, code('z', 'Zafirlukast'));
+    } finally {
+      vi.useRealTimers();
+    }
+
+    const yaml = await exportMemoryYaml(scope);
+    expect(yaml.indexOf('label: Zafirlukast')).toBeLessThan(
+      yaml.indexOf('label: Amoxicillin')
+    );
   });
 
   it('keeps the larger count when merging into existing usage', async () => {

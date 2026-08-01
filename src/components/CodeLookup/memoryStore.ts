@@ -415,8 +415,13 @@ export function matchMemory(
 
 /** Reset one (user, context) bucket entirely. Best-effort. */
 export async function clearMemory(scope: MemoryScope): Promise<void> {
+  const prefix = scopePrefix(scope);
+  // Drop the TTL too, so the next mount re-reads the server instead of
+  // serving the now-empty bucket until it expires.
+  for (const key of lastSynced.keys())
+    if (key.startsWith(prefix)) lastSynced.delete(key);
   try {
-    await memDelete(scopePrefix(scope));
+    await memDelete(prefix);
   } catch {
     /* ignore */
   }

@@ -36,7 +36,15 @@ export const MEMORY_YAML_VERSION = 1;
 
 let yamlPromise: Promise<typeof import('js-yaml')> | null = null;
 function loadYaml() {
-  yamlPromise ??= import(/* @vite-ignore */ 'js-yaml');
+  yamlPromise ??= import(/* @vite-ignore */ 'js-yaml').catch(
+    (cause: unknown) => {
+      yamlPromise = null; // let a later install work without a page reload
+      throw new Error(
+        'CodeLookup memory YAML needs the optional peer dependency `js-yaml`. Install it to use exportMemoryYaml/importMemoryYaml.',
+        { cause }
+      );
+    }
+  );
   return yamlPromise;
 }
 
@@ -68,32 +76,33 @@ function isoOrUndefined(ms: number): string | undefined {
 
 /** Group entries into buckets, codes ordered as the picklist shows them. */
 function toDoc(entries: readonly MemoryEntry[]): YamlDoc {
-  const buckets = new Map<string, YamlBucket>();
+  const grouped = new Map<string, MemoryEntry[]>();
   for (const e of entries) {
     const key = `${e.userId}|${e.context}`;
-    let bucket = buckets.get(key);
-    if (!bucket) {
-      bucket = { user: e.userId, context: e.context, codes: [] };
-      buckets.set(key, bucket);
-    }
-    bucket.codes.push({
-      fullid: e.fullid,
-      label: e.label,
-      codetype: e.codetype,
-      fullcode: e.fullcode,
-      domain: e.domain,
-      count: e.count,
-      lastUsed: isoOrUndefined(e.lastUsed),
-    });
+    const bucket = grouped.get(key);
+    if (bucket) bucket.push(e);
+    else grouped.set(key, [e]);
   }
-  for (const bucket of buckets.values())
-    bucket.codes.sort(
-      (a, b) => b.count - a.count || a.label.localeCompare(b.label)
-    );
+  const buckets = [...grouped.values()].map((list) => {
+    list.sort((a, b) => b.count - a.count || b.lastUsed - a.lastUsed);
+    return {
+      user: list[0].userId,
+      context: list[0].context,
+      codes: list.map((e) => ({
+        fullid: e.fullid,
+        label: e.label,
+        codetype: e.codetype,
+        fullcode: e.fullcode,
+        domain: e.domain,
+        count: e.count,
+        lastUsed: isoOrUndefined(e.lastUsed),
+      })),
+    };
+  });
   return {
     version: MEMORY_YAML_VERSION,
     exported: new Date().toISOString(),
-    buckets: [...buckets.values()].sort(
+    buckets: buckets.sort(
       (a, b) =>
         a.user.localeCompare(b.user) || a.context.localeCompare(b.context)
     ),
