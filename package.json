@@ -414,7 +414,10 @@
     "vite": "^7.3.2",
     "vitest": "^3.2.6",
     "wavesurfer.js": "^7.12.1",
+    "y-protocols": "^1.0.6",
+    "y-websocket": "^3.0.0",
     "ychart": "file:./packages/ychart",
+    "yjs": "^13.6.30",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },

@@ -22,6 +22,7 @@ export default defineConfig({
     'components/Button/index': 'src/components/Button/index.ts',
     'components/Card/index': 'src/components/Card/index.ts',
     'components/Checkbox/index': 'src/components/Checkbox/index.ts',
+    'components/CollabStatus/index': 'src/components/CollabStatus/index.ts',
     'components/Collapsible/index': 'src/components/Collapsible/index.ts',
     'components/CountryCodeDropdown/index': 'src/components/CountryCodeDropdown/index.ts',
     'components/DateInput/index': 'src/components/DateInput/index.ts',

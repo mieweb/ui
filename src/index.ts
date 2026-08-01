@@ -33,6 +33,7 @@ export * from './components/Checkbox';
 export * from './components/CodeLookup/context';
 export * from './components/ConditionEditor';
 export * from './components/CheckrIntegration';
+export * from './components/CollabStatus';
 export * from './components/Collapsible';
 export * from './components/CommandPalette';
 export * from './components/ConnectionStatus';
