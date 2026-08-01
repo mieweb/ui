@@ -247,8 +247,8 @@ user's most-picked codes for that context (count desc, most-recent tiebreak):
   indexUrl="/codify"
   memory={{
     context: 'med-orders',      // required — scopes the counts per use-site
-    userId: currentUser.id,     // default: provider `memory.userId`, then 'anonymous'
-    serverUrl: '/api/code-memory', // optional count sync; provider default fallback
+    userId: currentUser.id,     // default: provider `memory.userId`. No id, no memory
+    serverUrl: '/api/code-memory', // count sync; provider default fallback
     limit: 8,                   // picklist size (default 8)
   }}
   onSelect={…}
@@ -258,29 +258,64 @@ user's most-picked codes for that context (count desc, most-recent tiebreak):
 - **Scope = (userId, context)** — buckets never mix across users sharing a
   browser or across contexts (`med-orders` vs `presenting-meds`). Rows carry
   `viaMemory: true`.
-- **Storage** — IndexedDB (`mieweb-codelookup-memory` / `usage` store), keyed
-  `userId|context|fullid`, with full display fields so no shard rehydration is
-  needed. Persists across reloads; no IndexedDB (SSR) degrades to no-ops.
-- **Server sync (optional)** — with `serverUrl`:
-  - seed once per scope per session:
+- **Two gates, both fail closed.** Nothing is remembered unless *both* open:
+  1. **A signed-in user.** Placeholder ids (`anonymous`, `guest`, `kiosk`,
+     `unknown`, empty) are rejected rather than pooled into one shared bucket,
+     so forgetting to wire auth disables the feature instead of showing the
+     last kiosk visitor's codes to the next one.
+  2. **A storage mode** (below) that permits it.
+- **Storage — a property of the *machine*, never guessed.** No browser signal
+  distinguishes a kiosk from a workstation, so the app declares it once on the
+  provider and the library defaults to the safe answer:
+
+  | `memory.storage` | cache | for |
+  | --- | --- | --- |
+  | `'session'` *(default)* | RAM, dies with the tab | public/shared kiosks |
+  | `'local'` | IndexedDB (`mieweb-codelookup-memory` / `usage`), keyed `userId\|context\|fullid` | a per-user machine secured by a browser login |
+  | `'none'` | nothing | opted out |
+
+  Writing to *this* disk therefore needs an affirmative `storage: 'local'` in
+  the app source — greppable at review time, and forgetting it costs a
+  round-trip rather than a disclosure. `'local'` without IndexedDB (SSR)
+  degrades to no-ops.
+- **The server is the source of truth**; the local store is its cache. With
+  `serverUrl`:
+  - revalidate per scope, at most once a minute:
     `GET {serverUrl}?user={userId}&context={context}` →
-    `[{fullid, label, codetype, fullcode, domain, count}]`, merged with
-    `max(localCount, serverCount)`;
+    `[{fullid, label, codetype, fullcode, domain, count}]`, taken as
+    authoritative — a server count may move a local one **down**;
   - picks accumulate deltas flushed lazily:
     `POST {serverUrl}` body
     `{user, context, deltas: [{fullid, label, codetype, fullcode, domain, delta}]}`
-    (debounced; `navigator.sendBeacon` on `pagehide`). Failed flushes keep
+    (debounced — shorter in `'session'` mode, which has no durable cache to
+    retry from; `navigator.sendBeacon` on `pagehide`). Failed flushes keep
     their deltas for the next attempt.
+  - `count` = the server's total **plus** unflushed local picks, so
+    `pendingDelta` is the only locally-authoritative field and a sync can never
+    drop a pick that hasn't landed yet.
+  - **The server must take identity from the session** (cookie/bearer), not
+    from the `user` parameter — otherwise any user reads any other's list by
+    editing a query string. Treat `user` as a value to *validate* against the
+    session and reject on mismatch. Requests are sent with
+    `credentials: 'include'`.
 - **Provider defaults** — `CodeLookupProvider` accepts
-  `memory={{ userId, serverUrl }}` so apps set identity/sync once; each
-  instance still opts in with its own `context`.
+  `memory={{ userId, serverUrl, storage }}` so apps decide identity, sync and
+  device trust once; each instance still opts in with its own `context`.
+  `memory={false}` on the provider **disables memory everywhere below it**,
+  overriding any component's own opt-in — that's the one-line kiosk switch.
 - **Disable / reset** — omit the prop (or pass `false`) to disable;
-  `clearMemory({ userId, context })` (exported from the component barrel)
-  empties one bucket.
+  `clearMemory({ userId, context })` empties one bucket and `clearAllMemory()`
+  wipes every bucket whatever the current mode, for logout, kiosk session
+  reset, or a device downgraded from trusted to public.
 - **While typing** — remembered codes matching the query (same word-prefix
   rule as the index) are pinned above the index hits and marked with a ☆ and
   their pick count, so typing `f` keeps *Flonase* on top instead of dropping
   it for the generic matches.
+
+Storybook's **Signed in as** / **Device** toolbar globals feed exactly these
+two gates through the ambient provider in `.storybook/preview.tsx`, which
+doubles as the reference for wiring them in an app: one decision at the mount
+point, not per component.
 
 #### Import / export (`memoryYaml.ts`)
 

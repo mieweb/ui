@@ -163,8 +163,15 @@ export const QualityMeasures: Story = {
   ),
 };
 
-function MemoryTemplate({ locale }: { locale?: string }) {
-  const [userId, setUserId] = useState('alice');
+function MemoryTemplate({
+  locale,
+  userId,
+  device,
+}: {
+  locale?: string;
+  userId: string;
+  device: string;
+}) {
   const [context, setContext] = useState('med-orders');
   const [selected, setSelected] = useState<CodifyResult | null>(null);
   const [yamlText, setYamlText] = useState('');
@@ -192,22 +199,26 @@ function MemoryTemplate({ locale }: { locale?: string }) {
   );
   return (
     <div className="mx-auto max-w-2xl space-y-3">
-      <div className="flex gap-4">
-        {toggle('User', userId, ['alice', 'bob'], setUserId)}
+      <div className="flex items-center gap-4">
         {toggle(
           'Context',
           context,
           ['med-orders', 'presenting-meds'],
           setContext
         )}
+        <p className="text-muted-foreground text-xs">
+          Signed in as <strong>{userId}</strong> on a{' '}
+          <strong>{device === 'trusted' ? 'trusted' : 'public'}</strong> device
+          — set both in the toolbar.
+        </p>
       </div>
       <CodeLookup
         // remount on scope change so seeded input state can't linger
-        key={`${userId}|${context}|${reloadKey}`}
+        key={`${userId}|${context}|${device}|${reloadKey}`}
         indexUrl="/codify"
         locale={locale}
         domains={['med']}
-        memory={{ context, userId }}
+        memory={{ context }}
         onSelect={setSelected}
       />
       {selected && (
@@ -274,17 +285,28 @@ function MemoryTemplate({ locale }: { locale?: string }) {
 }
 
 /** Personal "Frequently used" picklist (the `memory` prop). Pick a few meds,
- * clear/refocus the empty box — your most-picked codes appear first, counts
- * persisted in IndexedDB. Keep typing and your remembered codes stay pinned
- * above the index hits, marked ☆ with their pick count. Switch the **user**
- * or **context** toggles to see bucket isolation (alice/med-orders never sees
- * bob's picks, nor alice's presenting-meds picks). Local-only here; add
- * `serverUrl` to seed + sync.
+ * clear/refocus the empty box — your most-picked codes appear first. Keep
+ * typing and your remembered codes stay pinned above the index hits, marked ☆
+ * with their pick count. Switch **context** here, and **Signed in as** in the
+ * toolbar, to see bucket isolation (alice/med-orders never sees bob's picks,
+ * nor alice's presenting-meds picks).
+ *
+ * Two gates guard the whole feature, both driven from the toolbar:
+ * *Not signed in* remembers nothing at all, and a **public kiosk** device
+ * keeps counts in RAM only — reload and they are gone. Only a **trusted
+ * workstation** caches them in IndexedDB. Local-only here; add `serverUrl` to
+ * make the server the source of truth.
  *
  * **Export/Import YAML** below the box: dump a bucket (or all of them) to
  * YAML, edit it, and merge it back — into the *currently selected* bucket, so
  * you can hand alice's list to bob or seed a context from a curated starter
  * set. Counts merge by max, so importing twice changes nothing. */
 export const WithMemory: Story = {
-  render: (_args, { globals }) => <MemoryTemplate locale={globals.locale} />,
+  render: (_args, { globals }) => (
+    <MemoryTemplate
+      locale={globals.locale}
+      userId={globals.user ?? 'anonymous'}
+      device={globals.device ?? 'public'}
+    />
+  ),
 };
