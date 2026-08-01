@@ -1,21 +1,44 @@
 /**
  * CodeLookup "memory" — per-(user, context) usage counts for picked codes,
- * persisted in IndexedDB, powering the "Frequently used" empty-query picklist.
+ * powering the "Frequently used" empty-query picklist.
  *
- * Pattern follows `src/components/AI/voiceprintStore.ts` /
- * `src/components/SuperChat/render/attachmentCache.ts`: promise-wrapped IDB,
- * best-effort (no-IDB environments — SSR, some tests — degrade to no-ops).
+ * `serverUrl` is the source of truth; the local store (see `memoryBackend`) is
+ * a cache whose durability is the device's call — IndexedDB on a trusted
+ * machine, RAM on a kiosk. Two gates must both open before anything is kept:
+ * a real `userId` (never a shared 'anonymous' bucket) and a storage mode.
  *
- * Optional server sync (full sync):
- *  - `seedFromServer` GETs `{serverUrl}?user=&context=` once per scope per
- *    session and merges counts with `max(count)`.
+ * Sync:
+ *  - `syncFromServer` GETs `{serverUrl}?user=&context=` (at most once per
+ *    minute per scope) and takes the server's counts as authoritative.
  *  - `scheduleFlush` debounces a POST of accumulated count deltas
  *    (`{user, context, deltas:[…]}`); a `pagehide` listener flushes any
  *    remaining deltas via `navigator.sendBeacon`.
+ *
+ * `count` is therefore "the server's total, plus our unflushed picks":
+ * `pendingDelta` is the only locally-authoritative field, so a server value
+ * can move a count *down* without ever losing a pick that hasn't landed yet.
+ *
+ * The server must take identity from the session, not from the `user`
+ * parameter — see the protocol notes in README.md.
  */
 
 import type { CodifyResult } from './engine';
 import { normalize } from './engine';
+import {
+  memGet,
+  memSet,
+  memGetAll,
+  memDelete,
+  memPurgeAll,
+  memoryAvailable,
+  getMemoryStorage,
+} from './memoryBackend';
+
+export {
+  setMemoryStorage,
+  getMemoryStorage,
+  type MemoryStorage,
+} from './memoryBackend';
 
 // =============================================================================
 // Types
@@ -23,7 +46,7 @@ import { normalize } from './engine';
 
 /** Identifies one memory bucket: counts never leak across users or contexts. */
 export interface MemoryScope {
-  /** Developer-supplied user id; use 'anonymous' when unknown. */
+  /** Signed-in user id. Placeholders like 'anonymous' disable memory. */
   userId: string;
   /** Usage context, e.g. 'med-orders' vs 'presenting-meds'. */
   context: string;
@@ -38,11 +61,11 @@ export interface MemoryEntry {
   codetype: string;
   fullcode: string;
   domain: string;
-  /** Total times picked (local + server-seeded). */
+  /** The server's total plus `pendingDelta` (see the module doc). */
   count: number;
   /** Epoch ms of the most recent pick (count-tie ordering). */
   lastUsed: number;
-  /** Picks not yet flushed to the server. */
+  /** Picks not yet flushed to the server — the only local truth. */
   pendingDelta: number;
 }
 
@@ -57,134 +80,39 @@ interface ServerCount {
 }
 
 // =============================================================================
-// IndexedDB plumbing
+// Keys and gates
 // =============================================================================
-
-const DB_NAME = 'mieweb-codelookup-memory';
-const STORE = 'usage';
-const DB_VERSION = 1;
-
-function hasIndexedDB(): boolean {
-  try {
-    return typeof indexedDB !== 'undefined' && indexedDB != null;
-  } catch {
-    return false;
-  }
-}
 
 function entryKey(scope: MemoryScope, fullid: string): string {
   return `${scope.userId}|${scope.context}|${fullid}`;
 }
 
-/** Key range covering every entry in a scope (keys are `user|context|fullid`). */
-function scopeRange(scope: MemoryScope): IDBKeyRange {
-  const prefix = `${scope.userId}|${scope.context}|`;
-  return IDBKeyRange.bound(prefix, `${prefix}\uffff`);
+/** Prefix covering every entry in a scope (keys are `user|context|fullid`). */
+function scopePrefix(scope: MemoryScope): string {
+  return `${scope.userId}|${scope.context}|`;
 }
 
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains(STORE))
-        req.result.createObjectStore(STORE);
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-    // A version upgrade blocked by another tab would otherwise hang forever.
-    req.onblocked = () =>
-      reject(
-        new Error('IndexedDB open blocked (another tab holds an upgrade lock)')
-      );
-  });
-}
+/**
+ * Placeholder ids that mean "nobody is signed in". They would otherwise be
+ * valid bucket keys, pooling every kiosk visitor into one shared picklist.
+ */
+const UNIDENTIFIED = new Set(['', 'anonymous', 'guest', 'kiosk', 'unknown']);
 
-function idbGet(key: string): Promise<MemoryEntry | undefined> {
-  return openDb().then(
-    (db) =>
-      new Promise<MemoryEntry | undefined>((resolve, reject) => {
-        const req = db
-          .transaction(STORE, 'readonly')
-          .objectStore(STORE)
-          .get(key);
-        req.onsuccess = () => {
-          resolve(req.result as MemoryEntry | undefined);
-          db.close();
-        };
-        req.onerror = () => {
-          reject(req.error);
-          db.close();
-        };
-      })
+function isIdentified(scope: MemoryScope): boolean {
+  return (
+    !!scope.userId &&
+    !!scope.context &&
+    !UNIDENTIFIED.has(scope.userId.trim().toLowerCase())
   );
 }
 
-function idbSet(key: string, value: MemoryEntry): Promise<void> {
-  return openDb().then(
-    (db) =>
-      new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(STORE, 'readwrite');
-        tx.objectStore(STORE).put(value, key);
-        tx.oncomplete = () => {
-          resolve();
-          db.close();
-        };
-        tx.onerror = () => {
-          reject(tx.error);
-          db.close();
-        };
-        tx.onabort = () => {
-          reject(tx.error);
-          db.close();
-        };
-      })
-  );
+/** Both gates: somewhere to store it, and someone to store it for. */
+function memoryOn(scope: MemoryScope): boolean {
+  return memoryAvailable() && isIdentified(scope);
 }
 
-function idbGetAll(range?: IDBKeyRange): Promise<MemoryEntry[]> {
-  return openDb().then(
-    (db) =>
-      new Promise<MemoryEntry[]>((resolve, reject) => {
-        const req = db
-          .transaction(STORE, 'readonly')
-          .objectStore(STORE)
-          .getAll(range);
-        req.onsuccess = () => {
-          resolve((req.result ?? []) as MemoryEntry[]);
-          db.close();
-        };
-        req.onerror = () => {
-          reject(req.error);
-          db.close();
-        };
-      })
-  );
-}
-
-function idbDeleteScope(scope: MemoryScope): Promise<void> {
-  return openDb().then(
-    (db) =>
-      new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(STORE, 'readwrite');
-        tx.objectStore(STORE).delete(scopeRange(scope));
-        tx.oncomplete = () => {
-          resolve();
-          db.close();
-        };
-        tx.onerror = () => {
-          reject(tx.error);
-          db.close();
-        };
-        tx.onabort = () => {
-          reject(tx.error);
-          db.close();
-        };
-      })
-  );
-}
-
-function idbGetScope(scope: MemoryScope): Promise<MemoryEntry[]> {
-  return idbGetAll(scopeRange(scope));
+function getScope(scope: MemoryScope): Promise<MemoryEntry[]> {
+  return memGetAll(scopePrefix(scope));
 }
 
 // =============================================================================
@@ -202,10 +130,10 @@ export async function recordUse(
     'fullid' | 'label' | 'codetype' | 'fullcode' | 'domain'
   >
 ): Promise<void> {
-  if (!hasIndexedDB()) return;
+  if (!memoryOn(scope)) return;
   try {
     const key = entryKey(scope, result.fullid);
-    const prev = await idbGet(key);
+    const prev = await memGet(key);
     const entry: MemoryEntry = {
       userId: scope.userId,
       context: scope.context,
@@ -218,7 +146,7 @@ export async function recordUse(
       lastUsed: Date.now(),
       pendingDelta: (prev?.pendingDelta ?? 0) + 1,
     };
-    await idbSet(key, entry);
+    await memSet(key, entry);
   } catch {
     /* best-effort */
   }
@@ -226,15 +154,15 @@ export async function recordUse(
 
 /**
  * The scope's most-used codes: `count` desc, `lastUsed` desc tiebreak,
- * capped at `limit`. Resolves `[]` without IDB.
+ * capped at `limit`. Resolves `[]` when either gate is closed.
  */
 export async function getTopCodes(
   scope: MemoryScope,
   limit = 8
 ): Promise<MemoryEntry[]> {
-  if (!hasIndexedDB()) return [];
+  if (!memoryOn(scope)) return [];
   try {
-    const entries = await idbGetScope(scope);
+    const entries = await getScope(scope);
     entries.sort((a, b) => b.count - a.count || b.lastUsed - a.lastUsed);
     return entries.slice(0, limit);
   } catch {
@@ -242,49 +170,57 @@ export async function getTopCodes(
   }
 }
 
-/** Scopes already seeded this session (`user|context|serverUrl`). */
-const seededScopes = new Set<string>();
+/** Last server sync per `user|context|serverUrl`, for TTL revalidation. */
+const lastSynced = new Map<string, number>();
+const REVALIDATE_MS = 60_000;
 
 /**
  * Every stored entry, for one bucket or (no scope) all of them. Resolves `[]`
- * without IDB.
+ * when nothing is stored locally.
  */
 export async function getAllEntries(
   scope?: MemoryScope
 ): Promise<MemoryEntry[]> {
-  if (!hasIndexedDB()) return [];
+  if (scope ? !memoryOn(scope) : !memoryAvailable()) return [];
   try {
-    return scope ? await idbGetScope(scope) : await idbGetAll();
+    return scope ? await getScope(scope) : await memGetAll();
   } catch {
     return [];
   }
 }
 
 /**
- * Merge entries into the store: `count` and `lastUsed` take the larger value,
- * local `pendingDelta` is preserved. `override` retargets every entry into one
- * bucket (importing a curated set for the current user). Returns the number
- * merged; best-effort.
+ * Merge entries into the store, preserving local `pendingDelta`. `override`
+ * retargets every entry into one bucket (importing a curated set for the
+ * current user). `authoritative` marks the entries as the server's truth, so
+ * counts may move down; otherwise the larger count wins (YAML import, which
+ * must be idempotent). Returns the number merged; best-effort.
  */
 export async function mergeEntries(
   entries: readonly MemoryEntry[],
-  override?: MemoryScope
+  override?: MemoryScope,
+  { authoritative = false }: { authoritative?: boolean } = {}
 ): Promise<number> {
-  if (!hasIndexedDB()) return 0;
+  if (!memoryAvailable()) return 0;
   let merged = 0;
   for (const e of entries) {
     try {
       const scope = override ?? { userId: e.userId, context: e.context };
+      if (!isIdentified(scope)) continue;
       const key = entryKey(scope, e.fullid);
-      const prev = await idbGet(key);
-      await idbSet(key, {
+      const prev = await memGet(key);
+      const pendingDelta = prev?.pendingDelta ?? 0;
+      await memSet(key, {
         ...e,
         userId: scope.userId,
         context: scope.context,
         label: e.label || (prev?.label ?? ''),
-        count: Math.max(prev?.count ?? 0, e.count),
+        // A flush in flight double-counts until the next sync corrects it.
+        count: authoritative
+          ? e.count + pendingDelta
+          : Math.max(prev?.count ?? 0, e.count),
         lastUsed: Math.max(prev?.lastUsed ?? 0, e.lastUsed),
-        pendingDelta: prev?.pendingDelta ?? 0,
+        pendingDelta,
       });
       merged++;
     } catch {
@@ -295,22 +231,23 @@ export async function mergeEntries(
 }
 
 /**
- * Seed the scope from the server once per session:
- * `GET {serverUrl}?user=…&context=…` → `ServerCount[]`, merged with
- * `max(localCount, serverCount)`; unknown codes are added. Best-effort.
+ * Refresh the scope from the server (at most once per `REVALIDATE_MS`):
+ * `GET {serverUrl}?user=…&context=…` → `ServerCount[]`, taken as authoritative.
+ * Best-effort — a failed sync leaves the cache in place.
  */
-export async function seedFromServer(
+export async function syncFromServer(
   scope: MemoryScope,
   serverUrl: string
 ): Promise<void> {
-  if (!hasIndexedDB()) return;
-  const seedKey = `${scope.userId}|${scope.context}|${serverUrl}`;
-  if (seededScopes.has(seedKey)) return;
-  seededScopes.add(seedKey);
+  if (!memoryOn(scope)) return;
+  const key = `${scope.userId}|${scope.context}|${serverUrl}`;
+  const last = lastSynced.get(key);
+  if (last != null && Date.now() - last < REVALIDATE_MS) return;
+  lastSynced.set(key, Date.now());
   try {
     const url = `${serverUrl}?user=${encodeURIComponent(scope.userId)}&context=${encodeURIComponent(scope.context)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`seed fetch failed: ${res.status}`);
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error(`memory sync failed: ${res.status}`);
     const rows = (await res.json()) as ServerCount[];
     if (!Array.isArray(rows)) return;
     await mergeEntries(
@@ -328,10 +265,12 @@ export async function seedFromServer(
           lastUsed: 0,
           pendingDelta: 0,
         })),
-      scope
+      scope,
+      { authoritative: true }
     );
   } catch {
-    // Failed seeds may retry next session; keep the local counts as-is.
+    // Retry on the next mount past the TTL; keep serving the cache.
+    lastSynced.delete(key);
   }
 }
 
@@ -340,7 +279,7 @@ async function pendingPayload(scope: MemoryScope): Promise<{
   body: string;
   flushed: Map<string, number>;
 } | null> {
-  const entries = await idbGetScope(scope);
+  const entries = await getScope(scope);
   const deltas: (ServerCount & { delta: number })[] = [];
   const flushed = new Map<string, number>();
   for (const e of entries) {
@@ -374,9 +313,9 @@ async function settleFlushed(
 ): Promise<void> {
   for (const [fullid, delta] of flushed) {
     const key = entryKey(scope, fullid);
-    const entry = await idbGet(key);
+    const entry = await memGet(key);
     if (!entry) continue;
-    await idbSet(key, {
+    await memSet(key, {
       ...entry,
       pendingDelta: Math.max(0, entry.pendingDelta - delta),
     });
@@ -389,6 +328,7 @@ async function flushNow(scope: MemoryScope, serverUrl: string): Promise<void> {
     if (!payload) return;
     const res = await fetch(serverUrl, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: payload.body,
     });
@@ -433,14 +373,15 @@ function registerPagehide(): void {
 
 /**
  * Debounce a POST of the scope's pending deltas to `serverUrl`. Also arms a
- * one-time `pagehide` beacon so deltas survive tab closes. Best-effort.
+ * one-time `pagehide` beacon so deltas survive tab closes. Session storage
+ * flushes fast by default — there is no durable cache to retry from.
  */
 export function scheduleFlush(
   scope: MemoryScope,
   serverUrl: string,
-  debounceMs = 5000
+  debounceMs = getMemoryStorage() === 'session' ? 500 : 5000
 ): void {
-  if (!hasIndexedDB()) return;
+  if (!memoryOn(scope)) return;
   const key = `${scope.userId}|${scope.context}|${serverUrl}`;
   beaconScopes.set(key, { scope, serverUrl });
   registerPagehide();
@@ -474,9 +415,21 @@ export function matchMemory(
 
 /** Reset one (user, context) bucket entirely. Best-effort. */
 export async function clearMemory(scope: MemoryScope): Promise<void> {
-  if (!hasIndexedDB()) return;
   try {
-    await idbDeleteScope(scope);
+    await memDelete(scopePrefix(scope));
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Wipe every bucket in this browser — for logout, kiosk session reset, or a
+ * device downgraded from trusted to public.
+ */
+export async function clearAllMemory(): Promise<void> {
+  lastSynced.clear();
+  try {
+    await memPurgeAll();
   } catch {
     /* ignore */
   }

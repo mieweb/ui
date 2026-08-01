@@ -3,16 +3,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   recordUse,
   getTopCodes,
-  seedFromServer,
+  syncFromServer,
   scheduleFlush,
   clearMemory,
+  clearAllMemory,
   matchMemory,
+  setMemoryStorage,
   type MemoryEntry,
   type MemoryScope,
 } from './memoryStore';
 
 // `fake-indexeddb/auto` polyfills a real IndexedDB for this file only (vitest
 // isolates modules per test file), so the store exercises its true IDB paths.
+// The default storage mode is 'session', so tests opt into 'local' explicitly.
+beforeEach(() => {
+  setMemoryStorage('local');
+});
 
 const code = (fullid: string, label = fullid) => ({
   fullid,
@@ -84,43 +90,64 @@ describe('memoryStore', () => {
     ]);
   });
 
-  it('seed merges server counts with max(count) and adds new entries', async () => {
+  it('takes the server as authoritative, keeping unflushed picks on top', async () => {
     const scope = freshScope();
-    await recordUse(scope, code('a')); // local count 1
+    await recordUse(scope, code('a')); // local count 1, unflushed
     await recordUse(scope, code('b'));
-    await recordUse(scope, code('b')); // local count 2
+    await recordUse(scope, code('b')); // local count 2, unflushed
 
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(
         JSON.stringify([
-          { ...code('a'), count: 5 }, // server higher → 5
-          { ...code('b'), count: 1 }, // local higher → stays 2
+          { ...code('a'), count: 5 },
+          { ...code('b'), count: 1 },
           { ...code('srv'), count: 3 }, // new from server
         ])
       )
     );
-    await seedFromServer(scope, 'https://api.example/memory');
+    await syncFromServer(scope, 'https://api.example/memory');
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `https://api.example/memory?user=alice&context=${scope.context}`
+      `https://api.example/memory?user=alice&context=${scope.context}`,
+      { credentials: 'include' }
     );
     const top = await getTopCodes(scope);
     const byId = Object.fromEntries(top.map((e) => [e.fullid, e]));
-    expect(byId.a.count).toBe(5);
-    expect(byId.b.count).toBe(2);
+    expect(byId.a.count).toBe(6); // 5 + 1 unflushed
+    expect(byId.b.count).toBe(3); // 1 + 2 unflushed
     expect(byId.srv.count).toBe(3);
-    // seeded counts are not pending deltas
     expect(byId.srv.pendingDelta).toBe(0);
     expect(byId.a.pendingDelta).toBe(1);
   });
 
-  it('seeds only once per scope per session', async () => {
+  it('lets the server lower a settled count', async () => {
+    const scope = freshScope();
+    await recordUse(scope, code('a'));
+    await recordUse(scope, code('a'));
+    await recordUse(scope, code('a'));
+
+    vi.useFakeTimers();
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'));
+    scheduleFlush(scope, 'https://api.example/memory', 10);
+    await vi.advanceTimersByTimeAsync(20);
+    vi.useRealTimers();
+    await Promise.resolve();
+    expect((await getTopCodes(scope))[0].pendingDelta).toBe(0);
+
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify([{ ...code('a'), count: 1 }]))
+    );
+    await syncFromServer(scope, 'https://api.example/memory');
+    expect((await getTopCodes(scope))[0].count).toBe(1);
+  });
+
+  it('revalidates at most once per TTL', async () => {
     const scope = freshScope();
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response('[]'));
-    await seedFromServer(scope, 'https://api.example/memory');
-    await seedFromServer(scope, 'https://api.example/memory');
+    await syncFromServer(scope, 'https://api.example/memory');
+    await syncFromServer(scope, 'https://api.example/memory');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -243,6 +270,7 @@ describe('matchMemory', () => {
 describe('memoryStore without IndexedDB', () => {
   let saved: IDBFactory;
   beforeEach(() => {
+    setMemoryStorage('local');
     saved = globalThis.indexedDB;
     // @ts-expect-error — simulate an environment without IndexedDB
     delete globalThis.indexedDB;
@@ -256,11 +284,62 @@ describe('memoryStore without IndexedDB', () => {
     await expect(recordUse(scope, code('a'))).resolves.toBeUndefined();
     await expect(getTopCodes(scope)).resolves.toEqual([]);
     await expect(
-      seedFromServer(scope, 'https://api.example/memory')
+      syncFromServer(scope, 'https://api.example/memory')
     ).resolves.toBeUndefined();
     expect(() =>
       scheduleFlush(scope, 'https://api.example/memory')
     ).not.toThrow();
     await expect(clearMemory(scope)).resolves.toBeUndefined();
+  });
+});
+
+describe('identity gate', () => {
+  it('refuses to pool unidentified users into a shared bucket', async () => {
+    for (const userId of ['anonymous', '', 'Guest', ' kiosk ']) {
+      const scope: MemoryScope = { userId, context: 'intake' };
+      await recordUse(scope, code('depression'));
+      expect(await getTopCodes(scope)).toEqual([]);
+    }
+  });
+
+  it('remembers once a real user id arrives', async () => {
+    const scope = freshScope('dr-alice');
+    await recordUse(scope, code('a'));
+    expect(await getTopCodes(scope)).toHaveLength(1);
+  });
+});
+
+describe('storage modes', () => {
+  it('session storage never reaches the disk', async () => {
+    const scope = freshScope();
+    setMemoryStorage('session');
+    await recordUse(scope, code('a'));
+    expect(await getTopCodes(scope)).toHaveLength(1);
+
+    setMemoryStorage('local');
+    expect(await getTopCodes(scope)).toEqual([]);
+  });
+
+  it("'none' stores nothing at all", async () => {
+    const scope = freshScope();
+    setMemoryStorage('none');
+    await recordUse(scope, code('a'));
+    expect(await getTopCodes(scope)).toEqual([]);
+  });
+});
+
+describe('clearAllMemory', () => {
+  it('wipes every bucket, whatever the current mode', async () => {
+    const alice = freshScope('alice');
+    const bob = freshScope('bob');
+    await recordUse(alice, code('a'));
+    setMemoryStorage('session');
+    await recordUse(bob, code('b'));
+
+    await clearAllMemory();
+
+    expect(await getTopCodes(bob)).toEqual([]);
+    setMemoryStorage('local');
+    expect(await getTopCodes(alice)).toEqual([]);
   });
 });

@@ -29,6 +29,7 @@
 
 import * as React from 'react';
 import type { CodeLookupProps } from './CodeLookup';
+import type { MemoryStorage } from './memoryBackend';
 
 /**
  * The CodeLookup component the provider distributes to consumers.
@@ -46,13 +47,19 @@ export type CodeLookupComponent = (
 /**
  * App-wide defaults for the CodeLookup memory picklist. Instances still opt
  * in per-use with the `memory` prop (its `context` is always per-instance);
- * these only fill in the identity/sync fields.
+ * these only fill in the identity/sync fields and the device's storage mode.
  */
 export interface CodeLookupMemoryDefaults {
   /** Default user id for memory scoping (per-instance prop wins). */
   userId?: string;
   /** Default count-sync endpoint (per-instance prop wins). */
   serverUrl?: string;
+  /**
+   * Where picks are cached on this machine. `'local'` (IndexedDB) asserts a
+   * per-user device secured by a browser login; the default `'session'` keeps
+   * them in RAM for the tab, which is what a public kiosk wants.
+   */
+  storage?: MemoryStorage;
 }
 
 /** Resolved lookup wiring a component consumes (from prop or context). */
@@ -63,8 +70,12 @@ export interface CodeLookupProviderConfig {
   indexUrl: string;
   /** Shard-set locale (default 'en'). */
   locale?: string;
-  /** Defaults for the memory picklist (see `CodeLookupMemoryDefaults`). */
-  memory?: CodeLookupMemoryDefaults;
+  /**
+   * Defaults for the memory picklist, or `false` to disable it everywhere
+   * below this provider (a public kiosk build) — unlike other props, this
+   * overrides a component's own `memory` opt-in.
+   */
+  memory?: false | CodeLookupMemoryDefaults;
 }
 
 const CodeLookupContext = React.createContext<CodeLookupProviderConfig | null>(
@@ -78,8 +89,8 @@ export interface CodeLookupProviderProps {
   indexUrl?: string;
   /** Shard-set locale (default 'en'). */
   locale?: string;
-  /** Defaults for the memory picklist (see `CodeLookupMemoryDefaults`). */
-  memory?: CodeLookupMemoryDefaults;
+  /** Defaults for the memory picklist, or `false` to disable it everywhere. */
+  memory?: false | CodeLookupMemoryDefaults;
   children: React.ReactNode;
 }
 

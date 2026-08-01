@@ -1,7 +1,16 @@
 import 'fake-indexeddb/auto';
-import { describe, it, expect } from 'vitest';
-import { recordUse, getTopCodes, clearMemory } from './memoryStore';
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  recordUse,
+  getTopCodes,
+  clearMemory,
+  setMemoryStorage,
+} from './memoryStore';
 import { exportMemoryYaml, importMemoryYaml } from './memoryYaml';
+
+beforeEach(() => {
+  setMemoryStorage('local');
+});
 
 const code = (fullid: string, label = fullid) => ({
   fullid,

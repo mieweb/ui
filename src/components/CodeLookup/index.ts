@@ -7,7 +7,15 @@ export {
   type CodifyDomain,
   type CodeLookupMemoryConfig,
 } from './CodeLookup';
-export { clearMemory, type MemoryEntry, type MemoryScope } from './memoryStore';
+export {
+  clearMemory,
+  clearAllMemory,
+  setMemoryStorage,
+  getMemoryStorage,
+  type MemoryEntry,
+  type MemoryScope,
+  type MemoryStorage,
+} from './memoryStore';
 export {
   exportMemoryYaml,
   importMemoryYaml,

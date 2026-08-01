@@ -27,9 +27,10 @@ import { useCodeLookupConfig } from './context';
 import {
   recordUse,
   scheduleFlush,
-  seedFromServer,
+  syncFromServer,
   getTopCodes,
   matchMemory,
+  setMemoryStorage,
   type MemoryEntry,
 } from './memoryStore';
 
@@ -48,15 +49,16 @@ export type CodifyDomain =
 
 /**
  * Opt-in config for the "Frequently used" memory picklist: focusing the
- * empty search box lists the user's most-picked codes for this context,
- * persisted in IndexedDB and optionally synced to `serverUrl`.
+ * empty search box lists the user's most-picked codes for this context.
+ * Requires a signed-in `userId`, and the provider's `memory.storage` decides
+ * whether the cache survives the tab.
  */
 export interface CodeLookupMemoryConfig {
   /** Usage context the counts are scoped to (e.g. 'med-orders'). Required. */
   context: string;
-  /** User id for scoping; falls back to the provider default, then 'anonymous'. */
+  /** User id for scoping; falls back to the provider default. No id, no memory. */
   userId?: string;
-  /** Count-sync endpoint (GET seed + POST deltas); provider default fallback. */
+  /** Count-sync endpoint (GET sync + POST deltas); provider default fallback. */
   serverUrl?: string;
   /** Max entries in the picklist (default 8). */
   limit?: number;
@@ -277,18 +279,29 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
 
     // ---- memory picklist ("Frequently used" on empty-query focus) ----
     const providerConfig = useCodeLookupConfig();
-    const memUserId = memory
-      ? (memory.userId ?? providerConfig?.memory?.userId ?? 'anonymous')
+    const providerMemory =
+      providerConfig?.memory === false ? null : providerConfig?.memory;
+    // A `memory={false}` provider (public kiosk) beats a per-instance opt-in.
+    const memCfg = providerConfig?.memory === false ? null : memory || null;
+    const memUserId = memCfg
+      ? (memCfg.userId ?? providerMemory?.userId ?? null)
       : null;
-    const memContext = memory ? memory.context : null;
-    const memServerUrl = memory
-      ? (memory.serverUrl ?? providerConfig?.memory?.serverUrl)
+    const memContext = memCfg ? memCfg.context : null;
+    const memServerUrl = memCfg
+      ? (memCfg.serverUrl ?? providerMemory?.serverUrl)
       : undefined;
-    const memLimit = (memory && memory.limit) || 8;
+    const memLimit = memCfg?.limit || 8;
+    const memStorage = providerMemory?.storage ?? 'session';
     const [memoryEntries, setMemoryEntries] = React.useState<MemoryEntry[]>([]);
     /** Mirror for effects that must not re-run when entries refresh. */
     const memoryCountRef = React.useRef(0);
     memoryCountRef.current = memoryEntries.length;
+
+    // Declared first so the store knows the device's trust level before the
+    // effect below reads or writes anything.
+    React.useEffect(() => {
+      setMemoryStorage(memStorage);
+    }, [memStorage]);
 
     React.useEffect(() => {
       if (!memUserId || !memContext) {
@@ -298,14 +311,14 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       let cancelled = false;
       const scope = { userId: memUserId, context: memContext };
       void (async () => {
-        if (memServerUrl) await seedFromServer(scope, memServerUrl);
+        if (memServerUrl) await syncFromServer(scope, memServerUrl);
         const top = await getTopCodes(scope, memLimit);
         if (!cancelled) setMemoryEntries(top);
       })();
       return () => {
         cancelled = true;
       };
-    }, [memUserId, memContext, memServerUrl, memLimit]);
+    }, [memUserId, memContext, memServerUrl, memLimit, memStorage]);
 
     React.useEffect(() => {
       // A new worker starts from scratch — reset all search state so a stale
