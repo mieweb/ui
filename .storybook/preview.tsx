@@ -278,6 +278,8 @@ const preview: Preview = {
     user: 'anonymous',
     device: 'public',
   },
+  // `dynamicTitle: false` (it defaults to true): the bar stays icon-only,
+  // the selected label shows in each dropdown.
   globalTypes: {
     brand: {
       name: 'Brand',
@@ -294,7 +296,7 @@ const preview: Preview = {
           { value: 'waggleline', title: '🍯 Waggleline' },
           { value: 'webchart', title: '🟠 WebChart' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
     theme: {
@@ -306,7 +308,7 @@ const preview: Preview = {
           { value: 'light', icon: 'sun', title: 'Light' },
           { value: 'dark', icon: 'moon', title: 'Dark' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
     density: {
@@ -318,7 +320,7 @@ const preview: Preview = {
           { value: 'standard', title: 'Standard' },
           { value: 'condensed', title: 'Condensed' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
     locale: {
@@ -330,7 +332,7 @@ const preview: Preview = {
           { value: 'en', title: '🇺🇸 English' },
           { value: 'es', title: '🇪🇸 Español (sample)' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
     user: {
@@ -344,7 +346,7 @@ const preview: Preview = {
           { value: 'alice', title: '👩‍⚕️ Dr. Alice' },
           { value: 'bob', title: '👨‍⚕️ Dr. Bob' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
     device: {
@@ -357,7 +359,7 @@ const preview: Preview = {
           { value: 'public', title: '🖥️ Public kiosk — nothing stored' },
           { value: 'trusted', title: '🔒 Trusted workstation — cached' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
   },
