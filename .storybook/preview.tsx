@@ -278,8 +278,9 @@ const preview: Preview = {
     user: 'anonymous',
     device: 'public',
   },
-  // `dynamicTitle: false` (it defaults to true): the bar stays icon-only,
-  // the selected label shows in each dropdown.
+  // The bar stays one glyph wide but still shows the current value: `title` is
+  // the emoji (or a per-item icon) and the wording moves to the dropdown's
+  // `right` column.
   globalTypes: {
     brand: {
       name: 'Brand',
@@ -287,16 +288,15 @@ const preview: Preview = {
       toolbar: {
         icon: 'paintbrush',
         items: [
-          { value: 'bluehive', title: '🐝 BlueHive' },
-          { value: 'ccme', title: '🌿 ccMe' },
-          { value: 'default', title: '⚪ Default' },
-          { value: 'enterprise-health', title: '🏥 Enterprise Health' },
-          { value: 'mieweb', title: '🟢 MIE Web' },
-          { value: 'ozwell', title: '🤖 Ozwell' },
-          { value: 'waggleline', title: '🍯 Waggleline' },
-          { value: 'webchart', title: '🟠 WebChart' },
+          { value: 'bluehive', title: '🐝', right: 'BlueHive' },
+          { value: 'ccme', title: '🌿', right: 'ccMe' },
+          { value: 'default', title: '⚪', right: 'Default' },
+          { value: 'enterprise-health', title: '🏥', right: 'Enterprise Health' },
+          { value: 'mieweb', title: '🟢', right: 'MIE Web' },
+          { value: 'ozwell', title: '🤖', right: 'Ozwell' },
+          { value: 'waggleline', title: '🍯', right: 'Waggleline' },
+          { value: 'webchart', title: '🟠', right: 'WebChart' },
         ],
-        dynamicTitle: false,
       },
     },
     theme: {
@@ -317,8 +317,8 @@ const preview: Preview = {
       toolbar: {
         icon: 'collapse',
         items: [
-          { value: 'standard', title: 'Standard' },
-          { value: 'condensed', title: 'Condensed' },
+          { value: 'standard', icon: 'grow', title: 'Standard' },
+          { value: 'condensed', icon: 'collapse', title: 'Condensed' },
         ],
         dynamicTitle: false,
       },
@@ -329,10 +329,9 @@ const preview: Preview = {
       toolbar: {
         icon: 'globe',
         items: [
-          { value: 'en', title: '🇺🇸 English' },
-          { value: 'es', title: '🇪🇸 Español (sample)' },
+          { value: 'en', title: '🇺🇸', right: 'English' },
+          { value: 'es', title: '🇪🇸', right: 'Español (sample)' },
         ],
-        dynamicTitle: false,
       },
     },
     user: {
@@ -342,11 +341,10 @@ const preview: Preview = {
       toolbar: {
         icon: 'user',
         items: [
-          { value: 'anonymous', title: '🚫 Not signed in' },
-          { value: 'alice', title: '👩‍⚕️ Dr. Alice' },
-          { value: 'bob', title: '👨‍⚕️ Dr. Bob' },
+          { value: 'anonymous', title: '🚫', right: 'Not signed in' },
+          { value: 'alice', title: '👩‍⚕️', right: 'Dr. Alice' },
+          { value: 'bob', title: '👨‍⚕️', right: 'Dr. Bob' },
         ],
-        dynamicTitle: false,
       },
     },
     device: {
@@ -356,8 +354,16 @@ const preview: Preview = {
       toolbar: {
         icon: 'lock',
         items: [
-          { value: 'public', title: '🖥️ Public kiosk — nothing stored' },
-          { value: 'trusted', title: '🔒 Trusted workstation — cached' },
+          {
+            value: 'public',
+            icon: 'unlock',
+            title: 'Public kiosk — nothing stored',
+          },
+          {
+            value: 'trusted',
+            icon: 'lock',
+            title: 'Trusted workstation — cached',
+          },
         ],
         dynamicTitle: false,
       },
