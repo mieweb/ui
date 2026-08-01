@@ -45,15 +45,22 @@ export type CodeLookupComponent = (
 ) => React.ReactElement | null;
 
 /**
- * App-wide defaults for the CodeLookup memory picklist. Instances still opt
- * in per-use with the `memory` prop (its `context` is always per-instance);
- * these only fill in the identity/sync fields and the device's storage mode.
+ * App-wide defaults for the CodeLookup memory picklist. Naming a signed-in
+ * `userId` here turns the picklist on for every lookup below the provider —
+ * instances need no wiring, and `memory={false}` (here or per-instance) turns
+ * it back off.
  */
 export interface CodeLookupMemoryDefaults {
-  /** Default user id for memory scoping (per-instance prop wins). */
+  /** Signed-in user the counts belong to. No id, no memory. */
   userId?: string;
   /** Default count-sync endpoint (per-instance prop wins). */
   serverUrl?: string;
+  /**
+   * Bucket the counts are scoped to. Defaults per instance to that lookup's
+   * `domains`, which keeps a med picker and a problem picker apart; set this
+   * to pool every lookup into one list instead.
+   */
+  context?: string;
   /**
    * Where picks are cached on this machine. `'local'` (IndexedDB) asserts a
    * per-user device secured by a browser login; the default `'session'` keeps
@@ -72,8 +79,8 @@ export interface CodeLookupProviderConfig {
   locale?: string;
   /**
    * Defaults for the memory picklist, or `false` to disable it everywhere
-   * below this provider (a public kiosk build) — unlike other props, this
-   * overrides a component's own `memory` opt-in.
+   * below this provider (a public kiosk build). Naming a `userId` here is all
+   * an instance needs; `false` overrides a component's own `memory` config.
    */
   memory?: false | CodeLookupMemoryDefaults;
 }

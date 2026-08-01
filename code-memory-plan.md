@@ -3,7 +3,8 @@
 Personal MRU/frequency picklist for CodeLookup: on focus with an **empty query**, show a
 "Frequently used" menu of the user's most-picked codes, scoped by **(userId, context)**.
 Counts persist in IndexedDB; an optional `serverUrl` seeds the list and receives lazily
-flushed count deltas. Off by default — enabled via a single `memory` prop.
+flushed count deltas. On by default wherever the provider names a signed-in user —
+`memory={false}` opts a provider or one box out.
 
 > Working agreement: complete a milestone → check its boxes → run its verification →
 > commit with the listed message (ask before committing, per repo policy).

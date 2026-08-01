@@ -237,16 +237,32 @@ In Storybook, the 🌐 **Language** toolbar global switches the locale for the
 > `new Worker(new URL(...))` pattern needs bundler configuration in the tsup
 > build. Storybook (Vite) handles it natively; see `Healthcare/CodeLookup`.
 
-### Memory — "Frequently used" picklist (`memory` prop)
+### Memory — "Frequently used" picklist
 
-Off by default. With a config, focusing the **empty** search box lists the
-user's most-picked codes for that context (count desc, most-recent tiebreak):
+**On by default** wherever the provider names a signed-in user: focusing the
+**empty** search box lists that user's most-picked codes for that context
+(count desc, most-recent tiebreak). One decision at the mount point, nothing
+per instance:
+
+```tsx
+<CodeLookupProvider
+  component={CodeLookup}
+  indexUrl="/codify"
+  memory={{ userId: currentUser.id, storage: 'local' }}
+>
+  <App /> {/* every CodeLookup below here remembers */}
+</CodeLookupProvider>
+```
+
+The bucket defaults to the box's own `domains` (`med`, `condition`, …), so two
+lookups over different domains never share a list. The `memory` prop only
+tunes that default — or turns one box off:
 
 ```tsx
 <CodeLookup
   indexUrl="/codify"
   memory={{
-    context: 'med-orders',      // required — scopes the counts per use-site
+    context: 'med-orders',      // default: this box's `domains`
     userId: currentUser.id,     // default: provider `memory.userId`. No id, no memory
     serverUrl: '/api/code-memory', // count sync; provider default fallback
     limit: 8,                   // picklist size (default 8)
@@ -299,14 +315,14 @@ user's most-picked codes for that context (count desc, most-recent tiebreak):
     session and reject on mismatch. Requests are sent with
     `credentials: 'include'`.
 - **Provider defaults** — `CodeLookupProvider` accepts
-  `memory={{ userId, serverUrl, storage }}` so apps decide identity, sync and
-  device trust once; each instance still opts in with its own `context`.
+  `memory={{ userId, serverUrl, context, storage }}` so apps decide identity,
+  sync and device trust once; naming a `userId` is all an instance needs.
   `memory={false}` on the provider **disables memory everywhere below it**,
-  overriding any component's own opt-in — that's the one-line kiosk switch.
-- **Disable / reset** — omit the prop (or pass `false`) to disable;
-  `clearMemory({ userId, context })` empties one bucket and `clearAllMemory()`
-  wipes every bucket whatever the current mode, for logout, kiosk session
-  reset, or a device downgraded from trusted to public.
+  overriding any component's own config — that's the one-line kiosk switch.
+- **Disable / reset** — pass `memory={false}` (on the provider, or on one
+  instance) to disable; `clearMemory({ userId, context })` empties one bucket
+  and `clearAllMemory()` wipes every bucket whatever the current mode, for
+  logout, kiosk session reset, or a device downgraded from trusted to public.
 - **While typing** — remembered codes matching the query (same word-prefix
   rule as the index) are pinned above the index hits and marked with a ☆ and
   their pick count, so typing `f` keeps *Flonase* on top instead of dropping

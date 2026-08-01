@@ -48,14 +48,20 @@ export type CodifyDomain =
   | 'quality';
 
 /**
- * Opt-in config for the "Frequently used" memory picklist: focusing the
+ * Per-instance tuning for the "Frequently used" memory picklist: focusing the
  * empty search box lists the user's most-picked codes for this context.
- * Requires a signed-in `userId`, and the provider's `memory.storage` decides
- * whether the cache survives the tab.
+ *
+ * Memory turns on by itself once the provider supplies a signed-in
+ * `memory.userId` — pass this only to override the bucket or the limits, or
+ * `memory={false}` to opt one box out.
  */
 export interface CodeLookupMemoryConfig {
-  /** Usage context the counts are scoped to (e.g. 'med-orders'). Required. */
-  context: string;
+  /**
+   * Usage context the counts are scoped to (e.g. 'med-orders'). Defaults to
+   * this box's `domains`, so a med picker and a problem picker never share a
+   * picklist.
+   */
+  context?: string;
   /** User id for scoping; falls back to the provider default. No id, no memory. */
   userId?: string;
   /** Count-sync endpoint (GET sync + POST deltas); provider default fallback. */
@@ -140,8 +146,9 @@ export interface CodeLookupProps extends Omit<
    */
   clearOnSelect?: boolean;
   /**
-   * Remember picked codes per (user, context) and offer a "Frequently used"
-   * picklist when the empty search box is focused. Off by default.
+   * Tune the "Frequently used" picklist — it is already on wherever the
+   * provider names a signed-in `memory.userId`. Pass `false` to opt this box
+   * out.
    */
   memory?: false | CodeLookupMemoryConfig;
   /** Additional CSS classes */
@@ -229,7 +236,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
       clearOnSelect,
-      memory = false,
+      memory,
       className,
       'data-testid': dataTestId,
       ...props
@@ -281,15 +288,20 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const providerConfig = useCodeLookupConfig();
     const providerMemory =
       providerConfig?.memory === false ? null : providerConfig?.memory;
-    // A `memory={false}` provider (public kiosk) beats a per-instance opt-in.
-    const memCfg = providerConfig?.memory === false ? null : memory || null;
-    const memUserId = memCfg
-      ? (memCfg.userId ?? providerMemory?.userId ?? null)
-      : null;
-    const memContext = memCfg ? memCfg.context : null;
-    const memServerUrl = memCfg
-      ? (memCfg.serverUrl ?? providerMemory?.serverUrl)
-      : undefined;
+    // On by default: a provider that names a signed-in user gets the picklist
+    // everywhere. `memory={false}` opts out — on the provider for a public
+    // kiosk, on the instance for one box.
+    const memOff = providerConfig?.memory === false || memory === false;
+    const memCfg = memory === false ? null : memory;
+    const memUserId = memOff
+      ? null
+      : (memCfg?.userId ?? providerMemory?.userId ?? null);
+    const memContext = memOff
+      ? null
+      : (memCfg?.context ?? providerMemory?.context ?? domainsKey ?? 'all');
+    const memServerUrl = memOff
+      ? undefined
+      : (memCfg?.serverUrl ?? providerMemory?.serverUrl);
     const memLimit = memCfg?.limit || 8;
     const memStorage = providerMemory?.storage ?? 'session';
     const [memoryEntries, setMemoryEntries] = React.useState<MemoryEntry[]>([]);
