@@ -15,7 +15,8 @@ const meta: Meta<typeof CollabStatus> = {
 Live-collaboration status chip for a header: connection dot, **Live** /
 **Connecting…** label, who else is editing, and a click-to-open panel with the
 room identity, the room's occupants and a rolling log of collaboration events.
-Pass \`compact\` to shrink the trigger down to the dot alone.
+Pass \`compact\` to shrink the trigger down to the dot alone, and \`attention\` to
+let an app condition ("Unsaved changes") share that dot.
 
 The component itself is transport-agnostic — it renders the presence state you
 hand it.
@@ -86,6 +87,11 @@ story in a second tab to watch presence and the log light up.
         'Shrink the trigger to the bare dot; the status text moves into its accessible name.',
       control: 'boolean',
     },
+    attention: {
+      description:
+        'App condition that shares the dot (turns it amber) and heads the panel.',
+      control: 'text',
+    },
     labels: { description: 'Overrides for any user-facing string (i18n).' },
   },
 };
@@ -132,6 +138,16 @@ export const Compact: Story = {
       { name: 'Ann Nurse', color: '#2563eb' },
       { name: 'Bo Tech', color: '#db2777' },
     ],
+  },
+};
+
+/** One dot, two meanings: connected, but the app has work not yet saved. */
+export const Attention: Story = {
+  args: {
+    connected: true,
+    room,
+    log: sampleLog,
+    attention: 'Unsaved changes',
   },
 };
 

@@ -62,6 +62,64 @@ describe('CollabStatus', () => {
       'You are the only one here.'
     );
   });
+
+  it('shares the dot with an app-level attention state', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <CollabStatus connected compact attention="Unsaved changes" />
+    );
+
+    const trigger = screen.getByRole('button');
+    expect(trigger).toHaveAccessibleName(/Live — Unsaved changes/);
+    expect(
+      container.querySelector('[data-slot="collab-status-dot"]')
+    ).toHaveClass('bg-warning-500');
+
+    await user.click(trigger);
+    expect(await screen.findByRole('dialog')).toHaveTextContent(
+      'Unsaved changes'
+    );
+  });
+
+  it('keeps the full text of clipped values in a hover tooltip', async () => {
+    const user = userEvent.setup();
+    const url = 'ws://localhost:5173/yorm/ws/Patient/p-demo?mode=editor';
+    render(
+      <CollabStatus
+        connected
+        room={{ name: 'Patient/p-demo', url }}
+        log={[{ id: 'e1', at: 0, kind: 'patch', detail: 'edited family' }]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: /Live-sync status/ }));
+
+    const panel = await screen.findByRole('dialog');
+    expect(panel.querySelector(`[title="${url}"]`)).not.toBeNull();
+    expect(panel.querySelector('[title="edited family"]')).not.toBeNull();
+  });
+
+  it('unclips every value when the wrap toggle is pressed', async () => {
+    const user = userEvent.setup();
+    const url = 'ws://localhost:5173/yorm/ws/Patient/p-demo?mode=editor';
+    render(
+      <CollabStatus
+        connected
+        room={{ name: 'Patient/p-demo', url }}
+        log={[{ id: 'e1', at: 0, kind: 'patch', detail: 'edited family' }]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: /Live-sync status/ }));
+    const panel = await screen.findByRole('dialog');
+    expect(panel.querySelectorAll('.truncate').length).toBeGreaterThan(0);
+
+    const wrap = screen.getByRole('button', { name: 'Wrap long values' });
+    await user.click(wrap);
+
+    expect(wrap).toHaveAttribute('aria-pressed', 'true');
+    expect(panel.querySelectorAll('.truncate')).toHaveLength(0);
+  });
 });
 
 describe('useYjsCollabStatus', () => {

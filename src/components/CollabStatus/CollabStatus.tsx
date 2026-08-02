@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { WrapText, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -62,6 +62,8 @@ export interface CollabStatusLabels {
   logTitle: (count: number) => string;
   /** Accessible name of the panel close button. */
   close: string;
+  /** Accessible name of the toggle that unclips long values. */
+  wrap: string;
   /** Shown when the log is empty. */
   empty: React.ReactNode;
   roomTerm: string;
@@ -83,6 +85,7 @@ export const defaultCollabStatusLabels: CollabStatusLabels = {
   alone: 'You are the only one here.',
   logTitle: (count) => `Update log (${count})`,
   close: 'Close update log',
+  wrap: 'Wrap long values',
   empty: 'No updates yet.',
   roomTerm: 'Room',
   urlTerm: 'Socket',
@@ -108,6 +111,12 @@ export interface CollabStatusProps {
    * its accessible name. For headers with no room for a full chip.
    */
   compact?: boolean;
+  /**
+   * An app-level condition worth the same glance as the connection state, e.g.
+   * `"Unsaved changes"`. While set, the dot turns amber and the text joins the
+   * trigger's accessible name and heads the panel.
+   */
+  attention?: React.ReactNode;
   /** Overrides for any user-facing string. */
   labels?: Partial<CollabStatusLabels>;
   /** Additional className for the trigger wrapper. */
@@ -210,7 +219,8 @@ const KIND_TONE: Record<CollabLogKind, string> = {
  * Live-collaboration status chip: a connection dot, a `Live` / `Connecting…`
  * label, a summary of who else is editing, and a click-to-open panel with the
  * room identity, who is in the room, and a rolling log of collaboration
- * events. Pass `compact` to shrink the trigger down to the dot alone.
+ * events. Pass `compact` to shrink the trigger down to the dot alone, and
+ * `attention` to let an app condition ("Unsaved changes") share that dot.
  *
  * Transport-agnostic — it renders whatever presence state you hand it. For a
  * Yjs (`y-websocket`) room, {@link useYjsCollabStatus} produces these props
@@ -235,11 +245,13 @@ export function CollabStatus({
   room = null,
   showLog = true,
   compact = false,
+  attention = null,
   labels: labelOverrides,
   className,
 }: CollabStatusProps) {
   const labels = { ...defaultCollabStatusLabels, ...labelOverrides };
   const [open, setOpen] = React.useState(false);
+  const [wrapped, setWrapped] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
   const pos = useAnchoredPanel(open && showLog, triggerRef, panelRef);
@@ -269,11 +281,21 @@ export function CollabStatus({
 
   const occupants = peerLabels(peers);
   const names = occupants.map((p) => p.label);
+  // Long values are clipped to one line; the panel's wrap toggle unclips them.
+  const clip = wrapped ? 'break-all whitespace-pre-wrap' : 'truncate';
   const statusText = connected ? labels.live : labels.connecting;
+  const clientLine = `${room?.clientId ?? '—'} · ${
+    connected ? labels.clientSynced : labels.clientConnecting
+  }`;
   // Compact triggers have no visible text, so the status and who is editing
   // have to reach assistive tech (and the tooltip) through the label.
   const triggerLabel = compact
-    ? [labels.triggerLabel, statusText, names.length > 0 && labels.editing(names)]
+    ? [
+        labels.triggerLabel,
+        statusText,
+        attention,
+        names.length > 0 && labels.editing(names),
+      ]
         .filter(Boolean)
         .join(' — ')
     : labels.triggerLabel;
@@ -300,10 +322,17 @@ export function CollabStatus({
         data-slot="collab-status-dot"
         className={cn(
           'h-2 w-2 shrink-0 rounded-full',
-          connected ? 'bg-success-500' : 'bg-warning-500 animate-pulse'
+          !connected && 'bg-warning-500 animate-pulse',
+          connected && attention && 'bg-warning-500',
+          connected && !attention && 'bg-success-500'
         )}
       />
       {!compact && <span>{statusText}</span>}
+      {!compact && attention && (
+        <span className="text-warning-700 truncate dark:text-warning-400">
+          · {attention}
+        </span>
+      )}
       {!compact && names.length > 0 && (
         <span className="truncate">{`· ${labels.editing(names)}`}</span>
       )}
@@ -340,38 +369,69 @@ export function CollabStatus({
               <strong id={titleId} className="text-foreground text-sm">
                 {labels.logTitle(log.length)}
               </strong>
-              <button
-                type="button"
-                className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded p-0.5 focus-visible:ring-2 focus-visible:outline-none"
-                onClick={() => {
-                  setOpen(false);
-                  triggerRef.current?.focus();
-                }}
-                aria-label={labels.close}
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
+              <span className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  className={cn(
+                    'hover:text-foreground focus-visible:ring-ring rounded p-0.5 focus-visible:ring-2 focus-visible:outline-none',
+                    wrapped ? 'text-foreground bg-muted' : 'text-muted-foreground'
+                  )}
+                  onClick={() => setWrapped((v) => !v)}
+                  aria-pressed={wrapped}
+                  aria-label={labels.wrap}
+                  title={labels.wrap}
+                  data-slot="collab-status-wrap"
+                >
+                  <WrapText className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded p-0.5 focus-visible:ring-2 focus-visible:outline-none"
+                  onClick={() => {
+                    setOpen(false);
+                    triggerRef.current?.focus();
+                  }}
+                  aria-label={labels.close}
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </span>
             </div>
+
+            {attention && (
+              <p
+                data-slot="collab-status-attention"
+                className="text-warning-700 dark:text-warning-400 mb-2"
+              >
+                {attention}
+              </p>
+            )}
 
             {room && (
               <dl className="border-border text-muted-foreground mb-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 border-b pb-2">
                 <dt className="opacity-70">{labels.roomTerm}</dt>
-                <dd className="truncate">{room.name}</dd>
+                {/* The values are clipped, so hovering must reveal the rest. */}
+                <dd className={clip} title={room.name}>
+                  {room.name}
+                </dd>
                 {room.url && (
                   <>
                     <dt className="opacity-70">{labels.urlTerm}</dt>
-                    <dd className="truncate">{room.url}</dd>
+                    <dd className={clip} title={room.url}>
+                      {room.url}
+                    </dd>
                   </>
                 )}
                 <dt className="opacity-70">{labels.clientTerm}</dt>
-                <dd className="truncate">
-                  {room.clientId ?? '—'}
-                  {` · ${connected ? labels.clientSynced : labels.clientConnecting}`}
+                <dd className={clip} title={clientLine}>
+                  {clientLine}
                 </dd>
                 {room.userId && (
                   <>
                     <dt className="opacity-70">{labels.userTerm}</dt>
-                    <dd className="truncate">{room.userId}</dd>
+                    <dd className={clip} title={room.userId}>
+                      {room.userId}
+                    </dd>
                   </>
                 )}
               </dl>
@@ -395,7 +455,7 @@ export function CollabStatus({
                         className="h-2 w-2 shrink-0 rounded-full"
                         style={{ backgroundColor: peer.color ?? 'currentColor' }}
                       />
-                      <span className="text-foreground truncate">
+                      <span className={cn('text-foreground', clip)} title={peer.label}>
                         {peer.label}
                       </span>
                     </li>
@@ -427,7 +487,9 @@ export function CollabStatus({
                       {e.kind}
                       {e.origin ? `/${e.origin}` : ''}
                     </span>
-                    <span className="text-foreground truncate">{e.detail}</span>
+                    <span className={cn('text-foreground', clip)} title={e.detail}>
+                      {e.detail}
+                    </span>
                   </li>
                 ))}
               </ul>
