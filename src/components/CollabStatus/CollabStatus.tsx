@@ -54,6 +54,10 @@ export interface CollabStatusLabels {
   editing: (names: string[]) => string;
   /** Accessible name / tooltip of the trigger button. */
   triggerLabel: string;
+  /** Heading of the room-occupants section. */
+  peersTitle: (count: number) => string;
+  /** Shown in the occupants section when nobody else is in the room. */
+  alone: React.ReactNode;
   /** Heading of the debug panel. */
   logTitle: (count: number) => string;
   /** Accessible name of the panel close button. */
@@ -75,6 +79,8 @@ export const defaultCollabStatusLabels: CollabStatusLabels = {
   editing: (names) =>
     `${names.join(', ')} ${names.length === 1 ? 'is' : 'are'} editing`,
   triggerLabel: 'Live-sync status — open the update log',
+  peersTitle: (count) => `In the room (${count})`,
+  alone: 'You are the only one here.',
   logTitle: (count) => `Update log (${count})`,
   close: 'Close update log',
   empty: 'No updates yet.',
@@ -97,6 +103,11 @@ export interface CollabStatusProps {
   room?: CollabRoomInfo | null;
   /** Set false to render a status-only chip with no debug panel. */
   showLog?: boolean;
+  /**
+   * Render the trigger as the bare connection dot, moving the status text into
+   * its accessible name. For headers with no room for a full chip.
+   */
+  compact?: boolean;
   /** Overrides for any user-facing string. */
   labels?: Partial<CollabStatusLabels>;
   /** Additional className for the trigger wrapper. */
@@ -107,11 +118,24 @@ export interface CollabStatusProps {
 // Helpers
 // =============================================================================
 
+/** One row of the occupants list: a display label and its presence color. */
+interface PeerLabel {
+  label: string;
+  color?: string;
+}
+
 /** Collapse multiple windows of the same person into `Name (N)`. */
-function peerLabels(peers: CollabPeer[]): string[] {
-  const counts = new Map<string, number>();
-  for (const p of peers) counts.set(p.name, (counts.get(p.name) ?? 0) + 1);
-  return [...counts].map(([name, n]) => (n > 1 ? `${name} (${n})` : name));
+function peerLabels(peers: CollabPeer[]): PeerLabel[] {
+  const seen = new Map<string, { count: number; color?: string }>();
+  for (const p of peers) {
+    const entry = seen.get(p.name);
+    if (entry) entry.count += 1;
+    else seen.set(p.name, { count: 1, color: p.color });
+  }
+  return [...seen].map(([name, { count, color }]) => ({
+    label: count > 1 ? `${name} (${count})` : name,
+    color,
+  }));
 }
 
 const PANEL_OFFSET = 6;
@@ -185,7 +209,8 @@ const KIND_TONE: Record<CollabLogKind, string> = {
 /**
  * Live-collaboration status chip: a connection dot, a `Live` / `Connecting…`
  * label, a summary of who else is editing, and a click-to-open panel with the
- * room identity and a rolling log of collaboration events.
+ * room identity, who is in the room, and a rolling log of collaboration
+ * events. Pass `compact` to shrink the trigger down to the dot alone.
  *
  * Transport-agnostic — it renders whatever presence state you hand it. For a
  * Yjs (`y-websocket`) room, {@link useYjsCollabStatus} produces these props
@@ -209,6 +234,7 @@ export function CollabStatus({
   log = [],
   room = null,
   showLog = true,
+  compact = false,
   labels: labelOverrides,
   className,
 }: CollabStatusProps) {
@@ -241,7 +267,16 @@ export function CollabStatus({
     };
   }, [open]);
 
-  const names = peerLabels(peers);
+  const occupants = peerLabels(peers);
+  const names = occupants.map((p) => p.label);
+  const statusText = connected ? labels.live : labels.connecting;
+  // Compact triggers have no visible text, so the status and who is editing
+  // have to reach assistive tech (and the tooltip) through the label.
+  const triggerLabel = compact
+    ? [labels.triggerLabel, statusText, names.length > 0 && labels.editing(names)]
+        .filter(Boolean)
+        .join(' — ')
+    : labels.triggerLabel;
 
   const trigger = (
     <button
@@ -255,9 +290,9 @@ export function CollabStatus({
       )}
       onClick={showLog ? () => setOpen((v) => !v) : undefined}
       disabled={!showLog}
-      title={showLog ? labels.triggerLabel : undefined}
+      title={showLog ? triggerLabel : undefined}
       aria-expanded={showLog ? open : undefined}
-      aria-label={showLog ? labels.triggerLabel : undefined}
+      aria-label={showLog ? triggerLabel : undefined}
       data-slot="collab-status-trigger"
     >
       <span
@@ -268,8 +303,8 @@ export function CollabStatus({
           connected ? 'bg-success-500' : 'bg-warning-500 animate-pulse'
         )}
       />
-      <span>{connected ? labels.live : labels.connecting}</span>
-      {names.length > 0 && (
+      {!compact && <span>{statusText}</span>}
+      {!compact && names.length > 0 && (
         <span className="truncate">{`· ${labels.editing(names)}`}</span>
       )}
     </button>
@@ -341,6 +376,33 @@ export function CollabStatus({
                 )}
               </dl>
             )}
+
+            <section className="border-border mb-2 border-b pb-2">
+              <strong className="text-foreground mb-1 block">
+                {labels.peersTitle(peers.length)}
+              </strong>
+              {peers.length === 0 ? (
+                <p className="text-muted-foreground">{labels.alone}</p>
+              ) : (
+                <ul
+                  className="flex flex-wrap gap-x-3 gap-y-1"
+                  data-slot="collab-status-peers"
+                >
+                  {occupants.map((peer) => (
+                    <li key={peer.label} className="flex items-center gap-1.5">
+                      <span
+                        aria-hidden="true"
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: peer.color ?? 'currentColor' }}
+                      />
+                      <span className="text-foreground truncate">
+                        {peer.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
 
             {log.length === 0 ? (
               <p className="text-muted-foreground">{labels.empty}</p>

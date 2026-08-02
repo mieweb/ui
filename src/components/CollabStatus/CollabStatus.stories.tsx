@@ -14,7 +14,8 @@ const meta: Meta<typeof CollabStatus> = {
         component: `
 Live-collaboration status chip for a header: connection dot, **Live** /
 **Connecting…** label, who else is editing, and a click-to-open panel with the
-room identity and a rolling log of collaboration events.
+room identity, the room's occupants and a rolling log of collaboration events.
+Pass \`compact\` to shrink the trigger down to the dot alone.
 
 The component itself is transport-agnostic — it renders the presence state you
 hand it.
@@ -80,6 +81,11 @@ story in a second tab to watch presence and the log light up.
       description: 'Set false for a status-only chip with no debug panel.',
       control: 'boolean',
     },
+    compact: {
+      description:
+        'Shrink the trigger to the bare dot; the status text moves into its accessible name.',
+      control: 'boolean',
+    },
     labels: { description: 'Overrides for any user-facing string (i18n).' },
   },
 };
@@ -113,6 +119,20 @@ export const WithPeers: Story = {
 
 export const StatusOnly: Story = {
   args: { connected: true, showLog: false, peers: [{ name: 'Ann Nurse' }] },
+};
+
+/** For headers with no room for a chip: the dot alone still opens the panel. */
+export const Compact: Story = {
+  args: {
+    connected: true,
+    compact: true,
+    room,
+    log: sampleLog,
+    peers: [
+      { name: 'Ann Nurse', color: '#2563eb' },
+      { name: 'Bo Tech', color: '#db2777' },
+    ],
+  },
 };
 
 // =============================================================================

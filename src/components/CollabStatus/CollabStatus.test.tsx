@@ -6,6 +6,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CollabStatus } from './CollabStatus';
 import { useYjsCollabStatus } from './useYjsCollabStatus';
 import { LocalYjsRoom } from './storyData';
@@ -29,6 +30,37 @@ describe('CollabStatus', () => {
   it('shows "Connecting…" before the initial sync', () => {
     render(<CollabStatus connected={false} />);
     expect(screen.getByRole('button')).toHaveTextContent('Connecting…');
+  });
+
+  it('renders a dot-only trigger when compact, keeping the status accessible', () => {
+    render(<CollabStatus connected compact peers={[{ name: 'Ann' }]} />);
+
+    const trigger = screen.getByRole('button');
+    expect(trigger).toHaveTextContent('');
+    expect(trigger).toHaveAccessibleName(/Live — Ann is editing/);
+  });
+
+  it('lists who is in the room in the panel', async () => {
+    const user = userEvent.setup();
+    render(<CollabStatus connected peers={[{ name: 'Ann' }, { name: 'Bo' }]} />);
+
+    await user.click(screen.getByRole('button', { name: /Live-sync status/ }));
+
+    const panel = await screen.findByRole('dialog');
+    expect(panel).toHaveTextContent('In the room (2)');
+    expect(panel).toHaveTextContent('Ann');
+    expect(panel).toHaveTextContent('Bo');
+  });
+
+  it('says so when nobody else is in the room', async () => {
+    const user = userEvent.setup();
+    render(<CollabStatus connected />);
+
+    await user.click(screen.getByRole('button', { name: /Live-sync status/ }));
+
+    expect(await screen.findByRole('dialog')).toHaveTextContent(
+      'You are the only one here.'
+    );
   });
 });
 
