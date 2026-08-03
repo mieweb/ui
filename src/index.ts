@@ -81,6 +81,8 @@ export * from './components/LanguageSelector';
 export * from './components/LoadingPage';
 export * from './components/Markdown';
 export * from './components/MedicationList';
+export * from './components/MediaEditor';
+export * from './components/MediaPlayer';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NotificationCenter';
@@ -173,6 +175,12 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
+export * from './components/TranscriptView';
+// `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
+// TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
+// type at the root barrel; import the media-schema type from the subpath
+// `@mieweb/ui/components/TranscriptView` when needed.
+export type { TranscriptSegment } from './components/AI';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {

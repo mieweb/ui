@@ -347,7 +347,9 @@ const preview: Preview = {
     },
     // Show the story source in a "Code" panel tab (next to Controls). Note: for stories with a custom
     // `render`, Storybook shows the render snippet/args, not the full component source.
-    docs: { codePanel: true },
+    // `canvas.withToolbar` gives every docs canvas (not just the primary story) the
+    // zoom / "Open canvas in new tab" toolbar.
+    docs: { codePanel: true, canvas: { withToolbar: true } },
     layout: 'padded',
     options: {
       storySort: {

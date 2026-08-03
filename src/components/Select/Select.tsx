@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useClickOutside } from '../../hooks/useClickOutside';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 // ============================================================================
 // Types
@@ -148,6 +150,10 @@ function Select({
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const typeaheadRef = React.useRef<{ query: string; timer: number | null }>({
+    query: '',
+    timer: null,
+  });
 
   const generatedId = React.useId();
   const selectId = id || generatedId;
@@ -213,22 +219,8 @@ function Select({
   const selectedOption = flatOptions.find((opt) => opt.value === value);
 
   // Close dropdown on click outside (handles both container and portaled dropdown)
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(target) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  const outsideRefs = React.useMemo(() => [containerRef, dropdownRef], []);
+  useClickOutside(outsideRefs, () => setIsOpen(false), isOpen);
 
   useEscapeKey(() => {
     if (isOpen) {
@@ -238,53 +230,15 @@ function Select({
   }, isOpen);
 
   // Track trigger position for portal dropdown
-  const [dropdownStyle, setDropdownStyle] = React.useState<React.CSSProperties>(
-    {}
-  );
-
-  const updateDropdownPosition = React.useCallback(() => {
-    if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const isCondensed = document.body.classList.contains('condensed');
-    const optionHeight = isCondensed ? 28 : 40;
-    const estimatedDropdownHeight = Math.min(
-      flatOptions.length * optionHeight + 16,
-      300
-    );
-    const openAbove =
-      spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow;
-
-    setDropdownStyle({
-      position: 'fixed',
-      ...(openAbove
-        ? { bottom: window.innerHeight - rect.top + 4 }
-        : { top: rect.bottom + 4 }),
-      left: rect.left,
-      width: rect.width,
-      maxHeight: Math.max(
-        Math.min(openAbove ? spaceAbove - 8 : spaceBelow - 8, 300),
-        0
-      ),
-      display: 'flex',
-      flexDirection: 'column' as const,
-      overflow: 'hidden',
-      zIndex: 9999,
-    });
-  }, [flatOptions.length]);
-
-  React.useEffect(() => {
-    if (!isOpen) return;
-    updateDropdownPosition();
-
-    window.addEventListener('scroll', updateDropdownPosition, true);
-    window.addEventListener('resize', updateDropdownPosition);
-    return () => {
-      window.removeEventListener('scroll', updateDropdownPosition, true);
-      window.removeEventListener('resize', updateDropdownPosition);
-    };
-  }, [isOpen, updateDropdownPosition]);
+  const {
+    anchorRef,
+    floatingRef,
+    style: dropdownStyle,
+  } = useAnchoredPosition<HTMLButtonElement, HTMLDivElement>({
+    open: isOpen,
+    matchWidth: true,
+    maxHeight: 300,
+  });
 
   // Handle value change
   const handleValueChange = React.useCallback(
@@ -303,6 +257,64 @@ function Select({
   // Handle keyboard navigation
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
+      // Typeahead (native-select style): when not using the dedicated search
+      // input, typing printable characters jumps to the first option whose
+      // label starts with the typed string. Repeating the same key cycles
+      // through matches. The buffer clears after a short pause.
+      if (
+        !searchable &&
+        e.key.length === 1 &&
+        e.key !== ' ' &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        e.preventDefault();
+        if (!isOpen) setIsOpen(true);
+
+        const hadPendingQuery = typeaheadRef.current.query !== '';
+        if (typeaheadRef.current.timer !== null) {
+          window.clearTimeout(typeaheadRef.current.timer);
+        }
+        const query = (typeaheadRef.current.query + e.key).toLowerCase();
+        typeaheadRef.current.query = query;
+        typeaheadRef.current.timer = window.setTimeout(() => {
+          typeaheadRef.current.query = '';
+          typeaheadRef.current.timer = null;
+        }, 600);
+
+        const len = filteredFlatOptions.length;
+        if (len > 0) {
+          const allSameChar = query.split('').every((c) => c === query[0]);
+          const needle = allSameChar ? query[0] : query;
+          const matches = (opt: SelectOption) =>
+            opt.label.toLowerCase().startsWith(needle);
+
+          // A fresh keystroke (or refining a multi-char query) searches from
+          // the current option inclusive so typing "car" stays on "Cardiology";
+          // repeating the same key cycles to the next match.
+          const startInclusive = !hadPendingQuery || !allSameChar;
+          const base = startInclusive
+            ? Math.max(highlightedIndex, 0)
+            : highlightedIndex + 1;
+
+          for (let i = 0; i < len; i++) {
+            const idx = (base + i) % len;
+            if (matches(filteredFlatOptions[idx])) {
+              setHighlightedIndex(idx);
+              break;
+            }
+          }
+        }
+        return;
+      }
+
+      // Let Space type normally in the search input (e.g. "new york")
+      // instead of being captured by the open/select handler below.
+      if (e.key === ' ' && e.target === searchInputRef.current) {
+        return;
+      }
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -343,7 +355,13 @@ function Select({
           break;
       }
     },
-    [isOpen, highlightedIndex, filteredFlatOptions, handleValueChange]
+    [
+      isOpen,
+      highlightedIndex,
+      filteredFlatOptions,
+      handleValueChange,
+      searchable,
+    ]
   );
 
   // Focus search input when dropdown opens
@@ -357,6 +375,42 @@ function Select({
   React.useEffect(() => {
     setHighlightedIndex(filteredFlatOptions.length > 0 ? 0 : -1);
   }, [searchQuery, filteredFlatOptions.length]);
+
+  // Keep the highlighted option visible within the listbox during keyboard
+  // navigation. We adjust only the list's own scrollTop instead of calling the
+  // native scrollIntoView: the dropdown is portaled to <body> with
+  // position: fixed, and scrollIntoView would also scroll ancestor/window,
+  // yanking the whole page.
+  React.useEffect(() => {
+    if (!isOpen || highlightedIndex < 0) return;
+    const list = listRef.current;
+    const el = list?.querySelector<HTMLElement>('[data-highlighted="true"]');
+    if (!list || !el) return;
+    const listRect = list.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    if (elRect.top < listRect.top) {
+      list.scrollTop -= listRect.top - elRect.top;
+    } else if (elRect.bottom > listRect.bottom) {
+      list.scrollTop += elRect.bottom - listRect.bottom;
+    }
+  }, [highlightedIndex, isOpen]);
+
+  // Reset the typeahead buffer whenever the dropdown closes (Escape, click
+  // outside, selection) so a stale query doesn't carry over on a quick reopen,
+  // and clear any pending timer on unmount.
+  const resetTypeahead = React.useCallback(() => {
+    if (typeaheadRef.current.timer !== null) {
+      window.clearTimeout(typeaheadRef.current.timer);
+      typeaheadRef.current.timer = null;
+    }
+    typeaheadRef.current.query = '';
+  }, []);
+
+  React.useEffect(() => {
+    if (!isOpen) resetTypeahead();
+  }, [isOpen, resetTypeahead]);
+
+  React.useEffect(() => resetTypeahead, [resetTypeahead]);
 
   // Build aria-describedby
   const describedByIds = [
@@ -388,7 +442,10 @@ function Select({
         {/* Trigger Button */}
         <button
           data-slot="select-trigger"
-          ref={triggerRef}
+          ref={(node) => {
+            triggerRef.current = node;
+            anchorRef.current = node;
+          }}
           id={selectId}
           type="button"
           role="combobox"
@@ -426,10 +483,14 @@ function Select({
           createPortal(
             <div
               data-slot="select-dropdown"
-              ref={dropdownRef}
+              ref={(node) => {
+                dropdownRef.current = node;
+                floatingRef.current = node;
+              }}
               style={dropdownStyle}
               className={cn(
                 'border-border bg-card rounded-lg border shadow-lg',
+                'flex flex-col overflow-hidden',
                 'animate-in fade-in zoom-in-95 duration-100'
               )}
             >

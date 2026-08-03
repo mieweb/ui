@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 
 /**
  * Hook that detects clicks outside of a specified element.
@@ -22,28 +22,36 @@ import { useEffect, type RefObject } from 'react';
  * ```
  */
 export function useClickOutside<T extends HTMLElement>(
-  ref: RefObject<T | null>,
+  ref: RefObject<T | null> | ReadonlyArray<RefObject<HTMLElement | null>>,
   callback: () => void,
   enabled: boolean = true
 ): void {
+  // Latest-ref pattern: keep the document listeners attached for the whole
+  // enabled cycle even when callers pass a new inline callback each render.
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
+
   useEffect(() => {
     if (!enabled) return;
 
     const handleClick = (event: Event) => {
-      if (
-        ref.current &&
-        !ref.current.contains(event.target as globalThis.Node)
-      ) {
-        callback();
+      const refs = Array.isArray(ref) ? ref : [ref];
+      const target = event.target;
+      if (!(target instanceof globalThis.Node)) return;
+      const attachedRefs = refs.filter((r) => r.current !== null);
+      if (attachedRefs.length === 0) return;
+      const inside = attachedRefs.some((r) => r.current?.contains(target));
+      if (!inside) {
+        callbackRef.current();
       }
     };
 
     document.addEventListener('mousedown', handleClick);
-    document.addEventListener('touchstart', handleClick);
+    document.addEventListener('touchstart', handleClick, { passive: true });
 
     return () => {
       document.removeEventListener('mousedown', handleClick);
       document.removeEventListener('touchstart', handleClick);
     };
-  }, [ref, callback, enabled]);
+  }, [ref, enabled]);
 }

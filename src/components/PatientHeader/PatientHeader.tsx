@@ -1,7 +1,9 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
@@ -314,9 +316,20 @@ function PatientOverflowMenu({
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
+  // Portal + fixed positioning so the menu escapes overflow-hidden ancestors.
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open, placement: 'bottom-end' });
+
+  const outsideRefs = React.useMemo(
+    () => [menuRef, floatingRef],
+    [floatingRef]
+  );
   useClickOutside(
-    menuRef,
-    React.useCallback(() => setOpen(false), [])
+    outsideRefs,
+    React.useCallback(() => setOpen(false), []),
+    open
   );
   useEscapeKey(
     React.useCallback(() => setOpen(false), []),
@@ -329,7 +342,13 @@ function PatientOverflowMenu({
   };
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div
+      className="relative"
+      ref={(node) => {
+        menuRef.current = node;
+        anchorRef.current = node;
+      }}
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -342,125 +361,128 @@ function PatientOverflowMenu({
         <MoreVerticalIcon size={18} />
       </Button>
 
-      {open && (
-        <div
-          role="menu"
-          aria-label="Patient actions"
-          className={cn(
-            'absolute top-full right-0 z-50 mt-1',
-            'w-[calc(100vw_-_2rem)] md:w-auto',
-            'border-border bg-card rounded-xl border py-1 shadow-lg',
-            'max-h-[calc(100vh_-_3rem)] overflow-y-auto md:max-h-[calc(100vh_-_4rem)]',
-            'motion-safe:animate-fade-in'
-          )}
-        >
-          {/* ── Quick Actions + Add: stacked on mobile, side-by-side on md+ ── */}
-          <div className="flex flex-col md:flex-row">
-            {/* Quick Actions column */}
-            <div className="min-w-[13rem]">
-              <div className="px-3 py-1.5">
-                <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
-                  Quick Actions
-                </span>
+      {open &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            role="menu"
+            aria-label="Patient actions"
+            className={cn(
+              'w-[calc(100vw_-_2rem)] md:w-auto',
+              'border-border bg-card rounded-xl border py-1 shadow-lg',
+              'overflow-y-auto',
+              'motion-safe:animate-fade-in'
+            )}
+          >
+            {/* ── Quick Actions + Add: stacked on mobile, side-by-side on md+ ── */}
+            <div className="flex flex-col md:flex-row">
+              {/* Quick Actions column */}
+              <div className="min-w-[13rem]">
+                <div className="px-3 py-1.5">
+                  <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
+                    Quick Actions
+                  </span>
+                </div>
+                <OverflowMenuItem
+                  icon={<PencilIcon size={15} />}
+                  label="Edit Patient"
+                  onClick={() => handleAction('edit-patient')}
+                />
+                <OverflowMenuItem
+                  icon={<PhoneIcon size={15} />}
+                  label="Contact"
+                  onClick={() => handleAction('contact')}
+                />
+                <OverflowMenuItem
+                  icon={<SendIcon size={15} />}
+                  label="Send Message"
+                  onClick={() => handleAction('send-message')}
+                />
+                <OverflowMenuItem
+                  icon={<CalendarIcon size={15} />}
+                  label="Schedule Appointment"
+                  onClick={() => handleAction('schedule-appointment')}
+                />
+                <OverflowMenuItem
+                  icon={<PrinterIcon size={15} />}
+                  label="Print Summary"
+                  onClick={() => handleAction('print-summary')}
+                />
+                <OverflowMenuItem
+                  icon={<DownloadIcon size={15} />}
+                  label="Export Record"
+                  onClick={() => handleAction('export-record')}
+                />
               </div>
-              <OverflowMenuItem
-                icon={<PencilIcon size={15} />}
-                label="Edit Patient"
-                onClick={() => handleAction('edit-patient')}
-              />
-              <OverflowMenuItem
-                icon={<PhoneIcon size={15} />}
-                label="Contact"
-                onClick={() => handleAction('contact')}
-              />
-              <OverflowMenuItem
-                icon={<SendIcon size={15} />}
-                label="Send Message"
-                onClick={() => handleAction('send-message')}
-              />
-              <OverflowMenuItem
-                icon={<CalendarIcon size={15} />}
-                label="Schedule Appointment"
-                onClick={() => handleAction('schedule-appointment')}
-              />
-              <OverflowMenuItem
-                icon={<PrinterIcon size={15} />}
-                label="Print Summary"
-                onClick={() => handleAction('print-summary')}
-              />
-              <OverflowMenuItem
-                icon={<DownloadIcon size={15} />}
-                label="Export Record"
-                onClick={() => handleAction('export-record')}
-              />
-            </div>
 
-            {/* Divider: horizontal on mobile, vertical on desktop */}
-            <div className="border-border my-1 border-t md:my-0 md:border-t-0 md:border-l" />
+              {/* Divider: horizontal on mobile, vertical on desktop */}
+              <div className="border-border my-1 border-t md:my-0 md:border-t-0 md:border-l" />
 
-            {/* Add column */}
-            <div className="md:min-w-[26rem]">
-              <div className="px-3 py-1.5">
-                <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
-                  Add
-                </span>
-              </div>
-              <div className="grid grid-cols-1 gap-1 md:grid-cols-2 md:gap-2">
-                <OverflowMenuItem
-                  icon={<ClipboardPlusIcon size={15} />}
-                  label="Task"
-                  onClick={() => handleAction('add-task')}
-                />
-                <OverflowMenuItem
-                  icon={<StethoscopeIcon size={15} />}
-                  label="Encounter"
-                  onClick={() => handleAction('add-encounter')}
-                />
-                <OverflowMenuItem
-                  icon={<ClipboardCheckIcon size={15} />}
-                  label="Due List Item"
-                  onClick={() => handleAction('add-due-list')}
-                />
-                <OverflowMenuItem
-                  icon={<FilePlusIcon size={15} />}
-                  label="Order Request"
-                  onClick={() => handleAction('add-order')}
-                />
-                <OverflowMenuItem
-                  icon={<FileCheckIcon size={15} />}
-                  label="eSign Request"
-                  onClick={() => handleAction('add-esign')}
-                />
-                <OverflowMenuItem
-                  icon={<AllergyIcon size={15} />}
-                  label="Allergy"
-                  onClick={() => handleAction('add-allergy')}
-                />
-                <OverflowMenuItem
-                  icon={<PillIcon size={15} />}
-                  label="Medication"
-                  onClick={() => handleAction('add-medication')}
-                />
-                <OverflowMenuItem
-                  icon={<BellIcon size={15} />}
-                  label="Alert"
-                  onClick={() => handleAction('add-alert')}
-                />
-                <OverflowMenuItem
-                  icon={<FileHeartIcon size={15} />}
-                  label="Condition"
-                  onClick={() => handleAction('add-condition')}
-                />
-                <OverflowMenuItem
-                  icon={<HeartPulseIcon size={15} />}
-                  label="Vitals"
-                  onClick={() => handleAction('add-vitals')}
-                />
+              {/* Add column */}
+              <div className="md:min-w-[26rem]">
+                <div className="px-3 py-1.5">
+                  <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
+                    Add
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-1 md:grid-cols-2 md:gap-2">
+                  <OverflowMenuItem
+                    icon={<ClipboardPlusIcon size={15} />}
+                    label="Task"
+                    onClick={() => handleAction('add-task')}
+                  />
+                  <OverflowMenuItem
+                    icon={<StethoscopeIcon size={15} />}
+                    label="Encounter"
+                    onClick={() => handleAction('add-encounter')}
+                  />
+                  <OverflowMenuItem
+                    icon={<ClipboardCheckIcon size={15} />}
+                    label="Due List Item"
+                    onClick={() => handleAction('add-due-list')}
+                  />
+                  <OverflowMenuItem
+                    icon={<FilePlusIcon size={15} />}
+                    label="Order Request"
+                    onClick={() => handleAction('add-order')}
+                  />
+                  <OverflowMenuItem
+                    icon={<FileCheckIcon size={15} />}
+                    label="eSign Request"
+                    onClick={() => handleAction('add-esign')}
+                  />
+                  <OverflowMenuItem
+                    icon={<AllergyIcon size={15} />}
+                    label="Allergy"
+                    onClick={() => handleAction('add-allergy')}
+                  />
+                  <OverflowMenuItem
+                    icon={<PillIcon size={15} />}
+                    label="Medication"
+                    onClick={() => handleAction('add-medication')}
+                  />
+                  <OverflowMenuItem
+                    icon={<BellIcon size={15} />}
+                    label="Alert"
+                    onClick={() => handleAction('add-alert')}
+                  />
+                  <OverflowMenuItem
+                    icon={<FileHeartIcon size={15} />}
+                    label="Condition"
+                    onClick={() => handleAction('add-condition')}
+                  />
+                  <OverflowMenuItem
+                    icon={<HeartPulseIcon size={15} />}
+                    label="Vitals"
+                    onClick={() => handleAction('add-vitals')}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

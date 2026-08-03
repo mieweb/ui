@@ -39,6 +39,30 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+  // Media stack (MediaEditor / TranscriptView / MediaPlayer) — opacity-modifier
+  // and state variants introduced with the media components (ui#323 finding):
+  'bg-muted/20',
+  'bg-primary-50',
+  'bg-primary-500/20',
+  'bg-primary-500/40',
+  'bg-success/15',
+  'bg-warning/20',
+  'bg-warning/40',
+  'border-l-warning',
+  'border-primary-600',
+  'border-warning/50',
+  'dark:bg-primary-950',
+  'hover:bg-destructive/20',
+  'hover:bg-muted',
+  'hover:bg-muted/70',
+  'hover:bg-primary-500/15',
+  'hover:bg-primary-500/30',
+  'hover:bg-success/25',
+  'hover:text-destructive',
+  'outline-destructive',
+  'outline-primary-500',
+  'outline-warning',
+  'text-primary-500',
   // Semantic colors
   'border-border',
   'border-input',
@@ -402,6 +426,10 @@ export const miewebUISafelist = [
   'focus:border-primary-500',
   'focus:ring-primary-500',
   'text-[10px]',
+  // SuperChat mermaid diagram wrapper — arbitrary variants applied to the
+  // injected <svg> so the diagram sizes naturally instead of collapsing.
+  '[&_svg]:h-auto',
+  '[&_svg]:max-w-none',
 ];
 
 export interface MiewebUIPreset {
