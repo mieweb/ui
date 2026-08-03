@@ -7,9 +7,13 @@ import * as HeyOzwellStories from './HeyOzwell.stories';
 
 Hey Ozwell is the **voice entry point** for the assistant: wake word, speaker
 verification, dictation, hands-free chat, and ambient visit scribing, all
-running **on-device, in the browser**. **Audio never leaves the page.** The
-only network dependency is the assistant's text reply (any OpenAI-compatible
-endpoint), which makes the stack PHI-safe by default.
+running **on-device, in the browser** by default. In that default
+configuration **audio never leaves the page**, which makes the stack PHI-safe
+out of the box. Two things do cross the network: the model assets on first
+load (downloaded once, then cached locally, see _Models, caching, hosting_)
+and the assistant's text reply (any OpenAI-compatible endpoint). One opt-in
+setting changes the audio guarantee: `transcription="server"` POSTs the clip
+to your own ASR endpoint instead of running Whisper in the browser.
 
 **80-second walkthrough** of everything on this page:
 
@@ -18,6 +22,7 @@ endpoint), which makes the stack PHI-safe by default.
   height="560"
   src="https://www.youtube.com/embed/hQBGofjXqmg"
   title="Hey Ozwell Demo"
+  loading="lazy"
   frameBorder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
   allowFullScreen
@@ -127,7 +132,8 @@ consumer (dictation recorder, volume meter, verification buffer) reads from
   via transformers.js, in a **Web Worker**.
 - **Diarization**: Whisper timestamps + TitaNet embeddings, worker + main.
 - **Assistant reply**: OpenAI-compatible `/v1/chat/completions` (SSE
-  streaming). This is the only network stage.
+  streaming). This is the only network stage at runtime, unless you opt into
+  `transcription="server"`.
 
 Transcription lives in a Web Worker so downloading and compiling the 1.3 GB
 model never starves the main-thread wake detector. **"Hey ozwell" responds
