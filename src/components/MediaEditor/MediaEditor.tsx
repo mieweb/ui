@@ -22,7 +22,7 @@ import type {
   PlaybackSegment,
   PlaybackSpeed,
 } from '../TranscriptView/transcript';
-import { PLAYBACK_SPEEDS } from '../TranscriptView/transcript';
+import { PLAYBACK_SPEEDS, isSilenceType } from '../TranscriptView/transcript';
 import { useTranscriptEdits } from '../../hooks/useTranscriptEdits';
 import {
   MediaPlayer,
@@ -315,10 +315,25 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
 
     // -- Refs --
     const playerRef = React.useRef<MediaPlayerRef>(null);
-    // Mirror the internal player handle to the host-provided ref, if any
+    // Mirror the internal player handle to the host-provided ref via a STABLE
+    // delegating proxy: every call forwards to playerRef.current at call time.
+    // (Snapshotting playerRef.current with [] deps captured the first-commit
+    // handle — ref assignment doesn't re-render, so hosts could hold a stale
+    // handle whose mediaElement stayed null forever.)
     React.useImperativeHandle(
       externalPlayerRef,
-      () => playerRef.current as MediaPlayerRef,
+      (): MediaPlayerRef => ({
+        seekToMs: (timeMs) => playerRef.current?.seekToMs(timeMs),
+        play: () => playerRef.current?.play(),
+        pause: () => playerRef.current?.pause(),
+        getCurrentTimeMs: () => playerRef.current?.getCurrentTimeMs() ?? 0,
+        getDurationMs: () => playerRef.current?.getDurationMs() ?? 0,
+        isPaused: () => playerRef.current?.isPaused() ?? true,
+        setPlaybackRate: (rate) => playerRef.current?.setPlaybackRate(rate),
+        get mediaElement() {
+          return playerRef.current?.mediaElement ?? null;
+        },
+      }),
       []
     );
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -580,7 +595,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           .filter((ew): ew is EditableWord => ew !== undefined && !ew.deleted);
         if (selectedWords.length === 0) return;
         const selectedText = selectedWords
-          .filter((ew) => ew.word.wordType !== 'silence')
+          .filter((ew) => !isSilenceType(ew.word.wordType))
           .map((ew) => ew.word.text)
           .join(' ');
         e.preventDefault();

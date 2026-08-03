@@ -118,7 +118,13 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
           </pre>
         </div>
       ) : showRaw ? (
-        <pre className="overflow-x-auto p-3 text-sm">
+        <pre
+          className="overflow-x-auto p-3 text-sm"
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable code needs keyboard focus (axe: scrollable-region-focusable)
+          tabIndex={0}
+          role="region"
+          aria-label="Raw code"
+        >
           <code>{code}</code>
         </pre>
       ) : (

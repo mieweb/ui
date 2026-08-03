@@ -10,8 +10,7 @@ coverage/
 playwright-report/
 playwright-results/
 test-results/*.swp
-TODO.local.md
-RESTORE-OZWELL.local.md
+*.local.md
 # MedicalCodify shards (.storybook/public/codify) are committed via git-lfs;
 # the extraction TSV + sqlite db live (gitignored) in packages/codify/data/
 # The codify build pipeline lives in a separate (not-yet-published) repo and is

@@ -11,6 +11,14 @@
 /** Type of transcript word - 'word' for spoken content, 'silence' for detected gaps, 'silence-newline' for longer pauses */
 export type WordType = 'word' | 'silence' | 'silence-newline';
 
+/** True for BOTH silence pseudo-word types ('silence' and 'silence-newline').
+ *  Use this instead of comparing against 'silence' directly — checking only one
+ *  of the two types is the root cause of a whole family of review findings
+ *  (stats, splitting, filler analysis, clipboard copy). */
+export function isSilenceType(wordType: WordType | undefined): boolean {
+  return wordType === 'silence' || wordType === 'silence-newline';
+}
+
 export interface TranscriptWord {
   text: string;
   startMs: number;
@@ -50,7 +58,10 @@ export interface Transcript {
  * Used in the edited timeline to track deletions and reordering.
  */
 export interface EditableWord {
-  /** Reference to original word in transcript.words */
+  /** Index into the SILENCE-INSERTED baseline timeline (transcript.words
+   *  with detected silence pseudo-words interleaved) — NOT into
+   *  transcript.words. -1 for split/inserted entries with no baseline slot.
+   *  Consumers persisting edits should key by this timeline. */
   originalIndex: number;
   /** The word data (from original transcript) */
   word: TranscriptWord;

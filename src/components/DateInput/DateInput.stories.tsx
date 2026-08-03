@@ -36,6 +36,14 @@ const meta: Meta<typeof DateInput> = {
     validateOnBlur: {
       control: 'boolean',
     },
+    minDate: {
+      control: 'text',
+      description: 'Earliest allowed date in MM/DD/YYYY format',
+    },
+    maxDate: {
+      control: 'text',
+      description: 'Latest allowed date in MM/DD/YYYY format',
+    },
   },
   decorators: [
     (Story) => (
@@ -69,6 +77,16 @@ export const WithCalendarPreFilled: Story = {
     showCalendar: true,
     width: 'fixed',
     value: '06/15/2026',
+  },
+};
+
+export const WithDateBounds: Story = {
+  args: {
+    label: 'Service Date',
+    minDate: '07/27/2024',
+    maxDate: '07/27/2028',
+    validateOnBlur: true,
+    showCalendar: true,
   },
 };
 
