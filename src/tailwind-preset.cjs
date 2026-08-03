@@ -65,6 +65,8 @@ module.exports = {
     // SchedulePicker / overflow handling
     'overflow-x-auto',
     'overflow-hidden',
+    // Scrollable floating panels (DateInput calendar, Autocomplete, Select, Table, ScrollArea, …)
+    'overflow-auto',
     // Select component
     'truncate',
   ],
