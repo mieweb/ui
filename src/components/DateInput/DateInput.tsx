@@ -11,6 +11,7 @@ import {
 } from '../../utils/date';
 import { Input, type InputProps } from '../Input';
 import { Calendar } from 'lucide-react';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 export type DateInputMode =
   | 'default'
@@ -322,34 +323,17 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
 
     // Calendar picker state
     const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
-    const calendarRef = React.useRef<HTMLDivElement>(null);
-    const buttonRef = React.useRef<HTMLButtonElement>(null);
-    const [calendarStyle, setCalendarStyle] =
-      React.useState<React.CSSProperties>();
 
-    const updateCalendarPosition = React.useCallback(() => {
-      if (!buttonRef.current) return;
-
-      const rect = buttonRef.current.getBoundingClientRect();
-      setCalendarStyle({
-        position: 'fixed',
-        top: rect.bottom + 4,
-        left: Math.max(8, rect.right - 288),
-        zIndex: 9999,
-      });
-    }, []);
-
-    React.useEffect(() => {
-      if (!isCalendarOpen) return;
-
-      updateCalendarPosition();
-      window.addEventListener('scroll', updateCalendarPosition, true);
-      window.addEventListener('resize', updateCalendarPosition);
-      return () => {
-        window.removeEventListener('scroll', updateCalendarPosition, true);
-        window.removeEventListener('resize', updateCalendarPosition);
-      };
-    }, [isCalendarOpen, updateCalendarPosition]);
+    // Portal + fixed positioning so the calendar escapes overflow-hidden
+    // ancestors, flips vertically, and clamps to the viewport.
+    const {
+      anchorRef: buttonRef,
+      floatingRef: calendarRef,
+      style: calendarStyle,
+    } = useAnchoredPosition<HTMLButtonElement, HTMLDivElement>({
+      open: isCalendarOpen,
+      placement: 'bottom-end',
+    });
 
     // Parse current value into date parts for calendar
     const parsedDate = React.useMemo(() => {
@@ -484,7 +468,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         return () =>
           document.removeEventListener('mousedown', handleClickOutside);
       }
-    }, [isCalendarOpen]);
+    }, [isCalendarOpen, buttonRef, calendarRef]);
 
     // Close on Escape key
     React.useEffect(() => {
@@ -499,7 +483,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         document.addEventListener('keydown', handleEscape);
         return () => document.removeEventListener('keydown', handleEscape);
       }
-    }, [isCalendarOpen]);
+    }, [isCalendarOpen, buttonRef]);
 
     const handleDateSelect = (day: number) => {
       if (!isCalendarDateInRange(day)) return;
@@ -617,7 +601,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           ref={calendarRef}
           className={cn(
             'bg-background border-border rounded-lg border shadow-lg',
-            'w-72 p-3'
+            'w-72 overflow-auto p-3'
           )}
           style={calendarStyle}
           role="dialog"
