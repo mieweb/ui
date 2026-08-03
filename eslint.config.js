@@ -74,6 +74,7 @@ export default [
         navigator: 'readonly',
         MediaRecorder: 'readonly',
         MediaStream: 'readonly',
+        MediaStreamTrack: 'readonly',
         MediaStreamConstraints: 'readonly',
         HTMLMediaElement: 'readonly',
         HTMLVideoElement: 'readonly',
@@ -122,6 +123,7 @@ export default [
         IntersectionObserver: 'readonly',
         IntersectionObserverEntry: 'readonly',
         MutationObserver: 'readonly',
+        ResizeObserver: 'readonly',
         // IndexedDB
         indexedDB: 'readonly',
         IDBDatabase: 'readonly',
@@ -132,6 +134,7 @@ export default [
         // DOM types
         Element: 'readonly',
         Document: 'readonly',
+        DOMException: 'readonly',
         ScrollBehavior: 'readonly',
         // Types
         PermissionName: 'readonly',
