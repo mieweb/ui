@@ -21,3 +21,4 @@ packages/codify/
 .adaptive-codegraph/
 .fastembed_cache/
 .vscode/
+.playwright-mcp/

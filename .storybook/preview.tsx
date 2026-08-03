@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import type { Preview, Decorator } from '@storybook/react-vite';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import '../src/styles/kerebron.css';
@@ -14,8 +14,362 @@ import { ozwellBrand } from '../src/brands/ozwell';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
-import { CodeLookup } from '../src/components/CodeLookup';
-import { CodeLookupProvider } from '../src/components/CodeLookup/context';
+import { collectLocoKeysFromElement, postLocoTextnodes } from '../src/utils/loco-live';
+import locoI18nPack from '../src/i18n/i18n-translations.json';
+
+const postedLiveSyncSignatures = new Set<string>();
+const locoScriptLoaders = new Map<string, Promise<void>>();
+
+// The exported Loco pack is also served statically (see staticDirs in main.ts)
+// so the Loco runtime can consume it in file mode. The runtime itself is
+// vendored from the Loco repo (public/loco.min.js) so package mode works
+// fully offline — no Loco server required.
+const LOCO_PACK_URL = '/i18n/i18n-translations.json';
+const LOCO_RUNTIME_URL = '/i18n/loco.min.js';
+const LOCO_LIVE_LANG_CACHE_KEY = 'mieweb:loco:languages';
+const LOCO_LIVE_LANG_RELOAD_FLAG = 'mieweb:loco:languages:reloaded';
+const LOCO_TOOLBAR_MODE_KEY = 'mieweb:loco:toolbar-mode';
+const LOCO_RESOLVED_API_KEY_CACHE_KEY = 'mieweb:loco:resolved-api-key';
+const DEFAULT_LOCALE = 'en';
+const locoPackLanguages: string[] = Array.isArray((locoI18nPack as { languages?: string[] }).languages)
+  ? (locoI18nPack as { languages: string[] }).languages
+  : [];
+const locoPackLanguageNames =
+  (locoI18nPack as { languageNames?: Record<string, string> }).languageNames || {};
+
+const localeNameFallbacks: Record<string, string> = {
+  en: 'English',
+  fr: 'French',
+  'zh-Hans': 'Chinese (Simplified)',
+  'zh-Hant': 'Chinese (Traditional)',
+};
+
+type LocoLanguageInfo = {
+  code: string;
+  name?: string;
+  dir?: 'ltr' | 'rtl';
+};
+
+type LocoProjectInfo = {
+  id?: number;
+  name?: string;
+  api_key?: string;
+};
+
+function getCurrentLocoModeFromUrl(): 'package' | 'live' | 'disable' {
+  if (typeof window === 'undefined') return 'package';
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const globalsParam = params.get('globals') || '';
+    const entries = globalsParam.split(';');
+    for (const pair of entries) {
+      const [key, value] = pair.split(':');
+      if (key === 'locoMode') {
+        if (value === 'live' || value === 'disable') return value;
+        return 'package';
+      }
+    }
+  } catch {
+    // Ignore parse errors.
+  }
+  return 'package';
+}
+
+function parseCachedLiveLanguages(): LocoLanguageInfo[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(LOCO_LIVE_LANG_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((entry) => entry && typeof entry.code === 'string')
+      .map((entry) => ({
+        code: String(entry.code),
+        name: typeof entry.name === 'string' ? entry.name : undefined,
+        dir: entry.dir === 'rtl' ? 'rtl' : 'ltr',
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function resolveLocaleTitle(code: string, explicitName?: string): string {
+  if (explicitName?.trim()) return explicitName.trim();
+
+  const normalized = code.trim();
+  if (localeNameFallbacks[normalized]) {
+    return localeNameFallbacks[normalized];
+  }
+
+  if (typeof Intl !== 'undefined' && 'DisplayNames' in Intl) {
+    try {
+      const formatter = new Intl.DisplayNames([DEFAULT_LOCALE], {
+        type: 'language',
+      });
+      const label = formatter.of(normalized);
+      if (label && label !== normalized) return label;
+    } catch {
+      // Ignore unsupported locale code formatting.
+    }
+  }
+
+  return normalized;
+}
+
+function buildLocaleToolbarItems(
+  mode: 'package' | 'live' | 'disable'
+): Array<{ value: string; title: string }> {
+  const merged = new Map<string, string>();
+  merged.set(DEFAULT_LOCALE, localeNameFallbacks[DEFAULT_LOCALE] || 'English');
+
+  for (const code of locoPackLanguages) {
+    if (!code) continue;
+    merged.set(code, locoPackLanguageNames[code] || merged.get(code) || code);
+  }
+
+  if (mode === 'live') {
+    for (const liveLang of parseCachedLiveLanguages()) {
+      if (!liveLang.code) continue;
+      merged.set(
+        liveLang.code,
+        liveLang.name ||
+          locoPackLanguageNames[liveLang.code] ||
+          merged.get(liveLang.code) ||
+          liveLang.code
+      );
+    }
+  }
+
+  const items = Array.from(merged.entries()).map(([value, name]) => ({
+    value,
+    title: `${resolveLocaleTitle(value, name)} (${value})`,
+  }));
+
+  items.sort((a, b) => {
+    if (a.value === DEFAULT_LOCALE) return -1;
+    if (b.value === DEFAULT_LOCALE) return 1;
+    return a.title.localeCompare(b.title);
+  });
+
+  return items;
+}
+
+const localeToolbarItems = buildLocaleToolbarItems(getCurrentLocoModeFromUrl());
+
+async function fetchLiveLocoLanguages(
+  serverUrl: string,
+  apiKey?: string,
+): Promise<LocoLanguageInfo[]> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (apiKey) headers['x-api-key'] = apiKey;
+
+  const baseUrl = serverUrl.replace(/\/$/, '');
+
+  const response = await fetch(`${baseUrl}/api/languages`, {
+    method: 'GET',
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error(`Loco languages fetch failed (${response.status})`);
+  }
+
+  const payload = await response.json();
+  if (!Array.isArray(payload)) return [];
+
+  const apiLanguages = payload
+    .filter((entry) => entry && typeof entry.code === 'string')
+    .map((entry) => ({
+      code: String(entry.code),
+      name: typeof entry.name === 'string' ? entry.name : undefined,
+      dir: entry.dir === 'rtl' ? 'rtl' : 'ltr',
+    }));
+
+  return apiLanguages;
+}
+
+async function resolveLiveApiKey(
+  serverUrl: string,
+  candidateApiKey?: string,
+  projectName?: string,
+): Promise<string | undefined> {
+  const baseUrl = serverUrl.replace(/\/$/, '');
+
+  const isValidKey = async (key: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${baseUrl}/api/project`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+        },
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const normalizedCandidate = String(candidateApiKey || '').trim();
+  if (normalizedCandidate && (await isValidKey(normalizedCandidate))) {
+    return normalizedCandidate;
+  }
+
+  try {
+    const projectsResponse = await fetch(`${baseUrl}/api/projects`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (projectsResponse.ok) {
+      const payload = await projectsResponse.json();
+      if (Array.isArray(payload)) {
+        const projects = payload as LocoProjectInfo[];
+        const normalizedProjectName = String(projectName || '').trim().toLowerCase();
+
+        const preferred = normalizedProjectName
+          ? projects.find((project) =>
+              String(project?.name || '').trim().toLowerCase() === normalizedProjectName
+            )
+          : undefined;
+
+        const defaultMiewebProject = !normalizedProjectName
+          ? projects.find(
+              (project) => String(project?.name || '').trim().toLowerCase() === 'miewebui'
+            )
+          : undefined;
+
+        const fallback = preferred || defaultMiewebProject || projects[0];
+        const resolved = String(fallback?.api_key || '').trim();
+        if (resolved) return resolved;
+      }
+    }
+  } catch {
+    // Ignore fallback lookup failures.
+  }
+
+  try {
+    const projectResponse = await fetch(`${baseUrl}/api/project`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!projectResponse.ok) return undefined;
+
+    const payload = (await projectResponse.json()) as LocoProjectInfo;
+    const fallbackKey = String(payload?.api_key || '').trim();
+    return fallbackKey || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+type LocoRuntime = {
+  init?: (config: { apiUrl?: string; apiKey?: string; file?: string }) => Promise<unknown> | unknown;
+  apply?: (lang: string) => Promise<unknown> | unknown;
+  restore?: () => Promise<unknown> | unknown;
+  languages?: () => Promise<unknown> | unknown;
+};
+
+// The Loco runtime is a singleton that can be initialized either in “file”
+// (package) mode or “API” (live) mode — not both. Track which mode we
+// initialized so switching modes triggers a clean reload of the preview iframe.
+let locoInitializedMode: 'package' | 'live' | null = null;
+let locoInitPromise: Promise<LocoRuntime | null> | null = null;
+
+async function ensureLocoRuntimeLoaded(
+  scriptUrl: string
+): Promise<LocoRuntime | null> {
+  if (typeof window === 'undefined') return null;
+
+  const runtime = (window as any).Loco as LocoRuntime | undefined;
+  if (runtime?.init) return runtime;
+
+  const scriptId = `loco-runtime-${scriptUrl}`;
+
+  let loader = locoScriptLoaders.get(scriptId);
+  if (!loader) {
+    loader = new Promise<void>((resolve, reject) => {
+      const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => reject(new Error('Failed to load Loco runtime script.')), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = scriptUrl;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Unable to load ${script.src}`));
+      document.head.appendChild(script);
+    });
+    locoScriptLoaders.set(scriptId, loader);
+  }
+
+  await loader;
+  return ((window as any).Loco as LocoRuntime | undefined) ?? null;
+}
+
+async function ensureLocoInitialized(
+  mode: 'package' | 'live',
+  serverUrl: string,
+  apiKey?: string,
+): Promise<LocoRuntime | null> {
+  // Runtime already initialized in a different mode — reload the preview iframe
+  // so the singleton starts fresh in the requested mode.
+  if (locoInitializedMode && locoInitializedMode !== mode) {
+    window.location.reload();
+    return null;
+  }
+
+  if (locoInitPromise) return locoInitPromise;
+
+  locoInitPromise = (async () => {
+    // Package mode uses the locally vendored runtime (fully offline);
+    // live mode loads the runtime from the Loco server it syncs with.
+    const scriptUrl =
+      mode === 'package'
+        ? LOCO_RUNTIME_URL
+        : `${serverUrl.replace(/\/$/, '')}/cdn/loco.js`;
+    const runtime = await ensureLocoRuntimeLoaded(scriptUrl);
+    if (!runtime?.init) return runtime ?? null;
+
+    if (mode === 'package') {
+      // File mode: translations come from the exported pack committed to this
+      // repo — no Loco server round-trip needed to render translations.
+      await Promise.resolve(runtime.init({ file: LOCO_PACK_URL }));
+      // languages() resolves once the pack file is loaded — use it as a
+      // readiness barrier before the first apply().
+      if (runtime.languages) {
+        await Promise.resolve(runtime.languages()).catch(() => undefined);
+      }
+    } else {
+      await Promise.resolve(
+        runtime.init({
+          apiUrl: serverUrl.replace(/\/$/, ''),
+          apiKey,
+        }),
+      );
+    }
+
+    locoInitializedMode = mode;
+    return runtime;
+  })();
+
+  try {
+    return await locoInitPromise;
+  } catch (error) {
+    locoInitPromise = null;
+    throw error;
+  }
+}
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -151,6 +505,14 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
+// Default Loco configuration from environment variables.
+// Production fallback points at hosted Loco + miewebui project, while local
+// testing can override via .env.local (VITE_LOCO_*) or URL query params.
+const defaultLocoServer = (import.meta.env.VITE_LOCO_SERVER_URL as string | undefined)?.trim() || 'https://loco.os.mieweb.org';
+const defaultLocoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || '84ad26c4d9934e638f206ae8';
+const defaultLocoProject = (import.meta.env.VITE_LOCO_PROJECT_NAME as string | undefined)?.trim() || 'miewebui';
+const isLocoDisabled = (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
+
 // Appends a "View source on GitHub" link below each story, derived from the
 // story file's absolute path on disk (context.parameters.fileName).
 const withGitHubSource: Decorator = (Story, context) => {
@@ -245,16 +607,187 @@ const withBrand: Decorator = (Story, context) => {
   );
 };
 
-// Provides an ambient CodeLookup so the healthcare components' default (no
-// explicit `codeLookup` / `renderCodeSearch` prop) demonstrates offline coded
-// search. Stories that inject their own config still win (explicit overrides
-// context); pass `codeLookup={false}` in a story to demo the plain-text opt-out.
-const withCodeLookup: Decorator = (Story, context) => {
-  const locale = (context.globals.locale as string) || 'en';
+const withLocoLiveSync: Decorator = (Story, context) => {
+  const locoMode = String(context.globals?.locoMode || 'package');
+  const locale = String(context.globals?.locale || 'en');
+  const queryParams =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : null;
+  const queryLocoServer = queryParams?.get('locoServerUrl')?.trim() || '';
+  const queryLocoApiKey = queryParams?.get('locoApiKey')?.trim() || '';
+  const queryLocoProject = queryParams?.get('locoProject')?.trim() || '';
+  const configuredServer = String(context.globals?.locoServer || '').trim();
+  const configuredApiKey = String(context.globals?.locoApiKey || '').trim();
+  const configuredProject = String(context.globals?.locoProject || '').trim();
+  const serverUrl = queryLocoServer || configuredServer || defaultLocoServer;
+  const apiKey = queryLocoApiKey || configuredApiKey || defaultLocoApiKey || undefined;
+  const projectName = queryLocoProject || configuredProject || defaultLocoProject || undefined;
+  const [resolvedApiKey, setResolvedApiKey] = useState<string | undefined>(() => {
+    if (typeof window === 'undefined') return apiKey;
+    const cached = window.sessionStorage.getItem(LOCO_RESOLVED_API_KEY_CACHE_KEY);
+    return cached || apiKey;
+  });
+  const activeApiKey = resolvedApiKey || apiKey;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (apiKey) {
+      setResolvedApiKey(apiKey);
+      window.sessionStorage.setItem(LOCO_RESOLVED_API_KEY_CACHE_KEY, apiKey);
+      return;
+    }
+
+    const cached = window.sessionStorage.getItem(LOCO_RESOLVED_API_KEY_CACHE_KEY);
+    setResolvedApiKey(cached || undefined);
+  }, [apiKey, serverUrl]);
+
+  useEffect(() => {
+    if (locoMode !== 'live' || isLocoDisabled || typeof window === 'undefined') return;
+
+    let cancelled = false;
+    void resolveLiveApiKey(serverUrl, apiKey, projectName)
+      .then((key) => {
+        if (cancelled || !key) return;
+        setResolvedApiKey(key);
+        window.sessionStorage.setItem(LOCO_RESOLVED_API_KEY_CACHE_KEY, key);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locoMode, serverUrl, apiKey, projectName]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const previousMode = window.sessionStorage.getItem(LOCO_TOOLBAR_MODE_KEY);
+    if (previousMode && previousMode !== locoMode) {
+      window.sessionStorage.setItem(LOCO_TOOLBAR_MODE_KEY, locoMode);
+      window.location.reload();
+      return;
+    }
+    window.sessionStorage.setItem(LOCO_TOOLBAR_MODE_KEY, locoMode);
+  }, [locoMode]);
+
+  useEffect(() => {
+    if (locoMode !== 'live' || isLocoDisabled || typeof window === 'undefined') {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      const languages = await fetchLiveLocoLanguages(serverUrl, activeApiKey);
+      if (cancelled || languages.length === 0) return;
+
+      const stableLanguages = [...languages].sort((a, b) =>
+        a.code.localeCompare(b.code)
+      );
+      const nextCodes = new Set(stableLanguages.map((item) => item.code));
+      const cachedCodes = new Set(parseCachedLiveLanguages().map((item) => item.code));
+      const languageSetChanged =
+        nextCodes.size !== cachedCodes.size ||
+        Array.from(nextCodes).some((code) => !cachedCodes.has(code));
+
+      window.localStorage.setItem(
+        LOCO_LIVE_LANG_CACHE_KEY,
+        JSON.stringify(stableLanguages)
+      );
+
+      // Storybook toolbar options are static at module load. Refresh once
+      // so live-mode locale options include the dashboard language list.
+      if (languageSetChanged && typeof window.sessionStorage !== 'undefined') {
+        const wasReloaded = window.sessionStorage.getItem(LOCO_LIVE_LANG_RELOAD_FLAG);
+        if (!wasReloaded && nextCodes.size > 0) {
+          window.sessionStorage.setItem(LOCO_LIVE_LANG_RELOAD_FLAG, '1');
+          window.location.reload();
+        }
+      }
+    })().catch((error) => {
+      console.warn('[loco-live] Unable to fetch live language list.', error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locoMode, serverUrl, activeApiKey]);
+
+  useEffect(() => {
+    if (locoMode !== 'live' || isLocoDisabled) return;
+
+    const root = document.querySelector('[data-loco-scan-root="true"]') as HTMLElement | null;
+    if (!root) return;
+
+    const keys = collectLocoKeysFromElement(root);
+    if (keys.length === 0) return;
+
+    const signature = `${context.id}:${serverUrl}:${keys.map((entry) => entry.key).join('|')}`;
+    if (postedLiveSyncSignatures.has(signature)) return;
+    postedLiveSyncSignatures.add(signature);
+
+    void postLocoTextnodes({
+      serverUrl,
+      keys,
+      pageUrl: window.location.href,
+      apiKey: activeApiKey,
+    }).catch((error) => {
+      console.warn(
+        '[loco-live-sync] Unable to post phrases to Loco. Check VITE_LOCO_SERVER_URL and VITE_LOCO_API_KEY.',
+        error,
+      );
+    });
+  }, [locoMode, serverUrl, activeApiKey, context.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // Disabled: undo any runtime translations and do nothing else.
+    if (locoMode === 'disable' || isLocoDisabled) {
+      const runtime = (window as any).Loco as LocoRuntime | undefined;
+      if (runtime?.restore) {
+        void Promise.resolve(runtime.restore()).catch(() => undefined);
+      }
+      return;
+    }
+
+    void (async () => {
+      const mode = locoMode === 'live' ? 'live' : 'package';
+
+      // In package mode only apply languages present in the exported pack;
+      // English (the source language) means “show originals”.
+      const shouldRestore =
+        locale === 'en' || (mode === 'package' && !locoPackLanguages.includes(locale));
+
+      // Nothing to undo yet — don't load the runtime just to restore originals.
+      if (shouldRestore && !(window as any).Loco) return;
+
+      const runtime = await ensureLocoInitialized(mode, serverUrl, activeApiKey);
+      if (!runtime || cancelled) return;
+
+      if (shouldRestore) {
+        if (runtime.restore) {
+          await Promise.resolve(runtime.restore());
+        }
+        return;
+      }
+
+      if (runtime.apply) {
+        await Promise.resolve(runtime.apply(locale));
+      }
+    })().catch((error) => {
+      console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locoMode, locale, serverUrl, activeApiKey, context.id]);
+
   return (
-    <CodeLookupProvider component={CodeLookup} indexUrl="/codify" locale={locale}>
+    <div data-loco-scan-root="true">
       <Story />
-    </CodeLookupProvider>
+    </div>
   );
 };
 
@@ -264,6 +797,9 @@ const preview: Preview = {
     theme: 'light',
     density: 'standard',
     locale: 'en',
+    locoMode: 'package',
+    locoServer: defaultLocoServer,
+    locoApiKey: defaultLocoApiKey,
   },
   globalTypes: {
     brand: {
@@ -309,13 +845,24 @@ const preview: Preview = {
       },
     },
     locale: {
-      name: 'Language',
-      description: 'Locale for locale-aware components (e.g. CodeLookup shards)',
+      name: 'Locale',
+      description: 'Locale used by i18n integration stories',
       toolbar: {
         icon: 'globe',
+        items: localeToolbarItems,
+        dynamicTitle: true,
+      },
+    },
+    locoMode: {
+      name: 'Loco i18n',
+      description:
+        'Use Loco i18n package for preview, Loco Sync Text to post discovered phrases to Loco pending list, or disable Loco.',
+      toolbar: {
+        icon: 'transfer',
         items: [
-          { value: 'en', title: '🇺🇸 English' },
-          { value: 'es', title: '🇪🇸 Español (sample)' },
+          { value: 'package', title: 'Loco i18n' },
+          { value: 'live', title: 'Loco Sync Text' },
+          { value: 'disable', title: 'Disable' },
         ],
         dynamicTitle: true,
       },
@@ -378,7 +925,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withGitHubSource, withBrand, withCodeLookup],
+  decorators: [withGitHubSource, withBrand, withLocoLiveSync],
 };
 
 export default preview;

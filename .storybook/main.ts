@@ -207,7 +207,13 @@ const config: StorybookConfig = {
   typescript: {
     reactDocgen: 'react-docgen-typescript',
   },
-  staticDirs: ['./public', { from: '../node_modules/@kerebron/wasm/assets', to: '/kerebron-wasm' }],
+  staticDirs: [
+    './public',
+    { from: '../node_modules/@kerebron/wasm/assets', to: '/kerebron-wasm' },
+    // Serve the exported Loco translation pack so the Loco runtime can load it
+    // in file (package) mode: Loco.init({ file: '/i18n/i18n-translations.json' })
+    { from: '../src/i18n', to: '/i18n' },
+  ],
   async viteFinal(config) {
     const optimizeDepNames = [
       ...datavisDependencyNames,
