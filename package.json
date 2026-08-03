@@ -232,10 +232,10 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@kerebron/editor": ">=0.7.9",
-    "@kerebron/editor-kits": ">=0.7.9",
+    "@kerebron/editor": ">=0.8.6",
+    "@kerebron/editor-kits": ">=0.8.6",
     "@kerebron/extension-yjs": ">=0.8.6",
-    "@kerebron/wasm": ">=0.7.9",
+    "@kerebron/wasm": ">=0.8.6",
     "@mieweb/datavis": "=1.6.0",
     "y-protocols": ">=1.0.6",
     "yjs": ">=13.6.0",

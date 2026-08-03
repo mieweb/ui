@@ -6,18 +6,12 @@
  * are unsafe for our usage — see {@link unsafeExtensions} — then collaborative
  * mode adds the Yjs pieces on top.
  *
- * We deliberately do not use `@kerebron/editor-kits`' own `YjsEditorKit`: it
- * constructs the `WebsocketProvider` with no query params, leaving no way to
- * authenticate the socket. Here we thread caller-supplied `params` (e.g. an auth
- * token) into the provider so the backend `/yjs` route can authorize the room.
+ * The Yjs pieces live in `collabKit.ts` behind a dynamic `import()`, so
+ * `@kerebron/extension-yjs`, `yjs` and `y-protocols` remain truly optional
+ * peers — plain-mode consumers never load them.
  */
 import type { EditorKit } from '@kerebron/editor';
 import { AdvancedEditorKit } from '@kerebron/editor-kits/AdvancedEditorKit';
-import { ExtensionYjs } from '@kerebron/extension-yjs';
-import { WebsocketProvider } from '@kerebron/extension-yjs/WebsocketProvider';
-import { MarkYChange } from '@kerebron/extension-yjs/MarkYChange';
-import * as awarenessProtocol from 'y-protocols/awareness';
-import * as Y from 'yjs';
 
 export interface CollabConfig {
   /** Room id — one shared document per room (e.g. a post id). */
@@ -29,14 +23,12 @@ export interface CollabConfig {
   wsUrl?: string;
   /** Extra query params for the socket (e.g. `{ token }` for auth). */
   params?: Record<string, string>;
-}
-
-/** Derive the default `/yjs` websocket URL from the current page origin. */
-function defaultWsUrl(): string {
-  const loc = globalThis.location;
-  const protocol = loc && loc.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = loc ? loc.host : 'localhost';
-  return `${protocol}//${host}/yjs`;
+  /**
+   * Custom WebSocket implementation handed to the Yjs provider — e.g. a
+   * loopback socket for demos/tests, or a polyfill outside the browser.
+   * Defaults to `globalThis.WebSocket`.
+   */
+  WebSocketPolyfill?: typeof globalThis.WebSocket;
 }
 
 /**
@@ -74,52 +66,30 @@ class SafeAdvancedEditorKit implements EditorKit {
     return new AdvancedEditorKit()
       .getExtensions()
       .filter(
-        (extension) => !('name' in extension && dropped.includes(extension.name)),
+        (extension) =>
+          !('name' in extension && dropped.includes(extension.name))
       );
   }
 }
 
-/** MarkYChange + ExtensionYjs, with an authenticated websocket provider. */
-class HuddleYjsKit implements EditorKit {
-  name = 'yjs-editor';
-  constructor(
-    private readonly url: string,
-    private readonly params: Record<string, string>,
-  ) {}
-
-  getExtensions() {
-    const url = this.url;
-    const params = this.params;
-    const createYjsProvider = (roomId: string): [WebsocketProvider, Y.Doc] => {
-      const ydoc = new Y.Doc({ gc: false });
-      // The provider's opts default is a *default parameter*, not a merge, so we
-      // must pass every field when we want to set `params`.
-      const provider = new WebsocketProvider(url, roomId, ydoc, {
-        connect: true,
-        awareness: new awarenessProtocol.Awareness(ydoc),
-        params,
-        protocols: [],
-        WebSocketPolyfill: WebSocket,
-        resyncInterval: -1,
-        maxBackoffTime: 2500,
-        disableBc: false,
-      });
-      return [provider, ydoc];
-    };
-    return [new MarkYChange(), new ExtensionYjs({ createYjsProvider })];
-  }
-}
+/** MarkYChange + ExtensionYjs live in `collabKit.ts` (lazy-loaded). */
 
 /**
  * Build the editor kits for a session. Pass `config` to join a collaborative
  * room; omit it for a plain local editor.
+ *
+ * Async because collaborative mode lazy-loads the Yjs kit (and its optional
+ * peer deps) on first use; plain mode resolves immediately.
  */
-export function createEditorKits(config?: CollabConfig): EditorKit[] {
+export async function createEditorKits(
+  config?: CollabConfig
+): Promise<EditorKit[]> {
   if (!config) return [new SafeAdvancedEditorKit(false)];
 
+  const { HuddleYjsKit, defaultWsUrl } = await import('./collabKit');
   const url = config.wsUrl ?? defaultWsUrl();
   return [
     new SafeAdvancedEditorKit(true),
-    new HuddleYjsKit(url, config.params ?? {}),
+    new HuddleYjsKit(url, config.params ?? {}, config.WebSocketPolyfill),
   ];
 }

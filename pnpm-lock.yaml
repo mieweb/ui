@@ -93,17 +93,20 @@ importers:
         specifier: ^9.39.3
         version: 9.39.3
       '@kerebron/editor':
-        specifier: 0.7.9
-        version: 0.7.9
+        specifier: ^0.8.6
+        version: 0.8.9
       '@kerebron/editor-kits':
-        specifier: 0.7.9
-        version: 0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+        specifier: ^0.8.6
+        version: 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/extension-yjs':
+        specifier: ^0.8.6
+        version: 0.8.9
       '@kerebron/wasm':
-        specifier: 0.7.9
-        version: 0.7.9
+        specifier: ^0.8.6
+        version: 0.8.9
       '@mieweb/datavis':
         specifier: '=1.6.0'
-        version: 1.6.0(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)
+        version: 1.6.0(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/wasm@0.8.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -311,9 +314,15 @@ importers:
       wavesurfer.js:
         specifier: ^7.12.1
         version: 7.12.1
+      y-protocols:
+        specifier: ^1.0.6
+        version: 1.0.6(yjs@13.6.30)
       ychart:
         specifier: file:./packages/ychart
         version: '@mieweb/ychart@file:packages/ychart(@popperjs/core@2.11.8)'
+      yjs:
+        specifier: ^13.6.30
+        version: 13.6.30
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -974,53 +983,53 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kerebron/editor-kits@0.7.9':
-    resolution: {integrity: sha512-O4HhtjzRZkM0fdQalWznGbvKtmT5dunXwUAPklpfQqOijktTJ2MwhSL1n5VuAY50Dum429d4QQ+hcjppPSRRWQ==}
+  '@kerebron/editor-kits@0.8.9':
+    resolution: {integrity: sha512-xCTRYeQkBjfkPSPvQc1fxV6rPwc0JwE/3x8/Q1Eb/wrHWtdcRollt0u0BMi7m0YvMZhP7b01FvZPMQAkZQ0Tcw==}
 
-  '@kerebron/editor@0.7.9':
-    resolution: {integrity: sha512-DqbKdAc1IJHlo52Z/IHKhYjLcPqlvQroYgPlwJjsPbhX+m0N6NoEtN/fSy1I4+ElhP8egledgZTiymiDXY04Pg==}
+  '@kerebron/editor@0.8.9':
+    resolution: {integrity: sha512-hQyrKAjyFW8RF7Khfe12LApSvLTfISyg4m0jI11SPSHXJgPe/nNQGD4KoBDkS7d2M+ng72X+FxHLNmVWZtAjEA==}
 
-  '@kerebron/extension-autocomplete@0.7.9':
-    resolution: {integrity: sha512-t7oclgz3cdtdf3RzDC+RPXcP5s/EuW/jEW/mAN2l6fjoGlUz3ALkS4VGBJPHvfM/fBsGvuSDyc3jHg5xgndeGg==}
+  '@kerebron/extension-basic-editor@0.8.9':
+    resolution: {integrity: sha512-pGBEJkdSWCSibtFARNRd9wKH6sSDanJvcSPDwlgj53yBmzKjCLurnK9YhVhVMD/MzJxC8id0RI8oP3U22Mc2wQ==}
 
-  '@kerebron/extension-basic-editor@0.7.9':
-    resolution: {integrity: sha512-HCS/JMgCyn6Kn/Oz5cxhgv3BjvgNRSW1b2161pRF+EL3jnDX3Ecp1HbFeTU/02a6V36PShO0paMr/Cz43lwdDQ==}
+  '@kerebron/extension-codecrock@0.8.9':
+    resolution: {integrity: sha512-l4AW621JzCCUcBd7S98gOiTSyaIbxEoH4Scv2yEyq2HBxaxO9kspZfnm65isnm1Q1mJEhEtYZ3xer48SHj02qw==}
 
-  '@kerebron/extension-codejar@0.7.9':
-    resolution: {integrity: sha512-fB3ChwHPQmSN6P838yJ9tx9ZSLBeHwOzcm4Qbb+9gJSC6sWJUVTjsQwdaRTtqdiT8vwvRkzhgLxrNdqGpB2kGQ==}
+  '@kerebron/extension-dev-toolkit@0.8.9':
+    resolution: {integrity: sha512-XRpnS7t/3NyYKFXl2jy9OYiWhbGAje7V1xPsnKYm03sLZNw9dvkvcyE1Pv3ZHUsB/zxhiNY3SstPOo4+cr3VOg==}
 
-  '@kerebron/extension-dev-toolkit@0.7.9':
-    resolution: {integrity: sha512-lh9+BIA3h6t8qYYuJsRQ0+MKh5bT9Gjpj8+DPqMp0GAX0Vk83FCGz+OcbIUijRFYyyxcaslbvVVbELHyIyDAlg==}
+  '@kerebron/extension-markdown@0.8.9':
+    resolution: {integrity: sha512-1/Wx9rXKA4nXTsLW51UaOLywFzUEQa+coNsRJjcqaogF6o0toZwKSl/eE7/2enSz2arojGWJqDcrmjAimxVAvg==}
 
-  '@kerebron/extension-lsp@0.7.9':
-    resolution: {integrity: sha512-BSisyPFXDOzc5bgoFe+zX5nDYD6cx+kUBflaAoqgIqwWbMh7t13QRlQLkGhUoPYj8IjXKgCt4uLAOgQSOikJ7A==}
+  '@kerebron/extension-menu-legacy@0.8.9':
+    resolution: {integrity: sha512-xEt3fjtXmh6zrRJvoukh1XWa8n7aoh1JrKXH2Js3ebWEsZoWo/vHCzNs6EfaIC/K2F6DOcrZVOcx5R7Z0zuCPg==}
 
-  '@kerebron/extension-markdown@0.7.9':
-    resolution: {integrity: sha512-DHw60zPStpHHAE4nK0KprSxYXDjEHX6Z9wU8ceE0iAN/SY2EapxgM1EafoAv2nDvxiOpDJd0M/nJVjwyP8LI8g==}
+  '@kerebron/extension-menu@0.8.9':
+    resolution: {integrity: sha512-FJNMRbv8dCQPYjJUrkSoPokshNvzO8QwFbZYQnT+ul3fXeupbQYFugBmK1Em8rWjlUNC22aDh3gHcRsApqEm7w==}
 
-  '@kerebron/extension-menu-legacy@0.7.9':
-    resolution: {integrity: sha512-5krTXnL6ILj5pL8QlDNMRtBV+KLonwAEKvbsRpuGnxvN018nc6gNCCIHomTCQpyEF4HoFkRC/+t0Z/K424AxgQ==}
+  '@kerebron/extension-odt@0.8.9':
+    resolution: {integrity: sha512-sjmHlMzrBwgSQufHUSbe/1NmDIAr6Z0xjQnTBV552ezPidI5sp78rneKKjY70DUzlBjPkYxB31cdSEKl1CsIOw==}
 
-  '@kerebron/extension-menu@0.7.9':
-    resolution: {integrity: sha512-GRmWK2546Ii0VkccWkHPA9U6dNMR7fsUWIZbO62H/wWj9apoM8iuFWu8/Res4NFYcmc2mYYHkSfMAejp/4Vn1w==}
+  '@kerebron/extension-tables@0.8.9':
+    resolution: {integrity: sha512-gU57VFLxADskuDUrZI/TVptvhUzVbBMku6NIBe8dFDn5+IZMHqNXDYZkxuVx1G7ff1Fzi6PqMeL3cJa2Vp0ayA==}
 
-  '@kerebron/extension-odt@0.7.9':
-    resolution: {integrity: sha512-zOKjO7i+pHeiAY31NdhH22f4rkOdA+5YYEIL8rtlIeGgblP6JSfJ5Cp/BwlNG9pp7NpTlTkXCXSc5z2T0en+Fw==}
+  '@kerebron/extension-ui@0.8.9':
+    resolution: {integrity: sha512-6hBIaQUb3OKBT1Ikywf6VjGriiVt5QlcdbCPf0a7SkAqWrPkXGS//v5Xq9XbbCnVAt40RIHVONyQLCjF9DWmIQ==}
 
-  '@kerebron/extension-tables@0.7.9':
-    resolution: {integrity: sha512-4z8DCUEAxf7rRZfv6lvC/cfzSXhRD2qDNT3kEuRrahf51ix3xLOmrFU/+bkiUkAqnxVLNKq6Pamtqb4htMMfvw==}
+  '@kerebron/extension-yjs@0.8.9':
+    resolution: {integrity: sha512-qnCEbudXaE8IQLXFKxv4R/1oUYupBRU64Vb1rc5Mu8ameOfviYt7dRlHwMh7VA2e2EX2kz11VZxGL6xGltpnQQ==}
 
-  '@kerebron/extension-yjs@0.7.9':
-    resolution: {integrity: sha512-3ddhPynQLiTyFs5NWvOwU9bMynmy472rDmEUqviTJNIrWwFkUlodFxqiDmQx+Nf+1uFwU/NmzFgul2L1wylBlQ==}
+  '@kerebron/odt-wasm@0.8.9':
+    resolution: {integrity: sha512-S5Krh+W4cmENneQ78MlkfRtYRi4RElJzjEuFKBu4ki0r6mWH4JU0KLO7hiPPdauHGTJb4HaEDKNG3NcBwqtZGw==}
 
-  '@kerebron/odt-wasm@0.7.9':
-    resolution: {integrity: sha512-gXFguetp3rRQCm//Axzk/kvLfJBkDJVxZvaol6cztU52PUuOXe1Zfi2o1nylLYTe3JIg1mg5j57t0uj76aomCg==}
+  '@kerebron/tree-sitter@0.8.9':
+    resolution: {integrity: sha512-ECeKvf+mIn1wq5JYrPovKqRUfppRXlM7uveKF/PXZbyR/lZRhIQP42yallcFIV5z+jIBmydcsZo/sqddaJOsVw==}
 
-  '@kerebron/tree-sitter@0.7.9':
-    resolution: {integrity: sha512-sAR0m6i4vjfXglJE73ER7XDQ7uhRDydyi5Di7A7qs6V4yP+fOzLJHYlE/KZ4IGeQlwh/ee9taSfEFztpaa9X0Q==}
+  '@kerebron/wasm@0.8.9':
+    resolution: {integrity: sha512-XzcDL9mHeD8oKla6G2+SDbZHv3qK76oF3jNgUe3czFG6J24MqWB5zfv1ty19ZA1MirxTxpfUdjnmTiMH6ToPew==}
 
-  '@kerebron/wasm@0.7.9':
-    resolution: {integrity: sha512-FjZTWTwxQ1TKDs+FHqP0g/KGLa5TE/+zLzBDC+CSsMPWYhVANzT9Fs0i/4eDdLCeXX3DtSpWpuPxEKUzH/7nmA==}
+  '@kerebron/workspace@0.8.9':
+    resolution: {integrity: sha512-BPa9pmxZcSg0bqPY1oeG2SBxN8OV97rrHqJPhV7+1gMjvlDtdlDFui7ZwocLwVaVQw7KU5YgdQDkRSa2AFeSuQ==}
 
   '@lezer/common@1.5.2':
     resolution: {integrity: sha512-sxQE460fPZyU3sdc8lafxiPwJHBzZRy/udNFynGQky1SePYBdhkBl1kOagA9uT3pxR8K09bOrmTUqA9wb/PjSQ==}
@@ -4913,14 +4922,11 @@ packages:
   prosemirror-dev-toolkit@1.1.8:
     resolution: {integrity: sha512-Qi549XA+DqU5cCkn/xv+M53gy1sQbyOTjiOfiG7Gjq5gm6ZxLilGN04UITWTAYx9kzLBi7Y9RJmvmWB4xiRauA==}
 
-  prosemirror-history@1.4.1:
-    resolution: {integrity: sha512-2JZD8z2JviJrboD9cPuX/Sv/1ChFng+xh2tChQ2X4bB2HeK+rra/bmJ3xGntCcjhOqIzSDG6Id7e8RJ9QPXLEQ==}
-
-  prosemirror-model@1.25.3:
-    resolution: {integrity: sha512-dY2HdaNXlARknJbrManZ1WyUtos+AP97AmvqdOQtWtrrC5g4mohVX5DTi9rXNFSk09eczLq9GuNTtq3EfMeMGA==}
-
   prosemirror-model@1.25.8:
     resolution: {integrity: sha512-BswA4BLSFEiORV6Vjj/yZBXDbos1zTEnhyeSSgT8psGFhstQS7UJ8/WOLiDos9Byaee27+tml0/DuMNxYR84zg==}
+
+  prosemirror-model@1.25.9:
+    resolution: {integrity: sha512-pRTklkDDMMRopyoAcrr9wV/8g/RYgrLHBuJAb5hlEuYZRdm5yqmPjWId83fpBwPpSFqEdja0H7Dfd7z1X/npcA==}
 
   prosemirror-state@1.4.3:
     resolution: {integrity: sha512-goFKORVbvPuAQaXhpbemJFRKJ2aixr+AZMGiquiqKxaucC6hlpHNZHWgz5R7dS4roHiwq9vDctE//CZ++o0W1Q==}
@@ -5130,9 +5136,6 @@ packages:
     resolution: {integrity: sha512-2oMpl67a3zCH9H79LeMcbDhXW/UmWG/y2zuqnF2jQq5uq9TbM9TVyXvA4+t+ne2IIkBdrLpAaRQAvo7YI/Yyeg==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
-
-  rope-sequence@1.3.4:
-    resolution: {integrity: sha512-UT5EDe2cu2E/6O4igUr5PSFs23nvvukicWHx6GnOPlHAiiYbzNuCRQCuiUdHJQcqKalLKlrYJnjY0ySGsXNQXQ==}
 
   roughjs@4.6.6:
     resolution: {integrity: sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ==}
@@ -5769,16 +5772,6 @@ packages:
     resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
     engines: {node: '>=0.10.0'}
 
-  vscode-jsonrpc@8.2.0:
-    resolution: {integrity: sha512-C+r0eKJUIfiDIfwJhria30+TYWPtuHJXHtI7J0YlOmKAo7ogxP20T0zxB7HZQIFhIyvoBPwWskjxrvAtfjyZfA==}
-    engines: {node: '>=14.0.0'}
-
-  vscode-languageserver-protocol@3.17.5:
-    resolution: {integrity: sha512-mb1bvRJN8SVznADSGWM9u/b07H7Ecg0I3OgXDuLdn307rl/J3A9YD6/eYOssqhecL27hK1IPZAsaqh00i/Jljg==}
-
-  vscode-languageserver-types@3.17.5:
-    resolution: {integrity: sha512-Ld1VelNuX9pdF39h2Hgaeb5hEZM2Z3jUrrMgWQAu82jMtZp7p3vJT3BzToKtZI7NgQssZje5o0zryOrhQvzQAg==}
-
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
 
@@ -5805,8 +5798,8 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
-  web-tree-sitter@0.26.6:
-    resolution: {integrity: sha512-fSPR7VBW/fZQdUSp/bXTDLT+i/9dwtbnqgEBMzowrM4U3DzeCwDbY3MKo0584uQxID4m/1xpLflrlT/rLIRPew==}
+  web-tree-sitter@0.26.11:
+    resolution: {integrity: sha512-Q5Dm3YTIXSXuH6FxX6RuzX2Qwpc4DPGiYMU87Wg5Z8OIStiQFiUex4zMDc0vBTw78EphaYJacncJghCHzbZptg==}
 
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
@@ -6786,138 +6779,125 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
+  '@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      '@kerebron/extension-autocomplete': 0.7.9
-      '@kerebron/extension-basic-editor': 0.7.9
-      '@kerebron/extension-codejar': 0.7.9
-      '@kerebron/extension-dev-toolkit': 0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      '@kerebron/extension-lsp': 0.7.9
-      '@kerebron/extension-markdown': 0.7.9
-      '@kerebron/extension-menu': 0.7.9
-      '@kerebron/extension-menu-legacy': 0.7.9
-      '@kerebron/extension-odt': 0.7.9
-      '@kerebron/extension-tables': 0.7.9
-      '@kerebron/extension-yjs': 0.7.9
-      yjs: 13.6.30
+      '@kerebron/editor': 0.8.9
+      '@kerebron/extension-basic-editor': 0.8.9
+      '@kerebron/extension-codecrock': 0.8.9
+      '@kerebron/extension-dev-toolkit': 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/extension-markdown': 0.8.9
+      '@kerebron/extension-menu': 0.8.9
+      '@kerebron/extension-menu-legacy': 0.8.9
+      '@kerebron/extension-odt': 0.8.9
+      '@kerebron/extension-tables': 0.8.9
+      '@kerebron/extension-ui': 0.8.9
     transitivePeerDependencies:
       - svelte
 
-  '@kerebron/editor@0.7.9':
+  '@kerebron/editor@0.8.9':
     dependencies:
-      prosemirror-model: 1.25.3
+      '@kerebron/workspace': 0.8.9
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-autocomplete@0.7.9':
+  '@kerebron/extension-basic-editor@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      prosemirror-model: 1.25.3
-      prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
-
-  '@kerebron/extension-basic-editor@0.7.9':
-    dependencies:
-      '@kerebron/editor': 0.7.9
-      prosemirror-history: 1.4.1
-      prosemirror-model: 1.25.3
+      '@kerebron/editor': 0.8.9
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-codejar@0.7.9':
+  '@kerebron/extension-codecrock@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      '@kerebron/extension-basic-editor': 0.7.9
-      '@kerebron/extension-lsp': 0.7.9
-      '@kerebron/extension-markdown': 0.7.9
-      '@kerebron/tree-sitter': 0.7.9
-      '@kerebron/wasm': 0.7.9
-      prosemirror-model: 1.25.3
+      '@kerebron/editor': 0.8.9
+      '@kerebron/extension-basic-editor': 0.8.9
+      '@kerebron/tree-sitter': 0.8.9
+      '@kerebron/wasm': 0.8.9
+      '@kerebron/workspace': 0.8.9
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-view: 1.40.0
-      vscode-languageserver-protocol: 3.17.5
 
-  '@kerebron/extension-dev-toolkit@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
+  '@kerebron/extension-dev-toolkit@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
     dependencies:
-      '@kerebron/editor': 0.7.9
+      '@kerebron/editor': 0.8.9
       prosemirror-dev-toolkit: 1.1.8(svelte@5.56.3(@typescript-eslint/types@8.56.1))
       prosemirror-view: 1.40.0
     transitivePeerDependencies:
       - svelte
 
-  '@kerebron/extension-lsp@0.7.9':
+  '@kerebron/extension-markdown@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      '@kerebron/extension-autocomplete': 0.7.9
-      '@kerebron/extension-markdown': 0.7.9
-      prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
-      vscode-languageserver-protocol: 3.17.5
-
-  '@kerebron/extension-markdown@0.7.9':
-    dependencies:
-      '@kerebron/editor': 0.7.9
-      '@kerebron/extension-basic-editor': 0.7.9
-      '@kerebron/tree-sitter': 0.7.9
-      '@kerebron/wasm': 0.7.9
+      '@kerebron/editor': 0.8.9
+      '@kerebron/extension-basic-editor': 0.8.9
+      '@kerebron/tree-sitter': 0.8.9
+      '@kerebron/wasm': 0.8.9
+      '@kerebron/workspace': 0.8.9
       mathml2latex: 1.1.3
-      prosemirror-model: 1.25.3
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
-      web-tree-sitter: 0.26.6
 
-  '@kerebron/extension-menu-legacy@0.7.9':
+  '@kerebron/extension-menu-legacy@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      prosemirror-model: 1.25.3
-      prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
-
-  '@kerebron/extension-menu@0.7.9':
-    dependencies:
-      '@kerebron/editor': 0.7.9
-      prosemirror-model: 1.25.3
+      '@kerebron/editor': 0.8.9
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-odt@0.7.9':
+  '@kerebron/extension-menu@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      '@kerebron/odt-wasm': 0.7.9
-      prosemirror-model: 1.25.3
+      '@kerebron/editor': 0.8.9
+      prosemirror-model: 1.25.9
+      prosemirror-state: 1.4.3
+      prosemirror-view: 1.40.0
+
+  '@kerebron/extension-odt@0.8.9':
+    dependencies:
+      '@kerebron/editor': 0.8.9
+      '@kerebron/odt-wasm': 0.8.9
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
 
-  '@kerebron/extension-tables@0.7.9':
+  '@kerebron/extension-tables@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      prosemirror-model: 1.25.3
+      '@kerebron/editor': 0.8.9
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-yjs@0.7.9':
+  '@kerebron/extension-ui@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      '@kerebron/extension-basic-editor': 0.7.9
+      '@kerebron/editor': 0.8.9
+      prosemirror-model: 1.25.9
+      prosemirror-state: 1.4.3
+      prosemirror-view: 1.40.0
+
+  '@kerebron/extension-yjs@0.8.9':
+    dependencies:
+      '@kerebron/editor': 0.8.9
+      '@kerebron/extension-basic-editor': 0.8.9
       lib0: 0.2.109
-      prosemirror-model: 1.25.3
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-view: 1.40.0
       y-protocols: 1.0.6(yjs@13.6.30)
       yjs: 13.6.30
 
-  '@kerebron/odt-wasm@0.7.9': {}
+  '@kerebron/odt-wasm@0.8.9': {}
 
-  '@kerebron/tree-sitter@0.7.9':
+  '@kerebron/tree-sitter@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
-      web-tree-sitter: 0.26.6
+      web-tree-sitter: 0.26.11
 
-  '@kerebron/wasm@0.7.9':
+  '@kerebron/wasm@0.8.9':
     dependencies:
-      '@kerebron/editor': 0.7.9
+      '@kerebron/editor': 0.8.9
+
+  '@kerebron/workspace@0.8.9': {}
 
   '@lezer/common@1.5.2': {}
 
@@ -6947,12 +6927,12 @@ snapshots:
     dependencies:
       '@chevrotain/types': 11.1.2
 
-  '@mieweb/datavis@1.6.0(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)':
+  '@mieweb/datavis@1.6.0(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/wasm@0.8.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@dnd-kit/utilities': 3.2.2(react@19.2.4)
-      '@mieweb/ui': 0.6.1-dev.169(c4a216e8f81f6aba5f7c3be536e2255b)
+      '@mieweb/ui': 0.6.1-dev.169(6157a0539ef5bc1faafe665ee9520b8d)
       datavis-ace: 4.1.0
       i18next: 26.3.4(typescript@5.9.3)
       lucide-react: 1.23.0(react@19.2.4)
@@ -7000,7 +6980,7 @@ snapshots:
       datavis-ace: 4.1.0
       wavesurfer.js: 7.12.1
 
-  '@mieweb/ui@0.6.1-dev.169(c4a216e8f81f6aba5f7c3be536e2255b)':
+  '@mieweb/ui@0.6.1-dev.169(6157a0539ef5bc1faafe665ee9520b8d)':
     dependencies:
       '@swc/helpers': 0.5.19
       '@tanstack/react-virtual': 3.14.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -7017,10 +6997,10 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       tailwind-merge: 2.6.1
     optionalDependencies:
-      '@kerebron/editor': 0.7.9
-      '@kerebron/editor-kits': 0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      '@kerebron/wasm': 0.7.9
-      '@mieweb/datavis': 1.6.0(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)
+      '@kerebron/editor': 0.8.9
+      '@kerebron/editor-kits': 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/wasm': 0.8.9
+      '@mieweb/datavis': 1.6.0(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/wasm@0.8.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)
       ag-grid-community: 35.1.0
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       datavis-ace: 4.1.0
@@ -11385,34 +11365,27 @@ snapshots:
     transitivePeerDependencies:
       - svelte
 
-  prosemirror-history@1.4.1:
-    dependencies:
-      prosemirror-state: 1.4.3
-      prosemirror-transform: 1.10.4
-      prosemirror-view: 1.40.0
-      rope-sequence: 1.3.4
-
-  prosemirror-model@1.25.3:
+  prosemirror-model@1.25.8:
     dependencies:
       orderedmap: 2.1.1
 
-  prosemirror-model@1.25.8:
+  prosemirror-model@1.25.9:
     dependencies:
       orderedmap: 2.1.1
 
   prosemirror-state@1.4.3:
     dependencies:
-      prosemirror-model: 1.25.3
+      prosemirror-model: 1.25.9
       prosemirror-transform: 1.10.4
       prosemirror-view: 1.40.0
 
   prosemirror-transform@1.10.4:
     dependencies:
-      prosemirror-model: 1.25.3
+      prosemirror-model: 1.25.9
 
   prosemirror-view@1.40.0:
     dependencies:
-      prosemirror-model: 1.25.3
+      prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
 
@@ -11725,8 +11698,6 @@ snapshots:
       '@rollup/rollup-win32-x64-gnu': 4.59.0
       '@rollup/rollup-win32-x64-msvc': 4.59.0
       fsevents: 2.3.3
-
-  rope-sequence@1.3.4: {}
 
   roughjs@4.6.6:
     dependencies:
@@ -12499,15 +12470,6 @@ snapshots:
 
   void-elements@3.1.0: {}
 
-  vscode-jsonrpc@8.2.0: {}
-
-  vscode-languageserver-protocol@3.17.5:
-    dependencies:
-      vscode-jsonrpc: 8.2.0
-      vscode-languageserver-types: 3.17.5
-
-  vscode-languageserver-types@3.17.5: {}
-
   w3c-keyname@2.2.8: {}
 
   w3c-xmlserializer@5.0.0:
@@ -12540,7 +12502,7 @@ snapshots:
 
   web-namespaces@2.0.1: {}
 
-  web-tree-sitter@0.26.6: {}
+  web-tree-sitter@0.26.11: {}
 
   webidl-conversions@7.0.0: {}
 
@@ -12663,7 +12625,7 @@ snapshots:
 
   y-protocols@1.0.6(yjs@13.6.30):
     dependencies:
-      lib0: 0.2.109
+      lib0: 0.2.117
       yjs: 13.6.30
 
   y18n@4.0.3: {}
