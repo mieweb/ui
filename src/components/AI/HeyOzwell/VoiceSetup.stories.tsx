@@ -8,6 +8,7 @@ import { VoiceSetup } from './VoiceSetup';
 const meta: Meta<typeof VoiceSetup> = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Voice Setup',
   component: VoiceSetup,
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {

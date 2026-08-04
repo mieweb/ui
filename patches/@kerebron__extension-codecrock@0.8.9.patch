@@ -1,0 +1,30 @@
+diff --git a/esm/CodeCrock.js b/esm/CodeCrock.js
+index 0daa11c6652a20d9bbd88903d57e67fe456d3f58..73ac9289797951c1901337f8cb062b4adec637f7 100644
+--- a/esm/CodeCrock.js
++++ b/esm/CodeCrock.js
+@@ -457,7 +457,11 @@ export class CodeCrock extends EventTarget {
+         if (typeof root.getSelection === 'function') {
+             return root.getSelection();
+         }
+-        return this.options.window.getSelection();
++        // `options.window` defaults to dnt's globalThis merge-proxy; invoking
++        // a native method with the proxy as `this` throws "Illegal invocation"
++        // (hit when the editor is detached during nodeview init). Call through
++        // the real document instead.
++        return this.options.window.document.getSelection();
+     }
+     uneditable(node) {
+         while (node && node !== this.editor) {
+diff --git a/esm/NodeViewCodeCrock.js b/esm/NodeViewCodeCrock.js
+index 9cb8fb023291070b9269e3b19b5e01e78dd13e86..1d4237fcb7d3a931eb9a32bbe44adefcd732dd3e 100644
+--- a/esm/NodeViewCodeCrock.js
++++ b/esm/NodeViewCodeCrock.js
+@@ -144,6 +144,8 @@ export class NodeViewCodeCrock {
+     addLanguageDropDown() {
+         const select = document.createElement('select');
+         select.classList.add('codecrock-select');
++        // Accessible name for the language picker (axe: select-name).
++        select.setAttribute('aria-label', 'Code language');
+         for (const lang of [''].concat(this.config.languageWhitelist || [])) {
+             const option = document.createElement('option');
+             option.value = lang;
