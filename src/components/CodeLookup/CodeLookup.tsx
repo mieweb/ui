@@ -19,9 +19,20 @@ import {
   AlertCircleIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
+  StarIcon,
 } from '../Icons';
 import type { CodifyResult } from './engine';
 import { familyKey, familyTerm } from './engine';
+import { useCodeLookupConfig } from './context';
+import {
+  recordUse,
+  scheduleFlush,
+  syncFromServer,
+  getTopCodes,
+  matchMemory,
+  setMemoryStorage,
+  type MemoryEntry,
+} from './memoryStore';
 
 // =============================================================================
 // Types
@@ -35,6 +46,29 @@ export type CodifyDomain =
   | 'vaccine'
   | 'occupational'
   | 'quality';
+
+/**
+ * Per-instance tuning for the "Frequently used" memory picklist: focusing the
+ * empty search box lists the user's most-picked codes for this context.
+ *
+ * Memory turns on by itself once the provider supplies a signed-in
+ * `memory.userId` — pass this only to override the bucket or the limits, or
+ * `memory={false}` to opt one box out.
+ */
+export interface CodeLookupMemoryConfig {
+  /**
+   * Usage context the counts are scoped to (e.g. 'med-orders'). Defaults to
+   * this box's `domains`, so a med picker and a problem picker never share a
+   * picklist.
+   */
+  context?: string;
+  /** User id for scoping; falls back to the provider default. No id, no memory. */
+  userId?: string;
+  /** Count-sync endpoint (GET sync + POST deltas); provider default fallback. */
+  serverUrl?: string;
+  /** Max entries in the picklist (default 8). */
+  limit?: number;
+}
 
 export interface CodeLookupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -111,6 +145,12 @@ export interface CodeLookupProps extends Omit<
    * immediately (defaults to true in bare mode, false otherwise).
    */
   clearOnSelect?: boolean;
+  /**
+   * Tune the "Frequently used" picklist — it is already on wherever the
+   * provider names a signed-in `memory.userId`. Pass `false` to opt this box
+   * out.
+   */
+  memory?: false | CodeLookupMemoryConfig;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -151,6 +191,20 @@ const DETAIL_NOUN: Record<string, string> = {
 /** Domains whose drill-down resolves a curated program order set. */
 const PROGRAM_DOMAINS = new Set(['occupational', 'quality']);
 
+/** A remembered entry as a result row (`score` carries the pick count). */
+function toMemoryResult(e: MemoryEntry): CodifyResult {
+  return {
+    fullid: e.fullid,
+    label: e.label,
+    codetype: e.codetype,
+    fullcode: e.fullcode,
+    domain: e.domain,
+    score: e.count,
+    viaAlias: false,
+    viaMemory: true,
+  };
+}
+
 // =============================================================================
 // CodeLookup
 // =============================================================================
@@ -182,6 +236,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
       clearOnSelect,
+      memory,
       className,
       'data-testid': dataTestId,
       ...props
@@ -228,6 +283,54 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const preferCodetypesKey = preferCodetypes
       ? preferCodetypes.join(',')
       : null;
+
+    // ---- memory picklist ("Frequently used" on empty-query focus) ----
+    const providerConfig = useCodeLookupConfig();
+    const providerMemory =
+      providerConfig?.memory === false ? null : providerConfig?.memory;
+    // On by default: a provider that names a signed-in user gets the picklist
+    // everywhere. `memory={false}` opts out — on the provider for a public
+    // kiosk, on the instance for one box.
+    const memOff = providerConfig?.memory === false || memory === false;
+    const memCfg = memory === false ? null : memory;
+    const memUserId = memOff
+      ? null
+      : (memCfg?.userId ?? providerMemory?.userId ?? null);
+    const memContext = memOff
+      ? null
+      : (memCfg?.context ?? providerMemory?.context ?? domainsKey ?? 'all');
+    const memServerUrl = memOff
+      ? undefined
+      : (memCfg?.serverUrl ?? providerMemory?.serverUrl);
+    const memLimit = memCfg?.limit || 8;
+    const memStorage = providerMemory?.storage ?? 'session';
+    const [memoryEntries, setMemoryEntries] = React.useState<MemoryEntry[]>([]);
+    /** Mirror for effects that must not re-run when entries refresh. */
+    const memoryCountRef = React.useRef(0);
+    memoryCountRef.current = memoryEntries.length;
+
+    // Declared first so the store knows the device's trust level before the
+    // effect below reads or writes anything.
+    React.useEffect(() => {
+      setMemoryStorage(memStorage);
+    }, [memStorage]);
+
+    React.useEffect(() => {
+      if (!memUserId || !memContext) {
+        setMemoryEntries([]);
+        return;
+      }
+      let cancelled = false;
+      const scope = { userId: memUserId, context: memContext };
+      void (async () => {
+        if (memServerUrl) await syncFromServer(scope, memServerUrl);
+        const top = await getTopCodes(scope, memLimit);
+        if (!cancelled) setMemoryEntries(top);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [memUserId, memContext, memServerUrl, memLimit, memStorage]);
 
     React.useEffect(() => {
       // A new worker starts from scratch — reset all search state so a stale
@@ -311,8 +414,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       if (!q) {
         setResults([]);
         setTookMs(null);
-        setOpen(false);
         setDrill(null);
+        // With memory entries the empty-query dropdown shows the "Frequently
+        // used" picklist instead of closing (open stays as-is: focus opens it).
+        if (memoryCountRef.current === 0) setOpen(false);
         return;
       }
       const t = setTimeout(() => {
@@ -379,9 +484,39 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       setActiveIndex(-1);
     };
 
-    const list: CodifyResult[] = drill ? (drill.results ?? []) : results;
+    /** Frequently-used picklist rows, shown for a true empty-query dropdown. */
+    const memoryResults = React.useMemo<CodifyResult[]>(
+      () => memoryEntries.map(toMemoryResult),
+      [memoryEntries]
+    );
+    const showMemory =
+      !drill && query.trim() === '' && memoryResults.length > 0;
+
+    /** While typing, matching remembered codes rank ahead of index hits. */
+    const rankedResults = React.useMemo<CodifyResult[]>(() => {
+      const matches = matchMemory(memoryEntries, query.trim());
+      if (matches.length === 0) return results;
+      const seen = new Set(matches.map((m) => m.fullid));
+      return [
+        ...matches.map(toMemoryResult),
+        ...results.filter((r) => !seen.has(r.fullid)),
+      ];
+    }, [memoryEntries, query, results]);
+
+    const list: CodifyResult[] = drill
+      ? (drill.results ?? [])
+      : showMemory
+        ? memoryResults
+        : rankedResults;
 
     const pick = (r: CodifyResult) => {
+      if (memUserId && memContext) {
+        const scope = { userId: memUserId, context: memContext };
+        void recordUse(scope, r).then(() => {
+          if (memServerUrl) scheduleFlush(scope, memServerUrl);
+          return getTopCodes(scope, memLimit).then(setMemoryEntries);
+        });
+      }
       onSelect?.(r);
       setOpen(false);
       setDrill(null);
@@ -540,10 +675,20 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 aria-label={
                   drill
                     ? `${DETAIL_NOUN[drill.parent.domain] ?? 'related codes'} of ${drill.parent.label}`
-                    : 'Code search results'
+                    : showMemory
+                      ? 'Frequently used codes'
+                      : 'Code search results'
                 }
                 className="divide-border max-h-80 min-h-0 divide-y overflow-y-auto"
               >
+                {showMemory && (
+                  <li
+                    role="presentation"
+                    className="text-muted-foreground bg-muted/50 px-3 py-1 text-[11px] font-semibold tracking-wide uppercase"
+                  >
+                    Frequently used
+                  </li>
+                )}
                 {list.map((r, i) => (
                   <li
                     key={r.fullid}
@@ -570,6 +715,18 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       <span className="text-foreground min-w-0 flex-1 truncate">
                         {r.label}
                       </span>
+                      {r.viaMemory && !showMemory && (
+                        <span
+                          className="text-primary-600 dark:text-primary-400 flex shrink-0 items-center gap-0.5 text-[11px]"
+                          title={`You've used this ${r.score} time${r.score === 1 ? '' : 's'}`}
+                        >
+                          <StarIcon size={11} aria-hidden="true" />
+                          {r.score}
+                          <span className="sr-only">
+                            frequently used, {r.score} picks
+                          </span>
+                        </span>
+                      )}
                       <span
                         className={cn(
                           'text-muted-foreground shrink-0 text-[11px] whitespace-nowrap',
@@ -678,7 +835,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             )}
             {status.state === 'ready' && tookMs !== null && (
               <>
-                {results.length} results in {tookMs.toFixed(1)} ms (local) · ↑↓
+                {list.length} results in {tookMs.toFixed(1)} ms (local) · ↑↓
                 navigate · → drill into a row · Enter selects
               </>
             )}
