@@ -202,3 +202,115 @@ describe('MediaEditor drag selection beyond the pane', () => {
     fireEvent.mouseUp(document);
   });
 });
+
+describe('MediaEditor host-extensible undo', () => {
+  /** The edit list for `transcript`, with one word optionally cut. */
+  const words = (deletedIndex?: number) =>
+    transcript.words.map((word, i) => ({
+      originalIndex: i,
+      word,
+      deleted: i === deletedIndex,
+    }));
+
+  /** Props that give the editor exactly one word-level undo step of its own. */
+  const withOneEditorStep = {
+    initialEditedWords: words(1),
+    initialUndoStack: [words()],
+  };
+
+  it('shows no Undo when neither the editor nor the host has one', () => {
+    render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
+    expect(
+      screen.queryByRole('button', { name: /Undo/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it('offers Undo for the host alone, before any edit has been made', () => {
+    const onUndoBeyond = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        onUndoBeyond={onUndoBeyond}
+        undoBeyondLabel="Trim to 45 seconds"
+      />
+    );
+    const undo = screen.getByRole('button', {
+      name: 'Undo: Trim to 45 seconds',
+    });
+    fireEvent.click(undo);
+    expect(onUndoBeyond).toHaveBeenCalledTimes(1);
+  });
+
+  it('spends its own history before handing over to the host', () => {
+    const onUndoBeyond = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        onUndoBeyond={onUndoBeyond}
+        {...withOneEditorStep}
+      />
+    );
+    // One word-level step exists, so Undo belongs to the editor.
+    const undo = screen.getByRole('button', { name: /Undo \(1 available\)/ });
+    fireEvent.click(undo);
+    expect(onUndoBeyond).not.toHaveBeenCalled();
+
+    // With that step spent, the same control now serves the host.
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(onUndoBeyond).toHaveBeenCalledTimes(1);
+  });
+
+  it('has no Redo of its own, and shows one only when a host provides it', () => {
+    const { unmount } = render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        {...withOneEditorStep}
+      />
+    );
+    expect(
+      screen.queryByRole('button', { name: /Redo/ })
+    ).not.toBeInTheDocument();
+    unmount();
+
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo
+        onRedo={onRedo}
+        redoLabel="Removed 8 words"
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Redo: Removed 8 words' })
+    );
+    expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables Redo when the host has nothing forward', () => {
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo={false}
+        onRedo={onRedo}
+      />
+    );
+    const redo = screen.getByRole('button', { name: 'Redo' });
+    expect(redo).toBeDisabled();
+    fireEvent.click(redo);
+    expect(onRedo).not.toHaveBeenCalled();
+  });
+});

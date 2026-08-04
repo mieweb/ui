@@ -77,6 +77,28 @@ export interface MediaEditorProps extends VariantProps<
   onCursorTimestampChange?: (timestampMs: number | null) => void;
   /** Fired whenever the edited words change — lets the host build raw-data views */
   onEditedWordsRender?: (editedWords: EditableWord[]) => void;
+  /**
+   * Undo beyond the editor's own history.
+   *
+   * The editor's undo is word-level, which is the right grain for typing and
+   * the wrong one for a host that also versions the document — undoing a batch
+   * change one word at a time is not undoing it. When a host provides this, the
+   * Undo control stays available once the editor's own stack is empty and hands
+   * over instead of going dead, so there is one Undo rather than two.
+   */
+  onUndoBeyond?: () => void;
+  /** Whether the host has anything left to undo. Keeps Undo live at depth 0. */
+  canUndoBeyond?: boolean;
+  /** What `onUndoBeyond` would undo, for the tooltip (e.g. a version name). */
+  undoBeyondLabel?: string;
+  /**
+   * Redo. The editor has no redo of its own — its undo stack is destructive —
+   * so the control only appears when a host can service it.
+   */
+  onRedo?: () => void;
+  canRedo?: boolean;
+  /** What `onRedo` would redo, for the tooltip. */
+  redoLabel?: string;
   /** Optional ref to the internal MediaPlayer (host escape hatch, e.g. thumbnail capture) */
   playerRef?: React.Ref<MediaPlayerRef>;
   /** Additional class name */
@@ -263,6 +285,12 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       onCursorTimestampChange,
       onEditedWordsRender,
       onSpeedStateChange,
+      onUndoBeyond,
+      canUndoBeyond = false,
+      undoBeyondLabel,
+      onRedo,
+      canRedo = false,
+      redoLabel,
       playerRef: externalPlayerRef,
       className,
       splitLayout,
@@ -1379,15 +1407,48 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
                 >
                   ✂️
                 </Button>
-                {undoStack.length > 0 && (
+                {(undoStack.length > 0 || canUndoBeyond) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={undo}
-                    aria-label={`Undo (${undoStack.length} available)`}
-                    title="Undo (⌘Z)"
+                    // Word-level first; the host only gets it once the
+                    // editor's own history is spent.
+                    onClick={undoStack.length > 0 ? undo : onUndoBeyond}
+                    aria-label={
+                      undoStack.length > 0
+                        ? `Undo (${undoStack.length} available)`
+                        : undoBeyondLabel
+                          ? `Undo: ${undoBeyondLabel}`
+                          : 'Undo'
+                    }
+                    title={
+                      undoStack.length > 0
+                        ? `Undo (⌘Z) — ${undoStack.length} step${undoStack.length === 1 ? '' : 's'}`
+                        : undoBeyondLabel
+                          ? `Undo (⌘Z) — back to "${undoBeyondLabel}"`
+                          : 'Undo (⌘Z)'
+                    }
                   >
-                    Undo ({undoStack.length})
+                    Undo{undoStack.length > 0 ? ` (${undoStack.length})` : ''}{' '}
+                    <kbd className="text-[10px] opacity-60">⌘Z</kbd>
+                  </Button>
+                )}
+                {onRedo && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onRedo}
+                    disabled={!canRedo}
+                    aria-label={redoLabel ? `Redo: ${redoLabel}` : 'Redo'}
+                    title={
+                      canRedo && redoLabel
+                        ? `Redo (⌘Y) — forward to "${redoLabel}"`
+                        : canRedo
+                          ? 'Redo (⌘Y)'
+                          : 'Nothing to redo'
+                    }
+                  >
+                    Redo <kbd className="text-[10px] opacity-60">⌘Y</kbd>
                   </Button>
                 )}
               </div>
