@@ -167,9 +167,22 @@ function idbActive(): boolean {
   return storage === 'local' && hasIndexedDB();
 }
 
-/** False when nothing can be stored: 'none', or 'local' without IndexedDB. */
+/**
+ * True only in a real browser tab. Session memory must never run server-side:
+ * in SSR/Node the module-level Map outlives the request and would bleed one
+ * user's codes into another's render (the 'local' path is already safe because
+ * IndexedDB doesn't exist there).
+ */
+function isBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
+/**
+ * False when nothing can be stored: 'none', 'local' without IndexedDB, or
+ * 'session' outside a browser (fail closed — see `isBrowser`).
+ */
 export function memoryAvailable(): boolean {
-  return storage === 'session' || idbActive();
+  return (storage === 'session' && isBrowser()) || idbActive();
 }
 
 export async function memGet(key: string): Promise<MemoryEntry | undefined> {
