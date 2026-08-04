@@ -9,6 +9,7 @@ import { VoiceManager } from './VoiceManager';
 const meta: Meta<typeof VoiceManager> = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Voice Manager',
   component: VoiceManager,
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {

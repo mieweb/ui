@@ -1,6 +1,6 @@
 {
   "name": "@mieweb/ui",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "A themeable, accessible React component library built with Tailwind CSS",
   "author": "Medical Informatics Engineering, Inc.",
   "license": "SEE LICENSE IN LICENSE",
@@ -232,10 +232,13 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@kerebron/editor": ">=0.7.9",
-    "@kerebron/editor-kits": ">=0.7.9",
-    "@kerebron/wasm": ">=0.7.9",
+    "@kerebron/editor": ">=0.8.6",
+    "@kerebron/editor-kits": ">=0.8.6",
+    "@kerebron/extension-yjs": ">=0.8.6",
+    "@kerebron/wasm": ">=0.8.6",
     "@mieweb/datavis": "=1.6.0",
+    "y-protocols": ">=1.0.6",
+    "yjs": ">=13.6.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.1.0",
@@ -260,7 +263,16 @@
     "@kerebron/editor-kits": {
       "optional": true
     },
+    "@kerebron/extension-yjs": {
+      "optional": true
+    },
     "@kerebron/wasm": {
+      "optional": true
+    },
+    "y-protocols": {
+      "optional": true
+    },
+    "yjs": {
       "optional": true
     },
     "@mieweb/datavis": {
@@ -341,9 +353,10 @@
     "@esheet/fields": "0.0.3",
     "@esheet/renderer": "0.0.3",
     "@eslint/js": "^9.39.3",
-    "@kerebron/editor": "0.7.9",
-    "@kerebron/editor-kits": "0.7.9",
-    "@kerebron/wasm": "0.7.9",
+    "@kerebron/editor": "^0.8.6",
+    "@kerebron/editor-kits": "^0.8.6",
+    "@kerebron/extension-yjs": "^0.8.6",
+    "@kerebron/wasm": "^0.8.6",
     "@mieweb/datavis": "=1.6.0",
     "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
@@ -414,7 +427,9 @@
     "vite": "^7.3.2",
     "vitest": "^3.2.6",
     "wavesurfer.js": "^7.12.1",
+    "y-protocols": "^1.0.6",
     "ychart": "file:./packages/ychart",
+    "yjs": "^13.6.30",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
