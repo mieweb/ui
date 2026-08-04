@@ -202,3 +202,260 @@ describe('MediaEditor drag selection beyond the pane', () => {
     fireEvent.mouseUp(document);
   });
 });
+
+describe('MediaEditor host-extensible undo', () => {
+  /** The edit list for `transcript`, with one word optionally cut. */
+  const words = (deletedIndex?: number) =>
+    transcript.words.map((word, i) => ({
+      originalIndex: i,
+      word,
+      deleted: i === deletedIndex,
+    }));
+
+  /** Props that give the editor exactly one word-level undo step of its own. */
+  const withOneEditorStep = {
+    initialEditedWords: words(1),
+    initialUndoStack: [words()],
+  };
+
+  it('shows no Undo when neither the editor nor the host has one', () => {
+    render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
+    expect(
+      screen.queryByRole('button', { name: /Undo/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps Undo and Redo together, disabling rather than removing either', () => {
+    // A host that can redo but not undo: Undo must still be on screen, greyed,
+    // rather than leaving a lone Redo that reads as a broken control.
+    const { rerender } = render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond={false}
+        onUndoBeyond={vi.fn()}
+        canRedo
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeEnabled();
+
+    // And the mirror image at the other end of the history.
+    rerender(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        onUndoBeyond={vi.fn()}
+        canRedo={false}
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled();
+  });
+
+  it('redoes its own word-level step, the one Undo just took', () => {
+    // The case that shipped broken: Undo (1) was live, Redo was grey, so a
+    // word-level undo could not be taken back.
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        {...withOneEditorStep}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    );
+
+    const redo = screen.getByRole('button', { name: 'Redo' });
+    expect(redo).toBeEnabled();
+    fireEvent.click(redo);
+    // Back where we started: the step is on the undo stack again.
+    expect(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    ).toBeEnabled();
+  });
+
+  it('spends its own redo before the one a host offers, mirroring undo', () => {
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo
+        onRedo={onRedo}
+        {...withOneEditorStep}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    );
+
+    // A word-level redo exists, so the host must not be called yet.
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }));
+    expect(onRedo).not.toHaveBeenCalled();
+
+    // With that spent, the same control serves the host.
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }));
+    expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not offer an action it has no handler for', () => {
+    // A host that sets the capability flag but forgets the handler would
+    // otherwise get an enabled button that silently does nothing.
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        canRedo
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled();
+  });
+
+  it('handles the redo shortcut it advertises', () => {
+    // The button shows a hint; the component has to honour it, or the hint is
+    // a lie for anyone who is not the one host that wired up its own listener.
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo
+        onRedo={onRedo}
+      />
+    );
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    fireEvent.keyDown(listbox, { key: 'z', metaKey: true, shiftKey: true });
+    expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+
+  it('redoes its own word-level step from the keyboard before the host one', () => {
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo
+        onRedo={onRedo}
+        {...withOneEditorStep}
+      />
+    );
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    fireEvent.keyDown(listbox, { key: 'z', metaKey: true });
+    fireEvent.keyDown(listbox, { key: 'z', metaKey: true, shiftKey: true });
+    expect(onRedo).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    ).toBeEnabled();
+  });
+
+  it('explains a disabled Undo rather than claiming a target', () => {
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond={false}
+        undoBeyondLabel="Trim to 45 seconds"
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toHaveAttribute(
+      'title',
+      'Nothing to undo'
+    );
+  });
+
+  it('offers Undo for the host alone, before any edit has been made', () => {
+    const onUndoBeyond = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        onUndoBeyond={onUndoBeyond}
+        undoBeyondLabel="Trim to 45 seconds"
+      />
+    );
+    const undo = screen.getByRole('button', {
+      name: 'Undo: Trim to 45 seconds',
+    });
+    fireEvent.click(undo);
+    expect(onUndoBeyond).toHaveBeenCalledTimes(1);
+  });
+
+  it('spends its own history before handing over to the host', () => {
+    const onUndoBeyond = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        onUndoBeyond={onUndoBeyond}
+        {...withOneEditorStep}
+      />
+    );
+    // One word-level step exists, so Undo belongs to the editor.
+    const undo = screen.getByRole('button', { name: /Undo \(1 available\)/ });
+    fireEvent.click(undo);
+    expect(onUndoBeyond).not.toHaveBeenCalled();
+
+    // With that step spent, the same control now serves the host.
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(onUndoBeyond).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows Redo alongside Undo, disabled until there is something to redo', () => {
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo={false}
+        onRedo={onRedo}
+        redoLabel="Removed 8 words"
+        {...withOneEditorStep}
+      />
+    );
+    // Undo has a step; Redo is present but inert rather than missing.
+    expect(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    ).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled();
+  });
+
+  it('disables Redo when the host has nothing forward', () => {
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo={false}
+        onRedo={onRedo}
+      />
+    );
+    const redo = screen.getByRole('button', { name: 'Redo' });
+    expect(redo).toBeDisabled();
+    fireEvent.click(redo);
+    expect(onRedo).not.toHaveBeenCalled();
+  });
+});
