@@ -62,6 +62,84 @@ describe('MediaEditor', () => {
     render(<MediaEditor src="clip.mp3" transcript={transcript} />);
     expect(screen.getByLabelText('Media player').tagName).toBe('AUDIO');
   });
+
+  it('rehydrates speed state and reports it via onSpeedStateChange', () => {
+    const onSpeedStateChange = vi.fn();
+    const onHasEditsChange = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        initialSpeedMarkers={[{ wordIndex: 1, speed: 1.5 }]}
+        initialDefaultSpeed={2}
+        onSpeedStateChange={onSpeedStateChange}
+        onHasEditsChange={onHasEditsChange}
+      />
+    );
+    expect(onSpeedStateChange).toHaveBeenCalledWith(
+      [{ wordIndex: 1, speed: 1.5 }],
+      2
+    );
+    // Rehydrated speed counts as an edit, same as setting a marker live
+    expect(onHasEditsChange).toHaveBeenCalledWith(true);
+  });
+
+  it('resets speed state when the transcript changes', () => {
+    const onSpeedStateChange = vi.fn();
+    const { rerender } = render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        initialSpeedMarkers={[{ wordIndex: 1, speed: 1.5 }]}
+        onSpeedStateChange={onSpeedStateChange}
+      />
+    );
+    onSpeedStateChange.mockClear();
+
+    const retranscribed: Transcript = {
+      durationMs: 1000,
+      words: [{ text: 'Different', startMs: 0, endMs: 1000 }],
+    };
+    rerender(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={retranscribed}
+        initialSpeedMarkers={[{ wordIndex: 1, speed: 1.5 }]}
+        onSpeedStateChange={onSpeedStateChange}
+      />
+    );
+    // Markers indexed the old transcript's words: they must not survive
+    expect(onSpeedStateChange).toHaveBeenCalledWith([], 1);
+  });
+
+  it('does not re-notify speed state when only the callback identity changes', () => {
+    const first = vi.fn();
+    const { rerender } = render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        onSpeedStateChange={first}
+      />
+    );
+    expect(first).toHaveBeenCalledTimes(1);
+
+    // Hosts passing inline handlers re-create the callback every render;
+    // unchanged speed state must not produce a duplicate notification
+    const second = vi.fn();
+    rerender(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        onSpeedStateChange={second}
+      />
+    );
+    expect(second).not.toHaveBeenCalled();
+  });
 });
 
 // Regression suite: dragging used to cancel on mouseleave and the selection

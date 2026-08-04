@@ -21,6 +21,7 @@ import type {
   EditableWord,
   PlaybackSegment,
   PlaybackSpeed,
+  SpeedMarker,
 } from '../TranscriptView/transcript';
 import { PLAYBACK_SPEEDS, isSilenceType } from '../TranscriptView/transcript';
 import { useTranscriptEdits } from '../../hooks/useTranscriptEdits';
@@ -52,6 +53,19 @@ export interface MediaEditorProps extends VariantProps<
   initialEditedWords?: EditableWord[];
   /** Initial undo stack (from saved edits) */
   initialUndoStack?: EditableWord[][];
+  /** Initial speed markers (from saved edits) */
+  initialSpeedMarkers?: SpeedMarker[];
+  /** Initial default playback speed (from saved edits) */
+  initialDefaultSpeed?: PlaybackSpeed;
+  /**
+   * Fired when speed markers or the default speed change (including once on
+   * mount with the initial values) — lets the host persist and bake speed
+   * into exports alongside the edit list.
+   */
+  onSpeedStateChange?: (
+    speedMarkers: SpeedMarker[],
+    defaultSpeed: PlaybackSpeed
+  ) => void;
   /** Fired after every edit mutation (for persistence) */
   onEditorStateChange?: (
     editedWords: EditableWord[],
@@ -130,6 +144,8 @@ interface WordVisualState {
   isAnchor: boolean;
   isFocused: boolean;
   hasSpeedMarker: boolean;
+  /** Word plays at a speed differing from the default — the whole region is marked */
+  isSped: boolean;
 }
 
 /**
@@ -194,6 +210,14 @@ function wordClassName(s: WordVisualState): string {
     parts.push('ml-0.5 border-l-[3px] border-l-warning pl-1.5');
   }
 
+  // A dotted warning underline spans every word of a re-timed region, so the
+  // affected range reads at a glance (the badge only sits on the first word)
+  if (s.isSped) {
+    parts.push(
+      'underline decoration-warning decoration-dotted decoration-2 underline-offset-4'
+    );
+  }
+
   return parts.join(' ');
 }
 
@@ -232,10 +256,13 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       transcript,
       initialEditedWords,
       initialUndoStack,
+      initialSpeedMarkers,
+      initialDefaultSpeed,
       onEditorStateChange,
       onHasEditsChange,
       onCursorTimestampChange,
       onEditedWordsRender,
+      onSpeedStateChange,
       playerRef: externalPlayerRef,
       className,
       splitLayout,
@@ -247,6 +274,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       transcript,
       initialEditedWords,
       initialUndoStack,
+      initialSpeedMarkers,
+      initialDefaultSpeed,
       onChange: onEditorStateChange,
     });
     const {
@@ -271,6 +300,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       defaultSpeed,
       setDefaultSpeed,
       toggleSpeedMarker,
+      setSpeedForRange,
       removeSpeedMarker,
       getSpeedAtIndex,
       getSpeedMarkerAtIndex,
@@ -369,6 +399,17 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     React.useEffect(() => {
       onEditedWordsRender?.(editedWords);
     }, [editedWords, onEditedWordsRender]);
+
+    // Documented to fire only on mount and on real speed-state changes —
+    // hosts persist on it — so the callback rides a ref: a new function
+    // identity per render must not re-notify unchanged state.
+    const onSpeedStateChangeRef = React.useRef(onSpeedStateChange);
+    React.useEffect(() => {
+      onSpeedStateChangeRef.current = onSpeedStateChange;
+    });
+    React.useEffect(() => {
+      onSpeedStateChangeRef.current?.(speedMarkers, defaultSpeed);
+    }, [speedMarkers, defaultSpeed]);
 
     // Report cursor timestamp changes to the parent
     React.useEffect(() => {
@@ -770,6 +811,15 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       // first). Standard editor behavior: extend to the nearest end.
       const spans =
         container.querySelectorAll<HTMLElement>('[data-word-index]');
+      if (spans.length === 0) return;
+      // Above every span (top padding): extend to the first word without
+      // scanning — the backward walk below would touch every span. Below
+      // the last line is already O(1): the walk's first probe matches.
+      if (spans[0].getBoundingClientRect().top > y) {
+        const parsed = Number(spans[0].dataset.wordIndex);
+        if (Number.isInteger(parsed)) extendDragSelection(parsed);
+        return;
+      }
       for (let i = spans.length - 1; i >= 0; i--) {
         const spanRect = spans[i].getBoundingClientRect();
         if (spanRect.top <= y) {
@@ -777,11 +827,6 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           if (Number.isInteger(parsed)) extendDragSelection(parsed);
           return;
         }
-      }
-      // The point sits above every span (top padding): extend to the first word
-      if (spans.length > 0) {
-        const parsed = Number(spans[0].dataset.wordIndex);
-        if (Number.isInteger(parsed)) extendDragSelection(parsed);
       }
     };
 
@@ -815,8 +860,14 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         );
       }
       if (step !== 0) {
+        // Re-extend only when the pane actually moved: held at a clamped
+        // top/bottom nothing shifts under the pointer, and mousemove already
+        // covers pointer motion
+        const before = container.scrollTop;
         container.scrollTop += step;
-        extendSelectionToPointer();
+        if (container.scrollTop !== before) {
+          extendSelectionToPointer();
+        }
       }
       dragScrollFrame.current = requestAnimationFrame(stepDragAutoScroll);
     };
@@ -1221,6 +1272,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
             isAnchor,
             isFocused,
             hasSpeedMarker,
+            isSped: effectiveSpeed !== defaultSpeed,
           })}
           onClick={(e) => handleWordClick(ew.word, index, e)}
           onDoubleClick={(e) => handleWordDoubleClick(index, e)}
@@ -1490,7 +1542,12 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           }
           defaultSpeed={defaultSpeed}
           onSetSpeed={(speed) => {
-            if (speedMenuWordIndex !== null) {
+            if (speedMenuWordIndex === null) return;
+            // With an active selection the speed applies to the whole range
+            // (and only the range); otherwise the classic from-here-on marker
+            if (selection) {
+              setSpeedForRange(selection.start, selection.end, speed);
+            } else {
               toggleSpeedMarker(speedMenuWordIndex, speed);
             }
           }}
