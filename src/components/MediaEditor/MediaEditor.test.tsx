@@ -258,6 +258,57 @@ describe('MediaEditor host-extensible undo', () => {
     expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled();
   });
 
+  it('redoes its own word-level step, the one Undo just took', () => {
+    // The case that shipped broken: Undo (1) was live, Redo was grey, so a
+    // word-level undo could not be taken back.
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        {...withOneEditorStep}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    );
+
+    const redo = screen.getByRole('button', { name: 'Redo' });
+    expect(redo).toBeEnabled();
+    fireEvent.click(redo);
+    // Back where we started: the step is on the undo stack again.
+    expect(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    ).toBeEnabled();
+  });
+
+  it('spends its own redo before the one a host offers, mirroring undo', () => {
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo
+        onRedo={onRedo}
+        {...withOneEditorStep}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    );
+
+    // A word-level redo exists, so the host must not be called yet.
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }));
+    expect(onRedo).not.toHaveBeenCalled();
+
+    // With that spent, the same control serves the host.
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }));
+    expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+
   it('explains a disabled Undo rather than claiming a target', () => {
     render(
       <MediaEditor
@@ -316,35 +367,24 @@ describe('MediaEditor host-extensible undo', () => {
     expect(onUndoBeyond).toHaveBeenCalledTimes(1);
   });
 
-  it('has no Redo of its own, and shows one only when a host provides it', () => {
-    const { unmount } = render(
-      <MediaEditor
-        src="clip.mp3"
-        kind="audio"
-        transcript={transcript}
-        {...withOneEditorStep}
-      />
-    );
-    expect(
-      screen.queryByRole('button', { name: /Redo/ })
-    ).not.toBeInTheDocument();
-    unmount();
-
+  it('shows Redo alongside Undo, disabled until there is something to redo', () => {
     const onRedo = vi.fn();
     render(
       <MediaEditor
         src="clip.mp3"
         kind="audio"
         transcript={transcript}
-        canRedo
+        canRedo={false}
         onRedo={onRedo}
         redoLabel="Removed 8 words"
+        {...withOneEditorStep}
       />
     );
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Redo: Removed 8 words' })
-    );
-    expect(onRedo).toHaveBeenCalledTimes(1);
+    // Undo has a step; Redo is present but inert rather than missing.
+    expect(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    ).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled();
   });
 
   it('disables Redo when the host has nothing forward', () => {

@@ -288,6 +288,10 @@ export interface UseTranscriptEditsResult {
   pushUndo: () => void;
   /** Restore the most recent undo snapshot */
   undo: () => void;
+  /** Step forward again after an undo. Cleared by any new edit. */
+  redo: () => void;
+  /** Whether there is anything to redo */
+  canRedo: boolean;
 
   // -- Word mutations (selection-agnostic: pass explicit indices) --
   /** Toggle the deleted flag on a single word */
@@ -450,10 +454,23 @@ export function useTranscriptEdits(
     }))
   );
 
+  // Redo mirrors undo. Undo used to pop and discard, which meant a mis-click
+  // was unrecoverable and any Redo control a host offered could not service
+  // word-level steps — the pair looked symmetric and was not. Not persisted, for
+  // the same reason the speed snapshots are not: a rehydrated stack describes a
+  // sequence of states this session never performed.
+  const [redoStack, setRedoStack] = useState<EditableWord[][]>([]);
+  const [speedRedoStack, setSpeedRedoStack] = useState<
+    { speedMarkers: SpeedMarker[]; defaultSpeed: PlaybackSpeed }[]
+  >([]);
+
   // Helper to save current state to undo stack before making changes
   const pushUndo = useCallback(() => {
     setUndoStack((prev) => [...prev, editedWords]);
     setSpeedUndoStack((prev) => [...prev, { speedMarkers, defaultSpeed }]);
+    // A fresh edit abandons the redo branch, as it does in every editor.
+    setRedoStack([]);
+    setSpeedRedoStack([]);
   }, [editedWords, speedMarkers, defaultSpeed]);
 
   // Track previous transcript to detect changes
@@ -476,6 +493,8 @@ export function useTranscriptEdits(
     setSpeedMarkers([]);
     setDefaultSpeed(1);
     setSpeedUndoStack([]);
+    setRedoStack([]);
+    setSpeedRedoStack([]);
     initializedFromSaved.current = false;
   }, [transcript, minSilenceMs, nlSilenceMs]);
 
@@ -499,6 +518,9 @@ export function useTranscriptEdits(
     if (undoStack.length === 0) return;
     const previousState = undoStack[undoStack.length - 1];
     setUndoStack((prev) => prev.slice(0, -1));
+    // Bank what we are leaving before leaving it.
+    setRedoStack((prev) => [...prev, editedWords]);
+    setSpeedRedoStack((prev) => [...prev, { speedMarkers, defaultSpeed }]);
     setEditedWords(previousState);
     // Speed snapshots ride along with word snapshots
     const speedSnapshot = speedUndoStack[speedUndoStack.length - 1];
@@ -525,7 +547,35 @@ export function useTranscriptEdits(
       (speedSnapshot.speedMarkers.length === 0 &&
         speedSnapshot.defaultSpeed === 1);
     setHasEdits(!isOriginal || !speedIsOriginal);
-  }, [undoStack, speedUndoStack, transcript, minSilenceMs, nlSilenceMs]);
+  }, [
+    undoStack,
+    speedUndoStack,
+    editedWords,
+    speedMarkers,
+    defaultSpeed,
+    transcript,
+    minSilenceMs,
+    nlSilenceMs,
+  ]);
+
+  /** Step forward again after an undo. Cleared by any new edit. */
+  const redo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    const nextState = redoStack[redoStack.length - 1];
+    setRedoStack((prev) => prev.slice(0, -1));
+    setUndoStack((prev) => [...prev, editedWords]);
+    setSpeedUndoStack((prev) => [...prev, { speedMarkers, defaultSpeed }]);
+    setEditedWords(nextState);
+    const speedSnapshot = speedRedoStack[speedRedoStack.length - 1];
+    if (speedSnapshot) {
+      setSpeedRedoStack((prev) => prev.slice(0, -1));
+      setSpeedMarkers(speedSnapshot.speedMarkers);
+      setDefaultSpeed(speedSnapshot.defaultSpeed);
+    }
+    // Redoing always lands on a state that was reached by editing, so it is by
+    // definition not the untouched original.
+    setHasEdits(true);
+  }, [redoStack, speedRedoStack, editedWords, speedMarkers, defaultSpeed]);
 
   // Toggle deleted state on a single word
   const toggleWordDeleted = useCallback(
@@ -1046,6 +1096,8 @@ export function useTranscriptEdits(
     hasEdits,
     pushUndo,
     undo,
+    redo,
+    canRedo: redoStack.length > 0,
     toggleWordDeleted,
     deleteRange,
     cut,

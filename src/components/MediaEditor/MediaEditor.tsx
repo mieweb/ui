@@ -92,8 +92,9 @@ export interface MediaEditorProps extends VariantProps<
   /** What `onUndoBeyond` would undo, for the tooltip (e.g. a version name). */
   undoBeyondLabel?: string;
   /**
-   * Redo. The editor has no redo of its own — its undo stack is destructive —
-   * so the control only appears when a host can service it.
+   * Redo beyond the editor's own history — the counterpart to `onUndoBeyond`.
+   * The editor redoes its own word-level steps first and only calls this once
+   * they are exhausted, so the pair walks the same states in both directions.
    */
   onRedo?: () => void;
   canRedo?: boolean;
@@ -312,6 +313,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       clipboard,
       hasEdits,
       undo,
+      redo,
+      canRedo: canRedoWords,
       toggleWordDeleted,
       deleteRange,
       cut,
@@ -336,6 +339,15 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       stats,
       fillerAnalysis,
     } = edits;
+
+    // Undo and Redo are one control pair: they appear and disappear together,
+    // and whichever cannot act is disabled rather than removed. A button that
+    // vanishes shifts the ones beside it; a lone greyed Redo reads as broken.
+    // Each side prefers the editor's own history and falls through to the
+    // host's, so the pair walks the same states in both directions.
+    const canUndoAnything = undoStack.length > 0 || canUndoBeyond;
+    const canRedoAnything = canRedoWords || canRedo;
+    const showUndoRedo = canUndoAnything || canRedoAnything || !!onRedo;
 
     // -- UI state --
     const [activeWordIndex, setActiveWordIndex] = React.useState<number | null>(
@@ -1411,11 +1423,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
                     Redo reads as broken, and an Undo that vanishes at the end
                     of history while Redo merely greys is two rules for one
                     pair — so whichever is inert is disabled, not removed. */}
-                {(undoStack.length > 0 || canUndoBeyond || onRedo) && (
+                {showUndoRedo && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    disabled={undoStack.length === 0 && !canUndoBeyond}
+                    disabled={!canUndoAnything}
                     // Word-level first; the host only gets it once the
                     // editor's own history is spent.
                     onClick={undoStack.length > 0 ? undo : onUndoBeyond}
@@ -1440,22 +1452,30 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
                     <kbd className="text-[10px] opacity-60">⌘Z</kbd>
                   </Button>
                 )}
-                {onRedo && (
+                {showUndoRedo && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={onRedo}
-                    disabled={!canRedo}
-                    aria-label={redoLabel ? `Redo: ${redoLabel}` : 'Redo'}
+                    // Word-level first, mirroring Undo, so the pair steps back
+                    // and forward through the same states in the same order.
+                    onClick={canRedoWords ? redo : onRedo}
+                    disabled={!canRedoAnything}
+                    aria-label={
+                      !canRedoWords && canRedo && redoLabel
+                        ? `Redo: ${redoLabel}`
+                        : 'Redo'
+                    }
                     title={
-                      canRedo && redoLabel
-                        ? `Redo (⌘Y) — forward to "${redoLabel}"`
-                        : canRedo
-                          ? 'Redo (⌘Y)'
-                          : 'Nothing to redo'
+                      canRedoWords
+                        ? 'Redo (⇧⌘Z)'
+                        : canRedo && redoLabel
+                          ? `Redo (⇧⌘Z) — forward to "${redoLabel}"`
+                          : canRedo
+                            ? 'Redo (⇧⌘Z)'
+                            : 'Nothing to redo'
                     }
                   >
-                    Redo <kbd className="text-[10px] opacity-60">⌘Y</kbd>
+                    Redo <kbd className="text-[10px] opacity-60">⇧⌘Z</kbd>
                   </Button>
                 )}
               </div>
