@@ -66,6 +66,8 @@ export interface CodifyResult {
   viaFuzzy?: boolean;
   /** true when the match came from the code itself (query looked like a code) */
   viaCode?: boolean;
+  /** true when the row came from the user's frequently-used memory picklist */
+  viaMemory?: boolean;
 }
 
 // =============================================================================

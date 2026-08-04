@@ -237,6 +237,141 @@ In Storybook, the 🌐 **Language** toolbar global switches the locale for the
 > `new Worker(new URL(...))` pattern needs bundler configuration in the tsup
 > build. Storybook (Vite) handles it natively; see `Healthcare/CodeLookup`.
 
+### Memory — "Frequently used" picklist
+
+**On by default** wherever the provider names a signed-in user: focusing the
+**empty** search box lists that user's most-picked codes for that context
+(count desc, most-recent tiebreak). One decision at the mount point, nothing
+per instance:
+
+```tsx
+<CodeLookupProvider
+  component={CodeLookup}
+  indexUrl="/codify"
+  memory={{ userId: currentUser.id, storage: 'local' }}
+>
+  <App /> {/* every CodeLookup below here remembers */}
+</CodeLookupProvider>
+```
+
+The bucket defaults to the box's own `domains` (`med`, `condition`, …), so two
+lookups over different domains never share a list. The `memory` prop only
+tunes that default — or turns one box off:
+
+```tsx
+<CodeLookup
+  indexUrl="/codify"
+  memory={{
+    context: 'med-orders',      // default: this box's `domains`
+    userId: currentUser.id,     // default: provider `memory.userId`. No id, no memory
+    serverUrl: '/api/code-memory', // count sync; provider default fallback
+    limit: 8,                   // picklist size (default 8)
+  }}
+  onSelect={…}
+/>
+```
+
+- **Scope = (userId, context)** — buckets never mix across users sharing a
+  browser or across contexts (`med-orders` vs `presenting-meds`). Rows carry
+  `viaMemory: true`.
+- **Two gates, both fail closed.** Nothing is remembered unless *both* open:
+  1. **A signed-in user.** Placeholder ids (`anonymous`, `guest`, `kiosk`,
+     `unknown`, empty) are rejected rather than pooled into one shared bucket,
+     so forgetting to wire auth disables the feature instead of showing the
+     last kiosk visitor's codes to the next one.
+  2. **A storage mode** (below) that permits it.
+- **Storage — a property of the *machine*, never guessed.** No browser signal
+  distinguishes a kiosk from a workstation, so the app declares it once on the
+  provider and the library defaults to the safe answer:
+
+  | `memory.storage` | cache | for |
+  | --- | --- | --- |
+  | `'session'` *(default)* | RAM, dies with the tab | public/shared kiosks |
+  | `'local'` | IndexedDB (`mieweb-codelookup-memory` / `usage`), keyed `userId\|context\|fullid` | a per-user machine secured by a browser login |
+  | `'none'` | nothing | opted out |
+
+  Writing to *this* disk therefore needs an affirmative `storage: 'local'` in
+  the app source — greppable at review time, and forgetting it costs a
+  round-trip rather than a disclosure. `'local'` without IndexedDB (SSR)
+  degrades to no-ops.
+- **The server is the source of truth**; the local store is its cache. With
+  `serverUrl`:
+  - revalidate per scope, at most once a minute:
+    `GET {serverUrl}?user={userId}&context={context}` →
+    `[{fullid, label, codetype, fullcode, domain, count}]`, taken as
+    authoritative — a server count may move a local one **down**;
+  - picks accumulate deltas flushed lazily:
+    `POST {serverUrl}` body
+    `{user, context, deltas: [{fullid, label, codetype, fullcode, domain, delta}]}`
+    (debounced — shorter in `'session'` mode, which has no durable cache to
+    retry from; `navigator.sendBeacon` on `pagehide`). Failed flushes keep
+    their deltas for the next attempt.
+  - `count` = the server's total **plus** unflushed local picks, so
+    `pendingDelta` is the only locally-authoritative field and a sync can never
+    drop a pick that hasn't landed yet.
+  - **The server must take identity from the session** (cookie/bearer), not
+    from the `user` parameter — otherwise any user reads any other's list by
+    editing a query string. Treat `user` as a value to *validate* against the
+    session and reject on mismatch. Requests are sent with
+    `credentials: 'include'`.
+- **Provider defaults** — `CodeLookupProvider` accepts
+  `memory={{ userId, serverUrl, context, storage }}` so apps decide identity,
+  sync and device trust once; naming a `userId` is all an instance needs.
+  `memory={false}` on the provider **disables memory everywhere below it**,
+  overriding any component's own config — that's the one-line kiosk switch.
+- **Disable / reset** — pass `memory={false}` (on the provider, or on one
+  instance) to disable; `clearMemory({ userId, context })` empties one bucket
+  and `clearAllMemory()` wipes every bucket whatever the current mode, for
+  logout, kiosk session reset, or a device downgraded from trusted to public.
+- **While typing** — remembered codes matching the query (same word-prefix
+  rule as the index) are pinned above the index hits and marked with a ☆ and
+  their pick count, so typing `f` keeps *Flonase* on top instead of dropping
+  it for the generic matches.
+
+Storybook's **Signed in as** / **Device** toolbar globals feed exactly these
+two gates through the ambient provider in `.storybook/preview.tsx`, which
+doubles as the reference for wiring them in an app: one decision at the mount
+point, not per component.
+
+#### Import / export (`memoryYaml.ts`)
+
+Buckets round-trip through YAML — back up a picklist, move it between
+machines, or ship a curated starter set for a context:
+
+```ts
+import { exportMemoryYaml, importMemoryYaml } from '…/CodeLookup';
+
+const yaml = await exportMemoryYaml({ userId: 'alice', context: 'med-orders' });
+await exportMemoryYaml();                       // every bucket in this browser
+await importMemoryYaml(yaml);                   // into the buckets it names
+await importMemoryYaml(yaml, { scope });        // …or all into one bucket
+```
+
+```yaml
+version: 1
+exported: 2026-07-31T19:00:00.000Z
+buckets:
+  - user: alice
+    context: med-orders
+    codes:
+      - fullid: FDBMEDNAME3722
+        label: Lasix
+        codetype: FDB MEDNAME
+        fullcode: '3722'
+        domain: med
+        count: 3
+        lastUsed: 2026-07-31T18:00:00.000Z
+```
+
+- Import **merges**: `count`/`lastUsed` keep the larger value and pending
+  server deltas are untouched, so re-importing the same file is a no-op and
+  local usage is never lost. `{ scope }` retargets every bucket into one.
+- Only `fullid` is required per code (`count` defaults to 1) — a hand-written
+  starter list is a valid import. Unusable rows are skipped and counted in the
+  result; a document without a `buckets` list, or a newer `version`, throws.
+- `js-yaml` is an **optional peer dependency**, imported lazily on first use,
+  so apps that never import/export don't pay for it.
+
 ## 6. Health surveillance — programs.json
 
 The **occupational** (OSHA/FMCSA/NFPA/FAA/OPM/USCG/MSHA/NIOSH/NRC/DOE/USCIS/
