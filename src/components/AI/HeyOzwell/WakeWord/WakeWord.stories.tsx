@@ -13,8 +13,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { useWakeWord } from './useWakeWord';
 
-const meta: Meta = {
+const meta: Meta<typeof WakeWordDemo> = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Wake Word',
+  component: WakeWordDemo,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     docs: {
