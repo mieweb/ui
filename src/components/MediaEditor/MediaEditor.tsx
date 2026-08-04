@@ -345,8 +345,11 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     // vanishes shifts the ones beside it; a lone greyed Redo reads as broken.
     // Each side prefers the editor's own history and falls through to the
     // host's, so the pair walks the same states in both directions.
-    const canUndoAnything = undoStack.length > 0 || canUndoBeyond;
-    const canRedoAnything = canRedoWords || canRedo;
+    // A host that sets the capability flag without the handler would otherwise
+    // get an enabled button that does nothing, so both are required.
+    const canUndoAnything =
+      undoStack.length > 0 || (canUndoBeyond && !!onUndoBeyond);
+    const canRedoAnything = canRedoWords || (canRedo && !!onRedo);
     const showUndoRedo = canUndoAnything || canRedoAnything || !!onRedo;
 
     // -- UI state --
@@ -1077,6 +1080,17 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         } else if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
           undo();
           handled = true;
+        } else if (
+          (e.metaKey || e.ctrlKey) &&
+          ((e.key === 'z' && e.shiftKey) || e.key === 'y')
+        ) {
+          // Redo. ⌘Y is accepted for anyone arriving from Windows but is never
+          // advertised — on macOS it is Chrome's own History shortcut and the
+          // browser wins. The button shows ⇧⌘Z, which is what this handles.
+          // Word-level first, then the host's, mirroring Undo.
+          if (canRedoWords) redo();
+          else if (canRedo && onRedo) onRedo();
+          handled = true;
         } else if (e.key === 'ArrowLeft') {
           if (cursorPosition === 'after') {
             // Move from 'after' the last word back to 'before' it
@@ -1234,6 +1248,10 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         handleCut,
         handlePaste,
         undo,
+        redo,
+        canRedoWords,
+        canRedo,
+        onRedo,
         openWordEditor,
       ]
     );

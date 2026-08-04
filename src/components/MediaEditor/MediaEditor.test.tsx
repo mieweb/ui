@@ -309,6 +309,61 @@ describe('MediaEditor host-extensible undo', () => {
     expect(onRedo).toHaveBeenCalledTimes(1);
   });
 
+  it('does not offer an action it has no handler for', () => {
+    // A host that sets the capability flag but forgets the handler would
+    // otherwise get an enabled button that silently does nothing.
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        canRedo
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled();
+  });
+
+  it('handles the redo shortcut it advertises', () => {
+    // The button shows a hint; the component has to honour it, or the hint is
+    // a lie for anyone who is not the one host that wired up its own listener.
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo
+        onRedo={onRedo}
+      />
+    );
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    fireEvent.keyDown(listbox, { key: 'z', metaKey: true, shiftKey: true });
+    expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+
+  it('redoes its own word-level step from the keyboard before the host one', () => {
+    const onRedo = vi.fn();
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canRedo
+        onRedo={onRedo}
+        {...withOneEditorStep}
+      />
+    );
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    fireEvent.keyDown(listbox, { key: 'z', metaKey: true });
+    fireEvent.keyDown(listbox, { key: 'z', metaKey: true, shiftKey: true });
+    expect(onRedo).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('button', { name: /Undo \(1 available\)/ })
+    ).toBeEnabled();
+  });
+
   it('explains a disabled Undo rather than claiming a target', () => {
     render(
       <MediaEditor
