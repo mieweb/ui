@@ -1407,26 +1407,33 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
                 >
                   ✂️
                 </Button>
-                {(undoStack.length > 0 || canUndoBeyond) && (
+                {/* Undo and Redo appear and disappear together. A lone greyed
+                    Redo reads as broken, and an Undo that vanishes at the end
+                    of history while Redo merely greys is two rules for one
+                    pair — so whichever is inert is disabled, not removed. */}
+                {(undoStack.length > 0 || canUndoBeyond || onRedo) && (
                   <Button
                     variant="ghost"
                     size="sm"
+                    disabled={undoStack.length === 0 && !canUndoBeyond}
                     // Word-level first; the host only gets it once the
                     // editor's own history is spent.
                     onClick={undoStack.length > 0 ? undo : onUndoBeyond}
                     aria-label={
                       undoStack.length > 0
                         ? `Undo (${undoStack.length} available)`
-                        : undoBeyondLabel
+                        : canUndoBeyond && undoBeyondLabel
                           ? `Undo: ${undoBeyondLabel}`
                           : 'Undo'
                     }
                     title={
                       undoStack.length > 0
                         ? `Undo (⌘Z) — ${undoStack.length} step${undoStack.length === 1 ? '' : 's'}`
-                        : undoBeyondLabel
-                          ? `Undo (⌘Z) — back to "${undoBeyondLabel}"`
-                          : 'Undo (⌘Z)'
+                        : canUndoBeyond
+                          ? undoBeyondLabel
+                            ? `Undo (⌘Z) — back to "${undoBeyondLabel}"`
+                            : 'Undo (⌘Z)'
+                          : 'Nothing to undo'
                     }
                   >
                     Undo{undoStack.length > 0 ? ` (${undoStack.length})` : ''}{' '}

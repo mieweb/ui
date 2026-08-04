@@ -225,6 +225,56 @@ describe('MediaEditor host-extensible undo', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('keeps Undo and Redo together, disabling rather than removing either', () => {
+    // A host that can redo but not undo: Undo must still be on screen, greyed,
+    // rather than leaving a lone Redo that reads as a broken control.
+    const { rerender } = render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond={false}
+        onUndoBeyond={vi.fn()}
+        canRedo
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeEnabled();
+
+    // And the mirror image at the other end of the history.
+    rerender(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond
+        onUndoBeyond={vi.fn()}
+        canRedo={false}
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled();
+  });
+
+  it('explains a disabled Undo rather than claiming a target', () => {
+    render(
+      <MediaEditor
+        src="clip.mp3"
+        kind="audio"
+        transcript={transcript}
+        canUndoBeyond={false}
+        undoBeyondLabel="Trim to 45 seconds"
+        onRedo={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Undo' })).toHaveAttribute(
+      'title',
+      'Nothing to undo'
+    );
+  });
+
   it('offers Undo for the host alone, before any edit has been made', () => {
     const onUndoBeyond = vi.fn();
     render(
