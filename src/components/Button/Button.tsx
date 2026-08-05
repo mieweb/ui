@@ -8,7 +8,9 @@ const buttonVariants = cva(
     'inline-flex items-center justify-center gap-2',
     'font-semibold transition-all duration-200',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-    'disabled:pointer-events-none disabled:opacity-50',
+    // Web-app affordance: buttons look clickable. (Tailwind v4 preflight
+    // resets buttons to cursor: default; QuickAction already opts back in.)
+    'cursor-pointer disabled:pointer-events-none disabled:opacity-50',
     'active:scale-[0.98]',
   ],
   {
@@ -29,11 +31,14 @@ const buttonVariants = cva(
         ],
         ghost: [
           'bg-transparent text-neutral-600',
-          'hover:bg-neutral-100',
-          'active:bg-neutral-200',
+          // One token step stronger than before: neutral-100 on a white page
+          // is a ~4% delta most displays can't show, so hover read as
+          // "nothing happens" and users only saw the active state on click.
+          'hover:bg-neutral-200',
+          'active:bg-neutral-300',
           'dark:text-neutral-400',
-          'dark:hover:bg-neutral-800',
-          'dark:active:bg-neutral-700',
+          'dark:hover:bg-neutral-700',
+          'dark:active:bg-neutral-600',
         ],
         outline: [
           'border-2 border-primary-800 text-primary-800 bg-transparent',
