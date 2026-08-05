@@ -382,3 +382,138 @@ describe('ui#323 / #327-review regressions', () => {
     expect(result.current.hasEdits).toBe(true);
   });
 });
+
+// ============================================================================
+// Speed edits: range apply + undo coverage
+// ============================================================================
+
+describe('speed range + undo', () => {
+  it('setSpeedForRange marks the range and restores the prior speed after it', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 2);
+    });
+    expect(result.current.speedMarkers).toEqual([
+      { wordIndex: 0, speed: 2 },
+      { wordIndex: 2, speed: 1 },
+    ]);
+    expect(result.current.getSpeedAtIndex(0)).toBe(2);
+    expect(result.current.getSpeedAtIndex(1)).toBe(2);
+    // The word after the range keeps its previous effective speed
+    expect(result.current.getSpeedAtIndex(2)).toBe(1);
+    expect(result.current.hasEdits).toBe(true);
+  });
+
+  it('setSpeedForRange clears markers inside the range', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleSpeedMarker(1, 0.5);
+    });
+    act(() => {
+      result.current.setSpeedForRange(0, 2, 1.5);
+    });
+    // The 0.5 marker inside the range must not fragment the new region;
+    // range reaches the final word, so no restore marker is added
+    expect(result.current.speedMarkers).toEqual([{ wordIndex: 0, speed: 1.5 }]);
+  });
+
+  it('setSpeedForRange adds no marker when the speed is already in effect', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    // Applying the default speed (1x) to a fresh range must not persist a no-op marker
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 1);
+    });
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.getSpeedAtIndex(0)).toBe(1);
+
+    // And when a preceding marker already sets the range's speed, re-applying it is a no-op
+    act(() => {
+      result.current.toggleSpeedMarker(0, 2);
+    });
+    act(() => {
+      result.current.setSpeedForRange(1, 2, 2);
+    });
+    expect(result.current.speedMarkers).toEqual([{ wordIndex: 0, speed: 2 }]);
+    expect(result.current.getSpeedAtIndex(2)).toBe(2);
+  });
+
+  it('undo reverts a speed marker set via toggleSpeedMarker', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleSpeedMarker(1, 2);
+    });
+    expect(result.current.speedMarkers).toHaveLength(1);
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('undo reverts a default-speed change and a range apply as single steps', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.setDefaultSpeed(1.5);
+    });
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 2);
+    });
+    act(() => {
+      result.current.undo();
+    });
+    // Range apply undone in one step; default-speed change still applied
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.defaultSpeed).toBe(1.5);
+    expect(result.current.hasEdits).toBe(true);
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.defaultSpeed).toBe(1);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('undo still restores words when speed was untouched', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleWordDeleted(0);
+    });
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.editedWords[0].deleted).toBe(false);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('re-anchors speed markers to the same words across a threshold rebuild (#343 review)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    const betaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    act(() => result.current.toggleSpeedMarker(betaIdx, 2));
+    // Raising the min threshold removes the leading silence, shifting every
+    // index — the marker must follow 'Beta', not its old position
+    act(() => result.current.setSilenceThresholds(700, 5000));
+    const newBetaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    expect(newBetaIdx).not.toBe(betaIdx);
+    expect(result.current.speedMarkers).toEqual([
+      { wordIndex: newBetaIdx, speed: 2 },
+    ]);
+    expect(result.current.getSpeedAtIndex(newBetaIdx)).toBe(2);
+  });
+});

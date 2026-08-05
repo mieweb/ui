@@ -382,6 +382,8 @@ export const miewebUISafelist = [
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',
+  // Scrollable floating panels (DateInput calendar, Autocomplete, Select, Table, ScrollArea, …)
+  'overflow-auto',
   // Select component
   'truncate',
   // AIReconciliationPanel
@@ -414,6 +416,8 @@ export const miewebUISafelist = [
   'last:border-b-0',
   'border-dashed',
   'text-[11px]',
+  // CodeLookup memory picklist (frequently-used pick count)
+  'text-primary-600',
   // SuperChat (participant chips, unread badge, active/hover states)
   'bg-primary-100',
   'bg-primary-600',

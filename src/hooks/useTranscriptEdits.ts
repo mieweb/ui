@@ -242,6 +242,10 @@ export interface UseTranscriptEditsOptions {
   minSilenceMs?: number;
   /** Threshold (ms) for "newline" silences (paragraph breaks). Default 1500 */
   nlSilenceMs?: number;
+  /** Initial speed markers (from saved edits) */
+  initialSpeedMarkers?: SpeedMarker[];
+  /** Initial default playback speed (from saved edits). Default 1 */
+  initialDefaultSpeed?: PlaybackSpeed;
 }
 
 export interface TranscriptEditStats {
@@ -284,6 +288,10 @@ export interface UseTranscriptEditsResult {
   pushUndo: () => void;
   /** Restore the most recent undo snapshot */
   undo: () => void;
+  /** Step forward again after an undo. Cleared by any new edit. */
+  redo: () => void;
+  /** Whether there is anything to redo */
+  canRedo: boolean;
 
   // -- Word mutations (selection-agnostic: pass explicit indices) --
   /** Toggle the deleted flag on a single word */
@@ -330,12 +338,21 @@ export interface UseTranscriptEditsResult {
   speedMarkers: SpeedMarker[];
   /** Default playback speed when no marker applies */
   defaultSpeed: PlaybackSpeed;
-  /** Set the default playback speed */
+  /** Set the default playback speed (undoable) */
   setDefaultSpeed: (speed: PlaybackSpeed) => void;
-  /** Add/update/remove a speed marker (re-selecting the same speed removes it) */
+  /** Add/update/remove a speed marker (re-selecting the same speed removes it; undoable) */
   toggleSpeedMarker: (index: number, speed: PlaybackSpeed) => void;
-  /** Remove the speed marker at a word index, if any */
+  /** Remove the speed marker at a word index, if any (undoable) */
   removeSpeedMarker: (index: number) => void;
+  /**
+   * Apply one speed across an index range (typically the selection): marks the
+   * start, restores the prior effective speed after the end. One undo step.
+   */
+  setSpeedForRange: (
+    startIndex: number,
+    endIndex: number,
+    speed: PlaybackSpeed
+  ) => void;
   /** Effective playback speed at a word index */
   getSpeedAtIndex: (index: number) => PlaybackSpeed;
   /** The speed marker at a word index, if any */
@@ -368,6 +385,8 @@ export function useTranscriptEdits(
     onChange,
     minSilenceMs: initialMinSilenceMs = DEFAULT_MIN_SILENCE_MS,
     nlSilenceMs: initialNlSilenceMs = DEFAULT_NL_SILENCE_MS,
+    initialSpeedMarkers,
+    initialDefaultSpeed,
   } = options;
 
   // Track if we've initialized from saved state (skip first onChange notification)
@@ -383,6 +402,14 @@ export function useTranscriptEdits(
   );
   const [clipboard, setClipboard] = useState<TranscriptClipboard | null>(null);
   const [hasEdits, setHasEdits] = useState(() => {
+    // Rehydrated speed state counts as an edit, matching the live setters
+    // (toggleSpeedMarker sets hasEdits) and this flag's documented contract
+    if (
+      (initialSpeedMarkers && initialSpeedMarkers.length > 0) ||
+      (initialDefaultSpeed !== undefined && initialDefaultSpeed !== 1)
+    ) {
+      return true;
+    }
     // Compare saved state against the derived baseline: deletions, insertions,
     // length changes, AND text edits (text-only edits previously initialized
     // hasEdits=false, which also suppressed onChange persistence).
@@ -407,13 +434,44 @@ export function useTranscriptEdits(
   });
   const [minSilenceMs, setMinSilenceMs] = useState(initialMinSilenceMs);
   const [nlSilenceMs, setNlSilenceMs] = useState(initialNlSilenceMs);
-  const [defaultSpeed, setDefaultSpeed] = useState<PlaybackSpeed>(1);
-  const [speedMarkers, setSpeedMarkers] = useState<SpeedMarker[]>([]);
+  const [defaultSpeed, setDefaultSpeed] = useState<PlaybackSpeed>(
+    initialDefaultSpeed ?? 1
+  );
+  const [speedMarkers, setSpeedMarkers] = useState<SpeedMarker[]>(
+    initialSpeedMarkers ?? []
+  );
+
+  // Speed snapshots aligned with undoStack so undo restores speed too. Not
+  // persisted: entries synthesized for a rehydrated undoStack carry the
+  // initial speed, so undoing past them simply leaves speed at its saved
+  // state instead of guessing history we never had.
+  const [speedUndoStack, setSpeedUndoStack] = useState<
+    { speedMarkers: SpeedMarker[]; defaultSpeed: PlaybackSpeed }[]
+  >(() =>
+    (initialUndoStack ?? []).map(() => ({
+      speedMarkers: initialSpeedMarkers ?? [],
+      defaultSpeed: initialDefaultSpeed ?? 1,
+    }))
+  );
+
+  // Redo mirrors undo. Undo used to pop and discard, which meant a mis-click
+  // was unrecoverable and any Redo control a host offered could not service
+  // word-level steps — the pair looked symmetric and was not. Not persisted, for
+  // the same reason the speed snapshots are not: a rehydrated stack describes a
+  // sequence of states this session never performed.
+  const [redoStack, setRedoStack] = useState<EditableWord[][]>([]);
+  const [speedRedoStack, setSpeedRedoStack] = useState<
+    { speedMarkers: SpeedMarker[]; defaultSpeed: PlaybackSpeed }[]
+  >([]);
 
   // Helper to save current state to undo stack before making changes
   const pushUndo = useCallback(() => {
     setUndoStack((prev) => [...prev, editedWords]);
-  }, [editedWords]);
+    setSpeedUndoStack((prev) => [...prev, { speedMarkers, defaultSpeed }]);
+    // A fresh edit abandons the redo branch, as it does in every editor.
+    setRedoStack([]);
+    setSpeedRedoStack([]);
+  }, [editedWords, speedMarkers, defaultSpeed]);
 
   // Track previous transcript to detect changes
   const prevTranscriptRef = useRef(transcript);
@@ -430,6 +488,13 @@ export function useTranscriptEdits(
     setUndoStack([]);
     setHasEdits(false);
     setClipboard(null);
+    // Speed markers index into the old transcript's word list; keeping them
+    // would apply stale rates to arbitrary words of the new transcript
+    setSpeedMarkers([]);
+    setDefaultSpeed(1);
+    setSpeedUndoStack([]);
+    setRedoStack([]);
+    setSpeedRedoStack([]);
     initializedFromSaved.current = false;
   }, [transcript, minSilenceMs, nlSilenceMs]);
 
@@ -453,7 +518,17 @@ export function useTranscriptEdits(
     if (undoStack.length === 0) return;
     const previousState = undoStack[undoStack.length - 1];
     setUndoStack((prev) => prev.slice(0, -1));
+    // Bank what we are leaving before leaving it.
+    setRedoStack((prev) => [...prev, editedWords]);
+    setSpeedRedoStack((prev) => [...prev, { speedMarkers, defaultSpeed }]);
     setEditedWords(previousState);
+    // Speed snapshots ride along with word snapshots
+    const speedSnapshot = speedUndoStack[speedUndoStack.length - 1];
+    if (speedSnapshot) {
+      setSpeedUndoStack((prev) => prev.slice(0, -1));
+      setSpeedMarkers(speedSnapshot.speedMarkers);
+      setDefaultSpeed(speedSnapshot.defaultSpeed);
+    }
     // Compare against the silence-inserted baseline (what the editor actually
     // starts from), not raw transcript.words — with any detected silence the
     // lengths never matched and hasEdits stayed true after undoing everything.
@@ -467,8 +542,40 @@ export function useTranscriptEdits(
           !ew.inserted &&
           ew.word.text === baseline[i].word.text
       );
-    setHasEdits(!isOriginal);
-  }, [undoStack, transcript, minSilenceMs, nlSilenceMs]);
+    const speedIsOriginal =
+      !speedSnapshot ||
+      (speedSnapshot.speedMarkers.length === 0 &&
+        speedSnapshot.defaultSpeed === 1);
+    setHasEdits(!isOriginal || !speedIsOriginal);
+  }, [
+    undoStack,
+    speedUndoStack,
+    editedWords,
+    speedMarkers,
+    defaultSpeed,
+    transcript,
+    minSilenceMs,
+    nlSilenceMs,
+  ]);
+
+  /** Step forward again after an undo. Cleared by any new edit. */
+  const redo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    const nextState = redoStack[redoStack.length - 1];
+    setRedoStack((prev) => prev.slice(0, -1));
+    setUndoStack((prev) => [...prev, editedWords]);
+    setSpeedUndoStack((prev) => [...prev, { speedMarkers, defaultSpeed }]);
+    setEditedWords(nextState);
+    const speedSnapshot = speedRedoStack[speedRedoStack.length - 1];
+    if (speedSnapshot) {
+      setSpeedRedoStack((prev) => prev.slice(0, -1));
+      setSpeedMarkers(speedSnapshot.speedMarkers);
+      setDefaultSpeed(speedSnapshot.defaultSpeed);
+    }
+    // Redoing always lands on a state that was reached by editing, so it is by
+    // definition not the untouched original.
+    setHasEdits(true);
+  }, [redoStack, speedRedoStack, editedWords, speedMarkers, defaultSpeed]);
 
   // Toggle deleted state on a single word
   const toggleWordDeleted = useCallback(
@@ -735,13 +842,59 @@ export function useTranscriptEdits(
       });
 
       setEditedWords(restoredWords);
+
+      // Speed markers index into the silence-inserted array, so the rebuild
+      // shifts them too. Re-anchor each marker to the first rebuild-surviving
+      // word at or after it — the same ordinal keyspace as the deletion
+      // restore above. Markers with no surviving word left are dropped;
+      // markers that collapse onto the same word keep the later speed (it
+      // governed the words from that point on).
+      if (speedMarkers.length > 0) {
+        const survivorPrefix: number[] = [];
+        let survivors = 0;
+        editedWords.forEach((ew) => {
+          survivorPrefix.push(survivors);
+          if (
+            !isSilenceType(ew.word.wordType) &&
+            ew.originalIndex >= 0 &&
+            !ew.inserted
+          ) {
+            survivors++;
+          }
+        });
+        survivorPrefix.push(survivors);
+        const newIndexByOrdinal: number[] = [];
+        restoredWords.forEach((ew, i) => {
+          if (!isSilenceType(ew.word.wordType)) newIndexByOrdinal.push(i);
+        });
+        const remapped: SpeedMarker[] = [];
+        speedMarkers.forEach((m) => {
+          const ordinal =
+            survivorPrefix[Math.min(m.wordIndex, editedWords.length)];
+          const newIndex = newIndexByOrdinal[ordinal];
+          if (newIndex === undefined) return;
+          const last = remapped[remapped.length - 1];
+          if (last && last.wordIndex === newIndex) {
+            remapped[remapped.length - 1] = {
+              wordIndex: newIndex,
+              speed: m.speed,
+            };
+          } else {
+            remapped.push({ wordIndex: newIndex, speed: m.speed });
+          }
+        });
+        setSpeedMarkers(remapped);
+      }
+
       // Undo snapshots were captured against the previous silence layout;
       // restoring one after a rebuild would resurrect silence chips that no
       // longer match the current thresholds. Threshold changes are not
-      // undoable, so drop the stale history rather than restore it.
+      // undoable, so drop the stale history rather than restore it — the
+      // speed stack rides along or the two stacks drift out of alignment.
       setUndoStack([]);
+      setSpeedUndoStack([]);
     },
-    [editedWords, transcript]
+    [editedWords, transcript, speedMarkers]
   );
 
   // Get the speed marker at a specific word index (if any)
@@ -755,6 +908,7 @@ export function useTranscriptEdits(
   // Toggle a speed marker at a word index
   const toggleSpeedMarker = useCallback(
     (wordIndex: number, speed: PlaybackSpeed) => {
+      pushUndo();
       setSpeedMarkers((prev) => {
         const existingIdx = prev.findIndex((m) => m.wordIndex === wordIndex);
         if (existingIdx >= 0) {
@@ -774,19 +928,70 @@ export function useTranscriptEdits(
       });
       setHasEdits(true);
     },
-    []
+    [pushUndo]
   );
 
   // Remove a speed marker at a word index
   const removeSpeedMarker = useCallback(
     (wordIndex: number) => {
-      const filtered = speedMarkers.filter((m) => m.wordIndex !== wordIndex);
-      if (filtered.length !== speedMarkers.length) {
-        setSpeedMarkers(filtered);
-        setHasEdits(true);
-      }
+      if (!speedMarkers.some((m) => m.wordIndex === wordIndex)) return;
+      pushUndo();
+      setSpeedMarkers(speedMarkers.filter((m) => m.wordIndex !== wordIndex));
+      setHasEdits(true);
     },
-    [speedMarkers]
+    [speedMarkers, pushUndo]
+  );
+
+  // Undoable default-speed setter (the raw setter stays internal for undo/reset)
+  const setDefaultSpeedUndoable = useCallback(
+    (speed: PlaybackSpeed) => {
+      if (speed === defaultSpeed) return;
+      pushUndo();
+      setDefaultSpeed(speed);
+      setHasEdits(true);
+    },
+    [defaultSpeed, pushUndo]
+  );
+
+  /**
+   * Apply one speed across an index range (typically the current selection):
+   * clears markers inside the range, marks the start with the new speed, and
+   * restores the previous effective speed just after the end so only the
+   * range is affected. One undo step.
+   */
+  const setSpeedForRange = useCallback(
+    (startIndex: number, endIndex: number, speed: PlaybackSpeed) => {
+      if (startIndex > endIndex) return;
+      pushUndo();
+      const afterIndex = endIndex + 1;
+      const speedAfter = getSpeedAtIndex(
+        afterIndex,
+        speedMarkers,
+        defaultSpeed
+      );
+      const kept = speedMarkers.filter(
+        (m) => m.wordIndex < startIndex || m.wordIndex > endIndex
+      );
+      // Only pin the range start when it changes the effective speed there.
+      // Applying the speed already in effect (e.g. 1x under a 1x default, or a
+      // preceding marker's speed) would persist a no-op marker into saves/exports.
+      const speedAtStart = getSpeedAtIndex(startIndex, kept, defaultSpeed);
+      const next =
+        speedAtStart === speed
+          ? [...kept]
+          : [...kept, { wordIndex: startIndex, speed }];
+      if (
+        afterIndex < editedWords.length &&
+        speedAfter !== speed &&
+        !kept.some((m) => m.wordIndex === afterIndex)
+      ) {
+        next.push({ wordIndex: afterIndex, speed: speedAfter });
+      }
+      next.sort((a, b) => a.wordIndex - b.wordIndex);
+      setSpeedMarkers(next);
+      setHasEdits(true);
+    },
+    [pushUndo, speedMarkers, defaultSpeed, editedWords.length]
   );
 
   // Effective playback speed at a word index (bound to current markers + default)
@@ -891,6 +1096,8 @@ export function useTranscriptEdits(
     hasEdits,
     pushUndo,
     undo,
+    redo,
+    canRedo: redoStack.length > 0,
     toggleWordDeleted,
     deleteRange,
     cut,
@@ -905,7 +1112,8 @@ export function useTranscriptEdits(
     silenceThresholds: { minSilenceMs, nlSilenceMs },
     speedMarkers,
     defaultSpeed,
-    setDefaultSpeed,
+    setDefaultSpeed: setDefaultSpeedUndoable,
+    setSpeedForRange,
     toggleSpeedMarker,
     removeSpeedMarker,
     getSpeedAtIndex: getSpeedAtIndexBound,
