@@ -457,7 +457,7 @@ function allowedCodetypes(
   s: CodifyShard,
   opts?: SearchOptions
 ): Set<number> | null {
-  if (!opts?.codetypes) return null;
+  if (!opts?.codetypes?.length) return null;
   return new Set(
     opts.codetypes.map((ct) => s.codetypes.indexOf(ct)).filter((i) => i >= 0)
   );

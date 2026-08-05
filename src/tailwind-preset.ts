@@ -406,6 +406,22 @@ export const miewebUISafelist = [
   // injected <svg> so the diagram sizes naturally instead of collapsing.
   '[&_svg]:h-auto',
   '[&_svg]:max-w-none',
+  // CodeLookup codetype segmented-control toggle
+  'flex',
+  'flex-wrap',
+  'items-center',
+  'gap-1',
+  'rounded-full',
+  'px-2.5',
+  'py-0.5',
+  'text-xs',
+  'transition-colors',
+  'border-primary-800',
+  'dark:border-primary-400',
+  'dark:bg-primary-400',
+  'dark:text-primary-950',
+  'text-white',
+  'hover:text-foreground',
 ];
 
 export interface MiewebUIPreset {

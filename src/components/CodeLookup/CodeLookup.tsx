@@ -264,7 +264,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const activeCodetypes = hasCodetypeOptions
       ? codetypeOptions![activeCodetypeIdx]?.codetypes
       : searchCodetypes;
-    const codetypesKey = activeCodetypes ? activeCodetypes.join(',') : null;
+    const codetypesKey = activeCodetypes?.length ? activeCodetypes.join(',') : null;
     /** active codetypes for the stable openDrill callback */
     const codetypesRef = React.useRef(activeCodetypes);
     codetypesRef.current = activeCodetypes;
