@@ -109,8 +109,14 @@ function isCenteringIdiom(token, lineText) {
   );
 }
 
+// Same alternation as rtl-scan.mjs: `space-x-` requires a real suffix and
+// `divide-x` a trailing boundary, so the `rtl:*-reverse` remedy itself never
+// matches as a spurious bare `space-x`/`divide-x` manual site.
 const NEEDS_MANUAL = new RegExp(
-  '(^|[\\s\'"`{:])-?(?:[a-z-]+:)*((?:space-x|divide-x)(?:-(?!reverse)[^\\s\'"`]+)?)',
+  '(^|[\\s\'"`{:])-?(?:[a-z-]+:)*(' +
+    'space-x-(?!reverse)[^\\s\'"`]+' +
+    '|divide-x(?:-(?!reverse)[^\\s\'"`]+)?(?![-\\w])' +
+    ')',
   'g'
 );
 
