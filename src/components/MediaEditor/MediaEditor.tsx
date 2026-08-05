@@ -141,6 +141,48 @@ const mediaEditorVariants = cva(
 // Helpers
 // ============================================================================
 
+/**
+ * Bring a word into view WITHIN the transcript, never by moving the page.
+ *
+ * `Element.scrollIntoView` walks up to the nearest scrolling ancestor. Above
+ * the md breakpoint that is the transcript's own box and the behaviour is
+ * right. Below it the editor grows to its content instead of scrolling
+ * internally, so the nearest scrolling ancestor is the DOCUMENT — following
+ * the active word dragged the whole page down, taking the player and its
+ * controls off screen a word at a time, and any attempt to scroll back was
+ * undone by the next word.
+ *
+ * Scrolling the container directly cannot escape it. The clamped-both-ways
+ * arithmetic reproduces `block: 'nearest'`, so behaviour above the breakpoint
+ * is unchanged.
+ */
+function scrollWordIntoTranscript(
+  container: HTMLElement | null,
+  wordIndex: number
+): void {
+  if (!container) return;
+  // Not its own scrolling box (the small-screen layout) — nothing to scroll,
+  // and anything we did here would move the page instead.
+  if (container.scrollHeight <= container.clientHeight) return;
+
+  const el = container.querySelector(`[data-word-index="${wordIndex}"]`);
+  if (!el) return;
+
+  const containerBox = container.getBoundingClientRect();
+  const wordBox = el.getBoundingClientRect();
+
+  const above = wordBox.top - containerBox.top;
+  const below = wordBox.bottom - containerBox.bottom;
+  // Already fully visible: `nearest` scrolls nothing.
+  const delta = above < 0 ? above : below > 0 ? below : 0;
+  if (delta === 0) return;
+
+  container.scrollTo({
+    top: container.scrollTop + delta,
+    behavior: 'smooth',
+  });
+}
+
 /** Format duration: seconds only if <90s, min:sec if <60min, h:mm:ss otherwise */
 function formatDuration(ms: number): string {
   const totalSeconds = Math.round(ms / 1000);
@@ -502,15 +544,18 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     // Auto-scroll the active word into view during playback
     React.useEffect(() => {
       if (activeWordIndex === null) return;
-      const el = contentRef.current?.querySelector(
-        `[data-word-index="${activeWordIndex}"]`
-      );
-      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      scrollWordIntoTranscript(contentRef.current, activeWordIndex);
     }, [activeWordIndex]);
 
-    // Auto-focus the transcript for keyboard navigation
+    // Auto-focus the transcript for keyboard navigation.
+    //
+    // `preventScroll` matters: focusing an element the browser considers
+    // off-screen scrolls it into view, and below the md breakpoint the
+    // transcript is part of a page-length document rather than its own
+    // scrolling box — so this landed the reader partway down the transcript
+    // with the player above the fold, on every load.
     React.useEffect(() => {
-      contentRef.current?.focus();
+      contentRef.current?.focus({ preventScroll: true });
     }, [transcript]);
 
     // Apply the default speed when it changes (and no marker overrides it)
@@ -1230,10 +1275,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           }
 
           // Scroll the cursor into view
-          const wordElement = contentRef.current?.querySelector(
-            `[data-word-index="${newIndex}"]`
-          );
-          wordElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          scrollWordIntoTranscript(contentRef.current, newIndex);
         }
       },
       [
@@ -1369,11 +1411,22 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           }`}
         >
           {/* Media surface */}
+          {/*
+            The cap is written twice on purpose. `max-h-[50%]` is a percentage
+            of the parent's height, which only resolves while the editor is a
+            fixed-height shell — on a small screen the parent grows to its
+            content, the percentage resolves against an indeterminate height,
+            and the rule silently becomes no cap at all. A portrait phone
+            recording then took the full viewport on its own and pushed its own
+            controls off the bottom of the screen. `max-h-[55vh]` always
+            resolves; the md variant keeps existing desktop behaviour byte for
+            byte.
+          */}
           <div
-            className={`border-border bg-background min-h-0 shrink-0 ${
+            className={`border-border bg-background flex min-h-0 shrink-0 ${
               splitLayout === 'vertical'
-                ? 'md:w-1/2 md:border-r'
-                : 'max-h-[50%] border-b'
+                ? 'max-h-[55vh] md:max-h-none md:w-1/2 md:border-r'
+                : 'max-h-[55vh] border-b md:max-h-[50%]'
             }`}
           >
             <MediaPlayer
