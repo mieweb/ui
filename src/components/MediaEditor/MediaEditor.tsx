@@ -1418,15 +1418,22 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
             content, the percentage resolves against an indeterminate height,
             and the rule silently becomes no cap at all. A portrait phone
             recording then took the full viewport on its own and pushed its own
-            controls off the bottom of the screen. `max-h-[55vh]` always
+            controls off the bottom of the screen. The `dvh` cap always
             resolves; the md variant keeps existing desktop behaviour byte for
             byte.
+
+            `dvh` rather than `vh`, matching Modal and Sheet: on iOS Safari
+            `vh` measures the viewport as if the browser chrome were hidden, so
+            while the address bar is on screen `55vh` is taller than 55% of
+            what you can actually see — which would put the player's own
+            controls back under the fold, the exact failure this cap exists to
+            prevent.
           */}
           <div
             className={`border-border bg-background flex min-h-0 shrink-0 ${
               splitLayout === 'vertical'
-                ? 'max-h-[55vh] md:max-h-none md:w-1/2 md:border-r'
-                : 'max-h-[55vh] border-b md:max-h-[50%]'
+                ? 'max-h-[55dvh] md:max-h-none md:w-1/2 md:border-r'
+                : 'max-h-[55dvh] border-b md:max-h-[50%]'
             }`}
           >
             <MediaPlayer
