@@ -329,7 +329,7 @@ export function CollabStatus({
       />
       {!compact && <span>{statusText}</span>}
       {!compact && attention && (
-        <span className="text-warning-700 truncate dark:text-warning-400">
+        <span className="text-warning-700 dark:text-warning-400 truncate">
           · {attention}
         </span>
       )}
@@ -374,7 +374,9 @@ export function CollabStatus({
                   type="button"
                   className={cn(
                     'hover:text-foreground focus-visible:ring-ring rounded p-0.5 focus-visible:ring-2 focus-visible:outline-none',
-                    wrapped ? 'text-foreground bg-muted' : 'text-muted-foreground'
+                    wrapped
+                      ? 'text-foreground bg-muted'
+                      : 'text-muted-foreground'
                   )}
                   onClick={() => setWrapped((v) => !v)}
                   aria-pressed={wrapped}
@@ -453,9 +455,14 @@ export function CollabStatus({
                       <span
                         aria-hidden="true"
                         className="h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: peer.color ?? 'currentColor' }}
+                        style={{
+                          backgroundColor: peer.color ?? 'currentColor',
+                        }}
                       />
-                      <span className={cn('text-foreground', clip)} title={peer.label}>
+                      <span
+                        className={cn('text-foreground', clip)}
+                        title={peer.label}
+                      >
                         {peer.label}
                       </span>
                     </li>
@@ -487,7 +494,10 @@ export function CollabStatus({
                       {e.kind}
                       {e.origin ? `/${e.origin}` : ''}
                     </span>
-                    <span className={cn('text-foreground', clip)} title={e.detail}>
+                    <span
+                      className={cn('text-foreground', clip)}
+                      title={e.detail}
+                    >
                       {e.detail}
                     </span>
                   </li>

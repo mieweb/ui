@@ -42,7 +42,9 @@ describe('CollabStatus', () => {
 
   it('lists who is in the room in the panel', async () => {
     const user = userEvent.setup();
-    render(<CollabStatus connected peers={[{ name: 'Ann' }, { name: 'Bo' }]} />);
+    render(
+      <CollabStatus connected peers={[{ name: 'Ann' }, { name: 'Bo' }]} />
+    );
 
     await user.click(screen.getByRole('button', { name: /Live-sync status/ }));
 

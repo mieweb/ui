@@ -418,6 +418,11 @@ export const miewebUISafelist = [
   'text-[11px]',
   // CodeLookup memory picklist (frequently-used pick count)
   'text-primary-600',
+  // CollabStatus debug panel (fixed-width portal, definition grid, log grid)
+  'w-[26rem]',
+  'max-w-[calc(100vw-1rem)]',
+  'grid-cols-[auto_1fr]',
+  'grid-cols-[auto_auto_1fr]',
   // SuperChat (participant chips, unread badge, active/hover states)
   'bg-primary-100',
   'bg-primary-600',

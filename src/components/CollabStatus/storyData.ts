@@ -122,6 +122,7 @@ export class LocalYjsRoom {
       awareness,
       provider,
       leave: () => {
+        window.clearTimeout(syncTimer);
         this.members.delete(member);
         doc.off('update', onDocUpdate);
         awareness.off('update', onAwareness);
@@ -138,7 +139,10 @@ export class LocalYjsRoom {
     };
 
     this.members.add(member);
-    window.setTimeout(() => provider.markSynced(true), syncDelay);
+    const syncTimer = window.setTimeout(
+      () => provider.markSynced(true),
+      syncDelay
+    );
     return member;
   }
 
