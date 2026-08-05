@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+import { Button } from '../Button/Button';
 import { CollabStatus } from './CollabStatus';
 import { useYjsCollabStatus } from './useYjsCollabStatus';
 import { LocalYjsRoom, sampleLog, type LocalYjsMember } from './storyData';
@@ -226,9 +227,8 @@ function SimulatedRoomDemo() {
           }}
         />
       ))}
-      <button
-        type="button"
-        className="bg-primary-500 rounded-md px-3 py-1.5 text-sm text-white"
+      <Button
+        size="sm"
         onClick={() => {
           const id = nextId.current++;
           const name = ['Ann Nurse', 'Bo Tech', 'Cy Admin'][(id - 1) % 3];
@@ -239,7 +239,7 @@ function SimulatedRoomDemo() {
         }}
       >
         Add a peer window
-      </button>
+      </Button>
       <p className="text-muted-foreground text-xs">
         Every row is a separate <code>Y.Doc</code> + <code>Awareness</code>,
         relayed in memory instead of over a WebSocket. Add a peer, click{' '}
