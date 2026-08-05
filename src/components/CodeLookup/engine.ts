@@ -66,6 +66,8 @@ export interface CodifyResult {
   viaFuzzy?: boolean;
   /** true when the match came from the code itself (query looked like a code) */
   viaCode?: boolean;
+  /** true when the row came from the user's frequently-used memory picklist */
+  viaMemory?: boolean;
 }
 
 // =============================================================================
@@ -440,7 +442,8 @@ export interface SearchOptions {
   boostCodetypes?: string[];
   /** Restrict results to these coding systems (e.g. ['ICD10'] for an
    * ICD-10-only condition picker). Docs of other codetypes are dropped;
-   * shards containing none of them are skipped entirely. */
+   * shards containing none of them are skipped entirely. Omitted or empty
+   * means all systems. */
   codetypes?: string[];
   /** Conditions: only billable (leaf) ICD-10 codes — category roots and
    * SNOMED entries are dropped. Other domains are unaffected. */
@@ -452,12 +455,14 @@ export interface SearchOptions {
 const CODETYPE_BOOST = 3;
 
 /** Shard-local codetype indices allowed by opts.codetypes (null = no filter;
- * an empty set means the shard has none of the requested systems). */
+ * an empty set means the shard has none of the requested systems). An empty
+ * codetypes array is treated the same as omitting it — "all systems" — so a
+ * consumer passing [] doesn't silently get zero results. */
 function allowedCodetypes(
   s: CodifyShard,
   opts?: SearchOptions
 ): Set<number> | null {
-  if (!opts?.codetypes) return null;
+  if (!opts?.codetypes?.length) return null;
   return new Set(
     opts.codetypes.map((ct) => s.codetypes.indexOf(ct)).filter((i) => i >= 0)
   );

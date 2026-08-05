@@ -425,6 +425,10 @@ describe('searchShards', () => {
           codetypes: ['ICD11'],
         })
       ).toHaveLength(0);
+      // an empty codetypes array means "no filter", same as omitting it
+      expect(
+        searchShards([shard], 'heart failure', 20, false, { codetypes: [] })
+      ).toHaveLength(2);
     });
 
     it('still finds the exact code among many prefix matches (scan cap)', () => {

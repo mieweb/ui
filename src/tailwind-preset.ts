@@ -39,6 +39,30 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+  // Media stack (MediaEditor / TranscriptView / MediaPlayer) — opacity-modifier
+  // and state variants introduced with the media components (ui#323 finding):
+  'bg-muted/20',
+  'bg-primary-50',
+  'bg-primary-500/20',
+  'bg-primary-500/40',
+  'bg-success/15',
+  'bg-warning/20',
+  'bg-warning/40',
+  'border-l-warning',
+  'border-primary-600',
+  'border-warning/50',
+  'dark:bg-primary-950',
+  'hover:bg-destructive/20',
+  'hover:bg-muted',
+  'hover:bg-muted/70',
+  'hover:bg-primary-500/15',
+  'hover:bg-primary-500/30',
+  'hover:bg-success/25',
+  'hover:text-destructive',
+  'outline-destructive',
+  'outline-primary-500',
+  'outline-warning',
+  'text-primary-500',
   // Semantic colors
   'border-border',
   'border-input',
@@ -358,6 +382,8 @@ export const miewebUISafelist = [
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',
+  // Scrollable floating panels (DateInput calendar, Autocomplete, Select, Table, ScrollArea, …)
+  'overflow-auto',
   // Select component
   'truncate',
   // AIReconciliationPanel
@@ -390,6 +416,31 @@ export const miewebUISafelist = [
   'last:border-b-0',
   'border-dashed',
   'text-[11px]',
+  // CodeLookup memory picklist (frequently-used pick count)
+  'text-primary-600',
+  // CodeLookup coding-system toggle (segmented radiogroup pills)
+  'flex',
+  'flex-wrap',
+  'items-center',
+  'gap-1',
+  'rounded-full',
+  'px-2.5',
+  'py-0.5',
+  'text-xs',
+  'transition-colors',
+  'focus:ring-2',
+  'focus:outline-none',
+  'border-primary-800',
+  'dark:border-primary-400',
+  'dark:bg-primary-400',
+  'dark:text-primary-950',
+  'text-white',
+  'hover:text-foreground',
+  // CollabStatus debug panel (fixed-width portal, definition grid, log grid)
+  'w-[26rem]',
+  'max-w-[calc(100vw-1rem)]',
+  'grid-cols-[auto_1fr]',
+  'grid-cols-[auto_auto_1fr]',
   // SuperChat (participant chips, unread badge, active/hover states)
   'bg-primary-100',
   'bg-primary-600',

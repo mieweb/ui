@@ -6,7 +6,24 @@ export {
   type CodeLookupProps,
   type CodifyDomain,
   type CodetypeOption,
+  type CodeLookupMemoryConfig,
 } from './CodeLookup';
+export {
+  clearMemory,
+  clearAllMemory,
+  setMemoryStorage,
+  getMemoryStorage,
+  type MemoryEntry,
+  type MemoryScope,
+  type MemoryStorage,
+} from './memoryStore';
+export {
+  exportMemoryYaml,
+  importMemoryYaml,
+  MEMORY_YAML_VERSION,
+  type ImportMemoryOptions,
+  type ImportMemoryResult,
+} from './memoryYaml';
 export {
   searchShards,
   parseShard,

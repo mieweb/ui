@@ -117,6 +117,19 @@ describe('getSpeedAtIndex', () => {
     expect(getSpeedAtIndex(2, markers, 1)).toBe(1.5);
     expect(getSpeedAtIndex(3, markers, 1)).toBe(2);
   });
+
+  it('is order-independent for external callers (#327 review)', () => {
+    // Public helper: callers may pass markers in arbitrary order.
+    const unsorted: SpeedMarker[] = [
+      { wordIndex: 5, speed: 2 },
+      { wordIndex: 1, speed: 1.5 },
+      { wordIndex: 3, speed: 0.5 },
+    ];
+    expect(getSpeedAtIndex(0, unsorted, 1)).toBe(1);
+    expect(getSpeedAtIndex(1, unsorted, 1)).toBe(1.5);
+    expect(getSpeedAtIndex(4, unsorted, 1)).toBe(0.5);
+    expect(getSpeedAtIndex(9, unsorted, 1)).toBe(2);
+  });
 });
 
 // ============================================================================
@@ -231,5 +244,276 @@ describe('useTranscriptEdits', () => {
     expect(onChange).toHaveBeenCalled();
     const [words] = onChange.mock.calls[onChange.mock.calls.length - 1];
     expect((words as EditableWord[])[0].deleted).toBe(true);
+  });
+});
+
+// ============================================================================
+// Regression tests for the ui#323 review findings
+// ============================================================================
+
+// A transcript with a leading pause and an inter-word gap, so the derived
+// timeline interleaves silence pseudo-words: [sil, A, sil-nl, B]
+const gappy: Transcript = {
+  durationMs: 4600,
+  words: [
+    { text: 'Alpha', startMs: 600, endMs: 1000 },
+    { text: 'Beta', startMs: 3000, endMs: 3500 },
+  ],
+};
+
+describe('ui#323 / #327-review regressions', () => {
+  it('counts silence-newline entries as silences, not words (finding 3)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    // Timeline: [silence 0-600][Alpha][silence-newline 1000-3000][Beta]
+    expect(result.current.stats.activeWordCount).toBe(2);
+    expect(result.current.stats.activeSilenceCount).toBe(2);
+  });
+
+  it('counts default filler words exactly once (findings 4/5)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    expect(result.current.fillerAnalysis.matchCounts.get('um')).toBe(1);
+    expect(result.current.fillerAnalysis.durations.get('um')).toBe(300);
+  });
+
+  it('can split a silence-newline entry (finding 6)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    const nlIndex = result.current.editedWords.findIndex(
+      (ew) => ew.word.wordType === 'silence-newline'
+    );
+    expect(nlIndex).toBeGreaterThan(-1);
+    act(() => result.current.splitSilence(nlIndex, [1, 1]));
+    // The 2s newline silence is replaced by two 1s segments
+    expect(result.current.editedWords.filter((ew) => ew.inserted)).toHaveLength(
+      2
+    );
+  });
+
+  it('keeps deletions on the SAME words across a threshold rebuild (finding 2)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    // Delete 'Beta' (the second non-silence word)
+    const betaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    act(() => result.current.toggleWordDeleted(betaIdx));
+    // Change thresholds so the silence layout changes entirely
+    act(() => result.current.setSilenceThresholds(100, 5000));
+    const beta = result.current.editedWords.find(
+      (ew) => ew.word.text === 'Beta'
+    );
+    const alpha = result.current.editedWords.find(
+      (ew) => ew.word.text === 'Alpha'
+    );
+    expect(beta?.deleted).toBe(true);
+    expect(alpha?.deleted).toBe(false);
+  });
+
+  it('clears hasEdits after undoing back to baseline with silences present (finding 1)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    act(() => result.current.toggleWordDeleted(1));
+    expect(result.current.hasEdits).toBe(true);
+    act(() => result.current.undo());
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('drops stale undo snapshots on a threshold rebuild (#327 review)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    const betaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    act(() => result.current.toggleWordDeleted(betaIdx));
+    expect(result.current.undoStack).toHaveLength(1);
+    // The snapshot in the stack was captured against the old silence layout
+    act(() => result.current.setSilenceThresholds(100, 5000));
+    expect(result.current.undoStack).toHaveLength(0);
+    // undo() is a no-op instead of restoring a stale-layout timeline
+    const before = result.current.editedWords;
+    act(() => result.current.undo());
+    expect(result.current.editedWords).toBe(before);
+  });
+
+  it('keeps deletions on the right words across a threshold rebuild with pasted words (#327 review)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    // Copy 'Hello' and paste the copy before 'world'. The pasted word keeps
+    // its source originalIndex, but the rebuild re-inits from the original
+    // transcript (dropping inserts) — so it must not occupy a slot in the
+    // deletion keyspace, or every word after it shifts.
+    act(() => result.current.copy([0]));
+    act(() => result.current.paste(2, true));
+    const worldIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'world'
+    );
+    act(() => result.current.toggleWordDeleted(worldIdx));
+
+    act(() => result.current.setSilenceThresholds(100, 5000));
+
+    // The rebuild drops the pasted copy; 'world' must still be the deleted one
+    expect(result.current.editedWords).toHaveLength(3);
+    const [hello, um, world] = result.current.editedWords;
+    expect(world.deleted).toBe(true);
+    expect(hello.deleted).toBe(false);
+    expect(um.deleted).toBe(false);
+  });
+
+  it('initializes hasEdits=true for saved text-only edits (finding 13)', () => {
+    const baseline = initEditableWords(packed);
+    const withTextEdit: EditableWord[] = baseline.map((ew, i) =>
+      i === 0 ? { ...ew, word: { ...ew.word, text: 'Howdy' } } : ew
+    );
+    const { result } = renderHook(() =>
+      useTranscriptEdits({
+        transcript: packed,
+        initialEditedWords: withTextEdit,
+      })
+    );
+    expect(result.current.hasEdits).toBe(true);
+  });
+});
+
+// ============================================================================
+// Speed edits: range apply + undo coverage
+// ============================================================================
+
+describe('speed range + undo', () => {
+  it('setSpeedForRange marks the range and restores the prior speed after it', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 2);
+    });
+    expect(result.current.speedMarkers).toEqual([
+      { wordIndex: 0, speed: 2 },
+      { wordIndex: 2, speed: 1 },
+    ]);
+    expect(result.current.getSpeedAtIndex(0)).toBe(2);
+    expect(result.current.getSpeedAtIndex(1)).toBe(2);
+    // The word after the range keeps its previous effective speed
+    expect(result.current.getSpeedAtIndex(2)).toBe(1);
+    expect(result.current.hasEdits).toBe(true);
+  });
+
+  it('setSpeedForRange clears markers inside the range', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleSpeedMarker(1, 0.5);
+    });
+    act(() => {
+      result.current.setSpeedForRange(0, 2, 1.5);
+    });
+    // The 0.5 marker inside the range must not fragment the new region;
+    // range reaches the final word, so no restore marker is added
+    expect(result.current.speedMarkers).toEqual([{ wordIndex: 0, speed: 1.5 }]);
+  });
+
+  it('setSpeedForRange adds no marker when the speed is already in effect', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    // Applying the default speed (1x) to a fresh range must not persist a no-op marker
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 1);
+    });
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.getSpeedAtIndex(0)).toBe(1);
+
+    // And when a preceding marker already sets the range's speed, re-applying it is a no-op
+    act(() => {
+      result.current.toggleSpeedMarker(0, 2);
+    });
+    act(() => {
+      result.current.setSpeedForRange(1, 2, 2);
+    });
+    expect(result.current.speedMarkers).toEqual([{ wordIndex: 0, speed: 2 }]);
+    expect(result.current.getSpeedAtIndex(2)).toBe(2);
+  });
+
+  it('undo reverts a speed marker set via toggleSpeedMarker', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleSpeedMarker(1, 2);
+    });
+    expect(result.current.speedMarkers).toHaveLength(1);
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('undo reverts a default-speed change and a range apply as single steps', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.setDefaultSpeed(1.5);
+    });
+    act(() => {
+      result.current.setSpeedForRange(0, 1, 2);
+    });
+    act(() => {
+      result.current.undo();
+    });
+    // Range apply undone in one step; default-speed change still applied
+    expect(result.current.speedMarkers).toEqual([]);
+    expect(result.current.defaultSpeed).toBe(1.5);
+    expect(result.current.hasEdits).toBe(true);
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.defaultSpeed).toBe(1);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('undo still restores words when speed was untouched', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: packed })
+    );
+    act(() => {
+      result.current.toggleWordDeleted(0);
+    });
+    act(() => {
+      result.current.undo();
+    });
+    expect(result.current.editedWords[0].deleted).toBe(false);
+    expect(result.current.hasEdits).toBe(false);
+  });
+
+  it('re-anchors speed markers to the same words across a threshold rebuild (#343 review)', () => {
+    const { result } = renderHook(() =>
+      useTranscriptEdits({ transcript: gappy })
+    );
+    const betaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    act(() => result.current.toggleSpeedMarker(betaIdx, 2));
+    // Raising the min threshold removes the leading silence, shifting every
+    // index — the marker must follow 'Beta', not its old position
+    act(() => result.current.setSilenceThresholds(700, 5000));
+    const newBetaIdx = result.current.editedWords.findIndex(
+      (ew) => ew.word.text === 'Beta'
+    );
+    expect(newBetaIdx).not.toBe(betaIdx);
+    expect(result.current.speedMarkers).toEqual([
+      { wordIndex: newBetaIdx, speed: 2 },
+    ]);
+    expect(result.current.getSpeedAtIndex(newBetaIdx)).toBe(2);
   });
 });

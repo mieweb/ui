@@ -21,6 +21,8 @@ import { suggestedActions } from '../storyData';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Demo',
+  component: HeyOzwell,
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {

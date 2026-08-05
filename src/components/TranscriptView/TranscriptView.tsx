@@ -298,7 +298,7 @@ export const TranscriptView = React.forwardRef<
             className={`hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer gap-3 rounded px-2 py-1 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
               isActive ? 'bg-primary-500/20' : ''
             }`}
-            {...activationProps(() => seekTo(row.startMs))}
+            onClick={() => seekTo(row.startMs)}
           >
             {showTimestamps && (
               <span className="text-muted-foreground w-12 shrink-0 font-mono">

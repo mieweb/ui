@@ -29,6 +29,7 @@
 
 import * as React from 'react';
 import type { CodeLookupProps } from './CodeLookup';
+import type { MemoryStorage } from './memoryBackend';
 
 /**
  * The CodeLookup component the provider distributes to consumers.
@@ -43,6 +44,31 @@ export type CodeLookupComponent = (
   props: CodeLookupProps
 ) => React.ReactElement | null;
 
+/**
+ * App-wide defaults for the CodeLookup memory picklist. Naming a signed-in
+ * `userId` here turns the picklist on for every lookup below the provider —
+ * instances need no wiring, and `memory={false}` (here or per-instance) turns
+ * it back off.
+ */
+export interface CodeLookupMemoryDefaults {
+  /** Signed-in user the counts belong to. No id, no memory. */
+  userId?: string;
+  /** Default count-sync endpoint (per-instance prop wins). */
+  serverUrl?: string;
+  /**
+   * Bucket the counts are scoped to. Defaults per instance to that lookup's
+   * `domains`, which keeps a med picker and a problem picker apart; set this
+   * to pool every lookup into one list instead.
+   */
+  context?: string;
+  /**
+   * Where picks are cached on this machine. `'local'` (IndexedDB) asserts a
+   * per-user device secured by a browser login; the default `'session'` keeps
+   * them in RAM for the tab, which is what a public kiosk wants.
+   */
+  storage?: MemoryStorage;
+}
+
 /** Resolved lookup wiring a component consumes (from prop or context). */
 export interface CodeLookupProviderConfig {
   /** The injected CodeLookup component (worker-capable, from the app bundle). */
@@ -51,6 +77,12 @@ export interface CodeLookupProviderConfig {
   indexUrl: string;
   /** Shard-set locale (default 'en'). */
   locale?: string;
+  /**
+   * Defaults for the memory picklist, or `false` to disable it everywhere
+   * below this provider (a public kiosk build). Naming a `userId` here is all
+   * an instance needs; `false` overrides a component's own `memory` config.
+   */
+  memory?: false | CodeLookupMemoryDefaults;
 }
 
 const CodeLookupContext = React.createContext<CodeLookupProviderConfig | null>(
@@ -64,6 +96,8 @@ export interface CodeLookupProviderProps {
   indexUrl?: string;
   /** Shard-set locale (default 'en'). */
   locale?: string;
+  /** Defaults for the memory picklist, or `false` to disable it everywhere. */
+  memory?: false | CodeLookupMemoryDefaults;
   children: React.ReactNode;
 }
 
@@ -71,11 +105,12 @@ export function CodeLookupProvider({
   component,
   indexUrl = '/codify',
   locale = 'en',
+  memory,
   children,
 }: CodeLookupProviderProps): React.ReactElement {
   const value = React.useMemo<CodeLookupProviderConfig>(
-    () => ({ component, indexUrl, locale }),
-    [component, indexUrl, locale]
+    () => ({ component, indexUrl, locale, memory }),
+    [component, indexUrl, locale, memory]
   );
   return (
     <CodeLookupContext.Provider value={value}>
