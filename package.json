@@ -216,6 +216,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "rtl:scan": "node scripts/rtl-scan.mjs",
+    "rtl:scan:update": "node scripts/rtl-scan.mjs --update",
     "format": "prettier --check \"src/**/*.{ts,tsx,css}\"",
     "format:fix": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",

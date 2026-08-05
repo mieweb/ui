@@ -16,6 +16,7 @@ import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
 import { CodeLookup } from '../src/components/CodeLookup';
 import { CodeLookupProvider } from '../src/components/CodeLookup/context';
+import { isRtlLocale } from '../src/hooks/useDirection';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -28,6 +29,18 @@ const brands: Record<string, BrandConfig> = {
   waggleline: wagglelineBrand,
   webchart: webchartBrand,
 };
+
+/*
+ * Resolve the effective text direction from the direction/locale globals.
+ * 'auto' derives it from the locale (rtl for ar/he/fa/ur).
+ */
+function resolveGlobalDirection(
+  globals: Record<string, unknown>
+): 'ltr' | 'rtl' {
+  const direction = (globals?.direction as string) || 'auto';
+  if (direction === 'ltr' || direction === 'rtl') return direction;
+  return isRtlLocale((globals?.locale as string) || 'en') ? 'rtl' : 'ltr';
+}
 
 /*
  * Global theme listener — ensures data-theme and brand styles are applied
@@ -54,6 +67,16 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
   } else {
     document.body.classList.remove('condensed');
   }
+
+  // Apply text direction (RTL preview) at the document level so CSS logical
+  // properties and `rtl:` variants respond everywhere, including docs pages.
+  document.documentElement.setAttribute('dir', resolveGlobalDirection(globals));
+  // Keep the document language in sync with the locale global so screen
+  // readers and locale-sensitive text shaping reflect the selected locale.
+  document.documentElement.setAttribute(
+    'lang',
+    (globals?.locale as string) || 'en'
+  );
 
   document.body.style.backgroundColor = semanticColors.background;
   document.body.style.color = semanticColors.foreground;
@@ -84,7 +107,13 @@ try {
     const [key, value] = pair.split(':');
     if (key && value) globals[key] = value;
   }
-  if (globals.theme || globals.brand || globals.density) {
+  if (
+    globals.theme ||
+    globals.brand ||
+    globals.density ||
+    globals.direction ||
+    globals.locale
+  ) {
     applyGlobalTheme(globals);
   }
 } catch {
@@ -201,11 +230,13 @@ const withBrand: Decorator = (Story, context) => {
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
   const isCondensed = context.globals.density === 'condensed';
+  const direction = context.globals.direction as string | undefined;
+  const locale = context.globals.locale as string | undefined;
 
   useEffect(() => {
     // Delegate to shared applyGlobalTheme to keep a single source of truth
     applyGlobalTheme(context.globals);
-  }, [brand, isDark, isCondensed, semanticColors]);
+  }, [brand, isDark, isCondensed, semanticColors, direction, locale]);
 
   // Load Google Fonts for the brand
   const fontLink = useMemo(() => {
@@ -257,11 +288,14 @@ const withCodeLookup: Decorator = (Story, context) => {
   const locale = (context.globals.locale as string) || 'en';
   const userId = (context.globals.user as string) || 'anonymous';
   const trusted = context.globals.device === 'trusted';
+  // Codify shards only exist for these locales; fall back to English for
+  // preview-only locales (e.g. the RTL Arabic sample).
+  const lookupLocale = ['en', 'es'].includes(locale) ? locale : 'en';
   return (
     <CodeLookupProvider
       component={CodeLookup}
       indexUrl="/codify"
-      locale={locale}
+      locale={lookupLocale}
       memory={{ userId, storage: trusted ? 'local' : 'session' }}
     >
       <Story />
@@ -275,6 +309,7 @@ const preview: Preview = {
     theme: 'light',
     density: 'standard',
     locale: 'en',
+    direction: 'auto',
     user: 'anonymous',
     device: 'public',
   },
@@ -331,6 +366,19 @@ const preview: Preview = {
         items: [
           { value: 'en', title: '🇺🇸', right: 'English' },
           { value: 'es', title: '🇪🇸', right: 'Español (sample)' },
+          { value: 'ar', title: '🇸🇦', right: 'العربية (RTL sample)' },
+        ],
+      },
+    },
+    direction: {
+      name: 'Direction',
+      description: 'Text direction (LTR/RTL preview)',
+      toolbar: {
+        icon: 'transfer',
+        items: [
+          { value: 'auto', title: '🔁', right: 'Auto (from language)' },
+          { value: 'ltr', title: '➡️', right: 'LTR' },
+          { value: 'rtl', title: '⬅️', right: 'RTL' },
         ],
       },
     },
