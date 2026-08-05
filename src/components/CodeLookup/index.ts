@@ -5,6 +5,7 @@ export {
   CodeLookup,
   type CodeLookupProps,
   type CodifyDomain,
+  type CodetypeOption,
   type CodeLookupMemoryConfig,
 } from './CodeLookup';
 export {
