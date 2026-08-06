@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { PillSelect } from './PillSelect';
@@ -30,8 +30,15 @@ describe('PillSelect', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: /size: small/i }));
-    await user.click(screen.getByRole('button', { name: /medium/i }));
+    const trigger = screen.getByRole('button', { name: /size: small/i });
+
+    await user.click(trigger);
+    expect(trigger).toBeVisible();
+    expect(
+      screen.getByRole('listbox', { name: /size options/i })
+    ).toBeVisible();
+
+    await user.click(screen.getByRole('option', { name: /medium/i }));
 
     expect(onValueChange).toHaveBeenCalledWith('medium');
     expect(screen.getByRole('button', { name: /size: medium/i })).toBeVisible();
@@ -51,7 +58,7 @@ describe('PillSelect', () => {
     );
 
     await user.click(screen.getByRole('button', { name: /size: small/i }));
-    expect(screen.getByRole('button', { name: /medium/i })).toBeDisabled();
+    expect(screen.getByRole('option', { name: /medium/i })).toBeDisabled();
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
@@ -70,7 +77,7 @@ describe('PillSelect', () => {
 
     expect(screen.getByRole('button', { name: /size: large/i })).toBeVisible();
     await user.click(screen.getByRole('button', { name: /size: large/i }));
-    await user.click(screen.getByRole('button', { name: /small/i }));
+    await user.click(screen.getByRole('option', { name: /small/i }));
 
     expect(onValueChange).toHaveBeenCalledWith('small');
   });
@@ -83,11 +90,50 @@ describe('PillSelect', () => {
     );
 
     await user.click(screen.getByRole('button', { name: /size: small/i }));
-    expect(screen.getByRole('group', { name: /size options/i })).toBeVisible();
+    expect(
+      screen.getByRole('listbox', { name: /size options/i })
+    ).toBeVisible();
 
     await user.keyboard('{Escape}');
 
-    expect(screen.queryByRole('group', { name: /size options/i })).toBeNull();
+    expect(screen.queryByRole('listbox', { name: /size options/i })).toBeNull();
     expect(screen.getByRole('button', { name: /size: small/i })).toBeVisible();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /size: small/i })).toHaveFocus()
+    );
+  });
+
+  it('renders options outside the trigger wrapper to avoid layout shift', async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithTheme(
+      <PillSelect options={options} defaultValue="small" label="Size" />
+    );
+
+    await user.click(screen.getByRole('button', { name: /size: small/i }));
+
+    const listbox = screen.getByRole('listbox', { name: /size options/i });
+
+    expect(container).not.toContainElement(listbox);
+    expect(screen.getByRole('button', { name: /size: small/i })).toBeVisible();
+  });
+
+  it('does not scroll the page when moving focus on open', async () => {
+    const user = userEvent.setup();
+    const focusSpy = vi.spyOn(HTMLElement.prototype, 'focus');
+
+    renderWithTheme(
+      <PillSelect options={options} defaultValue="small" label="Size" />
+    );
+
+    await user.click(screen.getByRole('button', { name: /size: small/i }));
+
+    expect(
+      screen.getByRole('listbox', { name: /size options/i })
+    ).toBeVisible();
+    await waitFor(() =>
+      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true })
+    );
+
+    focusSpy.mockRestore();
   });
 });
