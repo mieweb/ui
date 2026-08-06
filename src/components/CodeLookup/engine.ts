@@ -440,6 +440,11 @@ export interface SearchOptions {
   /** Multiply matching docs' scores by CODETYPE_BOOST (e.g. ['ICD10'] so
    * billing codes outrank SNOMED synonyms in an assessment context) */
   boostCodetypes?: string[];
+  /** Restrict results to these coding systems (e.g. ['ICD10'] for an
+   * ICD-10-only condition picker). Docs of other codetypes are dropped;
+   * shards containing none of them are skipped entirely. Omitted or empty
+   * means all systems. */
+  codetypes?: string[];
   /** Conditions: only billable (leaf) ICD-10 codes — category roots and
    * SNOMED entries are dropped. Other domains are unaffected. */
   billableOnly?: boolean;
@@ -448,6 +453,20 @@ export interface SearchOptions {
 /** Score multiplier for boostCodetypes matches — high enough that a billable
  * ICD-10 code outranks a shorter, leading-matched SNOMED synonym. */
 const CODETYPE_BOOST = 3;
+
+/** Shard-local codetype indices allowed by opts.codetypes (null = no filter;
+ * an empty set means the shard has none of the requested systems). An empty
+ * codetypes array is treated the same as omitting it — "all systems" — so a
+ * consumer passing [] doesn't silently get zero results. */
+function allowedCodetypes(
+  s: CodifyShard,
+  opts?: SearchOptions
+): Set<number> | null {
+  if (!opts?.codetypes?.length) return null;
+  return new Set(
+    opts.codetypes.map((ct) => s.codetypes.indexOf(ct)).filter((i) => i >= 0)
+  );
+}
 
 // =============================================================================
 // Code search — only label/alias words are tokenized in the shards, so a
@@ -517,6 +536,8 @@ function searchShardCodes(
   }
   const billable =
     opts?.billableOnly && s.domain === 'condition' ? billableMask(s) : null;
+  const allowed = allowedCodetypes(s, opts);
+  if (allowed && allowed.size === 0) return;
   // codetype boost — same contract as searchShard (see SearchOptions)
   let boostIdx: Set<number> | null = null;
   if (opts?.boostCodetypes) {
@@ -529,6 +550,7 @@ function searchShardCodes(
   for (let i = lo; i < end && keys[i].startsWith(q); i++) {
     const d = docs[i];
     if (billable && billable[d] !== 1) continue;
+    if (allowed && !allowed.has(s.docCodetype[d])) continue;
     const score =
       CODE_MATCH_BASE *
       (q.length / keys[i].length) *
@@ -627,6 +649,9 @@ function searchShard(
   opts?: SearchOptions
 ) {
   const { scoreBuf, maskBuf, aliasBuf, fuzzyBuf } = s;
+  // codetype filter: skip the whole shard when none of its systems qualify
+  const allowed = allowedCodetypes(s, opts);
+  if (allowed && allowed.size === 0) return;
   const N = s.docCount;
   const fullMask = (1 << qTokens.length) - 1;
   let touchedCount = 0;
@@ -734,7 +759,11 @@ function searchShard(
   }
   for (let i = 0; i < touchedCount; i++) {
     const d = s.touched[i];
-    if (maskBuf[d] === fullMask && (!billable || billable[d] === 1)) {
+    if (
+      maskBuf[d] === fullMask &&
+      (!billable || billable[d] === 1) &&
+      (!allowed || allowed.has(s.docCodetype[d]))
+    ) {
       const lenNorm = 1 / (1 + 0.25 * Math.max(0, s.docLen[d] - 1));
       // usage prior: frequently-used codes surface above obscure ones with
       // equal text relevance (docPrior is log-quantized usage, 0-255)

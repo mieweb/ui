@@ -47,6 +47,14 @@ export type CodifyDomain =
   | 'occupational'
   | 'quality';
 
+/** One choice in the user-facing coding-system filter (`codetypeOptions`). */
+export interface CodetypeOption {
+  /** User-visible label (externalize/translate in the consumer), e.g. 'ICD-10' */
+  label: string;
+  /** Coding systems this option restricts to (e.g. ['ICD10']); omit for "all" */
+  codetypes?: string[];
+}
+
 /**
  * Per-instance tuning for the "Frequently used" memory picklist: focusing the
  * empty search box lists the user's most-picked codes for this context.
@@ -112,6 +120,20 @@ export interface CodeLookupProps extends Omit<
    * and SNOMED entries are dropped. Other domains are unaffected.
    */
   billableOnly?: boolean;
+  /**
+   * Restrict results to these coding systems at query time (e.g. ['ICD10']
+   * for an ICD-10-only picker; ['ICD11'] once the shards carry ICD-11 rows).
+   * Applies to the drill-down too. Ignored while `codetypeOptions` is
+   * rendered — the user's pick wins.
+   */
+  searchCodetypes?: string[];
+  /**
+   * Let the user pick the coding-system filter: renders a segmented control
+   * above the search box. The first option is selected initially — give it
+   * no `codetypes` for "all systems". E.g.
+   * `[{ label: 'All' }, { label: 'ICD-10', codetypes: ['ICD10'] }]`.
+   */
+  codetypeOptions?: CodetypeOption[];
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /**
@@ -227,6 +249,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       preferDomains,
       preferCodetypes,
       billableOnly = false,
+      searchCodetypes,
+      codetypeOptions,
       programsUrl,
       onSelect,
       onFreeText,
@@ -283,6 +307,26 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const preferCodetypesKey = preferCodetypes
       ? preferCodetypes.join(',')
       : null;
+    // coding-system filter: the user's segmented-control pick (when
+    // codetypeOptions is rendered) overrides the searchCodetypes prop. Guard
+    // against an empty options array (falls back to searchCodetypes) and an
+    // index left past the end when the options shrink.
+    const [codetypeIdx, setCodetypeIdx] = React.useState(0);
+    const hasCodetypeOptions = (codetypeOptions?.length ?? 0) > 0;
+    const activeCodetypeIdx = hasCodetypeOptions
+      ? Math.min(codetypeIdx, codetypeOptions!.length - 1)
+      : 0;
+    const activeCodetypes = hasCodetypeOptions
+      ? codetypeOptions![activeCodetypeIdx]?.codetypes
+      : searchCodetypes;
+    // empty array = "no filter" (matches the engine); avoids codetypesKey ''
+    // decoding to [] and unexpectedly filtering out every result
+    const codetypesKey = activeCodetypes?.length
+      ? activeCodetypes.join(',')
+      : null;
+    /** active codetypes for the stable openDrill callback */
+    const codetypesRef = React.useRef(activeCodetypes);
+    codetypesRef.current = activeCodetypes;
 
     // ---- memory picklist ("Frequently used" on empty-query focus) ----
     const providerConfig = useCodeLookupConfig();
@@ -430,6 +474,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           domains: keyToDomains(searchDomainsKey),
           prefer: keyToDomains(preferDomainsKey),
           boostCodetypes: keyToDomains(preferCodetypesKey),
+          codetypes: keyToDomains(codetypesKey),
           billableOnly,
           // one row per med family; variants live in the → drill-down
           collapse: true,
@@ -443,6 +488,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       searchDomainsKey,
       preferDomainsKey,
       preferCodetypesKey,
+      codetypesKey,
       billableOnly,
     ]);
 
@@ -475,6 +521,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         query: familyTerm(parent.domain, parent.label) || parent.label,
         limit: 300,
         domains: [parent.domain],
+        codetypes: codetypesRef.current,
         billableOnly: billableOnlyRef.current,
       });
     }, []);
@@ -597,6 +644,74 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       HTMLDivElement
     >({ open: dropdownOpen, matchWidth: true });
 
+    // user-facing coding-system filter (e.g. All | ICD-10 | SNOMED)
+    const codetypeBtnRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+    const selectCodetype = (i: number) => {
+      setCodetypeIdx(i);
+      setDrill(null);
+    };
+    // ARIA radiogroup keyboard model: arrows/Home/End move selection and
+    // focus (roving tabIndex); only the checked radio is in the tab order.
+    const onCodetypeKeyDown = (
+      e: React.KeyboardEvent<HTMLButtonElement>,
+      i: number
+    ) => {
+      const n = codetypeOptions!.length;
+      let next: number;
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          next = (i + 1) % n;
+          break;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          next = (i - 1 + n) % n;
+          break;
+        case 'Home':
+          next = 0;
+          break;
+        case 'End':
+          next = n - 1;
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      selectCodetype(next);
+      codetypeBtnRefs.current[next]?.focus();
+    };
+    const codetypeToggle = hasCodetypeOptions && (
+      <div
+        role="radiogroup"
+        aria-label="Coding system"
+        className="flex flex-wrap items-center gap-1"
+      >
+        {codetypeOptions!.map((opt, i) => (
+          <button
+            key={i}
+            ref={(el) => {
+              codetypeBtnRefs.current[i] = el;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={i === activeCodetypeIdx}
+            tabIndex={i === activeCodetypeIdx ? 0 : -1}
+            onClick={() => selectCodetype(i)}
+            onKeyDown={(e) => onCodetypeKeyDown(e, i)}
+            className={cn(
+              'rounded-full border px-2.5 py-0.5 text-xs transition-colors',
+              'focus:ring-ring focus:ring-2 focus:outline-none',
+              i === activeCodetypeIdx
+                ? 'border-primary-800 bg-primary-800 dark:border-primary-400 dark:bg-primary-400 dark:text-primary-950 text-white'
+                : 'border-border text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    );
+
     const searchBox = (
       <div className="relative" ref={anchorRef}>
         <SearchIcon
@@ -631,7 +746,6 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             'focus:ring-ring focus:ring-2 focus:outline-none'
           )}
         />
-
         {/* floating dropdown — portaled so no ancestor can clip it */}
         {dropdownOpen &&
           createPortal(
@@ -795,10 +909,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       return (
         <div
           ref={ref}
-          className={cn('w-full', className)}
+          className={cn('w-full space-y-2', className)}
           data-testid={dataTestId}
           {...props}
         >
+          {codetypeToggle}
           {searchBox}
         </div>
       );
@@ -814,6 +929,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         {...props}
       >
         <CardContent className="space-y-2 px-4 py-4">
+          {codetypeToggle}
           {searchBox}
 
           {/* status line */}
