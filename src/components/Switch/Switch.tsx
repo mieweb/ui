@@ -35,9 +35,9 @@ const switchThumbVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-4 w-4 data-[state=checked]:translate-x-4 translate-x-0.5',
-        md: 'h-5 w-5 data-[state=checked]:translate-x-5 translate-x-0.5',
-        lg: 'h-6 w-6 data-[state=checked]:translate-x-7 translate-x-0.5',
+        sm: 'h-4 w-4 translate-x-0.5 data-[state=checked]:translate-x-4 rtl:-translate-x-0.5 rtl:data-[state=checked]:-translate-x-4',
+        md: 'h-5 w-5 translate-x-0.5 data-[state=checked]:translate-x-5 rtl:-translate-x-0.5 rtl:data-[state=checked]:-translate-x-5',
+        lg: 'h-6 w-6 translate-x-0.5 data-[state=checked]:translate-x-7 rtl:-translate-x-0.5 rtl:data-[state=checked]:-translate-x-7',
       },
     },
     defaultVariants: {
