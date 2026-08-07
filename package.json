@@ -249,7 +249,7 @@
     "@kerebron/extension-yjs": ">=0.8.6",
     "@kerebron/wasm": ">=0.8.6",
     "@mieweb/datavis": "=1.6.0",
-    "@mieweb/q": "^1.0.0",
+    "@mieweb/q": "1.0.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.1.0",

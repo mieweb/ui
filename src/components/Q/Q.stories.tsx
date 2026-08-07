@@ -6,6 +6,7 @@ import {
   qLandingPageAgentConfig,
   qTwilioAgentSchema,
 } from './index';
+import '@mieweb/q/style.css';
 
 const sampleTwilioConfig = {
   ...createQTwilioAgentConfig(),
