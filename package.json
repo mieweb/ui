@@ -171,6 +171,16 @@
         "default": "./dist/kerebron.cjs"
       }
     },
+    "./q": {
+      "import": {
+        "types": "./dist/q.d.ts",
+        "default": "./dist/q.js"
+      },
+      "require": {
+        "types": "./dist/q.d.cts",
+        "default": "./dist/q.cjs"
+      }
+    },
     "./styles.css": {
       "style": "./dist/styles.css",
       "default": "./dist/styles.css"
@@ -239,8 +249,7 @@
     "@kerebron/extension-yjs": ">=0.8.6",
     "@kerebron/wasm": ">=0.8.6",
     "@mieweb/datavis": "=1.6.0",
-    "y-protocols": ">=1.0.6",
-    "yjs": ">=13.6.0",
+    "@mieweb/q": "^1.0.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.1.0",
@@ -256,7 +265,9 @@
     "rehype-sanitize": ">=6.0.0",
     "remark-gfm": ">=4.0.0",
     "remark-math": ">=6.0.0",
-    "wavesurfer.js": ">=7.0.0"
+    "wavesurfer.js": ">=7.0.0",
+    "y-protocols": ">=1.0.6",
+    "yjs": ">=13.6.0"
   },
   "peerDependenciesMeta": {
     "@kerebron/editor": {
@@ -278,6 +289,9 @@
       "optional": true
     },
     "@mieweb/datavis": {
+      "optional": true
+    },
+    "@mieweb/q": {
       "optional": true
     },
     "ag-grid-community": {
@@ -360,6 +374,7 @@
     "@kerebron/extension-yjs": "^0.8.6",
     "@kerebron/wasm": "^0.8.6",
     "@mieweb/datavis": "=1.6.0",
+    "@mieweb/q": "1.0.0",
     "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
