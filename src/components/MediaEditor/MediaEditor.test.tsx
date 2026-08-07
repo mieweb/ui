@@ -459,3 +459,99 @@ describe('MediaEditor host-extensible undo', () => {
     expect(onRedo).not.toHaveBeenCalled();
   });
 });
+
+// On a small screen the editor grows to its content instead of scrolling
+// internally, so the transcript is no longer its own scrolling box. Anything
+// that scrolls "the nearest scrollable ancestor" therefore moves the PAGE, and
+// the player leaves the viewport. These pin the two places that happened.
+describe('MediaEditor does not scroll the page on small screens', () => {
+  it('focuses the transcript without scrolling it into view', () => {
+    type ScrollOption = { preventScroll?: boolean };
+    const calls: Array<{ el: HTMLElement; options?: ScrollOption }> = [];
+    const focus = vi
+      .spyOn(HTMLElement.prototype, 'focus')
+      .mockImplementation(function (this: HTMLElement, options?: ScrollOption) {
+        calls.push({ el: this, options });
+      });
+
+    render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
+
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    const call = calls.find((c) => c.el === listbox);
+
+    // Without preventScroll the browser scrolls a below-the-fold transcript
+    // into view, landing the reader past the player on every load.
+    expect(call).toBeDefined();
+    expect(call?.options).toEqual({ preventScroll: true });
+    focus.mockRestore();
+  });
+
+  it('never reaches for scrollIntoView when moving the cursor', () => {
+    render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    (Element.prototype.scrollIntoView as ReturnType<typeof vi.fn>).mockClear();
+
+    fireEvent.keyDown(listbox, { key: 'ArrowRight' });
+    fireEvent.keyDown(listbox, { key: 'ArrowRight' });
+
+    // scrollIntoView walks up to the nearest scrollable ancestor — the document
+    // in the small-screen layout. The transcript must scroll its own box or
+    // nothing at all.
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('leaves scroll alone when the transcript is not its own scroller', () => {
+    render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+
+    // jsdom reports 0/0, i.e. scrollHeight <= clientHeight: exactly the
+    // small-screen case, where the content defines the page height.
+    const scrollTo = vi.fn();
+    listbox.scrollTo = scrollTo as unknown as HTMLElement['scrollTo'];
+
+    fireEvent.keyDown(listbox, { key: 'ArrowRight' });
+
+    expect(scrollTo).not.toHaveBeenCalled();
+  });
+
+  it('still scrolls its own box when it does overflow (the desktop case)', () => {
+    render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+
+    // A transcript taller than its pane — the fixed-height desktop shell.
+    Object.defineProperty(listbox, 'scrollHeight', { value: 900 });
+    Object.defineProperty(listbox, 'clientHeight', { value: 300 });
+    vi.spyOn(listbox, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      bottom: 300,
+      left: 0,
+      right: 500,
+      width: 500,
+      height: 300,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    // Put the target word below the pane's bottom edge so `nearest` must move.
+    const word = screen.getByText('brave');
+    vi.spyOn(word, 'getBoundingClientRect').mockReturnValue({
+      top: 400,
+      bottom: 420,
+      left: 0,
+      right: 60,
+      width: 60,
+      height: 20,
+      x: 0,
+      y: 400,
+      toJSON: () => ({}),
+    });
+
+    const scrollTo = vi.fn();
+    listbox.scrollTo = scrollTo as unknown as HTMLElement['scrollTo'];
+
+    fireEvent.keyDown(listbox, { key: 'ArrowRight' });
+
+    // 420 - 300 = 120 past the bottom, which is what `block: 'nearest'` moves.
+    expect(scrollTo).toHaveBeenCalledWith({ top: 120, behavior: 'smooth' });
+  });
+});

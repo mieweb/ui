@@ -59,6 +59,12 @@ export const miewebUISafelist = [
   'hover:bg-primary-500/30',
   'hover:bg-success/25',
   'hover:text-destructive',
+  // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
+  // md variants that hand desktop back its original percentage cap. Purging
+  // these uncaps the player on a phone, which is the bug the cap exists for.
+  'max-h-[55dvh]',
+  'md:max-h-[50%]',
+  'md:max-h-none',
   'outline-destructive',
   'outline-primary-500',
   'outline-warning',

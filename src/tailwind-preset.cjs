@@ -76,6 +76,12 @@ module.exports = {
     'rtl:data-[state=checked]:-translate-x-4',
     'rtl:data-[state=checked]:-translate-x-5',
     'rtl:data-[state=checked]:-translate-x-7',
+    // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
+    // md variants that hand desktop back its original percentage cap. Purging
+    // these uncaps the player on a phone, which is the bug the cap exists for.
+    'max-h-[55dvh]',
+    'md:max-h-[50%]',
+    'md:max-h-none',
     // SchedulePicker / overflow handling
     'overflow-x-auto',
     'overflow-hidden',
