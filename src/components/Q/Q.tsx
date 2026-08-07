@@ -5,7 +5,6 @@ import {
   type QConfig,
   type QSchema,
 } from '@mieweb/q';
-import '@mieweb/q/style.css';
 import { cn } from '../../utils/cn';
 
 export type { QConfig, QSchema };
