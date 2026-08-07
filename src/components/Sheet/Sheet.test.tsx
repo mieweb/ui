@@ -59,4 +59,29 @@ describe('Sheet', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onOpenChange).not.toHaveBeenCalled();
   });
+
+  describe('side variants (logical properties)', () => {
+    it.each([
+      ['start', ['start-0', 'border-e']],
+      ['end', ['end-0', 'border-s']],
+    ] as const)('side="%s" positions via logical classes', (side, classes) => {
+      renderSheet({ side });
+      const dialog = screen.getByRole('dialog');
+      classes.forEach((c) => expect(dialog).toHaveClass(c));
+    });
+
+    it.each([
+      ['left', 'start'],
+      ['right', 'end'],
+    ] as const)(
+      'side="%s" is a direction-aware alias for "%s"',
+      (physical, logical) => {
+        const { unmount } = renderSheet({ side: physical });
+        const physicalClasses = screen.getByRole('dialog').className;
+        unmount();
+        renderSheet({ side: logical });
+        expect(screen.getByRole('dialog').className).toBe(physicalClasses);
+      }
+    );
+  });
 });
