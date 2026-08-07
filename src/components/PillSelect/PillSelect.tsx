@@ -193,7 +193,7 @@ export function PillSelect({
                   onClick={() => handleSelect(option)}
                   aria-selected={selected}
                   className={cn(
-                    'focus-visible:ring-ring flex w-full items-center rounded-md px-3 py-1.5 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2',
+                    'focus-visible:ring-ring flex w-full items-center rounded-md px-3 py-1.5 text-start text-sm transition-colors focus:outline-none focus-visible:ring-2',
                     selected
                       ? 'bg-muted text-foreground font-semibold'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground font-normal',

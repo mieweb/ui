@@ -207,7 +207,7 @@ function ThinkingBlock({
         defaultOpen={!defaultCollapsed}
         pillClassName="bg-violet-50 border-violet-200 text-violet-600 hover:bg-violet-100 dark:bg-violet-950/30 dark:border-violet-800 dark:text-violet-400 dark:hover:bg-violet-950/50 focus-visible:ring-violet-500"
       >
-        <div className="border-l-2 border-violet-200 pl-3 text-[13px] leading-relaxed text-neutral-600 italic dark:border-violet-700 dark:text-neutral-400">
+        <div className="border-s-2 border-violet-200 ps-3 text-[13px] leading-relaxed text-neutral-600 italic dark:border-violet-700 dark:text-neutral-400">
           {text}
         </div>
       </CollapsiblePill>
