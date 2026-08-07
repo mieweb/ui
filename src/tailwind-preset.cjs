@@ -100,6 +100,12 @@ module.exports = {
     'translate-x-0',
     '-translate-x-full',
     '[&:has([role=checkbox])]:pe-0',
+    // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
+    // md variants that hand desktop back its original percentage cap. Purging
+    // these uncaps the player on a phone, which is the bug the cap exists for.
+    'max-h-[55dvh]',
+    'md:max-h-[50%]',
+    'md:max-h-none',
     // SchedulePicker / overflow handling
     'overflow-x-auto',
     'overflow-hidden',
