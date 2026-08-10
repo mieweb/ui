@@ -197,6 +197,18 @@ export {
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
 
+// Icons (lucide-react re-exports)
+// Note: CloseIcon, RefreshIcon, SendIcon, and SparklesIcon are ambiguous with
+// the AI module's custom icons; the explicit AI exports below take precedence
+// so existing consumers keep the same components.
+export * from './components/Icons';
+export {
+  CloseIcon,
+  RefreshIcon,
+  SendIcon,
+  SparklesIcon,
+} from './components/AI';
+
 // Hooks
 export * from './hooks';
 
