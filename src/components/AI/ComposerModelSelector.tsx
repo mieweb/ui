@@ -433,7 +433,7 @@ export function ComposerModelSelector({
                           onClick={() => selectModel(model)}
                           onMouseEnter={() => setHighlightedIndex(index)}
                           className={cn(
-                            'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm',
+                            'flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm',
                             'focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none',
                             highlighted && 'bg-muted',
                             selected && 'bg-primary/10 text-primary'
