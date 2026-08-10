@@ -26,13 +26,13 @@ type ComposerModelSelectorBaseProps = {
 };
 
 type ControlledProviderFilterProps = {
-  providerFilter: string | 'any';
-  onProviderFilterChange: (provider: string | 'any') => void;
+  providerFilter: string | null;
+  onProviderFilterChange: (provider: string | null) => void;
 };
 
 type UncontrolledProviderFilterProps = {
   providerFilter?: undefined;
-  onProviderFilterChange?: (provider: string | 'any') => void;
+  onProviderFilterChange?: (provider: string | null) => void;
 };
 
 export type ComposerModelSelectorProps = ComposerModelSelectorBaseProps &
@@ -41,6 +41,16 @@ export type ComposerModelSelectorProps = ComposerModelSelectorBaseProps &
 function optionKey(option: ProviderModelValue) {
   return `${option.provider}\u0000${option.model}`;
 }
+
+function renderedOptionKey(option: ProviderModelOption, index: number) {
+  return `${option.id ?? optionKey(option)}\u0000${index}`;
+}
+
+type RenderedModelOption = {
+  option: ProviderModelOption;
+  index: number;
+  key: string;
+};
 
 function groupByProvider(models: ProviderModelOption[]) {
   const groups = new Map<string, ProviderModelOption[]>();
@@ -76,8 +86,9 @@ export function ComposerModelSelector({
   placeholder = 'Model',
 }: ComposerModelSelectorProps) {
   const [open, setOpen] = React.useState(false);
-  const [internalProviderFilter, setInternalProviderFilter] =
-    React.useState<string>('any');
+  const [internalProviderFilter, setInternalProviderFilter] = React.useState<
+    string | null
+  >(null);
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
   const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
 
@@ -87,7 +98,8 @@ export function ComposerModelSelector({
   const menuId = React.useId();
   const [listMaxHeight, setListMaxHeight] = React.useState(272);
 
-  const activeProviderFilter = providerFilter ?? internalProviderFilter;
+  const activeProviderFilter =
+    providerFilter === undefined ? internalProviderFilter : providerFilter;
   const selectedKey = value ? optionKey(value) : null;
   const selectedOption = models.find(
     (model) => optionKey(model) === selectedKey
@@ -108,7 +120,7 @@ export function ComposerModelSelector({
   );
   const filteredModels = React.useMemo(
     () =>
-      activeProviderFilter === 'any'
+      activeProviderFilter === null
         ? models
         : models.filter((model) => model.provider === activeProviderFilter),
     [activeProviderFilter, models]
@@ -117,14 +129,24 @@ export function ComposerModelSelector({
     () => groupByProvider(filteredModels),
     [filteredModels]
   );
+  const groupedRenderedModels = React.useMemo(() => {
+    let index = 0;
+    return groupedModels.map((group) => ({
+      provider: group.provider,
+      options: group.options.map((option) => {
+        const rendered: RenderedModelOption = {
+          option,
+          index,
+          key: renderedOptionKey(option, index),
+        };
+        index += 1;
+        return rendered;
+      }),
+    }));
+  }, [groupedModels]);
   const renderedModels = React.useMemo(
-    () => groupedModels.flatMap((group) => group.options),
-    [groupedModels]
-  );
-  const renderedModelIndexes = React.useMemo(
-    () =>
-      new Map(renderedModels.map((model, index) => [optionKey(model), index])),
-    [renderedModels]
+    () => groupedRenderedModels.flatMap((group) => group.options),
+    [groupedRenderedModels]
   );
   const getOptionId = React.useCallback(
     (index: number) => `${menuId}-option-${index}`,
@@ -136,7 +158,7 @@ export function ComposerModelSelector({
       : undefined;
 
   const setProvider = React.useCallback(
-    (provider: string | 'any') => {
+    (provider: string | null) => {
       if (providerFilter === undefined) {
         setInternalProviderFilter(provider);
       }
@@ -287,7 +309,7 @@ export function ComposerModelSelector({
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      const highlightedModel = renderedModels[highlightedIndex];
+      const highlightedModel = renderedModels[highlightedIndex]?.option;
       if (highlightedModel) {
         selectModel(highlightedModel);
       }
@@ -315,7 +337,7 @@ export function ComposerModelSelector({
           className
         )}
       >
-        <span className="max-w-40 min-w-0 truncate">
+        <span className="min-w-0 truncate" style={{ maxWidth: '10rem' }}>
           {selectedOption?.label ?? selectedOption?.model ?? placeholder}
         </span>
         <ChevronDown
@@ -342,13 +364,14 @@ export function ComposerModelSelector({
               data-slot="composer-model-selector-provider-filter"
               className="border-border flex gap-1 overflow-x-auto border-b p-2"
             >
-              {['any', ...providers].map((provider) => {
+              {[null, ...providers].map((provider) => {
                 const selected = activeProviderFilter === provider;
                 return (
                   <button
-                    key={provider}
+                    key={provider ?? 'all-providers'}
                     type="button"
                     aria-pressed={selected}
+                    onMouseDown={(event) => event.preventDefault()}
                     onClick={() => setProvider(provider)}
                     className={cn(
                       'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
@@ -358,7 +381,7 @@ export function ComposerModelSelector({
                         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                     )}
                   >
-                    {provider === 'any'
+                    {provider === null
                       ? 'Any'
                       : (providerLabels.get(provider) ?? provider)}
                   </button>
@@ -382,7 +405,7 @@ export function ComposerModelSelector({
                   No models
                 </div>
               ) : (
-                groupedModels.map((group) => (
+                groupedRenderedModels.map((group) => (
                   <div
                     key={group.provider}
                     role="group"
@@ -393,20 +416,20 @@ export function ComposerModelSelector({
                     <div className="text-muted-foreground px-3 py-1.5 text-xs font-semibold uppercase">
                       {providerLabels.get(group.provider) ?? group.provider}
                     </div>
-                    {group.options.map((model) => {
-                      const index = renderedModelIndexes.get(optionKey(model));
-                      if (index === undefined) return null;
+                    {group.options.map((renderedModel) => {
+                      const { index, key, option: model } = renderedModel;
 
                       const selected = optionKey(model) === selectedKey;
                       const highlighted = index === highlightedIndex;
 
                       return (
                         <button
-                          key={model.id ?? optionKey(model)}
+                          key={key}
                           id={getOptionId(index)}
                           type="button"
                           role="option"
                           aria-selected={selected}
+                          onMouseDown={(event) => event.preventDefault()}
                           onClick={() => selectModel(model)}
                           onMouseEnter={() => setHighlightedIndex(index)}
                           className={cn(
