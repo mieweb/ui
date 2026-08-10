@@ -497,6 +497,12 @@ export interface AIMessageDisplayProps {
    * text block with `{ messageId, streaming, role }`. Host must sanitize.
    */
   renderTextContent?: AIRenderTextContent;
+  /**
+   * Optional renderer for a per-message footer shown below the bubble (e.g.
+   * message action controls). Aligned with the message (right for user, left
+   * for assistant).
+   */
+  renderMessageFooter?: (message: AIMessage) => React.ReactNode;
   /** Additional class name */
   className?: string;
 }
@@ -511,6 +517,7 @@ export function AIMessageDisplay({
   showTimestamp = false,
   onLinkClick,
   renderTextContent,
+  renderMessageFooter,
   className,
 }: AIMessageDisplayProps) {
   const isStreaming = message.status === 'streaming';
@@ -589,6 +596,10 @@ export function AIMessageDisplay({
             </div>
           ) : null}
         </ChatBubble>
+
+        {renderMessageFooter && (
+          <div data-slot="ai-message-footer">{renderMessageFooter(message)}</div>
+        )}
 
         {showTimestamp && (
           <span
