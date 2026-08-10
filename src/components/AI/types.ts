@@ -216,6 +216,9 @@ export type AIRenderTextContent = (
   ctx: AITextRenderContext
 ) => React.ReactNode;
 
+/** Render-prop for appending custom content below a message bubble. */
+export type AIRenderMessageFooter = (message: AIMessage) => React.ReactNode;
+
 // ============================================================================
 // AI Chat Types
 // ============================================================================

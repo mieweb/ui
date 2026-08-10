@@ -16,6 +16,7 @@ import type {
   AIChatSession,
   AISuggestedAction,
   AIChatCallbacks,
+  AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
 } from './types';
@@ -283,6 +284,8 @@ export interface AIChatProps
    * text block with `{ messageId, streaming, role }`. Host must sanitize.
    */
   renderTextContent?: AIRenderTextContent;
+  /** Optional per-message footer rendered below each bubble (e.g. actions). */
+  renderMessageFooter?: AIRenderMessageFooter;
   /** Additional class name */
   className?: string;
 }
@@ -317,6 +320,7 @@ export function AIChat({
   onClear,
   onClose,
   renderTextContent,
+  renderMessageFooter,
 }: AIChatProps) {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -440,6 +444,7 @@ export function AIChat({
                 showTimestamp={showTimestamps}
                 onLinkClick={handleLinkClick}
                 renderTextContent={renderTextContent}
+                renderMessageFooter={renderMessageFooter}
               />
             ))}
             <div ref={messagesEndRef} />
