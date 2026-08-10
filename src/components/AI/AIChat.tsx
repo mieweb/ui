@@ -16,6 +16,7 @@ import type {
   AIChatSession,
   AISuggestedAction,
   AIChatCallbacks,
+  AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
 } from './types';
@@ -284,7 +285,7 @@ export interface AIChatProps
    */
   renderTextContent?: AIRenderTextContent;
   /** Optional per-message footer rendered below each bubble (e.g. actions). */
-  renderMessageFooter?: (message: AIMessage) => React.ReactNode;
+  renderMessageFooter?: AIRenderMessageFooter;
   /** Additional class name */
   className?: string;
 }

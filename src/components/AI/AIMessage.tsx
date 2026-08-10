@@ -10,6 +10,7 @@ import { cn } from '../../utils/cn';
 import type {
   AIMessage,
   AIMessageContent,
+  AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
 } from './types';
@@ -502,7 +503,7 @@ export interface AIMessageDisplayProps {
    * message action controls). Aligned with the message (right for user, left
    * for assistant).
    */
-  renderMessageFooter?: (message: AIMessage) => React.ReactNode;
+  renderMessageFooter?: AIRenderMessageFooter;
   /** Additional class name */
   className?: string;
 }
@@ -522,6 +523,7 @@ export function AIMessageDisplay({
 }: AIMessageDisplayProps) {
   const isStreaming = message.status === 'streaming';
   const hasContent = message.content.length > 0;
+  const messageFooter = renderMessageFooter?.(message);
 
   const formatTime = (timestamp: Date | string) => {
     const date = new Date(timestamp);
@@ -597,8 +599,10 @@ export function AIMessageDisplay({
           ) : null}
         </ChatBubble>
 
-        {renderMessageFooter && (
-          <div data-slot="ai-message-footer">{renderMessageFooter(message)}</div>
+        {messageFooter != null && messageFooter !== false && (
+          <div data-slot="ai-message-footer" className="w-fit max-w-[85%]">
+            {messageFooter}
+          </div>
         )}
 
         {showTimestamp && (
