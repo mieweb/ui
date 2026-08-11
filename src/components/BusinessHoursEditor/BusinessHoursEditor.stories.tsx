@@ -7,6 +7,7 @@ import {
   create24HourSchedule,
   createWeekdaySchedule,
 } from './BusinessHoursEditor';
+import { BusinessHours } from '../BusinessHours';
 
 const meta: Meta<typeof BusinessHoursEditor> = {
   title: 'Components/Forms & Inputs/BusinessHoursEditor',
@@ -29,6 +30,12 @@ const meta: Meta<typeof BusinessHoursEditor> = {
     // use24Hour is not implemented in the component (native time inputs use browser locale)
     use24Hour: { table: { disable: true } },
 
+    variant: {
+      control: 'radio',
+      options: ['days', 'rules'],
+      description:
+        "Editing layout: per-day sections or grouped day/time rules ('rules')",
+    },
     disabled: {
       control: 'boolean',
       description: 'Whether the editor is disabled',
@@ -314,5 +321,74 @@ export const Mobile: Story = {
     viewport: {
       defaultViewport: 'mobile1',
     },
+  },
+};
+
+// ============================================================================
+// Rules Variant
+// ============================================================================
+
+/** Patient availability: M/W/F 8–11am, Tu/Th 3–5pm, Sat 10am–4pm, Sun unavailable */
+const patientAvailability: DaySchedule[] = [
+  { day: 0, hours: [] },
+  { day: 1, hours: [{ id: '1', start: '08:00', end: '11:00' }] },
+  { day: 2, hours: [{ id: '2', start: '15:00', end: '17:00' }] },
+  { day: 3, hours: [{ id: '3', start: '08:00', end: '11:00' }] },
+  { day: 4, hours: [{ id: '4', start: '15:00', end: '17:00' }] },
+  { day: 5, hours: [{ id: '5', start: '08:00', end: '11:00' }] },
+  { day: 6, hours: [{ id: '6', start: '10:00', end: '16:00' }] },
+];
+
+// Interactive wrapper with a live read-only BusinessHours preview
+function RulesVariantWrapper({
+  value: initialValue,
+  onChange: _,
+  ...restProps
+}: Partial<React.ComponentProps<typeof BusinessHoursEditor>>) {
+  const [schedule, setSchedule] = useState<DaySchedule[]>(initialValue || []);
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <BusinessHoursEditor
+        {...restProps}
+        variant="rules"
+        value={schedule}
+        onChange={setSchedule}
+      />
+
+      <BusinessHours
+        schedule={{ officeHours: schedule }}
+        headerText="Availability Preview"
+        showStatus={false}
+      />
+    </div>
+  );
+}
+
+export const RulesVariant: Story = {
+  render: (args) => <RulesVariantWrapper {...args} />,
+  args: {
+    variant: 'rules',
+    value: patientAvailability,
+    showDescription: false,
+    addHoursLabel: 'Add availability',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The rules variant groups days that share the same hours into one row — ideal for capturing patient availability like "Mon/Wed/Fri 8–11am, Tue/Thu 3–5pm, Sat 10am–4pm". It reads and emits the same DaySchedule[] as the default variant, previewed here with the BusinessHours display component.',
+      },
+    },
+  },
+};
+
+export const RulesVariantEmpty: Story = {
+  render: (args) => <RulesVariantWrapper {...args} />,
+  args: {
+    variant: 'rules',
+    value: [],
+    showDescription: false,
+    addHoursLabel: 'Add availability',
   },
 };
