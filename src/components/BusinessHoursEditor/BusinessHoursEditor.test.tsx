@@ -52,6 +52,28 @@ describe('scheduleToRules / rulesToSchedule', () => {
     }
   });
 
+  it('preserves duplicate identical slots on the same day', () => {
+    const withDuplicates: DaySchedule[] = [
+      {
+        day: 1,
+        hours: [
+          { start: '08:00', end: '11:00' },
+          { start: '08:00', end: '11:00' },
+        ],
+      },
+      { day: 3, hours: [{ start: '08:00', end: '11:00' }] },
+    ];
+
+    const rules = scheduleToRules(withDuplicates);
+    expect(rules).toHaveLength(2);
+    expect(rules[0]).toMatchObject({ days: [1, 3], start: '08:00' });
+    expect(rules[1]).toMatchObject({ days: [1], start: '08:00' });
+
+    const schedule = rulesToSchedule(rules);
+    expect(slotsOf(schedule, 1)).toHaveLength(2);
+    expect(slotsOf(schedule, 3)).toHaveLength(1);
+  });
+
   it('keeps days with different descriptions in separate rules', () => {
     const rules = scheduleToRules([
       { day: 1, hours: [{ start: '08:00', end: '11:00', description: 'AM' }] },

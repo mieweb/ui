@@ -27,8 +27,13 @@ const meta: Meta<typeof BusinessHoursEditor> = {
     value: { table: { disable: true } },
     onChange: { table: { disable: true } },
     className: { table: { disable: true } },
-    // use24Hour is not implemented in the component (native time inputs use browser locale)
-    use24Hour: { table: { disable: true } },
+    // use24Hour only affects the rules variant; the days variant uses native
+    // time inputs (browser locale)
+    use24Hour: {
+      control: 'boolean',
+      description:
+        "Use 24-hour time display in the rules variant's time pickers",
+    },
 
     variant: {
       control: 'radio',

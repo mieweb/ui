@@ -418,27 +418,33 @@ function ruleSignature(slot: TimeSlot): string {
 
 /** Collapse a schedule into rules: days sharing an identical time range group into one row. */
 export function scheduleToRules(schedule: DaySchedule[]): HoursRule[] {
-  const rules = new Map<string, HoursRule>();
+  const rulesBySignature = new Map<string, HoursRule[]>();
+  const orderedRules: HoursRule[] = [];
 
   for (const day of schedule) {
     for (const slot of day.hours) {
       const signature = ruleSignature(slot);
-      const existing = rules.get(signature);
-      if (existing) {
-        if (!existing.days.includes(day.day)) existing.days.push(day.day);
-      } else {
-        rules.set(signature, {
+      const candidates = rulesBySignature.get(signature) ?? [];
+      // Duplicate identical slots on the same day each get their own rule so
+      // the schedule round-trips without dropping slots.
+      let rule = candidates.find((r) => !r.days.includes(day.day));
+      if (!rule) {
+        rule = {
           id: generateId(),
-          days: [day.day],
+          days: [],
           start: slot.start,
           end: slot.end,
           description: slot.description,
-        });
+        };
+        candidates.push(rule);
+        rulesBySignature.set(signature, candidates);
+        orderedRules.push(rule);
       }
+      rule.days.push(day.day);
     }
   }
 
-  return Array.from(rules.values());
+  return orderedRules;
 }
 
 /** Expand rules into the canonical DaySchedule[] shape (all 7 days present). */
@@ -587,7 +593,7 @@ function BusinessHoursRulesEditor({
                     'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
                     'disabled:cursor-not-allowed disabled:opacity-50',
                     selected
-                      ? 'border-primary bg-primary text-primary-foreground'
+                      ? 'border-primary-800 bg-primary-800 text-white'
                       : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground'
                   )}
                 >
@@ -673,7 +679,7 @@ function BusinessHoursRulesEditor({
         disabled={disabled}
         className="text-xs"
       >
-        <PlusIcon className="mr-1 h-3 w-3" />
+        <PlusIcon className="me-1 h-3 w-3" />
         {addHoursLabel}
       </Button>
     </div>
