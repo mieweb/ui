@@ -276,7 +276,13 @@ export function OzwellChat({
                           <span className="text-xs leading-tight font-bold">
                             {option.label}
                           </span>
-                          <span className="truncate text-[11px] leading-tight font-medium text-slate-500">
+                          <span
+                            className={cn(
+                              'truncate text-[11px] leading-tight font-medium text-slate-500',
+                              option.value === thinking.mode &&
+                                'text-primary-800'
+                            )}
+                          >
                             {option.description}
                           </span>
                         </span>
@@ -339,6 +345,7 @@ export function OzwellChat({
             message={warning}
             variant="warning"
             onClose={onDismissWarning ?? (() => undefined)}
+            dismissible={Boolean(onDismissWarning)}
           />
         </div>
       )}
