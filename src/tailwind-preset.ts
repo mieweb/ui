@@ -39,6 +39,9 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+  // PatientHeader showCountBadges={false} — hides CountBadge roots in the
+  // actions slot (ui#367):
+  '[&_[data-slot=count-badge-root]]:hidden',
   // Media stack (MediaEditor / TranscriptView / MediaPlayer) — opacity-modifier
   // and state variants introduced with the media components (ui#323 finding):
   'bg-muted/20',

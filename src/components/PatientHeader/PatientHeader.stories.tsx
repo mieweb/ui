@@ -288,7 +288,7 @@ export const HiddenCountBadges: Story = {
   },
 };
 
-/** Zero-count badges (Tasks, eSign) are always hidden, even when `showCountBadges` is true. */
+/** Zero-count badges (Tasks, eSign) are hidden by default, even when `showCountBadges` is true (opt back in per-badge with `showZero`). */
 export const WithZeroCounts: Story = {
   args: {
     ...Default.args,

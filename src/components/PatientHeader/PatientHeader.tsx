@@ -158,7 +158,7 @@ export interface PatientHeaderProps extends Omit<
   maxVisibleMeds?: number;
   /** Show the patient-level overflow menu to the right of count badges (default: false) */
   showOverflowMenu?: boolean;
-  /** Whether to show the count badges in the actions slot (default: true). Zero-count badges are always hidden. */
+  /** Whether to show the count badges in the actions slot (default: true). Zero-count badges are hidden by default (see CountBadge `showZero`). */
   showCountBadges?: boolean;
   /** Called when a patient overflow menu action is selected */
   onOverflowAction?: (action: PatientOverflowAction) => void;

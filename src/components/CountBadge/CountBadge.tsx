@@ -667,6 +667,14 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
     );
 
     const showMenu = items && items.length > 0;
+    const hidden = count === 0 && !showZero;
+
+    // Close the popover when the badge becomes hidden so document listeners
+    // (Escape/outside-click) don't stay active and the menu doesn't reappear
+    // if the count rises again.
+    React.useEffect(() => {
+      if (hidden) setOpen(false);
+    }, [hidden]);
 
     // Portal + fixed positioning so the menu escapes overflow-hidden ancestors.
     const {
@@ -731,7 +739,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
 
     // Hide zero-count badges unless explicitly opted in. Placed after all
     // hooks so the hook order stays stable when `count` changes.
-    if (count === 0 && !showZero) return null;
+    if (hidden) return null;
 
     return (
       <>
