@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronUp } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 export type ProviderModelValue = {
@@ -23,6 +25,9 @@ type ComposerModelSelectorBaseProps = {
   className?: string;
   boundaryRef?: React.RefObject<HTMLElement | null>;
   placeholder?: string;
+  anyLabel?: string;
+  emptyLabel?: string;
+  ariaLabel?: string;
 };
 
 type ControlledProviderFilterProps = {
@@ -37,6 +42,9 @@ type UncontrolledProviderFilterProps = {
 
 export type ComposerModelSelectorProps = ComposerModelSelectorBaseProps &
   (ControlledProviderFilterProps | UncontrolledProviderFilterProps);
+
+const MENU_OFFSET_PX = 6;
+const MENU_MAX_HEIGHT_PX = 320;
 
 function optionKey(option: ProviderModelValue) {
   return `${option.provider}\u0000${option.model}`;
@@ -84,19 +92,30 @@ export function ComposerModelSelector({
   className,
   boundaryRef,
   placeholder = 'Model',
+  anyLabel = 'Any',
+  emptyLabel = 'No models',
+  ariaLabel = 'Model',
 }: ComposerModelSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const [internalProviderFilter, setInternalProviderFilter] = React.useState<
     string | null
   >(null);
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
-  const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
-
-  const triggerRef = React.useRef<HTMLButtonElement>(null);
-  const menuRef = React.useRef<HTMLDivElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
   const menuId = React.useId();
-  const [listMaxHeight, setListMaxHeight] = React.useState(272);
+  const {
+    anchorRef: triggerRef,
+    floatingRef: menuRef,
+    style: menuStyle,
+  } = useAnchoredPosition<HTMLButtonElement, HTMLDivElement>({
+    open,
+    placement: 'top-start',
+    offset: MENU_OFFSET_PX,
+    matchMinWidth: true,
+    maxHeight: MENU_MAX_HEIGHT_PX,
+    allowFlip: false,
+    boundaryRef,
+  });
 
   const activeProviderFilter =
     providerFilter === undefined ? internalProviderFilter : providerFilter;
@@ -156,6 +175,15 @@ export function ComposerModelSelector({
     open && renderedModels[highlightedIndex]
       ? getOptionId(highlightedIndex)
       : undefined;
+  const selectedRenderedIndex = React.useMemo(
+    () =>
+      selectedKey
+        ? renderedModels.findIndex(
+            (renderedModel) => optionKey(renderedModel.option) === selectedKey
+          )
+        : -1,
+    [renderedModels, selectedKey]
+  );
 
   const setProvider = React.useCallback(
     (provider: string | null) => {
@@ -163,17 +191,19 @@ export function ComposerModelSelector({
         setInternalProviderFilter(provider);
       }
       onProviderFilterChange?.(provider);
-      setHighlightedIndex(0);
     },
     [onProviderFilterChange, providerFilter]
   );
 
-  const close = React.useCallback((restoreFocus = true) => {
-    setOpen(false);
-    if (restoreFocus) {
-      triggerRef.current?.focus({ preventScroll: true });
-    }
-  }, []);
+  const close = React.useCallback(
+    (restoreFocus = true) => {
+      setOpen(false);
+      if (restoreFocus) {
+        triggerRef.current?.focus({ preventScroll: true });
+      }
+    },
+    [triggerRef]
+  );
 
   const selectModel = React.useCallback(
     (model: ProviderModelOption) => {
@@ -183,86 +213,19 @@ export function ComposerModelSelector({
     [close, onChange]
   );
 
-  const updateMenuPosition = React.useCallback(() => {
-    const trigger = triggerRef.current;
-    if (!trigger) return;
+  const outsideRefs = React.useMemo(
+    () => [triggerRef, menuRef],
+    [triggerRef, menuRef]
+  );
 
-    const rect = trigger.getBoundingClientRect();
-    const boundary = boundaryRef?.current?.getBoundingClientRect() ?? {
-      top: 0,
-      right: window.innerWidth,
-      bottom: window.innerHeight,
-      left: 0,
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
-    const gap = 6;
-    const menuWidth = Math.min(320, Math.max(boundary.width - 16, 0));
-    const spaceAbove = rect.top - boundary.top - gap;
-    const spaceBelow = boundary.bottom - rect.bottom - gap;
-    const openAbove = spaceBelow < 260 && spaceAbove > spaceBelow;
-    const availableHeight = Math.max(openAbove ? spaceAbove : spaceBelow, 0);
-    const nextListMaxHeight = Math.max(Math.min(availableHeight - 49, 272), 0);
-    const left = Math.min(
-      Math.max(rect.left, boundary.left + 8),
-      boundary.right - menuWidth - 8
-    );
-
-    setMenuStyle({
-      position: 'fixed',
-      left,
-      width: menuWidth,
-      maxHeight: availableHeight,
-      ...(openAbove
-        ? { bottom: window.innerHeight - rect.top + gap }
-        : { top: rect.bottom + gap }),
-      zIndex: 9999,
-    });
-    setListMaxHeight(nextListMaxHeight);
-  }, [boundaryRef]);
-
-  React.useEffect(() => {
-    if (!open) return;
-
-    updateMenuPosition();
-    window.addEventListener('resize', updateMenuPosition);
-    window.addEventListener('scroll', updateMenuPosition, true);
-    return () => {
-      window.removeEventListener('resize', updateMenuPosition);
-      window.removeEventListener('scroll', updateMenuPosition, true);
-    };
-  }, [open, updateMenuPosition]);
-
-  React.useEffect(() => {
-    if (!open) return;
-
-    const handlePointerDown = (
-      event: globalThis.MouseEvent | globalThis.TouchEvent
-    ) => {
-      const target = event.target as Node;
-      if (
-        triggerRef.current?.contains(target) ||
-        menuRef.current?.contains(target)
-      ) {
-        return;
-      }
-      close(false);
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('touchstart', handlePointerDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('touchstart', handlePointerDown);
-    };
-  }, [close, open]);
+  useClickOutside(outsideRefs, () => close(false), open);
 
   useEscapeKey(close, open);
 
   React.useEffect(() => {
     if (!open) return;
-    setHighlightedIndex(0);
-  }, [activeProviderFilter, open]);
+    setHighlightedIndex(selectedRenderedIndex >= 0 ? selectedRenderedIndex : 0);
+  }, [activeProviderFilter, open, selectedRenderedIndex]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -337,16 +300,10 @@ export function ComposerModelSelector({
           className
         )}
       >
-        <span className="min-w-0 truncate" style={{ maxWidth: '10rem' }}>
+        <span className="min-w-0 truncate">
           {selectedOption?.label ?? selectedOption?.model ?? placeholder}
         </span>
-        <ChevronDown
-          aria-hidden="true"
-          className={cn(
-            'h-3.5 w-3.5 shrink-0 transition-transform',
-            open && 'rotate-180'
-          )}
-        />
+        <ChevronUp aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
       </button>
 
       {open &&
@@ -356,13 +313,13 @@ export function ComposerModelSelector({
             style={menuStyle}
             data-slot="composer-model-selector-menu"
             className={cn(
-              'border-border bg-card text-card-foreground rounded-lg border shadow-lg',
-              'animate-in fade-in zoom-in-95 overflow-hidden duration-100'
+              'border-border bg-card text-card-foreground flex w-80 max-w-full flex-col rounded-lg border shadow-lg',
+              'animate-in fade-in overflow-hidden duration-100'
             )}
           >
             <div
               data-slot="composer-model-selector-provider-filter"
-              className="border-border flex gap-1 overflow-x-auto border-b p-2"
+              className="border-border flex min-h-9 items-center gap-1 overflow-x-auto overflow-y-hidden border-b p-2"
             >
               {[null, ...providers].map((provider) => {
                 const selected = activeProviderFilter === provider;
@@ -374,7 +331,7 @@ export function ComposerModelSelector({
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => setProvider(provider)}
                     className={cn(
-                      'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+                      'inline-flex h-6 shrink-0 items-center justify-center rounded-full px-2.5 text-xs font-medium whitespace-nowrap transition-colors',
                       'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
                       selected
                         ? 'bg-primary text-primary-foreground'
@@ -382,7 +339,7 @@ export function ComposerModelSelector({
                     )}
                   >
                     {provider === null
-                      ? 'Any'
+                      ? anyLabel
                       : (providerLabels.get(provider) ?? provider)}
                   </button>
                 );
@@ -393,16 +350,15 @@ export function ComposerModelSelector({
               ref={listRef}
               id={menuId}
               role="listbox"
-              aria-label="Model"
+              aria-label={ariaLabel}
               aria-activedescendant={activeOptionId}
               tabIndex={-1}
               onKeyDown={handleMenuKeyDown}
-              style={{ maxHeight: listMaxHeight }}
-              className="overflow-y-auto p-1"
+              className="min-h-0 flex-1 overflow-y-auto p-1"
             >
               {groupedModels.length === 0 ? (
                 <div className="text-muted-foreground px-3 py-4 text-center text-sm">
-                  No models
+                  {emptyLabel}
                 </div>
               ) : (
                 groupedRenderedModels.map((group) => (

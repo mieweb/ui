@@ -115,4 +115,39 @@ describe('ComposerModelSelector', () => {
       model: 'gpt-5',
     });
   });
+
+  it('highlights the selected model when opened', () => {
+    renderSelector({ value: models[1] });
+
+    fireEvent.click(screen.getByRole('button', { name: /gpt-5/i }));
+
+    expect(screen.getByRole('listbox', { name: /model/i })).toHaveAttribute(
+      'aria-activedescendant',
+      expect.stringContaining('option-1')
+    );
+  });
+
+  it('allows caller-controlled labels', () => {
+    renderWithTheme(
+      <ComposerModelSelector
+        models={[]}
+        value={null}
+        onChange={vi.fn()}
+        placeholder="Choose model"
+        anyLabel="All providers"
+        emptyLabel="No available models"
+        ariaLabel="Model picker"
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /choose model/i }));
+
+    expect(
+      screen.getByRole('listbox', { name: /model picker/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /all providers/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText('No available models')).toBeInTheDocument();
+  });
 });

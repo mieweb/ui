@@ -68,6 +68,9 @@ type ModelsKey = keyof typeof modelSets;
 type ComposerModelSelectorStoryArgs = {
   modelsKey: ModelsKey;
   placeholder?: string;
+  anyLabel?: string;
+  emptyLabel?: string;
+  ariaLabel?: string;
   disabled?: boolean;
   className?: string;
 };
@@ -82,6 +85,9 @@ function SelectorDemo({
   boundaryRef,
   disabled,
   placeholder,
+  anyLabel,
+  emptyLabel,
+  ariaLabel,
   className,
 }: SelectorDemoProps) {
   const [value, setValue] = React.useState<ProviderModelValue | null>(
@@ -118,6 +124,9 @@ function SelectorDemo({
       boundaryRef={boundaryRef}
       disabled={disabled}
       placeholder={placeholder}
+      anyLabel={anyLabel}
+      emptyLabel={emptyLabel}
+      ariaLabel={ariaLabel}
       className={className}
     />
   );
@@ -127,6 +136,9 @@ function ConstrainedContainerDemo({
   modelsKey,
   disabled,
   placeholder,
+  anyLabel,
+  emptyLabel,
+  ariaLabel,
   className,
 }: ComposerModelSelectorStoryArgs) {
   const boundaryRef = React.useRef<HTMLDivElement>(null);
@@ -143,6 +155,9 @@ function ConstrainedContainerDemo({
           boundaryRef={boundaryRef}
           disabled={disabled}
           placeholder={placeholder}
+          anyLabel={anyLabel}
+          emptyLabel={emptyLabel}
+          ariaLabel={ariaLabel}
           className={className}
         />
       </div>
@@ -154,6 +169,9 @@ function ComposerModelSelectorStoryDemo({
   modelsKey,
   disabled,
   placeholder,
+  anyLabel,
+  emptyLabel,
+  ariaLabel,
   className,
 }: ComposerModelSelectorStoryArgs) {
   return (
@@ -161,6 +179,9 @@ function ComposerModelSelectorStoryDemo({
       models={modelSets[modelsKey]}
       disabled={disabled}
       placeholder={placeholder}
+      anyLabel={anyLabel}
+      emptyLabel={emptyLabel}
+      ariaLabel={ariaLabel}
       className={className}
     />
   );
@@ -192,6 +213,27 @@ const meta = {
       control: 'text',
       description: 'Text shown when no model is selected.',
     },
+    anyLabel: {
+      control: 'text',
+      description: 'Provider filter label for the unfiltered state.',
+      table: {
+        defaultValue: { summary: 'Any' },
+      },
+    },
+    emptyLabel: {
+      control: 'text',
+      description: 'Text shown when the current filter has no models.',
+      table: {
+        defaultValue: { summary: 'No models' },
+      },
+    },
+    ariaLabel: {
+      control: 'text',
+      description: 'Accessible label for the model listbox.',
+      table: {
+        defaultValue: { summary: 'Model' },
+      },
+    },
     disabled: {
       control: 'boolean',
       description: 'Disable the selector trigger.',
@@ -210,6 +252,9 @@ export const OneProvider: Story = {
   args: {
     modelsKey: 'oneProvider',
     placeholder: 'Model',
+    anyLabel: 'Any',
+    emptyLabel: 'No models',
+    ariaLabel: 'Model',
     disabled: false,
   },
 };
@@ -218,6 +263,9 @@ export const MultipleProviders: Story = {
   args: {
     modelsKey: 'multipleProviders',
     placeholder: 'Model',
+    anyLabel: 'Any',
+    emptyLabel: 'No models',
+    ariaLabel: 'Model',
     disabled: false,
   },
 };
@@ -226,6 +274,9 @@ export const LongOverflowNames: Story = {
   args: {
     modelsKey: 'longNames',
     placeholder: 'Model',
+    anyLabel: 'Any',
+    emptyLabel: 'No models',
+    ariaLabel: 'Model',
     disabled: false,
   },
   render: (args) => (
@@ -239,6 +290,9 @@ export const ConstrainedContainer: Story = {
   args: {
     modelsKey: 'multipleProviders',
     placeholder: 'Model',
+    anyLabel: 'Any',
+    emptyLabel: 'No models',
+    ariaLabel: 'Model',
     disabled: false,
   },
   parameters: {

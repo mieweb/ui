@@ -23,6 +23,10 @@ export interface UseAnchoredPositionOptions {
   matchMinWidth?: boolean;
   /** Minimum distance from the viewport edges, in px */
   viewportPadding?: number;
+  /** Flip to the opposite vertical side when the preferred side is cramped */
+  allowFlip?: boolean;
+  /** Optional element whose visible rectangle also constrains the popup */
+  boundaryRef?: React.RefObject<HTMLElement | null>;
   /**
    * Additional cap on the floating element's height, in px. The height is
    * always clamped to the available viewport space; this only lowers that
@@ -67,7 +71,7 @@ const HIDDEN_STYLE: React.CSSProperties = {
  * Render the floating element through `createPortal(..., document.body)`
  * and spread the returned `style` onto it. The hook:
  * - flips vertically when there is not enough space on the preferred side
- * - clamps horizontally to the viewport
+ * - clamps horizontally to the viewport or optional boundary element
  * - constrains `maxHeight` to the available space (add `overflow-auto`)
  * - tracks scroll, resize, and anchor/content size changes while open
  *
@@ -96,6 +100,8 @@ export function useAnchoredPosition<
   matchWidth = false,
   matchMinWidth = false,
   viewportPadding = 8,
+  allowFlip = true,
+  boundaryRef,
   maxHeight,
 }: UseAnchoredPositionOptions): UseAnchoredPositionReturn<TAnchor, TFloating> {
   const anchorRef = React.useRef<TAnchor | null>(null);
@@ -113,6 +119,23 @@ export function useAnchoredPosition<
     const rect = anchor.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const boundaryRect = boundaryRef?.current?.getBoundingClientRect();
+    const bounds = boundaryRect ?? {
+      top: 0,
+      right: viewportWidth,
+      bottom: viewportHeight,
+      left: 0,
+    };
+    const leftLimit = Math.max(bounds.left + viewportPadding, viewportPadding);
+    const rightLimit = Math.min(
+      bounds.right - viewportPadding,
+      viewportWidth - viewportPadding
+    );
+    const topLimit = Math.max(bounds.top + viewportPadding, viewportPadding);
+    const bottomLimit = Math.min(
+      bounds.bottom - viewportPadding,
+      viewportHeight - viewportPadding
+    );
 
     // Natural content size (scrollHeight so a previously applied maxHeight
     // doesn't skew the flip decision).
@@ -125,18 +148,20 @@ export function useAnchoredPosition<
     const floatingWidth = matchWidth
       ? rect.width
       : Math.max(floating.offsetWidth, matchMinWidth ? rect.width : 0);
+    const availableWidth = Math.max(rightLimit - leftLimit, 0);
+    const positionedWidth = Math.min(floatingWidth, availableWidth);
 
     // --- Vertical: preferred side, flip when out of space -------------------
-    const spaceBelow = viewportHeight - rect.bottom - offset - viewportPadding;
-    const spaceAbove = rect.top - offset - viewportPadding;
+    const spaceBelow = bottomLimit - rect.bottom - offset;
+    const spaceAbove = rect.top - topLimit - offset;
     const preferTop = placement.startsWith('top');
-    let side: 'top' | 'bottom';
-    if (preferTop) {
+    let side: 'top' | 'bottom' = preferTop ? 'top' : 'bottom';
+    if (allowFlip && preferTop) {
       side =
         spaceAbove < contentHeight && spaceBelow > spaceAbove
           ? 'bottom'
           : 'top';
-    } else {
+    } else if (allowFlip) {
       side =
         spaceBelow < contentHeight && spaceAbove > spaceBelow
           ? 'top'
@@ -157,11 +182,11 @@ export function useAnchoredPosition<
       align === 'left'
         ? rect.left
         : align === 'right'
-          ? rect.right - floatingWidth
-          : rect.left + rect.width / 2 - floatingWidth / 2;
+          ? rect.right - positionedWidth
+          : rect.left + rect.width / 2 - positionedWidth / 2;
     left = Math.min(
-      Math.max(left, viewportPadding),
-      Math.max(viewportWidth - floatingWidth - viewportPadding, viewportPadding)
+      Math.max(left, leftLimit),
+      Math.max(rightLimit - positionedWidth, leftLimit)
     );
 
     setActualSide(side);
@@ -173,6 +198,7 @@ export function useAnchoredPosition<
         : { top: rect.bottom + offset }),
       ...(matchWidth ? { width: rect.width } : {}),
       ...(matchMinWidth ? { minWidth: rect.width } : {}),
+      maxWidth: availableWidth,
       maxHeight: Math.min(availableHeight, maxHeight ?? Infinity),
       zIndex: 9999,
       transition: 'none',
@@ -184,6 +210,8 @@ export function useAnchoredPosition<
     offset,
     placement,
     viewportPadding,
+    allowFlip,
+    boundaryRef,
   ]);
 
   // Position synchronously before paint when opening / re-rendering open.
