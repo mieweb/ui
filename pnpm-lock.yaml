@@ -80,20 +80,20 @@ importers:
         specifier: ^6.41.0
         version: 6.43.0
       '@esheet/adapters':
-        specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+        specifier: 0.0.5
+        version: 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/builder':
-        specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+        specifier: 0.0.5
+        version: 0.0.5(4aeff67adbdba230964480e63dc97ed9)
       '@esheet/core':
-        specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+        specifier: 0.0.5
+        version: 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/fields':
-        specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+        specifier: 0.0.5
+        version: 0.0.5(ae7f3b4f60cc3d25e0a776d3bf01ed4e)
       '@esheet/renderer':
-        specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+        specifier: 0.0.5
+        version: 0.0.5(96c049e9706bac568b8658897cf79b30)
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
@@ -782,20 +782,20 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@esheet/adapters@0.0.3':
-    resolution: {integrity: sha512-RDRQ/MRWbBWot1ETqT7+yvDhj4mt42JQlauiEa0GID2GyibkWpxar0GL9IFkDYrOh48NdiXJNMKPMFPpwAp7Ew==}
+  '@esheet/adapters@0.0.5':
+    resolution: {integrity: sha512-T8/ikpS251JPXpfXVpZgEx0HuXw1X2X1x1tF+9JGSDlY+1JA9/kfRBFRPchG6eosTyWS0XAHCYmYrnW44lSrfA==}
 
-  '@esheet/builder@0.0.3':
-    resolution: {integrity: sha512-ckdad6ibi9+gEBssTymIfZSp0hQ1uPmqTVdUf4P39znZhxqzGUFMBoxH57WYQOaR2zfregMzeBBuZFqFnNz+CQ==}
+  '@esheet/builder@0.0.5':
+    resolution: {integrity: sha512-Q6s2Xpou+ebPf5atAM2Ysv9yGaV/uQQmSzcSCVcsYWrL3QKgMr3qp5Ws5s4VQV5daoKdyupUDAJUQjLGl2Loow==}
 
-  '@esheet/core@0.0.3':
-    resolution: {integrity: sha512-1jMrAyUWLGRB418jRFijtQv/9I08hCh2cQjzlxzgXYV3DucsIGepE7bYBhOeU/dn1wY9vLYbXfTSjhPA1ToZZw==}
+  '@esheet/core@0.0.5':
+    resolution: {integrity: sha512-/7KV1d/79Wt71tcDAHDF9hMUlBVYIMxloc1kJtsQGFAkyM/IcwomhYVB4n8aic8MteR5bGnQOlK+xc4xEsCUiA==}
 
-  '@esheet/fields@0.0.3':
-    resolution: {integrity: sha512-2TFHfUH+bI/ZuUJ7Xu8dWIDQWm0dSxLDGqqVY51ko8jzVTSpmhtqCgDGRaD9O393OlHg/+AHg+ElSV7qwDU6Ng==}
+  '@esheet/fields@0.0.5':
+    resolution: {integrity: sha512-TaSiTAj0MwpMrvMAPWCUYFfnogtu3nbb0+Cvyszq7iuKF4nUeIpssV1lb8tPZqPWE4P97zcOOb+QRy50yXrOKw==}
 
-  '@esheet/renderer@0.0.3':
-    resolution: {integrity: sha512-4h1Tui598E8A3oglDgxj9aCPqZ8risrb5jmZpvJSJBOkbbTWrIqS2BO1c95Fyg+u1FuNNCLr4aV5a+n/+lli3Q==}
+  '@esheet/renderer@0.0.5':
+    resolution: {integrity: sha512-rQHMkQy/N7DyuEs9Lm30rg2ptoBjKpZh1c/QSbKRwUQIShtOqneuV9dVcejMYjd8ciUS3Dcg80cdyFWFHlN83w==}
     peerDependencies:
       react: '>=19.0.0'
     peerDependenciesMeta:
@@ -1070,29 +1070,6 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@mieweb/ui@0.3.0-dev.108':
-    resolution: {integrity: sha512-cNG8USU4usMJhNGxL0Wek8h37C1URyZArjE1vtwpv2nEFD38yN2Vsf0ky9cEdGdPJwV6a8hcXCT/6FnFa1Wo7w==}
-    engines: {node: '>=20.0.0'}
-    peerDependencies:
-      '@ozwell/react': '>=0.1.0'
-      ag-grid-community: '>=32.0.0'
-      ag-grid-react: '>=32.0.0'
-      datavis-ace: '=4.1.0'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-      wavesurfer.js: '>=7.0.0'
-    peerDependenciesMeta:
-      '@ozwell/react':
-        optional: true
-      ag-grid-community:
-        optional: true
-      ag-grid-react:
-        optional: true
-      datavis-ace:
-        optional: true
-      wavesurfer.js:
-        optional: true
-
   '@mieweb/ui@0.6.1-dev.169':
     resolution: {integrity: sha512-YE6vtT/6+hMB7YQROZxPUKm4FVxLTYyLAru+IY8enn9x6GsctCeOA0yjHD6RjQ8oqQDknWS2c3NEfCJ665pGQw==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1153,6 +1130,77 @@ packages:
       remark-math:
         optional: true
       wavesurfer.js:
+        optional: true
+
+  '@mieweb/ui@0.7.1-dev.13':
+    resolution: {integrity: sha512-pDpFGnZ/4ifijV2Gp4Ho0rk0fI2q5D25LFWSLJvpyloJ/5C2NLAHXS8kSsLZduUJnJEvPPvme/wKjkkPWulZTA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      '@kerebron/editor': '>=0.8.6'
+      '@kerebron/editor-kits': '>=0.8.6'
+      '@kerebron/extension-yjs': '>=0.8.6'
+      '@kerebron/wasm': '>=0.8.6'
+      '@mieweb/datavis': '=1.6.0'
+      ag-grid-community: '>=32.0.0'
+      ag-grid-react: '>=32.0.0'
+      datavis-ace: '=4.1.0'
+      js-yaml: '>=4.0.0'
+      katex: '>=0.16.0'
+      mermaid: '>=11.0.0'
+      papaparse: '>=5.0.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+      react-markdown: '>=9.0.0'
+      rehype-highlight: '>=7.0.0'
+      rehype-katex: '>=7.0.0'
+      rehype-sanitize: '>=6.0.0'
+      remark-gfm: '>=4.0.0'
+      remark-math: '>=6.0.0'
+      wavesurfer.js: '>=7.0.0'
+      y-protocols: '>=1.0.6'
+      yjs: '>=13.6.0'
+    peerDependenciesMeta:
+      '@kerebron/editor':
+        optional: true
+      '@kerebron/editor-kits':
+        optional: true
+      '@kerebron/extension-yjs':
+        optional: true
+      '@kerebron/wasm':
+        optional: true
+      '@mieweb/datavis':
+        optional: true
+      ag-grid-community:
+        optional: true
+      ag-grid-react:
+        optional: true
+      datavis-ace:
+        optional: true
+      js-yaml:
+        optional: true
+      katex:
+        optional: true
+      mermaid:
+        optional: true
+      papaparse:
+        optional: true
+      react-markdown:
+        optional: true
+      rehype-highlight:
+        optional: true
+      rehype-katex:
+        optional: true
+      rehype-sanitize:
+        optional: true
+      remark-gfm:
+        optional: true
+      remark-math:
+        optional: true
+      wavesurfer.js:
+        optional: true
+      y-protocols:
+        optional: true
+      yjs:
         optional: true
 
   '@mieweb/ychart@file:packages/ychart':
@@ -6416,9 +6464,9 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@esheet/adapters@0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
+  '@esheet/adapters@0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
     dependencies:
-      '@esheet/core': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       tslib: 2.8.1
     transitivePeerDependencies:
       - '@types/react'
@@ -6426,29 +6474,46 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/builder@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
+  '@esheet/builder@0.0.5(4aeff67adbdba230964480e63dc97ed9)':
     dependencies:
-      '@esheet/adapters': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/core': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+      '@esheet/adapters': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@esheet/fields': 0.0.5(ae7f3b4f60cc3d25e0a776d3bf01ed4e)
+      '@mieweb/ui': 0.7.1-dev.13(ffd4da3b3e5f16223303ac5b6fa98eca)
       '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       js-yaml: 4.1.1
       react: 19.2.4
       sortablejs: 1.15.7
       tslib: 2.8.1
+      zustand: 5.0.14(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     transitivePeerDependencies:
-      - '@ozwell/react'
+      - '@kerebron/editor'
+      - '@kerebron/editor-kits'
+      - '@kerebron/extension-yjs'
+      - '@kerebron/wasm'
+      - '@mieweb/datavis'
       - '@types/react'
       - ag-grid-community
       - ag-grid-react
       - datavis-ace
       - immer
+      - katex
+      - mermaid
       - monaco-editor
+      - papaparse
       - react-dom
+      - react-markdown
+      - rehype-highlight
+      - rehype-katex
+      - rehype-sanitize
+      - remark-gfm
+      - remark-math
       - use-sync-external-store
       - wavesurfer.js
+      - y-protocols
+      - yjs
 
-  '@esheet/core@0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
+  '@esheet/core@0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
     dependencies:
       tslib: 2.8.1
       zod: 4.4.3
@@ -6459,41 +6524,73 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/fields@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
+  '@esheet/fields@0.0.5(ae7f3b4f60cc3d25e0a776d3bf01ed4e)':
     dependencies:
-      '@esheet/core': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@mieweb/ui': 0.3.0-dev.108(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
+      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@mieweb/ui': 0.7.1-dev.13(ffd4da3b3e5f16223303ac5b6fa98eca)
+      lucide-react: 0.562.0(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       sortablejs: 1.15.7
       tslib: 2.8.1
     transitivePeerDependencies:
-      - '@ozwell/react'
+      - '@kerebron/editor'
+      - '@kerebron/editor-kits'
+      - '@kerebron/extension-yjs'
+      - '@kerebron/wasm'
+      - '@mieweb/datavis'
       - '@types/react'
       - ag-grid-community
       - ag-grid-react
       - datavis-ace
       - immer
+      - js-yaml
+      - katex
+      - mermaid
+      - papaparse
+      - react-markdown
+      - rehype-highlight
+      - rehype-katex
+      - rehype-sanitize
+      - remark-gfm
+      - remark-math
       - use-sync-external-store
       - wavesurfer.js
+      - y-protocols
+      - yjs
 
-  '@esheet/renderer@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
+  '@esheet/renderer@0.0.5(96c049e9706bac568b8658897cf79b30)':
     dependencies:
-      '@esheet/adapters': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/core': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+      '@esheet/adapters': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@esheet/fields': 0.0.5(ae7f3b4f60cc3d25e0a776d3bf01ed4e)
       js-yaml: 4.1.1
     optionalDependencies:
       react: 19.2.4
     transitivePeerDependencies:
-      - '@ozwell/react'
+      - '@kerebron/editor'
+      - '@kerebron/editor-kits'
+      - '@kerebron/extension-yjs'
+      - '@kerebron/wasm'
+      - '@mieweb/datavis'
       - '@types/react'
       - ag-grid-community
       - ag-grid-react
       - datavis-ace
       - immer
+      - katex
+      - mermaid
+      - papaparse
+      - react-markdown
+      - rehype-highlight
+      - rehype-katex
+      - rehype-sanitize
+      - remark-gfm
+      - remark-math
       - use-sync-external-store
       - wavesurfer.js
+      - y-protocols
+      - yjs
 
   '@eslint-community/eslint-utils@4.9.1(eslint@9.39.3(jiti@2.6.1))':
     dependencies:
@@ -6977,23 +7074,6 @@ snapshots:
       - typescript
       - wavesurfer.js
 
-  '@mieweb/ui@0.3.0-dev.108(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
-    dependencies:
-      '@swc/helpers': 0.5.19
-      class-variance-authority: 0.7.1
-      clsx: 2.1.1
-      google-libphonenumber: 3.2.44
-      lucide-react: 0.562.0(react@19.2.4)
-      luxon: 3.7.2
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      tailwind-merge: 2.6.1
-    optionalDependencies:
-      ag-grid-community: 35.1.0
-      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      datavis-ace: 4.1.0
-      wavesurfer.js: 7.12.1
-
   '@mieweb/ui@0.6.1-dev.169(6157a0539ef5bc1faafe665ee9520b8d)':
     dependencies:
       '@swc/helpers': 0.5.19
@@ -7029,6 +7109,45 @@ snapshots:
       remark-gfm: 4.0.1
       remark-math: 6.0.0
       wavesurfer.js: 7.12.1
+
+  '@mieweb/ui@0.7.1-dev.13(ffd4da3b3e5f16223303ac5b6fa98eca)':
+    dependencies:
+      '@swc/helpers': 0.5.19
+      '@tanstack/react-virtual': 3.14.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      class-variance-authority: 0.7.1
+      clsx: 2.1.1
+      dompurify: 3.4.8
+      google-libphonenumber: 3.2.44
+      highlight.js: 11.11.1
+      lucide-react: 0.562.0(react@19.2.4)
+      luxon: 3.7.2
+      marked: 17.0.6
+      onnxruntime-web: 1.19.0
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      tailwind-merge: 2.6.1
+    optionalDependencies:
+      '@kerebron/editor': 0.8.9
+      '@kerebron/editor-kits': 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/extension-yjs': 0.8.9
+      '@kerebron/wasm': 0.8.9
+      '@mieweb/datavis': 1.6.0(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/wasm@0.8.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)
+      ag-grid-community: 35.1.0
+      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      datavis-ace: 4.1.0
+      js-yaml: 4.1.1
+      katex: 0.17.0
+      mermaid: 11.15.0
+      papaparse: 5.5.3
+      react-markdown: 10.1.0(@types/react@19.2.14)(react@19.2.4)
+      rehype-highlight: 7.0.2
+      rehype-katex: 7.0.1
+      rehype-sanitize: 6.0.0
+      remark-gfm: 4.0.1
+      remark-math: 6.0.0
+      wavesurfer.js: 7.12.1
+      y-protocols: 1.0.6(yjs@13.6.30)
+      yjs: 13.6.30
 
   '@mieweb/ychart@file:packages/ychart(@popperjs/core@2.11.8)':
     dependencies:

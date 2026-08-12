@@ -22,26 +22,31 @@ registerMieEsheetFields({
 const SAMPLE_FORM: FormDefinition = {
   id: 'storybook-demo',
   title: 'Patient Intake Form',
-  fields: [
+  pages: [
     {
-      id: 'name',
-      fieldType: 'text',
-      question: 'Full Name',
-    },
-    {
-      id: 'email',
-      fieldType: 'text',
-      question: 'Email Address',
-      inputType: 'email',
-    },
-    {
-      id: 'reason',
-      fieldType: 'radio',
-      question: 'Reason for Visit',
-      options: [
-        { id: 'r1', value: 'New Patient' },
-        { id: 'r2', value: 'Follow-up' },
-        { id: 'r3', value: 'Referral' },
+      id: 'page-1',
+      fields: [
+        {
+          id: 'name',
+          fieldType: 'text',
+          question: 'Full Name',
+        },
+        {
+          id: 'email',
+          fieldType: 'text',
+          question: 'Email Address',
+          inputType: 'email',
+        },
+        {
+          id: 'reason',
+          fieldType: 'radio',
+          question: 'Reason for Visit',
+          options: [
+            { id: 'r1', value: 'New Patient' },
+            { id: 'r2', value: 'Follow-up' },
+            { id: 'r3', value: 'Referral' },
+          ],
+        },
       ],
     },
   ],
@@ -179,31 +184,36 @@ export const MedicalFields: RendererStory = {
     formDataInput: {
       id: 'medical-demo',
       title: 'Encounter — Medications & Allergies',
-      fields: [
+      pages: [
         {
-          id: 'meds',
-          fieldType: 'medicationList',
-          question: 'Presenting medications',
-          medications: [
-            { id: 'm1', name: 'lisinopril 10 mg tablet', status: 'taking' },
+          id: 'page-1',
+          fields: [
             {
-              id: 'm2',
-              name: 'metformin 500 mg tablet',
-              status: 'unreconciled',
+              id: 'meds',
+              fieldType: 'medicationList',
+              question: 'Presenting medications',
+              medications: [
+                { id: 'm1', name: 'lisinopril 10 mg tablet', status: 'taking' },
+                {
+                  id: 'm2',
+                  name: 'metformin 500 mg tablet',
+                  status: 'unreconciled',
+                },
+              ],
             },
-          ],
-        },
-        {
-          id: 'allergies',
-          fieldType: 'allergyList',
-          question: 'Allergies',
-          allergies: [
             {
-              id: 'a1',
-              allergen: 'penicillin',
-              type: 'drug',
-              reaction: 'hives',
-              severity: 'moderate',
+              id: 'allergies',
+              fieldType: 'allergyList',
+              question: 'Allergies',
+              allergies: [
+                {
+                  id: 'a1',
+                  allergen: 'penicillin',
+                  type: 'drug',
+                  reaction: 'hives',
+                  severity: 'moderate',
+                },
+              ],
             },
           ],
         },
