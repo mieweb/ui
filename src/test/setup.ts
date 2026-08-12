@@ -49,13 +49,25 @@ beforeAll(() => {
     });
   }
 
-  // ResizeObserver is not available in jsdom
+  // ResizeObserver is not available in jsdom. This minimal stub matches the
+  // real API shape: it stores the callback and fires it once per observe()
+  // (mirroring the real initial-observation callback) so tests can exercise
+  // ResizeObserver-driven code paths.
   if (typeof globalThis.ResizeObserver === 'undefined') {
     globalThis.ResizeObserver = class ResizeObserver {
-      observe() {}
+      private callback: globalThis.ResizeObserverCallback;
+      constructor(callback: globalThis.ResizeObserverCallback) {
+        this.callback = callback;
+      }
+      observe(target: Element) {
+        this.callback(
+          [{ target } as globalThis.ResizeObserverEntry],
+          this as unknown as globalThis.ResizeObserver
+        );
+      }
       unobserve() {}
       disconnect() {}
-    };
+    } as unknown as typeof globalThis.ResizeObserver;
   }
 
   // DataTransfer is not available in jsdom

@@ -1,7 +1,9 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ButtonGroup, type ButtonGroupProps } from './ButtonGroup';
-import { Button } from '../Button';
+import { Button, type ButtonProps } from '../Button';
+
+type ButtonVariant = NonNullable<ButtonProps['variant']>;
 
 type PlaygroundArgs = ButtonGroupProps & {
   /** Label for the first button (empty hides it) */
@@ -10,32 +12,49 @@ type PlaygroundArgs = ButtonGroupProps & {
   secondLabel: string;
   /** Label for the third button (empty hides it) */
   thirdLabel: string;
+  /** Variant for the first button */
+  firstVariant: ButtonVariant;
+  /** Variant for the second button */
+  secondVariant: ButtonVariant;
+  /** Variant for the third button */
+  thirdVariant: ButtonVariant;
   /** Width of the resizable demo container in px */
   containerWidth: number;
 };
 
-const buttonVariants = ['secondary', 'primary', 'danger'] as const;
+const variantOptions: ButtonVariant[] = [
+  'primary',
+  'secondary',
+  'ghost',
+  'outline',
+  'danger',
+  'link',
+];
 
 /** Shared playground: resizable container + up to three label-driven buttons */
 function renderPlayground({
   firstLabel,
   secondLabel,
   thirdLabel,
+  firstVariant,
+  secondVariant,
+  thirdVariant,
   containerWidth,
   ...groupProps
 }: PlaygroundArgs) {
-  const labels = [firstLabel, secondLabel, thirdLabel].filter(Boolean);
+  const buttons = [
+    { label: firstLabel, variant: firstVariant },
+    { label: secondLabel, variant: secondVariant },
+    { label: thirdLabel, variant: thirdVariant },
+  ].filter((b) => b.label);
   return (
     <div
       className="resize-x overflow-auto rounded-lg border border-dashed border-neutral-300 p-4"
       style={{ width: containerWidth, minWidth: 140, maxWidth: 720 }}
     >
       <ButtonGroup {...groupProps}>
-        {labels.map((label, i) => (
-          <Button
-            key={i}
-            variant={buttonVariants[Math.min(i, buttonVariants.length - 1)]}
-          >
+        {buttons.map(({ label, variant }, i) => (
+          <Button key={i} variant={variant}>
             {label}
           </Button>
         ))}
@@ -70,6 +89,9 @@ const meta: Meta<PlaygroundArgs> = {
     firstLabel: { control: 'text' },
     secondLabel: { control: 'text' },
     thirdLabel: { control: 'text' },
+    firstVariant: { control: 'select', options: variantOptions },
+    secondVariant: { control: 'select', options: variantOptions },
+    thirdVariant: { control: 'select', options: variantOptions },
     containerWidth: {
       control: { type: 'range', min: 140, max: 720, step: 10 },
     },
@@ -78,8 +100,11 @@ const meta: Meta<PlaygroundArgs> = {
     orientation: 'auto',
     split: false,
     firstLabel: 'Cancel',
-    secondLabel: 'Save',
-    thirdLabel: '',
+    secondLabel: 'Save draft',
+    thirdLabel: 'Save and close',
+    firstVariant: 'danger',
+    secondVariant: 'secondary',
+    thirdVariant: 'primary',
     containerWidth: 480,
   },
   render: renderPlayground,
@@ -104,6 +129,9 @@ export const AutoStacking: Story = {
   args: {
     firstLabel: 'No, keep this record and return to the previous screen',
     secondLabel: 'Yes, permanently delete this patient encounter record',
+    thirdLabel: '',
+    firstVariant: 'secondary',
+    secondVariant: 'danger',
   },
 };
 
@@ -117,6 +145,9 @@ export const MixedLengthLabels: Story = {
   args: {
     firstLabel: 'Cancel',
     secondLabel: 'Submit encounter and notify the care team',
+    thirdLabel: '',
+    firstVariant: 'secondary',
+    secondVariant: 'primary',
     containerWidth: 560,
   },
 };
@@ -133,6 +164,9 @@ export const SplitActions: Story = {
     firstLabel: 'Back',
     secondLabel: 'Save draft',
     thirdLabel: 'Submit encounter',
+    firstVariant: 'ghost',
+    secondVariant: 'secondary',
+    thirdVariant: 'primary',
     containerWidth: 560,
   },
 };

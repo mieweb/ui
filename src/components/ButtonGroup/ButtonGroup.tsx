@@ -67,7 +67,8 @@ const ButtonGroup = React.forwardRef<HTMLDivElement, ButtonGroupProps>(
       };
 
       measure();
-      const observer = new window.ResizeObserver(measure);
+      if (typeof globalThis.ResizeObserver === 'undefined') return;
+      const observer = new globalThis.ResizeObserver(measure);
       observer.observe(el);
       return () => observer.disconnect();
     }, [orientation, stacked, children]);

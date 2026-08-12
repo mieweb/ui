@@ -138,7 +138,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       };
 
       update();
-      const observer = new window.ResizeObserver(update);
+      if (typeof globalThis.ResizeObserver === 'undefined') return;
+      const observer = new globalThis.ResizeObserver(update);
       observer.observe(label);
       return () => observer.disconnect();
     }, [title, children, isLoading, loadingText]);
