@@ -49,6 +49,15 @@ beforeAll(() => {
     });
   }
 
+  // ResizeObserver is not available in jsdom
+  if (typeof globalThis.ResizeObserver === 'undefined') {
+    globalThis.ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+  }
+
   // DataTransfer is not available in jsdom
   if (typeof globalThis.DataTransfer === 'undefined') {
     class MockDataTransfer {
