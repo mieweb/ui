@@ -125,6 +125,34 @@ export const SplitShifts: Story = {
   },
 };
 
+// Days sharing identical hours collapse into one row
+export const GroupedDays: Story = {
+  args: {
+    schedule: {
+      officeHours: [
+        { day: 0, hours: [] },
+        { day: 1, hours: [{ start: '08:00', end: '11:00' }] },
+        { day: 2, hours: [{ start: '15:00', end: '17:00' }] },
+        { day: 3, hours: [{ start: '08:00', end: '11:00' }] },
+        { day: 4, hours: [{ start: '15:00', end: '17:00' }] },
+        { day: 5, hours: [{ start: '08:00', end: '11:00' }] },
+        { day: 6, hours: [{ start: '10:00', end: '16:00' }] },
+      ],
+    },
+    groupDays: true,
+    useShortDayNames: true,
+    showStatus: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `groupDays`, days sharing identical hours collapse into one row — e.g. "Mon, Wed, Fri · 8:00 AM - 11:00 AM". Closed days group into a final row.',
+      },
+    },
+  },
+};
+
 // Text-only when structured hours unavailable
 export const TextOnly: Story = {
   args: {

@@ -10,7 +10,7 @@ import {
   calculateAge,
 } from '../../utils/date';
 import { Input, type InputProps } from '../Input';
-import { Calendar } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 export type DateInputMode =
@@ -20,7 +20,12 @@ export type DateInputMode =
   | 'past'
   | 'future';
 
-export type DateInputType = 'date' | 'datetime-local' | 'month' | 'year';
+export type DateInputType =
+  | 'date'
+  | 'datetime-local'
+  | 'time'
+  | 'month'
+  | 'year';
 
 export type DateInputWidth = 'full' | 'fit' | 'fixed';
 
@@ -104,6 +109,19 @@ function parsePickerDate(
   return { month: month - 1, year, day };
 }
 
+function formatTimeDisplay(
+  time: string,
+  timeFormat: DateInputTimeFormat
+): string {
+  const [hour, minute] = time.split(':').map(Number);
+  if (timeFormat === '12-hour') {
+    const displayHour = hour % 12 || 12;
+    const meridiem = hour >= 12 ? 'PM' : 'AM';
+    return `${displayHour}:${String(minute).padStart(2, '0')} ${meridiem}`;
+  }
+  return time;
+}
+
 function formatPickerValue(
   value: string,
   inputType: DateInputType,
@@ -112,13 +130,13 @@ function formatPickerValue(
   if (inputType === 'datetime-local') {
     const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})$/.exec(value);
     if (!match) return '';
-    if (timeFormat === '12-hour') {
-      const [hour, minute] = match[4].split(':').map(Number);
-      const displayHour = hour % 12 || 12;
-      const meridiem = hour >= 12 ? 'PM' : 'AM';
-      return `${match[2]}/${match[3]}/${match[1]} ${displayHour}:${String(minute).padStart(2, '0')} ${meridiem}`;
-    }
-    return `${match[2]}/${match[3]}/${match[1]} ${match[4]}`;
+    return `${match[2]}/${match[3]}/${match[1]} ${formatTimeDisplay(match[4], timeFormat)}`;
+  }
+
+  if (inputType === 'time') {
+    return /^\d{2}:\d{2}$/.test(value)
+      ? formatTimeDisplay(value, timeFormat)
+      : '';
   }
 
   if (inputType === 'month') {
@@ -139,6 +157,8 @@ export interface DateInputProps extends Omit<
   onChange?: (value: string) => void;
   /** Date value format and picker control. */
   inputType?: DateInputType;
+  /** Minute increment for the time picker (e.g. 15 shows :00, :15, :30, :45). */
+  minuteStep?: number;
   /** Time picker display format for datetime values. */
   timeFormat?: DateInputTimeFormat;
   /** Validation mode for the date input */
@@ -258,6 +278,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       value = '',
       onChange,
       inputType = 'date',
+      minuteStep = 1,
       timeFormat = '24-hour',
       mode = 'default',
       minAge,
@@ -349,12 +370,31 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
 
     const [calendarMonth, setCalendarMonth] = React.useState(parsedDate.month);
     const [calendarYear, setCalendarYear] = React.useState(parsedDate.year);
-    const [selectedTime, setSelectedTime] = React.useState(() =>
-      inputType === 'datetime-local' &&
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)
+    const [selectedTime, setSelectedTime] = React.useState(() => {
+      if (inputType === 'time' && /^\d{2}:\d{2}$/.test(value)) {
+        return value;
+      }
+      return inputType === 'datetime-local' &&
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)
         ? value.slice(-5)
-        : '00:00'
-    );
+        : '00:00';
+    });
+
+    // Minute choices honor minuteStep; an off-step current value is kept
+    // selectable so it still displays correctly.
+    const minuteOptions = React.useMemo(() => {
+      const step = Math.min(Math.max(Math.floor(minuteStep), 1), 60);
+      const minutes = Array.from(
+        { length: Math.ceil(60 / step) },
+        (_, index) => index * step
+      );
+      const currentMinute = Number(selectedTime.slice(3));
+      if (!minutes.includes(currentMinute)) {
+        minutes.push(currentMinute);
+        minutes.sort((a, b) => a - b);
+      }
+      return minutes.map((minute) => String(minute).padStart(2, '0'));
+    }, [minuteStep, selectedTime]);
     const minimumDate = React.useMemo(
       () => (minDate ? parseDateValue(minDate) : null),
       [minDate]
@@ -425,6 +465,12 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
 
     // Update calendar view when value changes
     React.useEffect(() => {
+      if (inputType === 'time') {
+        if (/^\d{2}:\d{2}$/.test(displayValue)) {
+          setSelectedTime(displayValue);
+        }
+        return;
+      }
       const date = parsePickerDate(displayValue, inputType);
       if (!date) return;
       setCalendarMonth(date.month);
@@ -542,6 +588,12 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         part === 'hour' ? `${nextValue}:${minute}` : `${hour}:${nextValue}`;
       setSelectedTime(nextTime);
 
+      if (inputType === 'time') {
+        setDisplayValue(nextTime);
+        onChange?.(nextTime);
+        return;
+      }
+
       if (parsedDate.day === null) return;
       const month = String(parsedDate.month + 1).padStart(2, '0');
       const day = String(parsedDate.day).padStart(2, '0');
@@ -601,93 +653,98 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           ref={calendarRef}
           className={cn(
             'bg-background border-border rounded-lg border shadow-lg',
-            'w-72 overflow-auto p-3'
+            'overflow-auto p-3',
+            inputType === 'time' ? 'w-fit' : 'w-72'
           )}
           style={calendarStyle}
           role="dialog"
           aria-label={
             inputType === 'month'
               ? 'Choose month'
-              : inputType === 'datetime-local'
-                ? 'Choose date and time'
-                : 'Choose date'
+              : inputType === 'time'
+                ? 'Choose time'
+                : inputType === 'datetime-local'
+                  ? 'Choose date and time'
+                  : 'Choose date'
           }
         >
           {/* Header with month/year navigation */}
-          <div className="mb-3 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => {
-                if (inputType === 'month') {
-                  setCalendarYear(calendarYear - 1);
-                } else if (calendarMonth === 0) {
-                  setCalendarMonth(11);
-                  setCalendarYear(calendarYear - 1);
-                } else {
-                  setCalendarMonth(calendarMonth - 1);
+          {inputType !== 'time' && (
+            <div className="mb-3 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  if (inputType === 'month') {
+                    setCalendarYear(calendarYear - 1);
+                  } else if (calendarMonth === 0) {
+                    setCalendarMonth(11);
+                    setCalendarYear(calendarYear - 1);
+                  } else {
+                    setCalendarMonth(calendarMonth - 1);
+                  }
+                }}
+                disabled={!canGoToPreviousCalendar}
+                className="enabled:hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={
+                  inputType === 'month' ? 'Previous year' : 'Previous month'
                 }
-              }}
-              disabled={!canGoToPreviousCalendar}
-              className="enabled:hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label={
-                inputType === 'month' ? 'Previous year' : 'Previous month'
-              }
-            >
-              <ChevronLeftIcon />
-            </button>
-            <div className="flex items-center gap-2">
-              {inputType !== 'month' && (
-                <select
-                  value={calendarMonth}
-                  onChange={(e) => setCalendarMonth(Number(e.target.value))}
-                  className="bg-background border-border rounded border px-2 py-1 text-sm"
-                  aria-label="Select month"
-                >
-                  {MONTH_NAMES.map((name, month) =>
-                    isCalendarMonthInRange(month, calendarYear) ? (
-                      <option key={name} value={month}>
-                        {name}
-                      </option>
-                    ) : null
-                  )}
-                </select>
-              )}
-              <select
-                value={calendarYear}
-                onChange={(e) =>
-                  handleCalendarYearChange(Number(e.target.value))
-                }
-                className="bg-background border-border rounded border px-2 py-1 text-sm"
-                aria-label="Select year"
               >
-                {calendarYears.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
+                <ChevronLeftIcon />
+              </button>
+              <div className="flex items-center gap-2">
+                {inputType !== 'month' && (
+                  <select
+                    value={calendarMonth}
+                    onChange={(e) => setCalendarMonth(Number(e.target.value))}
+                    className="bg-background border-border rounded border px-2 py-1 text-sm"
+                    aria-label="Select month"
+                  >
+                    {MONTH_NAMES.map((name, month) =>
+                      isCalendarMonthInRange(month, calendarYear) ? (
+                        <option key={name} value={month}>
+                          {name}
+                        </option>
+                      ) : null
+                    )}
+                  </select>
+                )}
+                <select
+                  value={calendarYear}
+                  onChange={(e) =>
+                    handleCalendarYearChange(Number(e.target.value))
+                  }
+                  className="bg-background border-border rounded border px-2 py-1 text-sm"
+                  aria-label="Select year"
+                >
+                  {calendarYears.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (inputType === 'month') {
+                    setCalendarYear(calendarYear + 1);
+                  } else if (calendarMonth === 11) {
+                    setCalendarMonth(0);
+                    setCalendarYear(calendarYear + 1);
+                  } else {
+                    setCalendarMonth(calendarMonth + 1);
+                  }
+                }}
+                disabled={!canGoToNextCalendar}
+                className="hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={inputType === 'month' ? 'Next year' : 'Next month'}
+              >
+                <ChevronRightIcon />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (inputType === 'month') {
-                  setCalendarYear(calendarYear + 1);
-                } else if (calendarMonth === 11) {
-                  setCalendarMonth(0);
-                  setCalendarYear(calendarYear + 1);
-                } else {
-                  setCalendarMonth(calendarMonth + 1);
-                }
-              }}
-              disabled={!canGoToNextCalendar}
-              className="hover:bg-muted rounded-md p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label={inputType === 'month' ? 'Next year' : 'Next month'}
-            >
-              <ChevronRightIcon />
-            </button>
-          </div>
+          )}
 
-          {inputType === 'month' ? (
+          {inputType === 'time' ? null : inputType === 'month' ? (
             <div className="grid grid-cols-3 gap-1">
               {MONTH_NAMES.map((name, month) => (
                 <button
@@ -748,8 +805,14 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             </>
           )}
 
-          {inputType === 'datetime-local' && (
-            <div className="border-border mt-3 flex items-center gap-2 border-t pt-3">
+          {(inputType === 'datetime-local' || inputType === 'time') && (
+            <div
+              className={cn(
+                'flex items-center gap-2',
+                inputType === 'datetime-local' &&
+                  'border-border mt-3 border-t pt-3'
+              )}
+            >
               <select
                 value={
                   timeFormat === '12-hour'
@@ -791,9 +854,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 className="bg-background border-border rounded border px-2 py-1 text-sm"
                 aria-label="Select minute"
               >
-                {Array.from({ length: 60 }, (_, minute) => (
-                  <option key={minute} value={String(minute).padStart(2, '0')}>
-                    {String(minute).padStart(2, '0')}
+                {minuteOptions.map((minute) => (
+                  <option key={minute} value={minute}>
+                    {minute}
                   </option>
                 ))}
               </select>
@@ -814,31 +877,33 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           )}
 
           <div className="border-border mt-3 flex gap-2 border-t pt-3">
-            <button
-              type="button"
-              onClick={() => {
-                const today = new Date();
-                setCalendarMonth(today.getMonth());
-                setCalendarYear(today.getFullYear());
-                if (inputType === 'month') {
-                  handleMonthSelect(today.getMonth());
-                } else {
-                  handleDateSelect(today.getDate());
+            {inputType !== 'time' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const today = new Date();
+                  setCalendarMonth(today.getMonth());
+                  setCalendarYear(today.getFullYear());
+                  if (inputType === 'month') {
+                    handleMonthSelect(today.getMonth());
+                  } else {
+                    handleDateSelect(today.getDate());
+                  }
+                }}
+                disabled={
+                  inputType === 'month'
+                    ? !isCalendarMonthInRange(
+                        new Date().getMonth(),
+                        new Date().getFullYear()
+                      )
+                    : !isDateInRange(new Date())
                 }
-              }}
-              disabled={
-                inputType === 'month'
-                  ? !isCalendarMonthInRange(
-                      new Date().getMonth(),
-                      new Date().getFullYear()
-                    )
-                  : !isDateInRange(new Date())
-              }
-              className="text-primary-800 flex-1 text-sm hover:underline disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Today
-            </button>
-            {inputType === 'datetime-local' && (
+                className="text-primary-800 flex-1 text-sm hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Today
+              </button>
+            )}
+            {(inputType === 'datetime-local' || inputType === 'time') && (
               <button
                 type="button"
                 onClick={() => setIsCalendarOpen(false)}
@@ -920,9 +985,11 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               placeholder={
                 inputType === 'month'
                   ? 'Select month'
-                  : inputType === 'datetime-local'
-                    ? 'Select date and time'
-                    : placeholder
+                  : inputType === 'time'
+                    ? 'Select time'
+                    : inputType === 'datetime-local'
+                      ? 'Select date and time'
+                      : placeholder
               }
               value={formatPickerValue(displayValue, inputType, timeFormat)}
               onChange={handleChange}
@@ -965,11 +1032,17 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 'focus:text-foreground focus:outline-none',
                 'transition-colors'
               )}
-              aria-label="Open calendar"
+              aria-label={
+                inputType === 'time' ? 'Open time picker' : 'Open calendar'
+              }
               aria-expanded={isCalendarOpen}
               aria-haspopup="dialog"
             >
-              <Calendar size={18} />
+              {inputType === 'time' ? (
+                <Clock size={18} />
+              ) : (
+                <Calendar size={18} />
+              )}
             </button>
           </div>
           {isCalendarOpen && createPortal(renderCalendar(), document.body)}
