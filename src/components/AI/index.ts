@@ -26,6 +26,9 @@ export {
   type SpinnerIconProps,
 } from './icons';
 
+// Collapsible Pill (shared primitive for thinking + tool display)
+export { CollapsiblePill, type CollapsiblePillProps } from './CollapsiblePill';
+
 // MCP Tool Call Display
 export {
   MCPToolCallDisplay,
@@ -188,6 +191,14 @@ export {
   chime,
   type RollingRecorder,
 } from './HeyOzwell/audio';
+
+// Composer model selector
+export {
+  ComposerModelSelector,
+  type ComposerModelSelectorProps,
+  type ProviderModelOption,
+  type ProviderModelValue,
+} from './ComposerModelSelector';
 
 // AI Chat Modal
 export {

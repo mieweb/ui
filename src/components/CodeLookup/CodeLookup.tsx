@@ -19,9 +19,20 @@ import {
   AlertCircleIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
+  StarIcon,
 } from '../Icons';
 import type { CodifyResult } from './engine';
 import { familyKey, familyTerm } from './engine';
+import { useCodeLookupConfig } from './context';
+import {
+  recordUse,
+  scheduleFlush,
+  syncFromServer,
+  getTopCodes,
+  matchMemory,
+  setMemoryStorage,
+  type MemoryEntry,
+} from './memoryStore';
 
 // =============================================================================
 // Types
@@ -35,6 +46,37 @@ export type CodifyDomain =
   | 'vaccine'
   | 'occupational'
   | 'quality';
+
+/** One choice in the user-facing coding-system filter (`codetypeOptions`). */
+export interface CodetypeOption {
+  /** User-visible label (externalize/translate in the consumer), e.g. 'ICD-10' */
+  label: string;
+  /** Coding systems this option restricts to (e.g. ['ICD10']); omit for "all" */
+  codetypes?: string[];
+}
+
+/**
+ * Per-instance tuning for the "Frequently used" memory picklist: focusing the
+ * empty search box lists the user's most-picked codes for this context.
+ *
+ * Memory turns on by itself once the provider supplies a signed-in
+ * `memory.userId` — pass this only to override the bucket or the limits, or
+ * `memory={false}` to opt one box out.
+ */
+export interface CodeLookupMemoryConfig {
+  /**
+   * Usage context the counts are scoped to (e.g. 'med-orders'). Defaults to
+   * this box's `domains`, so a med picker and a problem picker never share a
+   * picklist.
+   */
+  context?: string;
+  /** User id for scoping; falls back to the provider default. No id, no memory. */
+  userId?: string;
+  /** Count-sync endpoint (GET sync + POST deltas); provider default fallback. */
+  serverUrl?: string;
+  /** Max entries in the picklist (default 8). */
+  limit?: number;
+}
 
 export interface CodeLookupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -78,6 +120,20 @@ export interface CodeLookupProps extends Omit<
    * and SNOMED entries are dropped. Other domains are unaffected.
    */
   billableOnly?: boolean;
+  /**
+   * Restrict results to these coding systems at query time (e.g. ['ICD10']
+   * for an ICD-10-only picker; ['ICD11'] once the shards carry ICD-11 rows).
+   * Applies to the drill-down too. Ignored while `codetypeOptions` is
+   * rendered — the user's pick wins.
+   */
+  searchCodetypes?: string[];
+  /**
+   * Let the user pick the coding-system filter: renders a segmented control
+   * above the search box. The first option is selected initially — give it
+   * no `codetypes` for "all systems". E.g.
+   * `[{ label: 'All' }, { label: 'ICD-10', codetypes: ['ICD10'] }]`.
+   */
+  codetypeOptions?: CodetypeOption[];
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /**
@@ -111,6 +167,12 @@ export interface CodeLookupProps extends Omit<
    * immediately (defaults to true in bare mode, false otherwise).
    */
   clearOnSelect?: boolean;
+  /**
+   * Tune the "Frequently used" picklist — it is already on wherever the
+   * provider names a signed-in `memory.userId`. Pass `false` to opt this box
+   * out.
+   */
+  memory?: false | CodeLookupMemoryConfig;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -151,6 +213,20 @@ const DETAIL_NOUN: Record<string, string> = {
 /** Domains whose drill-down resolves a curated program order set. */
 const PROGRAM_DOMAINS = new Set(['occupational', 'quality']);
 
+/** A remembered entry as a result row (`score` carries the pick count). */
+function toMemoryResult(e: MemoryEntry): CodifyResult {
+  return {
+    fullid: e.fullid,
+    label: e.label,
+    codetype: e.codetype,
+    fullcode: e.fullcode,
+    domain: e.domain,
+    score: e.count,
+    viaAlias: false,
+    viaMemory: true,
+  };
+}
+
 // =============================================================================
 // CodeLookup
 // =============================================================================
@@ -173,6 +249,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       preferDomains,
       preferCodetypes,
       billableOnly = false,
+      searchCodetypes,
+      codetypeOptions,
       programsUrl,
       onSelect,
       onFreeText,
@@ -182,6 +260,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
       clearOnSelect,
+      memory,
       className,
       'data-testid': dataTestId,
       ...props
@@ -228,6 +307,74 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const preferCodetypesKey = preferCodetypes
       ? preferCodetypes.join(',')
       : null;
+    // coding-system filter: the user's segmented-control pick (when
+    // codetypeOptions is rendered) overrides the searchCodetypes prop. Guard
+    // against an empty options array (falls back to searchCodetypes) and an
+    // index left past the end when the options shrink.
+    const [codetypeIdx, setCodetypeIdx] = React.useState(0);
+    const hasCodetypeOptions = (codetypeOptions?.length ?? 0) > 0;
+    const activeCodetypeIdx = hasCodetypeOptions
+      ? Math.min(codetypeIdx, codetypeOptions!.length - 1)
+      : 0;
+    const activeCodetypes = hasCodetypeOptions
+      ? codetypeOptions![activeCodetypeIdx]?.codetypes
+      : searchCodetypes;
+    // empty array = "no filter" (matches the engine); avoids codetypesKey ''
+    // decoding to [] and unexpectedly filtering out every result
+    const codetypesKey = activeCodetypes?.length
+      ? activeCodetypes.join(',')
+      : null;
+    /** active codetypes for the stable openDrill callback */
+    const codetypesRef = React.useRef(activeCodetypes);
+    codetypesRef.current = activeCodetypes;
+
+    // ---- memory picklist ("Frequently used" on empty-query focus) ----
+    const providerConfig = useCodeLookupConfig();
+    const providerMemory =
+      providerConfig?.memory === false ? null : providerConfig?.memory;
+    // On by default: a provider that names a signed-in user gets the picklist
+    // everywhere. `memory={false}` opts out — on the provider for a public
+    // kiosk, on the instance for one box.
+    const memOff = providerConfig?.memory === false || memory === false;
+    const memCfg = memory === false ? null : memory;
+    const memUserId = memOff
+      ? null
+      : (memCfg?.userId ?? providerMemory?.userId ?? null);
+    const memContext = memOff
+      ? null
+      : (memCfg?.context ?? providerMemory?.context ?? domainsKey ?? 'all');
+    const memServerUrl = memOff
+      ? undefined
+      : (memCfg?.serverUrl ?? providerMemory?.serverUrl);
+    const memLimit = memCfg?.limit || 8;
+    const memStorage = providerMemory?.storage ?? 'session';
+    const [memoryEntries, setMemoryEntries] = React.useState<MemoryEntry[]>([]);
+    /** Mirror for effects that must not re-run when entries refresh. */
+    const memoryCountRef = React.useRef(0);
+    memoryCountRef.current = memoryEntries.length;
+
+    // Declared first so the store knows the device's trust level before the
+    // effect below reads or writes anything.
+    React.useEffect(() => {
+      setMemoryStorage(memStorage);
+    }, [memStorage]);
+
+    React.useEffect(() => {
+      if (!memUserId || !memContext) {
+        setMemoryEntries([]);
+        return;
+      }
+      let cancelled = false;
+      const scope = { userId: memUserId, context: memContext };
+      void (async () => {
+        if (memServerUrl) await syncFromServer(scope, memServerUrl);
+        const top = await getTopCodes(scope, memLimit);
+        if (!cancelled) setMemoryEntries(top);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [memUserId, memContext, memServerUrl, memLimit, memStorage]);
 
     React.useEffect(() => {
       // A new worker starts from scratch — reset all search state so a stale
@@ -311,8 +458,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       if (!q) {
         setResults([]);
         setTookMs(null);
-        setOpen(false);
         setDrill(null);
+        // With memory entries the empty-query dropdown shows the "Frequently
+        // used" picklist instead of closing (open stays as-is: focus opens it).
+        if (memoryCountRef.current === 0) setOpen(false);
         return;
       }
       const t = setTimeout(() => {
@@ -325,6 +474,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           domains: keyToDomains(searchDomainsKey),
           prefer: keyToDomains(preferDomainsKey),
           boostCodetypes: keyToDomains(preferCodetypesKey),
+          codetypes: keyToDomains(codetypesKey),
           billableOnly,
           // one row per med family; variants live in the → drill-down
           collapse: true,
@@ -338,6 +488,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       searchDomainsKey,
       preferDomainsKey,
       preferCodetypesKey,
+      codetypesKey,
       billableOnly,
     ]);
 
@@ -370,6 +521,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         query: familyTerm(parent.domain, parent.label) || parent.label,
         limit: 300,
         domains: [parent.domain],
+        codetypes: codetypesRef.current,
         billableOnly: billableOnlyRef.current,
       });
     }, []);
@@ -379,9 +531,39 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       setActiveIndex(-1);
     };
 
-    const list: CodifyResult[] = drill ? (drill.results ?? []) : results;
+    /** Frequently-used picklist rows, shown for a true empty-query dropdown. */
+    const memoryResults = React.useMemo<CodifyResult[]>(
+      () => memoryEntries.map(toMemoryResult),
+      [memoryEntries]
+    );
+    const showMemory =
+      !drill && query.trim() === '' && memoryResults.length > 0;
+
+    /** While typing, matching remembered codes rank ahead of index hits. */
+    const rankedResults = React.useMemo<CodifyResult[]>(() => {
+      const matches = matchMemory(memoryEntries, query.trim());
+      if (matches.length === 0) return results;
+      const seen = new Set(matches.map((m) => m.fullid));
+      return [
+        ...matches.map(toMemoryResult),
+        ...results.filter((r) => !seen.has(r.fullid)),
+      ];
+    }, [memoryEntries, query, results]);
+
+    const list: CodifyResult[] = drill
+      ? (drill.results ?? [])
+      : showMemory
+        ? memoryResults
+        : rankedResults;
 
     const pick = (r: CodifyResult) => {
+      if (memUserId && memContext) {
+        const scope = { userId: memUserId, context: memContext };
+        void recordUse(scope, r).then(() => {
+          if (memServerUrl) scheduleFlush(scope, memServerUrl);
+          return getTopCodes(scope, memLimit).then(setMemoryEntries);
+        });
+      }
       onSelect?.(r);
       setOpen(false);
       setDrill(null);
@@ -462,6 +644,74 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       HTMLDivElement
     >({ open: dropdownOpen, matchWidth: true });
 
+    // user-facing coding-system filter (e.g. All | ICD-10 | SNOMED)
+    const codetypeBtnRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+    const selectCodetype = (i: number) => {
+      setCodetypeIdx(i);
+      setDrill(null);
+    };
+    // ARIA radiogroup keyboard model: arrows/Home/End move selection and
+    // focus (roving tabIndex); only the checked radio is in the tab order.
+    const onCodetypeKeyDown = (
+      e: React.KeyboardEvent<HTMLButtonElement>,
+      i: number
+    ) => {
+      const n = codetypeOptions!.length;
+      let next: number;
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          next = (i + 1) % n;
+          break;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          next = (i - 1 + n) % n;
+          break;
+        case 'Home':
+          next = 0;
+          break;
+        case 'End':
+          next = n - 1;
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      selectCodetype(next);
+      codetypeBtnRefs.current[next]?.focus();
+    };
+    const codetypeToggle = hasCodetypeOptions && (
+      <div
+        role="radiogroup"
+        aria-label="Coding system"
+        className="flex flex-wrap items-center gap-1"
+      >
+        {codetypeOptions!.map((opt, i) => (
+          <button
+            key={i}
+            ref={(el) => {
+              codetypeBtnRefs.current[i] = el;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={i === activeCodetypeIdx}
+            tabIndex={i === activeCodetypeIdx ? 0 : -1}
+            onClick={() => selectCodetype(i)}
+            onKeyDown={(e) => onCodetypeKeyDown(e, i)}
+            className={cn(
+              'rounded-full border px-2.5 py-0.5 text-xs transition-colors',
+              'focus:ring-ring focus:ring-2 focus:outline-none',
+              i === activeCodetypeIdx
+                ? 'border-primary-800 bg-primary-800 dark:border-primary-400 dark:bg-primary-400 dark:text-primary-950 text-white'
+                : 'border-border text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    );
+
     const searchBox = (
       <div className="relative" ref={anchorRef}>
         <SearchIcon
@@ -496,7 +746,6 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             'focus:ring-ring focus:ring-2 focus:outline-none'
           )}
         />
-
         {/* floating dropdown — portaled so no ancestor can clip it */}
         {dropdownOpen &&
           createPortal(
@@ -540,10 +789,20 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 aria-label={
                   drill
                     ? `${DETAIL_NOUN[drill.parent.domain] ?? 'related codes'} of ${drill.parent.label}`
-                    : 'Code search results'
+                    : showMemory
+                      ? 'Frequently used codes'
+                      : 'Code search results'
                 }
                 className="divide-border max-h-80 min-h-0 divide-y overflow-y-auto"
               >
+                {showMemory && (
+                  <li
+                    role="presentation"
+                    className="text-muted-foreground bg-muted/50 px-3 py-1 text-[11px] font-semibold tracking-wide uppercase"
+                  >
+                    Frequently used
+                  </li>
+                )}
                 {list.map((r, i) => (
                   <li
                     key={r.fullid}
@@ -570,6 +829,18 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       <span className="text-foreground min-w-0 flex-1 truncate">
                         {r.label}
                       </span>
+                      {r.viaMemory && !showMemory && (
+                        <span
+                          className="text-primary-600 dark:text-primary-400 flex shrink-0 items-center gap-0.5 text-[11px]"
+                          title={`You've used this ${r.score} time${r.score === 1 ? '' : 's'}`}
+                        >
+                          <StarIcon size={11} aria-hidden="true" />
+                          {r.score}
+                          <span className="sr-only">
+                            frequently used, {r.score} picks
+                          </span>
+                        </span>
+                      )}
                       <span
                         className={cn(
                           'text-muted-foreground shrink-0 text-[11px] whitespace-nowrap',
@@ -638,10 +909,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       return (
         <div
           ref={ref}
-          className={cn('w-full', className)}
+          className={cn('w-full space-y-2', className)}
           data-testid={dataTestId}
           {...props}
         >
+          {codetypeToggle}
           {searchBox}
         </div>
       );
@@ -657,6 +929,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         {...props}
       >
         <CardContent className="space-y-2 px-4 py-4">
+          {codetypeToggle}
           {searchBox}
 
           {/* status line */}
@@ -678,7 +951,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             )}
             {status.state === 'ready' && tookMs !== null && (
               <>
-                {results.length} results in {tookMs.toFixed(1)} ms (local) · ↑↓
+                {list.length} results in {tookMs.toFixed(1)} ms (local) · ↑↓
                 navigate · → drill into a row · Enter selects
               </>
             )}

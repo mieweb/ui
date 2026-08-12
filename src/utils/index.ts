@@ -1,4 +1,4 @@
-export { cn } from './cn';
+export { cn, miewebUITwMergeConflicts } from './cn';
 export * from './html';
 export * from './phone';
 export * from './date';

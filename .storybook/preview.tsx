@@ -16,6 +16,7 @@ import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
 import { CodeLookup } from '../src/components/CodeLookup';
 import { CodeLookupProvider } from '../src/components/CodeLookup/context';
+import { isRtlLocale } from '../src/hooks/useDirection';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -28,6 +29,18 @@ const brands: Record<string, BrandConfig> = {
   waggleline: wagglelineBrand,
   webchart: webchartBrand,
 };
+
+/*
+ * Resolve the effective text direction from the direction/locale globals.
+ * 'auto' derives it from the locale (rtl for ar/he/fa/ur).
+ */
+function resolveGlobalDirection(
+  globals: Record<string, unknown>
+): 'ltr' | 'rtl' {
+  const direction = (globals?.direction as string) || 'auto';
+  if (direction === 'ltr' || direction === 'rtl') return direction;
+  return isRtlLocale((globals?.locale as string) || 'en') ? 'rtl' : 'ltr';
+}
 
 /*
  * Global theme listener — ensures data-theme and brand styles are applied
@@ -54,6 +67,16 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
   } else {
     document.body.classList.remove('condensed');
   }
+
+  // Apply text direction (RTL preview) at the document level so CSS logical
+  // properties and `rtl:` variants respond everywhere, including docs pages.
+  document.documentElement.setAttribute('dir', resolveGlobalDirection(globals));
+  // Keep the document language in sync with the locale global so screen
+  // readers and locale-sensitive text shaping reflect the selected locale.
+  document.documentElement.setAttribute(
+    'lang',
+    (globals?.locale as string) || 'en'
+  );
 
   document.body.style.backgroundColor = semanticColors.background;
   document.body.style.color = semanticColors.foreground;
@@ -84,7 +107,13 @@ try {
     const [key, value] = pair.split(':');
     if (key && value) globals[key] = value;
   }
-  if (globals.theme || globals.brand || globals.density) {
+  if (
+    globals.theme ||
+    globals.brand ||
+    globals.density ||
+    globals.direction ||
+    globals.locale
+  ) {
     applyGlobalTheme(globals);
   }
 } catch {
@@ -201,11 +230,13 @@ const withBrand: Decorator = (Story, context) => {
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
   const isCondensed = context.globals.density === 'condensed';
+  const direction = context.globals.direction as string | undefined;
+  const locale = context.globals.locale as string | undefined;
 
   useEffect(() => {
     // Delegate to shared applyGlobalTheme to keep a single source of truth
     applyGlobalTheme(context.globals);
-  }, [brand, isDark, isCondensed, semanticColors]);
+  }, [brand, isDark, isCondensed, semanticColors, direction, locale]);
 
   // Load Google Fonts for the brand
   const fontLink = useMemo(() => {
@@ -249,10 +280,24 @@ const withBrand: Decorator = (Story, context) => {
 // explicit `codeLookup` / `renderCodeSearch` prop) demonstrates offline coded
 // search. Stories that inject their own config still win (explicit overrides
 // context); pass `codeLookup={false}` in a story to demo the plain-text opt-out.
+//
+// The `user` / `device` toolbar globals drive the memory picklist's two gates,
+// and double as the reference for how an app wires them: one decision at the
+// mount point, not per component.
 const withCodeLookup: Decorator = (Story, context) => {
   const locale = (context.globals.locale as string) || 'en';
+  const userId = (context.globals.user as string) || 'anonymous';
+  const trusted = context.globals.device === 'trusted';
+  // Codify shards only exist for these locales; fall back to English for
+  // preview-only locales (e.g. the RTL Arabic sample).
+  const lookupLocale = ['en', 'es'].includes(locale) ? locale : 'en';
   return (
-    <CodeLookupProvider component={CodeLookup} indexUrl="/codify" locale={locale}>
+    <CodeLookupProvider
+      component={CodeLookup}
+      indexUrl="/codify"
+      locale={lookupLocale}
+      memory={{ userId, storage: trusted ? 'local' : 'session' }}
+    >
       <Story />
     </CodeLookupProvider>
   );
@@ -264,7 +309,13 @@ const preview: Preview = {
     theme: 'light',
     density: 'standard',
     locale: 'en',
+    direction: 'auto',
+    user: 'anonymous',
+    device: 'public',
   },
+  // The bar stays one glyph wide but still shows the current value: `title` is
+  // the emoji (or a per-item icon) and the wording moves to the dropdown's
+  // `right` column.
   globalTypes: {
     brand: {
       name: 'Brand',
@@ -272,16 +323,15 @@ const preview: Preview = {
       toolbar: {
         icon: 'paintbrush',
         items: [
-          { value: 'bluehive', title: '🐝 BlueHive' },
-          { value: 'ccme', title: '🌿 ccMe' },
-          { value: 'default', title: '⚪ Default' },
-          { value: 'enterprise-health', title: '🏥 Enterprise Health' },
-          { value: 'mieweb', title: '🟢 MIE Web' },
-          { value: 'ozwell', title: '🤖 Ozwell' },
-          { value: 'waggleline', title: '🍯 Waggleline' },
-          { value: 'webchart', title: '🟠 WebChart' },
+          { value: 'bluehive', title: '🐝', right: 'BlueHive' },
+          { value: 'ccme', title: '🌿', right: 'ccMe' },
+          { value: 'default', title: '⚪', right: 'Default' },
+          { value: 'enterprise-health', title: '🏥', right: 'Enterprise Health' },
+          { value: 'mieweb', title: '🟢', right: 'MIE Web' },
+          { value: 'ozwell', title: '🤖', right: 'Ozwell' },
+          { value: 'waggleline', title: '🍯', right: 'Waggleline' },
+          { value: 'webchart', title: '🟠', right: 'WebChart' },
         ],
-        dynamicTitle: true,
       },
     },
     theme: {
@@ -293,7 +343,7 @@ const preview: Preview = {
           { value: 'light', icon: 'sun', title: 'Light' },
           { value: 'dark', icon: 'moon', title: 'Dark' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
     density: {
@@ -302,10 +352,10 @@ const preview: Preview = {
       toolbar: {
         icon: 'collapse',
         items: [
-          { value: 'standard', title: 'Standard' },
-          { value: 'condensed', title: 'Condensed' },
+          { value: 'standard', icon: 'grow', title: 'Standard' },
+          { value: 'condensed', icon: 'collapse', title: 'Condensed' },
         ],
-        dynamicTitle: true,
+        dynamicTitle: false,
       },
     },
     locale: {
@@ -314,10 +364,59 @@ const preview: Preview = {
       toolbar: {
         icon: 'globe',
         items: [
-          { value: 'en', title: '🇺🇸 English' },
-          { value: 'es', title: '🇪🇸 Español (sample)' },
+          { value: 'en', title: '🇺🇸', right: 'English' },
+          { value: 'es', title: '🇪🇸', right: 'Español (sample)' },
+          { value: 'ar', title: '🇸🇦', right: 'العربية (RTL sample)' },
         ],
-        dynamicTitle: true,
+      },
+    },
+    direction: {
+      name: 'Direction',
+      description: 'Text direction (LTR/RTL preview)',
+      toolbar: {
+        icon: 'transfer',
+        items: [
+          { value: 'auto', title: '🔁', right: 'Auto (from language)' },
+          { value: 'ltr', title: '➡️', right: 'LTR' },
+          { value: 'rtl', title: '⬅️', right: 'RTL' },
+        ],
+      },
+    },
+    user: {
+      name: 'Signed in as',
+      description:
+        'Simulated session identity. CodeLookup only remembers picked codes for a real user.',
+      toolbar: {
+        icon: 'user',
+        items: [
+          { value: 'anonymous', title: '🚫', right: 'Not signed in' },
+          { value: 'alice', title: '👩‍⚕️', right: 'Dr. Alice' },
+          { value: 'bob', title: '👨‍⚕️', right: 'Dr. Bob' },
+          { value: 'nurse', title: '💉', right: 'Nurse Nia' },
+          { value: 'reception', title: '🧑‍💼', right: 'Reception Rae' },
+          { value: 'patient', title: '🤒', right: 'Patient Pat' },
+        ],
+      },
+    },
+    device: {
+      name: 'Device',
+      description:
+        'Simulates the deployment’s device-trust decision (not an end-user setting): whether picked codes may be cached on this machine.',
+      toolbar: {
+        icon: 'lock',
+        items: [
+          {
+            value: 'public',
+            icon: 'unlock',
+            title: 'Public kiosk — nothing stored',
+          },
+          {
+            value: 'trusted',
+            icon: 'lock',
+            title: 'Trusted workstation — cached',
+          },
+        ],
+        dynamicTitle: false,
       },
     },
   },

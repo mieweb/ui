@@ -77,6 +77,29 @@ export interface MediaEditorProps extends VariantProps<
   onCursorTimestampChange?: (timestampMs: number | null) => void;
   /** Fired whenever the edited words change — lets the host build raw-data views */
   onEditedWordsRender?: (editedWords: EditableWord[]) => void;
+  /**
+   * Undo beyond the editor's own history.
+   *
+   * The editor's undo is word-level, which is the right grain for typing and
+   * the wrong one for a host that also versions the document — undoing a batch
+   * change one word at a time is not undoing it. When a host provides this, the
+   * Undo control stays available once the editor's own stack is empty and hands
+   * over instead of going dead, so there is one Undo rather than two.
+   */
+  onUndoBeyond?: () => void;
+  /** Whether the host has anything left to undo. Keeps Undo live at depth 0. */
+  canUndoBeyond?: boolean;
+  /** What `onUndoBeyond` would undo, for the tooltip (e.g. a version name). */
+  undoBeyondLabel?: string;
+  /**
+   * Redo beyond the editor's own history — the counterpart to `onUndoBeyond`.
+   * The editor redoes its own word-level steps first and only calls this once
+   * they are exhausted, so the pair walks the same states in both directions.
+   */
+  onRedo?: () => void;
+  canRedo?: boolean;
+  /** What `onRedo` would redo, for the tooltip. */
+  redoLabel?: string;
   /** Optional ref to the internal MediaPlayer (host escape hatch, e.g. thumbnail capture) */
   playerRef?: React.Ref<MediaPlayerRef>;
   /** Additional class name */
@@ -117,6 +140,48 @@ const mediaEditorVariants = cva(
 // ============================================================================
 // Helpers
 // ============================================================================
+
+/**
+ * Bring a word into view WITHIN the transcript, never by moving the page.
+ *
+ * `Element.scrollIntoView` walks up to the nearest scrolling ancestor. Above
+ * the md breakpoint that is the transcript's own box and the behaviour is
+ * right. Below it the editor grows to its content instead of scrolling
+ * internally, so the nearest scrolling ancestor is the DOCUMENT — following
+ * the active word dragged the whole page down, taking the player and its
+ * controls off screen a word at a time, and any attempt to scroll back was
+ * undone by the next word.
+ *
+ * Scrolling the container directly cannot escape it. The clamped-both-ways
+ * arithmetic reproduces `block: 'nearest'`, so behaviour above the breakpoint
+ * is unchanged.
+ */
+function scrollWordIntoTranscript(
+  container: HTMLElement | null,
+  wordIndex: number
+): void {
+  if (!container) return;
+  // Not its own scrolling box (the small-screen layout) — nothing to scroll,
+  // and anything we did here would move the page instead.
+  if (container.scrollHeight <= container.clientHeight) return;
+
+  const el = container.querySelector(`[data-word-index="${wordIndex}"]`);
+  if (!el) return;
+
+  const containerBox = container.getBoundingClientRect();
+  const wordBox = el.getBoundingClientRect();
+
+  const above = wordBox.top - containerBox.top;
+  const below = wordBox.bottom - containerBox.bottom;
+  // Already fully visible: `nearest` scrolls nothing.
+  const delta = above < 0 ? above : below > 0 ? below : 0;
+  if (delta === 0) return;
+
+  container.scrollTo({
+    top: container.scrollTop + delta,
+    behavior: 'smooth',
+  });
+}
 
 /** Format duration: seconds only if <90s, min:sec if <60min, h:mm:ss otherwise */
 function formatDuration(ms: number): string {
@@ -263,6 +328,12 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       onCursorTimestampChange,
       onEditedWordsRender,
       onSpeedStateChange,
+      onUndoBeyond,
+      canUndoBeyond = false,
+      undoBeyondLabel,
+      onRedo,
+      canRedo = false,
+      redoLabel,
       playerRef: externalPlayerRef,
       className,
       splitLayout,
@@ -284,6 +355,8 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       clipboard,
       hasEdits,
       undo,
+      redo,
+      canRedo: canRedoWords,
       toggleWordDeleted,
       deleteRange,
       cut,
@@ -308,6 +381,18 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
       stats,
       fillerAnalysis,
     } = edits;
+
+    // Undo and Redo are one control pair: they appear and disappear together,
+    // and whichever cannot act is disabled rather than removed. A button that
+    // vanishes shifts the ones beside it; a lone greyed Redo reads as broken.
+    // Each side prefers the editor's own history and falls through to the
+    // host's, so the pair walks the same states in both directions.
+    // A host that sets the capability flag without the handler would otherwise
+    // get an enabled button that does nothing, so both are required.
+    const canUndoAnything =
+      undoStack.length > 0 || (canUndoBeyond && !!onUndoBeyond);
+    const canRedoAnything = canRedoWords || (canRedo && !!onRedo);
+    const showUndoRedo = canUndoAnything || canRedoAnything || !!onRedo;
 
     // -- UI state --
     const [activeWordIndex, setActiveWordIndex] = React.useState<number | null>(
@@ -459,15 +544,18 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
     // Auto-scroll the active word into view during playback
     React.useEffect(() => {
       if (activeWordIndex === null) return;
-      const el = contentRef.current?.querySelector(
-        `[data-word-index="${activeWordIndex}"]`
-      );
-      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      scrollWordIntoTranscript(contentRef.current, activeWordIndex);
     }, [activeWordIndex]);
 
-    // Auto-focus the transcript for keyboard navigation
+    // Auto-focus the transcript for keyboard navigation.
+    //
+    // `preventScroll` matters: focusing an element the browser considers
+    // off-screen scrolls it into view, and below the md breakpoint the
+    // transcript is part of a page-length document rather than its own
+    // scrolling box — so this landed the reader partway down the transcript
+    // with the player above the fold, on every load.
     React.useEffect(() => {
-      contentRef.current?.focus();
+      contentRef.current?.focus({ preventScroll: true });
     }, [transcript]);
 
     // Apply the default speed when it changes (and no marker overrides it)
@@ -1037,6 +1125,17 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         } else if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
           undo();
           handled = true;
+        } else if (
+          (e.metaKey || e.ctrlKey) &&
+          ((e.key === 'z' && e.shiftKey) || e.key === 'y')
+        ) {
+          // Redo. ⌘Y is accepted for anyone arriving from Windows but is never
+          // advertised — on macOS it is Chrome's own History shortcut and the
+          // browser wins. The button shows ⇧⌘Z, which is what this handles.
+          // Word-level first, then the host's, mirroring Undo.
+          if (canRedoWords) redo();
+          else if (canRedo && onRedo) onRedo();
+          handled = true;
         } else if (e.key === 'ArrowLeft') {
           if (cursorPosition === 'after') {
             // Move from 'after' the last word back to 'before' it
@@ -1176,10 +1275,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           }
 
           // Scroll the cursor into view
-          const wordElement = contentRef.current?.querySelector(
-            `[data-word-index="${newIndex}"]`
-          );
-          wordElement?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          scrollWordIntoTranscript(contentRef.current, newIndex);
         }
       },
       [
@@ -1194,6 +1290,10 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
         handleCut,
         handlePaste,
         undo,
+        redo,
+        canRedoWords,
+        canRedo,
+        onRedo,
         openWordEditor,
       ]
     );
@@ -1311,11 +1411,29 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           }`}
         >
           {/* Media surface */}
+          {/*
+            The cap is written twice on purpose. `max-h-[50%]` is a percentage
+            of the parent's height, which only resolves while the editor is a
+            fixed-height shell — on a small screen the parent grows to its
+            content, the percentage resolves against an indeterminate height,
+            and the rule silently becomes no cap at all. A portrait phone
+            recording then took the full viewport on its own and pushed its own
+            controls off the bottom of the screen. The `dvh` cap always
+            resolves; the md variant keeps existing desktop behaviour byte for
+            byte.
+
+            `dvh` rather than `vh`, matching Modal and Sheet: on iOS Safari
+            `vh` measures the viewport as if the browser chrome were hidden, so
+            while the address bar is on screen `55vh` is taller than 55% of
+            what you can actually see — which would put the player's own
+            controls back under the fold, the exact failure this cap exists to
+            prevent.
+          */}
           <div
-            className={`border-border bg-background min-h-0 shrink-0 ${
+            className={`border-border bg-background flex min-h-0 shrink-0 ${
               splitLayout === 'vertical'
-                ? 'md:w-1/2 md:border-r'
-                : 'max-h-[50%] border-b'
+                ? 'max-h-[55dvh] md:max-h-none md:w-1/2 md:border-r'
+                : 'max-h-[55dvh] border-b md:max-h-[50%]'
             }`}
           >
             <MediaPlayer
@@ -1379,15 +1497,63 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
                 >
                   ✂️
                 </Button>
-                {undoStack.length > 0 && (
+                {/* Undo and Redo appear and disappear together. A lone greyed
+                    Redo reads as broken, and an Undo that vanishes at the end
+                    of history while Redo merely greys is two rules for one
+                    pair — so whichever is inert is disabled, not removed. */}
+                {showUndoRedo && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={undo}
-                    aria-label={`Undo (${undoStack.length} available)`}
-                    title="Undo (⌘Z)"
+                    disabled={!canUndoAnything}
+                    // Word-level first; the host only gets it once the
+                    // editor's own history is spent.
+                    onClick={undoStack.length > 0 ? undo : onUndoBeyond}
+                    aria-label={
+                      undoStack.length > 0
+                        ? `Undo (${undoStack.length} available)`
+                        : canUndoBeyond && undoBeyondLabel
+                          ? `Undo: ${undoBeyondLabel}`
+                          : 'Undo'
+                    }
+                    title={
+                      undoStack.length > 0
+                        ? `Undo (⌘Z) — ${undoStack.length} step${undoStack.length === 1 ? '' : 's'}`
+                        : canUndoBeyond
+                          ? undoBeyondLabel
+                            ? `Undo (⌘Z) — back to "${undoBeyondLabel}"`
+                            : 'Undo (⌘Z)'
+                          : 'Nothing to undo'
+                    }
                   >
-                    Undo ({undoStack.length})
+                    Undo{undoStack.length > 0 ? ` (${undoStack.length})` : ''}{' '}
+                    <kbd className="text-[10px] opacity-60">⌘Z</kbd>
+                  </Button>
+                )}
+                {showUndoRedo && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    // Word-level first, mirroring Undo, so the pair steps back
+                    // and forward through the same states in the same order.
+                    onClick={canRedoWords ? redo : onRedo}
+                    disabled={!canRedoAnything}
+                    aria-label={
+                      !canRedoWords && canRedo && redoLabel
+                        ? `Redo: ${redoLabel}`
+                        : 'Redo'
+                    }
+                    title={
+                      canRedoWords
+                        ? 'Redo (⇧⌘Z)'
+                        : canRedo && redoLabel
+                          ? `Redo (⇧⌘Z) — forward to "${redoLabel}"`
+                          : canRedo
+                            ? 'Redo (⇧⌘Z)'
+                            : 'Nothing to redo'
+                    }
+                  >
+                    Redo <kbd className="text-[10px] opacity-60">⇧⌘Z</kbd>
                   </Button>
                 )}
               </div>

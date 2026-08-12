@@ -321,6 +321,7 @@ self.onmessage = (e: MessageEvent) => {
     const collapse = msg.collapse === true;
     const opts = {
       boostCodetypes: msg.boostCodetypes as string[] | undefined,
+      codetypes: msg.codetypes as string[] | undefined,
       billableOnly: msg.billableOnly === true,
     };
     let results;

@@ -67,9 +67,9 @@ export function AppHeaderSection({
       data-slot="app-header-section"
       className={cn(
         'flex items-center gap-3',
-        align === 'left' && 'mr-auto',
+        align === 'left' && 'me-auto',
         align === 'center' && 'mx-auto',
-        align === 'right' && 'ml-auto',
+        align === 'right' && 'ms-auto',
         className
       )}
     >
@@ -238,7 +238,7 @@ export function AppHeaderIconButton({
       {typeof badge === 'number' && badge > 0 && (
         <span
           className={cn(
-            'absolute -top-1 -right-1 flex items-center justify-center',
+            'absolute -end-1 -top-1 flex items-center justify-center',
             'h-[18px] min-w-[18px] px-1 text-[10px] font-bold',
             'rounded-full bg-red-700 text-white'
           )}
@@ -314,7 +314,7 @@ export function AppHeaderSearch({
       )}
     >
       <SearchIcon />
-      <span className="flex-1 text-left whitespace-nowrap">{placeholder}</span>
+      <span className="flex-1 text-start whitespace-nowrap">{placeholder}</span>
       <kbd
         className={cn(
           'hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex',
@@ -404,7 +404,7 @@ export function AppHeaderUserMenu({
       </div>
 
       {/* Name (hidden on small screens) */}
-      <div className="hidden min-w-0 text-left lg:block">
+      <div className="hidden min-w-0 text-start lg:block">
         <div
           data-slot="app-header-user-name"
           className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white"

@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { CodeLookup, type CodifyDomain } from './CodeLookup';
+import {
+  CodeLookup,
+  type CodifyDomain,
+  type CodetypeOption,
+} from './CodeLookup';
 import type { CodifyResult } from './engine';
+import { exportMemoryYaml, importMemoryYaml } from './memoryYaml';
+import { Button } from '../Button';
 
 const meta: Meta<typeof CodeLookup> = {
   title: 'Healthcare/CodeLookup',
@@ -50,10 +56,14 @@ type Story = StoryObj<typeof CodeLookup>;
 function Template({
   domains,
   searchDomains,
+  searchCodetypes,
+  codetypeOptions,
   locale,
 }: {
   domains?: CodifyDomain[];
   searchDomains?: CodifyDomain[];
+  searchCodetypes?: string[];
+  codetypeOptions?: CodetypeOption[];
   locale?: string;
 }) {
   const [selected, setSelected] = useState<CodifyResult | null>(null);
@@ -64,6 +74,8 @@ function Template({
         locale={locale}
         domains={domains}
         searchDomains={searchDomains}
+        searchCodetypes={searchCodetypes}
+        codetypeOptions={codetypeOptions}
         onSelect={setSelected}
       />
       {selected && (
@@ -82,11 +94,38 @@ export const AllDomains: Story = {
 
 /** Conditions only (ICD-10 + SNOMED, ~14 MB). Try "con hea fa", "chf", "lvhf".
  * Results collapse to one row per condition family (ICD-10 code root); → lists
- * the specific billable codes. Planned: the drill-down will also surface
- * suggested orders (labs/procedures) for the condition. */
+ * the specific billable codes. The segmented control lets the user restrict
+ * the coding system (`codetypeOptions`); a fixed programmer-set filter is the
+ * `searchCodetypes` prop instead (see "Conditions ICD-10 Only"). An ICD-11
+ * option is one `{ label: 'ICD-11', codetypes: ['ICD11'] }` away once the
+ * shards carry ICD-11 rows (the source dataset has none yet). Planned: the
+ * drill-down will also surface suggested orders (labs/procedures) for the
+ * condition. */
 export const ConditionsOnly: Story = {
   render: (_args, { globals }) => (
-    <Template domains={['condition']} locale={globals.locale} />
+    <Template
+      domains={['condition']}
+      codetypeOptions={[
+        { label: 'All' },
+        { label: 'ICD-10', codetypes: ['ICD10'] },
+        { label: 'SNOMED', codetypes: ['SNOMED US'] },
+      ]}
+      locale={globals.locale}
+    />
+  ),
+};
+
+/** Programmer-fixed coding system: `searchCodetypes={['ICD10']}` — SNOMED
+ * synonyms never appear, no user toggle. Swap in `['ICD11']` when the shards
+ * include ICD-11. */
+export const ConditionsIcd10Only: Story = {
+  name: 'Conditions ICD-10 Only',
+  render: (_args, { globals }) => (
+    <Template
+      domains={['condition']}
+      searchCodetypes={['ICD10']}
+      locale={globals.locale}
+    />
   ),
 };
 
@@ -157,6 +196,154 @@ export const QualityMeasures: Story = {
       domains={['quality', 'lab', 'procedure', 'vaccine']}
       searchDomains={['quality']}
       locale={globals.locale}
+    />
+  ),
+};
+
+function MemoryTemplate({
+  locale,
+  userId,
+  device,
+}: {
+  locale?: string;
+  userId: string;
+  device: string;
+}) {
+  const [context, setContext] = useState('med-orders');
+  const [selected, setSelected] = useState<CodifyResult | null>(null);
+  const [yamlText, setYamlText] = useState('');
+  const [yamlNote, setYamlNote] = useState('');
+  // bump to remount CodeLookup so an import shows up in the picklist
+  const [reloadKey, setReloadKey] = useState(0);
+  const toggle = (
+    label: string,
+    value: string,
+    options: string[],
+    onChange: (v: string) => void
+  ) => (
+    <label className="flex items-center gap-1.5 text-sm">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="border-border bg-background rounded border px-1.5 py-0.5 text-sm"
+      >
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+    </label>
+  );
+  return (
+    <div className="mx-auto max-w-2xl space-y-3">
+      <div className="flex items-center gap-4">
+        {toggle(
+          'Context',
+          context,
+          ['med-orders', 'presenting-meds'],
+          setContext
+        )}
+        <p className="text-muted-foreground text-xs">
+          Signed in as <strong>{userId}</strong> on a{' '}
+          <strong>{device === 'trusted' ? 'trusted' : 'public'}</strong> device
+          — set both in the toolbar.
+        </p>
+      </div>
+      <CodeLookup
+        // remount on scope change so seeded input state can't linger
+        key={`${userId}|${context}|${device}|${reloadKey}`}
+        indexUrl="/codify"
+        locale={locale}
+        domains={['med']}
+        memory={{ context }}
+        onSelect={setSelected}
+      />
+      {selected && (
+        <pre className="bg-muted overflow-auto rounded-md p-3 text-xs">
+          {JSON.stringify(selected, null, 2)}
+        </pre>
+      )}
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={async () => {
+              setYamlText(await exportMemoryYaml({ userId, context }));
+              setYamlNote(`Exported ${userId} / ${context}`);
+            }}
+          >
+            Export YAML
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={async () => {
+              setYamlText(await exportMemoryYaml());
+              setYamlNote('Exported all buckets');
+            }}
+          >
+            Export all
+          </Button>
+          <Button
+            size="sm"
+            onClick={async () => {
+              try {
+                const r = await importMemoryYaml(yamlText, {
+                  scope: { userId, context },
+                });
+                setYamlNote(
+                  `Imported ${r.imported} codes into ${userId} / ${context}` +
+                    (r.skipped ? ` (${r.skipped} skipped)` : '')
+                );
+                setReloadKey((k) => k + 1);
+              } catch (err) {
+                setYamlNote(`Import failed: ${(err as Error).message}`);
+              }
+            }}
+          >
+            Import into this bucket
+          </Button>
+          <span className="text-muted-foreground text-xs" aria-live="polite">
+            {yamlNote}
+          </span>
+        </div>
+        <textarea
+          value={yamlText}
+          onChange={(e) => setYamlText(e.target.value)}
+          aria-label="Memory YAML"
+          placeholder="Export writes YAML here; paste a memory export to import it."
+          className="border-border bg-background h-40 w-full rounded-md border p-2 font-mono text-xs"
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Personal "Frequently used" picklist (the `memory` prop). Pick a few meds,
+ * clear/refocus the empty box — your most-picked codes appear first. Keep
+ * typing and your remembered codes stay pinned above the index hits, marked ☆
+ * with their pick count. Switch **context** here, and **Signed in as** in the
+ * toolbar, to see bucket isolation (alice/med-orders never sees bob's picks,
+ * nor alice's presenting-meds picks).
+ *
+ * Two gates guard the whole feature, both driven from the toolbar:
+ * *Not signed in* remembers nothing at all, and a **public kiosk** device
+ * keeps counts in RAM only — reload and they are gone. Only a **trusted
+ * workstation** caches them in IndexedDB. Local-only here; add `serverUrl` to
+ * make the server the source of truth.
+ *
+ * **Export/Import YAML** below the box: dump a bucket (or all of them) to
+ * YAML, edit it, and merge it back — into the *currently selected* bucket, so
+ * you can hand alice's list to bob or seed a context from a curated starter
+ * set. Counts merge by max, so importing twice changes nothing. */
+export const WithMemory: Story = {
+  render: (_args, { globals }) => (
+    <MemoryTemplate
+      locale={globals.locale}
+      userId={globals.user ?? 'anonymous'}
+      device={globals.device ?? 'public'}
     />
   ),
 };

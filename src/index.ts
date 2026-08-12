@@ -33,6 +33,7 @@ export * from './components/Checkbox';
 export * from './components/CodeLookup/context';
 export * from './components/ConditionEditor';
 export * from './components/CheckrIntegration';
+export * from './components/CollabStatus';
 export * from './components/Collapsible';
 export * from './components/CommandPalette';
 export * from './components/ConnectionStatus';
@@ -139,6 +140,7 @@ export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
 export * from './components/ScrollArea';
 export * from './components/Select';
+export * from './components/PillSelect';
 export * from './components/ServiceAccordion';
 export * from './components/ServiceBadge';
 export * from './components/ServiceCard';
@@ -194,6 +196,18 @@ export {
   type ReportDatePickerProps,
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
+
+// Icons (lucide-react re-exports)
+// Note: CloseIcon, RefreshIcon, SendIcon, and SparklesIcon are ambiguous with
+// the AI module's custom icons; the explicit AI exports below take precedence
+// so existing consumers keep the same components.
+export * from './components/Icons';
+export {
+  CloseIcon,
+  RefreshIcon,
+  SendIcon,
+  SparklesIcon,
+} from './components/AI';
 
 // Hooks
 export * from './hooks';

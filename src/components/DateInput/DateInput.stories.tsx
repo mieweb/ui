@@ -12,7 +12,7 @@ const meta: Meta<typeof DateInput> = {
   argTypes: {
     inputType: {
       control: 'select',
-      options: ['date', 'datetime-local', 'month', 'year'],
+      options: ['date', 'datetime-local', 'time', 'month', 'year'],
       description: 'Date value format and picker control',
     },
     timeFormat: {
@@ -104,6 +104,23 @@ export const DateTimeTwelveHour: Story = {
     inputType: 'datetime-local',
     timeFormat: '12-hour',
     value: '2026-07-21T21:30',
+  },
+};
+
+export const Time: Story = {
+  args: {
+    label: 'Start Time',
+    inputType: 'time',
+    value: '09:30',
+  },
+};
+
+export const TimeTwelveHour: Story = {
+  args: {
+    label: 'Start Time',
+    inputType: 'time',
+    timeFormat: '12-hour',
+    value: '15:30',
   },
 };
 
