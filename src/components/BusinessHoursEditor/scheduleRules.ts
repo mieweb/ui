@@ -32,7 +32,11 @@ function ruleSignature(slot: TimeSlot): string {
   return `${slot.start}\u0000${slot.end}\u0000${slot.description ?? ''}`;
 }
 
-/** Collapse a schedule into rules: days sharing an identical time range group into one row. */
+/**
+ * Collapse a schedule into rules: days sharing an identical time range group
+ * into one row. Rule ids are deterministic (derived from position) so results
+ * are stable across renders — safe as React keys and for SSR hydration.
+ */
 export function scheduleToRules(schedule: DaySchedule[]): HoursRule[] {
   const rulesBySignature = new Map<string, HoursRule[]>();
   const orderedRules: HoursRule[] = [];
@@ -46,7 +50,7 @@ export function scheduleToRules(schedule: DaySchedule[]): HoursRule[] {
       let rule = candidates.find((r) => !r.days.includes(day.day));
       if (!rule) {
         rule = {
-          id: generateId(),
+          id: `rule-${orderedRules.length}`,
           days: [],
           start: slot.start,
           end: slot.end,
@@ -63,14 +67,14 @@ export function scheduleToRules(schedule: DaySchedule[]): HoursRule[] {
   return orderedRules;
 }
 
-/** Expand rules into the canonical DaySchedule[] shape (all 7 days present). */
+/** Expand rules into the canonical DaySchedule[] shape (all 7 days present). Slot ids are deterministic. */
 export function rulesToSchedule(rules: HoursRule[]): DaySchedule[] {
   return Array.from({ length: 7 }, (_, day) => ({
     day,
     hours: rules
       .filter((rule) => rule.days.includes(day))
-      .map((rule) => ({
-        id: generateId(),
+      .map((rule, index) => ({
+        id: `slot-${day}-${index}`,
         start: rule.start,
         end: rule.end,
         ...(rule.description ? { description: rule.description } : {}),
