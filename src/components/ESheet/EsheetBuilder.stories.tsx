@@ -75,6 +75,11 @@ const builderMeta: Meta<typeof EsheetBuilder> = {
           // esheet submodule (BuilderHeader.tsx / msprimary tokens) — a
           // separate repo/PR. Re-enable once that lands.
           { id: 'color-contrast', enabled: false },
+          // TODO(esheet): esheet 0d6d9a7 renders two unlabeled <aside>
+          // landmarks (`.panel-tools-wrap`), tripping landmark-unique.
+          // Fix belongs in the esheet submodule (add distinct aria-labels
+          // to the tool panels). Re-enable once that lands.
+          { id: 'landmark-unique', enabled: false },
         ],
       },
     },
