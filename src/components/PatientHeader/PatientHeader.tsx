@@ -158,6 +158,8 @@ export interface PatientHeaderProps extends Omit<
   maxVisibleMeds?: number;
   /** Show the patient-level overflow menu to the right of count badges (default: false) */
   showOverflowMenu?: boolean;
+  /** Whether to show the count badges in the actions slot (default: true). Zero-count badges are hidden by default (see CountBadge `showZero`). */
+  showCountBadges?: boolean;
   /** Called when a patient overflow menu action is selected */
   onOverflowAction?: (action: PatientOverflowAction) => void;
   /** Called when an 'Add' modal is submitted from the overflow menu */
@@ -559,6 +561,7 @@ export const PatientHeader = React.forwardRef<
       showProviderBanner = false,
       showFlagBanner = false,
       showOverflowMenu = false,
+      showCountBadges = true,
       onOverflowAction,
       onAddItem,
       onEditPatient,
@@ -697,7 +700,10 @@ export const PatientHeader = React.forwardRef<
                     'order-4 w-full md:order-2 md:w-auto md:shrink-0',
                     'mt-1 md:mt-0',
                     '[&_button[data-count-badge]]:gap-1.5 [&_button[data-count-badge]]:px-2 [&_button[data-count-badge]]:py-0.5 [&_button[data-count-badge]]:text-xs',
-                    'md:[&_button[data-count-badge]]:gap-2 md:[&_button[data-count-badge]]:px-3 md:[&_button[data-count-badge]]:py-1 md:[&_button[data-count-badge]]:text-sm'
+                    'md:[&_button[data-count-badge]]:gap-2 md:[&_button[data-count-badge]]:px-3 md:[&_button[data-count-badge]]:py-1 md:[&_button[data-count-badge]]:text-sm',
+                    // Hide count badges (but not other custom actions) when disabled
+                    !showCountBadges &&
+                      '[&_[data-slot=count-badge-root]]:hidden'
                   )}
                 >
                   {actions}

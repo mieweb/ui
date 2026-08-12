@@ -194,6 +194,8 @@ export interface CountBadgeProps
   deleteLabel?: string;
   /** Independent variant for the count chip. When set, overrides `variant` for just the number. */
   countVariant?: VariantProps<typeof countChipVariants>['variant'];
+  /** Render the badge even when `count` is 0. By default zero-count badges are hidden. */
+  showZero?: boolean;
 }
 
 // =============================================================================
@@ -647,6 +649,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
       onDelete,
       deleteLabel,
       countVariant,
+      showZero = false,
       ...props
     },
     ref
@@ -664,6 +667,14 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
     );
 
     const showMenu = items && items.length > 0;
+    const hidden = count === 0 && !showZero;
+
+    // Close the popover when the badge becomes hidden so document listeners
+    // (Escape/outside-click) don't stay active and the menu doesn't reappear
+    // if the count rises again.
+    React.useEffect(() => {
+      if (hidden) setOpen(false);
+    }, [hidden]);
 
     // Portal + fixed positioning so the menu escapes overflow-hidden ancestors.
     const {
@@ -726,6 +737,10 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
 
     const entityLabel = deleteLabel ?? 'item';
 
+    // Hide zero-count badges unless explicitly opted in. Placed after all
+    // hooks so the hook order stays stable when `count` changes.
+    if (hidden) return null;
+
     return (
       <>
         <div
@@ -733,6 +748,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
             containerRef.current = node;
             anchorRef.current = node;
           }}
+          data-slot="count-badge-root"
           className="relative inline-flex"
         >
           <button
