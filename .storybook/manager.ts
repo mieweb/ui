@@ -206,6 +206,13 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
   style.id = styleId;
   style.textContent = `
     /* Dynamic brand theming for Storybook manager */
+    /* Keep native form controls (radios, checkboxes) in sync with the app
+       theme instead of the OS theme. Storybook's app root sets
+       "color-scheme: light dark" on #root > div, so override there too. */
+    :root, #root, #root > div {
+      color-scheme: ${isDark ? 'dark' : 'light'};
+    }
+
     :root {
       --mieweb-manager-primary: ${brand.primary};
       --mieweb-manager-secondary: ${brand.secondary};
@@ -362,8 +369,9 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       color: ${textMuted} !important;
     }
     
-    /* Input fields */
-    input, select, textarea {
+    /* Input fields (skip radios/checkboxes: painting native pickers breaks
+       their rendering) */
+    input:not([type="radio"]):not([type="checkbox"]), select, textarea {
       background-color: ${inputBg} !important;
       border-color: ${inputBorder} !important;
       color: ${textColor} !important;
@@ -377,37 +385,39 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     
     /* ============================================
        BOOLEAN TOGGLE CONTROL FIX
-       The toggle has dark bg that hides text
+       The toggle has dark bg that hides text.
+       :has(input[role="switch"]) scopes this to boolean toggles only —
+       radio controls share the label[for^="control-"] pattern.
        ============================================ */
     /* Toggle switch background */
-    label[for^="control-"] {
+    label[for^="control-"]:has(input[role="switch"]) {
       background-color: #52525b !important;
     }
     
     /* "False" span (left side, selected by default) */
-    label[for^="control-"] > span:first-of-type {
+    label[for^="control-"]:has(input[role="switch"]) > span:first-of-type {
       color: #e4e4e7 !important;
       background-color: #71717a !important;
     }
     
     /* "True" span (right side, unselected by default) */
-    label[for^="control-"] > span:last-of-type {
+    label[for^="control-"]:has(input[role="switch"]) > span:last-of-type {
       color: #a1a1aa !important;
     }
     
     /* When checked: "True" becomes active */
-    label[for^="control-"] input:checked ~ span:last-of-type {
+    label[for^="control-"]:has(input[role="switch"]) input:checked ~ span:last-of-type {
       color: #e4e4e7 !important;
       background-color: #71717a !important;
     }
     
-    label[for^="control-"] input:checked ~ span:first-of-type {
+    label[for^="control-"]:has(input[role="switch"]) input:checked ~ span:first-of-type {
       background-color: transparent !important;
       color: #a1a1aa !important;
     }
     
     /* Make checkbox input transparent so it doesn't cover text */
-    label[for^="control-"] input[type="checkbox"] {
+    label[for^="control-"]:has(input[role="switch"]) input[type="checkbox"] {
       background: transparent !important;
     }
     ` : ''}

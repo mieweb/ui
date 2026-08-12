@@ -48,6 +48,10 @@ module.exports = {
     'bg-neutral-200',
     'dark:bg-neutral-700',
     'bg-primary-500',
+    // BusinessHoursEditor rules-variant day chips
+    'border-primary-800',
+    'bg-primary-800',
+    'text-white',
     'h-5',
     'w-9',
     'h-6',
