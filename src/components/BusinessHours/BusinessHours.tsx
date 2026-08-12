@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { scheduleToRules } from '../BusinessHoursEditor/BusinessHoursEditor';
 
 // ============================================================================
 // Types
@@ -436,6 +437,77 @@ function DayScheduleRow({
 }
 
 // ============================================================================
+// Grouped Rows (days sharing identical hours collapse into one row)
+// ============================================================================
+
+interface GroupedScheduleRowsProps {
+  officeHours: DayHours[];
+  useShortDayNames?: boolean;
+  use24Hour?: boolean;
+}
+
+function GroupedScheduleRows({
+  officeHours,
+  useShortDayNames = false,
+  use24Hour = false,
+}: GroupedScheduleRowsProps) {
+  const normalized = officeHours.map((dayHours) => ({
+    day: parseDayToNumber(dayHours.day),
+    hours: (dayHours.hours ?? []).map((range) => ({
+      start: range.start ?? '',
+      end: range.end ?? '',
+      ...(range.description ? { description: range.description } : {}),
+    })),
+  }));
+
+  const rules = scheduleToRules(normalized);
+  const closedDays = normalized
+    .filter((dayHours) => dayHours.hours.length === 0)
+    .map((dayHours) => dayHours.day);
+  const dayNames = useShortDayNames ? DAY_NAMES_SHORT : DAY_NAMES;
+  const formatDays = (days: number[]) =>
+    days.map((day) => dayNames[day]).join(', ');
+
+  return (
+    <>
+      {rules.map((rule) => (
+        <div
+          key={rule.id}
+          data-slot="business-hours-grouped-row"
+          className={cn(dayRowVariants({ isToday: false }))}
+        >
+          <span
+            data-slot="business-hours-day-name"
+            className="min-w-[80px] font-medium"
+          >
+            {formatDays(rule.days)}
+          </span>
+          <div data-slot="business-hours-day-hours" className="text-end">
+            <TimeRangeDisplay range={rule} use24Hour={use24Hour} />
+          </div>
+        </div>
+      ))}
+      {closedDays.length > 0 && (
+        <div
+          data-slot="business-hours-grouped-row"
+          className={cn(dayRowVariants({ isToday: false }))}
+        >
+          <span
+            data-slot="business-hours-day-name"
+            className="min-w-[80px] font-medium"
+          >
+            {formatDays(closedDays)}
+          </span>
+          <div data-slot="business-hours-day-hours" className="text-end">
+            <span className="text-muted-foreground">Closed</span>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ============================================================================
 // Main BusinessHours Component
 // ============================================================================
 
@@ -452,6 +524,8 @@ export interface BusinessHoursProps extends VariantProps<
   useShortDayNames?: boolean;
   /** Use 24-hour time format */
   use24Hour?: boolean;
+  /** Group days sharing identical hours into one row (e.g. "Mon, Wed, Fri · 8:00 AM - 11:00 AM") */
+  groupDays?: boolean;
   /** Show header with icon */
   showHeader?: boolean;
   /** Custom header text */
@@ -468,6 +542,7 @@ export function BusinessHours({
   highlightToday = true,
   useShortDayNames = false,
   use24Hour = false,
+  groupDays = false,
   showHeader = true,
   headerText = 'Hours',
   className,
@@ -580,16 +655,24 @@ export function BusinessHours({
           data-slot="business-hours-schedule"
           className="space-y-1 divide-y divide-neutral-100 dark:divide-neutral-800"
         >
-          {schedule.officeHours.map((dayHours, idx) => (
-            <DayScheduleRow
-              key={idx}
-              dayHours={dayHours}
-              isToday={parseDayToNumber(dayHours.day) === currentDay}
-              highlightToday={highlightToday}
+          {groupDays ? (
+            <GroupedScheduleRows
+              officeHours={schedule.officeHours}
               useShortDayNames={useShortDayNames}
               use24Hour={use24Hour}
             />
-          ))}
+          ) : (
+            schedule.officeHours.map((dayHours, idx) => (
+              <DayScheduleRow
+                key={idx}
+                dayHours={dayHours}
+                isToday={parseDayToNumber(dayHours.day) === currentDay}
+                highlightToday={highlightToday}
+                useShortDayNames={useShortDayNames}
+                use24Hour={use24Hour}
+              />
+            ))
+          )}
         </div>
 
         {schedule.timezone && (

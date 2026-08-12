@@ -348,8 +348,12 @@ const patientAvailability: DaySchedule[] = [
 function RulesVariantWrapper({
   value: initialValue,
   onChange: _,
+  groupPreview = true,
   ...restProps
-}: Partial<React.ComponentProps<typeof BusinessHoursEditor>>) {
+}: Partial<React.ComponentProps<typeof BusinessHoursEditor>> & {
+  /** Toggle the preview between grouped rows and a per-day list */
+  groupPreview?: boolean;
+}) {
   const [schedule, setSchedule] = useState<DaySchedule[]>(initialValue || []);
 
   return (
@@ -365,24 +369,37 @@ function RulesVariantWrapper({
         schedule={{ officeHours: schedule }}
         headerText="Availability Preview"
         showStatus={false}
+        groupDays={groupPreview}
+        useShortDayNames={groupPreview}
       />
     </div>
   );
 }
 
+const rulesStoryArgTypes = {
+  variant: { table: { disable: true } },
+  groupPreview: {
+    control: 'boolean',
+    description:
+      'Switch the Availability Preview between grouped rows (e.g. "Mon, Wed, Fri · 8:00 AM - 11:00 AM") and a per-day list',
+  },
+} as const;
+
 export const RulesVariant: Story = {
   render: (args) => <RulesVariantWrapper {...args} />,
+  argTypes: rulesStoryArgTypes,
   args: {
-    variant: 'rules',
     value: patientAvailability,
     showDescription: false,
     addHoursLabel: 'Add availability',
+    // @ts-expect-error story-only control for the preview display
+    groupPreview: true,
   },
   parameters: {
     docs: {
       description: {
         story:
-          'The rules variant groups days that share the same hours into one row — ideal for capturing patient availability like "Mon/Wed/Fri 8–11am, Tue/Thu 3–5pm, Sat 10am–4pm". It reads and emits the same DaySchedule[] as the default variant, previewed here with the BusinessHours display component.',
+          'The rules variant groups days that share the same hours into one row — ideal for capturing patient availability like "Mon/Wed/Fri 8–11am, Tue/Thu 3–5pm, Sat 10am–4pm". It reads and emits the same DaySchedule[] as the default variant, previewed here with the BusinessHours display component. Use the groupPreview control to switch the preview between grouped and per-day views.',
       },
     },
   },
@@ -390,10 +407,13 @@ export const RulesVariant: Story = {
 
 export const RulesVariantEmpty: Story = {
   render: (args) => <RulesVariantWrapper {...args} />,
+  argTypes: rulesStoryArgTypes,
   args: {
-    variant: 'rules',
     value: [],
     showDescription: false,
     addHoursLabel: 'Add availability',
+    use24Hour: true,
+    // @ts-expect-error story-only control for the preview display
+    groupPreview: true,
   },
 };
