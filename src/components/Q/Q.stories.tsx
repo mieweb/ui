@@ -31,6 +31,13 @@ const meta: Meta<typeof Q> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
+    a11y: {
+      config: {
+        // @mieweb/q renders tab triggers without their referenced tab panels.
+        // Keep the upstream-only exception narrow while retaining contrast checks.
+        rules: [{ id: 'aria-valid-attr-value', enabled: false }],
+      },
+    },
     docs: {
       description: {
         component:
