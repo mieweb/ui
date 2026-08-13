@@ -27,7 +27,9 @@ export function Q({ className, style, ...props }: QProps) {
     <div
       data-slot="q"
       className={cn('h-full min-h-0 w-full', className)}
-      style={{ '--mie-color-mieprimary': '#1d4ed8', ...style } as React.CSSProperties}
+      style={
+        { '--mie-color-mieprimary': '#1d4ed8', ...style } as React.CSSProperties
+      }
     >
       <AgentConfigGenerator {...props} />
     </div>
