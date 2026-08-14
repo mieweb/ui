@@ -108,13 +108,6 @@ function messagesFor(state: StoryState): AIMessage[] {
           content: [{ type: 'text' as const, text }],
         })
       ),
-      {
-        id: 'queued',
-        role: 'user',
-        status: 'pending',
-        timestamp: new Date(),
-        content: [{ type: 'text', text: 'Send this after the answer.' }],
-      },
     ];
   }
 
@@ -139,19 +132,32 @@ function OzwellChatStoryDemo({
     null
   );
   const [visibleWarning, setVisibleWarning] = React.useState(warning);
+  const [queuedMessage, setQueuedMessage] = React.useState<string | null>(
+    state === 'queued' ? 'Send this after the answer.' : null
+  );
 
   React.useEffect(
     () => setThinkingMode(initialThinkingMode),
     [initialThinkingMode]
   );
   React.useEffect(() => setVisibleWarning(warning), [warning]);
+  React.useEffect(
+    () =>
+      setQueuedMessage(
+        state === 'queued' ? 'Send this after the answer.' : null
+      ),
+    [state]
+  );
 
   return (
     <div className="h-[600px] w-[min(100vw,560px)] overflow-hidden rounded-lg border border-slate-200 shadow-sm">
       <OzwellChat
         messages={messagesFor(state)}
-        isGenerating={state === 'streaming'}
+        isGenerating={state === 'streaming' || state === 'queued'}
         onSendMessage={onSendMessage}
+        queuedMessage={queuedMessage}
+        onQueuedMessageChange={setQueuedMessage}
+        onCancelQueuedMessage={() => setQueuedMessage(null)}
         thinking={{
           enabled: thinkingEnabled,
           mode: thinkingMode,
@@ -203,6 +209,7 @@ function InteractivePlaygroundDemo({
     null
   );
   const [visibleWarning, setVisibleWarning] = React.useState(warning);
+  const [queuedMessage, setQueuedMessage] = React.useState<string | null>(null);
   const timerRef = React.useRef<number | undefined>(undefined);
   const messageNumber = React.useRef(0);
 
@@ -230,6 +237,12 @@ function InteractivePlaygroundDemo({
     );
 
   const sendDemoMessage = (text: string) => {
+    if (isGenerating) {
+      setQueuedMessage(text);
+      onSendMessage(text);
+      return;
+    }
+
     if (timerRef.current !== undefined) window.clearTimeout(timerRef.current);
 
     const id = ++messageNumber.current;
@@ -286,6 +299,9 @@ function InteractivePlaygroundDemo({
         messages={messages}
         isGenerating={isGenerating}
         onSendMessage={sendDemoMessage}
+        queuedMessage={queuedMessage}
+        onQueuedMessageChange={setQueuedMessage}
+        onCancelQueuedMessage={() => setQueuedMessage(null)}
         renderTextContent={renderMarkdown}
         thinking={{
           enabled: thinkingEnabled,
@@ -510,7 +526,7 @@ export const ToolResultAndWarning: Story = {
 
 export const QueuedMessageAndNavigation: Story = {
   name: 'Queued Message and Message Navigation',
-  tags: ['test'],
+  tags: ['test', 'queued-edit'],
   args: { state: 'queued' },
   parameters: {
     docs: {
@@ -522,6 +538,16 @@ export const QueuedMessageAndNavigation: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit queued message' })
+    );
+    const editor = canvas.getByRole('textbox', { name: 'Edit queued message' });
+    await userEvent.clear(editor);
+    await userEvent.type(editor, 'Updated follow-up');
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Save queued message' })
+    );
+    await expect(canvas.getByText('Updated follow-up')).toBeVisible();
     await userEvent.click(
       canvas.getByRole('button', { name: /show thinking: auto/i })
     );

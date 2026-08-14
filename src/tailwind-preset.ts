@@ -48,14 +48,13 @@ export const miewebUISafelist = [
   // OzwellChat's compact widget shell and portaled menus. These arbitrary
   // utilities must remain available to Tailwind 3 consumers that do not scan
   // package source files.
-  'bg-[#f7f9fc]',
   'max-w-[min(142px,38vw)]',
   'max-w-[190px]',
   'max-w-[min(248px,calc(100vw-24px))]',
   'max-w-[min(260px,calc(100vw-24px))]',
   'rounded-[10px]',
   'min-h-[30px]',
-  'animate-[ozwell-message-flare_1.8s_ease-out]',
+  'animate-ozwell-message-flare',
   'grid-cols-[22px_minmax(0,1fr)]',
   'h-[22px]',
   'w-[22px]',
@@ -797,6 +796,20 @@ export const miewebUIPreset: MiewebUIPreset = {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        'ozwell-message-flare': {
+          '0%': {
+            boxShadow:
+              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 34%, transparent)',
+          },
+          '70%': {
+            boxShadow:
+              '0 0 0 8px color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 0%, transparent)',
+          },
+          '100%': {
+            boxShadow:
+              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 0%, transparent)',
+          },
+        },
       },
       animation: {
         'fade-in': 'fade-in 150ms ease-out',
@@ -806,6 +819,7 @@ export const miewebUIPreset: MiewebUIPreset = {
         'slide-in-right': 'slide-in-right 300ms ease-out',
         'slide-in-left': 'slide-in-left 300ms ease-out',
         'scale-in': 'scale-in 150ms ease-out',
+        'ozwell-message-flare': 'ozwell-message-flare 1.8s ease-out',
       },
     },
   },

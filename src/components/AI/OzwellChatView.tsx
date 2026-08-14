@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Dropdown, DropdownContent, DropdownItem } from '../Dropdown';
+import { CheckIcon, CloseIcon, PencilIcon } from '../Icons';
 import { Toast } from '../Toast';
 import { Tooltip } from '../Tooltip';
 import {
@@ -10,7 +11,11 @@ import {
   type ProviderModelValue,
 } from './ComposerModelSelector';
 import { AIChat } from './AIChat';
-import type { AIMessage, AIRenderTextContent } from './types';
+import type {
+  AIMessage,
+  AIRenderMessageFooter,
+  AIRenderTextContent,
+} from './types';
 
 export type OzwellThinkingMode = 'never' | 'collapsed' | 'auto' | 'expanded';
 export type OzwellModelOption = ProviderModelOption;
@@ -58,8 +63,10 @@ const THINKING_OPTIONS: Array<{
   },
 ];
 
+const QUEUED_MESSAGE_ID = 'ozwell-queued-message';
+
 export interface OzwellChatProps {
-  /** Messages already prepared by the Ozwell API adapter. */
+  /** Messages prepared by the Ozwell API adapter, excluding `queuedMessage`. */
   messages: AIMessage[];
   /** Whether the adapter is receiving an assistant response. */
   isGenerating?: boolean;
@@ -67,6 +74,12 @@ export interface OzwellChatProps {
   inputPlaceholder?: string;
   /** Called with a user message; transport remains the adapter's responsibility. */
   onSendMessage?: (message: string) => void;
+  /** Follow-up held by the adapter while an assistant turn is still in progress. */
+  queuedMessage?: string | null;
+  /** Updates the adapter-owned queued follow-up. */
+  onQueuedMessageChange?: (message: string) => void;
+  /** Removes the adapter-owned queued follow-up. */
+  onCancelQueuedMessage?: () => void;
   /** Optional host renderer for text blocks such as sanitized Markdown. */
   renderTextContent?: AIRenderTextContent;
   /** Controlled thinking display settings. */
@@ -123,6 +136,9 @@ export function OzwellChat({
   isGenerating = false,
   inputPlaceholder = 'Ask a question...',
   onSendMessage,
+  queuedMessage,
+  onQueuedMessageChange,
+  onCancelQueuedMessage,
   renderTextContent,
   thinking,
   models,
@@ -135,7 +151,11 @@ export function OzwellChat({
   const [thinkingMenuOpen, setThinkingMenuOpen] = React.useState(false);
   const [messagesMenuOpen, setMessagesMenuOpen] = React.useState(false);
   const [messagesButtonFlare, setMessagesButtonFlare] = React.useState(false);
+  const [isEditingQueuedMessage, setIsEditingQueuedMessage] =
+    React.useState(false);
+  const [queuedMessageDraft, setQueuedMessageDraft] = React.useState('');
   const hasFlaredRef = React.useRef(false);
+  const queuedMessageEditorRef = React.useRef<HTMLTextAreaElement>(null);
 
   const displayedMessages = React.useMemo(
     () => applyThinkingMode(messages, thinking?.mode ?? 'auto'),
@@ -155,10 +175,34 @@ export function OzwellChat({
     [displayedMessages]
   );
   const showMessagesNav = userMessageItems.length >= 3;
+  const chatMessages = React.useMemo(
+    () =>
+      queuedMessage
+        ? [
+            ...displayedMessages,
+            {
+              id: QUEUED_MESSAGE_ID,
+              role: 'user' as const,
+              status: 'pending' as const,
+              timestamp: new Date(),
+              content: [{ type: 'text' as const, text: queuedMessage }],
+            },
+          ]
+        : displayedMessages,
+    [displayedMessages, queuedMessage]
+  );
   const selectedThinkingOption = THINKING_OPTIONS.find(
     (option) => option.value === thinking?.mode
   );
   const showModelSelector = Boolean(models?.value && models.options.length > 1);
+
+  React.useEffect(() => {
+    if (!queuedMessage) setIsEditingQueuedMessage(false);
+  }, [queuedMessage]);
+
+  React.useEffect(() => {
+    if (isEditingQueuedMessage) queuedMessageEditorRef.current?.focus();
+  }, [isEditingQueuedMessage]);
 
   React.useEffect(() => {
     if (!showMessagesNav || hasFlaredRef.current) return;
@@ -195,16 +239,114 @@ export function OzwellChat({
             }
           : { onProviderFilterChange: models.onProviderFilterChange })}
         boundaryRef={shellRef}
-        className="max-w-[min(142px,38vw)] border-slate-200 bg-white text-slate-700 shadow-sm"
+        className="border-border bg-card text-foreground max-w-[min(142px,38vw)] shadow-sm"
       />
     ) : undefined;
+
+  const startQueuedMessageEdit = () => {
+    setQueuedMessageDraft(queuedMessage ?? '');
+    setIsEditingQueuedMessage(true);
+  };
+
+  const saveQueuedMessage = () => {
+    const nextMessage = queuedMessageDraft.trim();
+    if (nextMessage) onQueuedMessageChange?.(nextMessage);
+    else if (onCancelQueuedMessage) onCancelQueuedMessage();
+    else return;
+    setIsEditingQueuedMessage(false);
+  };
+
+  const renderMessageTextContent: AIRenderTextContent = (text, context) => {
+    if (context.messageId === QUEUED_MESSAGE_ID && isEditingQueuedMessage) {
+      return (
+        <textarea
+          aria-label="Edit queued message"
+          ref={queuedMessageEditorRef}
+          className="border-border bg-card text-foreground focus-visible:ring-ring block min-h-20 w-full resize-y rounded border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
+          value={queuedMessageDraft}
+          onChange={(event) => setQueuedMessageDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') setIsEditingQueuedMessage(false);
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              saveQueuedMessage();
+            }
+          }}
+        />
+      );
+    }
+
+    return renderTextContent?.(text, context) ?? text;
+  };
+
+  const renderQueuedMessageFooter: AIRenderMessageFooter = (message) => {
+    if (message.id !== QUEUED_MESSAGE_ID) return null;
+
+    return (
+      <div className="flex items-center gap-1">
+        {isEditingQueuedMessage ? (
+          <>
+            <Tooltip content="Save queued message">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label="Save queued message"
+                onClick={saveQueuedMessage}
+              >
+                <CheckIcon size={14} aria-hidden="true" />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Cancel editing">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label="Cancel editing queued message"
+                onClick={() => setIsEditingQueuedMessage(false)}
+              >
+                <CloseIcon size={14} aria-hidden="true" />
+              </Button>
+            </Tooltip>
+          </>
+        ) : (
+          onQueuedMessageChange && (
+            <Tooltip content="Edit queued message">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label="Edit queued message"
+                onClick={startQueuedMessageEdit}
+              >
+                <PencilIcon size={14} aria-hidden="true" />
+              </Button>
+            </Tooltip>
+          )
+        )}
+        {onCancelQueuedMessage && !isEditingQueuedMessage && (
+          <Tooltip content="Cancel queued message">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label="Cancel queued message"
+              onClick={onCancelQueuedMessage}
+            >
+              <CloseIcon size={14} aria-hidden="true" />
+            </Button>
+          </Tooltip>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div
       ref={shellRef}
       data-slot="ozwell-chat"
       className={cn(
-        'flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f9fc] font-sans text-slate-900',
+        'bg-muted text-foreground flex h-full min-h-0 w-full flex-col overflow-hidden font-sans',
         '[&_[data-slot="ai-chat"]]:min-h-0 [&_[data-slot="ai-chat-messages"]]:min-h-0',
         '[&_[data-slot="ai-tool-call"]]:p-2 [&_[data-slot="ai-tool-icon"]]:h-7 [&_[data-slot="ai-tool-icon"]]:w-7',
         '[&_[data-slot="ai-tool-content"]]:text-sm [&_[data-slot="ai-tool-parameters"]]:text-xs [&_[data-slot="ai-tool-result"]]:text-xs',
@@ -213,21 +355,8 @@ export function OzwellChat({
         className
       )}
     >
-      <style>{`
-        @keyframes ozwell-message-flare {
-          0% {
-            box-shadow: 0 0 0 0 rgba(15, 116, 156, 0.34);
-          }
-          70% {
-            box-shadow: 0 0 0 8px rgba(15, 116, 156, 0);
-          }
-          100% {
-            box-shadow: 0 0 0 0 rgba(15, 116, 156, 0);
-          }
-        }
-      `}</style>
       {(thinking?.enabled || showMessagesNav) && (
-        <div className="flex items-center justify-between gap-2 border-b border-slate-200 bg-white px-2.5 py-[7px] text-xs font-semibold text-slate-700">
+        <div className="border-border bg-card text-foreground flex items-center justify-between gap-2 border-b px-2.5 py-[7px] text-xs font-semibold">
           <div className="flex min-w-0 items-center gap-1.5">
             {thinking?.enabled && (
               <Dropdown
@@ -278,7 +407,7 @@ export function OzwellChat({
                           </span>
                           <span
                             className={cn(
-                              'truncate text-[11px] leading-tight font-medium text-slate-500',
+                              'text-muted-foreground truncate text-[11px] leading-tight font-medium',
                               option.value === thinking.mode &&
                                 'text-primary-800'
                             )}
@@ -309,7 +438,7 @@ export function OzwellChat({
                   className={cn(
                     'min-h-[30px] rounded-lg',
                     messagesButtonFlare &&
-                      'bg-primary-50 text-primary-800 animate-[ozwell-message-flare_1.8s_ease-out]'
+                      'bg-primary-50 text-primary-800 animate-ozwell-message-flare'
                   )}
                 >
                   Messages
@@ -327,7 +456,7 @@ export function OzwellChat({
                     <span className="bg-primary-50 text-primary-800 inline-flex h-[22px] w-[22px] items-center justify-center rounded-full text-[11px] font-bold">
                       {index + 1}
                     </span>
-                    <span className="truncate text-xs leading-[1.35] font-medium text-slate-800">
+                    <span className="text-foreground truncate text-xs leading-[1.35] font-medium">
                       {item.text}
                     </span>
                   </DropdownItem>
@@ -339,7 +468,7 @@ export function OzwellChat({
       )}
 
       {warning && (
-        <div className="border-b border-amber-300 bg-amber-50 px-2.5 py-2 [&_[data-slot=toast-message]]:text-xs [&_[data-slot=toast-message]]:leading-[1.35] [&_[data-slot=toast]]:max-w-none [&_[data-slot=toast]]:min-w-0 [&_[data-slot=toast]]:rounded-lg [&_[data-slot=toast]]:p-2 [&_[data-slot=toast]]:shadow-none">
+        <div className="border-warning-300 bg-warning-50 border-b px-2.5 py-2 [&_[data-slot=toast-message]]:text-xs [&_[data-slot=toast-message]]:leading-[1.35] [&_[data-slot=toast]]:max-w-none [&_[data-slot=toast]]:min-w-0 [&_[data-slot=toast]]:rounded-lg [&_[data-slot=toast]]:p-2 [&_[data-slot=toast]]:shadow-none">
           <Toast
             id="ozwell-chat-warning"
             message={warning}
@@ -351,7 +480,7 @@ export function OzwellChat({
       )}
 
       <AIChat
-        messages={displayedMessages}
+        messages={chatMessages}
         isGenerating={isGenerating}
         showHeader={false}
         height="100%"
@@ -361,11 +490,16 @@ export function OzwellChat({
           showModelSelector ? 'Ask a question...' : inputPlaceholder
         }
         onSendMessage={onSendMessage}
-        renderTextContent={renderTextContent}
-        composerProps={{ inputTrailing: modelSelector }}
+        renderTextContent={renderMessageTextContent}
+        renderMessageFooter={renderQueuedMessageFooter}
+        composerProps={{
+          inputTrailing: modelSelector,
+          disabled: false,
+          isSending: false,
+        }}
       />
 
-      <div className="border-t border-slate-200 bg-white px-3 pt-2 pb-2.5 text-center text-[11px] leading-none text-slate-500">
+      <div className="border-border bg-card text-muted-foreground border-t px-3 pt-2 pb-2.5 text-center text-[11px] leading-none">
         {footer}
       </div>
     </div>
