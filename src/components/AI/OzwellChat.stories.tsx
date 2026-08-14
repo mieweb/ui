@@ -487,6 +487,9 @@ export const Playground: Story = {
     await expect(
       canvas.findByText('This reply is rendered as Markdown.')
     ).resolves.toBeVisible();
+    await expect(
+      canvas.getByRole('button', { name: /Thought/ })
+    ).toHaveAttribute('aria-expanded', 'false');
   },
 };
 
@@ -513,6 +516,14 @@ export const StreamingThinking: Story = {
           'An assistant turn is still streaming. Change **Thinking mode** to see the current widget’s Never, Collapsed, Auto, and Expanded display behavior.',
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const shell = canvasElement.querySelector('[data-slot="ozwell-chat"]');
+
+    await expect(shell).toHaveClass('bg-background');
+    const thinkingButton = canvas.getByRole('button', { name: 'Thinking' });
+    await expect(thinkingButton).toBeVisible();
   },
 };
 

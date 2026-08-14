@@ -346,7 +346,7 @@ export function OzwellChat({
       ref={shellRef}
       data-slot="ozwell-chat"
       className={cn(
-        'bg-muted text-foreground flex h-full min-h-0 w-full flex-col overflow-hidden font-sans',
+        'bg-background text-foreground flex h-full min-h-0 w-full flex-col overflow-hidden font-sans',
         '[&_[data-slot="ai-chat"]]:min-h-0 [&_[data-slot="ai-chat-messages"]]:min-h-0',
         '[&_[data-slot="ai-tool-call"]]:p-2 [&_[data-slot="ai-tool-icon"]]:h-7 [&_[data-slot="ai-tool-icon"]]:w-7',
         '[&_[data-slot="ai-tool-content"]]:text-sm [&_[data-slot="ai-tool-parameters"]]:text-xs [&_[data-slot="ai-tool-result"]]:text-xs',
