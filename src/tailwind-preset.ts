@@ -39,6 +39,9 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+  // CaseManagementHeader — logical spacing, details grid:
+  '-ms-2',
+  'gap-x-10',
   // PatientHeader showCountBadges={false} — hides CountBadge roots in the
   // actions slot (ui#367):
   '[&_[data-slot=count-badge-root]]:hidden',

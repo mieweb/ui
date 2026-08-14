@@ -27,6 +27,7 @@ export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/ButtonGroup';
 export * from './components/Card';
+export * from './components/CaseManagementHeader';
 export * from './components/Checkbox';
 // CodeLookup itself ships a module worker and is NOT exported here (apps import
 // it from their own bundler). Only its worker-free provider/context is safe to

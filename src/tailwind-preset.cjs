@@ -10,6 +10,9 @@ module.exports = {
   // Safelist classes used by @mieweb/ui components that may not be detected
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
+    // CaseManagementHeader — logical spacing, details grid:
+    '-ms-2',
+    'gap-x-10',
     // Semantic colors
     'border-border',
     'border-input',
