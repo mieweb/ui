@@ -136,3 +136,15 @@ export const TwilioAgentForm: Story = {
     </div>
   ),
 };
+
+export const DarkMode: Story = {
+  render: () => (
+    <div className="dark h-screen min-h-[720px] bg-neutral-950">
+      <Q
+        initialConfig={qLandingPageAgentConfig}
+        schema={qAgentSchema}
+        showEditor
+      />
+    </div>
+  ),
+};
