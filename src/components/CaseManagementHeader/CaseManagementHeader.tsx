@@ -17,7 +17,7 @@ export interface CaseInfo {
   statusVariant?: BadgeProps['variant'];
   /** Case type, e.g. "Absence management" */
   caseType?: string;
-  /** Date the case was opened (ISO or parseable date string) */
+  /** Date the case was opened (ISO 8601 date/datetime string) */
   openedDate?: string;
   /** Days the case has been open; computed from `openedDate` when omitted */
   daysOpen?: number;
@@ -182,7 +182,7 @@ export const CaseContextBar = React.forwardRef<
             <span className="text-foreground text-sm">{caseInfo.caseType}</span>
           </>
         )}
-        <span className="ms-auto flex items-center gap-4">
+        <div className="ms-auto flex items-center gap-4">
           {editingUsers && editingUsers.length > 0 && (
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <UsersIcon size={14} aria-hidden="true" className="shrink-0" />
@@ -190,7 +190,7 @@ export const CaseContextBar = React.forwardRef<
             </span>
           )}
           {collabStatus}
-        </span>
+        </div>
       </div>
     );
   }
