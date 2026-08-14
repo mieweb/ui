@@ -61,6 +61,7 @@ export const miewebUISafelist = [
   'text-[11px]',
   'leading-[1.35]',
   'py-[7px]',
+  '[&_[data-slot="composer-input"]]:pe-[min(160px,44vw)]',
   '[&_[data-slot="ai-chat"]]:min-h-0',
   '[&_[data-slot="ai-chat-messages"]]:min-h-0',
   '[&_[data-slot="ai-tool-call"]]:p-2',

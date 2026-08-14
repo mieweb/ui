@@ -193,7 +193,7 @@ function OzwellChatStoryDemo({
 function InteractivePlaygroundDemo({
   thinkingEnabled,
   thinkingMode: initialThinkingMode,
-  showModels,
+  showModels = true,
   warning,
   onSendMessage,
   onThinkingModeChange,
@@ -465,14 +465,22 @@ export const Playground: Story = {
   render: (args) => <InteractivePlaygroundDemo {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    const composer = canvas.getByRole('textbox', { name: 'Message' });
 
-    await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Message' }),
-      'hi'
+    await expect(composer.closest('[data-slot="ai-chat"]')).toHaveClass(
+      '[&_[data-slot="composer-input"]]:pe-[min(160px,44vw)]'
     );
+
+    await userEvent.type(composer, 'hi');
     await userEvent.keyboard('{Enter}');
 
     await expect(canvas.getByText('Reviewing your message…')).toBeVisible();
+    await userEvent.type(
+      canvas.getByRole('textbox', { name: 'Message' }),
+      'Follow-up'
+    );
+    await userEvent.keyboard('{Enter}');
+    await expect(canvas.getAllByText('Follow-up')).toHaveLength(1);
     await expect(
       canvas.findByRole('heading', { name: 'Hello' })
     ).resolves.toBeVisible();

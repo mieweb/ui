@@ -482,6 +482,11 @@ export function OzwellChat({
       <AIChat
         messages={chatMessages}
         isGenerating={isGenerating}
+        className={
+          showModelSelector
+            ? '[&_[data-slot="composer-input"]]:pe-[min(160px,44vw)]'
+            : undefined
+        }
         showHeader={false}
         height="100%"
         variant="embedded"
