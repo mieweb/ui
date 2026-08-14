@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronUp } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { useClickOutside } from '../../hooks/useClickOutside';
@@ -17,6 +17,14 @@ export type ProviderModelOption = ProviderModelValue & {
   id?: string;
 };
 
+/** A reasoning-effort level offered alongside the model. */
+export type ComposerEffortOption = {
+  value: string;
+  label: string;
+  /** Optional secondary line, e.g. a caveat about cost or latency. */
+  description?: string;
+};
+
 type ComposerModelSelectorBaseProps = {
   models: ProviderModelOption[];
   value: ProviderModelValue | null;
@@ -28,6 +36,22 @@ type ComposerModelSelectorBaseProps = {
   anyLabel?: string;
   emptyLabel?: string;
   ariaLabel?: string;
+  /**
+   * Reasoning-effort levels for the selected model. Omit or pass an empty
+   * array to hide the effort row entirely, which is what a model that cannot
+   * reason should resolve to — the levels are provider-specific, so the caller
+   * owns deciding which apply.
+   */
+  effortOptions?: ComposerEffortOption[];
+  /** Currently selected effort. */
+  effort?: string | null;
+  /** Effort marked with a "default" badge in the list. */
+  defaultEffort?: string;
+  onEffortChange?: (value: string) => void;
+  effortLabel?: string;
+  effortHint?: string;
+  defaultBadgeLabel?: string;
+  backLabel?: string;
 };
 
 type ControlledProviderFilterProps = {
@@ -95,13 +119,27 @@ export function ComposerModelSelector({
   anyLabel = 'Any',
   emptyLabel = 'No models',
   ariaLabel = 'Model',
+  effortOptions,
+  effort = null,
+  defaultEffort,
+  onEffortChange,
+  effortLabel = 'Effort',
+  effortHint,
+  defaultBadgeLabel = 'Default',
+  backLabel = 'Back',
 }: ComposerModelSelectorProps) {
   const [open, setOpen] = React.useState(false);
+  // The menu drills down rather than opening a side panel: one anchored
+  // surface is far less fragile near the viewport edge, which is exactly where
+  // a composer sits.
+  const [view, setView] = React.useState<'models' | 'effort'>('models');
+  const [effortHighlight, setEffortHighlight] = React.useState(0);
   const [internalProviderFilter, setInternalProviderFilter] = React.useState<
     string | null
   >(null);
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
   const listRef = React.useRef<HTMLDivElement>(null);
+  const effortListRef = React.useRef<HTMLDivElement>(null);
   const menuId = React.useId();
   const {
     anchorRef: triggerRef,
@@ -213,6 +251,53 @@ export function ComposerModelSelector({
     [close, onChange]
   );
 
+  const efforts = React.useMemo(() => effortOptions ?? [], [effortOptions]);
+  const selectedEffortOption = efforts.find(
+    (option) => option.value === effort
+  );
+
+  const selectEffort = React.useCallback(
+    (value: string) => {
+      onEffortChange?.(value);
+      close();
+    },
+    [close, onEffortChange]
+  );
+
+  const handleEffortKeyDown = (event: React.KeyboardEvent) => {
+    if (efforts.length === 0) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setEffortHighlight((current) => (current + 1) % efforts.length);
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setEffortHighlight(
+        (current) => (current - 1 + efforts.length) % efforts.length
+      );
+    }
+    if (event.key === 'Home') {
+      event.preventDefault();
+      setEffortHighlight(0);
+    }
+    if (event.key === 'End') {
+      event.preventDefault();
+      setEffortHighlight(efforts.length - 1);
+    }
+    // Left/Backspace mirrors the drill-down affordance so keyboard users can
+    // get back to the model list without reaching for the mouse.
+    if (event.key === 'ArrowLeft' || event.key === 'Backspace') {
+      event.preventDefault();
+      setView('models');
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const highlighted = efforts[effortHighlight];
+      if (highlighted) selectEffort(highlighted.value);
+    }
+  };
+
   const outsideRefs = React.useMemo(
     () => [triggerRef, menuRef],
     [triggerRef, menuRef]
@@ -227,6 +312,15 @@ export function ComposerModelSelector({
     setHighlightedIndex(selectedRenderedIndex >= 0 ? selectedRenderedIndex : 0);
   }, [activeProviderFilter, open, selectedRenderedIndex]);
 
+  // Every open starts on the model list, and the effort list starts on the
+  // current value so Enter is a no-op rather than a surprise change.
+  React.useEffect(() => {
+    if (!open) return;
+    setView('models');
+    const current = efforts.findIndex((option) => option.value === effort);
+    setEffortHighlight(current >= 0 ? current : 0);
+  }, [effort, efforts, open]);
+
   React.useEffect(() => {
     if (!open) return;
     setHighlightedIndex((current) =>
@@ -236,10 +330,12 @@ export function ComposerModelSelector({
 
   React.useEffect(() => {
     if (!open) return;
-    requestAnimationFrame(() =>
-      listRef.current?.focus({ preventScroll: true })
-    );
-  }, [open]);
+    requestAnimationFrame(() => {
+      const target =
+        view === 'effort' ? effortListRef.current : listRef.current;
+      target?.focus({ preventScroll: true });
+    });
+  }, [open, view]);
 
   const handleTriggerKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -303,6 +399,14 @@ export function ComposerModelSelector({
         <span className="min-w-0 truncate">
           {selectedOption?.label ?? selectedOption?.model ?? placeholder}
         </span>
+        {selectedEffortOption && (
+          <span
+            data-slot="composer-model-selector-trigger-effort"
+            className="text-muted-foreground min-w-0 truncate font-normal"
+          >
+            {selectedEffortOption.label}
+          </span>
+        )}
         <ChevronUp aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
       </button>
 
@@ -317,100 +421,214 @@ export function ComposerModelSelector({
               'animate-in fade-in overflow-hidden duration-100'
             )}
           >
-            <div
-              data-slot="composer-model-selector-provider-filter"
-              className="border-border flex min-h-9 items-center gap-1 overflow-x-auto overflow-y-hidden border-b p-2"
-            >
-              {[null, ...providers].map((provider) => {
-                const selected = activeProviderFilter === provider;
-                return (
+            {view === 'models' && (
+              <>
+                <div
+                  data-slot="composer-model-selector-provider-filter"
+                  className="border-border flex min-h-9 items-center gap-1 overflow-x-auto overflow-y-hidden border-b p-2"
+                >
+                  {[null, ...providers].map((provider) => {
+                    const selected = activeProviderFilter === provider;
+                    return (
+                      <button
+                        key={provider ?? 'all-providers'}
+                        type="button"
+                        aria-pressed={selected}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => setProvider(provider)}
+                        className={cn(
+                          'inline-flex h-6 shrink-0 items-center justify-center rounded-full px-2.5 text-xs font-medium whitespace-nowrap transition-colors',
+                          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+                          selected
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        )}
+                      >
+                        {provider === null
+                          ? anyLabel
+                          : (providerLabels.get(provider) ?? provider)}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div
+                  ref={listRef}
+                  id={menuId}
+                  role="listbox"
+                  aria-label={ariaLabel}
+                  aria-activedescendant={activeOptionId}
+                  tabIndex={-1}
+                  onKeyDown={handleMenuKeyDown}
+                  className="min-h-0 flex-1 overflow-y-auto p-1"
+                >
+                  {groupedModels.length === 0 ? (
+                    <div className="text-muted-foreground px-3 py-4 text-center text-sm">
+                      {emptyLabel}
+                    </div>
+                  ) : (
+                    groupedRenderedModels.map((group) => (
+                      <div
+                        key={group.provider}
+                        role="group"
+                        aria-label={
+                          providerLabels.get(group.provider) ?? group.provider
+                        }
+                      >
+                        <div className="text-muted-foreground px-3 py-1.5 text-xs font-semibold uppercase">
+                          {providerLabels.get(group.provider) ?? group.provider}
+                        </div>
+                        {group.options.map((renderedModel) => {
+                          const { index, key, option: model } = renderedModel;
+
+                          const selected = optionKey(model) === selectedKey;
+                          const highlighted = index === highlightedIndex;
+
+                          return (
+                            <button
+                              key={key}
+                              id={getOptionId(index)}
+                              type="button"
+                              role="option"
+                              aria-selected={selected}
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => selectModel(model)}
+                              onMouseEnter={() => setHighlightedIndex(index)}
+                              className={cn(
+                                'flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm',
+                                'focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                                highlighted && 'bg-muted',
+                                selected && 'bg-primary/10 text-primary'
+                              )}
+                            >
+                              <span className="min-w-0 flex-1 truncate">
+                                {model.label ?? model.model}
+                              </span>
+                              {selected && (
+                                <Check
+                                  aria-hidden="true"
+                                  className="text-primary h-4 w-4 shrink-0"
+                                />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {efforts.length > 0 && (
+                  <div className="border-border border-t p-1">
+                    <button
+                      type="button"
+                      data-slot="composer-model-selector-effort-row"
+                      aria-haspopup="listbox"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => setView('effort')}
+                      className={cn(
+                        'flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm',
+                        'hover:bg-muted transition-colors',
+                        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none'
+                      )}
+                    >
+                      <span className="min-w-0 flex-1 truncate">
+                        {effortLabel}
+                      </span>
+                      {selectedEffortOption && (
+                        <span className="text-muted-foreground min-w-0 truncate">
+                          {selectedEffortOption.label}
+                        </span>
+                      )}
+                      <ChevronRight
+                        aria-hidden="true"
+                        className="text-muted-foreground h-4 w-4 shrink-0"
+                      />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {view === 'effort' && (
+              <>
+                <div className="border-border flex items-center gap-1 border-b p-2">
                   <button
-                    key={provider ?? 'all-providers'}
                     type="button"
-                    aria-pressed={selected}
+                    data-slot="composer-model-selector-effort-back"
+                    aria-label={backLabel}
                     onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => setProvider(provider)}
+                    onClick={() => setView('models')}
                     className={cn(
-                      'inline-flex h-6 shrink-0 items-center justify-center rounded-full px-2.5 text-xs font-medium whitespace-nowrap transition-colors',
-                      'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-                      selected
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      'inline-flex h-6 shrink-0 items-center gap-1 rounded-full px-2 text-xs font-medium',
+                      'text-muted-foreground hover:bg-muted hover:text-foreground transition-colors',
+                      'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none'
                     )}
                   >
-                    {provider === null
-                      ? anyLabel
-                      : (providerLabels.get(provider) ?? provider)}
+                    <ChevronLeft aria-hidden="true" className="h-3.5 w-3.5" />
+                    {effortLabel}
                   </button>
-                );
-              })}
-            </div>
-
-            <div
-              ref={listRef}
-              id={menuId}
-              role="listbox"
-              aria-label={ariaLabel}
-              aria-activedescendant={activeOptionId}
-              tabIndex={-1}
-              onKeyDown={handleMenuKeyDown}
-              className="min-h-0 flex-1 overflow-y-auto p-1"
-            >
-              {groupedModels.length === 0 ? (
-                <div className="text-muted-foreground px-3 py-4 text-center text-sm">
-                  {emptyLabel}
                 </div>
-              ) : (
-                groupedRenderedModels.map((group) => (
-                  <div
-                    key={group.provider}
-                    role="group"
-                    aria-label={
-                      providerLabels.get(group.provider) ?? group.provider
-                    }
-                  >
-                    <div className="text-muted-foreground px-3 py-1.5 text-xs font-semibold uppercase">
-                      {providerLabels.get(group.provider) ?? group.provider}
-                    </div>
-                    {group.options.map((renderedModel) => {
-                      const { index, key, option: model } = renderedModel;
 
-                      const selected = optionKey(model) === selectedKey;
-                      const highlighted = index === highlightedIndex;
+                {effortHint && (
+                  <p className="text-muted-foreground px-3 pt-2 text-xs">
+                    {effortHint}
+                  </p>
+                )}
 
-                      return (
-                        <button
-                          key={key}
-                          id={getOptionId(index)}
-                          type="button"
-                          role="option"
-                          aria-selected={selected}
-                          onMouseDown={(event) => event.preventDefault()}
-                          onClick={() => selectModel(model)}
-                          onMouseEnter={() => setHighlightedIndex(index)}
-                          className={cn(
-                            'flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm',
-                            'focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                            highlighted && 'bg-muted',
-                            selected && 'bg-primary/10 text-primary'
+                <div
+                  ref={effortListRef}
+                  role="listbox"
+                  aria-label={effortLabel}
+                  tabIndex={-1}
+                  onKeyDown={handleEffortKeyDown}
+                  className="min-h-0 flex-1 overflow-y-auto p-1"
+                >
+                  {efforts.map((option, index) => {
+                    const selected = option.value === effort;
+                    const highlighted = index === effortHighlight;
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => selectEffort(option.value)}
+                        onMouseEnter={() => setEffortHighlight(index)}
+                        className={cn(
+                          'flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm',
+                          'focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                          highlighted && 'bg-muted',
+                          selected && 'bg-primary/10 text-primary'
+                        )}
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate">{option.label}</span>
+                          {option.description && (
+                            <span className="text-muted-foreground block truncate text-xs">
+                              {option.description}
+                            </span>
                           )}
-                        >
-                          <span className="min-w-0 flex-1 truncate">
-                            {model.label ?? model.model}
+                        </span>
+                        {option.value === defaultEffort && (
+                          <span className="bg-muted text-muted-foreground shrink-0 rounded px-1.5 py-0.5 text-xs">
+                            {defaultBadgeLabel}
                           </span>
-                          {selected && (
-                            <Check
-                              aria-hidden="true"
-                              className="text-primary h-4 w-4 shrink-0"
-                            />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              )}
-            </div>
+                        )}
+                        {selected && (
+                          <Check
+                            aria-hidden="true"
+                            className="text-primary h-4 w-4 shrink-0"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>,
           document.body
         )}
