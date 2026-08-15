@@ -209,6 +209,13 @@ export function ComposerModelSelector({
     (index: number) => `${menuId}-option-${index}`,
     [menuId]
   );
+  // The two views are mutually exclusive, so both listboxes carry `menuId` and
+  // the trigger's `aria-controls` stays pointed at whichever one is rendered.
+  // Option ids are namespaced per view so they cannot collide.
+  const getEffortOptionId = React.useCallback(
+    (index: number) => `${menuId}-effort-option-${index}`,
+    [menuId]
+  );
   const activeOptionId =
     open && renderedModels[highlightedIndex]
       ? getOptionId(highlightedIndex)
@@ -252,6 +259,10 @@ export function ComposerModelSelector({
   );
 
   const efforts = React.useMemo(() => effortOptions ?? [], [effortOptions]);
+  const activeEffortOptionId =
+    open && efforts[effortHighlight]
+      ? getEffortOptionId(effortHighlight)
+      : undefined;
   const selectedEffortOption = efforts.find(
     (option) => option.value === effort
   );
@@ -578,8 +589,10 @@ export function ComposerModelSelector({
 
                 <div
                   ref={effortListRef}
+                  id={menuId}
                   role="listbox"
                   aria-label={effortLabel}
+                  aria-activedescendant={activeEffortOptionId}
                   tabIndex={-1}
                   onKeyDown={handleEffortKeyDown}
                   className="min-h-0 flex-1 overflow-y-auto p-1"
@@ -591,6 +604,7 @@ export function ComposerModelSelector({
                     return (
                       <button
                         key={option.value}
+                        id={getEffortOptionId(index)}
                         type="button"
                         role="option"
                         aria-selected={selected}

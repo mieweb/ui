@@ -274,5 +274,47 @@ describe('ComposerModelSelector', () => {
         screen.getByRole('listbox', { name: /^model$/i })
       ).toBeInTheDocument();
     });
+
+    it('keeps the trigger aria-controls pointing at the visible listbox', () => {
+      renderWithEfforts();
+
+      const trigger = screen.getByRole('button', { name: /gpt-5 mini/i });
+      fireEvent.click(trigger);
+
+      const controls = trigger.getAttribute('aria-controls');
+      expect(controls).toBeTruthy();
+      expect(document.getElementById(controls!)).toBe(
+        screen.getByRole('listbox', { name: /^model$/i })
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /effort medium/i }));
+
+      // Same id, now resolving to the effort list — otherwise aria-controls
+      // would dangle for the whole time the drill-down is open.
+      expect(trigger.getAttribute('aria-controls')).toBe(controls);
+      expect(document.getElementById(controls!)).toBe(
+        screen.getByRole('listbox', { name: /effort/i })
+      );
+    });
+
+    it('announces the highlighted effort via aria-activedescendant', () => {
+      renderWithEfforts();
+
+      fireEvent.click(screen.getByRole('button', { name: /gpt-5 mini/i }));
+      fireEvent.click(screen.getByRole('button', { name: /effort medium/i }));
+
+      const list = screen.getByRole('listbox', { name: /effort/i });
+      const activeId = list.getAttribute('aria-activedescendant');
+      expect(activeId).toBeTruthy();
+      expect(document.getElementById(activeId!)).toBe(
+        screen.getByRole('option', { name: /^medium/i })
+      );
+
+      fireEvent.keyDown(list, { key: 'ArrowDown' });
+
+      expect(
+        document.getElementById(list.getAttribute('aria-activedescendant')!)
+      ).toBe(screen.getByRole('option', { name: /^high/i }));
+    });
   });
 });
