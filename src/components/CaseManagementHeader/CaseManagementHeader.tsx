@@ -2,7 +2,15 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Badge, type BadgeProps } from '../Badge';
 import { Button } from '../Button';
-import { ArrowLeftIcon, ChevronDownIcon, UsersIcon } from '../Icons';
+import { ButtonGroup } from '../ButtonGroup';
+import {
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  ChevronDownIcon,
+  FilePlusIcon,
+  PlusIcon,
+  UsersIcon,
+} from '../Icons';
 
 // =============================================================================
 // Types
@@ -30,6 +38,8 @@ export interface CasePatient {
   mrn?: string;
   /** Date of birth (display string) */
   dob?: string;
+  /** Age shown next to the DOB, e.g. 48 */
+  age?: number | string;
 }
 
 /** One label/value pair in the expandable case details grid */
@@ -48,6 +58,12 @@ export interface CaseManagementHeaderLabels {
   mrn: string;
   /** DOB field label */
   dob: string;
+  /** Age rendered next to the DOB, e.g. `(48 y.o.)` */
+  formatAge: (age: number | string) => string;
+  /** Label of the built-in add-case-note action */
+  addCaseNote: string;
+  /** Label of the built-in close-case action */
+  closeCase: string;
   /** Accessible name of the back button */
   back: string;
   /** Accessible name of the details toggle while collapsed */
@@ -65,6 +81,9 @@ export const defaultCaseManagementHeaderLabels: CaseManagementHeaderLabels = {
   daysOpenTerm: 'Days Open',
   mrn: 'MRN',
   dob: 'DOB',
+  formatAge: (age) => `(${age} y.o.)`,
+  addCaseNote: 'Add Case Note',
+  closeCase: 'Close Case',
   back: 'Go back',
   expandDetails: 'Show case details',
   collapseDetails: 'Hide case details',
@@ -89,6 +108,45 @@ function computeDaysOpen(openedDate?: string): number | null {
 /** Thin vertical divider used between context bar segments */
 function BarDivider() {
   return <span aria-hidden="true" className="bg-border h-4 w-px shrink-0" />;
+}
+
+/**
+ * Standard header action: a text button on `md`+ screens that swaps for an
+ * icon-only equivalent below `md`.
+ */
+function HeaderActionButton({
+  label,
+  mobileIcon,
+  desktopLeftIcon,
+  onClick,
+}: {
+  label: string;
+  mobileIcon: React.ReactNode;
+  desktopLeftIcon?: React.ReactElement;
+  onClick?: () => void;
+}) {
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onClick}
+        aria-label={label}
+        className="h-8 w-8 md:hidden"
+      >
+        {mobileIcon}
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClick}
+        leftIcon={desktopLeftIcon}
+        className="hidden md:inline-flex"
+      >
+        {label}
+      </Button>
+    </>
+  );
 }
 
 // =============================================================================
@@ -218,7 +276,17 @@ export interface CaseManagementHeaderProps extends Omit<
   showBackButton?: boolean;
   /** Called when the back button is clicked */
   onBack?: () => void;
-  /** Slot for action buttons on the right, e.g. "Add Case Note" */
+  /**
+   * Renders the built-in "Add Case Note" action (text button on `md`+, an
+   * icon-only button below) and is called when it is clicked.
+   */
+  onAddCaseNote?: () => void;
+  /**
+   * Renders the built-in "Close Case" action (text button on `md`+, an
+   * icon-only button below) and is called when it is clicked.
+   */
+  onCloseCase?: () => void;
+  /** Slot for extra action buttons, rendered after the built-in actions */
   actions?: React.ReactNode;
   /** Names of other users currently editing the case, shown on the context bar */
   editingUsers?: string[];
@@ -267,7 +335,7 @@ export interface CaseManagementHeaderProps extends Omit<
  *     { label: 'Case Manager', value: 'Unassigned' },
  *     { label: 'Opened', value: 'Jan 21, 2025' },
  *   ]}
- *   actions={<Button variant="ghost">+ Add Case Note</Button>}
+ *   onAddCaseNote={() => openNoteEditor()}
  * />
  * ```
  */
@@ -283,6 +351,8 @@ export const CaseManagementHeader = React.forwardRef<
       sticky = false,
       showBackButton = false,
       onBack,
+      onAddCaseNote,
+      onCloseCase,
       actions,
       editingUsers,
       collabStatus,
@@ -373,11 +443,34 @@ export const CaseManagementHeader = React.forwardRef<
               </span>
               <span className="text-muted-foreground text-sm whitespace-nowrap">
                 {l.dob}: {patient.dob ?? l.emptyValue}
+                {patient.age != null && ` ${l.formatAge(patient.age)}`}
               </span>
             </div>
 
-            {actions && (
-              <div className="flex shrink-0 items-center gap-2">{actions}</div>
+            {(onAddCaseNote || onCloseCase || actions) && (
+              // Horizontal always: long labels truncate (Button's built-in
+              // ellipsis) instead of stacking or starving the identity block.
+              <ButtonGroup
+                orientation="horizontal"
+                className="max-w-[60%] min-w-0 gap-2"
+              >
+                {onAddCaseNote && (
+                  <HeaderActionButton
+                    label={l.addCaseNote}
+                    mobileIcon={<FilePlusIcon size={16} />}
+                    desktopLeftIcon={<PlusIcon size={16} />}
+                    onClick={onAddCaseNote}
+                  />
+                )}
+                {onCloseCase && (
+                  <HeaderActionButton
+                    label={l.closeCase}
+                    mobileIcon={<CheckCircleIcon size={16} />}
+                    onClick={onCloseCase}
+                  />
+                )}
+                {actions}
+              </ButtonGroup>
             )}
 
             {hasDetails && (

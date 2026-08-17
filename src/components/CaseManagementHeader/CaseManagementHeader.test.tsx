@@ -159,4 +159,66 @@ describe('CaseManagementHeader', () => {
       'Complete these required fields'
     );
   });
+
+  it('renders age next to the DOB when provided', () => {
+    renderWithTheme(
+      <CaseManagementHeader
+        caseInfo={caseInfo}
+        patient={{ ...patient, dob: '03/18/1978', age: 48 }}
+      />
+    );
+    expect(screen.getByText('DOB: 03/18/1978 (48 y.o.)')).toBeInTheDocument();
+  });
+
+  it('wraps actions in a ButtonGroup', () => {
+    const { container } = renderWithTheme(
+      <CaseManagementHeader
+        caseInfo={caseInfo}
+        patient={patient}
+        actions={<button>Custom Action</button>}
+      />
+    );
+    const group = container.querySelector('[data-slot="button-group"]');
+    expect(group).toHaveTextContent('Custom Action');
+  });
+
+  it('renders built-in actions with mobile twins and fires their callbacks', async () => {
+    const user = userEvent.setup();
+    const onAddCaseNote = vi.fn();
+    const onCloseCase = vi.fn();
+    renderWithTheme(
+      <CaseManagementHeader
+        caseInfo={caseInfo}
+        patient={patient}
+        onAddCaseNote={onAddCaseNote}
+        onCloseCase={onCloseCase}
+      />
+    );
+    // Each action ships a desktop text button plus an icon-only mobile twin.
+    const addButtons = screen.getAllByRole('button', { name: 'Add Case Note' });
+    const closeButtons = screen.getAllByRole('button', { name: 'Close Case' });
+    expect(addButtons).toHaveLength(2);
+    expect(closeButtons).toHaveLength(2);
+
+    await user.click(addButtons[0]);
+    await user.click(addButtons[1]);
+    expect(onAddCaseNote).toHaveBeenCalledTimes(2);
+
+    await user.click(closeButtons[0]);
+    expect(onCloseCase).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports translated labels for the built-in actions', () => {
+    renderWithTheme(
+      <CaseManagementHeader
+        caseInfo={caseInfo}
+        patient={patient}
+        onAddCaseNote={() => {}}
+        labels={{ addCaseNote: 'Notiz hinzuf\u00fcgen' }}
+      />
+    );
+    expect(
+      screen.getAllByRole('button', { name: 'Notiz hinzuf\u00fcgen' })
+    ).toHaveLength(2);
+  });
 });
