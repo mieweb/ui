@@ -205,7 +205,8 @@ describe('CaseManagementHeader', () => {
     expect(onAddCaseNote).toHaveBeenCalledTimes(2);
 
     await user.click(closeButtons[0]);
-    expect(onCloseCase).toHaveBeenCalledTimes(1);
+    await user.click(closeButtons[1]);
+    expect(onCloseCase).toHaveBeenCalledTimes(2);
   });
 
   it('supports translated labels for the built-in actions', () => {

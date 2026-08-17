@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import {
   CaseManagementHeader,
   CaseContextBar,
@@ -29,8 +30,9 @@ const meta: Meta<typeof CaseManagementHeader> = {
     collabStatus: { table: { disable: true } },
     alert: { table: { disable: true } },
     onBack: { action: 'back-clicked' },
-    onAddCaseNote: { action: 'add-case-note' },
-    onCloseCase: { action: 'close-case' },
+    // onAddCaseNote / onCloseCase gate whether the built-in buttons render,
+    // so stories opt in with `fn()` args instead of an argTypes action (which
+    // would inject handlers into every story).
     onExpandedChange: { action: 'expanded-changed' },
   },
 };
@@ -91,7 +93,7 @@ export const Default: Story = {
     patient: samplePatient,
     details: sampleDetails,
     showBackButton: true,
-    onAddCaseNote: () => {},
+    onAddCaseNote: fn(),
     editingUsers,
     collabStatus: liveStatus,
   },
@@ -105,8 +107,8 @@ export const Expanded: Story = {
     details: richDetails,
     showBackButton: true,
     defaultExpanded: true,
-    onAddCaseNote: () => {},
-    onCloseCase: () => {},
+    onAddCaseNote: fn(),
+    onCloseCase: fn(),
     editingUsers,
     collabStatus: liveStatus,
   },
@@ -120,7 +122,7 @@ export const ExplicitDaysOpen: Story = {
     details: sampleDetails,
     showBackButton: true,
     defaultExpanded: true,
-    onAddCaseNote: () => {},
+    onAddCaseNote: fn(),
     collabStatus: liveStatus,
   },
 };
@@ -144,7 +146,7 @@ export const WithoutContextBar: Story = {
     details: richDetails,
     showContextBar: false,
     showBackButton: true,
-    onAddCaseNote: () => {},
+    onAddCaseNote: fn(),
   },
 };
 
@@ -156,8 +158,8 @@ export const WithAlert: Story = {
     details: richDetails,
     showBackButton: true,
     defaultExpanded: true,
-    onAddCaseNote: () => {},
-    onCloseCase: () => {},
+    onAddCaseNote: fn(),
+    onCloseCase: fn(),
     editingUsers,
     collabStatus: liveStatus,
     alert: (
