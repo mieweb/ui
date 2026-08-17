@@ -10,9 +10,14 @@ module.exports = {
   // Safelist classes used by @mieweb/ui components that may not be detected
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
-    // CaseManagementHeader — logical spacing, details grid:
+    // CaseManagementHeader — logical spacing, details grid, responsive
+    // built-in actions (icon-only below md):
     '-ms-2',
     'gap-x-10',
+    'hidden',
+    'max-w-[60%]',
+    'md:hidden',
+    'md:inline-flex',
     // Semantic colors
     'border-border',
     'border-input',
@@ -157,7 +162,8 @@ module.exports = {
           foreground: 'var(--mieweb-muted-foreground, hsl(215.4 16.3% 46.9%))',
         },
         destructive: {
-          DEFAULT: 'var(--mieweb-destructive, var(--mieweb-destructive-500, hsl(0 72.2% 50.6%)))',
+          DEFAULT:
+            'var(--mieweb-destructive, var(--mieweb-destructive-500, hsl(0 72.2% 50.6%)))',
           foreground: 'var(--mieweb-destructive-foreground, hsl(210 40% 98%))',
         },
         success: {
