@@ -157,34 +157,26 @@ export function formatE164(phoneNumber: string, countryCode: string): string {
 // Component
 // =============================================================================
 
+/** Internal base props — `showDialCode` is not part of the public API. */
+interface CountryDropdownBaseProps extends CountryCodeDropdownProps {
+  /** Show dial codes on the trigger and in the list (default: true) */
+  showDialCode?: boolean;
+}
+
 /**
- * A country-code selector dropdown designed to sit beside a phone number input.
- *
- * Defaults to United States (+1) with the 🇺🇸 flag. Clicking the trigger opens
- * a searchable list of all supported countries with their dial codes and flags.
- *
- * Uses Google's libphonenumber for the canonical country/code list and provides
- * a `validatePhoneNumber` helper for phone validation.
- *
- * @example
- * ```tsx
- * const [country, setCountry] = useState<CountryData>();
- *
- * <div className="flex gap-2">
- *   <CountryCodeDropdown value={country?.code} onChange={setCountry} />
- *   <Input placeholder="Phone number" />
- * </div>
- * ```
+ * Shared implementation behind {@link CountryCodeDropdown} (dial-code mode)
+ * and `CountryDropdown` (country-only mode). Not exported from the package.
  */
-function CountryCodeDropdown({
+function CountryDropdownBase({
   value,
   onChange,
   disabled = false,
   className,
   placement = 'bottom-start',
   searchPlaceholder = 'Search countries…',
+  showDialCode = true,
   'aria-label': ariaLabel = 'Select country code',
-}: CountryCodeDropdownProps) {
+}: CountryDropdownBaseProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [search, setSearch] = React.useState('');
   const [internalValue, setInternalValue] = React.useState(value ?? 'US');
@@ -229,10 +221,10 @@ function CountryCodeDropdown({
     return countries.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        c.dialCode.includes(q) ||
+        (showDialCode && c.dialCode.includes(q)) ||
         c.code.toLowerCase().includes(q)
     );
-  }, [search, countries]);
+  }, [search, countries, showDialCode]);
 
   // Close helpers
   const close = React.useCallback(() => {
@@ -338,7 +330,13 @@ function CountryCodeDropdown({
         >
           {selected.flag}
         </span>
-        <span data-slot="country-dropdown-dialcode">{selected.dialCode}</span>
+        {showDialCode ? (
+          <span data-slot="country-dropdown-dialcode">{selected.dialCode}</span>
+        ) : (
+          <span data-slot="country-dropdown-name" className="min-w-0 truncate">
+            {selected.name}
+          </span>
+        )}
         <svg
           data-slot="country-dropdown-chevron"
           className={cn(
@@ -441,12 +439,14 @@ function CountryCodeDropdown({
                     >
                       {country.name}
                     </span>
-                    <span
-                      data-slot="country-dropdown-option-dialcode"
-                      className="text-muted-foreground shrink-0 text-xs"
-                    >
-                      {country.dialCode}
-                    </span>
+                    {showDialCode && (
+                      <span
+                        data-slot="country-dropdown-option-dialcode"
+                        className="text-muted-foreground shrink-0 text-xs"
+                      >
+                        {country.dialCode}
+                      </span>
+                    )}
                   </button>
                 ))
               )}
@@ -458,6 +458,33 @@ function CountryCodeDropdown({
   );
 }
 
+CountryDropdownBase.displayName = 'CountryDropdownBase';
+
+/**
+ * A country-code selector dropdown designed to sit beside a phone number input.
+ *
+ * Defaults to United States (+1) with the 🇺🇸 flag. Clicking the trigger opens
+ * a searchable list of all supported countries with their dial codes and flags.
+ *
+ * Uses Google's libphonenumber for the canonical country/code list and provides
+ * a `validatePhoneNumber` helper for phone validation.
+ *
+ * For a country selector without dial codes, use `CountryDropdown`.
+ *
+ * @example
+ * ```tsx
+ * const [country, setCountry] = useState<CountryData>();
+ *
+ * <div className="flex gap-2">
+ *   <CountryCodeDropdown value={country?.code} onChange={setCountry} />
+ *   <Input placeholder="Phone number" />
+ * </div>
+ * ```
+ */
+function CountryCodeDropdown(props: CountryCodeDropdownProps) {
+  return <CountryDropdownBase {...props} />;
+}
+
 CountryCodeDropdown.displayName = 'CountryCodeDropdown';
 
-export { CountryCodeDropdown };
+export { CountryCodeDropdown, CountryDropdownBase };
