@@ -30,6 +30,19 @@ describe('CountryDropdown', () => {
     );
   });
 
+  it('applies id to the trigger for label association', () => {
+    renderWithTheme(
+      <>
+        <label htmlFor="country-select">Country</label>
+        <CountryDropdown id="country-select" />
+      </>
+    );
+    expect(screen.getByLabelText('Country')).toHaveAttribute(
+      'data-slot',
+      'country-dropdown-trigger'
+    );
+  });
+
   it('does not match dial codes when searching', async () => {
     const user = userEvent.setup();
     renderWithTheme(<CountryDropdown />);

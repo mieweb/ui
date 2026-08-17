@@ -41,6 +41,8 @@ export interface CountryCodeDropdownProps {
   placement?: 'bottom-start' | 'bottom-end';
   /** Placeholder text for the search field */
   searchPlaceholder?: string;
+  /** id for the trigger button, enabling `<label htmlFor>` association */
+  id?: string;
   /** Label for accessibility — visually hidden */
   'aria-label'?: string;
 }
@@ -174,6 +176,7 @@ function CountryDropdownBase({
   className,
   placement = 'bottom-start',
   searchPlaceholder = 'Search countries…',
+  id,
   showDialCode = true,
   'aria-label': ariaLabel = 'Select country code',
 }: CountryDropdownBaseProps) {
@@ -306,6 +309,7 @@ function CountryDropdownBase({
       {/* Trigger button */}
       <button
         type="button"
+        id={id}
         data-slot="country-dropdown-trigger"
         onClick={handleToggle}
         disabled={disabled}

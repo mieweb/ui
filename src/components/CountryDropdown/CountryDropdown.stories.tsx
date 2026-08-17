@@ -59,12 +59,16 @@ export const InAForm: Story = {
     return (
       <div style={{ width: '360px' }}>
         <label
-          htmlFor="country-dropdown-trigger"
+          htmlFor="country-select"
           className="text-foreground mb-1.5 block text-sm font-medium"
         >
           Country
         </label>
-        <CountryDropdown value={country?.code} onChange={setCountry} />
+        <CountryDropdown
+          id="country-select"
+          value={country?.code}
+          onChange={setCountry}
+        />
       </div>
     );
   },
