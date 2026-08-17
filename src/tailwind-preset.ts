@@ -39,9 +39,14 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
-  // CaseManagementHeader — logical spacing, details grid:
+  // CaseManagementHeader — logical spacing, details grid, responsive
+  // built-in actions (icon-only below md):
   '-ms-2',
   'gap-x-10',
+  'hidden',
+  'max-w-[60%]',
+  'md:hidden',
+  'md:inline-flex',
   // PatientHeader showCountBadges={false} — hides CountBadge roots in the
   // actions slot (ui#367):
   '[&_[data-slot=count-badge-root]]:hidden',
