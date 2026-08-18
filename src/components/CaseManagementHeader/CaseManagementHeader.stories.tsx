@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import {
   CaseManagementHeader,
   CaseContextBar,
@@ -6,10 +7,8 @@ import {
   type CasePatient,
   type CaseDetailItem,
 } from './CaseManagementHeader';
-import { Button } from '../Button';
 import { CollabStatus } from '../CollabStatus';
 import { Alert, AlertTitle } from '../Alert';
-import { PlusIcon, FilePlusIcon, CheckCircleIcon } from '../Icons';
 
 const meta: Meta<typeof CaseManagementHeader> = {
   title: 'Components/Text & Data Display/CaseManagementHeader',
@@ -31,6 +30,9 @@ const meta: Meta<typeof CaseManagementHeader> = {
     collabStatus: { table: { disable: true } },
     alert: { table: { disable: true } },
     onBack: { action: 'back-clicked' },
+    // onAddCaseNote / onCloseCase gate whether the built-in buttons render,
+    // so stories opt in with `fn()` args instead of an argTypes action (which
+    // would inject handlers into every story).
     onExpandedChange: { action: 'expanded-changed' },
   },
 };
@@ -68,6 +70,7 @@ const richPatient: CasePatient = {
   name: 'Lisa Ryan',
   mrn: 'MR-004821',
   dob: '03/18/1978',
+  age: 48,
 };
 
 const richDetails: CaseDetailItem[] = [
@@ -76,47 +79,6 @@ const richDetails: CaseDetailItem[] = [
   { label: 'Follow-up', value: '11/16/2025' },
   { label: 'Disability Date', value: '11/04/2025' },
 ];
-
-/**
- * Desktop buttons are unchanged; below `md` (768px) they swap for icon-only
- * equivalents (a +doc icon, and a check — not an X, which implies delete).
- */
-const addCaseNoteAction = (
-  <>
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label="Add Case Note"
-      className="h-8 w-8 md:hidden"
-    >
-      <FilePlusIcon size={16} />
-    </Button>
-    <Button
-      variant="ghost"
-      size="sm"
-      leftIcon={<PlusIcon size={16} />}
-      className="hidden md:inline-flex"
-    >
-      Add Case Note
-    </Button>
-  </>
-);
-
-const closeCaseAction = (
-  <>
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label="Close Case"
-      className="h-8 w-8 md:hidden"
-    >
-      <CheckCircleIcon size={16} />
-    </Button>
-    <Button variant="ghost" size="sm" className="hidden md:inline-flex">
-      Close Case
-    </Button>
-  </>
-);
 
 const liveStatus = <CollabStatus connected showLog={false} />;
 
@@ -131,13 +93,13 @@ export const Default: Story = {
     patient: samplePatient,
     details: sampleDetails,
     showBackButton: true,
-    actions: addCaseNoteAction,
+    onAddCaseNote: fn(),
     editingUsers,
     collabStatus: liveStatus,
   },
 };
 
-/** Expanded details grid with multiple actions (POC layout). */
+/** Expanded details grid with the built-in actions (POC layout). */
 export const Expanded: Story = {
   args: {
     caseInfo: richCase,
@@ -145,12 +107,8 @@ export const Expanded: Story = {
     details: richDetails,
     showBackButton: true,
     defaultExpanded: true,
-    actions: (
-      <>
-        {addCaseNoteAction}
-        {closeCaseAction}
-      </>
-    ),
+    onAddCaseNote: fn(),
+    onCloseCase: fn(),
     editingUsers,
     collabStatus: liveStatus,
   },
@@ -164,7 +122,7 @@ export const ExplicitDaysOpen: Story = {
     details: sampleDetails,
     showBackButton: true,
     defaultExpanded: true,
-    actions: addCaseNoteAction,
+    onAddCaseNote: fn(),
     collabStatus: liveStatus,
   },
 };
@@ -188,7 +146,7 @@ export const WithoutContextBar: Story = {
     details: richDetails,
     showContextBar: false,
     showBackButton: true,
-    actions: addCaseNoteAction,
+    onAddCaseNote: fn(),
   },
 };
 
@@ -200,12 +158,8 @@ export const WithAlert: Story = {
     details: richDetails,
     showBackButton: true,
     defaultExpanded: true,
-    actions: (
-      <>
-        {addCaseNoteAction}
-        {closeCaseAction}
-      </>
-    ),
+    onAddCaseNote: fn(),
+    onCloseCase: fn(),
     editingUsers,
     collabStatus: liveStatus,
     alert: (

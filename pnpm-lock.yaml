@@ -112,6 +112,9 @@ importers:
       '@mieweb/datavis':
         specifier: '=1.6.0'
         version: 1.6.0(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/wasm@0.8.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(redux@5.0.1)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(typescript@5.9.3)(wavesurfer.js@7.12.1)
+      '@mieweb/q':
+        specifier: 1.0.0
+        version: 1.0.0(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(immer@11.1.8)(monaco-editor@0.55.1)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1069,6 +1072,52 @@ packages:
       datavis-ace: '=4.1.0'
       react: ^19.0.0
       react-dom: ^19.0.0
+
+  '@mieweb/forms-editor@2.1.5':
+    resolution: {integrity: sha512-Wb/Sx9iPmkxlJXZe9NR7KkdWJoTuqAa1NHoKI6HQuaKBx5n3ThT/fDDnltNaGYJIpNZ1hPI4xdyzTRrGE3ib2A==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  '@mieweb/forms-engine@2.1.5':
+    resolution: {integrity: sha512-/E0Ry4LvXte2f0ZRXVOwLJ+pI2hS8jqu2NZFm8kuxQd8y8iY2DdQcBHS2AY4XYc09OGr7lzq9NatJ5LVBSdSHg==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  '@mieweb/forms-renderer@2.1.5':
+    resolution: {integrity: sha512-p3nzFIIKNzOG/rpmojvXyKP4OMRe1T6NZ1yIJqmRzwiNR0TxHqN6PXbvL6NyWE4Nrnxwsd4wR4TeF2f3B2Q0Uw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  '@mieweb/q@1.0.0':
+    resolution: {integrity: sha512-dZes79roq4LhagWTz3hN+eViSLyFJWxaL+4vEdVk9hPI4JPJ7CTsYuHnQd2b4RyZkCTaVClof1mCplzlxLB5pQ==}
+
+  '@mieweb/ui@0.2.4':
+    resolution: {integrity: sha512-1OBv6wCgxCGY+s2Di5LVGyqFoYWmX14/zLX1+kUc/qRjI+2NGywvLht73pOvcqomvHhzEtVp3hRuHm5bCsHx3g==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      ag-grid-community: '>=32.0.0'
+      ag-grid-react: '>=32.0.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+      wavesurfer.js: '>=7.0.0'
+    peerDependenciesMeta:
+      ag-grid-community:
+        optional: true
+      ag-grid-react:
+        optional: true
+      wavesurfer.js:
+        optional: true
 
   '@mieweb/ui@0.6.1-dev.169':
     resolution: {integrity: sha512-YE6vtT/6+hMB7YQROZxPUKm4FVxLTYyLAru+IY8enn9x6GsctCeOA0yjHD6RjQ8oqQDknWS2c3NEfCJ665pGQw==}
@@ -4344,6 +4393,11 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
+  lucide-react@0.344.0:
+    resolution: {integrity: sha512-6YyBnn91GB45VuVT96bYCOKElbJzUHqp65vX8cDcu55MQL9T969v4dhGClpljamuI/+KMO9P6w9Acq1CVQGvIQ==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0
+
   lucide-react@0.562.0:
     resolution: {integrity: sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw==}
     peerDependencies:
@@ -7073,6 +7127,76 @@ snapshots:
       - remark-math
       - typescript
       - wavesurfer.js
+
+  '@mieweb/forms-editor@2.1.5(@types/react@19.2.14)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
+    dependencies:
+      '@mieweb/forms-engine': 2.1.5(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      js-yaml: 4.1.1
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - monaco-editor
+      - use-sync-external-store
+
+  '@mieweb/forms-engine@2.1.5(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
+    dependencies:
+      js-yaml: 4.1.1
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      zustand: 5.0.14(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - use-sync-external-store
+
+  '@mieweb/forms-renderer@2.1.5(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
+    dependencies:
+      '@mieweb/forms-engine': 2.1.5(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+    optionalDependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - use-sync-external-store
+
+  '@mieweb/q@1.0.0(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(immer@11.1.8)(monaco-editor@0.55.1)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
+    dependencies:
+      '@mieweb/forms-editor': 2.1.5(@types/react@19.2.14)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@mieweb/forms-renderer': 2.1.5(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@mieweb/ui': 0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
+      '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      js-yaml: 4.1.1
+      lucide-react: 0.344.0(react@19.2.4)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      uuid: 11.1.1
+    transitivePeerDependencies:
+      - '@types/react'
+      - ag-grid-community
+      - ag-grid-react
+      - immer
+      - monaco-editor
+      - use-sync-external-store
+      - wavesurfer.js
+
+  '@mieweb/ui@0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
+    dependencies:
+      '@swc/helpers': 0.5.19
+      class-variance-authority: 0.7.1
+      clsx: 2.1.1
+      lucide-react: 0.562.0(react@19.2.4)
+      luxon: 3.7.2
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      tailwind-merge: 2.6.1
+    optionalDependencies:
+      ag-grid-community: 35.1.0
+      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      wavesurfer.js: 7.12.1
 
   '@mieweb/ui@0.6.1-dev.169(6157a0539ef5bc1faafe665ee9520b8d)':
     dependencies:
@@ -10668,6 +10792,10 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  lucide-react@0.344.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
 
   lucide-react@0.562.0(react@19.2.4):
     dependencies:
