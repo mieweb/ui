@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   ComposerModelSelector,
+  type ComposerEffortOption,
   type ProviderModelOption,
   type ProviderModelValue,
 } from './ComposerModelSelector';
@@ -299,4 +300,67 @@ export const ConstrainedContainer: Story = {
     layout: 'centered',
   },
   render: (args) => <ConstrainedContainerDemo {...args} />,
+};
+
+// Effort levels are provider-specific, so the caller supplies the list. Here
+// the OpenAI models stop at 'high' while the Anthropic ones continue to
+// 'xhigh' and 'max' — switching model swaps the available levels.
+const effortsByProvider: Record<
+  string,
+  { options: ComposerEffortOption[]; defaultEffort: string }
+> = {
+  openai: {
+    options: [
+      { value: 'minimal', label: 'Minimal' },
+      { value: 'low', label: 'Low' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'high', label: 'High' },
+    ],
+    defaultEffort: 'high',
+  },
+  anthropic: {
+    options: [
+      { value: 'low', label: 'Low' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'high', label: 'High' },
+      { value: 'xhigh', label: 'Extra high' },
+      { value: 'max', label: 'Max' },
+    ],
+    defaultEffort: 'max',
+  },
+};
+
+function EffortDemo() {
+  const models = multiProviderModels.filter(
+    (model) => model.provider !== 'ollama'
+  );
+  const [value, setValue] = React.useState<ProviderModelValue | null>(
+    models[0] ?? null
+  );
+  const [effort, setEffort] = React.useState<string | null>('medium');
+
+  const config = value ? effortsByProvider[value.provider] : undefined;
+
+  return (
+    <ComposerModelSelector
+      models={models}
+      value={value}
+      onChange={setValue}
+      effortOptions={config?.options ?? []}
+      effort={effort}
+      defaultEffort={config?.defaultEffort}
+      onEffortChange={setEffort}
+      effortHint="Higher effort means more thorough responses, but takes longer and uses more tokens."
+    />
+  );
+}
+
+export const WithReasoningEffort: Story = {
+  args: {
+    modelsKey: 'multipleProviders',
+  },
+  parameters: {
+    layout: 'centered',
+  },
+  render: () => <EffortDemo />,
 };
