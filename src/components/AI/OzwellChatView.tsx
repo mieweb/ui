@@ -491,9 +491,7 @@ export function OzwellChat({
         height="100%"
         variant="embedded"
         size="full"
-        inputPlaceholder={
-          showModelSelector ? 'Ask a question...' : inputPlaceholder
-        }
+        inputPlaceholder={inputPlaceholder}
         onSendMessage={onSendMessage}
         renderTextContent={renderMessageTextContent}
         renderMessageFooter={renderQueuedMessageFooter}
