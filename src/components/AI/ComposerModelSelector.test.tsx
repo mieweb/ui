@@ -275,6 +275,36 @@ describe('ComposerModelSelector', () => {
       ).toBeInTheDocument();
     });
 
+    it('stays in the effort list when the caller passes a new options array', () => {
+      // A composer parent re-renders on every keystroke, and callers derive
+      // the levels from the selected model, so `effortOptions` arrives as a
+      // fresh array each render. That must not count as "the menu reopened".
+      const element = () => (
+        <ComposerModelSelector
+          models={models}
+          value={models[0]}
+          onChange={vi.fn()}
+          effortOptions={efforts.map((option) => ({ ...option }))}
+          effort="medium"
+          onEffortChange={vi.fn()}
+        />
+      );
+
+      const { rerender } = renderWithTheme(element());
+
+      fireEvent.click(screen.getByRole('button', { name: /gpt-5 mini/i }));
+      fireEvent.click(screen.getByRole('button', { name: /effort medium/i }));
+      expect(
+        screen.getByRole('listbox', { name: /effort/i })
+      ).toBeInTheDocument();
+
+      rerender(element());
+
+      expect(
+        screen.getByRole('listbox', { name: /effort/i })
+      ).toBeInTheDocument();
+    });
+
     it('keeps the trigger aria-controls pointing at the visible listbox', () => {
       renderWithEfforts();
 

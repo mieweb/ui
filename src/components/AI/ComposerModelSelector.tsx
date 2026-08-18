@@ -323,11 +323,19 @@ export function ComposerModelSelector({
     setHighlightedIndex(selectedRenderedIndex >= 0 ? selectedRenderedIndex : 0);
   }, [activeProviderFilter, open, selectedRenderedIndex]);
 
-  // Every open starts on the model list, and the effort list starts on the
-  // current value so Enter is a no-op rather than a surprise change.
+  // Every open starts on the model list. Deliberately keyed on `open` alone:
+  // callers commonly derive `effortOptions` from the selected model, so the
+  // array identity changes on every parent render, and folding that into this
+  // effect would drop the user back to the model list mid-interaction.
   React.useEffect(() => {
     if (!open) return;
     setView('models');
+  }, [open]);
+
+  // The effort list starts on the current value so Enter is a no-op rather
+  // than a surprise change.
+  React.useEffect(() => {
+    if (!open) return;
     const current = efforts.findIndex((option) => option.value === effort);
     setEffortHighlight(current >= 0 ? current : 0);
   }, [effort, efforts, open]);
