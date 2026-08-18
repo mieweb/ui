@@ -57,6 +57,14 @@ export {
   type SuggestedActionsProps,
 } from './AIChat';
 
+export {
+  OzwellChat,
+  type OzwellChatProps,
+  type OzwellThinkingMode,
+  type OzwellModelOption,
+  type OzwellModelValue,
+} from './OzwellChatView';
+
 // Hey Ozwell — the voice entry point. <HeyOzwell> is the drop-in (octopus toggle + settings menu +
 // floating chat, wired end-to-end); useHeyOzwell is the headless core for custom layouts.
 export {

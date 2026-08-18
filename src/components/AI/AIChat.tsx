@@ -322,7 +322,7 @@ export function AIChat({
   renderTextContent,
   renderMessageFooter,
 }: AIChatProps) {
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
 
   const messages = React.useMemo(
     () => session?.messages || messagesProp || [],
@@ -332,7 +332,8 @@ export function AIChat({
 
   // Auto-scroll to bottom on new messages
   React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
   }, [messages]);
 
   const handleSend = async (message: { content: string }) => {
@@ -426,6 +427,7 @@ export function AIChat({
 
       {/* Messages */}
       <div
+        ref={messagesContainerRef}
         data-slot="ai-chat-messages"
         className="flex-1 overflow-y-auto px-4 py-4"
       >
@@ -447,7 +449,6 @@ export function AIChat({
                 renderMessageFooter={renderMessageFooter}
               />
             ))}
-            <div ref={messagesEndRef} />
           </div>
         )}
       </div>

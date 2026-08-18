@@ -50,6 +50,41 @@ export const miewebUISafelist = [
   // PatientHeader showCountBadges={false} — hides CountBadge roots in the
   // actions slot (ui#367):
   '[&_[data-slot=count-badge-root]]:hidden',
+  // OzwellChat's compact widget shell and portaled menus. These arbitrary
+  // utilities must remain available to Tailwind 3 consumers that do not scan
+  // package source files.
+  'max-w-[min(142px,38vw)]',
+  'max-w-[190px]',
+  'max-w-[min(248px,calc(100vw-24px))]',
+  'max-w-[min(260px,calc(100vw-24px))]',
+  'rounded-[10px]',
+  'min-h-[30px]',
+  'animate-ozwell-message-flare',
+  'grid-cols-[22px_minmax(0,1fr)]',
+  'h-[22px]',
+  'w-[22px]',
+  'text-[11px]',
+  'leading-[1.35]',
+  'py-[7px]',
+  '[&_[data-slot="composer-input"]]:pe-[min(160px,44vw)]',
+  '[&_[data-slot="ai-chat"]]:min-h-0',
+  '[&_[data-slot="ai-chat-messages"]]:min-h-0',
+  '[&_[data-slot="ai-tool-call"]]:p-2',
+  '[&_[data-slot="ai-tool-icon"]]:h-7',
+  '[&_[data-slot="ai-tool-icon"]]:w-7',
+  '[&_[data-slot="ai-tool-content"]]:text-sm',
+  '[&_[data-slot="ai-tool-parameters"]]:text-xs',
+  '[&_[data-slot="ai-tool-result"]]:text-xs',
+  '[&_[data-slot="ai-message-thinking"]_button]:px-2.5',
+  '[&_[data-slot="ai-message-thinking"]_button]:py-[7px]',
+  '[&_[data-slot="ai-message"].flex-row-reverse_[data-slot="ai-message-avatar"]]:hidden',
+  '[&_[data-slot=toast-message]]:text-xs',
+  '[&_[data-slot=toast-message]]:leading-[1.35]',
+  '[&_[data-slot=toast]]:max-w-none',
+  '[&_[data-slot=toast]]:min-w-0',
+  '[&_[data-slot=toast]]:rounded-lg',
+  '[&_[data-slot=toast]]:p-2',
+  '[&_[data-slot=toast]]:shadow-none',
   // Media stack (MediaEditor / TranscriptView / MediaPlayer) — opacity-modifier
   // and state variants introduced with the media components (ui#323 finding):
   'bg-muted/20',
@@ -767,6 +802,20 @@ export const miewebUIPreset: MiewebUIPreset = {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        'ozwell-message-flare': {
+          '0%': {
+            boxShadow:
+              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 34%, transparent)',
+          },
+          '70%': {
+            boxShadow:
+              '0 0 0 8px color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 0%, transparent)',
+          },
+          '100%': {
+            boxShadow:
+              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 0%, transparent)',
+          },
+        },
       },
       animation: {
         'fade-in': 'fade-in 150ms ease-out',
@@ -776,6 +825,7 @@ export const miewebUIPreset: MiewebUIPreset = {
         'slide-in-right': 'slide-in-right 300ms ease-out',
         'slide-in-left': 'slide-in-left 300ms ease-out',
         'scale-in': 'scale-in 150ms ease-out',
+        'ozwell-message-flare': 'ozwell-message-flare 1.8s ease-out',
       },
     },
   },

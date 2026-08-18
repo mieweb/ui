@@ -212,6 +212,20 @@ module.exports = {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        'ozwell-message-flare': {
+          '0%': {
+            boxShadow:
+              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #0b73a3) 34%, transparent)',
+          },
+          '70%': {
+            boxShadow:
+              '0 0 0 8px color-mix(in srgb, var(--mieweb-primary-700, #0b73a3) 0%, transparent)',
+          },
+          '100%': {
+            boxShadow:
+              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #0b73a3) 0%, transparent)',
+          },
+        },
       },
       animation: {
         'fade-in': 'fade-in 150ms ease-out',
@@ -219,6 +233,7 @@ module.exports = {
         'slide-in-from-top': 'slide-in-from-top 150ms ease-out',
         'slide-in-from-bottom': 'slide-in-from-bottom 150ms ease-out',
         'scale-in': 'scale-in 150ms ease-out',
+        'ozwell-message-flare': 'ozwell-message-flare 1.8s ease-out',
       },
     },
   },
