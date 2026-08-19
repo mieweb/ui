@@ -25,8 +25,16 @@ export interface AIChatTriggerProps {
   pulse?: boolean;
   /** Badge count for notifications */
   badge?: number;
-  /** Position of the button */
-  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  /** Position of the button. `start`/`end` aliases are direction-aware (RTL). */
+  position?:
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'top-right'
+    | 'top-left'
+    | 'bottom-end'
+    | 'bottom-start'
+    | 'top-end'
+    | 'top-start';
   /** Additional class name */
   className?: string;
 }
@@ -40,10 +48,14 @@ export function AIChatTrigger({
   className,
 }: AIChatTriggerProps) {
   const positionClasses = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
-    'top-right': 'top-4 right-4',
-    'top-left': 'top-4 left-4',
+    'bottom-right': 'bottom-4 end-4',
+    'bottom-left': 'bottom-4 start-4',
+    'top-right': 'top-4 end-4',
+    'top-left': 'top-4 start-4',
+    'bottom-end': 'bottom-4 end-4',
+    'bottom-start': 'bottom-4 start-4',
+    'top-end': 'top-4 end-4',
+    'top-start': 'top-4 start-4',
   };
 
   return (
@@ -72,7 +84,7 @@ export function AIChatTrigger({
       {badge && badge > 0 && (
         <span
           data-slot="ai-chat-trigger-badge"
-          className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold"
+          className="absolute -end-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold"
         >
           {badge > 9 ? '9+' : badge}
         </span>
@@ -96,8 +108,13 @@ export interface AIChatModalProps extends Omit<
   open: boolean;
   /** Callback when the modal should close */
   onOpenChange: (open: boolean) => void;
-  /** Position of the modal */
-  position?: 'bottom-right' | 'bottom-left' | 'center';
+  /** Position of the modal. `start`/`end` aliases are direction-aware (RTL). */
+  position?:
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'bottom-end'
+    | 'bottom-start'
+    | 'center';
   /** Width of the modal */
   width?: string | number;
   /** Height of the modal */
@@ -129,8 +146,10 @@ export function AIChatModal({
   if (!open) return null;
 
   const positionClasses = {
-    'bottom-right': 'bottom-20 right-4',
-    'bottom-left': 'bottom-20 left-4',
+    'bottom-right': 'bottom-20 end-4',
+    'bottom-left': 'bottom-20 start-4',
+    'bottom-end': 'bottom-20 end-4',
+    'bottom-start': 'bottom-20 start-4',
     center: 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
   };
 

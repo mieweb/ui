@@ -112,6 +112,18 @@ module.exports = {
     'translate-x-0',
     '-translate-x-full',
     '[&:has([role=checkbox])]:pe-0',
+    // RTL messaging+AI batch: bubble tails, composer borders/paddings, corner
+    // pins (AIChatModal/AttachmentPicker/MessageList), read-receipt avatar stack
+    'end-1',
+    'end-3',
+    'end-4',
+    'start-4',
+    'me-2',
+    'pe-10',
+    'border-s-4',
+    'rounded-ee-md',
+    'rounded-es-md',
+    'rtl:space-x-reverse',
     // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
     // md variants that hand desktop back its original percentage cap. Purging
     // these uncaps the player on a phone, which is the bug the cap exists for.
