@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-// eSheet ≥0.0.6 no longer self-imports its compiled CSS (see eSheet PR #145);
+// eSheet no longer self-imports its compiled CSS (see mieweb/eSheet#145);
 // consumers load it explicitly. Path is relative because the @esheet aliases
 // in .storybook/main.ts only cover bare package specifiers.
 import '../../../packages/esheet/packages/builder/src/index.output.css';
