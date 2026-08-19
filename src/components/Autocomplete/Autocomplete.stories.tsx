@@ -78,7 +78,8 @@ import { Autocomplete } from '@mieweb/ui';
 
 **2. Remote / async source** — the list lives behind an API. **Omit \`filter\`**, listen
 to \`onValueChange\`, fetch, and re-render with the new \`items\`. Whatever you pass is
-shown as-is. (See *Async Source* story.)
+shown as-is. (See *Async Source* for the shape, and *Live Wikipedia* for a real
+third-party API with debounce + abort.)
 
 \`\`\`tsx
 const [items, setItems] = useState<Patient[]>([]);
@@ -283,6 +284,114 @@ export const AsyncSource: Story = {
       description: {
         story:
           'Pattern 2 — **remote/async source**. Omit `filter`; use `onValueChange` to query your API (debounce it in a real app) and re-render with the results as `items`. A loading state can be surfaced through `emptyMessage` while the request is in flight.',
+      },
+    },
+  },
+};
+
+interface WikiArticle {
+  title: string;
+  description: string;
+  url: string;
+}
+
+/**
+ * Pattern 2 against a real third-party API: Wikipedia's opensearch endpoint
+ * (CORS-enabled via `origin=*`). Debounced 250ms, previous request aborted on
+ * each keystroke.
+ */
+function LiveWikipediaExample() {
+  const [items, setItems] = useState<WikiArticle[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<WikiArticle | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+  const abortRef = useRef<AbortController | undefined>(undefined);
+
+  const search = (q: string) => {
+    clearTimeout(debounceTimer.current);
+    abortRef.current?.abort();
+    if (!q) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    debounceTimer.current = setTimeout(async () => {
+      const ac = new AbortController();
+      abortRef.current = ac;
+      try {
+        const res = await fetch(
+          `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(q)}&limit=8&format=json&origin=*`,
+          { signal: ac.signal }
+        );
+        const [, titles, descriptions, urls] = (await res.json()) as [
+          string,
+          string[],
+          string[],
+          string[],
+        ];
+        setItems(
+          titles.map((title, i) => ({
+            title,
+            description: descriptions[i],
+            url: urls[i],
+          }))
+        );
+        setLoading(false);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') setLoading(false);
+      }
+    }, 250);
+  };
+
+  return (
+    <div className="max-w-md space-y-3">
+      <Autocomplete<WikiArticle>
+        items={items}
+        getItemKey={(a) => a.url}
+        renderItem={(a) => (
+          <div className="flex flex-col">
+            <span className="font-medium">{a.title}</span>
+            {a.description && (
+              <span className="text-muted-foreground line-clamp-1 text-xs">
+                {a.description}
+              </span>
+            )}
+          </div>
+        )}
+        onSelect={setSelected}
+        onValueChange={search}
+        clearOnSelect={false}
+        placeholder="Search Wikipedia articles…"
+        emptyMessage={loading ? 'Searching Wikipedia…' : 'No articles found.'}
+        aria-label="Search Wikipedia articles"
+      />
+      {selected && (
+        <p className="text-muted-foreground text-sm">
+          Selected:{' '}
+          <a
+            href={selected.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary underline"
+          >
+            {selected.title}
+          </a>
+        </p>
+      )}
+    </div>
+  );
+}
+
+export const LiveWikipedia: Story = {
+  render: () => <LiveWikipediaExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pattern 2 against a **real third-party API** — Wikipedia's [opensearch endpoint](https://www.mediawiki.org/wiki/API:Opensearch) (CORS-enabled via `origin=*`). Shows the full production recipe: **debounce** (250 ms) + **AbortController** so stale responses never land, loading state through `emptyMessage`. Requires internet access.",
       },
     },
   },
