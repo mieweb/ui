@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Autocomplete } from './Autocomplete';
 
@@ -297,8 +297,9 @@ interface WikiArticle {
 
 /**
  * Pattern 2 against a real third-party API: Wikipedia's opensearch endpoint
- * (CORS-enabled via `origin=*`). Debounced 250ms, previous request aborted on
- * each keystroke.
+ * (CORS-enabled via `origin=*`). Debounced 250ms; each keystroke aborts the
+ * previous request, and responses are ignored unless they belong to the
+ * current request.
  */
 function LiveWikipediaExample() {
   const [items, setItems] = useState<WikiArticle[]>([]);
@@ -308,6 +309,14 @@ function LiveWikipediaExample() {
     undefined
   );
   const abortRef = useRef<AbortController | undefined>(undefined);
+
+  // Cleanup on unmount: cancel the pending debounce and in-flight request.
+  useEffect(() => {
+    return () => {
+      clearTimeout(debounceTimer.current);
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const search = (q: string) => {
     clearTimeout(debounceTimer.current);
@@ -326,12 +335,15 @@ function LiveWikipediaExample() {
           `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(q)}&limit=8&format=json&origin=*`,
           { signal: ac.signal }
         );
+        if (!res.ok) throw new Error(`Wikipedia responded ${res.status}`);
         const [, titles, descriptions, urls] = (await res.json()) as [
           string,
           string[],
           string[],
           string[],
         ];
+        // Ignore stale responses: only the latest request may update state.
+        if (abortRef.current !== ac) return;
         setItems(
           titles.map((title, i) => ({
             title,
@@ -341,7 +353,10 @@ function LiveWikipediaExample() {
         );
         setLoading(false);
       } catch (err) {
-        if ((err as Error).name !== 'AbortError') setLoading(false);
+        if ((err as Error).name === 'AbortError') return;
+        if (abortRef.current !== ac) return;
+        setItems([]);
+        setLoading(false);
       }
     }, 250);
   };
