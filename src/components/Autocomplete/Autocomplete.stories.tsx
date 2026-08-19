@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Autocomplete } from './Autocomplete';
 
@@ -227,16 +227,20 @@ function AsyncExample() {
   const [items, setItems] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Employee | null>(null);
+  const pendingRequest = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Simulated server-side search with latency. In a real app, debounce and
-  // fetch from your API here.
+  // Simulated server-side search with latency. Each keystroke cancels the
+  // in-flight "request" so stale results never land. In a real app, debounce
+  // and fetch from your API here (e.g. with AbortController).
   const search = (q: string) => {
+    clearTimeout(pendingRequest.current);
     if (!q) {
       setItems([]);
+      setLoading(false);
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    pendingRequest.current = setTimeout(() => {
       setItems(
         employees.filter((e) => e.name.toLowerCase().includes(q.toLowerCase()))
       );
