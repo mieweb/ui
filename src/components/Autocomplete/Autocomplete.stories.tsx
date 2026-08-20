@@ -612,7 +612,14 @@ function LiveExplorerExample({
     clearTimeout(debounceTimer.current);
     abortRef.current?.abort();
     setError(null);
-    if (!dataSourceUrl.includes('{query}') || q.length < minQueryLength) {
+    if (!dataSourceUrl.includes('{query}')) {
+      // Misconfiguration, not an empty result: say so in the popover.
+      setItems([]);
+      setLoading(false);
+      setError('Data source URL must contain a {query} token.');
+      return;
+    }
+    if (q.length < minQueryLength) {
       setItems([]);
       setLoading(false);
       return;
@@ -642,7 +649,7 @@ function LiveExplorerExample({
         if ((err as Error).name === 'AbortError') return;
         if (abortRef.current !== ac) return;
         setItems([]);
-        setError((err as Error).message);
+        setError(`Request failed: ${(err as Error).message}`);
         setLoading(false);
       }
     }, 250);
@@ -670,13 +677,7 @@ function LiveExplorerExample({
         clearOnSelect={false}
         minQueryLength={minQueryLength}
         placeholder="Start typing to search…"
-        emptyMessage={
-          error
-            ? `Request failed: ${error}`
-            : loading
-              ? 'Searching…'
-              : 'No results.'
-        }
+        emptyMessage={error ?? (loading ? 'Searching…' : 'No results.')}
         aria-label="Live data explorer search"
       />
       {selected && (
