@@ -46,7 +46,7 @@ if (!existsSync(agentsPath)) {
 } else {
   const current = readFileSync(agentsPath, 'utf8');
   const start = current.indexOf(BEGIN);
-  const end = current.indexOf(END);
+  const end = start === -1 ? -1 : current.indexOf(END, start + BEGIN.length);
   let updated;
   if (start !== -1 && end !== -1) {
     updated = current.slice(0, start) + block + current.slice(end + END.length);

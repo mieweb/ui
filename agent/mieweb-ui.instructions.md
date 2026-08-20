@@ -8,11 +8,12 @@ applyTo: '**/*.{ts,tsx,js,jsx}'
 
 This project uses the `@mieweb/ui` component library. Follow these rules for ALL UI work. Browse the full catalog at https://ui.mieweb.org (Storybook).
 
-## Rule 1: All tables use DataVis NITRO
+## Rule 1: Tables start with DataVis NITRO
 
 When asked to create a table, data grid, or any tabular data view:
 
-- **Use `DataVisNitroGrid` from `@mieweb/ui/datavis`.** No exceptions without explicit human sign-off.
+- **Always start with `DataVisNitroGrid` from `@mieweb/ui/datavis`.** It is the default for every table — propose it first, every time.
+- If the human **explicitly insists** on a plain, simple table after you propose DataVis NITRO, fall back to the `Table` component from `@mieweb/ui` (`Table` + `TableHeader`/`TableBody`/`TableRow`/`TableCell`). Do not choose `Table` on your own.
 - **`AGGrid` is deprecated.** Never import from `@mieweb/ui/ag-grid` in new code.
 - **Never hand-roll a data grid** from raw `<table>`, `<div>` grids, or a third-party grid library.
 
@@ -25,17 +26,17 @@ import { DataVisNitroSource, DataVisNitroGrid } from '@mieweb/ui/datavis';
 
 Before writing any UI element, check whether `@mieweb/ui` already provides it. It ships 126+ components, including:
 
-| Category   | Components                                                                                        |
-| ---------- | ------------------------------------------------------------------------------------------------- |
-| Actions    | `Button`, `Dropdown`, `CommandPalette`, `QuickAction`                                             |
-| Forms      | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput` |
-| Display    | `Table`, `Badge`, `Avatar`, `Card`, `CountBadge`, `Text`, `Timeline`                              |
-| Feedback   | `Alert`, `Toast`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`, `ErrorPage`                   |
-| Navigation | `Tabs`, `Breadcrumb`, `Pagination`, `Sidebar`, `AppHeader`, `PageHeader`, `StepIndicator`         |
-| Overlays   | `Modal`, `Tooltip`, `DropzoneOverlay`                                                             |
-| Media      | `AudioPlayer`, `AudioRecorder`, `RecordButton`, `DocumentScanner`                                 |
-| Messaging  | `MessageBubble`, `MessageList`, `MessageComposer`                                                 |
-| Grids      | `DataVisNitroGrid` (all tables) — `AGGrid` is **deprecated**                                      |
+| Category   | Components                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------- |
+| Actions    | `Button`, `Dropdown`, `CommandPalette`, `QuickAction`                                                         |
+| Forms      | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput`             |
+| Display    | `Table` (only if the human insists — see Rule 1), `Badge`, `Avatar`, `Card`, `CountBadge`, `Text`, `Timeline` |
+| Feedback   | `Alert`, `Toast`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`, `ErrorPage`                               |
+| Navigation | `Tabs`, `Breadcrumb`, `Pagination`, `Sidebar`, `AppHeader`, `PageHeader`, `StepIndicator`                     |
+| Overlays   | `Modal`, `Tooltip`, `DropzoneOverlay`                                                                         |
+| Media      | `AudioPlayer`, `AudioRecorder`, `RecordButton`, `DocumentScanner`                                             |
+| Messaging  | `MessageBubble`, `MessageList`, `MessageComposer`                                                             |
+| Grids      | `DataVisNitroGrid` (default for all tables) — `AGGrid` is **deprecated**                                      |
 
 Raw HTML that duplicates a component is a violation, even if it looks right:
 
