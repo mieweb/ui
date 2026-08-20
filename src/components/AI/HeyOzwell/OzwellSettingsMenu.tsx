@@ -43,7 +43,7 @@ function ItemLabel({ label, sub }: { label: string; sub: string }) {
 
 /** DropdownItem's default-variant classes, reused by the custom collapsible row for visual parity. */
 const itemClasses = cn(
-  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
+  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start text-sm',
   'transition-colors duration-150 focus:outline-none',
   'text-neutral-700 dark:text-neutral-300',
   'hover:bg-neutral-100 dark:hover:bg-neutral-700',
