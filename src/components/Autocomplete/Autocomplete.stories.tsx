@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useArgs } from 'storybook/preview-api';
 import { Autocomplete } from './Autocomplete';
+import { Button } from '../Button/Button';
 
 interface Employee {
   id: string;
@@ -499,6 +501,89 @@ interface ExplorerArgs {
   minQueryLength: number;
 }
 
+interface ExplorerPreset {
+  name: string;
+  hint: string;
+  args: Omit<ExplorerArgs, 'minQueryLength'>;
+}
+
+/**
+ * Public, CORS-open, key-free APIs verified against this parser (and against
+ * the matching eSheet field — see mieweb/eSheet#162). Single source of truth
+ * for both the on-canvas preset table and the docs table below.
+ */
+const EXPLORER_PRESETS: ExplorerPreset[] = [
+  {
+    name: 'Wikipedia REST',
+    hint: 'Envelope + captured attributes. Try “toledo”.',
+    args: {
+      dataSourceUrl:
+        'https://en.wikipedia.org/w/rest.php/v1/search/title?q={query}&limit=8',
+      resultsPath: 'pages',
+      labelKey: 'title',
+      valueKey: 'key',
+      captureAttributes: 'id, description',
+    },
+  },
+  {
+    name: 'Wikipedia OpenSearch',
+    hint: 'OpenSearch array format, no keys needed. Try “hypertension”.',
+    args: {
+      dataSourceUrl:
+        'https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=8&format=json&origin=*',
+      resultsPath: '',
+      labelKey: '',
+      valueKey: '',
+      captureAttributes: '',
+    },
+  },
+  {
+    name: 'RxNorm (NIH)',
+    hint: 'Deep results path into a string array. Try “metformi”.',
+    args: {
+      dataSourceUrl:
+        'https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name={query}',
+      resultsPath: 'suggestionGroup.suggestionList.suggestion',
+      labelKey: '',
+      valueKey: '',
+      captureAttributes: '',
+    },
+  },
+  {
+    name: 'Datamuse',
+    hint: 'Bare object array. Try “hyperten”.',
+    args: {
+      dataSourceUrl: 'https://api.datamuse.com/sug?s={query}',
+      resultsPath: '',
+      labelKey: 'word',
+      valueKey: '',
+      captureAttributes: '',
+    },
+  },
+  {
+    name: 'OpenLibrary',
+    hint: 'Envelope + captured attributes (incl. arrays). Try “dune”.',
+    args: {
+      dataSourceUrl: 'https://openlibrary.org/search.json?q={query}&limit=8',
+      resultsPath: 'docs',
+      labelKey: 'title',
+      valueKey: 'key',
+      captureAttributes: 'first_publish_year, author_name',
+    },
+  },
+];
+
+const mdCell = (value: string) => (value ? `\`${value}\`` : '—');
+
+const presetTableMarkdown = [
+  '| Source | Data source URL | Results path | Label key | Value key | Capture attributes |',
+  '| --- | --- | --- | --- | --- | --- |',
+  ...EXPLORER_PRESETS.map(
+    ({ name, args }) =>
+      `| ${name} | ${mdCell(args.dataSourceUrl)} | ${mdCell(args.resultsPath)} | ${mdCell(args.labelKey)} | ${mdCell(args.valueKey)} | ${mdCell(args.captureAttributes)} |`
+  ),
+].join('\n');
+
 function LiveExplorerExample({
   dataSourceUrl,
   resultsPath,
@@ -613,12 +698,7 @@ function LiveExplorerExample({
 
 export const LiveDataExplorer: StoryObj<ExplorerArgs> = {
   args: {
-    dataSourceUrl:
-      'https://en.wikipedia.org/w/rest.php/v1/search/title?q={query}&limit=8',
-    resultsPath: 'pages',
-    labelKey: 'title',
-    valueKey: 'key',
-    captureAttributes: 'id, description',
+    ...EXPLORER_PRESETS[0].args,
     minQueryLength: 2,
   },
   argTypes: {
@@ -651,7 +731,95 @@ export const LiveDataExplorer: StoryObj<ExplorerArgs> = {
       description: 'Minimum characters before fetching.',
     },
   },
-  render: (args) => <LiveExplorerExample {...args} />,
+  render: function LiveDataExplorerStory(args) {
+    const [, updateArgs] = useArgs<ExplorerArgs>();
+    const isActive = (preset: ExplorerPreset) =>
+      preset.args.dataSourceUrl === args.dataSourceUrl;
+    // Remount the example when the source config changes so stale
+    // items/selection from the previous API never linger.
+    const configKey = `${args.dataSourceUrl}|${args.resultsPath}|${args.labelKey}|${args.valueKey}|${args.captureAttributes}`;
+    return (
+      <div className="space-y-6">
+        <LiveExplorerExample key={configKey} {...args} />
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <caption className="text-muted-foreground mb-2 text-left text-sm">
+              Verified public data sources — load one, then type to search.
+              Every column maps to a control in the Controls panel.
+            </caption>
+            <thead>
+              <tr className="border-border text-muted-foreground border-b">
+                <th scope="col" className="py-1.5 pr-3 font-semibold">
+                  Source
+                </th>
+                <th scope="col" className="py-1.5 pr-3 font-semibold">
+                  Data source URL
+                </th>
+                <th scope="col" className="py-1.5 pr-3 font-semibold">
+                  Results path
+                </th>
+                <th scope="col" className="py-1.5 pr-3 font-semibold">
+                  Label key
+                </th>
+                <th scope="col" className="py-1.5 pr-3 font-semibold">
+                  Value key
+                </th>
+                <th scope="col" className="py-1.5 pr-3 font-semibold">
+                  Capture attributes
+                </th>
+                <th scope="col" className="py-1.5">
+                  <span className="sr-only">Load preset</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {EXPLORER_PRESETS.map((preset) => (
+                <tr
+                  key={preset.name}
+                  className="border-border/50 border-b align-top"
+                >
+                  <th
+                    scope="row"
+                    className="py-2 pr-3 font-medium whitespace-nowrap"
+                  >
+                    {preset.name}
+                    <span className="text-muted-foreground block max-w-[12rem] text-[11px] font-normal whitespace-normal">
+                      {preset.hint}
+                    </span>
+                  </th>
+                  <td className="text-muted-foreground max-w-[18rem] py-2 pr-3 font-mono break-all">
+                    {preset.args.dataSourceUrl}
+                  </td>
+                  <td className="text-muted-foreground py-2 pr-3 font-mono break-all">
+                    {preset.args.resultsPath || '—'}
+                  </td>
+                  <td className="text-muted-foreground py-2 pr-3 font-mono">
+                    {preset.args.labelKey || '—'}
+                  </td>
+                  <td className="text-muted-foreground py-2 pr-3 font-mono">
+                    {preset.args.valueKey || '—'}
+                  </td>
+                  <td className="text-muted-foreground py-2 pr-3 font-mono break-all">
+                    {preset.args.captureAttributes || '—'}
+                  </td>
+                  <td className="py-2">
+                    <Button
+                      size="sm"
+                      variant={isActive(preset) ? 'primary' : 'outline'}
+                      onClick={() => updateArgs({ ...preset.args })}
+                      aria-label={`Load ${preset.name} preset`}
+                    >
+                      {isActive(preset) ? 'Loaded' : 'Load'}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  },
   parameters: {
     controls: {
       include: [
@@ -672,15 +840,9 @@ Controls panel, no code changes. It mirrors the \`autocomplete\` field type in
 shapes: OpenSearch arrays, bare string arrays, and object arrays (with envelope unwrap via
 **results path** and per-selection **capture attributes**).
 
-Verified presets to paste into the controls:
+Verified presets — use the **Load** buttons on the story canvas, or paste into the controls:
 
-| Source | Data source URL | Results path | Label key | Value key | Capture attributes |
-| --- | --- | --- | --- | --- | --- |
-| Wikipedia REST *(default)* | \`https://en.wikipedia.org/w/rest.php/v1/search/title?q={query}&limit=8\` | \`pages\` | \`title\` | \`key\` | \`id, description\` |
-| Wikipedia OpenSearch | \`https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=8&format=json&origin=*\` | — | — | — | — |
-| RxNorm (NIH) | \`https://rxnav.nlm.nih.gov/REST/spellingsuggestions.json?name={query}\` | \`suggestionGroup.suggestionList.suggestion\` | — | — | — |
-| Datamuse | \`https://api.datamuse.com/sug?s={query}\` | — | \`word\` | — | — |
-| OpenLibrary | \`https://openlibrary.org/search.json?q={query}&limit=8\` | \`docs\` | \`title\` | \`key\` | \`first_publish_year, author_name\` |
+${presetTableMarkdown}
 
 All presets are CORS-open and need no API key. Requires internet access.
         `,
