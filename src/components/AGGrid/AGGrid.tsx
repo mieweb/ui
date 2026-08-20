@@ -133,10 +133,12 @@ const getDefaultColDef = (
 // AG Grid Component
 // ============================================================================
 
-// Warn every consuming app once per session that AGGrid is deprecated.
+// Warn once per session (dev builds only) that AGGrid is deprecated.
+// Bundlers replace `process.env.NODE_ENV` at build time, so this entire
+// branch is dead-code-eliminated from production bundles.
 let didWarnDeprecated = false;
 function warnDeprecatedOnce() {
-  if (didWarnDeprecated) return;
+  if (process.env.NODE_ENV === 'production' || didWarnDeprecated) return;
   didWarnDeprecated = true;
   console.warn(
     '[@mieweb/ui] AGGrid is deprecated. Use DataVis NITRO (@mieweb/ui/datavis) for all tables.'
