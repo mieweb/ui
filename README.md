@@ -60,6 +60,20 @@ Heavy or specialized dependencies are kept in separate entry points so they don'
 > tables. The `@mieweb/ui/ag-grid` entry remains available for existing
 > consumers but will be removed in a future major release.
 
+### AI Agent Rules
+
+Working with AI coding agents (Copilot, Claude Code, Cursor, …)? Install
+@mieweb/ui's agent rules into your repo so agents use library components
+(DataVis NITRO for tables, `Button`/`Badge`/`Modal`/… instead of raw HTML):
+
+```bash
+npx @mieweb/ui init-agent
+```
+
+This writes `.github/instructions/mieweb-ui.instructions.md` (auto-applied by
+VS Code Copilot) and a marked block in `AGENTS.md` (the cross-tool convention).
+Idempotent — rerun after upgrading to refresh the rules. See [agent/](agent/).
+
 ## Quick Start
 
 ### Option 1: With Tailwind CSS (Recommended)
