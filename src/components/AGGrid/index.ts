@@ -1,3 +1,7 @@
+/**
+ * @deprecated AGGrid is deprecated — use DataVis NITRO (`@mieweb/ui/datavis`)
+ * for all tables. This module will be removed in a future major release.
+ */
 export { AGGrid, AgGridReact } from './AGGrid';
 export type {
   AGGridProps,

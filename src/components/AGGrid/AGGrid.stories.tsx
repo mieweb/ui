@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AGGrid, type ColDef } from './AGGrid';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
+import { withDeprecationBanner, DEPRECATION_NOTICE } from './DeprecationBanner';
 
 // Import cell renderers
 import {
@@ -246,8 +247,9 @@ function WithEditableCellsComponent() {
 }
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Components/Text & Data Display/AGGrid',
+  title: 'Deprecated/AGGrid',
   component: AGGrid,
+  decorators: [withDeprecationBanner],
   parameters: {
     layout: 'padded',
     // AG Grid is a third-party component whose internal DOM renders elements
@@ -262,6 +264,8 @@ const meta: Meta<typeof AGGrid> = {
       },
       description: {
         component: `
+${DEPRECATION_NOTICE}
+
 A themed AG Grid wrapper component that integrates with the MIE Web UI design system.
 
 ## Features

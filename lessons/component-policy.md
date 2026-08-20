@@ -12,19 +12,19 @@ Before writing any UI code, check [ui.mieweb.org](https://ui.mieweb.org) (Storyb
 
 ### Primitive Components (Always Available)
 
-| Category | Components |
-|----------|------------|
-| **Actions** | `Button`, `Dropdown`, `CommandPalette`, `QuickAction` |
-| **Forms** | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput`, `DateRangePicker`, `WebsiteInput` |
-| **Data Display** | `Table` (+ TableHeader/Body/Row/Cell), `Badge`, `Avatar`, `Card` (+ CardHeader/Content), `CountBadge`, `Text`, `Timeline` |
-| **Feedback** | `Alert`, `Toast`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`, `ErrorPage`, `ConnectionStatus` |
-| **Navigation** | `Tabs`, `Breadcrumb`, `Pagination`, `Sidebar`, `AppHeader`, `SiteHeader`, `SiteFooter`, `PageHeader`, `StepIndicator` |
-| **Overlays** | `Modal` (+ ModalHeader/Body/Footer), `Tooltip`, `DropzoneOverlay` |
-| **Layout** | `ThemeProvider`, `VisuallyHidden` |
-| **Media** | `AudioPlayer`, `AudioRecorder`, `RecordButton`, `DocumentScanner` |
-| **Messaging** | `MessageBubble`, `MessageList`, `MessageComposer` |
-| **Data Grids** | `AGGrid` (wrapper for ag-grid with theme integration) |
-| **Charts** | Chart colors via `--mieweb-chart-1` through `--mieweb-chart-5` CSS variables |
+| Category         | Components                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Actions**      | `Button`, `Dropdown`, `CommandPalette`, `QuickAction`                                                                                |
+| **Forms**        | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput`, `DateRangePicker`, `WebsiteInput` |
+| **Data Display** | `Table` (+ TableHeader/Body/Row/Cell), `Badge`, `Avatar`, `Card` (+ CardHeader/Content), `CountBadge`, `Text`, `Timeline`            |
+| **Feedback**     | `Alert`, `Toast`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`, `ErrorPage`, `ConnectionStatus`                                  |
+| **Navigation**   | `Tabs`, `Breadcrumb`, `Pagination`, `Sidebar`, `AppHeader`, `SiteHeader`, `SiteFooter`, `PageHeader`, `StepIndicator`                |
+| **Overlays**     | `Modal` (+ ModalHeader/Body/Footer), `Tooltip`, `DropzoneOverlay`                                                                    |
+| **Layout**       | `ThemeProvider`, `VisuallyHidden`                                                                                                    |
+| **Media**        | `AudioPlayer`, `AudioRecorder`, `RecordButton`, `DocumentScanner`                                                                    |
+| **Messaging**    | `MessageBubble`, `MessageList`, `MessageComposer`                                                                                    |
+| **Data Grids**   | `DataVisNITRO` (use for all tables); `AGGrid` is **deprecated** — no new usages                                                      |
+| **Charts**       | Chart colors via `--mieweb-chart-1` through `--mieweb-chart-5` CSS variables                                                         |
 
 ### How to Import
 
@@ -222,6 +222,7 @@ graph LR
 1. **Fork** `mieweb/ui` and create a feature branch: `feat/my-widget`
 
 2. **Copy** your local component into `src/components/MyWidget/`:
+
    ```
    src/components/MyWidget/
    ├── index.ts
@@ -232,6 +233,7 @@ graph LR
    ```
 
 3. **Export** from the barrel `src/index.ts`:
+
    ```typescript
    export { MyWidget, type MyWidgetProps } from './components/MyWidget';
    ```
@@ -239,6 +241,7 @@ graph LR
 4. **Write a Storybook story** covering all variants, sizes, and states (default, hover, focus, disabled, dark mode)
 
 5. **Write tests**:
+
    ```typescript
    import { render, screen } from '@testing-library/react';
    import { MyWidget } from './MyWidget';
@@ -296,8 +299,8 @@ flowchart TD
 
 ## Summary
 
-| Tier | When | What |
-|------|------|------|
-| **1. Use** | Component exists in `@mieweb/ui` | `import { X } from '@mieweb/ui'` |
-| **2. Build** | No equivalent exists yet | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
-| **3. Contribute** | Local component is stable + generic | PR to `mieweb/ui`, then replace local with import |
+| Tier              | When                                | What                                                                            |
+| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
+| **1. Use**        | Component exists in `@mieweb/ui`    | `import { X } from '@mieweb/ui'`                                                |
+| **2. Build**      | No equivalent exists yet            | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
+| **3. Contribute** | Local component is stable + generic | PR to `mieweb/ui`, then replace local with import                               |

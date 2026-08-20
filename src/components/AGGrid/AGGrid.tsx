@@ -133,8 +133,21 @@ const getDefaultColDef = (
 // AG Grid Component
 // ============================================================================
 
+// Warn every consuming app once per session that AGGrid is deprecated.
+let didWarnDeprecated = false;
+function warnDeprecatedOnce() {
+  if (didWarnDeprecated) return;
+  didWarnDeprecated = true;
+  console.warn(
+    '[@mieweb/ui] AGGrid is deprecated. Use DataVis NITRO (@mieweb/ui/datavis) for all tables.'
+  );
+}
+
 /**
  * A themed AG Grid wrapper component that integrates with the MIE Web UI design system.
+ *
+ * @deprecated Use DataVis NITRO (`@mieweb/ui/datavis`) for all tables. AGGrid
+ * will be removed in a future major release.
  *
  * This component wraps AG Grid Community Edition and provides:
  * - Consistent theming with CSS variables
@@ -192,6 +205,10 @@ function AGGridInner<TData = unknown>(
 ) {
   const internalRef = React.useRef<AgGridReact<TData>>(null);
   const gridApiRef = React.useRef<GridApi<TData> | null>(null);
+
+  React.useEffect(() => {
+    warnDeprecatedOnce();
+  }, []);
 
   // Use provided ref or internal ref
   const resolvedRef = gridRef || ref || internalRef;
@@ -320,6 +337,10 @@ function AGGridInner<TData = unknown>(
 }
 
 // Forward ref with generic support
+/**
+ * @deprecated Use DataVis NITRO (`@mieweb/ui/datavis`) for all tables. AGGrid
+ * will be removed in a future major release.
+ */
 export const AGGrid = React.forwardRef(AGGridInner) as <TData = unknown>(
   props: AGGridProps<TData> & { ref?: React.ForwardedRef<AgGridReact<TData>> }
 ) => React.ReactElement;
