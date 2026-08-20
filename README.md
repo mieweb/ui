@@ -51,10 +51,14 @@ npm install react react-dom
 
 Heavy or specialized dependencies are kept in separate entry points so they don't bloat the core bundle. Install the peer dependencies for the add-ons you need:
 
-| Entry point              | Install                                              | Import path              |
-| ------------------------ | ---------------------------------------------------- | ------------------------ |
-| **AG Grid**              | `npm install ag-grid-community ag-grid-react`        | `@mieweb/ui/ag-grid`    |
-| **DataVis**              | `npm install @mieweb/datavis datavis-ace`            | `@mieweb/ui/datavis`    |
+| Entry point              | Install                                       | Import path          |
+| ------------------------ | --------------------------------------------- | -------------------- |
+| **AG Grid** (deprecated) | `npm install ag-grid-community ag-grid-react` | `@mieweb/ui/ag-grid` |
+| **DataVis**              | `npm install @mieweb/datavis datavis-ace`     | `@mieweb/ui/datavis` |
+
+> ⚠️ **AGGrid is deprecated.** Use DataVis NITRO (`@mieweb/ui/datavis`) for all
+> tables. The `@mieweb/ui/ag-grid` entry remains available for existing
+> consumers but will be removed in a future major release.
 
 ## Quick Start
 
@@ -173,20 +177,20 @@ This watches for source changes and rebuilds automatically. It does **not** star
 
 ### Available Scripts
 
-| Script                    | Description                                               |
-| ------------------------- | --------------------------------------------------------- |
-| `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
+| Script                    | Description                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook)                                  |
 | `npm run build:esheet`    | Build eSheet submodule packages (auto-run by `prestorybook`/`prebuild`; skips when already built) |
-| `npm run build`           | Build the library for production                          |
-| `npm run storybook`       | Start Storybook development server                        |
-| `npm run build-storybook` | Build Storybook for static hosting                        |
-| `npm run typecheck`       | Run TypeScript type checking        |
-| `npm run lint`            | Run ESLint                          |
-| `npm run lint:fix`        | Run ESLint with auto-fix            |
-| `npm run format`          | Check code formatting with Prettier |
-| `npm run format:fix`      | Fix code formatting with Prettier   |
-| `npm run test`            | Run tests                           |
-| `npm run test:watch`      | Run tests in watch mode             |
+| `npm run build`           | Build the library for production                                                                  |
+| `npm run storybook`       | Start Storybook development server                                                                |
+| `npm run build-storybook` | Build Storybook for static hosting                                                                |
+| `npm run typecheck`       | Run TypeScript type checking                                                                      |
+| `npm run lint`            | Run ESLint                                                                                        |
+| `npm run lint:fix`        | Run ESLint with auto-fix                                                                          |
+| `npm run format`          | Check code formatting with Prettier                                                               |
+| `npm run format:fix`      | Fix code formatting with Prettier                                                                 |
+| `npm run test`            | Run tests                                                                                         |
+| `npm run test:watch`      | Run tests in watch mode                                                                           |
 
 ## Date & Time Standard
 
@@ -211,7 +215,8 @@ const inProviderZone = DateTime.fromISO(timestamp, {
   zone: 'America/New_York',
 });
 
-const isOpen = DateTime.now().setZone('America/New_York') <
+const isOpen =
+  DateTime.now().setZone('America/New_York') <
   inProviderZone.plus({ hours: 1 });
 ```
 
@@ -692,10 +697,10 @@ This package uses automated releases via GitHub Actions. There are two release c
 
 ### Release Channels
 
-| Channel | npm Tag | Install Command | Description |
-| ------- | ------- | --------------- | ----------- |
-| **Stable** | `latest` | `npm install @mieweb/ui` | Production-ready releases |
-| **Prerelease** | `next` | `npm install @mieweb/ui@next` | Latest from `main` branch |
+| Channel        | npm Tag  | Install Command               | Description               |
+| -------------- | -------- | ----------------------------- | ------------------------- |
+| **Stable**     | `latest` | `npm install @mieweb/ui`      | Production-ready releases |
+| **Prerelease** | `next`   | `npm install @mieweb/ui@next` | Latest from `main` branch |
 
 ### Prerelease (Automatic)
 
@@ -721,6 +726,7 @@ To create a stable release:
 5. Click **Run workflow**
 
 The workflow will:
+
 1. Bump the version in `package.json`
 2. Commit and push the change
 3. Create a git tag (e.g., `v0.2.0`)
@@ -737,6 +743,7 @@ git push origin v1.0.0
 ```
 
 The release workflow will automatically:
+
 - Run tests and build
 - Publish to npm with the appropriate tag (`latest` for stable, `next` for prereleases like `v1.0.0-beta.1`)
 - Create a GitHub Release with auto-generated release notes
@@ -752,8 +759,8 @@ We follow [Semantic Versioning](https://semver.org/):
 ## Contributing
 
 We welcome contributions! This README and the [Storybook](https://ui.mieweb.org)
-are the **consumer** docs (how to *use* the library). If you want to *build or
-change* the library itself, the **provider / maintainer** guide is
+are the **consumer** docs (how to _use_ the library). If you want to _build or
+change_ the library itself, the **provider / maintainer** guide is
 **[CONTRIBUTING.md](CONTRIBUTING.md)** — it covers repo layout, the component
 anatomy and conventions, the autodocs story pattern, exports & tree-shaking,
 build, testing (unit + visual baselines), submodules, brands, and the release

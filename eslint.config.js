@@ -63,6 +63,8 @@ export default [
         MediaQueryList: 'readonly',
         MediaQueryListEvent: 'readonly',
         NodeJS: 'readonly',
+        // Build-time env (replaced by bundlers, e.g. process.env.NODE_ENV)
+        process: 'readonly',
         // Browser APIs
         confirm: 'readonly',
         // Google Maps API (loaded externally)

@@ -473,6 +473,8 @@ const preview: Preview = {
           'Directory',
           'Search',
           'Layout',
+          '*',
+          'Deprecated',
         ],
       },
     },
