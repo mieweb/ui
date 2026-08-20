@@ -22,13 +22,35 @@ import { DataVisNitroSource, DataVisNitroGrid } from '@mieweb/ui/datavis';
 // Peer deps: npm install @mieweb/datavis datavis-ace
 ```
 
-## Rule 2: Use an existing @mieweb/ui component before writing your own
+## Rule 2: Buttons belong in a ButtonGroup
+
+- **Two or more adjacent buttons → always wrap them in `ButtonGroup`.** Never lay out sibling buttons with ad-hoc flex/gap divs.
+- **A single button with a long or unpredictable label** (sentence-like labels, translated text, user-provided data — e.g. "Permanently delete this record") **→ also wrap it in a `ButtonGroup`.** The default `orientation="auto"` measures labels and controls text ellipsis/stacking so long labels never truncate silently.
+- A single button with a short, fixed label ("Save", "OK") may stand alone.
+
+```tsx
+import { Button, ButtonGroup } from '@mieweb/ui';
+
+// Multiple buttons
+<ButtonGroup split>
+  <Button variant="ghost">Back</Button>
+  <Button variant="secondary">Cancel</Button>
+  <Button variant="danger">Permanently delete this record</Button>
+</ButtonGroup>
+
+// Single button, long/dynamic label
+<ButtonGroup>
+  <Button>{t('orders.submitForPriorAuthorization')}</Button>
+</ButtonGroup>
+```
+
+## Rule 3: Use an existing @mieweb/ui component before writing your own
 
 Before writing any UI element, check whether `@mieweb/ui` already provides it. It ships 126+ components, including:
 
 | Category   | Components                                                                                                    |
 | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| Actions    | `Button`, `Dropdown`, `CommandPalette`, `QuickAction`                                                         |
+| Actions    | `Button`, `ButtonGroup` (see Rule 2), `Dropdown`, `CommandPalette`, `QuickAction`                             |
 | Forms      | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput`             |
 | Display    | `Table` (only if the human insists — see Rule 1), `Badge`, `Avatar`, `Card`, `CountBadge`, `Text`, `Timeline` |
 | Feedback   | `Alert`, `Toast`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`, `ErrorPage`                               |
@@ -54,7 +76,7 @@ Raw HTML that duplicates a component is a violation, even if it looks right:
 <DataVisNitroGrid ... />
 ```
 
-## Rule 3: Imports
+## Rule 4: Imports
 
 ```tsx
 // Most components: named imports from the main barrel
@@ -67,6 +89,6 @@ import { generateBrandCSS, brands } from '@mieweb/ui/brands'; // branding
 
 Never import from `@mieweb/ui/ag-grid` (deprecated).
 
-## Rule 4: When no component exists
+## Rule 5: When no component exists
 
 Build it locally, but in `@mieweb/ui` style: Tailwind utility classes with the library's design tokens, ARIA labels on interactive elements, and externalized user-facing text. Prefer composing existing primitives (`Card`, `Text`, `Badge`) over new bespoke markup. If the pattern is generic, propose contributing it upstream to `@mieweb/ui`.
