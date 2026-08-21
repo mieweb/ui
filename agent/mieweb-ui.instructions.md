@@ -27,6 +27,7 @@ import { DataVisNitroSource, DataVisNitroGrid } from '@mieweb/ui/datavis';
 - **Two or more adjacent buttons → always wrap them in `ButtonGroup`.** Never lay out sibling buttons with ad-hoc flex/gap divs.
 - **A single button with a long or unpredictable label** (sentence-like labels, translated text, user-provided data — e.g. "Permanently delete this record") **→ also wrap it in a `ButtonGroup`.** The default `orientation="auto"` measures labels and controls text ellipsis/stacking so long labels never truncate silently.
 - A single button with a short, fixed label ("Save", "OK") may stand alone.
+- **Icon-only buttons** → `<Button size="icon" aria-label="...">`. The `aria-label` is required.
 
 ```tsx
 import { Button, ButtonGroup } from '@mieweb/ui';
@@ -76,7 +77,75 @@ Raw HTML that duplicates a component is a violation, even if it looks right:
 <DataVisNitroGrid ... />
 ```
 
-## Rule 4: Imports
+## Rule 4: Use composition slots, not custom markup
+
+Components ship structural sub-components — use them instead of bespoke divs inside a component:
+
+- `Modal` → `ModalHeader` / `ModalBody` / `ModalFooter`
+- `Card` → `CardHeader` / `CardContent`
+- `Table` → `TableHeader` / `TableBody` / `TableRow` / `TableCell`
+
+```tsx
+// ❌ <Modal open={open}><div className="p-4 border-b font-bold">Title</div>...</Modal>
+// ✅
+<Modal open={open} onClose={close}>
+  <ModalHeader>Title</ModalHeader>
+  <ModalBody>...</ModalBody>
+  <ModalFooter>...</ModalFooter>
+</Modal>
+```
+
+## Rule 5: Use variants and sizes, not className hacks
+
+If a component has a prop for it, use the prop. Never restyle a component with utility classes to imitate an existing variant.
+
+```tsx
+// ❌ <Button className="bg-red-600 text-white hover:bg-red-700">Delete</Button>
+// ✅ <Button variant="danger">Delete</Button>
+// ❌ <Button className="text-xs px-2 py-1">Save</Button>
+// ✅ <Button size="sm">Save</Button>
+```
+
+Button variants: `primary`, `secondary`, `ghost`, `outline`, `danger`, `link`. Sizes: `sm`, `md`, `lg`, `icon`.
+
+## Rule 6: Never hardcode colors
+
+Use design tokens so multi-brand theming (mieweb, bluehive, webchart, enterprise-health, …) keeps working:
+
+- ❌ `bg-blue-500`, `text-[#1a73e8]`, `style={{ color: 'red' }}`
+- ✅ semantic tokens: `bg-primary-600`, `text-muted-foreground`, `border-border`, `bg-background`
+- ✅ charts: `var(--mieweb-chart-1)` … `var(--mieweb-chart-5)`
+
+## Rule 7: Theme through the brand system, never global CSS
+
+- Wrap the app in `ThemeProvider`; use `@mieweb/ui/brands` (`generateBrandCSS`, `brands`) for brand switching.
+- **No global resets or element-selector overrides** (`button { … }`, `* { … }`). Styles stay component-scoped and minimal.
+
+## Rule 8: Feedback states use library components
+
+- Loading: `Spinner` (inline), `Skeleton` (content placeholder), `LoadingPage` (full page). Never a hand-rolled CSS spinner.
+- Outcomes: `Alert` (inline), `Toast` (transient — announces via aria-live for free). Never a bespoke alert div.
+- Errors/empty pages: `ErrorPage`. Progress: `Progress`.
+
+## Rule 9: Accessibility is not optional
+
+- Every interactive element needs an accessible name (`aria-label`, `aria-labelledby`, or visible text).
+- Use semantic HTML (`nav`, `main`, `button`) — never a clickable `div`.
+- Dynamic updates (modals, alerts, notifications) must be announced — prefer `Toast`/`Alert`, which handle aria-live.
+- Preserve logical tab order and visible focus indicators; never remove focus outlines.
+
+## Rule 10: Internationalization and RTL
+
+- **Externalize all user-facing text** — no hardcoded English strings in JSX. Use the project's i18n function (`t('…')`).
+- **Use RTL-safe logical classes**: `ms-*`/`me-*`, `ps-*`/`pe-*`, `start-*`/`end-*`, `text-start`/`text-end` — never `ml-*`/`mr-*`, `pl-*`/`pr-*`, `left-*`/`right-*`, `text-left`/`text-right`.
+- Localize dates, numbers, and currency via `Intl` APIs, not string formatting.
+
+## Rule 11: Forms
+
+- Always use library fields (`Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`) with a properly associated `<label>`.
+- Dates → `DateInput` / `DateRangePicker`, never raw `type="date"`. Phones → `PhoneInput`. URLs → `WebsiteInput`.
+
+## Rule 12: Imports and Tailwind setup
 
 ```tsx
 // Most components: named imports from the main barrel
@@ -89,6 +158,12 @@ import { generateBrandCSS, brands } from '@mieweb/ui/brands'; // branding
 
 Never import from `@mieweb/ui/ag-grid` (deprecated).
 
-## Rule 5: When no component exists
+Tailwind: on Tailwind 4, add an `@source` for `@mieweb/ui` so library classes are generated; on Tailwind 3, use the `@mieweb/ui/tailwind-preset` preset and `miewebUISafelist`. Do not invent purge/content configs.
 
-Build it locally, but in `@mieweb/ui` style: Tailwind utility classes with the library's design tokens, ARIA labels on interactive elements, and externalized user-facing text. Prefer composing existing primitives (`Card`, `Text`, `Badge`) over new bespoke markup. If the pattern is generic, propose contributing it upstream to `@mieweb/ui`.
+## Rule 13: Deprecations are law
+
+If JSDoc, the console, or the docs mark something deprecated (`AGGrid` today), do not use it in new code and do not suppress the warning. Use the documented replacement.
+
+## Rule 14: When no component exists
+
+First verify it truly doesn't exist — check https://ui.mieweb.org (Storybook) rather than guessing. Then build it locally, but in `@mieweb/ui` style: Tailwind utility classes with the library's design tokens, ARIA labels on interactive elements, and externalized user-facing text. Prefer composing existing primitives (`Card`, `Text`, `Badge`) over new bespoke markup. If the pattern is generic, propose contributing it upstream to `@mieweb/ui`.
