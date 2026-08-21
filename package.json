@@ -208,9 +208,13 @@
   },
   "files": [
     "dist",
+    "agent",
     "README.md",
     "LICENSE"
   ],
+  "bin": {
+    "mieweb-ui": "./agent/init-agent.mjs"
+  },
   "scripts": {
     "preinstall": "node -e \"try{if(require('fs').existsSync('.git'))require('child_process').execSync('git submodule update --init --recursive',{stdio:'inherit'})}catch(e){console.warn('[@mieweb/ui] submodule update skipped:',e.message)}\"",
     "prepare": "npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css && npm run copy:kerebron-css",

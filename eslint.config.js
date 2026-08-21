@@ -190,6 +190,19 @@ export default [
       'no-console': 'off',
     },
   },
+  // Node CLI scripts (run outside the browser bundle)
+  {
+    files: ['scripts/**/*.mjs', 'agent/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
   {
     ignores: ['dist/**', 'node_modules/**', '*.config.*', '.storybook/**'],
   },
