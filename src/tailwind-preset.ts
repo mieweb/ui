@@ -609,6 +609,7 @@ export const miewebUISafelist = [
   'line-clamp-8',
   'bg-gradient-to-t',
   'from-card',
+  'from-background',
   'to-transparent',
 ];
 

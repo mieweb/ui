@@ -25,7 +25,7 @@ const meta: Meta<typeof ClampedText> = {
     lines: {
       description: 'Lines visible while collapsed.',
       control: 'select',
-      options: [2, 3, 4, 5, 6, 8],
+      options: [2, 3, 4, 5, 6, 7, 8],
     },
     threshold: {
       description: 'Skip the clamp below this character count.',

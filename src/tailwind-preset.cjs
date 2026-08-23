@@ -135,6 +135,7 @@ module.exports = {
     'line-clamp-8',
     'bg-gradient-to-t',
     'from-card',
+    'from-background',
     'to-transparent',
   ],
   theme: {
