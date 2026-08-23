@@ -9,6 +9,28 @@ describe('DateInput', () => {
     vi.useRealTimers();
   });
 
+  it('exposes the Input density slots when it renders its own markup', () => {
+    renderWithTheme(
+      <DateInput label="Service date" helperText="MM/DD/YYYY" showCalendar />
+    );
+
+    expect(screen.getByLabelText('Service date')).toHaveAttribute(
+      'data-slot',
+      'input'
+    );
+    expect(screen.getByText('Service date')).toHaveAttribute(
+      'data-slot',
+      'input-label'
+    );
+    expect(screen.getByText('MM/DD/YYYY')).toHaveAttribute(
+      'data-slot',
+      'input-helper'
+    );
+    expect(
+      screen.getByRole('button', { name: 'Open calendar' })
+    ).toHaveAttribute('data-slot', 'date-input-trigger');
+  });
+
   it('shows only calendar years within its date bounds', async () => {
     const user = userEvent.setup();
 
