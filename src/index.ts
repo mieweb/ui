@@ -43,6 +43,7 @@ export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
 export * from './components/CountryDropdown';
 export * from './components/CookieConsent';
+export * from './components/CopyButton';
 export * from './components/CSVColumnMapper';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
