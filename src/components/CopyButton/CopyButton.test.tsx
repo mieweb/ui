@@ -9,10 +9,15 @@ describe('CopyButton', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     writeText.mockReset().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
+    // Stub (rather than mutate) the global so it is restored after each test
+    vi.stubGlobal('navigator', {
+      ...window.navigator,
+      clipboard: { writeText },
+    });
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     vi.useRealTimers();
   });
 
