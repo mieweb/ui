@@ -36,6 +36,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: { date: daysAgo(12) },
+  // Storybook's date control emits a numeric timestamp; normalize it back
+  // to a Date so the component's string | Date contract holds.
+  render: (args) => {
+    const raw = args.date as string | number | Date;
+    return (
+      <FreshnessBadge
+        {...args}
+        date={typeof raw === 'number' ? new Date(raw) : raw}
+      />
+    );
+  },
 };
 
 export const Levels: Story = {

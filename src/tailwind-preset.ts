@@ -599,6 +599,17 @@ export const miewebUISafelist = [
   'dark:border-primary-800',
   'dark:text-primary-300',
   'opacity-60',
+  // FreshnessBadge / FreshnessDot — tinted level chips and dots
+  'bg-success/10',
+  'dark:bg-success/20',
+  'bg-warning/15',
+  'dark:bg-warning/20',
+  'text-warning-700',
+  'dark:text-warning',
+  'bg-destructive/10',
+  'dark:bg-destructive/20',
+  'bg-muted-foreground/50',
+  'text-[11px]',
 ];
 
 export interface MiewebUIPreset {

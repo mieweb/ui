@@ -2,14 +2,19 @@
 
 import * as React from 'react';
 import { DateTime } from 'luxon';
-import { CircleAlert, CircleCheck, CircleMinus } from 'lucide-react';
+import {
+  CircleAlert,
+  CircleCheck,
+  CircleHelp,
+  CircleMinus,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 // =============================================================================
 // Types & helpers
 // =============================================================================
 
-export type FreshnessLevel = 'fresh' | 'aging' | 'stale';
+export type FreshnessLevel = 'fresh' | 'aging' | 'stale' | 'unknown';
 
 export interface FreshnessThresholds {
   /** Days within which a date counts as fresh (default 90). */
@@ -26,24 +31,34 @@ function toDateTime(date: string | Date): DateTime {
     : DateTime.fromJSDate(date);
 }
 
-/** Whole days elapsed since the given date (0 for today/future). */
-export function daysSince(date: string | Date): number {
-  const days = Math.floor(DateTime.now().diff(toDateTime(date), 'days').days);
+/**
+ * Whole days elapsed since the given date (0 for today/future), or `null`
+ * when the date cannot be parsed.
+ */
+export function daysSince(date: string | Date): number | null {
+  const dt = toDateTime(date);
+  if (!dt.isValid) return null;
+  const days = Math.floor(DateTime.now().diff(dt, 'days').days);
   return Math.max(0, days);
 }
 
-/** Bucket a date into fresh / aging / stale by day thresholds. */
+/**
+ * Bucket a date into fresh / aging / stale by day thresholds. Unparseable
+ * dates return `unknown` rather than masquerading as fresh or stale.
+ */
 export function freshnessLevel(
   date: string | Date,
   thresholds: FreshnessThresholds = DEFAULT_THRESHOLDS
 ): FreshnessLevel {
   const days = daysSince(date);
+  if (days === null) return 'unknown';
   if (days < thresholds.fresh) return 'fresh';
   if (days < thresholds.aging) return 'aging';
   return 'stale';
 }
 
-function ageText(days: number): string {
+function ageText(days: number | null): string {
+  if (days === null) return 'date unknown';
   return days === 0 ? 'today' : days === 1 ? 'yesterday' : `${days}d ago`;
 }
 
@@ -68,6 +83,12 @@ const META: Record<
     chip: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
     dot: 'bg-destructive',
     label: 'Stale',
+  },
+  unknown: {
+    Icon: CircleHelp,
+    chip: 'bg-muted text-muted-foreground',
+    dot: 'bg-muted-foreground/50',
+    label: 'Unknown',
   },
 };
 

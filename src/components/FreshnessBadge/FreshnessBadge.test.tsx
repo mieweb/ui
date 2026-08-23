@@ -62,4 +62,13 @@ describe('FreshnessBadge', () => {
     const dot = screen.getByRole('img');
     expect(dot).toHaveAccessibleName(/stale — reviewed \d+d ago/i);
   });
+
+  it('treats unparseable dates as unknown instead of fresh or stale', () => {
+    expect(freshnessLevel('not-a-date')).toBe('unknown');
+    expect(freshnessLevel(new Date('invalid'))).toBe('unknown');
+    expect(daysSince('not-a-date')).toBeNull();
+
+    renderWithTheme(<FreshnessBadge date="not-a-date" />);
+    expect(screen.getByText(/reviewed date unknown/i)).toBeInTheDocument();
+  });
 });
