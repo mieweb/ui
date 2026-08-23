@@ -142,13 +142,23 @@ function saveLayout(base: string | undefined, mode: DashboardLayout) {
   }
 }
 
+function sanitizeSlot(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((v): v is string => typeof v === 'string')
+    : [];
+}
+
 function loadOrder(base: string | undefined): DashboardOrder | null {
   if (!base) return null;
   try {
     const raw = localStorage.getItem(orderStorageKey(base));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Record<number, string[]>;
-    return [parsed[0] ?? [], parsed[1] ?? [], parsed[2] ?? []];
+    const parsed = JSON.parse(raw) as Record<number, unknown>;
+    return [
+      sanitizeSlot(parsed[0]),
+      sanitizeSlot(parsed[1]),
+      sanitizeSlot(parsed[2]),
+    ];
   } catch {
     return null;
   }
@@ -211,6 +221,83 @@ function buildItemMap(columns: DashboardColumns): Map<string, PortletItem> {
 
 function findColumn(colOrder: string[][], itemId: string): number {
   return colOrder.findIndex((ids) => ids.includes(itemId));
+}
+
+/**
+ * Move `activeId` into the column named by `overId` (a column id or an item
+ * id), inserted before the hovered item. Returns the same reference when no
+ * cross-column move is needed.
+ */
+export function moveAcrossColumns(
+  order: DashboardOrder,
+  activeId: string,
+  overId: string
+): DashboardOrder {
+  const colIdx = COL_IDS.indexOf(overId as (typeof COL_IDS)[number]);
+  const sourceCol = findColumn(order, activeId);
+  if (sourceCol === -1) return order;
+
+  const targetCol = colIdx !== -1 ? colIdx : findColumn(order, overId);
+  if (targetCol === -1 || sourceCol === targetCol) return order;
+
+  const next = order.map((col) => [...col]) as DashboardOrder;
+  next[sourceCol] = next[sourceCol].filter((id) => id !== activeId);
+  const overIdx = colIdx !== -1 ? -1 : next[targetCol].indexOf(overId);
+  if (overIdx === -1) {
+    next[targetCol].push(activeId);
+  } else {
+    next[targetCol].splice(overIdx, 0, activeId);
+  }
+  return next;
+}
+
+/**
+ * Final order for a drop. Same-column drags reorder around the hovered item;
+ * cross-column drags keep the position `moveAcrossColumns` already chose
+ * (reordering again would flip the item to the other side of the target).
+ */
+export function reorderOnDrop(
+  order: DashboardOrder,
+  activeId: string,
+  overId: string,
+  crossedColumns: boolean
+): DashboardOrder {
+  if (crossedColumns) return order;
+  const isColumnTarget =
+    COL_IDS.indexOf(overId as (typeof COL_IDS)[number]) !== -1;
+  if (isColumnTarget || overId === activeId) return order;
+
+  const col = findColumn(order, activeId);
+  if (col === -1 || findColumn(order, overId) !== col) return order;
+
+  const oldIdx = order[col].indexOf(activeId);
+  const newIdx = order[col].indexOf(overId);
+  if (oldIdx === -1 || newIdx === -1) return order;
+
+  const next = order.map((c) => [...c]) as DashboardOrder;
+  next[col] = arrayMove(next[col], oldIdx, newIdx);
+  return next;
+}
+
+/** Consolidate columns beyond the visible count into the last visible one. */
+export function consolidateColumns(
+  order: DashboardOrder,
+  mode: DashboardLayout
+): DashboardOrder {
+  if (mode >= 3) return order;
+  if (mode === 1) return [[...order[0], ...order[1], ...order[2]], [], []];
+  return [[...order[0]], [...order[1], ...order[2]], []];
+}
+
+/**
+ * Columns needed to show every item: the highest occupied index + 1, so a
+ * gap like `[a], [], [c]` still requires three columns.
+ */
+export function requiredColumns(order: DashboardOrder): DashboardLayout {
+  return Math.max(
+    1,
+    ...order.map((ids, i) => (ids.length > 0 ? i + 1 : 0))
+  ) as DashboardLayout;
 }
 
 /**
@@ -435,23 +522,41 @@ export const CustomizableDashboard = React.forwardRef<
 ) {
   const itemMap = React.useMemo(() => buildItemMap(columns), [columns]);
 
-  const [internalLayout, setInternalLayout] = React.useState<DashboardLayout>(
-    () => loadLayout(storageKey) ?? defaultLayout
-  );
+  // Initial state ignores persistence so the first client render matches SSR;
+  // saved values are restored in a mount effect below.
+  const [internalLayout, setInternalLayout] =
+    React.useState<DashboardLayout>(defaultLayout);
   const layoutMode = controlledLayout ?? internalLayout;
 
   const [colOrder, setColOrder] = React.useState<DashboardOrder>(() =>
-    mergeColumnOrder(
-      columns,
-      controlledOrder ?? loadOrder(storageKey) ?? defaultOrder ?? null
-    )
+    mergeColumnOrder(columns, controlledOrder ?? defaultOrder ?? null)
   );
   const [activeId, setActiveId] = React.useState<string | null>(null);
 
   const prevColOrder = React.useRef(colOrder);
   const layoutModeRef = React.useRef(layoutMode);
   layoutModeRef.current = layoutMode;
+  const colOrderRef = React.useRef(colOrder);
+  colOrderRef.current = colOrder;
+  const columnsRef = React.useRef(columns);
+  columnsRef.current = columns;
   const draggingRef = React.useRef(false);
+
+  // Restore persisted layout/order after mount (uncontrolled concerns only).
+  React.useEffect(() => {
+    if (!storageKey) return;
+    if (controlledLayout === undefined) {
+      const savedLayout = loadLayout(storageKey);
+      if (savedLayout !== null) setInternalLayout(savedLayout);
+    }
+    if (controlledOrder === undefined) {
+      const savedOrder = loadOrder(storageKey);
+      if (savedOrder) {
+        setColOrder(mergeColumnOrder(columnsRef.current, savedOrder));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only restore
+  }, [storageKey]);
 
   // Sync controlled order and newly added/removed items while not dragging.
   React.useEffect(() => {
@@ -476,11 +581,9 @@ export const CustomizableDashboard = React.forwardRef<
       saveOrder(storageKey, next);
       onOrderChange?.(next);
 
-      // Auto-shrink layout when trailing columns become empty
-      const occupied = Math.max(
-        1,
-        next.filter((ids) => ids.length > 0).length
-      ) as DashboardLayout;
+      // Auto-shrink only when trailing columns are empty (gaps keep their
+      // column so no item is hidden by a reduced layout)
+      const occupied = requiredColumns(next);
       if (occupied < layoutModeRef.current) {
         setLayout(occupied);
       }
@@ -491,20 +594,14 @@ export const CustomizableDashboard = React.forwardRef<
   const handleLayoutChange = React.useCallback(
     (mode: DashboardLayout) => {
       setLayout(mode);
-      // Consolidate trailing columns so droppable ids match visible columns.
-      if (mode >= 3) return;
-      setColOrder((prev) => {
-        const next: DashboardOrder = [[], [], []];
-        if (mode === 1) {
-          next[0] = [...prev[0], ...prev[1], ...prev[2]];
-        } else {
-          next[0] = [...prev[0]];
-          next[1] = [...prev[1], ...prev[2]];
-        }
+      // Consolidate so droppable ids match visible columns; persist/notify
+      // outside the state updater so replayed renders can't double-fire.
+      const next = consolidateColumns(colOrderRef.current, mode);
+      if (next !== colOrderRef.current) {
+        setColOrder(next);
         saveOrder(storageKey, next);
         onOrderChange?.(next);
-        return next;
-      });
+      }
     },
     [setLayout, storageKey, onOrderChange]
   );
@@ -529,40 +626,12 @@ export const CustomizableDashboard = React.forwardRef<
   const handleDragOver = React.useCallback((event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
-
-    const activeItemId = String(active.id);
-    const overId = String(over.id);
-    const colIdx = COL_IDS.indexOf(overId as (typeof COL_IDS)[number]);
-
-    setColOrder((prev) => {
-      const sourceCol = findColumn(prev, activeItemId);
-      if (sourceCol === -1) return prev;
-
-      let targetCol: number;
-      if (colIdx !== -1) {
-        targetCol = colIdx;
-      } else {
-        targetCol = findColumn(prev, overId);
-        if (targetCol === -1) return prev;
-      }
-
-      // Same column — SortableContext handles in-column reordering
-      if (sourceCol === targetCol) return prev;
-
-      const next = prev.map((col) => [...col]) as DashboardOrder;
-      next[sourceCol] = next[sourceCol].filter((id) => id !== activeItemId);
-      if (colIdx !== -1) {
-        next[targetCol].push(activeItemId);
-      } else {
-        const overIdx = next[targetCol].indexOf(overId);
-        if (overIdx === -1) {
-          next[targetCol].push(activeItemId);
-        } else {
-          next[targetCol].splice(overIdx, 0, activeItemId);
-        }
-      }
-      return next;
-    });
+    const next = moveAcrossColumns(
+      colOrderRef.current,
+      String(active.id),
+      String(over.id)
+    );
+    if (next !== colOrderRef.current) setColOrder(next);
   }, []);
 
   const handleDragEnd = React.useCallback(
@@ -577,30 +646,20 @@ export const CustomizableDashboard = React.forwardRef<
       }
 
       const activeItemId = String(active.id);
-      const overId = String(over.id);
-
-      setColOrder((prev) => {
-        const next = prev.map((col) => [...col]) as DashboardOrder;
-        const col = findColumn(next, activeItemId);
-        if (col === -1) return prev;
-
-        const isColumnTarget =
-          COL_IDS.indexOf(overId as (typeof COL_IDS)[number]) !== -1;
-
-        if (!isColumnTarget && overId !== activeItemId) {
-          const overCol = findColumn(next, overId);
-          if (overCol === col) {
-            const oldIdx = next[col].indexOf(activeItemId);
-            const newIdx = next[col].indexOf(overId);
-            if (oldIdx !== -1 && newIdx !== -1) {
-              next[col] = arrayMove(next[col], oldIdx, newIdx);
-            }
-          }
-        }
-
-        commitOrder(next);
-        return next;
-      });
+      // A drag that ends in a different column than it started already sits
+      // where moveAcrossColumns placed it; reordering again would flip it
+      // to the other side of the hovered item.
+      const crossedColumns =
+        findColumn(prevColOrder.current, activeItemId) !==
+        findColumn(colOrderRef.current, activeItemId);
+      const next = reorderOnDrop(
+        colOrderRef.current,
+        activeItemId,
+        String(over.id),
+        crossedColumns
+      );
+      if (next !== colOrderRef.current) setColOrder(next);
+      commitOrder(next);
     },
     [commitOrder]
   );

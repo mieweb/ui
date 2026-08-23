@@ -4,7 +4,12 @@ import { renderWithTheme } from '../../test/test-utils';
 import {
   CustomizableDashboard,
   mergeColumnOrder,
+  moveAcrossColumns,
+  reorderOnDrop,
+  consolidateColumns,
+  requiredColumns,
   type DashboardColumns,
+  type DashboardOrder,
 } from './CustomizableDashboard';
 
 function makeColumns(): DashboardColumns {
@@ -14,6 +19,60 @@ function makeColumns(): DashboardColumns {
     [{ id: 'c', node: <div data-testid="portlet-c">C</div> }],
   ];
 }
+
+describe('drag order helpers', () => {
+  const base: DashboardOrder = [['a', 'b'], ['c'], []];
+
+  it('moveAcrossColumns inserts before the hovered item', () => {
+    expect(moveAcrossColumns(base, 'a', 'c')).toEqual([['b'], ['a', 'c'], []]);
+  });
+
+  it('moveAcrossColumns appends when hovering a column', () => {
+    expect(moveAcrossColumns(base, 'a', 'column-2')).toEqual([
+      ['b'],
+      ['c'],
+      ['a'],
+    ]);
+  });
+
+  it('moveAcrossColumns is a no-op within the same column', () => {
+    expect(moveAcrossColumns(base, 'a', 'b')).toBe(base);
+  });
+
+  it('reorderOnDrop reorders within a column', () => {
+    expect(reorderOnDrop(base, 'a', 'b', false)).toEqual([
+      ['b', 'a'],
+      ['c'],
+      [],
+    ]);
+  });
+
+  it('reorderOnDrop keeps the drag-over position for cross-column drops', () => {
+    // After moveAcrossColumns placed `a` before `c`, the drop must not
+    // flip it to the other side of `c`.
+    const during = moveAcrossColumns(base, 'a', 'c');
+    expect(reorderOnDrop(during, 'a', 'c', true)).toBe(during);
+  });
+
+  it('consolidateColumns folds trailing columns into the visible set', () => {
+    expect(consolidateColumns([['a'], ['b'], ['c']], 2)).toEqual([
+      ['a'],
+      ['b', 'c'],
+      [],
+    ]);
+    expect(consolidateColumns([['a'], ['b'], ['c']], 1)).toEqual([
+      ['a', 'b', 'c'],
+      [],
+      [],
+    ]);
+  });
+
+  it('requiredColumns counts through gaps so no item is hidden', () => {
+    expect(requiredColumns([['a'], [], ['c']])).toBe(3);
+    expect(requiredColumns([['a'], ['b'], []])).toBe(2);
+    expect(requiredColumns([[], [], []])).toBe(1);
+  });
+});
 
 describe('mergeColumnOrder', () => {
   const columns = makeColumns();
@@ -140,6 +199,21 @@ describe('CustomizableDashboard', () => {
     expect(groups[0]).toContainElement(screen.getByTestId('portlet-c'));
     expect(groups[1]).toContainElement(screen.getByTestId('portlet-a'));
     expect(groups[2]).toContainElement(screen.getByTestId('portlet-b'));
+  });
+
+  it('survives corrupted saved order and falls back to props layout', () => {
+    localStorage.setItem(
+      'test-dash-portlet-order',
+      JSON.stringify({ 0: {}, 1: 'nope', 2: ['c', 42] })
+    );
+    renderWithTheme(
+      <CustomizableDashboard columns={makeColumns()} storageKey="test-dash" />
+    );
+    const groups = screen.getAllByRole('group', { name: /dashboard column/i });
+    expect(groups[0]).toContainElement(screen.getByTestId('portlet-a'));
+    expect(groups[1]).toContainElement(screen.getByTestId('portlet-b'));
+    // 'c' survives the sanitized slot and stays in its column
+    expect(groups[2]).toContainElement(screen.getByTestId('portlet-c'));
   });
 
   it('respects a controlled layout', () => {
