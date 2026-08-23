@@ -599,6 +599,10 @@ export const miewebUISafelist = [
   'dark:border-primary-800',
   'dark:text-primary-300',
   'opacity-60',
+  // Accordion — grid-rows height animation (arbitrary values TW3 won't scan)
+  'transition-[grid-template-rows]',
+  'grid-rows-[0fr]',
+  'grid-rows-[1fr]',
 ];
 
 export interface MiewebUIPreset {

@@ -125,6 +125,10 @@ module.exports = {
     'overflow-auto',
     // Select component
     'truncate',
+    // Accordion — grid-rows height animation (arbitrary values TW3 won't scan)
+    'transition-[grid-template-rows]',
+    'grid-rows-[0fr]',
+    'grid-rows-[1fr]',
   ],
   theme: {
     extend: {

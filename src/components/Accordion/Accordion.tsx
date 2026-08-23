@@ -108,7 +108,13 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
     const [internalOpen, setInternalOpen] = React.useState<string[]>(
       () => defaultOpenIds ?? []
     );
-    const open = controlledOpen ?? internalOpen;
+    const rawOpen = controlledOpen ?? internalOpen;
+    // Single mode keeps at most one panel open, even if defaultOpenIds or a
+    // controlled openIds array hands us several.
+    const open = React.useMemo(
+      () => (type === 'single' ? rawOpen.slice(0, 1) : rawOpen),
+      [type, rawOpen]
+    );
     const openSet = React.useMemo(() => new Set(open), [open]);
 
     const toggle = (id: string) => {
@@ -161,11 +167,14 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
                   />
                 </button>
               </Heading>
-              {/* grid-rows 0fr→1fr animates to natural height without a max-height clip */}
+              {/* grid-rows 0fr→1fr animates to natural height without a max-height clip;
+                  collapsed panels are hidden from AT and unfocusable via aria-hidden + inert */}
               <div
                 id={panelId}
                 role="region"
                 aria-labelledby={triggerId}
+                aria-hidden={!isOpen}
+                inert={!isOpen || undefined}
                 className={cn(
                   'grid transition-[grid-template-rows] duration-200 ease-out',
                   isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'

@@ -95,4 +95,36 @@ describe('Accordion', () => {
     renderWithTheme(<Accordion items={ITEMS} />);
     expect(screen.getByRole('button', { name: 'Question C' })).toBeDisabled();
   });
+
+  it('hides collapsed panels from AT and keyboard via aria-hidden + inert', () => {
+    renderWithTheme(<Accordion items={ITEMS} defaultOpenIds={['a']} />);
+    const openPanel = document.getElementById(
+      screen
+        .getByRole('button', { name: 'Question A' })
+        .getAttribute('aria-controls')!
+    )!;
+    const closedPanel = document.getElementById(
+      screen
+        .getByRole('button', { name: 'Question B' })
+        .getAttribute('aria-controls')!
+    )!;
+    expect(openPanel).toHaveAttribute('aria-hidden', 'false');
+    expect(openPanel).not.toHaveAttribute('inert');
+    expect(closedPanel).toHaveAttribute('aria-hidden', 'true');
+    expect(closedPanel).toHaveAttribute('inert');
+  });
+
+  it('normalizes single mode to at most one open panel', () => {
+    renderWithTheme(
+      <Accordion type="single" items={ITEMS} defaultOpenIds={['a', 'b']} />
+    );
+    expect(screen.getByRole('button', { name: 'Question A' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Question B' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
 });
