@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { RichEditor } from './RichEditor';
+import { RichEditor, type RichEditorHandle } from './RichEditor';
 import { CodeEditor } from './CodeEditor';
 
 const meta: Meta<typeof RichEditor> = {
@@ -26,6 +26,46 @@ function BasicExample() {
 
 export const Basic: Story = {
   render: () => <BasicExample />,
+};
+
+/**
+ * What a document composer needs: a label pointing at the surface, a disabled
+ * state while saving, and `getContent()` read on submit — `onChange` can lag
+ * the last keystroke.
+ */
+function ComposerExample() {
+  const editorRef = useRef<RichEditorHandle>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState<string | null>(null);
+
+  const save = async () => {
+    setSaving(true);
+    setSaved((await editorRef.current?.getContent().catch(() => '')) ?? '');
+    setSaving(false);
+  };
+
+  return (
+    <div className="max-w-2xl space-y-2">
+      <label htmlFor="composer-body" id="composer-body-label">
+        Note
+      </label>
+      <RichEditor
+        ref={editorRef}
+        id="composer-body"
+        aria-labelledby="composer-body-label"
+        disabled={saving}
+        value="Dear **{{patient}}**,"
+      />
+      <button type="button" onClick={save} disabled={saving}>
+        {saving ? 'Saving…' : 'Save'}
+      </button>
+      {saved !== null && <pre>{saved}</pre>}
+    </div>
+  );
+}
+
+export const Composer: Story = {
+  render: () => <ComposerExample />,
 };
 
 function CodeExample() {

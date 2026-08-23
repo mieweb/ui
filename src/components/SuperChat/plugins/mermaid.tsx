@@ -19,6 +19,7 @@
  */
 
 import * as React from 'react';
+import { useIsDarkMode } from '../../../hooks/useIsDarkMode';
 import { useTextRenderContext } from '../render/renderContext';
 import type { SuperChatRenderPlugin } from '../types';
 
@@ -203,41 +204,11 @@ function loadMermaid(dark: boolean) {
   return mermaidReady;
 }
 
-/** Read the current dark-mode state from the document root. */
-function isDarkMode(): boolean {
-  if (typeof document === 'undefined') return false;
-  const root = document.documentElement;
-  return (
-    root.classList.contains('dark') ||
-    root.getAttribute('data-theme') === 'dark'
-  );
-}
-
 /**
  * Track dark mode reactively. Mermaid bakes theme colors into the rendered SVG,
  * so diagrams must re-render when the user toggles light/dark — a CSS swap is
- * not enough. Observes the `class`/`data-theme` attributes the theme sets on
- * the document root.
+ * not enough.
  */
-function useIsDarkMode(): boolean {
-  const [dark, setDark] = React.useState(isDarkMode);
-
-  React.useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const root = document.documentElement;
-    const update = () => setDark(isDarkMode());
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(root, {
-      attributes: true,
-      attributeFilter: ['class', 'data-theme'],
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  return dark;
-}
-
 let mermaidSeq = 0;
 
 function MermaidDiagram({ code }: { code: string }) {
