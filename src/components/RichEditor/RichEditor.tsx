@@ -16,6 +16,19 @@ export type { CollabConfig } from './editorKits';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 
+/**
+ * The markdown converter's tree-sitter WASM init is not concurrency-safe, so
+ * every editor's *first* load queues behind the previous one. Later loads (a
+ * `value` change) are free — by then the grammars are warm.
+ */
+let initialLoadQueue: Promise<unknown> = Promise.resolve();
+
+function queueInitialLoad(load: () => Promise<void>): Promise<void> {
+  const queued = initialLoadQueue.catch(() => undefined).then(load);
+  initialLoadQueue = queued.catch(() => undefined);
+  return queued;
+}
+
 export interface RichEditorProps {
   /** Markdown to load. Changing it reloads the editor unless `collab` is set. */
   value?: string;
@@ -188,7 +201,9 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         };
 
         if (valueRef.current) {
-          await editor.loadDocumentText(MARKDOWN_TYPE, valueRef.current);
+          await queueInitialLoad(() =>
+            editor!.loadDocumentText(MARKDOWN_TYPE, valueRef.current)
+          );
           await onTransaction();
           joinRoom();
         } else {

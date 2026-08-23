@@ -202,6 +202,46 @@ describe('RichEditor', () => {
       .pop();
     expect(editable?.()).toBe(false);
   });
+
+  it('follows dark mode changes without remounting the editor', async () => {
+    const root = document.documentElement;
+    const initialClassName = root.className;
+    const initialTheme = root.getAttribute('data-theme');
+    root.classList.remove('dark');
+    root.removeAttribute('data-theme');
+
+    try {
+      const { container } = renderWithTheme(<RichEditor id="note-body" />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+      const host = container.querySelector('#note-body');
+      expect(host?.classList.contains('kb-component--dark')).toBe(false);
+
+      root.classList.add('dark');
+      await waitFor(() =>
+        expect(host?.classList.contains('kb-component--dark')).toBe(true)
+      );
+
+      root.classList.remove('dark');
+      root.dataset.theme = 'dark';
+      await waitFor(() =>
+        expect(host?.classList.contains('kb-component--dark')).toBe(true)
+      );
+
+      root.removeAttribute('data-theme');
+      await waitFor(() =>
+        expect(host?.classList.contains('kb-component--dark')).toBe(false)
+      );
+      // A theme swap is a class swap: the editor was created exactly once.
+      expect(coreEditorCreate).toHaveBeenCalledTimes(1);
+    } finally {
+      root.className = initialClassName;
+      if (initialTheme === null) {
+        root.removeAttribute('data-theme');
+      } else {
+        root.setAttribute('data-theme', initialTheme);
+      }
+    }
+  });
 });
 
 describe('CodeEditor', () => {
