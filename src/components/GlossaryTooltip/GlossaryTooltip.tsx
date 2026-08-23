@@ -191,6 +191,16 @@ export function GlossaryTooltip({
     }
   };
 
+  // Focus lives on the dialog container once pinned, so Enter/Space there
+  // (not on a link or the close button inside) must also unpin.
+  const onDialogKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      close();
+    }
+  };
+
   const onTriggerFocus = () => {
     if (suppressFocusShow.current) {
       suppressFocusShow.current = false;
@@ -266,6 +276,7 @@ export function GlossaryTooltip({
       )}
       {open &&
         createPortal(
+          /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- keyboard dismissal on a focused non-modal dialog container is the WAI-ARIA pattern; links inside keep their own semantics */
           <span
             ref={floatingRef}
             role="dialog"
@@ -274,6 +285,7 @@ export function GlossaryTooltip({
             onMouseEnter={show}
             onMouseLeave={scheduleHide}
             onBlurCapture={onBlurCapture}
+            onKeyDown={onDialogKeyDown}
             className="z-50 block w-80 outline-none"
             style={style}
           >
