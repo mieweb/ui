@@ -30,6 +30,8 @@ export default defineConfig({
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
+    'components/KeyboardShortcutsOverlay/index':
+      'src/components/KeyboardShortcutsOverlay/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
     'components/Markdown/index': 'src/components/Markdown/index.ts',
     'components/MediaEditor/index': 'src/components/MediaEditor/index.ts',
