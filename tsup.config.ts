@@ -28,6 +28,8 @@ export default defineConfig({
     'components/CountryCodeDropdown/index': 'src/components/CountryCodeDropdown/index.ts',
     'components/DateInput/index': 'src/components/DateInput/index.ts',
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
+    'components/FilterSummaryBar/index':
+      'src/components/FilterSummaryBar/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
