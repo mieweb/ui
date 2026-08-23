@@ -119,7 +119,9 @@ function ShortcutList({
  * @example
  * ```tsx
  * const [open, setOpen] = useState(false);
- * useKeyboardShortcut({ key: '?', shift: true }, () => setOpen((v) => !v));
+ * useKeyboardShortcut('?', () => setOpen((v) => !v), {
+ *   modifiers: { shift: true },
+ * });
  *
  * <KeyboardShortcutsOverlay
  *   open={open}

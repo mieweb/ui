@@ -599,6 +599,12 @@ export const miewebUISafelist = [
   'dark:border-primary-800',
   'dark:text-primary-300',
   'opacity-60',
+  // Kbd / KeyboardShortcutsOverlay — key chips and shortcut rows
+  'px-1.5',
+  'py-0.5',
+  'font-mono',
+  'text-[11px]',
+  'min-w-0',
 ];
 
 export interface MiewebUIPreset {
