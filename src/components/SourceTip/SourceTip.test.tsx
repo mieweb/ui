@@ -142,9 +142,11 @@ describe('SourceTip', () => {
     renderTip();
     const trigger = screen.getByRole('button');
     fireEvent.keyDown(trigger, { key: ' ' });
-    expect(screen.getByRole('dialog')).toHaveFocus();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveFocus();
 
-    fireEvent.keyDown(trigger, { key: ' ' });
+    // Focus moved into the dialog, so the second press lands there
+    fireEvent.keyDown(dialog, { key: ' ' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
   });

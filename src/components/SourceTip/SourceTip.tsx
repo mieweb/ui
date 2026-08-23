@@ -177,6 +177,16 @@ export function SourceTip({
     }
   };
 
+  // Focus lives on the dialog container once pinned, so Enter/Space there
+  // (not on a link inside) must also unpin — the trigger no longer has focus.
+  const onDialogKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      close();
+    }
+  };
+
   const onTriggerFocus = () => {
     if (suppressFocusShow.current) {
       suppressFocusShow.current = false;
@@ -229,6 +239,7 @@ export function SourceTip({
             onMouseEnter={show}
             onMouseLeave={scheduleHide}
             onBlurCapture={onBlurCapture}
+            onKeyDown={onDialogKeyDown}
             className="z-50 block w-80 outline-none"
             style={style}
           >

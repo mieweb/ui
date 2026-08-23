@@ -136,6 +136,8 @@ module.exports = {
     'to-primary-600',
     'ring-black/5',
     'dark:ring-white/10',
+    'ring-1',
+    'overflow-y-auto',
     'max-h-52',
     'text-primary-100/90',
     'text-[10px]',
