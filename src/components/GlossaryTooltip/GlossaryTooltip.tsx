@@ -94,6 +94,9 @@ export function GlossaryTooltip({
   const [open, setOpen] = React.useState(false);
   const [pinned, setPinned] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // True while close() restores focus to the trigger, so the trigger's
+  // focus-show doesn't immediately reopen a card the user just dismissed.
+  const suppressFocusShow = React.useRef(false);
 
   const { anchorRef, floatingRef, style } = useAnchoredPosition<
     HTMLSpanElement,
@@ -128,9 +131,20 @@ export function GlossaryTooltip({
     clearHideTimer();
     setPinned(false);
     setOpen(false);
-  }, []);
+    // Return focus to the trigger if it was inside the card.
+    if (floatingRef.current?.contains(document.activeElement)) {
+      suppressFocusShow.current = true;
+      (anchorRef.current?.querySelector('a,button') as HTMLElement)?.focus();
+    }
+  }, [anchorRef, floatingRef]);
 
   React.useEffect(() => () => clearHideTimer(), []);
+
+  // A pinned card is a non-modal dialog: move focus into it so its links
+  // and close button are reachable by keyboard.
+  React.useEffect(() => {
+    if (pinned) floatingRef.current?.focus();
+  }, [pinned, floatingRef]);
 
   useEscapeKey(close, open);
 
@@ -177,6 +191,14 @@ export function GlossaryTooltip({
     }
   };
 
+  const onTriggerFocus = () => {
+    if (suppressFocusShow.current) {
+      suppressFocusShow.current = false;
+      return;
+    }
+    show();
+  };
+
   const onBlurCapture = (e: React.FocusEvent<HTMLSpanElement>) => {
     const next = e.relatedTarget as Node | null;
     if (
@@ -187,9 +209,10 @@ export function GlossaryTooltip({
     scheduleHide();
   };
 
+  const limit = Math.max(1, maxDefinitionLength);
   const short =
-    definition.length > maxDefinitionLength
-      ? `${definition.slice(0, maxDefinitionLength - 1).trimEnd()}…`
+    definition.length > limit
+      ? `${definition.slice(0, limit - 1).trimEnd()}…`
       : definition;
 
   const triggerClasses = cn(
@@ -213,33 +236,45 @@ export function GlossaryTooltip({
       className="relative inline"
       onMouseEnter={show}
       onMouseLeave={scheduleHide}
-      onFocus={show}
+      onFocus={onTriggerFocus}
       onBlur={onBlurCapture}
     >
       {href ? (
-        <a href={href} aria-expanded={open} {...triggerProps}>
-          {children}
-        </a>
-      ) : (
-        <span
-          role="button"
-          tabIndex={0}
+        <a
+          href={href}
           aria-expanded={open}
-          aria-label={`${term} — show definition`}
-          onKeyDown={onTriggerKeyDown}
+          aria-haspopup="dialog"
           {...triggerProps}
         >
           {children}
-        </span>
+        </a>
+      ) : (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-label={`${term} — show definition`}
+          onKeyDown={onTriggerKeyDown}
+          {...triggerProps}
+          className={cn(
+            'inline appearance-none border-0 bg-transparent p-0 text-inherit [font:inherit]',
+            triggerProps.className
+          )}
+        >
+          {children}
+        </button>
       )}
       {open &&
         createPortal(
           <span
             ref={floatingRef}
-            role="tooltip"
+            role="dialog"
+            aria-label={term}
+            tabIndex={-1}
             onMouseEnter={show}
             onMouseLeave={scheduleHide}
-            className="z-50 block w-80"
+            onBlurCapture={onBlurCapture}
+            className="z-50 block w-80 outline-none"
             style={style}
           >
             <span className="border-border bg-card block overflow-hidden rounded-lg border text-start font-normal tracking-normal normal-case shadow-xl ring-1 ring-black/5 dark:ring-white/10">

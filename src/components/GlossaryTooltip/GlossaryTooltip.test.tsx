@@ -40,7 +40,7 @@ describe('GlossaryTooltip', () => {
     renderWithTheme(<GlossaryTooltip {...BASE}>DOT physicals</GlossaryTooltip>);
     fireEvent.mouseEnter(screen.getByRole('button'));
 
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Occupational Health')).toBeInTheDocument();
     expect(screen.getByText('DOT physical')).toBeInTheDocument();
     expect(
@@ -99,7 +99,7 @@ describe('GlossaryTooltip', () => {
     act(() => {
       vi.advanceTimersByTime(200);
     });
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('pins via keyboard and shows the close button', () => {
@@ -107,17 +107,35 @@ describe('GlossaryTooltip', () => {
     const trigger = screen.getByRole('button');
     fireEvent.keyDown(trigger, { key: 'Enter' });
 
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     const closeBtn = screen.getByRole('button', { name: /close definition/i });
     fireEvent.click(closeBtn);
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('closes on Escape', () => {
     renderWithTheme(<GlossaryTooltip {...BASE}>trigger</GlossaryTooltip>);
     fireEvent.focus(screen.getByRole('button'));
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('renders a real button element when the term has no href', () => {
+    renderWithTheme(<GlossaryTooltip {...BASE}>trigger</GlossaryTooltip>);
+    const trigger = screen.getByRole('button', { name: /show definition/i });
+    expect(trigger.tagName).toBe('BUTTON');
+    expect(trigger).toHaveAttribute('type', 'button');
+  });
+
+  it('clamps maxDefinitionLength so tiny values cannot break truncation', () => {
+    renderWithTheme(
+      <GlossaryTooltip {...BASE} maxDefinitionLength={0}>
+        trigger
+      </GlossaryTooltip>
+    );
+    fireEvent.focus(screen.getByRole('button'));
+    // limit is clamped to 1 → nothing before the ellipsis, but no crash
+    expect(screen.getByText(/…$/)).toBeInTheDocument();
   });
 });
