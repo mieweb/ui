@@ -125,6 +125,14 @@ module.exports = {
     'overflow-auto',
     // Select component
     'truncate',
+    // Sparkline — bar sizing, gaps, and hover tints
+    'min-w-[3px]',
+    'gap-[2px]',
+    'bg-primary-500/40',
+    'hover:bg-primary-500/70',
+    'hover:bg-primary-500/90',
+    'hover:bg-muted-foreground/20',
+    'focus-visible:ring-offset-1',
   ],
   theme: {
     extend: {

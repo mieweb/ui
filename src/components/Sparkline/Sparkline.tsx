@@ -129,7 +129,10 @@ export const Sparkline = React.forwardRef<HTMLDivElement, SparklineProps>(
                 aria-pressed={isSelected}
                 title={title}
                 aria-label={title}
-                className={cn(barClasses, 'cursor-pointer')}
+                className={cn(
+                  barClasses,
+                  'focus-visible:ring-ring cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none'
+                )}
                 style={{ height: `${heightPct}%` }}
               />
             ) : (

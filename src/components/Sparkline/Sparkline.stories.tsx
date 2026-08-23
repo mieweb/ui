@@ -3,7 +3,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DateTime } from 'luxon';
 import { Sparkline, type SparklinePoint } from './Sparkline';
 
-// Deterministic pseudo-random activity so visual baselines stay stable
+// Deterministic pseudo-random activity so visual baselines stay stable —
+// values AND dates are fixed (anchored, not DateTime.now()) so labels and
+// keys never drift between snapshot runs.
+const ANCHOR = DateTime.fromISO('2026-08-22');
+
 function thirtyDays(seed = 7): SparklinePoint[] {
   let s = seed;
   const rand = () => {
@@ -11,7 +15,7 @@ function thirtyDays(seed = 7): SparklinePoint[] {
     return s / 2147483647;
   };
   return Array.from({ length: 30 }, (_, i) => {
-    const d = DateTime.now().minus({ days: 29 - i });
+    const d = ANCHOR.minus({ days: 29 - i });
     const quiet = rand() < 0.3;
     return {
       key: d.toISODate()!,
