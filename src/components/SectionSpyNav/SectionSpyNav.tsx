@@ -113,26 +113,33 @@ export function SectionSpyNav({
   const railRef = React.useRef<HTMLDivElement>(null);
   const markRef = React.useRef<HTMLSpanElement>(null);
 
+  // Find the active link by dataset rather than a CSS selector, so ids
+  // never need escaping and CSS.escape availability doesn't matter.
+  const findActiveLink = React.useCallback((): HTMLAnchorElement | null => {
+    const links = railRef.current?.querySelectorAll<HTMLAnchorElement>('a');
+    if (!links) return null;
+    for (const link of links) {
+      if (link.dataset.id === active) return link;
+    }
+    return null;
+  }, [active]);
+
   // Slide the underline beneath the active link. offsetLeft/offsetWidth are
   // physical and measured against the rail, so the marker tracks the link
   // in both directions and while the rail is scrolled horizontally.
   const syncMarker = React.useCallback(() => {
-    const link = railRef.current?.querySelector<HTMLAnchorElement>(
-      `a[data-id="${window.CSS.escape(active)}"]`
-    );
+    const link = findActiveLink();
     const mark = markRef.current;
     if (!link || !mark) return;
     mark.style.left = `${link.offsetLeft}px`;
     mark.style.width = `${link.offsetWidth}px`;
-  }, [active]);
+  }, [findActiveLink]);
 
   React.useEffect(() => {
-    const link = railRef.current?.querySelector<HTMLAnchorElement>(
-      `a[data-id="${window.CSS.escape(active)}"]`
-    );
+    const link = findActiveLink();
     link?.scrollIntoView?.({ inline: 'center', block: 'nearest' });
     syncMarker();
-  }, [active, syncMarker]);
+  }, [findActiveLink, syncMarker]);
 
   React.useEffect(() => {
     window.addEventListener('resize', syncMarker);
