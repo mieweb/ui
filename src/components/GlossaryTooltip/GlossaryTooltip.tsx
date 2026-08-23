@@ -290,7 +290,7 @@ export function GlossaryTooltip({
             onMouseLeave={scheduleHide}
             onBlurCapture={onBlurCapture}
             onKeyDown={onDialogKeyDown}
-            className="z-50 block w-80 outline-none"
+            className="focus-visible:ring-ring z-50 block w-80 rounded-lg outline-none focus-visible:ring-2"
             style={style}
           >
             <span className="border-border bg-card block overflow-hidden rounded-lg border text-start font-normal tracking-normal normal-case shadow-xl ring-1 ring-black/5 dark:ring-white/10">
