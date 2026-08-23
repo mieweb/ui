@@ -231,6 +231,7 @@ export function SourceTip({
       {children}
       {open &&
         createPortal(
+          /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- keyboard dismissal on a focused non-modal dialog container is the WAI-ARIA pattern; links inside keep their own semantics */
           <span
             ref={floatingRef}
             role="dialog"
