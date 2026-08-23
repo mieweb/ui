@@ -125,6 +125,17 @@ module.exports = {
     'overflow-auto',
     // Select component
     'truncate',
+    // ClampedText — collapsed clamp levels and fade gradient
+    'line-clamp-2',
+    'line-clamp-3',
+    'line-clamp-4',
+    'line-clamp-5',
+    'line-clamp-6',
+    'line-clamp-7',
+    'line-clamp-8',
+    'bg-gradient-to-t',
+    'from-card',
+    'to-transparent',
   ],
   theme: {
     extend: {
@@ -234,6 +245,11 @@ module.exports = {
         'slide-in-from-bottom': 'slide-in-from-bottom 150ms ease-out',
         'scale-in': 'scale-in 150ms ease-out',
         'ozwell-message-flare': 'ozwell-message-flare 1.8s ease-out',
+      },
+      // ClampedText supports 7/8-line clamps beyond Tailwind 3's core 1–6 scale
+      lineClamp: {
+        7: '7',
+        8: '8',
       },
     },
   },

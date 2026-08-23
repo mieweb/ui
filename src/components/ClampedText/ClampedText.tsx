@@ -3,11 +3,11 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 
-export interface ClampedTextProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ClampedTextProps extends React.HTMLAttributes<HTMLElement> {
   /** The long text to clamp. */
   text: string;
   /** Lines visible while collapsed (2–8, default 6). */
-  lines?: 2 | 3 | 4 | 5 | 6 | 8;
+  lines?: 2 | 3 | 4 | 5 | 6 | 7 | 8;
   /** Skip the clamp entirely below this character count (default 280). */
   threshold?: number;
   /** Toggle labels, overridable for i18n. */
@@ -20,13 +20,17 @@ export interface ClampedTextProps extends React.HTMLAttributes<HTMLDivElement> {
   fadeClassName?: string;
 }
 
-// Static map so Tailwind sees every clamp utility it must generate
+// Static map so Tailwind sees every clamp utility it must generate.
+// 7/8 are beyond Tailwind 3's core 1–6 scale — the preset extends
+// theme.lineClamp so TW3 consumers generate them too (TW4 accepts any
+// integer as a bare value).
 const LINE_CLAMP: Record<number, string> = {
   2: 'line-clamp-2',
   3: 'line-clamp-3',
   4: 'line-clamp-4',
   5: 'line-clamp-5',
   6: 'line-clamp-6',
+  7: 'line-clamp-7',
   8: 'line-clamp-8',
 };
 
@@ -42,7 +46,7 @@ const LINE_CLAMP: Record<number, string> = {
  * <ClampedText text={note.body} lines={4} />
  * ```
  */
-export const ClampedText = React.forwardRef<HTMLDivElement, ClampedTextProps>(
+export const ClampedText = React.forwardRef<HTMLElement, ClampedTextProps>(
   function ClampedText(
     {
       text,
@@ -60,14 +64,22 @@ export const ClampedText = React.forwardRef<HTMLDivElement, ClampedTextProps>(
 
     if (text.length <= threshold) {
       return (
-        <span className={cn('break-words whitespace-pre-wrap', className)}>
+        <span
+          ref={ref as React.ForwardedRef<HTMLSpanElement>}
+          className={cn('break-words whitespace-pre-wrap', className)}
+          {...props}
+        >
           {text}
         </span>
       );
     }
 
     return (
-      <div ref={ref} className={className} {...props}>
+      <div
+        ref={ref as React.ForwardedRef<HTMLDivElement>}
+        className={className}
+        {...props}
+      >
         <div
           className={cn(
             'relative break-words whitespace-pre-wrap',
