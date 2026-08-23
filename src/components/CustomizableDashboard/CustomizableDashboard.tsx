@@ -303,9 +303,12 @@ export function moveAcrossColumns(
 }
 
 /**
- * Final order for a drop. Same-column drags reorder around the hovered item;
- * cross-column drags keep the position `moveAcrossColumns` already chose
- * (reordering again would flip the item to the other side of the target).
+ * Final order for a drop. Same-column drags reorder around the hovered
+ * item. After a cross-column move, the one position `moveAcrossColumns`
+ * already chose — active sitting immediately before the hovered item — is
+ * kept (reordering would flip it to the other side of that item), but
+ * hovering any other item in the destination column still reorders, so a
+ * drag can keep moving after it crosses.
  */
 export function reorderOnDrop(
   order: DashboardOrder,
@@ -313,7 +316,6 @@ export function reorderOnDrop(
   overId: string,
   crossedColumns: boolean
 ): DashboardOrder {
-  if (crossedColumns) return order;
   const isColumnTarget =
     COL_IDS.indexOf(overId as (typeof COL_IDS)[number]) !== -1;
   if (isColumnTarget || overId === activeId) return order;
@@ -324,6 +326,9 @@ export function reorderOnDrop(
   const oldIdx = order[col].indexOf(activeId);
   const newIdx = order[col].indexOf(overId);
   if (oldIdx === -1 || newIdx === -1) return order;
+  // Immediately-before adjacency after a cross is dragOver's insertion,
+  // not a new reorder request.
+  if (crossedColumns && newIdx === oldIdx + 1) return order;
 
   const next = order.map((c) => [...c]) as DashboardOrder;
   next[col] = arrayMove(next[col], oldIdx, newIdx);

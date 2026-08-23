@@ -54,6 +54,17 @@ describe('drag order helpers', () => {
     expect(reorderOnDrop(during, 'a', 'c', true)).toBe(during);
   });
 
+  it('reorderOnDrop keeps reordering within the destination column after a cross', () => {
+    // `a` crossed into column 2 (before `c`), then kept dragging past `d`:
+    // the drop over `d` must still reorder, not freeze at the insertion.
+    const during: DashboardOrder = [[], ['a', 'c', 'd'], []];
+    expect(reorderOnDrop(during, 'a', 'd', true)).toEqual([
+      [],
+      ['c', 'd', 'a'],
+      [],
+    ]);
+  });
+
   it('consolidateColumns folds trailing columns into the visible set', () => {
     expect(consolidateColumns([['a'], ['b'], ['c']], 2)).toEqual([
       ['a'],
