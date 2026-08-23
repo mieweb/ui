@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { SectionSpyNav, type SectionSpyItem } from './SectionSpyNav';
@@ -7,6 +7,10 @@ const ITEMS: SectionSpyItem[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'pricing', label: 'Pricing' },
 ];
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 beforeEach(() => {
   // jsdom has no IntersectionObserver; the spy falls back to the first item
