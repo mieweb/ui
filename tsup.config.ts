@@ -45,6 +45,7 @@ export default defineConfig({
     'components/RichTextEditor/index': 'src/components/RichTextEditor/index.ts',
     'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
     'components/ScrollArea/index': 'src/components/ScrollArea/index.ts',
+    'components/SectionSpyNav/index': 'src/components/SectionSpyNav/index.ts',
     'components/Select/index': 'src/components/Select/index.ts',
     'components/Separator/index': 'src/components/Separator/index.ts',
     'components/Sheet/index': 'src/components/Sheet/index.ts',
