@@ -31,7 +31,9 @@ export const ReadingProgressBar = React.forwardRef<
     const update = () => {
       const el = document.documentElement;
       const max = el.scrollHeight - el.clientHeight;
-      setPct(max > 0 ? Math.min(100, (el.scrollTop / max) * 100) : 0);
+      setPct(
+        max > 0 ? Math.min(100, Math.max(0, (el.scrollTop / max) * 100)) : 0
+      );
     };
 
     // Coalesce bursty scroll events to one state update per frame
@@ -54,7 +56,10 @@ export const ReadingProgressBar = React.forwardRef<
     <div
       ref={ref}
       aria-hidden="true"
-      className={cn('fixed inset-x-0 top-0 z-50 h-1 bg-transparent', className)}
+      className={cn(
+        'pointer-events-none fixed inset-x-0 top-0 z-50 h-1 bg-transparent',
+        className
+      )}
       {...props}
     >
       <div
