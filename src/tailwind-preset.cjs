@@ -138,6 +138,8 @@ module.exports = {
     'dark:ring-white/10',
     'ring-1',
     'overflow-y-auto',
+    'focus-visible:ring-2',
+    'focus-visible:ring-ring',
     'max-h-52',
     'text-primary-100/90',
     'text-[10px]',
