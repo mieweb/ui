@@ -28,6 +28,16 @@ generalized for library use.
 - `storageKey` derives `{key}-portlet-order`, `{key}-dashboard-layout`, and
   `{key}-dashboard-hidden` — the first two are the exact keys echart-sim
   already writes, so its saved layouts survive adoption.
+- **Persisted values are restored in a mount effect, not in state
+  initializers**, so the first client render always matches SSR output and
+  hydration cannot mismatch. Saved order slots are validated (arrays of
+  strings) before use; corrupted storage falls back to the props layout.
+- Drag math lives in exported pure helpers — `moveAcrossColumns`
+  (drag-over), `reorderOnDrop` (drop, with the cross-column guard),
+  `consolidateColumns`, `requiredColumns` (gap-aware auto-shrink) — unit
+  tested directly; sensor-level interaction coverage belongs to the
+  Storybook/visual layer. Persistence and callbacks fire outside React
+  state updaters so Strict Mode replays cannot double-write.
 - Controlled (`order`/`layout`) and uncontrolled modes can mix per concern.
   During a drag, internal state is authoritative; `onOrderChange` fires only
   at commit points (drop, layout consolidation) so hosts can persist to a

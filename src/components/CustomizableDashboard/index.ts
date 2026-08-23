@@ -1,6 +1,10 @@
 export {
   CustomizableDashboard,
   mergeColumnOrder,
+  moveAcrossColumns,
+  reorderOnDrop,
+  consolidateColumns,
+  requiredColumns,
   type CustomizableDashboardProps,
   type PortletItem,
   type DashboardLayout,
