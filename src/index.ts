@@ -44,6 +44,7 @@ export * from './components/CountryCodeDropdown';
 export * from './components/CountryDropdown';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
+export * from './components/CustomizableDashboard';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
