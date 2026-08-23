@@ -48,6 +48,7 @@ export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
+export * from './components/DockablePanel';
 export * from './components/Dropdown';
 export * from './components/DropzoneOverlay';
 export * from './components/ClaimProviderForm';
