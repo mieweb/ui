@@ -29,6 +29,7 @@ export default defineConfig({
     'components/DateInput/index': 'src/components/DateInput/index.ts',
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
+    'components/FreshnessBadge/index': 'src/components/FreshnessBadge/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
     'components/Markdown/index': 'src/components/Markdown/index.ts',
