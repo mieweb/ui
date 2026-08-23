@@ -12,6 +12,7 @@ export default defineConfig({
     'utils/index': 'src/utils/index.ts',
     'tailwind-preset': 'src/tailwind-preset.ts',
     // Individual component entries for tree-shaking
+    'components/Accordion/index': 'src/components/Accordion/index.ts',
     'components/Alert/index': 'src/components/Alert/index.ts',
     'components/AlertDialog/index': 'src/components/AlertDialog/index.ts',
     'components/AudioPlayer/index': 'src/components/AudioPlayer/index.ts',

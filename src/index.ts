@@ -1,5 +1,6 @@
 // Components
 export * from './components/AddContactModal';
+export * from './components/Accordion';
 export * from './components/AdditionalFields';
 export * from './components/Address';
 // AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
