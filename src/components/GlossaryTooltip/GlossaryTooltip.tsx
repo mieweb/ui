@@ -173,13 +173,17 @@ export function GlossaryTooltip({
     }
   }, [pinned, close, show]);
 
-  // Desktop clicks on a linked term navigate; coarse pointers pin instead.
+  // Linked terms: desktop clicks navigate, coarse pointers pin instead.
+  // Unlinked (button) terms: any click toggles the pin — hover previews,
+  // click holds the card open.
   const onTriggerClick = (e: React.MouseEvent) => {
     const coarse =
       typeof window !== 'undefined' &&
       window.matchMedia('(hover: none)').matches;
-    if (!coarse) return;
-    if (href) e.preventDefault();
+    if (href) {
+      if (!coarse) return;
+      e.preventDefault();
+    }
     togglePin();
   };
 
