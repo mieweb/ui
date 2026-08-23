@@ -25,6 +25,10 @@ export interface FilterSummaryBarProps extends React.HTMLAttributes<HTMLDivEleme
   searchActiveLabel?: string;
   allVisibleLabel?: string;
   clearLabel?: string;
+  /** Joiner between filtered and total counts (default "of"). */
+  ofLabel?: string;
+  /** Suffix appended when search narrows on top of filters (default "+ search"). */
+  plusSearchLabel?: string;
 }
 
 /**
@@ -63,6 +67,8 @@ export const FilterSummaryBar = React.forwardRef<
     searchActiveLabel = 'search active',
     allVisibleLabel = 'all records visible',
     clearLabel = 'Clear all',
+    ofLabel = 'of',
+    plusSearchLabel = '+ search',
     className,
     ...props
   },
@@ -102,7 +108,7 @@ export const FilterSummaryBar = React.forwardRef<
         {totalCount ? (
           <>
             {' '}
-            of{' '}
+            {ofLabel}{' '}
             <span className="font-semibold">{totalCount.toLocaleString()}</span>
           </>
         ) : null}{' '}
@@ -121,7 +127,7 @@ export const FilterSummaryBar = React.forwardRef<
         {hasSearchText && activeFilterCount === 0 && (
           <> &mdash; {searchActiveLabel}</>
         )}
-        {hasSearchText && activeFilterCount > 0 && <> + search</>}
+        {hasSearchText && activeFilterCount > 0 && <> {plusSearchLabel}</>}
         {!isFiltering && showWhenIdle && <> &mdash; {allVisibleLabel}</>}
       </span>
       {isFiltering && (
