@@ -36,14 +36,14 @@ describe('SourceTip', () => {
       name: /recordable rate — show source/i,
     });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('opens on hover and shows heading, source link, and sub', () => {
     renderTip();
     fireEvent.mouseEnter(screen.getByRole('button'));
 
-    const tooltip = screen.getByRole('tooltip');
+    const tooltip = screen.getByRole('dialog');
     expect(tooltip).toBeInTheDocument();
     expect(screen.getByText('Recordable rate')).toBeInTheDocument();
     const link = screen.getByRole('link', { name: 'BLS SOII 2023' });
@@ -56,37 +56,37 @@ describe('SourceTip', () => {
     renderTip();
     const trigger = screen.getByRole('button');
     fireEvent.mouseEnter(trigger);
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     fireEvent.mouseLeave(trigger);
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     act(() => {
       vi.advanceTimersByTime(200);
     });
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('stays open when the pointer moves onto the card', () => {
     renderTip();
     const trigger = screen.getByRole('button');
     fireEvent.mouseEnter(trigger);
-    const tooltip = screen.getByRole('tooltip');
+    const tooltip = screen.getByRole('dialog');
 
     fireEvent.mouseLeave(trigger);
     fireEvent.mouseEnter(tooltip);
     act(() => {
       vi.advanceTimersByTime(200);
     });
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('opens on focus and closes on Escape', () => {
     renderTip();
     fireEvent.focus(screen.getByRole('button'));
-    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('renders a note and unlinked sources', () => {
@@ -120,5 +120,56 @@ describe('SourceTip', () => {
       </SourceTip>
     );
     expect(screen.getByRole('button')).toHaveClass('underline');
+  });
+
+  it('pins on Enter, moves focus into the dialog, and survives blur', () => {
+    renderTip();
+    const trigger = screen.getByRole('button');
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+
+    const dialog = screen.getByRole('dialog', { name: 'Recordable rate' });
+    expect(dialog).toHaveFocus();
+
+    // A pinned card ignores the hover hide grace.
+    fireEvent.mouseLeave(trigger);
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('toggles closed on a second Space press and returns focus to the trigger', () => {
+    renderTip();
+    const trigger = screen.getByRole('button');
+    fireEvent.keyDown(trigger, { key: ' ' });
+    expect(screen.getByRole('dialog')).toHaveFocus();
+
+    fireEvent.keyDown(trigger, { key: ' ' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it('closes a pinned card on an outside tap but not on an inside one', () => {
+    renderTip();
+    const trigger = screen.getByRole('button');
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    const dialog = screen.getByRole('dialog');
+
+    fireEvent.mouseDown(dialog);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('closes a pinned card on Escape and returns focus to the trigger', () => {
+    renderTip();
+    const trigger = screen.getByRole('button');
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    expect(screen.getByRole('dialog')).toHaveFocus();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
 });

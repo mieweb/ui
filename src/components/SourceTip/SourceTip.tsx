@@ -55,7 +55,9 @@ const HIDE_GRACE_MS = 180;
  * The trigger and card are phrasing content (`span`/`a` only), so it is
  * valid inside `<p>` prose and table cells. The card portals to `body` with
  * fixed positioning, flipping and clamping to stay in the viewport. On
- * touch, a tap pins the card; Escape or an outside tap closes it.
+ * touch, a tap pins the card; Escape or an outside tap closes it. A pinned
+ * card behaves as a non-modal dialog — focus moves into it so its source
+ * links are keyboard-reachable, and returns to the trigger on close.
  *
  * @example
  * ```tsx
@@ -80,6 +82,9 @@ export function SourceTip({
   const [open, setOpen] = React.useState(false);
   const [pinned, setPinned] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // True while close() restores focus to the trigger, so the trigger's
+  // focus-show doesn't immediately reopen a card the user just dismissed.
+  const suppressFocusShow = React.useRef(false);
 
   const { anchorRef, floatingRef, style } = useAnchoredPosition<
     HTMLSpanElement,
@@ -114,9 +119,20 @@ export function SourceTip({
     clearHideTimer();
     setPinned(false);
     setOpen(false);
-  }, []);
+    // Return focus to the trigger if it was inside the card.
+    if (floatingRef.current?.contains(document.activeElement)) {
+      suppressFocusShow.current = true;
+      anchorRef.current?.focus();
+    }
+  }, [anchorRef, floatingRef]);
 
   React.useEffect(() => () => clearHideTimer(), []);
+
+  // A pinned card is a non-modal dialog: move focus into it so its links
+  // are reachable by keyboard.
+  React.useEffect(() => {
+    if (pinned) floatingRef.current?.focus();
+  }, [pinned, floatingRef]);
 
   useEscapeKey(close, open);
 
@@ -161,6 +177,14 @@ export function SourceTip({
     }
   };
 
+  const onTriggerFocus = () => {
+    if (suppressFocusShow.current) {
+      suppressFocusShow.current = false;
+      return;
+    }
+    show();
+  };
+
   const onBlurCapture = (e: React.FocusEvent<HTMLSpanElement>) => {
     const next = e.relatedTarget as Node | null;
     if (
@@ -184,12 +208,13 @@ export function SourceTip({
       )}
       onMouseEnter={show}
       onMouseLeave={scheduleHide}
-      onFocus={show}
+      onFocus={onTriggerFocus}
       onBlur={onBlurCapture}
       onClick={onTriggerClick}
       onKeyDown={onTriggerKeyDown}
       tabIndex={0}
       role="button"
+      aria-haspopup="dialog"
       aria-expanded={open}
       aria-label={`${heading} — show source`}
     >
@@ -198,10 +223,13 @@ export function SourceTip({
         createPortal(
           <span
             ref={floatingRef}
-            role="tooltip"
+            role="dialog"
+            aria-label={heading}
+            tabIndex={-1}
             onMouseEnter={show}
             onMouseLeave={scheduleHide}
-            className="z-50 block w-80"
+            onBlurCapture={onBlurCapture}
+            className="z-50 block w-80 outline-none"
             style={style}
           >
             <span className="border-border bg-card block overflow-hidden rounded-lg border text-start font-normal tracking-normal normal-case shadow-xl ring-1 ring-black/5 dark:ring-white/10">
