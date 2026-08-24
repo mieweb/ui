@@ -26,9 +26,10 @@ export interface CollabConfig {
   /**
    * Who this editor is, published on awareness (`kerebron:user`) so peers see
    * a named, coloured cursor. Without it remote cursors do not render — the
-   * position plugin skips awareness states that carry no user.
+   * position plugin skips awareness states that carry no user — and the
+   * `id` is what the cursor colour is derived from (kerebron's `User` shape).
    */
-  user?: { name: string; color?: string };
+  user?: { id: string; name: string; color?: string };
   /**
    * Custom WebSocket implementation handed to the Yjs provider — e.g. a
    * loopback socket for demos/tests, or a polyfill outside the browser.

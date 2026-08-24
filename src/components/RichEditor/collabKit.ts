@@ -34,7 +34,7 @@ export class HuddleYjsKit implements EditorKit {
     private readonly url: string,
     private readonly params: Record<string, string>,
     private readonly WebSocketImpl?: typeof globalThis.WebSocket,
-    private readonly user?: { name: string; color?: string }
+    private readonly user?: { id: string; name: string; color?: string }
   ) {}
 
   getExtensions() {
