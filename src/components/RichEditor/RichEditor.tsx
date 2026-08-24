@@ -197,7 +197,43 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             (
               editor.run as Record<string, (...args: unknown[]) => boolean>
             ).changeRoom?.(collab.room);
+            reseedWhenRoomStaysEmpty();
           }
+        };
+
+        // The Yjs binding is supposed to seed an empty room from the local
+        // content, but the sync import can land as an overwrite that blanks
+        // the just-loaded seed (observed with extension-yjs 0.8.x). Heal it:
+        // once the join settles, an empty document with a non-empty seed
+        // means nobody's content won — reload the seed, which the binding
+        // then pushes into the room. Joiners pass no value, so exactly one
+        // participant ever does this.
+        const seed = valueRef.current;
+        const reseedWhenRoomStaysEmpty = () => {
+          if (!seed) return;
+          const check = async (attempt: number) => {
+            if (disposed || !editorInstance.current) return;
+            try {
+              const buffer =
+                await editorInstance.current.saveDocument(MARKDOWN_TYPE);
+              const current = new globalThis.TextDecoder()
+                .decode(buffer)
+                .trim();
+              if (disposed || !editorInstance.current) return;
+              if (current) return; // somebody's content arrived — done
+              if (attempt >= 2) {
+                await editorInstance.current.loadDocumentText(
+                  MARKDOWN_TYPE,
+                  seed
+                );
+                return;
+              }
+              setTimeout(() => void check(attempt + 1), 300);
+            } catch {
+              // A failed probe must not break the editor; the room stays as-is.
+            }
+          };
+          setTimeout(() => void check(0), 300);
         };
 
         if (valueRef.current) {

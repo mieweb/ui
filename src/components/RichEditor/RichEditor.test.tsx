@@ -93,7 +93,8 @@ describe('RichEditor', () => {
     expect(huddleYjsKit).toHaveBeenCalledWith(
       'ws://example.test/yjs',
       { token: 't' },
-      undefined // no WebSocketPolyfill override
+      undefined, // no WebSocketPolyfill override
+      undefined // no user — anonymous cursors
     );
     // … and handed to the editor.
     const kits = (
