@@ -31,6 +31,11 @@ describe('Autocomplete', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
+  it('exposes the Input density slot so condensed mode applies', () => {
+    renderWithTheme(<Autocomplete {...baseProps} onSelect={vi.fn()} />);
+    expect(screen.getByRole('combobox')).toHaveAttribute('data-slot', 'input');
+  });
+
   it('opens and filters results as the user types', () => {
     renderWithTheme(<Autocomplete {...baseProps} onSelect={vi.fn()} />);
     const input = screen.getByRole('combobox');
