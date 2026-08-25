@@ -954,9 +954,13 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       const errorMessage = error || localError;
 
       return (
-        <div className={cn('flex flex-col gap-1.5', widthClasses[width])}>
+        <div
+          data-slot="input-wrapper"
+          className={cn('flex flex-col gap-1.5', widthClasses[width])}
+        >
           {label && (
             <label
+              data-slot="input-label"
               htmlFor={inputId}
               className={cn(
                 'text-foreground text-sm font-medium',
@@ -977,6 +981,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           )}
           <div className="relative">
             <input
+              data-slot="input"
               ref={ref}
               id={inputId}
               type="text"
@@ -1023,6 +1028,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               {...inputProps}
             />
             <button
+              data-slot="date-input-trigger"
               ref={buttonRef}
               type="button"
               onClick={() => setIsCalendarOpen(!isCalendarOpen)}
@@ -1049,6 +1055,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           {errorMessage && (
             <p
               id={errorId}
+              data-slot="input-error"
               className="text-sm"
               style={{ color: '#ef4444' }}
               role="alert"
@@ -1057,7 +1064,11 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             </p>
           )}
           {helperText && !errorMessage && (
-            <p id={helperId} className="text-muted-foreground text-sm">
+            <p
+              id={helperId}
+              data-slot="input-helper"
+              className="text-muted-foreground text-sm"
+            >
               {helperText}
             </p>
           )}
