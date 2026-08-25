@@ -279,16 +279,21 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           return markdown;
         },
         focus: (): void => {
-          const view = editorInstance.current?.view as
-            | { focus?: () => void }
-            | undefined;
-          if (view?.focus) {
-            view.focus();
-            return;
-          }
-          hostRef.current
-            ?.querySelector<HTMLElement>('[contenteditable="true"], textarea')
-            ?.focus();
+          const apply = (): void => {
+            const view = editorInstance.current?.view as
+              | { focus?: () => void }
+              | undefined;
+            if (view?.focus) {
+              view.focus();
+              return;
+            }
+            hostRef.current
+              ?.querySelector<HTMLElement>('[contenteditable="true"], textarea')
+              ?.focus();
+          };
+          // Callers focus on mount; the editor may still be loading its kits.
+          if (editorInstance.current) apply();
+          else void readyRef.current?.then(apply);
         },
       }),
       []
