@@ -37,6 +37,7 @@ const sampleGroups: ServiceGroup[] = [
       { id: 'dt-5', name: '5-Panel Drug Test', code: 'DT5', price: 45.0 },
       { id: 'dt-10', name: '10-Panel Drug Test', code: 'DT10', price: 65.0 },
       { id: 'dt-12', name: '12-Panel Drug Test', code: 'DT12', price: 85.0 },
+      { id: 'dt-q', name: 'Substance Use Questionnaire', badge: 'Questionnaire' },
     ],
     subGroups: [
       {
