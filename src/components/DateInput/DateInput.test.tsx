@@ -57,6 +57,31 @@ describe('DateInput', () => {
       renderWithTheme(<DateInput label="Service date" showCalendar />);
       expect(screen.getByLabelText('Service date')).not.toHaveClass('peer');
     });
+
+    it('overrides a consumer placeholder while floating', () => {
+      renderWithTheme(
+        <DateInput
+          label="Select Date"
+          labelVariant="floating"
+          showCalendar
+          placeholder="MM/DD/YYYY"
+        />
+      );
+      expect(screen.getByLabelText('Select Date')).toHaveAttribute(
+        'placeholder',
+        ' '
+      );
+    });
+
+    it('honors a consumer placeholder when stacked', () => {
+      renderWithTheme(
+        <DateInput label="Select Date" showCalendar placeholder="Pick a day" />
+      );
+      expect(screen.getByLabelText('Select Date')).toHaveAttribute(
+        'placeholder',
+        'Pick a day'
+      );
+    });
   });
 
   it('shows only calendar years within its date bounds', async () => {

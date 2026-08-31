@@ -949,6 +949,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         hideLabel,
         required,
         size,
+        placeholder: placeholderProp,
         ...inputProps
       } = props;
       // Ensure size has a valid value (fallback to 'md' if null/undefined)
@@ -995,13 +996,14 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               placeholder={
                 isFloating
                   ? ' '
-                  : inputType === 'month'
-                    ? 'Select month'
-                    : inputType === 'time'
-                      ? 'Select time'
-                      : inputType === 'datetime-local'
-                        ? 'Select date and time'
-                        : placeholder
+                  : (placeholderProp ??
+                    (inputType === 'month'
+                      ? 'Select month'
+                      : inputType === 'time'
+                        ? 'Select time'
+                        : inputType === 'datetime-local'
+                          ? 'Select date and time'
+                          : placeholder))
               }
               value={formatPickerValue(displayValue, inputType, timeFormat)}
               onChange={handleChange}
