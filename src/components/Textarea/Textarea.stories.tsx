@@ -14,6 +14,10 @@ const meta: Meta<typeof Textarea> = {
       control: 'select',
       options: ['sm', 'md', 'lg'],
     },
+    labelVariant: {
+      control: 'select',
+      options: ['stacked', 'floating'],
+    },
     resize: {
       control: 'select',
       options: ['none', 'vertical', 'horizontal', 'both'],
@@ -234,4 +238,38 @@ export const AllSizes: Story = {
       <Textarea label="Large" placeholder="Large textarea" size="lg" />
     </div>
   ),
+};
+
+export const FloatingLabel: Story = {
+  args: {
+    label: 'Description',
+    labelVariant: 'floating',
+  },
+};
+
+export const FloatingLabelWithValue: Story = {
+  args: {
+    label: 'Description',
+    labelVariant: 'floating',
+    defaultValue: 'A multi-line note that sits below the floated label.',
+  },
+};
+
+export const FloatingLabelSizes: Story = {
+  render: () => (
+    <div className="w-80 space-y-6">
+      <Textarea label="Small" labelVariant="floating" size="sm" />
+      <Textarea label="Medium" labelVariant="floating" size="md" />
+      <Textarea label="Large" labelVariant="floating" size="lg" />
+    </div>
+  ),
+};
+
+export const FloatingLabelWithError: Story = {
+  args: {
+    label: 'Description',
+    labelVariant: 'floating',
+    defaultValue: 'Too short',
+    error: 'Description must be at least 20 characters.',
+  },
 };
