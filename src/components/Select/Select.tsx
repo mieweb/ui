@@ -52,20 +52,80 @@ const selectTriggerVariants = cva(
         true: 'border-destructive focus:ring-destructive',
         false: '',
       },
+      labelVariant: {
+        stacked: '',
+        floating: 'peer',
+      },
     },
+    compoundVariants: [
+      { labelVariant: 'floating', size: 'sm', className: 'h-11' },
+      { labelVariant: 'floating', size: 'md', className: 'h-14' },
+      { labelVariant: 'floating', size: 'lg', className: 'h-16' },
+    ],
     defaultVariants: {
       size: 'md',
+      hasError: false,
+      labelVariant: 'stacked',
+    },
+  }
+);
+
+const floatingLabelVariants = cva(
+  [
+    'absolute start-3 pointer-events-none select-none',
+    'transition-all duration-200 ease-out',
+  ],
+  {
+    variants: {
+      size: {
+        sm: [
+          'peer-focus:top-0.5 peer-focus:translate-y-0 peer-focus:text-[0.65rem]',
+        ],
+        md: ['peer-focus:top-1 peer-focus:translate-y-0 peer-focus:text-xs'],
+        lg: ['peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-sm'],
+      },
+      floated: {
+        true: '',
+        false: 'top-1/2 -translate-y-1/2',
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
+    },
+    compoundVariants: [
+      { size: 'sm', floated: false, className: 'text-sm' },
+      { size: 'md', floated: false, className: 'text-base' },
+      { size: 'lg', floated: false, className: 'text-lg' },
+      {
+        size: 'sm',
+        floated: true,
+        className: 'top-0.5 translate-y-0 text-[0.65rem]',
+      },
+      { size: 'md', floated: true, className: 'top-1 translate-y-0 text-xs' },
+      { size: 'lg', floated: true, className: 'top-1.5 translate-y-0 text-sm' },
+    ],
+    defaultVariants: {
+      size: 'md',
+      floated: false,
       hasError: false,
     },
   }
 );
 
+const floatingValuePadding = {
+  sm: 'pt-4 pb-1',
+  md: 'pt-5 pb-1.5',
+  lg: 'pt-6 pb-2',
+} as const;
+
 // ============================================================================
 // Select Component
 // ============================================================================
 
-export interface SelectProps extends VariantProps<
-  typeof selectTriggerVariants
+export interface SelectProps extends Omit<
+  VariantProps<typeof selectTriggerVariants>,
+  'labelVariant'
 > {
   /** Array of options or groups */
   options: (SelectOption | SelectGroup)[];
@@ -83,6 +143,14 @@ export interface SelectProps extends VariantProps<
   label?: string;
   /** Hide the label visually */
   hideLabel?: boolean;
+  /**
+   * Visual style of the label.
+   * - `stacked` (default): label sits above the trigger.
+   * - `floating`: label rests inside the trigger like a placeholder and
+   *   floats up (staying inside the trigger) when open or a value is
+   *   selected. The `placeholder` prop is ignored in this mode.
+   */
+  labelVariant?: 'stacked' | 'floating';
   /** Error message */
   error?: string;
   /** Helper text */
@@ -127,6 +195,7 @@ function Select({
   disabled = false,
   label,
   hideLabel = false,
+  labelVariant = 'stacked',
   error,
   helperText,
   size,
@@ -420,12 +489,16 @@ function Select({
     .filter(Boolean)
     .join(' ');
 
+  const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
+  const isFloated = isOpen || !!selectedOption;
+  const resolvedSize = size ?? 'md';
+
   return (
     <div
       data-slot="select-wrapper"
       className={cn('flex flex-col gap-1.5', className)}
     >
-      {label && (
+      {label && !isFloating && (
         <label
           data-slot="select-label"
           htmlFor={selectId}
@@ -451,7 +524,9 @@ function Select({
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
-          aria-controls={listboxId}
+          // Only reference the listbox while it exists in the DOM (it is
+          // portaled and unmounted when closed) so the ID is always valid.
+          aria-controls={isOpen ? listboxId : undefined}
           aria-invalid={hasError || !!error}
           aria-label={!label ? ariaLabel : undefined}
           aria-describedby={describedByIds || undefined}
@@ -459,16 +534,23 @@ function Select({
           onClick={() => setIsOpen(!isOpen)}
           onKeyDown={handleKeyDown}
           className={cn(
-            selectTriggerVariants({ size, hasError: hasError || !!error })
+            selectTriggerVariants({
+              size,
+              hasError: hasError || !!error,
+              labelVariant: isFloating ? 'floating' : 'stacked',
+            })
           )}
         >
           <span
             className={cn(
               'truncate',
-              !selectedOption && 'text-muted-foreground'
+              !selectedOption && 'text-muted-foreground',
+              isFloating && floatingValuePadding[resolvedSize]
             )}
           >
-            {selectedOption?.label || placeholder}
+            {isFloating
+              ? (selectedOption?.label ?? '\u00A0')
+              : selectedOption?.label || placeholder}
           </span>
           <ChevronDownIcon
             className={cn(
@@ -477,6 +559,21 @@ function Select({
             )}
           />
         </button>
+
+        {/* Floating label (rendered after the trigger so `peer-focus` applies) */}
+        {isFloating && (
+          <label
+            data-slot="select-label"
+            htmlFor={selectId}
+            className={floatingLabelVariants({
+              size: resolvedSize,
+              floated: isFloated,
+              hasError: hasError || !!error,
+            })}
+          >
+            {label}
+          </label>
+        )}
 
         {/* Dropdown (portaled to body to avoid overflow clipping) */}
         {isOpen &&
