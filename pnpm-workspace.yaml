@@ -4,6 +4,10 @@
 # pulled in as workspace members — this stays a single-package install.
 packages: []
 
+# Git-protocol install of @artipod/core needs its prepare script (tsc build).
+onlyBuiltDependencies:
+  - "@artipod/core"
+
 overrides:
   datavis-ace: "=4.1.0"
   "esbuild@<0.28.1": "0.28.1"
