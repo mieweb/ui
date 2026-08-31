@@ -605,6 +605,7 @@ export const miewebUISafelist = [
   // would purge them. (The bare `peer` marker class generates no CSS and
   // needs no safelisting.)
   'placeholder:text-transparent',
+  'relative',
   'h-11',
   'h-14',
   'h-16',
