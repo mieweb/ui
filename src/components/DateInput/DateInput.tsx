@@ -1032,7 +1032,10 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               <label
                 data-slot="input-label"
                 htmlFor={inputId}
-                className={floatingLabelVariants({ size: resolvedSize })}
+                className={floatingLabelVariants({
+                  size: resolvedSize,
+                  hasError: showError,
+                })}
               >
                 {label}
                 {requiredMark}

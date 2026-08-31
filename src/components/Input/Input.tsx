@@ -46,7 +46,6 @@ const inputVariants = cva(
 const floatingLabelVariants = cva(
   [
     'absolute start-3 pointer-events-none select-none',
-    'text-muted-foreground',
     'transition-all duration-200 ease-out',
     // Rest state: vertically centered, placeholder-sized (input is empty and unfocused).
     'top-1/2 -translate-y-1/2',
@@ -73,9 +72,14 @@ const floatingLabelVariants = cva(
           'peer-focus:text-sm peer-[:not(:placeholder-shown)]:text-sm peer-autofill:text-sm',
         ],
       },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
     },
     defaultVariants: {
       size: 'md',
+      hasError: false,
     },
   }
 );
@@ -204,7 +208,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <label
               data-slot="input-label"
               htmlFor={inputId}
-              className={floatingLabelVariants({ size })}
+              className={floatingLabelVariants({
+                size,
+                hasError: hasError || !!error,
+              })}
             >
               {label}
               {requiredMark}

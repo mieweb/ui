@@ -73,7 +73,6 @@ const selectTriggerVariants = cva(
 const floatingLabelVariants = cva(
   [
     'absolute start-3 pointer-events-none select-none',
-    'text-muted-foreground',
     'transition-all duration-200 ease-out',
   ],
   {
@@ -88,6 +87,10 @@ const floatingLabelVariants = cva(
       floated: {
         true: '',
         false: 'top-1/2 -translate-y-1/2',
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
       },
     },
     compoundVariants: [
@@ -105,6 +108,7 @@ const floatingLabelVariants = cva(
     defaultVariants: {
       size: 'md',
       floated: false,
+      hasError: false,
     },
   }
 );
@@ -563,6 +567,7 @@ function Select({
             className={floatingLabelVariants({
               size: resolvedSize,
               floated: isFloated,
+              hasError: hasError || !!error,
             })}
           >
             {label}

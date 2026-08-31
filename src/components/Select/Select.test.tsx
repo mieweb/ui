@@ -246,6 +246,20 @@ describe('Select floating label', () => {
     expect(screen.queryByText('Pick one')).not.toBeInTheDocument();
   });
 
+  it('tints the label when there is an error', () => {
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        labelVariant="floating"
+        error="Required"
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.getByText('Location Type')).toHaveClass('text-destructive');
+    expect(screen.getByText('Required')).toBeInTheDocument();
+  });
+
   it('falls back to the stacked label when hideLabel is set', () => {
     renderWithTheme(
       <Select

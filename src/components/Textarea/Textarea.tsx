@@ -66,7 +66,6 @@ const textareaVariants = cva(
 const floatingLabelVariants = cva(
   [
     'absolute start-3 pointer-events-none select-none',
-    'text-muted-foreground',
     'transition-all duration-200 ease-out',
   ],
   {
@@ -88,9 +87,14 @@ const floatingLabelVariants = cva(
           'peer-focus:text-sm peer-[:not(:placeholder-shown)]:text-sm peer-autofill:text-sm',
         ],
       },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
     },
     defaultVariants: {
       size: 'md',
+      hasError: false,
     },
   }
 );
@@ -264,7 +268,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             <label
               data-slot="textarea-label"
               htmlFor={textareaId}
-              className={floatingLabelVariants({ size })}
+              className={floatingLabelVariants({
+                size,
+                hasError: hasError || !!error,
+              })}
             >
               {label}
             </label>

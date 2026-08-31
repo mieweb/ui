@@ -132,6 +132,9 @@ describe('Input', () => {
         'aria-invalid',
         'true'
       );
+      expect(screen.getByText('Account number')).toHaveClass(
+        'text-destructive'
+      );
     });
   });
 

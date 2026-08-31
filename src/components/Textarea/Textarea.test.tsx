@@ -61,6 +61,7 @@ describe('Textarea', () => {
         'aria-invalid',
         'true'
       );
+      expect(screen.getByText('Description')).toHaveClass('text-destructive');
     });
   });
 });
