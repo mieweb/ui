@@ -184,3 +184,79 @@ describe('Select typeahead', () => {
     }
   });
 });
+
+describe('Select floating label', () => {
+  it('renders the label inside the trigger and associates it', () => {
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        labelVariant="floating"
+        options={LOCATION_TYPES}
+      />
+    );
+
+    const trigger = screen.getByRole('combobox', { name: 'Location Type' });
+    expect(trigger).toHaveClass('peer');
+    expect(trigger).toHaveClass('h-14');
+    // No stacked label; the floating label lives next to the trigger.
+    const label = screen.getByText('Location Type');
+    expect(label).toHaveAttribute('data-slot', 'select-label');
+    expect(label).toHaveClass('top-1/2');
+  });
+
+  it('floats the label when a value is selected', () => {
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        labelVariant="floating"
+        defaultValue="clinic"
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.getByText('Location Type')).not.toHaveClass('top-1/2');
+    expect(screen.getByText('Clinic')).toBeInTheDocument();
+  });
+
+  it('floats the label while the dropdown is open', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        labelVariant="floating"
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.getByText('Location Type')).toHaveClass('top-1/2');
+    await user.click(screen.getByRole('combobox'));
+    expect(screen.getByText('Location Type')).not.toHaveClass('top-1/2');
+  });
+
+  it('ignores the placeholder in floating mode', () => {
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        labelVariant="floating"
+        placeholder="Pick one"
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.queryByText('Pick one')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the stacked label when hideLabel is set', () => {
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        labelVariant="floating"
+        hideLabel
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.getByText('Location Type')).toHaveClass('sr-only');
+    expect(screen.getByRole('combobox')).not.toHaveClass('peer');
+  });
+});
