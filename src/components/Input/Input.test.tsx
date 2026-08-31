@@ -74,6 +74,67 @@ describe('Input', () => {
     expect(input.closest('div')).toHaveClass('opacity-50');
   });
 
+  describe('floating label', () => {
+    it('associates the floating label with the input', () => {
+      renderWithTheme(<Input label="Account number" labelVariant="floating" />);
+      expect(screen.getByLabelText('Account number')).toBeInTheDocument();
+    });
+
+    it('applies peer and floating height classes', () => {
+      renderWithTheme(<Input label="Account number" labelVariant="floating" />);
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveClass('peer');
+      expect(input).toHaveClass('h-14');
+    });
+
+    it('uses a space placeholder and ignores a user placeholder', () => {
+      renderWithTheme(
+        <Input
+          label="Account number"
+          labelVariant="floating"
+          placeholder="12345678"
+        />
+      );
+      expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', ' ');
+    });
+
+    it('keeps the stacked placeholder when not floating', () => {
+      renderWithTheme(<Input label="Email" placeholder="you@example.com" />);
+      expect(screen.getByRole('textbox')).toHaveAttribute(
+        'placeholder',
+        'you@example.com'
+      );
+    });
+
+    it('shows required indicator inside the floating label', () => {
+      renderWithTheme(
+        <Input label="Sort code" labelVariant="floating" required />
+      );
+      expect(screen.getByText('*')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeRequired();
+    });
+
+    it('falls back to stacked rendering when hideLabel is set', () => {
+      renderWithTheme(
+        <Input label="Search" labelVariant="floating" hideLabel />
+      );
+      const label = screen.getByText('Search');
+      expect(label).toHaveClass('sr-only');
+      expect(screen.getByRole('textbox')).not.toHaveClass('peer');
+    });
+
+    it('still renders error message below the input', () => {
+      renderWithTheme(
+        <Input label="Account number" labelVariant="floating" error="Bad" />
+      );
+      expect(screen.getByText('Bad')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
+    });
+  });
+
   describe('accessibility', () => {
     it('associates label with input via id', () => {
       renderWithTheme(<Input label="Email" />);
