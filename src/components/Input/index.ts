@@ -1,1 +1,6 @@
-export { Input, inputVariants, type InputProps } from './Input';
+export {
+  Input,
+  inputVariants,
+  floatingLabelVariants,
+  type InputProps,
+} from './Input';

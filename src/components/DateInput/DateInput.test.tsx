@@ -31,9 +31,36 @@ describe('DateInput', () => {
     ).toHaveAttribute('data-slot', 'date-input-trigger');
   });
 
+  describe('floating label', () => {
+    it('floats through the plain Input path', () => {
+      renderWithTheme(
+        <DateInput label="Date of Birth" labelVariant="floating" />
+      );
+      const input = screen.getByLabelText('Date of Birth');
+      expect(input).toHaveClass('peer');
+      expect(input).toHaveAttribute('placeholder', ' ');
+    });
+
+    it('floats through the calendar picker path', () => {
+      renderWithTheme(
+        <DateInput label="Select Date" labelVariant="floating" showCalendar />
+      );
+      const input = screen.getByLabelText('Select Date');
+      expect(input).toHaveClass('peer');
+      expect(input).toHaveAttribute('placeholder', ' ');
+      expect(
+        screen.getByRole('button', { name: 'Open calendar' })
+      ).toBeInTheDocument();
+    });
+
+    it('keeps the stacked label by default', () => {
+      renderWithTheme(<DateInput label="Service date" showCalendar />);
+      expect(screen.getByLabelText('Service date')).not.toHaveClass('peer');
+    });
+  });
+
   it('shows only calendar years within its date bounds', async () => {
     const user = userEvent.setup();
-
     renderWithTheme(
       <DateInput
         label="Service date"
