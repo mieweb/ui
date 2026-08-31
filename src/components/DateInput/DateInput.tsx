@@ -961,7 +961,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
 
       const requiredMark = required && (
-        <span className="ml-1" style={{ color: '#ef4444' }} aria-hidden="true">
+        <span className="text-destructive ms-1" aria-hidden="true">
           *
         </span>
       );
@@ -1011,6 +1011,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 setIsCalendarOpen(true);
               }}
               readOnly={!isFormattedDate}
+              required={required}
               aria-invalid={showError}
               aria-describedby={
                 [errorMessage ? errorId : null, helperText ? helperId : null]

@@ -123,8 +123,9 @@ const floatingValuePadding = {
 // Select Component
 // ============================================================================
 
-export interface SelectProps extends VariantProps<
-  typeof selectTriggerVariants
+export interface SelectProps extends Omit<
+  VariantProps<typeof selectTriggerVariants>,
+  'labelVariant'
 > {
   /** Array of options or groups */
   options: (SelectOption | SelectGroup)[];

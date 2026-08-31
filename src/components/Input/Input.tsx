@@ -87,7 +87,7 @@ const floatingLabelVariants = cva(
 export interface InputProps
   extends
     Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof inputVariants> {
+    Omit<VariantProps<typeof inputVariants>, 'labelVariant'> {
   /** Error message to display below the input */
   error?: string;
   /** Helper text to display below the input */
@@ -99,7 +99,8 @@ export interface InputProps
    * - `stacked` (default): label above the input.
    * - `floating`: label rests inside the input like a placeholder and floats
    *   to the top of the field (staying inside it) when focused or filled.
-   *   Incompatible with `hideLabel` and ignores `placeholder`.
+   *   Ignores `placeholder`; when `hideLabel` is set, falls back to a
+   *   visually-hidden stacked label.
    */
   labelVariant?: 'stacked' | 'floating';
   /** Whether the label should be visually hidden (still accessible) */

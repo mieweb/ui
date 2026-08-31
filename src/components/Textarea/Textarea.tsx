@@ -102,7 +102,7 @@ const floatingLabelVariants = cva(
 export interface TextareaProps
   extends
     Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
-    VariantProps<typeof textareaVariants> {
+    Omit<VariantProps<typeof textareaVariants>, 'labelVariant'> {
   /** Label for the textarea */
   label?: string;
   /**
@@ -110,7 +110,8 @@ export interface TextareaProps
    * - `stacked` (default): label above the textarea.
    * - `floating`: label rests inside the textarea like a placeholder and
    *   floats to the top (staying inside it) when focused or filled.
-   *   Incompatible with `hideLabel` and ignores `placeholder`.
+   *   Ignores `placeholder`; when `hideLabel` is set, falls back to a
+   *   visually-hidden stacked label.
    */
   labelVariant?: 'stacked' | 'floating';
   /** Whether the label should be visually hidden */

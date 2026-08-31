@@ -39,52 +39,9 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
-  // CaseManagementHeader — logical spacing, details grid, responsive
-  // built-in actions (icon-only below md):
-  '-ms-2',
-  'gap-x-10',
-  'hidden',
-  'max-w-[60%]',
-  'md:hidden',
-  'md:inline-flex',
   // PatientHeader showCountBadges={false} — hides CountBadge roots in the
   // actions slot (ui#367):
   '[&_[data-slot=count-badge-root]]:hidden',
-  // OzwellChat's compact widget shell and portaled menus. These arbitrary
-  // utilities must remain available to Tailwind 3 consumers that do not scan
-  // package source files.
-  'max-w-[min(142px,38vw)]',
-  'max-w-[190px]',
-  'max-w-[min(248px,calc(100vw-24px))]',
-  'max-w-[min(260px,calc(100vw-24px))]',
-  'rounded-[10px]',
-  'min-h-[30px]',
-  'animate-ozwell-message-flare',
-  'grid-cols-[22px_minmax(0,1fr)]',
-  'h-[22px]',
-  'w-[22px]',
-  'text-[11px]',
-  'leading-[1.35]',
-  'py-[7px]',
-  '[&_[data-slot="composer-input"]]:pe-[min(160px,44vw)]',
-  '[&_[data-slot="ai-chat"]]:min-h-0',
-  '[&_[data-slot="ai-chat-messages"]]:min-h-0',
-  '[&_[data-slot="ai-tool-call"]]:p-2',
-  '[&_[data-slot="ai-tool-icon"]]:h-7',
-  '[&_[data-slot="ai-tool-icon"]]:w-7',
-  '[&_[data-slot="ai-tool-content"]]:text-sm',
-  '[&_[data-slot="ai-tool-parameters"]]:text-xs',
-  '[&_[data-slot="ai-tool-result"]]:text-xs',
-  '[&_[data-slot="ai-message-thinking"]_button]:px-2.5',
-  '[&_[data-slot="ai-message-thinking"]_button]:py-[7px]',
-  '[&_[data-slot="ai-message"].flex-row-reverse_[data-slot="ai-message-avatar"]]:hidden',
-  '[&_[data-slot=toast-message]]:text-xs',
-  '[&_[data-slot=toast-message]]:leading-[1.35]',
-  '[&_[data-slot=toast]]:max-w-none',
-  '[&_[data-slot=toast]]:min-w-0',
-  '[&_[data-slot=toast]]:rounded-lg',
-  '[&_[data-slot=toast]]:p-2',
-  '[&_[data-slot=toast]]:shadow-none',
   // Media stack (MediaEditor / TranscriptView / MediaPlayer) — opacity-modifier
   // and state variants introduced with the media components (ui#323 finding):
   'bg-muted/20',
@@ -599,6 +556,69 @@ export const miewebUISafelist = [
   'dark:border-primary-800',
   'dark:text-primary-300',
   'opacity-60',
+  // Floating labels (labelVariant="floating" on Input / Textarea / DateInput /
+  // Select, ui#406). The peer-* float states, arbitrary font size, and the
+  // taller field heights/paddings never appear in consumer markup, so TW3
+  // would purge them. (The bare `peer` marker class generates no CSS and
+  // needs no safelisting.)
+  'placeholder:text-transparent',
+  'h-11',
+  'h-14',
+  'h-16',
+  'pt-4',
+  'pt-5',
+  'pt-6',
+  'pt-7',
+  'pb-1',
+  'pb-1.5',
+  'pb-2',
+  'min-h-[76px]',
+  'min-h-[96px]',
+  'min-h-[120px]',
+  'absolute',
+  'pointer-events-none',
+  'select-none',
+  'transition-all',
+  'duration-200',
+  'ease-out',
+  'top-0.5',
+  'top-1',
+  'top-1.5',
+  'top-2',
+  'top-3',
+  'top-4',
+  'top-5',
+  'top-1/2',
+  '-translate-y-1/2',
+  'translate-y-0',
+  'text-sm',
+  'text-base',
+  'text-lg',
+  'text-[0.65rem]',
+  'peer-focus:top-0.5',
+  'peer-focus:top-1',
+  'peer-focus:top-1.5',
+  'peer-focus:top-2',
+  'peer-focus:text-[0.65rem]',
+  'peer-focus:text-xs',
+  'peer-focus:text-sm',
+  'peer-focus:translate-y-0',
+  'peer-[:not(:placeholder-shown)]:top-0.5',
+  'peer-[:not(:placeholder-shown)]:top-1',
+  'peer-[:not(:placeholder-shown)]:top-1.5',
+  'peer-[:not(:placeholder-shown)]:top-2',
+  'peer-[:not(:placeholder-shown)]:text-[0.65rem]',
+  'peer-[:not(:placeholder-shown)]:text-xs',
+  'peer-[:not(:placeholder-shown)]:text-sm',
+  'peer-[:not(:placeholder-shown)]:translate-y-0',
+  'peer-autofill:top-0.5',
+  'peer-autofill:top-1',
+  'peer-autofill:top-1.5',
+  'peer-autofill:top-2',
+  'peer-autofill:text-[0.65rem]',
+  'peer-autofill:text-xs',
+  'peer-autofill:text-sm',
+  'peer-autofill:translate-y-0',
 ];
 
 export interface MiewebUIPreset {
@@ -802,20 +822,6 @@ export const miewebUIPreset: MiewebUIPreset = {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
-        'ozwell-message-flare': {
-          '0%': {
-            boxShadow:
-              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 34%, transparent)',
-          },
-          '70%': {
-            boxShadow:
-              '0 0 0 8px color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 0%, transparent)',
-          },
-          '100%': {
-            boxShadow:
-              '0 0 0 0 color-mix(in srgb, var(--mieweb-primary-700, #1786b3) 0%, transparent)',
-          },
-        },
       },
       animation: {
         'fade-in': 'fade-in 150ms ease-out',
@@ -825,7 +831,6 @@ export const miewebUIPreset: MiewebUIPreset = {
         'slide-in-right': 'slide-in-right 300ms ease-out',
         'slide-in-left': 'slide-in-left 300ms ease-out',
         'scale-in': 'scale-in 150ms ease-out',
-        'ozwell-message-flare': 'ozwell-message-flare 1.8s ease-out',
       },
     },
   },
