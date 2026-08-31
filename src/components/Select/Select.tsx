@@ -519,7 +519,9 @@ function Select({
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
-          aria-controls={listboxId}
+          // Only reference the listbox while it exists in the DOM (it is
+          // portaled and unmounted when closed) so the ID is always valid.
+          aria-controls={isOpen ? listboxId : undefined}
           aria-invalid={hasError || !!error}
           aria-label={!label ? ariaLabel : undefined}
           aria-describedby={describedByIds || undefined}
