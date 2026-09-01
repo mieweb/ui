@@ -232,6 +232,12 @@ function Select(props: SelectProps) {
     id,
   } = props;
   const multiple = props.multiple === true;
+  // The discriminated union types onValueChange as either a string or string[]
+  // callback; widen it once here so handlers can use it without referencing
+  // the whole `props` object. Runtime calls stay consistent with `multiple`.
+  const onValueChange = props.onValueChange as
+    | ((value: string | string[]) => void)
+    | undefined;
   const [isOpen, setIsOpen] = React.useState(false);
   const [uncontrolledValues, setUncontrolledValues] = React.useState<string[]>(
     () => toValueArray(props.defaultValue)
@@ -344,26 +350,25 @@ function Select(props: SelectProps) {
   // toggles the option and keeps the dropdown open.
   const handleValueChange = React.useCallback(
     (optionValue: string) => {
-      if (props.multiple) {
+      if (multiple) {
         const next = selectedValues.includes(optionValue)
           ? selectedValues.filter((v) => v !== optionValue)
           : [...selectedValues, optionValue];
         if (!isControlled) {
           setUncontrolledValues(next);
         }
-        props.onValueChange?.(next);
+        onValueChange?.(next);
         return;
       }
       if (!isControlled) {
         setUncontrolledValues([optionValue]);
       }
-      props.onValueChange?.(optionValue);
+      onValueChange?.(optionValue);
       setIsOpen(false);
       setSearchQuery('');
       triggerRef.current?.focus();
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isControlled, props.multiple, props.onValueChange, selectedValues]
+    [isControlled, multiple, onValueChange, selectedValues]
   );
 
   // Handle keyboard navigation
