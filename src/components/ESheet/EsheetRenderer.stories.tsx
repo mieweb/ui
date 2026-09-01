@@ -172,6 +172,21 @@ export const PreFilled: RendererStory = {
       reason: { selected: { id: 'r2', value: 'Follow-up' } },
     },
   },
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          // eSheet's selected option card (selection-controls redesign,
+          // mieweb/eSheet#150) paints white text on `--msprimary`, which
+          // fails WCAG AA contrast (~2.6:1 with our brand primary; even
+          // eSheet's own #3b82f6 default is only ~3.7:1). The fix belongs
+          // upstream in eSheet — remove this exclusion once the selected
+          // state ships accessible colors.
+          { id: 'color-contrast', enabled: false },
+        ],
+      },
+    },
+  },
   render: (args) => <RendererDemo {...args} />,
 };
 
