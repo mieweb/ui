@@ -400,4 +400,52 @@ describe('Select multiple', () => {
       'chiropractic',
     ]);
   });
+
+  it('restores focus after a mouse toggle so keyboard nav keeps working', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Select
+        multiple
+        aria-label="Location Type"
+        options={LOCATION_TYPES}
+        onValueChange={onValueChange}
+      />
+    );
+
+    const trigger = screen.getByRole('combobox');
+    await user.click(trigger);
+    await user.click(screen.getByRole('option', { name: 'Clinic' }));
+
+    // Focus returns to the trigger (not stranded on the option <li>) so
+    // arrow keys and typeahead still work while the dropdown stays open.
+    expect(trigger).toHaveFocus();
+    await user.keyboard('{ArrowDown}');
+    await user.keyboard('{Enter}');
+    expect(onValueChange).toHaveBeenLastCalledWith([
+      'clinic',
+      'collection-site',
+    ]);
+  });
+
+  it('restores focus to the search input after a mouse toggle when searchable', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Select
+        multiple
+        searchable
+        aria-label="Location Type"
+        options={LOCATION_TYPES}
+      />
+    );
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByRole('option', { name: 'Clinic' }));
+
+    expect(
+      screen.getByRole('textbox', { name: 'Search options' })
+    ).toHaveFocus();
+  });
 });

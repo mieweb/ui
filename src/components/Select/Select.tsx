@@ -123,7 +123,12 @@ const floatingValuePadding = {
 // Select Component
 // ============================================================================
 
-interface SelectBaseProps extends Omit<
+/**
+ * Props shared by both single- and multiple-selection modes. Exported so
+ * wrapper components can extend the common shape (`SelectProps` itself is a
+ * discriminated union, which interfaces cannot extend).
+ */
+export interface SelectBaseProps extends Omit<
   VariantProps<typeof selectTriggerVariants>,
   'labelVariant'
 > {
@@ -364,6 +369,14 @@ function Select(props: SelectProps) {
           setUncontrolledValues(next);
         }
         onValueChange?.(next);
+        // The dropdown stays open; a mouse click focuses the option <li>,
+        // which only handles Enter/Space. Restore focus so arrow-key
+        // navigation and typeahead keep working.
+        if (searchable) {
+          searchInputRef.current?.focus();
+        } else {
+          triggerRef.current?.focus();
+        }
         return;
       }
       if (!isControlled) {
@@ -374,7 +387,7 @@ function Select(props: SelectProps) {
       setSearchQuery('');
       triggerRef.current?.focus();
     },
-    [isControlled, multiple, onValueChange, selectedValues]
+    [isControlled, multiple, onValueChange, searchable, selectedValues]
   );
 
   // Handle keyboard navigation
