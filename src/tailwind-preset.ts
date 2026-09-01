@@ -619,6 +619,17 @@ export const miewebUISafelist = [
   'min-h-[76px]',
   'min-h-[96px]',
   'min-h-[120px]',
+  // Floating-group field boxes (labelVariant="floating" on RadioGroup /
+  // CheckboxGroup) share the floating input heights as min-heights. sr-only
+  // visually hides the group legend (and the hideLabel input label) while
+  // keeping it accessible. mb-1.5 spaces stacked legends (legends ignore
+  // fieldset flex gap) and mt-1 spaces floating-group descriptions.
+  'min-h-11',
+  'min-h-14',
+  'min-h-16',
+  'sr-only',
+  'mb-1.5',
+  'mt-1',
   'absolute',
   'pointer-events-none',
   'select-none',

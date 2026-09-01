@@ -43,6 +43,54 @@ const inputVariants = cva(
   }
 );
 
+// Bordered field box for group controls (RadioGroup / CheckboxGroup) rendered
+// with labelVariant="floating". Mirrors the floating input's box metrics so
+// mixed forms stay vertically aligned.
+const floatingGroupVariants = cva(
+  ['relative rounded-lg border border-input bg-background px-3'],
+  {
+    variants: {
+      size: {
+        sm: 'min-h-11 pt-4 pb-1',
+        md: 'min-h-14 pt-5 pb-1.5',
+        lg: 'min-h-16 pt-6 pb-2',
+      },
+      hasError: {
+        true: 'border-destructive',
+        false: '',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
+    },
+  }
+);
+
+// Group label fixed in the floated position (groups have no empty state to
+// float from, so the label never animates). Metrics match the floated state
+// of floatingLabelVariants.
+const floatingGroupLabelVariants = cva(
+  ['absolute start-3 pointer-events-none select-none'],
+  {
+    variants: {
+      size: {
+        sm: 'top-0.5 text-[0.65rem]',
+        md: 'top-1 text-xs',
+        lg: 'top-1.5 text-sm',
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
+    },
+  }
+);
+
 const floatingLabelVariants = cva(
   [
     'absolute start-3 pointer-events-none select-none',
@@ -247,4 +295,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input';
 
-export { Input, inputVariants, floatingLabelVariants };
+export {
+  Input,
+  inputVariants,
+  floatingLabelVariants,
+  floatingGroupVariants,
+  floatingGroupLabelVariants,
+};
