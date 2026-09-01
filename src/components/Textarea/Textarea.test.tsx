@@ -15,6 +15,13 @@ describe('Textarea', () => {
     expect(screen.getByRole('textbox')).toBeRequired();
   });
 
+  it('uses the warning color for soft requirements', () => {
+    renderWithTheme(
+      <Textarea label="Description" required requiredVariant="warning" />
+    );
+    expect(screen.getByText('*')).toHaveClass('text-warning');
+  });
+
   describe('floating label', () => {
     it('associates the floating label with the textarea', () => {
       renderWithTheme(<Textarea label="Description" labelVariant="floating" />);
