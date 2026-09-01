@@ -636,7 +636,7 @@ const MessageComposer = React.forwardRef<
               className={cn(
                 'flex items-center gap-2 px-4 py-2',
                 'bg-neutral-50 dark:bg-neutral-800/50',
-                'border-primary-500 border-l-4'
+                'border-primary-500 border-s-4'
               )}
             >
               <div className="min-w-0 flex-1">
@@ -755,7 +755,7 @@ const MessageComposer = React.forwardRef<
                           }}
                           onMouseEnter={() => setMentionHighlight(i)}
                           className={cn(
-                            'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                            'flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm',
                             i === clampedMentionHighlight
                               ? 'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-100'
                               : 'text-neutral-700 dark:text-neutral-200'
@@ -765,7 +765,7 @@ const MessageComposer = React.forwardRef<
                           <span className="min-w-0 flex-1 truncate">
                             <span className="font-medium">{option.label}</span>
                             {option.description && (
-                              <span className="ml-1 text-xs text-neutral-400">
+                              <span className="ms-1 text-xs text-neutral-400">
                                 {option.description}
                               </span>
                             )}
@@ -803,7 +803,7 @@ const MessageComposer = React.forwardRef<
                 rows={1}
                 className={cn(
                   'w-full resize-none rounded-2xl py-2.5',
-                  inputTrailing ? 'pr-10 pl-4' : 'px-4',
+                  inputTrailing ? 'ps-4 pe-10' : 'px-4',
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
@@ -829,7 +829,7 @@ const MessageComposer = React.forwardRef<
               {inputTrailing && (
                 <div
                   data-slot="composer-input-trailing"
-                  className="pointer-events-none absolute top-0 right-1 flex h-[44px] items-center [&>*]:pointer-events-auto"
+                  className="pointer-events-none absolute end-1 top-0 flex h-[44px] items-center [&>*]:pointer-events-auto"
                 >
                   {inputTrailing}
                 </div>
@@ -840,7 +840,7 @@ const MessageComposer = React.forwardRef<
                 <div
                   data-slot="composer-char-count"
                   id="char-count"
-                  className="absolute right-3 bottom-1.5"
+                  className="absolute end-3 bottom-1.5"
                 >
                   <CharacterCounter current={content.length} max={maxLength} />
                 </div>
