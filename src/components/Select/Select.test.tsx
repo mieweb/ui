@@ -274,3 +274,130 @@ describe('Select floating label', () => {
     expect(screen.getByRole('combobox')).not.toHaveClass('peer');
   });
 });
+
+describe('Select multiple', () => {
+  it('toggles options and keeps the dropdown open', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Select
+        multiple
+        aria-label="Location Type"
+        options={LOCATION_TYPES}
+        onValueChange={onValueChange}
+      />
+    );
+
+    await user.click(screen.getByRole('combobox'));
+    expect(screen.getByRole('listbox')).toHaveAttribute(
+      'aria-multiselectable',
+      'true'
+    );
+
+    await user.click(screen.getByRole('option', { name: 'Clinic' }));
+    expect(onValueChange).toHaveBeenLastCalledWith(['clinic']);
+    // Dropdown stays open for further selections
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('option', { name: 'Cardiology' }));
+    expect(onValueChange).toHaveBeenLastCalledWith(['clinic', 'cardiology']);
+
+    // Clicking a selected option deselects it
+    await user.click(screen.getByRole('option', { name: 'Clinic' }));
+    expect(onValueChange).toHaveBeenLastCalledWith(['cardiology']);
+  });
+
+  it('shows selected labels comma-separated in the trigger', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Select
+        multiple
+        aria-label="Location Type"
+        defaultValue={['clinic', 'dermatology']}
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(
+      screen.getByRole('combobox', { name: 'Location Type' })
+    ).toHaveTextContent('Clinic, Dermatology');
+
+    await user.click(screen.getByRole('combobox'));
+    expect(
+      screen.getByRole('option', { name: /Clinic/, selected: true })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: /Dermatology/, selected: true })
+    ).toBeInTheDocument();
+  });
+
+  it('supports controlled string[] values', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Select
+        multiple
+        aria-label="Location Type"
+        value={['corporate']}
+        options={LOCATION_TYPES}
+        onValueChange={onValueChange}
+      />
+    );
+
+    expect(screen.getByRole('combobox')).toHaveTextContent(
+      'Corporate Location'
+    );
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByRole('option', { name: 'Clinic' }));
+    expect(onValueChange).toHaveBeenCalledWith(['corporate', 'clinic']);
+    // Controlled: display unchanged until parent updates value
+    expect(screen.getByRole('combobox')).toHaveTextContent(
+      'Corporate Location'
+    );
+  });
+
+  it('floats the floating label when selections exist', () => {
+    renderWithTheme(
+      <Select
+        multiple
+        label="Location Type"
+        labelVariant="floating"
+        defaultValue={['clinic']}
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.getByText('Location Type')).not.toHaveClass('top-1/2');
+  });
+
+  it('toggles via keyboard without closing', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Select
+        multiple
+        aria-label="Location Type"
+        options={LOCATION_TYPES}
+        onValueChange={onValueChange}
+      />
+    );
+
+    await user.tab();
+    await user.keyboard('{ArrowDown}'); // open
+    await user.keyboard('{Enter}'); // toggle highlighted (Cardiology)
+    expect(onValueChange).toHaveBeenLastCalledWith(['cardiology']);
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+    await user.keyboard('{ArrowDown}');
+    await user.keyboard('{Enter}');
+    expect(onValueChange).toHaveBeenLastCalledWith([
+      'cardiology',
+      'chiropractic',
+    ]);
+  });
+});
