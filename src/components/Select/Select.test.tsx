@@ -275,6 +275,50 @@ describe('Select floating label', () => {
   });
 });
 
+describe('Select required', () => {
+  it('shows required indicator next to the stacked label', () => {
+    renderWithTheme(
+      <Select label="Location Type" required options={LOCATION_TYPES} />
+    );
+
+    expect(screen.getByText('*')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toHaveAttribute(
+      'aria-required',
+      'true'
+    );
+  });
+
+  it('uses the warning color for soft requirements', () => {
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        required
+        requiredVariant="warning"
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.getByText('*')).toHaveClass('text-warning');
+  });
+
+  it('shows required indicator inside the floating label', () => {
+    renderWithTheme(
+      <Select
+        label="Location Type"
+        labelVariant="floating"
+        required
+        options={LOCATION_TYPES}
+      />
+    );
+
+    expect(screen.getByText('*')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toHaveAttribute(
+      'aria-required',
+      'true'
+    );
+  });
+});
+
 describe('Select multiple', () => {
   it('toggles options and keeps the dropdown open', async () => {
     const user = userEvent.setup();

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { RequiredMark, type RequiredMarkVariant } from '../Input';
 
 const textareaVariants = cva(
   [
@@ -126,6 +127,12 @@ export interface TextareaProps
   showCount?: boolean;
   /** Auto-resize based on content */
   autoResize?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
 }
 
 /**
@@ -157,6 +164,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       maxLength,
       showCount = false,
       autoResize = false,
+      required = false,
+      requiredVariant,
       id,
       value,
       defaultValue,
@@ -222,6 +231,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
 
+    const requiredMark = required && <RequiredMark variant={requiredVariant} />;
+
     const textareaElement = (
       <textarea
         data-slot="textarea"
@@ -233,6 +244,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         maxLength={maxLength}
         aria-invalid={hasError || !!error}
         aria-describedby={describedByIds || undefined}
+        required={required}
         // A single-space placeholder keeps :placeholder-shown reliable so the
         // label can float via CSS alone.
         placeholder={isFloating ? ' ' : placeholder}
@@ -261,6 +273,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             )}
           >
             {label}
+            {requiredMark}
           </label>
         )}
         {isFloating ? (
@@ -275,6 +288,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               })}
             >
               {label}
+              {requiredMark}
             </label>
           </div>
         ) : (
