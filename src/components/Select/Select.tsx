@@ -5,6 +5,7 @@ import { cn } from '../../utils/cn';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { RequiredMark, type RequiredMarkVariant } from '../Input';
 
 // ============================================================================
 // Types
@@ -154,6 +155,14 @@ export interface SelectBaseProps extends Omit<
   error?: string;
   /** Helper text */
   helperText?: string;
+  /** Whether a selection is required (shows an asterisk next to the label) */
+  required?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
   /** Enable search/filter */
   searchable?: boolean;
   /** Search placeholder */
@@ -227,6 +236,8 @@ function Select(props: SelectProps) {
     labelVariant = 'stacked',
     error,
     helperText,
+    required = false,
+    requiredVariant,
     size,
     hasError,
     'aria-label': ariaLabel,
@@ -560,6 +571,8 @@ function Select(props: SelectProps) {
   const isFloated = isOpen || hasSelection;
   const resolvedSize = size ?? 'md';
 
+  const requiredMark = required && <RequiredMark variant={requiredVariant} />;
+
   return (
     <div
       data-slot="select-wrapper"
@@ -575,6 +588,7 @@ function Select(props: SelectProps) {
           )}
         >
           {label}
+          {requiredMark}
         </label>
       )}
 
@@ -595,6 +609,7 @@ function Select(props: SelectProps) {
           // portaled and unmounted when closed) so the ID is always valid.
           aria-controls={isOpen ? listboxId : undefined}
           aria-invalid={hasError || !!error}
+          aria-required={required || undefined}
           aria-label={!label ? ariaLabel : undefined}
           aria-describedby={describedByIds || undefined}
           disabled={disabled}
@@ -643,6 +658,7 @@ function Select(props: SelectProps) {
             })}
           >
             {label}
+            {requiredMark}
           </label>
         )}
 

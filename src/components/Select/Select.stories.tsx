@@ -377,6 +377,36 @@ export const FloatingLabelWithError: Story = {
   },
 };
 
+export const Required: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex w-[280px] flex-col gap-4">
+      <Select options={simpleOptions} label="Required (stacked)" required />
+      <Select
+        options={simpleOptions}
+        label="Soft required (stacked)"
+        required
+        requiredVariant="warning"
+      />
+      <Select
+        options={simpleOptions}
+        label="Required (floating)"
+        labelVariant="floating"
+        required
+      />
+      <Select
+        options={simpleOptions}
+        label="Soft required (floating)"
+        labelVariant="floating"
+        required
+        requiredVariant="warning"
+      />
+    </div>
+  ),
+};
+
 export const Multiple: Story = {
   parameters: {
     controls: { disable: true },

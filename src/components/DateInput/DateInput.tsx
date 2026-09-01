@@ -11,6 +11,7 @@ import {
 } from '../../utils/date';
 import {
   Input,
+  RequiredMark,
   inputVariants,
   floatingLabelVariants,
   type InputProps,
@@ -948,6 +949,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         helperText,
         hideLabel,
         required,
+        requiredVariant,
         size,
         placeholder: placeholderProp,
         ...inputProps
@@ -962,9 +964,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
 
       const requiredMark = required && (
-        <span className="text-destructive ms-1" aria-hidden="true">
-          *
-        </span>
+        <RequiredMark variant={requiredVariant} />
       );
 
       return (

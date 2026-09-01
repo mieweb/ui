@@ -155,6 +155,33 @@ export interface InputProps
   hideLabel?: boolean;
   /** Whether the input is required */
   required?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
+}
+
+type RequiredMarkVariant = 'default' | 'warning';
+
+/** Asterisk rendered next to a label when the field is required. */
+function RequiredMark({
+  variant = 'default',
+}: {
+  variant?: RequiredMarkVariant;
+}) {
+  return (
+    <span
+      className={cn(
+        'ms-1',
+        variant === 'warning' ? 'text-warning' : 'text-destructive'
+      )}
+      aria-hidden="true"
+    >
+      *
+    </span>
+  );
 }
 
 /**
@@ -179,6 +206,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       labelVariant = 'stacked',
       hideLabel,
       required,
+      requiredVariant,
       disabled,
       id,
       placeholder,
@@ -202,11 +230,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
 
-    const requiredMark = required && (
-      <span className="text-destructive ms-1" aria-hidden="true">
-        *
-      </span>
-    );
+    const requiredMark = required && <RequiredMark variant={requiredVariant} />;
 
     const inputElement = (
       <input
@@ -297,8 +321,10 @@ Input.displayName = 'Input';
 
 export {
   Input,
+  RequiredMark,
   inputVariants,
   floatingLabelVariants,
   floatingGroupVariants,
   floatingGroupLabelVariants,
 };
+export type { RequiredMarkVariant };

@@ -9,10 +9,31 @@ describe('Textarea', () => {
     expect(screen.getByLabelText('Description')).toBeInTheDocument();
   });
 
+  it('shows required indicator and sets required when required', () => {
+    renderWithTheme(<Textarea label="Description" required />);
+    expect(screen.getByText('*')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeRequired();
+  });
+
+  it('uses the warning color for soft requirements', () => {
+    renderWithTheme(
+      <Textarea label="Description" required requiredVariant="warning" />
+    );
+    expect(screen.getByText('*')).toHaveClass('text-warning');
+  });
+
   describe('floating label', () => {
     it('associates the floating label with the textarea', () => {
       renderWithTheme(<Textarea label="Description" labelVariant="floating" />);
       expect(screen.getByLabelText('Description')).toBeInTheDocument();
+    });
+
+    it('shows required indicator inside the floating label', () => {
+      renderWithTheme(
+        <Textarea label="Description" labelVariant="floating" required />
+      );
+      expect(screen.getByText('*')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeRequired();
     });
 
     it('applies peer and floating padding classes', () => {
