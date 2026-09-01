@@ -262,9 +262,15 @@ function Select(props: SelectProps) {
   const helperId = `${selectId}-helper`;
 
   const isControlled = props.value !== undefined;
-  const selectedValues = isControlled
-    ? toValueArray(props.value)
-    : uncontrolledValues;
+  const controlledValue = props.value;
+  // Memoize the controlled normalization: toValueArray allocates a fresh
+  // array when value is a string, which would otherwise churn callback
+  // identities (handleValueChange depends on selectedValues) every render.
+  const controlledValues = React.useMemo(
+    () => toValueArray(controlledValue),
+    [controlledValue]
+  );
+  const selectedValues = isControlled ? controlledValues : uncontrolledValues;
 
   // Flatten options for easy access
   const flatOptions = React.useMemo(() => {
