@@ -377,6 +377,29 @@ export const FloatingLabelWithError: Story = {
   },
 };
 
+export const Multiple: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex w-[280px] flex-col gap-4">
+      <Select
+        multiple
+        options={simpleOptions}
+        label="Fruits"
+        placeholder="Select fruits"
+      />
+      <Select
+        multiple
+        options={simpleOptions}
+        label="Fruits (floating)"
+        labelVariant="floating"
+        defaultValue={['apple', 'banana']}
+      />
+    </div>
+  ),
+};
+
 // =============================================================================
 // Showcase Stories (Controls Disabled)
 // =============================================================================
