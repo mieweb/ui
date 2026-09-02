@@ -4,7 +4,12 @@ import { type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
-import { inputVariants } from '../Input';
+import {
+  inputVariants,
+  floatingLabelVariants,
+  RequiredMark,
+  type RequiredMarkVariant,
+} from '../Input';
 
 export interface AutocompleteProps<T> extends Pick<
   VariantProps<typeof inputVariants>,
@@ -46,6 +51,23 @@ export interface AutocompleteProps<T> extends Pick<
   clearOnSelect?: boolean;
   /** Disable the input. */
   disabled?: boolean;
+  /** Label for the input. */
+  label?: string;
+  /**
+   * How the label is rendered.
+   * - `stacked` (default): label above the input.
+   * - `floating`: label rests inside the input like a placeholder and floats
+   *   to the top of the field when focused or filled. Ignores `placeholder`.
+   */
+  labelVariant?: 'stacked' | 'floating';
+  /** Whether the input is required. */
+  required?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
   /** Accessible label for the combobox input. */
   'aria-label'?: string;
   /** Class applied to the outer wrapper. */
@@ -63,6 +85,7 @@ export interface AutocompleteProps<T> extends Pick<
     | 'size'
     | 'placeholder'
     | 'disabled'
+    | 'required'
     | 'aria-label'
   >;
 }
@@ -104,6 +127,10 @@ function Autocomplete<T>({
   minQueryLength = 1,
   clearOnSelect = true,
   disabled,
+  label,
+  labelVariant = 'stacked',
+  required = false,
+  requiredVariant,
   size,
   className,
   inputClassName,
@@ -121,6 +148,11 @@ function Autocomplete<T>({
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const listId = React.useId();
+  const generatedInputId = React.useId();
+  const inputId = inputProps?.id ?? generatedInputId;
+
+  const isFloating = labelVariant === 'floating' && !!label;
+  const requiredMark = required && <RequiredMark variant={requiredVariant} />;
 
   const meetsMinLength = query.length >= minQueryLength;
 
@@ -228,8 +260,19 @@ function Autocomplete<T>({
       data-slot="autocomplete"
       className={cn('relative', className)}
     >
+      {label && !isFloating && (
+        <label
+          data-slot="autocomplete-label"
+          htmlFor={inputId}
+          className="text-foreground mb-1.5 block text-sm font-medium"
+        >
+          {label}
+          {requiredMark}
+        </label>
+      )}
       <input
         ref={inputRef}
+        id={inputId}
         type="text"
         role="combobox"
         aria-expanded={isOpen}
@@ -240,16 +283,35 @@ function Autocomplete<T>({
         autoComplete="off"
         data-slot="autocomplete-input"
         value={query}
-        placeholder={placeholder}
+        // A single-space placeholder keeps :placeholder-shown reliable so the
+        // label can float via CSS alone (mirrors Input).
+        placeholder={isFloating ? ' ' : placeholder}
         disabled={disabled}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={() => {
           if (meetsMinLength) setOpen(true);
         }}
-        className={cn(inputVariants({ size }), inputClassName)}
+        className={cn(
+          inputVariants({
+            size,
+            labelVariant: isFloating ? 'floating' : 'stacked',
+          }),
+          inputClassName
+        )}
         {...inputProps}
+        required={required}
       />
+      {isFloating && (
+        <label
+          data-slot="autocomplete-label"
+          htmlFor={inputId}
+          className={floatingLabelVariants({ size })}
+        >
+          {label}
+          {requiredMark}
+        </label>
+      )}
 
       {isOpen &&
         createPortal(
