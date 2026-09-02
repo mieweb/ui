@@ -10,6 +10,10 @@ const ITEMS: SectionSpyItem[] = [
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  // Remove the seeded sections so they can't leak into other test files.
+  for (const it of ITEMS) {
+    document.getElementById(it.id)?.remove();
+  }
 });
 
 beforeEach(() => {
@@ -49,7 +53,7 @@ describe('SectionSpyNav', () => {
     renderWithTheme(<SectionSpyNav items={ITEMS} />);
     expect(screen.getByRole('link', { name: 'Overview' })).toHaveAttribute(
       'aria-current',
-      'true'
+      'location'
     );
     expect(screen.getByRole('link', { name: 'Pricing' })).not.toHaveAttribute(
       'aria-current'

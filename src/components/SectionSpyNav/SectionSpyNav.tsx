@@ -191,7 +191,7 @@ export function SectionSpyNav({
                       ? 'text-foreground font-semibold'
                       : 'text-muted-foreground hover:text-foreground'
                 )}
-                aria-current={isActive ? 'true' : undefined}
+                aria-current={isActive ? 'location' : undefined}
               >
                 {it.label}
               </a>
