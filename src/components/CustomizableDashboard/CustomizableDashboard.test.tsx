@@ -78,6 +78,14 @@ describe('drag order helpers', () => {
     ]);
   });
 
+  it('consolidateColumns returns the same reference when nothing moves', () => {
+    const fits2: DashboardOrder = [['a'], ['b'], []];
+    expect(consolidateColumns(fits2, 2)).toBe(fits2);
+    const fits1: DashboardOrder = [['a', 'b'], [], []];
+    expect(consolidateColumns(fits1, 1)).toBe(fits1);
+    expect(consolidateColumns(base, 3)).toBe(base);
+  });
+
   it('requiredColumns counts through gaps so no item is hidden', () => {
     expect(requiredColumns([['a'], [], ['c']])).toBe(3);
     expect(requiredColumns([['a'], ['b'], []])).toBe(2);
