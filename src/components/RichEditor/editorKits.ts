@@ -24,6 +24,13 @@ export interface CollabConfig {
   /** Extra query params for the socket (e.g. `{ token }` for auth). */
   params?: Record<string, string>;
   /**
+   * Who this editor is, published on awareness (`kerebron:user`) so peers see
+   * a named, coloured cursor. Without it remote cursors do not render — the
+   * position plugin skips awareness states that carry no user — and the
+   * `id` is what the cursor colour is derived from (kerebron's `User` shape).
+   */
+  user?: { id: string; name: string; color?: string };
+  /**
    * Custom WebSocket implementation handed to the Yjs provider — e.g. a
    * loopback socket for demos/tests, or a polyfill outside the browser.
    * Defaults to `globalThis.WebSocket`.
@@ -90,6 +97,11 @@ export async function createEditorKits(
   const url = config.wsUrl ?? defaultWsUrl();
   return [
     new SafeAdvancedEditorKit(true),
-    new HuddleYjsKit(url, config.params ?? {}, config.WebSocketPolyfill),
+    new HuddleYjsKit(
+      url,
+      config.params ?? {},
+      config.WebSocketPolyfill,
+      config.user
+    ),
   ];
 }

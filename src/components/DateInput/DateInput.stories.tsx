@@ -227,3 +227,34 @@ export const AllModes: Story = {
     </div>
   ),
 };
+
+export const FloatingLabel: Story = {
+  args: {
+    label: 'Date of Birth',
+    labelVariant: 'floating',
+  },
+};
+
+export const FloatingLabelWithValue: Story = {
+  args: {
+    label: 'Date of Birth',
+    labelVariant: 'floating',
+    value: '01/15/1990',
+  },
+};
+
+export const FloatingLabelWithCalendar: Story = {
+  args: {
+    label: 'Select Date',
+    labelVariant: 'floating',
+    showCalendar: true,
+  },
+};
+
+export const FloatingLabelDateTime: Story = {
+  args: {
+    label: 'Appointment',
+    labelVariant: 'floating',
+    inputType: 'datetime-local',
+  },
+};
