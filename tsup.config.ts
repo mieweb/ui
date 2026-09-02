@@ -25,7 +25,10 @@ export default defineConfig({
     'components/Checkbox/index': 'src/components/Checkbox/index.ts',
     'components/CollabStatus/index': 'src/components/CollabStatus/index.ts',
     'components/Collapsible/index': 'src/components/Collapsible/index.ts',
-    'components/CountryCodeDropdown/index': 'src/components/CountryCodeDropdown/index.ts',
+    'components/CountryCodeDropdown/index':
+      'src/components/CountryCodeDropdown/index.ts',
+    'components/CustomizableDashboard/index':
+      'src/components/CustomizableDashboard/index.ts',
     'components/DateInput/index': 'src/components/DateInput/index.ts',
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
@@ -51,6 +54,7 @@ export default defineConfig({
     'components/Sheet/index': 'src/components/Sheet/index.ts',
     'components/Skeleton/index': 'src/components/Skeleton/index.ts',
     'components/Slider/index': 'src/components/Slider/index.ts',
+    'components/SourceTip/index': 'src/components/SourceTip/index.ts',
     'components/Spinner/index': 'src/components/Spinner/index.ts',
     'components/SuperChat/index': 'src/components/SuperChat/index.ts',
     'components/SuperChat/plugins/index': 'src/components/SuperChat/plugins/index.ts',
