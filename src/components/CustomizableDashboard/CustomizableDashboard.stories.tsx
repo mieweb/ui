@@ -190,6 +190,51 @@ function ControlledExample(args: ComponentProps<typeof CustomizableDashboard>) {
   );
 }
 
+export const WithWidgetCatalog: Story = {
+  args: {
+    columns: demoColumns,
+    title: 'Patient Summary',
+    widgets: [
+      {
+        id: 'demographics',
+        title: 'Demographics',
+        description: 'Patient identity and contact details',
+        icon: <Users aria-hidden="true" className="h-4 w-4" />,
+        category: 'Chart',
+      },
+      {
+        id: 'vitals',
+        title: 'Vitals',
+        description: 'Latest recorded vital signs',
+        icon: <Activity aria-hidden="true" className="h-4 w-4" />,
+        category: 'Chart',
+      },
+      {
+        id: 'medications',
+        title: 'Medications',
+        description: 'Active medication list',
+        icon: <Pill aria-hidden="true" className="h-4 w-4" />,
+        category: 'Chart',
+      },
+      {
+        id: 'orders',
+        title: 'Open Orders',
+        description: 'Pending and scheduled orders',
+        icon: <ClipboardList aria-hidden="true" className="h-4 w-4" />,
+        category: 'Workflow',
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With a `widgets` catalog, the toolbar gains a Customize button opening the add/remove panel where widgets can be shown, hidden, and the layout reset.',
+      },
+    },
+  },
+};
+
 export const ToolbarInPageHeader: Story = {
   render: (args) => <ToolbarSlotExample {...args} />,
   args: { columns: demoColumns },

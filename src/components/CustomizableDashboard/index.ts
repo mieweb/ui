@@ -11,3 +11,8 @@ export {
   type DashboardColumns,
   type DashboardOrder,
 } from './CustomizableDashboard';
+export {
+  DashboardCustomizePanel,
+  type DashboardCustomizePanelProps,
+  type WidgetDefinition,
+} from './DashboardCustomizePanel';

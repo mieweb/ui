@@ -25,9 +25,9 @@ generalized for library use.
 
 ## Persistence semantics
 
-- `storageKey` derives `{key}-portlet-order` and `{key}-dashboard-layout` —
-  the exact keys echart-sim already writes, so its saved layouts survive
-  adoption.
+- `storageKey` derives `{key}-portlet-order`, `{key}-dashboard-layout`, and
+  `{key}-dashboard-hidden` — the first two are the exact keys echart-sim
+  already writes, so its saved layouts survive adoption.
 - **Persisted values are restored in a mount effect, not in state
   initializers**, so the first client render always matches SSR output and
   hydration cannot mismatch. Saved order slots are validated (arrays of
@@ -46,6 +46,11 @@ generalized for library use.
 - `mergeColumnOrder` reconciles saved/controlled order with props: saved
   positions win, stale ids are dropped, new items append to their props
   column. It is exported for host-side migrations.
+- Hidden widgets keep their slot in the column order — hiding filters at
+  render time (`resolve`), so unhiding restores the previous position. The
+  customize panel (`DashboardCustomizePanel`, UX generalized from
+  waggleline's board-column config offcanvas) is also exported standalone
+  for hosts that render their own trigger.
 
 ## Known tradeoffs (inherited from the original)
 

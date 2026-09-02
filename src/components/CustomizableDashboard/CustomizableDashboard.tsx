@@ -25,8 +25,19 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Columns2, Columns3, Square } from 'lucide-react';
+import {
+  GripVertical,
+  Columns2,
+  Columns3,
+  Square,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { Button } from '../Button';
+import {
+  DashboardCustomizePanel,
+  type WidgetDefinition,
+} from './DashboardCustomizePanel';
 
 // =============================================================================
 // Types
@@ -91,6 +102,20 @@ export interface CustomizableDashboardProps {
    * header matches, the handle floats over the portlet's top end corner.
    */
   dragHandleSelector?: string;
+  /**
+   * Widget catalog metadata. When provided, the toolbar gains a Customize
+   * button opening a panel where users show/hide widgets and reset the
+   * layout. Ids must match the portlet ids in `columns`.
+   */
+  widgets?: WidgetDefinition[];
+  /** Initially hidden widget ids for uncontrolled usage. */
+  defaultHiddenIds?: string[];
+  /** Controlled hidden widget ids. Changes reported via `onHiddenChange`. */
+  hiddenIds?: string[];
+  /** Called with the full hidden-id list when visibility changes. */
+  onHiddenChange?: (hiddenIds: string[]) => void;
+  /** Label for the toolbar customize button (default "Customize"). */
+  customizeLabel?: string;
   /** Additional class name for the grid element. */
   className?: string;
 }
@@ -120,6 +145,32 @@ function orderStorageKey(base: string): string {
 
 function layoutStorageKey(base: string): string {
   return `${base}-dashboard-layout`;
+}
+
+function hiddenStorageKey(base: string): string {
+  return `${base}-dashboard-hidden`;
+}
+
+function loadHidden(base: string | undefined): string[] | null {
+  if (!base) return null;
+  try {
+    const raw = localStorage.getItem(hiddenStorageKey(base));
+    const parsed = raw ? (JSON.parse(raw) as unknown) : null;
+    return Array.isArray(parsed)
+      ? parsed.filter((v) => typeof v === 'string')
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveHidden(base: string | undefined, ids: string[]) {
+  if (!base) return;
+  try {
+    localStorage.setItem(hiddenStorageKey(base), JSON.stringify(ids));
+  } catch {
+    /* storage unavailable */
+  }
 }
 
 function loadLayout(base: string | undefined): DashboardLayout | null {
@@ -496,6 +547,11 @@ function DroppableColumn({
  * or can be controlled via `order`/`onOrderChange` and
  * `layout`/`onLayoutChange` for server-side persistence.
  *
+ * Passing a `widgets` catalog adds a toolbar Customize button opening a
+ * `DashboardCustomizePanel` where users show/hide widgets and reset the
+ * layout; visibility follows the same persistence rules via
+ * `hiddenIds`/`onHiddenChange`.
+ *
  * @example
  * ```tsx
  * <CustomizableDashboard
@@ -525,6 +581,11 @@ export const CustomizableDashboard = React.forwardRef<
     layout: controlledLayout,
     onLayoutChange,
     dragHandleSelector = DEFAULT_HANDLE_SELECTOR,
+    widgets,
+    defaultHiddenIds,
+    hiddenIds: controlledHidden,
+    onHiddenChange,
+    customizeLabel = 'Customize',
     className,
   },
   ref
@@ -545,6 +606,13 @@ export const CustomizableDashboard = React.forwardRef<
   );
   const [activeId, setActiveId] = React.useState<string | null>(null);
 
+  const [internalHidden, setInternalHidden] = React.useState<string[]>(
+    () => defaultHiddenIds ?? []
+  );
+  const hiddenList = controlledHidden ?? internalHidden;
+  const hiddenSet = React.useMemo(() => new Set(hiddenList), [hiddenList]);
+  const [panelOpen, setPanelOpen] = React.useState(false);
+
   const prevColOrder = React.useRef(colOrder);
   const layoutModeRef = React.useRef(layoutMode);
   layoutModeRef.current = layoutMode;
@@ -554,7 +622,8 @@ export const CustomizableDashboard = React.forwardRef<
   columnsRef.current = columns;
   const draggingRef = React.useRef(false);
 
-  // Restore persisted layout/order after mount (uncontrolled concerns only).
+  // Restore persisted layout/order/visibility after mount (uncontrolled
+  // concerns only) so the first client render matches SSR.
   React.useEffect(() => {
     if (!storageKey) return;
     if (controlledLayout === undefined) {
@@ -566,6 +635,10 @@ export const CustomizableDashboard = React.forwardRef<
       if (savedOrder) {
         setColOrder(mergeColumnOrder(columnsRef.current, savedOrder));
       }
+    }
+    if (controlledHidden === undefined) {
+      const savedHidden = loadHidden(storageKey);
+      if (savedHidden) setInternalHidden(savedHidden);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only restore
   }, [storageKey]);
@@ -630,7 +703,10 @@ export const CustomizableDashboard = React.forwardRef<
   );
 
   const resolve = (ids: string[]): PortletItem[] =>
-    ids.map((id) => itemMap.get(id)).filter(Boolean) as PortletItem[];
+    ids
+      .filter((id) => !hiddenSet.has(id))
+      .map((id) => itemMap.get(id))
+      .filter(Boolean) as PortletItem[];
 
   const handleDragStart = React.useCallback(
     (event: DragStartEvent) => {
@@ -692,6 +768,55 @@ export const CustomizableDashboard = React.forwardRef<
     setColOrder(prevColOrder.current);
   }, []);
 
+  const setHidden = React.useCallback(
+    (ids: string[]) => {
+      if (controlledHidden === undefined) setInternalHidden(ids);
+      saveHidden(storageKey, ids);
+      onHiddenChange?.(ids);
+    },
+    [controlledHidden, storageKey, onHiddenChange]
+  );
+
+  const handleToggleWidget = React.useCallback(
+    (id: string, visible: boolean) => {
+      setHidden(
+        visible ? hiddenList.filter((h) => h !== id) : [...hiddenList, id]
+      );
+    },
+    [hiddenList, setHidden]
+  );
+
+  const handleReset = React.useCallback(() => {
+    if (storageKey) {
+      try {
+        localStorage.removeItem(orderStorageKey(storageKey));
+        localStorage.removeItem(layoutStorageKey(storageKey));
+        localStorage.removeItem(hiddenStorageKey(storageKey));
+      } catch {
+        /* storage unavailable */
+      }
+    }
+    const next = mergeColumnOrder(columns, defaultOrder ?? null);
+    setColOrder(next);
+    onOrderChange?.(next);
+    if (controlledLayout === undefined) setInternalLayout(defaultLayout);
+    onLayoutChange?.(defaultLayout);
+    const hidden = defaultHiddenIds ?? [];
+    if (controlledHidden === undefined) setInternalHidden(hidden);
+    onHiddenChange?.(hidden);
+  }, [
+    storageKey,
+    columns,
+    defaultOrder,
+    onOrderChange,
+    controlledLayout,
+    defaultLayout,
+    onLayoutChange,
+    defaultHiddenIds,
+    controlledHidden,
+    onHiddenChange,
+  ]);
+
   const cols: DashboardColumns = [
     resolve(colOrder[0]),
     resolve(colOrder[1]),
@@ -707,6 +832,19 @@ export const CustomizableDashboard = React.forwardRef<
         <h2 className="text-foreground me-auto text-lg font-semibold">
           {title}
         </h2>
+      )}
+      {widgets && widgets.length > 0 && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPanelOpen(true)}
+          aria-haspopup="dialog"
+          leftIcon={
+            <SlidersHorizontal aria-hidden="true" className="h-4 w-4" />
+          }
+        >
+          {customizeLabel}
+        </Button>
       )}
       <div
         className="border-border bg-muted flex gap-0.5 rounded-md border p-0.5 max-md:hidden"
@@ -773,6 +911,16 @@ export const CustomizableDashboard = React.forwardRef<
           />
         ))}
       </div>
+      {widgets && widgets.length > 0 && (
+        <DashboardCustomizePanel
+          open={panelOpen}
+          onOpenChange={setPanelOpen}
+          widgets={widgets}
+          hiddenIds={hiddenList}
+          onToggleWidget={handleToggleWidget}
+          onReset={handleReset}
+        />
+      )}
     </DndContext>
   );
 });
