@@ -606,6 +606,11 @@ export const miewebUISafelist = [
   'dark:text-warning',
   'dark:bg-destructive/20',
   'bg-muted-foreground/50',
+  'h-2',
+  'w-2',
+  'inline-block',
+  'dark:text-success',
+  'dark:text-destructive',
   // Accordion — grid-rows height animation (arbitrary values TW3 won't scan)
   'transition-[grid-template-rows]',
   'grid-rows-[0fr]',

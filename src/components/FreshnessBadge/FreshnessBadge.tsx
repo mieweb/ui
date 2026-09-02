@@ -68,19 +68,19 @@ const META: Record<
 > = {
   fresh: {
     Icon: CircleCheck,
-    chip: 'bg-success/10 text-success dark:bg-success/20',
+    chip: 'bg-success/10 text-success-800 dark:bg-success/20 dark:text-success',
     dot: 'bg-success',
     label: 'Fresh',
   },
   aging: {
     Icon: CircleMinus,
-    chip: 'bg-warning/15 text-warning-700 dark:bg-warning/20 dark:text-warning',
+    chip: 'bg-warning/15 text-warning-800 dark:bg-warning/20 dark:text-warning',
     dot: 'bg-warning',
     label: 'Aging',
   },
   stale: {
     Icon: CircleAlert,
-    chip: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
+    chip: 'bg-destructive/10 text-destructive-700 dark:bg-destructive/20 dark:text-destructive',
     dot: 'bg-destructive',
     label: 'Stale',
   },
