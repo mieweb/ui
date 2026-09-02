@@ -156,6 +156,7 @@ export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
 export * from './components/Separator';
 export * from './components/Sheet';
+export * from './components/SourceTip';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,
