@@ -90,6 +90,7 @@ interface SelectWithStateProps {
   hasError?: boolean;
   helperText?: string;
   hideLabel?: boolean;
+  labelVariant?: 'stacked' | 'floating';
   searchPlaceholder?: string;
   noResultsText?: string;
   defaultValue?: string;
@@ -106,6 +107,7 @@ function SelectWithState({
   hasError = false,
   helperText,
   hideLabel = false,
+  labelVariant = 'stacked',
   searchPlaceholder,
   noResultsText,
   defaultValue,
@@ -128,6 +130,7 @@ function SelectWithState({
         hasError={hasError}
         helperText={helperText}
         hideLabel={hideLabel}
+        labelVariant={labelVariant}
         searchPlaceholder={searchPlaceholder}
         noResultsText={noResultsText}
       />
@@ -194,6 +197,14 @@ const meta = {
     hideLabel: {
       control: 'boolean',
       description: 'Visually hide the label',
+    },
+    labelVariant: {
+      control: 'select',
+      options: ['stacked', 'floating'],
+      description: 'Visual style of the label',
+      table: {
+        defaultValue: { summary: 'stacked' },
+      },
     },
     searchPlaceholder: {
       control: 'text',
@@ -310,6 +321,113 @@ export const WithDefaultValue: Story = {
     placeholder: 'Select a fruit',
     defaultValue: 'banana',
   },
+};
+
+export const FloatingLabel: Story = {
+  args: {
+    optionsKey: 'simple',
+    label: 'Fruit',
+    labelVariant: 'floating',
+  },
+};
+
+export const FloatingLabelWithValue: Story = {
+  args: {
+    optionsKey: 'countries',
+    label: 'Country',
+    labelVariant: 'floating',
+    defaultValue: 'uk',
+  },
+};
+
+export const FloatingLabelSizes: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex w-[280px] flex-col gap-4">
+      <Select
+        options={simpleOptions}
+        label="Small"
+        labelVariant="floating"
+        size="sm"
+      />
+      <Select
+        options={simpleOptions}
+        label="Medium"
+        labelVariant="floating"
+        size="md"
+      />
+      <Select
+        options={simpleOptions}
+        label="Large"
+        labelVariant="floating"
+        size="lg"
+      />
+    </div>
+  ),
+};
+
+export const FloatingLabelWithError: Story = {
+  args: {
+    optionsKey: 'simple',
+    label: 'Fruit',
+    labelVariant: 'floating',
+    error: 'Please select a fruit',
+  },
+};
+
+export const Required: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex w-[280px] flex-col gap-4">
+      <Select options={simpleOptions} label="Required (stacked)" required />
+      <Select
+        options={simpleOptions}
+        label="Soft required (stacked)"
+        required
+        requiredVariant="warning"
+      />
+      <Select
+        options={simpleOptions}
+        label="Required (floating)"
+        labelVariant="floating"
+        required
+      />
+      <Select
+        options={simpleOptions}
+        label="Soft required (floating)"
+        labelVariant="floating"
+        required
+        requiredVariant="warning"
+      />
+    </div>
+  ),
+};
+
+export const Multiple: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex w-[280px] flex-col gap-4">
+      <Select
+        multiple
+        options={simpleOptions}
+        label="Fruits"
+        placeholder="Select fruits"
+      />
+      <Select
+        multiple
+        options={simpleOptions}
+        label="Fruits (floating)"
+        labelVariant="floating"
+        defaultValue={['apple', 'banana']}
+      />
+    </div>
+  ),
 };
 
 // =============================================================================

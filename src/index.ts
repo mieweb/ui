@@ -45,10 +45,12 @@ export * from './components/CountryCodeDropdown';
 export * from './components/CountryDropdown';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
+export * from './components/CustomizableDashboard';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
+export * from './components/DockablePanel';
 export * from './components/Dropdown';
 export * from './components/DropzoneOverlay';
 export * from './components/ClaimProviderForm';
@@ -71,6 +73,7 @@ export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
 export * from './components/FloatingWindow';
+export * from './components/GlossaryTooltip';
 export * from './components/HealthSurveillance';
 export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
@@ -155,6 +158,8 @@ export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
 export * from './components/Separator';
 export * from './components/Sheet';
+export * from './components/SectionSpyNav';
+export * from './components/SourceTip';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,

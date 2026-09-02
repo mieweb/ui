@@ -33,7 +33,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Lint
         run: pnpm lint
@@ -105,7 +105,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Build package
         run: pnpm build
@@ -153,7 +153,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Build package
         run: pnpm build
@@ -195,7 +195,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Build package
         run: pnpm build
