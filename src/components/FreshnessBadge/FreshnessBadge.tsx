@@ -177,7 +177,7 @@ export const FreshnessDot = React.forwardRef<
 ) {
   const days = daysSince(date);
   const level = levelForDays(days, thresholds);
-  const description = `${META[level].label} — ${label.toLowerCase()} ${ageText(days)}`;
+  const description = `${META[level].label} — ${label} ${ageText(days)}`;
   return (
     <span
       ref={ref}
