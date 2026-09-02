@@ -9,7 +9,13 @@ import {
   isDateInFuture,
   calculateAge,
 } from '../../utils/date';
-import { Input, type InputProps } from '../Input';
+import {
+  Input,
+  RequiredMark,
+  inputVariants,
+  floatingLabelVariants,
+  type InputProps,
+} from '../Input';
 import { Calendar, Clock } from 'lucide-react';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
@@ -36,12 +42,6 @@ const widthClasses: Record<DateInputWidth, string> = {
   fit: 'w-fit',
   fixed: 'w-44', // ~176px - enough for MM/DD/YYYY + calendar icon
 };
-
-const sizeClasses = {
-  sm: 'h-8 text-sm',
-  md: 'h-10 text-base',
-  lg: 'h-12 text-lg',
-} as const;
 
 const MONTH_NAMES = [
   'January',
@@ -943,8 +943,17 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     if (showCalendar || inputType !== 'date') {
       // Extract label/error/helper and component-specific props to handle positioning correctly
       // Filter out Input component props that aren't valid HTML input attributes
-      const { label, helperText, hideLabel, required, size, ...inputProps } =
-        props;
+      const {
+        label,
+        labelVariant,
+        helperText,
+        hideLabel,
+        required,
+        requiredVariant,
+        size,
+        placeholder: placeholderProp,
+        ...inputProps
+      } = props;
       // Ensure size has a valid value (fallback to 'md' if null/undefined)
       const resolvedSize = size ?? 'md';
       const inputId = inputProps.id || generatedId;
@@ -952,13 +961,18 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       const helperId = `${inputId}-helper`;
       const showError = hasError || !!localError;
       const errorMessage = error || localError;
+      const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
+
+      const requiredMark = required && (
+        <RequiredMark variant={requiredVariant} />
+      );
 
       return (
         <div
           data-slot="input-wrapper"
           className={cn('flex flex-col gap-1.5', widthClasses[width])}
         >
-          {label && (
+          {label && !isFloating && (
             <label
               data-slot="input-label"
               htmlFor={inputId}
@@ -968,15 +982,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               )}
             >
               {label}
-              {required && (
-                <span
-                  className="ml-1"
-                  style={{ color: '#ef4444' }}
-                  aria-hidden="true"
-                >
-                  *
-                </span>
-              )}
+              {requiredMark}
             </label>
           )}
           <div className="relative">
@@ -988,13 +994,16 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               inputMode={inputType === 'date' ? 'numeric' : undefined}
               autoComplete={autoComplete}
               placeholder={
-                inputType === 'month'
-                  ? 'Select month'
-                  : inputType === 'time'
-                    ? 'Select time'
-                    : inputType === 'datetime-local'
-                      ? 'Select date and time'
-                      : placeholder
+                isFloating
+                  ? ' '
+                  : (placeholderProp ??
+                    (inputType === 'month'
+                      ? 'Select month'
+                      : inputType === 'time'
+                        ? 'Select time'
+                        : inputType === 'datetime-local'
+                          ? 'Select date and time'
+                          : placeholder))
               }
               value={formatPickerValue(displayValue, inputType, timeFormat)}
               onChange={handleChange}
@@ -1004,6 +1013,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 setIsCalendarOpen(true);
               }}
               readOnly={!isFormattedDate}
+              required={required}
               aria-invalid={showError}
               aria-describedby={
                 [errorMessage ? errorId : null, helperText ? helperId : null]
@@ -1011,22 +1021,29 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   .join(' ') || undefined
               }
               className={cn(
-                'w-full px-3 py-2',
-                'rounded-lg border',
-                'bg-background text-foreground',
-                'placeholder:text-muted-foreground',
-                'transition-colors duration-200',
-                'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
-                'disabled:cursor-not-allowed disabled:opacity-50',
-                sizeClasses[resolvedSize],
-                showError
-                  ? 'border-destructive focus:ring-destructive'
-                  : 'border-input',
+                inputVariants({
+                  size: resolvedSize,
+                  hasError: showError,
+                  labelVariant: isFloating ? 'floating' : 'stacked',
+                }),
                 'pr-10',
                 className
               )}
               {...inputProps}
             />
+            {isFloating && (
+              <label
+                data-slot="input-label"
+                htmlFor={inputId}
+                className={floatingLabelVariants({
+                  size: resolvedSize,
+                  hasError: showError,
+                })}
+              >
+                {label}
+                {requiredMark}
+              </label>
+            )}
             <button
               data-slot="date-input-trigger"
               ref={buttonRef}

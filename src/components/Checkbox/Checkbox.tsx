@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import {
+  floatingGroupVariants,
+  floatingGroupLabelVariants,
+} from '../Input/Input';
 
 const checkboxVariants = cva(
   [
@@ -181,6 +185,14 @@ Checkbox.displayName = 'Checkbox';
 export interface CheckboxGroupProps {
   /** Group label */
   label?: string;
+  /**
+   * How the group label is rendered.
+   * - `stacked` (default): label above the options.
+   * - `floating`: renders the group as a bordered field matching floating
+   *   inputs, with the label fixed in the floated position so mixed forms
+   *   stay vertically aligned.
+   */
+  labelVariant?: 'stacked' | 'floating';
   /** Description for the group */
   description?: string;
   /** Error message for the group */
@@ -207,6 +219,7 @@ export interface CheckboxGroupProps {
  */
 function CheckboxGroup({
   label,
+  labelVariant = 'stacked',
   description,
   error,
   orientation = 'vertical',
@@ -216,6 +229,21 @@ function CheckboxGroup({
   const groupId = React.useId();
   const descriptionId = `${groupId}-description`;
   const errorId = `${groupId}-error`;
+
+  const isFloating = labelVariant === 'floating' && !!label;
+
+  const itemsElement = (
+    <div
+      role="group"
+      data-slot="checkbox-group-items"
+      className={cn(
+        'flex gap-4',
+        orientation === 'vertical' && 'flex-col gap-2'
+      )}
+    >
+      {children}
+    </div>
+  );
 
   return (
     <fieldset
@@ -230,30 +258,44 @@ function CheckboxGroup({
       {label && (
         <legend
           data-slot="checkbox-group-legend"
-          className="text-foreground mb-1 text-sm font-medium"
+          className={cn(
+            // Legends are excluded from the fieldset's flex layout; explicit
+            // margin matches the stacked Input label's 6px gap.
+            'text-foreground mb-1.5 text-sm font-medium',
+            isFloating && 'sr-only'
+          )}
         >
           {label}
         </legend>
       )}
+      {isFloating ? (
+        <div
+          data-slot="checkbox-group-field"
+          className={floatingGroupVariants({ hasError: !!error })}
+        >
+          <span
+            aria-hidden="true"
+            data-slot="checkbox-group-floating-label"
+            className={floatingGroupLabelVariants({ hasError: !!error })}
+          >
+            {label}
+          </span>
+          {itemsElement}
+        </div>
+      ) : null}
       {description && (
         <p
           id={descriptionId}
           data-slot="checkbox-group-description"
-          className="text-muted-foreground mb-3 text-xs"
+          className={cn(
+            'text-muted-foreground text-xs',
+            isFloating ? 'mt-1' : 'mb-3'
+          )}
         >
           {description}
         </p>
       )}
-      <div
-        role="group"
-        data-slot="checkbox-group-items"
-        className={cn(
-          'flex gap-4',
-          orientation === 'vertical' && 'flex-col gap-2'
-        )}
-      >
-        {children}
-      </div>
+      {!isFloating && itemsElement}
       {error && (
         <p
           id={errorId}

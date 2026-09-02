@@ -108,3 +108,67 @@ describe('Autocomplete', () => {
     expect(input).toHaveAttribute('aria-expanded', 'false');
   });
 });
+
+describe('Autocomplete label', () => {
+  it('renders a stacked label associated with the input', () => {
+    renderWithTheme(
+      <Autocomplete
+        {...baseProps}
+        aria-label={undefined}
+        onSelect={vi.fn()}
+        label="Assignee"
+      />
+    );
+    const input = screen.getByLabelText(/assignee/i);
+    expect(input).toHaveAttribute('role', 'combobox');
+    const label = document.querySelector('[data-slot="autocomplete-label"]');
+    expect(label).not.toHaveClass('absolute');
+  });
+
+  it('renders a floating label and blanks the placeholder', () => {
+    renderWithTheme(
+      <Autocomplete
+        {...baseProps}
+        aria-label={undefined}
+        onSelect={vi.fn()}
+        label="Assignee"
+        labelVariant="floating"
+        placeholder="Search…"
+      />
+    );
+    const input = screen.getByLabelText(/assignee/i);
+    expect(input).toHaveClass('peer');
+    expect(input).toHaveAttribute('placeholder', ' ');
+    const label = document.querySelector('[data-slot="autocomplete-label"]');
+    expect(label).toHaveClass('absolute');
+  });
+
+  it('shows a destructive asterisk and required attribute when required', () => {
+    renderWithTheme(
+      <Autocomplete
+        {...baseProps}
+        onSelect={vi.fn()}
+        label="Assignee"
+        required
+      />
+    );
+    expect(screen.getByRole('combobox')).toBeRequired();
+    const star = screen.getByText('*');
+    expect(star).toHaveClass('text-destructive');
+    expect(star).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('shows a warning asterisk for requiredVariant="warning"', () => {
+    renderWithTheme(
+      <Autocomplete
+        {...baseProps}
+        onSelect={vi.fn()}
+        label="Assignee"
+        labelVariant="floating"
+        required
+        requiredVariant="warning"
+      />
+    );
+    expect(screen.getByText('*')).toHaveClass('text-warning');
+  });
+});
