@@ -595,7 +595,10 @@ export const CustomizableDashboard = React.forwardRef<
   const layoutMode = controlledLayout ?? internalLayout;
 
   const [colOrder, setColOrder] = React.useState<DashboardOrder>(() =>
-    mergeColumnOrder(columns, controlledOrder ?? defaultOrder ?? null)
+    consolidateColumns(
+      mergeColumnOrder(columns, controlledOrder ?? defaultOrder ?? null),
+      controlledLayout ?? defaultLayout
+    )
   );
   const [activeId, setActiveId] = React.useState<string | null>(null);
 
@@ -636,14 +639,20 @@ export const CustomizableDashboard = React.forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only restore
   }, [storageKey]);
 
-  // Sync controlled order and newly added/removed items while not dragging.
+  // Sync controlled order and newly added/removed items while not dragging,
+  // consolidating into the effective layout so portlets in columns beyond the
+  // visible count (e.g. mounting with `defaultLayout` 1/2, or a restored or
+  // controlled layout) are never sliced off the render.
   React.useEffect(() => {
     if (draggingRef.current) return;
     setColOrder((prev) => {
-      const next = mergeColumnOrder(columns, controlledOrder ?? prev);
+      const next = consolidateColumns(
+        mergeColumnOrder(columns, controlledOrder ?? prev),
+        layoutMode
+      );
       return JSON.stringify(next) === JSON.stringify(prev) ? prev : next;
     });
-  }, [columns, controlledOrder]);
+  }, [columns, controlledOrder, layoutMode]);
 
   const setLayout = React.useCallback(
     (mode: DashboardLayout) => {
