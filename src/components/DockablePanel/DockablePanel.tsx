@@ -227,7 +227,7 @@ export function DockablePanel({
         className={cn(
           'fixed',
           docked
-            ? 'inset-auto right-6 bottom-0 w-[26rem] max-w-[calc(100vw-3rem)] overflow-hidden max-sm:inset-x-0 max-sm:w-full max-sm:max-w-full'
+            ? 'inset-auto end-6 bottom-0 w-[26rem] max-w-[calc(100vw-3rem)] overflow-hidden max-sm:inset-x-0 max-sm:w-full max-sm:max-w-full'
             : 'inset-6 flex justify-center max-sm:inset-0'
         )}
         style={{ zIndex: 'var(--mieweb-dockable-panel-z, 45)' }}
@@ -315,7 +315,7 @@ export function DockablePanel({
             className={cn(
               'flex min-h-0 flex-1 flex-col',
               docked &&
-                'absolute top-full right-0 h-[calc(100vh-4rem)] w-[min(90rem,100vw-3rem)] max-sm:w-screen'
+                'absolute end-0 top-full h-[calc(100vh-4rem)] w-[min(90rem,100vw-3rem)] max-sm:w-screen'
             )}
           >
             {children}
