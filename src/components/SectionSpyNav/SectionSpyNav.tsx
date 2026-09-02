@@ -163,7 +163,7 @@ export function SectionSpyNav({
         <span
           className={cn(
             'shrink-0 text-[11px] font-semibold tracking-wide uppercase max-md:hidden',
-            brand ? 'text-white/60' : 'text-muted-foreground'
+            brand ? 'text-white/85' : 'text-muted-foreground'
           )}
           aria-hidden="true"
         >
@@ -186,7 +186,7 @@ export function SectionSpyNav({
                   brand
                     ? isActive
                       ? 'font-semibold text-white'
-                      : 'text-white/70 hover:text-white'
+                      : 'text-white/85 hover:text-white'
                     : isActive
                       ? 'text-foreground font-semibold'
                       : 'text-muted-foreground hover:text-foreground'
