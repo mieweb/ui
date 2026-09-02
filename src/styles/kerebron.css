@@ -119,6 +119,16 @@
   color: var(--kb-menu-dropdown-text) !important;
 }
 
+/*
+ * Kerebron's base.css paints inline shortcode pills green without setting a
+ * text color, so the inherited foreground fails WCAG AA contrast. Pin an
+ * explicit white-on-green pairing (≈5.1:1) that holds in both themes.
+ */
+.kb-shortcode-inline {
+  background-color: #008000;
+  color: #ffffff;
+}
+
 /* Overflow-menu icons declare min sizes that burst their compact buttons. */
 .kb-custom-menu__overflow-menu .kb-icon {
   display: inline-flex !important;

@@ -186,15 +186,22 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         });
 
         editorInstance.current = editor;
-        const surfaceAttributes = {
-          ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
-          ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
-        };
+        // The contenteditable surface has no implicit ARIA role, so labeling
+        // attributes are only permitted alongside an explicit textbox role.
+        const surfaceAttributes =
+          ariaLabel || ariaLabelledBy
+            ? {
+                role: 'textbox',
+                'aria-multiline': 'true',
+                ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+                ...(ariaLabelledBy
+                  ? { 'aria-labelledby': ariaLabelledBy }
+                  : {}),
+              }
+            : null;
         editor.view.setProps({
           editable: () => !disabledRef.current,
-          ...(Object.keys(surfaceAttributes).length
-            ? { attributes: surfaceAttributes }
-            : {}),
+          ...(surfaceAttributes ? { attributes: surfaceAttributes } : {}),
         });
         editor.addEventListener('transaction', onTransaction);
 
