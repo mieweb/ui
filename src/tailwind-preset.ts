@@ -601,6 +601,8 @@ export const miewebUISafelist = [
   'opacity-60',
   // SourceTip hover card — trigger affordance, gradient header, ring, scroll cap
   'cursor-help',
+  'hover:text-primary-500',
+  'dark:hover:text-primary-300',
   'w-80',
   'decoration-dashed',
   'decoration-primary-400/70',

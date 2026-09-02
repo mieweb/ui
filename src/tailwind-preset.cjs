@@ -127,6 +127,12 @@ module.exports = {
     'truncate',
     // SourceTip hover card — trigger affordance, gradient header, ring, scroll cap
     'cursor-help',
+    'underline',
+    'text-primary-600',
+    'hover:text-primary-500',
+    'dark:text-primary-400',
+    'dark:hover:text-primary-300',
+    'text-muted-foreground/70',
     'w-80',
     'decoration-dashed',
     'decoration-primary-400/70',
