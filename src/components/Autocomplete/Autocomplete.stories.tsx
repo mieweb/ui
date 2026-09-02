@@ -175,6 +175,52 @@ export const Basic: Story = {
   },
 };
 
+function LabelsExample() {
+  const shared = {
+    items: employees,
+    getItemKey: (e: Employee) => e.id,
+    filter: (e: Employee, q: string) =>
+      e.name.toLowerCase().includes(q.toLowerCase()),
+    renderItem: (e: Employee) => <span>{e.name}</span>,
+    onSelect: () => {},
+  };
+  return (
+    <div className="max-w-md space-y-6">
+      <Autocomplete<Employee>
+        {...shared}
+        label="Assignee"
+        required
+        placeholder="Search employees…"
+      />
+      <Autocomplete<Employee>
+        {...shared}
+        label="Assignee"
+        labelVariant="floating"
+        required
+      />
+      <Autocomplete<Employee>
+        {...shared}
+        label="Backup assignee (recommended)"
+        labelVariant="floating"
+        required
+        requiredVariant="warning"
+      />
+    </div>
+  );
+}
+
+export const Labels: Story = {
+  render: () => <LabelsExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Built-in labels: `label` renders stacked by default or inside the field with `labelVariant="floating"`. `required` adds an asterisk — `requiredVariant="warning"` renders it in the warning color for soft requirements.',
+      },
+    },
+  },
+};
+
 function CreatableExample() {
   const [items, setItems] = useState<Employee[]>(employees);
   const [selected, setSelected] = useState<Employee | null>(null);
