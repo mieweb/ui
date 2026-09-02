@@ -1398,6 +1398,14 @@ body.condensed [data-slot='input-helper'] {
   line-height: 0.875rem !important;
 }
 
+/* ── DateInput ── */
+
+/* Shares the Input slots; only the calendar/clock trigger needs scaling down. */
+body.condensed [data-slot='date-input-trigger'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
 /* ── Textarea ── */
 
 /* Wrapper: tighter gap between label/textarea/footer */
