@@ -42,6 +42,16 @@ export function daysSince(date: string | Date): number | null {
   return Math.max(0, days);
 }
 
+function levelForDays(
+  days: number | null,
+  thresholds: FreshnessThresholds
+): FreshnessLevel {
+  if (days === null) return 'unknown';
+  if (days < thresholds.fresh) return 'fresh';
+  if (days < thresholds.aging) return 'aging';
+  return 'stale';
+}
+
 /**
  * Bucket a date into fresh / aging / stale by day thresholds. Unparseable
  * dates return `unknown` rather than masquerading as fresh or stale.
@@ -50,11 +60,7 @@ export function freshnessLevel(
   date: string | Date,
   thresholds: FreshnessThresholds = DEFAULT_THRESHOLDS
 ): FreshnessLevel {
-  const days = daysSince(date);
-  if (days === null) return 'unknown';
-  if (days < thresholds.fresh) return 'fresh';
-  if (days < thresholds.aging) return 'aging';
-  return 'stale';
+  return levelForDays(daysSince(date), thresholds);
 }
 
 function ageText(days: number | null): string {
@@ -129,8 +135,8 @@ export const FreshnessBadge = React.forwardRef<
   },
   ref
 ) {
-  const level = freshnessLevel(date, thresholds);
   const days = daysSince(date);
+  const level = levelForDays(days, thresholds);
   const { Icon, chip } = META[level];
   return (
     <span
@@ -169,8 +175,8 @@ export const FreshnessDot = React.forwardRef<
   },
   ref
 ) {
-  const level = freshnessLevel(date, thresholds);
   const days = daysSince(date);
+  const level = levelForDays(days, thresholds);
   const description = `${META[level].label} — ${label.toLowerCase()} ${ageText(days)}`;
   return (
     <span
