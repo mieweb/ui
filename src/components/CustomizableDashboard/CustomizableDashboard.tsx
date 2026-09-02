@@ -335,12 +335,16 @@ export function reorderOnDrop(
   return next;
 }
 
-/** Consolidate columns beyond the visible count into the last visible one. */
+/**
+ * Consolidate columns beyond the visible count into the last visible one.
+ * Returns the same reference when nothing needs to move so callers can use
+ * reference equality to skip persistence/notification.
+ */
 export function consolidateColumns(
   order: DashboardOrder,
   mode: DashboardLayout
 ): DashboardOrder {
-  if (mode >= 3) return order;
+  if (mode >= 3 || requiredColumns(order) <= mode) return order;
   if (mode === 1) return [[...order[0], ...order[1], ...order[2]], [], []];
   return [[...order[0]], [...order[1], ...order[2]], []];
 }
@@ -749,7 +753,11 @@ export const CustomizableDashboard = React.forwardRef<
         crossedColumns
       );
       if (next !== colOrderRef.current) setColOrder(next);
-      commitOrder(next);
+      // A drag that ends where it started is a no-op: skip the commit so it
+      // can't write storage, notify hosts, or auto-shrink the layout.
+      if (JSON.stringify(next) !== JSON.stringify(prevColOrder.current)) {
+        commitOrder(next);
+      }
     },
     [commitOrder]
   );
