@@ -240,7 +240,7 @@ export function GlossaryTooltip({
     onClick: onTriggerClick,
     className: cn(
       triggerClasses,
-      href && 'text-primary-700 dark:text-primary-400 font-medium'
+      href && 'text-primary-800 dark:text-primary-400 font-medium'
     ),
   };
 
@@ -345,7 +345,7 @@ export function GlossaryTooltip({
                           <a
                             key={r.term}
                             href={r.href}
-                            className="border-border bg-card text-foreground hover:border-primary-400 hover:text-primary-700 dark:hover:text-primary-400 rounded-full border px-2 py-0.5 text-[11px] font-medium"
+                            className="border-border bg-card text-foreground hover:border-primary-400 hover:text-primary-800 dark:hover:text-primary-400 rounded-full border px-2 py-0.5 text-[11px] font-medium"
                           >
                             {r.term}
                           </a>
@@ -366,7 +366,7 @@ export function GlossaryTooltip({
                         href={source.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary-700 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 min-w-0 truncate text-[11px] font-semibold"
+                        className="text-primary-800 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 min-w-0 truncate text-[11px] font-semibold"
                       >
                         {source.label}
                       </a>
