@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ClipboardList, Activity, Pill, Users } from 'lucide-react';
 import {
@@ -59,7 +60,7 @@ type Story = StoryObj<typeof meta>;
 
 function widget(
   title: string,
-  icon: React.ReactNode,
+  icon: ReactNode,
   items: { label: string; value: string }[]
 ) {
   return (
@@ -166,9 +167,7 @@ export const Controlled: Story = {
   },
 };
 
-function ControlledExample(
-  args: React.ComponentProps<typeof CustomizableDashboard>
-) {
+function ControlledExample(args: ComponentProps<typeof CustomizableDashboard>) {
   const [order, setOrder] = useState<DashboardOrder>([
     ['demographics', 'vitals'],
     ['medications'],
@@ -250,7 +249,7 @@ export const ToolbarInPageHeader: Story = {
 };
 
 function ToolbarSlotExample(
-  args: React.ComponentProps<typeof CustomizableDashboard>
+  args: ComponentProps<typeof CustomizableDashboard>
 ) {
   const slotRef = useRef<HTMLDivElement>(null);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
