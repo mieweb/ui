@@ -281,7 +281,8 @@ function Autocomplete<T>({
         aria-activedescendant={activeId}
         aria-label={ariaLabel}
         autoComplete="off"
-        data-slot="autocomplete-input"
+        // The shared Input slot: condensed-view.css keys density off it.
+        data-slot="input"
         value={query}
         // A single-space placeholder keeps :placeholder-shown reliable so the
         // label can float via CSS alone (mirrors Input).
