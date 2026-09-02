@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * SuperChat Mermaid plugin (opt-in).
  *
