@@ -97,6 +97,11 @@ export async function createEditorKits(
   const url = config.wsUrl ?? defaultWsUrl();
   return [
     new SafeAdvancedEditorKit(true),
-    new HuddleYjsKit(url, config.params ?? {}, config.WebSocketPolyfill, config.user),
+    new HuddleYjsKit(
+      url,
+      config.params ?? {},
+      config.WebSocketPolyfill,
+      config.user
+    ),
   ];
 }

@@ -117,14 +117,23 @@ export function DockablePanel({
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key !== 'Escape') return;
+      // A docked panel is non-modal — the app behind it owns global Escape.
+      // Only an Escape from within the panel acts on it.
+      if (
+        modeRef.current === 'docked' &&
+        !panelRef.current?.contains(event.target as Node)
+      ) {
+        return;
+      }
       if (dockable && dirtyRef.current && modeRef.current === 'full') {
         onModeChangeRef.current?.('docked');
         return;
       }
       requestClose();
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    const doc = panelRef.current?.ownerDocument ?? document;
+    doc.addEventListener('keydown', handleKeyDown);
+    return () => doc.removeEventListener('keydown', handleKeyDown);
   }, [dockable, requestClose]);
 
   // Work held only in memory means leaving the page has to be a choice.
@@ -152,6 +161,13 @@ export function DockablePanel({
       for (const element of inerted) element.removeAttribute('inert');
     };
   }, [mode]);
+
+  // Docked content is clipped, not hidden — make it unreachable for keyboard
+  // and assistive tech too, so only the dock strip's controls remain. Runs
+  // before the focus effect below so restoring can focus into the content.
+  React.useEffect(() => {
+    contentRef.current?.toggleAttribute('inert', docked);
+  }, [docked]);
 
   // Opening lands the caret in the content, not on the header's chrome.
   React.useEffect(() => {
@@ -222,7 +238,7 @@ export function DockablePanel({
           data-slot="dockable-panel"
           data-mode={docked ? 'docked' : 'full'}
           className={cn(
-            'relative flex flex-col overflow-hidden border border-border bg-card text-card-foreground shadow-[0_1.25rem_2.5rem_rgb(15_23_42/0.22)]',
+            'border-border bg-card text-card-foreground relative flex flex-col overflow-hidden border shadow-[0_1.25rem_2.5rem_rgb(15_23_42/0.22)]',
             docked
               ? 'w-full rounded-t-lg border-b-0'
               : 'h-full w-full max-w-[90rem] rounded-lg',
@@ -236,7 +252,7 @@ export function DockablePanel({
         >
           <div
             data-slot="dockable-panel-header"
-            className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5"
+            className="border-border flex items-center justify-between gap-2 border-b px-3 py-2.5"
           >
             {docked ? (
               <div
@@ -260,7 +276,9 @@ export function DockablePanel({
                   variant="ghost"
                   size="sm"
                   data-slot={
-                    docked ? 'dockable-panel-restore' : 'dockable-panel-collapse'
+                    docked
+                      ? 'dockable-panel-restore'
+                      : 'dockable-panel-collapse'
                   }
                   aria-expanded={!docked}
                   aria-controls={contentId}

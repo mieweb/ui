@@ -46,9 +46,9 @@ function ComposerExample() {
 
   return (
     <div className="max-w-2xl space-y-2">
-      <label htmlFor="composer-body" id="composer-body-label">
-        Note
-      </label>
+      {/* Not a <label htmlFor>: the editor host is a div, not a labelable
+          control — aria-labelledby carries the name instead. */}
+      <span id="composer-body-label">Note</span>
       <RichEditor
         ref={editorRef}
         id="composer-body"

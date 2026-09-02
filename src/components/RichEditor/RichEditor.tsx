@@ -1,3 +1,5 @@
+'use client';
+
 import {
   forwardRef,
   useEffect,
@@ -45,7 +47,12 @@ export interface RichEditorProps {
   collab?: CollabConfig;
   /** Read-only surface: no typing, and the content dims. */
   disabled?: boolean;
-  /** Id for the editor surface, so a `<label htmlFor>` can point at it. */
+  /**
+   * Id for the editor host element — an `aria-labelledby`/`aria-describedby`
+   * anchor. The host is a `div`, not a labelable control, so a
+   * `<label htmlFor>` will not associate; name the editor with `aria-label`
+   * or `aria-labelledby` instead.
+   */
   id?: string;
   /** Extra classes on the editor surface, beside `kb-component`. */
   className?: string;
@@ -179,9 +186,15 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         });
 
         editorInstance.current = editor;
+        const surfaceAttributes = {
+          ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+          ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
+        };
         editor.view.setProps({
           editable: () => !disabledRef.current,
-          ...(ariaLabel ? { attributes: { 'aria-label': ariaLabel } } : {}),
+          ...(Object.keys(surfaceAttributes).length
+            ? { attributes: surfaceAttributes }
+            : {}),
         });
         editor.addEventListener('transaction', onTransaction);
 

@@ -51,7 +51,7 @@ function ComposerExample() {
               </span>
               {subject.trim() && (
                 <span
-                  className="size-2 shrink-0 rounded-full bg-primary"
+                  className="bg-primary size-2 shrink-0 rounded-full"
                   aria-label="Unsaved changes"
                 />
               )}
@@ -66,7 +66,7 @@ function ComposerExample() {
               onChange={(event) => setSubject(event.target.value)}
             />
             <textarea
-              className="min-h-64 flex-1 rounded-lg border border-border bg-background p-3"
+              className="border-border bg-background min-h-64 flex-1 rounded-lg border p-3"
               placeholder="Dear…"
             />
           </div>

@@ -79,8 +79,12 @@ describe('DockablePanel', () => {
       'aria-expanded',
       'false'
     );
-    // The app behind must be reachable again.
-    expect(document.body.querySelector('[inert]')).toBeNull();
+    // The app behind must be reachable again…
+    expect(document.body.querySelector(':scope > [inert]')).toBeNull();
+    // …while the clipped content is off-limits to keyboard and AT.
+    expect(
+      document.querySelector('[data-slot="dockable-panel-content"]')
+    ).toHaveAttribute('inert');
   });
 
   it('keeps the content mounted across a collapse', async () => {
@@ -143,6 +147,28 @@ describe('DockablePanel', () => {
       </DockablePanel>
     );
     fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('ignores Escape from outside while docked but honors it from within', () => {
+    const onClose = vi.fn();
+    renderWithTheme(
+      <DockablePanel
+        title="Compose letter"
+        mode="docked"
+        onModeChange={vi.fn()}
+        onClose={onClose}
+      >
+        <Body />
+      </DockablePanel>
+    );
+    // Docked is non-modal — Escape in the app behind must not touch it.
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Discard' }), {
+      key: 'Escape',
+    });
     expect(onClose).toHaveBeenCalled();
   });
 
