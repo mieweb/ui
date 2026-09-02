@@ -240,6 +240,40 @@ describe('CustomizableDashboard', () => {
     ).toHaveLength(1);
   });
 
+  it('renders every portlet when mounted with a reduced defaultLayout', () => {
+    renderWithTheme(
+      <CustomizableDashboard columns={makeColumns()} defaultLayout={1} />
+    );
+    const groups = screen.getAllByRole('group', { name: /dashboard column/i });
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toContainElement(screen.getByTestId('portlet-a'));
+    expect(groups[0]).toContainElement(screen.getByTestId('portlet-b'));
+    expect(groups[0]).toContainElement(screen.getByTestId('portlet-c'));
+  });
+
+  it('renders every portlet when a controlled layout shrinks externally', () => {
+    const { rerender } = renderWithTheme(
+      <CustomizableDashboard columns={makeColumns()} layout={3} />
+    );
+    rerender(<CustomizableDashboard columns={makeColumns()} layout={2} />);
+    const groups = screen.getAllByRole('group', { name: /dashboard column/i });
+    expect(groups).toHaveLength(2);
+    expect(groups[1]).toContainElement(screen.getByTestId('portlet-b'));
+    expect(groups[1]).toContainElement(screen.getByTestId('portlet-c'));
+  });
+
+  it('renders every portlet when a saved reduced layout is restored', () => {
+    localStorage.setItem('dash-dashboard-layout', '1');
+    renderWithTheme(
+      <CustomizableDashboard columns={makeColumns()} storageKey="dash" />
+    );
+    const groups = screen.getAllByRole('group', { name: /dashboard column/i });
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toContainElement(screen.getByTestId('portlet-a'));
+    expect(groups[0]).toContainElement(screen.getByTestId('portlet-b'));
+    expect(groups[0]).toContainElement(screen.getByTestId('portlet-c'));
+  });
+
   it('respects a controlled order', () => {
     renderWithTheme(
       <CustomizableDashboard
