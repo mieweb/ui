@@ -87,6 +87,34 @@ describe('DockablePanel', () => {
     ).toHaveAttribute('inert');
   });
 
+  it('keeps the background inert until the last full panel closes', () => {
+    const app = document.createElement('div');
+    app.id = 'app';
+    document.body.appendChild(app);
+    try {
+      const first = renderWithTheme(
+        <DockablePanel title="First" onClose={vi.fn()}>
+          <Body />
+        </DockablePanel>
+      );
+      const second = renderWithTheme(
+        <DockablePanel title="Second" onClose={vi.fn()}>
+          <input aria-label="Other" />
+        </DockablePanel>
+      );
+      expect(app).toHaveAttribute('inert');
+
+      // Closing one panel must not free the background for the other.
+      first.unmount();
+      expect(app).toHaveAttribute('inert');
+
+      second.unmount();
+      expect(app).not.toHaveAttribute('inert');
+    } finally {
+      app.remove();
+    }
+  });
+
   it('keeps the content mounted across a collapse', async () => {
     const user = userEvent.setup();
     const onModeChange = vi.fn();

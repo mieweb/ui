@@ -20,6 +20,27 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
+// Reference-counted `inert` claims: overlapping full-mode panels may inert the
+// same background element, and it must stay inert until the *last* one lets
+// go. Elements inerted by something other than us are never counted or freed.
+const inertClaims = new WeakMap<Element, number>();
+
+function claimInert(element: Element): void {
+  const claims = inertClaims.get(element) ?? 0;
+  if (claims === 0) element.setAttribute('inert', '');
+  inertClaims.set(element, claims + 1);
+}
+
+function releaseInert(element: Element): void {
+  const claims = inertClaims.get(element) ?? 0;
+  if (claims <= 1) {
+    inertClaims.delete(element);
+    element.removeAttribute('inert');
+  } else {
+    inertClaims.set(element, claims - 1);
+  }
+}
+
 export interface DockablePanelProps {
   /** Accessible name for the dialog, and the dock strip's default summary. */
   title: string;
@@ -154,11 +175,15 @@ export function DockablePanel({
     const root = panel.closest('[data-slot="dockable-panel-dock"]') ?? panel;
     const inerted = Array.from(panel.ownerDocument.body.children).filter(
       (child) =>
-        child !== root && !child.contains(root) && !child.hasAttribute('inert')
+        child !== root &&
+        !child.contains(root) &&
+        // Inert applied by something that isn't a DockablePanel is not ours
+        // to count or to remove.
+        (inertClaims.has(child) || !child.hasAttribute('inert'))
     );
-    for (const element of inerted) element.setAttribute('inert', '');
+    for (const element of inerted) claimInert(element);
     return () => {
-      for (const element of inerted) element.removeAttribute('inert');
+      for (const element of inerted) releaseInert(element);
     };
   }, [mode]);
 
