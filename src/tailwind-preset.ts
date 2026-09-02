@@ -604,6 +604,7 @@ export const miewebUISafelist = [
   'w-80',
   'decoration-dashed',
   'decoration-primary-400/70',
+  'bg-primary-400',
   'underline-offset-4',
   'bg-gradient-to-br',
   'from-primary-700',
