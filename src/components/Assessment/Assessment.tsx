@@ -294,6 +294,11 @@ export interface AssessmentProps extends Omit<
   /** Hide all controls (display only) */
   readOnly?: boolean;
   /**
+   * Initial mode of the unified add row's "What to add" selector.
+   * Default 'auto' (the pick's coding system decides concern vs order).
+   */
+  defaultAddMode?: 'auto' | 'problem' | 'order';
+  /**
    * Restrict concern searches to billable (leaf) ICD-10 codes — category
    * roots (E11) and SNOMED synonyms are dropped. Forwarded to
    * renderOrderSearch as `billableOnly`.
@@ -839,6 +844,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       onReorderOrders,
       renderOrderSearch,
       readOnly = false,
+      defaultAddMode = 'auto',
       billableOnly = false,
       className,
       'data-testid': dataTestId,
@@ -848,7 +854,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
   ) => {
     const [addingFor, setAddingFor] = React.useState<string | null>(null);
     const [addMode, setAddMode] = React.useState<'auto' | 'problem' | 'order'>(
-      'auto'
+      defaultAddMode
     );
     /** Free text typed in auto mode — we must ask what it is before adding */
     const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(
