@@ -85,6 +85,7 @@ export interface AutocompleteProps<T> extends Pick<
     | 'size'
     | 'placeholder'
     | 'disabled'
+    | 'required'
     | 'aria-label'
   >;
 }
@@ -286,7 +287,6 @@ function Autocomplete<T>({
         // label can float via CSS alone (mirrors Input).
         placeholder={isFloating ? ' ' : placeholder}
         disabled={disabled}
-        required={required}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={() => {
@@ -300,6 +300,7 @@ function Autocomplete<T>({
           inputClassName
         )}
         {...inputProps}
+        required={required}
       />
       {isFloating && (
         <label
