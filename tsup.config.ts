@@ -24,6 +24,7 @@ export default defineConfig({
     'components/Button/index': 'src/components/Button/index.ts',
     'components/Card/index': 'src/components/Card/index.ts',
     'components/Checkbox/index': 'src/components/Checkbox/index.ts',
+    'components/ClampedText/index': 'src/components/ClampedText/index.ts',
     'components/CollabStatus/index': 'src/components/CollabStatus/index.ts',
     'components/Collapsible/index': 'src/components/Collapsible/index.ts',
     'components/CopyButton/index': 'src/components/CopyButton/index.ts',
