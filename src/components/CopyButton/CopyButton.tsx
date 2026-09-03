@@ -22,8 +22,8 @@ export interface CopyButtonProps extends Omit<
 
 /**
  * An inline copy-to-clipboard icon button with a brief success check.
- * Stateless across instances — safe to drop into table rows, ID chips,
- * and detail fields.
+ * Copied state is isolated per instance — safe to drop into table rows,
+ * ID chips, and detail fields.
  *
  * @example
  * ```tsx
