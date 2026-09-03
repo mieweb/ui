@@ -295,7 +295,7 @@ const confidenceBadgeVariants = cva(
   {
     variants: {
       level: {
-        high: 'bg-success-100 text-success dark:bg-success-900/30 dark:text-success-300',
+        high: 'bg-success-100 text-success-900 dark:bg-success-900/30 dark:text-success-300',
         medium:
           'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
         low: 'bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',

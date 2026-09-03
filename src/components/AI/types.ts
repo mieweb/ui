@@ -131,8 +131,17 @@ export type AIMessageStatus = 'pending' | 'streaming' | 'complete' | 'error';
  */
 export interface AIMessageContent {
   /** Type of content */
-  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'code';
-  /** Text content */
+  type:
+    | 'text'
+    | 'tool_use'
+    | 'tool_result'
+    | 'thinking'
+    | 'code'
+    | 'image'
+    | 'file'
+    | 'audio'
+    | 'video';
+  /** Text content (also used as the label for `audio` and `video` blocks) */
   text?: string;
   /** Tool call reference */
   toolCall?: MCPToolCall;
@@ -140,6 +149,22 @@ export interface AIMessageContent {
   language?: string;
   /** Whether this content is collapsed by default */
   collapsed?: boolean;
+  /** Image source URL (for `image` blocks) */
+  imageUrl?: string;
+  /** Alt text / file name (for `image` and `file` blocks) */
+  name?: string;
+  /** File size in bytes (for `file` blocks) */
+  fileSize?: number;
+  /** MIME type (for `file`, `audio`, and `video` blocks) */
+  mimeType?: string;
+  /** Download/open URL (for `file` blocks) */
+  fileUrl?: string;
+  /** Source URL for `audio` blocks */
+  audioUrl?: string;
+  /** Source URL for `video` blocks */
+  videoUrl?: string;
+  /** Duration in seconds for `audio` blocks */
+  duration?: number;
 }
 
 /**
@@ -190,6 +215,9 @@ export type AIRenderTextContent = (
   text: string,
   ctx: AITextRenderContext
 ) => React.ReactNode;
+
+/** Render-prop for appending custom content below a message bubble. */
+export type AIRenderMessageFooter = (message: AIMessage) => React.ReactNode;
 
 // ============================================================================
 // AI Chat Types

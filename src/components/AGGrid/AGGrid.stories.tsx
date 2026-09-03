@@ -1,32 +1,33 @@
+import * as React from 'react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { AGGrid, type ColDef } from './AGGrid';
+import { Badge } from '../Badge';
+import { Button } from '../Button';
+import { withDeprecationBanner, DEPRECATION_NOTICE } from './DeprecationBanner';
+
+// Import cell renderers
+import {
+  MemoizedAvatarNameRenderer,
+  MemoizedStatusBadgeRenderer,
+  MemoizedEngagementScoreRenderer,
+  MemoizedEmailRenderer,
+  MemoizedPhoneRenderer,
+  MemoizedLinkedInRenderer,
+  MemoizedDomainRenderer,
+  MemoizedCurrencyRenderer,
+  MemoizedNumberRenderer,
+  MemoizedDateRenderer,
+  MemoizedBooleanRenderer,
+  MemoizedCompanyRenderer,
+  MemoizedProgressRenderer,
+  MemoizedTagsRenderer,
+  statusColors,
+} from './CellRenderers';
+
 // Import AG Grid styles
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/agGridQuartzFont.css';
 import './ag-grid-theme.css';
-
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import * as React from 'react';
-
-import { Badge } from '../Badge';
-import { Button } from '../Button';
-import { AGGrid, type ColDef } from './AGGrid';
-// Import cell renderers
-import {
-  MemoizedAvatarNameRenderer,
-  MemoizedBooleanRenderer,
-  MemoizedCompanyRenderer,
-  MemoizedCurrencyRenderer,
-  MemoizedDateRenderer,
-  MemoizedDomainRenderer,
-  MemoizedEmailRenderer,
-  MemoizedEngagementScoreRenderer,
-  MemoizedLinkedInRenderer,
-  MemoizedNumberRenderer,
-  MemoizedPhoneRenderer,
-  MemoizedProgressRenderer,
-  MemoizedStatusBadgeRenderer,
-  MemoizedTagsRenderer,
-  statusColors,
-} from './CellRenderers';
 
 // ============================================================================
 // Sample Data Types and Data
@@ -160,7 +161,7 @@ function WithRowSelectionComponent() {
           setSelectedRows(event.api.getSelectedRows());
         }}
       />
-      <div className="text-sm text-muted-foreground">
+      <div className="text-muted-foreground text-sm">
         Selected: {selectedRows.length} row(s)
         {selectedRows.length > 0 && (
           <span className="ml-2">
@@ -187,9 +188,9 @@ function WithRowClickComponent() {
         }}
       />
       {clickedRow && (
-        <div className="rounded-lg bg-muted p-4">
+        <div className="bg-muted rounded-lg p-4">
           <p className="font-medium">Clicked Row:</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {clickedRow.name} - {clickedRow.email} ({clickedRow.role})
           </p>
         </div>
@@ -226,7 +227,7 @@ function WithEditableCellsComponent() {
 
   return (
     <div className="w-full space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Double-click a cell in the Name, Email, or Role columns to edit.
       </p>
       <AGGrid<User>
@@ -246,8 +247,9 @@ function WithEditableCellsComponent() {
 }
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Components/Text & Data Display/AGGrid',
+  title: 'Deprecated/AGGrid',
   component: AGGrid,
+  decorators: [withDeprecationBanner],
   parameters: {
     layout: 'padded',
     // AG Grid is a third-party component whose internal DOM renders elements
@@ -262,6 +264,8 @@ const meta: Meta<typeof AGGrid> = {
       },
       description: {
         component: `
+${DEPRECATION_NOTICE}
+
 A themed AG Grid wrapper component that integrates with the MIE Web UI design system.
 
 ## Features
@@ -971,7 +975,7 @@ Showcases all the built-in cell renderers available for AG Grid columns.
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           This grid demonstrates Avatar, Status, Engagement, Email, Phone, and
           Currency renderers.
         </p>
@@ -1046,7 +1050,7 @@ export const CompanyAndLinksRenderers: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Click on domains or LinkedIn icons to open links. Tags overflow is
           handled gracefully.
         </p>
@@ -1118,7 +1122,7 @@ export const DateFormatsShowcase: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           The DateRenderer supports multiple format options for displaying
           dates.
         </p>
@@ -1183,7 +1187,7 @@ export const ProgressAndBooleansShowcase: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Progress bars show completion percentage. Boolean values display as
           colored Yes/No badges.
         </p>
@@ -1336,7 +1340,7 @@ export const StatusColorsVariations: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           StatusBadgeRenderer can use different color configurations for
           different columns.
         </p>
@@ -1408,7 +1412,7 @@ export const WithFloatingFilters: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Type in the filter inputs below each column header to filter the data.
         </p>
         <AGGrid<Contact>

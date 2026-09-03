@@ -1,60 +1,65 @@
+/**
+ * @deprecated AGGrid is deprecated — use DataVis NITRO (`@mieweb/ui/datavis`)
+ * for all tables. This module will be removed in a future major release.
+ */
+export { AGGrid, AgGridReact } from './AGGrid';
 export type {
-  AGColDef,
   AGGridProps,
-  CellClickedEvent,
-  CellValueChangedEvent,
   ColDef,
-  FilterChangedEvent,
-  FirstDataRenderedEvent,
+  AGColDef,
   GridApi,
   GridReadyEvent,
   RowClickedEvent,
-  RowSelectedEvent,
+  CellClickedEvent,
+  CellValueChangedEvent,
   SelectionChangedEvent,
+  FilterChangedEvent,
   SortChangedEvent,
+  RowSelectedEvent,
+  FirstDataRenderedEvent,
 } from './AGGrid';
-export { AGGrid, AgGridReact } from './AGGrid';
 
 // Cell Renderers
-export type {
-  DateRendererProps,
-  ProgressRendererProps,
-  StatusBadgeRendererProps,
-  StatusConfig,
-} from './CellRenderers';
 export {
+  CellRenderers,
   // Individual renderers
   AvatarNameRenderer,
-  BooleanRenderer,
-  CellRenderers,
-  CompanyRenderer,
-  CurrencyRenderer,
-  DateRenderer,
-  DomainRenderer,
-  EmailRenderer,
+  StatusBadgeRenderer,
   EngagementScoreRenderer,
-  // Utilities
-  formatPhoneDisplay,
+  EmailRenderer,
+  PhoneRenderer,
   LinkedInRenderer,
+  DomainRenderer,
+  CurrencyRenderer,
+  NumberRenderer,
+  DateRenderer,
+  BooleanRenderer,
+  CompanyRenderer,
+  ProgressRenderer,
+  TagsRenderer,
   // Memoized renderers (recommended)
   MemoizedAvatarNameRenderer,
+  MemoizedStatusBadgeRenderer,
+  MemoizedEngagementScoreRenderer,
+  MemoizedEmailRenderer,
+  MemoizedPhoneRenderer,
+  MemoizedLinkedInRenderer,
+  MemoizedDomainRenderer,
+  MemoizedCurrencyRenderer,
+  MemoizedNumberRenderer,
+  MemoizedDateRenderer,
   MemoizedBooleanRenderer,
   MemoizedCompanyRenderer,
-  MemoizedCurrencyRenderer,
-  MemoizedDateRenderer,
-  MemoizedDomainRenderer,
-  MemoizedEmailRenderer,
-  MemoizedEngagementScoreRenderer,
-  MemoizedLinkedInRenderer,
-  MemoizedNumberRenderer,
-  MemoizedPhoneRenderer,
   MemoizedProgressRenderer,
-  MemoizedStatusBadgeRenderer,
   MemoizedTagsRenderer,
-  NumberRenderer,
-  PhoneRenderer,
-  ProgressRenderer,
-  StatusBadgeRenderer,
+  // Utilities
+  formatPhoneDisplay,
   statusColors,
-  TagsRenderer,
+} from './CellRenderers';
+
+export type {
+  StatusConfig,
+  StatusBadgeRendererProps,
+  DateRendererProps,
+  ProgressRendererProps,
 } from './CellRenderers';

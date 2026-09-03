@@ -1,7 +1,10 @@
 export {
   Select,
-  type SelectGroup,
-  type SelectOption,
-  type SelectProps,
   selectTriggerVariants,
+  type SelectProps,
+  type SelectBaseProps,
+  type SelectSingleProps,
+  type SelectMultipleProps,
+  type SelectOption,
+  type SelectGroup,
 } from './Select';

@@ -1,7 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
-
-import { Radio, RadioGroup } from './Radio';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { RadioGroup, Radio } from './Radio';
+import { Input } from '../Input';
+import { Select } from '../Select';
+import { Checkbox, CheckboxGroup } from '../Checkbox';
 
 // Wrapper component to handle controlled state for stories
 function RadioGroupWithState(
@@ -75,6 +77,11 @@ const meta = {
     label: {
       control: 'text',
       description: 'Group label displayed above the options',
+    },
+    labelVariant: {
+      control: 'select',
+      options: ['stacked', 'floating'],
+      description: 'How the group label is rendered',
     },
     description: {
       control: 'text',
@@ -313,7 +320,7 @@ function ControlledRadioDemo() {
         <Radio value="b" label="Option B" />
         <Radio value="c" label="Option C" />
       </RadioGroup>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         Selected: <code className="font-mono">{value || 'none'}</code>
       </p>
     </div>
@@ -325,4 +332,146 @@ export const Controlled: Story = {
     controls: { disable: true },
   },
   render: () => <ControlledRadioDemo />,
+};
+
+function FloatingFormAlignmentDemo() {
+  return (
+    <div className="flex flex-col gap-8">
+      <section>
+        <h3 className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+          Stacked labels throughout (aligned)
+        </h3>
+        <form className="grid w-[560px] grid-cols-2 gap-4">
+          <Input label="First name" />
+          <Input label="Last name" />
+          <Select
+            label="Country"
+            options={[
+              { value: 'us', label: 'United States' },
+              { value: 'gb', label: 'United Kingdom' },
+            ]}
+          />
+          <RadioGroup
+            name="contact-all-stacked"
+            label="Contact method"
+            orientation="horizontal"
+          >
+            <Radio value="email" label="Email" />
+            <Radio value="phone" label="Phone" />
+          </RadioGroup>
+          <Input label="Street address" />
+          <CheckboxGroup label="Preferences">
+            <Checkbox label="Subscribe to newsletter" />
+          </CheckboxGroup>
+        </form>
+      </section>
+      <section>
+        <h3 className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+          Stacked group labels next to floating inputs (misaligned)
+        </h3>
+        <form className="grid w-[560px] grid-cols-2 gap-4">
+          <Input label="First name" labelVariant="floating" />
+          <RadioGroup
+            name="contact-stacked"
+            label="Contact method"
+            orientation="horizontal"
+          >
+            <Radio value="email" label="Email" />
+            <Radio value="phone" label="Phone" />
+          </RadioGroup>
+        </form>
+      </section>
+      <section>
+        <h3 className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+          Floating group labels (aligned)
+        </h3>
+        <form className="grid w-[560px] grid-cols-2 gap-4">
+          <Input label="First name" labelVariant="floating" />
+          <Input label="Last name" labelVariant="floating" />
+          <Select
+            label="Country"
+            labelVariant="floating"
+            options={[
+              { value: 'us', label: 'United States' },
+              { value: 'gb', label: 'United Kingdom' },
+            ]}
+          />
+          <RadioGroup
+            name="contact-floating"
+            label="Contact method"
+            labelVariant="floating"
+            orientation="horizontal"
+          >
+            <Radio value="email" label="Email" />
+            <Radio value="phone" label="Phone" />
+          </RadioGroup>
+          <Input label="Street address" labelVariant="floating" />
+          <CheckboxGroup label="Preferences" labelVariant="floating">
+            <Checkbox label="Subscribe to newsletter" />
+          </CheckboxGroup>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+/**
+ * Mixes floating-label inputs with radio and checkbox groups to check
+ * vertical alignment between self-labeled controls and top-labeled groups.
+ */
+export const FloatingFormAlignment: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => <FloatingFormAlignmentDemo />,
+};
+
+export const FloatingLabel: Story = {
+  args: {
+    name: 'contact',
+    label: 'Contact method',
+    labelVariant: 'floating',
+    orientation: 'horizontal',
+    options: [
+      { value: 'email', label: 'Email' },
+      { value: 'phone', label: 'Phone' },
+    ],
+  },
+};
+
+export const FloatingLabelSizes: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex w-72 flex-col gap-4">
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <RadioGroup
+          key={size}
+          name={`size-${size}`}
+          label={`Size ${size}`}
+          labelVariant="floating"
+          orientation="horizontal"
+          size={size}
+        >
+          <Radio value="a" label="Option A" />
+          <Radio value="b" label="Option B" />
+        </RadioGroup>
+      ))}
+    </div>
+  ),
+};
+
+export const FloatingLabelWithError: Story = {
+  args: {
+    name: 'contact-error',
+    label: 'Contact method',
+    labelVariant: 'floating',
+    orientation: 'horizontal',
+    error: 'Please choose a contact method.',
+    options: [
+      { value: 'email', label: 'Email' },
+      { value: 'phone', label: 'Phone' },
+    ],
+  },
 };

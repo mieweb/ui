@@ -1,8 +1,15 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
-import { inputVariants } from '../Input';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import {
+  inputVariants,
+  floatingLabelVariants,
+  RequiredMark,
+  type RequiredMarkVariant,
+} from '../Input';
 
 export interface AutocompleteProps<T> extends Pick<
   VariantProps<typeof inputVariants>,
@@ -44,6 +51,23 @@ export interface AutocompleteProps<T> extends Pick<
   clearOnSelect?: boolean;
   /** Disable the input. */
   disabled?: boolean;
+  /** Label for the input. */
+  label?: string;
+  /**
+   * How the label is rendered.
+   * - `stacked` (default): label above the input.
+   * - `floating`: label rests inside the input like a placeholder and floats
+   *   to the top of the field when focused or filled. Ignores `placeholder`.
+   */
+  labelVariant?: 'stacked' | 'floating';
+  /** Whether the input is required. */
+  required?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
   /** Accessible label for the combobox input. */
   'aria-label'?: string;
   /** Class applied to the outer wrapper. */
@@ -61,6 +85,7 @@ export interface AutocompleteProps<T> extends Pick<
     | 'size'
     | 'placeholder'
     | 'disabled'
+    | 'required'
     | 'aria-label'
   >;
 }
@@ -102,6 +127,10 @@ function Autocomplete<T>({
   minQueryLength = 1,
   clearOnSelect = true,
   disabled,
+  label,
+  labelVariant = 'stacked',
+  required = false,
+  requiredVariant,
   size,
   className,
   inputClassName,
@@ -119,16 +148,13 @@ function Autocomplete<T>({
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const listId = React.useId();
+  const generatedInputId = React.useId();
+  const inputId = inputProps?.id ?? generatedInputId;
 
-  useClickOutside(containerRef, () => setOpen(false), open);
+  const isFloating = labelVariant === 'floating' && !!label;
+  const requiredMark = required && <RequiredMark variant={requiredVariant} />;
 
-  const setQuery = React.useCallback(
-    (next: string) => {
-      if (!isControlled) setUncontrolledValue(next);
-      onValueChange?.(next);
-    },
-    [isControlled, onValueChange]
-  );
+  const meetsMinLength = query.length >= minQueryLength;
 
   const filteredItems = React.useMemo(() => {
     if (!filter) return items;
@@ -149,10 +175,30 @@ function Autocomplete<T>({
     return itemRows;
   }, [filteredItems, showCreate, getItemKey]);
 
-  const meetsMinLength = query.length >= minQueryLength;
   const hasContent =
     rows.length > 0 || (meetsMinLength && emptyMessage != null);
   const isOpen = open && meetsMinLength && hasContent;
+
+  // Portal + fixed positioning so the listbox escapes overflow-hidden
+  // ancestors (cards, dialogs, scroll containers, …).
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open: isOpen, matchWidth: true, maxHeight: 300 });
+
+  const outsideRefs = React.useMemo(
+    () => [containerRef, floatingRef],
+    [floatingRef]
+  );
+  useClickOutside(outsideRefs, () => setOpen(false), open);
+
+  const setQuery = React.useCallback(
+    (next: string) => {
+      if (!isControlled) setUncontrolledValue(next);
+      onValueChange?.(next);
+    },
+    [isControlled, onValueChange]
+  );
 
   React.useEffect(() => {
     if (!isOpen) setActiveIndex(-1);
@@ -207,12 +253,26 @@ function Autocomplete<T>({
 
   return (
     <div
-      ref={containerRef}
+      ref={(node) => {
+        containerRef.current = node;
+        anchorRef.current = node;
+      }}
       data-slot="autocomplete"
       className={cn('relative', className)}
     >
+      {label && !isFloating && (
+        <label
+          data-slot="autocomplete-label"
+          htmlFor={inputId}
+          className="text-foreground mb-1.5 block text-sm font-medium"
+        >
+          {label}
+          {requiredMark}
+        </label>
+      )}
       <input
         ref={inputRef}
+        id={inputId}
         type="text"
         role="combobox"
         aria-expanded={isOpen}
@@ -221,73 +281,99 @@ function Autocomplete<T>({
         aria-activedescendant={activeId}
         aria-label={ariaLabel}
         autoComplete="off"
-        data-slot="autocomplete-input"
+        // The shared Input slot: condensed-view.css keys density off it.
+        data-slot="input"
         value={query}
-        placeholder={placeholder}
+        // A single-space placeholder keeps :placeholder-shown reliable so the
+        // label can float via CSS alone (mirrors Input).
+        placeholder={isFloating ? ' ' : placeholder}
         disabled={disabled}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={() => {
           if (meetsMinLength) setOpen(true);
         }}
-        className={cn(inputVariants({ size }), inputClassName)}
+        className={cn(
+          inputVariants({
+            size,
+            labelVariant: isFloating ? 'floating' : 'stacked',
+          }),
+          inputClassName
+        )}
         {...inputProps}
+        required={required}
       />
-
-      {isOpen && (
-        <div
-          id={listId}
-          role="listbox"
-          data-slot="autocomplete-list"
-          className={cn(
-            'border-border absolute z-50 mt-1 w-full overflow-auto rounded-md border',
-            'bg-card text-card-foreground max-h-[300px] shadow-lg'
-          )}
+      {isFloating && (
+        <label
+          data-slot="autocomplete-label"
+          htmlFor={inputId}
+          className={floatingLabelVariants({ size })}
         >
-          {rows.length === 0
-            ? emptyMessage != null && (
-                <div
-                  data-slot="autocomplete-empty"
-                  className="text-muted-foreground px-4 py-3 text-sm"
-                >
-                  {emptyMessage}
-                </div>
-              )
-            : rows.map((row, index) => {
-                const isActive = index === activeIndex;
-                const optionId = `${listId}-opt-${row.key}`;
-                return (
-                  <button
-                    key={row.key}
-                    id={optionId}
-                    type="button"
-                    role="option"
-                    aria-selected={isActive}
-                    data-slot={
-                      row.kind === 'create'
-                        ? 'autocomplete-create'
-                        : 'autocomplete-option'
-                    }
-                    onMouseEnter={() => setActiveIndex(index)}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => commitRow(row)}
-                    className={cn(
-                      'w-full px-4 py-3 text-left text-sm transition-colors',
-                      'border-border border-b last:border-b-0',
-                      'focus:outline-none',
-                      isActive ? 'bg-muted text-foreground' : 'hover:bg-muted',
-                      row.kind === 'create' &&
-                        'text-primary-800 flex items-center gap-2 font-medium'
-                    )}
-                  >
-                    {row.kind === 'create'
-                      ? createLabel!(query)
-                      : renderItem(row.item)}
-                  </button>
-                );
-              })}
-        </div>
+          {label}
+          {requiredMark}
+        </label>
       )}
+
+      {isOpen &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            id={listId}
+            role="listbox"
+            data-slot="autocomplete-list"
+            className={cn(
+              'border-border overflow-auto rounded-md border',
+              'bg-card text-card-foreground shadow-lg'
+            )}
+          >
+            {rows.length === 0
+              ? emptyMessage != null && (
+                  <div
+                    data-slot="autocomplete-empty"
+                    className="text-muted-foreground px-4 py-3 text-sm"
+                  >
+                    {emptyMessage}
+                  </div>
+                )
+              : rows.map((row, index) => {
+                  const isActive = index === activeIndex;
+                  const optionId = `${listId}-opt-${row.key}`;
+                  return (
+                    <button
+                      key={row.key}
+                      id={optionId}
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      data-slot={
+                        row.kind === 'create'
+                          ? 'autocomplete-create'
+                          : 'autocomplete-option'
+                      }
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => commitRow(row)}
+                      className={cn(
+                        'w-full px-4 py-3 text-left text-sm transition-colors',
+                        'border-border border-b last:border-b-0',
+                        'focus:outline-none',
+                        isActive
+                          ? 'bg-muted text-foreground'
+                          : 'hover:bg-muted',
+                        row.kind === 'create' &&
+                          'text-primary-800 flex items-center gap-2 font-medium'
+                      )}
+                    >
+                      {row.kind === 'create'
+                        ? createLabel!(query)
+                        : renderItem(row.item)}
+                    </button>
+                  );
+                })}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

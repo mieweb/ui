@@ -1,8 +1,10 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import * as libphonenumber from 'google-libphonenumber';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 const PhoneNumberUtil =
   (libphonenumber as unknown as { default?: typeof libphonenumber }).default
@@ -39,6 +41,8 @@ export interface CountryCodeDropdownProps {
   placement?: 'bottom-start' | 'bottom-end';
   /** Placeholder text for the search field */
   searchPlaceholder?: string;
+  /** id for the trigger button, enabling `<label htmlFor>` association */
+  id?: string;
   /** Label for accessibility — visually hidden */
   'aria-label'?: string;
 }
@@ -155,34 +159,27 @@ export function formatE164(phoneNumber: string, countryCode: string): string {
 // Component
 // =============================================================================
 
+/** Internal base props — `showDialCode` is not part of the public API. */
+interface CountryDropdownBaseProps extends CountryCodeDropdownProps {
+  /** Show dial codes on the trigger and in the list (default: true) */
+  showDialCode?: boolean;
+}
+
 /**
- * A country-code selector dropdown designed to sit beside a phone number input.
- *
- * Defaults to United States (+1) with the 🇺🇸 flag. Clicking the trigger opens
- * a searchable list of all supported countries with their dial codes and flags.
- *
- * Uses Google's libphonenumber for the canonical country/code list and provides
- * a `validatePhoneNumber` helper for phone validation.
- *
- * @example
- * ```tsx
- * const [country, setCountry] = useState<CountryData>();
- *
- * <div className="flex gap-2">
- *   <CountryCodeDropdown value={country?.code} onChange={setCountry} />
- *   <Input placeholder="Phone number" />
- * </div>
- * ```
+ * Shared implementation behind {@link CountryCodeDropdown} (dial-code mode)
+ * and `CountryDropdown` (country-only mode). Not exported from the package.
  */
-function CountryCodeDropdown({
+function CountryDropdownBase({
   value,
   onChange,
   disabled = false,
   className,
   placement = 'bottom-start',
   searchPlaceholder = 'Search countries…',
+  id,
+  showDialCode = true,
   'aria-label': ariaLabel = 'Select country code',
-}: CountryCodeDropdownProps) {
+}: CountryDropdownBaseProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [search, setSearch] = React.useState('');
   const [internalValue, setInternalValue] = React.useState(value ?? 'US');
@@ -227,10 +224,10 @@ function CountryCodeDropdown({
     return countries.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        c.dialCode.includes(q) ||
+        (showDialCode && c.dialCode.includes(q)) ||
         c.code.toLowerCase().includes(q)
     );
-  }, [search, countries]);
+  }, [search, countries, showDialCode]);
 
   // Close helpers
   const close = React.useCallback(() => {
@@ -238,7 +235,17 @@ function CountryCodeDropdown({
     setSearch('');
   }, []);
 
-  useClickOutside(containerRef, close);
+  // Portal + fixed positioning so the panel escapes overflow-hidden ancestors.
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLDivElement,
+    HTMLDivElement
+  >({ open: isOpen, placement });
+
+  const outsideRefs = React.useMemo(
+    () => [containerRef, floatingRef],
+    [containerRef, floatingRef]
+  );
+  useClickOutside(outsideRefs, close, isOpen);
   useEscapeKey(close, isOpen);
 
   // Focus search input when opening
@@ -290,20 +297,19 @@ function CountryCodeDropdown({
     [isOpen]
   );
 
-  const placementClass =
-    placement === 'bottom-end'
-      ? 'top-full right-0 mt-1'
-      : 'top-full left-0 mt-1';
-
   return (
     <div
-      ref={containerRef}
+      ref={(node) => {
+        containerRef.current = node;
+        anchorRef.current = node;
+      }}
       data-slot="country-dropdown"
       className="relative inline-flex"
     >
       {/* Trigger button */}
       <button
         type="button"
+        id={id}
         data-slot="country-dropdown-trigger"
         onClick={handleToggle}
         disabled={disabled}
@@ -328,7 +334,13 @@ function CountryCodeDropdown({
         >
           {selected.flag}
         </span>
-        <span data-slot="country-dropdown-dialcode">{selected.dialCode}</span>
+        {showDialCode ? (
+          <span data-slot="country-dropdown-dialcode">{selected.dialCode}</span>
+        ) : (
+          <span data-slot="country-dropdown-name" className="min-w-0 truncate">
+            {selected.name}
+          </span>
+        )}
         <svg
           data-slot="country-dropdown-chevron"
           className={cn(
@@ -349,102 +361,134 @@ function CountryCodeDropdown({
       </button>
 
       {/* Dropdown panel */}
-      {isOpen && (
-        <div
-          id={menuId}
-          role="listbox"
-          data-slot="country-dropdown-panel"
-          aria-label={ariaLabel}
-          tabIndex={-1}
-          onKeyDown={handleKeyDown}
-          className={cn(
-            'absolute z-50 w-72',
-            'rounded-xl border border-neutral-200 bg-white shadow-lg',
-            'dark:border-neutral-700 dark:bg-neutral-800',
-            'animate-in fade-in zoom-in-95 duration-100',
-            placementClass
-          )}
-        >
-          {/* Search input */}
+      {isOpen &&
+        createPortal(
           <div
-            data-slot="country-dropdown-search"
-            className="border-b border-neutral-200 p-2 dark:border-neutral-700"
-          >
-            <input
-              ref={searchInputRef}
-              type="text"
-              data-slot="country-dropdown-search-input"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={searchPlaceholder}
-              aria-label="Search countries"
-              className={cn(
-                'w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm',
-                'text-foreground placeholder:text-muted-foreground bg-white',
-                'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
-                'dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100'
-              )}
-            />
-          </div>
-
-          {/* Country list */}
-          <div
-            ref={listRef}
-            data-slot="country-dropdown-list"
-            className="max-h-60 overflow-y-auto p-1"
-          >
-            {filtered.length === 0 ? (
-              <div className="text-muted-foreground px-3 py-4 text-center text-sm">
-                No countries found
-              </div>
-            ) : (
-              filtered.map((country) => (
-                <button
-                  key={country.code}
-                  type="button"
-                  role="option"
-                  data-slot="country-dropdown-option"
-                  aria-selected={country.code === selected.code}
-                  onClick={() => handleSelect(country)}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
-                    'transition-colors duration-150',
-                    'focus:outline-none',
-                    country.code === selected.code
-                      ? 'bg-neutral-100 font-medium text-neutral-900 dark:bg-neutral-700 dark:text-white'
-                      : 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-700/50',
-                    'focus:bg-neutral-100 dark:focus:bg-neutral-700'
-                  )}
-                >
-                  <span
-                    data-slot="country-dropdown-option-flag"
-                    className="text-base leading-none"
-                    aria-hidden="true"
-                  >
-                    {country.flag}
-                  </span>
-                  <span
-                    data-slot="country-dropdown-option-name"
-                    className="flex-1 truncate"
-                  >
-                    {country.name}
-                  </span>
-                  <span
-                    data-slot="country-dropdown-option-dialcode"
-                    className="text-muted-foreground shrink-0 text-xs"
-                  >
-                    {country.dialCode}
-                  </span>
-                </button>
-              ))
+            ref={floatingRef}
+            style={style}
+            id={menuId}
+            role="listbox"
+            data-slot="country-dropdown-panel"
+            aria-label={ariaLabel}
+            tabIndex={-1}
+            onKeyDown={handleKeyDown}
+            className={cn(
+              'flex w-72 flex-col overflow-hidden',
+              'rounded-xl border border-neutral-200 bg-white shadow-lg',
+              'dark:border-neutral-700 dark:bg-neutral-800',
+              'animate-in fade-in zoom-in-95 duration-100'
             )}
-          </div>
-        </div>
-      )}
+          >
+            {/* Search input */}
+            <div
+              data-slot="country-dropdown-search"
+              className="shrink-0 border-b border-neutral-200 p-2 dark:border-neutral-700"
+            >
+              <input
+                ref={searchInputRef}
+                type="text"
+                data-slot="country-dropdown-search-input"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={searchPlaceholder}
+                aria-label="Search countries"
+                className={cn(
+                  'w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm',
+                  'text-foreground placeholder:text-muted-foreground bg-white',
+                  'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
+                  'dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100'
+                )}
+              />
+            </div>
+
+            {/* Country list */}
+            <div
+              ref={listRef}
+              data-slot="country-dropdown-list"
+              className="max-h-60 min-h-0 overflow-y-auto p-1"
+            >
+              {filtered.length === 0 ? (
+                <div className="text-muted-foreground px-3 py-4 text-center text-sm">
+                  No countries found
+                </div>
+              ) : (
+                filtered.map((country) => (
+                  <button
+                    key={country.code}
+                    type="button"
+                    role="option"
+                    data-slot="country-dropdown-option"
+                    aria-selected={country.code === selected.code}
+                    onClick={() => handleSelect(country)}
+                    className={cn(
+                      'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
+                      'transition-colors duration-150',
+                      'focus:outline-none',
+                      country.code === selected.code
+                        ? 'bg-neutral-100 font-medium text-neutral-900 dark:bg-neutral-700 dark:text-white'
+                        : 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-700/50',
+                      'focus:bg-neutral-100 dark:focus:bg-neutral-700'
+                    )}
+                  >
+                    <span
+                      data-slot="country-dropdown-option-flag"
+                      className="text-base leading-none"
+                      aria-hidden="true"
+                    >
+                      {country.flag}
+                    </span>
+                    <span
+                      data-slot="country-dropdown-option-name"
+                      className="flex-1 truncate"
+                    >
+                      {country.name}
+                    </span>
+                    {showDialCode && (
+                      <span
+                        data-slot="country-dropdown-option-dialcode"
+                        className="text-muted-foreground shrink-0 text-xs"
+                      >
+                        {country.dialCode}
+                      </span>
+                    )}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
 
+CountryDropdownBase.displayName = 'CountryDropdownBase';
+
+/**
+ * A country-code selector dropdown designed to sit beside a phone number input.
+ *
+ * Defaults to United States (+1) with the 🇺🇸 flag. Clicking the trigger opens
+ * a searchable list of all supported countries with their dial codes and flags.
+ *
+ * Uses Google's libphonenumber for the canonical country/code list and provides
+ * a `validatePhoneNumber` helper for phone validation.
+ *
+ * For a country selector without dial codes, use `CountryDropdown`.
+ *
+ * @example
+ * ```tsx
+ * const [country, setCountry] = useState<CountryData>();
+ *
+ * <div className="flex gap-2">
+ *   <CountryCodeDropdown value={country?.code} onChange={setCountry} />
+ *   <Input placeholder="Phone number" />
+ * </div>
+ * ```
+ */
+function CountryCodeDropdown(props: CountryCodeDropdownProps) {
+  return <CountryDropdownBase {...props} />;
+}
+
 CountryCodeDropdown.displayName = 'CountryCodeDropdown';
 
-export { CountryCodeDropdown };
+export { CountryCodeDropdown, CountryDropdownBase };

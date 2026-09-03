@@ -22,6 +22,7 @@ const meta: Meta<typeof PatientHeader> = {
     showCommentsBanner: { control: 'boolean' },
     showProviderBanner: { control: 'boolean' },
     showFlagBanner: { control: 'boolean' },
+    showCountBadges: { control: 'boolean' },
     maxVisibleMeds: { control: { type: 'number', min: 1, max: 20 } },
     patient: { table: { disable: true } },
     allergies: { table: { disable: true } },
@@ -274,6 +275,39 @@ export const WithActions: Story = {
         <Button variant="ghost" size="sm">
           Print
         </Button>
+      </div>
+    ),
+  },
+};
+
+/** Count badges hidden via `showCountBadges={false}` — custom actions still render. */
+export const HiddenCountBadges: Story = {
+  args: {
+    ...Default.args,
+    showCountBadges: false,
+  },
+};
+
+/** Zero-count badges (Tasks, eSign) are hidden by default, even when `showCountBadges` is true (opt back in per-badge with `showZero`). */
+export const WithZeroCounts: Story = {
+  args: {
+    ...Default.args,
+    actions: (
+      <div className="flex flex-wrap gap-2">
+        <CountBadge label="Tasks" count={0} countVariant="informative" />
+        <CountBadge
+          label="Open Enc"
+          count={5}
+          countVariant="informative"
+          items={sampleEncounters}
+        />
+        <CountBadge
+          label="Due List"
+          count={4}
+          countVariant="informative"
+          items={sampleDueList}
+        />
+        <CountBadge label="eSign" count={0} countVariant="informative" />
       </div>
     ),
   },

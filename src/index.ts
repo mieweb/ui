@@ -8,10 +8,14 @@ export * from './components/Address';
 // This avoids forcing ag-grid-community/ag-grid-react on all consumers.
 // See: src/ag-grid.ts
 // Same with DataVis (src/datavis.ts)
+// Kerebron editors (RichEditor/CodeEditor) are exported via @mieweb/ui/kerebron
+// to keep @kerebron/* (and its WASM/CSS) optional. See: src/kerebron.ts
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AlertDialog';
+export * from './components/AllergyList';
 export * from './components/AppHeader';
+export * from './components/Assessment';
 export * from './components/AudioPlayer';
 export * from './components/AudioRecorder';
 export * from './components/AuthDialog';
@@ -23,21 +27,34 @@ export * from './components/Breadcrumb';
 export * from './components/BusinessHours';
 export * from './components/BusinessHoursEditor';
 export * from './components/Button';
+export * from './components/ButtonGroup';
 export * from './components/Card';
+export * from './components/CaseManagementHeader';
 export * from './components/Checkbox';
+// CodeLookup itself ships a module worker and is NOT exported here (apps import
+// it from their own bundler). Only its worker-free provider/context is safe to
+// ship in the main entry — it distributes an app-injected CodeLookup.
+export * from './components/CodeLookup/context';
+export * from './components/ConditionEditor';
 export * from './components/CheckrIntegration';
+export * from './components/ClampedText';
+export * from './components/CollabStatus';
 export * from './components/Collapsible';
 export * from './components/CommandPalette';
 export * from './components/ConfirmDialog';
 export * from './components/ConnectionStatus';
 export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
+export * from './components/CountryDropdown';
 export * from './components/CookieConsent';
+export * from './components/CopyButton';
 export * from './components/CSVColumnMapper';
+export * from './components/CustomizableDashboard';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
+export * from './components/DockablePanel';
 export * from './components/Dropdown';
 export * from './components/DropzoneOverlay';
 export * from './components/ClaimProviderForm';
@@ -60,14 +77,11 @@ export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
 export * from './components/FloatingWindow';
-// HelpSupportPanel exports FAQItem which conflicts with Accordion
-export {
-  type FAQItem as HelpFAQItem,
-  HelpSupportPanel,
-  type HelpSupportPanelProps,
-  type SupportContact,
-} from './components/HelpSupportPanel';
 export * from './components/HeroActionCard';
+export * from './components/FreshnessBadge';
+export * from './components/GlossaryTooltip';
+export * from './components/HealthSurveillance';
+export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
 export * from './components/IconBadge';
 export * from './components/Input';
@@ -82,6 +96,9 @@ export * from './components/LanguageSelector';
 export * from './components/LiveOrderTracker';
 export * from './components/LoadingPage';
 export * from './components/Markdown';
+export * from './components/MedicationList';
+export * from './components/MediaEditor';
+export * from './components/MediaPlayer';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NearbyProviderCard';
@@ -96,6 +113,7 @@ export {
   type OrderListProps,
   type OrderListTab,
 } from './components/OrderList';
+export * from './components/OrderEditor';
 export * from './components/OrderLookupForm';
 export * from './components/OrderSidebar';
 export * from './components/OTPInput';
@@ -109,6 +127,8 @@ export * from './components/PermissionsEditor';
 export * from './components/PhoneInput';
 export * from './components/PhoneNumber';
 export * from './components/PortalShell';
+export * from './components/PresentingProblems';
+export * from './components/ProblemList';
 export * from './components/ProductVersion';
 export * from './components/Progress';
 export * from './components/ProviderCard';
@@ -129,16 +149,19 @@ export * from './components/ProviderUsersTable';
 export * from './components/QuickAction';
 export * from './components/QuickLinksCard';
 export * from './components/Radio';
+export * from './components/ReadingProgressBar';
 export * from './components/RecordButton';
 export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
 export * from './components/RichTextEditor';
+export * from './components/RowActionToolbar';
 export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
 export * from './components/ScrollArea';
 export * from './components/Select';
+export * from './components/PillSelect';
 export * from './components/ServiceAccordion';
 export * from './components/ServiceBadge';
 export * from './components/ServiceCard';
@@ -149,6 +172,8 @@ export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
 export * from './components/Separator';
 export * from './components/Sheet';
+export * from './components/SectionSpyNav';
+export * from './components/SourceTip';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,
@@ -178,6 +203,12 @@ export * from './components/Toggle';
 export * from './components/Tooltip';
 export * from './components/UserAvatar';
 export * from './components/UserBadge';
+export * from './components/TranscriptView';
+// `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
+// TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
+// type at the root barrel; import the media-schema type from the subpath
+// `@mieweb/ui/components/TranscriptView` when needed.
+export type { TranscriptSegment } from './components/AI';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
@@ -192,6 +223,18 @@ export {
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
 export * from './components/WorkspaceSwitcher';
+
+// Icons (lucide-react re-exports)
+// Note: CloseIcon, RefreshIcon, SendIcon, and SparklesIcon are ambiguous with
+// the AI module's custom icons; the explicit AI exports below take precedence
+// so existing consumers keep the same components.
+export * from './components/Icons';
+export {
+  CloseIcon,
+  RefreshIcon,
+  SendIcon,
+  SparklesIcon,
+} from './components/AI';
 
 // Hooks
 export * from './hooks';

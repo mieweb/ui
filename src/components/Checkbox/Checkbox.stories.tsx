@@ -154,6 +154,34 @@ export const GroupWithError: Story = {
   ),
 };
 
+export const GroupFloatingLabel: Story = {
+  render: () => (
+    <CheckboxGroup
+      label="Notification preferences"
+      labelVariant="floating"
+      orientation="horizontal"
+    >
+      <Checkbox label="Email" />
+      <Checkbox label="SMS" />
+      <Checkbox label="Push" />
+    </CheckboxGroup>
+  ),
+};
+
+export const GroupFloatingLabelWithError: Story = {
+  render: () => (
+    <CheckboxGroup
+      label="Required selections"
+      labelVariant="floating"
+      orientation="horizontal"
+      error="Please select at least one option"
+    >
+      <Checkbox label="Option 1" />
+      <Checkbox label="Option 2" />
+    </CheckboxGroup>
+  ),
+};
+
 function IndeterminateDemo() {
   const [checked, setChecked] = React.useState([false, false, false]);
 

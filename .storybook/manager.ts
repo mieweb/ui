@@ -1,5 +1,8 @@
-import { addons } from 'storybook/manager-api';
+import React from 'react';
+import { addons, types } from 'storybook/manager-api';
 import { create } from 'storybook/theming/create';
+import { IconButton } from 'storybook/internal/components';
+import { ShareAltIcon } from '@storybook/icons';
 
 // Brand theme configurations for the Storybook manager UI
 const brandThemes = {
@@ -203,6 +206,13 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
   style.id = styleId;
   style.textContent = `
     /* Dynamic brand theming for Storybook manager */
+    /* Keep native form controls (radios, checkboxes) in sync with the app
+       theme instead of the OS theme. Storybook's app root sets
+       "color-scheme: light dark" on #root > div, so override there too. */
+    :root, #root, #root > div {
+      color-scheme: ${isDark ? 'dark' : 'light'};
+    }
+
     :root {
       --mieweb-manager-primary: ${brand.primary};
       --mieweb-manager-secondary: ${brand.secondary};
@@ -266,6 +276,14 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     /* Toolbar selected button */
     [role="toolbar"] button[aria-pressed="true"],
     [role="toolbar"] button[data-active="true"] {
+      color: ${brand.primary} !important;
+    }
+
+    /* Brand-theme switcher reflects the active brand (higher specificity than
+       the generic muted toolbar-button rule, so it wins in both light/dark). */
+    [role="toolbar"] button[aria-label*="brand themes"],
+    [class*="toolbar"] button[aria-label*="brand themes"],
+    [class*="bar"] button[aria-label*="brand themes"] {
       color: ${brand.primary} !important;
     }
     
@@ -351,8 +369,9 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       color: ${textMuted} !important;
     }
     
-    /* Input fields */
-    input, select, textarea {
+    /* Input fields (skip radios/checkboxes: painting native pickers breaks
+       their rendering) */
+    input:not([type="radio"]):not([type="checkbox"]), select, textarea {
       background-color: ${inputBg} !important;
       border-color: ${inputBorder} !important;
       color: ${textColor} !important;
@@ -366,37 +385,39 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     
     /* ============================================
        BOOLEAN TOGGLE CONTROL FIX
-       The toggle has dark bg that hides text
+       The toggle has dark bg that hides text.
+       :has(input[role="switch"]) scopes this to boolean toggles only —
+       radio controls share the label[for^="control-"] pattern.
        ============================================ */
     /* Toggle switch background */
-    label[for^="control-"] {
+    label[for^="control-"]:has(input[role="switch"]) {
       background-color: #52525b !important;
     }
     
     /* "False" span (left side, selected by default) */
-    label[for^="control-"] > span:first-of-type {
+    label[for^="control-"]:has(input[role="switch"]) > span:first-of-type {
       color: #e4e4e7 !important;
       background-color: #71717a !important;
     }
     
     /* "True" span (right side, unselected by default) */
-    label[for^="control-"] > span:last-of-type {
+    label[for^="control-"]:has(input[role="switch"]) > span:last-of-type {
       color: #a1a1aa !important;
     }
     
     /* When checked: "True" becomes active */
-    label[for^="control-"] input:checked ~ span:last-of-type {
+    label[for^="control-"]:has(input[role="switch"]) input:checked ~ span:last-of-type {
       color: #e4e4e7 !important;
       background-color: #71717a !important;
     }
     
-    label[for^="control-"] input:checked ~ span:first-of-type {
+    label[for^="control-"]:has(input[role="switch"]) input:checked ~ span:first-of-type {
       background-color: transparent !important;
       color: #a1a1aa !important;
     }
     
     /* Make checkbox input transparent so it doesn't cover text */
-    label[for^="control-"] input[type="checkbox"] {
+    label[for^="control-"]:has(input[role="switch"]) input[type="checkbox"] {
       background: transparent !important;
     }
     `
@@ -467,4 +488,55 @@ addons.register('mieweb-404-redirect', (api) => {
       selectFallbackIfAvailable();
     }
   }, POLL_INTERVAL_MS);
+});
+
+// Storybook 10 moved "Open canvas in new tab" into the Share menu; restore a
+// one-click toolbar button that opens the bare story iframe (current globals
+// preserved) in a new tab.
+addons.register('mieweb-open-in-new-tab', (api) => {
+  addons.add('mieweb-open-in-new-tab/tool', {
+    type: types.TOOLEXTRA,
+    title: 'Open canvas in new tab',
+    match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
+    render: () =>
+      React.createElement(
+        IconButton,
+        {
+          key: 'mieweb-open-in-new-tab',
+          title: 'Open canvas in new tab',
+          'aria-label': 'Open canvas in new tab',
+          onClick: () => {
+            const { storyId } = api.getUrlState();
+            if (!storyId) return;
+            const url = new URL('iframe.html', window.location.href);
+            url.searchParams.set('id', storyId);
+            url.searchParams.set('viewMode', 'story');
+            // Only forward this project's toolbar globals (see preview.tsx
+            // globalTypes); tool globals (measure/outline) and object-valued
+            // globals (viewport, backgrounds, a11y) must not follow the story
+            // into the popped-out tab.
+            const FORWARDED_GLOBALS = new Set([
+              'brand',
+              'theme',
+              'density',
+              'locale',
+            ]);
+            const globalsParam = Object.entries(api.getGlobals() ?? {})
+              .filter(([key, value]) => {
+                if (!FORWARDED_GLOBALS.has(key)) return false;
+                return (
+                  typeof value === 'string' ||
+                  typeof value === 'number' ||
+                  typeof value === 'boolean'
+                );
+              })
+              .map(([key, value]) => `${key}:${String(value)}`)
+              .join(';');
+            if (globalsParam) url.searchParams.set('globals', globalsParam);
+            window.open(url.toString(), '_blank', 'noopener,noreferrer');
+          },
+        },
+        React.createElement(ShareAltIcon)
+      ),
+  });
 });

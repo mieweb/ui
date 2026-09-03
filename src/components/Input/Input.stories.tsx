@@ -14,6 +14,10 @@ const meta: Meta<typeof Input> = {
       control: 'select',
       options: ['sm', 'md', 'lg'],
     },
+    labelVariant: {
+      control: 'select',
+      options: ['stacked', 'floating'],
+    },
     hasError: {
       control: 'boolean',
     },
@@ -103,5 +107,56 @@ export const HiddenLabel: Story = {
     label: 'Search',
     hideLabel: true,
     placeholder: 'Search...',
+  },
+};
+
+export const FloatingLabel: Story = {
+  args: {
+    label: 'Account number',
+    labelVariant: 'floating',
+  },
+};
+
+export const FloatingLabelWithValue: Story = {
+  args: {
+    label: 'Recipient’s bank country',
+    labelVariant: 'floating',
+    defaultValue: 'British Pound',
+  },
+};
+
+export const FloatingLabelRequired: Story = {
+  args: {
+    label: 'Sort code',
+    labelVariant: 'floating',
+    required: true,
+  },
+};
+
+export const FloatingLabelWithError: Story = {
+  args: {
+    label: 'Account number',
+    labelVariant: 'floating',
+    defaultValue: '12',
+    error: 'Account number must be 8 digits.',
+  },
+};
+
+export const FloatingLabelSizes: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <Input label="Small" labelVariant="floating" size="sm" />
+      <Input label="Medium" labelVariant="floating" size="md" />
+      <Input label="Large" labelVariant="floating" size="lg" />
+    </div>
+  ),
+};
+
+export const FloatingLabelDisabled: Story = {
+  args: {
+    label: 'Sort code',
+    labelVariant: 'floating',
+    disabled: true,
+    defaultValue: '04-00-04',
   },
 };

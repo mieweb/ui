@@ -1,15 +1,5 @@
 export {
   Accordion,
-  AccordionContent,
-  type AccordionContentProps,
-  AccordionItem,
-  type AccordionItemProps,
   type AccordionProps,
-  AccordionTrigger,
-  type AccordionTriggerProps,
-  FAQAccordion,
-  type FAQAccordionProps,
-  type FAQItem,
-  generateProviderFAQs,
-  type ProviderFAQData,
+  type AccordionItem,
 } from './Accordion';

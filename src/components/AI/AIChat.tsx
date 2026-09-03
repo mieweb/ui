@@ -16,6 +16,7 @@ import type {
   AIChatSession,
   AISuggestedAction,
   AIChatCallbacks,
+  AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
 } from './types';
@@ -283,6 +284,8 @@ export interface AIChatProps
    * text block with `{ messageId, streaming, role }`. Host must sanitize.
    */
   renderTextContent?: AIRenderTextContent;
+  /** Optional per-message footer rendered below each bubble (e.g. actions). */
+  renderMessageFooter?: AIRenderMessageFooter;
   /** Additional class name */
   className?: string;
 }
@@ -317,8 +320,9 @@ export function AIChat({
   onClear,
   onClose,
   renderTextContent,
+  renderMessageFooter,
 }: AIChatProps) {
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
 
   const messages = React.useMemo(
     () => session?.messages || messagesProp || [],
@@ -328,7 +332,8 @@ export function AIChat({
 
   // Auto-scroll to bottom on new messages
   React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
   }, [messages]);
 
   const handleSend = async (message: { content: string }) => {
@@ -422,6 +427,7 @@ export function AIChat({
 
       {/* Messages */}
       <div
+        ref={messagesContainerRef}
         data-slot="ai-chat-messages"
         className="flex-1 overflow-y-auto px-4 py-4"
       >
@@ -440,9 +446,9 @@ export function AIChat({
                 showTimestamp={showTimestamps}
                 onLinkClick={handleLinkClick}
                 renderTextContent={renderTextContent}
+                renderMessageFooter={renderMessageFooter}
               />
             ))}
-            <div ref={messagesEndRef} />
           </div>
         )}
       </div>

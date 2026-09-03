@@ -1,7 +1,7 @@
 # Contributing to `@mieweb/ui`
 
-> **This is the provider (maintainer) guide** — for people who *build and change* the
-> library. If you only *consume* `@mieweb/ui` in an app, you want the
+> **This is the provider (maintainer) guide** — for people who _build and change_ the
+> library. If you only _consume_ `@mieweb/ui` in an app, you want the
 > [README](README.md), the [Storybook](https://ui.mieweb.org), and the
 > [`lessons/`](lessons/README.md) adoption guides instead.
 
@@ -10,10 +10,10 @@
 This repository serves two distinct developer audiences. Keep the distinction in
 mind whenever you write docs or code comments.
 
-| Audience | "I want to…" | Read |
-|----------|--------------|------|
-| **Consumer** (app developer) | Use a component, theme it, migrate an app | [README.md](README.md), [Storybook](https://ui.mieweb.org), [lessons/](lessons/README.md) |
-| **Provider / Maintainer** (you) | Add/change a component, fix a bug, cut a release | **This file** + per-component [`MAINTAINERS.md`](#per-component-maintainer-notes) |
+| Audience                        | "I want to…"                                     | Read                                                                                      |
+| ------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **Consumer** (app developer)    | Use a component, theme it, migrate an app        | [README.md](README.md), [Storybook](https://ui.mieweb.org), [lessons/](lessons/README.md) |
+| **Provider / Maintainer** (you) | Add/change a component, fix a bug, cut a release | **This file** + per-component [`MAINTAINERS.md`](#per-component-maintainer-notes)         |
 
 Rule of thumb: **consumer docs answer "how do I use it"; provider docs answer "how
 do I change it."** Don't mix the two — keep usage in Storybook autodocs and the
@@ -33,7 +33,7 @@ src/
   hooks/  utils/  styles/  types/
   test/setup.ts         # Vitest setup
 packages/               # Git submodules with heavy/optional implementations
-  datavis/  esheet/  ychart/
+  esheet/  ychart/      # (DataVis NITRO is an npm package, not a submodule)
 .storybook/             # Storybook (react-vite) config
 tests/visual/           # Playwright visual-regression specs + snapshots
 lessons/                # Consumer-facing adoption + policy docs
@@ -51,22 +51,21 @@ pnpm storybook        # http://localhost:6006
 ```
 
 If you cloned without `--recurse-submodules`, run
-`git submodule update --init --recursive` and re-run `pnpm install`. A stale
-`datavis` link is auto-repaired by the `postinstall` script.
+`git submodule update --init --recursive` and re-run `pnpm install`.
 
 ## Everyday commands
 
-| Command | Purpose |
-|---------|---------|
-| `pnpm dev` | `tsup --watch` — rebuild the library on change |
-| `pnpm storybook` | Storybook dev server on `:6006` (primary dev surface) |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm lint` / `pnpm lint:fix` | ESLint over `src/**/*.{ts,tsx}` |
-| `pnpm format` / `pnpm format:fix` | Prettier check / write |
-| `pnpm test` / `pnpm test:watch` | Vitest unit tests |
-| `pnpm test:coverage` | Vitest with coverage (80% thresholds) |
-| `pnpm test:visual` | Playwright visual regression (serves `storybook-static`; run `pnpm build-storybook` first) |
-| `pnpm build` | Full library build (tsup + CSS + brand CSS) |
+| Command                           | Purpose                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
+| `pnpm dev`                        | `tsup --watch` — rebuild the library on change                                             |
+| `pnpm storybook`                  | Storybook dev server on `:6006` (primary dev surface)                                      |
+| `pnpm typecheck`                  | `tsc --noEmit`                                                                             |
+| `pnpm lint` / `pnpm lint:fix`     | ESLint over `src/**/*.{ts,tsx}`                                                            |
+| `pnpm format` / `pnpm format:fix` | Prettier check / write                                                                     |
+| `pnpm test` / `pnpm test:watch`   | Vitest unit tests                                                                          |
+| `pnpm test:coverage`              | Vitest with coverage (80% thresholds)                                                      |
+| `pnpm test:visual`                | Playwright visual regression (serves `storybook-static`; run `pnpm build-storybook` first) |
+| `pnpm build`                      | Full library build (tsup + CSS + brand CSS)                                                |
 
 ## Quality gates (must pass before opening a PR)
 
@@ -91,7 +90,7 @@ src/components/MyWidget/
 ```
 
 Coding conventions (the full standard lives in
-[lessons/component-policy.md](lessons/component-policy.md) → *Tier 2*):
+[lessons/component-policy.md](lessons/component-policy.md) → _Tier 2_):
 
 - **Variants** via `class-variance-authority` (CVA); merge classes with the
   `cn()` helper (`clsx` + `tailwind-merge`) from [src/utils](src/utils).
@@ -176,17 +175,20 @@ file should:
   Test brand switching via `ThemeProvider`.
 - Deep reference: [lessons/tailwind4-integration.md](lessons/tailwind4-integration.md).
 
-## Submodules (datavis, esheet, ychart)
+## Submodules (esheet, ychart)
 
-Three heavy capabilities live in **git submodules** under `packages/`, not in
+Two heavy capabilities live in **git submodules** under `packages/`, not in
 `src/`. This is the most common source of "it builds on CI but not locally"
 confusion, so know which is which:
 
-| Submodule | Backs | Exposed as | Notes |
-|-----------|-------|-----------|-------|
-| `packages/datavis` | `DataVisNITRO` | `@mieweb/ui/datavis` | Linked into `node_modules/datavis`; `postinstall` repairs a stale link. Also needs the `datavis-ace` peer. |
+| Submodule         | Backs                              | Exposed as          | Notes                                                                                                 |
+| ----------------- | ---------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
 | `packages/esheet` | `EsheetBuilder` / `EsheetRenderer` | `@mieweb/ui/esheet` | nx monorepo (`core/fields/adapters/builder/renderer`); built by `build:esheet` before the main build. |
-| `packages/ychart` | `YChart` (Storybook only) | *not exported* | A vanilla editor class dynamically imported by the story only. |
+| `packages/ychart` | `YChart` (Storybook only)          | _not exported_      | A vanilla editor class dynamically imported by the story only.                                        |
+
+DataVis NITRO is **not** a submodule: it's consumed from the published
+`@mieweb/datavis` npm package (plus the `datavis-ace` peer), exposed as
+`@mieweb/ui/datavis`.
 
 If a submodule-backed component fails to resolve, run
 `git submodule update --init --recursive` then `pnpm install`.
@@ -194,34 +196,34 @@ If a submodule-backed component fails to resolve, run
 ## Optional peer dependencies
 
 `react` / `react-dom` are required peers. Everything else heavy is **optional**:
-`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@esheet/builder`,
-`@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
+`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@mieweb/datavis`,
+`@esheet/builder`, `@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
 
-> **Grids: prefer NITRO DataVis over AGGrid.** `ag-grid-*` is heavy. Use
-> [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) by default and reach
-> for [AGGrid](src/components/AGGrid/MAINTAINERS.md) only when NITRO lacks the
-> needed functionality. See those notes for details.
+> **Grids: AGGrid is deprecated — use NITRO DataVis.** `ag-grid-*` is heavy and
+> [AGGrid](src/components/AGGrid/MAINTAINERS.md) is deprecated with no new usages
+> allowed. Use [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)
+> (`@mieweb/ui/datavis`) for all tables. See those notes for details.
 
 ## Per-component maintainer notes
 
 Non-trivial modules carry a `MAINTAINERS.md` next to the code with the internals a
 maintainer needs: invariants, extension points, gotchas, and test/baseline notes.
-**Consumers never need these; they document how to *change* the module, not how to
+**Consumers never need these; they document how to _change_ the module, not how to
 use it.** Add one when a component has hidden coupling, an optional peer dep, a
 submodule, a module-level side effect, or a non-obvious extension point.
 
 Current notes:
 
-| Module | Why it has notes |
-|--------|------------------|
-| [AI](src/components/AI/MAINTAINERS.md) | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer |
-| [AGGrid](src/components/AGGrid/MAINTAINERS.md) | Registers AG Grid modules at import; optional peers; brand theming; base vs. enhanced split |
-| [ESheet](src/components/ESheet/MAINTAINERS.md) | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src` |
-| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) | Wraps `datavis-ace` + the `datavis` submodule; context/source/grid wiring |
-| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled |
-| [YChart](src/components/YChart/MAINTAINERS.md) | Vanilla editor in a submodule, dynamically imported; not in the public API |
+| Module                                                         | Why it has notes                                                                            |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [AI](src/components/AI/MAINTAINERS.md)                         | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer  |
+| [AGGrid](src/components/AGGrid/MAINTAINERS.md)                 | Registers AG Grid modules at import; optional peers; brand theming; base vs. enhanced split |
+| [ESheet](src/components/ESheet/MAINTAINERS.md)                 | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`              |
+| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)     | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring         |
+| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled                         |
+| [YChart](src/components/YChart/MAINTAINERS.md)                 | Vanilla editor in a submodule, dynamically imported; not in the public API                  |
 
 ## Commits, versioning & releases
 

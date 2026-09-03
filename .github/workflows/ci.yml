@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Least-privilege default for all jobs (override per-job as needed).
+permissions:
+  contents: read
+
 jobs:
   lint-and-type-check:
     name: Lint and Type Check
@@ -29,10 +33,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Lint
         run: pnpm lint
+
+      - name: RTL guard (no new physical-direction classes)
+        run: pnpm rtl:scan
 
       - name: Type check
         run: pnpm typecheck
@@ -98,7 +105,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Build package
         run: pnpm build
@@ -146,7 +153,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Build package
         run: pnpm build
@@ -188,7 +195,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Build package
         run: pnpm build

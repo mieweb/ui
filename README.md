@@ -51,10 +51,28 @@ npm install react react-dom
 
 Heavy or specialized dependencies are kept in separate entry points so they don't bloat the core bundle. Install the peer dependencies for the add-ons you need:
 
-| Entry point              | Install                                              | Import path              |
-| ------------------------ | ---------------------------------------------------- | ------------------------ |
-| **AG Grid**              | `npm install ag-grid-community ag-grid-react`        | `@mieweb/ui/ag-grid`    |
-| **DataVis**              | `npm install datavis-ace`                             | `@mieweb/ui/datavis`    |
+| Entry point              | Install                                       | Import path          |
+| ------------------------ | --------------------------------------------- | -------------------- |
+| **AG Grid** (deprecated) | `npm install ag-grid-community ag-grid-react` | `@mieweb/ui/ag-grid` |
+| **DataVis**              | `npm install @mieweb/datavis datavis-ace`     | `@mieweb/ui/datavis` |
+
+> ⚠️ **AGGrid is deprecated.** Use DataVis NITRO (`@mieweb/ui/datavis`) for all
+> tables. The `@mieweb/ui/ag-grid` entry remains available for existing
+> consumers but will be removed in a future major release.
+
+### AI Agent Rules
+
+Working with AI coding agents (Copilot, Claude Code, Cursor, …)? Install
+@mieweb/ui's agent rules into your repo so agents use library components
+(DataVis NITRO for tables, `Button`/`Badge`/`Modal`/… instead of raw HTML):
+
+```bash
+npx @mieweb/ui init-agent
+```
+
+This writes `.github/instructions/mieweb-ui.instructions.md` (auto-applied by
+VS Code Copilot) and a marked block in `AGENTS.md` (the cross-tool convention).
+Idempotent — rerun after upgrading to refresh the rules. See [agent/](agent/).
 
 ## Quick Start
 
@@ -120,7 +138,7 @@ git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
 ```
 
-> `--recurse-submodules` is strongly recommended for first clone so `packages/esheet`, `packages/datavis`, and `packages/ychart` are populated immediately. Without these submodules, eSheet, DataVis, and YChart stories will not work.
+> `--recurse-submodules` is strongly recommended for first clone so the `packages/esheet` and `packages/ychart` submodules are populated immediately. Without them, the eSheet and YChart stories will not work. DataVis NITRO is not a submodule — it ships as the published `@mieweb/datavis` npm package.
 
 If you already cloned without submodules, run:
 
@@ -136,18 +154,13 @@ npm install
 
 Use one package manager consistently per clone. The commands below use npm.
 
-3. **Build eSheet packages** (required before first Storybook run):
+3. **eSheet packages build automatically.** A `prestorybook` hook runs `npm run build:esheet` before Storybook starts, so the `@esheet/*` packages are compiled on first run with no manual step. It's a near-instant no-op on later runs once the artifacts exist.
+
+If `packages/esheet` is updated later (submodule update, branch switch, or pull) and you need to force a fresh rebuild, remove the built artifacts and run the build again:
 
 ```bash
+rm -f packages/esheet/packages/core/dist/index.d.ts packages/esheet/packages/renderer/src/index.output.css
 npm run build:esheet
-```
-
-This installs eSheet's own dependencies and compiles all `@esheet/*` packages.
-
-If `packages/esheet` is updated later (submodule update, branch switch, or pull), force a fresh rebuild:
-
-```bash
-npm run rebuild:esheet
 ```
 
 4. **Start Storybook:**
@@ -156,7 +169,15 @@ npm run rebuild:esheet
 npm run storybook
 ```
 
-This starts the Storybook development server at [http://localhost:6006](http://localhost:6006) with all components, including eSheet, DataVis, and YChart.
+This starts the Storybook development server at [http://localhost:6006](http://localhost:6006) with all components, including eSheet, DataVis NITRO, and YChart.
+
+### How the Sub-Packages Are Wired
+
+Storybook integrates three sibling MIE projects, each sourced differently:
+
+- **DataVis NITRO** — npm package `@mieweb/datavis`. No build step; consumed as a published package (no submodule needed).
+- **eSheet** — git submodule `packages/esheet`. Built automatically by the `prestorybook` hook; rebuilds only when its artifacts are missing.
+- **YChart** — git submodule `packages/ychart`. No build step; the story imports it directly from source via a relative dynamic import, and Storybook's Vite config adds a `virtual:git-info` plugin, a `__YCHART_VERSION__` define, and dependency pre-bundling (`optimizeDeps`).
 
 ### Library Development (watch mode)
 
@@ -170,21 +191,20 @@ This watches for source changes and rebuilds automatically. It does **not** star
 
 ### Available Scripts
 
-| Script                    | Description                                               |
-| ------------------------- | --------------------------------------------------------- |
-| `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
-| `npm run build:esheet`    | Build eSheet submodule packages for first-time setup (skips when already built) |
-| `npm run rebuild:esheet`  | Force a full eSheet rebuild after `packages/esheet` changes |
-| `npm run build`           | Build the library for production                          |
-| `npm run storybook`       | Start Storybook development server                        |
-| `npm run build-storybook` | Build Storybook for static hosting                        |
-| `npm run typecheck`       | Run TypeScript type checking        |
-| `npm run lint`            | Run ESLint                          |
-| `npm run lint:fix`        | Run ESLint with auto-fix            |
-| `npm run format`          | Check code formatting with Prettier |
-| `npm run format:fix`      | Fix code formatting with Prettier   |
-| `npm run test`            | Run tests                           |
-| `npm run test:watch`      | Run tests in watch mode             |
+| Script                    | Description                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook)                                  |
+| `npm run build:esheet`    | Build eSheet submodule packages (auto-run by `prestorybook`/`prebuild`; skips when already built) |
+| `npm run build`           | Build the library for production                                                                  |
+| `npm run storybook`       | Start Storybook development server                                                                |
+| `npm run build-storybook` | Build Storybook for static hosting                                                                |
+| `npm run typecheck`       | Run TypeScript type checking                                                                      |
+| `npm run lint`            | Run ESLint                                                                                        |
+| `npm run lint:fix`        | Run ESLint with auto-fix                                                                          |
+| `npm run format`          | Check code formatting with Prettier                                                               |
+| `npm run format:fix`      | Fix code formatting with Prettier                                                                 |
+| `npm run test`            | Run tests                                                                                         |
+| `npm run test:watch`      | Run tests in watch mode                                                                           |
 
 ## Date & Time Standard
 
@@ -209,7 +229,8 @@ const inProviderZone = DateTime.fromISO(timestamp, {
   zone: 'America/New_York',
 });
 
-const isOpen = DateTime.now().setZone('America/New_York') <
+const isOpen =
+  DateTime.now().setZone('America/New_York') <
   inProviderZone.plus({ hours: 1 });
 ```
 
@@ -243,6 +264,26 @@ npm run build-storybook
 ```
 
 The output will be in the `storybook-static` directory.
+
+### Configuring the Ozwell API (AI stories)
+
+The AI stories (AIChat, Hands-Free Chat, and the DataVis NITRO **Ozwell Assistant**
+story) call the real Ozwell backend when a key is configured and fall back to a
+canned reply when it isn't. Set the key and endpoint from the browser console:
+
+```js
+// Recommended — survives reloads and is shared with the story iframe:
+localStorage.setItem(
+  'ozwellConfig',
+  JSON.stringify({ apiKey: 'YOUR_KEY', baseURL: 'https://your-ozwell-host' })
+);
+```
+
+`baseURL` is optional (defaults to `https://api.ozwell.ai`); other optional keys are
+`model`, `system`, and `temperature`. Never commit a key — see
+[src/components/AI/OZWELL-BACKEND.md](src/components/AI/OZWELL-BACKEND.md) for full
+details, including why `window.__ozwell` is unreliable inside Storybook iframes and
+how to proxy the key for public deploys.
 
 ## Using in Other Projects
 
@@ -732,8 +773,8 @@ We follow [Semantic Versioning](https://semver.org/):
 ## Contributing
 
 We welcome contributions! This README and the [Storybook](https://ui.mieweb.org)
-are the **consumer** docs (how to *use* the library). If you want to *build or
-change* the library itself, the **provider / maintainer** guide is
+are the **consumer** docs (how to _use_ the library). If you want to _build or
+change_ the library itself, the **provider / maintainer** guide is
 **[CONTRIBUTING.md](CONTRIBUTING.md)** — it covers repo layout, the component
 anatomy and conventions, the autodocs story pattern, exports & tree-shaking,
 build, testing (unit + visual baselines), submodules, brands, and the release

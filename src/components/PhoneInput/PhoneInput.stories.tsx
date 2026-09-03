@@ -78,3 +78,18 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
+
+export const FloatingLabel: Story = {
+  args: {
+    label: 'Phone Number',
+    labelVariant: 'floating',
+  },
+};
+
+export const FloatingLabelWithValue: Story = {
+  args: {
+    label: 'Phone Number',
+    labelVariant: 'floating',
+    value: '5551234567',
+  },
+};

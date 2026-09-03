@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "locale": "en",
+  "builtAt": "2026-07-04T16:04:51.814Z",
+  "shards": [
+    {
+      "domain": "condition",
+      "file": "condition.mcdx",
+      "bytes": 4289695,
+      "docCount": 103088,
+      "tokenCount": 8728
+    },
+    {
+      "domain": "med",
+      "file": "med.mcdx",
+      "bytes": 15301251,
+      "docCount": 381526,
+      "tokenCount": 40153
+    },
+    {
+      "domain": "lab",
+      "file": "lab.mcdx",
+      "bytes": 8820150,
+      "docCount": 185261,
+      "tokenCount": 22914
+    },
+    {
+      "domain": "procedure",
+      "file": "procedure.mcdx",
+      "bytes": 4134391,
+      "docCount": 99551,
+      "tokenCount": 9810
+    },
+    {
+      "domain": "vaccine",
+      "file": "vaccine.mcdx",
+      "bytes": 23054,
+      "docCount": 608,
+      "tokenCount": 489
+    },
+    {
+      "domain": "occupational",
+      "file": "occupational.mcdx",
+      "bytes": 2508,
+      "docCount": 29,
+      "tokenCount": 99
+    },
+    {
+      "domain": "quality",
+      "file": "quality.mcdx",
+      "bytes": 827,
+      "docCount": 8,
+      "tokenCount": 27
+    }
+  ]
+}

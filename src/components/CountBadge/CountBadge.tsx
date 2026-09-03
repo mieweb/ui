@@ -2,6 +2,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import {
   MoreHorizontalIcon,
   ShareIcon,
@@ -192,6 +194,8 @@ export interface CountBadgeProps
   deleteLabel?: string;
   /** Independent variant for the count chip. When set, overrides `variant` for just the number. */
   countVariant?: VariantProps<typeof countChipVariants>['variant'];
+  /** Render the badge even when `count` is 0. By default zero-count badges are hidden. */
+  showZero?: boolean;
 }
 
 // =============================================================================
@@ -210,21 +214,8 @@ function RowActionMenu({
   const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   // Close on outside click
-  React.useEffect(() => {
-    if (!open) return;
-    function handleClick(e: MouseEvent) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
+  const outsideRefs = React.useMemo(() => [menuRef, buttonRef], []);
+  useClickOutside(outsideRefs, () => setOpen(false), open);
 
   // Close on Escape
   React.useEffect(() => {
@@ -332,10 +323,14 @@ function HoverMenu({
   items,
   actions,
   variant,
+  floatingRef,
+  style,
 }: {
   items: CountBadgeItem[];
   actions: CountBadgeAction[];
   variant: CountBadgeProps['variant'];
+  floatingRef: React.RefObject<HTMLDivElement | null>;
+  style: React.CSSProperties;
 }) {
   // Variant-aware header accent
   const headerBg: Record<string, string> = {
@@ -350,11 +345,13 @@ function HoverMenu({
   return (
     /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
     <div
+      ref={floatingRef}
+      style={style}
       data-slot="count-badge-menu"
       className={cn(
-        'absolute top-full right-0 z-50 mt-2',
         'w-[320px] rounded-lg border border-neutral-200 bg-white shadow-xl',
         'dark:border-neutral-700 dark:bg-neutral-800',
+        'flex flex-col overflow-hidden',
         'animate-in fade-in slide-in-from-top-1 duration-150'
       )}
       // Prevent click-outside handler from immediately closing when interacting
@@ -363,7 +360,7 @@ function HoverMenu({
       {/* Header */}
       <div
         className={cn(
-          'rounded-t-lg border-b border-neutral-200 px-3 py-2 dark:border-neutral-700',
+          'shrink-0 rounded-t-lg border-b border-neutral-200 px-3 py-2 dark:border-neutral-700',
           headerBg[variant ?? 'default']
         )}
       >
@@ -375,7 +372,7 @@ function HoverMenu({
       {/* Table */}
       <div
         data-slot="count-badge-menu-scroll"
-        className="max-h-[240px] overflow-y-auto"
+        className="max-h-[240px] min-h-0 overflow-y-auto"
       >
         <table className="w-full text-left text-xs">
           <thead>
@@ -472,22 +469,32 @@ function ViewModalActions({
   const [shareOpen, setShareOpen] = React.useState(false);
   const shareRef = React.useRef<HTMLDivElement>(null);
 
+  // Portal + fixed positioning so the dropdown escapes the modal's clipping.
+  const {
+    anchorRef: shareAnchorRef,
+    floatingRef: shareFloatingRef,
+    style: shareStyle,
+  } = useAnchoredPosition<HTMLDivElement, HTMLDivElement>({
+    open: shareOpen,
+  });
+
   // Close share dropdown on outside click
-  React.useEffect(() => {
-    if (!shareOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (shareRef.current && !shareRef.current.contains(e.target as Node)) {
-        setShareOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [shareOpen]);
+  const shareOutsideRefs = React.useMemo(
+    () => [shareRef, shareFloatingRef],
+    [shareFloatingRef]
+  );
+  useClickOutside(shareOutsideRefs, () => setShareOpen(false), shareOpen);
 
   return (
     <div className="mb-4 flex items-center gap-1 border-b border-neutral-200 pb-3 dark:border-neutral-700">
       {/* Share with dropdown */}
-      <div ref={shareRef} className="relative">
+      <div
+        ref={(node) => {
+          shareRef.current = node;
+          shareAnchorRef.current = node;
+        }}
+        className="relative"
+      >
         <Button
           variant="ghost"
           size="sm"
@@ -506,66 +513,69 @@ function ViewModalActions({
           />
         </Button>
 
-        {shareOpen && (
-          <div
-            role="menu"
-            className={cn(
-              'absolute top-full left-0 z-50 mt-1',
-              'min-w-[10rem] rounded-lg border border-neutral-200 bg-white py-1 shadow-lg',
-              'dark:border-neutral-700 dark:bg-neutral-800',
-              'animate-in fade-in zoom-in-95 duration-100'
-            )}
-          >
-            <button
-              role="menuitem"
-              type="button"
+        {shareOpen &&
+          ReactDOM.createPortal(
+            <div
+              ref={shareFloatingRef}
+              style={shareStyle}
+              role="menu"
               className={cn(
-                'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
-                'text-neutral-700 hover:bg-neutral-100',
-                'dark:text-neutral-300 dark:hover:bg-neutral-700'
+                'min-w-[10rem] overflow-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg',
+                'dark:border-neutral-700 dark:bg-neutral-800',
+                'animate-in fade-in zoom-in-95 duration-100'
               )}
-              onClick={() => {
-                console.warn('Share with physician', viewTarget);
-                setShareOpen(false);
-              }}
             >
-              <StethoscopeIcon size={14} />
-              Physician
-            </button>
-            <button
-              role="menuitem"
-              type="button"
-              className={cn(
-                'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
-                'text-neutral-700 hover:bg-neutral-100',
-                'dark:text-neutral-300 dark:hover:bg-neutral-700'
-              )}
-              onClick={() => {
-                console.warn('Share with patient', viewTarget);
-                setShareOpen(false);
-              }}
-            >
-              <UserIcon size={14} />
-              Patient
-            </button>
-            <button
-              role="menuitem"
-              type="button"
-              className={cn(
-                'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
-                'text-neutral-700 hover:bg-neutral-100',
-                'dark:text-neutral-300 dark:hover:bg-neutral-700'
-              )}
-              onClick={() => {
-                console.warn('Share via email', viewTarget);
-                setShareOpen(false);
-              }}
-            >
-              <MailIcon size={14} />
-              Email
-            </button>
-          </div>
-        )}
+              <button
+                role="menuitem"
+                type="button"
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                  'text-neutral-700 hover:bg-neutral-100',
+                  'dark:text-neutral-300 dark:hover:bg-neutral-700'
+                )}
+                onClick={() => {
+                  console.warn('Share with physician', viewTarget);
+                  setShareOpen(false);
+                }}
+              >
+                <StethoscopeIcon size={14} />
+                Physician
+              </button>
+              <button
+                role="menuitem"
+                type="button"
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                  'text-neutral-700 hover:bg-neutral-100',
+                  'dark:text-neutral-300 dark:hover:bg-neutral-700'
+                )}
+                onClick={() => {
+                  console.warn('Share with patient', viewTarget);
+                  setShareOpen(false);
+                }}
+              >
+                <UserIcon size={14} />
+                Patient
+              </button>
+              <button
+                role="menuitem"
+                type="button"
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                  'text-neutral-700 hover:bg-neutral-100',
+                  'dark:text-neutral-300 dark:hover:bg-neutral-700'
+                )}
+                onClick={() => {
+                  console.warn('Share via email', viewTarget);
+                  setShareOpen(false);
+                }}
+              >
+                <MailIcon size={14} />
+                Email
+              </button>
+            </div>,
+            document.body
+          )}
       </div>
 
       <Button
@@ -639,6 +649,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
       onDelete,
       deleteLabel,
       countVariant,
+      showZero = false,
       ...props
     },
     ref
@@ -656,22 +667,32 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
     );
 
     const showMenu = items && items.length > 0;
+    const hidden = count === 0 && !showZero;
+
+    // Close the popover when the badge becomes hidden so document listeners
+    // (Escape/outside-click) don't stay active and the menu doesn't reappear
+    // if the count rises again.
+    React.useEffect(() => {
+      if (hidden) setOpen(false);
+    }, [hidden]);
+
+    // Portal + fixed positioning so the menu escapes overflow-hidden ancestors.
+    const {
+      anchorRef,
+      floatingRef,
+      style: menuStyle,
+    } = useAnchoredPosition<HTMLDivElement, HTMLDivElement>({
+      open: Boolean(showMenu && open),
+      placement: 'bottom-end',
+      offset: 8,
+    });
 
     // Close on click outside
-    React.useEffect(() => {
-      if (!open) return;
-      const handleClickOutside = (e: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(e.target as Node)
-        ) {
-          setOpen(false);
-        }
-      };
-      document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
-    }, [open]);
+    const outsideRefs = React.useMemo(
+      () => [containerRef, floatingRef],
+      [floatingRef]
+    );
+    useClickOutside(outsideRefs, () => setOpen(false), open);
 
     // Close on Escape
     React.useEffect(() => {
@@ -716,9 +737,20 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
 
     const entityLabel = deleteLabel ?? 'item';
 
+    // Hide zero-count badges unless explicitly opted in. Placed after all
+    // hooks so the hook order stays stable when `count` changes.
+    if (hidden) return null;
+
     return (
       <>
-        <div ref={containerRef} className="relative inline-flex">
+        <div
+          ref={(node) => {
+            containerRef.current = node;
+            anchorRef.current = node;
+          }}
+          data-slot="count-badge-root"
+          className="relative inline-flex"
+        >
           <button
             ref={ref}
             type="button"
@@ -746,13 +778,18 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
             </span>
           </button>
 
-          {showMenu && open && (
-            <HoverMenu
-              items={items}
-              actions={resolvedActions}
-              variant={variant}
-            />
-          )}
+          {showMenu &&
+            open &&
+            ReactDOM.createPortal(
+              <HoverMenu
+                items={items}
+                actions={resolvedActions}
+                variant={variant}
+                floatingRef={floatingRef}
+                style={menuStyle}
+              />,
+              document.body
+            )}
         </div>
 
         {/* Delete confirmation modal */}

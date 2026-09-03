@@ -3,88 +3,94 @@ export * from './types';
 
 // Core Components
 export {
-  AttachmentPicker,
-  type AttachmentPickerProps,
-  AttachmentPreviewItem,
-  type AttachmentPreviewItemProps,
-  CameraButton,
-  type CameraButtonProps,
-  DragDropZone,
-  type DragDropZoneProps,
-  generateAttachmentId,
-  getFileType,
-  validateFile,
-} from './AttachmentPicker';
-export {
-  ConversationHeader,
-  type ConversationHeaderProps,
-  ConversationListItem,
-  type ConversationListItemProps,
-  ConversationListSkeleton,
-  type ConversationListSkeletonProps,
-  formatLastSeen,
-  getConversationSubtitle,
-  getConversationTitle,
-  headerVariants,
-} from './ConversationHeader';
-export {
+  MessageBubble,
+  MessageStatusIcon,
+  ReadReceiptIndicator,
   AttachmentPreview,
-  type AttachmentPreviewProps,
   bubbleVariants,
   formatFileSize,
-  MessageBubble,
   type MessageBubbleProps,
-  MessageStatusIcon,
   type MessageStatusIconProps,
-  ReadReceiptIndicator,
   type ReadReceiptIndicatorProps,
+  type AttachmentPreviewProps,
 } from './MessageBubble';
+
 export {
-  CharacterCounter,
-  type CharacterCounterProps,
-  MessageComposer,
-  type MessageComposerProps,
-  SendButton,
-  type SendButtonProps,
-  sendButtonVariants,
-} from './MessageComposer';
-export {
-  DateSeparator,
-  type DateSeparatorProps,
-  EmptyState,
-  type EmptyStateProps,
-  formatDateLabel,
-  groupMessagesByDate,
-  isSameSenderGroup,
-  LoadMoreButton,
-  type LoadMoreButtonProps,
   MessageList,
-  type MessageListProps,
   SkeletonMessage,
-  type SkeletonMessageProps,
   TypingIndicator,
+  DateSeparator,
+  EmptyState,
+  LoadMoreButton,
+  groupMessagesByDate,
+  formatDateLabel,
+  isSameSenderGroup,
+  type MessageListProps,
+  type SkeletonMessageProps,
   type TypingIndicatorProps,
+  type DateSeparatorProps,
+  type EmptyStateProps,
+  type LoadMoreButtonProps,
 } from './MessageList';
+
 export {
-  LightboxModal,
-  type LightboxModalProps,
+  MessageComposer,
+  CharacterCounter,
+  SendButton,
+  sendButtonVariants,
+  type MessageComposerProps,
+  type CharacterCounterProps,
+  type SendButtonProps,
+  type MentionOption,
+} from './MessageComposer';
+
+export {
+  AttachmentPicker,
+  AttachmentPreviewItem,
+  DragDropZone,
+  CameraButton,
+  getFileType,
+  validateFile,
+  generateAttachmentId,
+  type AttachmentPickerProps,
+  type AttachmentPreviewItemProps,
+  type DragDropZoneProps,
+  type CameraButtonProps,
+} from './AttachmentPicker';
+
+export {
+  ConversationHeader,
+  ConversationListItem,
+  ConversationListSkeleton,
+  headerVariants,
+  getConversationTitle,
+  getConversationSubtitle,
+  formatLastSeen,
+  type ConversationHeaderProps,
+  type ConversationListItemProps,
+  type ConversationListSkeletonProps,
+} from './ConversationHeader';
+
+export {
   MessageThread,
-  type MessageThreadProps,
+  LightboxModal,
   MessagingSplitView,
+  type MessageThreadProps,
+  type LightboxModalProps,
   type MessagingSplitViewProps,
 } from './MessageThread';
 
 // Hooks
 export {
   useMessages,
+  useTypingIndicator,
   useMessageScroll,
-  type UseMessageScrollOptions,
-  type UseMessageScrollReturn,
+  useReadReceipts,
   type UseMessagesOptions,
   type UseMessagesReturn,
-  useReadReceipts,
-  type UseReadReceiptsOptions,
-  useTypingIndicator,
   type UseTypingIndicatorOptions,
   type UseTypingIndicatorReturn,
+  type UseMessageScrollOptions,
+  type UseMessageScrollReturn,
+  type UseReadReceiptsOptions,
 } from './hooks';

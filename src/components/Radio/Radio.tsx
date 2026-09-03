@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import {
+  floatingGroupVariants,
+  floatingGroupLabelVariants,
+} from '../Input/Input';
 
 // ============================================================================
 // Radio Group Context
@@ -70,6 +74,14 @@ export interface RadioGroupProps {
   onValueChange?: (value: string) => void;
   /** Group label */
   label?: string;
+  /**
+   * How the group label is rendered.
+   * - `stacked` (default): label above the options.
+   * - `floating`: renders the group as a bordered field matching floating
+   *   inputs, with the label fixed in the floated position so mixed forms
+   *   stay vertically aligned.
+   */
+  labelVariant?: 'stacked' | 'floating';
   /** Description for the group */
   description?: string;
   /** Error message */
@@ -104,6 +116,7 @@ function RadioGroup({
   defaultValue = '',
   onValueChange,
   label,
+  labelVariant = 'stacked',
   description,
   error,
   disabled = false,
@@ -133,6 +146,20 @@ function RadioGroup({
     [isControlled, onValueChange]
   );
 
+  const isFloating = labelVariant === 'floating' && !!label;
+
+  const itemsElement = (
+    <div
+      data-slot="radio-group-items"
+      className={cn(
+        'flex gap-4',
+        orientation === 'vertical' && 'flex-col gap-3'
+      )}
+    >
+      {children}
+    </div>
+  );
+
   return (
     <RadioGroupContext.Provider
       value={{ name: groupName, value, onChange: handleChange, disabled, size }}
@@ -151,15 +178,37 @@ function RadioGroup({
           <legend
             data-slot="radio-group-legend"
             className={cn(
-              'text-foreground font-medium',
+              // Legends are excluded from the fieldset's flex layout, so gap-*
+              // never applies to them; use an explicit margin matching the
+              // stacked Input label's 6px gap.
+              'text-foreground mb-1.5 font-medium',
               size === 'sm' && 'text-xs',
               size === 'md' && 'text-sm',
-              size === 'lg' && 'text-base'
+              size === 'lg' && 'text-base',
+              isFloating && 'sr-only'
             )}
           >
             {label}
           </legend>
         )}
+        {isFloating ? (
+          <div
+            data-slot="radio-group-field"
+            className={floatingGroupVariants({ size, hasError: !!error })}
+          >
+            <span
+              aria-hidden="true"
+              data-slot="radio-group-floating-label"
+              className={floatingGroupLabelVariants({
+                size,
+                hasError: !!error,
+              })}
+            >
+              {label}
+            </span>
+            {itemsElement}
+          </div>
+        ) : null}
         {description && (
           <p
             id={descriptionId}
@@ -174,15 +223,7 @@ function RadioGroup({
             {description}
           </p>
         )}
-        <div
-          data-slot="radio-group-items"
-          className={cn(
-            'flex gap-4',
-            orientation === 'vertical' && 'flex-col gap-3'
-          )}
-        >
-          {children}
-        </div>
+        {!isFloating && itemsElement}
         {error && (
           <p
             id={errorId}

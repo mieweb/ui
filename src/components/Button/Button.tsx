@@ -7,6 +7,7 @@ const buttonVariants = cva(
   // Base styles
   [
     'inline-flex items-center justify-center gap-2',
+    'min-w-0 whitespace-nowrap',
     'font-semibold transition-all duration-200',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
@@ -118,11 +119,38 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       loadingText,
       disabled,
       children,
+      title,
       ...props
     },
     ref
   ) => {
     const resolvedSize = size ?? 'md';
+    const labelRef = React.useRef<HTMLSpanElement>(null);
+    const innerRef = React.useRef<HTMLButtonElement>(null);
+    React.useImperativeHandle(ref, () => innerRef.current as HTMLButtonElement);
+
+    // When the label truncates, expose the full text as a native tooltip.
+    // A consumer-provided `title` always takes precedence.
+    React.useLayoutEffect(() => {
+      const label = labelRef.current;
+      const button = innerRef.current;
+      if (!label || !button || title !== undefined) return;
+
+      const update = () => {
+        if (label.scrollWidth > label.clientWidth) {
+          button.title = label.textContent ?? '';
+        } else {
+          button.removeAttribute('title');
+        }
+      };
+
+      update();
+      if (typeof globalThis.ResizeObserver === 'undefined') return;
+      const observer = new globalThis.ResizeObserver(update);
+      observer.observe(label);
+      return () => observer.disconnect();
+    }, [title, children, isLoading, loadingText]);
+
     return (
       <button
         data-slot="button"
@@ -131,22 +159,27 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           buttonVariants({ variant, size: resolvedSize, fullWidth }),
           className
         )}
-        ref={ref}
+        ref={innerRef}
         disabled={disabled || isLoading}
         aria-busy={isLoading}
+        title={title}
         {...props}
       >
         {isLoading ? (
           <>
             <LoadingSpinner />
-            {loadingText || children}
+            <span ref={labelRef} data-slot="button-label" className="truncate">
+              {loadingText || children}
+            </span>
           </>
         ) : (
           <>
             {React.isValidElement(leftIcon) && (
               <span className="shrink-0">{leftIcon}</span>
             )}
-            {children}
+            <span ref={labelRef} data-slot="button-label" className="truncate">
+              {children}
+            </span>
             {React.isValidElement(rightIcon) && (
               <span className="shrink-0">{rightIcon}</span>
             )}
@@ -165,7 +198,7 @@ Button.displayName = 'Button';
 function LoadingSpinner() {
   return (
     <svg
-      className="h-4 w-4 animate-spin"
+      className="h-4 w-4 shrink-0 animate-spin"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

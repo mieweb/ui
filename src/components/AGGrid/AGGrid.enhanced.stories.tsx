@@ -1,21 +1,21 @@
-// Import AG Grid styles
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/agGridQuartzFont.css';
-import './ag-grid-theme.css';
-
 import type { Meta, StoryObj } from '@storybook/react-vite';
-
 import {
   AGGrid,
-  EnhancedActionsRenderer,
   EnhancedAvatarNameRenderer,
+  EnhancedStatusBadgeRenderer,
+  EnhancedActionsRenderer,
   EnhancedBooleanRenderer,
   EnhancedCurrencyRenderer,
   EnhancedDateRenderer,
   EnhancedProgressRenderer,
-  EnhancedStatusBadgeRenderer,
   EnhancedTagsRenderer,
 } from './index-enhanced';
+import { withDeprecationBanner, DEPRECATION_NOTICE } from './DeprecationBanner';
+
+// Import AG Grid styles
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/agGridQuartzFont.css';
+import './ag-grid-theme.css';
 
 // ============================================================================
 // Sample Data
@@ -163,8 +163,9 @@ const enhancedColumnDefs: Record<string, unknown>[] = [
 // ============================================================================
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Components/Text & Data Display/AGGrid/Enhanced',
+  title: 'Deprecated/AGGrid/Enhanced',
   component: AGGrid,
+  decorators: [withDeprecationBanner],
   parameters: {
     layout: 'padded',
     // AG Grid is a third-party component whose internal DOM renders elements
@@ -173,6 +174,8 @@ const meta: Meta<typeof AGGrid> = {
     docs: {
       description: {
         component: `
+${DEPRECATION_NOTICE}
+
 # Enhanced AG Grid with Full Design System Integration
 
 This enhanced version provides multi-brand support, design system integration, and advanced features.

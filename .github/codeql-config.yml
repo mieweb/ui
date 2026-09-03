@@ -6,3 +6,8 @@ paths-ignore:
   - node_modules
   - "**/*.min.js"
   - "**/*.bundle.js"
+  - "**/dist"
+  # Git submodules are scanned in their own repositories (mieweb/eSheet,
+  # mieweb/ychart); exclude them here to avoid duplicate/noisy alerts.
+  - packages/esheet
+  - packages/ychart

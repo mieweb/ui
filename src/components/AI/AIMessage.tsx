@@ -10,11 +10,14 @@ import { cn } from '../../utils/cn';
 import type {
   AIMessage,
   AIMessageContent,
+  AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
 } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
-import { SparklesIcon, ChevronIcon } from './icons';
+import { SparklesIcon } from './icons';
+import { CollapsiblePill } from './CollapsiblePill';
+import { AudioPlayer } from '../AudioPlayer';
 
 // ============================================================================
 // Avatar Component
@@ -161,6 +164,59 @@ function AITypingIndicator({ className }: { className?: string }) {
 }
 
 // ============================================================================
+// Thinking Block
+// ============================================================================
+
+function ThinkingBlock({
+  text,
+  streaming,
+  defaultCollapsed = false,
+}: {
+  text: string;
+  streaming: boolean;
+  defaultCollapsed?: boolean;
+}) {
+  const startedAt = React.useRef(Date.now());
+  const [elapsed, setElapsed] = React.useState<number | null>(null);
+  const prevStreaming = React.useRef(streaming);
+
+  React.useEffect(() => {
+    if (prevStreaming.current && !streaming) {
+      setElapsed(Math.round((Date.now() - startedAt.current) / 1000));
+    }
+    prevStreaming.current = streaming;
+  }, [streaming]);
+
+  const label = streaming
+    ? 'Thinking'
+    : elapsed !== null && elapsed > 0
+      ? `Thought for ${elapsed}s`
+      : 'Thought';
+
+  const dot = streaming ? (
+    <span
+      aria-hidden="true"
+      className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-violet-500 dark:bg-violet-400"
+    />
+  ) : null;
+
+  return (
+    <div data-slot="ai-message-thinking">
+      <CollapsiblePill
+        label={label}
+        leadingIcon={dot}
+        defaultOpen={!defaultCollapsed}
+        pillClassName="bg-violet-50 border-violet-200 text-violet-600 hover:bg-violet-100 dark:bg-violet-950/30 dark:border-violet-800 dark:text-violet-400 dark:hover:bg-violet-950/50 focus-visible:ring-violet-500"
+      >
+        <div className="border-s-2 border-violet-200 ps-3 text-[13px] leading-relaxed text-neutral-600 italic dark:border-violet-700 dark:text-neutral-400">
+          {text}
+        </div>
+      </CollapsiblePill>
+    </div>
+  );
+}
+
+// ============================================================================
 // Content Block Renderer
 // ============================================================================
 
@@ -181,10 +237,6 @@ function ContentBlock({
   role,
   renderTextContent,
 }: ContentBlockProps) {
-  const [isCollapsed, setIsCollapsed] = React.useState(
-    content.collapsed ?? false
-  );
-
   if (content.type === 'text' && content.text) {
     if (renderTextContent) {
       return (
@@ -212,44 +264,11 @@ function ContentBlock({
 
   if (content.type === 'thinking' && content.text) {
     return (
-      <div
-        data-slot="ai-message-thinking"
-        className="rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50"
-      >
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex w-full items-center justify-between px-3 py-2 text-left"
-        >
-          <span className="text-muted-foreground flex items-center gap-2 text-sm">
-            <svg
-              aria-hidden="true"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-              />
-            </svg>
-            Thinking...
-          </span>
-          <ChevronIcon
-            direction={isCollapsed ? 'right' : 'down'}
-            className="text-neutral-400"
-          />
-        </button>
-        {!isCollapsed && (
-          <div className="border-t border-neutral-200 px-3 py-2 dark:border-neutral-700">
-            <p className="text-sm text-neutral-600 italic dark:text-neutral-400">
-              {content.text}
-            </p>
-          </div>
-        )}
-      </div>
+      <ThinkingBlock
+        text={content.text}
+        streaming={streaming}
+        defaultCollapsed={content.collapsed ?? false}
+      />
     );
   }
 
@@ -268,7 +287,122 @@ function ContentBlock({
     );
   }
 
+  if (content.type === 'audio' && content.audioUrl) {
+    // Guard against `javascript:` URLs, mirroring the image/file blocks.
+    if (/^\s*javascript:/i.test(content.audioUrl)) {
+      return null;
+    }
+    return (
+      <AudioPlayer
+        src={content.audioUrl}
+        title={content.text || 'Audio recording'}
+        variant="waveform"
+        showTime
+        showPlaybackRate
+        fallbackDuration={content.duration}
+      />
+    );
+  }
+
+  if (content.type === 'video' && content.videoUrl) {
+    // Guard against `javascript:` URLs, mirroring the audio/image/file blocks.
+    if (/^\s*javascript:/i.test(content.videoUrl)) {
+      return null;
+    }
+    return (
+      <video
+        src={content.videoUrl}
+        controls
+        preload="metadata"
+        aria-label={content.text || 'Video recording'}
+        className="my-1 max-h-80 w-full rounded-lg bg-black"
+      >
+        {/* Recorded clips carry no caption track; present for a11y compliance. */}
+        <track kind="captions" />
+      </video>
+    );
+  }
+
+  if (content.type === 'image' && content.imageUrl) {
+    const safeHref = /^\s*javascript:/i.test(content.imageUrl)
+      ? undefined
+      : content.imageUrl;
+    return (
+      <a
+        href={safeHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-fit transition-transform hover:scale-[1.02]"
+        aria-label={`View ${content.name || 'Uploaded image'}`}
+      >
+        <img
+          src={content.imageUrl}
+          alt={content.name || 'Uploaded image'}
+          loading="lazy"
+          className="my-1 max-h-64 w-auto rounded-lg object-cover"
+        />
+      </a>
+    );
+  }
+
+  if (content.type === 'file') {
+    const sizeLabel =
+      typeof content.fileSize === 'number'
+        ? formatFileSize(content.fileSize)
+        : undefined;
+    const card = (
+      <div className="my-1 flex items-center gap-3 rounded-lg bg-neutral-100 p-3 transition-colors dark:bg-neutral-800">
+        <div className="rounded-lg bg-neutral-200 p-2 dark:bg-neutral-700">
+          <svg
+            aria-hidden="true"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">
+            {content.name || 'Document'}
+          </p>
+          {sizeLabel && <p className="text-xs opacity-70">{sizeLabel}</p>}
+        </div>
+      </div>
+    );
+
+    if (content.fileUrl) {
+      const safeFileHref = /^\s*javascript:/i.test(content.fileUrl)
+        ? undefined
+        : content.fileUrl;
+      return (
+        <a
+          href={safeFileHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-fit no-underline"
+        >
+          {card}
+        </a>
+      );
+    }
+    return card;
+  }
+
   return null;
+}
+
+/** Human-readable file size (e.g. "1.2 MB"). */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ============================================================================
@@ -291,7 +425,7 @@ const messageVariants = cva('flex gap-3', {
 
 const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
   variants: {
-    role: {
+    variant: {
       user: 'bg-primary-800 text-white dark:bg-primary-800',
       assistant:
         'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
@@ -301,9 +435,52 @@ const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
     },
   },
   defaultVariants: {
-    role: 'assistant',
+    variant: 'assistant',
   },
 });
+
+export interface ChatBubbleProps
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof bubbleVariants> {
+  /** Show error styling (red border). */
+  hasError?: boolean;
+  /**
+   * Optional left-border accent color. Used by multi-participant surfaces
+   * (e.g. SuperChat) to tint a speaker's bubble; AI chat leaves it unset.
+   */
+  accent?: string;
+}
+
+/**
+ * The shared chat bubble shell. This is the single source of truth for how a
+ * chat message bubble looks across the library (AI chat, SuperChat, etc.).
+ * Presentational only — callers render their own content inside.
+ */
+const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
+  (
+    { className, variant, hasError, accent, style, children, ...props },
+    ref
+  ) => {
+    return (
+      <div
+        ref={ref}
+        data-slot="chat-bubble"
+        className={cn(
+          bubbleVariants({ variant }),
+          hasError && 'border border-red-300 dark:border-red-700',
+          className
+        )}
+        style={accent ? { borderLeft: `3px solid ${accent}`, ...style } : style}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+ChatBubble.displayName = 'ChatBubble';
 
 export interface AIMessageDisplayProps {
   /** The message to display */
@@ -321,6 +498,12 @@ export interface AIMessageDisplayProps {
    * text block with `{ messageId, streaming, role }`. Host must sanitize.
    */
   renderTextContent?: AIRenderTextContent;
+  /**
+   * Optional renderer for a per-message footer shown below the bubble (e.g.
+   * message action controls). Aligned with the message (right for user, left
+   * for assistant).
+   */
+  renderMessageFooter?: AIRenderMessageFooter;
   /** Additional class name */
   className?: string;
 }
@@ -335,10 +518,12 @@ export function AIMessageDisplay({
   showTimestamp = false,
   onLinkClick,
   renderTextContent,
+  renderMessageFooter,
   className,
 }: AIMessageDisplayProps) {
   const isStreaming = message.status === 'streaming';
   const hasContent = message.content.length > 0;
+  const messageFooter = renderMessageFooter?.(message);
 
   const formatTime = (timestamp: Date | string) => {
     const date = new Date(timestamp);
@@ -388,13 +573,10 @@ export function AIMessageDisplay({
           message.role === 'user' && 'items-end'
         )}
       >
-        <div
+        <ChatBubble
           data-slot="ai-message-bubble"
-          className={cn(
-            bubbleVariants({ role: message.role }),
-            message.status === 'error' &&
-              'border border-red-300 dark:border-red-700'
-          )}
+          variant={message.role}
+          hasError={message.status === 'error'}
         >
           {hasContent ? (
             <div className="space-y-3">
@@ -415,7 +597,13 @@ export function AIMessageDisplay({
               <AITypingIndicator />
             </div>
           ) : null}
-        </div>
+        </ChatBubble>
+
+        {messageFooter != null && messageFooter !== false && (
+          <div data-slot="ai-message-footer" className="w-fit max-w-[85%]">
+            {messageFooter}
+          </div>
+        )}
 
         {showTimestamp && (
           <span
@@ -436,4 +624,4 @@ export function AIMessageDisplay({
   );
 }
 
-export { MessageAvatar, AITypingIndicator };
+export { MessageAvatar, AITypingIndicator, ChatBubble, bubbleVariants };

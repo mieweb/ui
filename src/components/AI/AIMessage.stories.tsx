@@ -6,6 +6,8 @@ import {
   type AIRenderTextContent,
 } from './index';
 import { successToolCall } from './storyData';
+import { getSampleAudio } from '../AudioPlayer/sampleAudio';
+import { getSampleVideo } from '../AudioPlayer/sampleVideo';
 
 // ============================================================================
 // AI Message Stories
@@ -30,6 +32,10 @@ const meta: Meta<typeof AIMessageDisplay> = {
           '| `tool_use` | An embedded `MCPToolCallDisplay` |',
           '| `thinking` | A collapsible "Thinking…" reasoning panel |',
           '| `code` | A syntax-styled code block |',
+          '| `image` | A clickable image thumbnail |',
+          '| `file` | A document card with icon, filename & size |',
+          '| `audio` | An inline waveform `AudioPlayer` for recorded clips |',
+          '| `video` | An inline native `<video>` player for screen/video recordings |',
           '',
           '### Rich content: Markdown, images & Mermaid',
           'Text blocks are plain text by default. To render **Markdown, images, or Mermaid diagrams**,',
@@ -159,17 +165,61 @@ export const StreamingMessage: Story = {
   },
 };
 
-/** A collapsible reasoning ("thinking") block ahead of the final answer. */
-export const ThinkingBlock: Story = {
+/** Thinking pill while the model is actively reasoning — pulsing dot, "Thinking" label. */
+export const ThinkingActive: Story = {
   render: () => {
     const message: AIMessage = {
-      id: '5',
+      id: '5a',
+      role: 'assistant',
+      content: [
+        {
+          type: 'thinking',
+          text: 'The user wants to add a new patient. I should use the create_patient tool with the provided information. Validating date format and required fields...',
+          collapsed: false,
+        },
+      ],
+      timestamp: new Date(),
+      status: 'streaming',
+    };
+    return <AIMessageDisplay message={message} />;
+  },
+};
+
+/** Thinking pill after the model finished — "Thought" label, no dot, collapsed by default. */
+export const ThinkingComplete: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '5b',
       role: 'assistant',
       content: [
         {
           type: 'thinking',
           text: 'The user wants to add a new patient. I should use the create_patient tool with the provided information. I need to validate the date format and ensure all required fields are present.',
           collapsed: true,
+        },
+        {
+          type: 'text',
+          text: "I'll create a new patient record for John Smith.",
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} />;
+  },
+};
+
+/** Thinking pill expanded — user clicked to reveal reasoning content. */
+export const ThinkingExpanded: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '5c',
+      role: 'assistant',
+      content: [
+        {
+          type: 'thinking',
+          text: 'The user wants to add a new patient. I should use the create_patient tool with the provided information. I need to validate the date format and ensure all required fields are present.',
+          collapsed: false,
         },
         {
           type: 'text',
@@ -224,4 +274,151 @@ export const WithCustomMarkdownRenderer: Story = {
       />
     );
   },
+};
+
+/** An assistant turn with a clickable image thumbnail. */
+export const WithImageBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '7',
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: "Here's the lab result image you requested.",
+        },
+        {
+          type: 'image',
+          imageUrl:
+            'https://placehold.co/600x400/4f46e5/ffffff/png?text=Lab+Result',
+          name: 'Lab result scan',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} />;
+  },
+};
+
+/** An assistant turn with a file document card showing icon, filename, and size. */
+export const WithFileBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '8',
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: "Here's the full report you requested.",
+        },
+        {
+          type: 'file',
+          name: 'patient-report.pdf',
+          fileSize: 1_258_291,
+          mimeType: 'application/pdf',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} />;
+  },
+};
+
+/**
+ * A user turn carrying a recorded audio clip, rendered inline as a waveform
+ * `AudioPlayer`. This is how a captured dictation plays back next to its
+ * transcription. `duration` (seconds) is passed through as the player's
+ * `fallbackDuration` so the time shows before audio metadata loads.
+ */
+export const WithAudioBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '9',
+      role: 'user',
+      content: [
+        {
+          type: 'audio',
+          audioUrl: getSampleAudio(),
+          text: 'Voice recording',
+          mimeType: 'audio/wav',
+          duration: 10,
+        },
+        {
+          type: 'text',
+          text: 'Patient reports mild headache for the past two days.',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} userName="Dr. Jane" />;
+  },
+};
+
+/**
+ * A user turn carrying a recorded screen/video clip, rendered inline as a native
+ * `<video>` player. This is how a captured screen recording plays back next to
+ * its transcription. The sample clip is generated locally via canvas +
+ * `MediaRecorder`, so the demo shows a brief loading state while it renders.
+ */
+const VideoBlockDemo: React.FC = () => {
+  const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let active = true;
+    void getSampleVideo().then(
+      (url) => {
+        if (active) setVideoUrl(url);
+      },
+      (err: unknown) => {
+        if (active) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Failed to generate sample video.'
+          );
+        }
+      }
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (error) {
+    return <p className="text-destructive text-sm">{error}</p>;
+  }
+
+  if (!videoUrl) {
+    return (
+      <p className="text-muted-foreground text-sm">Generating sample video…</p>
+    );
+  }
+
+  const message: AIMessage = {
+    id: '10',
+    role: 'user',
+    content: [
+      {
+        type: 'video',
+        videoUrl,
+        text: 'Screen recording',
+        mimeType: 'video/webm',
+      },
+      {
+        type: 'text',
+        text: 'Walkthrough of the reported issue on the dashboard.',
+      },
+    ],
+    timestamp: new Date(),
+    status: 'complete',
+  };
+  return <AIMessageDisplay message={message} userName="Dr. Jane" />;
+};
+
+export const WithVideoBlock: Story = {
+  render: () => <VideoBlockDemo />,
 };

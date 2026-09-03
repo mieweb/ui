@@ -2,6 +2,8 @@
 @import './condensed-view.css';
 @import './datavis-dark.css';
 @import './datavis-overrides.css';
+@source "../../node_modules/@mieweb/datavis/dist";
+
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
 /* Hide DataVis slider from layout when closed to prevent horizontal overflow */
@@ -33,6 +35,11 @@
   --color-primary-900: var(--mieweb-primary-900);
   --color-primary-950: var(--mieweb-primary-950);
   --color-primary-foreground: var(--mieweb-primary-foreground, #ffffff);
+
+  /* ── Ozwell brand accent (the "Hey Ozwell" octopus blue) ───────────── */
+  /* A sub-brand color distinct from the host app's primary; themeable via --mieweb-ozwell. */
+  --color-ozwell: var(--mieweb-ozwell, #0ba0e0);
+  --color-ozwell-foreground: var(--mieweb-ozwell-foreground, #ffffff);
 
   /* ── Secondary Color Scale ─────────────────────────────────────────── */
   --color-secondary: var(--mieweb-secondary-500, #6366f1);
@@ -366,6 +373,50 @@
   --mieweb-chart-3: #fbbf24;
   --mieweb-chart-4: #f87171;
   --mieweb-chart-5: #818cf8;
+}
+
+/* Q's published form renderer uses the same primary token for headers and actions. */
+[data-slot='q'] {
+  --mie-color-mietext: var(--mieweb-card-foreground, #171717);
+  --mie-color-miesurface: var(--mieweb-card, #ffffff);
+  --mie-color-mieborder: var(--mieweb-neutral-300, #d4d4d4);
+  --mie-color-miebackground: var(--mieweb-background, #fafafa);
+}
+
+:is(.dark, [data-theme='dark']) [data-slot='q'],
+[data-slot='q']:is(.dark, [data-theme='dark']) {
+  --mie-color-mietext: var(--mieweb-card-foreground, #d4d4d4);
+  --mie-color-miesurface: var(--mieweb-card, #262626);
+  --mie-color-mieborder: var(--mieweb-neutral-700, #404040);
+  --mie-color-miebackground: var(--mieweb-background, #171717);
+  --mieweb-destructive: #f87171;
+}
+
+[data-slot='q'] [data-field-id] section > .mie\:bg-mieprimary {
+  background-color: var(--mieweb-neutral-300, #d4d4d4);
+  color: var(--mieweb-neutral-900, #171717);
+}
+
+:is(.dark, [data-theme='dark'])
+  [data-slot='q']
+  [data-field-id]
+  section
+  > .mie\:bg-mieprimary,
+[data-slot='q']:is(.dark, [data-theme='dark'])
+  [data-field-id]
+  section
+  > .mie\:bg-mieprimary {
+  background-color: var(--mieweb-neutral-700, #404040);
+  color: var(--mieweb-neutral-300, #d4d4d4);
+}
+
+:is(.dark, [data-theme='dark'])
+  [data-slot='q']
+  [role='tab'][data-state='active'],
+[data-slot='q']:is(.dark, [data-theme='dark'])
+  [role='tab'][data-state='active'] {
+  border-color: #27aae1;
+  color: #27aae1;
 }
 
 /* ============================================

@@ -8,6 +8,7 @@ import {
   createWeekdaySchedule,
   DaySchedule,
 } from './BusinessHoursEditor';
+import { BusinessHours } from '../BusinessHours';
 
 const meta: Meta<typeof BusinessHoursEditor> = {
   title: 'Components/Forms & Inputs/BusinessHoursEditor',
@@ -27,9 +28,20 @@ const meta: Meta<typeof BusinessHoursEditor> = {
     value: { table: { disable: true } },
     onChange: { table: { disable: true } },
     className: { table: { disable: true } },
-    // use24Hour is not implemented in the component (native time inputs use browser locale)
-    use24Hour: { table: { disable: true } },
+    // use24Hour only affects the rules variant; the days variant uses native
+    // time inputs (browser locale)
+    use24Hour: {
+      control: 'boolean',
+      description:
+        "Use 24-hour time display in the rules variant's time pickers",
+    },
 
+    variant: {
+      control: 'radio',
+      options: ['days', 'rules'],
+      description:
+        "Editing layout: per-day sections or grouped day/time rules ('rules')",
+    },
     disabled: {
       control: 'boolean',
       description: 'Whether the editor is disabled',
@@ -315,5 +327,94 @@ export const Mobile: Story = {
     viewport: {
       defaultViewport: 'mobile1',
     },
+  },
+};
+
+// ============================================================================
+// Rules Variant
+// ============================================================================
+
+/** Patient availability: M/W/F 8–11am, Tu/Th 3–5pm, Sat 10am–4pm, Sun unavailable */
+const patientAvailability: DaySchedule[] = [
+  { day: 0, hours: [] },
+  { day: 1, hours: [{ id: '1', start: '08:00', end: '11:00' }] },
+  { day: 2, hours: [{ id: '2', start: '15:00', end: '17:00' }] },
+  { day: 3, hours: [{ id: '3', start: '08:00', end: '11:00' }] },
+  { day: 4, hours: [{ id: '4', start: '15:00', end: '17:00' }] },
+  { day: 5, hours: [{ id: '5', start: '08:00', end: '11:00' }] },
+  { day: 6, hours: [{ id: '6', start: '10:00', end: '16:00' }] },
+];
+
+// Interactive wrapper with a live read-only BusinessHours preview
+function RulesVariantWrapper({
+  value: initialValue,
+  onChange: _,
+  groupPreview = true,
+  ...restProps
+}: Partial<React.ComponentProps<typeof BusinessHoursEditor>> & {
+  /** Toggle the preview between grouped rows and a per-day list */
+  groupPreview?: boolean;
+}) {
+  const [schedule, setSchedule] = useState<DaySchedule[]>(initialValue || []);
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <BusinessHoursEditor
+        {...restProps}
+        variant="rules"
+        value={schedule}
+        onChange={setSchedule}
+      />
+
+      <BusinessHours
+        schedule={{ officeHours: schedule }}
+        headerText="Availability Preview"
+        showStatus={false}
+        groupDays={groupPreview}
+        useShortDayNames={groupPreview}
+      />
+    </div>
+  );
+}
+
+const rulesStoryArgTypes = {
+  variant: { table: { disable: true } },
+  groupPreview: {
+    control: 'boolean',
+    description:
+      'Switch the Availability Preview between grouped rows (e.g. "Mon, Wed, Fri · 8:00 AM - 11:00 AM") and a per-day list',
+  },
+} as const;
+
+export const RulesVariant: Story = {
+  render: (args) => <RulesVariantWrapper {...args} />,
+  argTypes: rulesStoryArgTypes,
+  args: {
+    value: patientAvailability,
+    showDescription: false,
+    addHoursLabel: 'Add availability',
+    // @ts-expect-error story-only control for the preview display
+    groupPreview: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The rules variant groups days that share the same hours into one row — ideal for capturing patient availability like "Mon/Wed/Fri 8–11am, Tue/Thu 3–5pm, Sat 10am–4pm". It reads and emits the same DaySchedule[] as the default variant, previewed here with the BusinessHours display component. Use the groupPreview control to switch the preview between grouped and per-day views.',
+      },
+    },
+  },
+};
+
+export const RulesVariantEmpty: Story = {
+  render: (args) => <RulesVariantWrapper {...args} />,
+  argTypes: rulesStoryArgTypes,
+  args: {
+    value: [],
+    showDescription: false,
+    addHoursLabel: 'Add availability',
+    use24Hour: true,
+    // @ts-expect-error story-only control for the preview display
+    groupPreview: true,
   },
 };

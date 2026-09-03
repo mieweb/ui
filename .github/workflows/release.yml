@@ -3,9 +3,9 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'  # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
+      - 'v*' # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
     branches:
-      - main   # Auto dev-prerelease on every main push
+      - main # Auto dev-prerelease on every main push
     paths-ignore:
       - '*.md'
       - '.github/**'
@@ -13,7 +13,11 @@ on:
 
 permissions:
   contents: write
-  id-token: write  # Required for npm Trusted Publishing (OIDC)
+  id-token: write # Required for npm Trusted Publishing (OIDC)
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -32,8 +36,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Pinned to 20 to match ci.yml.
-          node-version: '20'
+          # Node 24 (Active LTS "Krypton"). Its BUNDLED npm is 11.x (>=11.5.1),
+          # which supports tokenless OIDC Trusted Publishing for the provenance
+          # publish step below. Using the bundled npm (rather than a global
+          # `npm install -g npm@latest`) keeps npm's dependency tree intact —
+          # the global upgrade on the runner produced a broken tree missing
+          # `sigstore`, which broke `npm publish --provenance`.
+          node-version: '24'
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
@@ -44,17 +53,11 @@ jobs:
           npm -v
           pnpm -v
 
-      - name: Upgrade npm
-        run: npm install -g npm@latest
-
-      - name: Show npm version after upgrade
-        run: npm -v
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build eSheet submodule
-        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+        run: pnpm build:esheet
 
       - name: Lint
         run: pnpm lint
@@ -87,7 +90,40 @@ jobs:
           else
             # Branch push — auto dev prerelease
             BASE_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
-            VERSION="${BASE_VERSION}-dev.${GITHUB_RUN_NUMBER}"
+            PACKAGE_NAME=$(node -p "require('./package.json').name")
+            NPM_ERROR_FILE=$(mktemp)
+            if ! PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json 2>"$NPM_ERROR_FILE"); then
+              NPM_ERROR=$(<"$NPM_ERROR_FILE")
+              rm -f "$NPM_ERROR_FILE"
+              if [[ "$NPM_ERROR" == *"E404"* ]]; then
+                PUBLISHED_VERSIONS='[]'
+              else
+                echo "Failed to query published versions for $PACKAGE_NAME:" >&2
+                echo "$NPM_ERROR" >&2
+                exit 1
+              fi
+            else
+              rm -f "$NPM_ERROR_FILE"
+            fi
+            DEV_NUMBER=$(printf '%s' "$PUBLISHED_VERSIONS" | node -e '
+              let versions = "";
+              process.stdin.on("data", (chunk) => { versions += chunk; });
+              process.stdin.on("end", () => {
+                const baseVersion = process.argv[1];
+                try {
+                  const publishedVersions = JSON.parse(versions || "[]");
+                  const devVersions = (Array.isArray(publishedVersions) ? publishedVersions : [publishedVersions])
+                    .map((version) => new RegExp(`^${baseVersion.replace(/\./g, "\\.")}-dev\\.(\\d+)$`).exec(version))
+                    .filter(Boolean)
+                    .map((match) => Number(match[1]));
+                  console.log(devVersions.length === 0 ? 0 : Math.max(...devVersions) + 1);
+                } catch (error) {
+                  console.error(`Unable to parse published versions: ${error.message}`);
+                  process.exitCode = 1;
+                }
+              });
+            ' "$BASE_VERSION")
+            VERSION="${BASE_VERSION}-dev.${DEV_NUMBER}"
             IS_TAG=false
             NPM_TAG=next
             IS_PRERELEASE=true

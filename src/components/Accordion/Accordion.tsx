@@ -1,482 +1,195 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import * as React from 'react';
+'use client';
 
+import * as React from 'react';
+import { ChevronDown } from 'lucide-react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // =============================================================================
-// Accordion Context
+// Variants
 // =============================================================================
 
-interface AccordionContextValue {
-  expandedItems: Set<string>;
-  toggleItem: (id: string) => void;
-  allowMultiple: boolean;
-}
-
-const AccordionContext = React.createContext<AccordionContextValue | null>(
-  null
-);
-
-function useAccordionContext() {
-  const context = React.useContext(AccordionContext);
-  if (!context) {
-    throw new Error('Accordion components must be used within an Accordion');
-  }
-  return context;
-}
-
-// =============================================================================
-// Accordion Root
-// =============================================================================
-
-const accordionVariants = cva('w-full', {
+const accordionVariants = cva('', {
   variants: {
     variant: {
-      default: 'divide-y divide-gray-200 dark:divide-gray-700',
-      bordered:
-        'border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700',
-      separated: 'space-y-2',
+      // Each item is its own card with spacing between
+      separated: 'flex flex-col gap-3',
+      // One bordered list with dividers
+      joined: 'border-border divide-border divide-y rounded-lg border',
     },
   },
   defaultVariants: {
-    variant: 'default',
+    variant: 'separated',
   },
 });
+
+const itemVariants = cva('overflow-hidden', {
+  variants: {
+    variant: {
+      separated: 'border-border bg-card rounded-lg border',
+      joined: 'bg-card first:rounded-t-lg last:rounded-b-lg',
+    },
+  },
+  defaultVariants: {
+    variant: 'separated',
+  },
+});
+
+// =============================================================================
+// Types
+// =============================================================================
+
+export interface AccordionItem {
+  /** Stable id used for open state and aria wiring. */
+  id: string;
+  /** Header label (e.g. an FAQ question). */
+  title: React.ReactNode;
+  /** Panel content (e.g. the answer). */
+  content: React.ReactNode;
+  disabled?: boolean;
+}
 
 export interface AccordionProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>,
     VariantProps<typeof accordionVariants> {
-  children: React.ReactNode;
-  /** Allow multiple items to be expanded at once */
-  allowMultiple?: boolean;
-  /** Default expanded item IDs */
-  defaultExpanded?: string[];
+  items: AccordionItem[];
+  /** `single` keeps at most one panel open; `multiple` allows any number. */
+  type?: 'single' | 'multiple';
+  /** Ids open initially (uncontrolled). */
+  defaultOpenIds?: string[];
+  /** Controlled open ids. Changes reported via `onOpenChange`. */
+  openIds?: string[];
+  onOpenChange?: (openIds: string[]) => void;
+  /** In `single` mode, allow closing the open panel (default true). */
+  collapsible?: boolean;
+  /** Heading level wrapping each trigger for document outline (default h3). */
+  headingLevel?: 'h2' | 'h3' | 'h4';
 }
 
-export function Accordion({
-  children,
-  variant,
-  allowMultiple = false,
-  defaultExpanded = [],
-  className,
-  ...props
-}: AccordionProps) {
-  const [expandedItems, setExpandedItems] = React.useState<Set<string>>(
-    new Set(defaultExpanded)
-  );
+// =============================================================================
+// Accordion
+// =============================================================================
 
-  const toggleItem = React.useCallback(
-    (id: string) => {
-      setExpandedItems((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) {
-          next.delete(id);
-        } else {
-          if (!allowMultiple) {
-            next.clear();
-          }
-          next.add(id);
-        }
-        return next;
-      });
+/**
+ * A vertically stacked set of expandable panels — FAQ lists, settings
+ * groups, progressive disclosure. Panels animate open to their natural
+ * height (CSS grid rows, no max-height clipping), and headers are real
+ * buttons inside headings with full `aria-expanded`/`aria-controls` wiring.
+ *
+ * @example
+ * ```tsx
+ * <Accordion
+ *   type="single"
+ *   items={[
+ *     { id: 'pricing', title: 'How is pricing calculated?', content: <p>…</p> },
+ *     { id: 'billing', title: 'When am I billed?', content: <p>…</p> },
+ *   ]}
+ * />
+ * ```
+ */
+export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
+  function Accordion(
+    {
+      items,
+      type = 'single',
+      defaultOpenIds,
+      openIds: controlledOpen,
+      onOpenChange,
+      collapsible = true,
+      headingLevel: Heading = 'h3',
+      variant,
+      className,
+      ...props
     },
-    [allowMultiple]
-  );
-
-  const contextValue = React.useMemo(
-    () => ({ expandedItems, toggleItem, allowMultiple }),
-    [expandedItems, toggleItem, allowMultiple]
-  );
-
-  return (
-    <AccordionContext.Provider value={contextValue}>
-      <div className={cn(accordionVariants({ variant }), className)} {...props}>
-        {children}
-      </div>
-    </AccordionContext.Provider>
-  );
-}
-
-// =============================================================================
-// Accordion Item
-// =============================================================================
-
-interface AccordionItemContextValue {
-  itemId: string;
-  isExpanded: boolean;
-}
-
-const AccordionItemContext =
-  React.createContext<AccordionItemContextValue | null>(null);
-
-function useAccordionItemContext() {
-  const context = React.useContext(AccordionItemContext);
-  if (!context) {
-    throw new Error(
-      'AccordionItem components must be used within an AccordionItem'
+    ref
+  ) {
+    const baseId = React.useId();
+    const [internalOpen, setInternalOpen] = React.useState<string[]>(
+      () => defaultOpenIds ?? []
     );
-  }
-  return context;
-}
+    const rawOpen = controlledOpen ?? internalOpen;
+    // Single mode keeps at most one panel open, even if defaultOpenIds or a
+    // controlled openIds array hands us several.
+    const open = React.useMemo(
+      () => (type === 'single' ? rawOpen.slice(0, 1) : rawOpen),
+      [type, rawOpen]
+    );
+    const openSet = React.useMemo(() => new Set(open), [open]);
 
-const accordionItemVariants = cva('', {
-  variants: {
-    variant: {
-      default: '',
-      bordered: 'first:rounded-t-lg last:rounded-b-lg',
-      separated:
-        'border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-  },
-});
+    const toggle = (id: string) => {
+      let next: string[];
+      if (openSet.has(id)) {
+        if (type === 'single' && !collapsible) return;
+        next = open.filter((o) => o !== id);
+      } else {
+        next = type === 'single' ? [id] : [...open, id];
+      }
+      if (controlledOpen === undefined) setInternalOpen(next);
+      onOpenChange?.(next);
+    };
 
-export interface AccordionItemProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof accordionItemVariants> {
-  children: React.ReactNode;
-  /** Unique identifier for this item */
-  id: string;
-}
-
-export function AccordionItem({
-  children,
-  id,
-  variant,
-  className,
-  ...props
-}: AccordionItemProps) {
-  const { expandedItems } = useAccordionContext();
-  const isExpanded = expandedItems.has(id);
-
-  const contextValue = React.useMemo(
-    () => ({ itemId: id, isExpanded }),
-    [id, isExpanded]
-  );
-
-  return (
-    <AccordionItemContext.Provider value={contextValue}>
+    return (
       <div
-        className={cn(accordionItemVariants({ variant }), className)}
-        data-state={isExpanded ? 'open' : 'closed'}
+        ref={ref}
+        className={cn(accordionVariants({ variant }), className)}
         {...props}
       >
-        {children}
+        {items.map((item) => {
+          const isOpen = openSet.has(item.id);
+          const triggerId = `${baseId}-${item.id}-trigger`;
+          const panelId = `${baseId}-${item.id}-panel`;
+          return (
+            <div key={item.id} className={cn(itemVariants({ variant }))}>
+              <Heading className="m-0">
+                <button
+                  type="button"
+                  id={triggerId}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  disabled={item.disabled}
+                  onClick={() => toggle(item.id)}
+                  className={cn(
+                    'hover:bg-muted/60 flex w-full items-center justify-between gap-4 px-5 py-4 text-start transition-colors',
+                    'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset',
+                    'disabled:pointer-events-none disabled:opacity-50'
+                  )}
+                >
+                  <span className="text-foreground min-w-0 text-sm font-semibold">
+                    {item.title}
+                  </span>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className={cn(
+                      'text-muted-foreground h-5 w-5 shrink-0 transition-transform duration-200',
+                      isOpen && 'rotate-180'
+                    )}
+                  />
+                </button>
+              </Heading>
+              {/* grid-rows 0fr→1fr animates to natural height without a max-height clip;
+                  collapsed panels are hidden from AT and unfocusable via aria-hidden + inert */}
+              <div
+                id={panelId}
+                role="region"
+                aria-labelledby={triggerId}
+                aria-hidden={!isOpen}
+                inert={!isOpen || undefined}
+                className={cn(
+                  'grid transition-[grid-template-rows] duration-200 ease-out',
+                  isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="text-muted-foreground px-5 pb-4 text-sm leading-relaxed">
+                    {item.content}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
-    </AccordionItemContext.Provider>
-  );
-}
-
-// =============================================================================
-// Accordion Trigger
-// =============================================================================
-
-const accordionTriggerVariants = cva(
-  'flex w-full items-center justify-between text-left font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
-  {
-    variants: {
-      size: {
-        sm: 'py-2 px-3 text-sm',
-        md: 'py-3 px-4 text-base',
-        lg: 'py-4 px-5 text-lg',
-      },
-      variant: {
-        default:
-          'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-white',
-        muted:
-          'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200',
-      },
-    },
-    defaultVariants: {
-      size: 'md',
-      variant: 'default',
-    },
+    );
   }
 );
-
-export interface AccordionTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof accordionTriggerVariants> {
-  children: React.ReactNode;
-  /** Show chevron icon */
-  showChevron?: boolean;
-}
-
-export function AccordionTrigger({
-  children,
-  size,
-  variant,
-  showChevron = true,
-  className,
-  ...props
-}: AccordionTriggerProps) {
-  const { toggleItem } = useAccordionContext();
-  const { itemId, isExpanded } = useAccordionItemContext();
-
-  return (
-    <button
-      type="button"
-      onClick={() => toggleItem(itemId)}
-      aria-expanded={isExpanded}
-      aria-controls={`accordion-content-${itemId}`}
-      className={cn(accordionTriggerVariants({ size, variant }), className)}
-      {...props}
-    >
-      <span className="flex-1">{children}</span>
-      {showChevron && (
-        <ChevronIcon
-          className={cn(
-            'h-5 w-5 shrink-0 text-gray-500 transition-transform duration-200',
-            isExpanded && 'rotate-180'
-          )}
-        />
-      )}
-    </button>
-  );
-}
-
-// =============================================================================
-// Accordion Content
-// =============================================================================
-
-const accordionContentVariants = cva(
-  'overflow-hidden transition-all duration-200 ease-in-out',
-  {
-    variants: {
-      size: {
-        sm: 'px-3 text-sm',
-        md: 'px-4 text-base',
-        lg: 'px-5 text-lg',
-      },
-    },
-    defaultVariants: {
-      size: 'md',
-    },
-  }
-);
-
-export interface AccordionContentProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof accordionContentVariants> {
-  children: React.ReactNode;
-}
-
-export function AccordionContent({
-  children,
-  size,
-  className,
-  ...props
-}: AccordionContentProps) {
-  const { itemId, isExpanded } = useAccordionItemContext();
-  const contentRef = React.useRef<HTMLDivElement>(null);
-  const [height, setHeight] = React.useState<number | undefined>(
-    isExpanded ? undefined : 0
-  );
-
-  React.useEffect(() => {
-    if (!contentRef.current) return;
-    const resizeObserver = new ResizeObserver(() => {
-      if (isExpanded) {
-        setHeight(contentRef.current?.scrollHeight);
-      }
-    });
-    resizeObserver.observe(contentRef.current);
-    return () => resizeObserver.disconnect();
-  }, [isExpanded]);
-
-  React.useEffect(() => {
-    if (isExpanded) {
-      setHeight(contentRef.current?.scrollHeight);
-    } else {
-      setHeight(0);
-    }
-  }, [isExpanded]);
-
-  return (
-    <div
-      id={`accordion-content-${itemId}`}
-      role="region"
-      aria-labelledby={`accordion-trigger-${itemId}`}
-      style={{ height }}
-      className={cn(
-        accordionContentVariants({ size }),
-        'text-gray-600 dark:text-gray-400',
-        className
-      )}
-      {...props}
-    >
-      <div ref={contentRef} className="pb-4 pt-1">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// =============================================================================
-// FAQ Accordion (Specialized for Provider Pages)
-// =============================================================================
-
-export interface FAQItem {
-  id: string;
-  question: string;
-  answer: string | React.ReactNode;
-}
-
-export interface FAQAccordionProps {
-  items: FAQItem[];
-  className?: string;
-}
-
-export function FAQAccordion({ items, className }: FAQAccordionProps) {
-  return (
-    <Accordion variant="default" className={className}>
-      {items.map((item) => (
-        <AccordionItem key={item.id} id={item.id}>
-          <AccordionTrigger>{item.question}</AccordionTrigger>
-          <AccordionContent>{item.answer}</AccordionContent>
-        </AccordionItem>
-      ))}
-    </Accordion>
-  );
-}
-
-// =============================================================================
-// Provider FAQ Generator
-// =============================================================================
-
-export interface ProviderFAQData {
-  name: string;
-  address: {
-    street1: string;
-    street2?: string;
-    city: string;
-    state: string;
-    postalCode: string;
-  };
-  phoneNumber?: string;
-  services?: { name: string }[];
-  website?: string;
-  locationType?: string;
-}
-
-export function generateProviderFAQs(provider: ProviderFAQData): FAQItem[] {
-  const faqs: FAQItem[] = [];
-  const { name, address, phoneNumber, services, website, locationType } =
-    provider;
-
-  // Location FAQ
-  faqs.push({
-    id: 'location',
-    question: `Where is ${name} located?`,
-    answer: (
-      <span>
-        {name} is located at{' '}
-        <a
-          href={`https://www.google.com/maps?daddr=${encodeURIComponent(
-            `${address.street1}, ${address.city}, ${address.state} ${address.postalCode}`
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
-        >
-          {address.street1}, {address.city}, {address.state}{' '}
-          {address.postalCode}
-        </a>
-        .
-      </span>
-    ),
-  });
-
-  // Phone FAQ
-  if (phoneNumber) {
-    faqs.push({
-      id: 'phone',
-      question: `What is the phone number for ${name}?`,
-      answer: (
-        <span>
-          You can contact {name} by calling{' '}
-          <a
-            href={`tel:${phoneNumber}`}
-            className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
-          >
-            {phoneNumber}
-          </a>
-          .
-        </span>
-      ),
-    });
-  }
-
-  // Services FAQ
-  if (services && services.length > 0) {
-    const serviceNames = services.slice(0, 5).map((s) => s.name);
-    const hasMore = services.length > 5;
-    faqs.push({
-      id: 'services',
-      question: `What services does ${name} offer?`,
-      answer: `${name} offers services including ${serviceNames.join(', ')}${hasMore ? ` and ${services.length - 5} more services` : ''}.`,
-    });
-  }
-
-  // Website FAQ
-  if (website) {
-    faqs.push({
-      id: 'website',
-      question: `Does ${name} have a website?`,
-      answer: (
-        <span>
-          Yes, you can visit the {name} website at{' '}
-          <a
-            href={website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
-          >
-            {new URL(website).hostname}
-          </a>
-          .
-        </span>
-      ),
-    });
-  }
-
-  // Facility Type FAQ
-  if (locationType) {
-    faqs.push({
-      id: 'facility-type',
-      question: `What type of facility is ${name}?`,
-      answer: `${name} is classified as a ${locationType}.`,
-    });
-  }
-
-  // Booking FAQ
-  faqs.push({
-    id: 'booking',
-    question: `How do I book an appointment at ${name}?`,
-    answer: `You can book an appointment at ${name} by clicking the "Book Appointment" button on this page, calling the provider directly${phoneNumber ? ` at ${phoneNumber}` : ''}, or visiting their website${website ? ` at ${new URL(website).hostname}` : ''}.`,
-  });
-
-  return faqs;
-}
-
-// =============================================================================
-// Icon
-// =============================================================================
-
-function ChevronIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
-  );
-}
-
-export default Accordion;

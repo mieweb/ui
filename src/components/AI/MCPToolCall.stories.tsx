@@ -19,21 +19,8 @@ const meta: Meta<typeof MCPToolCallDisplay> = {
     layout: 'padded',
     docs: {
       description: {
-        component: [
-          '`MCPToolCallDisplay` renders a single **Model Context Protocol (MCP) tool invocation**',
-          'inside an AI conversation — for example, an assistant calling a `create_patient` tool.',
-          '',
-          'It shows a friendly, human-readable summary by default (tool name, status, duration, and',
-          'any resulting resource link), and hides the technical parameter/JSON details behind a',
-          '_Show details_ toggle so non-technical users are not overwhelmed.',
-          '',
-          '### Status states',
-          '`pending` · `running` · `success` · `error` · `cancelled` — each renders a distinct icon and color.',
-          '',
-          '### When to use',
-          'Embed it inside an `AIMessage` content block of type `tool_use`, or render it standalone to',
-          'visualize an in-progress or completed tool call. Inside `AIChat` this happens automatically.',
-        ].join('\n'),
+        component:
+          'Renders an MCP tool invocation as a status pill with an optional detail box for results, errors, and parameters.',
       },
     },
   },
@@ -52,19 +39,26 @@ const meta: Meta<typeof MCPToolCallDisplay> = {
     },
     collapsible: {
       control: 'boolean',
-      description: 'Whether the technical details can be collapsed/expanded.',
+      description:
+        'Whether clicking the pill toggles the entire detail box open/closed.',
       table: { defaultValue: { summary: 'true' } },
     },
     defaultCollapsed: {
       control: 'boolean',
       description:
-        'Initial collapsed state. `true` hides the technical details by default.',
-      table: { defaultValue: { summary: 'true' } },
+        'Initial detail-box state. When omitted, completed tool calls start expanded and in-progress calls start collapsed.',
+      table: { defaultValue: { summary: 'status-based' } },
     },
     compact: {
       control: 'boolean',
       description:
         'Render a condensed single-line variant, ideal for dense lists.',
+    },
+    hidden: {
+      control: 'boolean',
+      description:
+        'Hide the whole tool-call display (mirrors the Ozwell widget debug flag).',
+      table: { defaultValue: { summary: 'false' } },
     },
     onLinkClick: {
       action: 'onLinkClick',
@@ -96,7 +90,6 @@ export const Running: Story = {
 export const Success: Story = {
   args: {
     toolCall: successToolCall,
-    defaultCollapsed: false,
   },
 };
 
@@ -104,7 +97,6 @@ export const Success: Story = {
 export const Error: Story = {
   args: {
     toolCall: errorToolCall,
-    defaultCollapsed: false,
   },
 };
 
@@ -114,5 +106,27 @@ export const Compact: Story = {
     toolCall: successToolCall,
     compact: true,
     collapsible: false,
+  },
+};
+
+/**
+ * Pill only by default — the box (result + params) stays hidden until the pill
+ * is clicked. While running, the pill shows the input summary
+ * (e.g. "Creating patient · John Smith").
+ */
+export const PillOnly: Story = {
+  args: {
+    toolCall: pendingToolCall,
+  },
+};
+
+/**
+ * `hidden` turns the whole display off at once — the equivalent of the Ozwell
+ * widget's debug flag for toggling tool-call visibility.
+ */
+export const Hidden: Story = {
+  args: {
+    toolCall: successToolCall,
+    hidden: true,
   },
 };

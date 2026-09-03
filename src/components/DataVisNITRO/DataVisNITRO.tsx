@@ -3,24 +3,21 @@ import { ComputedView, Source } from 'datavis-ace';
 
 import {
   DataGrid,
+  determineColumns,
+  getBuiltinGroupFunctions,
+  buildAggregateFunctions,
+  useView,
+  TableRenderer,
   type DataGridProps,
   type GridTableDef,
-} from 'datavis/src/components/DataGrid';
-import { determineColumns } from 'datavis/src/adapters/colconfig-adapter';
-import { getBuiltinGroupFunctions } from 'datavis/src/adapters/group-adapter';
-import { buildAggregateFunctions } from 'datavis/src/adapters/wcdatavis-interop';
-import { useView, type ViewInstance } from 'datavis/src/adapters/use-data';
-import {
-  TableRenderer,
+  type ViewInstance,
   type TableRendererProps,
-} from 'datavis/src/components/table/TableRenderer';
-import type {
-  TableColumn,
-  TableFeatures,
-} from 'datavis/src/components/table/types';
-import type { ColumnFilterConfig } from 'datavis/src/components/filters/types';
-import type { AggregateFunction } from 'datavis/src/components/controls/AggregateSection';
-import type { GroupFunction as GroupFunctionDef } from 'datavis/src/components/dialogs/GroupFunctionDialog';
+  type TableColumn,
+  type TableFeatures,
+  type ColumnFilterConfig,
+  type AggregateFunction,
+  type GroupFunctionDef,
+} from '@mieweb/datavis';
 
 type TranslateFn = (key: string, ...args: unknown[]) => string;
 
@@ -34,6 +31,7 @@ interface HttpDataVisNitroSourceProps {
 
 interface LocalDataVisNitroSourceProps {
   type: 'local';
+  varName?: string;
   children?: React.ReactNode;
 }
 
@@ -240,39 +238,46 @@ function mergeTableDef(
   }
 
   const { rowMode, ...featureFlags } = features ?? {};
+  const mergedFeatures =
+    Object.keys(featureFlags).length > 0
+      ? ({
+          ...(tableDef?.features ?? {}),
+          ...featureFlags,
+        } as GridTableDef['features'])
+      : undefined;
 
   return {
     ...tableDef,
     ...(rowMode !== undefined ? { rowMode } : {}),
-    ...(Object.keys(featureFlags).length > 0
-      ? {
-          features: {
-            ...(tableDef?.features ?? {}),
-            ...featureFlags,
-          },
-        }
-      : {}),
+    ...(mergedFeatures ? { features: mergedFeatures } : {}),
   };
 }
 
 function DataVisNitroSource(props: DataVisNitroSourceProps) {
   const { type, children } = props;
   const url = props.type === 'http' ? props.url : undefined;
+  const varName = props.type === 'local' ? props.varName : undefined;
   const viewRef = useRef<TrackedViewInstance | null>(null);
 
   if (
     viewRef.current === null ||
     viewRef.current._dvType !== type ||
-    viewRef.current._dvUrl !== url
+    viewRef.current._dvUrl !== url ||
+    (viewRef.current as TrackedViewInstance & { _dvVarName?: string })
+      ._dvVarName !== varName
   ) {
     const source =
       props.type === 'http'
         ? new Source({ type, url: props.url })
-        : new Source({ type });
+        : new Source(
+            props.type === 'local' && props.varName
+              ? { type, varName: props.varName }
+              : { type }
+          );
 
     viewRef.current = Object.assign(
       new ComputedView(source) as unknown as ViewInstance,
-      { _dvType: type, _dvUrl: url }
+      { _dvType: type, _dvUrl: url, _dvVarName: varName }
     );
   }
 

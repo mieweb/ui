@@ -11,6 +11,16 @@ const meta: Meta<typeof DateInput> = {
   },
   tags: ['autodocs'],
   argTypes: {
+    inputType: {
+      control: 'select',
+      options: ['date', 'datetime-local', 'time', 'month', 'year'],
+      description: 'Date value format and picker control',
+    },
+    timeFormat: {
+      control: 'select',
+      options: ['12-hour', '24-hour'],
+      description: 'Time picker display format for datetime values',
+    },
     mode: {
       control: 'select',
       options: ['default', 'dob', 'expiration', 'past', 'future'],
@@ -26,6 +36,14 @@ const meta: Meta<typeof DateInput> = {
     },
     validateOnBlur: {
       control: 'boolean',
+    },
+    minDate: {
+      control: 'text',
+      description: 'Earliest allowed date in MM/DD/YYYY format',
+    },
+    maxDate: {
+      control: 'text',
+      description: 'Latest allowed date in MM/DD/YYYY format',
     },
   },
   decorators: [
@@ -60,6 +78,66 @@ export const WithCalendarPreFilled: Story = {
     showCalendar: true,
     width: 'fixed',
     value: '06/15/2026',
+  },
+};
+
+export const WithDateBounds: Story = {
+  args: {
+    label: 'Service Date',
+    minDate: '07/27/2024',
+    maxDate: '07/27/2028',
+    validateOnBlur: true,
+    showCalendar: true,
+  },
+};
+
+export const DateTime: Story = {
+  args: {
+    label: 'Appointment Time',
+    inputType: 'datetime-local',
+    value: '2026-07-21T09:30',
+  },
+};
+
+export const DateTimeTwelveHour: Story = {
+  args: {
+    label: 'Appointment Time',
+    inputType: 'datetime-local',
+    timeFormat: '12-hour',
+    value: '2026-07-21T21:30',
+  },
+};
+
+export const Time: Story = {
+  args: {
+    label: 'Start Time',
+    inputType: 'time',
+    value: '09:30',
+  },
+};
+
+export const TimeTwelveHour: Story = {
+  args: {
+    label: 'Start Time',
+    inputType: 'time',
+    timeFormat: '12-hour',
+    value: '15:30',
+  },
+};
+
+export const Month: Story = {
+  args: {
+    label: 'Billing Month',
+    inputType: 'month',
+    value: '2026-07',
+  },
+};
+
+export const Year: Story = {
+  args: {
+    label: 'Graduation Year',
+    inputType: 'year',
+    value: '2026',
   },
 };
 
@@ -149,4 +227,35 @@ export const AllModes: Story = {
       <DateInput label="Future Date" mode="future" validateOnBlur />
     </div>
   ),
+};
+
+export const FloatingLabel: Story = {
+  args: {
+    label: 'Date of Birth',
+    labelVariant: 'floating',
+  },
+};
+
+export const FloatingLabelWithValue: Story = {
+  args: {
+    label: 'Date of Birth',
+    labelVariant: 'floating',
+    value: '01/15/1990',
+  },
+};
+
+export const FloatingLabelWithCalendar: Story = {
+  args: {
+    label: 'Select Date',
+    labelVariant: 'floating',
+    showCalendar: true,
+  },
+};
+
+export const FloatingLabelDateTime: Story = {
+  args: {
+    label: 'Appointment',
+    labelVariant: 'floating',
+    inputType: 'datetime-local',
+  },
 };

@@ -21,3 +21,21 @@ export {
   type EsheetRendererProps,
   type EsheetRendererHandle,
 } from '@esheet/renderer';
+
+// Custom field types backed by @mieweb/ui components
+export {
+  MedicationListField,
+  registerMedicationListFieldType,
+  type MedicationListFieldValue,
+} from './esheet-fields/MedicationListField';
+export {
+  AllergyListField,
+  registerAllergyListFieldType,
+  type AllergyListFieldValue,
+} from './esheet-fields/AllergyListField';
+
+// Convenience: register every @mieweb/ui custom field type in one call
+export {
+  registerMieEsheetFields,
+  type RegisterMieEsheetFieldsOptions,
+} from './esheet-fields/registerAll';

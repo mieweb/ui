@@ -45,6 +45,17 @@ export const Default: Story = {
   },
 };
 
+/** Zero-count badges are hidden by default; pass `showZero` to render them anyway. */
+export const ZeroCount: Story = {
+  render: () => (
+    <div className="flex items-center gap-2">
+      <CountBadge label="Hidden (count 0)" count={0} />
+      <CountBadge label="Shown via showZero" count={0} showZero />
+      <CountBadge label="Tasks" count={3} />
+    </div>
+  ),
+};
+
 /** Info variant using the primary accent color. */
 export const Info: Story = {
   args: {

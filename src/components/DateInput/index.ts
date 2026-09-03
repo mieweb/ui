@@ -1,5 +1,6 @@
 export {
   DateInput,
-  type DateInputMode,
   type DateInputProps,
+  type DateInputMode,
+  type DateInputType,
 } from './DateInput';
