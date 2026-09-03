@@ -1,5 +1,6 @@
 // Components
 export * from './components/AddContactModal';
+export * from './components/Accordion';
 export * from './components/AdditionalFields';
 export * from './components/Address';
 // AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
@@ -44,11 +45,14 @@ export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
 export * from './components/CountryDropdown';
 export * from './components/CookieConsent';
+export * from './components/CopyButton';
 export * from './components/CSVColumnMapper';
+export * from './components/CustomizableDashboard';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
+export * from './components/DockablePanel';
 export * from './components/Dropdown';
 export * from './components/DropzoneOverlay';
 export * from './components/ClaimProviderForm';
@@ -71,6 +75,8 @@ export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
 export * from './components/FloatingWindow';
+export * from './components/FreshnessBadge';
+export * from './components/GlossaryTooltip';
 export * from './components/HealthSurveillance';
 export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
@@ -133,6 +139,7 @@ export * from './components/ProviderUsersTable';
 export * from './components/QuickAction';
 export * from './components/QuickLinksCard';
 export * from './components/Radio';
+export * from './components/ReadingProgressBar';
 export * from './components/RecordButton';
 export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
@@ -155,6 +162,8 @@ export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
 export * from './components/Separator';
 export * from './components/Sheet';
+export * from './components/SectionSpyNav';
+export * from './components/SourceTip';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,

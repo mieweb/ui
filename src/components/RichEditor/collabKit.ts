@@ -33,12 +33,14 @@ export class HuddleYjsKit implements EditorKit {
   constructor(
     private readonly url: string,
     private readonly params: Record<string, string>,
-    private readonly WebSocketImpl?: typeof globalThis.WebSocket
+    private readonly WebSocketImpl?: typeof globalThis.WebSocket,
+    private readonly user?: { id: string; name: string; color?: string }
   ) {}
 
   getExtensions() {
     const url = this.url;
     const params = this.params;
+    const user = this.user;
     const WebSocketImpl = this.WebSocketImpl ?? globalThis.WebSocket;
     const createYjsProvider = (roomId: string): [WebsocketProvider, Y.Doc] => {
       const ydoc = new Y.Doc({ gc: false });
@@ -54,6 +56,8 @@ export class HuddleYjsKit implements EditorKit {
         maxBackoffTime: 2500,
         disableBc: false,
       });
+      // Named cursors: the position plugin skips states with no user field.
+      if (user) provider.awareness.setLocalStateField('kerebron:user', user);
       return [provider, ydoc];
     };
     return [new MarkYChange(), new ExtensionYjs({ createYjsProvider })];
