@@ -1,4 +1,5 @@
 export { useTheme, type Theme, type ResolvedTheme } from './useTheme';
+export { useIsDarkMode, isDarkMode } from './useIsDarkMode';
 export {
   useDirection,
   isRtlLocale,
