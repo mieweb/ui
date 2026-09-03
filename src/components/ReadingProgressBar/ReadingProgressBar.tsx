@@ -55,12 +55,12 @@ export const ReadingProgressBar = React.forwardRef<
   return (
     <div
       ref={ref}
+      {...props}
       aria-hidden="true"
       className={cn(
         'pointer-events-none fixed inset-x-0 top-0 z-50 h-1 bg-transparent',
         className
       )}
-      {...props}
     >
       <div
         data-slot="reading-progress-fill"
