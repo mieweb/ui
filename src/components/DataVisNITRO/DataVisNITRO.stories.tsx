@@ -316,6 +316,8 @@ export const OzwellAssistant: Story = {
   ),
 };
 
+const PREFS_STORAGE_KEY = 'mieweb-ui-storybook:datavis-prefs';
+
 /**
  * Reads the shared view from DataVisNitroContext, binds a localStorage-backed
  * Prefs module to it, and passes the module to the grid so the perspective
@@ -332,7 +334,7 @@ const PerspectivesGrid = () => {
       backend: {
         type: 'localStorage',
         localStorage: {
-          key: 'mieweb-ui-storybook:datavis-prefs',
+          key: PREFS_STORAGE_KEY,
         },
       },
     });
@@ -358,6 +360,17 @@ const PerspectivesGrid = () => {
 };
 
 export const WithPerspectives: Story = {
+  loaders: [
+    () => {
+      // Clear saved perspectives in automated runs (test runner, visual
+      // regression) so the story renders deterministically, while keeping
+      // localStorage persistence for normal browsing.
+      if (typeof navigator !== 'undefined' && navigator.webdriver) {
+        window.localStorage.removeItem(PREFS_STORAGE_KEY);
+      }
+      return {};
+    },
+  ],
   parameters: {
     docs: {
       description: {
