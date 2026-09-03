@@ -599,6 +599,18 @@ export const miewebUISafelist = [
   'dark:border-primary-800',
   'dark:text-primary-300',
   'opacity-60',
+  // FreshnessBadge / FreshnessDot — tinted level chips and dots
+  'dark:bg-success/20',
+  'bg-warning/15',
+  'dark:bg-warning/20',
+  'dark:text-warning',
+  'dark:bg-destructive/20',
+  'bg-muted-foreground/50',
+  'h-2',
+  'w-2',
+  'inline-block',
+  'dark:text-success',
+  'dark:text-destructive',
   // Accordion — grid-rows height animation (arbitrary values TW3 won't scan)
   'transition-[grid-template-rows]',
   'grid-rows-[0fr]',
