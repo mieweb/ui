@@ -55,6 +55,26 @@ describe('FilterSummaryBar', () => {
     expect(screen.getByRole('status')).toHaveTextContent('1 filter active');
   });
 
+  it('uses the singular record label when one row is visible', () => {
+    renderWithTheme(
+      <FilterSummaryBar
+        filteredCount={1}
+        totalCount={8911}
+        activeFilterCount={1}
+        onClearAll={() => {}}
+      />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('1 of 8,911 record —');
+  });
+
+  it('hides the clear button when onClearAll is omitted', () => {
+    renderWithTheme(
+      <FilterSummaryBar filteredCount={5} activeFilterCount={2} />
+    );
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
   it('describes search-only and search+filters states', () => {
     const { rerender } = renderWithTheme(
       <FilterSummaryBar

@@ -15,9 +15,10 @@ export interface FilterSummaryBarProps extends React.HTMLAttributes<HTMLDivEleme
   hasSearchText?: boolean;
   /** Keep the summary visible even when no filters/search are active. */
   showWhenIdle?: boolean;
-  /** Called when the clear action is clicked. */
-  onClearAll: () => void;
+  /** Called when the clear action is clicked. Omit to hide the clear button. */
+  onClearAll?: () => void;
   /** Visible strings, overridable for i18n. */
+  recordLabel?: string;
   recordsLabel?: string;
   filterLabel?: string;
   filtersLabel?: string;
@@ -60,6 +61,7 @@ export const FilterSummaryBar = React.forwardRef<
     hasSearchText = false,
     showWhenIdle = false,
     onClearAll,
+    recordLabel = 'record',
     recordsLabel = 'records',
     filterLabel = 'filter',
     filtersLabel = 'filters',
@@ -112,13 +114,13 @@ export const FilterSummaryBar = React.forwardRef<
             <span className="font-semibold">{totalCount.toLocaleString()}</span>
           </>
         ) : null}{' '}
-        {recordsLabel}
+        {filteredCount === 1 ? recordLabel : recordsLabel}
         {activeFilterCount > 0 && (
           <>
             {' '}
             &mdash;{' '}
             <span className="font-semibold">
-              {activeFilterCount}{' '}
+              {activeFilterCount.toLocaleString()}{' '}
               {activeFilterCount === 1 ? filterLabel : filtersLabel}
             </span>{' '}
             {activeLabel}
@@ -130,7 +132,7 @@ export const FilterSummaryBar = React.forwardRef<
         {hasSearchText && activeFilterCount > 0 && <> {plusSearchLabel}</>}
         {!isFiltering && showWhenIdle && <> &mdash; {allVisibleLabel}</>}
       </span>
-      {isFiltering && (
+      {isFiltering && onClearAll && (
         <button
           type="button"
           onClick={onClearAll}

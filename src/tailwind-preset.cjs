@@ -138,7 +138,6 @@ module.exports = {
     'rounded-md',
     'py-1',
     'text-primary-700',
-    'hover:text-primary-700',
     'hover:bg-primary-500/15',
     'dark:text-primary-300',
     'dark:hover:text-primary-200',
