@@ -246,3 +246,28 @@ export const FullFeatured: Story = {
     },
   },
 };
+
+/**
+ * Async postal-code validation: the host app can plug in a ZIP dataset check
+ * (bluehive-api `GET /zipcodes/:zip`). Try `12345` (rejected) vs `46514`.
+ */
+export const WithPostalCodeValidation: Story = {
+  args: {
+    departments: sampleDepartments,
+    isNew: true,
+    onSubmit: (data) => console.log('Submitted', data),
+    validatePostalCode: async (postalCode, country) => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      if (country && !['us', 'usa', 'united states'].includes(country.toLowerCase())) {
+        return null;
+      }
+      if (!/^\d{5}(?:[-\s]\d{4})?$/.test(postalCode)) {
+        return 'Enter a 5-digit ZIP code (or ZIP+4).';
+      }
+      return postalCode.startsWith('12345') ? 'We do not recognise that ZIP code.' : null;
+    },
+    initialData: {
+      address: { street1: '1 Main St', city: 'Elkhart', state: 'IN', postalCode: '12345' },
+    },
+  },
+};

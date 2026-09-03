@@ -80,6 +80,16 @@ export interface EmployeeFormProps {
   onCancel?: () => void;
   /** Custom fields component */
   customFields?: React.ReactNode;
+  /**
+   * Optional async postal-code check (e.g. against a ZIP dataset). Runs when the
+   * field loses focus and again on submit; return an error message to block
+   * saving, or `null` when the code is acceptable. Non-US countries can be
+   * skipped by the callback itself.
+   */
+  validatePostalCode?: (
+    postalCode: string,
+    country?: string
+  ) => Promise<string | null>;
   /** Labels for i18n */
   labels?: {
     required?: string;
@@ -104,6 +114,8 @@ export interface EmployeeFormProps {
     lastNameRequired?: string;
     emailRequired?: string;
     dobRequired?: string;
+    postalCode?: string;
+    checkingPostalCode?: string;
   };
   /** Custom className */
   className?: string;
@@ -148,6 +160,7 @@ export function EmployeeForm({
   onSubmit,
   onCancel,
   customFields,
+  validatePostalCode,
   labels = {},
   className,
 }: EmployeeFormProps) {
@@ -174,6 +187,8 @@ export function EmployeeForm({
     lastNameRequired = 'Last name is required',
     emailRequired = 'Email is required',
     dobRequired = 'Date of birth is required',
+    postalCode: postalCodeLabel = 'Postal Code',
+    checkingPostalCode = 'Checking…',
   } = labels;
 
   // Form state
@@ -199,6 +214,31 @@ export function EmployeeForm({
 
   // Validation errors
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [checkingZip, setCheckingZip] = React.useState(false);
+  const zipCheckRef = React.useRef(0);
+
+  /** Run the async postal-code check; resolves to the error message (or null). */
+  const checkPostalCode = React.useCallback(async (): Promise<string | null> => {
+    const value = (address.postalCode ?? '').trim();
+    if (!validatePostalCode || !value) return null;
+    const token = ++zipCheckRef.current;
+    setCheckingZip(true);
+    try {
+      const message = await validatePostalCode(value, address.country);
+      if (token !== zipCheckRef.current) return null; // superseded
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (message) next.postalCode = message;
+        else delete next.postalCode;
+        return next;
+      });
+      return message;
+    } catch {
+      return null; // network hiccup — don't block the user
+    } finally {
+      if (token === zipCheckRef.current) setCheckingZip(false);
+    }
+  }, [address.postalCode, address.country, validatePostalCode]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -207,14 +247,22 @@ export function EmployeeForm({
     if (!lastName.trim()) newErrors.lastName = lastNameRequired;
     if (!email.trim()) newErrors.email = emailRequired;
     if (!dob) newErrors.dob = dobRequired;
+    if (errors.postalCode) newErrors.postalCode = errors.postalCode;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (validatePostalCode && (address.postalCode ?? '').trim()) {
+      const zipError = await checkPostalCode();
+      if (zipError) {
+        validate();
+        return;
+      }
+    }
     if (!validate()) return;
 
     onSubmit({
@@ -387,11 +435,23 @@ export function EmployeeForm({
               }
             />
             <Input
-              label="Postal Code"
+              label={postalCodeLabel}
               value={address.postalCode ?? ''}
-              onChange={(e) =>
-                setAddress((prev) => ({ ...prev, postalCode: e.target.value }))
-              }
+              onChange={(e) => {
+                setAddress((prev) => ({ ...prev, postalCode: e.target.value }));
+                if (errors.postalCode) {
+                  setErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.postalCode;
+                    return next;
+                  });
+                }
+              }}
+              onBlur={() => void checkPostalCode()}
+              error={errors.postalCode}
+              helperText={checkingZip ? checkingPostalCode : undefined}
+              inputMode="numeric"
+              autoComplete="postal-code"
             />
             <Input
               label="Country"
