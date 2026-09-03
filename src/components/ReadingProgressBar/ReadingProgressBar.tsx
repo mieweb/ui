@@ -3,7 +3,10 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 
-export interface ReadingProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ReadingProgressBarProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'children'
+> {
   /** Class for the filled bar (default `bg-primary-500`). */
   barClassName?: string;
 }
