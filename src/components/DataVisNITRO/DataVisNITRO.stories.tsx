@@ -364,9 +364,14 @@ export const WithPerspectives: Story = {
     () => {
       // Clear saved perspectives in automated runs (test runner, visual
       // regression) so the story renders deterministically, while keeping
-      // localStorage persistence for normal browsing.
-      if (typeof navigator !== 'undefined' && navigator.webdriver) {
-        window.localStorage.removeItem(PREFS_STORAGE_KEY);
+      // localStorage persistence for normal browsing. localStorage access
+      // can throw in restricted contexts, so fall back to defaults quietly.
+      try {
+        if (typeof navigator !== 'undefined' && navigator.webdriver) {
+          window.localStorage.removeItem(PREFS_STORAGE_KEY);
+        }
+      } catch {
+        // Storage unavailable — the story just renders its defaults.
       }
       return {};
     },
