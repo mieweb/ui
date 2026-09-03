@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { ClampedText } from './ClampedText';
@@ -61,5 +61,20 @@ describe('ClampedText', () => {
     expect(container.querySelector('.from-background')).not.toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
     expect(container.querySelector('.from-background')).toBeNull();
+  });
+
+  it('does not propagate toggle clicks to clickable containers', () => {
+    const onContainerClick = vi.fn();
+    renderWithTheme(
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+      <div onClick={onContainerClick}>
+        <ClampedText text={LONG} />
+      </div>
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
+    expect(onContainerClick).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('button', { name: 'Show less' })
+    ).toBeInTheDocument();
   });
 });
