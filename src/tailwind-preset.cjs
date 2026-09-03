@@ -133,6 +133,13 @@ module.exports = {
     'hover:bg-primary-500/90',
     'hover:bg-muted-foreground/20',
     'focus-visible:ring-offset-1',
+    'items-end',
+    'w-16',
+    'pb-0.5',
+    'leading-tight',
+    'tracking-wider',
+    'rounded-sm',
+    'cursor-pointer',
     // ClampedText — collapsed clamp levels and fade gradient
     'line-clamp-2',
     'line-clamp-3',
