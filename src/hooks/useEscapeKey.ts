@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 /**
  * Hook that triggers a callback when the Escape key is pressed.

@@ -1,11 +1,12 @@
 import React, {
   createContext,
-  useContext,
-  useCallback,
-  useState,
-  useMemo,
   type ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
 } from 'react';
+
 import { useCommandK } from '../../hooks/useKeyboardShortcut';
 
 // =============================================================================

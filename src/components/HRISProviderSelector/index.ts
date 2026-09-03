@@ -1,5 +1,5 @@
 export {
+  type HRISProvider,
   HRISProviderSelector,
   type HRISProviderSelectorProps,
-  type HRISProvider,
 } from './HRISProviderSelector';

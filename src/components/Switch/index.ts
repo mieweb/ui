@@ -1,6 +1,6 @@
 export {
   Switch,
-  switchTrackVariants,
-  switchThumbVariants,
   type SwitchProps,
+  switchThumbVariants,
+  switchTrackVariants,
 } from './Switch';

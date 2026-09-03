@@ -1,24 +1,25 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { PageHeader } from './PageHeader';
+import type { LucideIcon } from 'lucide-react';
+
 import { Button } from '../Button/Button';
 import {
+  BellIcon,
+  BriefcaseIcon,
+  BuildingIcon,
+  CalendarIcon,
+  ChartIcon,
+  ClipboardListIcon,
+  FileTextIcon,
   HomeIcon,
+  HospitalIcon,
+  SearchIcon,
   SettingsIcon,
+  ShieldIcon,
+  StethoscopeIcon,
   UserIcon,
   UsersIcon,
-  CalendarIcon,
-  FileTextIcon,
-  BuildingIcon,
-  BriefcaseIcon,
-  ChartIcon,
-  ShieldIcon,
-  BellIcon,
-  SearchIcon,
-  StethoscopeIcon,
-  HospitalIcon,
-  ClipboardListIcon,
 } from '../Icons';
-import type { LucideIcon } from 'lucide-react';
+import { PageHeader } from './PageHeader';
 
 const iconMap: Record<string, LucideIcon> = {
   Home: HomeIcon,

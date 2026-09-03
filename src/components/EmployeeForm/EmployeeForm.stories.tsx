@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { EmployeeForm } from './EmployeeForm';
 
 const meta: Meta<typeof EmployeeForm> = {
@@ -143,9 +144,9 @@ export const WithCustomFields: Story = {
     isNew: true,
     mode: 'create',
     customFields: (
-      <div className="bg-muted border-border rounded-lg border p-4">
+      <div className="rounded-lg border border-border bg-muted p-4">
         <h4 className="mb-2 font-medium">Custom Fields Section</h4>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Additional custom fields can be injected here.
         </p>
       </div>
@@ -227,11 +228,11 @@ export const FullFeatured: Story = {
     mode: 'create',
     customFields: (
       <div className="grid grid-cols-2 gap-4">
-        <div className="border-border rounded border border-dashed p-3">
-          <span className="text-muted-foreground text-xs">Badge ID</span>
+        <div className="rounded border border-dashed border-border p-3">
+          <span className="text-xs text-muted-foreground">Badge ID</span>
         </div>
-        <div className="border-border rounded border border-dashed p-3">
-          <span className="text-muted-foreground text-xs">Start Date</span>
+        <div className="rounded border border-dashed border-border p-3">
+          <span className="text-xs text-muted-foreground">Start Date</span>
         </div>
       </div>
     ),
@@ -242,6 +243,31 @@ export const FullFeatured: Story = {
       dob: '1988-07-14',
       title: 'Product Manager',
       phones: [{ number: '', type: 'cell' }],
+    },
+  },
+};
+
+/**
+ * Async postal-code validation: the host app can plug in a ZIP dataset check
+ * (bluehive-api `GET /zipcodes/:zip`). Try `12345` (rejected) vs `46514`.
+ */
+export const WithPostalCodeValidation: Story = {
+  args: {
+    departments: sampleDepartments,
+    isNew: true,
+    onSubmit: (data) => console.log('Submitted', data),
+    validatePostalCode: async (postalCode, country) => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      if (country && !['us', 'usa', 'united states'].includes(country.toLowerCase())) {
+        return null;
+      }
+      if (!/^\d{5}(?:[-\s]\d{4})?$/.test(postalCode)) {
+        return 'Enter a 5-digit ZIP code (or ZIP+4).';
+      }
+      return postalCode.startsWith('12345') ? 'We do not recognise that ZIP code.' : null;
+    },
+    initialData: {
+      address: { street1: '1 Main St', city: 'Elkhart', state: 'IN', postalCode: '12345' },
     },
   },
 };

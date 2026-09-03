@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { SetupServiceModal } from './SetupServiceModal';
 
 const meta: Meta<typeof SetupServiceModal> = {

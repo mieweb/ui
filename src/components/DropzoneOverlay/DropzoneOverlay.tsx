@@ -1,6 +1,7 @@
+import { FileUp, FolderUp, Upload } from 'lucide-react';
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
-import { Upload, FileUp, FolderUp } from 'lucide-react';
 
 // ============================================================================
 // Types

@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -178,7 +179,7 @@ export function StripeSecureBadge({
   return (
     <div
       className={cn(
-        'text-muted-foreground inline-flex items-center',
+        'inline-flex items-center text-muted-foreground',
         sizeClasses[size].container,
         className
       )}

@@ -6,19 +6,18 @@
 
 // Types and utilities
 export type {
-  BrandConfig,
-  BrandColors,
-  BrandTypography,
   BrandBorderRadius,
   BrandBoxShadow,
+  BrandColors,
+  BrandConfig,
+  BrandTypography,
   ColorScale,
   SemanticColors,
 } from './types';
-
 export {
+  createBrandPreset,
   generateBrandCSS,
   generateTailwindTheme,
-  createBrandPreset,
 } from './types';
 
 // Brand configurations

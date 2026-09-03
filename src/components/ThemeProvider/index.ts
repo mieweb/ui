@@ -1,14 +1,13 @@
 export {
   ThemeProvider,
   ThemeProviderContext,
-  useThemeContext,
-  type ThemeProviderProps,
   type ThemeProviderContextValue,
+  type ThemeProviderProps,
+  useThemeContext,
 } from './ThemeProvider';
-
 export {
   ThemeToggle,
-  themeToggleVariants,
   themeToggleIconVariants,
   type ThemeToggleProps,
+  themeToggleVariants,
 } from './ThemeToggle';

@@ -1,6 +1,7 @@
 // Components
-export * from './components/AddContactModal';
 export * from './components/Accordion';
+export * from './components/ActivityFeed';
+export * from './components/AddContactModal';
 export * from './components/AdditionalFields';
 export * from './components/Address';
 // AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
@@ -40,6 +41,7 @@ export * from './components/ClampedText';
 export * from './components/CollabStatus';
 export * from './components/Collapsible';
 export * from './components/CommandPalette';
+export * from './components/ConfirmDialog';
 export * from './components/ConnectionStatus';
 export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
@@ -75,11 +77,13 @@ export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
 export * from './components/FloatingWindow';
+export * from './components/HeroActionCard';
 export * from './components/FreshnessBadge';
 export * from './components/GlossaryTooltip';
 export * from './components/HealthSurveillance';
 export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
+export * from './components/IconBadge';
 export * from './components/Input';
 export * from './components/InventoryManager';
 export * from './components/Label';
@@ -89,6 +93,7 @@ export * from './components/InvoicePaymentPage';
 // InvoiceView exports InvoiceLineItem which conflicts with InvoicePaymentPage
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
+export * from './components/LiveOrderTracker';
 export * from './components/LoadingPage';
 export * from './components/Markdown';
 export * from './components/MedicationList';
@@ -96,6 +101,7 @@ export * from './components/MediaEditor';
 export * from './components/MediaPlayer';
 export * from './components/Messaging';
 export * from './components/Modal';
+export * from './components/NearbyProviderCard';
 export * from './components/NotificationCenter';
 export * from './components/OnboardingWizard';
 export * from './components/OrderCard';
@@ -110,6 +116,7 @@ export {
 export * from './components/OrderEditor';
 export * from './components/OrderLookupForm';
 export * from './components/OrderSidebar';
+export * from './components/OTPInput';
 export * from './components/PageHeader';
 export * from './components/Pagination';
 export * from './components/PatientHeader';
@@ -118,12 +125,15 @@ export * from './components/PaymentMethod';
 export * from './components/PendingClaimsTable';
 export * from './components/PermissionsEditor';
 export * from './components/PhoneInput';
+export * from './components/PhoneNumber';
+export * from './components/PortalShell';
 export * from './components/PresentingProblems';
 export * from './components/ProblemList';
 export * from './components/ProductVersion';
 export * from './components/Progress';
 export * from './components/ProviderCard';
 export * from './components/ProviderDetailHeader';
+export * from './components/ProviderMap';
 // ProviderOverview exports QuickAction type which conflicts with QuickAction component
 export {
   ProviderOverview,
@@ -177,6 +187,7 @@ export * from './components/Skeleton';
 export * from './components/Slider';
 export * from './components/Spinner';
 export * from './components/SSOConfigForm';
+export * from './components/StatCard';
 export * from './components/StepIndicator';
 export * from './components/StripeBadge';
 export * from './components/Switch';
@@ -190,6 +201,8 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
+export * from './components/UserAvatar';
+export * from './components/UserBadge';
 export * from './components/TranscriptView';
 // `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
 // TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
@@ -209,6 +222,7 @@ export {
   type ReportDatePickerProps,
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
+export * from './components/WorkspaceSwitcher';
 
 // Icons (lucide-react re-exports)
 // Note: CloseIcon, RefreshIcon, SendIcon, and SparklesIcon are ambiguous with

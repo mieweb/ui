@@ -67,7 +67,7 @@ type BrandKey = keyof typeof brandThemes;
 // Create a theme for a specific brand
 function createBrandTheme(brandKey: BrandKey, isDark = false) {
   const brand = brandThemes[brandKey] || brandThemes.bluehive;
-  
+
   if (isDark) {
     return create({
       base: 'dark',
@@ -115,7 +115,7 @@ function createBrandTheme(brandKey: BrandKey, isDark = false) {
       fontCode: '"SF Mono", "Monaco", "Consolas", monospace',
     });
   }
-  
+
   return create({
     base: 'light',
 
@@ -184,13 +184,13 @@ const styleId = 'mieweb-manager-theme';
 
 function injectBrandCSS(brandKey: BrandKey, isDark = false) {
   const brand = brandThemes[brandKey] || brandThemes.bluehive;
-  
+
   // Remove existing style
   const existingStyle = document.getElementById(styleId);
   if (existingStyle) {
     existingStyle.remove();
   }
-  
+
   // Dark mode colors
   const bgColor = isDark ? brand.appBgDark : brand.appBg;
   const borderColor = isDark ? brand.borderColorDark : brand.borderColor;
@@ -200,7 +200,7 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
   const barBg = isDark ? '#27272a' : '#ffffff';
   const inputBg = isDark ? '#27272a' : '#ffffff';
   const inputBorder = isDark ? '#3f3f46' : '#d1d5db';
-  
+
   // Create new style with brand colors
   const style = document.createElement('style');
   style.id = styleId;
@@ -420,9 +420,11 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     label[for^="control-"]:has(input[role="switch"]) input[type="checkbox"] {
       background: transparent !important;
     }
-    ` : ''}
+    `
+      : ''
+    }
   `;
-  
+
   document.head.appendChild(style);
 }
 
@@ -432,18 +434,18 @@ addons.register('mieweb-brand-sync', (api) => {
   const initialGlobals = api.getGlobals();
   const initialBrand = (initialGlobals?.brand || 'bluehive') as BrandKey;
   const initialDark = initialGlobals?.theme === 'dark';
-  
+
   // Apply initial theme
   injectBrandCSS(initialBrand, initialDark);
   if (initialDark) {
     api.setOptions({ theme: createBrandTheme(initialBrand, true) });
   }
-  
+
   // Listen for global changes
   api.on('globalsUpdated', ({ globals }) => {
     const brand = (globals?.brand || 'bluehive') as BrandKey;
     const isDark = globals?.theme === 'dark';
-    
+
     // Update CSS and theme
     injectBrandCSS(brand, isDark);
     api.setOptions({ theme: createBrandTheme(brand, isDark) });

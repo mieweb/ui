@@ -1,2 +1,2 @@
+export type { FileItem, FileManagerProps } from './FileManager';
 export { FileManager } from './FileManager';
-export type { FileManagerProps, FileItem } from './FileManager';

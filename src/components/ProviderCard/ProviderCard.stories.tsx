@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
 import {
+  type Provider,
   ProviderCard,
   ProviderCardGrid,
   ProviderCardSkeleton,
-  type Provider,
 } from './ProviderCard';
 
 const sampleProvider: Provider = {

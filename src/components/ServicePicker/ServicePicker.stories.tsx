@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
-import { ServicePicker, type ServiceGroup } from './ServicePicker';
+import { type ServiceGroup, ServicePicker } from './ServicePicker';
 
 const meta: Meta<typeof ServicePicker> = {
   title: 'Components/Forms & Inputs/ServicePicker',
@@ -18,7 +18,7 @@ const meta: Meta<typeof ServicePicker> = {
   },
   decorators: [
     (Story) => (
-      <div className="border-border h-[500px] w-[400px] overflow-hidden rounded-lg border">
+      <div className="h-[500px] w-[400px] overflow-hidden rounded-lg border border-border">
         <Story />
       </div>
     ),
@@ -37,6 +37,7 @@ const sampleGroups: ServiceGroup[] = [
       { id: 'dt-5', name: '5-Panel Drug Test', code: 'DT5', price: 45.0 },
       { id: 'dt-10', name: '10-Panel Drug Test', code: 'DT10', price: 65.0 },
       { id: 'dt-12', name: '12-Panel Drug Test', code: 'DT12', price: 85.0 },
+      { id: 'dt-q', name: 'Substance Use Questionnaire', badge: 'Questionnaire' },
     ],
     subGroups: [
       {
@@ -125,8 +126,8 @@ function ServicePickerExample(
         onSelectionChange={setSelectedIds}
         fullWidth
       />
-      <div className="border-border bg-muted/50 border-t p-3">
-        <p className="text-muted-foreground text-xs">
+      <div className="bg-muted/50 border-t border-border p-3">
+        <p className="text-xs text-muted-foreground">
           Selected: {selectedIds.length > 0 ? selectedIds.join(', ') : 'None'}
         </p>
       </div>

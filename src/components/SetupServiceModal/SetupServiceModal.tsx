@@ -41,6 +41,8 @@ export interface SetupServiceModalProps {
   errorMessage?: string;
   /** Title for the modal */
   title?: string;
+  /** Pre-fill the form (edit mode). Applied when the modal opens. */
+  defaultValues?: Partial<ServiceFormData>;
 }
 
 export interface ServiceFormData {
@@ -68,8 +70,9 @@ export function SetupServiceModal({
   isSubmitting = false,
   errorMessage,
   title = 'Add New Service',
+  defaultValues,
 }: SetupServiceModalProps) {
-  const [formData, setFormData] = React.useState<ServiceFormData>({
+  const blankForm = (): ServiceFormData => ({
     name: '',
     description: '',
     price: 0,
@@ -80,20 +83,27 @@ export function SetupServiceModal({
     autoAcceptReferrals: false,
   });
 
-  // Reset form when modal closes
+  const [formData, setFormData] = React.useState<ServiceFormData>(blankForm);
+
+  // Populate from `defaultValues` when the modal opens (edit mode) and reset to
+  // a blank form when it closes. `defaultValues` is intentionally excluded from
+  // the deps so the form isn't reset on every parent re-render (parents
+  // commonly pass a new object literal each render).
   React.useEffect(() => {
-    if (!open) {
-      setFormData({
-        name: '',
-        description: '',
-        price: 0,
-        categoryId: '',
-        currentlyOffered: true,
-        limitedInventory: false,
-        initialInventory: undefined,
-        autoAcceptReferrals: false,
-      });
+    if (open) {
+      const next = blankForm();
+      if (defaultValues) {
+        for (const [key, value] of Object.entries(defaultValues)) {
+          if (value !== undefined) {
+            (next as unknown as Record<string, unknown>)[key] = value;
+          }
+        }
+      }
+      setFormData(next);
+    } else {
+      setFormData(blankForm());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleServiceSelect = (serviceId: string) => {

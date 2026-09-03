@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useEffect, useState } from 'react';
+
 import {
   BusinessHoursEditor,
-  DaySchedule,
-  createDefaultSchedule,
   create24HourSchedule,
+  createDefaultSchedule,
   createWeekdaySchedule,
+  DaySchedule,
 } from './BusinessHoursEditor';
 import { BusinessHours } from '../BusinessHours';
 

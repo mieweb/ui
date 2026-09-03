@@ -93,6 +93,25 @@ export const bluehiveBrand: BrandConfig = {
     dropdown:
       '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
     modal: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+    // Soft, high-blur elevation for floating surfaces (auth cards, popovers)
+    elevated: '0 10px 40px -4px rgb(0 0 0 / 0.12)',
+    elevatedHover: '0 18px 50px -6px rgb(0 0 0 / 0.18)',
+    // Brand-tinted glow for primary/hero actions (BlueHive Blue #27aae1)
+    glow: '0 4px 14px -2px rgb(39 170 225 / 0.35)',
+    glowHover: '0 8px 24px -4px rgb(39 170 225 / 0.45)',
+    // Dark mode needs deeper ambient shadow to read against #171717
+    elevatedDark: '0 10px 40px -4px rgb(0 0 0 / 0.5)',
+    elevatedHoverDark: '0 18px 50px -6px rgb(0 0 0 / 0.6)',
+  },
+
+  gradients: {
+    // Primary action gradient — tuned darker (600 → 800) so bold white text
+    // stays legible across the whole sweep.
+    brand: 'linear-gradient(135deg, #1f98ca 0%, #0f749c 100%)',
+    // Vibrant hero gradient (500 → 700) — the signature BlueHive look.
+    brandStrong: 'linear-gradient(135deg, #27aae1 0%, #1786b3 100%)',
+    // Deepened for dark mode so it doesn't glare against a dark page.
+    brandStrongDark: 'linear-gradient(135deg, #1786b3 0%, #00506e 100%)',
   },
 };
 

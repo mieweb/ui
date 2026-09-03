@@ -1,8 +1,8 @@
 export {
   AuthDialog,
-  DEFAULT_SOCIAL_PROVIDERS,
   type AuthDialogProps,
   type AuthMode,
-  type SocialProvider,
+  DEFAULT_SOCIAL_PROVIDERS,
   type SignupData,
+  type SocialProvider,
 } from './AuthDialog';

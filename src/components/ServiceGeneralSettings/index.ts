@@ -1,2 +1,2 @@
-export { ServiceGeneralSettings } from './ServiceGeneralSettings';
 export type { ServiceGeneralSettingsProps } from './ServiceGeneralSettings';
+export { ServiceGeneralSettings } from './ServiceGeneralSettings';

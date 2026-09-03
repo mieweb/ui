@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+
 import {
-  ConnectionStatusOverlay,
-  UpdateAvailableOverlay,
+  type ConnectionState,
   ConnectionStatusBadge,
   ConnectionStatusBar,
+  ConnectionStatusOverlay,
+  UpdateAvailableOverlay,
   useConnectionStatus,
-  type ConnectionState,
 } from './ConnectionStatus';
 
 const meta: Meta<typeof ConnectionStatusOverlay> = {

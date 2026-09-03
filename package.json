@@ -259,6 +259,7 @@
     "datavis-ace": "=4.1.0",
     "js-yaml": ">=4.0.0",
     "katex": ">=0.16.0",
+    "mapbox-gl": ">=2.0.0",
     "mermaid": ">=11.0.0",
     "papaparse": ">=5.0.0",
     "react": ">=18.0.0",
@@ -308,6 +309,9 @@
       "optional": true
     },
     "js-yaml": {
+      "optional": true
+    },
+    "mapbox-gl": {
       "optional": true
     },
     "mermaid": {
@@ -398,6 +402,7 @@
     "@types/google-libphonenumber": "^7.4.30",
     "@types/js-yaml": "^4.0.9",
     "@types/luxon": "^3.7.1",
+    "@types/mapbox-gl": "^3.4.1",
     "@types/node": "^22.19.11",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.2.14",
@@ -429,6 +434,7 @@
     "js-yaml": "^4.1.1",
     "jsdom": "^26.1.0",
     "katex": "^0.17.0",
+    "mapbox-gl": "^3.18.1",
     "mermaid": "^11.15.0",
     "papaparse": "^5.5.3",
     "postcss": "^8.5.10",

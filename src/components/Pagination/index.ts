@@ -1,7 +1,7 @@
 export {
   Pagination,
-  SimplePagination,
   paginationButtonVariants,
   type PaginationProps,
+  SimplePagination,
   type SimplePaginationProps,
 } from './Pagination';

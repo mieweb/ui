@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { EmployerContactCard } from './EmployerContactCard';
 
 const meta: Meta<typeof EmployerContactCard> = {

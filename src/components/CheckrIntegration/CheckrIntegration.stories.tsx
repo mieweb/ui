@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+
 import {
-  CheckrIntegration,
   type BackgroundCheckReport,
+  CheckrIntegration,
 } from './CheckrIntegration';
 
 const samplePackages = [

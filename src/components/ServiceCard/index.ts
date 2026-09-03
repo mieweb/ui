@@ -1,2 +1,2 @@
-export { ServiceCard, AddServiceCard } from './ServiceCard';
-export type { ServiceCardProps, AddServiceCardProps } from './ServiceCard';
+export type { AddServiceCardProps, ServiceCardProps } from './ServiceCard';
+export { AddServiceCard, ServiceCard } from './ServiceCard';

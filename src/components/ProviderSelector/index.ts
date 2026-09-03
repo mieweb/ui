@@ -1,5 +1,5 @@
 export {
+  type ProviderOption,
   ProviderSelector,
   type ProviderSelectorProps,
-  type ProviderOption,
 } from './ProviderSelector';

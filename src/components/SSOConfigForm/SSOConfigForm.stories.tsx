@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { SSOConfigForm } from './SSOConfigForm';
 
 const meta: Meta<typeof SSOConfigForm> = {
@@ -165,7 +166,7 @@ export const DarkMode: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="dark bg-background rounded-lg p-4">
+      <div className="dark rounded-lg bg-background p-4">
         <Story />
       </div>
     ),

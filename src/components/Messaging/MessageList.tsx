@@ -8,6 +8,7 @@ import type {
   TypingState,
 } from './types';
 import { MessageBubble } from './MessageBubble';
+import { useReadReceipts } from './hooks';
 
 // ============================================================================
 // Utility Functions
@@ -402,6 +403,14 @@ export interface MessageListProps {
   onRetryMessage?: (messageId: string) => void;
   /** Callback when an attachment is clicked */
   onAttachmentClick?: (attachment: MessageAttachment, message: Message) => void;
+  /**
+   * Called when an unread incoming message scrolls into view (via
+   * IntersectionObserver) — use to send read receipts. Only messages from
+   * other senders whose `status` is not already `'read'` are observed.
+   */
+  onReadReceipt?: (messageId: string) => void;
+  /** IntersectionObserver threshold for read receipts (default 0.5). */
+  readReceiptThreshold?: number;
   /** Custom empty state */
   emptyState?: React.ReactNode;
   /** Custom timestamp formatter */
@@ -442,6 +451,8 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
       onLoadMore,
       onRetryMessage,
       onAttachmentClick,
+      onReadReceipt,
+      readReceiptThreshold = 0.5,
       emptyState,
       formatTimestamp,
       className,
@@ -453,6 +464,14 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
     const bottomRef = React.useRef<HTMLDivElement>(null);
     const [isUserScrolled, setIsUserScrolled] = React.useState(false);
     const prevMessageCountRef = React.useRef(messages.length);
+
+    // Read receipts — observe unread incoming messages as they scroll into view.
+    const { observeMessage } = useReadReceipts({
+      messages,
+      currentUserId: currentUser.id,
+      onMarkRead: onReadReceipt,
+      threshold: readReceiptThreshold,
+    });
 
     // Combine refs
     React.useImperativeHandle(ref, () => scrollContainerRef.current!);
@@ -467,18 +486,32 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
       setIsUserScrolled(!isAtBottom);
     }, []);
 
+    // Scroll the message list's OWN container to the bottom. We set scrollTop
+    // on the container directly rather than calling bottomRef.scrollIntoView():
+    // scrollIntoView() also scrolls every scrollable ancestor (the page's
+    // <main>/window) to reveal the anchor, which yanks the whole page down to
+    // the bottom on load. Scoping the scroll to the container keeps the chat
+    // self-contained and never moves the surrounding page.
+    const scrollToBottom = React.useCallback((smooth: boolean) => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    }, []);
+
     // Auto-scroll on new messages
     React.useEffect(() => {
       const container = scrollContainerRef.current;
-      const bottom = bottomRef.current;
-      if (!container || !bottom) return;
+      if (!container) return;
 
       const messageCountChanged =
         messages.length !== prevMessageCountRef.current;
       prevMessageCountRef.current = messages.length;
 
       if (autoScroll === 'always') {
-        bottom.scrollIntoView({ behavior: 'smooth' });
+        scrollToBottom(true);
       } else if (autoScroll === 'onNewMessage' && messageCountChanged) {
         // Check if new message is from current user (outgoing)
         const lastMessage = messages[messages.length - 1];
@@ -486,18 +519,17 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
 
         // Always scroll on outgoing, only scroll on incoming if at bottom
         if (isOutgoing || !isUserScrolled) {
-          bottom.scrollIntoView({ behavior: 'smooth' });
+          scrollToBottom(true);
         }
       }
-    }, [messages, currentUser.id, autoScroll, isUserScrolled]);
+    }, [messages, currentUser.id, autoScroll, isUserScrolled, scrollToBottom]);
 
     // Scroll to bottom on initial load
     React.useEffect(() => {
-      const bottom = bottomRef.current;
-      if (bottom && !isLoading) {
-        bottom.scrollIntoView();
+      if (!isLoading) {
+        scrollToBottom(false);
       }
-    }, [isLoading]);
+    }, [isLoading, scrollToBottom]);
 
     // Group messages
     const messageGroups = groupByDate
@@ -572,6 +604,11 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
                 return (
                   <div
                     key={message.id}
+                    ref={
+                      onReadReceipt
+                        ? (el) => observeMessage(el, message)
+                        : undefined
+                    }
                     className={cn(
                       'transition-opacity duration-200',
                       isSameGroup ? 'mt-0.5' : 'mt-3',
@@ -616,7 +653,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
           <button
             type="button"
             onClick={() => {
-              bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+              scrollToBottom(true);
             }}
             className={cn(
               'fixed right-4 bottom-24 z-10',

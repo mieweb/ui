@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const buttonVariants = cva(
@@ -19,6 +20,11 @@ const buttonVariants = cva(
           'bg-primary-800 text-white',
           'hover:bg-primary-900',
           'active:bg-primary-950',
+        ],
+        brand: [
+          'bg-gradient-brand text-white shadow-glow',
+          'hover:-translate-y-0.5 hover:shadow-glow-hover',
+          'active:translate-y-0 active:shadow-glow',
         ],
         secondary: [
           'bg-neutral-200 text-neutral-900',
@@ -95,6 +101,7 @@ export interface ButtonProps
  * @example
  * ```tsx
  * <Button variant="primary" size="md">Click me</Button>
+ * <Button variant="brand" size="lg">Get started</Button>
  * <Button variant="danger" leftIcon={<TrashIcon />}>Delete</Button>
  * <Button variant="ghost" isLoading loadingText="Saving...">Save</Button>
  * ```

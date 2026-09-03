@@ -11,11 +11,13 @@ Run validation checks without committing.
 Execute these steps and report results:
 
 1. **Format check**
+
    ```bash
    npm run format
    ```
 
 2. **Lint check**
+
    ```bash
    npm run lint
    ```

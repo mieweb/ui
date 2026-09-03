@@ -1,6 +1,6 @@
 export {
+  type SelectableService,
+  type ServiceGroup,
   ServicePicker,
   type ServicePickerProps,
-  type ServiceGroup,
-  type SelectableService,
 } from './ServicePicker';

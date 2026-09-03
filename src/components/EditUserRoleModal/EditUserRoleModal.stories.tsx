@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { EditUserRoleModal, UserRole } from './EditUserRoleModal';
+
 import { Button } from '../Button/Button';
+import { EditUserRoleModal, UserRole } from './EditUserRoleModal';
 
 const sampleRoles: UserRole[] = [
   {
