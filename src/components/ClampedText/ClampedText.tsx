@@ -104,7 +104,7 @@ export const ClampedText = React.forwardRef<HTMLElement, ClampedTextProps>(
             e.stopPropagation();
             setOpen((v) => !v);
           }}
-          className="text-primary-600 dark:text-primary-400 mt-1 text-[11px] font-medium hover:underline"
+          className="text-primary-800 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 mt-1 text-[11px] font-medium hover:underline"
         >
           {open ? showLessLabel : showMoreLabel}
         </button>

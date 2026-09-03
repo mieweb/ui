@@ -611,6 +611,9 @@ export const miewebUISafelist = [
   'from-card',
   'from-background',
   'to-transparent',
+  'break-words',
+  'whitespace-pre-wrap',
+  'hover:underline',
   // FreshnessBadge / FreshnessDot — tinted level chips and dots
   'dark:bg-success/20',
   'bg-warning/15',

@@ -137,6 +137,10 @@ module.exports = {
     'from-card',
     'from-background',
     'to-transparent',
+    'break-words',
+    'whitespace-pre-wrap',
+    'mt-1',
+    'hover:underline',
     // FreshnessBadge / FreshnessDot — tinted level chips and dots
     'bg-success/10',
     'dark:bg-success/20',
