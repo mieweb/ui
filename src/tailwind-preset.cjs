@@ -245,6 +245,10 @@ module.exports = {
     'w-1.5',
     'border-dashed',
     'shadow-xl',
+    // CopyButton — inline copy-to-clipboard button
+    'p-1',
+    'hover:bg-muted',
+
     // ReadingProgressBar — fixed top rail and width-transition fill
     'pointer-events-none',
     'inset-x-0',
