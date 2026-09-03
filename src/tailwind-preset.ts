@@ -696,6 +696,9 @@ export const miewebUISafelist = [
   'w-1.5',
   'border-dashed',
   'shadow-xl',
+  // CopyButton — inline copy-to-clipboard button
+  'p-1',
+
   // ReadingProgressBar — fixed top rail and width-transition fill
   'inset-x-0',
   'h-1',
