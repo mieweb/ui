@@ -21,6 +21,24 @@ describe('Sparkline', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
+  it('names each track group after its visible label', () => {
+    renderWithTheme(
+      <>
+        <Sparkline data={DATA} label="All activity" />
+        <Sparkline data={DATA} label="Errors" />
+        <Sparkline data={DATA} label="Logins" ariaLabel="Login volume" />
+      </>
+    );
+    expect(
+      screen.getByRole('group', { name: 'All activity' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Errors' })).toBeInTheDocument();
+    // explicit ariaLabel still wins over the visible label
+    expect(
+      screen.getByRole('group', { name: 'Login volume' })
+    ).toBeInTheDocument();
+  });
+
   it('scales bars to the series maximum with a stub for zero', () => {
     renderWithTheme(<Sparkline data={DATA} />);
     expect(screen.getByRole('img', { name: 'Aug 22 — 12' })).toHaveStyle({

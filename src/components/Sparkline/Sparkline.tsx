@@ -30,7 +30,10 @@ export interface SparklineProps extends Omit<
   onSelect?: (key: string | null) => void;
   /** Track label rendered before the bars (e.g. "All activity"). */
   label?: string;
-  /** Accessible name for the bar group (default "Activity over time"). */
+  /**
+   * Accessible name for the bar group. Defaults to the visible `label`
+   * (so multiple tracks stay distinguishable), else "Activity over time".
+   */
   ariaLabel?: string;
   /** Bar track height in px (default 32). */
   height?: number;
@@ -68,7 +71,7 @@ export const Sparkline = React.forwardRef<HTMLDivElement, SparklineProps>(
       selectedKey,
       onSelect,
       label,
-      ariaLabel = 'Activity over time',
+      ariaLabel,
       height = 32,
       formatValue,
       className,
@@ -98,7 +101,7 @@ export const Sparkline = React.forwardRef<HTMLDivElement, SparklineProps>(
           className="flex flex-1 items-end gap-[2px]"
           style={{ height }}
           role="group"
-          aria-label={ariaLabel}
+          aria-label={ariaLabel ?? label ?? 'Activity over time'}
         >
           {data.map((point) => {
             const heightPct =
