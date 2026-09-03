@@ -4,7 +4,8 @@
  * Tests the pure functions used for stability detection
  */
 
-import { describe, expect, it } from 'vitest';
+/* eslint-disable no-undef */
+import { describe, it, expect } from 'vitest';
 
 // We need to test the pure functions, so we'll recreate them here
 // In a real scenario, these could be exported from the hook file

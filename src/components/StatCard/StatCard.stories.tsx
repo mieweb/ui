@@ -81,7 +81,7 @@ export const Interactive: Story = {
     accent: 'success',
     description: 'Click to view',
 
-    onClick: () => alert('Navigate to results'),
+    onClick: () => window.alert('Navigate to results'),
   },
 };
 

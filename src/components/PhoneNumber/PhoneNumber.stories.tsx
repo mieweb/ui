@@ -102,7 +102,7 @@ export const InRow: Story = {
     <button
       type="button"
       className="hover:bg-muted/50 flex w-96 items-center justify-between rounded-lg border bg-card p-3 text-left"
-      onClick={() => alert('Row clicked')}
+      onClick={() => window.alert('Row clicked')}
     >
       <span className="text-sm font-medium">Jake Pollard</span>
       <PhoneNumber value={{ number: '3175550123', type: 'Cell' }} showIcon />

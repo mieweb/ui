@@ -64,6 +64,8 @@ export function useTheme(defaultTheme: Theme = 'system') {
     const resolved = initial === 'system' ? getSystemTheme() : initial;
     setResolvedTheme(resolved);
     applyTheme(resolved);
+    // Mount-only: defaultTheme is a fallback for the first render, not a control.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Listen for system theme changes

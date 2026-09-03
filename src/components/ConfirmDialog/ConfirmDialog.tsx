@@ -130,12 +130,13 @@ export function ConfirmDialog({
   );
 
   // Reset state whenever the dialog is reopened or the default changes.
+  const defaultMessage = fieldOpts?.defaultValue ?? '';
   React.useEffect(() => {
     if (open) {
-      setMessage(fieldOpts?.defaultValue ?? '');
+      setMessage(defaultMessage);
       setValidationError(null);
     }
-  }, [open]);
+  }, [open, defaultMessage]);
 
   const handleCancel = React.useCallback(() => {
     if (isSubmitting) return;

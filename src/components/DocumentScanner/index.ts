@@ -52,19 +52,19 @@
  * compose them as needed.
  */
 
-export { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
 export { DocumentScanner } from './DocumentScanner';
 export { DropZone } from './DropZone';
 export { FilePreview } from './FilePreview';
-export type * from './types';
+export { WebcamModal } from './WebcamModal';
+export { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
+export { useFileUpload } from './useFileUpload';
 export { useCamera } from './useCamera';
+export { useDocumentDetection } from './useDocumentDetection';
+export type * from './types';
 export type {
-  DetectionConfig,
+  Point,
+  DocumentBoundary,
   DetectionMetrics,
   DetectionState,
-  DocumentBoundary,
-  Point,
+  DetectionConfig,
 } from './useDocumentDetection';
-export { useDocumentDetection } from './useDocumentDetection';
-export { useFileUpload } from './useFileUpload';
-export { WebcamModal } from './WebcamModal';

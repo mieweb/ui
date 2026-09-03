@@ -59,7 +59,6 @@ export function ProviderMap({
   const [mapStyle, setMapStyle] = React.useState<'streets' | 'satellite'>(
     'streets'
   );
-  const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   // Load Mapbox GL JS dynamically
@@ -185,6 +184,8 @@ export function ProviderMap({
         mapRef.current = null;
       }
     };
+    // mapStyle is applied by the effect below without re-creating the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     mapboxToken,
     coordinates,
@@ -206,16 +207,6 @@ export function ProviderMap({
       );
     }
   }, [mapStyle, mapLoaded]);
-
-  // Handle fullscreen changes
-  React.useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () =>
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
 
   // Fallback to static map if no token
   if (!mapboxToken) {
@@ -332,7 +323,7 @@ function StaticMapFallback({
   return (
     <div className="relative h-full w-full">
       <iframe
-        title={`Map showing ${providerName} location`}
+        title={`Map showing ${providerName}, ${address}`}
         src={staticMapUrl}
         className="h-full w-full border-0"
         loading="lazy"
