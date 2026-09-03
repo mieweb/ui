@@ -696,6 +696,12 @@ export const miewebUISafelist = [
   'w-1.5',
   'border-dashed',
   'shadow-xl',
+  // ReadingProgressBar — fixed top rail and width-transition fill
+  'inset-x-0',
+  'h-1',
+  'transition-[width]',
+  'duration-150',
+
   // SectionSpyNav — sticky rail, brand tone whites, sliding underline
   'sticky',
   'top-0',
