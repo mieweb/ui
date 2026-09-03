@@ -599,6 +599,11 @@ export const miewebUISafelist = [
   'dark:border-primary-800',
   'dark:text-primary-300',
   'opacity-60',
+  // Kbd / KeyboardShortcutsOverlay — key chips and shortcut rows
+  'px-1.5',
+  'font-mono',
+  'mx-0.5',
+  'list-none',
   // Sparkline — bar sizing, gaps, and hover tints (bg-primary-500/40 and
   // focus-visible:ring-offset-1 are already safelisted above)
   'min-w-[3px]',

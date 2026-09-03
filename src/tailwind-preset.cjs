@@ -125,6 +125,11 @@ module.exports = {
     'overflow-auto',
     // Select component
     'truncate',
+    // Kbd / KeyboardShortcutsOverlay — key chips and shortcut rows
+    'px-1.5',
+    'font-mono',
+    'mx-0.5',
+    'list-none',
     // Sparkline — bar sizing, gaps, and hover tints
     'min-w-[3px]',
     'gap-[2px]',

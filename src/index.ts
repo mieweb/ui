@@ -85,6 +85,7 @@ export * from './components/InventoryManager';
 export * from './components/Label';
 export * from './components/InviteUserModal';
 export * from './components/InvoiceList';
+export * from './components/KeyboardShortcutsOverlay';
 export * from './components/InvoicePaymentPage';
 // InvoiceView exports InvoiceLineItem which conflicts with InvoicePaymentPage
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';

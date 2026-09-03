@@ -38,6 +38,8 @@ export default defineConfig({
     'components/FreshnessBadge/index': 'src/components/FreshnessBadge/index.ts',
     'components/GlossaryTooltip/index': 'src/components/GlossaryTooltip/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
+    'components/KeyboardShortcutsOverlay/index':
+      'src/components/KeyboardShortcutsOverlay/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
     'components/Markdown/index': 'src/components/Markdown/index.ts',
     'components/MediaEditor/index': 'src/components/MediaEditor/index.ts',
