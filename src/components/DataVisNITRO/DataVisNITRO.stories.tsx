@@ -327,27 +327,22 @@ const PerspectivesGrid = () => {
   const prefs = useMemo(() => {
     if (!view) return null;
 
-    const nextPrefs = new PrefsConstructor(
-      'mieweb-ui-storybook:employees',
-      null,
-      {
-        autoSave: true,
-        backend: {
-          type: 'localStorage',
-          localStorage: {
-            key: 'mieweb-ui-storybook:datavis-prefs',
-          },
+    return new PrefsConstructor('mieweb-ui-storybook:employees', null, {
+      autoSave: true,
+      backend: {
+        type: 'localStorage',
+        localStorage: {
+          key: 'mieweb-ui-storybook:datavis-prefs',
         },
-      }
-    );
-
-    view.setPrefs(nextPrefs);
-    return nextPrefs;
+      },
+    });
   }, [view]);
 
   useEffect(() => {
-    prefs?.prime?.();
-  }, [prefs]);
+    if (!view || !prefs) return;
+    view.setPrefs(prefs);
+    prefs.prime?.();
+  }, [view, prefs]);
 
   if (!prefs) return null;
 
