@@ -62,6 +62,7 @@ export default defineConfig({
     'components/Skeleton/index': 'src/components/Skeleton/index.ts',
     'components/Slider/index': 'src/components/Slider/index.ts',
     'components/SourceTip/index': 'src/components/SourceTip/index.ts',
+    'components/Sparkline/index': 'src/components/Sparkline/index.ts',
     'components/Spinner/index': 'src/components/Spinner/index.ts',
     'components/SuperChat/index': 'src/components/SuperChat/index.ts',
     'components/SuperChat/plugins/index': 'src/components/SuperChat/plugins/index.ts',

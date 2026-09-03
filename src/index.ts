@@ -164,6 +164,7 @@ export * from './components/Separator';
 export * from './components/Sheet';
 export * from './components/SectionSpyNav';
 export * from './components/SourceTip';
+export * from './components/Sparkline';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,
