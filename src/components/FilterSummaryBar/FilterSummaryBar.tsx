@@ -136,7 +136,7 @@ export const FilterSummaryBar = React.forwardRef<
           onClick={onClearAll}
           className={cn(
             'ms-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors',
-            'text-primary-700 hover:bg-primary-500/15 dark:text-primary-300'
+            'text-primary-800 hover:bg-primary-500/15 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200'
           )}
         >
           <X aria-hidden="true" className="h-2.5 w-2.5" />
