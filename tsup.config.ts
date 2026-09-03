@@ -47,6 +47,8 @@ export default defineConfig({
     'components/Q/index': 'src/components/Q/index.ts',
     'components/QuickAction/index': 'src/components/QuickAction/index.ts',
     'components/Radio/index': 'src/components/Radio/index.ts',
+    'components/ReadingProgressBar/index':
+      'src/components/ReadingProgressBar/index.ts',
     'components/RecordButton/index': 'src/components/RecordButton/index.ts',
     'components/RichTextEditor/index': 'src/components/RichTextEditor/index.ts',
     'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
