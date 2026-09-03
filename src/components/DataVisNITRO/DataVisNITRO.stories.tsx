@@ -1,11 +1,24 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { GridAssistant, type GridAssistantColumn } from '@mieweb/datavis';
+import {
+  GridAssistant,
+  type GridAssistantColumn,
+  type PrefsInstance,
+} from '@mieweb/datavis';
+import { Prefs } from 'datavis-ace';
 import {
   DataVisNitroContext,
   DataVisNitroGrid,
   DataVisNitroSource,
 } from './DataVisNITRO';
+
+// datavis-ace is untyped JS (`Prefs` is built with a runtime `makeSubclass`
+// helper), so give it an explicit constructor signature for use below.
+const PrefsConstructor = Prefs as unknown as new (
+  name: string,
+  moduleBindings: unknown,
+  opts: Record<string, unknown>
+) => PrefsInstance;
 
 const meta: Meta<typeof DataVisNitroGrid> = {
   title: 'Components/Text & Data Display/DataVis NITRO',
@@ -299,6 +312,68 @@ export const OzwellAssistant: Story = {
         />
         <ConnectedGridAssistant />
       </div>
+    </DataVisNitroSource>
+  ),
+};
+
+/**
+ * Reads the shared view from DataVisNitroContext, binds a localStorage-backed
+ * Prefs module to it, and passes the module to the grid so the perspective
+ * toolbar ("Main Perspective" dropdown, save/reset/history buttons) renders.
+ */
+const PerspectivesGrid = () => {
+  const view = useContext(DataVisNitroContext);
+
+  const prefs = useMemo(() => {
+    if (!view) return null;
+
+    const nextPrefs = new PrefsConstructor(
+      'mieweb-ui-storybook:employees',
+      null,
+      {
+        autoSave: true,
+        backend: {
+          type: 'localStorage',
+          localStorage: {
+            key: 'mieweb-ui-storybook:datavis-prefs',
+          },
+        },
+      }
+    );
+
+    view.setPrefs(nextPrefs);
+    return nextPrefs;
+  }, [view]);
+
+  useEffect(() => {
+    prefs?.prime?.();
+  }, [prefs]);
+
+  if (!prefs) return null;
+
+  return (
+    <DataVisNitroGrid
+      title="Employees"
+      columns={EMPLOYEE_COLUMNS}
+      prefs={prefs}
+      showControls
+      height="480px"
+    />
+  );
+};
+
+export const WithPerspectives: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Passing a `prefs` module (a `PrefsInstance` from `datavis-ace`) enables the perspective toolbar: the "Main Perspective" dropdown, save / save-as / reset buttons, and undo/redo history. Perspectives capture the grid configuration (sort, filter, group, pivot, aggregate, column layout) and here persist to `localStorage`. Create the `Prefs` instance, bind it to the shared view with `view.setPrefs(prefs)`, and pass it to `<DataVisNitroGrid prefs={…}>`. In minimal mode the same toolbar appears inside the hamburger menu.',
+      },
+    },
+  },
+  render: () => (
+    <DataVisNitroSource type="http" url="/sample-data.json">
+      <PerspectivesGrid />
     </DataVisNitroSource>
   ),
 };
