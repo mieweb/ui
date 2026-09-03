@@ -68,6 +68,10 @@ const meta: Meta<typeof ResultsEntryForm> = {
       control: 'boolean',
       description: 'Whether to show "apply to all services" checkbox',
     },
+    showSentToLab: {
+      control: 'boolean',
+      description: 'Whether to offer the preliminary "Sent to Lab" result',
+    },
     providerContacts: {
       control: 'object',
       description: 'Array of provider contacts to display',
@@ -170,6 +174,25 @@ export const FullFeatured: Story = {
     employeeLastName: 'Wilson',
     showFileUpload: true,
     showApplyToAll: true,
+  },
+  decorators: [
+    (Story) => (
+      <Card className="max-w-2xl p-6">
+        <Story />
+      </Card>
+    ),
+  ],
+};
+
+// Preliminary "Sent to Lab" option (provider portal parity)
+export const WithSentToLab: Story = {
+  args: {
+    serviceName: 'Drug Screen - 10 Panel',
+    employeeFirstName: 'Maria',
+    employeeLastName: 'Lopez',
+    showFileUpload: true,
+    showSentToLab: true,
+    providerContacts: [],
   },
   decorators: [
     (Story) => (
