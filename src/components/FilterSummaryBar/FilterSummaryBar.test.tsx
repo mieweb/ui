@@ -73,6 +73,18 @@ describe('FilterSummaryBar', () => {
     );
   });
 
+  it('renders a real total of zero', () => {
+    renderWithTheme(
+      <FilterSummaryBar
+        filteredCount={0}
+        totalCount={0}
+        activeFilterCount={1}
+        onClearAll={() => {}}
+      />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('0 of 0 records');
+  });
+
   it('hides the clear button when onClearAll is omitted', () => {
     renderWithTheme(
       <FilterSummaryBar filteredCount={5} activeFilterCount={2} />

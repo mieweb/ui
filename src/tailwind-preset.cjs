@@ -143,6 +143,7 @@ module.exports = {
     'dark:hover:text-primary-200',
     'h-2.5',
     'w-2.5',
+    'focus-visible:ring-offset-2',
     // Sparkline — bar sizing, gaps, and hover tints
     'min-w-[3px]',
     'gap-[2px]',

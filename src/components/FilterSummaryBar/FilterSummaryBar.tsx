@@ -7,7 +7,7 @@ import { cn } from '../../utils/cn';
 export interface FilterSummaryBarProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Rows currently visible after filtering. */
   filteredCount: number;
-  /** Total records before filtering. Omit (or pass 0) when unknown. */
+  /** Total records before filtering. Omit when unknown; `0` renders as a real total. */
   totalCount?: number;
   /** Number of active filter conditions. */
   activeFilterCount: number;
@@ -103,6 +103,8 @@ export const FilterSummaryBar = React.forwardRef<
       />
       <span
         role="status"
+        aria-live="polite"
+        aria-atomic="true"
         className={cn(
           isFiltering
             ? 'text-primary-800 dark:text-primary-200'
@@ -114,7 +116,7 @@ export const FilterSummaryBar = React.forwardRef<
             <span className="font-semibold">
               {filteredCount.toLocaleString()}
             </span>
-            {totalCount ? (
+            {typeof totalCount === 'number' && Number.isFinite(totalCount) ? (
               <>
                 {' '}
                 {ofLabel}{' '}
@@ -150,7 +152,8 @@ export const FilterSummaryBar = React.forwardRef<
           onClick={onClearAll}
           className={cn(
             'ms-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors',
-            'text-primary-800 hover:bg-primary-500/15 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200'
+            'text-primary-800 hover:bg-primary-500/15 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200',
+            'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
           )}
         >
           <X aria-hidden="true" className="h-2.5 w-2.5" />
@@ -160,3 +163,5 @@ export const FilterSummaryBar = React.forwardRef<
     </div>
   );
 });
+
+FilterSummaryBar.displayName = 'FilterSummaryBar';

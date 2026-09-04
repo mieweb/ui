@@ -609,6 +609,7 @@ export const miewebUISafelist = [
   'h-2.5',
   'w-2.5',
   'dark:hover:text-primary-200',
+  'focus-visible:ring-offset-2',
   // Sparkline — bar sizing, gaps, and hover tints (bg-primary-500/40 and
   // focus-visible:ring-offset-1 are already safelisted above)
   'min-w-[3px]',
