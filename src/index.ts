@@ -74,6 +74,7 @@ export * from './components/EmployerView';
 export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
+export * from './components/FilterSummaryBar';
 export * from './components/FloatingWindow';
 export * from './components/FreshnessBadge';
 export * from './components/GlossaryTooltip';
