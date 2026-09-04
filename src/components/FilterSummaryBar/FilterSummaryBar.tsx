@@ -13,7 +13,10 @@ export interface FilterSummaryBarProps extends React.HTMLAttributes<HTMLDivEleme
   activeFilterCount: number;
   /** Whether a search query is also active. */
   hasSearchText?: boolean;
-  /** Keep the summary visible even when no filters/search are active. */
+  /**
+   * Keep the bar visible even when no filters/search are active. The idle
+   * bar shows only `allVisibleLabel` (no counts).
+   */
   showWhenIdle?: boolean;
   /** Called when the clear action is clicked. Omit to hide the clear button. */
   onClearAll?: () => void;
@@ -82,7 +85,6 @@ export const FilterSummaryBar = React.forwardRef<
   return (
     <div
       ref={ref}
-      role="status"
       className={cn(
         'flex items-center gap-3 rounded-lg border px-4 py-2 text-xs transition-colors',
         isFiltering
@@ -100,37 +102,47 @@ export const FilterSummaryBar = React.forwardRef<
         )}
       />
       <span
+        role="status"
         className={cn(
           isFiltering
             ? 'text-primary-800 dark:text-primary-200'
             : 'text-muted-foreground'
         )}
       >
-        <span className="font-semibold">{filteredCount.toLocaleString()}</span>
-        {totalCount ? (
+        {isFiltering ? (
           <>
-            {' '}
-            {ofLabel}{' '}
-            <span className="font-semibold">{totalCount.toLocaleString()}</span>
-          </>
-        ) : null}{' '}
-        {filteredCount === 1 ? recordLabel : recordsLabel}
-        {activeFilterCount > 0 && (
-          <>
-            {' '}
-            &mdash;{' '}
             <span className="font-semibold">
-              {activeFilterCount.toLocaleString()}{' '}
-              {activeFilterCount === 1 ? filterLabel : filtersLabel}
-            </span>{' '}
-            {activeLabel}
+              {filteredCount.toLocaleString()}
+            </span>
+            {totalCount ? (
+              <>
+                {' '}
+                {ofLabel}{' '}
+                <span className="font-semibold">
+                  {totalCount.toLocaleString()}
+                </span>
+              </>
+            ) : null}{' '}
+            {filteredCount === 1 ? recordLabel : recordsLabel}
+            {activeFilterCount > 0 && (
+              <>
+                {' '}
+                &mdash;{' '}
+                <span className="font-semibold">
+                  {activeFilterCount.toLocaleString()}{' '}
+                  {activeFilterCount === 1 ? filterLabel : filtersLabel}
+                </span>{' '}
+                {activeLabel}
+              </>
+            )}
+            {hasSearchText && activeFilterCount === 0 && (
+              <> &mdash; {searchActiveLabel}</>
+            )}
+            {hasSearchText && activeFilterCount > 0 && <> {plusSearchLabel}</>}
           </>
+        ) : (
+          allVisibleLabel
         )}
-        {hasSearchText && activeFilterCount === 0 && (
-          <> &mdash; {searchActiveLabel}</>
-        )}
-        {hasSearchText && activeFilterCount > 0 && <> {plusSearchLabel}</>}
-        {!isFiltering && showWhenIdle && <> &mdash; {allVisibleLabel}</>}
       </span>
       {isFiltering && onClearAll && (
         <button

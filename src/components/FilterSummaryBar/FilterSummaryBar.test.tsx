@@ -26,7 +26,9 @@ describe('FilterSummaryBar', () => {
         onClearAll={() => {}}
       />
     );
-    expect(screen.getByRole('status')).toHaveTextContent('all records visible');
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('all records visible');
+    expect(status).not.toHaveTextContent('100');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
