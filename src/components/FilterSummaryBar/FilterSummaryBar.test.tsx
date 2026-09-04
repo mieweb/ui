@@ -40,7 +40,9 @@ describe('FilterSummaryBar', () => {
       />
     );
     const status = screen.getByRole('status');
-    expect(status).toHaveTextContent('1,204 of 8,911 records');
+    expect(status).toHaveTextContent(
+      `${(1204).toLocaleString()} of ${(8911).toLocaleString()} records`
+    );
     expect(status).toHaveTextContent('3 filters active');
   });
 
@@ -64,7 +66,9 @@ describe('FilterSummaryBar', () => {
         onClearAll={() => {}}
       />
     );
-    expect(screen.getByRole('status')).toHaveTextContent('1 of 8,911 record —');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      `1 of ${(8911).toLocaleString()} record —`
+    );
   });
 
   it('hides the clear button when onClearAll is omitted', () => {
