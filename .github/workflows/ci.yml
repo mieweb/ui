@@ -211,10 +211,12 @@ jobs:
           NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Start Storybook server
-        run: pnpm dlx http-server storybook-static --port 6006 --silent &
+        # pnpm exec uses the pinned devDependency — pnpm dlx downloads from
+        # the npm registry at run time and times out during registry outages.
+        run: pnpm exec http-server storybook-static --port 6006 --silent &
 
       - name: Wait for Storybook
-        run: pnpm dlx wait-on http://localhost:6006
+        run: pnpm exec wait-on http://localhost:6006
 
       - name: Run Storybook tests
         run: pnpm test:storybook
