@@ -10,6 +10,7 @@ import {
   DataVisNitroContext,
   DataVisNitroGrid,
   DataVisNitroSource,
+  type DataVisNitroGridProps,
 } from './DataVisNITRO';
 
 // datavis-ace is untyped JS (`Prefs` is built with a runtime `makeSubclass`
@@ -19,6 +20,33 @@ const PrefsConstructor = Prefs as unknown as new (
   moduleBindings: unknown,
   opts: Record<string, unknown>
 ) => PrefsInstance;
+
+const PREFS_STORAGE_KEY = 'mieweb-ui-storybook:datavis-prefs';
+
+// Clears saved perspectives in automated runs (test runner, visual
+// regression) so stories render deterministically, while keeping
+// localStorage persistence for normal browsing. localStorage access
+// can throw in restricted contexts, so fall back to defaults quietly.
+const clearSavedPerspectives = () => {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.webdriver) {
+      window.localStorage.removeItem(PREFS_STORAGE_KEY);
+    }
+  } catch {
+    // Storage unavailable — the story just renders its defaults.
+  }
+  return {};
+};
+
+const EMPLOYEE_COLUMNS = [
+  'id',
+  'name',
+  'email',
+  'department',
+  'status',
+  'start_date',
+  'manager',
+];
 
 const meta: Meta<typeof DataVisNitroGrid> = {
   title: 'Components/Text & Data Display/DataVis NITRO',
@@ -34,7 +62,8 @@ const meta: Meta<typeof DataVisNitroGrid> = {
     docs: {
       description: {
         component:
-          "React wrapper around the `datavis/wcdatavis-lib` package. `<DataVisNitroSource>` creates a datavis source/view pair using that library and `<DataVisNitroGrid>` renders that view through DataVis NITRO's React `DataGrid` and `TableRenderer`.",
+          'Source: [mieweb/datavis](https://github.com/mieweb/datavis) (the `@mieweb/datavis` package), built on the [mieweb/wcdatavis](https://github.com/mieweb/wcdatavis) DataVis ACE engine (`datavis-ace`).\n\n' +
+          "React wrapper around the `@mieweb/datavis` package. `<DataVisNitroSource>` creates a datavis source/view pair using that library and `<DataVisNitroGrid>` renders that view through DataVis NITRO's React `DataGrid` and `TableRenderer`.",
       },
     },
   },
@@ -52,24 +81,38 @@ export default meta;
 
 type Story = StoryObj<typeof DataVisNitroGrid>;
 
-export const Default: Story = {
-  render: () => (
-    <DataVisNitroSource type="http" url="/sample-data.json">
-      <DataVisNitroGrid
-        title="Employees"
-        columns={[
-          'id',
-          'name',
-          'email',
-          'department',
-          'status',
-          'start_date',
-          'manager',
-        ]}
-        height="420px"
-      />
-    </DataVisNitroSource>
-  ),
+type DefaultArgs = DataVisNitroGridProps & {
+  perspectives?: boolean;
+};
+
+export const Default: StoryObj<DefaultArgs> = {
+  args: {
+    perspectives: true,
+  },
+  argTypes: {
+    perspectives: {
+      control: 'boolean',
+      description:
+        'Enable the perspective variant: binds a localStorage-backed `Prefs` module so the "Main Perspective" toolbar renders. See the With Perspectives story for details.',
+    },
+  },
+  loaders: [clearSavedPerspectives],
+  render: ({ perspectives }) => {
+    const grid = {
+      title: 'Employees',
+      columns: EMPLOYEE_COLUMNS,
+      height: '420px',
+    };
+    return (
+      <DataVisNitroSource type="http" url="/sample-data.json">
+        {perspectives ? (
+          <PerspectivesGrid {...grid} />
+        ) : (
+          <DataVisNitroGrid {...grid} />
+        )}
+      </DataVisNitroSource>
+    );
+  },
 };
 
 export const WithControls: Story = {
@@ -133,16 +176,6 @@ export const MinimalMode: Story = {
     </DataVisNitroSource>
   ),
 };
-
-const EMPLOYEE_COLUMNS = [
-  'id',
-  'name',
-  'email',
-  'department',
-  'status',
-  'start_date',
-  'manager',
-];
 
 export const DetailRows: Story = {
   parameters: {
@@ -316,14 +349,12 @@ export const OzwellAssistant: Story = {
   ),
 };
 
-const PREFS_STORAGE_KEY = 'mieweb-ui-storybook:datavis-prefs';
-
 /**
  * Reads the shared view from DataVisNitroContext, binds a localStorage-backed
  * Prefs module to it, and passes the module to the grid so the perspective
  * toolbar ("Main Perspective" dropdown, save/reset/history buttons) renders.
  */
-const PerspectivesGrid = () => {
+const PerspectivesGrid = (props: DataVisNitroGridProps) => {
   const view = useContext(DataVisNitroContext);
 
   const prefs = useMemo(() => {
@@ -348,34 +379,11 @@ const PerspectivesGrid = () => {
 
   if (!prefs) return null;
 
-  return (
-    <DataVisNitroGrid
-      title="Employees"
-      columns={EMPLOYEE_COLUMNS}
-      prefs={prefs}
-      showControls
-      height="480px"
-    />
-  );
+  return <DataVisNitroGrid {...props} prefs={prefs} />;
 };
 
 export const WithPerspectives: Story = {
-  loaders: [
-    () => {
-      // Clear saved perspectives in automated runs (test runner, visual
-      // regression) so the story renders deterministically, while keeping
-      // localStorage persistence for normal browsing. localStorage access
-      // can throw in restricted contexts, so fall back to defaults quietly.
-      try {
-        if (typeof navigator !== 'undefined' && navigator.webdriver) {
-          window.localStorage.removeItem(PREFS_STORAGE_KEY);
-        }
-      } catch {
-        // Storage unavailable — the story just renders its defaults.
-      }
-      return {};
-    },
-  ],
+  loaders: [clearSavedPerspectives],
   parameters: {
     docs: {
       description: {
@@ -386,7 +394,12 @@ export const WithPerspectives: Story = {
   },
   render: () => (
     <DataVisNitroSource type="http" url="/sample-data.json">
-      <PerspectivesGrid />
+      <PerspectivesGrid
+        title="Employees"
+        columns={EMPLOYEE_COLUMNS}
+        showControls
+        height="480px"
+      />
     </DataVisNitroSource>
   ),
 };
