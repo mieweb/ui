@@ -24,6 +24,8 @@ const ozBtn =
   'bg-ozwell hover:bg-ozwell active:bg-ozwell text-ozwell-foreground hover:brightness-95 active:brightness-90';
 
 export interface VoiceSetupProps {
+  /** Isolates persisted enrollment from other users of the same browser profile. */
+  voiceprintNamespace?: string;
   /**
    * 'enroll' (default) = fresh first-time setup. 'add' = jump straight into appending a new voice/condition
    * to the existing voiceprints — what the settings menu's "Add a voice" uses, so the user doesn't have to
@@ -44,6 +46,7 @@ export interface VoiceSetupProps {
 
 /** On-device voice enrollment — tap the octopus, it pulses as you talk. Brand-aligned. */
 export function VoiceSetup({
+  voiceprintNamespace,
   mode = 'enroll',
   voiceId,
   label,
@@ -51,7 +54,12 @@ export function VoiceSetup({
   onDone,
   onCancel,
 }: VoiceSetupProps) {
-  const oz = useVoiceSetup({ startAdding: mode === 'add', voiceId, label });
+  const oz = useVoiceSetup({
+    startAdding: mode === 'add',
+    voiceId,
+    label,
+    voiceprintNamespace,
+  });
   const { phase, phrase, step, total, adding, level, ready, error } = oz;
 
   const octoScale = 1 + Math.min(0.32, level * 2.2);
