@@ -300,8 +300,11 @@ Current notes:
 | Prerelease (`next`) | `npm install @mieweb/ui@next` | Eligible pushes to `main` and prerelease tags |
 
 The [release workflow](.github/workflows/release.yml) defines the triggers and
-path exclusions. In particular, Markdown-only changes do not currently trigger
-a `main` prerelease, so an updated README reaches npm with the next release.
+path exclusions. A push changing only root-level Markdown files (such as
+`README.md`) does not trigger a `main` prerelease, so a README-only update reaches
+npm with the next release. Markdown in subdirectories, such as `lessons/`, is not
+excluded by `*.md` and can trigger a prerelease. Changes under `.github/` are also
+excluded, except for the release workflow itself.
 
 For a stable release, use GitHub Actions' **Create Stable Release** workflow and
 select the semantic version bump. It updates the package version and creates the
