@@ -224,7 +224,7 @@
     "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ] || [ ! -f packages/esheet/packages/renderer/src/index.output.css ] || [ ! -f packages/esheet/packages/builder/src/index.output.css ]; then cd packages/esheet && pnpm install --frozen-lockfile && pnpm --filter '@esheet/builder...' --filter '@esheet/renderer...' build; fi",
     "build:css": "mkdir -p dist && npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "mkdir -p dist/brands && cp src/brands/*.css dist/brands/",
-    "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
+    "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css src/styles/effects.css dist/styles/ 2>/dev/null || true",
     "copy:markdown-css": "mkdir -p dist/components/Markdown && cp src/components/Markdown/styles.css dist/components/Markdown/ 2>/dev/null || true",
     "copy:kerebron-css": "mkdir -p dist && cp src/styles/kerebron.css dist/kerebron.css",
     "typecheck": "tsc --noEmit",

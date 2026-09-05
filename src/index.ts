@@ -96,6 +96,7 @@ export * from './components/Markdown';
 export * from './components/MedicationList';
 export * from './components/MediaEditor';
 export * from './components/MediaPlayer';
+export * from './components/MegaMenu';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NotificationCenter';
@@ -194,6 +195,7 @@ export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
 export * from './components/TranscriptView';
+export * from './components/VideoCard';
 // `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
 // TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
 // type at the root barrel; import the media-schema type from the subpath

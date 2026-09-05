@@ -2,6 +2,7 @@
 @import './condensed-view.css';
 @import './datavis-dark.css';
 @import './datavis-overrides.css';
+@import './effects.css';
 @source "../../node_modules/@mieweb/datavis/dist";
 
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));

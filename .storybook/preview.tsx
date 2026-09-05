@@ -25,6 +25,7 @@ import type { BrandConfig } from '../src/brands/types';
 import { CodeLookup } from '../src/components/CodeLookup';
 import { CodeLookupProvider } from '../src/components/CodeLookup/context';
 import { isRtlLocale } from '../src/hooks/useDirection';
+import { DocsPage } from './DocsPage';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -456,7 +457,9 @@ const preview: Preview = {
     // `render`, Storybook shows the render snippet/args, not the full component source.
     // `canvas.withToolbar` gives every docs canvas (not just the primary story) the
     // zoom / "Open canvas in new tab" toolbar.
-    docs: { codePanel: true, canvas: { withToolbar: true } },
+    // `page` adds the "In production" strip driven by `parameters.meta`
+    // (see src/docs/component-meta.ts).
+    docs: { codePanel: true, canvas: { withToolbar: true }, page: DocsPage },
     layout: 'padded',
     options: {
       storySort: {

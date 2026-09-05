@@ -46,6 +46,7 @@ export default defineConfig({
     'components/Markdown/index': 'src/components/Markdown/index.ts',
     'components/MediaEditor/index': 'src/components/MediaEditor/index.ts',
     'components/MediaPlayer/index': 'src/components/MediaPlayer/index.ts',
+    'components/MegaMenu/index': 'src/components/MegaMenu/index.ts',
     'components/Modal/index': 'src/components/Modal/index.ts',
     'components/Pagination/index': 'src/components/Pagination/index.ts',
     'components/PhoneInput/index': 'src/components/PhoneInput/index.ts',
@@ -79,6 +80,7 @@ export default defineConfig({
     'components/Toggle/index': 'src/components/Toggle/index.ts',
     'components/Tooltip/index': 'src/components/Tooltip/index.ts',
     'components/TranscriptView/index': 'src/components/TranscriptView/index.ts',
+    'components/VideoCard/index': 'src/components/VideoCard/index.ts',
     'components/VisuallyHidden/index': 'src/components/VisuallyHidden/index.ts',
     // Brand system entries for tree-shaking
     'brands/index': 'src/brands/index.ts',

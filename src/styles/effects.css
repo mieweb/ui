@@ -1,0 +1,128 @@
+/**
+ * @mieweb/ui — Motion effects
+ *
+ * Opt-in hover/focus treatments that need pseudo-elements, masks or
+ * registered custom properties (things Tailwind utilities can't express).
+ * Ported from the Enterprise Health frontdoor `.btn--*` system and
+ * re-tokenised on `--mieweb-*` so every brand gets them for free.
+ *
+ * Consumed by <Button effect="sheen" | "orbit"> and reusable on any element.
+ */
+
+/* ── Sheen: a soft skewed light band sweeps across the face on hover ──── */
+.mie-fx-sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.mie-fx-sheen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -104%;
+  width: 88%;
+  height: 100%;
+  transform: skewX(-18deg);
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in srgb, #fff 42%, transparent) 50%,
+    transparent 100%
+  );
+  transition: left 0.8s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+/* Light faces (secondary/ghost/outline/link) get a brand-tinted band —
+   a white sheen on a pale surface is invisible. */
+.mie-fx-sheen:is(
+    [data-variant='secondary'],
+    [data-variant='ghost'],
+    [data-variant='outline'],
+    [data-variant='link']
+  )::before {
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--mieweb-primary-500) 24%, transparent) 50%,
+    transparent 100%
+  );
+}
+.mie-fx-sheen:hover::before,
+.mie-fx-sheen:focus-visible::before {
+  left: 120%;
+}
+
+/* ── Orbit: the border gives way to a brand ring with one accent glint that
+      orbits the element — an animated conic-gradient masked to the ring ─── */
+@property --mie-orbit {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.mie-fx-orbit {
+  position: relative;
+  isolation: isolate;
+}
+.mie-fx-orbit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--mie-orbit-width, 2px);
+  background: conic-gradient(
+    from var(--mie-orbit),
+    var(--mieweb-primary-600) 0deg,
+    var(--mieweb-primary-600) 298deg,
+    var(--mieweb-accent, var(--mieweb-primary-300)) 330deg,
+    var(--mieweb-primary-400) 346deg,
+    var(--mieweb-primary-600) 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.mie-fx-orbit:hover,
+.mie-fx-orbit:focus-visible {
+  border-color: transparent;
+}
+.mie-fx-orbit:hover::after,
+.mie-fx-orbit:focus-visible::after {
+  opacity: 1;
+  animation: mie-orbit-spin 2.4s linear infinite;
+}
+@keyframes mie-orbit-spin {
+  to {
+    --mie-orbit: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mie-fx-orbit:hover::after,
+  .mie-fx-orbit:focus-visible::after {
+    animation: none;
+  }
+}
+
+/* ── Spin: slow continuous rotation for orbital rings (OrbitRing) ──────── */
+@keyframes mie-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Fade-in: mount transition for swapped panels (MegaMenu featured) ──── */
+@keyframes mie-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
