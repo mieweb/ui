@@ -1,0 +1,264 @@
+# @mieweb/ui Documentation Revamp Plan
+
+> Plan derived from the [component documentation audit](ComponentDocsAudit.md) (2026-09-05).
+> Sections 1–5 of that file hold the evidence and grades this plan refers to as §1–§5.
+> Tick boxes as work lands; re-score in the audit's grade table when a family is done.
+
+## Catalog size: is 190 components too many?
+
+The count is not the problem by itself; the **mix** and the **navigation** are.
+
+**What the 190 actually are** (by Storybook `title` prefix, measured from story files):
+
+| Tier                                       | Count | Nature                                                                                                |
+| ------------------------------------------ | ----- | ----------------------------------------------------------------------------------------------------- |
+| Foundations                                | 5     | Colors, Icons, Text, ThemeProvider, VisuallyHidden                                                    |
+| Components/\*                              | ~125  | Design-system primitives and generic compositions                                                     |
+| Healthcare/\*                              | 9     | Clinical domain compositions (ProblemList, MedicationList, CodeLookup, …)                             |
+| Product/Feature Modules + Product/Provider | 56    | Application screens for one product line (Employer\*, Invoice\*, Provider\*, Service\*, Checkr, HRIS) |
+| Deprecated                                 | 2     | AGGrid                                                                                                |
+
+Roughly a third of the catalog is **application UI living in a shared library**. Those pages are
+also where 90 % of the F grades sit, because they cannot honestly answer "why does this belong in
+the library?" — they exist because one app needed them. Documenting them to an A standard would
+mean inventing rationale; the better fix is structural.
+
+**The 10 × 3 rule applied to the current Storybook sidebar.** Level 1 has 5 groups (fine). Level 2
+already violates the rule badly: `Components/Forms & Inputs` has **48** children,
+`Product/Feature Modules` 31, `Product/Provider` 25. There are also near-duplicate categories that
+split the same concept three ways — `Overlays & Layering` (9) / `Overlays & Popups` (3) /
+`Overlays` (1); `Layout & Structure` (14) / `Layout` (3); `Text & Data Display` (13) /
+`Data Display` (4); `Status Indicators` / `Feedback` / `Loaders`. A reader cannot compare Modal,
+Sheet and DockablePanel when they are filed in three different drawers.
+
+**Assessment of the rule for this library.** ≤10 per list and ≤3 levels is achievable for 190
+leaves (3 levels × 10 gives room for 1 000), but only if the Product tier is separated: 190 leaves
+need ≥19 level-2 groups, which is impossible under a single `Components` node while keeping level 1
+small. Practically:
+
+- Treat **≤10** as a hard rule for the sidebar and for every "family map" table in docs, and as a
+  soft rule (≤12) for prop tables.
+- Treat **≤3 levels** as hard for navigation (`Tier / Family / Component`); component _variants_
+  should be stories on the component page, not a fourth level.
+- When a family exceeds 10, that is the signal to either split by user task (e.g. Forms → Text
+  inputs / Choice inputs / Date & time / Composite forms) or to question whether some members are
+  really the same component with a prop.
+
+---
+
+## Plan to bring the catalog to A
+
+Definition of done per component: ≥2 in every rubric dimension, ≥16 total, no misleading
+guidance, and every relationship link verified and reciprocal. Work is organised so that Phase 0
+shrinks the surface area **before** anyone writes prose, and each later phase is a family (≤10
+components) that can be a single PR with a single reviewer.
+
+### Storybook as the enforcement mechanism
+
+Storybook can carry the taxonomy and the catalog metadata, and can be made to _fail the build_ when
+either drifts. Today it does neither: `title` is free text (hence the duplicate families in the catalog-size section above),
+and the sort order in [.storybook/preview.tsx](.storybook/preview.tsx#L462-L486) still lists ghost
+categories — `Inputs & Controls`, `Authentication & Permissions`, `Commerce & Payments`,
+`Media & Device`, `Provider Directory`, `Directory`, `Search`, `Examples` — that no story uses. The
+taxonomy has already been redesigned at least once and the stories never followed.
+
+| Need                                    | Storybook feature                                                                                                                                                                                              | Notes                                                                                                                                                                    |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| One taxonomy nobody can bypass          | **Autotitle**: omit `title` and Storybook derives it from the file path under the `stories` glob (`{ directory, titlePrefix, files }` in `main.ts`).                                                           | Folder layout becomes the sidebar: `src/components/<Family>/<Component>/`. Requires a one-time folder move; after that a new family is a new folder, reviewed in the PR. |
+| Stable identity through renames         | CSF `id` on the default export overrides the auto-generated story id; `?path=/docs/<id>--docs` keeps working after a title or folder change.                                                                   | Directly satisfies #421 "stable identifiers, not names alone". Adopt before the folder move so no existing link breaks.                                                  |
+| Facets (scope, maturity, owner)         | **Tags** on `Meta` (`tags: ['autodocs', 'scope:general', 'maturity:stable']`). Storybook 8.4+ filters the sidebar by tag (`sidebar.filters` in `manager.ts`; built-in tag filter in the toolbar on 9/10).      | Tags are exported in `index.json`, so they are machine-readable without loading the story.                                                                               |
+| Rich catalog fields                     | `parameters.catalog = { purpose, scope, maturity, owners, relationships: [{ type, target, why }], entry, peers }` on `Meta`.                                                                                   | Parameters are not in `index.json`; extract with `@storybook/csf-tools` (`loadCsf`) in a script. That script _is_ the #421 build-time inventory manifest.                |
+| One comparison table per family         | A `Family.mdx` with `<Meta title="Components/Overlays" />` becomes the family's landing page; member pages link to it, it links to each member (`<Meta of={…}>` / `?path=` with stable ids).                   | Fixes "discoverable from both pages" at family granularity instead of N² pairwise links.                                                                                 |
+| Status visible without opening the page | `sidebar.renderLabel` in `manager.ts` can append a badge from tags (Deprecated, Beta, Product-specific).                                                                                                       | Replaces the hand-written AGGrid banner with a generic mechanism that #421's lifecycle table needs anyway.                                                               |
+| Order and depth                         | `parameters.options.storySort` with the tier order only; alphabetical within a family. Prune the ghost entries.                                                                                                | Combined with autotitle, depth is structurally capped at `Tier / Family / Component`.                                                                                    |
+| Cross-repository participation (#421)   | **Storybook Composition** (`refs` in `main.ts`) mounts another repo's published Storybook in this sidebar.                                                                                                     | Lets a product team keep product-specific components in their own repo and still appear in one catalog — the preferred Phase 0 option for the Product tier.              |
+| Regression guard                        | CI script over `index.json` + csf-tools: fail on missing `description.component`, unknown family, family > 10, missing `scope:`/`maturity:` tag, or a one-way `alternative to` / `composes with` relationship. | Cheap; runs against the same build the visual tests already use.                                                                                                         |
+
+### Harmonisation with #421 (Catalog Model)
+
+[mieweb/ui#421](https://github.com/mieweb/ui/issues/421) says durable rationale stays in the
+owning repository and the catalog references it. For this repo that means **the Storybook page is
+the record of truth and the catalog manifest is derived from it**, so the two efforts should share
+one schema rather than run in parallel. Mapping:
+
+| #421 Catalog Model field                                                                         | Where it lives in this repo                                                                                          | Audit rubric dimension |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| Stable identifier                                                                                | CSF `id`                                                                                                             | —                      |
+| Reuse scope: general-purpose / domain-specific / product-specific / application-local            | `tags: ['scope:…']` → drives the sidebar tier (`Components`, `Healthcare`, `Apps/<product>`)                         | Purpose (why here)     |
+| Lifecycle: experimental / alpha / beta / stable / deprecated / retired                           | `tags: ['maturity:…']` → sidebar badge + page banner                                                                 | Limitations            |
+| Purpose, selection guidance, limitations                                                         | `description.component` written to the six-heading template                                                          | P, S, L                |
+| Relationships: `alternative to`, `composes with`, `supersedes`, `contains`, `uses`, `depends on` | `parameters.catalog.relationships[]` with a one-line `why`; rendered into the page and checked for reciprocity in CI | A, R                   |
+| Composition examples                                                                             | Stories with story-level descriptions                                                                                | C                      |
+| Documentation / demo links                                                                       | Storybook URL by stable id                                                                                           | R                      |
+| Maintainers, lifecycle decisions                                                                 | `parameters.catalog.owners`; `MAINTAINERS.md` for internals                                                          | —                      |
+| Package / artifact identity, entry point, peers                                                  | `parameters.catalog.entry` (`@mieweb/ui`, `/datavis`, `/esheet`, `/kerebron`, `/q`) and `peers`                      | Limitations            |
+| Approved usage references                                                                        | Out of scope for this repo; supplied by consuming apps' build manifests (#421 evidence source 1)                     | —                      |
+
+Two points from #421 change how the audit findings should be read:
+
+- **Product and application are deployment contexts, not a measure of reusability.** #421 explicitly
+  says a useful local component does not have to become a shared primitive. So the 56 Product pages
+  are not a documentation failure to be fixed by prose; they are mis-scoped entries that need a
+  `scope:product-specific` classification and, ideally, a home in the owning product's repository
+  mounted via Composition. The A target applies to `scope:general-purpose` and `scope:domain-specific`.
+- **Maturity is per artifact version, not inferred from npm tags or deprecation banners.** The
+  AGGrid banner, the YChart "not exported" gap and the `SpeakerVerify` "DEV DIAGNOSTIC" label are all
+  the same missing field. One `maturity:` tag replaces three ad-hoc conventions.
+
+### Phase 0 — Organise and reduce (no documentation prose yet)
+
+Goal: a catalog whose shape can be held in one head, whose taxonomy is enforced by the build, and
+whose metadata is the seed of the #421 manifest.
+
+- [ ] **0.1 Adopt the metadata contract first.** Agree the `tags` vocabulary (`scope:*`, `maturity:*`),
+      the `parameters.catalog` shape, and stable `id` naming (`<family>-<component>`) with the #421
+      owners so this repo becomes #421's reference implementation rather than a second schema. Write it
+      into CONTRIBUTING's autodocs section together with the six-heading description template
+      (_What it's for · Use it when / Don't use it when · Related (one-line reason each) · Example ·
+      Limitations · Install / entry point_).
+- [ ] **0.2 Classify every entry by reuse scope** (one PR, tags only, no prose). Expected split from the catalog-size section above:
+      ~125 general-purpose, ~9 domain-specific, ~56 product-specific, plus YChart / Dashboard as
+      `application-local` demos. This is the Product-tier decision from the previous draft, made with
+      #421 vocabulary.
+- [ ] **0.3 Choose the home for `scope:product-specific`**, in order of preference (record the decision here):
+  - [ ] Move to the owning product's repository and mount its Storybook via Composition (`refs`).
+  - [ ] Keep here under an `Apps/<product>` tier with a rendered ownership banner and a B target.
+  - [ ] Retire entries no consumer imports — after the #421 build-time inventory confirms it.
+- [ ] **0.4 Enforce `Tier / Family / Component`, ≤10 per family.**
+  - [ ] Set stable `id`s on every `Meta` (before any move, so no link breaks).
+  - [ ] Switch to autotitle from folder layout (`src/components/<Family>/<Component>/`). Proposed
+        families for `Components`: Actions · Text inputs · Choice inputs · Date & time · Composite forms
+        · Data display · Feedback & status · Overlays · Navigation · Layout · Media · Editors · Chat.
+  - [ ] Merge the duplicate categories in the catalog-size section above; delete the ghost entries in `storySort`.
+- [ ] **0.5 Add the CI guard** (table above) so the new shape cannot drift: missing description, unknown
+      family, family > 10, missing scope/maturity, one-way relationship. Same script emits the #421
+      manifest.
+- [ ] **0.6 Fix the public-API hygiene items from §3.**
+  - [ ] `RowActionToolbar`: add a story or remove from the barrel.
+  - [ ] YChart: `maturity:` tag and "not exported" banner.
+  - [ ] `Dashboard` folder cleanup (`.bak/.backup/.broken`).
+  - [ ] Add `CustomizableDashboard` and `SuperChat` to the MAINTAINERS table.
+  - [ ] Document the `kerebron` and `q` entries in CONTRIBUTING.
+- [ ] **0.7 Reconcile the four governing documents** (§1 conflicts).
+  - [ ] One Table policy sentence reused verbatim in CONTRIBUTING, agent rules, component-policy and
+        the Table/NITRO pages.
+  - [ ] One component anatomy (drop the SCSS variant or make CONTRIBUTING match).
+  - [ ] One PR rationale checklist.
+  - [ ] Component counts generated from `index.json`, not typed.
+
+Exit criteria:
+
+- [ ] `index.json` shows ≤10 items at every level and no duplicate families.
+- [ ] Every entry has `scope:` and `maturity:` tags and a stable `id`.
+- [ ] CI fails on a new undocumented or unclassified story.
+- [ ] The manifest script emits an inventory the #421 pilot can ingest.
+- [ ] Policy sentence identical in all four documents.
+
+### Family checklist (Phases 1–6)
+
+A family is checked off when every member has the six-heading description, the family landing
+page exists and links both ways, every `alternative to` / `composes with` relationship is
+reciprocal, and each member scores ≥16 (≥13 for `scope:product-specific`). Re-score in §2 when
+ticking.
+
+### Phase 1 — Policy-bearing families (unblocks agent rules)
+
+- [ ] **Grids** — DataVis NITRO, DataVisNitroGraph, Table, Pagination, AGGrid banner, Sparkline.
+      _Why first:_ Rule 1; today the default grid page is a D.
+- [ ] **Actions** — Button, ButtonGroup, CopyButton, QuickAction, RowActionToolbar, Toggle.
+      _Why first:_ Rule 2 is invisible on the Button page.
+- [ ] **Feedback** — Alert, AlertDialog, Toast, NotificationCenter, Spinner, Skeleton, LoadingPage,
+      Progress, ErrorPage. _Why first:_ Rule 8; Toast a11y claim undocumented.
+- [ ] **Overlays** — Modal, Sheet, FloatingWindow, DockablePanel, Sidebar, Tooltip, GlossaryTooltip,
+      SourceTip. _Why first:_ Rule 4 (Modal slots) and the most-asked "which overlay" question.
+
+Each family PR ships: one shared comparison table (linked from every member), reciprocal links,
+and the template filled on each page.
+
+### Phase 2 — Core inputs
+
+- [ ] **Text inputs** — Input, Textarea, Label, PhoneInput, PhoneInputGroup, WebsiteInput, Address,
+      AddressForm.
+- [ ] **Choice inputs** — Checkbox, Radio, Switch, Select, Dropdown, Autocomplete, PillSelect,
+      CommandPalette, CountryDropdown, CountryCodeDropdown.
+- [ ] **Date & time** — DateInput, DateRangePicker, SchedulePicker, ScheduleCalendar, BusinessHours,
+      BusinessHoursEditor.
+- [ ] **Composite forms** — AdditionalFields, CSVColumnMapper, PermissionsEditor, LanguageSelector,
+      Slider, ESheet Builder/Renderer.
+
+Rule 11 (dates/phones/URLs) and the Select / Dropdown / Autocomplete confusion are resolved here.
+
+### Phase 3 — Display, navigation and layout
+
+- [ ] **Data display** — Card, Badge, CountBadge, ServiceBadge, FreshnessBadge, StripeBadge, Avatar,
+      ClampedText, Text, Timeline.
+- [ ] **Navigation** — Tabs, Breadcrumb, TableOfContents, SectionSpyNav, ReadingProgressBar,
+      StepIndicator, OnboardingWizard.
+- [ ] **Layout** — AppHeader, SiteHeader, SiteFooter, PageHeader, Accordion, Collapsible, ScrollArea,
+      Separator, ProductVersion.
+- [ ] **Dashboards** — DashboardWidget, CustomizableDashboard, QuickLinksCard, ReportDashboard
+      (+ Dashboard demo labelled).
+
+### Phase 4 — Media, editors, chat, files
+
+- [ ] **Media** — AudioPlayer, MediaPlayer, MediaEditor, TranscriptView, AudioRecorder, RecordButton.
+- [ ] **Editors** — RichEditor, RichTextEditor, Markdown, Textarea (cross-link), Q.
+- [ ] **Chat** — AIChat, AIChat (Voice), AIMessage, MCPToolCall, OzwellChat, SuperChat ×3, Messaging
+      module.
+- [ ] **Voice** — HeyOzwell, HandsFreeChat, VisitScribe, VoiceSetup, VoiceManager, WakeWord,
+      SpeakerVerify (dev-only banner).
+- [ ] **Files** — DropzoneOverlay, FileManager, DocumentScanner.
+
+Install / entry-point blocks (kerebron peers, `@mieweb/ui/datavis`, model hosting) land here.
+
+### Phase 5 — Healthcare
+
+- [ ] **Clinical lists** — ProblemList, PresentingProblems, ConditionEditor, MedicationList,
+      AllergyList, CodeLookup.
+- [ ] **Encounter & orders** — OrderEditor, Assessment, HealthSurveillance, CaseManagementHeader,
+      PatientHeader, WebChartReportViewer.
+
+Already the strongest tier; work is mostly reciprocal links and pulling README selection guidance
+into stories.
+
+### Phase 6 — Product-specific tier (per the Phase 0.3 decision)
+
+If kept in the library, one PR per family adding the "application-owned responsibilities" block
+and a family map (target B unless 0.3 says otherwise). If moved, the work per family is mounting
+the product Storybook via Composition and confirming its entries carry the same `scope:` /
+`maturity:` tags.
+
+- [ ] **Orders** — OrderCard, OrderList, OrderConfirmationWizard, OrderLookupForm, OrderSidebar.
+- [ ] **Employers & employees** — EmployerContactCard, EmployerList, EmployerPricingCard,
+      EmployerServiceModal, EmployerView, EmployeeForm, EmployeeProfile.
+- [ ] **Billing** — InvoiceList, InvoiceView, InvoicePaymentPage, PaymentMethod, PaymentHistoryTable,
+      PendingClaimsTable, CreateInvoiceModal.
+- [ ] **Providers** — ProviderCard, ProviderDetailHeader, ProviderOverview, ProviderSearchBar,
+      ProviderSearchFilters, ProviderSelector, ProviderSettings, ProviderUsersTable, ClaimProviderForm.
+- [ ] **Services** — ServiceAccordion, ServiceCard, ServiceGrid, ServicePicker, ServiceGeneralSettings,
+      ServicePricingManager, ServiceShippingSettings, SetupServiceModal, RecurringServiceCard.
+- [ ] **Users, auth & integrations** — AuthDialog, BookingDialog, HRISProviderSelector,
+      CheckrIntegration, SSOConfigForm, InviteUserModal, EditUserRoleModal, AddContactModal,
+      CreateReferralModal, RejectionModal.
+- [ ] **Other** — InventoryManager, ReportDashboard, HelpSupportPanel, ResultsEntryForm,
+      FilterSummaryBar, CookieConsent, ConnectionStatus, CollabStatus.
+
+### Tracking
+
+- [ ] Re-audit after Phase 0 (structure only: counts, tags, ids, CI green).
+- [ ] Re-audit after Phase 1
+- [ ] Re-audit after Phase 2
+- [ ] Re-audit after Phase 3
+- [ ] Re-audit after Phase 4
+- [ ] Re-audit after Phase 5
+- [ ] Re-audit after Phase 6
+
+Re-audits use the same rubric, with scores recorded in §2 so the trend is auditable.
+
+Once Phase 0 lands, the manifest script gives the counts for free (entries per family, missing
+fields, one-way relationships) and the audit reduces to scoring prose quality. Phase 0 exit
+criteria, the CI guard, and the per-family PR cadence are the three controls that keep the catalog
+from sliding back.
+
+**Continuation checkpoint:** all 186 gradable inventory entries are accounted for; the only flagged
+re-check is `Accordion` (reviewer variance 8–11).
