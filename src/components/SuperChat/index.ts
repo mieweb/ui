@@ -42,6 +42,7 @@ export type {
   SuperChatMessage,
   SuperChatItemType,
   SuperChatChannel,
+  SuperChatCopyFormat,
   SuperChatRef,
   SuperChatLinkBuilder,
   ComposerAttachment,

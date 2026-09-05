@@ -31,6 +31,7 @@ import type {
   ComposerAttachment,
   Participant,
   SuperChatConversation,
+  SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatRef,
   SuperChatRenderPlugin,
@@ -74,6 +75,13 @@ export interface SuperChatProps {
   virtualized?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
+  /**
+   * One-click format for each message's default copy action (footer copy
+   * button / top-level "Copy message" menu item). All formats stay reachable
+   * per message via the overflow menu's "Copy as" submenu. Defaults to
+   * `'rich'`.
+   */
+  defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */
   className?: string;
 
@@ -121,6 +129,7 @@ export function SuperChat({
   order = 'asc',
   virtualized = false,
   linkBuilder,
+  defaultCopyFormat,
   className,
   onMessageSent,
   onMessageEdited,
@@ -291,6 +300,7 @@ export function SuperChat({
           onReferenceClick={onReferenceClick}
           editable={editable}
           onMessageEdited={handleMessageEdited}
+          defaultCopyFormat={defaultCopyFormat}
           order={order}
           conversationId={conversation.id}
           containerProps={{
@@ -329,6 +339,7 @@ export function SuperChat({
               onReferenceClick={onReferenceClick}
               editable={editable}
               onMessageEdited={handleMessageEdited}
+              defaultCopyFormat={defaultCopyFormat}
             />
           ))}
         </div>

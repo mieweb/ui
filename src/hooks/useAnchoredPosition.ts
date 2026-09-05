@@ -8,7 +8,15 @@ export type AnchoredPlacement =
   | 'bottom'
   | 'top-start'
   | 'top-end'
-  | 'top';
+  | 'top'
+  | 'right-start'
+  | 'right-end'
+  | 'right'
+  | 'left-start'
+  | 'left-end'
+  | 'left';
+
+export type AnchoredSide = 'top' | 'bottom' | 'left' | 'right';
 
 export interface UseAnchoredPositionOptions {
   /** Whether the floating element is currently shown */
@@ -45,8 +53,8 @@ export interface UseAnchoredPositionReturn<
   floatingRef: React.RefObject<TFloating | null>;
   /** Fixed-position style for the floating element — spread onto it */
   style: React.CSSProperties;
-  /** Vertical side in use after flipping ('top' or 'bottom') */
-  actualSide: 'top' | 'bottom';
+  /** Side of the anchor in use after flipping */
+  actualSide: AnchoredSide;
   /** Recompute the position (e.g. after async content loads) */
   update: () => void;
 }
@@ -107,8 +115,14 @@ export function useAnchoredPosition<
   const anchorRef = React.useRef<TAnchor | null>(null);
   const floatingRef = React.useRef<TFloating | null>(null);
   const [style, setStyle] = React.useState<React.CSSProperties>(HIDDEN_STYLE);
-  const [actualSide, setActualSide] = React.useState<'top' | 'bottom'>(
-    placement.startsWith('top') ? 'top' : 'bottom'
+  const [actualSide, setActualSide] = React.useState<AnchoredSide>(
+    placement.startsWith('top')
+      ? 'top'
+      : placement.startsWith('left')
+        ? 'left'
+        : placement.startsWith('right')
+          ? 'right'
+          : 'bottom'
   );
 
   const update = React.useCallback(() => {
@@ -150,6 +164,61 @@ export function useAnchoredPosition<
       : Math.max(floating.offsetWidth, matchMinWidth ? rect.width : 0);
     const availableWidth = Math.max(rightLimit - leftLimit, 0);
     const positionedWidth = Math.min(floatingWidth, availableWidth);
+
+    // --- Horizontal-axis placements (left/right flyouts, e.g. submenus) -----
+    // The floating element sits beside the anchor: flip horizontally when the
+    // preferred side is cramped, align vertically (-start = top edges,
+    // -end = bottom edges, bare = centered), and clamp to the boundary.
+    if (placement.startsWith('left') || placement.startsWith('right')) {
+      const contentWidth = floating.offsetWidth;
+      const spaceRight = rightLimit - rect.right - offset;
+      const spaceLeft = rect.left - leftLimit - offset;
+      const preferLeft = placement.startsWith('left');
+      let hSide: 'left' | 'right' = preferLeft ? 'left' : 'right';
+      if (allowFlip && preferLeft) {
+        hSide =
+          spaceLeft < contentWidth && spaceRight > spaceLeft ? 'right' : 'left';
+      } else if (allowFlip) {
+        hSide =
+          spaceRight < contentWidth && spaceLeft > spaceRight
+            ? 'left'
+            : 'right';
+      }
+      const sideWidth = Math.max(hSide === 'left' ? spaceLeft : spaceRight, 0);
+
+      const boundaryHeight = Math.max(bottomLimit - topLimit, 0);
+      const positionedHeight = Math.min(contentHeight, boundaryHeight);
+      const alignV = placement.endsWith('-start')
+        ? 'top'
+        : placement.endsWith('-end')
+          ? 'bottom'
+          : 'center';
+      let top =
+        alignV === 'top'
+          ? rect.top
+          : alignV === 'bottom'
+            ? rect.bottom - positionedHeight
+            : rect.top + rect.height / 2 - positionedHeight / 2;
+      top = Math.min(
+        Math.max(top, topLimit),
+        Math.max(bottomLimit - positionedHeight, topLimit)
+      );
+
+      setActualSide(hSide);
+      setStyle({
+        position: 'fixed',
+        top,
+        // Anchor the edge nearest the trigger so the flyout grows away from it.
+        ...(hSide === 'left'
+          ? { right: viewportWidth - rect.left + offset }
+          : { left: rect.right + offset }),
+        maxWidth: sideWidth,
+        maxHeight: Math.min(boundaryHeight, maxHeight ?? Infinity),
+        zIndex: 9999,
+        transition: 'none',
+      });
+      return;
+    }
 
     // --- Vertical: preferred side, flip when out of space -------------------
     const spaceBelow = bottomLimit - rect.bottom - offset;

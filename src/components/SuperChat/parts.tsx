@@ -11,12 +11,13 @@ import { cva } from 'class-variance-authority';
 import {
   Check as CheckIcon,
   Clipboard as ClipboardIcon,
+  Ellipsis as EllipsisIcon,
   Pencil as PencilIcon,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
-import { Dropdown, DropdownItem } from '../Dropdown';
+import { Dropdown, DropdownItem, DropdownSubmenu } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
 import { SparklesIcon } from '../AI/icons';
@@ -26,6 +27,7 @@ import type {
   ComposerAttachment,
   Participant,
   SuperChatConversation,
+  SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
@@ -295,26 +297,68 @@ export function filesToComposerAttachments(
   );
 }
 
-interface CopyMenuProps {
-  /** Aligns the popover to the outer margin (right for self, left otherwise). */
-  isSelf: boolean;
+// ============================================================================
+// Message actions (footer bar + sticky overflow menu)
+// ============================================================================
+
+/**
+ * Reveal-on-hover/focus for message action affordances. Hover doesn't exist on
+ * touch devices, so coarse pointers always show the actions.
+ */
+const actionRevealClass =
+  'opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 [@media(pointer:coarse)]:opacity-100';
+
+const actionButtonClass =
+  'rounded p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200';
+
+interface MessageActionItem {
+  id: string;
+  label: string;
+  /** Secondary line shown under the label in the overflow menu. */
+  description?: string;
+  onSelect: () => void;
+}
+
+/**
+ * One per-message action, rendered twice from the same definition: as an icon
+ * button in the footer bar and as an item in the sticky overflow (⋯) menu.
+ */
+interface MessageAction {
+  id: string;
+  /** Accessible name (footer button) and menu label. */
+  label: string;
+  icon: React.ReactNode;
+  /** Default behavior (footer click / top-level menu item). */
+  onSelect: () => void;
+  /** Explicit variants, rendered as a flyout submenu in the overflow menu. */
+  submenu?: { label: string; items: MessageActionItem[] };
+}
+
+interface UseMessageCopyOptions {
   /** Markdown source for this message (plain-text / Markdown copy). */
   markdown: string;
   /** Read the rendered bubble HTML at copy time (rich-text copy). */
   getHtml: () => string;
   /** Read the rendered bubble plain text at copy time. */
   getText: () => string;
+  /** One-click format for the default copy action. */
+  defaultFormat: SuperChatCopyFormat;
 }
 
 /**
- * Per-message copy control. The primary **Copy** writes *both* a rich-text
+ * Per-message clipboard writes. The **rich** format writes *both* a rich-text
  * (`text/html`) and a Markdown (`text/plain`) representation in a single
  * clipboard write, so the paste target decides: rich editors get formatting,
- * plain editors get Markdown. Explicit "as Markdown" / "as plain text" options
- * are also offered.
+ * plain editors get Markdown. Explicit "as Markdown" / "as plain text"
+ * variants are also exposed, and `copyDefault` honors the host-configured
+ * {@link SuperChatCopyFormat}.
  */
-function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
-  const [open, setOpen] = React.useState(false);
+function useMessageCopy({
+  markdown,
+  getHtml,
+  getText,
+  defaultFormat,
+}: UseMessageCopyOptions) {
   const [copied, setCopied] = React.useState(false);
   const copiedTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
@@ -361,25 +405,193 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
   };
 
   const run = (fn: () => Promise<void>) => {
-    setOpen(false);
     // Only flash "Copied" when the write actually succeeds; swallow failures
     // (insecure context / denied permission) instead of leaking an unhandled
     // rejection or showing a false success.
     void fn().then(flash, () => {});
   };
 
+  const copyRich = () => run(writeBoth);
+  const copyMarkdown = () => run(() => writeText(markdown || getText()));
+  const copyPlain = () => run(() => writeText(getText()));
+  const copyDefault =
+    defaultFormat === 'markdown'
+      ? copyMarkdown
+      : defaultFormat === 'plain'
+        ? copyPlain
+        : copyRich;
+
+  return { copied, copyDefault, copyRich, copyMarkdown, copyPlain };
+}
+
+interface MessageActionsBarProps {
+  actions: MessageAction[];
+  isSelf: boolean;
+}
+
+/** A submenu item as a Dropdown row, with an optional secondary line. */
+function ActionMenuItem({
+  item,
+  onSelect,
+}: {
+  item: MessageActionItem;
+  onSelect: (fn: () => void) => void;
+}) {
+  return (
+    <DropdownItem onClick={() => onSelect(item.onSelect)}>
+      {item.description ? (
+        <span className="flex flex-col items-start">
+          <span>{item.label}</span>
+          <span className="text-[10px] font-normal text-neutral-400">
+            {item.description}
+          </span>
+        </span>
+      ) : (
+        item.label
+      )}
+    </DropdownItem>
+  );
+}
+
+/**
+ * One footer-bar affordance. Plain actions run their default on click; actions
+ * with variants (e.g. copy formats) open a small menu of those variants, like
+ * the original per-message copy menu. Ctrl/Cmd-click skips the menu and runs
+ * the action's default (e.g. the host-configured {@link SuperChatCopyFormat}).
+ */
+function FooterActionButton({
+  action,
+  isSelf,
+}: {
+  action: MessageAction;
+  isSelf: boolean;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  // Capture-phase so it runs before the Dropdown's trigger onClick: a
+  // modifier click fires the default action instead of opening the menu.
+  const onClickCapture = action.submenu
+    ? (e: React.MouseEvent) => {
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          action.onSelect();
+        }
+      }
+    : undefined;
+
+  const button = (
+    <button
+      type="button"
+      data-slot={`superchat-action-${action.id}`}
+      aria-label={action.label}
+      title={
+        action.submenu
+          ? `${action.label} (\u2318/Ctrl-click: default format)`
+          : action.label
+      }
+      onClick={action.submenu ? undefined : action.onSelect}
+      onClickCapture={onClickCapture}
+      className={actionButtonClass}
+    >
+      {action.icon}
+    </button>
+  );
+
+  if (!action.submenu) return button;
+
+  return (
+    <Dropdown
+      open={open}
+      onOpenChange={setOpen}
+      placement={isSelf ? 'top-end' : 'top-start'}
+      trigger={button}
+    >
+      {action.submenu.items.map((item) => (
+        <ActionMenuItem
+          key={item.id}
+          item={item}
+          onSelect={(fn) => {
+            setOpen(false);
+            fn();
+          }}
+        />
+      ))}
+    </Dropdown>
+  );
+}
+
+/**
+ * The hover-revealed row of action icon buttons under a message bubble. Each
+ * button runs its action's default behavior; explicit variants live in the
+ * sticky overflow menu ({@link MessageOverflowMenu}).
+ */
+const MessageActionsBar = React.forwardRef<
+  HTMLDivElement,
+  MessageActionsBarProps
+>(function MessageActionsBar({ actions, isSelf }, ref) {
   return (
     <div
-      // Self-align to the bottom of the (possibly tall) message row and stick to
-      // the viewport bottom: on long messages the control follows the scroll and
-      // settles at the message's end once it is fully in view. Raise the whole
-      // (sticky) stacking context above the sibling bubble while open so the
-      // menu sits over rich content like tables.
+      ref={ref}
+      data-slot="superchat-message-actions"
       className={cn(
-        'sticky bottom-2 shrink-0 self-end',
+        'flex items-center gap-0.5',
+        isSelf && 'justify-end',
+        actionRevealClass
+      )}
+    >
+      {actions.map((action) => (
+        <FooterActionButton key={action.id} action={action} isSelf={isSelf} />
+      ))}
+    </div>
+  );
+});
+
+interface MessageOverflowMenuProps {
+  /** Aligns the popover to the outer margin (right for self, left otherwise). */
+  isSelf: boolean;
+  actions: MessageAction[];
+  /**
+   * Whether the footer action bar is currently in view. While it is, the
+   * overflow trigger hides on fine pointers (the footer already offers the
+   * actions); coarse pointers always show both.
+   */
+  footerVisible: boolean;
+}
+
+/**
+ * The sticky overflow (⋯) control beside the bubble. On long messages it
+ * follows the scroll (sticky within the thread) so actions stay reachable, and
+ * hands off to the footer bar once the message end scrolls into view.
+ */
+function MessageOverflowMenu({
+  isSelf,
+  actions,
+  footerVisible,
+}: MessageOverflowMenuProps) {
+  const [open, setOpen] = React.useState(false);
+
+  const select = (fn: () => void) => {
+    setOpen(false);
+    fn();
+  };
+
+  return (
+    <div
+      // Self-align to the bottom of the (possibly tall) message row and stick
+      // to the viewport bottom: on long messages the control follows the
+      // scroll and settles at the message's end once it is fully in view.
+      // Raise the whole (sticky) stacking context above the sibling bubble
+      // while open so the menu sits over rich content like tables.
+      className={cn(
+        'sticky bottom-2 shrink-0 self-end transition-opacity',
         // Rich content (e.g. NITRO tables) layers internals up to z-50, so the
         // open menu's stacking context must clear that.
-        open ? 'z-[60]' : 'z-10'
+        open ? 'z-[60]' : 'z-10',
+        // Hand off to the footer bar when it's visible (desktop only).
+        footerVisible &&
+          !open &&
+          'pointer-events-none opacity-0 [@media(pointer:coarse)]:pointer-events-auto [@media(pointer:coarse)]:opacity-100'
       )}
     >
       <Dropdown
@@ -389,34 +601,32 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
         trigger={
           <button
             type="button"
-            data-slot="superchat-copy-button"
-            aria-label="Copy message"
-            className="rounded p-1 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-neutral-600 focus-visible:opacity-100 dark:hover:text-neutral-200"
+            data-slot="superchat-overflow-button"
+            aria-label="Message actions"
+            className={cn(actionButtonClass, actionRevealClass)}
           >
-            {copied ? (
-              <CheckIcon size={14} aria-hidden="true" />
-            ) : (
-              <ClipboardIcon size={14} aria-hidden="true" />
-            )}
+            <EllipsisIcon size={14} aria-hidden="true" />
           </button>
         }
       >
-        <DropdownItem onClick={() => run(writeBoth)}>
-          <span className="flex flex-col items-start">
-            <span>Copy</span>
-            <span className="text-[10px] font-normal text-neutral-400">
-              Rich text + Markdown
-            </span>
-          </span>
-        </DropdownItem>
-        <DropdownItem
-          onClick={() => run(() => writeText(markdown || getText()))}
-        >
-          Copy as Markdown
-        </DropdownItem>
-        <DropdownItem onClick={() => run(() => writeText(getText()))}>
-          Copy as plain text
-        </DropdownItem>
+        {actions.map((action) =>
+          action.submenu ? (
+            // Actions with variants collapse to just their submenu — a
+            // top-level default item would duplicate the flyout's options.
+            <DropdownSubmenu key={action.id} label={action.submenu.label}>
+              {action.submenu.items.map((item) => (
+                <ActionMenuItem key={item.id} item={item} onSelect={select} />
+              ))}
+            </DropdownSubmenu>
+          ) : (
+            <DropdownItem
+              key={action.id}
+              onClick={() => select(action.onSelect)}
+            >
+              {action.label}
+            </DropdownItem>
+          )
+        )}
       </Dropdown>
     </div>
   );
@@ -433,6 +643,8 @@ interface MessageRowProps {
   editable?: boolean;
   /** Save handler for an inline message edit (bound to this message's id). */
   onMessageEdited?: (messageId: string, text: string) => void;
+  /** One-click format for the default copy action (defaults to `'rich'`). */
+  defaultCopyFormat?: SuperChatCopyFormat;
 }
 
 /**
@@ -453,6 +665,7 @@ export const MessageRow = React.memo(function MessageRow({
   onReferenceClick,
   editable,
   onMessageEdited,
+  defaultCopyFormat = 'rich',
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasBody = !!message.text || (message.content?.length ?? 0) > 0;
@@ -478,6 +691,72 @@ export const MessageRow = React.memo(function MessageRow({
     el.setSelectionRange(el.value.length, el.value.length);
     autosize();
   }, [isEditing, autosize]);
+
+  // --- Message actions (copy / edit) ---------------------------------------
+  // Computed before the early returns below so the hooks run unconditionally
+  // (system/ref rows simply never render the action surfaces).
+
+  // Inline editing applies only to the local user's own plain-text messages
+  // (rich content blocks / streaming messages are not inline-editable).
+  const canEdit =
+    !!editable &&
+    isSelf &&
+    !streaming &&
+    typeof message.text === 'string' &&
+    !message.content?.length;
+
+  // The Markdown source for copying: prefer the raw `text`, otherwise assemble
+  // it from the message's text/code content blocks.
+  const markdownSource =
+    typeof message.text === 'string' && message.text
+      ? message.text
+      : (message.content
+          ?.map((block) => {
+            if (block.type === 'code' && block.text) {
+              return `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+            }
+            if (
+              (block.type === 'text' || block.type === 'thinking') &&
+              block.text
+            ) {
+              return block.text;
+            }
+            return '';
+          })
+          .filter(Boolean)
+          .join('\n\n') ?? '');
+
+  // A copy affordance appears on every message that has a body (not while it
+  // is being edited).
+  const canCopy =
+    !isEditing &&
+    (!!message.content?.length ||
+      (typeof message.text === 'string' && message.text.length > 0));
+
+  const hasActions = canCopy || (canEdit && !isEditing);
+
+  const copy = useMessageCopy({
+    markdown: markdownSource,
+    getHtml: () => bubbleRef.current?.innerHTML ?? '',
+    getText: () => bubbleRef.current?.textContent ?? '',
+    defaultFormat: defaultCopyFormat,
+  });
+
+  // Hand-off between the footer action bar and the sticky overflow (⋯): the
+  // overflow only shows (on fine pointers) while the footer bar is scrolled
+  // out of view. Clipping by the scrollable thread counts as "not
+  // intersecting", so the default viewport root is sufficient.
+  const actionsBarRef = React.useRef<HTMLDivElement>(null);
+  const [footerVisible, setFooterVisible] = React.useState(false);
+  React.useEffect(() => {
+    const el = actionsBarRef.current;
+    if (!el || typeof globalThis.IntersectionObserver === 'undefined') return;
+    const observer = new globalThis.IntersectionObserver(([entry]) => {
+      setFooterVisible(entry?.isIntersecting ?? false);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasActions]);
 
   if (message.type === 'system') {
     return (
@@ -509,15 +788,6 @@ export const MessageRow = React.memo(function MessageRow({
   const accent = participant?.color;
   const accentTextColor = accessibleAccentTextColor(accent);
   const authorName = participant?.name ?? 'Unknown';
-
-  // Inline editing applies only to the local user's own plain-text messages
-  // (rich content blocks / streaming messages are not inline-editable).
-  const canEdit =
-    !!editable &&
-    isSelf &&
-    !streaming &&
-    typeof message.text === 'string' &&
-    !message.content?.length;
 
   const startEdit = () => {
     setDraft(message.text ?? '');
@@ -577,33 +847,55 @@ export const MessageRow = React.memo(function MessageRow({
     });
   };
 
-  // The Markdown source for copying: prefer the raw `text`, otherwise assemble
-  // it from the message's text/code content blocks.
-  const markdownSource =
-    typeof message.text === 'string' && message.text
-      ? message.text
-      : (message.content
-          ?.map((block) => {
-            if (block.type === 'code' && block.text) {
-              return `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
-            }
-            if (
-              (block.type === 'text' || block.type === 'thinking') &&
-              block.text
-            ) {
-              return block.text;
-            }
-            return '';
-          })
-          .filter(Boolean)
-          .join('\n\n') ?? '');
-
-  // A copy affordance appears on every message that has a body (not while it is
-  // being edited).
-  const canCopy =
-    !isEditing &&
-    (!!message.content?.length ||
-      (typeof message.text === 'string' && message.text.length > 0));
+  // The same action definitions power both surfaces: the footer icon bar and
+  // the sticky overflow menu.
+  const actions: MessageAction[] = [
+    ...(canCopy
+      ? [
+          {
+            id: 'copy',
+            label: 'Copy message',
+            icon: copy.copied ? (
+              <CheckIcon size={14} aria-hidden="true" />
+            ) : (
+              <ClipboardIcon size={14} aria-hidden="true" />
+            ),
+            onSelect: copy.copyDefault,
+            submenu: {
+              label: 'Copy as',
+              items: [
+                {
+                  id: 'copy-rich',
+                  label: 'Copy as rich text',
+                  description: 'Rich text + Markdown',
+                  onSelect: copy.copyRich,
+                },
+                {
+                  id: 'copy-markdown',
+                  label: 'Copy as Markdown',
+                  onSelect: copy.copyMarkdown,
+                },
+                {
+                  id: 'copy-plain',
+                  label: 'Copy as plain text',
+                  onSelect: copy.copyPlain,
+                },
+              ],
+            },
+          } satisfies MessageAction,
+        ]
+      : []),
+    ...(canEdit && !isEditing
+      ? [
+          {
+            id: 'edit',
+            label: 'Edit message',
+            icon: <PencilIcon size={14} aria-hidden="true" />,
+            onSelect: startEdit,
+          } satisfies MessageAction,
+        ]
+      : []),
+  ];
 
   return (
     <div
@@ -644,17 +936,6 @@ export const MessageRow = React.memo(function MessageRow({
               (edited)
             </span>
           )}
-          {canEdit && !isEditing && (
-            <button
-              type="button"
-              data-slot="superchat-edit-button"
-              onClick={startEdit}
-              aria-label="Edit message"
-              className="rounded p-0.5 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-neutral-600 focus-visible:opacity-100 dark:hover:text-neutral-200"
-            >
-              <PencilIcon size={14} aria-hidden="true" />
-            </button>
-          )}
         </div>
 
         <div
@@ -663,12 +944,11 @@ export const MessageRow = React.memo(function MessageRow({
             isSelf ? 'flex-row-reverse' : 'flex-row'
           )}
         >
-          {canCopy && (
-            <CopyMenu
+          {hasActions && (
+            <MessageOverflowMenu
               isSelf={isSelf}
-              markdown={markdownSource}
-              getHtml={() => bubbleRef.current?.innerHTML ?? ''}
-              getText={() => bubbleRef.current?.textContent ?? ''}
+              actions={actions}
+              footerVisible={footerVisible}
             />
           )}
           <ChatBubble
@@ -795,6 +1075,13 @@ export const MessageRow = React.memo(function MessageRow({
             )}
           </ChatBubble>
         </div>
+        {hasActions && (
+          <MessageActionsBar
+            ref={actionsBarRef}
+            actions={actions}
+            isSelf={isSelf}
+          />
+        )}
       </div>
     </div>
   );

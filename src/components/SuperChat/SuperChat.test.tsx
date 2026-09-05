@@ -892,7 +892,7 @@ describe('SuperChat', () => {
     expect(copyButtons).toHaveLength(2);
   });
 
-  it('copies the message source as Markdown via the copy menu', async () => {
+  it('copies the message source as Markdown via the footer copy menu', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
     const writeText = vi.fn(async () => {});
@@ -908,13 +908,80 @@ describe('SuperChat', () => {
       </div>
     );
 
-    // Open the menu on the first message (m1, authored by u1) and pick Markdown.
+    // The footer copy button opens the format menu (like the original copy
+    // control); pick Markdown.
     const [firstCopy] = screen.getAllByRole('button', {
       name: 'Copy message',
     });
     await user.click(firstCopy);
     await user.click(
       screen.getByRole('menuitem', { name: 'Copy as Markdown' })
+    );
+
+    expect(writeText).toHaveBeenCalledWith(conversation.thread[0].text);
+    vi.unstubAllGlobals();
+  });
+
+  it('Ctrl/Cmd-click on the footer copy button copies in the default format', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const writeText = vi.fn(async () => {});
+    const write = vi.fn(async () => {});
+    vi.stubGlobal('navigator', {
+      ...globalThis.navigator,
+      clipboard: { writeText, write },
+    });
+
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          defaultCopyFormat="markdown"
+        />
+      </div>
+    );
+
+    const [firstCopy] = screen.getAllByRole('button', {
+      name: 'Copy message',
+    });
+    await user.keyboard('{Control>}');
+    await user.click(firstCopy);
+    await user.keyboard('{/Control}');
+
+    // Copies immediately in the configured format without opening the menu.
+    expect(writeText).toHaveBeenCalledWith(conversation.thread[0].text);
+    expect(
+      screen.queryByRole('menuitem', { name: 'Copy as Markdown' })
+    ).not.toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+
+  it('copies the message source as Markdown via the overflow menu', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const writeText = vi.fn(async () => {});
+    const write = vi.fn(async () => {});
+    vi.stubGlobal('navigator', {
+      ...globalThis.navigator,
+      clipboard: { writeText, write },
+    });
+
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+
+    // Open the overflow menu on the first message (m1, authored by u1), then
+    // the "Copy as" submenu, and pick Markdown.
+    const [firstOverflow] = screen.getAllByRole('button', {
+      name: 'Message actions',
+    });
+    await user.click(firstOverflow);
+    await user.click(screen.getByRole('menuitem', { name: 'Copy as' }));
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Copy as Markdown' })
     );
 
     expect(writeText).toHaveBeenCalledWith(conversation.thread[0].text);
