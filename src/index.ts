@@ -99,6 +99,7 @@ export * from './components/MediaPlayer';
 export * from './components/MegaMenu';
 export * from './components/Messaging';
 export * from './components/Modal';
+export * from './components/OrbitRing';
 export * from './components/NotificationCenter';
 export * from './components/OnboardingWizard';
 export * from './components/OrderCard';
@@ -166,6 +167,7 @@ export * from './components/ServiceShippingSettings';
 export * from './components/Separator';
 export * from './components/Sheet';
 export * from './components/SectionSpyNav';
+export * from './components/SliderCalculator';
 export * from './components/SourceTip';
 export * from './components/Sparkline';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
@@ -196,6 +198,7 @@ export * from './components/Toggle';
 export * from './components/Tooltip';
 export * from './components/TranscriptView';
 export * from './components/VideoCard';
+export * from './components/YearTimeline';
 // `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
 // TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
 // type at the root barrel; import the media-schema type from the subpath
