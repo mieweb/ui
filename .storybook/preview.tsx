@@ -25,6 +25,7 @@ import type { BrandConfig } from '../src/brands/types';
 import { CodeLookup } from '../src/components/CodeLookup';
 import { CodeLookupProvider } from '../src/components/CodeLookup/context';
 import { isRtlLocale } from '../src/hooks/useDirection';
+import { DocsPage } from './DocsPage';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -143,8 +144,17 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   // Create a style tag with high specificity to override base.css
   const styleTag = document.createElement('style');
   styleTag.id = 'mieweb-brand-styles';
+  const accent = colors.accent
+    ? `
+      --mieweb-accent: ${colors.accent.DEFAULT} !important;
+      --mieweb-accent-light: ${colors.accent.light ?? colors.accent.DEFAULT} !important;
+      --mieweb-accent-dark: ${colors.accent.dark ?? colors.accent.DEFAULT} !important;`
+    : `
+      --mieweb-accent: initial !important;
+      --mieweb-accent-light: initial !important;
+      --mieweb-accent-dark: initial !important;`;
   styleTag.textContent = `
-    :root, [data-theme="light"], [data-theme="dark"] {
+    :root, [data-theme="light"], [data-theme="dark"] {${accent}
       --mieweb-primary-50: ${colors.primary[50]} !important;
       --mieweb-primary-100: ${colors.primary[100]} !important;
       --mieweb-primary-200: ${colors.primary[200]} !important;
@@ -456,7 +466,9 @@ const preview: Preview = {
     // `render`, Storybook shows the render snippet/args, not the full component source.
     // `canvas.withToolbar` gives every docs canvas (not just the primary story) the
     // zoom / "Open canvas in new tab" toolbar.
-    docs: { codePanel: true, canvas: { withToolbar: true } },
+    // `page` adds the "In production" strip driven by `parameters.meta`
+    // (see src/docs/component-meta.ts).
+    docs: { codePanel: true, canvas: { withToolbar: true }, page: DocsPage },
     layout: 'padded',
     options: {
       storySort: {
