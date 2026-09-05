@@ -44,6 +44,9 @@ export const enterpriseHealthBrand: BrandConfig = {
       950: '#280e25',
     },
 
+    // Gold accent from the logo — mirrors --mieweb-accent* in enterprise-health.css
+    accent: { DEFAULT: '#f8b700', light: '#ffc933', dark: '#d49d00' },
+
     // Light mode semantic colors
     // Based on actual Enterprise Health website styles
     light: {

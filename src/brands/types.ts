@@ -81,6 +81,11 @@ export interface BrandColors {
   warning?: ColorScale;
   /** Info color scale (optional — falls back to library defaults) */
   info?: ColorScale;
+  /**
+   * Brand accent (optional) — exposed as `--mieweb-accent`, `--mieweb-accent-light`
+   * and `--mieweb-accent-dark`. Components fall back to the primary scale when unset.
+   */
+  accent?: { DEFAULT: string; light?: string; dark?: string };
   /** Light mode semantic colors */
   light: SemanticColors;
   /** Dark mode semantic colors */
