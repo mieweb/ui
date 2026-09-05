@@ -15,16 +15,39 @@ mind whenever you write docs or code comments.
 | **Consumer** (app developer)    | Use a component, theme it, migrate an app        | [README.md](README.md), [Storybook](https://ui.mieweb.org), [lessons/](lessons/README.md) |
 | **Provider / Maintainer** (you) | Add/change a component, fix a bug, cut a release | **This file** + per-component [`MAINTAINERS.md`](#per-component-maintainer-notes)         |
 
-Rule of thumb: **consumer docs answer "how do I use it"; provider docs answer "how
-do I change it."** Don't mix the two — keep usage in Storybook autodocs and the
-README, keep internals/invariants/gotchas in `CONTRIBUTING.md` and `MAINTAINERS.md`.
+Rule of thumb: **consumer docs answer "why should I choose it, when should I not,
+and how does it fit" as well as "how do I use it"; provider docs answer "how do I
+change it."** Keep component guidance in Storybook and internals in this guide
+and per-component `MAINTAINERS.md` files.
+
+## Documentation ownership
+
+- **Shared introduction:** edit [README.md](README.md). GitHub and npm display it;
+  [src/Introduction.mdx](src/Introduction.mdx) imports it as raw Markdown and renders
+  it in Storybook. Keep that wrapper free of a second copy of onboarding prose.
+- **Portable content:** use ordinary Markdown and absolute links to published
+  documentation or GitHub files. Repository-relative links break when rendered
+  inside Storybook. Heading anchors must work in both renderers.
+- **Component guidance:** keep rationale, limitations, alternatives, related
+  components, and composition examples with the component's stories. Link to
+  detailed guidance from the introduction instead of maintaining another copy.
+- **Agent setup:** the introduction links to [agent/](agent/README.md). Agent rules
+  and component policy must agree; this shared introduction does not itself
+  synchronize those separate documents or enforce PR review.
+- **Contributor setup and releases:** maintain them here, not in the README.
+
+When changing the README, check the Introduction page in local Storybook,
+including code blocks, tables, heading links, and mobile layout. The README is
+included in the npm package's `files` list. GitHub shows changes on the selected
+branch; Storybook and npm show the content from their latest deployment or
+release, not necessarily the latest Git commit.
 
 ## Repository layout
 
 ```
 src/
   index.ts              # Public barrel — the main entry point
-  ag-grid.ts            # Separate entry: @mieweb/ui/ag-grid (optional ag-grid deps)
+  ag-grid.ts            # Deprecated entry retained for existing consumers only
   datavis.ts            # Separate entry: @mieweb/ui/datavis (optional datavis-ace dep)
   esheet.ts             # Separate entry: @mieweb/ui/esheet (optional @esheet/* deps)
   tailwind-preset.ts    # Tailwind preset consumers extend
@@ -53,6 +76,18 @@ pnpm storybook        # http://localhost:6006
 If you cloned without `--recurse-submodules`, run
 `git submodule update --init --recursive` and re-run `pnpm install`.
 
+Use Node.js 24 (the version used by CI) and the pnpm version declared in
+`package.json`. The `prestorybook` hook builds eSheet when its required artifacts
+are missing; it does not detect every stale build after a submodule update. To
+rebuild updated eSheet sources explicitly:
+
+```bash
+pnpm --dir packages/esheet --filter '@esheet/builder...' --filter '@esheet/renderer...' build
+```
+
+Storybook uses HMR for source and documentation edits. Do not restart it after
+each edit; restart when configuration or dependencies change.
+
 ## Everyday commands
 
 | Command                           | Purpose                                                                                    |
@@ -66,6 +101,22 @@ If you cloned without `--recurse-submodules`, run
 | `pnpm test:coverage`              | Vitest with coverage (80% thresholds)                                                      |
 | `pnpm test:visual`                | Playwright visual regression (serves `storybook-static`; run `pnpm build-storybook` first) |
 | `pnpm build`                      | Full library build (tsup + CSS + brand CSS)                                                |
+
+`pnpm dev` rebuilds the library for locally linked consumers; it does not start
+Storybook. To try a local build in another application, build the library and use
+your package manager's local linking or `file:` dependency support. Import the
+same public entry points as a published consumer, including
+`@mieweb/ui/styles.css`.
+
+For a static Storybook build, run `pnpm build-storybook`; output is written to
+`storybook-static`. Do not hand-edit generated output.
+
+### AI story configuration
+
+For Ozwell-backed stories, follow
+[the Ozwell backend guide](src/components/AI/OZWELL-BACKEND.md) for endpoint,
+browser-local configuration, and proxy options. Never commit API keys or embed
+them in a public Storybook build.
 
 ## Quality gates (must pass before opening a PR)
 
@@ -103,6 +154,10 @@ Coding conventions (the full standard lives in
   focus. Modal/overlay components trap focus and close on `Escape`.
 - **Icons** from `lucide-react`; dates via `luxon`.
 
+For new date parsing, formatting, and comparisons, use Luxon's `DateTime`. Keep
+business timezones explicit with IANA identifiers such as `America/New_York`;
+prefer ISO-8601 values in storage and transport and localize at the UI boundary.
+
 After adding a component, export it from [src/index.ts](src/index.ts)
 and (if it should be individually importable) add a `tsup` entry — see
 [Exports & tree-shaking](#exports-entry-points--tree-shaking).
@@ -128,23 +183,25 @@ file should:
 - The public API is the barrel [src/index.ts](src/index.ts). Everything a
   consumer can `import { X } from '@mieweb/ui'` must be re-exported there.
 - **Heavy/optional integrations get their own subpath entry** so they stay out
-  of the default bundle: `@mieweb/ui/ag-grid`, `@mieweb/ui/datavis`,
-  `@mieweb/ui/esheet`. These map to `src/ag-grid.ts`, `src/datavis.ts`,
-  `src/esheet.ts` and to dedicated `tsup` entries.
+  of the default bundle: `@mieweb/ui/datavis` and `@mieweb/ui/esheet` map to
+  `src/datavis.ts`, `src/esheet.ts`, and dedicated `tsup` entries.
+  The deprecated `@mieweb/ui/ag-grid` entry remains for existing consumers only;
+  do not use it as a starting point for new integrations.
 - Individually tree-shakeable components are listed explicitly in the `entry`
   map in [tsup.config.ts](tsup.config.ts). Add yours there if it should be
   importable as `@mieweb/ui/components/<Name>`.
 - `package.json` `sideEffects` is `["**/*.css"]` — CSS is intentionally
   side-effectful so it isn't tree-shaken away. Keep JS/TS modules side-effect
-  free (the AGGrid `ModuleRegistry` call is a deliberate, documented exception).
+  free (the deprecated AGGrid integration's `ModuleRegistry` call is a legacy
+  exception, not a pattern for new components).
 
 ## Build & bundle
 
 - **Bundler:** [tsup](tsup.config.ts) → dual **ESM + CJS**, `target: es2022`,
   `.d.ts` emitted, sourcemaps, `treeshake` + `splitting` on. JSX is `automatic`.
   Types build against [tsconfig.build.json](tsconfig.build.json).
-- **External:** `react`, `react-dom`, `ag-grid-*`, `datavis-ace`, `@esheet/*`
-  are never bundled (they're peers).
+- **External:** `react`, `react-dom`, `datavis-ace`, and `@esheet/*` are never
+  bundled (they're peers). Legacy `ag-grid-*` peers remain external for compatibility.
 - **CSS:** `pnpm build:css` compiles `src/styles/base.css` → `dist/styles.css`
   via the Tailwind CLI; brand CSS is copied into `dist/brands/`.
 - **Submodule builds:** `prebuild` runs `build:esheet`, which builds the
@@ -196,15 +253,16 @@ If a submodule-backed component fails to resolve, run
 ## Optional peer dependencies
 
 `react` / `react-dom` are required peers. Everything else heavy is **optional**:
-`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@mieweb/datavis`,
+`datavis-ace`, `@mieweb/datavis`,
 `@esheet/builder`, `@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
 
-> **Grids: AGGrid is deprecated — use NITRO DataVis.** `ag-grid-*` is heavy and
-> [AGGrid](src/components/AGGrid/MAINTAINERS.md) is deprecated with no new usages
-> allowed. Use [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)
-> (`@mieweb/ui/datavis`) for all tables. See those notes for details.
+> **Grids: use DataVis NITRO for new work.** The `@mieweb/ui` AGGrid integration
+> is deprecated; `ag-grid-community` and `ag-grid-react` remain optional peers
+> only for existing consumers. Its source and maintainer notes document legacy
+> maintenance, not a recommended choice. Use
+> [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) (`@mieweb/ui/datavis`).
 
 ## Per-component maintainer notes
 
@@ -216,14 +274,14 @@ submodule, a module-level side effect, or a non-obvious extension point.
 
 Current notes:
 
-| Module                                                         | Why it has notes                                                                            |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [AI](src/components/AI/MAINTAINERS.md)                         | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer  |
-| [AGGrid](src/components/AGGrid/MAINTAINERS.md)                 | Registers AG Grid modules at import; optional peers; brand theming; base vs. enhanced split |
-| [ESheet](src/components/ESheet/MAINTAINERS.md)                 | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`              |
-| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)     | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring         |
-| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled                         |
-| [YChart](src/components/YChart/MAINTAINERS.md)                 | Vanilla editor in a submodule, dynamically imported; not in the public API                  |
+| Module                                                         | Why it has notes                                                                                                                        |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [AI](src/components/AI/MAINTAINERS.md)                         | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer                                              |
+| [AGGrid (deprecated)](src/components/AGGrid/MAINTAINERS.md)    | Legacy maintenance only; retained for existing consumers. Use [DataVis NITRO](src/components/DataVisNITRO/MAINTAINERS.md) for new work. |
+| [ESheet](src/components/ESheet/MAINTAINERS.md)                 | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                          |
+| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)     | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring                                                     |
+| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                     |
+| [YChart](src/components/YChart/MAINTAINERS.md)                 | Vanilla editor in a submodule, dynamically imported; not in the public API                                                              |
 
 ## Commits, versioning & releases
 
@@ -234,7 +292,154 @@ Current notes:
 - `prepublishOnly` runs a full build. Never publish from a dirty/un-built tree.
 - **Never publish without explicit confirmation.**
 
+### Release channels
+
+| Channel             | Install                       | Source                                        |
+| ------------------- | ----------------------------- | --------------------------------------------- |
+| Stable (`latest`)   | `npm install @mieweb/ui`      | Stable version tags                           |
+| Prerelease (`next`) | `npm install @mieweb/ui@next` | Eligible pushes to `main` and prerelease tags |
+
+The [release workflow](.github/workflows/release.yml) defines the triggers and
+path exclusions. A push changing only root-level Markdown files (such as
+`README.md`) does not trigger a `main` prerelease, so a README-only update reaches
+npm with the next release. Markdown in subdirectories, such as `lessons/`, is not
+excluded by `*.md` and can trigger a prerelease. Changes under `.github/` are also
+excluded, except for the release workflow itself.
+
+For a stable release, use GitHub Actions' **Create Stable Release** workflow and
+select the semantic version bump. It updates the package version and creates the
+tag that triggers publishing. Maintainers can also publish through a deliberate
+`v*` tag; inspect the workflow and obtain approval before creating or pushing one.
+
+## Developing Components From a Consuming Application
+
+Before proposing a new component, read this guide and audit the component
+catalog, related examples, and existing composition patterns. Evaluate candidates
+by behavior and user need, not only by name. Document why using, configuring,
+composing, or extending existing components does not adequately solve the problem.
+Present the gap and supporting evidence before implementation.
+
+When a reusable gap remains, develop the component so it can be contributed
+upstream. Follow the [component checklist](#adding-a-new-component-checklist),
+including documentation, accessibility, internationalization, theming, and tests.
+Keep application-specific data access and business rules in the consuming
+application; expose reusable behavior through a clear public API. Do not invent a
+generic abstraction solely to make project-specific code contributable.
+
+### Coordinated Development With a Submodule
+
+1. Obtain approval before introducing a submodule or changing the consuming
+   project's dependency strategy. Reuse an existing checkout when available;
+   otherwise add `mieweb/ui` as a Git submodule using the project's vendor-directory
+   convention and an upstream repository or fork accessible to collaborators.
+2. Create a focused feature branch in the submodule for development and the
+   upstream PR. A submodule pins an **exact commit**, not a branch; branch tracking
+   does not replace the commit recorded by the consuming repository.
+3. Configure the application to consume the submodule checkout through its
+   established build and dependency tooling. Adding a submodule alone does not
+   replace an installed npm dependency. Verify that the application actually uses
+   the changed build and does not load a second React runtime.
+4. Implement and test the reusable change in the submodule, then verify its
+   integration in the consuming application. With the required approvals, commit
+   and push the submodule change before recording its tested revision in the
+   consumer. The pinned commit must be fetchable by collaborators and CI.
+5. Open the upstream and consumer PRs using the process below. After upstream
+   release, update the consumer to the released package or corresponding submodule
+   commit according to its dependency policy, removing temporary overrides.
+
+### Opening the Pull Requests
+
+Follow each repository's approval requirements for commits, pushes, and PR
+creation. This guide is not authorization to publish changes.
+
+1. Run the [quality gates](#quality-gates-must-pass-before-opening-a-pr) and the
+   integration checks relevant to the change. Record results and known gaps.
+2. Push the feature branch to the upstream repository, or your fork if you lack
+   write access. Open a PR targeting `mieweb/ui`'s `main` branch using GitHub's
+   **Compare & pull request** flow or `gh pr create`. For a fork, select
+   `mieweb/ui:main` as the base and your fork's feature branch as the head.
+3. Supply the rationale and evidence below. Use a draft PR while the API, examples,
+   or required checks are incomplete. Request maintainer review.
+4. Open a separate consumer PR for the integration and pinned submodule revision.
+   Link the two PRs in both directions and state any merge or release dependency.
+   Do not include application-specific code or private data in the upstream PR.
+
+### Component PR Rationale and Evidence
+
+Every new or materially extended reusable component PR must explain:
+
+- **Problem:** the user need and why it belongs in a shared library.
+- **Alternatives:** existing components considered and why reuse, composition,
+  or extension was insufficient.
+- **Relationships:** what it complements, overlaps with, or replaces, with links
+  and selection guidance discoverable from the affected component pages.
+- **Boundaries:** when not to use it, known limitations, and application-owned
+  responsibilities.
+- **Evidence:** a realistic composition example and verification of interactions,
+  mobile and desktop layouts, light and dark themes, brand switching,
+  accessibility, translated text expansion, and RTL behavior. Explain any
+  inapplicable checks or unverified requirements.
+- **Compatibility:** API impact, dependencies, and migration guidance where needed.
+
+Put enduring guidance in the component documentation and link to it from the PR.
+Use the PR description for change-specific reasoning and verification evidence,
+not a second copy of the documentation. Reviewers should be able to understand
+why to choose the component, when to choose something else, and how it fits with
+the rest of the library without reading its implementation.
+
+### Reviewing Component Guidance
+
+Human and Copilot reviewers should apply the
+[rationale and evidence requirements](#component-pr-rationale-and-evidence),
+not just check for section headings:
+
+1. Identify the new or materially changed components. Read their implementation,
+   consumer-facing docs, stories, and relevant alternatives. Check whether the
+   stated rationale is supported by actual behavior; props documentation alone
+   does not explain why to choose a component or when not to use it.
+2. Follow related-component links and verify their targets. Each relationship
+   should explain the choice or composition, not just say "see also." Check that
+   the guidance is discoverable from both affected component pages, either through
+   reciprocal links or a shared comparison linked from each. Do not require
+   arbitrary links when no meaningful relationship exists; assess the author's
+   explanation of the alternatives considered.
+3. Check that examples support the claimed composition, including state ownership
+   and limitations. Similar appearance does not establish duplication: for example,
+   ReadingProgressBar and TableOfContents may serve complementary needs. Do not
+   invent a replacement recommendation or deprecation without evidence.
+4. Report each actionable gap with a file or story reference, the unmet requirement,
+   its effect on a developer's choice, and a concrete correction. Distinguish
+   verified findings from questions and unavailable evidence. Keep enduring
+   guidance in component docs, with links from the PR rather than copied prose.
+
+Apply these checks to the change and affected relationships, not all historical
+documentation debt. A documentation-only PR should be checked for inaccurate
+guidance and broken links without requiring a new component or composition story.
+
+### Requesting Copilot Review
+
+Our [repository instructions](.github/copilot-instructions.md) direct Copilot code
+review to the requirements above. On the GitHub PR, request **Copilot** under
+**Reviewers**, alongside a human maintainer. After addressing feedback, request a
+re-review; new pushes are not automatically reviewed unless that option is enabled.
+See [Using GitHub Copilot code review](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review).
+
+Repository administrators can configure
+[automatic reviews and Review new pushes](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/configure-automatic-review).
+Instruction files alone do not enable automatic review or block merging. Use
+repository rulesets for required checks and approvals, and retain human judgment
+for component selection and documented exceptions. Copilot comments alone are
+not proof that the contribution requirements have been satisfied.
+
+GitHub currently reads custom review instructions from the PR's head branch, so
+instruction changes can be tested in the same PR. Review changes to these rules
+and this guide explicitly; they are not a tamper-proof enforcement boundary.
+
 ## Adding a new component (checklist)
+
+First complete the [alternatives audit and contribution workflow](#developing-components-from-a-consuming-application).
+For work directly in this repository, the consumer submodule steps apply only
+when a consuming application is involved; the audit and PR requirements still apply.
 
 1. `src/components/<Name>/` with `index.ts`, `<Name>.tsx`, `<Name>.stories.tsx`.
 2. Follow the [anatomy](#anatomy-of-a-component) conventions (CVA, `cn`,
