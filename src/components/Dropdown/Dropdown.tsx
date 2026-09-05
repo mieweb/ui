@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
@@ -62,6 +63,12 @@ interface DropdownContextValue {
   multiSelect: boolean;
   selectedValues: string[];
   toggleSelectedValue: (value: string) => void;
+  /**
+   * Registers a portaled descendant (submenu panel) with the root dropdown's
+   * click-outside detection so clicks inside it don't close the menu.
+   * Returns an unregister function.
+   */
+  registerOutsideRef: (ref: React.RefObject<HTMLElement | null>) => () => void;
 }
 
 const DropdownContext = React.createContext<DropdownContextValue | null>(null);
@@ -226,6 +233,31 @@ function filterDropdownChildren(
         return searchText.includes(normalizedQuery) ? child : null;
       }
 
+      if (isDropdownElement(child, DropdownSubmenu)) {
+        const searchText = [
+          getNodeText(child.props.label),
+          child.props.searchText,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        // Keep the whole submenu when its label matches; otherwise filter its
+        // items and keep it only when something inside still matches.
+        if (searchText.includes(normalizedQuery)) {
+          return child;
+        }
+
+        const submenuChildren = filterDropdownChildren(
+          child.props.children,
+          normalizedQuery
+        );
+
+        return hasVisibleDropdownContent(submenuChildren)
+          ? React.cloneElement(child, undefined, submenuChildren)
+          : null;
+      }
+
       if (isDropdownElement(child, DropdownContent)) {
         const contentChildren = filterDropdownChildren(
           child.props.children,
@@ -326,6 +358,9 @@ function Dropdown({
   const [uncontrolledSelectedValues, setUncontrolledSelectedValues] =
     React.useState(defaultSelectedValues);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [extraOutsideRefs, setExtraOutsideRefs] = React.useState<
+    ReadonlyArray<React.RefObject<HTMLElement | null>>
+  >([]);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const menuId = React.useId();
@@ -382,13 +417,22 @@ function Dropdown({
     [multiSelect, selectedValues, setSelectedValues]
   );
 
+  const registerOutsideRef = React.useCallback(
+    (ref: React.RefObject<HTMLElement | null>) => {
+      setExtraOutsideRefs((prev) => [...prev, ref]);
+      return () => setExtraOutsideRefs((prev) => prev.filter((r) => r !== ref));
+    },
+    []
+  );
+
   const dropdownContext = React.useMemo<DropdownContextValue>(
     () => ({
       multiSelect,
       selectedValues,
       toggleSelectedValue,
+      registerOutsideRef,
     }),
-    [multiSelect, selectedValues, toggleSelectedValue]
+    [multiSelect, selectedValues, toggleSelectedValue, registerOutsideRef]
   );
 
   useEscapeKey(handleClose, isOpen);
@@ -405,8 +449,8 @@ function Dropdown({
   });
 
   const outsideRefs = React.useMemo(
-    () => [containerRef, floatingRef],
-    [floatingRef]
+    () => [containerRef, floatingRef, ...extraOutsideRefs],
+    [floatingRef, extraOutsideRefs]
   );
   useClickOutside(outsideRefs, handleClose, isOpen);
 
@@ -841,6 +885,208 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
 DropdownItem.displayName = 'DropdownItem';
 
 // ============================================================================
+// Dropdown Submenu Component
+// ============================================================================
+
+export interface DropdownSubmenuProps {
+  /** The parent item's label */
+  label: React.ReactNode;
+  /** Icon to display before the label */
+  icon?: React.ReactNode;
+  /** Whether the submenu trigger is disabled */
+  disabled?: boolean;
+  /** Optional text used when filtering searchable dropdown items */
+  searchText?: string;
+  /** Additional class name for the submenu trigger item */
+  className?: string;
+  /** Submenu items */
+  children: React.ReactNode;
+}
+
+/** Delay before a hover-opened submenu closes, allowing diagonal travel. */
+const submenuCloseDelay = 150;
+
+/**
+ * A dropdown item that opens a nested flyout menu.
+ *
+ * Opens on hover or click, and via ArrowRight/Enter/Space from the keyboard;
+ * ArrowLeft or Escape closes just the submenu (Escape is stopped so the root
+ * menu stays open) and returns focus to the trigger.
+ *
+ * @example
+ * ```tsx
+ * <Dropdown trigger={<Button>Options</Button>}>
+ *   <DropdownItem onClick={copy}>Copy</DropdownItem>
+ *   <DropdownSubmenu label="Copy as">
+ *     <DropdownItem onClick={copyMarkdown}>Markdown</DropdownItem>
+ *     <DropdownItem onClick={copyPlain}>Plain text</DropdownItem>
+ *   </DropdownSubmenu>
+ * </Dropdown>
+ * ```
+ */
+function DropdownSubmenu({
+  label,
+  icon,
+  disabled = false,
+  className,
+  children,
+}: DropdownSubmenuProps) {
+  const [open, setOpen] = React.useState(false);
+  const menuId = React.useId();
+  const dropdownContext = React.useContext(DropdownContext);
+  const closeTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+
+  const { anchorRef, floatingRef, style } = useAnchoredPosition<
+    HTMLButtonElement,
+    HTMLDivElement
+  >({ open, placement: 'right-start', offset: 4 });
+
+  // Let the root dropdown treat clicks inside the portaled flyout as "inside"
+  // so they don't dismiss the whole menu.
+  const registerOutsideRef = dropdownContext?.registerOutsideRef;
+  React.useEffect(() => {
+    if (!open || !registerOutsideRef) return;
+    return registerOutsideRef(floatingRef);
+  }, [open, registerOutsideRef, floatingRef]);
+
+  React.useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  const cancelClose = () => clearTimeout(closeTimer.current);
+  const openNow = () => {
+    if (disabled) return;
+    cancelClose();
+    setOpen(true);
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), submenuCloseDelay);
+  };
+  const closeAndRefocus = () => {
+    cancelClose();
+    setOpen(false);
+    anchorRef.current?.focus();
+  };
+
+  const focusFirstItem = () => {
+    // The flyout positions in a layout effect; wait a frame so it's measurable
+    // and visible before moving focus.
+    requestAnimationFrame(() => {
+      floatingRef.current
+        ?.querySelector<HTMLElement>('[data-slot="dropdown-item"]')
+        ?.focus();
+    });
+  };
+
+  return (
+    <>
+      <button
+        ref={anchorRef}
+        type="button"
+        role="menuitem"
+        disabled={disabled}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        data-slot="dropdown-submenu-trigger"
+        className={cn(
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start text-sm',
+          'transition-colors duration-150',
+          'focus:outline-none',
+          'text-neutral-700 dark:text-neutral-300',
+          'hover:bg-neutral-100 dark:hover:bg-neutral-700',
+          'focus:bg-neutral-100 dark:focus:bg-neutral-700',
+          open && 'bg-neutral-100 dark:bg-neutral-700',
+          className
+        )}
+        onPointerEnter={(event) => {
+          // Hover-open is a mouse affordance; touch taps go through onClick so
+          // the flyout doesn't open-then-toggle on the same tap.
+          if (event.pointerType === 'mouse') openNow();
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === 'mouse') scheduleClose();
+        }}
+        onClick={(event) => {
+          openNow();
+          // Keyboard activation (Enter/Space fire click with detail 0) moves
+          // focus into the flyout; pointer clicks leave focus on the trigger.
+          if (event.detail === 0) focusFirstItem();
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            openNow();
+            focusFirstItem();
+          } else if (
+            open &&
+            (event.key === 'ArrowLeft' || event.key === 'Escape')
+          ) {
+            event.preventDefault();
+            // Keep the root menu open: stop Escape before it reaches the
+            // document-level listener that closes the whole dropdown.
+            event.stopPropagation();
+            closeAndRefocus();
+          }
+        }}
+      >
+        {icon && (
+          <span className="h-4 w-4 shrink-0" data-slot="dropdown-item-icon">
+            {icon}
+          </span>
+        )}
+        <span className="flex-1 font-medium" data-slot="dropdown-item-label">
+          {label}
+        </span>
+        <ChevronRightIcon
+          size={16}
+          aria-hidden="true"
+          className="shrink-0 text-neutral-400"
+        />
+      </button>
+      {open &&
+        createPortal(
+          <div
+            ref={floatingRef}
+            style={style}
+            id={menuId}
+            role="menu"
+            // Programmatically focusable (a11y: interactive role); focus lands
+            // on the menu items themselves.
+            tabIndex={-1}
+            data-slot="dropdown-submenu"
+            className={cn(
+              // min() keeps the preferred width from beating the hook's
+              // maxWidth viewport clamp on very narrow screens.
+              'flex min-w-[min(10rem,calc(100vw-1rem))] flex-col overflow-hidden',
+              'rounded-xl border border-neutral-200 bg-white shadow-lg',
+              'dark:border-neutral-700 dark:bg-neutral-800',
+              'animate-in fade-in zoom-in-95 duration-100'
+            )}
+            onPointerEnter={cancelClose}
+            onPointerLeave={(event) => {
+              if (event.pointerType === 'mouse') scheduleClose();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowLeft' || event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                closeAndRefocus();
+              }
+            }}
+          >
+            <div className="min-h-0 overflow-y-auto">{children}</div>
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
+DropdownSubmenu.displayName = 'DropdownSubmenu';
+
+// ============================================================================
 // Dropdown Separator Component
 // ============================================================================
 
@@ -896,6 +1142,7 @@ export {
   DropdownHeader,
   DropdownContent,
   DropdownItem,
+  DropdownSubmenu,
   DropdownSeparator,
   DropdownLabel,
 };

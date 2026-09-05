@@ -19,6 +19,7 @@ import type {
   AttachmentKind,
   ComposerAttachment,
   SuperChatConversation,
+  SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatRef,
   SuperChatRenderPlugin,
@@ -58,6 +59,8 @@ export interface SuperChatInboxProps {
   showSidebar?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
+  /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
+  defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */
   className?: string;
 
@@ -101,6 +104,7 @@ export function SuperChatInbox({
   virtualized,
   showSidebar = true,
   linkBuilder,
+  defaultCopyFormat,
   className,
   onMessageSent,
   onMessageEdited,
@@ -165,6 +169,7 @@ export function SuperChatInbox({
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}
+          defaultCopyFormat={defaultCopyFormat}
           onMessageSent={onMessageSent}
           onMessageEdited={onMessageEdited}
           onConversationClosed={onConversationClosed}
