@@ -164,6 +164,21 @@ Tailwind: on Tailwind 4, add an `@source` for `@mieweb/ui` so library classes ar
 
 If JSDoc, the console, or the docs mark something deprecated (`AGGrid` today), do not use it in new code and do not suppress the warning. Use the documented replacement.
 
-## Rule 14: When no component exists
+## Rule 14: When existing components do not meet the need
 
-First verify it truly doesn't exist — check https://ui.mieweb.org (Storybook) rather than guessing. Then build it locally, but in `@mieweb/ui` style: Tailwind utility classes with the library's design tokens, ARIA labels on interactive elements, and externalized user-facing text. Prefer composing existing primitives (`Card`, `Text`, `Badge`) over new bespoke markup. If the pattern is generic, propose contributing it upstream to `@mieweb/ui`.
+Before creating or materially extending a reusable component, read the
+[upstream contribution guide](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md)
+and follow its
+[Developing Components From a Consuming Application](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md#developing-components-from-a-consuming-application)
+process, including the alternatives audit, contribution-ready implementation,
+submodule workflow, and PR requirements. If the guide is unavailable, report that
+limitation and obtain it before proceeding with the contribution workflow.
+
+Present the gap and supporting evidence before implementation. Obtain approval
+before introducing a submodule or changing the consuming project's dependency
+strategy. Keep project-specific behavior local, and do not create a generic
+abstraction solely to make it contributable.
+
+Follow the repository's permissions and approval requirements for commits,
+pushes, and PR creation. Do not treat these instructions as authorization to
+publish changes.
