@@ -387,6 +387,54 @@ not a second copy of the documentation. Reviewers should be able to understand
 why to choose the component, when to choose something else, and how it fits with
 the rest of the library without reading its implementation.
 
+### Reviewing Component Guidance
+
+Human and Copilot reviewers should apply the
+[rationale and evidence requirements](#component-pr-rationale-and-evidence),
+not just check for section headings:
+
+1. Identify the new or materially changed components. Read their implementation,
+   consumer-facing docs, stories, and relevant alternatives. Check whether the
+   stated rationale is supported by actual behavior; props documentation alone
+   does not explain why to choose a component or when not to use it.
+2. Follow related-component links and verify their targets. Each relationship
+   should explain the choice or composition, not just say "see also." Check that
+   the guidance is discoverable from both affected component pages, either through
+   reciprocal links or a shared comparison linked from each. Do not require
+   arbitrary links when no meaningful relationship exists; assess the author's
+   explanation of the alternatives considered.
+3. Check that examples support the claimed composition, including state ownership
+   and limitations. Similar appearance does not establish duplication: for example,
+   ReadingProgressBar and TableOfContents may serve complementary needs. Do not
+   invent a replacement recommendation or deprecation without evidence.
+4. Report each actionable gap with a file or story reference, the unmet requirement,
+   its effect on a developer's choice, and a concrete correction. Distinguish
+   verified findings from questions and unavailable evidence. Keep enduring
+   guidance in component docs, with links from the PR rather than copied prose.
+
+Apply these checks to the change and affected relationships, not all historical
+documentation debt. A documentation-only PR should be checked for inaccurate
+guidance and broken links without requiring a new component or composition story.
+
+### Requesting Copilot Review
+
+Our [repository instructions](.github/copilot-instructions.md) direct Copilot code
+review to the requirements above. On the GitHub PR, request **Copilot** under
+**Reviewers**, alongside a human maintainer. After addressing feedback, request a
+re-review; new pushes are not automatically reviewed unless that option is enabled.
+See [Using GitHub Copilot code review](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review).
+
+Repository administrators can configure
+[automatic reviews and Review new pushes](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/configure-automatic-review).
+Instruction files alone do not enable automatic review or block merging. Use
+repository rulesets for required checks and approvals, and retain human judgment
+for component selection and documented exceptions. Copilot comments alone are
+not proof that the contribution requirements have been satisfied.
+
+GitHub currently reads custom review instructions from the PR's head branch, so
+instruction changes can be tested in the same PR. Review changes to these rules
+and this guide explicitly; they are not a tamper-proof enforcement boundary.
+
 ## Adding a new component (checklist)
 
 First complete the [alternatives audit and contribution workflow](#developing-components-from-a-consuming-application).
