@@ -12,6 +12,17 @@
  * are Periscope's to compute — link to them, never hardcode dollars.
  */
 
+export interface ComponentTokens {
+  /** Total tokens (in + out) the agent sessions that built this consumed. */
+  total: number;
+  /** Working sessions it took. */
+  sessions?: number;
+  /** Human review rounds. */
+  reviews?: number;
+  /** Where the number came from, e.g. "Copilot session log, 2026-09-04". */
+  source?: string;
+}
+
 export interface ComponentConsumer {
   /** `owner/repo`, e.g. `mieweb/enterprise-health-frontdoor`. */
   repo: string;
@@ -49,7 +60,13 @@ export interface ComponentMeta {
   skills?: ComponentSkill[];
   /** Design provenance — where this was ported from. */
   origin?: ComponentOrigin;
-  /** Periscope URL for adoption / token-footprint facts for this component. */
+  /**
+   * Creation footprint in tokens — a fact, never dollars (those are a view
+   * Periscope computes over a rate table). Fill from the session log when
+   * the component lands.
+   */
+  tokens?: ComponentTokens;
+  /** Periscope URL for live adoption / token-footprint facts for this component. */
   periscope?: string;
 }
 

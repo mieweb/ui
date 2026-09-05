@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useOf } from '@storybook/addon-docs/blocks';
-import { ExternalLink, GitBranch, Globe, Sparkles, Telescope } from 'lucide-react';
+import { Coins, ExternalLink, GitBranch, Globe, Sparkles, Telescope } from 'lucide-react';
 import { SourceTip, type TipSource } from '../../src/components/SourceTip';
 import { repoUrl, type ComponentMeta } from '../../src/docs/component-meta';
 
@@ -16,8 +16,8 @@ export function ComponentMetaBlock() {
     : undefined) as ComponentMeta | undefined;
 
   if (!meta) return null;
-  const { usedIn = [], skills = [], origin, periscope } = meta;
-  if (!usedIn.length && !skills.length && !origin && !periscope) return null;
+  const { usedIn = [], skills = [], origin, tokens, periscope } = meta;
+  if (!usedIn.length && !skills.length && !origin && !tokens && !periscope) return null;
 
   return (
     <section
@@ -85,9 +85,33 @@ export function ComponentMetaBlock() {
           </Row>
         )}
 
-        {periscope && (
-          <Row icon={<Telescope size={14} aria-hidden />} label="Periscope">
-            <Chip href={periscope}>Adoption &amp; token footprint</Chip>
+        {(tokens || periscope) && (
+          <Row icon={<Coins size={14} aria-hidden />} label="Cost">
+            {tokens && (
+              <SourceTip
+                eyebrow="Creation footprint"
+                heading={`${tokens.total.toLocaleString()} tokens`}
+                note={[
+                  tokens.sessions && `${tokens.sessions} session${tokens.sessions === 1 ? '' : 's'}`,
+                  tokens.reviews && `${tokens.reviews} review round${tokens.reviews === 1 ? '' : 's'}`,
+                  tokens.source,
+                  'Tokens are the fact; dollars are a view Periscope computes over a rate table.',
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+                sources={periscope ? [{ label: 'Live usage in Periscope', url: periscope, sub: 'Periscope' }] : undefined}
+              >
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium tabular-nums text-foreground">
+                  ≈ {tokens.total.toLocaleString()} tokens to build
+                </span>
+              </SourceTip>
+            )}
+            {periscope && (
+              <Chip href={periscope}>
+                <Telescope size={12} aria-hidden />
+                Adoption in Periscope
+              </Chip>
+            )}
           </Row>
         )}
       </div>

@@ -100,6 +100,7 @@ export * from './components/MegaMenu';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/OrbitRing';
+export * from './components/RadialExplorer';
 export * from './components/NotificationCenter';
 export * from './components/OnboardingWizard';
 export * from './components/OrderCard';
