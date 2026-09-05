@@ -589,9 +589,11 @@ function MessageOverflowMenu({
         // open menu's stacking context must clear that.
         open ? 'z-[60]' : 'z-10',
         // Hand off to the footer bar when it's visible (desktop only).
+        // `invisible` (not just opacity) drops the hidden button from the tab
+        // order so keyboard users can't focus an unseen control.
         footerVisible &&
           !open &&
-          'pointer-events-none opacity-0 [@media(pointer:coarse)]:pointer-events-auto [@media(pointer:coarse)]:opacity-100'
+          'pointer-events-none invisible opacity-0 [@media(pointer:coarse)]:pointer-events-auto [@media(pointer:coarse)]:visible [@media(pointer:coarse)]:opacity-100'
       )}
     >
       <Dropdown
@@ -643,7 +645,8 @@ interface MessageRowProps {
   editable?: boolean;
   /** Save handler for an inline message edit (bound to this message's id). */
   onMessageEdited?: (messageId: string, text: string) => void;
-  /** One-click format for the default copy action (defaults to `'rich'`). */
+  /** Format for the default copy action — Ctrl/Cmd-click on the footer copy
+   * button (defaults to `'rich'`). */
   defaultCopyFormat?: SuperChatCopyFormat;
 }
 

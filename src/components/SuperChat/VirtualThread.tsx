@@ -41,7 +41,7 @@ export interface VirtualThreadProps {
   editable?: boolean;
   /** Save handler for an inline message edit (bound to the message's id). */
   onMessageEdited?: (messageId: string, text: string) => void;
-  /** One-click format for the default copy action. */
+  /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
   defaultCopyFormat?: SuperChatCopyFormat;
   /**
    * Thread ordering. `'asc'` anchors new messages to the bottom; `'desc'`

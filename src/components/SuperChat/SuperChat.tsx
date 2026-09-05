@@ -76,10 +76,9 @@ export interface SuperChatProps {
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /**
-   * One-click format for each message's default copy action (footer copy
-   * button / top-level "Copy message" menu item). All formats stay reachable
-   * per message via the overflow menu's "Copy as" submenu. Defaults to
-   * `'rich'`.
+   * Format for a message's default copy action (Ctrl/Cmd-click on the footer
+   * copy button). All formats stay reachable per message via the copy menus.
+   * Defaults to `'rich'`.
    */
   defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */

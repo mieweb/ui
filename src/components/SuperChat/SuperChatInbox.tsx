@@ -59,7 +59,7 @@ export interface SuperChatInboxProps {
   showSidebar?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
-  /** One-click format for each message's default copy action. */
+  /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
   defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */
   className?: string;

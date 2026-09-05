@@ -1057,7 +1057,9 @@ function DropdownSubmenu({
             tabIndex={-1}
             data-slot="dropdown-submenu"
             className={cn(
-              'flex min-w-[10rem] flex-col overflow-hidden',
+              // min() keeps the preferred width from beating the hook's
+              // maxWidth viewport clamp on very narrow screens.
+              'flex min-w-[min(10rem,calc(100vw-1rem))] flex-col overflow-hidden',
               'rounded-xl border border-neutral-200 bg-white shadow-lg',
               'dark:border-neutral-700 dark:bg-neutral-800',
               'animate-in fade-in zoom-in-95 duration-100'
