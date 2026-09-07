@@ -1,0 +1,77 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Inputs/Date & time/Overview" />
+
+# Date & time
+
+> **Dates go through `DateInput` (one date) or `DateRangePicker` (start/end) — never a raw
+> `<input type="date">`.** Keep dates as Luxon `DateTime` with an explicit IANA zone in
+> application code and ISO-8601 on the wire; the components below hand you strings or local
+> `Date`s, so convert at the boundary. Picking from _available_ slots is `SchedulePicker`;
+> showing booked appointments is `ScheduleCalendar`; recurring weekly hours are `BusinessHours`
+> (show) and `BusinessHoursEditor` (edit).
+
+## Which one?
+
+| Component                                                              | Use it when                                                                                                                                                                    | Not when                                                                                                                                             |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [DateInput](?path=/docs/date-time-dateinput--docs)                     | One date, time, month or year in a form (`inputType`); typed `MM/DD/YYYY` with auto-format, optional calendar (`showCalendar`), built-in `mode` / `minDate` / `maxDate` checks | A start/end pair or "Last 30 days" — `DateRangePicker`; the user must pick from open slots — `SchedulePicker`                                        |
+| [DateRangePicker](?path=/docs/date-time-daterangepicker--docs)         | Filtering a list or report by a period: presets plus a two-month custom range; `DateRangeFilter` when presets alone will do                                                    | A single validated date — `DateInput`; the range must be constrained or carry an error message (not supported)                                       |
+| [SchedulePicker](?path=/docs/date-time-schedulepicker--docs)           | Booking: the host supplies available `dates` and `times`, the user picks one of each (`DatePicker`, `TimePicker`, `RadioOption` building blocks)                               | Any date may be entered — `DateInput`; you need to _see_ existing appointments — `ScheduleCalendar`                                                  |
+| [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs)       | Staff view of appointments on an hourly day/week grid, colour-coded by `status`, with click-to-open and click-empty-hour-to-add (`onAddAppointment`)                           | The patient is choosing a slot — `SchedulePicker`; recurring opening hours — `BusinessHours`; you need month view, drag-reschedule or overlap layout |
+| [BusinessHours](?path=/docs/date-time-businesshours--docs)             | Displaying weekly opening hours with an Open/Closed badge — full week, `CompactHours` one-liner, or `HoursSummary` expandable                                                  | The hours are being edited — `BusinessHoursEditor`; open/closed must be exact for a location in another time zone (computed from the viewer's clock) |
+| [BusinessHoursEditor](?path=/docs/date-time-businesshourseditor--docs) | Admin settings to define weekly hours, split shifts and notes; `variant="rules"` when several days share hours                                                                 | Read-only display — `BusinessHours`; dated exceptions, holidays or time-zone selection (not modelled)                                                |
+
+Free text, phones and URLs live in [Text inputs](?path=/docs/inputs-text-inputs-overview--docs);
+lists of options in [Choice inputs](?path=/docs/inputs-choice-inputs-overview--docs).
+
+## How they fit together
+
+- **Three value shapes.** `DateInput` speaks _strings_ (`MM/DD/YYYY`, `YYYY-MM-DDTHH:mm`,
+  `HH:mm`, `YYYY-MM`, `YYYY`). `DateRangePicker` speaks local `Date` objects
+  (`{ start, end }`). `SchedulePicker` takes the host's `Date[]` for days and opaque display
+  strings for times. None of them emit ISO-8601 with an offset — convert with Luxon
+  (`DateTime.fromFormat(value, 'MM/dd/yyyy', { zone })`) before persisting.
+- **Two picker anatomies.** `DateInput` and `DateRangePicker` open a portaled `role="dialog"`
+  through `useAnchoredPosition` so the calendar escapes `overflow: hidden`; `DateInput` is a real
+  labelled field (`Input` anatomy, `error`, `required`), `DateRangePicker` is a bare trigger
+  button with no form-field props. `SchedulePicker` renders inline — no popover.
+- **The hours pair.** `BusinessHoursEditor` emits `DaySchedule[]`
+  (`{ day: 0–6, hours: [{ start, end, description? }] }`), and `BusinessHours` accepts that
+  array as `schedule.officeHours` unchanged. Both group identical days through the shared
+  `scheduleToRules` helper, so `variant="rules"` in the editor and `groupDays` in the display
+  show the same rows.
+- **Composition inside the family.** `BusinessHoursEditor`'s rules variant renders
+  `DateInput inputType="time"` for start/end; `DateRangeFilter` is a `Dropdown` of presets.
+  `ScheduleCalendar` and `SchedulePicker` sit on opposite sides of a booking flow — one shows
+  what is taken, the other offers what is free — but do not share data types.
+
+## Shared limitations
+
+- **Time zones.** Nothing in this family accepts a zone. `DateInput` parses with Luxon in
+  `zone: 'local'`; `DateRangePicker`, `ScheduleCalendar` and `BusinessHours` use the browser's
+  `new Date()` — so "Open Now", "today" highlights and preset boundaries follow the viewer, not
+  the clinic. `BusinessHours.schedule.timezone` is display text only.
+- **English by default.** Day and month names, weekday headers (`Su Mo Tu …`), validation
+  messages, "Today", "Done", "Open Now", "Closed", "Add Appointment" and the `en-US`
+  `toLocaleDateString` / `toLocaleTimeString` formats are hard-coded; only `DateRangePicker`
+  (`labels`), `BusinessHoursEditor` (`addHoursLabel`) and `SchedulePicker`
+  (`dateLabel` / `timeLabel`) expose strings as props. `DateRangePicker`'s grid names do follow
+  the browser locale via `Intl`. Weeks start on Sunday everywhere except
+  `BusinessHoursEditor weekStartsOn={1}`.
+- **Calendar grids are not ARIA grids.** Day cells in `DateInput` and `DateRangePicker`, and
+  every button in `SchedulePicker`, are plain `<button>`s with no `aria-label`,
+  `aria-pressed`/`aria-selected` or arrow-key navigation — Tab visits each one. `DateInput` and
+  `DateRangePicker` close on Escape and return focus to the trigger; only the mobile
+  `DateRangePicker` sheet traps focus. `ScheduleCalendar` conveys status by colour alone.
+- **Validation is thin.** Only `DateInput` validates (`validateOnBlur`, `mode`, `minDate` /
+  `maxDate`). `DateRangePicker` has no bounds; `BusinessHoursEditor` accepts end-before-start and
+  overlaps; `SchedulePicker` trusts the host's lists.
+- **RTL.** Physical classes remain: `DateInput` trigger `right-3` / `pr-10`, `DateRangePicker`
+  `text-left` / `border-r` / `rounded-l|r-md` / `mr-2`, `ScheduleCalendar` `left-1 right-1` /
+  `text-right`, `BusinessHours` `text-right` / `ml-1`, editor days variant `mr-1`.
+- **Theming.** `DateInput` and `DateRangePicker` use semantic tokens (`bg-background`,
+  `border-border`, `bg-primary-800`); `SchedulePicker`, `ScheduleCalendar`, `BusinessHours` and
+  `BusinessHoursEditor` lean on hard-coded `neutral-*` / `gray-*` / `blue-*` / `green|red-*`
+  classes with `dark:` variants that a brand theme will not recolour. Only `DateInput` depends
+  on `luxon`.

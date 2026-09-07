@@ -222,14 +222,21 @@ and the template filled on each page.
 
 ### Phase 2 — Core inputs
 
-- [ ] **Text inputs** — Input, Textarea, Label, PhoneInput, PhoneInputGroup, WebsiteInput, Address,
-      AddressForm.
-- [ ] **Choice inputs** — Checkbox, Radio, Switch, Select, Dropdown, Autocomplete, PillSelect,
-      CommandPalette, CountryDropdown, CountryCodeDropdown.
-- [ ] **Date & time** — DateInput, DateRangePicker, SchedulePicker, ScheduleCalendar, BusinessHours,
-      BusinessHoursEditor.
-- [ ] **Composite forms** — AdditionalFields, CSVColumnMapper, PermissionsEditor, LanguageSelector,
-      Slider, ESheet Builder/Renderer.
+- [x] **Text inputs** — Input, Textarea, Label, PhoneInput, PhoneInputGroup, WebsiteInput, Address,
+      AddressForm. _Landing:_ [TextInputs.mdx](src/catalog/TextInputs.mdx) (Rule 11 phones/URLs).
+- [x] **Choice inputs** — Checkbox, Radio, Switch, Select, Dropdown, Autocomplete, PillSelect,
+      Slider, CountryDropdown, CountryCodeDropdown (CommandPalette moved to Navigation).
+      _Landing:_ [ChoiceInputs.mdx](src/catalog/ChoiceInputs.mdx). Source review: Select is a
+      `role="combobox"` + listbox (not native, no `name`); Dropdown is `role="menu"` with no arrow-key
+      navigation; Switch/PillSelect do not submit with a form; Slider is not RTL-aware — all documented.
+- [x] **Date & time** — DateInput, DateRangePicker, SchedulePicker, ScheduleCalendar, BusinessHours,
+      BusinessHoursEditor. _Landing:_ [DateTime.mdx](src/catalog/DateTime.mdx) (Rule 11 dates).
+      Flagged for maintainers: ScheduleCalendar reads `selectedDate` once; BusinessHoursEditor mutates
+      `value` day objects in place.
+- [x] **Composite forms** — AdditionalFields, CSVColumnMapper, PermissionsEditor, LanguageSelector,
+      ESheet Builder/Renderer (Slider moved to Choice inputs). _Landing:_
+      [CompositeForms.mdx](src/catalog/CompositeForms.mdx). Flagged: `@esheet/*` are devDependencies,
+      not declared optional peers; ESheet CSS is not in the packages' `exports`.
 
 Rule 11 (dates/phones/URLs) and the Select / Dropdown / Autocomplete confusion are resolved here.
 
@@ -296,7 +303,8 @@ the product Storybook via Composition and confirming its entries carry the same 
 - [ ] Re-audit after Phase 1 — prose scoring of the 33 Phase 1 pages against the §2 rubric is still
       to be done by a second reviewer; the structural half (descriptions present, reciprocal links
       verified by CI, landing pages linked) is green.
-- [ ] Re-audit after Phase 2
+- [x] Re-audit after Phase 2 — structural half green (`catalog:check` ok, 75 ids left in the baseline);
+      prose scoring pending a second reviewer.
 - [ ] Re-audit after Phase 3
 - [ ] Re-audit after Phase 4
 - [ ] Re-audit after Phase 5

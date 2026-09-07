@@ -52,54 +52,11 @@ const meta: Meta<typeof Autocomplete<Employee>> = {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-A **data-agnostic combobox**: search input + filterable results popover + optional
-"create new" row. It fetches nothing on its own — you hand it \`items\` and callbacks,
-so it wires up to any store, API, or static array.
+        component: `### What it's for
 
-## Quick start
+A **data-agnostic combobox**: a text input (\`role="combobox"\`) with a filterable, portaled results listbox and an optional "create new" row. It fetches nothing on its own — you hand it \`items\` and callbacks, so it wires up to any store, API, or static array. Generic over the item type: \`items: T[]\`, \`getItemKey\`, \`renderItem\`, \`onSelect(item)\`. Field anatomy follows \`Input\`: \`label\` (\`labelVariant\` \`stacked\` | \`floating\`), \`required\` + \`requiredVariant\`, \`size\`, plus \`inputProps\` / \`inputRef\` / \`inputClassName\` for the underlying \`<input>\`.
 
-\`\`\`tsx
-import { Autocomplete } from '@mieweb/ui';
-
-<Autocomplete<Employee>
-  items={employees}                // your data, any shape
-  getItemKey={(e) => e.id}         // stable key per item
-  renderItem={(e) => <span>{e.name}</span>}   // row content
-  filter={(e, q) => e.name.toLowerCase().includes(q.toLowerCase())}
-  onSelect={(e) => console.log('picked', e)}
-  placeholder="Search employees…"
-  emptyMessage="No matches."
-  aria-label="Search employees"
-/>
-\`\`\`
-
-## The two wiring patterns
-
-**1. Local filtering** — you have the full list in memory. Pass \`items\` once and a
-\`filter\` predicate; the component filters per keystroke. (See *Basic* story.)
-
-**2. Remote / async source** — the list lives behind an API. **Omit \`filter\`**, listen
-to \`onValueChange\`, fetch, and re-render with the new \`items\`. Whatever you pass is
-shown as-is. (See *Async Source* for the shape, and *Live Wikipedia* for a real
-third-party API with debounce + abort.)
-
-\`\`\`tsx
-const [items, setItems] = useState<Patient[]>([]);
-
-<Autocomplete<Patient>
-  items={items}
-  // no filter — the server already filtered
-  onValueChange={(q) => debouncedSearch(q).then(setItems)}
-  getItemKey={(p) => p.id}
-  renderItem={(p) => <span>{p.name}</span>}
-  onSelect={openChart}
-  emptyMessage="No patients found."
-  aria-label="Search patients"
-/>
-\`\`\`
-
-## Prop cheat sheet
+**Prop cheat sheet**
 
 | Concern | Props |
 | --- | --- |
@@ -111,19 +68,108 @@ const [items, setItems] = useState<Patient[]>([]);
 | Popover behavior | \`minQueryLength\` (default 1), \`emptyMessage\` |
 | Styling / input | \`size\`, \`className\`, \`inputClassName\`, \`inputProps\`, \`inputRef\` |
 
-## Good to know
+### Use it when
 
-- The results list renders in a **portal with fixed positioning**, so it escapes
-  \`overflow: hidden\` ancestors (cards, dialogs, scroll containers).
-- Full keyboard support: ↑/↓ to move, Enter to select, Escape to close. ARIA combobox
-  pattern (\`role="combobox"\`, \`aria-activedescendant\`) built in — just supply
-  \`aria-label\` (or wire a visible \`<Label>\` via \`inputProps.id\`).
-- The popover opens only once the query reaches \`minQueryLength\` **and** there is
-  something to show (\`items\` or \`emptyMessage\`).
-- For async sources, debounce inside your \`onValueChange\` handler — the component
-  deliberately doesn't debounce for you.
-        `,
+- The list is **too large to scroll** (patients, employees, drugs, articles) and the user knows roughly what they are looking for.
+- The candidates live behind an API and must be fetched per keystroke.
+- "Pick an existing one or create it" flows — \`createLabel\` + \`onCreate\` append the create row.
+- The selection is a *search result* (typically cleared after pick, \`clearOnSelect\`), not a value displayed in the field.
+
+### Don't use it when
+
+- The options are a short, known list the user should see at once — \`Select\` (labelled combobox over a listbox, \`multiple\`, error/helper text).
+- The items are actions — \`Dropdown\`.
+- The value must stay visible in the field after selection and be validated as a form value — \`Select\`, or an \`Input\` with your own state (Autocomplete clears the query by default and has no \`error\` prop).
+- The user searches commands app-wide — \`CommandPalette\`.
+- You need offline medical-code search — \`CodeLookup\` (its own engine, not built on this component).
+
+### Example
+
+**1. Local filtering** — the full list is in memory. Pass \`items\` once and a \`filter\` predicate; the component filters per keystroke.
+
+\`\`\`tsx
+import { Autocomplete } from '@mieweb/ui';
+
+<Autocomplete<Employee>
+  items={employees}                // your data, any shape
+  getItemKey={(e) => e.id}         // stable key per item
+  renderItem={(e) => <span>{e.name}</span>}   // row content
+  filter={(e, q) => e.name.toLowerCase().includes(q.toLowerCase())}
+  onSelect={(e) => setAssignee(e)}
+  placeholder="Search employees…"
+  emptyMessage="No matches."
+  aria-label="Search employees"
+/>
+\`\`\`
+
+**2. Remote / async source** — the list lives behind an API. **Omit \`filter\`**, listen to \`onValueChange\`, fetch, and re-render with the new \`items\`. Whatever you pass is shown as-is. Debounce and abort stale requests yourself (see the *Live Wikipedia* story for a full recipe with \`setTimeout\` + \`AbortController\` and a loading state through \`emptyMessage\`).
+
+\`\`\`tsx
+const [items, setItems] = useState<Patient[]>([]);
+const [loading, setLoading] = useState(false);
+const timer = useRef<ReturnType<typeof setTimeout>>();
+const abort = useRef<AbortController>();
+
+const search = (q: string) => {
+  clearTimeout(timer.current);
+  abort.current?.abort();
+  if (!q) return setItems([]);
+  timer.current = setTimeout(async () => {
+    const ac = (abort.current = new AbortController());
+    setLoading(true);
+    try {
+      const res = await fetch(\`/api/patients?q=\${encodeURIComponent(q)}\`, { signal: ac.signal });
+      setItems(await res.json());
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') setItems([]);
+    } finally {
+      if (!ac.signal.aborted) setLoading(false);
+    }
+  }, 250);
+};
+
+<Autocomplete<Patient>
+  items={items}
+  // no filter — the server already filtered
+  onValueChange={search}
+  getItemKey={(p) => p.id}
+  renderItem={(p) => <span>{p.name}</span>}
+  onSelect={openChart}
+  emptyMessage={loading ? 'Searching…' : 'No patients found.'}
+  aria-label="Search patients"
+/>
+\`\`\`
+
+### Limitations
+
+- Accessibility: \`<input role="combobox" aria-expanded aria-controls aria-autocomplete="list" aria-activedescendant autoComplete="off">\`; the popover is \`role="listbox"\` and rows are \`<button role="option">\`. \`aria-selected\` marks the **keyboard-active** row, not a persisted selection. Keyboard: ↑/↓ move (wrapping), Enter commits, Escape closes; focus opens the list when the query already meets \`minQueryLength\`. Label: \`label\` prop (\`<label htmlFor>\`), or \`aria-label\`, or an external \`Label\` via \`inputProps.id\`.
+- The popover opens only once the query reaches \`minQueryLength\` **and** there is something to show (\`items\` or \`emptyMessage\`) — without an \`emptyMessage\` a query with no matches shows nothing.
+- No \`error\` / \`helperText\` props and no \`name\`; the input is a search box, not a submitted form value. \`required\` is forwarded to the native input.
+- No debounce, loading indicator or request cancellation — the component deliberately leaves that to your \`onValueChange\` handler.
+- Rows call \`event.preventDefault()\` on mousedown so the input keeps focus; a custom \`renderItem\` must not contain its own interactive elements.
+- The results list renders in a **portal with fixed positioning** (\`useAnchoredPosition\`, width matches the input, max height 300px), so it escapes \`overflow: hidden\` ancestors.
+- RTL and theming come from \`Input\`'s \`inputVariants\` / \`floatingLabelVariants\` (logical \`start-*\`, semantic tokens); the popover uses \`bg-card\`, \`border-border\`, \`bg-muted\`, create row \`text-primary-800\`. No built-in strings — \`placeholder\`, \`emptyMessage\` and \`createLabel\` are all yours.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-select',
+          why: 'Autocomplete is a text field for large or remote lists with a create-new row; Select filters a list it already has.',
+        },
+        {
+          type: 'alternative to',
+          target: 'clinical-lists-codelookup',
+          why: 'CodeLookup is a purpose-built offline medical-code search with its own worker engine; Autocomplete is the generic combobox you wire to any data.',
+        },
+        {
+          type: 'uses',
+          target: 'text-inputs-input',
+          why: 'Renders a raw <input> styled with the inputVariants / floatingLabelVariants and RequiredMark exported by Input.',
+        },
+      ],
     },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],

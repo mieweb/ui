@@ -8,6 +8,66 @@ const meta: Meta<typeof Textarea> = {
   component: Textarea,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+The multi-line counterpart of \`Input\`, sharing its anatomy — \`label\` (\`labelVariant\` \`stacked\` | \`floating\`, \`hideLabel\`), \`helperText\`, \`error\`, \`required\` + \`requiredVariant\`, \`size\`, \`hasError\` — and adding what long text needs: \`maxLength\` + \`showCount\` (a live \`n/max\` counter), \`autoResize\` (grows to fit content) and \`resize\` \`none\` | \`vertical\` | \`horizontal\` | \`both\`. The folder exports \`Textarea\` and \`textareaVariants\`.
+
+### Use it when
+
+- The user writes a sentence or more: notes, comments, descriptions, reasons.
+- There is a character budget the user should see while typing (\`maxLength\` + \`showCount\`).
+
+### Don't use it when
+
+- The value fits on one line — \`Input\`.
+- The text needs formatting, headings or collaborative editing — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
+- You need a fixed-height, read-only block — plain \`Text\`.
+
+### Example
+
+\`\`\`tsx
+const [note, setNote] = React.useState('');
+
+<Textarea
+  label="Visit note"
+  value={note}
+  onChange={(e) => setNote(e.target.value)}
+  maxLength={500}
+  showCount
+  autoResize
+  helperText="Visible to the patient."
+/>
+\`\`\`
+
+Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an internal copy only so the counter stays correct.
+
+### Limitations
+
+- Same wiring as \`Input\`: \`<label htmlFor>\`, \`aria-invalid\` always rendered, \`aria-describedby\` → error (\`<p role="alert">\`) or helper text, plus the counter's id when \`showCount\` is on. Helper text is hidden while an error shows.
+- The counter turns red at \`maxLength\` but does not announce it; \`maxLength\` is enforced by the native attribute, so the user is simply stopped from typing.
+- \`autoResize\` sets \`style.height\` from \`scrollHeight\` on every change and forces \`resize: none\`; \`rows\` still sets the initial height.
+- \`ref\` is forwarded through \`useImperativeHandle\`, so it is populated after mount, not during the first render.
+- RTL-safe (\`start-3\`, \`ms-1\`); the footer uses \`justify-between\` so the counter sits at the end. Dark mode via the same semantic tokens as \`Input\`.
+- No built-in strings; depends on \`Input\` for \`RequiredMark\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'text-inputs-input',
+          why: 'Textarea for multi-line text with character count and auto-resize; Input for one line.',
+        },
+        {
+          type: 'alternative to',
+          target: 'editors-richeditor',
+          why: 'RichEditor when the text needs formatting or collaboration; Textarea for plain multi-line text.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
@@ -18,10 +78,13 @@ const meta: Meta<typeof Textarea> = {
     labelVariant: {
       control: 'select',
       options: ['stacked', 'floating'],
+      description:
+        'stacked: label above the field. floating: label rests inside and floats on focus/value (ignores placeholder).',
     },
     resize: {
       control: 'select',
       options: ['none', 'vertical', 'horizontal', 'both'],
+      description: 'User resize handle; forced to none when autoResize is on.',
     },
     showCount: {
       control: 'boolean',

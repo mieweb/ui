@@ -1,0 +1,79 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Inputs/Choice inputs/Overview" />
+
+# Choice inputs
+
+> **Is the user picking a value, or running an action?** A value the form will save → `Select`
+> (or `Radio` when all options fit on screen, `Checkbox` when several may be on). An action or
+> menu → `Dropdown`. A value found by typing into a large or remote list → `Autocomplete`. A
+> setting that applies the instant it flips → `Switch`; a pressed toolbar button →
+> [Toggle](?path=/docs/actions-toggle--docs). A one-of-N view switch in a toolbar → `PillSelect`.
+
+## Which one?
+
+| Component                                                                  | Use it when                                                                                                   | Not when                                                                                                                  |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [Checkbox](?path=/docs/choice-inputs-checkbox--docs)                       | Zero or more independent options, saved with the form; a "select all" with `indeterminate`                    | It takes effect immediately — `Switch`; exactly one option — `Radio`                                                      |
+| [Radio](?path=/docs/choice-inputs-radio--docs)                             | Exactly one of 2–7 options, all visible, inside a `RadioGroup`                                                | More options or search — `Select`; toolbar space — `PillSelect`                                                           |
+| [Switch](?path=/docs/choice-inputs-switch--docs)                           | An on/off setting that applies at once (`role="switch"`)                                                      | The value is submitted with a form — `Checkbox`; a toolbar pressed state — [Toggle](?path=/docs/actions-toggle--docs)     |
+| [Select](?path=/docs/choice-inputs-select--docs)                           | Picking a value (or several with `multiple`) from a known list of ~8+ options in a form; groups; local search | The items are actions — `Dropdown`; the list is huge or remote — `Autocomplete`                                           |
+| [Dropdown](?path=/docs/choice-inputs-dropdown--docs)                       | A menu of actions or links (`role="menu"`), row "⋯" menus, tick-box filters (`multiSelect`)                   | Choosing a form value — `Select`; app-wide command search — [CommandPalette](?path=/docs/navigation-commandpalette--docs) |
+| [Autocomplete](?path=/docs/choice-inputs-autocomplete--docs)               | Typing to find an item in a large, remote or creatable list (patients, drugs, articles)                       | A short known list — `Select`; the value must stay in the field with validation — `Select` / `Input`                      |
+| [PillSelect](?path=/docs/choice-inputs-pillselect--docs)                   | A compact "Label: Value" pill for a one-of-N view/sort/period choice in a toolbar                             | A validated form field — `Select`; options should all be visible — `Radio`                                                |
+| [Slider](?path=/docs/choice-inputs-slider--docs)                           | An approximate number in a bounded range with live feedback (volume, opacity, pain score)                     | Exact digits matter — `Input type="number"`; two thumbs (not supported)                                                   |
+| [CountryDropdown](?path=/docs/choice-inputs-countrydropdown--docs)         | A country for an address or nationality — the list, flags and localized names are built in                    | It accompanies a phone number — `CountryCodeDropdown`; a curated subset — `Select`                                        |
+| [CountryCodeDropdown](?path=/docs/choice-inputs-countrycodedropdown--docs) | A dial-code picker beside an `Input` for international phone numbers (`validatePhoneNumber`, `formatE164`)    | US/Canada only — [PhoneInput](?path=/docs/text-inputs-phoneinput--docs); the country itself — `CountryDropdown`           |
+
+Free text, phones and URLs live in [Text inputs](?path=/docs/inputs-text-inputs-overview--docs);
+dates go to [DateInput](?path=/docs/date-time-dateinput--docs).
+
+## How they fit together
+
+- **Native inputs vs. widgets.** `Checkbox` and `Radio` wrap real `<input>` elements, so they
+  post `name`/`value` with a form and get keyboard behaviour from the browser. `Slider` keeps a
+  hidden `<input type="range">` for submission. Everything else (`Switch`, `Select`, `Dropdown`,
+  `Autocomplete`, `PillSelect`, the country pickers) is a button/portal widget with **no `name`**
+  — you own the state and post it yourself.
+- **Two popover grammars.** `Select`, `Autocomplete`, `PillSelect` and the country pickers open
+  a `role="listbox"` of `role="option"` rows (a value is chosen). `Dropdown` opens a
+  `role="menu"` of `menuitem` / `menuitemcheckbox` buttons (an action runs). All of them portal
+  to `<body>` through `useAnchoredPosition` (PillSelect uses its own fixed positioning) so they
+  escape `overflow: hidden`.
+- **One-of-N at three densities.** `RadioGroup` (all options visible), `PillSelect` (one chip),
+  `Select` (labelled field, groups, search, `multiple`). Pick by how much the user needs to
+  see and whether the field is validated.
+- **Shared field anatomy.** `Select` and `Autocomplete` reuse `Input`'s `RequiredMark`,
+  `inputVariants` / `floatingLabelVariants`; `CheckboxGroup` and `RadioGroup` borrow the
+  floating-frame variants so `labelVariant="floating"` lines up with floating inputs; the
+  `Dropdown` search box uses `inputVariants`.
+- `CountryDropdown` is `CountryCodeDropdown` without dial codes (one shared base, same
+  `CountryData` shape, same `google-libphonenumber` list).
+
+## Shared limitations
+
+- Only `Checkbox`, `Radio` and `Slider` submit with a form. `Switch`, `Select`, `Dropdown`,
+  `Autocomplete`, `PillSelect` and the country pickers have no `name`; `Switch`, `Autocomplete`,
+  `PillSelect`, `Dropdown` and the country pickers also have no `error` prop.
+- Keyboard coverage is uneven: `Select` and `Autocomplete` implement arrow keys, Enter and Escape
+  (`Select` adds Home/End and typeahead); the country pickers arrow between options once focus is
+  inside the panel; **`Dropdown` and `PillSelect` have no arrow-key navigation** (Tab only).
+  `Select` and `Dropdown` mark the highlighted row visually but do not set
+  `aria-activedescendant`; only `Autocomplete` does.
+- Focus return on close: `Select` and `PillSelect` return focus to the trigger on Escape;
+  `Dropdown`, `Autocomplete` and the country pickers do not.
+- Built-in English strings: `Select` (`"Select an option"`, `"Search..."`, `"No results found"`
+  as props; `"Search options"`, `"Options"` hard-coded), `Dropdown` (all four as props),
+  `PillSelect` (`"Label: Value"` join, `"No options"`), `Slider` (`"Slider"` fallback
+  `aria-label`), country pickers (`"Search countries"`, `"No countries found"` hard-coded;
+  country names are localized via `Intl.DisplayNames`). `Checkbox`, `Radio`, `Switch` and
+  `Autocomplete` ship no strings.
+- RTL: `Checkbox`, `Radio` and `Switch` are logical (`flex-row-reverse`, `rtl:` thumb
+  variants); `Select` / `Autocomplete` use `start-*` offsets; `Dropdown` and the country pickers
+  have logical placement but `text-left` rows; `PillSelect` positions from `rect.left`;
+  `Slider` is fully physical (`left`, `ml-1`, `clientX`, ArrowRight = increase).
+- Theming: `Checkbox`, `Radio`, `Select`, `Autocomplete`, `PillSelect` use semantic tokens
+  (`border-input`, `bg-card`, `bg-muted`, `primary-*`). `Dropdown`, the country-picker panels,
+  the `Switch` / `Slider` tracks and the non-default `Slider` variants use hard-coded
+  `neutral-*` / `white` / `green|yellow|red-*` classes with `dark:` variants that a brand theme
+  will not recolour.

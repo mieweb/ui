@@ -67,16 +67,76 @@ const rendererMeta: Meta<typeof EsheetRenderer> = {
     layout: 'centered',
     docs: {
       description: {
-        component: `
-Read-only form renderer that auto-detects eSheet, SurveyJS, and MCP elicitation formats.
+        component: `### What it's for
+
+The **fill-out side of eSheet**: renders a form definition as live fields and collects the answers. Re-exported from \`@esheet/renderer\` via \`@mieweb/ui/esheet\`. \`formDataInput: unknown\` accepts an eSheet \`FormDefinition\`, a SurveyJS schema, an MCP elicitation envelope, or any of those as a JSON/YAML string — formats are auto-detected and converted unless \`strict\` is set (then only a valid \`FormDefinition\` is accepted). \`initialResponses?: FormResponse\` pre-fills answers, \`onReady()\` fires once the definition is parsed into the store, \`className\` styles the root (add \`dark\` for dark mode). Responses are read through a ref: \`EsheetRendererHandle\` exposes \`getValidResponse()\` → \`{ response: FormResponse | null, errors: ValidationError[] }\` (\`response\` is \`null\` when there are errors), \`getRawResponse()\`, \`getFormStore()\` and \`getUIStore()\`. Register @mieweb/ui field types (\`registerMieEsheetFields\`) before mounting when definitions use \`medicationList\` / \`allergyList\`.
+
+### Use it when
+
+- Patients or staff fill in a **template someone authored** (in \`ESheet Builder\` or exported from SurveyJS / an MCP tool) and you need validated answers back.
+- You want one component that tolerates several schema dialects — or \`strict\` when you must reject anything but eSheet.
+
+### Don't use it when
+
+- You need to **edit the form definition** — \`ESheet Builder\`.
+- The form is fixed and developer-authored — compose \`Input\`, \`Select\`, \`DateInput\` etc. directly.
+- Users add free key/value extras to an otherwise fixed form — \`AdditionalFields\`.
+- You need a submit button, autosave or server persistence out of the box — the renderer has none; the host calls \`getValidResponse()\` and posts.
+
+### Example
 
 \`\`\`tsx
-import { EsheetRenderer } from '@mieweb/ui/esheet';
+import { EsheetRenderer, type EsheetRendererHandle, type FormDefinition } from '@mieweb/ui/esheet';
 
-<EsheetRenderer formDataInput={formDefinition} ref={rendererRef} />
+function IntakeForm({ definition, draft }: { definition: FormDefinition; draft?: FormResponse }) {
+  const ref = useRef<EsheetRendererHandle>(null);
+  const [errors, setErrors] = useState<ValidationError[]>([]);
+
+  const submit = async () => {
+    const { response, errors } = ref.current!.getValidResponse();
+    setErrors(errors);
+    if (response) await saveIntake(definition.id, response);   // host owns persistence
+  };
+
+  return (
+    <>
+      <EsheetRenderer ref={ref} formDataInput={definition} initialResponses={draft} strict />
+      {errors.length > 0 && <Alert variant="error">{errors.length} answers need attention</Alert>}
+      <Button onClick={submit}>Submit</Button>
+    </>
+  );
+}
 \`\`\`
-        `,
+
+### Limitations
+
+- Separate install: \`@esheet/renderer\` (and \`@esheet/core\` for types) are optional peers behind \`@mieweb/ui/esheet\`. The compiled stylesheet (\`index.output.css\`) lives in the package's \`src/\` and is not in its \`exports\`, so the host must copy/alias it (Storybook imports it from the submodule source); load it before the builder's when both are present.
+- Imperative API: there is no \`onChange\` / \`onSubmit\` and no submit button — read answers via the ref. Validation runs only when you call \`getValidResponse()\`; \`getRawResponse()\` returns unvalidated state.
+- Accessibility depends on \`@esheet/fields\`' field markup; the renderer shell itself sets one \`aria-*\` attribute and no landmark roles. A known upstream contrast failure on the selected option card (mieweb/eSheet#170) is excluded from axe in the *PreFilled* story.
+- i18n / RTL: no locale, direction or translation hooks were found in the renderer source; built-in strings are English and layout is LTR. Dark mode is a \`dark\` class on \`className\`, not the @mieweb/ui theme provider.
+- Format auto-detection converts SurveyJS / MCP input to a \`FormDefinition\` internally — the response shape you get back is eSheet's \`FormResponse\`, not the source dialect's. Custom field types require a core that accepts them (mieweb/eSheet#91).`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui/esheet',
+      peers: ['@esheet/renderer', '@esheet/core'],
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'composite-forms-esheet-builder',
+          why: 'The Renderer displays and collects responses for the FormDefinition JSON that the Builder produces.',
+        },
+        {
+          type: 'contains',
+          target: 'clinical-lists-medicationlistfield-esheet',
+          why: 'Renders the medicationList custom field type once registerMieEsheetFields() has run.',
+        },
+        {
+          type: 'contains',
+          target: 'clinical-lists-allergylistfield-esheet',
+          why: 'Renders the allergyList custom field type once registerMieEsheetFields() has run.',
+        },
+      ],
     },
   },
   argTypes: {

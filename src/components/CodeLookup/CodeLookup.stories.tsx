@@ -47,6 +47,16 @@ aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https:
         `,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-autocomplete',
+          why: 'CodeLookup is a purpose-built offline medical-code search with its own worker engine; Autocomplete is the generic combobox you wire to any data.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };

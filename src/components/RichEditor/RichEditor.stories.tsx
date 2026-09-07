@@ -18,6 +18,11 @@ const meta: Meta<typeof RichEditor> = {
           target: 'feedback-collabstatus',
           why: 'CollabStatus shows who else is editing and whether the Yjs document is in sync.',
         },
+        {
+          type: 'alternative to',
+          target: 'text-inputs-textarea',
+          why: 'RichEditor when the text needs formatting or collaboration; Textarea for plain multi-line text.',
+        },
       ],
     },
   },

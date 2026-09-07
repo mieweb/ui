@@ -46,9 +46,62 @@ const meta: Meta<typeof AdditionalFields> = {
     layout: 'padded',
     docs: {
       description: {
-        component:
-          "A collapsible section for adding custom key-value pairs. Useful for additional/custom fields that don't fit into structured forms.",
+        component: `### What it's for
+
+A **free-form "extra fields" section**: rows of name + value \`Input\`s that the person filling the form adds on the spot, wrapped in a collapsible header with a count badge. Controlled through \`value: KeyValueEntry[]\` (\`{ id, name, value }\`) and \`onChange(entries)\`; \`generateId()\` is exported for creating rows yourself. \`title\` (default "Additional Information (Optional)"), \`defaultExpanded\`, \`collapsible\` (\`false\` renders a plain heading + rows), \`maxEntries\` (default 20, disables the add button), \`namePlaceholder\` / \`valuePlaceholder\` / \`addButtonLabel\`, \`disabled\`. Exports: \`AdditionalFields\`, \`generateId\`, types \`AdditionalFieldsProps\`, \`KeyValueEntry\`.
+
+### Use it when
+
+- A structured form (employee, order, patient) needs an escape hatch for **ad-hoc attributes** you did not model — "Badge colour: blue", "Locker: 14".
+- The extra keys are decided by the **end user at fill time** and stored as loose key/value pairs.
+
+### Don't use it when
+
+- An administrator should **design** the custom fields once and reuse them across records with types, options and validation — \`ESheet Builder\` to author the definition, \`ESheet Renderer\` to fill it.
+- Keys come from a fixed vocabulary — render \`Select\` / \`Input\` pairs per key, or \`CSVColumnMapper\` when mapping import columns to known fields.
+- Values need types other than text (dates, numbers, choices) — this component only offers two text inputs per row.
+
+### Example
+
+\`\`\`tsx
+const [extras, setExtras] = useState<KeyValueEntry[]>(
+  () => Object.entries(employee.customFields ?? {}).map(([name, value]) => ({ id: generateId(), name, value }))
+);
+
+<AdditionalFields title="Custom fields" value={extras} onChange={setExtras} maxEntries={10} />
+
+// on submit, the host serialises and persists:
+const customFields = Object.fromEntries(extras.filter((e) => e.name.trim()).map((e) => [e.name, e.value]));
+\`\`\`
+
+### Limitations
+
+- Accessibility: the collapsible header is a \`<button aria-expanded aria-controls={contentId}>\`; the content region is \`hidden\` when collapsed. Each row's inputs are \`Input\`s with visually hidden labels "Field name" / "Field value" (identical for every row — screen readers cannot tell row 1 from row 3); the remove button is \`aria-label="Remove field"\` (also not row-specific). No live announcement when rows are added or removed; focus is not moved to a newly added row.
+- No validation or de-duplication: empty names, duplicate names and blank values are all allowed and emitted; the host must filter. Nothing is submitted with a form (\`Input\`s have no \`name\`).
+- Adding the first row while collapsed auto-expands the section; \`maxEntries\` silently disables the add button with no message.
+- i18n: defaults are English props (\`title\`, placeholders, \`addButtonLabel\`); the two hidden labels and "Remove field" are hard-coded English.
+- RTL: header uses \`text-left\`; the count badge uses \`ml-1\` (physical). Theming: title \`text-gray-700 dark:text-gray-300\`, remove button \`text-red-600\`, add button and badge use \`brand-*\` classes (\`text-brand-600\`, \`bg-brand-100\`) rather than \`primary-*\` tokens. Depends on \`Button\`, \`Input\` and the \`Icons\` set (\`ChevronDownIcon\`, \`PlusIcon\`, \`TrashIcon\`).`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'composite-forms-esheet-builder',
+          why: 'AdditionalFields lets the person filling a form add loose text key/value pairs; ESheet Builder lets an author define typed, reusable fields up front.',
+        },
+        {
+          type: 'alternative to',
+          target: 'composite-forms-csvcolumnmapper',
+          why: 'AdditionalFields lets the user invent loose key/value pairs; CSVColumnMapper matches incoming columns to fields you already defined.',
+        },
+        {
+          type: 'uses',
+          target: 'text-inputs-input',
+          why: 'Each row is two Input fields (name and value) with hidden labels.',
+        },
+      ],
     },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],

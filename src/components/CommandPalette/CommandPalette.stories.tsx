@@ -234,6 +234,11 @@ const meta: Meta<typeof CommandPalette> = {
           target: 'overlays-keyboardshortcutsoverlay',
           why: 'KeyboardShortcutsOverlay documents the keys; CommandPalette lets users search and run commands.',
         },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-dropdown',
+          why: 'CommandPalette searches and runs commands app-wide from a keyboard shortcut; Dropdown is a short anchored menu for one context.',
+        },
       ],
     },
     docs: {

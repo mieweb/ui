@@ -148,6 +148,87 @@ const meta = {
   component: SelectWithState,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A custom **value picker for forms**: a \`<button role="combobox">\` trigger that opens a portaled \`role="listbox"\`. It is not a native \`<select>\`. Options come in as data — \`options: (SelectOption | SelectGroup)[]\` (\`{ value, label, disabled? }\` or \`{ label, options }\`) — and the value flows through \`value\` / \`defaultValue\` / \`onValueChange\`. \`multiple\` switches the props to \`string[]\` and keeps the list open while toggling. Field anatomy matches \`Input\`: \`label\` (\`labelVariant\` \`stacked\` | \`floating\`, \`hideLabel\`), \`helperText\`, \`error\` / \`hasError\`, \`required\` + \`requiredVariant\`, \`size\`. \`searchable\` adds a filter box; without it, typing does native-style typeahead. \`selectTriggerVariants\` is exported.
+
+### Use it when
+
+- The user picks **a value** (one, or several with \`multiple\`) from a known list of ~8+ options, and the choice is part of a form.
+- Options need grouping (\`SelectGroup\`), disabling, or quick filtering of a list you already have in memory (\`searchable\`).
+
+### Don't use it when
+
+- The items are **actions** (Edit, Delete, Export) or a user menu — \`Dropdown\` (\`role="menu"\`, \`DropdownItem\` runs \`onClick\`).
+- The list is large or remote and the user types to search it — \`Autocomplete\` (text input, async \`items\`, "create new" row).
+- Up to ~7 options that benefit from being visible at once — \`Radio\`; several independent yes/no — \`Checkbox\`.
+- A toolbar view switch — \`PillSelect\`.
+- The value is a country — \`CountryDropdown\` / \`CountryCodeDropdown\` (list is built for you).
+
+### Example
+
+\`\`\`tsx
+const [specialty, setSpecialty] = useState('');
+
+<Select
+  label="Specialty"
+  required
+  placeholder="Choose…"
+  options={[
+    { label: 'Primary care', options: [{ value: 'fm', label: 'Family medicine' }, { value: 'im', label: 'Internal medicine' }] },
+    { label: 'Surgical', options: [{ value: 'gs', label: 'General surgery' }, { value: 'ortho', label: 'Orthopedics', disabled: true }] },
+  ]}
+  value={specialty}
+  onValueChange={setSpecialty}
+  error={submitted && !specialty ? 'Specialty is required' : undefined}
+/>
+
+// multiple: value and onValueChange become string[]
+<Select multiple label="Symptoms" options={symptoms} value={selected} onValueChange={setSelected} searchable />
+\`\`\`
+
+### Limitations
+
+- Accessibility: trigger is \`<button role="combobox" aria-haspopup="listbox" aria-expanded aria-controls>\` with \`aria-invalid\`, \`aria-required\` and \`aria-describedby\` → error or helper text; the \`<label htmlFor>\` targets the trigger's \`id\`. Options are \`<li role="option" aria-selected>\`, groups \`<li role="presentation">\` + \`<ul role="group" aria-label>\`, \`aria-multiselectable\` in \`multiple\` mode. Keyboard: ArrowUp/Down, Home/End, Enter/Space, Escape (returns focus to the trigger), typeahead when not \`searchable\`. **No \`aria-activedescendant\`** — the highlighted option is marked with \`data-highlighted\`, so screen readers are not told which option the arrow keys reached until it is selected.
+- Not a form control: there is no \`name\` and nothing is submitted. Keep the value in state and post it yourself.
+- Filtering is a case-insensitive \`includes\` on \`label\` only; \`multiple\` shows selected labels joined with \`", "\` and truncates.
+- The listbox is portaled to \`<body>\` with fixed positioning (\`useAnchoredPosition\`, width matches trigger, max height 300px) so it escapes \`overflow: hidden\` ancestors.
+- Strings default to English but are props: \`placeholder\` ("Select an option"), \`searchPlaceholder\` ("Search..."), \`noResultsText\` ("No results found"). The search box's \`aria-label="Search options"\` and the listbox fallback \`aria-label="Options"\` are hard-coded.
+- RTL: floating label uses logical \`start-3\`; the chevron sits at the flex end. Theming: \`border-input\`, \`bg-background\`, popover \`bg-card border-border\`, selected option \`bg-primary-50 dark:bg-primary-950\`. Depends on \`class-variance-authority\` and \`Input\`'s \`RequiredMark\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-dropdown',
+          why: 'Select picks a value into a form (role="combobox"/listbox); Dropdown runs actions from a menu (role="menu").',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-autocomplete',
+          why: 'Select filters a list it already has; Autocomplete is a text field for large or remote lists with a create-new row.',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-radio',
+          why: 'Select when the list is long, grouped or searchable; Radio for up to ~7 visible options.',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-pillselect',
+          why: 'Select is a form field with label/error; PillSelect is a compact toolbar pill for one-of-N view choices.',
+        },
+        {
+          type: 'alternative to',
+          target: 'composite-forms-languageselector',
+          why: 'Select is a labelled, validated form field for arbitrary values; LanguageSelector is a header/settings switcher with a built-in language list.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
