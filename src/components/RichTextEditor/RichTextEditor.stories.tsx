@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
 
 const meta: Meta<typeof RichTextEditor> = {
-  title: 'Components/Forms & Inputs/RichTextEditor',
+  id: 'editors-richtexteditor',
+  title: 'Modules/Editors/RichTextEditor',
   component: RichTextEditor,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

@@ -5,7 +5,8 @@ import { AllergyManager } from './AllergyManager';
 import { CodeLookup } from '../CodeLookup';
 
 const meta: Meta<typeof AllergyList> = {
-  title: 'Healthcare/AllergyList',
+  id: 'clinical-lists-allergylist',
+  title: 'Healthcare/Clinical lists/AllergyList',
   component: AllergyList,
   parameters: {
     layout: 'padded',
@@ -29,7 +30,7 @@ is explicitly confirmed — an empty allergy list must never silently imply
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

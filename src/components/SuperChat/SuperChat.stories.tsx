@@ -22,9 +22,10 @@ import 'katex/dist/katex.min.css';
 // ============================================================================
 
 const meta: Meta<typeof SuperChat> = {
-  title: 'Product/Feature Modules/SuperChat/SuperChat (Panel)',
+  id: 'superchat-superchat-panel',
+  title: 'Modules/SuperChat/SuperChat (Panel)',
   component: SuperChat,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     readOnly: {
       control: 'boolean',

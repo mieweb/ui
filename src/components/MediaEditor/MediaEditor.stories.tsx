@@ -37,9 +37,10 @@ const sampleTranscript: Transcript = {
 // ============================================================================
 
 const meta: Meta<typeof MediaEditor> = {
-  title: 'Components/Images & Media/MediaEditor',
+  id: 'media-mediaeditor',
+  title: 'Modules/Media/MediaEditor',
   component: MediaEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

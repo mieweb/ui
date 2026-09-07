@@ -9,9 +9,10 @@ import {
 import { Badge } from '../Badge';
 
 const meta: Meta<typeof WebChartReportViewer> = {
-  title: 'Components/Text & Data Display/WebChartReportViewer',
+  id: 'encounter-orders-webchartreportviewer',
+  title: 'Healthcare/Encounter & orders/WebChartReportViewer',
   component: WebChartReportViewer,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     docs: {
       story: {

@@ -189,9 +189,10 @@ function ComposerModelSelectorStoryDemo({
 }
 
 const meta = {
-  title: 'Product/Feature Modules/AI/ComposerModelSelector',
+  id: 'chat-composermodelselector',
+  title: 'Modules/Chat/ComposerModelSelector',
   component: ComposerModelSelectorStoryDemo,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

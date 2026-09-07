@@ -8,9 +8,10 @@ import {
 } from './Address';
 
 const meta: Meta<typeof Address> = {
-  title: 'Components/Forms & Inputs/Address',
+  id: 'text-inputs-address',
+  title: 'Inputs/Text inputs/Address',
   component: Address,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

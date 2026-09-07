@@ -9,9 +9,10 @@ import { Card } from '../Card';
 import { Button } from '../Button';
 
 const meta: Meta<typeof PermissionsEditor> = {
-  title: 'Components/Forms & Inputs/PermissionsEditor',
+  id: 'composite-forms-permissionseditor',
+  title: 'Inputs/Composite forms/PermissionsEditor',
   component: PermissionsEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     userName: {
       control: 'text',

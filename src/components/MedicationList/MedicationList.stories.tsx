@@ -11,7 +11,8 @@ import { MedicationReconciliation } from './MedicationReconciliation';
 import { CodeLookup } from '../CodeLookup';
 
 const meta: Meta<typeof MedicationList> = {
-  title: 'Healthcare/MedicationList',
+  id: 'clinical-lists-medicationlist',
+  title: 'Healthcare/Clinical lists/MedicationList',
   component: MedicationList,
   parameters: {
     layout: 'padded',
@@ -38,7 +39,7 @@ Full docs: [README](https://github.com/mieweb/ui/blob/main/src/components/Medica
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

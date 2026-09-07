@@ -192,7 +192,8 @@ type AppHeaderStoryProps = React.ComponentProps<typeof AppHeader> &
 // =============================================================================
 
 const meta: Meta<AppHeaderStoryProps> = {
-  title: 'Components/Layout & Structure/AppHeader',
+  id: 'layout-appheader',
+  title: 'Components/Layout/AppHeader',
   component: AppHeader,
   parameters: {
     layout: 'fullscreen',
@@ -203,7 +204,7 @@ const meta: Meta<AppHeaderStoryProps> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     sticky: {
       control: 'boolean',

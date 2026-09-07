@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PhoneInput } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInput> = {
-  title: 'Components/Forms & Inputs/PhoneInput',
+  id: 'text-inputs-phoneinput',
+  title: 'Inputs/Text inputs/PhoneInput',
   component: PhoneInput,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   decorators: [
     (Story) => (
       <div style={{ width: '300px' }}>

@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Checkbox, CheckboxGroup } from './Checkbox';
 
 const meta: Meta<typeof Checkbox> = {
-  title: 'Components/Forms & Inputs/Checkbox',
+  id: 'choice-inputs-checkbox',
+  title: 'Inputs/Choice inputs/Checkbox',
   component: Checkbox,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

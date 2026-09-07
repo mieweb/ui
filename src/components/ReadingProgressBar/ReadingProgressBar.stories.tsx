@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ReadingProgressBar } from './ReadingProgressBar';
 
 const meta: Meta<typeof ReadingProgressBar> = {
-  title: 'Components/Feedback/ReadingProgressBar',
+  id: 'navigation-readingprogressbar',
+  title: 'Components/Navigation/ReadingProgressBar',
   component: ReadingProgressBar,
   parameters: {
     layout: 'fullscreen',
@@ -15,7 +16,7 @@ const meta: Meta<typeof ReadingProgressBar> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     barClassName: {
       description: 'Class for the filled bar (default bg-primary-500).',

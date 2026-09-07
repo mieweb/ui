@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { PhoneInputGroup, type PhoneEntry } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInputGroup> = {
-  title: 'Components/Forms & Inputs/PhoneInputGroup',
+  id: 'text-inputs-phoneinputgroup',
+  title: 'Inputs/Text inputs/PhoneInputGroup',
   component: PhoneInputGroup,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

@@ -4,7 +4,8 @@ import { Button } from '../Button';
 import { FilterSummaryBar } from './FilterSummaryBar';
 
 const meta: Meta<typeof FilterSummaryBar> = {
-  title: 'Components/Data Display/FilterSummaryBar',
+  id: 'data-display-filtersummarybar',
+  title: 'Components/Data display/FilterSummaryBar',
   component: FilterSummaryBar,
   parameters: {
     layout: 'padded',
@@ -18,7 +19,7 @@ const meta: Meta<typeof FilterSummaryBar> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     filteredCount: {
       description: 'Rows visible after filtering.',

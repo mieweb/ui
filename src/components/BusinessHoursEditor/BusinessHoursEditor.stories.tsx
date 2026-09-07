@@ -10,9 +10,10 @@ import {
 import { BusinessHours } from '../BusinessHours';
 
 const meta: Meta<typeof BusinessHoursEditor> = {
-  title: 'Components/Forms & Inputs/BusinessHoursEditor',
+  id: 'date-time-businesshourseditor',
+  title: 'Inputs/Date & time/BusinessHoursEditor',
   component: BusinessHoursEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

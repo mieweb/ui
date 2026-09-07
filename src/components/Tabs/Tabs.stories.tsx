@@ -15,12 +15,13 @@ import {
 import { Badge } from '../Badge';
 
 const meta: Meta<typeof Tabs> = {
-  title: 'Components/Layout & Structure/Tabs',
+  id: 'navigation-tabs',
+  title: 'Components/Navigation/Tabs',
   component: Tabs,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

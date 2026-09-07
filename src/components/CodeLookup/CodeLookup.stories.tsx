@@ -10,7 +10,8 @@ import { exportMemoryYaml, importMemoryYaml } from './memoryYaml';
 import { Button } from '../Button';
 
 const meta: Meta<typeof CodeLookup> = {
-  title: 'Healthcare/CodeLookup',
+  id: 'clinical-lists-codelookup',
+  title: 'Healthcare/Clinical lists/CodeLookup',
   component: CodeLookup,
   parameters: {
     layout: 'padded',
@@ -47,7 +48,7 @@ aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https:
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

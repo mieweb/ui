@@ -74,9 +74,10 @@ const wordOnlyTranscript: Transcript = {
 // ============================================================================
 
 const meta: Meta<typeof TranscriptView> = {
-  title: 'Components/Images & Media/TranscriptView',
+  id: 'media-transcriptview',
+  title: 'Modules/Media/TranscriptView',
   component: TranscriptView,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

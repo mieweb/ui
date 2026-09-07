@@ -7,12 +7,13 @@ import {
 } from './Collapsible';
 
 const meta: Meta<typeof Collapsible> = {
+  id: 'layout-collapsible',
   title: 'Components/Layout/Collapsible',
   component: Collapsible,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

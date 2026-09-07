@@ -2,12 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text, SmallMuted } from './Text';
 
 const meta: Meta<typeof Text> = {
+  id: 'foundations-text',
   title: 'Foundations/Text',
   component: Text,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

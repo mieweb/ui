@@ -14,7 +14,8 @@ import { OrderEditor } from '../OrderEditor';
 import type { ConditionAssertion, ConditionConcern } from '../ProblemList';
 
 const meta: Meta<typeof Assessment> = {
-  title: 'Healthcare/Assessment',
+  id: 'encounter-orders-assessment',
+  title: 'Healthcare/Encounter & orders/Assessment',
   component: Assessment,
   parameters: {
     layout: 'padded',
@@ -30,7 +31,7 @@ Visit-specific **Assessment & Plan**.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

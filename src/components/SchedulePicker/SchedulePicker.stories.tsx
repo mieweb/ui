@@ -104,12 +104,13 @@ type SchedulePickerStoryArgs = Omit<
 };
 
 const meta = {
-  title: 'Components/Forms & Inputs/SchedulePicker',
+  id: 'date-time-schedulepicker',
+  title: 'Inputs/Date & time/SchedulePicker',
   component: SchedulePicker,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     dateLabel: {
       control: 'text',

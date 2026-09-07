@@ -2,7 +2,9 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta = {
+  id: 'foundations-colors',
   title: 'Foundations/Colors',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

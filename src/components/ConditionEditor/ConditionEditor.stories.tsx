@@ -20,7 +20,8 @@ import type {
 } from '../ProblemList';
 
 const meta: Meta<typeof ConditionEditor> = {
-  title: 'Healthcare/ConditionEditor',
+  id: 'clinical-lists-conditioneditor',
+  title: 'Healthcare/Clinical lists/ConditionEditor',
   component: ConditionEditor,
   parameters: {
     layout: 'padded',
@@ -33,7 +34,7 @@ Dialog editor for **condition assertions** — the condition analog of the plann
 - **Three-state uncertainty (§4.1):** every optional field has an *Unknown* toggle (explicitly unknown — distinct from untouched) and a low/med/high confidence control, written to the assertion's \`uncertainty\` block.
 - **Fuzzy onset:** an exact date *or* a human string ("since her twenties").
 - **Modes:** \`add\` / \`refine\` (with a progression checkbox) / \`revise\` (warns the prior assertion will be refuted) / \`relate\` (relationship type + target concern).
-- **Code search:** \`renderCodeSearch\` dependency-injects a [CodeLookup](?path=/docs/healthcare-codelookup--docs) into the coding section (same pattern as Assessment's \`renderOrderSearch\`) — picking a result appends a coding row and fills an empty problem name.
+- **Code search:** \`renderCodeSearch\` dependency-injects a [CodeLookup](?path=/docs/clinical-lists-codelookup--docs) into the coding section (same pattern as Assessment's \`renderOrderSearch\`) — picking a result appends a coding row and fills an empty problem name.
 
 The story is one **NITRO grid** of the patient's conditions — spanning severities,
 verification statuses, exact and fuzzy onsets, concern relationships, and coding
@@ -44,7 +45,7 @@ sits below the grid. Every operation writes back to the grid.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

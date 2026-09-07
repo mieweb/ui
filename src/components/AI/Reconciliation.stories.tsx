@@ -7,10 +7,11 @@ import {
 import { Button } from '../Button';
 
 const meta: Meta<typeof AIReconciliationPanel> = {
-  title: 'Product/Feature Modules/AI/ReconciliationPanel',
+  id: 'chat-reconciliationpanel',
+  title: 'Modules/Chat/ReconciliationPanel',
   component: AIReconciliationPanel,
   parameters: { layout: 'padded' },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

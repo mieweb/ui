@@ -3,8 +3,9 @@ import { ProviderUsersTable } from './ProviderUsersTable';
 
 const meta: Meta<typeof ProviderUsersTable> = {
   component: ProviderUsersTable,
-  title: 'Components/Text & Data Display/ProviderUsersTable',
-  tags: ['autodocs'],
+  id: 'providers-provideruserstable',
+  title: 'BlueHive/Providers/ProviderUsersTable',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

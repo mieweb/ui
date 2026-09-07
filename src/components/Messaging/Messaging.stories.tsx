@@ -239,7 +239,8 @@ const mockConversations: Conversation[] = [
 // ============================================================================
 
 const bubbleMeta: Meta<typeof MessageBubble> = {
-  title: 'Components/Messaging/MessageBubble',
+  id: 'chat-messaging',
+  title: 'Modules/Chat/Messaging',
   component: MessageBubble,
   parameters: {
     layout: 'centered',
@@ -250,7 +251,7 @@ const bubbleMeta: Meta<typeof MessageBubble> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   decorators: [
     (Story) => (
       <div className="w-[400px] bg-white p-4 dark:bg-neutral-900">

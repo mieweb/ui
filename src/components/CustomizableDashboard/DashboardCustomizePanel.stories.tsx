@@ -8,7 +8,8 @@ import {
 } from './DashboardCustomizePanel';
 
 const meta: Meta<typeof DashboardCustomizePanel> = {
-  title: 'Components/Layout & Structure/DashboardCustomizePanel',
+  id: 'dashboards-dashboardcustomizepanel',
+  title: 'Modules/Dashboards/DashboardCustomizePanel',
   component: DashboardCustomizePanel,
   parameters: {
     layout: 'centered',
@@ -22,7 +23,7 @@ const meta: Meta<typeof DashboardCustomizePanel> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     widgets: {
       description: 'The full widget catalog for the dashboard.',

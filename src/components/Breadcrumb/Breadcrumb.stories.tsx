@@ -19,12 +19,13 @@ type BreadcrumbStoryArgs = Omit<BreadcrumbProps, 'separator'> & {
 };
 
 const meta: Meta<BreadcrumbStoryArgs> = {
+  id: 'navigation-breadcrumb',
   title: 'Components/Navigation/Breadcrumb',
   component: Breadcrumb,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     separatorName: {
       control: 'select',

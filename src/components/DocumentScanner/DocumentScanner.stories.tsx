@@ -12,9 +12,10 @@ import { DocumentScanner } from './DocumentScanner';
  * data from scanned documents.
  */
 const meta: Meta<typeof DocumentScanner> = {
-  title: 'Components/Images & Media/DocumentScanner',
+  id: 'files-documentscanner',
+  title: 'Modules/Files/DocumentScanner',
   component: DocumentScanner,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

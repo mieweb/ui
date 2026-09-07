@@ -13,7 +13,8 @@ import {
 } from '../ConditionEditor';
 
 const meta: Meta<typeof ProblemList> = {
-  title: 'Healthcare/ProblemList',
+  id: 'clinical-lists-problemlist',
+  title: 'Healthcare/Clinical lists/ProblemList',
   component: ProblemList,
   parameters: {
     layout: 'padded',
@@ -30,7 +31,7 @@ Patient-level problem list built on the **concern / assertion** model.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

@@ -11,9 +11,10 @@ import { CollabStatus } from '../CollabStatus';
 import { Alert, AlertTitle } from '../Alert';
 
 const meta: Meta<typeof CaseManagementHeader> = {
-  title: 'Components/Text & Data Display/CaseManagementHeader',
+  id: 'encounter-orders-casemanagementheader',
+  title: 'Healthcare/Encounter & orders/CaseManagementHeader',
   component: CaseManagementHeader,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

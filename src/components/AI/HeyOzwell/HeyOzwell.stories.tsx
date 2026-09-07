@@ -20,9 +20,10 @@ import { HeyOzwellToggle, type HeyOzwellToggleProps } from './HeyOzwellToggle';
 import { suggestedActions } from '../storyData';
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/AI/Hey Ozwell/Demo',
+  id: 'voice-hey-ozwell-demo',
+  title: 'Modules/Voice/Hey Ozwell Demo',
   component: HeyOzwell,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -40,16 +41,15 @@ const meta: Meta = {
 export default meta;
 
 // --- story-to-story navigation (the settings menu links to the sibling Voice/Wake stories). Build the
-// Storybook story id from the title + export name (same sanitize Storybook uses) and point the manager
+// Storybook story id from the sibling Meta's stable `id` + export name and point the manager
 // frame at it — avoids depending on addon-links being registered. ---
-const HEY_OZWELL = 'Product/Feature Modules/AI/Hey Ozwell';
 const sanitize = (s: string) =>
   s
     .toLowerCase()
     .replace(/[^a-z0-9]+/gi, '-')
     .replace(/^-+|-+$/g, '');
-const gotoStory = (title: string, story: string) => () => {
-  const id = `${sanitize(title)}--${sanitize(story)}`;
+const gotoStory = (metaId: string, story: string) => () => {
+  const id = `${metaId}--${sanitize(story)}`;
   try {
     const top =
       window.parent && window.parent !== window ? window.parent : window;
@@ -118,7 +118,7 @@ function Demo({
           // "Your voice" opens the central Voice Manager page (set up / add / rename / remove voices). In a
           // real app this opens the host's voice-management surface. Diagnostics (wake-word test, speaker
           // verify) are dev-only and intentionally NOT surfaced in the product settings menu.
-          onManageVoices={gotoStory(`${HEY_OZWELL}/Voice Manager`, 'Manage')}
+          onManageVoices={gotoStory('voice-voice-manager', 'Manage')}
         />
       </div>
 

@@ -44,12 +44,13 @@ type BadgeStoryArgs = React.ComponentProps<typeof Badge> & {
 };
 
 const meta: Meta<typeof Badge> = {
-  title: 'Components/Text & Data Display/Badge',
+  id: 'data-display-badge',
+  title: 'Components/Data display/Badge',
   component: Badge,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

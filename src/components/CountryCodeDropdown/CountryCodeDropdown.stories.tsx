@@ -8,12 +8,13 @@ import {
 import { Input } from '../Input';
 
 const meta: Meta<typeof CountryCodeDropdown> = {
-  title: 'Components/Forms & Inputs/CountryCodeDropdown',
+  id: 'choice-inputs-countrycodedropdown',
+  title: 'Inputs/Choice inputs/CountryCodeDropdown',
   component: CountryCodeDropdown,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

@@ -143,12 +143,13 @@ function SelectWithState({
 // =============================================================================
 
 const meta = {
-  title: 'Components/Forms & Inputs/Select',
+  id: 'choice-inputs-select',
+  title: 'Inputs/Choice inputs/Select',
   component: SelectWithState,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     optionsKey: {
       control: 'select',

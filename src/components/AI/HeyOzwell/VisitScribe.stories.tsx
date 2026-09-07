@@ -8,9 +8,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { VisitScribe } from './VisitScribe';
 
 const meta: Meta<typeof VisitScribe> = {
-  title: 'Product/Feature Modules/AI/Hey Ozwell/Visit Scribe',
+  id: 'voice-visit-scribe',
+  title: 'Modules/Voice/Visit Scribe',
   component: VisitScribe,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

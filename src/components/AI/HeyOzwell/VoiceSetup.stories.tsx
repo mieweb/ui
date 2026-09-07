@@ -6,9 +6,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { VoiceSetup } from './VoiceSetup';
 
 const meta: Meta<typeof VoiceSetup> = {
-  title: 'Product/Feature Modules/AI/Hey Ozwell/Voice Setup',
+  id: 'voice-voice-setup',
+  title: 'Modules/Voice/Voice Setup',
   component: VoiceSetup,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { AddressForm, type AddressFormData } from './AddressForm';
 
 const meta: Meta<typeof AddressForm> = {
-  title: 'Components/Forms & Inputs/AddressForm',
+  id: 'text-inputs-addressform',
+  title: 'Inputs/Text inputs/AddressForm',
   component: AddressForm,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

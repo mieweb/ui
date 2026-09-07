@@ -5,9 +5,10 @@ import { Button } from '../Button';
 import { Card } from '../Card';
 
 const meta: Meta<typeof DropzoneOverlay> = {
-  title: 'Components/Forms & Inputs/DropzoneOverlay',
+  id: 'files-dropzoneoverlay',
+  title: 'Modules/Files/DropzoneOverlay',
   component: DropzoneOverlay,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

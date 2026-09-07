@@ -7,9 +7,10 @@ import {
 } from './CSVColumnMapper';
 
 const meta: Meta<typeof CSVColumnMapper> = {
-  title: 'Components/Forms & Inputs/CSVColumnMapper',
+  id: 'composite-forms-csvcolumnmapper',
+  title: 'Inputs/Composite forms/CSVColumnMapper',
   component: CSVColumnMapper,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   args: {
     importing: false,
     importProgress: 0,

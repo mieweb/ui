@@ -221,10 +221,21 @@ function EmptyDemo() {
 // =============================================================================
 
 const meta: Meta<typeof CommandPalette> = {
+  id: 'navigation-commandpalette',
   title: 'Components/Navigation/CommandPalette',
   component: CommandPalette,
   parameters: {
     layout: 'centered',
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'overlays-keyboardshortcutsoverlay',
+          why: 'KeyboardShortcutsOverlay documents the keys; CommandPalette lets users search and run commands.',
+        },
+      ],
+    },
     docs: {
       description: {
         component:
@@ -232,7 +243,7 @@ const meta: Meta<typeof CommandPalette> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     placeholder: {
       control: 'text',

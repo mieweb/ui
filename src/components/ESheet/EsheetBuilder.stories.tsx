@@ -70,7 +70,9 @@ const SAMPLE_FORM = {
 // ============================================================================
 
 const builderMeta: Meta<typeof EsheetBuilder> = {
-  title: 'Components/Forms & Inputs/eSheet/Builder',
+  id: 'composite-forms-esheet-builder',
+  title: 'Inputs/Composite forms/ESheet Builder',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   component: EsheetBuilder,
   parameters: {
     layout: 'fullscreen',

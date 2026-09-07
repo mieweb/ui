@@ -71,9 +71,10 @@ const mockCategories: ServiceCategory[] = [
 ];
 
 const meta: Meta<typeof ServiceAccordion> = {
-  title: 'Product/Provider/ServiceAccordion',
+  id: 'services-serviceaccordion',
+  title: 'BlueHive/Services/ServiceAccordion',
   component: ServiceAccordion,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

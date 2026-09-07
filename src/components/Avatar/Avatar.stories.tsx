@@ -27,12 +27,13 @@ function avatarDataUri(
 }
 
 const meta: Meta<typeof Avatar> = {
-  title: 'Components/Text & Data Display/Avatar',
+  id: 'data-display-avatar',
+  title: 'Components/Data display/Avatar',
   component: Avatar,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   args: {
     ring: false,
   },

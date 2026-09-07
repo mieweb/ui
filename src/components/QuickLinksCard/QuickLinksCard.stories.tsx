@@ -3,8 +3,9 @@ import { QuickLinksCard } from './QuickLinksCard';
 
 const meta: Meta<typeof QuickLinksCard> = {
   component: QuickLinksCard,
-  title: 'Components/Layout & Structure/QuickLinksCard',
-  tags: ['autodocs'],
+  id: 'dashboards-quicklinkscard',
+  title: 'Modules/Dashboards/QuickLinksCard',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

@@ -50,9 +50,10 @@ const SAMPLE_FORM = {
 } as unknown as FormDefinition;
 
 const meta: Meta<typeof EsheetRenderer> = {
-  title: 'Components/Forms & Inputs/eSheet/AllergyListField',
+  id: 'clinical-lists-allergylistfield-esheet',
+  title: 'Healthcare/Clinical lists/AllergyListField (eSheet)',
   component: EsheetRenderer,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

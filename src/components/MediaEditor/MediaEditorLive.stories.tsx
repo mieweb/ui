@@ -21,9 +21,10 @@ import {
 // ============================================================================
 
 const meta: Meta<typeof MediaEditor> = {
-  title: 'Components/Images & Media/MediaEditor Live Demo',
+  id: 'media-mediaeditor-live-demo',
+  title: 'Modules/Media/MediaEditor Live Demo',
   component: MediaEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     // The story renders the LiveDemo harness, not <MediaEditor {...args}/>,

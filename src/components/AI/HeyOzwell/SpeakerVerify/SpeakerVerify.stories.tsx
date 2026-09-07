@@ -17,8 +17,9 @@ import { loadWhatPrints, clearWhatPrints } from '../../voiceprintStore';
 import { openRollingRecorder, chime, type RollingRecorder } from '../audio';
 
 const meta: Meta = {
-  title:
-    'Product/Feature Modules/AI/Hey Ozwell/Speaker Verify (dev diagnostic)',
+  id: 'voice-speaker-verify',
+  title: 'Modules/Voice/Speaker Verify',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:experimental'],
   parameters: {
     layout: 'centered',
     docs: {

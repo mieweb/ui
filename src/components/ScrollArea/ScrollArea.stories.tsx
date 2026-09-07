@@ -2,12 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ScrollArea } from './ScrollArea';
 
 const meta: Meta<typeof ScrollArea> = {
+  id: 'layout-scrollarea',
   title: 'Components/Layout/ScrollArea',
   component: ScrollArea,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     orientation: {
       control: 'select',

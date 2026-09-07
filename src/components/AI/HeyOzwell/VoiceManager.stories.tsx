@@ -7,9 +7,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { VoiceManager } from './VoiceManager';
 
 const meta: Meta<typeof VoiceManager> = {
-  title: 'Product/Feature Modules/AI/Hey Ozwell/Voice Manager',
+  id: 'voice-voice-manager',
+  title: 'Modules/Voice/Voice Manager',
   component: VoiceManager,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

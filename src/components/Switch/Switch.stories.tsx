@@ -3,12 +3,23 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Switch } from './Switch';
 
 const meta: Meta<typeof Switch> = {
-  title: 'Components/Forms & Inputs/Switch',
+  id: 'choice-inputs-switch',
+  title: 'Inputs/Choice inputs/Switch',
   component: Switch,
   parameters: {
     layout: 'centered',
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'actions-toggle',
+          why: 'Toggle is a pressed-state button for toolbars; Switch is the labelled on/off form control.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

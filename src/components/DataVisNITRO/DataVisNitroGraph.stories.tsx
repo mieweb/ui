@@ -3,7 +3,8 @@ import { DataVisNitroGraph } from './DataVisNitroGraph';
 import { DataVisNitroSource } from './DataVisNITRO';
 
 const meta: Meta<typeof DataVisNitroGraph> = {
-  title: 'Components/Text & Data Display/DataVis NITRO Graph',
+  id: 'grids-datavis-nitro-graph',
+  title: 'Components/Grids/DataVis NITRO Graph',
   component: DataVisNitroGraph,
   parameters: {
     layout: 'fullscreen',
@@ -12,12 +13,58 @@ const meta: Meta<typeof DataVisNitroGraph> = {
     },
     docs: {
       description: {
-        component:
-          'Graph visualization component powered by `@mieweb/datavis`. Wraps the `GraphView` component and supports bar, line, area, and pie chart types. Use `<DataVisNitroSource>` to provide data and `<DataVisNitroGraph>` to render the chart. All fields are available in the X/Y axis dropdowns so you can freely explore different combinations.',
+        component: `### What it's for
+
+Charting the same record set a NITRO grid shows. Wraps \`@mieweb/datavis\`'s \`GraphView\` and supports bar, line, area and pie charts driven by a \`config\` (\`Partial<GraphConfig>\`). Every field of the source is offered in the X/Y axis pickers, so users can explore combinations without a developer pre-defining each chart.
+
+### Use it when
+
+- A dashboard or report needs an interactive chart over data that already lives in a \`DataVisNitroSource\`.
+- Users should be able to change axes or chart type themselves (\`onConfigChange\` lets the host persist their choice).
+
+### Don't use it when
+
+- You need a tiny inline trend (a cell, a header strip) — use \`Sparkline\`, which takes pre-bucketed points and no peers.
+- The chart is decorative and static; an image or SVG avoids loading the datavis engine.
+- You need rows, not a picture — use \`DataVisNitroGrid\`.
+
+### Example
+
+\`\`\`tsx
+<DataVisNitroSource type="http" url="/api/revenue">
+  <DataVisNitroGraph
+    height="360px"
+    config={{ type: 'bar', x: 'region', y: 'revenue' }}
+    onConfigChange={saveUserChartPrefs}
+  />
+</DataVisNitroSource>
+\`\`\`
+
+### Limitations
+
+- Same accessibility caveats as the grid: the engine's SVG/DOM is not screen-reader friendly and automated a11y checks are disabled here. Pair charts with a grid or a textual summary of the numbers.
+- Colours come from the DataVis scheme, which follows brand and dark mode; individual series colours are not brand tokens.
+- Requires the optional peers \`@mieweb/datavis\` and \`datavis-ace\`; only available from the \`@mieweb/ui/datavis\` entry.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui/datavis',
+      peers: ['@mieweb/datavis', 'datavis-ace'],
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'grids-datavis-nitro',
+          why: 'Share one DataVisNitroSource between a grid and a graph of the same records.',
+        },
+        {
+          type: 'alternative to',
+          target: 'grids-sparkline',
+          why: 'Sparkline is a dependency-free inline strip over pre-bucketed points; the graph is a full interactive chart.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   decorators: [
     (Story) => (
       <div style={{ padding: '1rem' }}>

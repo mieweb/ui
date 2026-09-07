@@ -26,9 +26,10 @@ const sampleTwilioConfig = {
 };
 
 const meta: Meta<typeof Q> = {
-  title: 'Product/Feature Modules/Q',
+  id: 'editors-q',
+  title: 'Modules/Editors/Q',
   component: Q,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     a11y: {

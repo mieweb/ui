@@ -66,9 +66,10 @@ function LanguageSelectorWithState({
 }
 
 const meta: Meta<typeof LanguageSelectorWithState> = {
-  title: 'Components/Forms & Inputs/LanguageSelector',
+  id: 'composite-forms-languageselector',
+  title: 'Inputs/Composite forms/LanguageSelector',
   component: LanguageSelectorWithState,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

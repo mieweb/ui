@@ -4,12 +4,13 @@ import { CountryDropdown } from './CountryDropdown';
 import type { CountryData } from '../CountryCodeDropdown';
 
 const meta: Meta<typeof CountryDropdown> = {
-  title: 'Components/Forms & Inputs/CountryDropdown',
+  id: 'choice-inputs-countrydropdown',
+  title: 'Inputs/Choice inputs/CountryDropdown',
   component: CountryDropdown,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

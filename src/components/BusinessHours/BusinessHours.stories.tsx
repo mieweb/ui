@@ -69,9 +69,10 @@ Sunday: Closed`,
 };
 
 const meta: Meta<typeof BusinessHours> = {
-  title: 'Product/Provider/BusinessHours',
+  id: 'date-time-businesshours',
+  title: 'Inputs/Date & time/BusinessHours',
   component: BusinessHours,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

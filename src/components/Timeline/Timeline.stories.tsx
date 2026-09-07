@@ -62,9 +62,10 @@ function TimelineProgressWrapper({
 }
 
 const progressMeta: Meta<typeof TimelineProgressWrapper> = {
-  title: 'Components/Text & Data Display/Timeline',
+  id: 'data-display-timeline',
+  title: 'Components/Data display/Timeline',
   component: TimelineProgressWrapper,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

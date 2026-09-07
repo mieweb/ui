@@ -6,7 +6,8 @@ const LONG_TEXT = `Patient called regarding ongoing wrist discomfort following t
 Recommended: resume PT exercises twice daily, schedule ergonomic re-evaluation, and follow up with occupational health if numbness spreads past the second digit. Employee agreed to a two-week check-in and asked whether the standing desk request from March was still in the approval queue — confirmed it cleared facilities on Monday and installation is scheduled for the 28th.`;
 
 const meta: Meta<typeof ClampedText> = {
-  title: 'Components/Data Display/ClampedText',
+  id: 'data-display-clampedtext',
+  title: 'Components/Data display/ClampedText',
   component: ClampedText,
   parameters: {
     layout: 'centered',
@@ -19,7 +20,7 @@ const meta: Meta<typeof ClampedText> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     text: { description: 'The long text to clamp.', control: 'text' },
     lines: {

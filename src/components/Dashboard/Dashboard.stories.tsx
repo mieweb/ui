@@ -71,7 +71,9 @@ import {
 // ============================================================================
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/Dashboard',
+  id: 'dashboards-dashboard-demo',
+  title: 'Modules/Dashboards/Dashboard (Demo)',
+  tags: ['autodocs', 'scope:application-local', 'maturity:experimental'],
   parameters: {
     layout: 'fullscreen',
   },

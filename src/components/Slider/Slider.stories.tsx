@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Slider } from './Slider';
 
 const meta: Meta<typeof Slider> = {
-  title: 'Components/Forms & Inputs/Slider',
+  id: 'choice-inputs-slider',
+  title: 'Inputs/Choice inputs/Slider',
   component: Slider,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

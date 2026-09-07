@@ -11,7 +11,8 @@ import {
 // =============================================================================
 
 const meta: Meta<typeof WebsiteInput> = {
-  title: 'Components/Forms & Inputs/WebsiteInput',
+  id: 'text-inputs-websiteinput',
+  title: 'Inputs/Text inputs/WebsiteInput',
   component: WebsiteInput,
   parameters: {
     layout: 'centered',
@@ -22,7 +23,7 @@ const meta: Meta<typeof WebsiteInput> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     value: {
       control: 'text',

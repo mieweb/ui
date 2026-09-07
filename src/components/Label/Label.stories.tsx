@@ -2,12 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Label } from './Label';
 
 const meta: Meta<typeof Label> = {
-  title: 'Components/Forms & Inputs/Label',
+  id: 'text-inputs-label',
+  title: 'Inputs/Text inputs/Label',
   component: Label,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

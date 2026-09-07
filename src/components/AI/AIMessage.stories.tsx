@@ -14,9 +14,10 @@ import { getSampleVideo } from '../AudioPlayer/sampleVideo';
 // ============================================================================
 
 const meta: Meta<typeof AIMessageDisplay> = {
-  title: 'Product/Feature Modules/AI/AIMessage',
+  id: 'chat-aimessage',
+  title: 'Modules/Chat/AIMessage',
   component: AIMessageDisplay,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

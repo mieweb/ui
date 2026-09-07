@@ -6,10 +6,26 @@ import { useYjsCollabStatus } from './useYjsCollabStatus';
 import { LocalYjsRoom, sampleLog, type LocalYjsMember } from './storyData';
 
 const meta: Meta<typeof CollabStatus> = {
-  title: 'Components/Status Indicators/CollabStatus',
+  id: 'feedback-collabstatus',
+  title: 'Components/Feedback/CollabStatus',
   component: CollabStatus,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-connectionstatus',
+          why: 'ConnectionStatus blocks the whole app when the connection is unusable; CollabStatus is a header chip that keeps working.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-richeditor',
+          why: 'Shows presence and sync state for a collaborative RichEditor document.',
+        },
+      ],
+    },
     docs: {
       description: {
         component: `
@@ -21,6 +37,22 @@ let an app condition ("Unsaved changes") share that dot.
 
 The component itself is transport-agnostic — it renders the presence state you
 hand it.
+
+### Use it when
+
+- A document or case is edited collaboratively (Yjs or similar) and users need to see who else is in it and whether their edits are syncing.
+- You want a debug log of sync events reachable from the UI without a console.
+
+### Don't use it when
+
+- The app itself cannot function without the connection — \`ConnectionStatusOverlay\` blocks and explains instead.
+- There is no shared document; a plain online/offline indicator does not need the room panel.
+
+### Limitations
+
+- The panel is portalled to \`document.body\` and positioned under the chip; Escape closes it and returns focus to the chip, a pointer outside dismisses it, and it does not trap focus.
+- All strings are overridable through \`labels\`; defaults are English.
+- Peer colours come from the awareness payload, not brand tokens — check contrast against your header background.
 
 ### Binding it to a Yjs server (the short version)
 

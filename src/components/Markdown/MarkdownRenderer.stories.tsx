@@ -3,7 +3,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
 const meta: Meta<typeof MarkdownRenderer> = {
-  title: 'Components/Markdown/MarkdownRenderer',
+  id: 'editors-markdown',
+  title: 'Modules/Editors/Markdown',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   component: MarkdownRenderer,
   parameters: { layout: 'padded' },
 };

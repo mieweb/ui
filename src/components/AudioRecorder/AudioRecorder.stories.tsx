@@ -3,7 +3,8 @@ import * as React from 'react';
 import { AudioRecorder } from './AudioRecorder';
 
 const meta: Meta<typeof AudioRecorder> = {
-  title: 'Components/Images & Media/AudioRecorder',
+  id: 'media-audiorecorder',
+  title: 'Modules/Media/AudioRecorder',
   component: AudioRecorder,
   parameters: {
     layout: 'centered',
@@ -51,7 +52,7 @@ function VoiceMessage() {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     state: {
       control: 'select',

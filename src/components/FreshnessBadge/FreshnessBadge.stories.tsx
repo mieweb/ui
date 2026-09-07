@@ -5,7 +5,8 @@ import { FreshnessBadge, FreshnessDot } from './FreshnessBadge';
 const daysAgo = (n: number) => DateTime.now().minus({ days: n }).toISODate()!;
 
 const meta: Meta<typeof FreshnessBadge> = {
-  title: 'Components/Data Display/FreshnessBadge',
+  id: 'data-display-freshnessbadge',
+  title: 'Components/Data display/FreshnessBadge',
   component: FreshnessBadge,
   parameters: {
     layout: 'centered',
@@ -20,7 +21,7 @@ const meta: Meta<typeof FreshnessBadge> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     date: { description: 'The date being aged.', control: 'date' },
     thresholds: {

@@ -8,9 +8,10 @@ import { CountBadge, type CountBadgeItem } from '../CountBadge';
 import { Button } from '../Button';
 
 const meta: Meta<typeof PatientHeader> = {
-  title: 'Components/Text & Data Display/PatientHeader',
+  id: 'encounter-orders-patientheader',
+  title: 'Healthcare/Encounter & orders/PatientHeader',
   component: PatientHeader,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

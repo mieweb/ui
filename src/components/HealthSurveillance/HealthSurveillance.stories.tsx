@@ -13,7 +13,8 @@ import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
 
 const meta: Meta<typeof HealthSurveillance> = {
-  title: 'Healthcare/HealthSurveillance',
+  id: 'encounter-orders-healthsurveillance',
+  title: 'Healthcare/Encounter & orders/HealthSurveillance',
   component: HealthSurveillance,
   parameters: {
     layout: 'padded',
@@ -37,7 +38,7 @@ CMS eCQM quality measures.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

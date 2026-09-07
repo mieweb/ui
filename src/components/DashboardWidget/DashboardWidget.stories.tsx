@@ -27,12 +27,13 @@ import { Printer } from 'lucide-react';
 // =============================================================================
 
 const meta: Meta<typeof DashboardWidget> = {
-  title: 'Components/Layout & Structure/DashboardWidget',
+  id: 'dashboards-dashboardwidget',
+  title: 'Modules/Dashboards/DashboardWidget',
   component: DashboardWidget,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     title: { control: 'text' },
     count: { control: 'number' },

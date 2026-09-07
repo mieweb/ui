@@ -4,12 +4,24 @@ import { RichEditor, type RichEditorHandle } from './RichEditor';
 import { CodeEditor } from './CodeEditor';
 
 const meta: Meta<typeof RichEditor> = {
-  title: 'Components/Forms & Inputs/RichEditor',
+  id: 'editors-richeditor',
+  title: 'Modules/Editors/RichEditor',
   component: RichEditor,
   parameters: {
     layout: 'padded',
+    catalog: {
+      entry: '@mieweb/ui/kerebron',
+      peers: ['@kerebron/editor', '@kerebron/editor-kits', '@kerebron/wasm'],
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'feedback-collabstatus',
+          why: 'CollabStatus shows who else is editing and whether the Yjs document is in sync.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

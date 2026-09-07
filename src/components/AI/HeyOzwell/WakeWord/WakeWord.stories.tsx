@@ -14,9 +14,10 @@ import * as React from 'react';
 import { useWakeWord } from './useWakeWord';
 
 const meta: Meta<typeof WakeWordDemo> = {
-  title: 'Product/Feature Modules/AI/Hey Ozwell/Wake Word',
+  id: 'voice-wake-word',
+  title: 'Modules/Voice/Wake Word',
   component: WakeWordDemo,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

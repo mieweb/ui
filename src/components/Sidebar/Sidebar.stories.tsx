@@ -377,18 +377,74 @@ function ConfigurableSidebarDemo({
 // =============================================================================
 
 const meta: Meta<SidebarStoryArgs> = {
-  title: 'Components/Navigation/Sidebar',
+  id: 'overlays-sidebar',
+  title: 'Components/Overlays/Sidebar',
   component: Sidebar,
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'A composable sidebar navigation component with support for collapsing, mobile drawer, groups, search, and accordion behavior.',
+        component: `### What it's for
+
+The application's primary navigation rail. \`SidebarProvider\` holds collapsed / mobile-open / expanded-group state (\`useSidebar()\` reads it); \`Sidebar\` renders a \`<nav aria-label="Main navigation">\` sized by \`expandedWidth\` / \`collapsedWidth\`, composed from \`SidebarHeader\`, \`SidebarSearch\`, \`SidebarContent\` › \`SidebarNav\` › \`SidebarNavGroup\` / \`SidebarNavItem\`, and \`SidebarFooter\`. \`SidebarToggle\` collapses it to icons on desktop; on small viewports it becomes a fixed drawer opened by \`SidebarMobileToggle\` over a backdrop.
+
+### Use it when
+
+- The app has a persistent set of top-level destinations (5–15) that should stay reachable on every screen.
+- Groups of links need accordion behaviour and an active-item indicator.
+
+### Don't use it when
+
+- Navigation is transient or contextual (filters, a record's details) — \`Sheet\`.
+- There are only a few destinations — \`Tabs\` or an \`AppHeader\` menu is lighter.
+- Navigating within one long page — \`TableOfContents\` / \`SectionSpyNav\`.
+
+### Example
+
+\`\`\`tsx
+<SidebarProvider>
+  <div className="flex min-h-screen">
+    <Sidebar>
+      <SidebarHeader><Logo /></SidebarHeader>
+      <SidebarContent>
+        <SidebarNav>
+          <SidebarNavItem icon={<Home />} label="Dashboard" href="/" isActive={path === '/'} />
+          <SidebarNavGroup label="Orders" icon={<ClipboardList />} groupId="orders">
+            <SidebarNavItem label="Open" href="/orders/open" badge={<CountBadge count={open} />} />
+            <SidebarNavItem label="Completed" href="/orders/done" />
+          </SidebarNavGroup>
+        </SidebarNav>
+      </SidebarContent>
+      <SidebarFooter><SidebarToggle /></SidebarFooter>
+    </Sidebar>
+    <main className="flex-1">
+      <SidebarMobileToggle />
+      {children}
+    </main>
+  </div>
+</SidebarProvider>
+\`\`\`
+
+### Limitations
+
+- Collapsed items expose their label through \`aria-label\`; icons are decorative. The mobile drawer has a backdrop and close button but no focus trap.
+- Active state is controlled (\`isActive\`); the sidebar does not read the router.
+- Positioned with logical properties (\`start-0\`), so it mirrors in RTL; widths are CSS strings you supply.
+- Only one group expands at a time (accordion); \`defaultExpanded\` seeds the initial one.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'overlays-sheet',
+          why: 'Sheet is a transient edge panel; Sidebar is the persistent navigation rail (drawer only on mobile).',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     expandedWidth: {
       control: 'text',

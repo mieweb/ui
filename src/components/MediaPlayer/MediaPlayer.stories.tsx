@@ -11,7 +11,8 @@ import { Button } from '../Button';
 // ============================================================================
 
 const meta: Meta<typeof MediaPlayer> = {
-  title: 'Components/Images & Media/MediaPlayer',
+  id: 'media-mediaplayer',
+  title: 'Modules/Media/MediaPlayer',
   component: MediaPlayer,
   parameters: {
     layout: 'centered',
@@ -24,7 +25,7 @@ const meta: Meta<typeof MediaPlayer> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     src: { control: false, description: 'Media source URL' },
     kind: {

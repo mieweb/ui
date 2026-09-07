@@ -38,7 +38,8 @@ function StatefulAdditionalFields({
 // =============================================================================
 
 const meta: Meta<typeof AdditionalFields> = {
-  title: 'Components/Forms & Inputs/AdditionalFields',
+  id: 'composite-forms-additionalfields',
+  title: 'Inputs/Composite forms/AdditionalFields',
   component: AdditionalFields,
   render: (args) => <StatefulAdditionalFields {...args} />,
   parameters: {
@@ -50,7 +51,7 @@ const meta: Meta<typeof AdditionalFields> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     title: {
       control: 'text',

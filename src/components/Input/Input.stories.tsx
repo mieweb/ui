@@ -2,12 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Input } from './Input';
 
 const meta: Meta<typeof Input> = {
-  title: 'Components/Forms & Inputs/Input',
+  id: 'text-inputs-input',
+  title: 'Inputs/Text inputs/Input',
   component: Input,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

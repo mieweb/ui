@@ -5,6 +5,7 @@ import { execSync } from 'node:child_process';
 
 import type { StorybookConfig } from '@storybook/react-vite';
 import type { Plugin } from 'vite';
+import remarkGfm from 'remark-gfm';
 
 const storybookDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(storybookDir, '..');
@@ -197,7 +198,13 @@ const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   addons: [
     '@storybook/addon-a11y',
-    '@storybook/addon-docs'
+    {
+      name: '@storybook/addon-docs',
+      options: {
+        // GFM tables for the family Overview pages in src/catalog/*.mdx
+        mdxPluginOptions: { mdxCompileOptions: { remarkPlugins: [remarkGfm] } },
+      },
+    },
   ],
   framework: {
     name: '@storybook/react-vite',

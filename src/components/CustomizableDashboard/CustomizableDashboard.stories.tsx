@@ -10,7 +10,8 @@ import {
 import { DashboardWidget, DashboardWidgetInfo } from '../DashboardWidget';
 
 const meta: Meta<typeof CustomizableDashboard> = {
-  title: 'Components/Layout & Structure/CustomizableDashboard',
+  id: 'dashboards-customizabledashboard',
+  title: 'Modules/Dashboards/CustomizableDashboard',
   component: CustomizableDashboard,
   parameters: {
     layout: 'padded',
@@ -26,7 +27,7 @@ const meta: Meta<typeof CustomizableDashboard> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     columns: {
       description:

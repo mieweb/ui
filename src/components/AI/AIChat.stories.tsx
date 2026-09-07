@@ -14,9 +14,10 @@ import { sampleMessages, suggestedActions } from './storyData';
 // ============================================================================
 
 const meta: Meta<typeof AIChat> = {
-  title: 'Product/Feature Modules/AI/AIChat',
+  id: 'chat-aichat',
+  title: 'Modules/Chat/AIChat',
   component: AIChat,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

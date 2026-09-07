@@ -3,8 +3,9 @@ import { EmployerPricingCard } from './EmployerPricingCard';
 
 const meta: Meta<typeof EmployerPricingCard> = {
   component: EmployerPricingCard,
-  title: 'Product/Provider/EmployerPricingCard',
-  tags: ['autodocs'],
+  id: 'employers-employerpricingcard',
+  title: 'BlueHive/Employers/EmployerPricingCard',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

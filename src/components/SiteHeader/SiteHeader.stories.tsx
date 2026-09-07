@@ -23,9 +23,10 @@ const sampleUser: UserProfile = {
 };
 
 const meta: Meta<typeof SiteHeader> = {
-  title: 'Components/Layout & Structure/SiteHeader',
+  id: 'layout-siteheader',
+  title: 'Components/Layout/SiteHeader',
   component: SiteHeader,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

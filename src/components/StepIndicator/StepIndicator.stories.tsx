@@ -2,9 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { StepIndicator } from './StepIndicator';
 
 const meta: Meta<typeof StepIndicator> = {
-  title: 'Components/Layout & Structure/StepIndicator',
+  id: 'navigation-stepindicator',
+  title: 'Components/Navigation/StepIndicator',
   component: StepIndicator,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

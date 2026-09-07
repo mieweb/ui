@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Textarea } from './Textarea';
 
 const meta: Meta<typeof Textarea> = {
-  title: 'Components/Forms & Inputs/Textarea',
+  id: 'text-inputs-textarea',
+  title: 'Inputs/Text inputs/Textarea',
   component: Textarea,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

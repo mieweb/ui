@@ -59,9 +59,10 @@ const SAMPLE_FORM = {
 } as unknown as FormDefinition;
 
 const meta: Meta<typeof EsheetRenderer> = {
-  title: 'Components/Forms & Inputs/eSheet/MedicationListField',
+  id: 'clinical-lists-medicationlistfield-esheet',
+  title: 'Healthcare/Clinical lists/MedicationListField (eSheet)',
   component: EsheetRenderer,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

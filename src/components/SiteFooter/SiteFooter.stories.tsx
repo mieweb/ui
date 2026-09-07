@@ -47,9 +47,10 @@ const defaultLinkGroups: FooterLinkGroup[] = [
 ];
 
 const meta: Meta<typeof SiteFooter> = {
-  title: 'Components/Layout & Structure/SiteFooter',
+  id: 'layout-sitefooter',
+  title: 'Components/Layout/SiteFooter',
   component: SiteFooter,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

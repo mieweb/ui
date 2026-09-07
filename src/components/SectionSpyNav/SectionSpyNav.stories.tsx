@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SectionSpyNav, type SectionSpyItem } from './SectionSpyNav';
 
 const meta: Meta<typeof SectionSpyNav> = {
+  id: 'navigation-sectionspynav',
   title: 'Components/Navigation/SectionSpyNav',
   component: SectionSpyNav,
   parameters: {
@@ -16,7 +17,7 @@ const meta: Meta<typeof SectionSpyNav> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     items: {
       description: 'Sections to link to, in page order.',

@@ -3,9 +3,10 @@ import * as React from 'react';
 import { PillSelect } from './PillSelect';
 
 const meta: Meta<typeof PillSelect> = {
-  title: 'Components/Navigation/PillSelect',
+  id: 'choice-inputs-pillselect',
+  title: 'Inputs/Choice inputs/PillSelect',
   component: PillSelect,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: { layout: 'centered' },
   argTypes: {
     value: { control: 'text' },

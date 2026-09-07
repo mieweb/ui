@@ -26,9 +26,10 @@ import {
 import { transcribeBlob, warmWhisper } from './whisperTranscribe';
 
 const meta: Meta<typeof AIChat> = {
-  title: 'Product/Feature Modules/AI/AIChat (Voice)',
+  id: 'chat-aichat-voice',
+  title: 'Modules/Chat/AIChat (Voice)',
   component: AIChat,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

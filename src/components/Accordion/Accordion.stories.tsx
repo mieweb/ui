@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Accordion, type AccordionItem } from './Accordion';
 
 const meta: Meta<typeof Accordion> = {
-  title: 'Components/Layout & Structure/Accordion',
+  id: 'layout-accordion',
+  title: 'Components/Layout/Accordion',
   component: Accordion,
   parameters: {
     layout: 'padded',
@@ -18,7 +19,7 @@ const meta: Meta<typeof Accordion> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     items: { description: 'Panels to render.', control: false },
     type: {

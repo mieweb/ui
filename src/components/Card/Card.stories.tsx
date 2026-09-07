@@ -17,12 +17,13 @@ import {
 import { Button } from '../Button';
 
 const meta: Meta<typeof Card> = {
-  title: 'Components/Layout & Structure/Card',
+  id: 'layout-card',
+  title: 'Components/Layout/Card',
   component: Card,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

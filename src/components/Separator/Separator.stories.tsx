@@ -2,12 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Separator } from './Separator';
 
 const meta: Meta<typeof Separator> = {
+  id: 'layout-separator',
   title: 'Components/Layout/Separator',
   component: Separator,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     orientation: {
       control: 'select',

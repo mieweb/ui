@@ -1,0 +1,96 @@
+{
+  "$comment": "Single source of truth for the Storybook sidebar (Tier / Family / Component) and the catalog metadata contract. Read by .storybook/preview.tsx (sort), .storybook/manager.ts (badges) and scripts/catalog-check.mjs (CI guard). Contract is documented in CONTRIBUTING.md → 'Stories & documentation'.",
+  "maxFamilySize": 10,
+  "landingPage": "Overview",
+  "scopeTags": [
+    "scope:general-purpose",
+    "scope:domain-specific",
+    "scope:product-specific",
+    "scope:application-local"
+  ],
+  "maturityTags": [
+    "maturity:experimental",
+    "maturity:alpha",
+    "maturity:beta",
+    "maturity:stable",
+    "maturity:deprecated",
+    "maturity:retired"
+  ],
+  "relationshipTypes": [
+    "alternative to",
+    "composes with",
+    "supersedes",
+    "superseded by",
+    "contains",
+    "uses",
+    "depends on"
+  ],
+  "reciprocalRelationships": {
+    "alternative to": "alternative to",
+    "composes with": "composes with",
+    "supersedes": "superseded by",
+    "superseded by": "supersedes"
+  },
+  "tiers": [
+    { "name": "Introduction", "flat": true },
+    { "name": "Branding", "flat": true },
+    { "name": "Foundations", "flat": true, "scope": "scope:general-purpose" },
+    {
+      "name": "Inputs",
+      "scope": "scope:general-purpose",
+      "families": [
+        "Actions",
+        "Text inputs",
+        "Choice inputs",
+        "Date & time",
+        "Composite forms"
+      ]
+    },
+    {
+      "name": "Components",
+      "scope": "scope:general-purpose",
+      "families": [
+        "Data display",
+        "Grids",
+        "Feedback",
+        "Loading",
+        "Overlays",
+        "Navigation",
+        "Layout"
+      ]
+    },
+    {
+      "name": "Modules",
+      "scope": "scope:general-purpose",
+      "families": [
+        "Dashboards",
+        "Media",
+        "Editors",
+        "Chat",
+        "SuperChat",
+        "Voice",
+        "Files"
+      ]
+    },
+    {
+      "name": "Healthcare",
+      "scope": "scope:domain-specific",
+      "families": ["Clinical lists", "Encounter & orders"]
+    },
+    {
+      "name": "BlueHive",
+      "scope": "scope:product-specific",
+      "owner": "BlueHive",
+      "families": [
+        "Orders",
+        "Employers",
+        "Billing",
+        "Providers",
+        "Services",
+        "Users & integrations",
+        "Operations"
+      ]
+    },
+    { "name": "Deprecated", "flat": true }
+  ]
+}

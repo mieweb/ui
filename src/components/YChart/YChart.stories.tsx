@@ -510,7 +510,9 @@ function YChartWrapper({
 // ============================================================================
 
 const meta: Meta<typeof YChartWrapper> = {
-  title: 'Product/Feature Modules/YChart',
+  id: 'data-display-ychart',
+  title: 'Components/Data display/YChart',
+  tags: ['autodocs', 'scope:application-local', 'maturity:experimental'],
   component: YChartWrapper,
   render: (args, context) => (
     <YChartWrapper

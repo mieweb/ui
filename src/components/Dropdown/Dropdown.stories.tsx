@@ -69,12 +69,13 @@ function SearchableMultiSelectStoryDemo() {
 }
 
 const meta: Meta<typeof Dropdown> = {
-  title: 'Components/Forms & Inputs/Dropdown',
+  id: 'choice-inputs-dropdown',
+  title: 'Inputs/Choice inputs/Dropdown',
   component: Dropdown,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     placement: {
       control: 'select',

@@ -8,9 +8,10 @@ import { conversations } from './storyData';
 // ============================================================================
 
 const meta: Meta<typeof SuperChatConversations> = {
-  title: 'Product/Feature Modules/SuperChat/Conversations (List)',
+  id: 'superchat-conversations-list',
+  title: 'Modules/SuperChat/Conversations (List)',
   component: SuperChatConversations,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     defaultActiveConversationId: {
       control: 'select',

@@ -45,7 +45,8 @@ const employees: Employee[] = [
 ];
 
 const meta: Meta<typeof Autocomplete<Employee>> = {
-  title: 'Components/Forms & Inputs/Autocomplete',
+  id: 'choice-inputs-autocomplete',
+  title: 'Inputs/Choice inputs/Autocomplete',
   component: Autocomplete,
   parameters: {
     layout: 'padded',
@@ -125,7 +126,7 @@ const [items, setItems] = useState<Patient[]>([]);
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

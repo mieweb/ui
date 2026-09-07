@@ -336,9 +336,10 @@ function InteractivePlaygroundDemo({
 }
 
 const meta = {
-  title: 'Product/Feature Modules/AI/OzwellChat',
+  id: 'chat-ozwellchat',
+  title: 'Modules/Chat/OzwellChat',
   component: OzwellChatStoryDemo,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

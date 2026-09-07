@@ -354,7 +354,8 @@ function PressAndHoldDemo() {
 // ============================================================================
 
 const meta: Meta<typeof RecordButton> = {
-  title: 'Components/Images & Media/RecordButton',
+  id: 'media-recordbutton',
+  title: 'Modules/Media/RecordButton',
   component: RecordButton,
   parameters: {
     layout: 'centered',
@@ -395,7 +396,7 @@ Supports multiple visual variants, sizes, and interaction patterns.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     state: {
       control: 'select',

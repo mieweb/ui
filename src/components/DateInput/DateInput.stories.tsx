@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DateInput } from './DateInput';
 
 const meta: Meta<typeof DateInput> = {
-  title: 'Components/Forms & Inputs/DateInput',
+  id: 'date-time-dateinput',
+  title: 'Inputs/Date & time/DateInput',
   component: DateInput,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     inputType: {
       control: 'select',

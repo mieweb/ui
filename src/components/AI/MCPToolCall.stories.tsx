@@ -12,9 +12,10 @@ import {
 // ============================================================================
 
 const meta: Meta<typeof MCPToolCallDisplay> = {
-  title: 'Product/Feature Modules/AI/MCPToolCall',
+  id: 'chat-mcptoolcall',
+  title: 'Modules/Chat/MCPToolCall',
   component: MCPToolCallDisplay,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

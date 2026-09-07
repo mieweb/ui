@@ -59,7 +59,9 @@ const SAMPLE_FORM: FormDefinition = {
 // ============================================================================
 
 const rendererMeta: Meta<typeof EsheetRenderer> = {
-  title: 'Components/Forms & Inputs/eSheet/Renderer',
+  id: 'composite-forms-esheet-renderer',
+  title: 'Inputs/Composite forms/ESheet Renderer',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   component: EsheetRenderer,
   parameters: {
     layout: 'centered',

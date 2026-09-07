@@ -10,7 +10,8 @@ import {
 } from '../Assessment';
 
 const meta: Meta<typeof OrderEditor> = {
-  title: 'Healthcare/OrderEditor',
+  id: 'encounter-orders-ordereditor',
+  title: 'Healthcare/Encounter & orders/OrderEditor',
   component: OrderEditor,
   parameters: {
     layout: 'padded',
@@ -31,7 +32,7 @@ target remounts the draft.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

@@ -63,12 +63,13 @@ type RadioGroupStoryArgs = Omit<
 };
 
 const meta = {
-  title: 'Components/Forms & Inputs/Radio',
+  id: 'choice-inputs-radio',
+  title: 'Inputs/Choice inputs/Radio',
   component: RadioGroup,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     name: {
       control: 'text',

@@ -9,7 +9,8 @@ import {
 import type { ConditionConcern } from '../ProblemList';
 
 const meta: Meta<typeof PresentingProblems> = {
-  title: 'Healthcare/PresentingProblems',
+  id: 'clinical-lists-presentingproblems',
+  title: 'Healthcare/Clinical lists/PresentingProblems',
   component: PresentingProblems,
   parameters: {
     layout: 'padded',
@@ -25,7 +26,7 @@ Encounter-scoped **relevant problem list** (a.k.a. Medical History), fed by the 
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

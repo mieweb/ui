@@ -12,7 +12,8 @@ import { Badge } from '../Badge';
 // ============================================================================
 
 const meta: Meta<typeof AudioPlayer> = {
-  title: 'Components/Images & Media/AudioPlayer',
+  id: 'media-audioplayer',
+  title: 'Modules/Media/AudioPlayer',
   component: AudioPlayer,
   parameters: {
     layout: 'centered',
@@ -23,7 +24,7 @@ const meta: Meta<typeof AudioPlayer> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     src: {
       control: false, // Can't easily control blob URLs

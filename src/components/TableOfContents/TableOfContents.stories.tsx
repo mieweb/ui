@@ -7,12 +7,13 @@ import { TableOfContents, type TocItem } from './TableOfContents';
 // =============================================================================
 
 const meta: Meta<typeof TableOfContents> = {
+  id: 'navigation-tableofcontents',
   title: 'Components/Navigation/TableOfContents',
   component: TableOfContents,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     smooth: { control: 'boolean' },
     indentLines: { control: 'boolean' },

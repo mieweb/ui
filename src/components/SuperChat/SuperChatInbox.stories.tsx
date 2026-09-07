@@ -21,9 +21,10 @@ import 'katex/dist/katex.min.css';
 // ============================================================================
 
 const meta: Meta<typeof SuperChatInbox> = {
-  title: 'Product/Feature Modules/SuperChat/Inbox',
+  id: 'superchat-inbox',
+  title: 'Modules/SuperChat/Inbox',
   component: SuperChatInbox,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     readOnly: {
       control: 'boolean',

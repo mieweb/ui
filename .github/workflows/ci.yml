@@ -41,6 +41,9 @@ jobs:
       - name: RTL guard (no new physical-direction classes)
         run: pnpm rtl:scan
 
+      - name: Catalog guard (taxonomy, tags, ids, descriptions, relationships)
+        run: pnpm catalog:check
+
       - name: Type check
         run: pnpm typecheck
 

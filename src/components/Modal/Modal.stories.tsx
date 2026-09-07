@@ -12,10 +12,84 @@ import { Button } from '../Button';
 import { Input } from '../Input';
 
 const meta: Meta<typeof Modal> = {
-  title: 'Components/Overlays & Layering/Modal',
+  id: 'overlays-modal',
+  title: 'Components/Overlays/Modal',
   component: Modal,
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+The standard blocking dialog. Controlled by \`open\` / \`onOpenChange\`; centred over a dimmed backdrop on desktop and full-screen on small viewports; eight \`size\`s up to \`full\`. Build the content from the slots — \`ModalHeader\`, \`ModalTitle\` (an \`h2\` that becomes the dialog's label), \`ModalClose\`, \`ModalBody\` (scrolls), \`ModalFooter\` — so every dialog in the product has the same anatomy. \`closeOnOverlayClick\` and \`closeOnEscape\` default to \`true\`.
+
+### Use it when
+
+- A focused task interrupts the page and should be completed or cancelled before returning: edit a record, pick from a list, view details.
+- The content is short enough to fit without the dialog itself scrolling much; put long content in \`ModalBody\`.
+
+### Don't use it when
+
+- The user must make a yes/no decision — \`AlertDialog\` fixes the buttons and disables casual dismissal.
+- The task is secondary and the page should stay visible/usable beside it — \`Sheet\` (edge panel) or \`DockablePanel\` (can be docked while working).
+- It is a long-lived tool the user drags around (a notes editor) — \`FloatingWindow\`.
+- You are showing a hint — \`Tooltip\` / \`GlossaryTooltip\` / \`SourceTip\`.
+
+### Example
+
+\`\`\`tsx
+<Modal open={open} onOpenChange={setOpen} size="lg">
+  <ModalHeader>
+    <ModalTitle>Edit contact</ModalTitle>
+    <ModalClose />
+  </ModalHeader>
+  <ModalBody>
+    <ContactForm id="contact-form" contact={contact} onSubmit={save} />
+  </ModalBody>
+  <ModalFooter>
+    <ButtonGroup split>
+      <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
+      <Button type="submit" form="contact-form">Save</Button>
+    </ButtonGroup>
+  </ModalFooter>
+</Modal>
+\`\`\`
+
+The host owns \`open\`; keep form state in the form so closing discards it predictably.
+
+### Limitations
+
+- \`role="dialog"\` + \`aria-modal\`, labelled by \`ModalTitle\` (or pass \`aria-label\`). Focus is trapped and moved to the first focusable element on open; **focus is not returned to the trigger on close** — handle that in \`onOpenChange\` when it matters.
+- Body scroll is locked while open (reference-counted, so nested modals are safe). Background content is not made \`inert\`.
+- Fixed \`z-50\` layer, not portalled: render it outside any ancestor with \`transform\`/\`overflow\` or it will clip.
+- Full-screen on mobile means the footer sits at the bottom of the viewport; test with the keyboard open.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-alertdialog',
+          why: 'AlertDialog for a decision the user cannot skip; Modal for content and forms.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-sheet',
+          why: 'Sheet slides from an edge and keeps the page in view; Modal centres and blocks it.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-floatingwindow',
+          why: 'FloatingWindow is a draggable, resizable, long-lived tool window; Modal is a one-shot task.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-dockablepanel',
+          why: 'DockablePanel can shrink to a strip so the user keeps working; Modal always blocks.',
+        },
+      ],
+    },
   },
   decorators: [
     (Story) => (
@@ -27,7 +101,7 @@ const meta: Meta<typeof Modal> = {
       </div>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

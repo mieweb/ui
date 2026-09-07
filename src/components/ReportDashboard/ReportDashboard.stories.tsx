@@ -7,9 +7,10 @@ import {
 } from './ReportDashboard';
 
 const meta: Meta<typeof ReportDashboard> = {
-  title: 'Product/Provider/ReportDashboard',
+  id: 'dashboards-reportdashboard',
+  title: 'Modules/Dashboards/ReportDashboard',
   component: ReportDashboard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

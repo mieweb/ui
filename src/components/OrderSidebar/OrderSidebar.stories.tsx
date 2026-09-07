@@ -3,8 +3,9 @@ import { OrderSidebar } from './OrderSidebar';
 
 const meta: Meta<typeof OrderSidebar> = {
   component: OrderSidebar,
-  title: 'Components/Navigation/OrderSidebar',
-  tags: ['autodocs'],
+  id: 'orders-ordersidebar',
+  title: 'BlueHive/Orders/OrderSidebar',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

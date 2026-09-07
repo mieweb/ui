@@ -40,7 +40,9 @@ import {
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/Dashboard (Widgets)',
+  id: 'dashboards-dashboard-widgets-demo',
+  title: 'Modules/Dashboards/Dashboard Widgets (Demo)',
+  tags: ['autodocs', 'scope:application-local', 'maturity:experimental'],
   parameters: {
     layout: 'fullscreen',
   },
