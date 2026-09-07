@@ -280,10 +280,18 @@ Install / entry-point blocks (kerebron peers, `@mieweb/ui/datavis`, model hostin
 
 ### Phase 5 — Healthcare
 
-- [ ] **Clinical lists** — ProblemList, PresentingProblems, ConditionEditor, MedicationList,
-      AllergyList, CodeLookup.
-- [ ] **Encounter & orders** — OrderEditor, Assessment, HealthSurveillance, CaseManagementHeader,
-      PatientHeader, WebChartReportViewer.
+- [x] **Clinical lists** — ProblemList, PresentingProblems, ConditionEditor, MedicationList,
+      AllergyList, CodeLookup, AllergyListField / MedicationListField (eSheet). README guidance
+      ("start with MedicationReconciliation", CodeLookup injection) now lives in the stories;
+      ProblemList ↔ PresentingProblems reciprocal. CodeLookup's Install block removed — it is not
+      exported from `@mieweb/ui` (apps import from source; only `CodeLookupProvider` ships).
+      _Landing:_ [ClinicalLists.mdx](src/catalog/ClinicalLists.mdx).
+- [x] **Encounter & orders** — OrderEditor, Assessment, HealthSurveillance, CaseManagementHeader,
+      PatientHeader, WebChartReportViewer. All six take plain props/callbacks (no WebChart/FHIR
+      dependency) — stated in a data-contracts table. Flagged: WebChartReportViewer injects string
+      results with `dangerouslySetInnerHTML` unsanitised; PatientHeader menu has no arrow-key
+      navigation; `HealthSurveillance` story grids are not exported.
+      _Landing:_ [EncounterOrders.mdx](src/catalog/EncounterOrders.mdx).
 
 Already the strongest tier; work is mostly reciprocal links and pulling README selection guidance
 into stories.
@@ -324,7 +332,9 @@ the product Storybook via Composition and confirming its entries carry the same 
       pending.
 - [x] Re-audit after Phase 4 — structural half green (51 ids left in the baseline: BlueHive, Foundations and three Healthcare pages due in Phase 5;
       prose scoring pending.
-- [ ] Re-audit after Phase 5
+- [x] Re-audit after Phase 5 — structural half green: every non-BlueHive, non-Foundations page has a
+      five-heading description; 48 ids remain in the baseline (45 BlueHive + 3 Foundations); the
+      only families without an Overview are the seven BlueHive ones (Phase 6). Prose scoring pending.
 - [ ] Re-audit after Phase 6
 
 Re-audits use the same rubric, with scores recorded in §2 so the trend is auditable.

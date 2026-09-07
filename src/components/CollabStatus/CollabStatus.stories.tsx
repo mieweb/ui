@@ -24,6 +24,11 @@ const meta: Meta<typeof CollabStatus> = {
           target: 'editors-richeditor',
           why: 'Shows presence and sync state for a collaborative RichEditor document.',
         },
+        {
+          type: 'composes with',
+          target: 'encounter-orders-casemanagementheader',
+          why: 'Drops into CaseManagementHeader\'s collabStatus slot beside the "… are editing" line on the case context bar.',
+        },
       ],
     },
     docs: {

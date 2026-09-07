@@ -116,6 +116,11 @@ The source owns the data lifecycle; the grid is presentational. Keep application
           why: 'Table is for a few static rows; NITRO whenever users browse, sort, filter or export records.',
         },
         {
+          type: 'alternative to',
+          target: 'encounter-orders-webchartreportviewer',
+          why: 'NITRO is the interactive grid for sorting, grouping and pivoting a dataset; WebChartReportViewer picks a backend-run report and shows its rows in a static Table.',
+        },
+        {
           type: 'composes with',
           target: 'grids-datavis-nitro-graph',
           why: 'Both render the same DataVisNitroSource; switch between rows and a chart without refetching.',

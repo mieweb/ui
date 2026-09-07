@@ -16,14 +16,74 @@ const meta: Meta<typeof PresentingProblems> = {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-Encounter-scoped **relevant problem list** (a.k.a. Medical History), fed by the patient-level ProblemList.
+        component: `### What it's for
 
-- Providers select which patient concerns are relevant this visit and tag each with a relevance (**Addressed / Relevant Hx / Noted**). The tag lives on the encounter *reference*, never on the concern — a specialist's judgment never pollutes the holistic record.
-- The **scope banner** distinguishes a *problem-focused* encounter (unselected problems are out of scope, not absent) from a *comprehensive* visit (closing reconciles the full problem list).
-- In problem-focused scope the negative assertion ("no known problems") is disabled: absence of mention asserts nothing.
-        `,
+The **encounter-scope problem list** (a.k.a. Medical History): the provider picks which of the patient's chart concerns matter *this visit* and tags each with a \`ProblemRelevance\` — **Addressed / Relevant Hx / Noted**. The tag lives on the encounter reference (\`PresentingEntry { concernId, relevance, comments? }\`), never on the \`ConditionConcern\`, so a specialist's judgment never pollutes the holistic record. Two sections: **Relevant this visit** (\`presenting\` order, drag-reorderable via \`onReorder\`) and **From patient problem list** (the unselected remainder of \`patientConcerns\`). The required \`scope\` — \`'problem-focused'\` or \`'comprehensive'\` — drives a \`role="status"\` banner, marks unselected rows *out of scope* (not absent) in problem-focused visits, and gates the negative assertion: the **No known problems** checkbox (\`noKnownProblems\` / \`onNoKnownProblemsChange\`) is disabled unless the visit is comprehensive. Controlled throughout: \`onRelevanceChange(concern, relevance | null)\`, \`onAddProblem(text)\` for ad-hoc capture, \`readOnly\` to strip controls. \`RELEVANCE_LABELS\` and the \`EncounterScope\` / \`ProblemRelevance\` / \`PresentingEntry\` types are exported.
+
+### Use it when
+
+- You are building the **encounter** and need "which problems are in play today" without editing the chart list itself.
+- The host owns both the chart concerns (\`patientConcerns\`, the same \`ConditionConcern[]\` a \`ProblemList\` renders) and the encounter's \`presenting\` references, and can persist relevance changes and order.
+- You must record a **negative assertion** correctly — only a comprehensive visit may say "no known problems".
+
+### Don't use it when
+
+- You are showing or maintaining the **chart-scope** list — statuses, assertion history, relationships, resolve — [ProblemList](?path=/docs/clinical-lists-problemlist--docs).
+- You need today's **assertion plus plan** (orders under each problem) — [Assessment](?path=/docs/encounter-orders-assessment--docs). PresentingProblems answers *relevance*; Assessment answers *what we concluded and ordered*.
+- You need to edit codes, severity or onset — [ConditionEditor](?path=/docs/clinical-lists-conditioneditor--docs) via a ProblemList or Assessment action; this component only adds by name.
+
+### Example
+
+\`\`\`tsx
+const [presenting, setPresenting] = useState<PresentingEntry[]>(encounter.presentingProblems);
+const [noKnownProblems, setNoKnownProblems] = useState(false);
+
+<PresentingProblems
+  patientConcerns={chartConcerns}
+  presenting={presenting}
+  scope={encounter.type === 'annual' ? 'comprehensive' : 'problem-focused'}
+  onRelevanceChange={(concern, relevance) =>
+    setPresenting((prev) => {
+      const rest = prev.filter((p) => p.concernId !== concern.concernId);
+      return relevance ? [...rest, { concernId: concern.concernId, relevance }] : rest;
+    })
+  }
+  onAddProblem={(text) => {
+    const concern = addAdHocConcern(text); // host appends an unconfirmed concern to the chart
+    setPresenting((prev) => [...prev, { concernId: concern.concernId, relevance: 'addressed' }]);
+  }}
+  onReorder={(ids) => setPresenting((prev) => [...prev].sort((a, b) => ids.indexOf(a.concernId) - ids.indexOf(b.concernId)))}
+  noKnownProblems={noKnownProblems}
+  onNoKnownProblemsChange={setNoKnownProblems}
+/>
+\`\`\`
+
+\`presenting\` and \`noKnownProblems\` belong to the encounter object; \`patientConcerns\` belongs to the chart — persist them separately.
+
+### Limitations
+
+- **Accessibility as implemented.** Each row's relevance control is a \`role="toolbar"\` of \`aria-pressed\` buttons with ←/→ navigation (\`toolbarKeyNav\`); only *selected* rows are focus stops (\`tabIndex={0}\`, ↑/↓ between rows, Alt+↑/↓ to reorder) — rows in the unselected pool are not keyboard-reachable except through their relevance buttons. Reorders are announced via \`useLiveAnnouncement\` into an \`sr-only\` \`aria-live="polite"\` region; relevance changes and adds are **not** announced. The scope banner is \`role="status"\`. Out-of-scope rows are dimmed to \`opacity-80\` plus an "out of scope" badge.
+- **Clinical logic is the host's.** The component enforces only the scope gate; it does not merge relevance back into the chart, resolve or reconcile concerns on encounter close, or validate that a comprehensive visit actually reviewed everything.
+- **No relevance editing of \`comments\`** — they display if present on the entry but there is no input for them.
+- **Responsive / RTL.** Rows \`flex-wrap\` and push the relevance control with \`ml-auto\` (physical); no RTL mirroring.
+- **Theming / i18n.** Semantic tokens via \`Card\` / \`Badge\`, plus hard-coded amber / primary banner colours. \`title\` is a prop; relevance labels, scope banner copy, section headings, "No problems selected yet.", the add placeholder and the negative-assertion tooltip are English constants.
+- **Dependencies.** \`ProblemList\` (\`CodingChips\`, \`currentAssertion\`), \`Card\`, \`Badge\`, \`Button\`, \`Tooltip\`, \`RowActionToolbar\` (\`toolbarKeyNav\`), \`useDragReorder\`, \`useLiveAnnouncement\`; main \`@mieweb/ui\` entry, no peers.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'clinical-lists-problemlist',
+          why: 'Renders the chart-scope ConditionConcern[] from ProblemList as its patientConcerns pool and tags encounter relevance on top.',
+        },
+        {
+          type: 'alternative to',
+          target: 'encounter-orders-assessment',
+          why: "PresentingProblems records which chart problems are relevant this visit; Assessment records today's assertion and the orders placed for each.",
+        },
+      ],
     },
   },
   tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],

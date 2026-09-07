@@ -18,25 +18,86 @@ const meta: Meta<typeof MedicationList> = {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-Presenting-medications list with **medication reconciliation** — review a
-patient's medications during an encounter and record whether they're
-actually taking each one. Medications group themselves by status
-(Unreconciled → Taking as Directed → Not Taking as Directed → Not Taking →
-Unknown); hover or keyboard-focus a row to reveal the action toolbar.
+        component: `### What it's for
 
-### Which layer do I use?
+The **presenting-medications list with medication reconciliation**: review a patient's medications during an encounter and record whether they are actually taking each one. Rows group by \`MedicationStatus\` — Unreconciled → Taking as Directed → Not Taking as Directed → Not Taking → Unknown — and each row shows name, \`code\` (\`RxNORM 314076\`), \`sig\`, an **EXPIRED** flag, "Discontinued on", and any \`note\` / \`task\`. Three layers ship from this folder:
 
 | Component | Use when | Story |
 |---|---|---|
-| \`MedicationReconciliation\` | You want the whole workflow working out of the box — dialogs, NCPDP editor, add/remove/reorder | **Interactive**, **Reconciliation** |
-| \`MedicationList\` | You need full control of the data flow and will supply your own dialogs/editor | **Headless**, **Default**, and the variant stories |
-| \`registerMedicationListFieldType()\` | The list is a question inside an eSheet form | *eSheet/MedicationListField* |
+| \`MedicationReconciliation\` | You want the whole workflow working out of the box — status buttons, the NCPDP \`MedicationEditor\` for Correct / Add, Notes and Add Task dialogs, remove, reorder, quick-add or an inline coded search (\`inlineAddSearch\`). Uncontrolled (\`defaultMedications\`) or controlled (\`medications\` + \`onChange\`) | **Interactive**, **Empty**, **Reconciliation** |
+| \`MedicationList\` | You need full control of the data flow and will supply your own dialogs / editor. Presentational and controlled: \`medications\` in, \`onStatusChange\` / \`onAction\` / \`onReorder\` / \`onQuickAdd\` / \`onAddOther\` out | **Headless**, **Default** and the variant stories |
+| \`registerMedicationListFieldType()\` | The list is a question inside an eSheet form | [MedicationListField (eSheet)](?path=/docs/clinical-lists-medicationlistfield-esheet--docs) |
 
-Start with \`MedicationReconciliation\` unless you have a reason not to.
-Full docs: [README](https://github.com/mieweb/ui/blob/main/src/components/MedicationList/README.md).
-        `,
+**Start with \`MedicationReconciliation\` unless you have a reason not to.** \`MedicationEditor\` (the NCPDP SCRIPT NewRx \`MedicationPrescribed\` field set — drug, code, strength, dose form, quantity, days supply, refills, DAW, sig, dates, indication, pharmacy notes) is exported on its own too, as are the parsers it uses: \`parseMedicationLabel\` ("lisinopril 20 mg tablet" → strength / dose form / quantity unit) and \`parseSig\` (route / frequency / PRN from the sig text). Drug coding is dependency-injected: \`codeLookup={{ component: CodeLookup, indexUrl }}\` (or an ambient \`CodeLookupProvider\`); omit it and the editor falls back to a plain name input. \`actions\` trims the row toolbar (\`open · correct · refill · add-task · note · remove · move-up · move-down\`); host-specific \`open\` / \`refill\` are reported through \`onAction\`, never handled.
+
+### Use it when
+
+- An encounter workflow needs the patient's medication list **reconciled** — every row ends up Taking / Not taking as directed / Not taking / Unknown — and the result persisted as \`Medication[]\`.
+- You want prescription detail captured in NCPDP-shaped fields so it can feed an eRx or reconciliation document later.
+- Patient-facing intake: \`MedicationReconciliation inlineAddSearch\` without \`quickAddOptions\` adds coded medications from an empty list without leading the patient.
+
+### Don't use it when
+
+- You need the **allergy** list — [AllergyList](?path=/docs/clinical-lists-allergylist--docs); same three-layer pattern, different model (NKA tri-state, allergy vs intolerance).
+- You are placing a **new medication order** inside the visit's plan — [Assessment](?path=/docs/encounter-orders-assessment--docs) with [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs), which morphs into this folder's \`MedicationEditor\` for \`type: 'medication'\` orders.
+- You just need a read-only medication summary in a banner — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)'s \`showMedicationBanner\` renders name / dose pills; use \`MedicationList readOnly\` only when the grouped status view matters.
+- You need drug–drug interaction, dose-range or formulary checks — nothing here validates clinical content.
+
+### Example
+
+\`\`\`tsx
+// Batteries-included, controlled, coded — the recommended shape
+const [meds, setMeds] = useState<Medication[]>(encounter.presentingMedications);
+
+<MedicationReconciliation
+  medications={meds}
+  onChange={(next) => { setMeds(next); saveEncounter({ presentingMedications: next }); }}
+  quickAddOptions={['aspirin 81 mg tablet', 'atorvastatin 20 mg tablet']}
+  codeLookup={{ component: CodeLookup, indexUrl: '/codify' }} // omit inside a CodeLookupProvider
+  actions={['correct', 'add-task', 'note', 'remove', 'refill']}
+  onAction={(med, action) => action === 'refill' && openRefill(med)}   // host-specific actions
+/>
+
+// Presentational layer only — you own every mutation
+<MedicationList
+  medications={meds}
+  onStatusChange={(med, status) => setMeds((prev) => prev.map((m) => (m.id === med.id ? { ...m, status } : m)))}
+  onAction={(med, action) => action === 'remove' ? setMeds((prev) => prev.filter((m) => m.id !== med.id)) : openMyDialog(med, action)}
+  onReorder={(ids) => setMeds((prev) => [...prev].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)))}
+/>
+\`\`\`
+
+\`MedicationReconciliation\` owns dialog state only; the list itself is yours in controlled mode. Give \`MedicationEditor\` a \`key\` per target when you mount it directly — the draft is seeded once per mount.
+
+### Limitations
+
+- **Accessibility as implemented.** Groups are \`<section aria-label>\` with a \`<ul>\`; rows become focusable (\`tabIndex={0}\`, ↑/↓ between rows, Alt+↑/↓ to reorder) only when \`onReorder\` is set. Row actions are a \`RowActionToolbar\` (\`role="toolbar"\`, ←/→) — hover-revealed on fine-pointer devices, always visible on touch, reachable by Tab; status buttons carry \`aria-pressed\`. Status changes and reorders are announced via \`useLiveAnnouncement\` into an \`sr-only\` \`aria-live="polite"\` region; adds, removes, notes and tasks are **not** announced. The editor's derived route / frequency / PRN line is \`aria-live="polite"\`. Dialogs come from \`Modal\` (focus trap, Esc).
+- **Clinical safety.** No interaction, allergy, duplicate-therapy, dose-range or formulary checking; \`expired\` and \`discontinuedDate\` are display flags the host derives; \`parseSig\` / \`parseMedicationLabel\` are regex heuristics for English sigs and labels and can be wrong — treat their output as suggestions. Coded search only covers what the codify shards contain (RxNorm / FDB); the fallback is uncoded free text.
+- **Reordering** is confined to the same status group; cross-group moves must go through a status button.
+- **Responsive / RTL.** Rows \`flex-wrap\`; the toolbar's \`right-*\` overlay and \`pl-*\` note indents are physical, so RTL does not mirror.
+- **Theming / i18n.** Semantic tokens via \`Card\` / \`Badge\` plus hard-coded red for **EXPIRED**. \`title\`, \`reconciledMessage\` and \`emptyMessage\` are props; group labels (\`MEDICATION_STATUS_LABELS\`), action labels, dialog copy and the NCPDP field labels are English constants.
+- **Dependencies / entry.** \`Card\`, \`Badge\`, \`Button\`, \`Modal\`, \`Textarea\`, \`Label\`, \`RowActionToolbar\`, \`useDragReorder\`, \`useLiveAnnouncement\`; main \`@mieweb/ui\` entry, no peers. \`CodeLookup\` is **not** in the package build (module Web Worker) — import it from a source checkout through your app bundler and inject it.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'clinical-lists-codelookup',
+          why: 'codeLookup={{ component: CodeLookup, indexUrl }} gives MedicationEditor and the inline add bar offline RxNorm / FDB drug coding.',
+        },
+        {
+          type: 'composes with',
+          target: 'encounter-orders-ordereditor',
+          why: "OrderEditor morphs into this folder's MedicationEditor for medication orders and maps AssessmentOrder ⇄ Medication.",
+        },
+        {
+          type: 'uses',
+          target: 'actions-rowactiontoolbar',
+          why: 'Status buttons and row actions are RowIconButtons inside a RowActionToolbar.',
+        },
+      ],
     },
   },
   tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],

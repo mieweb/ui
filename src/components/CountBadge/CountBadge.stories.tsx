@@ -73,6 +73,11 @@ The host owns the items and the mutations; the component owns popover open state
           why: 'CountBadge is a button with a count chip that can open a popover table of items; Badge is a static label span.',
         },
         {
+          type: 'composes with',
+          target: 'encounter-orders-patientheader',
+          why: "PatientHeader's actions slot is sized for CountBadge chips (Tasks, Open Enc, Due List…) and toggles them with showCountBadges.",
+        },
+        {
           type: 'uses',
           target: 'overlays-modal',
           why: 'The default View / Edit / Delete row actions open built-in Modals.',

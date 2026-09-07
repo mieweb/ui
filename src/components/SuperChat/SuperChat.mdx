@@ -3,17 +3,17 @@ import rawReadme from './README.md?raw';
 
 <Meta title="Modules/SuperChat/Overview" />
 
-{/\*
-Single source of truth: this page renders the consumer README verbatim so the
-docs never drift from the guide shipped in the package. Edit README.md, not
-this file.
+{/*
+  Single source of truth: this page renders the consumer README verbatim so the
+  docs never drift from the guide shipped in the package. Edit README.md, not
+  this file.
 
-Storybook has no file server for the repo, so the README's _relative_ links to
-other Markdown files (MAINTAINERS.md, ../AI/MAINTAINERS.md)
-would 404 here. Rewrite those to absolute GitHub URLs, resolved against the
-README's own location, so they stay clickable in Storybook while remaining
-correct relative links on GitHub / npm.
-\*/}
+  Storybook has no file server for the repo, so the README's *relative* links to
+  other Markdown files (MAINTAINERS.md, ../AI/MAINTAINERS.md)
+  would 404 here. Rewrite those to absolute GitHub URLs, resolved against the
+  README's own location, so they stay clickable in Storybook while remaining
+  correct relative links on GitHub / npm.
+*/}
 
 export const README_DIR = 'src/components/SuperChat';
 export const GITHUB_BLOB_BASE = 'https://github.com/mieweb/ui/blob/main';

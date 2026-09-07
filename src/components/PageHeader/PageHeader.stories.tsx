@@ -143,6 +143,16 @@ Tab state stays in the page; the header is a pure layout wrapper.
           target: 'dashboards-customizabledashboard',
           why: 'CustomizableDashboard portals its title + layout toggle into a toolbarSlot element placed in the PageHeader actions row.',
         },
+        {
+          type: 'alternative to',
+          target: 'encounter-orders-patientheader',
+          why: 'PageHeader titles a generic page with breadcrumb and tabs; PatientHeader is the chart banner with demographics, safety rows and a patient action menu.',
+        },
+        {
+          type: 'alternative to',
+          target: 'encounter-orders-casemanagementheader',
+          why: 'PageHeader titles a generic page with breadcrumb and tabs; CaseManagementHeader is the record banner for a case with its own context bar and details grid.',
+        },
       ],
     },
   },
