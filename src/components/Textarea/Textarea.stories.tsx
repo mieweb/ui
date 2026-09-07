@@ -66,6 +66,11 @@ Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an 
           target: 'editors-richeditor',
           why: 'RichEditor when the text needs formatting or collaboration; Textarea for plain multi-line text.',
         },
+        {
+          type: 'alternative to',
+          target: 'editors-richtexteditor',
+          why: 'RichTextEditor when the note needs bold/lists/alignment, merge variables or dictation; Textarea for plain multi-line text.',
+        },
       ],
     },
   },

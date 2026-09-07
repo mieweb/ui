@@ -139,6 +139,11 @@ Choosing an item does **not** close the menu by itself — close it from \`onCli
           target: 'text-inputs-input',
           why: 'The searchable variant styles its filter box with inputVariants from Input.',
         },
+        {
+          type: 'alternative to',
+          target: 'chat-composermodelselector',
+          why: 'Dropdown holds arbitrary menu items; ComposerModelSelector adds provider grouping, a filter strip and an effort drill-down for LLM choice.',
+        },
       ],
     },
   },

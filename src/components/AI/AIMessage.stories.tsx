@@ -22,32 +22,75 @@ const meta: Meta<typeof AIMessageDisplay> = {
     layout: 'padded',
     docs: {
       description: {
-        component: [
-          '`AIMessageDisplay` renders a single message in an AI conversation. A message is made up of',
-          'one or more **content blocks**, so a single assistant turn can interleave prose, tool calls,',
-          'reasoning, and code:',
-          '',
-          '| Block type | Renders as |',
-          '| ---------- | ---------- |',
-          '| `text` | Prose (optionally via a custom `renderTextContent` renderer) |',
-          '| `tool_use` | An embedded `MCPToolCallDisplay` |',
-          '| `thinking` | A collapsible "Thinking…" reasoning panel |',
-          '| `code` | A syntax-styled code block |',
-          '| `image` | A clickable image thumbnail |',
-          '| `file` | A document card with icon, filename & size |',
-          '| `audio` | An inline waveform `AudioPlayer` for recorded clips |',
-          '| `video` | An inline native `<video>` player for screen/video recordings |',
-          '',
-          '### Rich content: Markdown, images & Mermaid',
-          'Text blocks are plain text by default. To render **Markdown, images, or Mermaid diagrams**,',
-          'supply a `renderTextContent` render-prop and plug in your own renderer (e.g. `react-markdown`).',
-          'The host owns rendering so it can also own **sanitization** of untrusted model output.',
-          'See the _With Custom Markdown Renderer_ story for the contract.',
-          '',
-          '### Streaming',
-          'Set the message `status` to `streaming` to show the animated typing indicator while tokens arrive.',
-        ].join('\n'),
+        component: `### What it's for
+
+**Renders one \`AIMessage\` — avatar, bubble and its ordered content blocks — for any role.** \`AIMessageDisplay\` takes \`message: AIMessage\` (\`role\` \`user\` | \`assistant\` | \`system\` | \`tool\`, \`status\` \`pending\` | \`streaming\` | \`complete\` | \`error\`, \`content: AIMessageContent[]\`) plus \`userName\` (initials for the user avatar), \`showAvatar\`, \`showTimestamp\`, \`onLinkClick(link)\` for resource links inside tool results, \`renderTextContent\` and \`renderMessageFooter\`. Each block type has a fixed renderer: \`text\` → \`whitespace-pre-wrap\` paragraph or your \`renderTextContent(text, { messageId, streaming, role })\`; \`tool_use\` → an embedded \`MCPToolCallDisplay\`; \`thinking\` → a violet \`CollapsiblePill\` ("Thinking" while streaming, then "Thought for Ns"); \`code\` → \`<pre><code class="language-…">\`; \`image\` → lazy \`<img>\` inside a new-tab link; \`file\` → card with name and formatted size, linked when \`fileUrl\` is set; \`audio\` → \`AudioPlayer variant="waveform"\`; \`video\` → native \`<video controls>\`. A \`streaming\` message with no blocks shows \`AITypingIndicator\`; \`status: 'error'\` adds a red border and "Failed to send" / "An error occurred". \`tool\` messages render bubble-less. Also exported: \`ChatBubble\` (the shared bubble shell with \`variant\`, \`hasError\`, \`accent\`), \`MessageAvatar\`, \`AITypingIndicator\`, \`bubbleVariants\`.
+
+### Use it when
+
+- You are building your own thread layout (virtualised list, side-by-side compare, transcript export view) but want the library's message rendering, including MCP tool calls and thinking blocks.
+- You need the shared \`ChatBubble\` look for a non-AI surface (SuperChat uses it with a per-participant \`accent\`).
+- You want Markdown, Mermaid or custom widgets: pass \`renderTextContent\` and use \`ctx.streaming\` to defer expensive work and \`ctx.messageId\` as a cache key.
+
+### Don't use it when
+
+- You need the whole chat — thread, composer, suggestions — \`AIChat\` renders this component for you.
+- The content is a human-to-human message with delivery status, reactions and read receipts — Messaging's \`MessageBubble\`.
+- You only need the tool-call card — \`MCPToolCallDisplay\` directly.
+
+### Example
+
+\`\`\`tsx
+// Host-owned renderer; MarkdownRenderer sanitises, and streaming skips heavy blocks until complete.
+const renderText: AIRenderTextContent = (text, { streaming }) => (
+  <MarkdownRenderer content={text} streaming={streaming} />
+);
+
+<div role="log" aria-live="polite" aria-label={t('chat.thread')} className="space-y-4">
+  {messages.map((m) => (
+    <AIMessageDisplay
+      key={m.id}
+      message={m}
+      userName={currentUser.displayName}
+      showTimestamp
+      renderTextContent={renderText}
+      onLinkClick={(link) => navigate(link.href)}
+      renderMessageFooter={(msg) => msg.role === 'assistant' && msg.status === 'complete'
+        ? <CopyButton text={plainText(msg)} />
+        : null}
+    />
+  ))}
+</div>
+\`\`\`
+
+### Limitations
+
+- **Sanitisation is yours.** Whatever \`renderTextContent\` returns is mounted verbatim inside a \`prose\` wrapper; the default is plain text. \`image\`/\`file\`/\`audio\`/\`video\` URLs are only rejected when they start with \`javascript:\` — validate hosts and MIME types before they reach the message.
+- **No announcements.** The component has no \`aria-live\`; streaming, the typing indicator, the error text and the thinking/tool pills changing state are silent unless the host wraps the thread in a live region. Timestamps use \`toLocaleTimeString\` and the \`ai-message-timestamp\` span is not a \`<time>\`. Avatars are decorative (icon or initials, no accessible name); the image link's label is \`View <name>\` and the video's label falls back to "Video recording".
+- **Layout is not virtualised** and a \`renderTextContent\` runs for every text block on every render; memoise heavy renderers.
+- **RTL / theming.** User messages use \`flex-row-reverse\` and bubbles are \`max-w-[85%]\`; the thinking block uses logical \`border-s\`/\`ps-3\` but \`ChatBubble accent\` sets a physical \`borderLeft\`. Colours are hard-coded \`neutral-*\`, \`primary-800\`, \`violet-*\`, \`red-*\`; the \`prose\` classes need \`@tailwindcss/typography\` to have any effect.
+- i18n: "Thinking", "Thought for Ns", "Failed to send", "An error occurred", "Audio recording", "Video recording", "Uploaded image", "Document" and the \`B\`/\`KB\`/\`MB\` size labels are English. The \`audio\` block requires the \`wavesurfer.js\` optional peer via \`AudioPlayer\`. Entry \`@mieweb/ui\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'media-audioplayer',
+          why: 'AIMessageDisplay renders `audio` content blocks with a waveform AudioPlayer.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-markdown',
+          why: 'Pass MarkdownRenderer through renderTextContent to render assistant text as sanitised Markdown.',
+        },
+        {
+          type: 'composes with',
+          target: 'chat-mcptoolcall',
+          why: '`tool_use` blocks render an embedded MCPToolCallDisplay with the message’s onLinkClick.',
+        },
+      ],
     },
   },
   argTypes: {

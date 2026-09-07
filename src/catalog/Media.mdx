@@ -1,0 +1,81 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Media/Overview" />
+
+# Media
+
+> **Is the user recording, playing, or reading along?** Capturing a take → `AudioRecorder`
+> (a panel with review) or `RecordButton` (one button that hands off a `Blob`). Playing a clip
+> → `AudioPlayer` (styled, audio-only, seconds) or `MediaPlayer` (native `<audio>`/`<video>`,
+> milliseconds). Reading along → `TranscriptView` (read-only, click-to-seek). Editing the
+> words of a recording → `MediaEditor`, which already contains a `MediaPlayer`. The
+> **MediaEditor Live Demo** is a Storybook page, not a component.
+
+## Which one?
+
+| Component                                                              | Use it when                                                                                                                                                       | Not when                                                                                                                                                                     |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [AudioPlayer](?path=/docs/media-audioplayer--docs)                     | A small, themed player for one audio clip: `inline` / `compact` / `waveform` variants, `AudioPlayerRef` in **seconds**, `preload={false}` for lists               | The source may be video or you want native controls and captions — `MediaPlayer`; you are capturing — `AudioRecorder` / `RecordButton`                                       |
+| [MediaPlayer](?path=/docs/media-mediaplayer--docs)                     | Native `<audio>`/`<video>` with `controls`, `kind` inferred from the extension, `MediaPlayerRef` in **milliseconds** to sync a transcript                         | You want a compact styled audio control or a waveform — `AudioPlayer`; the words are edited — `MediaEditor`                                                                  |
+| [TranscriptView](?path=/docs/media-transcriptview--docs)               | Read-only word- or segment-level transcript that highlights `currentTimeMs` and reports `onSeek(ms)`; speaker rows via `speakerLabels` / `mergeSameSpeaker`       | The user changes words or the cut — `MediaEditor`; you have no media position to follow                                                                                      |
+| [MediaEditor](?path=/docs/media-mediaeditor--docs)                     | Word-timestamped `Transcript` the user tightens: delete/cut/paste words, split silences, filler removal, speed markers; state persisted via `onEditorStateChange` | Read-only playback — `TranscriptView` + `MediaPlayer`; segment-only timestamps (no per-word times)                                                                           |
+| [MediaEditor Live Demo](?path=/docs/media-mediaeditor-live-demo--docs) | Trying `MediaEditor` on your own file: on-device Whisper transcription, then the editor with the Script panel                                                     | Anything you ship — use `MediaEditor` with your own transcription source                                                                                                     |
+| [AudioRecorder](?path=/docs/media-audiorecorder--docs)                 | A deliberate take with pause/resume, `maxDuration`, waveform playback and delete before the host receives the `Blob` (`onRecordingComplete`)                      | A single mic icon in a composer — `RecordButton`; you cannot ship `wavesurfer.js`; a speaker-labelled visit transcript — [VisitScribe](?path=/docs/voice-visit-scribe--docs) |
+| [RecordButton](?path=/docs/media-recordbutton--docs)                   | One round button for talk-to-text / voice messages: six visual states, `transcriptionState` overlay, controlled `state` when you own the recorder                 | The user should review the take first — `AudioRecorder`; you want a real waveform (its bars are a CSS animation)                                                             |
+
+## How they fit together
+
+- **Two players, two clocks.** `AudioPlayer` speaks **seconds** and draws its own controls
+  (`ProgressBar`, optional WaveSurfer waveform); `MediaPlayer` speaks **milliseconds**, renders
+  the browser's own `<audio>`/`<video>` and exposes the transport of the shared
+  `useMediaTransport` hook. Everything transcript-shaped in this family (`Transcript`,
+  `TranscriptView`, `MediaEditor`, `useTranscriptEdits`) is in milliseconds, so pair those with
+  `MediaPlayer`; reach for `AudioPlayer` when the clip stands alone in a list, card or chat
+  bubble (`AIMessageDisplay` renders `audio` blocks with it).
+- **Player + transcript is host-wired.** `MediaPlayer` and `TranscriptView` never reference each
+  other: the host holds `positionMs`, feeds `onTimeUpdate → currentTimeMs` one way and
+  `onSeek → ref.seekToMs()` the other. `MediaEditor` is that wiring done for you, plus editing —
+  it **contains** a `MediaPlayer` (`playerRef` escape hatch) and renders its own word tokens,
+  not a `TranscriptView`.
+- **Two recorders, no shared code.** `AudioRecorder` and `RecordButton` each own a
+  `getUserMedia` → `MediaRecorder` pipeline; `RecordButton` does not wrap `AudioRecorder`.
+  Choose by what happens after Stop: `AudioRecorder` loads the take into a waveform for review
+  and delete; `RecordButton` flashes `processing` / `success` and hands the `Blob` to
+  `onRecordingComplete` — play it back with an `AudioPlayer` if the user needs to hear it.
+- **Whisper is a demo, not a peer.** The Live Demo transcribes with the repo-internal
+  `whisperTranscribe` worker; only `decodeTo16kMono` is public. Hosts bring their own
+  word-level timestamps.
+
+## Shared limitations
+
+- **Permissions and formats.** Both recorders need a secure context and the microphone prompt;
+  a denied prompt reaches only `onError` / `onRecordingError` with no built-in message.
+  `MediaRecorder` containers differ by browser (`audio/webm` vs Safari `audio/mp4`), and when
+  the requested `mimeType` is unsupported both fall back yet still label the `Blob` with the
+  requested type. In both, the `duration` argument of `onRecordingComplete` is read from a
+  closure captured at record start, so as implemented it does not reflect the take's length.
+- **wavesurfer.js** (optional peer, `>=7`) is dynamically imported by `AudioPlayer
+variant="waveform"` and by `AudioRecorder` whenever `showWaveform` (default `true`); with
+  `showWaveform={false}` `AudioRecorder` cannot play the take back at all. A missing package is
+  only `console.error`ed.
+- **Announcements.** Nothing in the family uses `aria-live`: recording/paused indicators,
+  elapsed time, transcription captions, the active transcript word and `MediaEditor`'s
+  deletions are visual only. `MediaPlayer`'s error panel (`role="alert"`) is the one exception.
+- **Keyboard.** `AudioPlayer`'s slider seeks in 5 % steps with ArrowLeft/Right only;
+  `TranscriptView` word mode puts a Tab stop on every word; `MediaEditor`'s speed markers are
+  right-click only and its range gestures (drag, long-press, double-click anchor) have no
+  keyboard path; `MediaPlayer` with `controls={false}` has no control at all.
+- **i18n.** Every label in the family is hard-coded English — play/pause and record labels,
+  "Recording"/"Paused", "Silence, N seconds", `MediaEditor`'s toolbar and modals (with Mac
+  `⌘`/`⇧` glyphs on every platform), `MediaPlayer`'s "Unable to load media… / Retry" — and
+  time is always `m:ss` with Latin digits. `MediaPlayer` renders no `<track>`, so captions
+  cannot be attached.
+- **RTL.** `AudioPlayer` positions its fill/thumb/hover cursor with physical `left`;
+  `MediaEditor` uses `md:border-r`, `-left-px` / `right-0.5` and a `border-l` deleted-word rule;
+  `TranscriptView` rows are `text-left` with fixed-width columns. `MediaPlayer`,
+  `AudioRecorder` and `RecordButton` are symmetric.
+- **Theming.** Containers use `bg-card` / `border-border`, but `AudioPlayer`, `AudioRecorder`
+  and `RecordButton` hard-code `primary-800/900`, `neutral-*`, `red-*` and `text-white`;
+  WaveSurfer colours read `--color-primary-*` with hex fallbacks. `RecordButton`'s
+  `showWaveform` bars need the `animate-waveform` keyframes from `@mieweb/ui/styles.css`.
+  Everything here is on the main `@mieweb/ui` entry and depends on `class-variance-authority`.

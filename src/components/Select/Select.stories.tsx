@@ -227,6 +227,11 @@ const [specialty, setSpecialty] = useState('');
           target: 'composite-forms-languageselector',
           why: 'Select is a labelled, validated form field for arbitrary values; LanguageSelector is a header/settings switcher with a built-in language list.',
         },
+        {
+          type: 'alternative to',
+          target: 'chat-composermodelselector',
+          why: 'Select is the labelled form field; ComposerModelSelector is an unlabelled upward-opening pill for provider/model pairs in a chat composer.',
+        },
       ],
     },
   },

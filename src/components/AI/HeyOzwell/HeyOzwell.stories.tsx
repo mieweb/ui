@@ -28,13 +28,79 @@ const meta: Meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'The Hey Ozwell entry point. The **octopus in the header** is gray until clicked; activating it ' +
-          'starts the on-device **wake-word detector** (the octopus turns colour and pulses with the room ' +
-          'volume) and the library **floating chat button** appears. Use the **Controls** panel to switch ' +
-          'between auto-dictate (“hey ozwell” → dictate) and open-chat-only (“hey ozwell” → just opens the ' +
-          'chat). **Right-click / long-press** the octopus for Ozwell settings (enrollment / test).',
+        component: `### What it's for
+
+**The drop-in voice entry point: an octopus toggle for the app header that runs the on-device wake-word detector, opens a \`FloatingAIChat\`, dictates on "hey ozwell", transcribes on "ozwell I'm done" and sends.** \`HeyOzwell\` is a thin wrapper over the headless \`useHeyOzwell\` hook that composes \`HeyOzwellToggle\` (\`aria-pressed\` button with a load ring and volume pulse), \`OzwellSettingsMenu\` (right-click / long-press: "Your voice" via \`onManageVoices\`, plus a read-only "Models & versions" list from \`MODEL_MANIFEST\`) and, while active, \`FloatingAIChat {...oz.chatProps} {...chatProps}\`. Options (all \`UseHeyOzwellOptions\`): \`autoDictateOnWake\`, \`closeChatOnDone\`, \`transcription\` \`browser\` | \`server\`, \`requireDoctor\` (invisible speaker-verify gate against enrolled voiceprints), \`autoStart\`, \`liveTranscript\`, \`conversationMode\` (diarize the clip and send "Dr. Jane: … / Patient: …"), \`reviewBeforeSend\`, \`onSend(text)\`, \`assetBase\`, \`diarizationOptions\`; plus \`size\`, \`logoSrc\`, \`longPressMs\`, \`className\`, \`chatProps\` (e.g. \`suggestions\`, \`userName\`). For a custom layout use \`useHeyOzwell\` directly: it returns \`toggleProps\`, \`chatProps\`, \`phase\` \`listening\` | \`dictating\` | \`transcribing\`, \`send\`, \`startDictation\` / \`stopDictation\`, \`settingsOpen\`, \`modelStatus\`. One shared microphone: the detector opens \`getUserMedia\` once and every other consumer reads \`getStream()\`.
+
+### Use it when
+
+- You want the whole voice flow in a header slot with one line of JSX and are happy with the floating-chat presentation.
+- Audio must stay on the device (PHI): wake, speaker verification, transcription and diarization all run in the browser by default; only the assistant's text reply goes over the network (via \`onSend\` or the built-in OpenAI-compatible client).
+- Clinicians share a room and only the enrolled clinician should be able to trigger the assistant (\`requireDoctor\`).
+
+### Don't use it when
+
+- The chat should be **inline** rather than floating, or you already render your own \`AIChat\` — \`HandsFreeChat\`, or \`useHeyOzwell\` + your layout.
+- You only need push-to-talk on an existing composer — \`AIChat talkToText\` with \`transcribeBlob\` (see Chat › AIChat (Voice)).
+- The encounter is a multi-person conversation to transcribe rather than commands to an assistant — \`VisitScribe\`.
+- The host cannot download models (locked-down networks, small devices) — see Limitations; consider \`transcription="server"\` or a non-voice entry point.
+
+### Example
+
+\`\`\`tsx
+import { HeyOzwell } from '@mieweb/ui';
+
+// Once, at app start: point model assets at your own hosts (defaults are HuggingFace + Cloudflare R2).
+window.__ozwellAssets = config.voiceAssetBase;        // wakeword/ + sv-runtime/ under this base
+window.__ozwellWhisperHost = config.whisperHost;      // Whisper weights (must send Content-Length)
+
+<header className="flex items-center gap-4">
+  <AppLogo />
+  <span className="flex-1" />
+  <HeyOzwell
+    requireDoctor
+    autoDictateOnWake
+    reviewBeforeSend
+    onSend={(text) => assistant.send(text)}          // your backend; reply rendering stays yours
+    onManageVoices={() => navigate('/settings/voice')} // route to a page rendering <VoiceManager />
+    chatProps={{ userName: user.displayName, suggestions }}
+  />
+</header>
+\`\`\`
+
+### Limitations
+
+- **Model downloads and hosting.** First activation fetches ~6 MB of wake models (ONNX, \`onnxruntime-web\` 1.19 loaded from jsDelivr with a bundled fallback), ~50 MB of sherpa-onnx/TitaNet when \`requireDoctor\` or \`conversationMode\` is on, Transformers.js from a CDN and Whisper turbo (~1.3 GB, WebGPU; \`base.en\` ~75 MB WASM fallback). Defaults point at a personal HuggingFace repo and an R2 bucket — override \`assetBase\` / \`window.__ozwellAssets\`, \`window.__ozwellWhisperHost\`, \`window.__ozwellTransformersUrl\` for production. Caching uses OPFS, the Cache API and a service worker that this repo serves only from Storybook (\`/ozwell-model-sw.js\`); a consumer must host that file or pass \`registerServiceWorker: false\`. Strict CSP needs \`worker-src blob:\` and the model origins.
+- **Browser requirements:** secure context, microphone permission, AudioWorklet, Web Workers, WASM, IndexedDB (voiceprints), ideally WebGPU. A denied mic shows "Microphone unavailable" on the toggle after ~8 s.
+- **Backend config is runtime and browser-visible.** Without \`onSend\`, replies come from \`localStorage.ozwellConfig\` / \`window.__ozwell\` (\`{ apiKey, baseURL, model, system, temperature }\`); with no key a canned reply is used. A Bearer key in the browser is readable by users — proxy it for public deploys.
+- **Accessibility as implemented:** the toggle is a \`<button aria-pressed>\` with English \`aria-label\`/\`title\` and a visual-only load ring; wake/dictate/transcribe phase changes are conveyed by the composer placeholder text and octopus animation, not a live region; the floating chat is \`FloatingAIChat\` (dialog, focus trap, Escape). Long-press is pointer-based; keyboard users open settings via the context-menu key.
+- Speaker verification thresholds are tuned for the enrolled mic/room; \`conversationMode\` forces on-device transcription. i18n: all strings ("hey ozwell", "Activate Hey Ozwell", "Ozwell is listening…", placeholders) are English and the wake phrases are fixed English models. Entry \`@mieweb/ui\` (\`onnxruntime-web\` is a runtime dependency).`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'contains',
+          target: 'voice-wake-word',
+          why: 'useHeyOzwell runs useWakeWord for "hey ozwell" / "ozwell I’m done" and shares its mic stream.',
+        },
+        {
+          type: 'uses',
+          target: 'voice-speaker-verify',
+          why: 'requireDoctor gates each wake through useSpeakerVerify against the enrolled voiceprints.',
+        },
+        {
+          type: 'uses',
+          target: 'chat-aichat',
+          why: 'While active it renders FloatingAIChat with the hook’s messages, placeholder and send handler.',
+        },
+        {
+          type: 'alternative to',
+          target: 'voice-hands-free-chat',
+          why: 'HeyOzwell is a header toggle with a floating chat; HandsFreeChat is the same flow as a full inline chat surface.',
+        },
+      ],
     },
   },
 };

@@ -13,9 +13,65 @@ const meta: Meta<typeof DropzoneOverlay> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'A visual overlay component shown when dragging files over a drop zone. Includes a custom `useDropzone` hook for managing drag-and-drop file uploads.',
+        component: `### What it's for
+
+**Turning an existing area into a drop target, and showing "drop here" while a drag is over it.** Two exports: \`DropzoneOverlay\` is the visual — a dashed \`fixed inset-0\` (or \`absolute inset-0\` with \`size="compact"\`) layer with an icon (\`upload\` | \`file\` | \`folder\` | your node) and a \`message\`, rendered only while \`isVisible\`; \`useDropzone({ onDrop, accept?, multiple?, disabled? })\` is the behaviour — it returns \`isDragging\` (counter-based, so child enter/leave does not flicker), \`getRootProps()\` for the drag handlers, \`getInputProps()\` for a hidden \`<input type="file">\`, and \`open()\` to launch the picker. The host decides what happens to the \`File[]\`.
+
+### Use it when
+
+- A **page or panel you already have** (a message thread, a record, an editor) should accept dropped files without adding a permanent upload widget; the overlay appears only during the drag.
+- You need drag-and-drop plus a "Browse" button but want to render the list, progress and errors yourself.
+
+### Don't use it when
+
+- You want a **standing upload area with a file table**, storage meter and per-file actions — \`FileManager\`.
+- The files are **documents to scan** (camera/webcam, validation, preview, AI extraction) — \`DocumentScanner\`.
+- Users need a clear affordance when nothing is being dragged — the overlay is invisible until then; pair it with a visible \`Button\` calling \`open()\` or use \`FileManager\`.
+
+### Example
+
+\`\`\`tsx
+const [queue, setQueue] = useState<File[]>([]);
+const { isDragging, getRootProps, getInputProps, open } = useDropzone({
+  onDrop: (files) => setQueue((q) => [...q, ...files]),
+  accept: ['image/*', 'application/pdf'],
+  multiple: true,
+  disabled: uploading,
+});
+
+<section {...getRootProps()} className="relative min-h-[320px]">
+  <input {...getInputProps()} aria-label="Attach files" />
+  <DropzoneOverlay isVisible={isDragging} size="compact" variant="primary" message="Drop to attach" />
+  <Button variant="outline" onClick={open}>Attach files</Button>
+  <AttachmentList files={queue} onRemove={(f) => setQueue((q) => q.filter((x) => x !== f))} />
+</section>
+\`\`\`
+
+\`size="compact"\` positions inside the nearest \`relative\` ancestor; the default covers the viewport.
+
+### Limitations
+
+- Accessibility: the overlay is \`role="status" aria-live="polite"\`, so the \`message\` is announced when it appears — but it appears only for **pointer drags**; keyboard and screen-reader users need the \`open()\` button you provide. \`getInputProps()\` renders \`display: none\` with no label — add \`aria-label\` yourself. Nothing announces the drop result; \`onDrop\` is your hook for that.
+- The hook does **no validation**: \`accept\` is passed to the picker only (dropped files of any type are delivered) and there is no size limit, count limit or duplicate check. With \`multiple: false\` only the first dropped file is kept.
+- The default \`message\` ("Drop to upload file") is English. Icons come from \`lucide-react\`.
+- Layout/RTL: the overlay is symmetric and centred; \`z-50\` may sit under other fixed chrome. Because the default is \`fixed inset-0\`, several overlays on one page stack; use \`compact\` for per-region targets.
+- Theming: \`bg-background/90\`, \`border-border\`, \`text-muted-foreground\`; \`primary\` and \`success\` variants use \`/10\` tints. Entry \`@mieweb/ui\` (also the default export).`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'files-filemanager',
+          why: 'DropzoneOverlay adds an invisible-until-dragged target to an existing surface; FileManager is a standing upload card with a file table and actions.',
+        },
+        {
+          type: 'alternative to',
+          target: 'files-documentscanner',
+          why: 'DropzoneOverlay delivers raw File[] with no validation or preview; DocumentScanner validates, previews, adds camera/webcam capture and sends to onScan.',
+        },
+      ],
     },
   },
   argTypes: {

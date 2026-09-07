@@ -22,11 +22,60 @@ const meta: Meta<typeof WakeWordDemo> = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'On-device wake-word detection. Say **"hey ozwell"** or **"ozwell I\'m done"** — it fires ' +
-          'a verified event entirely in the browser (no audio leaves the page). Headless: a host wires ' +
-          '`onWake` to an action (e.g. start the AIChat voice).',
+        component: `### What it's for
+
+**The headless on-device wake-word detector — \`useWakeWord\` — shown with a live probability readout.** The hook opens the microphone once (AudioWorklet capture, 16 kHz resample), runs the vendored HeyBuddy pipeline on \`onnxruntime-web\` (mel-spectrogram → speech embedding → per-phrase ONNX heads, gated by Silero VAD) on the main thread and fires \`onWake(name)\` for \`"hey-ozwell"\` and \`"ozwell-i'm-done"\`. Options (\`UseWakeWordOpts\`): \`onWake\`, \`onUtterance(name, samples)\` (the 16 kHz clip that triggered, for verification), \`thresholds\` per phrase (defaults 0.8 / 0.5), \`vadThresholds { positive, negative }\` (0.05 / 0.03), \`enabled\` (false tears the mic down), \`assetBase\`, \`registerServiceWorker\` (default true). It returns \`WakeWordState\` (\`ready\`, \`error\`, \`speech\`, \`probs\`) plus \`WakeWordControls\`: \`getStream()\` (the shared \`MediaStream\` — never open a second \`getUserMedia\`), \`getLastEmbedding\`, \`getLastProb\`, \`getLastWakeDuration\`, and the WHAT phrase-print API (\`setVoiceprint\`, \`hasVoiceprint\`, \`clearVoiceprint\`, \`phraseCosine\`). Also exported: \`warmWakeModels(assetBase?)\` to pre-fetch the ~6 MB of models into OPFS without opening the mic, with \`getWakeWarm\` / \`subscribeWakeWarm\` for progress. The story's \`WakeWordDemo\` is story-only; the Controls are live thresholds.
+
+### Use it when
+
+- You are building a **custom voice surface** and need the wake trigger and the shared mic stream without the rest of Hey Ozwell (\`useHeyOzwell\` and \`useVoiceSetup\` are built on this).
+- You want to tune detection thresholds against real speech in a real room before setting deployment defaults.
+
+### Don't use it when
+
+- You want the finished flow — \`HeyOzwell\` (header toggle) or \`HandsFreeChat\` (inline).
+- You need to know **who** spoke — pair with \`useSpeakerVerify\`; the wake model is speaker-agnostic and the built-in WHAT print only checks *how the phrase was said*.
+- You need different or localised wake phrases: the two English phrases are baked into the ONNX heads; new phrases mean training and hosting new models.
+- Push-to-talk suffices — \`RecordButton\` / \`AIChat talkToText\` need no models.
+
+### Example
+
+\`\`\`tsx
+import { useWakeWord, warmWakeModels } from '@mieweb/ui';
+
+useEffect(() => { warmWakeModels(config.voiceAssetBase); }, []); // prefetch, no mic
+
+const wake = useWakeWord({
+  enabled: listening,
+  assetBase: config.voiceAssetBase,        // <base>/wakeword/*.onnx
+  registerServiceWorker: false,            // unless you serve ozwell-model-sw.js
+  onWake: (name) => {
+    if (name === 'hey-ozwell') startDictation(wake.getStream()!); // reuse the ONE mic stream
+    else stopDictation();
+  },
+});
+
+<StatusPill state={wake.error ? 'error' : wake.ready ? 'listening' : 'loading'} />
+\`\`\`
+
+### Limitations
+
+- **Assets and runtime:** loads \`onnxruntime-web\` 1.19 from jsDelivr (bundled ESM fallback), fetches \`hey-ozwell.onnx\`, \`ozwell-i'm-done.onnx\`, \`silero-vad.onnx\`, \`speech-embedding.onnx\`, \`mel-spectrogram.onnx\` from \`assetBase\` → \`window.__ozwellAssets\` → \`localStorage.ozwellAssetBase\` → a personal HuggingFace repo by default, caches them in OPFS and (when the SW is served) the Cache API. Inference runs on the **main thread** — heavy pages will drop frames and detections.
+- **Browser requirements:** secure context, microphone permission, AudioWorklet, WASM, OPFS. Model-ready is not mic-ready: a denied or missing mic surfaces as \`error\` ("Microphone unavailable …") after an ~8 s watchdog. Disabling (\`enabled: false\`) releases the mic and resets \`ready\` so consumers re-attach to the fresh stream.
+- **No UI, no a11y of its own.** The hook is headless; the story's readout (dot, bars, log) is a dev visualisation with inline styles and no live region. Whatever you build must announce wake events itself.
+- Detection is probabilistic: short phrases false-fire on similar sounds (hence the 0.8 default), and the VAD gate reads low, so most audio reaches the model. \`onUtterance\` is paired with the **last** phrase that fired, so two quick wakes can mislabel a clip.
+- Entry \`@mieweb/ui\`; \`onnxruntime-web\` is a runtime dependency; the hosted models are English-only.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'voice-speaker-verify',
+          why: 'The wake detector says WHAT was said; useSpeakerVerify checks WHO said it on the same utterance.',
+        },
+      ],
     },
   },
 };

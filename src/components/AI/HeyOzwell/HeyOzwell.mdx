@@ -10,8 +10,8 @@ verification, dictation, hands-free chat, and ambient visit scribing, all
 running **on-device, in the browser** by default. In that default
 configuration **audio never leaves the page**, which makes the stack PHI-safe
 out of the box. Two things do cross the network: the model assets on first
-load (downloaded once, then cached locally, see _Models, caching, hosting_)
-and the assistant's text reply (any OpenAI-compatible endpoint). One opt-in
+load (downloaded once, then cached locally, see _Dependencies & hosting_) and
+the assistant's text reply (any OpenAI-compatible endpoint). One opt-in
 setting changes the audio guarantee: `transcription="server"` POSTs the clip
 to your own ASR endpoint instead of running Whisper in the browser.
 
@@ -31,6 +31,24 @@ to your own ASR endpoint instead of running Whisper in the browser.
 
 If the embed doesn't load in your environment:
 [watch on YouTube](https://www.youtube.com/shorts/hQBGofjXqmg).
+
+## Which one?
+
+> **Where does voice enter, and who is speaking?** A header toggle that opens a floating chat
+> → `HeyOzwell`. The assistant _is_ the page → `HandsFreeChat`. Several people in a room to
+> transcribe, no assistant turns → `VisitScribe`. Enrolling or managing voices → `VoiceSetup` /
+> `VoiceManager`. Building your own flow → the `Wake Word` and `Speaker Verify` primitives. Just a
+> mic button on a chat → [AIChat (Voice)](?path=/docs/chat-aichat-voice--docs) in Chat.
+
+| Component                                                  | Use it when                                                                                                                                                                          | Not when                                                                                                                                                                  |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Hey Ozwell Demo](?path=/docs/voice-hey-ozwell-demo--docs) | Drop-in for the app header: octopus toggle + settings menu + `FloatingAIChat`; wake → dictate → transcribe → send; `requireDoctor`, `conversationMode`, `reviewBeforeSend`, `onSend` | The chat must be inline — `HandsFreeChat`; you already render `AIChat` — `useHeyOzwell` + your layout; the device cannot download models                                  |
+| [Hands-Free Chat](?path=/docs/voice-hands-free-chat--docs) | A full-height, always-listening assistant page (kiosk, dictation workstation); the same flow as an inline `AIChat`; reference composition of the primitives                          | Voice should be opt-in from the header — `HeyOzwell` (no mic until activated); you need `onSend` to your own backend (use the hook)                                       |
+| [Visit Scribe](?path=/docs/voice-visit-scribe--docs)       | Record a multi-person encounter, stop, get an on-device speaker-labelled transcript; rename/merge/reassign speakers; Re-analyze with new settings                                    | You only need the audio file — [AudioRecorder](?path=/docs/media-audiorecorder--docs); it is a dialogue with the assistant — `HandsFreeChat`; server-side ASR is mandated |
+| [Voice Manager](?path=/docs/voice-voice-manager--docs)     | The "Your voice" settings page: list, rename, remove, add and clear enrolled voices; launches `VoiceSetup`; target of `HeyOzwell onManageVoices`                                     | Enrollment embedded in onboarding — `VoiceSetup` alone; inspecting scores — `Speaker Verify`; voices must sync across devices (per-browser IndexedDB only)                |
+| [Voice Setup](?path=/docs/voice-voice-setup--docs)         | The guided enrollment screen (two phrases × 3 reps) building the WHO speaker print and WHAT phrase print; `mode="add"` for another voice or condition                                | You need to see what is enrolled — `VoiceManager`; a compact control (this is a full-bleed page); the user cannot say the fixed English phrases                           |
+| [Wake Word](?path=/docs/voice-wake-word--docs)             | Headless `useWakeWord` for a custom voice surface: `onWake`, `onUtterance`, thresholds, the shared `getStream()`; `warmWakeModels` prefetch                                          | You want the finished flow — `HeyOzwell` / `HandsFreeChat`; you need _who_ spoke — pair with `Speaker Verify`; different or localised phrases (new models)                |
+| [Speaker Verify](?path=/docs/voice-speaker-verify--docs)   | **Developer diagnostic** (experimental) for tuning the WHO/WHAT gates with live scores; reference for `useSpeakerVerify` (`verify`, `identify`, `enroll`, `setGates`)                | End users enrolling — `VoiceSetup` / `VoiceManager`; identity as an authentication factor (it is a convenience gate)                                                      |
 
 ## Quick start
 
@@ -141,17 +159,49 @@ while Whisper is still loading**, and the buffered audio catches up.
 
 ### Models, caching, hosting
 
-- **Wake models** (~6 MB): cached in OPFS, pre-fetched on mount. Override
-  with the `assetBase` prop or `window.__ozwellAssets`.
-- **Speaker runtime** (~50 MB): cached via the Cache API (service worker).
-  Override with `window.__ozwellAssets`.
-- **Whisper weights**: streamed into the Cache API by transformers.js.
-  Override with `window.__ozwellWhisperHost`.
-- **transformers.js ESM** (pinned version): browser cache. Override with
-  `window.__ozwellTransformersUrl`.
+See _Dependencies & hosting_ below for the full table. In short: wake models are
+cached in OPFS, the speaker runtime and Whisper weights in the Cache API, and
+every host is config-swappable.
 
-Voiceprints persist in **IndexedDB**; `localStorage` holds config only. Every
-host is config-swappable, so repointing models requires no source edits.
+## Dependencies & hosting
+
+Nothing in this family is bundled except the React code and `onnxruntime-web`
+(a runtime dependency of `@mieweb/ui`). Everything else is **fetched at runtime**
+from configurable hosts and cached in the browser. The defaults point at a
+personal HuggingFace repo (`jlocala/ozwell-voice-assets`), a Cloudflare R2
+bucket and jsDelivr — fine for the Storybook demo, **not** for production. Set
+the overrides before the components mount (app entry or `.storybook/preview`).
+
+| Asset                                                                                                                                | Size    | Used by                                                                                               | Runs                                                               | Default host → override                                                                                                                                                                 | Cache                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Wake-word models** — `hey-ozwell.onnx`, `ozwell-i'm-done.onnx`, `silero-vad.onnx`, `speech-embedding.onnx`, `mel-spectrogram.onnx` | ~6 MB   | `useWakeWord` → `HeyOzwell`, `HandsFreeChat`, `VoiceSetup`, `Speaker Verify`                          | Main thread, `onnxruntime-web`                                     | `<base>/wakeword/` → `assetBase` prop, `window.__ozwellAssets` (string or `{ wakeword, svRuntime }`), `localStorage.ozwellAssetBase`                                                    | OPFS (`warmWakeModels` prefetches); Cache API via service worker                                 |
+| **onnxruntime-web 1.19** (`ort.min.js`)                                                                                              | ~few MB | `useWakeWord`                                                                                         | Main thread, WASM                                                  | jsDelivr CDN; falls back to the bundled ESM if the CDN load fails                                                                                                                       | Browser HTTP cache                                                                               |
+| **Speaker runtime** — sherpa-onnx WASM + `.data` (TitaNet `titanet_small`) + `sv-cohort.json` (AS-norm cohort)                       | ~50 MB  | `useSpeakerVerify` → `requireDoctor`, `conversationMode`, `VisitScribe`, `VoiceSetup`, `VoiceManager` | Main thread, WASM, via `<script>` globals (`window.SpeakerVerify`) | `<base>/sv-runtime/` → `window.__ozwellAssets`; pass `useSpeakerVerify({ enabled: false })` to skip when the gate is off                                                                | Cache API via service worker                                                                     |
+| **Whisper turbo** (encoder fp16 / decoder q4, multilingual)                                                                          | ~1.3 GB | `transcribeBlob` / `transcribeSamples` → dictation, live captions, diarization                        | **Web Worker**, WebGPU (WASM fallback)                             | Cloudflare R2 → `window.__ozwellWhisperHost` / `ozwellConfig.whisperHost` (host must send `Content-Length`); `ozwellConfig.whisper: 'base.en'` selects the ~75 MB English model instead | Cache API, streamed by Transformers.js (`navigator.storage.persist()` requested, not guaranteed) |
+| **Whisper base.en** (`Xenova/whisper-base.en`)                                                                                       | ~75 MB  | Stop-phrase confirmation gate (`transcribeGate`, `warmStopGate`); turbo fallback                      | Web Worker                                                         | HuggingFace → same overrides                                                                                                                                                            | Cache API                                                                                        |
+| **Transformers.js 3.8.1** ESM                                                                                                        | ~1 MB   | The Whisper worker                                                                                    | Web Worker (`import()` from a Blob-URL module)                     | jsDelivr → `window.__ozwellTransformersUrl` / `localStorage.ozwellTransformersUrl`                                                                                                      | Browser HTTP cache                                                                               |
+| **Model service worker** `ozwell-model-sw.js`                                                                                        | —       | Caches the wake + speaker files across app opens                                                      | Service worker                                                     | Served by Storybook from `.storybook/public/`; a consumer must copy it to its own origin or pass `useWakeWord({ registerServiceWorker: false })`                                        | —                                                                                                |
+
+**Browser vs server transcription.** By default (`transcription="browser"`) every
+stage — wake, verification, Whisper, diarization — runs in the browser and no
+audio leaves the page. `transcription="server"` (`HeyOzwell`, `HandsFreeChat`)
+instead records the clip and POSTs it to `/v1/audio/transcriptions` on the
+configured OpenAI-compatible base URL (`transcribeServer`), falling back to
+on-device on failure; `conversationMode` overrides it because diarization needs
+the audio locally. `VisitScribe` has no server option. The assistant **reply**
+(`askOzwellStream`) and `VisitScribe`'s optional role inference (`askOzwell`,
+transcript text only) are the only other network stages, and only when
+`ozwellConfig` / `window.__ozwell` holds a key.
+
+**Browser requirements.** Secure context (HTTPS or `localhost`), microphone
+permission, AudioWorklet, Web Workers, WASM, IndexedDB (voiceprints, db
+`ozwell-voice`), OPFS; WebGPU strongly recommended for turbo (set
+`window.__ozwell.whisperDevice = 'wasm'` to skip the attempt). Strict CSP needs
+`worker-src blob:` plus the model and CDN origins — or self-host everything via
+the overrides above. Peer/package facts: `onnxruntime-web` is in
+`dependencies`; sherpa-onnx, Whisper and Transformers.js are **not** npm
+dependencies at all. Voiceprints persist per browser and origin; `localStorage`
+holds config only.
 
 ## Backend integration
 
@@ -187,11 +237,14 @@ The component is backend-agnostic. Two seams:
 
 ## Related
 
-- **Voice Setup**: one-time speaker enrollment (the octopus-pulse pattern).
-- **Voice Manager**: manage, rename, and remove enrolled voices.
-- **Wake Word**: the on-device detector primitive.
-- **Hands-Free Chat**: the voice conversation composition.
-- **Visit Scribe**: the ambient multi-person scribe.
+- [Voice Setup](?path=/docs/voice-voice-setup--docs): one-time speaker enrollment (the octopus-pulse pattern).
+- [Voice Manager](?path=/docs/voice-voice-manager--docs): manage, rename, and remove enrolled voices.
+- [Wake Word](?path=/docs/voice-wake-word--docs): the on-device detector primitive.
+- [Speaker Verify](?path=/docs/voice-speaker-verify--docs): developer diagnostic for the WHO/WHAT gates.
+- [Hands-Free Chat](?path=/docs/voice-hands-free-chat--docs): the voice conversation composition.
+- [Visit Scribe](?path=/docs/voice-visit-scribe--docs): the ambient multi-person scribe.
+- [Chat › Overview](?path=/docs/modules-chat-overview--docs): the `AIChat` these surfaces render into, and
+  [AIChat (Voice)](?path=/docs/chat-aichat-voice--docs) for push-to-talk without wake words.
 
 Deeper docs in the repo: `MODEL-HOSTING.md` (asset hosting + cutover),
 `OZWELL-BACKEND.md` (chat wiring), `DIARIZATION.md` (speaker attribution).

@@ -17,15 +17,72 @@ const meta: Meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'Composition of the voice primitives — wake-word + on-device speaker verify + on-device ' +
-          'dictation + AIChat. Say **“hey ozwell”** to start dictating, **“ozwell I’m done”** to send. ' +
-          'One shared mic. **Configuration is props-first** — the **Controls panel below is a live props ' +
-          'editor** (doctor-only gate, transcription mode, conversation mode, auto-dictate). These are ' +
-          'deployment config the host sets at mount, not end-user controls, so they’re NOT in the octopus ' +
-          'menu. **Long-press / right-click the octopus** opens the end-user settings menu — *Your voice* ' +
-          '(enrollment) + a read-only *Models & versions* readout — the same behavior as the drop-in.',
+        component: `### What it's for
+
+**A full-height, always-listening voice chat: the Hey Ozwell flow rendered as an inline \`AIChat\` instead of a floating popup.** \`HandsFreeChat\` calls \`useHeyOzwell({ autoStart: true, … })\` and renders \`AIChat\` (\`title\` default "Ozwell Assistant — hands-free", \`suggestions\`, \`userName\`) with the octopus \`HeyOzwellToggle\` + \`OzwellSettingsMenu\` overlaid in the header's top-right, a status-driven composer placeholder ("Ozwell is off — tap the octopus to listen" → "Say “hey ozwell”, or type…" → live caption while dictating), and a controlled \`RecordButton\` in the composer's trailing slot wired to \`startDictation\` / \`stopDictation\` on the **shared** stream so tap-to-talk and "hey ozwell" do the same thing. Deployment options are props — \`requireDoctor\` (default \`true\`), \`transcription\` \`browser\` | \`server\`, \`autoDictateOnWake\` (default \`true\`), \`liveTranscript\`, \`conversationMode\`, \`reviewBeforeSend\` — not runtime toggles; the settings menu's "Your voice" opens \`VoiceManager\` in a \`Modal\`. Say **"hey ozwell"** to dictate and **"ozwell I'm done"** to transcribe and send.
+
+### Use it when
+
+- The assistant **is the page** (a kiosk, a dictation workstation, a dedicated assistant tab) and should start listening as soon as it mounts.
+- You want the reference composition of the primitives (\`useWakeWord\` + \`useSpeakerVerify\` + \`whisperTranscribe\` + \`AIChat\`) to copy from when building a custom voice surface.
+
+### Don't use it when
+
+- Voice should live in the app header and open on demand — \`HeyOzwell\` (floating chat, click to activate; no mic until the user opts in).
+- You need multiple speakers attributed in one transcript rather than a turn-taking chat — \`VisitScribe\`.
+- The product's chat is not \`AIChat\` — use \`useHeyOzwell\` and spread \`chatProps\` / \`toggleProps\` onto your own components.
+- You cannot accept an auto-started microphone: \`autoStart\` is hard-wired here, so the permission prompt appears on mount.
+
+### Example
+
+\`\`\`tsx
+import { HandsFreeChat } from '@mieweb/ui';
+
+// Deployment config comes from the host's settings, never hard-coded per user.
+<HandsFreeChat
+  title={t('assistant.title')}
+  userName={user.displayName}
+  suggestions={suggestions}
+  requireDoctor={settings.voice.requireEnrolledClinician}
+  transcription={settings.voice.serverAsr ? 'server' : 'browser'}
+  reviewBeforeSend
+  conversationMode={settings.voice.roomMode}
+/>
+\`\`\`
+
+### Limitations
+
+- **No \`onSend\` prop.** Unlike \`HeyOzwell\`, this component always uses the hook's built-in send: a streamed reply from the OpenAI-compatible endpoint in \`localStorage.ozwellConfig\` / \`window.__ozwell\`, or a canned "Heard: …" reply when no key is configured. To route to your own backend use \`useHeyOzwell({ onSend })\` with your own layout. A browser-held API key is visible to users — proxy it in production.
+- **Layout is fixed:** \`height: 100vh\` flex column with the octopus absolutely positioned (\`top: 11px; right: 16px\`) over \`AIChat\`'s header — it is a page, not an embeddable widget, and the overlay is physical (RTL would need repositioning).
+- Inherits every dependency of \`HeyOzwell\`: wake models (~6 MB), the speaker runtime (~50 MB, loaded because \`requireDoctor\` defaults to \`true\`), Transformers.js + Whisper (~1.3 GB turbo / ~75 MB base.en) from configurable hosts, OPFS / Cache API / service-worker caching, \`worker-src blob:\` under strict CSP, IndexedDB for voiceprints. \`transcription="server"\` POSTs audio to \`/v1/audio/transcriptions\` on the configured base URL (falls back to on-device on failure); \`conversationMode\` overrides it.
+- **Accessibility as implemented:** the same as \`AIChat\` plus the toggle's \`aria-pressed\`; phase changes surface only as placeholder text and animation (no live region); the composer mic is a controlled \`RecordButton\` whose wrapper intercepts clicks (capture phase) to start/stop the shared recorder, so the button's own \`aria-label\`s describe a recorder it does not run. Errors from model loading appear as "⚠️ …" placeholder text.
+- i18n: title, placeholders and the settings menu are English; wake phrases are fixed English models. Entry \`@mieweb/ui\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'voice-hey-ozwell-demo',
+          why: 'HeyOzwell is a header toggle with a floating chat; HandsFreeChat is the same flow as a full inline chat surface.',
+        },
+        {
+          type: 'alternative to',
+          target: 'chat-aichat-voice',
+          why: 'AIChat (Voice) is tap-to-record dictation on the plain AIChat; HandsFreeChat adds wake words, speaker verification and diarization.',
+        },
+        {
+          type: 'contains',
+          target: 'chat-aichat',
+          why: 'The visible chat is AIChat driven by useHeyOzwell’s messages, placeholder and composer bindings.',
+        },
+        {
+          type: 'uses',
+          target: 'voice-voice-manager',
+          why: 'The settings menu’s "Your voice" item opens VoiceManager in a Modal for enrollment.',
+        },
+      ],
     },
   },
 };

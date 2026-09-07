@@ -71,16 +71,87 @@ const meta: Meta<typeof SuperChat> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: [
-          '`SuperChat` is the **single-conversation panel**: header (title + participants +',
-          'optional close), a `role="log"` message thread, and the compose box. It renders',
-          'exactly one `conversation` — the host owns its state.',
-          '',
-          'See **SuperChat › Overview** for the full consumer guide (install, props, plugins,',
-          'accessibility). For the list use `SuperChatConversations`; for the combined inbox',
-          'use `SuperChatInbox`.',
-        ].join('\n'),
+        component: `### What it's for
+
+**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments })\`, \`onMessageEdited(messageId, text, { conversation })\` (enables inline Edit on your own text messages), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\`.
+
+### Use it when
+
+- You already know which conversation to show (a patient's thread on their chart, a case page) or you build your own list/panel layout — pair with \`SuperChatConversations\`.
+- Several **agents and humans** share one thread, replies interleave by timestamp, and users address agents with \`@\`; \`mentions\` in \`onMessageSent\` tells your router who was asked.
+- Messages are **Markdown** and you want opt-in code / math / Mermaid / GenUI / NITRO-table / image / attachment rendering without writing a renderer.
+
+### Don't use it when
+
+- You want the list and the panel together with selection handled — \`SuperChatInbox\`.
+- One user talks to one assistant and you do not need Markdown, participants or a conversation model — \`AIChat\` is lighter (no \`react-markdown\` peers).
+- Plain human-to-human messaging with delivery states and read receipts — the Messaging module; SuperChat has no \`status\` icons or read receipts.
+- The host cannot install the Markdown-core peers (\`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\`) — they are required for the default renderer.
+
+### Example
+
+\`\`\`tsx
+import { SuperChat } from '@mieweb/ui/components/SuperChat';
+import { createCodePlugin, createMathPlugin } from '@mieweb/ui/components/SuperChat/plugins';
+import 'katex/dist/katex.min.css';
+
+const plugins = useMemo(() => [createCodePlugin(), createMathPlugin()], []);
+const [conversation, setConversation] = useState<SuperChatConversation>(initial);
+const append = (m: SuperChatMessage) =>
+  setConversation((c) => ({ ...c, thread: [...c.thread, m], lastActivity: m.time }));
+
+<div style={{ height: 520, display: 'flex' }}>
+  <SuperChat
+    conversation={conversation}
+    currentParticipantId={me.id}
+    renderPlugins={plugins}
+    virtualized={conversation.thread.length > 200}
+    linkBuilder={(ref) => \`/records/\${ref.refType}/\${ref.refId}\`}
+    onMessageSent={(text, { mentions }) => {
+      append({ id: crypto.randomUUID(), participantId: me.id, text, time: new Date().toISOString() });
+      mentions.forEach((agentId) => agents.ask(agentId, conversation.id, text)); // host routes to its backend
+    }}
+    onMessageEdited={(id, text) =>
+      setConversation((c) => ({ ...c, thread: c.thread.map((m) => m.id === id ? { ...m, text, editedAt: new Date().toISOString() } : m) }))}
+  />
+</div>
+\`\`\`
+
+### Limitations
+
+- **Accessibility as implemented:** panel is a \`section role="group"\` labelled by its \`<h2>\`; the thread is \`role="log" aria-label="Messages" aria-live="polite"\` and focusable; each message is \`role="article"\` named "author, time"; system messages are \`role="status"\`. The composer is Messaging's \`MessageComposer\` (textarea "Message", mention listbox "Mention", Enter sends). Copy / Edit / Close / Back are icon buttons with English \`aria-label\`s; the Copy menu appears on hover **or** focus. Nothing moves focus after send.
+- **Security is shared.** Default rendering sanitises with \`rehype-sanitize\`; \`trustedContent\`, a custom \`renderTextContent\`, the Mermaid plugin (\`dangerouslySetInnerHTML\` under \`securityLevel: 'strict'\`) and any plugin's \`sanitizeSchema\` widen the trust boundary — you own it. GenUI widgets render only host-registered, schema-validated components.
+- Copy uses \`navigator.clipboard.write\` (secure context; plain-text fallback). Attachments are delivered to the host as base64 \`dataUrl\`s — upload and swap URLs yourself; \`attachmentCache\` (IndexedDB) is opt-in.
+- **Layout.** Fills its flex parent (\`h-full\`); you must give it a bounded height. Non-virtualised threads render every row (rows are \`React.memo\`; keep message objects referentially stable). \`order="desc"\` anchors to the top.
+- i18n: "Messages", "Participants", "Send message", "Copy message", "Edit message", "(edited)" and time via \`toLocaleTimeString\` are English/locale-default. RTL: alignment is flex-based, but the speaker accent is a physical \`borderLeft\` and the Copy control floats left/right by author.
+- Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core); \`rehype-highlight\`, \`remark-math\` + \`rehype-katex\` + \`katex\`, \`mermaid\`, \`@mieweb/datavis\` per plugin — all optional in \`package.json\`. Not in the main barrel: import from \`@mieweb/ui/components/SuperChat\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui/components/SuperChat',
+      peers: ['react-markdown', 'remark-gfm', 'rehype-sanitize'],
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'chat-aichat',
+          why: 'AIChat is one user ↔ one assistant with plain text by default; SuperChat is multi-participant with a Markdown plugin pipeline.',
+        },
+        {
+          type: 'composes with',
+          target: 'superchat-conversations-list',
+          why: 'Pair the list with the panel to build a custom inbox layout; SuperChatInbox does exactly this.',
+        },
+        {
+          type: 'uses',
+          target: 'chat-aimessage',
+          why: 'Message rows reuse ChatBubble (with a per-speaker accent) and AITypingIndicator from the AI module.',
+        },
+        {
+          type: 'uses',
+          target: 'chat-messaging',
+          why: 'The compose box is Messaging’s MessageComposer with mentionOptions built from the participants.',
+        },
+      ],
     },
   },
 };

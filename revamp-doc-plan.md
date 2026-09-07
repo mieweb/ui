@@ -259,13 +259,22 @@ Rule 11 (dates/phones/URLs) and the Select / Dropdown / Autocomplete confusion a
 
 ### Phase 4 — Media, editors, chat, files
 
-- [ ] **Media** — AudioPlayer, MediaPlayer, MediaEditor, TranscriptView, AudioRecorder, RecordButton.
-- [ ] **Editors** — RichEditor, RichTextEditor, Markdown, Textarea (cross-link), Q.
-- [ ] **Chat** — AIChat, AIChat (Voice), AIMessage, MCPToolCall, OzwellChat, SuperChat ×3, Messaging
-      module.
-- [ ] **Voice** — HeyOzwell, HandsFreeChat, VisitScribe, VoiceSetup, VoiceManager, WakeWord,
-      SpeakerVerify (dev-only banner).
-- [ ] **Files** — DropzoneOverlay, FileManager, DocumentScanner.
+- [x] **Media** — AudioPlayer, MediaPlayer, MediaEditor (+ Live Demo), TranscriptView, AudioRecorder,
+      RecordButton. _Landing:_ [Media.mdx](src/catalog/Media.mdx). Flagged: RecordButton does not wrap
+      AudioRecorder (separate MediaRecorder pipelines); both report `duration` from a stale closure.
+- [x] **Editors** — RichEditor, RichTextEditor, Markdown, Q (Textarea cross-linked). RichEditor vs
+      RichTextEditor resolved (Markdown/ProseMirror on `/kerebron` with Yjs vs HTML `contentEditable`
+      on the main barrel). _Landing:_ [Editors.mdx](src/catalog/Editors.mdx) with entry-point table.
+- [x] **Chat** — AIChat, AIChat (Voice), AIMessage, MCPToolCall, OzwellChat, ComposerModelSelector,
+      ReconciliationPanel, Messaging. _Landing:_ [Chat.mdx](src/catalog/Chat.mdx) maps the chat
+      surfaces (AIChat / OzwellChat / SuperChat / Messaging / HeyOzwell). **SuperChat** ×3 documented;
+      its existing Overview MDX gained id links. Flagged: `AIChat.onToolCall/onToolComplete` never
+      invoked; `MessageComposer` drops attachments on failed send.
+- [x] **Voice** — Hey Ozwell demo, HandsFreeChat, VisitScribe, VoiceSetup, VoiceManager, WakeWord,
+      SpeakerVerify (experimental banner). Existing Overview MDX gained "Which one?" and
+      "Dependencies & hosting" (models, hosts, browser vs server transcription).
+- [x] **Files** — DropzoneOverlay, FileManager, DocumentScanner. _Landing:_ [Files.mdx](src/catalog/Files.mdx).
+      Flagged: `FileManager.maxFileSize` is never read.
 
 Install / entry-point blocks (kerebron peers, `@mieweb/ui/datavis`, model hosting) land here.
 
@@ -313,7 +322,8 @@ the product Storybook via Composition and confirming its entries carry the same 
       prose scoring pending a second reviewer.
 - [x] Re-audit after Phase 3 — structural half green (56 ids left in the baseline); prose scoring
       pending.
-- [ ] Re-audit after Phase 4
+- [x] Re-audit after Phase 4 — structural half green (51 ids left in the baseline: BlueHive, Foundations and three Healthcare pages due in Phase 5;
+      prose scoring pending.
 - [ ] Re-audit after Phase 5
 - [ ] Re-audit after Phase 6
 

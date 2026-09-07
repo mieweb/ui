@@ -19,9 +19,74 @@ const meta: Meta<typeof AudioPlayer> = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'A versatile audio player component with multiple variants, playback controls, and customizable appearance.',
+        component: `### What it's for
+
+**Playing one audio clip with styled, self-contained controls.** \`AudioPlayer\` owns its playback state (\`idle\` | \`loading\` | \`playing\` | \`paused\` | \`error\`) and renders one of three \`variant\`s: \`inline\` (play button + optional \`title\` + duration), \`compact\` (play button, seekable \`ProgressBar\`, time, optional speed \`<select>\`) or \`waveform\` (a lazy-loaded **wavesurfer.js** waveform with hover cursor). \`inline\` / \`compact\` drive a plain \`HTMLAudioElement\` that is created on first play (or on mount with \`preload\`); \`waveform\` hands playback to WaveSurfer. Times are in **seconds**. \`AudioPlayerRef\` (\`seekTo\`, \`play\`, \`pause\`, \`getCurrentTime\`, \`getDuration\`, \`container\`) gives the host imperative control; \`onTimeUpdate(currentTime, duration)\`, \`onStateChange\`, \`onEnded\`, \`onError\` report back. Also exported: \`audioPlayerVariants\`, \`playButtonVariants\`, \`ProgressBar\`, \`formatAudioTime\`.
+
+### Use it when
+
+- A voice note, dictation or message attachment needs a **small, themed** player rather than the browser's native chrome — lists of clips (\`variant="inline"\`, \`preload={false}\`, \`fallbackDuration\`), a chat bubble, a card.
+- You want a **waveform** picture of the clip (\`variant="waveform"\`) and can install \`wavesurfer.js\`.
+- You need to seek the clip from outside (a transcript, a marker list) through the ref, in seconds.
+
+### Don't use it when
+
+- The source may be **video**, or you want the browser's native controls, captions and millisecond API — \`MediaPlayer\`.
+- You are **capturing** audio — \`AudioRecorder\` (panel with its own playback) or \`RecordButton\` (single button; play the resulting blob back with this component).
+- The clip is a transcript the user edits word by word — \`MediaEditor\`.
+
+### Example
+
+\`\`\`tsx
+const playerRef = useRef<AudioPlayerRef>(null);
+const [active, setActive] = useState<string | null>(null);
+
+{notes.map((note) => (
+  <AudioPlayer
+    key={note.id}
+    ref={note.id === active ? playerRef : undefined}
+    src={note.url}
+    title={note.title}
+    variant="compact"
+    showPlaybackRate
+    fallbackDuration={note.durationSec}
+    onStateChange={(s) => s === 'playing' && setActive(note.id)}
+    onError={(err) => toast.error(err.message)}
+  />
+))}
+\`\`\`
+
+The host only tracks *which* clip is active; each player owns its own transport. \`fallbackDuration\` shows a length before metadata loads, which matters with the default \`preload={false}\`.
+
+### Limitations
+
+- Accessibility: the play button is \`aria-pressed\` with an English label — \`aria-label\` prop, else \`"Play/Pause {title}"\`, else \`"Play/Pause audio"\`. The \`compact\` progress bar is a \`role="slider"\` (\`aria-label="Audio progress"\`, \`aria-valuetext\`) that seeks in **5 % steps** with ArrowLeft/ArrowRight only (no Home/End, no PageUp/Down). The speed control is a native \`<select aria-label="Playback speed">\`. No \`aria-live\` region announces state or errors; \`inline\` has no seek control at all.
+- \`waveform\` needs the optional peer \`wavesurfer.js\` (dynamic \`import\`); a missing package is only \`console.error\`ed and the waveform stays a pulsing box. The waveform is a \`role="slider"\` only while \`showWaveformHoverCursor\` (default \`true\`); its hover cursor is mouse-only. Waveform colours default to \`#d1d5db\` / \`var(--color-primary-600)\` and the cursor to a hard-coded red.
+- \`disabled\` greys the controls but does not pause playback that is already running. \`playbackRates\` default \`[0.5, 0.75, 1, 1.25, 1.5, 2]\`. Time formatting is fixed \`m:ss\`.
+- RTL: fill and thumb are positioned with physical \`left\` (\`left-0\`, \`left: calc(…)\`), and click-to-seek measures from \`rect.left\`, so in RTL layouts the bar still reads left-to-right.
+- Theming: \`bg-card\` / \`border-border\` containers but hard-coded \`primary-800/900\` buttons, \`neutral-*\` text and track, \`text-white\`. Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      peers: ['wavesurfer.js'],
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'media-mediaplayer',
+          why: 'AudioPlayer is a styled audio-only player (seconds, optional waveform); MediaPlayer is the native audio/video surface with a millisecond ref for transcript sync.',
+        },
+        {
+          type: 'composes with',
+          target: 'media-recordbutton',
+          why: 'RecordButton hands the host a Blob; an AudioPlayer on its object URL plays the take back.',
+        },
+        {
+          type: 'composes with',
+          target: 'chat-aimessage',
+          why: 'AIMessageDisplay renders `audio` content blocks with a waveform AudioPlayer.',
+        },
+      ],
     },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
