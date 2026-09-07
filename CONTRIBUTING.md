@@ -50,14 +50,20 @@ src/
   ag-grid.ts            # Deprecated entry retained for existing consumers only
   datavis.ts            # Separate entry: @mieweb/ui/datavis (optional datavis-ace dep)
   esheet.ts             # Separate entry: @mieweb/ui/esheet (optional @esheet/* deps)
+  kerebron.ts           # Separate entry: @mieweb/ui/kerebron (optional @kerebron/* deps)
+  q.ts                  # Separate entry: @mieweb/ui/q (optional @mieweb/q dep)
   tailwind-preset.ts    # Tailwind preset consumers extend
   brands/               # BrandConfig (*.ts) + CSS variable themes (*.css)
+  catalog/              # One MDX landing page per component family (see README there)
   components/<Name>/     # One folder per component (see "Anatomy" below)
   hooks/  utils/  styles/  types/
   test/setup.ts         # Vitest setup
 packages/               # Git submodules with heavy/optional implementations
   esheet/  ychart/      # (DataVis NITRO is an npm package, not a submodule)
 .storybook/             # Storybook (react-vite) config
+  taxonomy.json         # Sidebar tiers/families + tag vocabulary (single source of truth)
+  CatalogDocsPage.tsx   # Autodocs template that renders the catalog metadata
+scripts/catalog-check.mjs  # CI guard + manifest for the catalog (see "Stories & documentation")
 tests/visual/           # Playwright visual-regression specs + snapshots
 lessons/                # Consumer-facing adoption + policy docs
 ```
@@ -90,17 +96,19 @@ each edit; restart when configuration or dependencies change.
 
 ## Everyday commands
 
-| Command                           | Purpose                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------ |
-| `pnpm dev`                        | `tsup --watch` — rebuild the library on change                                             |
-| `pnpm storybook`                  | Storybook dev server on `:6006` (primary dev surface)                                      |
-| `pnpm typecheck`                  | `tsc --noEmit`                                                                             |
-| `pnpm lint` / `pnpm lint:fix`     | ESLint over `src/**/*.{ts,tsx}`                                                            |
-| `pnpm format` / `pnpm format:fix` | Prettier check / write                                                                     |
-| `pnpm test` / `pnpm test:watch`   | Vitest unit tests                                                                          |
-| `pnpm test:coverage`              | Vitest with coverage (80% thresholds)                                                      |
-| `pnpm test:visual`                | Playwright visual regression (serves `storybook-static`; run `pnpm build-storybook` first) |
-| `pnpm build`                      | Full library build (tsup + CSS + brand CSS)                                                |
+| Command                           | Purpose                                                                                          |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `pnpm dev`                        | `tsup --watch` — rebuild the library on change                                                   |
+| `pnpm storybook`                  | Storybook dev server on `:6006` (primary dev surface)                                            |
+| `pnpm typecheck`                  | `tsc --noEmit`                                                                                   |
+| `pnpm lint` / `pnpm lint:fix`     | ESLint over `src/**/*.{ts,tsx}`                                                                  |
+| `pnpm format` / `pnpm format:fix` | Prettier check / write                                                                           |
+| `pnpm test` / `pnpm test:watch`   | Vitest unit tests                                                                                |
+| `pnpm test:coverage`              | Vitest with coverage (80% thresholds)                                                            |
+| `pnpm test:visual`                | Playwright visual regression (serves `storybook-static`; run `pnpm build-storybook` first)       |
+| `pnpm catalog:check`              | Catalog guard: taxonomy, tags, ids, descriptions, relationship reciprocity (runs in CI)          |
+| `pnpm catalog:manifest`           | Same check, plus writes `storybook-static/catalog-manifest.json` (also run by `build-storybook`) |
+| `pnpm build`                      | Full library build (tsup + CSS + brand CSS)                                                      |
 
 `pnpm dev` rebuilds the library for locally linked consumers; it does not start
 Storybook. To try a local build in another application, build the library and use
@@ -164,27 +172,74 @@ and (if it should be individually importable) add a `tsup` entry — see
 
 ## Stories & documentation (autodocs convention)
 
-Consumer-facing component docs are generated by Storybook **autodocs**. A story
-file should:
+Consumer-facing component docs are generated by Storybook **autodocs** through the
+template in [.storybook/CatalogDocsPage.tsx](.storybook/CatalogDocsPage.tsx), and
+`pnpm catalog:check` ([scripts/catalog-check.mjs](scripts/catalog-check.mjs)) fails
+CI when a story breaks the contract below. The same script emits the catalog
+manifest that the cross-repository catalog ([mieweb/ui#421](https://github.com/mieweb/ui/issues/421))
+ingests, so **the story is the record of truth and the manifest is derived from it**.
 
-- Export **one** `Meta` default export per component (one component per CSF
-  file — a file can't drive two autodocs pages).
-- Set `tags: ['autodocs']`.
-- Provide `argTypes` with a `description` for every meaningful prop.
-- Provide the component overview via
-  `parameters.docs.description.component` (Markdown).
+### Metadata contract (every `Meta`)
+
+| Field                                   | Rule                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                    | Stable, kebab-case `<family>-<component>` (e.g. `grids-table`). Deep links use `?path=/docs/<id>--docs`; never link by title.                                                                                                                                                                                                                            |
+| `title`                                 | `Tier/Family/Component` using only the tiers and families in [.storybook/taxonomy.json](.storybook/taxonomy.json). A family holds at most 10 components; adding an 11th means splitting the family or merging variants into one page.                                                                                                                    |
+| `tags`                                  | `'autodocs'` plus exactly one `scope:*` and one `maturity:*` from the vocabulary in `taxonomy.json`. Scope must match the tier (`Inputs`/`Components`/`Modules` = general-purpose, `Healthcare` = domain-specific, `BlueHive` = product-specific).                                                                                                       |
+| `parameters.docs.description.component` | Markdown in the five-heading template below. New stories fail CI without it; existing gaps are grandfathered in `scripts/catalog-baseline.json`, which can only shrink.                                                                                                                                                                                  |
+| `parameters.catalog.entry` / `peers`    | Import path (`@mieweb/ui`, `@mieweb/ui/datavis`, `/esheet`, `/kerebron`, `/q`, `/ag-grid`) and optional peer packages. Rendered as the **Install / entry point** block.                                                                                                                                                                                  |
+| `parameters.catalog.relationships[]`    | `{ type, target, why }` where `type` is one of `alternative to`, `composes with`, `supersedes`, `superseded by`, `contains`, `uses`, `depends on`; `target` is another Meta `id`; `why` is one line. Rendered as **Related**. `alternative to` and `composes with` must be declared on **both** pages; `supersedes` must be answered by `superseded by`. |
+| `argTypes`                              | A `description` for every meaningful prop.                                                                                                                                                                                                                                                                                                               |
+
+`maturity:` and `scope:` drive the sidebar badge and the banner at the top of the
+page (deprecated, experimental, product-specific, demo-only), so a component never
+needs a hand-written status notice.
+
+### Description template
+
+Write `description.component` under these headings, in this order. Keep each
+bullet a decision aid, not a feature list:
+
+1. **What it's for** — the user problem and what the component renders; name the
+   exported sub-components.
+2. **Use it when** — concrete situations.
+3. **Don't use it when** — the neighbouring component to reach for instead, with the
+   distinguishing criterion.
+4. **Example** — a realistic composition showing state ownership.
+5. **Limitations** — accessibility facts as implemented (roles, focus, live regions),
+   responsive/RTL behaviour, theming, i18n defaults, dependencies.
+
+**Related** and **Install / entry point** are rendered from `parameters.catalog`;
+do not duplicate them in prose.
+
+### Family landing pages
+
+Each family has one `src/catalog/<Family>.mdx` titled `<Tier>/<Family>/Overview`
+with the comparison table every member's Related list leads to. Family-level policy
+sentences live there and are quoted verbatim elsewhere.
+
+### Other conventions
+
+- One `Meta` default export per component (one component per CSF file — a file
+  can't drive two autodocs pages).
 - Put **shared fixtures in a non-story file** (e.g. `storyData.ts`) so Storybook
   doesn't try to load it as stories. See
   [src/components/AI/storyData.ts](src/components/AI/storyData.ts) and the AI
   story files for the reference pattern.
+- Storybook parses `storySort` statically, so the order in
+  [.storybook/preview.tsx](.storybook/preview.tsx) is a literal; `catalog:check`
+  fails if it drifts from `taxonomy.json` and prints the command to regenerate it.
 
 ## Exports, entry points & tree-shaking
 
 - The public API is the barrel [src/index.ts](src/index.ts). Everything a
   consumer can `import { X } from '@mieweb/ui'` must be re-exported there.
 - **Heavy/optional integrations get their own subpath entry** so they stay out
-  of the default bundle: `@mieweb/ui/datavis` and `@mieweb/ui/esheet` map to
-  `src/datavis.ts`, `src/esheet.ts`, and dedicated `tsup` entries.
+  of the default bundle: `@mieweb/ui/datavis`, `@mieweb/ui/esheet`,
+  `@mieweb/ui/kerebron` (RichEditor / CodeEditor; needs the `@kerebron/*` peers,
+  `@mieweb/ui/kerebron.css` and `@kerebron/wasm/assets` served at `/kerebron-wasm`)
+  and `@mieweb/ui/q` (needs `@mieweb/q/style.css`) map to `src/datavis.ts`,
+  `src/esheet.ts`, `src/kerebron.ts`, `src/q.ts` and dedicated `tsup` entries.
   The deprecated `@mieweb/ui/ag-grid` entry remains for existing consumers only;
   do not use it as a starting point for new integrations.
 - Individually tree-shakeable components are listed explicitly in the `entry`
@@ -253,16 +308,21 @@ If a submodule-backed component fails to resolve, run
 ## Optional peer dependencies
 
 `react` / `react-dom` are required peers. Everything else heavy is **optional**:
-`datavis-ace`, `@mieweb/datavis`,
-`@esheet/builder`, `@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
+`datavis-ace`, `@mieweb/datavis`, `@esheet/builder`, `@esheet/renderer`,
+`@kerebron/*`, `@mieweb/q`, `wavesurfer.js`. Components that need them must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
 
-> **Grids: use DataVis NITRO for new work.** The `@mieweb/ui` AGGrid integration
-> is deprecated; `ag-grid-community` and `ag-grid-react` remain optional peers
-> only for existing consumers. Its source and maintainer notes document legacy
-> maintenance, not a recommended choice. Use
-> [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) (`@mieweb/ui/datavis`).
+> **Tables and data grids start with DataVis NITRO.** Use `Table` only for a few
+> static rows the user will not sort, filter, page or export. Never hand-roll grid
+> features on a plain table; `AGGrid` is deprecated.
+
+That sentence is the library's grid policy; it is repeated verbatim in
+[agent/mieweb-ui.instructions.md](agent/mieweb-ui.instructions.md),
+[lessons/component-policy.md](lessons/component-policy.md) and the Grids family
+page ([src/catalog/Grids.mdx](src/catalog/Grids.mdx)). `ag-grid-community` and
+`ag-grid-react` remain optional peers only for existing consumers; see
+[DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) (`@mieweb/ui/datavis`).
 
 ## Per-component maintainer notes
 
@@ -274,14 +334,16 @@ submodule, a module-level side effect, or a non-obvious extension point.
 
 Current notes:
 
-| Module                                                         | Why it has notes                                                                                                                        |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| [AI](src/components/AI/MAINTAINERS.md)                         | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer                                              |
-| [AGGrid (deprecated)](src/components/AGGrid/MAINTAINERS.md)    | Legacy maintenance only; retained for existing consumers. Use [DataVis NITRO](src/components/DataVisNITRO/MAINTAINERS.md) for new work. |
-| [ESheet](src/components/ESheet/MAINTAINERS.md)                 | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                          |
-| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)     | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring                                                     |
-| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                     |
-| [YChart](src/components/YChart/MAINTAINERS.md)                 | Vanilla editor in a submodule, dynamically imported; not in the public API                                                              |
+| Module                                                                       | Why it has notes                                                                                                                        |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [AI](src/components/AI/MAINTAINERS.md)                                       | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer                                              |
+| [AGGrid (deprecated)](src/components/AGGrid/MAINTAINERS.md)                  | Legacy maintenance only; retained for existing consumers. Use [DataVis NITRO](src/components/DataVisNITRO/MAINTAINERS.md) for new work. |
+| [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                |
+| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                          |
+| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring                                                     |
+| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                     |
+| [SuperChat](src/components/SuperChat/MAINTAINERS.md)                         | Conversation/inbox/panel surfaces, sanitization contract, plugin dependencies; design rationale in its Mission section                  |
+| [YChart](src/components/YChart/MAINTAINERS.md)                               | Vanilla editor in a submodule, dynamically imported; not in the public API                                                              |
 
 ## Commits, versioning & releases
 
@@ -444,7 +506,11 @@ when a consuming application is involved; the audit and PR requirements still ap
 1. `src/components/<Name>/` with `index.ts`, `<Name>.tsx`, `<Name>.stories.tsx`.
 2. Follow the [anatomy](#anatomy-of-a-component) conventions (CVA, `cn`,
    `forwardRef`, theme tokens, a11y).
-3. Autodocs story (one component per file, `argTypes`, component description).
+3. Autodocs story that satisfies the
+   [metadata contract](#stories--documentation-autodocs-convention): stable `id`,
+   taxonomy `title`, `scope:`/`maturity:` tags, the five-heading description,
+   `parameters.catalog` relationships declared on both pages. `pnpm catalog:check`
+   must pass.
 4. Export from [src/index.ts](src/index.ts); add a
    `tsup` entry if it should be individually importable.
 5. Add a unit test; add a visual story baseline if it has notable rendering.

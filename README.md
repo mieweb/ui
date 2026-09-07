@@ -41,9 +41,9 @@ first. This introduction is shared by GitHub, npm, and Storybook.
 
 ## See It In Action
 
-[![Open the interactive dashboard demo: navigation, summary cards, recent orders, and activity](https://ui.mieweb.org/dashboard-preview.png)](https://ui.mieweb.org/?path=/story/product-feature-modules-dashboard--dashboard)
+[![Open the interactive dashboard demo: navigation, summary cards, recent orders, and activity](https://ui.mieweb.org/dashboard-preview.png)](https://ui.mieweb.org/?path=/story/dashboards-dashboard-demo--dashboard)
 
-**[Open the interactive dashboard](https://ui.mieweb.org/?path=/story/product-feature-modules-dashboard--dashboard)**
+**[Open the interactive dashboard](https://ui.mieweb.org/?path=/story/dashboards-dashboard-demo--dashboard)**
 to see navigation, headers, cards, and data displays working together in an
 application layout. Try the brand and theme switchers to see how the same
 components adapt. No installation required.
@@ -154,7 +154,7 @@ Tailwind 4 setup.
 Heavy integrations use separate entry points and optional peer dependencies so
 you only install what you need:
 
-- **Data grids:** [DataVis NITRO](https://ui.mieweb.org/?path=/docs/components-text-data-display-datavis-nitro--docs), imported from `@mieweb/ui/datavis`.
+- **Data grids:** [DataVis NITRO](https://ui.mieweb.org/?path=/docs/grids-datavis-nitro--docs), imported from `@mieweb/ui/datavis`.
 - **Form authoring and rendering:** [eSheet integration](https://github.com/mieweb/ui/blob/main/src/components/ESheet/MAINTAINERS.md), imported from `@mieweb/ui/esheet`.
 - **Rich text and code editing:** [Kerebron editor setup](https://github.com/mieweb/ui/tree/main/src/components/RichEditor), imported from `@mieweb/ui/kerebron`.
 
@@ -171,17 +171,17 @@ Those tools belong to Storybook, not to the component you install.
 
 Start with the user's task, then compare components before choosing an API:
 
-- **Browse and work with records:** start with [DataVis NITRO](https://ui.mieweb.org/?path=/docs/components-text-data-display-datavis-nitro--docs)
-  and compare [Table](https://ui.mieweb.org/?path=/docs/components-layout-structure-table--docs).
+- **Browse and work with records:** start with [DataVis NITRO](https://ui.mieweb.org/?path=/docs/grids-datavis-nitro--docs)
+  and compare [Table](https://ui.mieweb.org/?path=/docs/grids-table--docs).
   NITRO provides integrated data tooling; Table provides lower-level markup.
   Consider the behavior your application would need to supply and consult the
   selection rules before choosing an exception.
-- **Navigate a long document:** compare [TableOfContents](https://ui.mieweb.org/?path=/docs/components-navigation-tableofcontents--docs)
-  and [ReadingProgressBar](https://ui.mieweb.org/?path=/docs/components-feedback-readingprogressbar--docs).
+- **Navigate a long document:** compare [TableOfContents](https://ui.mieweb.org/?path=/docs/navigation-tableofcontents--docs)
+  and [ReadingProgressBar](https://ui.mieweb.org/?path=/docs/navigation-readingprogressbar--docs).
   A TOC provides named destinations and navigation. A reading bar is a decorative
   document-scroll cue, not navigation or proof of reading. They can complement
   each other; neither may be needed for short content.
-- **Assemble an application view:** explore the [Dashboard example](https://ui.mieweb.org/?path=/story/product-feature-modules-dashboard--dashboard).
+- **Assemble an application view:** explore the [Dashboard example](https://ui.mieweb.org/?path=/story/dashboards-dashboard-demo--dashboard).
   Inspect how navigation, headers, and content fit together, then adapt the
   composition to your workflow rather than copying the layout indiscriminately.
 

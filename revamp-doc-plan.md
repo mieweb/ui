@@ -110,49 +110,80 @@ Two points from #421 change how the audit findings should be read:
 Goal: a catalog whose shape can be held in one head, whose taxonomy is enforced by the build, and
 whose metadata is the seed of the #421 manifest.
 
-- [ ] **0.1 Adopt the metadata contract first.** Agree the `tags` vocabulary (`scope:*`, `maturity:*`),
+- [x] **0.1 Adopt the metadata contract first.** Agree the `tags` vocabulary (`scope:*`, `maturity:*`),
       the `parameters.catalog` shape, and stable `id` naming (`<family>-<component>`) with the #421
       owners so this repo becomes #421's reference implementation rather than a second schema. Write it
       into CONTRIBUTING's autodocs section together with the six-heading description template
       (_What it's for · Use it when / Don't use it when · Related (one-line reason each) · Example ·
       Limitations · Install / entry point_).
-- [ ] **0.2 Classify every entry by reuse scope** (one PR, tags only, no prose). Expected split from the catalog-size section above:
+      _Done:_ vocabulary and tiers live in [.storybook/taxonomy.json](.storybook/taxonomy.json);
+      contract in [CONTRIBUTING → Stories & documentation](CONTRIBUTING.md#stories--documentation-autodocs-convention).
+      **Related** and **Install / entry point** are rendered from `parameters.catalog` by
+      [.storybook/CatalogDocsPage.tsx](.storybook/CatalogDocsPage.tsx), so prose carries five headings.
+      Still to do with the #421 owners: confirm the manifest field names before the pilot ingests it.
+- [x] **0.2 Classify every entry by reuse scope** (one PR, tags only, no prose). Expected split from the catalog-size section above:
       ~125 general-purpose, ~9 domain-specific, ~56 product-specific, plus YChart / Dashboard as
       `application-local` demos. This is the Product-tier decision from the previous draft, made with
       #421 vocabulary.
-- [ ] **0.3 Choose the home for `scope:product-specific`**, in order of preference (record the decision here):
+      _Result:_ 200 components — 130 general-purpose, 14 domain-specific, 52 product-specific,
+      3 application-local (`YChart`, `Dashboard (Demo)`, `Dashboard Widgets (Demo)`); maturity is
+      `stable` except `deprecated` (AGGrid ×2) and `experimental` (SpeakerVerify + the three demos).
+- [x] **0.3 Choose the home for `scope:product-specific`**, in order of preference (record the decision here):
   - [ ] Move to the owning product's repository and mount its Storybook via Composition (`refs`).
-  - [ ] Keep here under an `Apps/<product>` tier with a rendered ownership banner and a B target.
+        _Deferred:_ needs a BlueHive-side Storybook; nothing in this repo blocks it — the tier can be
+        replaced by a `refs` entry once that exists.
+  - [x] Keep here under an `Apps/<product>` tier with a rendered ownership banner and a B target.
+        _Decision:_ the tier is named **`BlueHive`** at level 1 (all 52 product-specific entries belong
+        to one product, and `Apps/BlueHive/<Family>/<Component>` would be a fourth level). The
+        product-specific banner is rendered by the docs template from the `scope:` tag.
   - [ ] Retire entries no consumer imports — after the #421 build-time inventory confirms it.
-- [ ] **0.4 Enforce `Tier / Family / Component`, ≤10 per family.**
-  - [ ] Set stable `id`s on every `Meta` (before any move, so no link breaks).
-  - [ ] Switch to autotitle from folder layout (`src/components/<Family>/<Component>/`). Proposed
-        families for `Components`: Actions · Text inputs · Choice inputs · Date & time · Composite forms
-        · Data display · Feedback & status · Overlays · Navigation · Layout · Media · Editors · Chat.
-  - [ ] Merge the duplicate categories in the catalog-size section above; delete the ghost entries in `storySort`.
-- [ ] **0.5 Add the CI guard** (table above) so the new shape cannot drift: missing description, unknown
+- [x] **0.4 Enforce `Tier / Family / Component`, ≤10 per family.**
+  - [x] Set stable `id`s on every `Meta` (before any move, so no link breaks). README and in-repo
+        `?path=` links now use ids.
+  - [x] ~~Switch to autotitle from folder layout~~ _Decision:_ **not** moving folders — `src/index.ts`,
+        cross-component imports and tests all key off `src/components/<Name>`; a 190-folder move is a
+        sweeping change with no documentation benefit. The same guarantee ("a title nobody can
+        invent") comes from `catalog:check` validating every title against `taxonomy.json`.
+        Final families — **Inputs:** Actions · Text inputs · Choice inputs · Date & time · Composite
+        forms. **Components:** Data display · Grids · Feedback · Loading · Overlays · Navigation ·
+        Layout. **Modules:** Dashboards · Media · Editors · Chat · SuperChat · Voice · Files.
+        **Healthcare:** Clinical lists · Encounter & orders. **BlueHive:** Orders · Employers · Billing ·
+        Providers · Services · Users & integrations · Operations. The 13 proposed `Components`
+        families exceeded the ≤10 rule, hence the `Inputs` / `Components` / `Modules` split (all
+        `scope:general-purpose`; the tag, not the tier, carries scope).
+  - [x] Merge the duplicate categories in the catalog-size section above; delete the ghost entries in `storySort`.
+        `storySort` is now a literal mirror of `taxonomy.json` (Storybook parses it statically) and
+        `catalog:check` fails on drift.
+- [x] **0.5 Add the CI guard** (table above) so the new shape cannot drift: missing description, unknown
       family, family > 10, missing scope/maturity, one-way relationship. Same script emits the #421
-      manifest.
-- [ ] **0.6 Fix the public-API hygiene items from §3.**
-  - [ ] `RowActionToolbar`: add a story or remove from the barrel.
-  - [ ] YChart: `maturity:` tag and "not exported" banner.
-  - [ ] `Dashboard` folder cleanup (`.bak/.backup/.broken`).
-  - [ ] Add `CustomizableDashboard` and `SuperChat` to the MAINTAINERS table.
-  - [ ] Document the `kerebron` and `q` entries in CONTRIBUTING.
-- [ ] **0.7 Reconcile the four governing documents** (§1 conflicts).
-  - [ ] One Table policy sentence reused verbatim in CONTRIBUTING, agent rules, component-policy and
-        the Table/NITRO pages.
-  - [ ] One component anatomy (drop the SCSS variant or make CONTRIBUTING match).
-  - [ ] One PR rationale checklist.
-  - [ ] Component counts generated from `index.json`, not typed.
+      manifest. _Done:_ [scripts/catalog-check.mjs](scripts/catalog-check.mjs) (`pnpm catalog:check`,
+      wired into `ci.yml`); undocumented ids are grandfathered in `scripts/catalog-baseline.json`,
+      which can only shrink; `build-storybook` writes `storybook-static/catalog-manifest.json`.
+- [x] **0.6 Fix the public-API hygiene items from §3.**
+  - [x] `RowActionToolbar`: add a story or remove from the barrel. _Story added (Inputs/Actions)._
+  - [x] YChart: `maturity:` tag and "not exported" banner. _`scope:application-local` +
+        `maturity:experimental`; the template renders the "Storybook demo only — not exported" banner._
+  - [x] `Dashboard` folder cleanup (`.bak/.backup/.broken`).
+  - [x] Add `CustomizableDashboard` and `SuperChat` to the MAINTAINERS table.
+  - [x] Document the `kerebron` and `q` entries in CONTRIBUTING.
+- [x] **0.7 Reconcile the four governing documents** (§1 conflicts).
+  - [x] One Table policy sentence reused verbatim in CONTRIBUTING, agent rules, component-policy and
+        the Table/NITRO pages (and the Grids Overview). Agent Rule 1 keeps its "propose NITRO first"
+        protocol but now uses the same criterion for `Table`.
+  - [x] One component anatomy (drop the SCSS variant or make CONTRIBUTING match). _SCSS dropped from
+        component-policy; it links to CONTRIBUTING's anatomy._
+  - [x] One PR rationale checklist. _component-policy Tier 3 step 6 now points at CONTRIBUTING's
+        Component PR Rationale and Evidence._
+  - [x] Component counts generated from `index.json`, not typed. _"126+" removed; both documents
+        point at `catalog-manifest.json` / `pnpm catalog:check`._
 
 Exit criteria:
 
-- [ ] `index.json` shows ≤10 items at every level and no duplicate families.
-- [ ] Every entry has `scope:` and `maturity:` tags and a stable `id`.
-- [ ] CI fails on a new undocumented or unclassified story.
-- [ ] The manifest script emits an inventory the #421 pilot can ingest.
-- [ ] Policy sentence identical in all four documents.
+- [x] `index.json` shows ≤10 items at every level and no duplicate families.
+- [x] Every entry has `scope:` and `maturity:` tags and a stable `id`.
+- [x] CI fails on a new undocumented or unclassified story.
+- [x] The manifest script emits an inventory the #421 pilot can ingest.
+- [x] Policy sentence identical in all four documents.
 
 ### Family checklist (Phases 1–6)
 
@@ -163,14 +194,28 @@ ticking.
 
 ### Phase 1 — Policy-bearing families (unblocks agent rules)
 
-- [ ] **Grids** — DataVis NITRO, DataVisNitroGraph, Table, Pagination, AGGrid banner, Sparkline.
+- [x] **Grids** — DataVis NITRO, DataVisNitroGraph, Table, Pagination, AGGrid banner, Sparkline.
       _Why first:_ Rule 1; today the default grid page is a D.
-- [ ] **Actions** — Button, ButtonGroup, CopyButton, QuickAction, RowActionToolbar, Toggle.
+      _Landing page:_ [src/catalog/Grids.mdx](src/catalog/Grids.mdx). AGGrid pages declare
+      `superseded by` NITRO and the deprecation notice links by id; the Table Playground is labelled as
+      the hand-off point to NITRO (§3 finding 2).
+- [x] **Actions** — Button, ButtonGroup, CopyButton, QuickAction, RowActionToolbar, Toggle.
       _Why first:_ Rule 2 is invisible on the Button page.
-- [ ] **Feedback** — Alert, AlertDialog, Toast, NotificationCenter, Spinner, Skeleton, LoadingPage,
+      _Landing page:_ [src/catalog/Actions.mdx](src/catalog/Actions.mdx). Toggle ↔ Switch reciprocal
+      link added (Switch otherwise untouched until Phase 2).
+- [x] **Feedback** — Alert, AlertDialog, Toast, NotificationCenter, Spinner, Skeleton, LoadingPage,
       Progress, ErrorPage. _Why first:_ Rule 8; Toast a11y claim undocumented.
-- [ ] **Overlays** — Modal, Sheet, FloatingWindow, DockablePanel, Sidebar, Tooltip, GlossaryTooltip,
+      _Split into two families to respect ≤10:_ **Feedback** (Alert, AlertDialog, Toast,
+      NotificationCenter, ConnectionStatus, CollabStatus, ErrorPage — [Feedback.mdx](src/catalog/Feedback.mdx))
+      and **Loading** (Spinner, Skeleton, Progress, LoadingPage — [Loading.mdx](src/catalog/Loading.mdx)).
+      CollabStatus ↔ RichEditor reciprocal link added.
+- [x] **Overlays** — Modal, Sheet, FloatingWindow, DockablePanel, Sidebar, Tooltip, GlossaryTooltip,
       SourceTip. _Why first:_ Rule 4 (Modal slots) and the most-asked "which overlay" question.
+      _Landing page:_ [src/catalog/Overlays.mdx](src/catalog/Overlays.mdx); family also holds
+      KeyboardShortcutsOverlay and CookieConsent (10). KeyboardShortcutsOverlay ↔ CommandPalette
+      reciprocal link added. Source review surfaced three limitations now documented on every page
+      that applies: no focus return on close, `Sheet` has no scroll lock, `FloatingWindow` has no
+      focus trap or Escape handling.
 
 Each family PR ships: one shared comparison table (linked from every member), reciprocal links,
 and the template filled on each page.
@@ -245,8 +290,12 @@ the product Storybook via Composition and confirming its entries carry the same 
 
 ### Tracking
 
-- [ ] Re-audit after Phase 0 (structure only: counts, tags, ids, CI green).
-- [ ] Re-audit after Phase 1
+- [x] Re-audit after Phase 0 (structure only: counts, tags, ids, CI green). `pnpm catalog:check`:
+      200 components / 4 docs pages / 7 family Overviews; every family ≤10; 96 ids remain in the
+      description baseline (was 114 before Phase 1).
+- [ ] Re-audit after Phase 1 — prose scoring of the 33 Phase 1 pages against the §2 rubric is still
+      to be done by a second reviewer; the structural half (descriptions present, reciprocal links
+      verified by CI, landing pages linked) is green.
 - [ ] Re-audit after Phase 2
 - [ ] Re-audit after Phase 3
 - [ ] Re-audit after Phase 4

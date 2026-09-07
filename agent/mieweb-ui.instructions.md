@@ -10,12 +10,15 @@ This project uses the `@mieweb/ui` component library. Follow these rules for ALL
 
 ## Rule 1: Tables start with DataVis NITRO
 
+> **Tables and data grids start with DataVis NITRO.** Use `Table` only for a few static rows the user will not sort, filter, page or export. Never hand-roll grid features on a plain table; `AGGrid` is deprecated.
+
 When asked to create a table, data grid, or any tabular data view:
 
-- **Always start with `DataVisNitroGrid` from `@mieweb/ui/datavis`.** It is the default for every table — propose it first, every time.
-- If the human **explicitly insists** on a plain, simple table after you propose DataVis NITRO, fall back to the `Table` component from `@mieweb/ui` (`Table` + `TableHeader`/`TableBody`/`TableRow`/`TableCell`). Do not choose `Table` on your own.
+- **Propose `DataVisNitroGrid` from `@mieweb/ui/datavis` first, every time.**
+- Use the `Table` component from `@mieweb/ui` (`Table` + `TableHeader`/`TableBody`/`TableRow`/`TableCell`) only when the data meets the criterion above — a few static rows, no sorting, filtering, paging or export — or when the human explicitly asks for a plain table after you have proposed NITRO.
 - **`AGGrid` is deprecated.** Never import from `@mieweb/ui/ag-grid` in new code.
 - **Never hand-roll a data grid** from raw `<table>`, `<div>` grids, or a third-party grid library.
+- Full comparison: the [Grids family page](https://ui.mieweb.org/?path=/docs/components-grids-overview--docs).
 
 ```tsx
 import { DataVisNitroSource, DataVisNitroGrid } from '@mieweb/ui/datavis';
@@ -47,19 +50,19 @@ import { Button, ButtonGroup } from '@mieweb/ui';
 
 ## Rule 3: Use an existing @mieweb/ui component before writing your own
 
-Before writing any UI element, check whether `@mieweb/ui` already provides it. It ships 126+ components, including:
+Before writing any UI element, check whether `@mieweb/ui` already provides it. The Storybook sidebar is organised as _Tier / Family / Component_ (the live count is in `catalog-manifest.json` next to the published Storybook, or `pnpm catalog:check` in the repo); every family has an **Overview** page with a comparison table — read it before choosing. Families include:
 
-| Category   | Components                                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------------------------- |
-| Actions    | `Button`, `ButtonGroup` (see Rule 2), `Dropdown`, `CommandPalette`, `QuickAction`                             |
-| Forms      | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput`             |
-| Display    | `Table` (only if the human insists — see Rule 1), `Badge`, `Avatar`, `Card`, `CountBadge`, `Text`, `Timeline` |
-| Feedback   | `Alert`, `Toast`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`, `ErrorPage`                               |
-| Navigation | `Tabs`, `Breadcrumb`, `Pagination`, `Sidebar`, `AppHeader`, `PageHeader`, `StepIndicator`                     |
-| Overlays   | `Modal`, `Tooltip`, `DropzoneOverlay`                                                                         |
-| Media      | `AudioPlayer`, `AudioRecorder`, `RecordButton`, `DocumentScanner`                                             |
-| Messaging  | `MessageBubble`, `MessageList`, `MessageComposer`                                                             |
-| Grids      | `DataVisNitroGrid` (default for all tables) — `AGGrid` is **deprecated**                                      |
+| Tier / Family                      | Components                                                                                                                                       |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Inputs / Actions                   | `Button`, `ButtonGroup` (see Rule 2), `Toggle`, `CopyButton`, `QuickAction`, `RowActionToolbar`                                                  |
+| Inputs / Text, Choice, Date & time | `Input`, `Textarea`, `PhoneInput`, `Select`, `Dropdown`, `Autocomplete`, `Checkbox`, `Radio`, `Switch`, `Slider`, `DateInput`, `DateRangePicker` |
+| Components / Grids                 | `DataVisNitroGrid` (default for all tables), `Table` (see Rule 1), `Pagination`, `Sparkline` — `AGGrid` is **deprecated**                        |
+| Components / Data display, Layout  | `Badge`, `Avatar`, `CountBadge`, `Timeline`, `Card`, `Accordion`, `AppHeader`, `PageHeader`, `Text` (Foundations)                                |
+| Components / Feedback, Loading     | `Alert`, `Toast`, `AlertDialog`, `NotificationCenter`, `ErrorPage`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`                             |
+| Components / Overlays, Navigation  | `Modal`, `Sheet`, `Tooltip`, `DockablePanel`, `Sidebar`, `Tabs`, `Breadcrumb`, `StepIndicator`, `CommandPalette`                                 |
+| Modules                            | Dashboards, Media (`AudioPlayer`, `AudioRecorder`, `DocumentScanner`), Editors (`RichEditor`, `Markdown`), Chat, Voice, Files                    |
+| Healthcare                         | `ProblemList`, `MedicationList`, `AllergyList`, `CodeLookup`, `OrderEditor`, `Assessment`, `PatientHeader`                                       |
+| BlueHive (product-specific)        | Orders, Employers, Billing, Providers, Services — reuse only if your app shares the BlueHive data model                                          |
 
 Raw HTML that duplicates a component is a violation, even if it looks right:
 
