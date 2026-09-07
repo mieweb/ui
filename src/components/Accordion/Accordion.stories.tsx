@@ -10,13 +10,64 @@ const meta: Meta<typeof Accordion> = {
     layout: 'padded',
     docs: {
       description: {
-        component:
-          'A vertically stacked set of expandable panels for FAQ lists, settings groups, and ' +
-          'progressive disclosure. Panels animate to their natural height (CSS grid rows — no ' +
-          'max-height clipping), headers are real buttons inside headings with full ' +
-          '`aria-expanded`/`aria-controls` wiring, and open state can be single or multiple, ' +
-          'uncontrolled or controlled.',
+        component: `### What it's for
+
+**A vertically stacked set of labelled, expandable panels** driven by data — FAQ lists, settings groups, progressive disclosure. One component, no sub-components: pass \`items: AccordionItem[]\` (\`{ id, title, content, disabled? }\`); \`type\` (\`single\` keeps at most one open, \`multiple\` any number); \`collapsible\` (single mode may close the open panel, default \`true\`); \`defaultOpenIds\` (uncontrolled) or \`openIds\` + \`onOpenChange(openIds)\` (controlled); \`variant\` (\`separated\` cards with gaps | \`joined\` one bordered, divided list); \`headingLevel\` (\`h2\` | \`h3\` | \`h4\`, default \`h3\`) for the document outline. Panels animate to natural height with \`grid-template-rows\` 0fr→1fr — no max-height clipping.
+
+### Use it when
+
+- 3+ sections share one list, each has a short label, and the user reads them one after another (FAQs, grouped settings, order line groups).
+- You want the component to own the "one open at a time" rule (\`type="single"\`) and the aria wiring.
+
+### Don't use it when
+
+- There is a **single** toggle, or you need to style the trigger and panel yourself — \`Collapsible\` (headless \`CollapsibleTrigger\` / \`CollapsibleContent\`, unmounts when closed).
+- Only one section is visible at a time **and** the sections are peer views the user switches between — \`Tabs\`.
+- The disclosure lives inside a \`Card\` as a "Show more" tail — \`CardCollapsible\`.
+- Panel headers need actions, badges or rich layout — the trigger is a single button whose content is \`title\` plus a chevron; put controls in \`content\` or use \`Collapsible\`.
+
+### Example
+
+\`\`\`tsx
+const [openIds, setOpenIds] = useState<string[]>(() =>
+  sections.filter((s) => s.hasErrors).map((s) => s.id)
+);
+
+<Accordion
+  type="multiple"
+  variant="joined"
+  headingLevel="h2"
+  openIds={openIds}
+  onOpenChange={setOpenIds}
+  items={sections.map((s) => ({
+    id: s.id,
+    title: s.label,
+    disabled: s.locked,
+    content: <SectionForm section={s} />,
+  }))}
+/>
+\`\`\`
+
+Controlled so sections with validation errors can be forced open; \`defaultOpenIds\` suffices when the host does not care.
+
+### Limitations
+
+- Accessibility: each trigger is a native \`<button type="button">\` inside the chosen heading, with \`aria-expanded\` and \`aria-controls\` pointing at the panel; each panel is \`role="region"\` with \`aria-labelledby\` the trigger, and when closed it gets \`aria-hidden\` **and** \`inert\` so hidden content is unreachable. Ids come from \`useId()\` + \`item.id\`, so repeated Accordions do not collide. Keyboard is native only: Tab / Enter / Space — **no Arrow Up/Down, Home/End** between headers (not required by the APG pattern, but absent). \`disabled\` items keep their heading but the button is disabled.
+- Closed panels stay **mounted** (content renders even when hidden); there is no lazy-mount or \`forceMount\` switch.
+- In \`single\` mode extra ids in \`defaultOpenIds\` / \`openIds\` are truncated to the first one.
+- RTL: \`text-start\` on the trigger; the chevron is symmetric. Responsive: full-width block, no breakpoints.
+- Theming: semantic tokens only (\`bg-card\`, \`border-border\`, \`divide-border\`, \`bg-muted/60\`, \`text-muted-foreground\`, \`ring-ring\`). No strings. Depends on \`lucide-react\` (\`ChevronDown\`) and \`class-variance-authority\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'layout-collapsible',
+          why: 'Accordion renders a styled stack of panels from an items array and owns the single/multiple rule; Collapsible is one headless trigger + content you style.',
+        },
+      ],
     },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],

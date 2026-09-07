@@ -242,14 +242,20 @@ Rule 11 (dates/phones/URLs) and the Select / Dropdown / Autocomplete confusion a
 
 ### Phase 3 — Display, navigation and layout
 
-- [ ] **Data display** — Card, Badge, CountBadge, ServiceBadge, FreshnessBadge, StripeBadge, Avatar,
-      ClampedText, Text, Timeline.
-- [ ] **Navigation** — Tabs, Breadcrumb, TableOfContents, SectionSpyNav, ReadingProgressBar,
-      StepIndicator, OnboardingWizard.
-- [ ] **Layout** — AppHeader, SiteHeader, SiteFooter, PageHeader, Accordion, Collapsible, ScrollArea,
-      Separator, ProductVersion.
-- [ ] **Dashboards** — DashboardWidget, CustomizableDashboard, QuickLinksCard, ReportDashboard
-      (+ Dashboard demo labelled).
+- [x] **Data display** — Badge, CountBadge, FreshnessBadge, Avatar, ClampedText, Timeline,
+      FilterSummaryBar, YChart (demo-only, banner + description). ServiceBadge/StripeBadge are
+      BlueHive-specific and linked from the Overview only; Text stays in Foundations.
+      _Landing:_ [DataDisplay.mdx](src/catalog/DataDisplay.mdx).
+- [x] **Navigation** — Tabs, Breadcrumb, TableOfContents, SectionSpyNav, ReadingProgressBar,
+      StepIndicator, OnboardingWizard, CommandPalette. TOC ↔ SectionSpyNav ↔ ReadingProgressBar are
+      now reciprocal. _Landing:_ [Navigation.mdx](src/catalog/Navigation.mdx).
+- [x] **Layout** — AppHeader, SiteHeader, SiteFooter, PageHeader, Accordion, Collapsible, ScrollArea,
+      Separator, ProductVersion, Card. Headers question resolved (app chrome / public site / in-page
+      title block). Flagged: `SiteHeader` `NavLink.hideOnMobile` is declared but never read.
+      _Landing:_ [Layout.mdx](src/catalog/Layout.mdx).
+- [x] **Dashboards** — DashboardWidget, CustomizableDashboard, DashboardCustomizePanel,
+      QuickLinksCard, ReportDashboard, Dashboard demos (labelled Storybook-only).
+      _Landing:_ [Dashboards.mdx](src/catalog/Dashboards.mdx).
 
 ### Phase 4 — Media, editors, chat, files
 
@@ -305,7 +311,8 @@ the product Storybook via Composition and confirming its entries carry the same 
       verified by CI, landing pages linked) is green.
 - [x] Re-audit after Phase 2 — structural half green (`catalog:check` ok, 75 ids left in the baseline);
       prose scoring pending a second reviewer.
-- [ ] Re-audit after Phase 3
+- [x] Re-audit after Phase 3 — structural half green (56 ids left in the baseline); prose scoring
+      pending.
 - [ ] Re-audit after Phase 4
 - [ ] Re-audit after Phase 5
 - [ ] Re-audit after Phase 6

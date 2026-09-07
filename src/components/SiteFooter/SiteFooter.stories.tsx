@@ -53,6 +53,68 @@ const meta: Meta<typeof SiteFooter> = {
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**The public-site \`<footer>\`**: brand block (\`logo\`, \`description\`, \`socialLinks\`), up to four \`linkGroups\` (\`{ title, links: [{ label, href, external? }] }\`), an optional newsletter form (\`showNewsletter\`, \`onNewsletterSubmit(email)\`, \`newsletterPlaceholder\`), then a bottom row with \`CopyrightText\` (\`companyName\`, default **"BlueHive Health LLC"**) and \`LegalLinks\` (\`privacyHref\`, \`termsHref\`, \`cookiesHref\`, \`additionalLegalLinks\`), plus \`disclaimer\` and the \`emergencyDisclaimer\` ("call 911") line. \`variant\`: \`default\` (grey) | \`dark\` | \`primary\` | \`white\`. Pieces are exported for custom footers: \`FooterSocialLinks\`, \`NewsletterForm\`, \`FooterLinkSection\`, \`CopyrightText\`, \`LegalLinks\`, \`DisclaimerText\`; \`SimpleFooter\` is the one-line © + Privacy + Terms variant for app or auth pages.
+
+### Use it when
+
+- Marketing / help / legal pages that need the standard columns, social icons and legal strip.
+- Signed-in pages that only need a thin © line — \`SimpleFooter\`.
+
+### Don't use it when
+
+- You need only the version / build line — \`ProductVersion\` (drop it next to \`SimpleFooter\`).
+- The footer must contain arbitrary content or a sitemap deeper than one level — compose the exported pieces in your own \`<footer>\`.
+- Links must be router links — every link is a plain \`<a href>\`.
+
+### Example
+
+\`\`\`tsx
+const subscribe = useMutation(subscribeToNewsletter);
+
+<SiteFooter
+  variant="dark"
+  logo={{ name: 'BlueHive', href: '/' }}
+  description="Occupational health, connected."
+  socialLinks={[{ platform: 'linkedin', href: 'https://linkedin.com/company/bluehivehealth' }]}
+  linkGroups={footerGroups}
+  showNewsletter
+  onNewsletterSubmit={(email) => subscribe.mutate({ email })}
+  companyName="BlueHive Health LLC"
+  privacyHref="/privacy"
+  termsHref="/terms"
+  emergencyDisclaimer
+/>
+\`\`\`
+
+\`NewsletterForm\` owns the input value and clears it after calling \`onSubmit\`; the host owns the request.
+
+### Limitations
+
+- Accessibility: a \`<footer>\` landmark; \`LegalLinks\` is a \`<nav>\` **without a label**, and link-group columns are plain \`<ul>\`s under \`<h3>\`s (no \`nav\`). Social links get \`aria-label\` (\`label\` or \`"Follow us on {platform}"\`) and open in a new tab with no hint. The newsletter \`<input type="email">\` has **no label** (placeholder only) and no success / error state — \`isLoading\` is on \`NewsletterForm\` but \`SiteFooter\` never passes it. \`external\` links show an icon but no "opens in new tab" text.
+- i18n: hard-coded English \`"Subscribe to our newsletter"\`, \`"Enter your email"\`, \`"Sign Up"\`, \`"Sending..."\`, \`"Privacy Policy"\`, \`"Terms & Conditions"\`, \`"Cookie Policy"\`, \`"Privacy"\`, \`"Terms"\`, the 911 sentence and the default company name; \`year\` is the runtime year, not formatted.
+- Layout: \`container mx-auto px-4 py-12\`, 1 → 2 → 12-column grid; link groups fill \`grid-cols-2 sm:grid-cols-3 lg:grid-cols-4\` so a fifth group wraps. \`SimpleFooter\` and \`LegalLinks\` separators use physical \`sm:text-left\` and \`ml-1\`; otherwise symmetric.
+- Theming: only \`primary\` uses a brand token (\`bg-primary-800\`); grey/dark/white variants and all text are hard-coded \`gray-*\` / \`white/NN\` with \`dark:\` variants. Social icons are inline SVGs (no icon library). Depends on \`class-variance-authority\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'layout-siteheader',
+          why: 'SiteHeader and SiteFooter frame a public page: same logo/name props, same light/dark colour variants.',
+        },
+        {
+          type: 'composes with',
+          target: 'layout-productversion',
+          why: 'ProductVersion sits in or under SiteFooter / SimpleFooter to show the deployed version next to the copyright line.',
+        },
+      ],
+    },
   },
   argTypes: {
     variant: {

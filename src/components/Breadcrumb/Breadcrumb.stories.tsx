@@ -24,6 +24,64 @@ const meta: Meta<BreadcrumbStoryArgs> = {
   component: Breadcrumb,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**"You are here" in a hierarchy**: a \`<nav aria-label="Breadcrumb">\` with an ordered list of ancestors ending in the current page. Pass \`items: BreadcrumbItem[]\` (\`{ label, href?, icon? }\`); every item with an \`href\` except the last renders as a link, the last (or any item without \`href\`) renders as the current page with \`aria-current="page"\`. \`separator\` swaps the chevron (\`BreadcrumbSlash\` is provided), \`maxItems\` collapses the middle into "…" (first item, ellipsis, then the last \`maxItems − 1\`), and \`renderLink(item, index)\` lets you substitute your router's \`<Link>\`.
+
+### Use it when
+
+- The page sits two or more levels deep in a tree the user can climb back up (Employers › Acme Inc › Locations › Fort Wayne).
+- Paths can get long and you want them bounded — \`maxItems\`.
+
+### Don't use it when
+
+- The user is switching between **peer views** of one page — \`Tabs\`.
+- It is the site's **primary navigation** — \`Sidebar\` / \`AppHeader\`; breadcrumbs are secondary wayfinding.
+- The path is one level deep — a "Back" \`Button\` or the \`PageHeader\` title alone is clearer.
+- You need in-page section navigation — \`TableOfContents\` / \`SectionSpyNav\`.
+
+### Example
+
+\`\`\`tsx
+const crumbs = useMatches().map((m) => ({ label: m.handle.title, href: m.pathname }));
+
+<PageHeader title={employer.name}>
+  <Breadcrumb
+    items={[{ label: 'Home', href: '/', icon: <HomeIcon size={14} /> }, ...crumbs]}
+    maxItems={4}
+    renderLink={(item) => <Link to={item.href!}>{item.icon}{item.label}</Link>}
+  />
+</PageHeader>
+\`\`\`
+
+Stateless: the host derives the items from its router.
+
+### Limitations
+
+- Accessibility: \`<nav aria-label="Breadcrumb">\` › \`<ol>\` › \`<li>\`; separators are \`aria-hidden\`; the current page is a \`<span aria-current="page">\` (not a link). The collapsed "…" is a plain \`<span>\` — **not a button**, so hidden ancestors are unreachable; use a \`Dropdown\` in \`renderLink\` or a larger \`maxItems\` when they matter. The hard-coded English \`aria-label="Breadcrumb"\` is not a prop.
+- Default links are plain \`<a href>\` (full navigation); pass \`renderLink\` for client-side routing. \`renderLink\` is *not* used for the last item.
+- \`maxItems\` below 2 still shows at least the first item and the ellipsis; \`icon\` is rendered as-is (add \`aria-hidden\` yourself).
+- RTL: the default chevron is a fixed right-pointing SVG and does not mirror; pass \`separator\` for RTL layouts. Items \`flex-wrap\` onto new lines rather than truncating.
+- Theming: semantic tokens only (\`text-muted-foreground\`, \`text-foreground\`, \`ring-ring\`). No dependencies beyond \`cn\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'layout-pageheader',
+          why: 'Breadcrumb in PageHeader children shows where the titled page sits in the hierarchy.',
+        },
+        {
+          type: 'alternative to',
+          target: 'navigation-tabs',
+          why: 'Breadcrumb shows the ancestor path of the current page; Tabs switch between peer views inside one page.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {

@@ -441,6 +441,16 @@ The application's primary navigation rail. \`SidebarProvider\` holds collapsed /
           target: 'overlays-sheet',
           why: 'Sheet is a transient edge panel; Sidebar is the persistent navigation rail (drawer only on mobile).',
         },
+        {
+          type: 'alternative to',
+          target: 'navigation-tabs',
+          why: 'Sidebar is the persistent app navigation rail between routes; Tabs switch peer views inside one page (local state).',
+        },
+        {
+          type: 'composes with',
+          target: 'layout-appheader',
+          why: 'Sidebar + AppHeader form the app shell: the rail owns route navigation, the header owns brand, search and account triggers (SidebarMobileToggle lives in the header).',
+        },
       ],
     },
   },

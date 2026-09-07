@@ -165,6 +165,11 @@ const search = (q: string) => {
           why: 'CodeLookup is a purpose-built offline medical-code search with its own worker engine; Autocomplete is the generic combobox you wire to any data.',
         },
         {
+          type: 'alternative to',
+          target: 'navigation-commandpalette',
+          why: 'Autocomplete is a form field that puts a chosen value into the form; CommandPalette is a global ⌘K overlay that runs a command or opens a record.',
+        },
+        {
           type: 'uses',
           target: 'text-inputs-input',
           why: 'Renders a raw <input> styled with the inputVariants / floatingLabelVariants and RequiredMark exported by Input.',

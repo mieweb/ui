@@ -281,9 +281,82 @@ const meta: Meta<typeof OnboardingWizardDemo> = {
     layout: 'padded',
     docs: {
       description: {
-        component:
-          'A multi-step onboarding wizard for guiding users through setup flows. Features include progress tracking, step navigation, loading states, error handling, and customizable branding. **Use the Demo Mode control** to explore different states.',
+        component: `### What it's for
+
+A **full-screen guided setup flow** (\`fixed inset-0 z-50\`): branded header, a scrollable step body, and a footer with Back, a \`Progress\` bar ("Step 2 of 5"), Next / Finish and an optional Skip. It is **controlled**: pass \`steps: OnboardingStep[]\` (\`{ id, title, description?, skippable?, complete?, content }\`), \`currentStep\` (0-based) and \`onStepChange(index)\`; \`onComplete\` fires from Finish on the last step, \`onSkip(index)\` from Skip (which also advances). \`loading\` + \`loadingMessage\` swap the body for a \`Spinner\`; \`error\` renders an \`Alert\` above the step; \`backEnabled\` / \`nextEnabled\` gate the buttons (e.g. until the step validates); \`labels\` overrides the four button strings; \`showHeader\`, \`logoUrl\`, \`brandName\`, \`brandSubname\`, \`headerContent\` shape the header. Two content helpers ship with it: \`OnboardingStepQuestion\` (title, description, pill-button \`options\` with \`onSelect\`) and \`OnboardingCompletion\` (the "Setup complete!" / "Some steps not completed" final screen with BlueHive-specific actions). In Storybook, use the **Demo Mode** control to switch between the interactive, loading, error, custom-branding, no-header and incomplete scenarios.
+
+### Use it when
+
+- A new account or user must complete several setup questions before landing in the app, and the flow should take over the viewport.
+- You want Back / Next / Skip / Finish, progress and loading/error handling for free and are happy to render each step's body yourself.
+
+### Don't use it when
+
+- The steps live **inside a page** with your own layout and buttons — \`StepIndicator\` gives you just the clickable rail.
+- The flow is a **dialog**, not a takeover — compose \`Modal\` with a \`StepIndicator\`.
+- Progress is something the user watches rather than drives — \`TimelineProgress\`.
+- The product is not BlueHive — the default \`logoUrl\`, \`brandName\` ("BlueHive"), \`brandSubname\` ("for employers") and every string in \`OnboardingCompletion\` are BlueHive copy; override or replace them.
+
+### Example
+
+\`\`\`tsx
+const [step, setStep] = useState(0);
+const [answers, setAnswers] = useState<Answers>({});
+const save = useSaveOnboarding();
+
+<OnboardingWizard
+  steps={[
+    { id: 'size', title: 'Company size', content: (
+        <OnboardingStepQuestion title="How many employees?" options={sizeOptions.map((o) => ({ ...o, selected: answers.size === o.id }))} onSelect={(id) => setAnswers((a) => ({ ...a, size: id }))} />
+      ) },
+    { id: 'services', title: 'Services', skippable: true, content: <ServicesPicker … /> },
+    { id: 'done', title: 'Done', content: <OnboardingCompletion completed onStartOrder={() => navigate('/orders/new')} onGoToDashboard={() => navigate('/')} /> },
+  ]}
+  currentStep={step}
+  onStepChange={setStep}
+  nextEnabled={step !== 0 || Boolean(answers.size)}
+  loading={save.isPending}
+  error={save.error?.message}
+  onComplete={() => save.mutate(answers)}
+  labels={{ back: t('back'), next: t('next'), skip: t('skip'), finish: t('finish') }}
+/>
+\`\`\`
+
+The host owns the step index, the answers and persistence; the wizard owns layout and button enablement only.
+
+### Limitations
+
+- Accessibility: the root is a plain \`<div>\` — **no \`role="dialog"\`, no \`aria-modal\`, no focus trap, no scroll lock**, even though it covers the page; the header is a \`<nav>\` with no label. Buttons get \`aria-label\` from \`labels\`; on small screens the text is hidden and a Font Awesome \`<i class="fas fa-chevron-*">\` icon is shown instead — **Font Awesome CSS is not bundled**, so without it the mobile buttons are empty. \`OnboardingStepQuestion\` option icons and \`OnboardingCompletion\` icons are also \`fas\` classes. Focus is not moved when the step changes; step titles (\`title\`, \`description\`) from \`OnboardingStep\` are **not rendered** by the wizard itself — put them in \`content\`. The \`Progress\` bar is labelled "Step N of M".
+- i18n: button labels are props, but "Getting ready, one moment please...", "Step N of M", " Logo" alt suffix, and all \`OnboardingCompletion\` copy ("Setup complete!", "Start your first order", …) are hard-coded English. \`OnboardingStepQuestion\`'s \`multiple\` prop is accepted but unused.
+- \`complete\` on a step is not used for anything; Skip appears on every non-last step unless \`skippable === false\`.
+- RTL: header uses physical \`ml-3\`; icons use \`mr-2\`; chevrons do not mirror.
+- Theming: header is \`bg-primary-800\`; body uses semantic tokens (\`bg-background\`, \`border-border\`); the \`Progress\` bar is fixed to \`variant="success"\`. Depends on \`Button\`, \`Alert\`, \`Spinner\`, \`Progress\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'navigation-stepindicator',
+          why: 'OnboardingWizard is the full-screen flow with header, buttons, progress, loading and error states; StepIndicator is only the clickable step rail for a wizard you build.',
+        },
+        {
+          type: 'uses',
+          target: 'loading-progress',
+          why: 'The footer progress bar ("Step N of M") is a Progress with variant="success".',
+        },
+        {
+          type: 'uses',
+          target: 'feedback-alert',
+          why: 'The error prop renders as an Alert variant="danger" above the step body.',
+        },
+        {
+          type: 'uses',
+          target: 'actions-button',
+          why: 'Back / Next / Skip / Finish and the option pills are Buttons.',
+        },
+      ],
     },
   },
   args: {

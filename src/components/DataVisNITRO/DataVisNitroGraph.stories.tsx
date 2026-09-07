@@ -61,6 +61,11 @@ Charting the same record set a NITRO grid shows. Wraps \`@mieweb/datavis\`'s \`G
           target: 'grids-sparkline',
           why: 'Sparkline is a dependency-free inline strip over pre-bucketed points; the graph is a full interactive chart.',
         },
+        {
+          type: 'alternative to',
+          target: 'data-display-ychart',
+          why: 'DataVisNitroGraph is the shipped, token-themed chart; YChart is an unexported org-chart demo from the ychart submodule.',
+        },
       ],
     },
   },

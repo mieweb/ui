@@ -102,6 +102,11 @@ The **Playground** story below deliberately hand-rolls sorting, filtering, pinne
           target: 'actions-rowactiontoolbar',
           why: 'Per-row edit/delete icons revealed on hover, in a relative group row.',
         },
+        {
+          type: 'composes with',
+          target: 'data-display-filtersummarybar',
+          why: 'FilterSummaryBar above a host-filtered Table shows filtered-of-total counts with one Clear all.',
+        },
       ],
     },
   },

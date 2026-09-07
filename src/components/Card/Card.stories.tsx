@@ -22,6 +22,91 @@ const meta: Meta<typeof Card> = {
   component: Card,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**The general-purpose bordered surface** for grouping related content. \`Card\` is a \`div\` (or \`as\` \`article\` / \`section\` / \`aside\`) with \`variant\` (\`default\` | \`elevated\` | \`outlined\` | \`ghost\` | \`filled\`), \`padding\` (\`none\` … \`xl\`), \`orientation\` (\`vertical\` | \`horizontal\`), an \`accent\` bar on the start edge, \`interactive\` hover/focus styling, a \`selected\` ring and a \`loading\` overlay. Slot sub-components: \`CardHeader\`, \`CardTitle\` (\`as\` h1–h6, default \`h3\`), \`CardDescription\`, \`CardContent\`, \`CardFooter\`, \`CardActions\` (\`align\`), \`CardDivider\`, \`CardMedia\` (\`aspectRatio\`, \`overlay\`), \`CardBadge\` (\`position\`, \`variant\`), \`CardCollapsible\` (\`expanded\` / \`onExpandChange\` / \`trigger\`) and \`CardStat\` (\`value\`, \`label\`, \`trend\`, \`icon\`). \`cardVariants\` / \`cardAccentVariants\` are exported.
+
+### Use it when
+
+- A page section, list item or tile needs its own visual boundary and you want to arrange header / body / footer yourself.
+- A grid of selectable or clickable items (\`interactive\` + \`selected\`, with \`onClick\` / \`tabIndex\` from the host).
+- A metric tile (\`CardStat\`) or image tile (\`CardMedia\` + \`CardBadge\`).
+
+### Don't use it when
+
+- The tile is a **titled dashboard portlet** with a count, "+" button and one of the widget bodies — \`DashboardWidget\` (built on Card).
+- You want a ready-made list of shortcut links — \`QuickLinksCard\`; large explained shortcut tiles — \`QuickAction\`.
+- The content should collapse behind a heading as part of a stack — \`Accordion\`; a single headless toggle — \`Collapsible\` (\`CardCollapsible\` is only the inline "Show more" pattern).
+- You only need a rule between blocks — \`Separator\` (\`CardDivider\` is the Card-edge-bleeding version).
+
+### Example
+
+\`\`\`tsx
+const [selectedId, setSelectedId] = useState<string | null>(null);
+
+{plans.map((plan) => (
+  <Card
+    key={plan.id}
+    as="article"
+    interactive
+    selected={selectedId === plan.id}
+    role="button"
+    tabIndex={0}
+    aria-pressed={selectedId === plan.id}
+    onClick={() => setSelectedId(plan.id)}
+    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedId(plan.id)}
+  >
+    <CardHeader>
+      <CardTitle as="h2">{plan.name}</CardTitle>
+      <CardDescription>{plan.summary}</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <CardStat value={plan.price} label="per month" trend={{ value: plan.delta, label: 'vs last year' }} />
+    </CardContent>
+    <CardActions>
+      <Button size="sm" onClick={(e) => { e.stopPropagation(); choose(plan.id); }}>Choose</Button>
+    </CardActions>
+  </Card>
+))}
+\`\`\`
+
+The host owns selection; \`interactive\` and \`selected\` are purely visual.
+
+### Limitations
+
+- Accessibility: \`Card\` adds **no role or keyboard handling** — \`interactive\` only styles hover/focus, so a clickable card needs \`role\`, \`tabIndex\` and \`onKeyDown\` from you. \`loading\` sets \`aria-busy\` and overlays bouncing dots with no text. \`CardCollapsible\`'s button has \`aria-expanded\` but **no \`aria-controls\`**, and the collapsed panel stays in the DOM (grid-rows 0fr, \`opacity-0\`) without \`hidden\` / \`inert\`, so its content remains reachable. \`CardStat\`'s trend arrow is \`aria-hidden\` with the sign expressed only by colour/rotation; the text shows \`Math.abs(value)%\`.
+- i18n: \`CardCollapsible\` defaults to English \`"Show more"\` / \`"Show less"\` (pass a non-string \`trigger\` to control both states yourself). \`CardStat\` formats \`{n}%\` without \`Intl\`.
+- RTL: \`accent\`, \`CardBadge\` positions (\`start-*\` / \`end-*\`; the \`*-left\` / \`*-right\` names are logical aliases) and \`ps-4\` are logical. \`CardMedia\` (\`-mx-4 -mt-4\`) and \`CardDivider\` (\`-mx-4\`) assume the default \`padding="md"\` (\`p-4\`) — other paddings misalign the bleed. \`CardActions align\` uses physical names (\`left\` / \`right\`) that map to \`justify-start\` / \`justify-end\`.
+- Theming: semantic tokens (\`bg-card\`, \`border-border\`, \`bg-muted\`, \`text-muted-foreground\`) plus \`primary-*\` / \`success-*\` / \`warning-*\` / \`destructive-*\`; \`CardMedia\` overlay uses hard-coded \`from-neutral-900/60\`. Depends on \`class-variance-authority\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'data-display-clampedtext',
+          why: 'ClampedText inside CardContent for long free-text fields; its default fade (from-card) matches the Card surface.',
+        },
+        {
+          type: 'alternative to',
+          target: 'dashboards-dashboardwidget',
+          why: 'Card is the free-form surface you lay out yourself; DashboardWidget is a Card with a fixed title bar, count badge and add button for portlet grids.',
+        },
+        {
+          type: 'composes with',
+          target: 'layout-scrollarea',
+          why: 'A fixed-height Card scrolls its CardContent through a ScrollArea so long lists keep the tile size in a grid.',
+        },
+        {
+          type: 'alternative to',
+          target: 'layout-separator',
+          why: 'CardDivider is an <hr> that bleeds to the Card edges (-mx-4); Separator is the plain rule for everywhere else.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {

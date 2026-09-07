@@ -122,6 +122,11 @@ A card-shaped shortcut button: a tinted icon tile, a \`title\` and a \`subtitle\
           target: 'actions-button',
           why: 'Button is the inline control; QuickAction is a large, explained shortcut for dashboards.',
         },
+        {
+          type: 'alternative to',
+          target: 'dashboards-quicklinkscard',
+          why: 'QuickLinksCard is a compact titled list of plain link rows with badges; QuickAction is a large explained tile you arrange in your own grid.',
+        },
       ],
     },
   },

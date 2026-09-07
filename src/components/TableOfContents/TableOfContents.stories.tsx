@@ -12,6 +12,69 @@ const meta: Meta<typeof TableOfContents> = {
   component: TableOfContents,
   parameters: {
     layout: 'padded',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A **sidebar outline of the headings on the page** that highlights the section in view. With no \`items\` it discovers headings itself — \`selector\` (default \`'h2, h3'\`) inside \`contentRef\` (or the whole document), keeping only elements that have an \`id\` and a level ≤ \`maxDepth\` (default 3) — and re-discovers on DOM mutations. Or pass \`items: TocItem[]\` (\`{ id, title, level, children? }\`). Flat items are nested by \`level\` into an indented tree (\`indentLines\` draws the guide rail). Scroll-spy comes from \`useScrollSpy\` (tunable via \`scrollSpyOptions\`), or hand it an \`activeId\` to control it and listen with \`onActiveChange\`. Clicking a link scrolls (\`smooth\`, minus \`scrollOffset\` for fixed headers) and pushes \`#id\` to the URL. \`title\` renders a heading above the list; \`hideWhenEmpty\` (default true) renders nothing until there are items.
+
+### Use it when
+
+- Long documentation, reports or settings pages have a **two-column layout** with room for a sticky outline of h2/h3s.
+- Headings are nested and the reader benefits from seeing the hierarchy, not just the top-level sections.
+
+### Don't use it when
+
+- The page is single-column and the sections are few and flat — \`SectionSpyNav\` is the sticky **horizontal band** version with an optional CTA.
+- You only want a sense of progress, not navigation — \`ReadingProgressBar\`.
+- The items are pages, not sections of this page — \`Sidebar\` / \`Breadcrumb\`.
+- The content scrolls inside a container you cannot ref — auto-discovery and scroll-spy both need \`contentRef\` (or the window) to observe.
+
+### Example
+
+\`\`\`tsx
+const contentRef = useRef<HTMLDivElement>(null);
+
+<div className="grid grid-cols-[1fr_16rem] gap-8">
+  <div ref={contentRef}>
+    <article>
+      <h2 id="overview">Overview</h2> …
+      <h3 id="eligibility">Eligibility</h3> …
+    </article>
+  </div>
+  <aside className="sticky top-20 self-start">
+    <TableOfContents contentRef={contentRef} title="On this page" scrollOffset={80} />
+  </aside>
+</div>
+\`\`\`
+
+Uncontrolled: discovery and the active id are internal. Pass \`items\` + \`activeId\` when the host already knows the outline (e.g. from MDX frontmatter).
+
+### Limitations
+
+- Accessibility: \`<nav aria-label="Table of contents">\` (hard-coded English, not a prop) with nested \`<ul>\`/\`<li>\`/\`<a href="#id">\`; the active link gets \`aria-current="location"\`. Links are real anchors, so they work without JS and with modifier-clicks; there is no extra keyboard handling. The \`title\` is a \`<p>\`, not a heading.
+- Headings **without an \`id\`** are skipped silently — give every heading a stable id (or pass \`items\`). \`title\` for discovered items is the heading's \`textContent\`.
+- Scroll-spy picks the **topmost intersecting** target within \`rootMargin\` (default \`'0px 0px -60% 0px'\`); with short final sections the last heading may never become active. Scroll-spy is disabled while \`activeId\` is controlled.
+- \`hideWhenEmpty\` returns \`null\` — the \`<nav>\` disappears entirely rather than rendering an empty landmark.
+- RTL: nested lists use physical \`ml-3 pl-3 border-l\` / \`ml-4\`, so the indent rail sits on the wrong side in RTL.
+- Theming: active link \`primary-800\` / \`dark:primary-400\`; inactive links hard-coded \`neutral-600/400\`; rail \`border-border\`. Depends on \`useScrollSpy\` (IntersectionObserver, MutationObserver).`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'navigation-sectionspynav',
+          why: 'TableOfContents is a nested sidebar outline that can auto-discover headings; SectionSpyNav is a flat sticky horizontal band with an optional CTA.',
+        },
+        {
+          type: 'composes with',
+          target: 'navigation-readingprogressbar',
+          why: 'Outline for jumping between sections plus a viewport-top bar for how far through the document the reader is; they share no state.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {

@@ -53,6 +53,11 @@ Determinate progress. \`Progress\` is a linear bar (\`value\`/\`max\`, \`label\`
           target: 'loading-spinner',
           why: 'Progress needs a real value; fall back to Spinner when there is none.',
         },
+        {
+          type: 'alternative to',
+          target: 'navigation-readingprogressbar',
+          why: 'Progress is a determinate, labelled progressbar for a value the host owns; ReadingProgressBar binds to window scroll and is decorative.',
+        },
       ],
     },
   },

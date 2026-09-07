@@ -88,6 +88,11 @@ The host owns \`open\`; keep form state in the form so closing discards it predi
           target: 'overlays-dockablepanel',
           why: 'DockablePanel can shrink to a strip so the user keeps working; Modal always blocks.',
         },
+        {
+          type: 'alternative to',
+          target: 'data-display-timeline',
+          why: "Modal is the general dialog with slots, focus trap and scroll lock; Timeline's OrderConfirmation is a fixed one-button success overlay without focus management.",
+        },
       ],
     },
   },

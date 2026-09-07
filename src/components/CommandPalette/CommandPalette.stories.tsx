@@ -239,12 +239,73 @@ const meta: Meta<typeof CommandPalette> = {
           target: 'choice-inputs-dropdown',
           why: 'CommandPalette searches and runs commands app-wide from a keyboard shortcut; Dropdown is a short anchored menu for one context.',
         },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-autocomplete',
+          why: 'CommandPalette is a global ⌘K overlay that runs a command or opens a record; Autocomplete is a form field that puts a chosen value into the form.',
+        },
+        {
+          type: 'composes with',
+          target: 'layout-appheader',
+          why: 'AppHeaderSearch is the ⌘K placeholder button whose onClick opens the CommandPalette.',
+        },
       ],
     },
     docs: {
       description: {
-        component:
-          'A command palette / global search component with keyboard navigation, category filtering, and customizable items. Supports Cmd+K (Mac) / Ctrl+K (Windows) keyboard shortcut.',
+        component: `### What it's for
+
+**App-wide search-and-run from the keyboard** (⌘K / Ctrl+K): a centred overlay with a search box, optional category filter chips, grouped results and a hint footer. Three pieces: \`CommandPaletteProvider\` owns open state, \`query\`, \`selectedIndex\`, \`activeCategory\`, \`items\` and \`categories\` and registers the shortcut (\`enableShortcut\`, optional \`customEventName\`); \`useCommandPalette()\` exposes \`open\` / \`close\` / \`toggle\` / \`setItems\` / \`setCategories\` so any part of the app can contribute \`CommandPaletteItem\`s (\`{ id, label, subtitle?, description?, category?, icon?, shortcut?, disabled?, metadata? }\`); \`CommandPalette\` renders the overlay and calls \`onSelect(item)\`. \`CommandPaletteTrigger\` is the "Search… ⌘K" button for a header. Results are filtered client-side on label / subtitle / description unless \`serverFiltered\`; \`onQueryChange\` lets you fetch async results; \`pinnedItems\` stay at the top (grouped under \`pinnedCategoryLabel\`), \`recentItems\` show when the query is empty and nothing else matches (\`recentCategoryLabel\`); \`renderItem\`, \`emptyState\` and \`footer\` are render overrides; \`isLoading\` shows a spinner.
+
+### Use it when
+
+- Power users need to jump to any record, page or action by typing, from anywhere in the app.
+- Several features register commands independently and one global entry point should aggregate them.
+
+### Don't use it when
+
+- The actions belong to **one element** (a row, a card) — \`Dropdown\` anchored to it.
+- The user is **choosing a value for a form** — \`Autocomplete\` / \`Select\`.
+- You only need to **show** the shortcuts — \`KeyboardShortcutsOverlay\`.
+- It is a domain search with its own filters and results page — e.g. \`ProviderSearchBar\`.
+
+### Example
+
+\`\`\`tsx
+// App root
+<CommandPaletteProvider>
+  <AppShell />
+  <CommandPalette placeholder="Search patients, orders, pages…" onSelect={(item) => run(item)} onQueryChange={setSearch} isLoading={isFetching} serverFiltered />
+</CommandPaletteProvider>
+
+// Any feature registers what it can do
+function PatientsFeature() {
+  const { setItems, setCategories } = useCommandPalette();
+  const { data: patients } = usePatientSearch(search);
+  useEffect(() => {
+    setCategories([{ id: 'patients', label: 'Patients' }, { id: 'pages', label: 'Pages' }]);
+    setItems([
+      ...pages.map((p) => ({ id: p.path, label: p.title, category: 'pages' })),
+      ...(patients ?? []).map((p) => ({ id: p.id, label: p.name, subtitle: p.mrn, category: 'patients' })),
+    ]);
+  }, [patients]);
+  return null;
+}
+
+// Header
+<CommandPaletteTrigger placeholder="Search…" />
+\`\`\`
+
+The provider owns open/query/selection; the host owns items and what \`onSelect\` does. \`setItems\` replaces the whole list — merge across features yourself.
+
+### Limitations
+
+- Accessibility: the overlay is a fixed \`<div>\` — **no \`role="dialog"\`, \`aria-modal\`, focus trap or scroll lock**; the backdrop is \`aria-hidden\`. The input has no \`aria-label\` (only \`placeholder\`) and no combobox/listbox roles; results are plain \`<button>\`s (or \`role="button"\` divs with \`renderItem\`) and the highlighted row is visual only (no \`aria-activedescendant\`). Keyboard on the input: ArrowUp/Down move the highlight (no wrap), Enter selects, Escape closes (\`useEscapeKey\`), **Tab / Shift+Tab cycle category filters** instead of moving focus. Focus is moved into the input 50ms after open and not returned to the trigger on close.
+- Selection resets to the first item whenever the item count changes; disabled items are skipped only on Enter/click (arrows still land on them).
+- i18n: \`placeholder\`, \`pinnedCategoryLabel\`, \`recentCategoryLabel\` are props; "All", "Other" (uncategorised group), "Start typing to search...", "No results for …", "Searching for …", the footer hints ("navigate", "select", "close", "N results") and "Clear search" are hard-coded English. The trigger shows ⌘ on Apple platforms (via \`navigator.platform\`) else Ctrl.
+- Layout: not portaled — \`fixed inset-x-0 top-20 z-50\`, max-width 2xl, results capped at 60vh. Renders \`null\` when closed.
+- RTL: uses physical \`left-4\` / \`right-12\` / \`pl-12 pr-12\` / \`mr-2\` / \`text-left\`, so the search icon, clear button and shortcut chips sit on the wrong side.
+- Theming: hard-coded \`gray-*\` / \`bg-white\` surfaces with \`dark:\` variants; \`primary-800\` for active chips and \`primary-50\` for the highlighted row — brands recolour only the accents. Depends on \`useKeyboardShortcut\` (\`useCommandK\`), \`useEscapeKey\`, \`useClickOutside\`.`,
       },
     },
   },

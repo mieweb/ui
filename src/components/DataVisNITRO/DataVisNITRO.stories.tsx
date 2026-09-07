@@ -126,6 +126,11 @@ The source owns the data lifecycle; the grid is presentational. Keep application
           why: 'Render per-row actions inside a grid cell with group="grid" so they reveal on row hover.',
         },
         {
+          type: 'composes with',
+          target: 'data-display-filtersummarybar',
+          why: 'FilterSummaryBar above the grid shows filtered-of-total counts for host-side filters and search, with one Clear all.',
+        },
+        {
           type: 'supersedes',
           target: 'deprecated-aggrid',
           why: 'AGGrid is deprecated; NITRO ships brand theming and perspectives without the ag-grid peers.',

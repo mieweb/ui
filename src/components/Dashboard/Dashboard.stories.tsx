@@ -76,6 +76,72 @@ const meta: Meta = {
   tags: ['autodocs', 'scope:application-local', 'maturity:experimental'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**A Storybook-only demo — not exported from \`@mieweb/ui\`, not an API.** It shows a complete signed-in application shell assembled from library components so you can see how they fit: \`SidebarProvider\` + \`Sidebar\` (\`SidebarHeader\` / \`SidebarNav\` / \`SidebarNavItem\` / \`SidebarFooter\` / \`SidebarMobileToggle\`), a hand-rolled sticky \`<header>\` with a \`RecordButton\`-powered voice search, a \`Dropdown\` user menu and notifications, a theme toggle, then routed pages built from \`Breadcrumb\`, \`Card\` (+ \`CardStat\`-style tiles), \`Table\` + \`Pagination\`, \`DataVisNitroGrid\`, \`QuickAction\`, \`Progress\`, \`Avatar\`, \`Badge\`, form inputs (\`Input\`, \`Select\`, \`Checkbox\`, \`RadioGroup\`, \`Switch\`, \`Textarea\`, \`DateInput\`, \`PhoneInput\`) and \`AudioPlayer\` / \`AudioRecorder\`. The **All Components** story is a flat showcase of the same primitives. Copy the patterns (state ownership, page switching, shell layout) into your app; do not import anything from this folder.
+
+### Use it when
+
+- You are starting an app on \`@mieweb/ui\` and want a reference for wiring \`Sidebar\`, a header and page content together.
+- You want to eyeball many components in one theme (light/dark) at once.
+
+### Don't use it when
+
+- You need a real top bar — the demo's header is bespoke; use \`AppHeader\` in production.
+- You need a user-arrangeable dashboard — \`CustomizableDashboard\`; titled portlets — \`DashboardWidget\`; a fixed analytics page — \`ReportDashboard\`.
+- You want a spec of any single component — read that component's own docs page.
+
+### Example
+
+\`\`\`tsx
+// the shell pattern this demo illustrates (AppShell)
+const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+
+<SidebarProvider persistCollapsed={false}>
+  <div className="bg-background flex min-h-screen">
+    <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+    <div className="flex flex-1 flex-col">
+      <Header user={user} onLogout={logout} />
+      <main className="flex-1 p-4 lg:p-6">
+        <Breadcrumb items={breadcrumbsFor(currentPage)} />
+        {renderPage(currentPage)}
+      </main>
+    </div>
+  </div>
+</SidebarProvider>
+\`\`\`
+
+In a real app \`currentPage\` is the router location, not local state.
+
+### Limitations
+
+- Demo-grade: mock data, \`console.log\` handlers, in-memory "routing" and a \`loggedOut\` flag; nothing persists.
+- Accessibility checks are **disabled** (\`a11y: { test: 'off' }\`) on the Dashboard story because the embedded DataVis NITRO grid emits invalid ARIA and duplicate landmarks; do not treat the demo as an accessibility reference.
+- Uses Storybook's \`addons\` channel to flip the theme global — not something an app does.
+- Theming, RTL and i18n behaviour is whatever each composed component provides; hard-coded English throughout.`,
+      },
+    },
+    catalog: {
+      relationships: [
+        {
+          type: 'uses',
+          target: 'overlays-sidebar',
+          why: 'The AppShell wraps everything in SidebarProvider and renders Sidebar as the route rail.',
+        },
+        {
+          type: 'uses',
+          target: 'layout-card',
+          why: 'Every dashboard tile and page section in the demo is a Card.',
+        },
+        {
+          type: 'uses',
+          target: 'grids-datavis-nitro',
+          why: 'The Dashboard page embeds a DataVisNitroGrid (with DataVisNitroSource) for the sample analytics block.',
+        },
+      ],
+    },
   },
 };
 

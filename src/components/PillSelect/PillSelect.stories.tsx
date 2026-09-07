@@ -69,6 +69,11 @@ const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
           target: 'choice-inputs-select',
           why: 'PillSelect is a compact toolbar pill for one-of-N view choices; Select is a form field with label/error.',
         },
+        {
+          type: 'alternative to',
+          target: 'navigation-tabs',
+          why: 'PillSelect collapses a one-of-N view/sort choice into a single toolbar pill; Tabs expose every view as a labelled panel with tablist semantics.',
+        },
       ],
     },
   },

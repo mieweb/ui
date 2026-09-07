@@ -20,6 +20,77 @@ const meta: Meta<typeof Tabs> = {
   component: Tabs,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**Switching between peer views of the same thing** inside one page — Overview / History / Documents on a record. \`Tabs\` holds the selection (\`value\` + \`onValueChange\` controlled, or \`defaultValue\` uncontrolled) and the \`variant\` (\`underline\` | \`pills\` | \`enclosed\`); \`TabsList\` is the \`role="tablist"\` strip with arrow-key handling; each \`TabsTrigger value\` (optional \`icon\`, \`disabled\`) toggles the matching \`TabsContent value\`. Inactive panels are **unmounted** unless \`forceMount\` (then hidden with \`hidden\`). \`tabsListVariants\` / \`tabsTriggerVariants\` are exported.
+
+### Use it when
+
+- 2–7 sibling views share one context and only one needs to be visible at a time; the selection is local UI state, not a route.
+- The content of each panel is cheap enough to mount on switch, or you pass \`forceMount\` to keep expensive panels alive.
+
+### Don't use it when
+
+- The choice is **app-level navigation** across pages — \`Sidebar\` (persistent rail with routes) or \`Breadcrumb\` for position in a hierarchy.
+- The switch is a compact **filter or sort** in a toolbar — \`PillSelect\`; a value saved with a form — \`Radio\` / \`Select\`.
+- Sections should be readable one after another and several open at once — \`Accordion\` / \`Collapsible\`.
+- The steps are ordered and gated — \`StepIndicator\`.
+
+### Example
+
+\`\`\`tsx
+const [tab, setTab] = useState<'summary' | 'history' | 'files'>('summary');
+
+<Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} variant="underline">
+  <TabsList aria-label="Encounter sections">
+    <TabsTrigger value="summary" icon={<FileTextIcon size={16} />}>Summary</TabsTrigger>
+    <TabsTrigger value="history">History <Badge size="sm" variant="secondary">{events.length}</Badge></TabsTrigger>
+    <TabsTrigger value="files" disabled={!canViewFiles}>Files</TabsTrigger>
+  </TabsList>
+  <TabsContent value="summary"><EncounterSummary id={id} /></TabsContent>
+  <TabsContent value="history"><TimelineEventList events={events} /></TabsContent>
+  <TabsContent value="files" forceMount><FileGrid id={id} /></TabsContent>
+</Tabs>
+\`\`\`
+
+Controlled here so the tab can be synced to a URL query param; \`defaultValue\` alone is fine for purely local state.
+
+### Limitations
+
+- Accessibility: \`TabsList\` is \`role="tablist"\`; triggers are \`<button role="tab" aria-selected aria-controls="tabpanel-{value}" id="tab-{value}">\` with roving \`tabIndex\` (selected 0, others −1); panels are \`role="tabpanel" aria-labelledby tabIndex={0}\`. Arrow Left/Right and Up/Down move focus (wrapping), Home/End jump — but **focus does not select**: the user must press Enter/Space (manual activation). \`TabsList\` itself also has \`tabIndex={0}\`, so Tab stops once on the list before the active tab. Pass \`aria-label\` to \`TabsList\` yourself; none is set. Ids are derived from \`value\`, so two \`Tabs\` on one page with the same values produce duplicate ids.
+- No \`orientation\` prop: the list is always horizontal, though arrow keys accept both axes. No overflow handling — many tabs wrap or overflow the container; \`whitespace-nowrap\` on triggers.
+- The \`variant\` is read from context, so all triggers share one style; \`TabsContent\` adds \`mt-4\`.
+- RTL: symmetric flex; ArrowRight always moves to the *next* DOM tab, which is visually leftward in RTL.
+- Theming: semantic tokens (\`border-border\`, \`bg-muted\`, \`bg-background\`, \`text-muted-foreground\`) plus \`primary-700/800\` for the active underline. No built-in strings. Depends on \`class-variance-authority\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'overlays-sidebar',
+          why: 'Tabs switch peer views inside one page (local state); Sidebar is the persistent app navigation rail between routes.',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-pillselect',
+          why: 'Tabs expose every view as a labelled panel with tablist semantics; PillSelect collapses a one-of-N view/sort choice into a single toolbar pill.',
+        },
+        {
+          type: 'composes with',
+          target: 'layout-pageheader',
+          why: 'A TabsList in PageHeader children sits under the title as the section switcher for the page.',
+        },
+        {
+          type: 'alternative to',
+          target: 'navigation-breadcrumb',
+          why: 'Tabs switch between peer views inside one page; Breadcrumb shows the ancestor path of the current page.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {

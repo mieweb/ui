@@ -1,0 +1,105 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Layout/Overview" />
+
+# Layout
+
+> **What are you framing?** A block of related content → `Card`. Content that hides behind a
+> heading → `Accordion` (a styled stack) or `Collapsible` (one headless toggle). A region that
+> must scroll inside a fixed box → `ScrollArea`. A rule between things → `Separator`. The bar
+> across the top → `AppHeader` for the signed-in app, `SiteHeader` for the public site,
+> `PageHeader` for the title block _inside_ a page. The bottom of a public page → `SiteFooter`
+> (or `SimpleFooter`), with `ProductVersion` for the deployed version line.
+
+## Which one?
+
+| Component                                                 | Use it when                                                                                                                                                                    | Not when                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Card](?path=/docs/layout-card--docs)                     | A bordered surface you lay out yourself with `CardHeader` / `CardContent` / `CardFooter` / `CardActions`, `CardMedia`, `CardStat`; `interactive` + `selected` tiles            | A titled portlet with count and "+" — [DashboardWidget](?path=/docs/dashboards-dashboardwidget--docs); a titled list of shortcuts — [QuickLinksCard](?path=/docs/dashboards-quicklinkscard--docs)                                                                                                          |
+| [Accordion](?path=/docs/layout-accordion--docs)           | 3+ labelled sections in one stack from an `items` array; `type="single"` / `"multiple"`; `headingLevel`; animated, styled, `aria-hidden` + `inert` when closed                 | One toggle or custom trigger/panel styling — `Collapsible`; peer views the user switches between — [Tabs](?path=/docs/navigation-tabs--docs)                                                                                                                                                               |
+| [Collapsible](?path=/docs/layout-collapsible--docs)       | One headless `CollapsibleTrigger` + `CollapsibleContent`; content unmounts when closed (or `forceMount`); you bring every class                                                | A styled stack with single/multiple rules — `Accordion`; a "Show more" tail inside a Card — `CardCollapsible`                                                                                                                                                                                              |
+| [ScrollArea](?path=/docs/layout-scrollarea--docs)         | A nested region with a fixed height/width that should scroll with thin themed scrollbars; `orientation` vertical / horizontal / both                                           | The document should scroll; you need virtualisation, scroll shadows or custom thumbs                                                                                                                                                                                                                       |
+| [Separator](?path=/docs/layout-separator--docs)           | A 1px rule between blocks or inline items; `decorative={false}` for a semantic `role="separator"`                                                                              | Inside a Card edge-to-edge — `CardDivider`; in a header rail — `AppHeaderDivider`; between menu items — `DropdownSeparator`                                                                                                                                                                                |
+| [AppHeader](?path=/docs/layout-appheader--docs)           | The sticky top bar of the **signed-in app** beside a `Sidebar`: `AppHeaderBrand`, `AppHeaderTitle`, `AppHeaderSearch` (⌘K trigger), `AppHeaderIconButton`, `AppHeaderUserMenu` | A public page with nav links and Log In / Sign Up — `SiteHeader`; the title block inside the page — `PageHeader`; you need the dropdowns themselves — wrap the triggers in `Dropdown` / `NotificationCenter`                                                                                               |
+| [SiteHeader](?path=/docs/layout-siteheader--docs)         | The **fixed, brand-coloured public-site bar**: logo, `links`, `AuthButtons` ↔ `UserMenu` on `user`, built-in mobile menu; `CompactHeader` for back-button sub-pages            | The app shell with search and account triggers — `AppHeader`; router links or active-route styling — [Sidebar](?path=/docs/overlays-sidebar--docs)                                                                                                                                                         |
+| [PageHeader](?path=/docs/layout-pageheader--docs)         | The **`<h1>` title block inside a page**: `title`, `subtitle`, `icon`, `actions`, and `children` for a `Breadcrumb` or `TabsList`                                              | The app-wide bar — `AppHeader`; a record banner — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs), [CaseManagementHeader](?path=/docs/encounter-orders-casemanagementheader--docs), [ProviderDetailHeader](?path=/docs/providers-providerdetailheader--docs); a tile title — `CardTitle` |
+| [SiteFooter](?path=/docs/layout-sitefooter--docs)         | The public `<footer>`: brand, `linkGroups`, social icons, newsletter, `LegalLinks`, disclaimers; `SimpleFooter` for a one-line © strip                                         | Only a version line — `ProductVersion`; router links — every link is a plain `<a>`                                                                                                                                                                                                                         |
+| [ProductVersion](?path=/docs/layout-productversion--docs) | "Name vX.Y.Z (build) · © year author" for footers and About pages, optionally linking to a changelog; `ProductVersionBadge` for a tiny env chip                                | A generic status label — [Badge](?path=/docs/data-display-badge--docs); the whole footer — `SiteFooter`                                                                                                                                                                                                    |
+
+## How they fit together
+
+- **Three headers, three jobs.** `AppHeader` is the _application_ chrome: a sticky `<header>`
+  of slots (brand, `<h1>` title, ⌘K search button, icon buttons with badges, a user-menu
+  trigger) that sits next to a `Sidebar` and holds no navigation links of its own.
+  `SiteHeader` is the _public site_ bar: `fixed` (it renders its own 64px spacer), brand
+  colours (`primary` / `white` / `transparent` / `glass`), a `<nav>` of plain `<a>` links,
+  Log In / Sign Up or a self-contained user dropdown, and a mobile menu panel it opens and
+  closes itself. `PageHeader` is neither: it is the `<h1>` + actions block at the top of the
+  page _content_, with `children` for `Breadcrumb` and `TabsList`. Use one `AppHeader` **or**
+  `SiteHeader` per layout and one `PageHeader` per page — and mind the headings: `AppHeaderTitle`
+  and `PageHeader` both render `<h1>`, so pick one to carry the page title. The domain headers
+  ([PatientHeader](?path=/docs/encounter-orders-patientheader--docs),
+  [CaseManagementHeader](?path=/docs/encounter-orders-casemanagementheader--docs),
+  [ProviderDetailHeader](?path=/docs/providers-providerdetailheader--docs)) are record banners
+  that go _below_ the app chrome where a `PageHeader` would otherwise sit.
+- **Accordion vs. Collapsible.** Both wire `aria-expanded` / `aria-controls` on a native button
+  and `role="region"` + `aria-labelledby` on the panel. `Accordion` is the finished product:
+  data-driven `items`, `single` / `multiple` with `collapsible`, controlled `openIds`, a
+  heading level for the outline, grid-rows animation, and closed panels kept mounted but
+  `aria-hidden` + `inert`. `Collapsible` is the raw mechanism: one trigger, one panel, no
+  classes, no animation, and the panel **unmounts** when closed unless `forceMount`. Reach
+  for `Collapsible` when you have exactly one toggle or need to own the markup; reach for
+  `Accordion` when you have a stack. `CardCollapsible` is a third, narrower thing: the inline
+  "Show more / Show less" tail of a `Card`, with `aria-expanded` but no `aria-controls` and no
+  `inert`.
+- **Card vs. DashboardWidget.** `DashboardWidget` _is_ a `Card` (`padding="none"`) with a fixed
+  header (icon, upper-case title, count pill, "+" button) and four body components; it exists
+  so portlet grids look uniform and so `CustomizableDashboard` can find its header
+  (`data-slot="dashboard-widget-header"`) to attach a drag handle. Use `Card` when you need
+  media, selection, custom headers or non-dashboard layouts; use `DashboardWidget` when the
+  tile is a portlet. `QuickLinksCard` and `ReportDashboard` are also built on `Card`.
+- **Public page frame.** `SiteHeader` and `SiteFooter` share the `logo` shape and the
+  light/dark colour switch (`primary` / `dark` variants flip text to white). `ProductVersion`
+  drops beside `SimpleFooter`'s `CopyrightText`; do not render two © lines.
+- **Small parts.** `Separator` is the general rule; `CardDivider` (bleeds to the Card edge) and
+  `AppHeaderDivider` (header spacing) are the specialised ones. `ScrollArea` gives any
+  fixed-height `CardContent`, Sheet body or sidebar panel a themed scrollbar — it is the only
+  Layout component with a `tabIndex`.
+
+## Shared limitations
+
+- **Landmarks and labels.** `AppHeader`, `SiteHeader`, `CompactHeader` and `SiteFooter` render
+  unlabelled `<header>` / `<footer>` landmarks; `SiteHeader`'s desktop `<nav>` is labelled
+  "Main navigation" (English, only overridable on the `NavLinks` piece) and its mobile `<nav>`
+  and `LegalLinks` `<nav>` are unlabelled. `ScrollArea` is an unnamed `role="region"` until you
+  pass `aria-label`. `PageHeader` is a `div`, not a `<header>`.
+- **Headings.** `AppHeaderTitle`, `PageHeader`, `CompactHeader` and `ReportDashboard` all emit
+  `<h1>`; `CardTitle` defaults to `h3` (`as` to change), `Accordion` to `h3` (`headingLevel`),
+  `SiteFooter` link-group titles are fixed `h3`.
+- **Popups are triggers only or under-specified.** `AppHeaderUserMenu` / `AppHeaderIconButton`
+  just fire `onClick` (no `aria-haspopup` / `aria-expanded`); `SiteHeader`'s `UserMenu` popup
+  has `aria-expanded` / `aria-haspopup` but no `role="menu"`, arrow keys, Escape or focus
+  management, and `MobileMenuPanel` has no dialog role, focus trap or scroll lock.
+- **Keyboard.** Everything relies on native `<button>` / `<a>`; `Accordion` has no arrow-key
+  header navigation; `Card` `interactive` is style-only (bring `role`, `tabIndex`,
+  `onKeyDown`); `Separator` is never focusable.
+- **RTL.** Mostly logical: `Card` accent / `CardBadge` / `ps-4`, `AppHeader` sections
+  (`me-auto` / `ms-auto`), `Accordion` `text-start`. Physical exceptions: `SiteHeader` dropdown
+  and mobile panel `right-0`, external-link icons `ml-1`, `CompactHeader` back chevron,
+  `ProductVersion` `minimal` `ml-1`, `SiteFooter` `sm:text-left`, `CardActions align`
+  names (`left` / `right`), `CardMedia` / `CardDivider` `-mx-4` assuming `padding="md"`.
+- **Theming.** `Card`, `Accordion`, `Collapsible`, `ScrollArea` and `Separator` use semantic
+  tokens (`bg-card`, `border-border`, `bg-muted`, `text-muted-foreground`). `AppHeader`,
+  `SiteHeader`, `SiteFooter`, `PageHeader` and `ProductVersion` hard-code `white` / `gray-*` /
+  `yellow` / `blue` / `green` / `red` with `dark:` variants and use brand tokens only for
+  `primary-*` accents. `PageHeader` and `QuickLinksCard` concatenate class strings without
+  `cn`, so `className` cannot merge-override.
+- **i18n.** `Card` (`"Show more"` / `"Show less"`), `AppHeader` (`"Search..."`, ⌘/Ctrl decided
+  at module load), `SiteHeader` (`"Log In"`, `"Sign Up"`, `"Log Out"`, `"Profile"`,
+  `"Settings"`, `"Menu"`, `"Toggle menu"`, `"Close menu"`), `SiteFooter` (newsletter copy,
+  legal labels, the 911 sentence, default company name) and `ProductVersion` (`"Build:"`, `©`,
+  `•`, `v`) ship hard-coded English with no locale formatting. `Accordion`, `Collapsible`,
+  `ScrollArea`, `Separator` and `PageHeader` have no strings.
+- **Dependencies.** `class-variance-authority` (`Card`, `Accordion`, `ScrollArea`, `Separator`,
+  `SiteHeader`, `SiteFooter`); `lucide-react` (`Accordion` chevron). Everything else is
+  inline SVG or dependency-free.
