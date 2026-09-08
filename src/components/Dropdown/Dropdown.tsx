@@ -944,9 +944,11 @@ function DropdownSubmenu({
   >({ open, placement: 'right-start', offset: 4 });
 
   // Let the root dropdown treat clicks inside the portaled flyout as "inside"
-  // so they don't dismiss the whole menu.
+  // so they don't dismiss the whole menu. Layout effect so the registration
+  // flushes before the browser can deliver the next mousedown/touchstart —
+  // a passive effect could lose a fast open-then-click race.
   const registerOutsideRef = dropdownContext?.registerOutsideRef;
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (!open || !registerOutsideRef) return;
     return registerOutsideRef(floatingRef);
   }, [open, registerOutsideRef, floatingRef]);
