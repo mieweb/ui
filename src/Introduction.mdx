@@ -698,11 +698,11 @@ That's the whole flow — `pnpm install && pnpm storybook`. A `prestorybook` hoo
 
 `@mieweb/ui`'s Storybook integrates three sibling MIE projects, each sourced differently:
 
-- **DataVis NITRO** — npm package `@mieweb/datavis`. _No build step:_ consumed as a published package (not a submodule). Powers the DataVis NITRO data-grid stories.
+- **DataVis NITRO** — git submodule `packages/datavis`. _Built automatically_ by the `prestorybook` hook (`npm run build:datavis`) before Storybook starts; rebuilds only when its artifacts are missing. Powers the DataVis NITRO data-grid stories.
 - **eSheet** — git submodule `packages/esheet`. _Built automatically_ by the `prestorybook` hook (nx) before Storybook starts; rebuilds only when its artifacts are missing. The form builder/renderer toolkit.
 - **YChart** — git submodule `packages/ychart`. _No build step:_ the story imports it directly from source via a relative dynamic import; Storybook's Vite config supplies a `virtual:git-info` plugin, a `__YCHART_VERSION__` define, and dependency pre-bundling (`optimizeDeps`). Org-chart / visualization toolkit.
 
-> **Heads up:** DataVis NITRO is consumed from the published `@mieweb/datavis` npm package — it is not a git submodule, and a fresh clone does not build DataVis from source.
+> **Heads up:** DataVis NITRO now lives in the `packages/datavis` git submodule and is built from source on first Storybook run. Use `--recurse-submodules` (or run `git submodule update --init --recursive`) so a fresh clone can build it.
 
 ### Common Commands
 
