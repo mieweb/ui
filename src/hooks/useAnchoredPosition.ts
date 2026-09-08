@@ -170,7 +170,9 @@ export function useAnchoredPosition<
     // preferred side is cramped, align vertically (-start = top edges,
     // -end = bottom edges, bare = centered), and clamp to the boundary.
     if (placement.startsWith('left') || placement.startsWith('right')) {
-      const contentWidth = floating.offsetWidth;
+      // Use floatingWidth (not raw offsetWidth) so matchWidth/matchMinWidth
+      // factor into the flip decision, same as the vertical branch.
+      const contentWidth = floatingWidth;
       const spaceRight = rightLimit - rect.right - offset;
       const spaceLeft = rect.left - leftLimit - offset;
       const preferLeft = placement.startsWith('left');
@@ -212,6 +214,8 @@ export function useAnchoredPosition<
         ...(hSide === 'left'
           ? { right: viewportWidth - rect.left + offset }
           : { left: rect.right + offset }),
+        ...(matchWidth ? { width: rect.width } : {}),
+        ...(matchMinWidth ? { minWidth: rect.width } : {}),
         maxWidth: sideWidth,
         maxHeight: Math.min(boundaryHeight, maxHeight ?? Infinity),
         zIndex: 9999,
