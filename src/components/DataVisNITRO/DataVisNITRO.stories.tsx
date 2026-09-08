@@ -64,7 +64,7 @@ const meta: Meta<typeof DataVisNitroGrid> = {
       description: {
         component:
           'Source: [mieweb/datavis](https://github.com/mieweb/datavis) (the `@mieweb/datavis` package), built on the [mieweb/wcdatavis](https://github.com/mieweb/wcdatavis) DataVis ACE engine (`datavis-ace`).\n\n' +
-          "React wrapper around the `@mieweb/datavis` package. `<DataVisNitroSource>` creates a datavis source/view pair using that library and `<DataVisNitroGrid>` renders that view through DataVis NITRO's React `DataGrid` and `TableRenderer`.",
+          '`<DataVisNitroSource>` and `<DataVisNitroGrid>` are implemented by `@mieweb/datavis` and re-exported through `@mieweb/ui/datavis`, the supported consumer entry point.',
       },
     },
   },
@@ -142,7 +142,7 @@ export const Operations: Story = {
     docs: {
       description: {
         story:
-          'Passing an `operations` array surfaces the operations palette above the table. Each entry has a `label`, optional `icon` and `category`, and a `callback` that receives the current selection context (`ctx.rows`). Use it to wire row actions such as edit, delete, or export.',
+          'Passing an `operations` array surfaces the operations palette in the controls region. Each entry has a `label`, optional `icon` and `category`, and a `callback` that receives the current selection context (`ctx.rows`). Use it to wire row actions such as edit, delete, or export.',
       },
     },
   },
@@ -152,6 +152,8 @@ export const Operations: Story = {
         title="Employees"
         columns={EMPLOYEE_COLUMNS}
         height="420px"
+        mode="full"
+        showControls
         operations={[
           {
             label: 'Edit',
