@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Download, Pencil, Trash2 } from 'lucide-react';
 import {
   GridAssistant,
   type GridAssistantColumn,
@@ -131,6 +132,46 @@ export const WithControls: Story = {
         ]}
         showControls
         height="480px"
+      />
+    </DataVisNitroSource>
+  ),
+};
+
+export const Operations: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Passing an `operations` array surfaces the operations palette above the table. Each entry has a `label`, optional `icon` and `category`, and a `callback` that receives the current selection context (`ctx.rows`). Use it to wire row actions such as edit, delete, or export.',
+      },
+    },
+  },
+  render: () => (
+    <DataVisNitroSource type="http" url="/sample-data.json">
+      <DataVisNitroGrid
+        title="Employees"
+        columns={EMPLOYEE_COLUMNS}
+        height="420px"
+        operations={[
+          {
+            label: 'Edit',
+            category: 'Actions',
+            icon: <Pencil className="h-4 w-4" />,
+            callback: (ctx) => window.alert(`Edit ${ctx.rows.length} row(s)`),
+          },
+          {
+            label: 'Delete',
+            category: 'Actions',
+            icon: <Trash2 className="h-4 w-4" />,
+            callback: (ctx) => window.alert(`Delete ${ctx.rows.length} row(s)`),
+          },
+          {
+            label: 'Export',
+            category: 'Export',
+            icon: <Download className="h-4 w-4" />,
+            callback: () => window.alert('Exporting…'),
+          },
+        ]}
       />
     </DataVisNitroSource>
   ),
