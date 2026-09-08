@@ -553,8 +553,8 @@ interface MessageOverflowMenuProps {
   actions: MessageAction[];
   /**
    * Whether the footer action bar is currently in view. While it is, the
-   * overflow trigger hides on fine pointers (the footer already offers the
-   * actions); coarse pointers always show both.
+   * overflow trigger hides (the footer already offers the actions); it
+   * reappears — floating — once the footer scrolls out of view mid-message.
    */
   footerVisible: boolean;
 }
@@ -588,12 +588,10 @@ function MessageOverflowMenu({
         // Rich content (e.g. NITRO tables) layers internals up to z-50, so the
         // open menu's stacking context must clear that.
         open ? 'z-[60]' : 'z-10',
-        // Hand off to the footer bar when it's visible (desktop only).
-        // `invisible` (not just opacity) drops the hidden button from the tab
-        // order so keyboard users can't focus an unseen control.
-        footerVisible &&
-          !open &&
-          'pointer-events-none invisible opacity-0 [@media(pointer:coarse)]:pointer-events-auto [@media(pointer:coarse)]:visible [@media(pointer:coarse)]:opacity-100'
+        // Hand off to the footer bar when it's visible. `invisible` (not
+        // just opacity) drops the hidden button from the tab order so
+        // keyboard users can't focus an unseen control.
+        footerVisible && !open && 'pointer-events-none invisible opacity-0'
       )}
     >
       <Dropdown
@@ -746,11 +744,13 @@ export const MessageRow = React.memo(function MessageRow({
   });
 
   // Hand-off between the footer action bar and the sticky overflow (⋯): the
-  // overflow only shows (on fine pointers) while the footer bar is scrolled
-  // out of view. Clipping by the scrollable thread counts as "not
-  // intersecting", so the default viewport root is sufficient.
+  // overflow only shows while the footer bar is scrolled out of view.
+  // Clipping by the scrollable thread counts as "not intersecting", so the
+  // default viewport root is sufficient. Starts optimistic (footer assumed
+  // visible) so rows freshly mounted by the virtualized thread don't flash
+  // the overflow before the observer's first callback.
   const actionsBarRef = React.useRef<HTMLDivElement>(null);
-  const [footerVisible, setFooterVisible] = React.useState(false);
+  const [footerVisible, setFooterVisible] = React.useState(true);
   React.useEffect(() => {
     const el = actionsBarRef.current;
     if (!el || typeof globalThis.IntersectionObserver === 'undefined') return;

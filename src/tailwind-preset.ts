@@ -546,8 +546,6 @@ export const miewebUISafelist = [
   // SuperChat message actions (footer bar + sticky overflow menu) — arbitrary
   // touch-pointer variants and stacking above rich content (z-50 internals).
   '[@media(pointer:coarse)]:opacity-100',
-  '[@media(pointer:coarse)]:pointer-events-auto',
-  '[@media(pointer:coarse)]:visible',
   'z-[60]',
   // Dropdown submenu flyout — preferred width clamped to the viewport.
   'min-w-[min(10rem,calc(100vw-1rem))]',
