@@ -2,22 +2,64 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SourceTip } from './SourceTip';
 
 const meta: Meta<typeof SourceTip> = {
-  title: 'Components/Overlays & Popups/SourceTip',
+  id: 'overlays-sourcetip',
+  title: 'Components/Overlays/SourceTip',
   component: SourceTip,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'A hover card answering "what backs this claim?" — an eyebrow + heading, optional ' +
-          'free-text provenance, and one-line source links. Use it where a numbered footnote ' +
-          'would be overkill: stat tiles, table cells, inline facts. Trigger and card are ' +
-          'phrasing content, so it is valid inside prose and table cells; the card portals ' +
-          'to body and stays inside the viewport. On touch, a tap pins the card.',
+        component: `### What it's for
+
+A hover card answering "what backs this claim?" — an \`eyebrow\` ("Source") + \`heading\`, optional free-text \`note\`, and one-line \`sources\` links. Use it where a numbered footnote would be overkill: stat tiles, table cells, inline facts. Trigger and card are phrasing content, so it is valid inside prose and table cells; the card portals to body and stays inside the viewport. The sibling of \`GlossaryTooltip\` ("what does this mean?"): hover previews, a touch tap pins, Escape or an outside tap closes and returns focus.
+
+### Use it when
+
+- A number, date or statement is derived and readers may ask where it came from (a KPI tile, an AI-generated summary line, a regulatory threshold).
+- You want provenance available on demand without cluttering the layout.
+
+### Don't use it when
+
+- Defining a term — \`GlossaryTooltip\`.
+- The note is a plain label — \`Tooltip\`.
+- Provenance must always be visible (compliance documents): render it inline instead.
+
+### Example
+
+\`\`\`tsx
+<SourceTip
+  heading="12 open orders"
+  note="Counts orders in status Pending or Scheduled as of the last sync."
+  sources={[{ label: 'Orders API', sub: 'GET /orders?status=open', url: docsUrl }]}
+>
+  12
+</SourceTip>
+\`\`\`
+
+### Limitations
+
+- Pinned card is a non-modal dialog with focus moved inside; not reachable by keyboard until the trigger is focused.
+- Sources are one-line each; long provenance belongs in a linked page.
+- \`eyebrow\` defaults to English "Source".`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'overlays-tooltip',
+          why: 'Tooltip holds a few words and no links; SourceTip lists clickable sources.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-glossarytooltip',
+          why: 'GlossaryTooltip defines a term; SourceTip cites the evidence behind a claim.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     heading: {
       description: "The claim the card explains — the card's heading.",

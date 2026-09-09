@@ -1,7 +1,7 @@
 import { Meta, Markdown } from '@storybook/addon-docs/blocks';
 import rawReadme from './README.md?raw';
 
-<Meta title="Product/Feature Modules/SuperChat/Overview" />
+<Meta title="Modules/SuperChat/Overview" />
 
 {/*
   Single source of truth: this page renders the consumer README verbatim so the
@@ -38,3 +38,14 @@ export const readme = rawReadme.replace(
 );
 
 <Markdown>{readme}</Markdown>
+
+## In this section
+
+| Component                                                              | Use it when                                                                             | Not when                                                                           |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [Inbox](?path=/docs/superchat-inbox--docs)                             | You want list + panel with selection and the mobile master/detail switch handled        | You need a different arrangement — compose the two parts below                     |
+| [SuperChat (Panel)](?path=/docs/superchat-superchat-panel--docs)       | You already know which conversation to show, or you lay out list and panel yourself     | One user ↔ one assistant with plain text — [AIChat](?path=/docs/chat-aichat--docs) |
+| [Conversations (List)](?path=/docs/superchat-conversations-list--docs) | You need the switcher on its own (a rail, a drawer) and open the conversation elsewhere | Human-to-human lists with presence — Messaging's `ConversationListItem`            |
+
+Related families: [Chat](?path=/docs/modules-chat-overview--docs) (the `AIChat` /
+`Messaging` pieces SuperChat composes) and [Voice](?path=/docs/modules-voice-overview--docs).

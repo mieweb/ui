@@ -510,7 +510,9 @@ function YChartWrapper({
 // ============================================================================
 
 const meta: Meta<typeof YChartWrapper> = {
-  title: 'Product/Feature Modules/YChart',
+  id: 'data-display-ychart',
+  title: 'Components/Data display/YChart',
+  tags: ['autodocs', 'scope:application-local', 'maturity:experimental'],
   component: YChartWrapper,
   render: (args, context) => (
     <YChartWrapper
@@ -522,9 +524,48 @@ const meta: Meta<typeof YChartWrapper> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'YChart is a flexible organizational chart editor with YAML-based data management. It renders interactive hierarchical charts using D3.',
+        component: `### What it's for
+
+**Storybook demo only — YChart is not exported from \`@mieweb/ui\`.** There is no React component, no \`index.ts\` and no build entry for it; the folder contains only this story (see \`src/components/YChart/MAINTAINERS.md\`). The engine is a vanilla, non-React \`YChartEditor\` class in the \`packages/ychart\` git submodule; the story dynamically imports \`packages/ychart/src/ychartEditor\` and hand-rolls a wrapper that calls \`initView(container, yaml)\` on mount and \`destroy()\` on unmount. It renders a **YAML-driven organisational chart** (D3 hierarchy of person cards with a \`supervisor\` field) beside a CodeMirror YAML editor; options are \`nodeWidth\`, \`nodeHeight\`, \`collapsible\`, \`editorTheme\`, \`toolbarPosition\`.
+
+### Use it when
+
+- You are evaluating whether an org-chart / hierarchy editor belongs in a product and want to see the submodule's behaviour under the Storybook theme toolbar.
+- You are working on the \`ychart\` submodule and need a quick visual harness.
+
+### Don't use it when
+
+- You need charting in an application — the shipped option is \`DataVisNitroGraph\` (\`@mieweb/ui/datavis\`), or \`Sparkline\` for inline trends. Neither draws hierarchies; a real org chart would need YChart promoted to a component first.
+- You need a hierarchical *list* — \`TableOfContents\` nests headings; a tree view is not in the catalog.
+
+### Example
+
+There is nothing to import. If you must prototype against the engine, mirror the story's wrapper:
+
+\`\`\`tsx
+const mod = await import('../../../packages/ychart/src/ychartEditor'); // requires the submodule
+const editor = new mod.default({ collapsible: true, editorTheme: 'light', toolbarPosition: 'bottomleft' });
+editor.initView(containerEl, yamlString);
+// …on unmount:
+editor.destroy?.();
+\`\`\`
+
+### Limitations
+
+- Not shipped: the dynamic import 404s unless \`git submodule update --init --recursive\` has been run. The wrapper's \`useEffect\` re-creates the editor on every option change.
+- Accessibility is **patched after the fact** by the story: it walks the generated DOM to add \`aria-hidden\` to icon SVGs, copy tooltips into \`aria-label\`s, label the CodeMirror region and the "Show/Hide YAML editor" toggle — the engine itself emits none of this, and the patch re-runs only on click.
+- Theming is bespoke: the story bridges light/dark by overriding the engine's inline colours with \`[data-ychart-story-root][data-yc-theme]\` CSS and \`!important\`; \`--mieweb-*\` tokens are not used. The story also forces \`html, body, #storybook-root { overflow: hidden }\`.
+- No RTL handling, no i18n (engine strings are English), no React props contract — everything above is the demo wrapper's API, not a library API.`,
       },
+    },
+    catalog: {
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'grids-datavis-nitro-graph',
+          why: 'DataVisNitroGraph is the shipped, token-themed chart over a DataVisNitroSource; YChart is an unexported org-chart demo from the ychart submodule.',
+        },
+      ],
     },
   },
   argTypes: {

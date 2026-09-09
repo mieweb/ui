@@ -5,9 +5,10 @@ import {
 } from './ProviderSettings';
 
 const meta: Meta<typeof ProviderSettings> = {
-  title: 'Product/Provider/ProviderSettings',
+  id: 'providers-providersettings',
+  title: 'BlueHive/Providers/ProviderSettings',
   component: ProviderSettings,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

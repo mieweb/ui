@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   Dropdown,
   DropdownItem,
+  DropdownSubmenu,
   DropdownSeparator,
   DropdownLabel,
 } from './Dropdown';
@@ -69,12 +70,85 @@ function SearchableMultiSelectStoryDemo() {
 }
 
 const meta: Meta<typeof Dropdown> = {
-  title: 'Components/Forms & Inputs/Dropdown',
+  id: 'choice-inputs-dropdown',
+  title: 'Inputs/Choice inputs/Dropdown',
   component: Dropdown,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+An **action menu** anchored to any \`trigger\` element: the trigger is cloned with \`aria-haspopup="menu"\` / \`aria-expanded\` / \`aria-controls\`, and the panel (portaled, \`useAnchoredPosition\`, \`placement\`, \`width\` \`auto\` | \`trigger\` | px) renders a \`<div role="menu">\`. Children are the folder's building blocks: \`DropdownItem\` (\`<button role="menuitem">\`, \`icon\`, \`variant="danger"\`, \`onClick\`), \`DropdownSeparator\`, \`DropdownLabel\`, \`DropdownHeader\` (avatar/title/subtitle) and \`DropdownContent\` (padding wrapper). Open state is uncontrolled or controlled (\`open\` + \`onOpenChange\`). \`searchable\` adds a filter box over item text (\`searchText\` for extra keywords); \`multiSelect\` turns items with a \`value\` into \`role="menuitemcheckbox"\` rows driven by \`selectedValues\` / \`defaultSelectedValues\` / \`onSelectedValuesChange\`, with an optional \`showSelectAll\` row.
+
+### Use it when
+
+- The items **do something** — Edit, Duplicate, Delete, Sign out — or navigate; a user/account menu behind an avatar.
+- Row-level "⋯" actions in tables and cards.
+- A filter menu where several boxes can be ticked without leaving the page (\`multiSelect\`).
+
+### Don't use it when
+
+- The user is picking **a value** that a form will save — \`Select\` (labelled combobox/listbox, error/helper text, single or \`multiple\`).
+- The user types to find an item in a large or remote list — \`Autocomplete\`.
+- The user wants to search and run commands globally (⌘K) — \`CommandPalette\`.
+- The menu has one item — just a \`Button\`.
+
+### Example
+
+\`\`\`tsx
+const [open, setOpen] = useState(false);
+
+<Dropdown open={open} onOpenChange={setOpen} placement="bottom-end"
+  trigger={<Button variant="ghost" aria-label="Order actions">⋯</Button>}>
+  <DropdownContent>
+    <DropdownItem icon={<PencilIcon />} onClick={() => { setOpen(false); edit(order); }}>Edit</DropdownItem>
+    <DropdownItem onClick={() => { setOpen(false); duplicate(order); }}>Duplicate</DropdownItem>
+    <DropdownSeparator />
+    <DropdownItem variant="danger" onClick={() => { setOpen(false); remove(order); }}>Delete</DropdownItem>
+  </DropdownContent>
+</Dropdown>
+\`\`\`
+
+Choosing an item does **not** close the menu by itself — close it from \`onClick\` (as above) or leave it open for \`multiSelect\`.
+
+### Limitations
+
+- Accessibility: \`role="menu"\` with \`role="menuitem"\` / \`role="menuitemcheckbox"\` (\`aria-checked\`, \`"mixed"\` for indeterminate) buttons; the trigger gets \`aria-haspopup="menu"\`, \`aria-expanded\`, \`aria-controls\`. **No arrow-key navigation, Home/End or typeahead** — items are reached with Tab; Escape and outside click close (via \`useEscapeKey\` / \`useClickOutside\`). Focus is not moved into the menu on open unless \`searchable\` (then the search input is focused) and is not returned to the trigger on close.
+- Selecting an item does not close the menu; the consumer must call \`onOpenChange(false)\` or control \`open\`.
+- \`searchable\` filtering inspects rendered children (\`getNodeText\` + \`searchText\`) — it only understands \`DropdownItem\`, \`DropdownContent\`, \`DropdownSeparator\`, \`DropdownLabel\`, \`DropdownHeader\` and fragments; arbitrary wrappers are filtered by their nested children.
+- Not a form control: no \`name\`, nothing submits; \`multiSelect\` values live in state only.
+- Strings default to English but are props: \`searchPlaceholder\` ("Search..."), \`searchAriaLabel\` ("Search dropdown items"), \`searchEmptyState\` ("No results found"), \`selectAllLabel\` ("Select all").
+- RTL: \`placement\` uses logical \`start\` / \`end\`, but item text is \`text-left\`. Theming: panel and items use hard-coded \`neutral-*\` / \`red-*\` palette classes with \`dark:\` variants, not semantic tokens; the checkbox glyph uses \`primary-*\`. Depends on \`Input\`'s \`inputVariants\` for the search box.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-select',
+          why: 'Dropdown runs actions from a menu (role="menu"); Select picks a value into a form (role="combobox"/listbox).',
+        },
+        {
+          type: 'alternative to',
+          target: 'navigation-commandpalette',
+          why: 'Dropdown is a short anchored menu for one context; CommandPalette searches and runs commands app-wide from a keyboard shortcut.',
+        },
+        {
+          type: 'uses',
+          target: 'text-inputs-input',
+          why: 'The searchable variant styles its filter box with inputVariants from Input.',
+        },
+        {
+          type: 'alternative to',
+          target: 'chat-composermodelselector',
+          why: 'Dropdown holds arbitrary menu items; ComposerModelSelector adds provider grouping, a filter strip and an effort drill-down for LLM choice.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     placement: {
       control: 'select',
@@ -110,6 +184,42 @@ export const Default: Story = {
       </DropdownItem>
     </Dropdown>
   ),
+};
+
+export const WithSubmenu: Story = {
+  render: () => (
+    <Dropdown trigger={<Button>Export</Button>}>
+      <DropdownItem onClick={() => console.warn('Copy clicked')}>
+        Copy
+      </DropdownItem>
+      <DropdownSubmenu label="Copy as">
+        <DropdownItem onClick={() => console.warn('Rich text clicked')}>
+          Rich text
+        </DropdownItem>
+        <DropdownItem onClick={() => console.warn('Markdown clicked')}>
+          Markdown
+        </DropdownItem>
+        <DropdownItem onClick={() => console.warn('Plain text clicked')}>
+          Plain text
+        </DropdownItem>
+      </DropdownSubmenu>
+      <DropdownSeparator />
+      <DropdownItem
+        variant="danger"
+        onClick={() => console.warn('Delete clicked')}
+      >
+        Delete
+      </DropdownItem>
+    </Dropdown>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A `DropdownSubmenu` opens a nested flyout on hover, click, or ArrowRight; ArrowLeft/Escape closes just the flyout.',
+      },
+    },
+  },
 };
 
 export const WithIcons: Story = {

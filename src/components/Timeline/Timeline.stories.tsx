@@ -62,16 +62,80 @@ function TimelineProgressWrapper({
 }
 
 const progressMeta: Meta<typeof TimelineProgressWrapper> = {
-  title: 'Components/Text & Data Display/Timeline',
+  id: 'data-display-timeline',
+  title: 'Components/Data display/Timeline',
   component: TimelineProgressWrapper,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component:
-          'A horizontal timeline progress indicator showing order/workflow steps.',
+        component: `### What it's for
+
+Three read-only views of **where a workflow is and what has happened**:
+
+- \`TimelineProgress\` — a horizontal milestone track. \`steps: TimelineStep[]\` (\`{ key, label, description?, completedAt?, hidden?, error? }\`) and \`currentStep\` (a key) derive each step's state (\`completed\` / \`current\` / \`pending\` / \`error\`, exported as \`TimelineStepState\`); \`showTimestamps\` prints \`completedAt\` above the dots, \`size\` is \`sm\` | \`md\` | \`lg\`, \`pulse\` animates the current dot.
+- \`TimelineEventList\` — a vertical activity feed. \`events: TimelineEvent[]\` (\`{ id, type, title, content?, author?, timestamp }\`, \`type\` ∈ message | status | attachment | assignment | note picks the icon/colour); \`relativeTime\` switches to "5m ago" for the last week.
+- \`OrderConfirmation\` — a fixed, pre-written success dialog ("Order Submitted!", optional \`orderNumber\`, \`message\`) controlled by \`open\` / \`onClose\`.
+
+### Use it when
+
+- The user is **watching** a process advance (order submitted → scheduled → results) and cannot jump between stages — \`TimelineProgress\`.
+- A record needs its history of messages, status changes and assignments in one column — \`TimelineEventList\`.
+- A BlueHive order flow needs the standard confirmation overlay — \`OrderConfirmation\`.
+
+### Don't use it when
+
+- The user **drives** the steps (a wizard, a form in stages) — \`StepIndicator\` renders clickable steps with \`aria-current="step"\`; \`OnboardingWizard\` supplies the whole flow.
+- You need a percentage or a loading bar — \`Progress\`.
+- The confirmation needs custom content, sizes or focus management — compose \`Modal\`; \`OrderConfirmation\` has one button and fixed copy.
+- Events need avatars, grouping by day, pagination or "load more" — this list renders everything it is given, flat.
+
+### Example
+
+\`\`\`tsx
+const { data: order } = useOrder(id);
+
+<TimelineProgress
+  steps={[
+    { key: 'submitted', label: 'Submitted', completedAt: order.submittedAt },
+    { key: 'scheduled', label: 'Scheduled', completedAt: order.scheduledAt },
+    { key: 'completed', label: 'Completed', error: order.status === 'failed' },
+    { key: 'results', label: 'Results', hidden: !order.hasResults },
+  ]}
+  currentStep={order.stage}
+/>
+
+<TimelineEventList events={order.events} relativeTime />
+
+<OrderConfirmation open={justSubmitted} onClose={() => setJustSubmitted(false)} orderNumber={order.number} />
+\`\`\`
+
+All three are stateless; the host maps its domain model to steps/events and owns the \`open\` flag.
+
+### Limitations
+
+- Accessibility: \`TimelineProgress\` is \`role="progressbar"\` with \`aria-valuenow\` = current index + 1, \`aria-valuemin={1}\`, \`aria-valuemax\` = visible steps and a hard-coded \`aria-label="Timeline progress"\`; the individual step labels are plain text (no list semantics, no \`aria-current\`). \`TimelineEventList\` has no list roles; timestamps are \`<time>\` elements **without \`dateTime\`**. \`OrderConfirmation\` is \`role="dialog" aria-modal\` labelled by its title but has **no focus trap, no focus move on open, no Escape handling and no scroll lock** — it is not a \`Modal\`.
+- \`TimelineEvent.authorAvatar\` and \`metadata\` are accepted but **never rendered**. Unknown \`currentStep\` keys make every step \`pending\`.
+- i18n: dates go through \`toLocaleDateString(undefined, …)\` (browser locale), but "Just now", "Nm/Nh/Nd ago", "by {author}", "No activity yet.", "Order Submitted!", "Order #" and the default confirmation \`message\` are hard-coded English. Step labels are rendered with CSS \`capitalize\`.
+- RTL: the progress track is symmetric flex, but \`TimelineEventList\`'s connector line is physical \`left-5\` and will sit on the wrong side.
+- Theming: completed/current states use \`primary-*\`; event-type colours are hard-coded \`blue|green|purple|orange|neutral-*\`, the error state \`red-*\`, and the dialog surface \`bg-white dark:bg-neutral-800\`. No dependencies beyond \`cn\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'navigation-stepindicator',
+          why: 'TimelineProgress shows the status of a process the user watches; StepIndicator has clickable steps for a flow the user drives.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-modal',
+          why: 'OrderConfirmation is a fixed one-button success overlay without focus management; Modal is the general dialog with slots, focus trap and scroll lock.',
+        },
+      ],
     },
   },
   argTypes: {

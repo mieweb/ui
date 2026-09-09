@@ -5,22 +5,66 @@ import { FreshnessBadge, FreshnessDot } from './FreshnessBadge';
 const daysAgo = (n: number) => DateTime.now().minus({ days: n }).toISODate()!;
 
 const meta: Meta<typeof FreshnessBadge> = {
-  title: 'Components/Data Display/FreshnessBadge',
+  id: 'data-display-freshnessbadge',
+  title: 'Components/Data display/FreshnessBadge',
   component: FreshnessBadge,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'A recency chip that ages from success through warning to destructive — "Reviewed ' +
-          '12d ago". Thresholds are configurable per use (default 90/180 days), so the same ' +
-          'component covers source-registry review ages, sync statuses, and data-quality ' +
-          'freshness. `FreshnessDot` is the compact variant for table cells; `freshnessLevel` ' +
-          'and `daysSince` are exported for host logic.',
+        component: `### What it's for
+
+A **recency chip whose colour is computed, not chosen**: give it a \`date\` (ISO string or \`Date\`) and it renders "Reviewed 12d ago" bucketed into \`fresh\` → \`aging\` → \`stale\` (success → warning → destructive) by \`thresholds: { fresh, aging }\` in days (default 90 / 180). Unparseable dates render \`unknown\` (muted, "date unknown") rather than pretending. \`label\` swaps the verb ("Synced", "Updated"). \`FreshnessDot\` is the 8px \`role="img"\` variant for table cells and tooltip rows; \`freshnessLevel(date, thresholds)\` and \`daysSince(date)\` are exported so the host can sort or filter by the same buckets.
+
+### Use it when
+
+- Staleness is the signal: last review of a source, last sync of an integration, last update of a data-quality metric — anywhere the reader should notice that a date is getting old.
+- Many rows need the same ageing rule; set \`thresholds\` once per use and every chip agrees.
+
+### Don't use it when
+
+- The state is a **category** the host already knows ("Active", "Draft") — \`Badge\` with a \`variant\`.
+- The number is a **count** the user clicks — \`CountBadge\`.
+- You need the full date, a timezone, or "in 3 days" (future) — this renders only \`today\` / \`yesterday\` / \`Nd ago\` and clamps future dates to 0 days; render the date with \`Text\` or your date formatter.
+
+### Example
+
+\`\`\`tsx
+const SYNC_THRESHOLDS = { fresh: 1, aging: 7 };
+
+<td><FreshnessBadge date={source.lastSyncedAt} label="Synced" thresholds={SYNC_THRESHOLDS} /></td>
+
+// Sort stale rows first using the same buckets
+const order = { stale: 0, unknown: 1, aging: 2, fresh: 3 };
+rows.sort((a, b) => order[freshnessLevel(a.reviewedAt)] - order[freshnessLevel(b.reviewedAt)]);
+
+// Tight cell
+<FreshnessDot date={row.reviewedAt} />
+\`\`\`
+
+Stateless: the host supplies the date; the component recomputes on every render (there is no timer, so a page left open will not tick over at midnight).
+
+### Limitations
+
+- Accessibility: \`FreshnessBadge\` is a \`<span>\` with visible text and an \`aria-hidden\` icon — colour is redundant to the words. \`FreshnessDot\` is \`role="img"\` with \`aria-label\` and \`title\` "Fresh — Reviewed 12d ago".
+- i18n: the age text (\`today\`, \`yesterday\`, \`Nd ago\`, \`date unknown\`) and the level names in the dot's label (Fresh / Aging / Stale / Unknown) are **hard-coded English**; only the verb \`label\` is a prop. Days are whole days via Luxon in the browser's zone.
+- Theming: uses the semantic \`success\` / \`warning\` / \`destructive\` / \`muted\` tokens, so brands recolour it. Fixed 11px text; not sized.
+- RTL: symmetric \`gap-1\` layout; no physical offsets.
+- Depends on \`luxon\` and \`lucide-react\` icons.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'data-display-badge',
+          why: 'FreshnessBadge computes its colour from a date and thresholds; Badge takes a variant you choose.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     date: { description: 'The date being aged.', control: 'date' },
     thresholds: {

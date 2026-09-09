@@ -13,31 +13,80 @@ import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
 
 const meta: Meta<typeof HealthSurveillance> = {
-  title: 'Healthcare/HealthSurveillance',
+  id: 'encounter-orders-healthsurveillance',
+  title: 'Healthcare/Encounter & orders/HealthSurveillance',
   component: HealthSurveillance,
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-**Health-surveillance due list** — evaluates a \`PatientHistory\` against program
-metadata (\`programs.json\` from the codify pipeline, or a deployment's own) and
-shows what's **overdue / due / pending** vs **done** across the *health
-surveillance* umbrella: occupational programs (OSHA, DOT, GS-1811…) **and**
-CMS eCQM quality measures.
+        component: `### What it's for
 
-- Age/sex gates, periodicity windows and pending-order suppression come from
-  the pure \`evaluateDue()\` engine (unit-tested; injectable clock).
-- Each due item expands into a **multi-select picklist** of its satisfying
-  orders — add several at once via \`onOrderMany\`, linked to the program so
-  the Assessment component can nest them under the program's concern.
-- \`dueForOrder()\` supports ordering-time prompts ("due for OSHA 1910.95",
-  "already satisfied") in any ordering UI.
-        `,
+The patient's **health-surveillance due list**. It runs the pure \`evaluateDue(history, programs, { enrolledKeys, now })\` engine over a \`PatientHistory\` (orders, observations, procedures, immunizations, conditions, age, sex) and program metadata (\`ProgramsMap\` — the \`programs\` field of \`programs.json\` from the codify pipeline, or a deployment's own) and renders every applicable program as **Overdue / Due / Pending / Done** across the *health surveillance* umbrella: occupational programs (OSHA 1910.95 hearing conservation, 1910.1025 lead, DOT / FMCSA, NFPA, FAA — only those in \`enrolledKeys\`) **and** CMS eCQM quality measures (everyone passing the program's age / sex gates). Each actionable item expands into a **multi-select picklist** of the orders that satisfy it — alternatives grouped as "one of", prerequisites shown as "after …" and disabled until met, already-pending orders disabled — and **Add N orders** emits \`onOrderMany(picks)\` (or \`onOrder(pick)\` per item) as \`SurveillanceOrderPick { key, label, programKey, programLabel }\`, ready to become \`AssessmentOrder\`s linked to the program's concern. \`programLabels\` / \`orderLabels\` map \`CODETYPE|FULLCODE\` keys to display text; \`now\` injects the evaluation clock. The engine (\`evaluateDue\`, \`evaluateProgram\`, \`dueForOrder\`, \`isApplicable\`) and the row builders (\`buildChartOrderRows\`, \`buildEncounterOrderRows\`) are exported for hosts that want the knowledge without this card.
+
+### Use it when
+
+- An encounter or chart view should tell the clinician **what is due** for this patient — periodicity windows, age / sex gates and in-flight orders already accounted for — and let them place the satisfying orders in one click.
+- The host has the patient's history in (or can map it to) \`PatientHistory\` and can serve or embed the program metadata.
+- You want ordering-time prompts elsewhere: \`dueForOrder(orderKey, dueItems)\` returns the due items an order would satisfy ("due for OSHA 1910.95" / "already satisfied").
+
+### Don't use it when
+
+- You need the **plan** itself — where the picked orders live under their problems — [Assessment](?path=/docs/encounter-orders-assessment--docs); this card proposes, Assessment records.
+- You need a **full order history grid** with grouping, requisitions and mass cancel — the \`ChartOrdersGrid\` / \`EncounterOrdersGrid\` demos in the *ChartOrders* / *EncounterOrders* stories are built on \`buildChartOrderRows\` / \`buildEncounterOrderRows\` + \`DataVisNitroGrid\`, but the grid components themselves are **not exported** from the package.
+- You want a patient-level count chip ("Due List 4") in a header — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs) with a \`CountBadge\`; feed it \`evaluateDue(...).length\`.
+- Your programs are not expressible as *periodicity + age / sex gate + satisfying order keys* (e.g. lab-value-driven follow-up, risk-stratified intervals) — the engine has no rule language beyond \`ProgramMeta\`.
+
+### Example
+
+\`\`\`tsx
+const [programs, setPrograms] = useState<ProgramsMap | null>(null);
+useEffect(() => { fetch('/codify/en/programs.json').then((r) => r.json()).then((j) => setPrograms(j.programs)); }, []);
+
+if (!programs) return <Skeleton />;
+
+<HealthSurveillance
+  history={patientHistory}                   // host maps chart data into PatientHistory
+  programs={programs}
+  enrolledKeys={employee.programs}           // ['OSHA|1910.95', 'OSHA|1910.1025']
+  programLabels={PROGRAM_LABELS}
+  orderLabels={ORDER_LABELS}
+  onOrderMany={(picks) =>
+    setOrders((prev) => [
+      ...prev,
+      ...picks.map((p) => ({ orderId: newId(), type: orderTypeForCodetype(p.key.split('|')[0]), display: p.label,
+                              code: { fullid: p.key, codetype: p.key.split('|')[0], fullcode: p.key.split('|')[1] },
+                              concernId: concernForProgram(p.programKey) })),   // link under the program's concern in Assessment
+    ])
+  }
+/>
+\`\`\`
+
+The card owns only which item is expanded and which checkboxes are ticked; history, programs and the resulting orders are the host's.
+
+### Limitations
+
+- **Accessibility as implemented.** Two \`<ul aria-label>\` lists (due / satisfied); each item's expander is a \`<button aria-expanded aria-label="Show orders for …">\`; the picklist uses labelled \`Checkbox\`es with \`description\` for "after …" / "already pending". Status is conveyed by badge colour **and** text. Nothing is announced: expanding, checking or **Add N orders** produce no live-region message, and the header counts ("2 actionable · 3 done") are plain text. Item keys (\`OSHA|1910.95\`) render as visible monospace text.
+- **Clinical / regulatory caveats.** \`evaluateDue\` is periodicity arithmetic (UTC, day-of-month clamped) over \`ProgramMeta { kind?, periodicityMonths?, ageMin?, ageMax?, sex?, orders? }\`: it does **not** know exposure levels, standard-threshold-shift logic, abnormal results, employer-specific protocols beyond what \`programsUrl\` / your \`programs\` supply, or payer measure specifications. Correctness of due status depends entirely on the completeness of \`history\` — a completed order the host omits reads as overdue. Nothing here places orders or writes back to the chart.
+- **Hard-coded card chrome**: the title "Health surveillance", header counts and empty copy are not props; there is no \`readOnly\` (omit both \`onOrder\` / \`onOrderMany\` to hide the picklists) and no per-item action beyond ordering.
+- **Preselection heuristics** — expanding an item ticks the first alternative of every unblocked, non-pending order spec; alternatives are mutually exclusive — may not match local practice.
+- **Responsive / RTL.** Rows are single-line \`flex\` with a truncating label; the nested picklist uses physical \`marginLeft\` / \`border-l-2\` lanes — no RTL mirroring.
+- **Theming / i18n.** Semantic tokens via \`Card\` / \`Badge\`; every string (badges, "one of", "after", "linked to", "Nothing due — …") is English.
+- **Dependencies / entry.** \`Card\`, \`Badge\`, \`Button\`, \`Checkbox\`, \`./evaluate\`, \`./history\`; main \`@mieweb/ui\` entry, no peers. The stories fetch \`programs.json\` from \`/codify/en/\` (Storybook static) — the same sidecar CodeLookup uses for its program drill-downs.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'encounter-orders-assessment',
+          why: "onOrderMany picks carry programKey so the host can add them to Assessment as orders linked to the program's concern.",
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

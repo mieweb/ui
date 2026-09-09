@@ -38,9 +38,10 @@ const mockLogEntries = [
 ];
 
 const meta: Meta<typeof InventoryManager> = {
-  title: 'Components/Text & Data Display/InventoryManager',
+  id: 'operations-inventorymanager',
+  title: 'BlueHive/Operations/InventoryManager',
   component: InventoryManager,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

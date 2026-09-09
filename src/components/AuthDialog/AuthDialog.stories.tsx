@@ -113,9 +113,10 @@ function AuthDialogDemo({
 type AuthDialogStoryProps = DemoControls;
 
 const meta: Meta<AuthDialogStoryProps> = {
-  title: 'Components/Forms & Inputs/AuthDialog',
+  id: 'users-integrations-authdialog',
+  title: 'BlueHive/Users & integrations/AuthDialog',
   component: AuthDialogDemo,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

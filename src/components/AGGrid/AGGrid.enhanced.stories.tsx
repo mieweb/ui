@@ -163,7 +163,8 @@ const enhancedColumnDefs: Record<string, unknown>[] = [
 // ============================================================================
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Deprecated/AGGrid/Enhanced',
+  id: 'deprecated-aggrid-enhanced',
+  title: 'Deprecated/AGGrid Enhanced',
   component: AGGrid,
   decorators: [withDeprecationBanner],
   parameters: {
@@ -171,6 +172,17 @@ const meta: Meta<typeof AGGrid> = {
     // AG Grid is a third-party component whose internal DOM renders elements
     // with ARIA and contrast issues we cannot control.
     a11y: { test: 'off' },
+    catalog: {
+      entry: '@mieweb/ui/ag-grid',
+      peers: ['ag-grid-community', 'ag-grid-react'],
+      relationships: [
+        {
+          type: 'superseded by',
+          target: 'grids-datavis-nitro',
+          why: 'formatCell and the engine column types replace the enhanced cell renderers.',
+        },
+      ],
+    },
     docs: {
       description: {
         component: `
@@ -190,7 +202,7 @@ This enhanced version provides multi-brand support, design system integration, a
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:deprecated'],
   argTypes: {
     brand: {
       control: { type: 'select' },

@@ -10,44 +10,101 @@ import { exportMemoryYaml, importMemoryYaml } from './memoryYaml';
 import { Button } from '../Button';
 
 const meta: Meta<typeof CodeLookup> = {
-  title: 'Healthcare/CodeLookup',
+  id: 'clinical-lists-codelookup',
+  title: 'Healthcare/Clinical lists/CodeLookup',
   component: CodeLookup,
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-**Offline medical-code autocomplete (proof of concept)** over the full MedicalCodify_search
-dataset (~770K entries: ICD-10, SNOMED, RxNorm, FDB, LOINC, HCPCS, ICD-10-PCS, CVX,
-Quest/LabCorp orders).
+        component: `### What it's for
 
-- Pre-built binary index shards are fetched once and searched **entirely in a Web Worker** —
-  no server round-trips per keystroke, works offline.
-- **Every token is a word prefix**: \`con hea fa\` → *Congestive heart failure*.
-- **Aliases** are indexed on the documents at build time: \`chf\`, \`lvhf\`, \`lasix\` ↔
-  \`furosemide\`, \`a1c\` ↔ \`hba1c\`, \`tylenol\` ↔ \`acetaminophen\`…
-- **Typo fallback**: a token that matches nothing retries with edit-distance-1 candidates
-  (\`congestve\`, \`furosemid\`).
-- **Usage priors**: frequently used codes (top-200 meds/diagnoses/procedures sample) rank
-  above rare ones with equal text relevance.
-- **Locales**: shards are built per locale under \`/codify/{locale}/\`; use the 🌐 Language
-  toolbar to switch. The \`es\` set is a curated sample (common diagnoses + med ingredients —
-  try *insuficiencia card*, *hta*, *paracetamol*).
-- **OPFS persistence**: shards are cached in the browser's origin-private file system and
-  refetched only when the served manifest changes.
+**Offline medical-code autocomplete** over the full MedicalCodify_search dataset (~770K entries: ICD-10, SNOMED, RxNorm, FDB, LOINC, HCPCS, ICD-10-PCS, CVX, Quest / LabCorp orders, plus OSHA / DOT / FAA occupational programs and CMS eCQM quality measures). Pre-built binary index shards (\`.mcdx\`) are fetched once from \`{indexUrl}/{locale}/manifest.json\` and searched **entirely in a module Web Worker** — no server round-trip per keystroke, works offline, cached in the browser's origin-private file system (OPFS) and refetched only when the manifest changes.
 
-Shards are committed via git-lfs and served from \`.storybook/public/codify/{locale}/\`;
-to rebuild them, clone the external \`codify\` pipeline repo (private / not yet published)
-into \`packages/codify/\` (gitignored) and run its build scripts — see the CodeLookup README
-for the exact commands.
+- **Every token is a word prefix**: \`con hea fa\` → *Congestive heart failure*; code-shaped queries (\`I50.9\`) hit a lazy code index.
+- **Aliases** are indexed at build time (\`chf\`, \`lasix\` ↔ \`furosemide\`, \`a1c\` ↔ \`hba1c\`, \`tylenol\` ↔ \`acetaminophen\`); a token that matches nothing retries with **edit-distance-1** candidates; **usage priors** rank common codes above rare ones at equal relevance.
+- **Scope & ranking props**: \`domains\` (which shards to load), \`searchDomains\` (query-time filter), \`preferDomains\` / \`preferCodetypes\` (boost), \`searchCodetypes\` (hard filter, e.g. \`['ICD10']\`), \`codetypeOptions\` (user-facing segmented control), \`billableOnly\` (leaf ICD-10 only), \`limit\`, \`locale\` (per-locale shard sets — \`es\` is a curated sample).
+- **Embedding props**: \`bare\` (input + dropdown only, for forms), \`clearOnSelect\`, \`initialQuery\` / \`initialSearch\` (seed an editor opened on an uncoded entry), \`placeholder\`, \`onSelect(CodifyResult)\`, \`onFreeText(text)\` for anything not in the index. Result rows drill down (→) into forms & strengths, specific codes, related tests, or a program's **required orders** (from the \`programs.json\` sidecar, overridable via \`programsUrl\`).
+- **Memory picklist** (\`memory\`): with a signed-in \`userId\` from \`CodeLookupProvider\`, focusing the empty box lists the user's most-picked codes per \`context\`; counts live in RAM by default (\`storage: 'session'\`, right for a kiosk) or IndexedDB on a trusted device (\`'local'\`), optionally synced to \`serverUrl\`. \`exportMemoryYaml\` / \`importMemoryYaml\` move buckets between users.
 
-📖 Full architecture documentation — build pipeline, .mcdx binary format, scoring, priors,
-aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/main/src/components/CodeLookup/README.md).
-        `,
+\`CodeLookupProvider\` (main entry) distributes one configured lookup to every clinical component below it — \`MedicationReconciliation\`, \`AllergyManager\`, \`ConditionEditor\`, \`OrderEditor\`, \`Assessment\` — so they default to coded search without per-component wiring; an explicit \`codeLookup\` / \`renderCodeSearch\` prop overrides it and \`false\` opts out.
+
+### Use it when
+
+- A clinical form needs a **coded** pick — diagnosis, drug, lab, procedure, vaccine, surveillance program — and the app can serve the shard set (Storybook serves \`.storybook/public/codify/{locale}/\`; ~81 MB for all domains, ~14 MB for conditions only).
+- The app is bundled by Vite / Next / another bundler that understands \`new Worker(new URL(…, import.meta.url))\` and you can import the component from source.
+- You want the same search injected everywhere via \`CodeLookupProvider\` instead of five separate wirings.
+
+### Don't use it when
+
+- The list is **your own data** (users, employers, locations) or lives behind an API — [Autocomplete](?path=/docs/choice-inputs-autocomplete--docs) is the generic combobox.
+- You cannot host ~14–81 MB of shards or run a Web Worker (SSR-only rendering, restrictive CSP) — every consumer degrades to a plain text input when \`codeLookup\` is omitted or \`false\`.
+- You need coding systems the dataset lacks (ICD-11 rows, food / environmental allergens, non-US drug databases) — pair the consumer with \`onFreeText\` instead.
+- You only need to **display** a code — \`ProblemList\`'s \`CodingChips\` or a \`Badge\`.
+
+### Example
+
+\`\`\`tsx
+// App-wide: configure once, every clinical component below inherits it
+import { CodeLookupProvider } from '@mieweb/ui';
+import { CodeLookup } from '@mieweb/ui/src/components/CodeLookup'; // source import — see Limitations
+
+<CodeLookupProvider component={CodeLookup} indexUrl="/codify" memory={{ userId: session.userId }}>
+  <EncounterPage />
+</CodeLookupProvider>
+
+// Standalone: a condition picker limited to billable ICD-10, with free text for the rest
+const [pick, setPick] = useState<CodifyResult | null>(null);
+<CodeLookup
+  indexUrl="/codify"
+  domains={['condition']}
+  codetypeOptions={[{ label: 'All' }, { label: 'ICD-10', codetypes: ['ICD10'] }, { label: 'SNOMED', codetypes: ['SNOMED US'] }]}
+  billableOnly
+  onSelect={setPick}
+  onFreeText={(text) => setPick({ label: text } as CodifyResult)}
+/>
+\`\`\`
+
+The component owns query, results and worker state; the host owns what a pick means. Remount (\`key\`) to reseed \`initialQuery\`.
+
+### Limitations
+
+- **Not in the package build.** \`CodeLookup\` is deliberately **not exported** from \`@mieweb/ui\` (no tsup entry either): its module Web Worker needs the consuming app's bundler. Import it from a source checkout (\`src/components/CodeLookup\`) or vendor the folder; only \`CodeLookupProvider\` / \`useCodeLookupConfig\` (worker-free) ship in the main entry. Shards are committed via git-lfs and rebuilt with the external, not-yet-published \`codify\` pipeline — see the folder README for the pipeline, \`.mcdx\` format, scoring and aliases.
+- **Runtime requirements.** \`Worker\` + \`fetch\` for shards, OPFS (\`navigator.storage.getDirectory\`) for caching (falls back to re-fetch), IndexedDB for trusted-device memory. First load of all domains downloads ~81 MB in the background; searches work per shard as they arrive.
+- **Accessibility as implemented.** The input is \`role="combobox"\` with \`aria-label="Search medical codes"\` (not overridable by prop), results are a \`role="listbox"\` of \`role="option"\` rows with keyboard navigation, the coding-system filter is a \`role="radiogroup"\`, and load / result status is an \`aria-live="polite"\` line (hidden in \`bare\` mode, where status moves into the placeholder). Drill-down buttons have generated labels ("Show forms & strengths of …").
+- **Clinical / data caveats.** Results are only as good as the shards: no ICD-11 rows yet, drug allergens only via the \`med\` shard, the \`es\` locale is a sample. Ranking is lexical + priors, not clinical relevance; a pick carries \`codetype\` / \`fullcode\` / \`label\` and nothing about validity for billing, formulary or interactions. Free text from \`onFreeText\` is uncoded.
+- **Memory picklist** requires a \`userId\`; counts are per browser (or per \`serverUrl\`) and the YAML import merges by max — there is no delete-one-entry UI.
+- **Responsive / RTL.** The dropdown is positioned under the input with physical offsets; RTL is untested. Domain colours are hard-coded Tailwind palette classes, not tokens.
+- **i18n.** UI strings ("Search medical codes", "use as free text", drill-down nouns, status lines) are English constants; \`codetypeOptions\` labels are yours to translate; shard **content** follows \`locale\`.
+- **Dependencies.** \`codify.worker.ts\`, \`engine.ts\`, \`memoryStore\` / \`memoryBackend\`; no third-party runtime deps.`,
       },
     },
+    catalog: {
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-autocomplete',
+          why: 'CodeLookup is a purpose-built offline medical-code search with its own worker engine; Autocomplete is the generic combobox you wire to any data.',
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-medicationlist',
+          why: 'Injected as codeLookup into MedicationReconciliation / MedicationEditor for RxNorm / FDB drug coding and the inline add bar.',
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-conditioneditor',
+          why: 'Injected through renderCodeSearch (condition shard, ICD-10 preferred) to append coding rows to an assertion.',
+        },
+        {
+          type: 'composes with',
+          target: 'encounter-orders-ordereditor',
+          why: 'Injected as codeLookup so lab / imaging / procedure / referral editors search the matching shards and seed from the order name.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

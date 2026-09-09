@@ -46,12 +46,13 @@ const mockBreadcrumbs: BreadcrumbItem[] = [
 ];
 
 const meta: Meta<typeof ProviderDetailHeader> = {
-  title: 'Product/Provider/ProviderDetailHeader',
+  id: 'providers-providerdetailheader',
+  title: 'BlueHive/Providers/ProviderDetailHeader',
   component: ProviderDetailHeader,
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

@@ -27,12 +27,98 @@ import { Printer } from 'lucide-react';
 // =============================================================================
 
 const meta: Meta<typeof DashboardWidget> = {
-  title: 'Components/Layout & Structure/DashboardWidget',
+  id: 'dashboards-dashboardwidget',
+  title: 'Modules/Dashboards/DashboardWidget',
   component: DashboardWidget,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**The portlet tile of a dashboard**: a \`Card\` (\`padding="none"\`) with a fixed header — \`icon\`, upper-case \`title\` in a \`headingLevel\` heading (default \`h3\`), \`count\` pill, and either a ghost "+" button (\`onAdd\`, \`addLabel\`) or your own \`headerAction\` — a body for \`children\`, optional \`footer\`, \`loading\` overlay and \`accent\` bar. Four body components for the common widget shapes: \`DashboardWidgetInfo\` (\`<dl>\` label/value grid, \`items\`, \`columns\` 1–4, \`layout\` \`stacked\` | \`inline\`), \`DashboardWidgetTable\` (generic \`columns\` / \`data\` / row \`actions\` overflow menu, \`showHeader\`, \`onRowClick\`, \`emptyMessage\`, \`rowKey\`), \`DashboardWidgetActions\` (\`actions\` grid of shortcut buttons/links, \`columns\` 1–3, per-item \`color\`) and \`DashboardWidgetDataCards\` (\`<dl>\` stat blocks with \`unit\`, \`columns\` 2–4, \`footer\`). The header carries \`data-slot="dashboard-widget-header"\`, which \`CustomizableDashboard\` uses to attach its drag handle.
+
+### Use it when
+
+- A home / patient-summary / reports page is a grid of same-looking tiles, each titled, countable and optionally addable.
+- The tile's content is one of: a fact sheet (Info), a short list with row actions (Table), a shortcut grid (Actions) or vitals-style metrics (DataCards).
+
+### Don't use it when
+
+- The surface needs free-form layout, media or selection states — \`Card\` and its slots.
+- You want a plain list of links with a title — \`QuickLinksCard\`; large explained shortcut tiles outside a widget — \`QuickAction\`.
+- The list is long, sortable, filterable or paginated — \`Table\` / \`DataVisNitroGrid\` in a \`Card\`; \`DashboardWidgetTable\` is a static slice.
+- The whole page is a fixed report layout — \`ReportDashboard\`.
+
+### Example
+
+\`\`\`tsx
+const { data: allergies = [], isLoading } = useAllergies(patientId);
+
+<DashboardWidget
+  title="Allergies"
+  icon={<AlertTriangleIcon className="h-4 w-4" />}
+  count={allergies.length}
+  loading={isLoading}
+  accent="warning"
+  onAdd={() => openAllergyForm()}
+  addLabel="Add allergy"
+  headingLevel="h2"
+>
+  <DashboardWidgetTable<Allergy>
+    columns={[
+      { key: 'name' },
+      { key: 'severity', align: 'right', render: (r) => <Badge size="sm" variant={severityVariant(r.severity)}>{r.severity}</Badge> },
+    ]}
+    data={allergies}
+    rowKey={(r) => r.id}
+    actions={[
+      { label: 'Edit', icon: <PencilIcon />, onClick: (r) => openAllergyForm(r) },
+      { label: 'Delete', icon: <TrashIcon />, variant: 'danger', onClick: (r) => remove(r.id) },
+    ]}
+    emptyMessage="No known allergies"
+  />
+</DashboardWidget>
+\`\`\`
+
+Data and mutations live in the host; the widget only renders the slice it is given.
+
+### Limitations
+
+- Accessibility: the title heading level is yours (\`headingLevel\`); \`count\` is a bare \`<span>\` with no label ("3" is read without context). The add button gets \`aria-label={addLabel}\` (default \`"Add"\`). \`DashboardWidgetTable\` rows with \`onRowClick\` are clickable \`<tr>\`s with **no keyboard handler, role or tabIndex**; the row overflow menu is a button with \`aria-haspopup="menu"\` / \`aria-expanded\` and a portalled \`role="menu"\` of \`role="menuitem"\` buttons that closes on Escape and outside click but has **no arrow-key navigation or focus management**. \`DashboardWidgetActions\` items are native \`<button>\` / \`<a>\`; disabled ones use \`pointer-events-none\` (links stay focusable). \`DashboardWidgetInfo\` / \`DataCards\` use \`<dl>\` semantics correctly.
+- No overflow / \`size\` behaviour: \`size\` (\`sm\` … \`full\`) exists on \`widgetVariants\` but every value maps to an empty class. Body has no max height or scroll — wrap children in \`ScrollArea\`.
+- i18n: defaults \`"Add"\`, \`"No items"\`, \`"Actions"\` (sr-only header), \`"Row actions for row N"\`. No number formatting on \`count\`.
+- RTL: header/body/footer use physical \`pl-6\` with \`accent\` (the Card's own accent is logical \`ps-4\`); table alignment uses physical \`text-right\`; the row menu is positioned from \`rect.right\` with \`translateX(-100%)\`; DataCards \`unit\` uses \`ml-0.5\`. \`DashboardWidgetTable\` bleeds with \`-mx-4\` assuming the default body padding.
+- Theming: header/body use semantic tokens; the count pill and \`DashboardWidgetActions\` colours are fixed palettes (\`primary-*\`, \`emerald\`, \`sky\`, \`violet\`, …); the row menu uses hard-coded \`neutral-*\` / \`bg-white\` / \`red-*\`. Uses \`Card\`, \`Button\`, \`Table\` and \`MoreHorizontalIcon\` (lucide via \`Icons\`); depends on \`class-variance-authority\` and \`react-dom\` \`createPortal\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'layout-card',
+          why: 'Card is the free-form surface you lay out yourself; DashboardWidget is a Card with a fixed title bar, count badge and add button for portlet grids.',
+        },
+        {
+          type: 'composes with',
+          target: 'dashboards-customizabledashboard',
+          why: 'DashboardWidget is the expected portlet node: its data-slot="dashboard-widget-header" is where CustomizableDashboard appends the drag handle.',
+        },
+        {
+          type: 'alternative to',
+          target: 'dashboards-quicklinkscard',
+          why: 'DashboardWidgetActions is a coloured shortcut grid inside a widget; QuickLinksCard is a standalone Card listing plain link rows with badges.',
+        },
+        {
+          type: 'uses',
+          target: 'grids-table',
+          why: 'DashboardWidgetTable renders through the Table primitives (responsive wrapper, header, rows).',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     title: { control: 'text' },
     count: { control: 'number' },

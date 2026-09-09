@@ -7,11 +7,62 @@ import {
 } from './CookieConsent';
 
 const meta: Meta<typeof CookieConsentBanner> = {
-  title: 'Components/Overlays & Layering/CookieConsent',
+  id: 'overlays-cookieconsent',
+  title: 'Components/Overlays/CookieConsent',
   component: CookieConsentBanner,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A fixed-position consent banner (\`role="dialog"\`, \`aria-live="polite"\`) with Accept and optional Decline / Customize buttons and links to terms, privacy and cookie policies. \`position\` (\`bottom\`, \`top\`, \`bottom-left\`, \`bottom-right\`) and \`variant\` (\`default\`, \`minimal\`, \`branded\`) control the presentation; \`isVisible\` is controlled by the host, which also persists the choice.
+
+### Use it when
+
+- A public-facing site or app must obtain cookie/tracking consent before setting non-essential cookies.
+- You need the standard accept / decline / customise trio with policy links.
+
+### Don't use it when
+
+- The message is not a consent request — use \`Alert\` (inline) or \`Toast\` (transient).
+- Consent needs a full preferences form — open a \`Modal\` from \`onCustomize\`.
+- Inside an authenticated clinical app where consent is handled contractually; do not show it out of habit.
+
+### Example
+
+\`\`\`tsx
+const [consent, setConsent] = useStoredConsent();
+
+<CookieConsentBanner
+  isVisible={consent === undefined}
+  onAccept={() => setConsent('all')}
+  onDecline={() => setConsent('essential')}
+  showDecline
+  privacyLink={{ label: 'Privacy policy', href: '/privacy' }}
+  cookieLink={{ label: 'Cookie policy', href: '/cookies' }}
+/>
+\`\`\`
+
+### Limitations
+
+- Non-modal: no focus trap or scroll lock, so the page stays usable; the polite live region announces it once.
+- Default \`message\` and button labels are English — pass translated strings.
+- Positioned with physical \`left/right\` classes; check the corner variants in RTL.
+- Fixed \`z-50\`, the same layer as \`Modal\`; open a Modal after the banner is dismissed or stacking will follow DOM order.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-alert',
+          why: 'Alert is inline content; CookieConsent is a fixed consent banner with accept/decline actions.',
+        },
+      ],
+    },
   },
   argTypes: {
     position: {

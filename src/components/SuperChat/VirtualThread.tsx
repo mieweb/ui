@@ -18,6 +18,7 @@ import { MessageRow } from './parts';
 import type {
   AIRenderTextContent,
   Participant,
+  SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
@@ -40,6 +41,8 @@ export interface VirtualThreadProps {
   editable?: boolean;
   /** Save handler for an inline message edit (bound to the message's id). */
   onMessageEdited?: (messageId: string, text: string) => void;
+  /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
+  defaultCopyFormat?: SuperChatCopyFormat;
   /**
    * Thread ordering. `'asc'` anchors new messages to the bottom; `'desc'`
    * anchors them to the top (feed style).
@@ -62,6 +65,7 @@ export function VirtualThread({
   onReferenceClick,
   editable,
   onMessageEdited,
+  defaultCopyFormat,
   order,
   conversationId,
   containerProps,
@@ -134,6 +138,7 @@ export function VirtualThread({
                   onReferenceClick={onReferenceClick}
                   editable={editable}
                   onMessageEdited={onMessageEdited}
+                  defaultCopyFormat={defaultCopyFormat}
                 />
               </div>
             </div>

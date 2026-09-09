@@ -1,0 +1,80 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Chat/Overview" />
+
+# Chat
+
+> **Who is talking, and what do the messages contain?** One user and one assistant, messages
+> may carry tool calls / thinking / code blocks → `AIChat` (or the Ozwell-branded shell around it,
+> `OzwellChat`). Several humans and/or several agents in one thread, Markdown with plugins, a
+> conversation list → [SuperChat](?path=/docs/modules-superchat-overview--docs). Humans messaging
+> humans with delivery status, read receipts and attachments → the `Messaging` primitives. Talking
+> instead of typing → [Voice](?path=/docs/modules-voice-overview--docs). Reviewing AI-proposed
+> field changes rather than chatting → `AIReconciliationPanel`.
+
+## Which one?
+
+| Component                                                             | Use it when                                                                                                                                                                     | Not when                                                                                                                                                    |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [AIChat](?path=/docs/chat-aichat--docs)                               | One user ↔ one assistant; you own transport and push `AIMessage[]` with `status`, `isGenerating`; suggestions chips; `FloatingAIChat` / `AIChatModal` for a corner popup        | Multiple participants or a conversation list — `SuperChatInbox`; human-to-human messaging — `Messaging`; Markdown out of the box — pass `renderTextContent` |
+| [AIChat (Voice)](?path=/docs/chat-aichat-voice--docs)                 | Reference wiring of `AIChat talkToText` → `transcribeBlob` (on-device Whisper) → send, with a streamed reply when a backend is configured                                       | Hands-free wake words, speaker gating or diarization — `HandsFreeChat`; server ASR — `transcribeServer`                                                     |
+| [AIMessage](?path=/docs/chat-aimessage--docs)                         | Rendering one `AIMessage` (text / tool_use / thinking / code / image / file / audio / video blocks) inside your own thread layout; `ChatBubble` shell; `renderTextContent` seam | You need the whole chat — `AIChat`; human messages with receipts — Messaging's `MessageBubble`                                                              |
+| [MCPToolCall](?path=/docs/chat-mcptoolcall--docs)                     | Showing a tool invocation as a status pill that expands into result, links, error and parameters; `compact` for dense logs                                                      | Approving/cancelling calls (display-only); large `result.data` (only `summary`/links render)                                                                |
+| [OzwellChat](?path=/docs/chat-ozwellchat--docs)                       | You are the Ozwell application: thinking-mode menu, message jump list, warning strip, model picker, queued follow-up editing, "Powered by Ozwell" footer                        | A generic assistant in your own product — `AIChat`; multi-participant — `SuperChat`                                                                         |
+| [ComposerModelSelector](?path=/docs/chat-composermodelselector--docs) | Picking an LLM per message from a short provider-grouped list inside a composer; menu opens upward within `boundaryRef`; optional effort drill-down                             | A normal form field — `Select` / `Dropdown`; options are not provider/model pairs; hundreds of options — `Autocomplete`                                     |
+| [ReconciliationPanel](?path=/docs/chat-reconciliationpanel--docs)     | A person must confirm AI-extracted values (OCR, parsed intake, agent output) before they overwrite data on file; confidence-aware defaults; `onApply(accepted)`                 | No existing record to compare (use a form); a single yes/no — `AlertDialog`; long-text diffs                                                                |
+| [Messaging](?path=/docs/chat-messaging--docs)                         | Human-to-human messaging primitives — `MessageBubble`, `MessageList` (live `role="log"`), `MessageComposer` (mentions, attachments), `MessageThread`, `MessagingSplitView`      | The other party is an AI with tool calls — `AIChat`; a finished multi-participant inbox — `SuperChatInbox`; real-time transport (bring your own)            |
+
+## How they fit together
+
+- **Three chat surfaces, one axis: participants.** `AIChat` is a 1 : 1 assistant view whose
+  `AIMessage` type has roles `user` / `assistant` / `system` / `tool` and typed content blocks.
+  [SuperChat](?path=/docs/modules-superchat-overview--docs) generalises that into a
+  **participant** model (`human` / `agent` / `system`, many of each) with a conversation list and
+  a Markdown plugin pipeline — and it _composes_ this family: its rows reuse `ChatBubble`,
+  `AITypingIndicator` and `MCPToolCallDisplay`, and its compose box is Messaging's
+  `MessageComposer`. `Messaging` is the human-to-human kit (`Message` / `Conversation` types with
+  delivery `status`, read receipts, typing state) that both of the others borrow pieces from.
+  Pick by participants first, then by whether you want a finished surface or primitives.
+- **`OzwellChat` and `HeyOzwell` are shells around `AIChat`, not new chats.** `OzwellChat` renders
+  `AIChat` headerless and adds widget chrome (thinking modes applied client-side, queued message,
+  `ComposerModelSelector` in the composer's trailing slot). The
+  [Voice](?path=/docs/modules-voice-overview--docs) family's `HeyOzwell` opens a `FloatingAIChat`
+  and `HandsFreeChat` renders an inline `AIChat`; both feed it `messages` from `useHeyOzwell`.
+- **Text rendering is a seam, and the host owns sanitisation.** Every text block is plain
+  `whitespace-pre-wrap` unless you pass `renderTextContent(text, { messageId, streaming, role })`
+  — to `AIChat`, `AIMessageDisplay` or `OzwellChat`. Pair it with
+  [Markdown](?path=/docs/editors-markdown--docs) (`MarkdownRenderer`, DOMPurify) or SuperChat's
+  `createMarkdownRenderer` (`react-markdown` + `rehype-sanitize`). Nothing in this family
+  sanitises model output for you.
+- **Nothing here talks to a network.** `AIChat` and `OzwellChat` render what you give them;
+  `MCPToolCallDisplay` is display-only (`onToolCall` / `onToolComplete` are declared but never
+  invoked). The `askOzwell*` / `isOzwellConfigured` helpers exist for demos and read a
+  browser-held config (`localStorage.ozwellConfig` / `window.__ozwell`) — never commit a key, and
+  proxy it server-side for anything public (see `src/components/AI/OZWELL-BACKEND.md`).
+- **Reconciliation closes the loop with extraction.** [DocumentScanner](?path=/docs/files-documentscanner--docs)
+  (Files) produces fields; `AIReconciliationPanel` is where a human accepts them.
+
+## Shared limitations
+
+- **Live regions.** `AIChat`'s thread and `AIMessageDisplay` have no `aria-live`; streamed
+  replies, typing indicators, tool-status changes and error text are silent to screen readers
+  unless the host wraps the thread. Messaging's `MessageList` (`role="log" aria-live="polite"`)
+  and SuperChat's thread are the exceptions. No component moves focus after send.
+- **Icon buttons and defaults are English.** "AI Assistant", "Ask anything...", "Clear chat",
+  "Close chat", "Stop", "Thinking", "Failed to send", the MCP friendly-name map and tense
+  rewriting, "Powered by Ozwell", "Today" / "Yesterday", "Apply n updates" — externalise before
+  localising. Timestamps use `toLocaleTimeString` / `toLocaleDateString`.
+- **Physical layout.** User messages use `flex-row-reverse`; composer trailing slots sit at
+  `right-1`; modal/trigger positions are `right-4` / `left-4`; `ChatBubble accent` is a physical
+  `borderLeft`; Messaging's reply preview is `border-l-4`. Thinking blocks use logical
+  `border-s` / `ps-3`.
+- **Theming.** Most surfaces use hard-coded `neutral-*` / `white` / `primary-800` utilities rather
+  than semantic tokens; `OzwellChat`, `ComposerModelSelector` and `AIReconciliationPanel` use
+  `bg-card` / `border-border` / `text-muted-foreground`. `prose` classes on message text need
+  `@tailwindcss/typography` to have any effect.
+- **Browser APIs and peers.** `talkToText` needs a secure context and microphone; the `audio`
+  block needs the optional `wavesurfer.js` peer via `AudioPlayer`; SuperChat needs
+  `react-markdown` + `remark-gfm` + `rehype-sanitize`. Everything in this family is in the main
+  `@mieweb/ui` entry except SuperChat (`@mieweb/ui/components/SuperChat`). All depend on
+  `class-variance-authority`.

@@ -50,53 +50,81 @@ const SAMPLE_FORM = {
 } as unknown as FormDefinition;
 
 const meta: Meta<typeof EsheetRenderer> = {
-  title: 'Components/Forms & Inputs/eSheet/AllergyListField',
+  id: 'clinical-lists-allergylistfield-esheet',
+  title: 'Healthcare/Clinical lists/AllergyListField (eSheet)',
   component: EsheetRenderer,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-The \`allergyList\` **custom eSheet field type** — the allergy / intolerance
-list as a form question, backed by \`AllergyManager\` (see
-*Healthcare/AllergyList* for the standalone component).
+        component: `### What it's for
 
-### Setup (once, at module load, before the builder/renderer mounts)
+The \`allergyList\` **custom eSheet field type** — the allergy / intolerance list as a form question. \`AllergyListField\` is a thin adapter (same pattern as \`MedicationListField\`) that maps the eSheet field contract (\`field.definition\`, \`response\`, \`isPreview\` / \`isEnabled\`, \`onResponse\`) onto [AllergyList](?path=/docs/clinical-lists-allergylist--docs)'s \`AllergyManager\`. \`registerAllergyListFieldType({ codeLookup? })\` registers it with \`@esheet/fields\` (label "Allergy List", category \`rich\`, \`answerType: 'text'\`), or register both clinical fields at once with \`registerMieEsheetFields({ codeLookup })\`. The response persists as JSON in \`response.answer\`: \`{ "allergies": Allergy[], "noKnownAllergies"?: boolean }\` — additions, corrections, notes, ordering **and the tri-state NKA flag** all round-trip; recording any allergy clears the flag. The field seeds from \`definition.allergies\` until a response exists, uses \`definition.question\` as the card title, turns on \`inlineAddSearch\` whenever a lookup is available (registration option or ambient \`CodeLookupProvider\`), and is interactive **only in fill-out mode** (\`isPreview && isEnabled\`).
+
+### Use it when
+
+- A patient intake or encounter **eSheet form** asks "Do you have any allergies?" and the answer must distinguish *not asked* from *asked — none* (NKA) from a list.
+- Form authors should drop the question in from the \`EsheetBuilder\` palette with an optional seed list.
+
+### Don't use it when
+
+- The allergy list lives outside an eSheet form — use \`AllergyManager\` from the main entry directly.
+- You need the medication question — [MedicationListField (eSheet)](?path=/docs/clinical-lists-medicationlistfield-esheet--docs).
+- Your \`@esheet/core\` predates the custom-field schema fix ([mieweb/eSheet#91](https://github.com/mieweb/eSheet/pull/91)).
+
+### Example
 
 \`\`\`tsx
-import { registerAllergyListFieldType } from '@mieweb/ui/esheet';
-import { CodeLookup } from '…/CodeLookup'; // optional — offline RxNorm/FDB coding
+// once, at module load, before EsheetBuilder / EsheetRenderer mounts
+import { registerAllergyListFieldType, EsheetRenderer, type EsheetRendererHandle } from '@mieweb/ui/esheet';
+import { CodeLookup } from '…/CodeLookup'; // optional — coded drug allergens, app bundler only
 
-registerAllergyListFieldType({
-  codeLookup: { component: CodeLookup, indexUrl: '/codify' },
-});
+registerAllergyListFieldType({ codeLookup: { component: CodeLookup, indexUrl: '/codify' } });
+
+const form: FormDefinition = {
+  id: 'intake',
+  title: 'Patient Intake — Allergies',
+  fields: [{ id: 'allergies', fieldType: 'allergyList', question: 'Do you have any allergies?' }],
+};
+
+const renderer = useRef<EsheetRendererHandle>(null);
+<EsheetRenderer ref={renderer} formDataInput={form} />
+<Button onClick={() => {
+  const { response } = renderer.current!.getValidResponse();
+  if (response) {
+    const { allergies, noKnownAllergies } = JSON.parse(response.allergies.answer) as AllergyListFieldValue;
+    save({ allergies, noKnownAllergies }); // persist both — an empty list without the flag means "not asked"
+  }
+}}>Submit</Button>
 \`\`\`
 
-> Registering **both** medical fields at once? Use
-> \`registerMieEsheetFields({ codeLookup })\` instead.
+State ownership is the eSheet form store; the field writes through \`onResponse\` on every change and the host reads the answer back through the renderer handle.
 
-### Field definition
+### Limitations
 
-\`\`\`jsonc
-{
-  "id": "allergies",
-  "fieldType": "allergyList",
-  "question": "Allergies",              // rendered as the card title
-  "allergies": [ /* seed list, shown until a response exists */ ]
-}
-\`\`\`
-
-### Behavior to know about
-
-- The response persists as JSON in \`response.answer\`:
-  \`{ "allergies": […], "noKnownAllergies"?: boolean }\` — additions,
-  corrections, notes, ordering, and the tri-state NKA flag all round-trip
-- Recording any allergy automatically clears the *no known allergies* flag
-- Interactive **only in fill-out mode** (preview + enabled); read-only on
-  the builder canvas or when conditionally disabled
-        `,
+- **Inherits everything from AllergyList** — accessibility (\`RowActionToolbar\` hover reveal, only reorders announced, NKA is a toggling \`Button\`), clinical caveats (no drug–allergy cross-check, no allergen normalisation, coded search only for drugs) and English strings. See that page.
+- **Registration is global and one-shot**: the \`codeLookup\` chosen at registration applies to every form; there is no per-field override. Without it the field still consults an ambient \`CodeLookupProvider\` (and enables the inline search when one exists), otherwise falls back to plain text.
+- **Answer shape** is a JSON string in a \`text\` answer type; malformed or non-object JSON degrades to an empty list with no NKA flag. Nothing validates the allergies against a schema.
+- **Read-only outside fill-out mode** — the builder canvas shows the seed list but cannot edit it inline; \`definition.allergies\` is edited as JSON.
+- **Dependencies / entry.** \`@mieweb/ui/esheet\` (not the main barrel); peers \`@esheet/renderer\` (or \`@esheet/builder\`), \`@esheet/core\`, \`@esheet/fields\` — currently listed only as devDependencies of \`@mieweb/ui\`, so install them yourself. \`CodeLookup\` is not in the package build.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui/esheet',
+      peers: ['@esheet/renderer', '@esheet/core', '@esheet/fields'],
+      relationships: [
+        {
+          type: 'uses',
+          target: 'clinical-lists-allergylist',
+          why: 'The field renders AllergyManager and serialises its Allergy[] plus the NKA flag into response.answer.',
+        },
+        {
+          type: 'depends on',
+          target: 'composite-forms-esheet-renderer',
+          why: 'Only meaningful inside an EsheetRenderer / EsheetBuilder after registerAllergyListFieldType() has run.',
+        },
+      ],
     },
   },
 };

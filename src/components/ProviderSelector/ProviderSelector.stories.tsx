@@ -42,9 +42,10 @@ const sampleProviders: ProviderOption[] = [
 ];
 
 const meta: Meta<typeof ProviderSelector> = {
-  title: 'Components/Forms & Inputs/ProviderSelector',
+  id: 'providers-providerselector',
+  title: 'BlueHive/Providers/ProviderSelector',
   component: ProviderSelector,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

@@ -237,12 +237,41 @@ const AVERAGE_SALARY: DataVisNitroAggregate[] = [
 ];
 
 const meta: Meta<typeof DataVisNitroGrid> = {
-  title: 'Components/Text & Data Display/DataVis NITRO/Demo Coverage',
+  id: 'grids-datavis-nitro-demo-coverage',
+  title: 'Components/Grids/DataVis NITRO Demo Coverage',
   component: DataVisNitroGrid,
   parameters: {
     layout: 'fullscreen',
     a11y: { disable: true },
+    docs: {
+      description: {
+        component: `### What it's for
+
+Stress and integration scenarios for DataVis NITRO using deterministic local datasets. These stories cover wide tables, large row counts, shared grid/graph views, sticky containers and other layouts that need more data than the primary component examples.
+
+### Use it when
+
+Validating DataVis NITRO behavior, performance or layout against the standalone demo scenarios.
+
+### Don't use it when
+
+Choosing a production API or learning basic grid setup; start with the primary DataVis NITRO stories instead.
+
+### Example
+
+Open a scenario in Storybook and exercise its controls, scrolling and responsive layout directly.
+
+### Limitations
+
+The scenarios use generated local data and do not model application networking or authorization.
+
+### Related components
+
+See DataVis NITRO for the grid API and DataVis NITRO Graph for chart configuration.`,
+      },
+    },
   },
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   decorators: [
     (Story) => (
       <div className="p-4">

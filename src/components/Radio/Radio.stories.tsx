@@ -63,12 +63,82 @@ type RadioGroupStoryArgs = Omit<
 };
 
 const meta = {
-  title: 'Components/Forms & Inputs/Radio',
+  id: 'choice-inputs-radio',
+  title: 'Inputs/Choice inputs/Radio',
   component: RadioGroup,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+One-of-N selection with native radios. \`RadioGroup\` is the unit: a \`<fieldset role="radiogroup">\` that owns the value (\`value\` + \`onValueChange\`, or \`defaultValue\`), the shared \`name\` (auto-generated with \`useId\` when omitted), \`label\` (\`labelVariant\` \`stacked\` | \`floating\`), \`description\`, \`error\`, \`disabled\`, \`size\` and \`orientation\`. Each \`Radio\` is an \`<input type="radio">\` with its own \`value\`, \`label\`, \`description\` and \`labelPosition\`; it reads everything else from the group context and throws if rendered outside one. \`radioVariants\` is exported for custom builds.
+
+### Use it when
+
+- The user must pick **exactly one** of 2–7 options and seeing them all at once helps the decision (plan, priority, yes/no/unknown).
+- The answer is saved with the form — the native \`name\` / \`value\` submit as usual.
+- Options need a second line of explanation (\`description\` on each \`Radio\`).
+
+### Don't use it when
+
+- Several options may be on at once — \`Checkbox\` / \`CheckboxGroup\`.
+- Space is tight or the choice is a view mode in a toolbar — \`PillSelect\` (collapsed pill, one label).
+- More than ~7 options, or they need search — \`Select\`.
+- One option switches a live setting — \`Switch\`.
+
+### Example
+
+\`\`\`tsx
+const [plan, setPlan] = useState('pro');
+
+<RadioGroup name="plan" label="Plan" value={plan} onValueChange={setPlan}
+  error={submitted && !plan ? 'Choose a plan' : undefined}>
+  <Radio value="free" label="Free" description="Up to 3 users" />
+  <Radio value="pro" label="Pro" description="Unlimited users, audit log" />
+  <Radio value="enterprise" label="Enterprise" disabled />
+</RadioGroup>
+\`\`\`
+
+State lives on the group; a \`Radio\` never takes \`checked\` or \`onChange\` of its own (its \`checked\` is derived from the group's value).
+
+### Limitations
+
+- Accessibility: \`<fieldset role="radiogroup">\` + \`<legend>\`; each \`<label htmlFor>\` is bound to its input's \`id\` (auto \`useId\`); \`aria-describedby\` on the fieldset lists the group description / error ids, on each input its own description id. Error is a \`<p role="alert">\`. Arrow-key movement between radios is the browser's native behaviour. Neither the group nor the inputs set \`aria-invalid\` or \`aria-required\`.
+- \`Radio\` has no \`error\` prop — validation messages belong to the group.
+- Uncontrolled \`defaultValue\` defaults to \`''\` (nothing selected); there is no built-in "clear".
+- RTL: \`labelPosition\` uses \`flex-row-reverse\`, so it follows the writing direction despite the \`left\` / \`right\` names. No physical offsets.
+- Theming: \`border-input\`, \`bg-background\`, checked ring \`border-primary-500 dark:border-primary-800\`, dot \`bg-primary-800 dark:bg-primary-500\`; error uses plain \`text-destructive\` (no dark override).
+- No built-in strings; depends on \`class-variance-authority\` and the floating-frame variants from \`Input\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-checkbox',
+          why: 'Radio allows exactly one option; Checkbox lets several be on at once.',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-pillselect',
+          why: 'Radio shows every option at once in a form; PillSelect collapses the same one-of-N choice into a toolbar pill.',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-select',
+          why: 'Radio for up to ~7 visible options; Select when the list is long, grouped or searchable.',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-slider',
+          why: 'Radio when the choice is one of a few labelled steps; Slider for a continuous numeric range.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     name: {
       control: 'text',

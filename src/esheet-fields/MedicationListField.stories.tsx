@@ -59,54 +59,83 @@ const SAMPLE_FORM = {
 } as unknown as FormDefinition;
 
 const meta: Meta<typeof EsheetRenderer> = {
-  title: 'Components/Forms & Inputs/eSheet/MedicationListField',
+  id: 'clinical-lists-medicationlistfield-esheet',
+  title: 'Healthcare/Clinical lists/MedicationListField (eSheet)',
   component: EsheetRenderer,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-The \`medicationList\` **custom eSheet field type** — medication
-reconciliation as a form question, backed by \`MedicationReconciliation\`
-(see *Healthcare/MedicationList* for the standalone component).
+        component: `### What it's for
 
-### Setup (once, at module load, before the builder/renderer mounts)
+The \`medicationList\` **custom eSheet field type** — medication reconciliation as a form question. \`MedicationListField\` is a thin adapter that maps the eSheet field contract (\`field.definition\`, \`response\`, \`isPreview\` / \`isEnabled\`, \`onResponse\`) onto [MedicationList](?path=/docs/clinical-lists-medicationlist--docs)'s \`MedicationReconciliation\`; all reconciliation UI and behaviour lives there. \`registerMedicationListFieldType({ codeLookup? })\` registers it with \`@esheet/fields\` (label "Medication Reconciliation", category \`rich\`, \`answerType: 'text'\`), or register both clinical fields at once with \`registerMieEsheetFields({ codeLookup })\`. The response persists as JSON in \`response.answer\`: \`{ "medications": Medication[] }\` — statuses, corrections, notes, tasks, ordering, additions and removals all round-trip. The field seeds from \`definition.medications\` until a response exists, uses \`definition.question\` as the card title and \`definition.quickAddOptions\` as the quick-add pills, and is interactive **only in fill-out mode** (\`isPreview && isEnabled\`) — read-only on the builder canvas or when conditionally disabled.
+
+### Use it when
+
+- A clinical intake or encounter **eSheet form** needs a reconciled medication list as one of its questions, stored with the rest of the form's responses.
+- Form authors should be able to drop the question in from the \`EsheetBuilder\` palette (after registration) with a seed list and quick-add options in the definition.
+
+### Don't use it when
+
+- The medication list lives on a page that is **not an eSheet form** — use \`MedicationReconciliation\` from the main entry directly; the adapter adds nothing but the form contract.
+- You need the allergy question — [AllergyListField (eSheet)](?path=/docs/clinical-lists-allergylistfield-esheet--docs).
+- Your \`@esheet/core\` predates the custom-field schema fix ([mieweb/eSheet#91](https://github.com/mieweb/eSheet/pull/91)) — older cores reject custom field types at validation with "Invalid form definition".
+
+### Example
 
 \`\`\`tsx
-import { registerMedicationListFieldType } from '@mieweb/ui/esheet';
-import { CodeLookup } from '…/CodeLookup'; // optional — offline RxNorm/FDB coding
+// once, at module load, before EsheetBuilder / EsheetRenderer mounts
+import { registerMedicationListFieldType, EsheetRenderer, type EsheetRendererHandle, type FormDefinition } from '@mieweb/ui/esheet';
+import { CodeLookup } from '…/CodeLookup'; // optional — offline RxNorm / FDB coding, app bundler only
 
-registerMedicationListFieldType({
-  codeLookup: { component: CodeLookup, indexUrl: '/codify' },
-});
+registerMedicationListFieldType({ codeLookup: { component: CodeLookup, indexUrl: '/codify' } });
+
+// the form definition carries the seed list; the renderer owns the response store
+const form: FormDefinition = {
+  id: 'med-rec',
+  title: 'Encounter — Medication Reconciliation',
+  fields: [
+    { id: 'meds', fieldType: 'medicationList', question: 'Presenting medications',
+      medications: [{ id: '1', name: 'lisinopril 10 mg tablet', status: 'unreconciled' }],
+      quickAddOptions: ['aspirin 81 mg tablet'] },
+  ],
+};
+
+const renderer = useRef<EsheetRendererHandle>(null);
+<EsheetRenderer ref={renderer} formDataInput={form} />
+<Button onClick={() => {
+  const { response } = renderer.current!.getValidResponse();
+  if (response) save(JSON.parse(response.meds.answer).medications as Medication[]);
+}}>Submit</Button>
 \`\`\`
 
-### Field definition
+State ownership is the eSheet form store: every change goes through \`onResponse({ answer: JSON.stringify(…) })\`; the host reads \`Medication[]\` back out of the answer via the renderer handle (\`getRawResponse\` / \`getValidResponse\`).
 
-\`\`\`jsonc
-{
-  "id": "meds",
-  "fieldType": "medicationList",
-  "question": "Presenting medications",       // rendered as the card title
-  "medications": [ /* seed list, shown until a response exists */ ],
-  "quickAddOptions": ["aspirin 81 mg tablet"] // quick-add pills
-}
-\`\`\`
+### Limitations
 
-### Behavior to know about
-
-- The response persists as JSON in \`response.answer\`:
-  \`{ "medications": […] }\` — statuses, corrections, notes, tasks,
-  ordering, additions, removals all round-trip
-- Interactive **only in fill-out mode** (preview + enabled); read-only on
-  the builder canvas or when conditionally disabled
-- Requires \`@esheet/core\` ≥ the custom-field schema fix
-  ([mieweb/eSheet#91](https://github.com/mieweb/eSheet/pull/91)) — older
-  cores reject custom field types at validation with
-  "Invalid form definition"
-        `,
+- **Inherits everything from MedicationList** — accessibility (\`RowActionToolbar\` hover reveal, \`useLiveAnnouncement\` for status / reorder only), clinical caveats (no interaction or dose checking, heuristic sig parsing) and English strings. See that page.
+- **Registration is global and one-shot**: \`registerCustomFieldTypes\` mutates the \`@esheet/fields\` registry, so the \`codeLookup\` chosen at registration applies to every form; there is no per-field override. Omit it and \`MedicationReconciliation\` falls back to an ambient \`CodeLookupProvider\`, then to a plain name input.
+- **Answer shape** is a JSON string in a \`text\` answer type; malformed or non-object JSON degrades to an empty list rather than throwing. Nothing validates the medications against a schema.
+- **Read-only outside fill-out mode** means the builder canvas shows the seed list but cannot edit it inline — authors edit \`definition.medications\` as JSON.
+- **Dependencies / entry.** \`@mieweb/ui/esheet\` (not the main barrel); peers \`@esheet/renderer\` (or \`@esheet/builder\`), \`@esheet/core\`, \`@esheet/fields\` — currently listed only as devDependencies of \`@mieweb/ui\`, so install them yourself. \`CodeLookup\` is not in the package build.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui/esheet',
+      peers: ['@esheet/renderer', '@esheet/core', '@esheet/fields'],
+      relationships: [
+        {
+          type: 'uses',
+          target: 'clinical-lists-medicationlist',
+          why: 'The field renders MedicationReconciliation and serialises its Medication[] into response.answer.',
+        },
+        {
+          type: 'depends on',
+          target: 'composite-forms-esheet-renderer',
+          why: 'Only meaningful inside an EsheetRenderer / EsheetBuilder after registerMedicationListFieldType() has run.',
+        },
+      ],
     },
   },
 };

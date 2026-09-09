@@ -51,7 +51,8 @@ const EMPLOYEE_COLUMNS = [
 ];
 
 const meta: Meta<typeof DataVisNitroGrid> = {
-  title: 'Components/Text & Data Display/DataVis NITRO',
+  id: 'grids-datavis-nitro',
+  title: 'Components/Grids/DataVis NITRO',
   component: DataVisNitroGrid,
   parameters: {
     layout: 'fullscreen',
@@ -63,13 +64,93 @@ const meta: Meta<typeof DataVisNitroGrid> = {
     },
     docs: {
       description: {
-        component:
-          'Source: [mieweb/datavis](https://github.com/mieweb/datavis) (the `@mieweb/datavis` package), built on the [mieweb/wcdatavis](https://github.com/mieweb/wcdatavis) DataVis ACE engine (`datavis-ace`).\n\n' +
-          '`<DataVisNitroSource>` and `<DataVisNitroGrid>` are implemented by `@mieweb/datavis` and re-exported through `@mieweb/ui/datavis`, the supported consumer entry point.',
+        component: `> **Tables and data grids start with DataVis NITRO.** Use \`Table\` only for a few static rows the user will not sort, filter, page or export. Never hand-roll grid features on a plain table; \`AGGrid\` is deprecated.
+
+Source: [mieweb/datavis](https://github.com/mieweb/datavis) (\`@mieweb/datavis\`), built on the [mieweb/wcdatavis](https://github.com/mieweb/wcdatavis) DataVis ACE engine (\`datavis-ace\`).
+
+### What it's for
+
+Browsing, sorting, filtering, grouping and exporting record sets without writing grid logic. \`<DataVisNitroSource>\` creates a datavis source/view pair (HTTP, local array or file) and \`<DataVisNitroGrid>\` renders that view through DataVis NITRO's React \`DataGrid\`. Column menus, pinned columns, aggregates and saved perspectives come from the engine, so a product gets the same grid behaviour everywhere.
+
+### Use it when
+
+- Users need to browse or work with records: any list that may grow, be sorted, filtered or exported.
+- You would otherwise hand-roll sorting, filtering or column menus on top of a plain \`<table>\`.
+- Row actions are needed: render a \`RowActionToolbar\` with \`group="grid"\` from \`formatCell\`.
+
+### Don't use it when
+
+- The data is a handful of static rows shown for reading (a summary block, a definition list) — use \`Table\`.
+- You need a chart rather than rows — use \`DataVisNitroGraph\` on the same source, or \`Sparkline\` for an inline strip.
+- The consumer cannot take the optional peers (\`@mieweb/datavis\`, \`datavis-ace\`); keep it behind the \`@mieweb/ui/datavis\` entry so apps that never show a grid do not pay for it.
+
+### Example
+
+\`\`\`tsx
+import { DataVisNitroGrid, DataVisNitroSource } from '@mieweb/ui/datavis';
+
+<DataVisNitroSource type="http" url="/api/employees">
+  <DataVisNitroGrid
+    columns={['name', 'department', 'status']}
+    onRowClick={(row) => openEmployee(row.id)}
+  />
+</DataVisNitroSource>
+\`\`\`
+
+The source owns the data lifecycle; the grid is presentational. Keep application state (selected id, route) in the host and react to \`onRowClick\` / \`onSelectionChange\`.
+
+### Limitations
+
+- **Accessibility:** the engine's DOM emits invalid ARIA attributes, nested interactive elements and some non-conforming contrast; automated a11y checks are disabled for this page. Provide a keyboard-reachable alternative for critical actions until upstream fixes land.
+- **Theming:** the grid follows the active brand and dark mode through the DataVis colour scheme; per-cell styling goes through \`formatCell\`.
+- **\`formatCell\` must return the value itself for columns it does not handle** — returning \`undefined\` blanks the cell.
+- Saved perspectives persist in \`localStorage\` only on trusted workstations; public kiosks keep them in memory until refresh.
+- Renders inline (no portal); the host controls height and scrolling.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui/datavis',
+      peers: ['@mieweb/datavis', 'datavis-ace'],
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'grids-table',
+          why: 'Table is for a few static rows; NITRO whenever users browse, sort, filter or export records.',
+        },
+        {
+          type: 'alternative to',
+          target: 'encounter-orders-webchartreportviewer',
+          why: 'NITRO is the interactive grid for sorting, grouping and pivoting a dataset; WebChartReportViewer picks a backend-run report and shows its rows in a static Table.',
+        },
+        {
+          type: 'composes with',
+          target: 'grids-datavis-nitro-graph',
+          why: 'Both render the same DataVisNitroSource; switch between rows and a chart without refetching.',
+        },
+        {
+          type: 'composes with',
+          target: 'actions-rowactiontoolbar',
+          why: 'Render per-row actions inside a grid cell with group="grid" so they reveal on row hover.',
+        },
+        {
+          type: 'composes with',
+          target: 'data-display-filtersummarybar',
+          why: 'FilterSummaryBar above the grid shows filtered-of-total counts for host-side filters and search, with one Clear all.',
+        },
+        {
+          type: 'supersedes',
+          target: 'deprecated-aggrid',
+          why: 'AGGrid is deprecated; NITRO ships brand theming and perspectives without the ag-grid peers.',
+        },
+        {
+          type: 'supersedes',
+          target: 'deprecated-aggrid-enhanced',
+          why: 'The enhanced cell renderers are covered by formatCell and the engine column types.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   decorators: [
     (Story) => (
       <div style={{ padding: '1rem' }}>
