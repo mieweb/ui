@@ -534,6 +534,8 @@ export const miewebUISafelist = [
   'ps-6',
   'rounded-s-none',
   'start-1',
+  'first:border-s-0',
+  'rtl:origin-right',
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',

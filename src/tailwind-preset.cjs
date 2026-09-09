@@ -178,6 +178,8 @@ module.exports = {
     'ps-6',
     'rounded-s-none',
     'start-1',
+    'first:border-s-0',
+    'rtl:origin-right',
     // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
     // md variants that hand desktop back its original percentage cap. Purging
     // these uncaps the player on a phone, which is the bug the cap exists for.

@@ -108,7 +108,7 @@ export function FloatingInput({
         htmlFor={inputId}
         data-slot="floating-input-label"
         className={cn(
-          'text-muted-foreground absolute start-4 top-4 origin-left transform transition-all duration-200',
+          'text-muted-foreground absolute start-4 top-4 origin-left transform transition-all duration-200 rtl:origin-right',
           'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
           'peer-focus:-translate-y-2 peer-focus:scale-75',
           'peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-75',
