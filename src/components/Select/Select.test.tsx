@@ -42,6 +42,52 @@ describe('Select portals', () => {
 
     expect(onValueChange).toHaveBeenCalledWith('new');
   });
+
+  it('does not select on touchstart while preparing a touch scroll', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Dropdown trigger={<button type="button">Actions</button>}>
+        <DropdownContent>
+          <Select
+            aria-label="Perspective"
+            options={[{ value: 'new', label: 'New Perspective' }]}
+            onValueChange={onValueChange}
+          />
+        </DropdownContent>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Actions' }));
+    await user.click(screen.getByRole('combobox', { name: 'Perspective' }));
+    fireEvent.touchStart(
+      screen.getByRole('option', { name: 'New Perspective' })
+    );
+
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('option', { name: 'New Perspective' })
+    ).toBeVisible();
+  });
+
+  it('supports programmatic click activation', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Select
+        aria-label="Perspective"
+        options={[{ value: 'new', label: 'New Perspective' }]}
+        onValueChange={onValueChange}
+      />
+    );
+
+    await user.click(screen.getByRole('combobox', { name: 'Perspective' }));
+    fireEvent.click(screen.getByRole('option', { name: 'New Perspective' }));
+
+    expect(onValueChange).toHaveBeenCalledWith('new');
+  });
 });
 
 describe('Select typeahead', () => {
