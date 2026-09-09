@@ -95,11 +95,11 @@ export const Default: StoryObj<DefaultArgs> = {
     perspectives: {
       control: 'boolean',
       description:
-        'Enable the perspective variant: binds a localStorage-backed `Prefs` module so the "Main Perspective" toolbar renders. See the With Perspectives story for details.',
+        'Enable the perspective variant: binds a `Prefs` module so the "Main Perspective" toolbar renders. Persistence follows the public kiosk / trusted workstation toolbar setting. See the With Perspectives story for details.',
     },
   },
   loaders: [clearSavedPerspectives],
-  render: ({ perspectives }) => {
+  render: ({ perspectives }, { globals }) => {
     const grid = {
       title: 'Employees',
       columns: EMPLOYEE_COLUMNS,
@@ -108,7 +108,10 @@ export const Default: StoryObj<DefaultArgs> = {
     return (
       <DataVisNitroSource type="http" url="/sample-data.json">
         {perspectives ? (
-          <PerspectivesGrid {...grid} />
+          <PerspectivesGrid
+            {...grid}
+            trustedDevice={globals.device === 'trusted'}
+          />
         ) : (
           <DataVisNitroGrid {...grid} />
         )}
@@ -444,11 +447,14 @@ export const OzwellAssistant: Story = {
 };
 
 /**
- * Reads the shared view from DataVisNitroContext, binds a localStorage-backed
- * Prefs module to it, and passes the module to the grid so the perspective
- * toolbar ("Main Perspective" dropdown, save/reset/history buttons) renders.
+ * Reads the shared view from DataVisNitroContext, binds a Prefs module to it,
+ * and passes the module to the grid so the perspective toolbar ("Main
+ * Perspective" dropdown, save/reset/history buttons) renders.
  */
-const PerspectivesGrid = (props: DataVisNitroGridProps) => {
+const PerspectivesGrid = ({
+  trustedDevice,
+  ...props
+}: DataVisNitroGridProps & { trustedDevice: boolean }) => {
   const view = useContext(DataVisNitroContext);
 
   const prefs = useMemo(() => {
@@ -456,14 +462,16 @@ const PerspectivesGrid = (props: DataVisNitroGridProps) => {
 
     return new PrefsConstructor('mieweb-ui-storybook:employees', null, {
       autoSave: true,
-      backend: {
-        type: 'localStorage',
-        localStorage: {
-          key: PREFS_STORAGE_KEY,
-        },
-      },
+      backend: trustedDevice
+        ? {
+            type: 'localStorage',
+            localStorage: {
+              key: PREFS_STORAGE_KEY,
+            },
+          }
+        : { type: 'temporary' },
     });
-  }, [view]);
+  }, [view, trustedDevice]);
 
   useEffect(() => {
     if (!view || !prefs) return;
@@ -482,17 +490,18 @@ export const WithPerspectives: Story = {
     docs: {
       description: {
         story:
-          'Passing a `prefs` module (a `PrefsInstance` from `datavis-ace`) enables the perspective toolbar: the "Main Perspective" dropdown, save / save-as / reset buttons, and undo/redo history. Perspectives capture the grid configuration (sort, filter, group, pivot, aggregate, column layout) and here persist to `localStorage`. Create the `Prefs` instance, bind it to the shared view with `view.setPrefs(prefs)`, and pass it to `<DataVisNitroGrid prefs={…}>`. In minimal mode the same toolbar appears inside the hamburger menu.',
+          'Passing a `prefs` module (a `PrefsInstance` from `datavis-ace`) enables the perspective toolbar: the "Main Perspective" dropdown, save / save-as / reset buttons, and undo/redo history. Perspectives capture the grid configuration (sort, filter, group, pivot, aggregate, column layout). The device toolbar controls persistence: trusted workstations save to `localStorage`, while public kiosks keep perspectives in memory only and discard them on refresh. Create the `Prefs` instance, bind it to the shared view with `view.setPrefs(prefs)`, and pass it to `<DataVisNitroGrid prefs={…}>`. In minimal mode the same toolbar appears inside the hamburger menu.',
       },
     },
   },
-  render: () => (
+  render: (_args, { globals }) => (
     <DataVisNitroSource type="http" url="/sample-data.json">
       <PerspectivesGrid
         title="Employees"
         columns={EMPLOYEE_COLUMNS}
         showControls
         height="480px"
+        trustedDevice={globals.device === 'trusted'}
       />
     </DataVisNitroSource>
   ),

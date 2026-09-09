@@ -833,6 +833,12 @@ function SelectOptionItem({
   onSelect,
   onMouseEnter,
 }: SelectOptionItemProps) {
+  const handlePointerDown = (event: React.PointerEvent) => {
+    if (event.button !== 0 || option.disabled) return;
+    event.preventDefault();
+    onSelect();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -851,7 +857,7 @@ function SelectOptionItem({
       data-highlighted={isHighlighted}
       data-disabled={option.disabled}
       tabIndex={isHighlighted ? 0 : -1}
-      onClick={option.disabled ? undefined : onSelect}
+      onPointerDown={handlePointerDown}
       onKeyDown={handleKeyDown}
       onMouseEnter={option.disabled ? undefined : onMouseEnter}
       className={cn(
