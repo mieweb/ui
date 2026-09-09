@@ -1,23 +1,23 @@
 # AGGrid — Maintainer Notes
 
-> **Provider notes** — how to *change* the AG Grid wrapper. Consumers should read
+> **Provider notes** — how to _change_ the AG Grid wrapper. Consumers should read
 > the in-folder [implementation-guide.md](implementation-guide.md) (usage) and the
 > Storybook stories. General conventions: [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
-## ⚠️ Prefer NITRO DataVis over AGGrid
+## ⚠️ DEPRECATED — no new usages
 
-**AGGrid is a last resort, not the default grid.** `ag-grid-community` /
+**AGGrid is deprecated.** Use [DataVisNITRO](../DataVisNITRO/MAINTAINERS.md)
+(`@mieweb/ui/datavis`) for **all** tables and data grids. `ag-grid-community` /
 `ag-grid-react` are heavy dependencies and pull significant weight into any bundle
-that uses them. To minimize bloat:
+that uses them.
 
-- **Reach for [DataVisNITRO](../DataVisNITRO/MAINTAINERS.md) first** for tables and
-  data grids. Use AGGrid **only** when NITRO DataVis genuinely lacks the required
-  functionality.
-- When you do use AGGrid, **document why** NITRO couldn't cover the case — that
-  gap is a candidate feature request for NITRO so the next consumer can avoid the
-  dependency.
-- Whenever NITRO gains the missing capability, **migrate AGGrid usages back to
-  NITRO** and drop the AG Grid peers where possible.
+- **No new AGGrid usages are allowed.** Reach for NITRO DataVis instead.
+- The component logs a one-time `console.warn` on first mount and is tagged
+  `@deprecated` in JSDoc, so editors flag usages with strikethrough.
+- If NITRO lacks a capability you need, **file a feature request against NITRO**
+  rather than adopting AGGrid.
+- **Migrate existing AGGrid usages to NITRO** as capabilities allow, and drop the
+  AG Grid peers where possible. AGGrid will be removed in a future major release.
 
 The separate `@mieweb/ui/ag-grid` entry already keeps AG Grid out of the default
 bundle (see below) — but the cheapest dependency is the one you never import.
@@ -28,7 +28,7 @@ A themeable wrapper around **ag-grid-react / ag-grid-community** (both are
 **optional peer deps**). It ships from a **separate entry**, not the main barrel:
 
 ```ts
-import { AGGrid } from '@mieweb/ui/ag-grid';   // → src/ag-grid.ts → ./components/AGGrid
+import { AGGrid } from '@mieweb/ui/ag-grid'; // → src/ag-grid.ts → ./components/AGGrid
 ```
 
 This keeps AG Grid out of the default install/bundle for consumers who don't need
@@ -36,10 +36,10 @@ grids.
 
 ## Two surfaces: base vs. enhanced
 
-| Surface | Entry | Contents |
-|---------|-------|----------|
-| Base | [index.ts](index.ts) | `AGGrid`, `AgGridReact`, `CellRenderers` + per-renderer + **Memoized** variants, utilities |
-| Enhanced | [index-enhanced.ts](index-enhanced.ts) | `Enhanced*` cell renderers (richer, design-system-integrated) |
+| Surface  | Entry                                  | Contents                                                                                   |
+| -------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Base     | [index.ts](index.ts)                   | `AGGrid`, `AgGridReact`, `CellRenderers` + per-renderer + **Memoized** variants, utilities |
+| Enhanced | [index-enhanced.ts](index-enhanced.ts) | `Enhanced*` cell renderers (richer, design-system-integrated)                              |
 
 Keep the two in sync conceptually but don't merge them — the enhanced renderers
 pull in more and are opt-in. Stories: [AGGrid.stories.tsx](AGGrid.stories.tsx) and

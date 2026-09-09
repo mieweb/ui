@@ -23,6 +23,107 @@ const inputVariants = cva(
         true: 'border-destructive focus:ring-destructive',
         false: '',
       },
+      labelVariant: {
+        stacked: '',
+        floating: 'peer placeholder:text-transparent',
+      },
+    },
+    compoundVariants: [
+      // Floating labels need extra height and asymmetric padding so both
+      // the floated label and the entered text fit inside the field.
+      { labelVariant: 'floating', size: 'sm', className: 'h-11 pt-4 pb-1' },
+      { labelVariant: 'floating', size: 'md', className: 'h-14 pt-5 pb-1.5' },
+      { labelVariant: 'floating', size: 'lg', className: 'h-16 pt-6 pb-2' },
+    ],
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
+      labelVariant: 'stacked',
+    },
+  }
+);
+
+// Bordered field box for group controls (RadioGroup / CheckboxGroup) rendered
+// with labelVariant="floating". Mirrors the floating input's box metrics so
+// mixed forms stay vertically aligned.
+const floatingGroupVariants = cva(
+  ['relative rounded-lg border border-input bg-background px-3'],
+  {
+    variants: {
+      size: {
+        sm: 'min-h-11 pt-4 pb-1',
+        md: 'min-h-14 pt-5 pb-1.5',
+        lg: 'min-h-16 pt-6 pb-2',
+      },
+      hasError: {
+        true: 'border-destructive',
+        false: '',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
+    },
+  }
+);
+
+// Group label fixed in the floated position (groups have no empty state to
+// float from, so the label never animates). Metrics match the floated state
+// of floatingLabelVariants.
+const floatingGroupLabelVariants = cva(
+  ['absolute start-3 pointer-events-none select-none'],
+  {
+    variants: {
+      size: {
+        sm: 'top-0.5 text-[0.65rem]',
+        md: 'top-1 text-xs',
+        lg: 'top-1.5 text-sm',
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
+    },
+  }
+);
+
+const floatingLabelVariants = cva(
+  [
+    'absolute start-3 pointer-events-none select-none',
+    'transition-all duration-200 ease-out',
+    // Rest state: vertically centered, placeholder-sized (input is empty and unfocused).
+    'top-1/2 -translate-y-1/2',
+    // Floated state: focused, has a value, or was autofilled → shrink and move to the top,
+    // staying inside the field.
+    'peer-focus:translate-y-0 peer-[:not(:placeholder-shown)]:translate-y-0 peer-autofill:translate-y-0',
+  ],
+  {
+    variants: {
+      size: {
+        sm: [
+          'text-sm',
+          'peer-focus:top-0.5 peer-[:not(:placeholder-shown)]:top-0.5 peer-autofill:top-0.5',
+          'peer-focus:text-[0.65rem] peer-[:not(:placeholder-shown)]:text-[0.65rem] peer-autofill:text-[0.65rem]',
+        ],
+        md: [
+          'text-base',
+          'peer-focus:top-1 peer-[:not(:placeholder-shown)]:top-1 peer-autofill:top-1',
+          'peer-focus:text-xs peer-[:not(:placeholder-shown)]:text-xs peer-autofill:text-xs',
+        ],
+        lg: [
+          'text-lg',
+          'peer-focus:top-1.5 peer-[:not(:placeholder-shown)]:top-1.5 peer-autofill:top-1.5',
+          'peer-focus:text-sm peer-[:not(:placeholder-shown)]:text-sm peer-autofill:text-sm',
+        ],
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
     },
     defaultVariants: {
       size: 'md',
@@ -34,17 +135,53 @@ const inputVariants = cva(
 export interface InputProps
   extends
     Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof inputVariants> {
+    Omit<VariantProps<typeof inputVariants>, 'labelVariant'> {
   /** Error message to display below the input */
   error?: string;
   /** Helper text to display below the input */
   helperText?: string;
   /** Label for the input */
   label?: string;
+  /**
+   * How the label is rendered.
+   * - `stacked` (default): label above the input.
+   * - `floating`: label rests inside the input like a placeholder and floats
+   *   to the top of the field (staying inside it) when focused or filled.
+   *   Ignores `placeholder`; when `hideLabel` is set, falls back to a
+   *   visually-hidden stacked label.
+   */
+  labelVariant?: 'stacked' | 'floating';
   /** Whether the label should be visually hidden (still accessible) */
   hideLabel?: boolean;
   /** Whether the input is required */
   required?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
+}
+
+type RequiredMarkVariant = 'default' | 'warning';
+
+/** Asterisk rendered next to a label when the field is required. */
+function RequiredMark({
+  variant = 'default',
+}: {
+  variant?: RequiredMarkVariant;
+}) {
+  return (
+    <span
+      className={cn(
+        'ms-1',
+        variant === 'warning' ? 'text-warning' : 'text-destructive'
+      )}
+      aria-hidden="true"
+    >
+      *
+    </span>
+  );
 }
 
 /**
@@ -54,6 +191,7 @@ export interface InputProps
  * ```tsx
  * <Input label="Email" type="email" placeholder="you@example.com" />
  * <Input label="Password" type="password" error="Password is required" hasError />
+ * <Input label="Account number" labelVariant="floating" />
  * ```
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -65,10 +203,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       error,
       helperText,
       label,
+      labelVariant = 'stacked',
       hideLabel,
       required,
+      requiredVariant,
       disabled,
       id,
+      placeholder,
       'aria-describedby': ariaDescribedBy,
       ...props
     },
@@ -87,12 +228,41 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       .filter(Boolean)
       .join(' ');
 
+    const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
+
+    const requiredMark = required && <RequiredMark variant={requiredVariant} />;
+
+    const inputElement = (
+      <input
+        data-slot="input"
+        id={inputId}
+        ref={ref}
+        className={cn(
+          inputVariants({
+            size,
+            hasError: hasError || !!error,
+            labelVariant: isFloating ? 'floating' : 'stacked',
+          }),
+          className
+        )}
+        aria-invalid={hasError || !!error}
+        aria-describedby={describedByIds || undefined}
+        required={required}
+        disabled={disabled}
+        // A single-space placeholder keeps :placeholder-shown reliable so the
+        // label can float via CSS alone; a user placeholder would clash with
+        // the resting label.
+        placeholder={isFloating ? ' ' : placeholder}
+        {...props}
+      />
+    );
+
     return (
       <div
         data-slot="input-wrapper"
         className={cn('flex flex-col gap-1.5', disabled && 'opacity-50')}
       >
-        {label && (
+        {label && !isFloating && (
           <label
             data-slot="input-label"
             htmlFor={inputId}
@@ -102,27 +272,27 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             )}
           >
             {label}
-            {required && (
-              <span className="text-destructive ms-1" aria-hidden="true">
-                *
-              </span>
-            )}
+            {requiredMark}
           </label>
         )}
-        <input
-          data-slot="input"
-          id={inputId}
-          ref={ref}
-          className={cn(
-            inputVariants({ size, hasError: hasError || !!error }),
-            className
-          )}
-          aria-invalid={hasError || !!error}
-          aria-describedby={describedByIds || undefined}
-          required={required}
-          disabled={disabled}
-          {...props}
-        />
+        {isFloating ? (
+          <div className="relative">
+            {inputElement}
+            <label
+              data-slot="input-label"
+              htmlFor={inputId}
+              className={floatingLabelVariants({
+                size,
+                hasError: hasError || !!error,
+              })}
+            >
+              {label}
+              {requiredMark}
+            </label>
+          </div>
+        ) : (
+          inputElement
+        )}
         {error && (
           <p
             id={errorId}
@@ -149,4 +319,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input';
 
-export { Input, inputVariants };
+export {
+  Input,
+  RequiredMark,
+  inputVariants,
+  floatingLabelVariants,
+  floatingGroupVariants,
+  floatingGroupLabelVariants,
+};
+export type { RequiredMarkVariant };

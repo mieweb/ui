@@ -38,9 +38,10 @@ const mockServices: ServiceOption[] = [
 ];
 
 const meta: Meta<typeof ProviderSearchFilters> = {
-  title: 'Product/Provider/ProviderSearchFilters',
+  id: 'providers-providersearchfilters',
+  title: 'BlueHive/Providers/ProviderSearchFilters',
   component: ProviderSearchFilters,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

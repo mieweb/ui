@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AGGrid, type ColDef } from './AGGrid';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
+import { withDeprecationBanner, DEPRECATION_NOTICE } from './DeprecationBanner';
 
 // Import cell renderers
 import {
@@ -246,8 +247,10 @@ function WithEditableCellsComponent() {
 }
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Components/Text & Data Display/AGGrid',
+  id: 'deprecated-aggrid',
+  title: 'Deprecated/AGGrid',
   component: AGGrid,
+  decorators: [withDeprecationBanner],
   parameters: {
     layout: 'padded',
     // AG Grid is a third-party component whose internal DOM renders elements
@@ -256,12 +259,25 @@ const meta: Meta<typeof AGGrid> = {
     a11y: { test: 'off' },
     // Disable Storybook's animation waiting which conflicts with AG Grid
     chromatic: { disableSnapshot: true },
+    catalog: {
+      entry: '@mieweb/ui/ag-grid',
+      peers: ['ag-grid-community', 'ag-grid-react'],
+      relationships: [
+        {
+          type: 'superseded by',
+          target: 'grids-datavis-nitro',
+          why: 'NITRO provides theming, perspectives and column features without the ag-grid peers.',
+        },
+      ],
+    },
     docs: {
       story: {
         autoplay: false,
       },
       description: {
         component: `
+${DEPRECATION_NOTICE}
+
 A themed AG Grid wrapper component that integrates with the MIE Web UI design system.
 
 ## Features
@@ -325,7 +341,7 @@ import {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:deprecated'],
   argTypes: {
     variant: {
       control: 'select',

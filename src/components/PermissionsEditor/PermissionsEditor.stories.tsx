@@ -9,9 +9,10 @@ import { Card } from '../Card';
 import { Button } from '../Button';
 
 const meta: Meta<typeof PermissionsEditor> = {
-  title: 'Components/Forms & Inputs/PermissionsEditor',
+  id: 'composite-forms-permissionseditor',
+  title: 'Inputs/Composite forms/PermissionsEditor',
   component: PermissionsEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     userName: {
       control: 'text',
@@ -36,10 +37,60 @@ const meta: Meta<typeof PermissionsEditor> = {
   parameters: {
     docs: {
       description: {
-        component:
-          'A hierarchical permission editor for managing user roles with support for nested permissions, employer access control, and summary display.',
+        component: `### What it's for
+
+A **role / permission assignment panel** for a user. \`groups: PermissionGroup[]\` (\`{ id, name, permissions: Permission[], defaultExpanded? }\`) hold a tree of \`Permission\`s (\`{ id, name, description?, children?, … }\`, up to three levels) rendered as collapsible groups of \`Checkbox\` rows. Assignment is controlled: \`assignedPermissions: string[]\` + \`onPermissionsChange(ids)\`. Optional second section when \`showEmployerAccess\` and \`employers: EmployerAccess[]\` (\`{ id, name, address? }\`) are given: \`selectedEmployers\` / \`onEmployersChange\` scope the user to employers (none selected reads as "All"). A summary box lists assigned permission names and employer scope. \`userName\` shows who is being edited; \`labels\` overrides the section titles (\`userRole\`, \`employerAccess\`, \`summary\`, \`all\`). Exports: \`PermissionsEditor\` (also default), types \`Permission\`, \`PermissionGroup\`, \`EmployerAccess\`, \`PermissionsEditorProps\`.
+
+### Use it when
+
+- An admin screen edits **which capabilities a user has**, and the capabilities form a hierarchy (Admin › Orders › Approve).
+- Access must also be narrowed to a subset of organisations (employer access) alongside the role.
+
+### Don't use it when
+
+- There is one flat list of a few flags — a \`CheckboxGroup\` is enough.
+- The user picks **one** role from a list — \`Select\` or \`RadioGroup\`.
+- You need a matrix (roles × permissions), search over hundreds of permissions, or read-only display of effective permissions — not provided.
+
+### Example
+
+\`\`\`tsx
+const [perms, setPerms] = useState<string[]>(user.permissionIds);
+const [employers, setEmployers] = useState<string[]>(user.employerIds);
+
+<PermissionsEditor
+  userName={user.fullName}
+  groups={permissionGroups}            // from your API, nested via children
+  assignedPermissions={perms}
+  onPermissionsChange={setPerms}
+  showEmployerAccess
+  employers={employerList}
+  selectedEmployers={employers}
+  onEmployersChange={setEmployers}
+/>
+
+<Button onClick={() => savePermissions(user.id, { perms, employers })}>Save</Button>  // host persists
+\`\`\`
+
+### Limitations
+
+- Accessibility: each permission is a \`Checkbox\` with \`id="permission-{id}"\` and an explicit \`<label htmlFor>\`; employers likewise (\`employer-{id}\`). Group headers are \`<button>\`s that toggle visibility but have **no \`aria-expanded\` / \`aria-controls\`**; the per-permission expand chevrons do have \`aria-expanded\` and an English \`aria-label\` ("Expand {name}"). The tree has no \`role="tree"\` / \`treeitem\` semantics and no arrow-key navigation — Tab through every checkbox. The summary box is a static \`<div>\` (no live region), so changes are not announced. Permission \`description\` is accepted but never rendered.
+- Cascading is one-directional: unchecking a parent also unchecks its children (each as a separate \`onPermissionsChange\` call, so batch or use a functional setter); checking a parent does **not** check children, and a child is disabled while its parent is unchecked. Nothing is submitted with a form — the host persists.
+- Hierarchy depth is fixed at three levels (permission › child › grandchild); deeper \`children\` are ignored when computing \`isAssigned\`.
+- i18n: section titles and "All" are \`labels\` props; "Expand/Collapse …" aria-labels and the "—" separators are hard-coded. Employer address is rendered as "street1 - city, state" (US order).
+- RTL: nested rows indent with \`ml-4\` / \`ml-6\` / \`pl-2\` / \`pl-4\` / \`-ml-2\`, group headers are \`text-left\`, the tree rule is \`border-l\`, address uses \`ml-2\` — all physical. Theming: semantic tokens (\`text-primary\`, \`hover:bg-muted/50\`, \`border-border\`, summary \`bg-info/10 border-info/30\`). Depends on \`Checkbox\` and \`lucide-react\` (Shield, Building2, chevrons).`,
       },
       story: { inline: true },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'uses',
+          target: 'choice-inputs-checkbox',
+          why: 'Every permission and employer row is a Checkbox with an explicit htmlFor label.',
+        },
+      ],
     },
   },
   args: {

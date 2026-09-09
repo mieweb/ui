@@ -52,64 +52,64 @@ test.beforeAll(async ({ browser }) => {
 
 test.describe('Visual Regression Tests - Core Components', () => {
   test('Button - Primary', async ({ page }) => {
-    await gotoStory(page, 'components-forms-inputs-button--primary');
+    await gotoStory(page, 'actions-button--primary');
     await expect(page).toHaveScreenshot('button-primary.png');
   });
 
   test('Button - All variants', async ({ page }) => {
-    await gotoStory(page, 'components-forms-inputs-button--all-variants');
+    await gotoStory(page, 'actions-button--all-variants');
     await expect(page).toHaveScreenshot('button-all-variants.png');
   });
 
   test('Input - Default', async ({ page }) => {
-    await gotoStory(page, 'components-forms-inputs-input--default');
+    await gotoStory(page, 'text-inputs-input--default');
     await expect(page).toHaveScreenshot('input-default.png');
   });
 
   test('Avatar - Default', async ({ page }) => {
-    await gotoStory(page, 'components-text-data-display-avatar--default');
+    await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');
   });
 
   test('Badge - Default', async ({ page }) => {
-    await gotoStory(page, 'components-text-data-display-badge--default');
+    await gotoStory(page, 'data-display-badge--default');
     await expect(page).toHaveScreenshot('badge-default.png');
   });
 
   test('Card - Default', async ({ page }) => {
-    await gotoStory(page, 'components-layout-structure-card--default');
+    await gotoStory(page, 'layout-card--default');
     await expect(page).toHaveScreenshot('card-default.png');
   });
 
   test('Checkbox - Default', async ({ page }) => {
-    await gotoStory(page, 'components-forms-inputs-checkbox--default');
+    await gotoStory(page, 'choice-inputs-checkbox--default');
     await expect(page).toHaveScreenshot('checkbox-default.png');
   });
 
   test('Switch - Default', async ({ page }) => {
-    await gotoStory(page, 'components-forms-inputs-switch--default');
+    await gotoStory(page, 'choice-inputs-switch--default');
     await expect(page).toHaveScreenshot('switch-default.png');
   });
 
   test('Select - Default', async ({ page }) => {
-    await gotoStory(page, 'components-forms-inputs-select--default');
+    await gotoStory(page, 'choice-inputs-select--default');
     await expect(page).toHaveScreenshot('select-default.png');
   });
 
   test('Table - Default', async ({ page }) => {
-    await gotoStory(page, 'components-layout-structure-table--default');
+    await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');
   });
 
   test('Spinner - Default', async ({ page }) => {
-    await gotoStory(page, 'components-loaders-spinner--default');
+    await gotoStory(page, 'loading-spinner--default');
     await expect(page).toHaveScreenshot('spinner-default.png', {
       animations: 'disabled',
     });
   });
 
   test('Progress - Default', async ({ page }) => {
-    await gotoStory(page, 'components-loaders-progress--default');
+    await gotoStory(page, 'loading-progress--default');
     await expect(page).toHaveScreenshot('progress-default.png', {
       animations: 'disabled',
     });
@@ -121,38 +121,38 @@ test.describe('Visual Regression Tests - Core Components', () => {
   });
 
   test('Breadcrumb - Default', async ({ page }) => {
-    await gotoStory(page, 'components-navigation-breadcrumb--default');
+    await gotoStory(page, 'navigation-breadcrumb--default');
     await expect(page).toHaveScreenshot('breadcrumb-default.png');
   });
 
   test('Tabs - Underline', async ({ page }) => {
-    await gotoStory(page, 'components-layout-structure-tabs--underline');
+    await gotoStory(page, 'navigation-tabs--underline');
     await expect(page).toHaveScreenshot('tabs-underline.png');
   });
 
   // Components with branding fixes
   test('Toast - Success', async ({ page }) => {
-    await gotoStory(page, 'components-messaging-toast--success');
+    await gotoStory(page, 'feedback-toast--success');
     await expect(page).toHaveScreenshot('toast-success.png');
   });
 
   test('AudioPlayer - Compact', async ({ page }) => {
-    await gotoStory(page, 'components-images-media-audioplayer--compact');
+    await gotoStory(page, 'media-audioplayer--compact');
     await expect(page).toHaveScreenshot('audioplayer-compact.png');
   });
 
   test('AudioPlayer - Podcast Player', async ({ page }) => {
-    await gotoStory(page, 'components-images-media-audioplayer--podcast-player');
+    await gotoStory(page, 'media-audioplayer--podcast-player');
     await expect(page).toHaveScreenshot('audioplayer-podcast-player.png');
   });
 
   test('CommandPalette - Default', async ({ page }) => {
-    await gotoStory(page, 'components-navigation-commandpalette--default');
+    await gotoStory(page, 'navigation-commandpalette--default');
     await expect(page).toHaveScreenshot('commandpalette-default.png');
   });
 
   test('AGGrid - Default', async ({ page }) => {
-    await gotoStory(page, 'components-text-data-display-aggrid--default');
+    await gotoStory(page, 'deprecated-aggrid--default');
     await expect(page).toHaveScreenshot('aggrid-default.png');
   });
 });

@@ -111,12 +111,74 @@ const renderIcon = (iconName: string | undefined) => {
 };
 
 const meta: Meta<typeof Button> = {
-  title: 'Components/Forms & Inputs/Button',
+  id: 'actions-button',
+  title: 'Inputs/Actions/Button',
   component: Button,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+The one clickable control for actions: six intents (\`primary\`, \`secondary\`, \`outline\`, \`ghost\`, \`danger\`, \`link\`), four sizes (\`sm\`, \`md\`, \`lg\`, \`icon\`), \`leftIcon\` / \`rightIcon\` slots and an \`isLoading\` state that swaps in a spinner and \`loadingText\`. It is a real \`<button>\` with \`forwardRef\`, so every native attribute (\`type\`, \`disabled\`, \`aria-*\`) passes through.
+
+### Use it when
+
+- The user triggers an action (submit, open, save, delete). One \`primary\` per view; \`secondary\`/\`outline\` for the rest; \`danger\` for destructive actions that are confirmed elsewhere.
+- **Two or more buttons sit together, or a single label is long, translated or user-supplied** — always wrap them in a \`ButtonGroup\`. Its default \`orientation="auto"\` measures the labels and stacks before anything truncates.
+- You need a link that looks like a button: pass \`variant="link"\`, or render an \`<a>\` styled with the same classes when navigation is the intent.
+
+### Don't use it when
+
+- The control has an on/off state that persists — use \`Toggle\` (toolbar formatting, view switches) or \`Switch\` in forms.
+- It is a large, icon-led shortcut on a dashboard — \`QuickAction\` is the card-shaped variant.
+- The action is "copy this value" — \`CopyButton\` handles clipboard and the success state.
+- Per-row list actions revealed on hover — \`RowActionToolbar\`.
+
+### Example
+
+\`\`\`tsx
+<ModalFooter>
+  <ButtonGroup className="w-full" split>
+    <Button variant="ghost" onClick={onBack}>Back</Button>
+    <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+    <Button variant="danger" isLoading={saving} loadingText="Deleting…" onClick={onDelete}>
+      Permanently delete this record
+    </Button>
+  </ButtonGroup>
+</ModalFooter>
+\`\`\`
+
+### Limitations
+
+- Keyboard and focus are native; a visible \`focus-visible\` ring is always rendered. An \`icon\` button has no text, so **you must pass \`aria-label\`**.
+- While \`isLoading\`, the button is disabled and announces \`loadingText\` — keep that text short and translated.
+- Labels render in a \`data-slot="button-label"\` span with \`truncate\`; without a \`ButtonGroup\` a long label is silently clipped.
+- Colours are brand tokens with \`dark:\` variants; there is no per-brand override API beyond \`className\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'actions-buttongroup',
+          why: 'Two or more buttons, or one long/translated label, always go in a ButtonGroup so labels never truncate.',
+        },
+        {
+          type: 'alternative to',
+          target: 'actions-toggle',
+          why: 'Toggle keeps a pressed state (aria-pressed); Button fires an action and forgets.',
+        },
+        {
+          type: 'alternative to',
+          target: 'actions-quickaction',
+          why: 'QuickAction is a card-sized icon shortcut for dashboards; Button is the inline control.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

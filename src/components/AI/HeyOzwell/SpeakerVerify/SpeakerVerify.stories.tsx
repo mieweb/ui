@@ -17,16 +17,63 @@ import { loadWhatPrints, clearWhatPrints } from '../../voiceprintStore';
 import { openRollingRecorder, chime, type RollingRecorder } from '../audio';
 
 const meta: Meta = {
-  title:
-    'Product/Feature Modules/AI/Hey Ozwell/Speaker Verify (dev diagnostic)',
+  id: 'voice-speaker-verify',
+  title: 'Modules/Voice/Speaker Verify',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:experimental'],
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'DEV diagnostic for tuning the gates — not the client UI (in the product, verification is invisible). ' +
-          'Enroll once, then talk: every wake shows the phrase + base/WHO/WHAT confidence, colour-coded, on-device.',
+        component: `### What it's for
+
+**A developer diagnostic for tuning the two-gate voice check — not a product screen.** In the product, speaker verification is invisible (folded into \`HeyOzwell\` / \`HandsFreeChat\` via \`requireDoctor\`); this story exposes the machinery: enroll once (guided, phrase-validated, 3 reps per phrase), then talk, and every wake logs which phrase fired with three scores — **base** (wake-model probability), **WHO** (\`useSpeakerVerify().verify\`: cosine to the enrolled TitaNet centroid and its AS-norm z-score against a 500-voice cohort) and **WHAT** (\`useWakeWord().phraseCosine\`: similarity of the phrase embedding to the enrolled phrase-print) — each green / red / grey with the overall verdict. The Controls (\`cosineThreshold\` 0.45, \`znormThreshold\` 1.5, \`useAsnorm\`) call \`setGates\` live. The exported primitive is \`useSpeakerVerify(opts?: { enabled })\` → \`SpeakerVerifyHandle\`: \`ready\`, \`error\`, \`enroll(phrase, utterances, { append, voiceId, label })\`, \`verify(phrase, samples, sampleRate)\` → \`{ score, znorm, pass, enrolled }\`, \`identify(samples, sampleRate)\` → best \`VoiceMatch\`, \`embed\`, \`listVoices\`, \`removeVoice\`, \`renameVoice\`, \`clear\`, \`setGates\`. It wraps the vendored \`speaker-verify.js\` (sherpa-onnx WASM + TitaNet) and persists centroids in IndexedDB (\`ozwell-voice\`).
+
+### Use it when
+
+- You are **tuning** the doctor-only gate for a site (new mics, noisy rooms, masked speech) and need to see raw scores rather than a silent pass/fail.
+- You are building a custom voice flow on \`useSpeakerVerify\` (\`identify\` for diarization anchoring, \`verify\` for gating) and want a reference for the calls and thresholds.
+
+### Don't use it when
+
+- End users need to enroll or manage voices — \`VoiceSetup\` / \`VoiceManager\` are the product screens.
+- You only need the wake trigger — \`Wake Word\`; or only who-spoke-when on a recording — \`VisitScribe\` / \`useDiarization\`.
+- Identity must be **authoritative**: this is a convenience gate against impostors in the room, not an authentication factor — scores are tunable and thresholds trade false accepts for false rejects.
+
+### Example
+
+\`\`\`tsx
+import { useSpeakerVerify, useWakeWord } from '@mieweb/ui';
+
+const sv = useSpeakerVerify({ enabled: settings.requireEnrolledClinician });
+const wake = useWakeWord({
+  onUtterance: (name, samples) => {
+    if (!sv.ready) return;
+    const who = sv.verify(name, samples, 16000);
+    if (!who || !who.enrolled || who.pass) act(name); // open gate until someone is enrolled
+    else telemetry.log('wake_rejected', { score: who.score, znorm: who.znorm }); // no audio, scores only
+  },
+});
+useEffect(() => { if (sv.ready) sv.setGates({ cosine: settings.cosine, useAsnorm: true }); }, [sv.ready]);
+\`\`\`
+
+### Limitations
+
+- **Runtime download:** \`useSpeakerVerify\` loads ~50 MB (sherpa-onnx WASM + \`.data\` + \`sv-cohort.json\`) from \`window.__ozwellAssets\` → \`sv-runtime/\` (default: a personal HuggingFace repo) via \`<script>\` tags that set a \`window.SpeakerVerify\` / \`window.Module\` global — one instance per page; pass \`enabled: false\` to avoid the download when the gate is off. Embedding runs on the **main thread**.
+- **Browser requirements:** secure context, WASM, IndexedDB; the story additionally needs the microphone through \`useWakeWord\` and keeps a rolling recorder open on the shared stream.
+- **Accessibility as implemented:** dev-only UI with inline styles and hard-coded colours; the readout, status line and enrollment cues are not live regions; pass/fail is conveyed by emoji + colour dots with text scores alongside. Not themed and not RTL-tested.
+- Scores depend on the enrollment conditions; the cohort is fixed (English speakers), and the default thresholds were tuned on the team's mics. Verification is per phrase-print, so a phrase never enrolled always reports \`enrolled: false\`.
+- i18n: English strings and English wake phrases. Entry \`@mieweb/ui\` (\`onnxruntime-web\` runtime dependency; sherpa-onnx is fetched, not bundled).`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'voice-wake-word',
+          why: 'The wake detector says WHAT was said; useSpeakerVerify checks WHO said it on the same utterance.',
+        },
+      ],
     },
   },
 };

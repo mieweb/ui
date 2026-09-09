@@ -2,12 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ProviderOverview } from './ProviderOverview';
 
 const meta: Meta<typeof ProviderOverview> = {
-  title: 'Product/Provider/ProviderOverview',
+  id: 'providers-provideroverview',
+  title: 'BlueHive/Providers/ProviderOverview',
   component: ProviderOverview,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
 };
 
 export default meta;

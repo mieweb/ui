@@ -10,6 +10,7 @@ import {
   EnhancedProgressRenderer,
   EnhancedTagsRenderer,
 } from './index-enhanced';
+import { withDeprecationBanner, DEPRECATION_NOTICE } from './DeprecationBanner';
 
 // Import AG Grid styles
 import 'ag-grid-community/styles/ag-grid.css';
@@ -162,16 +163,31 @@ const enhancedColumnDefs: Record<string, unknown>[] = [
 // ============================================================================
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Components/Text & Data Display/AGGrid/Enhanced',
+  id: 'deprecated-aggrid-enhanced',
+  title: 'Deprecated/AGGrid Enhanced',
   component: AGGrid,
+  decorators: [withDeprecationBanner],
   parameters: {
     layout: 'padded',
     // AG Grid is a third-party component whose internal DOM renders elements
     // with ARIA and contrast issues we cannot control.
     a11y: { test: 'off' },
+    catalog: {
+      entry: '@mieweb/ui/ag-grid',
+      peers: ['ag-grid-community', 'ag-grid-react'],
+      relationships: [
+        {
+          type: 'superseded by',
+          target: 'grids-datavis-nitro',
+          why: 'formatCell and the engine column types replace the enhanced cell renderers.',
+        },
+      ],
+    },
     docs: {
       description: {
         component: `
+${DEPRECATION_NOTICE}
+
 # Enhanced AG Grid with Full Design System Integration
 
 This enhanced version provides multi-brand support, design system integration, and advanced features.
@@ -186,7 +202,7 @@ This enhanced version provides multi-brand support, design system integration, a
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:deprecated'],
   argTypes: {
     brand: {
       control: { type: 'select' },

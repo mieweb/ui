@@ -64,9 +64,10 @@ const inactiveEmployee: EmployeeData = {
 // ============================================================================
 
 const meta: Meta<typeof EmployeeProfileCard> = {
-  title: 'Product/Feature Modules/EmployeeProfile/Card',
+  id: 'employers-employeeprofile',
+  title: 'BlueHive/Employers/EmployeeProfile',
   component: EmployeeProfileCard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

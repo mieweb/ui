@@ -1,6 +1,9 @@
 /**
  * AG Grid entry point — separate from the main bundle.
  *
+ * @deprecated AGGrid is deprecated — use DataVis NITRO (`@mieweb/ui/datavis`)
+ * for all tables. This entry point will be removed in a future major release.
+ *
  * Usage:
  *   npm install @mieweb/ui ag-grid-community ag-grid-react
  *   import { AGGrid } from '@mieweb/ui/ag-grid';

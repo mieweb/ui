@@ -5,6 +5,7 @@ import { cn } from '../../utils/cn';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { RequiredMark, type RequiredMarkVariant } from '../Input';
 
 // ============================================================================
 // Types
@@ -52,29 +53,88 @@ const selectTriggerVariants = cva(
         true: 'border-destructive focus:ring-destructive',
         false: '',
       },
+      labelVariant: {
+        stacked: '',
+        floating: 'peer',
+      },
     },
+    compoundVariants: [
+      { labelVariant: 'floating', size: 'sm', className: 'h-11' },
+      { labelVariant: 'floating', size: 'md', className: 'h-14' },
+      { labelVariant: 'floating', size: 'lg', className: 'h-16' },
+    ],
     defaultVariants: {
       size: 'md',
+      hasError: false,
+      labelVariant: 'stacked',
+    },
+  }
+);
+
+const floatingLabelVariants = cva(
+  [
+    'absolute start-3 pointer-events-none select-none',
+    'transition-all duration-200 ease-out',
+  ],
+  {
+    variants: {
+      size: {
+        sm: [
+          'peer-focus:top-0.5 peer-focus:translate-y-0 peer-focus:text-[0.65rem]',
+        ],
+        md: ['peer-focus:top-1 peer-focus:translate-y-0 peer-focus:text-xs'],
+        lg: ['peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-sm'],
+      },
+      floated: {
+        true: '',
+        false: 'top-1/2 -translate-y-1/2',
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
+    },
+    compoundVariants: [
+      { size: 'sm', floated: false, className: 'text-sm' },
+      { size: 'md', floated: false, className: 'text-base' },
+      { size: 'lg', floated: false, className: 'text-lg' },
+      {
+        size: 'sm',
+        floated: true,
+        className: 'top-0.5 translate-y-0 text-[0.65rem]',
+      },
+      { size: 'md', floated: true, className: 'top-1 translate-y-0 text-xs' },
+      { size: 'lg', floated: true, className: 'top-1.5 translate-y-0 text-sm' },
+    ],
+    defaultVariants: {
+      size: 'md',
+      floated: false,
       hasError: false,
     },
   }
 );
 
+const floatingValuePadding = {
+  sm: 'pt-4 pb-1',
+  md: 'pt-5 pb-1.5',
+  lg: 'pt-6 pb-2',
+} as const;
+
 // ============================================================================
 // Select Component
 // ============================================================================
 
-export interface SelectProps extends VariantProps<
-  typeof selectTriggerVariants
+/**
+ * Props shared by both single- and multiple-selection modes. Exported so
+ * wrapper components can extend the common shape (`SelectProps` itself is a
+ * discriminated union, which interfaces cannot extend).
+ */
+export interface SelectBaseProps extends Omit<
+  VariantProps<typeof selectTriggerVariants>,
+  'labelVariant'
 > {
   /** Array of options or groups */
   options: (SelectOption | SelectGroup)[];
-  /** Controlled value */
-  value?: string;
-  /** Default value (uncontrolled) */
-  defaultValue?: string;
-  /** Callback when value changes */
-  onValueChange?: (value: string) => void;
   /** Placeholder text */
   placeholder?: string;
   /** Whether the select is disabled */
@@ -83,10 +143,26 @@ export interface SelectProps extends VariantProps<
   label?: string;
   /** Hide the label visually */
   hideLabel?: boolean;
+  /**
+   * Visual style of the label.
+   * - `stacked` (default): label sits above the trigger.
+   * - `floating`: label rests inside the trigger like a placeholder and
+   *   floats up (staying inside the trigger) when open or a value is
+   *   selected. The `placeholder` prop is ignored in this mode.
+   */
+  labelVariant?: 'stacked' | 'floating';
   /** Error message */
   error?: string;
   /** Helper text */
   helperText?: string;
+  /** Whether a selection is required (shows an asterisk next to the label) */
+  required?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
   /** Enable search/filter */
   searchable?: boolean;
   /** Search placeholder */
@@ -100,6 +176,30 @@ export interface SelectProps extends VariantProps<
   /** ID for the select */
   id?: string;
 }
+
+export interface SelectSingleProps extends SelectBaseProps {
+  /** Single-selection mode (default). */
+  multiple?: false;
+  /** Controlled value */
+  value?: string;
+  /** Default value (uncontrolled) */
+  defaultValue?: string;
+  /** Callback when value changes */
+  onValueChange?: (value: string) => void;
+}
+
+export interface SelectMultipleProps extends SelectBaseProps {
+  /** Multiple-selection mode: selecting an option toggles it and keeps the dropdown open. */
+  multiple: true;
+  /** Controlled values */
+  value?: string[];
+  /** Default values (uncontrolled) */
+  defaultValue?: string[];
+  /** Callback when values change */
+  onValueChange?: (value: string[]) => void;
+}
+
+export type SelectProps = SelectSingleProps | SelectMultipleProps;
 
 /**
  * An accessible select/dropdown component with search support.
@@ -116,31 +216,47 @@ export interface SelectProps extends VariantProps<
  *   ]}
  *   onValueChange={(value) => console.log(value)}
  * />
+ *
+ * // Multiple selection — value/onValueChange use string[]
+ * <Select
+ *   multiple
+ *   label="Symptoms"
+ *   options={options}
+ *   onValueChange={(values) => console.log(values)}
+ * />
  * ```
  */
-function Select({
-  options,
-  value: controlledValue,
-  defaultValue,
-  onValueChange,
-  placeholder = 'Select an option',
-  disabled = false,
-  label,
-  hideLabel = false,
-  error,
-  helperText,
-  size,
-  hasError,
-  'aria-label': ariaLabel,
-  searchable = false,
-  searchPlaceholder = 'Search...',
-  noResultsText = 'No results found',
-  className,
-  id,
-}: SelectProps) {
+function Select(props: SelectProps) {
+  const {
+    options,
+    placeholder = 'Select an option',
+    disabled = false,
+    label,
+    hideLabel = false,
+    labelVariant = 'stacked',
+    error,
+    helperText,
+    required = false,
+    requiredVariant,
+    size,
+    hasError,
+    'aria-label': ariaLabel,
+    searchable = false,
+    searchPlaceholder = 'Search...',
+    noResultsText = 'No results found',
+    className,
+    id,
+  } = props;
+  const multiple = props.multiple === true;
+  // The discriminated union types onValueChange as either a string or string[]
+  // callback; widen it once here so handlers can use it without referencing
+  // the whole `props` object. Runtime calls stay consistent with `multiple`.
+  const onValueChange = props.onValueChange as
+    | ((value: string | string[]) => void)
+    | undefined;
   const [isOpen, setIsOpen] = React.useState(false);
-  const [uncontrolledValue, setUncontrolledValue] = React.useState(
-    defaultValue || ''
+  const [uncontrolledValues, setUncontrolledValues] = React.useState<string[]>(
+    () => toValueArray(props.defaultValue)
   );
   const [searchQuery, setSearchQuery] = React.useState('');
   const [highlightedIndex, setHighlightedIndex] = React.useState(-1);
@@ -161,8 +277,16 @@ function Select({
   const errorId = `${selectId}-error`;
   const helperId = `${selectId}-helper`;
 
-  const isControlled = controlledValue !== undefined;
-  const value = isControlled ? controlledValue : uncontrolledValue;
+  const isControlled = props.value !== undefined;
+  const controlledValue = props.value;
+  // Memoize the controlled normalization: toValueArray allocates a fresh
+  // array when value is a string, which would otherwise churn callback
+  // identities (handleValueChange depends on selectedValues) every render.
+  const controlledValues = React.useMemo(
+    () => toValueArray(controlledValue),
+    [controlledValue]
+  );
+  const selectedValues = isControlled ? controlledValues : uncontrolledValues;
 
   // Flatten options for easy access
   const flatOptions = React.useMemo(() => {
@@ -215,8 +339,12 @@ function Select({
     return result;
   }, [filteredOptions]);
 
-  // Get selected option
-  const selectedOption = flatOptions.find((opt) => opt.value === value);
+  // Get selected options (in selection order)
+  const selectedOptions = selectedValues
+    .map((v) => flatOptions.find((opt) => opt.value === v))
+    .filter((opt): opt is SelectOption => opt !== undefined);
+  const hasSelection = selectedOptions.length > 0;
+  const displayLabel = selectedOptions.map((opt) => opt.label).join(', ');
 
   // Close dropdown on click outside (handles both container and portaled dropdown)
   const outsideRefs = React.useMemo(() => [containerRef, dropdownRef], []);
@@ -240,18 +368,37 @@ function Select({
     maxHeight: 300,
   });
 
-  // Handle value change
+  // Handle option selection: single mode replaces and closes; multiple mode
+  // toggles the option and keeps the dropdown open.
   const handleValueChange = React.useCallback(
-    (newValue: string) => {
-      if (!isControlled) {
-        setUncontrolledValue(newValue);
+    (optionValue: string) => {
+      if (multiple) {
+        const next = selectedValues.includes(optionValue)
+          ? selectedValues.filter((v) => v !== optionValue)
+          : [...selectedValues, optionValue];
+        if (!isControlled) {
+          setUncontrolledValues(next);
+        }
+        onValueChange?.(next);
+        // The dropdown stays open; a mouse click focuses the option <li>,
+        // which only handles Enter/Space. Restore focus so arrow-key
+        // navigation and typeahead keep working.
+        if (searchable) {
+          searchInputRef.current?.focus();
+        } else {
+          triggerRef.current?.focus();
+        }
+        return;
       }
-      onValueChange?.(newValue);
+      if (!isControlled) {
+        setUncontrolledValues([optionValue]);
+      }
+      onValueChange?.(optionValue);
       setIsOpen(false);
       setSearchQuery('');
       triggerRef.current?.focus();
     },
-    [isControlled, onValueChange]
+    [isControlled, multiple, onValueChange, searchable, selectedValues]
   );
 
   // Handle keyboard navigation
@@ -420,12 +567,18 @@ function Select({
     .filter(Boolean)
     .join(' ');
 
+  const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
+  const isFloated = isOpen || hasSelection;
+  const resolvedSize = size ?? 'md';
+
+  const requiredMark = required && <RequiredMark variant={requiredVariant} />;
+
   return (
     <div
       data-slot="select-wrapper"
       className={cn('flex flex-col gap-1.5', className)}
     >
-      {label && (
+      {label && !isFloating && (
         <label
           data-slot="select-label"
           htmlFor={selectId}
@@ -435,6 +588,7 @@ function Select({
           )}
         >
           {label}
+          {requiredMark}
         </label>
       )}
 
@@ -451,24 +605,38 @@ function Select({
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
-          aria-controls={listboxId}
+          // Only reference the listbox while it exists in the DOM (it is
+          // portaled and unmounted when closed) so the ID is always valid.
+          aria-controls={isOpen ? listboxId : undefined}
           aria-invalid={hasError || !!error}
+          aria-required={required || undefined}
           aria-label={!label ? ariaLabel : undefined}
           aria-describedby={describedByIds || undefined}
           disabled={disabled}
           onClick={() => setIsOpen(!isOpen)}
           onKeyDown={handleKeyDown}
           className={cn(
-            selectTriggerVariants({ size, hasError: hasError || !!error })
+            selectTriggerVariants({
+              size,
+              hasError: hasError || !!error,
+              labelVariant: isFloating ? 'floating' : 'stacked',
+            })
           )}
         >
           <span
             className={cn(
               'truncate',
-              !selectedOption && 'text-muted-foreground'
+              !hasSelection && 'text-muted-foreground',
+              isFloating && floatingValuePadding[resolvedSize]
             )}
           >
-            {selectedOption?.label || placeholder}
+            {isFloating
+              ? hasSelection
+                ? displayLabel
+                : '\u00A0'
+              : hasSelection
+                ? displayLabel
+                : placeholder}
           </span>
           <ChevronDownIcon
             className={cn(
@@ -477,6 +645,22 @@ function Select({
             )}
           />
         </button>
+
+        {/* Floating label (rendered after the trigger so `peer-focus` applies) */}
+        {isFloating && (
+          <label
+            data-slot="select-label"
+            htmlFor={selectId}
+            className={floatingLabelVariants({
+              size: resolvedSize,
+              floated: isFloated,
+              hasError: hasError || !!error,
+            })}
+          >
+            {label}
+            {requiredMark}
+          </label>
+        )}
 
         {/* Dropdown (portaled to body to avoid overflow clipping) */}
         {isOpen &&
@@ -523,6 +707,7 @@ function Select({
                 id={listboxId}
                 role="listbox"
                 aria-label={label || 'Options'}
+                aria-multiselectable={multiple || undefined}
                 data-slot="select-listbox"
                 className="flex-1 overflow-auto p-1"
               >
@@ -547,7 +732,9 @@ function Select({
                               <SelectOptionItem
                                 key={option.value}
                                 option={option}
-                                isSelected={option.value === value}
+                                isSelected={selectedValues.includes(
+                                  option.value
+                                )}
                                 isHighlighted={
                                   filteredFlatOptions[highlightedIndex]
                                     ?.value === option.value
@@ -571,7 +758,7 @@ function Select({
                       <SelectOptionItem
                         key={item.value}
                         option={item}
-                        isSelected={item.value === value}
+                        isSelected={selectedValues.includes(item.value)}
                         isHighlighted={
                           filteredFlatOptions[highlightedIndex]?.value ===
                           item.value
@@ -620,6 +807,12 @@ function Select({
 }
 
 Select.displayName = 'Select';
+
+/** Normalize a single/multiple value prop into an array of selected values. */
+function toValueArray(value: string | string[] | undefined): string[] {
+  if (value === undefined || value === '') return [];
+  return Array.isArray(value) ? value : [value];
+}
 
 // ============================================================================
 // Select Option Item (Internal)

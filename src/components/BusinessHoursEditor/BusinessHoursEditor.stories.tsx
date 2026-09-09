@@ -10,16 +10,76 @@ import {
 import { BusinessHours } from '../BusinessHours';
 
 const meta: Meta<typeof BusinessHoursEditor> = {
-  title: 'Components/Forms & Inputs/BusinessHoursEditor',
+  id: 'date-time-businesshourseditor',
+  title: 'Inputs/Date & time/BusinessHoursEditor',
   component: BusinessHoursEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component:
-          'An editable interface for managing business hours with support for multiple time slots per day, descriptions, and copy functionality.',
+        component: `### What it's for
+
+The **editor for weekly opening hours**. Controlled: \`value: DaySchedule[]\` (\`{ day: 0–6, hours: TimeSlot[] }\`, \`TimeSlot = { id?, start: 'HH:MM', end: 'HH:MM', description? }\`) and \`onChange(schedule)\`. Two layouts via \`variant\`: \`'days'\` (default) lists all seven days, each with "Add Hours", per-slot start/end native time inputs, an optional description and a Copy menu ("Copy to all days" / "Copy to weekdays"); \`'rules'\` shows compact rows of day toggles + one time range (Mon/Wed/Fri 8:00–11:00) using \`DateInput inputType="time"\` with 15-minute steps, and emits the same \`DaySchedule[]\`. \`weekStartsOn\` (\`0\` | \`1\`) reorders days, \`showDescription\` hides the note field, \`use24Hour\` affects the rules variant's pickers, \`disabled\` freezes everything, \`addHoursLabel\` renames the add button. Helpers: \`createDefaultSchedule()\` (Mon–Fri 09:00–17:00), \`createWeekdaySchedule(start, end)\`, \`create24HourSchedule()\`. Types \`DaySchedule\`, \`TimeSlot\`.
+
+### Use it when
+
+- Admin or provider settings let someone **define recurring hours** — clinic hours, employer contact hours, on-call windows — including split shifts.
+- Several days share the same hours and you want the fast grouped entry (\`variant="rules"\`).
+
+### Don't use it when
+
+- You only need to **show** hours — \`BusinessHours\` (pass the same array as \`officeHours\`).
+- You are scheduling dated appointments or blocks — \`ScheduleCalendar\` (\`onAddAppointment\`) or \`SchedulePicker\`.
+- Hours need holidays, date-specific exceptions, time-zone selection or overnight ranges validated — none are modelled; keep those in the host.
+
+### Example
+
+\`\`\`tsx
+const [hours, setHours] = useState<DaySchedule[]>(() => provider.hours ?? createDefaultSchedule());
+
+<BusinessHoursEditor
+  variant="rules"
+  value={hours}
+  onChange={setHours}
+  weekStartsOn={1}
+  use24Hour={false}
+/>
+
+<BusinessHours schedule={{ officeHours: hours }} groupDays />   // live preview
+
+<Button onClick={() => saveHours(provider.id, hours)}>Save</Button>   // host persists
+\`\`\`
+
+### Limitations
+
+- Accessibility: days variant — time and description \`Input\`s carry \`aria-label\`s ("Mon start time", "Mon end time", "Mon description"), remove buttons \`aria-label="Remove Mon time slot"\`; day names are \`<h4>\`s. Rules variant — each row is a \`<fieldset>\` with an sr-only legend "Availability rule"; day toggles are \`<button aria-pressed aria-label="Monday">\`; time pickers are \`DateInput\` with a hidden label ("Start time" / "End time"). No live-region announcement when rows are added/removed; no keyboard shortcuts beyond native controls.
+- **No validation**: end may precede start, ranges may overlap, a rule with no days selected is silently dropped from the emitted schedule (kept only as a draft row). Days-variant \`Input type="time"\` renders the browser's native time control (locale/format decided by the browser, \`use24Hour\` ignored there).
+- State: the days variant **mutates the day objects inside \`value\` in place** before calling \`onChange\` (\`daySchedule.hours = …\`) — hosts relying on reference equality of nested objects or frozen state should clone before passing. The rules variant keeps its own row state and re-derives when the normalized \`value\` changes.
+- Time zones: times are naive \`HH:MM\` wall-clock strings; no zone is stored or offered.
+- i18n: hard-coded English — day names, "Closed", "Copy", "Copy to all days", "Copy to weekdays", "Description (optional)", "Availability rule", aria-labels; only \`addHoursLabel\` is a prop. Default new slot is 09:00–17:00.
+- RTL: days variant icons use \`mr-1\` (physical); rules variant uses \`me-1\`. Theming: \`gray-*\` borders/headings and \`text-red-500\` remove buttons are hard-coded; rules toggles use \`bg-primary-800\` / \`border-border\` / \`hover:bg-muted\`. Depends on \`Button\`, \`Input\`, \`DateInput\`, \`Dropdown\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'date-time-businesshours',
+          why: 'BusinessHoursEditor edits the DaySchedule[] that BusinessHours displays; pair them for edit + live preview.',
+        },
+        {
+          type: 'uses',
+          target: 'date-time-dateinput',
+          why: 'The rules variant renders DateInput inputType="time" (minuteStep 15) for each range\'s start and end.',
+        },
+        {
+          type: 'uses',
+          target: 'choice-inputs-dropdown',
+          why: 'The days variant\'s Copy menu is a Dropdown with "Copy to all days" / "Copy to weekdays" items.',
+        },
+      ],
     },
   },
   argTypes: {

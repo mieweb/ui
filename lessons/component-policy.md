@@ -8,23 +8,25 @@
 
 **Rule: Every UI element MUST use `@mieweb/ui` if a component exists.**
 
-Before writing any UI code, check [ui.mieweb.org](https://ui.mieweb.org) (Storybook) for an existing component. The library ships 126+ components covering:
+Before writing any UI code, check [ui.mieweb.org](https://ui.mieweb.org) (Storybook) for an existing component. The sidebar is organised _Tier / Family / Component_ and every family has an **Overview** page with a comparison table; the live component count is published in `catalog-manifest.json` next to the Storybook (or `pnpm catalog:check` in the repo). Families include:
+
+> **Tables and data grids start with DataVis NITRO.** Use `Table` only for a few static rows the user will not sort, filter, page or export. Never hand-roll grid features on a plain table; `AGGrid` is deprecated.
 
 ### Primitive Components (Always Available)
 
-| Category | Components |
-|----------|------------|
-| **Actions** | `Button`, `Dropdown`, `CommandPalette`, `QuickAction` |
-| **Forms** | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput`, `DateRangePicker`, `WebsiteInput` |
-| **Data Display** | `Table` (+ TableHeader/Body/Row/Cell), `Badge`, `Avatar`, `Card` (+ CardHeader/Content), `CountBadge`, `Text`, `Timeline` |
-| **Feedback** | `Alert`, `Toast`, `Spinner`, `Skeleton`, `Progress`, `LoadingPage`, `ErrorPage`, `ConnectionStatus` |
-| **Navigation** | `Tabs`, `Breadcrumb`, `Pagination`, `Sidebar`, `AppHeader`, `SiteHeader`, `SiteFooter`, `PageHeader`, `StepIndicator` |
-| **Overlays** | `Modal` (+ ModalHeader/Body/Footer), `Tooltip`, `DropzoneOverlay` |
-| **Layout** | `ThemeProvider`, `VisuallyHidden` |
-| **Media** | `AudioPlayer`, `AudioRecorder`, `RecordButton`, `DocumentScanner` |
-| **Messaging** | `MessageBubble`, `MessageList`, `MessageComposer` |
-| **Data Grids** | `AGGrid` (wrapper for ag-grid with theme integration) |
-| **Charts** | Chart colors via `--mieweb-chart-1` through `--mieweb-chart-5` CSS variables |
+| Category         | Components                                                                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Actions**      | `Button`, `ButtonGroup`, `Toggle`, `CopyButton`, `QuickAction`, `RowActionToolbar`                                                                                                     |
+| **Forms**        | `Input`, `Textarea`, `Select`, `Dropdown`, `Autocomplete`, `Checkbox`, `Radio`, `Switch`, `Slider`, `PhoneInput`, `DateInput`, `DateRangePicker`, `WebsiteInput`                       |
+| **Data Grids**   | `DataVisNitroGrid` (default for all tables), `Table` (+ TableHeader/Body/Row/Cell — see the policy sentence above), `Pagination`, `Sparkline`; `AGGrid` is **deprecated**              |
+| **Data Display** | `Badge`, `Avatar`, `CountBadge`, `Timeline`, `Text`                                                                                                                                    |
+| **Feedback**     | `Alert`, `Toast`, `AlertDialog`, `NotificationCenter`, `ErrorPage`, `ConnectionStatus`; loading: `Spinner`, `Skeleton`, `Progress`, `LoadingPage`                                      |
+| **Navigation**   | `Tabs`, `Breadcrumb`, `StepIndicator`, `CommandPalette`, `TableOfContents`                                                                                                             |
+| **Layout**       | `Card` (+ CardHeader/Content), `Accordion`, `AppHeader`, `SiteHeader`, `SiteFooter`, `PageHeader`, `ThemeProvider`, `VisuallyHidden`                                                   |
+| **Overlays**     | `Modal` (+ ModalHeader/Body/Footer), `Sheet`, `Tooltip`, `DockablePanel`, `Sidebar`                                                                                                    |
+| **Modules**      | Media (`AudioPlayer`, `AudioRecorder`, `DocumentScanner`), Editors (`RichEditor`, `Markdown`), Chat (`MessageBubble`, `AIChat`, `SuperChat`), Files (`DropzoneOverlay`, `FileManager`) |
+| **Healthcare**   | `ProblemList`, `MedicationList`, `AllergyList`, `CodeLookup`, `OrderEditor`, `Assessment`, `PatientHeader`                                                                             |
+| **Charts**       | `DataVisNitroGraph`; chart colors via `--mieweb-chart-1` through `--mieweb-chart-5` CSS variables                                                                                      |
 
 ### How to Import
 
@@ -103,12 +105,17 @@ Every local component must follow these rules to be compatible with upstream con
 
 #### 1. File Structure
 
+Same anatomy as the library itself (see
+[CONTRIBUTING → Anatomy of a component](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md#anatomy-of-a-component)):
+Tailwind utilities + CVA, no per-component stylesheet.
+
 ```
 src/components/MyWidget/
-├── index.ts           # Re-exports
-├── MyWidget.tsx       # Component implementation
-├── MyWidget.scss      # Component-specific styles (SASS)
-└── MyWidget.stories.tsx  # Storybook story (optional but encouraged)
+├── index.ts              # Re-exports the component + its public types
+├── MyWidget.tsx          # Implementation (Tailwind + CVA, forwardRef)
+├── MyWidget.stories.tsx  # Storybook story (autodocs) — required before contributing
+├── MyWidget.test.tsx     # Vitest unit test (optional locally, required upstream)
+└── MAINTAINERS.md        # Provider notes — only for non-trivial modules
 ```
 
 #### 2. Coding Standards
@@ -222,23 +229,29 @@ graph LR
 1. **Fork** `mieweb/ui` and create a feature branch: `feat/my-widget`
 
 2. **Copy** your local component into `src/components/MyWidget/`:
+
    ```
    src/components/MyWidget/
    ├── index.ts
    ├── MyWidget.tsx
-   ├── MyWidget.scss
    ├── MyWidget.stories.tsx
    └── MyWidget.test.tsx
    ```
 
 3. **Export** from the barrel `src/index.ts`:
+
    ```typescript
    export { MyWidget, type MyWidgetProps } from './components/MyWidget';
    ```
 
-4. **Write a Storybook story** covering all variants, sizes, and states (default, hover, focus, disabled, dark mode)
+4. **Write a Storybook story** that satisfies the
+   [metadata contract](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md#stories--documentation-autodocs-convention)
+   (stable `id`, taxonomy `title`, `scope:`/`maturity:` tags, five-heading description,
+   `parameters.catalog` relationships on both pages) and covers all variants, sizes and states
+   (default, hover, focus, disabled, dark mode). `pnpm catalog:check` must pass.
 
 5. **Write tests**:
+
    ```typescript
    import { render, screen } from '@testing-library/react';
    import { MyWidget } from './MyWidget';
@@ -249,10 +262,12 @@ graph LR
    });
    ```
 
-6. **Open a PR** to `mieweb/ui:main` with:
-   - Description of the component's purpose
-   - Screenshot of light and dark mode
-   - Link to Storybook story (if deployed)
+6. **Open a PR** to `mieweb/ui:main` that supplies the
+   [Component PR Rationale and Evidence](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md#component-pr-rationale-and-evidence)
+   required by CONTRIBUTING — problem, alternatives considered, relationships, boundaries,
+   evidence (composition example, light/dark, brands, a11y, text expansion, RTL) and
+   compatibility. That checklist is the single definition; this document does not maintain a
+   second one.
 
 7. **After merge and release**, update your project:
    ```bash
@@ -296,8 +311,8 @@ flowchart TD
 
 ## Summary
 
-| Tier | When | What |
-|------|------|------|
-| **1. Use** | Component exists in `@mieweb/ui` | `import { X } from '@mieweb/ui'` |
-| **2. Build** | No equivalent exists yet | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
-| **3. Contribute** | Local component is stable + generic | PR to `mieweb/ui`, then replace local with import |
+| Tier              | When                                | What                                                                            |
+| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
+| **1. Use**        | Component exists in `@mieweb/ui`    | `import { X } from '@mieweb/ui'`                                                |
+| **2. Build**      | No equivalent exists yet            | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
+| **3. Contribute** | Local component is stable + generic | PR to `mieweb/ui`, then replace local with import                               |

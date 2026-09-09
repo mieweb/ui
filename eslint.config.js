@@ -63,6 +63,8 @@ export default [
         MediaQueryList: 'readonly',
         MediaQueryListEvent: 'readonly',
         NodeJS: 'readonly',
+        // Build-time env (replaced by bundlers, e.g. process.env.NODE_ENV)
+        process: 'readonly',
         // Browser APIs
         confirm: 'readonly',
         // Google Maps API (loaded externally)
@@ -184,6 +186,19 @@ export default [
       'src/components/AI/modelCache.ts',
       'src/components/AI/HeyOzwell/**/*.{ts,tsx,js}',
     ],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  // Node CLI scripts (run outside the browser bundle)
+  {
+    files: ['scripts/**/*.mjs', 'agent/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
     rules: {
       'no-console': 'off',
     },

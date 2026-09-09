@@ -52,9 +52,10 @@ const mockOrders = [
 ];
 
 const meta: Meta<typeof CreateInvoiceModal> = {
-  title: 'Components/Forms & Inputs/CreateInvoiceModal',
+  id: 'billing-createinvoicemodal',
+  title: 'BlueHive/Billing/CreateInvoiceModal',
   component: CreateInvoiceModal,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

@@ -52,7 +52,10 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npx http-server storybook-static -p 6006 -c-1 --silent',
+    // http-server is a pinned devDependency so this never hits the npm
+    // registry at test time (npx-on-demand installs caused CI timeouts
+    // during registry outages).
+    command: 'pnpm exec http-server storybook-static -p 6006 -c-1 --silent',
     url: 'http://localhost:6006',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000, // 2 minutes for Storybook to start

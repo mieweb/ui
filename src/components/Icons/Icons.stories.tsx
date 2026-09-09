@@ -6,7 +6,9 @@ import type { LucideIcon } from 'lucide-react';
 import * as Icons from './index';
 
 const meta: Meta = {
+  id: 'foundations-icons',
   title: 'Foundations/Icons',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

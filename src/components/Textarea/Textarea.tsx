@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { RequiredMark, type RequiredMarkVariant } from '../Input';
 
 const textareaVariants = cva(
   [
@@ -30,11 +31,71 @@ const textareaVariants = cva(
         horizontal: 'resize-x',
         both: 'resize',
       },
+      labelVariant: {
+        stacked: '',
+        floating: 'peer placeholder:text-transparent',
+      },
     },
+    compoundVariants: [
+      // Floating labels reserve top padding so entered text always starts
+      // below the floated label, plus a little extra min-height.
+      {
+        labelVariant: 'floating',
+        size: 'sm',
+        className: 'pt-5 min-h-[76px]',
+      },
+      {
+        labelVariant: 'floating',
+        size: 'md',
+        className: 'pt-6 min-h-[96px]',
+      },
+      {
+        labelVariant: 'floating',
+        size: 'lg',
+        className: 'pt-7 min-h-[120px]',
+      },
+    ],
     defaultVariants: {
       size: 'md',
       hasError: false,
       resize: 'vertical',
+      labelVariant: 'stacked',
+    },
+  }
+);
+
+const floatingLabelVariants = cva(
+  [
+    'absolute start-3 pointer-events-none select-none',
+    'transition-all duration-200 ease-out',
+  ],
+  {
+    variants: {
+      size: {
+        sm: [
+          'text-sm top-3',
+          'peer-focus:top-1 peer-[:not(:placeholder-shown)]:top-1 peer-autofill:top-1',
+          'peer-focus:text-[0.65rem] peer-[:not(:placeholder-shown)]:text-[0.65rem] peer-autofill:text-[0.65rem]',
+        ],
+        md: [
+          'text-base top-4',
+          'peer-focus:top-1.5 peer-[:not(:placeholder-shown)]:top-1.5 peer-autofill:top-1.5',
+          'peer-focus:text-xs peer-[:not(:placeholder-shown)]:text-xs peer-autofill:text-xs',
+        ],
+        lg: [
+          'text-lg top-5',
+          'peer-focus:top-2 peer-[:not(:placeholder-shown)]:top-2 peer-autofill:top-2',
+          'peer-focus:text-sm peer-[:not(:placeholder-shown)]:text-sm peer-autofill:text-sm',
+        ],
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
     },
   }
 );
@@ -42,9 +103,18 @@ const textareaVariants = cva(
 export interface TextareaProps
   extends
     Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
-    VariantProps<typeof textareaVariants> {
+    Omit<VariantProps<typeof textareaVariants>, 'labelVariant'> {
   /** Label for the textarea */
   label?: string;
+  /**
+   * How the label is rendered.
+   * - `stacked` (default): label above the textarea.
+   * - `floating`: label rests inside the textarea like a placeholder and
+   *   floats to the top (staying inside it) when focused or filled.
+   *   Ignores `placeholder`; when `hideLabel` is set, falls back to a
+   *   visually-hidden stacked label.
+   */
+  labelVariant?: 'stacked' | 'floating';
   /** Whether the label should be visually hidden */
   hideLabel?: boolean;
   /** Error message to display */
@@ -57,6 +127,12 @@ export interface TextareaProps
   showCount?: boolean;
   /** Auto-resize based on content */
   autoResize?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
 }
 
 /**
@@ -81,16 +157,20 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       hasError,
       resize,
       label,
+      labelVariant = 'stacked',
       hideLabel,
       error,
       helperText,
       maxLength,
       showCount = false,
       autoResize = false,
+      required = false,
+      requiredVariant,
       id,
       value,
       defaultValue,
       onChange,
+      placeholder,
       'aria-describedby': ariaDescribedBy,
       ...props
     },
@@ -149,9 +229,41 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       .filter(Boolean)
       .join(' ');
 
+    const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
+
+    const requiredMark = required && <RequiredMark variant={requiredVariant} />;
+
+    const textareaElement = (
+      <textarea
+        data-slot="textarea"
+        ref={internalRef}
+        id={textareaId}
+        value={value}
+        defaultValue={value === undefined ? defaultValue : undefined}
+        onChange={handleChange}
+        maxLength={maxLength}
+        aria-invalid={hasError || !!error}
+        aria-describedby={describedByIds || undefined}
+        required={required}
+        // A single-space placeholder keeps :placeholder-shown reliable so the
+        // label can float via CSS alone.
+        placeholder={isFloating ? ' ' : placeholder}
+        className={cn(
+          textareaVariants({
+            size,
+            hasError: hasError || !!error,
+            resize: autoResize ? 'none' : resize,
+            labelVariant: isFloating ? 'floating' : 'stacked',
+          }),
+          className
+        )}
+        {...props}
+      />
+    );
+
     return (
       <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
-        {label && (
+        {label && !isFloating && (
           <label
             data-slot="textarea-label"
             htmlFor={textareaId}
@@ -161,28 +273,27 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             )}
           >
             {label}
+            {requiredMark}
           </label>
         )}
-        <textarea
-          data-slot="textarea"
-          ref={internalRef}
-          id={textareaId}
-          value={value}
-          defaultValue={value === undefined ? defaultValue : undefined}
-          onChange={handleChange}
-          maxLength={maxLength}
-          aria-invalid={hasError || !!error}
-          aria-describedby={describedByIds || undefined}
-          className={cn(
-            textareaVariants({
-              size,
-              hasError: hasError || !!error,
-              resize: autoResize ? 'none' : resize,
-            }),
-            className
-          )}
-          {...props}
-        />
+        {isFloating ? (
+          <div className="relative">
+            {textareaElement}
+            <label
+              data-slot="textarea-label"
+              htmlFor={textareaId}
+              className={floatingLabelVariants({
+                size,
+                hasError: hasError || !!error,
+              })}
+            >
+              {label}
+              {requiredMark}
+            </label>
+          </div>
+        ) : (
+          textareaElement
+        )}
         <div
           data-slot="textarea-footer"
           className="flex items-center justify-between gap-2"

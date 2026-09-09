@@ -21,9 +21,10 @@ import {
 // ============================================================================
 
 const meta: Meta<typeof MediaEditor> = {
-  title: 'Components/Images & Media/MediaEditor Live Demo',
+  id: 'media-mediaeditor-live-demo',
+  title: 'Modules/Media/MediaEditor Live Demo',
   component: MediaEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     // The story renders the LiveDemo harness, not <MediaEditor {...args}/>,
@@ -32,18 +33,54 @@ const meta: Meta<typeof MediaEditor> = {
     controls: { disable: true },
     docs: {
       description: {
-        component:
-          'Fully-functional MediaEditor demo: drop any audio or video file and it is ' +
-          'transcribed IN THE BROWSER by the on-device Whisper worker (no server, no API ' +
-          'keys — audio never leaves the page), then opened in the editor. Pick the ' +
-          'Whisper model before the first transcription; base.en is the recommended ' +
-          'default (it preserves inter-word silence gaps, which the silence-editing ' +
-          'features depend on). Word-level timestamps are requested first, with a ' +
-          'fallback to segment-level if the model rejects word alignment. The ' +
-          'toolbar Script button docks the ScriptPanel: the live edit state as an ' +
-          'editable YAML/JSON script (Apply pushes changes back through the ' +
-          'undo-safe replaceEditedWords), alongside the read-only original.',
+        component: `### What it's for
+
+**A Storybook-only demo page for \`MediaEditor\`**, not a component you import. Drop any audio or video file and it is transcribed **in the browser** by the on-device Whisper worker (\`whisperTranscribe\` — no server, no API keys; audio never leaves the page), then opened in a \`MediaEditor\`. It exists to show the editor with real word timestamps and to exercise the **Script** panel (\`ScriptPanel\`: the edit state as editable YAML/JSON, applied back through the undo-safe \`replaceEditedWords\`).
+
+### Use it when
+
+- You want to try \`MediaEditor\` on your own recording before wiring it into an app.
+- You are choosing a Whisper model: \`base.en\` is the recommended default because it preserves inter-word silence gaps that the silence-editing features depend on; word-level timestamps are requested first with a fallback to segment-level.
+
+### Don't use it when
+
+- You are building a product — use \`MediaEditor\` directly and supply your own transcription pipeline (the worker in \`src/components/AI/whisperTranscribe.ts\` is a reference, not a public API).
+- You only need a viewer — \`TranscriptView\`.
+
+### Example
+
+\`\`\`tsx
+// What the demo does, minus the UI chrome (transcribeWordsFromSamples is
+// internal to this repo — it is not exported from @mieweb/ui):
+const samples = await decodeTo16kMono(file);
+const segments = await transcribeWordsFromSamples(samples); // seconds
+const transcript: Transcript = {
+  durationMs: Math.round(duration * 1000),
+  words: segments.map((s) => ({
+    text: s.text.trim(),
+    startMs: Math.round(s.start * 1000),
+    endMs: Math.round(Math.max(s.end, s.start) * 1000),
+  })),
+};
+<MediaEditor src={URL.createObjectURL(file)} transcript={transcript} />
+\`\`\`
+
+### Limitations
+
+- Model downloads (~40 MB to ~1.3 GB) and inference run on the visitor's machine; WebGPU is optional and the demo falls back to CPU (wasm) when the adapter produces garbage tokens. Expect long first runs on low-end devices.
+- Only \`decodeTo16kMono\` is a public export; the word-level worker calls are repo-internal, so a host needs its own transcription source that yields per-word times in milliseconds.
+- Controls are disabled on this page — the story renders a harness, not \`<MediaEditor {...args} />\`; the props table lives on the **MediaEditor** page.
+- Everything in **MediaEditor › Limitations** applies (listbox semantics, right-click-only speed markers, English copy, internal clipboard).`,
       },
+    },
+    catalog: {
+      relationships: [
+        {
+          type: 'uses',
+          target: 'media-mediaeditor',
+          why: 'The demo transcribes a dropped file in the browser and opens the result in a MediaEditor.',
+        },
+      ],
     },
   },
 };

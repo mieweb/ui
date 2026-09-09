@@ -7,9 +7,78 @@ import {
 } from './CSVColumnMapper';
 
 const meta: Meta<typeof CSVColumnMapper> = {
-  title: 'Components/Forms & Inputs/CSVColumnMapper',
+  id: 'composite-forms-csvcolumnmapper',
+  title: 'Inputs/Composite forms/CSVColumnMapper',
   component: CSVColumnMapper,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  parameters: {
+    docs: {
+      description: {
+        component: `### What it's for
+
+The **column-mapping step of a CSV import**. You parse the file; it shows one card per \`columns[i]\` (\`CSVColumn = { name, sampleValue?, mappedTo?, childField?, ignored?, hasError? }\`) with the sample value, a \`Select\` of your \`fieldOptions\` (\`FieldOption = { value, label, disabled?, hasChildren? }\`), an optional sub-field \`Select\` from \`childFieldOptions[mappedTo]\` (e.g. phone → mobile/home) and an Ignore/Include toggle. Everything is controlled and event-driven: \`onColumnChange(columnIndex, mappedTo, childField?)\`, \`onIgnoreToggle(columnIndex, ignored)\`, \`onBulkAction('ignoreAll' | 'includeAll' | 'ignoreUncompleted')\`, \`onImport()\`; \`importing\` + \`importProgress\` (0–100) overlay a progress panel; \`labels\` overrides the bulk buttons, import button, banner and instructions. The companion **\`CSVFileUpload\`** is a drag-and-drop / click-to-browse zone (\`onFileSelect(file)\`, \`accept\` default \`.csv\`, \`processing\`). Exports: \`CSVColumnMapper\`, \`CSVFileUpload\`, types \`CSVColumnMapperProps\`, \`CSVColumn\`, \`FieldOption\`, \`CSVFileUploadProps\`.
+
+### Use it when
+
+- Users upload a spreadsheet of records (employees, patients, providers) whose headers must be **matched to your schema** before import.
+- You need a visual "which columns still need mapping" overview with bulk ignore/include.
+
+### Don't use it when
+
+- Columns are already known and fixed — skip the step and import directly.
+- You need the parsing, validation or de-duplication itself — this component does none of it; pair it with a CSV parser (e.g. \`papaparse\`) and your own validation.
+- The user is adding arbitrary extra attributes rather than mapping to known fields — \`AdditionalFields\`.
+- You need a generic file drop area for many file types — \`CSVFileUpload\` filters dropped files to \`.csv\` by name; use the Files family components instead.
+
+### Example
+
+\`\`\`tsx
+const [columns, setColumns] = useState<CSVColumn[]>([]);   // from Papa.parse(file, { header: true })
+const [progress, setProgress] = useState(0);
+const [importing, setImporting] = useState(false);
+
+const used = new Set(columns.filter((c) => !c.ignored).map((c) => c.mappedTo));
+const fieldOptions = EMPLOYEE_FIELDS.map((f) => ({ ...f, disabled: used.has(f.value) }));
+
+<CSVColumnMapper
+  columns={columns}
+  fieldOptions={fieldOptions}
+  childFieldOptions={{ phone: [{ value: 'mobile', label: 'Mobile' }, { value: 'work', label: 'Work' }] }}
+  onColumnChange={(i, mappedTo, childField) =>
+    setColumns((cols) => cols.map((c, idx) => (idx === i ? { ...c, mappedTo, childField } : c)))}
+  onIgnoreToggle={(i, ignored) => setColumns((cols) => cols.map((c, idx) => (idx === i ? { ...c, ignored } : c)))}
+  onBulkAction={(action) => setColumns((cols) => applyBulk(cols, action))}
+  onImport={async () => { setImporting(true); await importRows(columns, setProgress); setImporting(false); }}
+  importing={importing}
+  importProgress={progress}
+/>
+\`\`\`
+
+### Limitations
+
+- Accessibility: each card's field \`Select\` has a hidden label \`"Map {column} to field"\` and the sub-field one \`"{column} sub-field"\` (English, built from the column name), so the combobox is announced per column. "Sample Data" / "Map to Field" / "Sub-field" captions are \`<span>\`s, not labels. The mapped/unmapped status icon is decorative (\`aria-hidden\`) — **status is conveyed by colour and icon only**, with no text alternative. The progress overlay is a plain \`<div>\` (no \`role="dialog"\`, \`aria-modal\`, focus trap or \`role="progressbar"\`), and it does not block keyboard focus behind it. \`CSVFileUpload\`'s drop zone is a non-focusable \`<div>\` with a hard-coded \`id="csv-file-upload"\` on the hidden input (two instances collide) and no keyboard drop alternative beyond the browse button.
+- Nothing is parsed, validated or imported here; the component cannot know required fields — set \`hasError\` yourself (unmapped, non-ignored columns are highlighted automatically). \`disabled\` on a \`FieldOption\` is your job (e.g. already-mapped fields).
+- Cards are keyed by \`column.name\` — duplicate CSV headers will collide.
+- i18n: bulk buttons, import button, banner ("Ensure Accurate Employee Data …") and instructions come from \`labels\`; "Sample Data", "Map to Field", "Sub-field", "Empty", "Ignore Column" / "Include Column", "Processing Employees", "% complete", "Select a field...", "Select sub-field..." and \`CSVFileUpload\`'s "Processing file..." are hard-coded English. The defaults are employer/employee-flavoured.
+- Layout: responsive grid 1 → 2 (\`sm\`) → 3 (\`lg\`) → 4 (\`xl\`) columns; no physical \`left/right\` offsets. Theming: semantic tokens (\`bg-card\`, \`border-border\`, \`bg-muted\`, \`success-*\`, \`warning-*\`, \`bg-primary-800\`) except \`CSVFileUpload\`'s \`neutral-*\` text and its Font Awesome \`<i class="fas fa-file-csv">\` icon, which renders nothing unless Font Awesome is loaded. Depends on \`Button\` and \`Select\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'uses',
+          target: 'choice-inputs-select',
+          why: 'Each column card maps to a field (and optional sub-field) through Select with a hidden per-column label.',
+        },
+        {
+          type: 'alternative to',
+          target: 'composite-forms-additionalfields',
+          why: 'CSVColumnMapper matches incoming columns to fields you already defined; AdditionalFields lets the user invent loose key/value pairs.',
+        },
+      ],
+    },
+  },
   args: {
     importing: false,
     importProgress: 0,
