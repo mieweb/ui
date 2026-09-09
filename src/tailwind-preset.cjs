@@ -144,6 +144,11 @@ module.exports = {
     'ps-1.5',
     '-start-px',
     'md:border-e',
+    // RTL billing+invoices batch: invoice tables/headers, search icon inset,
+    // button spinners
+    '-ms-1',
+    'ps-9',
+    'sm:text-end',
     // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
     // md variants that hand desktop back its original percentage cap. Purging
     // these uncaps the player on a phone, which is the bug the cap exists for.

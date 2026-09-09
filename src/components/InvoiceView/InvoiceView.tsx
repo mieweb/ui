@@ -127,7 +127,7 @@ export function InvoiceView({
             <Button variant="ghost" size="sm" onClick={onBack}>
               <svg
                 aria-hidden="true"
-                className="mr-1 h-4 w-4"
+                className="me-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -168,7 +168,7 @@ export function InvoiceView({
             >
               <svg
                 aria-hidden="true"
-                className="mr-1 h-4 w-4"
+                className="me-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -192,7 +192,7 @@ export function InvoiceView({
             >
               <svg
                 aria-hidden="true"
-                className="mr-1 h-4 w-4"
+                className="me-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -226,7 +226,7 @@ export function InvoiceView({
             >
               <svg
                 aria-hidden="true"
-                className="mr-1 h-4 w-4"
+                className="me-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -245,7 +245,7 @@ export function InvoiceView({
             <Button size="sm" onClick={onSend} disabled={actionsDisabled}>
               <svg
                 aria-hidden="true"
-                className="mr-1 h-4 w-4"
+                className="me-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -304,7 +304,7 @@ export function InvoiceView({
             </div>
             <div
               data-slot="invoice-view-meta"
-              className="text-left sm:text-right"
+              className="text-start sm:text-end"
             >
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 INVOICE
@@ -359,16 +359,16 @@ export function InvoiceView({
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium uppercase">
                     Description
                   </th>
                   <th className="text-muted-foreground hidden px-4 py-3 text-center text-xs font-medium uppercase sm:table-cell">
                     Qty
                   </th>
-                  <th className="text-muted-foreground hidden px-4 py-3 text-right text-xs font-medium uppercase sm:table-cell">
+                  <th className="text-muted-foreground hidden px-4 py-3 text-end text-xs font-medium uppercase sm:table-cell">
                     Unit Price
                   </th>
-                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium uppercase">
+                  <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium uppercase">
                     Total
                   </th>
                 </tr>
@@ -390,10 +390,10 @@ export function InvoiceView({
                     <td className="hidden px-4 py-3 text-center text-gray-700 sm:table-cell dark:text-gray-300">
                       {item.quantity}
                     </td>
-                    <td className="hidden px-4 py-3 text-right text-gray-700 sm:table-cell dark:text-gray-300">
+                    <td className="hidden px-4 py-3 text-end text-gray-700 sm:table-cell dark:text-gray-300">
                       {formatCurrency(item.unitPrice)}
                     </td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
+                    <td className="px-4 py-3 text-end font-medium text-gray-900 dark:text-white">
                       {formatCurrency(item.total)}
                     </td>
                   </tr>
