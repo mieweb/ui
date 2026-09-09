@@ -66,11 +66,18 @@ const buttonVariants = cva(
         true: 'w-full',
         false: '',
       },
+      /** Opt-in hover motion (see src/styles/effects.css). */
+      effect: {
+        none: '',
+        sheen: 'mie-fx-sheen hover:-translate-y-0.5',
+        orbit: 'mie-fx-orbit hover:-translate-y-0.5',
+      },
     },
     defaultVariants: {
       variant: 'primary',
       size: 'md',
       fullWidth: false,
+      effect: 'none',
     },
   }
 );
@@ -97,6 +104,8 @@ export interface ButtonProps
  * <Button variant="primary" size="md">Click me</Button>
  * <Button variant="danger" leftIcon={<TrashIcon />}>Delete</Button>
  * <Button variant="ghost" isLoading loadingText="Saving...">Save</Button>
+ * <Button effect="sheen">Request a demo</Button>
+ * <Button variant="outline" effect="orbit">Watch the film</Button>
  * ```
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -106,6 +115,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant,
       size,
       fullWidth,
+      effect,
       leftIcon,
       rightIcon,
       isLoading,
@@ -148,8 +158,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         data-slot="button"
         data-size={resolvedSize}
+        data-variant={variant ?? 'primary'}
         className={cn(
-          buttonVariants({ variant, size: resolvedSize, fullWidth }),
+          buttonVariants({ variant, size: resolvedSize, fullWidth, effect }),
           className
         )}
         ref={innerRef}

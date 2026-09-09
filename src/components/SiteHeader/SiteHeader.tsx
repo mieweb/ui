@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { MegaMenuBar, type MegaMenuConfig } from '../MegaMenu';
 
 // =============================================================================
 // Types
@@ -488,6 +489,8 @@ export interface MobileMenuPanelProps {
   isOpen: boolean;
   onClose: () => void;
   links: NavLink[];
+  /** Mega-menus flattened into labelled groups. */
+  menus?: MegaMenuConfig[];
   user?: UserProfile | null;
   onLogin?: () => void;
   onSignUp?: () => void;
@@ -499,6 +502,7 @@ export function MobileMenuPanel({
   isOpen,
   onClose,
   links,
+  menus = [],
   user,
   onLogin,
   onSignUp,
@@ -537,7 +541,39 @@ export function MobileMenuPanel({
           </button>
         </div>
 
-        <nav className="space-y-1 p-4">
+        <nav className="max-h-[calc(100dvh-10rem)] space-y-1 overflow-y-auto p-4">
+          {menus.map((menu) => {
+            const items = menu.groups
+              ? menu.groups.flatMap((g) => g.items)
+              : (menu.items ?? []);
+            return (
+              <div key={menu.key} className="pb-2">
+                {menu.href ? (
+                  <a
+                    href={menu.href}
+                    onClick={onClose}
+                    className="text-muted-foreground block rounded-lg px-4 py-2 text-xs font-bold tracking-wider uppercase hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    {menu.label}
+                  </a>
+                ) : (
+                  <p className="text-muted-foreground px-4 py-2 text-xs font-bold tracking-wider uppercase">
+                    {menu.label}
+                  </p>
+                )}
+                {items.map((it) => (
+                  <a
+                    key={it.href}
+                    href={it.href}
+                    onClick={onClose}
+                    className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                  >
+                    {it.label}
+                  </a>
+                ))}
+              </div>
+            );
+          })}
           {links.map((link) => (
             <a
               key={link.href}
@@ -649,6 +685,13 @@ export interface SiteHeaderProps extends VariantProps<typeof headerVariants> {
     href?: string;
   };
   links?: NavLink[];
+  /**
+   * Mega-menu dropdowns rendered before `links` on desktop (see `MegaMenu`).
+   * On mobile they flatten into labelled groups in the drawer.
+   */
+  menus?: MegaMenuConfig[];
+  /** Current pathname, forwarded to the mega-menus for `aria-current`. */
+  currentPath?: string;
   user?: UserProfile | null;
   onLogin?: () => void;
   onSignUp?: () => void;
@@ -664,6 +707,8 @@ export interface SiteHeaderProps extends VariantProps<typeof headerVariants> {
 export function SiteHeader({
   logo = {},
   links = [],
+  menus,
+  currentPath,
   user,
   variant,
   onLogin,
@@ -707,8 +752,25 @@ export function SiteHeader({
               variant={colorVariant}
             />
 
-            {/* Navigation Links (Desktop) */}
-            <NavLinks links={links} variant={colorVariant} />
+            {/* Navigation (Desktop) */}
+            {menus?.length ? (
+              <div className="hidden items-center gap-1 md:flex">
+                <MegaMenuBar
+                  menus={menus}
+                  currentPath={currentPath}
+                  variant={colorVariant}
+                />
+                {links.length > 0 && (
+                  <NavLinks
+                    links={links}
+                    variant={colorVariant}
+                    aria-label="Secondary navigation"
+                  />
+                )}
+              </div>
+            ) : (
+              <NavLinks links={links} variant={colorVariant} />
+            )}
 
             {/* Right Side */}
             <div className="flex items-center gap-2">
@@ -750,6 +812,7 @@ export function SiteHeader({
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         links={links}
+        menus={menus}
         user={user}
         onLogin={onLogin}
         onSignUp={onSignUp}

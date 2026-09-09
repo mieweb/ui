@@ -1,11 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SourceTip } from './SourceTip';
+import type { ComponentMeta } from '../../docs/component-meta';
+
+const componentMeta: ComponentMeta = {
+  usedIn: [
+    {
+      repo: 'mieweb/enterprise-health-frontdoor',
+      live: 'https://concept.enterprise.health/global/ai-sovereignty/',
+      note: 'Provenance on atlas table cells, stat tiles and tier badges.',
+    },
+    {
+      repo: 'mieweb/enterprise-health-observatory',
+      note: 'Origin of the pattern — per-cell "where did this come from?" cards.',
+    },
+    {
+      repo: 'mieweb/agent-skills',
+      live: 'https://skills.mieweb.org/',
+      note: 'SkillTip provenance cards derive from this grammar.',
+    },
+    {
+      repo: 'mieweb/ui',
+      live: 'https://ui.mieweb.org/',
+      note: 'The "In production" strip on every docs page is built from SourceTip.',
+    },
+  ],
+  origin: {
+    repo: 'mieweb/enterprise-health-observatory',
+    note: 'Ported from src/components/SourceTip.tsx.',
+  },
+};
 
 const meta: Meta<typeof SourceTip> = {
   title: 'Components/Overlays & Popups/SourceTip',
   component: SourceTip,
   parameters: {
     layout: 'centered',
+    meta: componentMeta,
     docs: {
       description: {
         component:

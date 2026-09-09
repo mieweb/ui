@@ -115,6 +115,12 @@ const meta: Meta<typeof Button> = {
   component: Button,
   parameters: {
     layout: 'centered',
+    meta: {
+      origin: {
+        repo: 'mieweb/enterprise-health-frontdoor',
+        note: 'The `effect` prop ports the `.btn--plum` sheen sweep and `.btn--outline` orbiting glint from app/globals.css.',
+      },
+    },
   },
   tags: ['autodocs'],
   argTypes: {
@@ -128,6 +134,12 @@ const meta: Meta<typeof Button> = {
     },
     fullWidth: {
       control: 'boolean',
+    },
+    effect: {
+      control: 'select',
+      options: ['none', 'sheen', 'orbit'],
+      description:
+        'Opt-in hover motion: `sheen` sweeps a light band across the face; `orbit` replaces the border with a brand ring and an orbiting accent glint.',
     },
     isLoading: {
       control: 'boolean',
@@ -283,6 +295,28 @@ export const AllSizes: Story = {
       <Button size="sm">Small</Button>
       <Button size="md">Medium</Button>
       <Button size="lg">Large</Button>
+    </div>
+  ),
+};
+
+/**
+ * Hover motion ported from the Enterprise Health frontdoor CTA system.
+ * `sheen` suits filled primaries; `orbit` suits outlines. Both respect
+ * `prefers-reduced-motion` and also fire on `:focus-visible`.
+ */
+export const HoverEffects: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button effect="sheen">Request a demo</Button>
+      <Button variant="secondary" effect="sheen">
+        Secondary sheen
+      </Button>
+      <Button variant="outline" effect="orbit">
+        Watch the film
+      </Button>
+      <Button variant="ghost" effect="orbit">
+        Ghost orbit
+      </Button>
     </div>
   ),
 };

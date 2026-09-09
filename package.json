@@ -141,6 +141,16 @@
         "default": "./dist/ag-grid.cjs"
       }
     },
+    "./globe": {
+      "import": {
+        "types": "./dist/globe.d.ts",
+        "default": "./dist/globe.js"
+      },
+      "require": {
+        "types": "./dist/globe.d.cts",
+        "default": "./dist/globe.cjs"
+      }
+    },
     "./datavis": {
       "import": {
         "types": "./dist/datavis.d.ts",
@@ -224,7 +234,7 @@
     "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ] || [ ! -f packages/esheet/packages/renderer/src/index.output.css ] || [ ! -f packages/esheet/packages/builder/src/index.output.css ]; then cd packages/esheet && pnpm install --frozen-lockfile && pnpm --filter '@esheet/builder...' --filter '@esheet/renderer...' build; fi",
     "build:css": "mkdir -p dist && npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "mkdir -p dist/brands && cp src/brands/*.css dist/brands/",
-    "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
+    "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css src/styles/effects.css dist/styles/ 2>/dev/null || true",
     "copy:markdown-css": "mkdir -p dist/components/Markdown && cp src/components/Markdown/styles.css dist/components/Markdown/ 2>/dev/null || true",
     "copy:kerebron-css": "mkdir -p dist && cp src/styles/kerebron.css dist/kerebron.css",
     "typecheck": "tsc --noEmit",
@@ -263,17 +273,25 @@
     "papaparse": ">=5.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
+    "react-globe.gl": ">=2.30.0",
     "react-markdown": ">=9.0.0",
     "rehype-highlight": ">=7.0.0",
     "rehype-katex": ">=7.0.0",
     "rehype-sanitize": ">=6.0.0",
     "remark-gfm": ">=4.0.0",
     "remark-math": ">=6.0.0",
+    "three": ">=0.160.0",
     "wavesurfer.js": ">=7.0.0",
     "y-protocols": ">=1.0.6",
     "yjs": ">=13.6.0"
   },
   "peerDependenciesMeta": {
+    "react-globe.gl": {
+      "optional": true
+    },
+    "three": {
+      "optional": true
+    },
     "@kerebron/editor": {
       "optional": true
     },
@@ -402,6 +420,7 @@
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.185.4",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "@vitest/coverage-v8": "^3.2.6",
@@ -437,6 +456,7 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-globe.gl": "^2.38.0",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
     "rehype-katex": "^7.0.1",
@@ -447,6 +467,7 @@
     "sortablejs": "^1.15.7",
     "storybook": "^10.2.11",
     "tailwindcss": "^4.2.1",
+    "three": "^0.185.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.2",

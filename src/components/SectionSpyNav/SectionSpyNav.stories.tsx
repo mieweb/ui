@@ -1,11 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SectionSpyNav, type SectionSpyItem } from './SectionSpyNav';
+import { skillUrl, type ComponentMeta } from '../../docs/component-meta';
+
+const componentMeta: ComponentMeta = {
+  usedIn: [
+    {
+      repo: 'mieweb/enterprise-health-frontdoor',
+      live: 'https://concept.enterprise.health/industry/aviation/',
+      note: 'The dark "On this page" band on every industry hub and /platform, with the per-page CTA.',
+    },
+    {
+      repo: 'mieweb/agent-skills',
+      live: 'https://skills.mieweb.org/',
+      note: 'Skill detail pages.',
+    },
+  ],
+  skills: [
+    {
+      name: 'industry-page',
+      repo: 'mieweb/enterprise-health-frontdoor',
+      url: skillUrl('mieweb/enterprise-health-frontdoor', 'industry-page'),
+      summary:
+        'Scaffolds a vertical hub — wires the spy nav items and CTA tier.',
+    },
+  ],
+  origin: {
+    repo: 'mieweb/enterprise-health-frontdoor',
+    note: 'Promoted from components/ui/SectionSpyNav.tsx after the scroll-spy strip lab.',
+  },
+};
 
 const meta: Meta<typeof SectionSpyNav> = {
   title: 'Components/Navigation/SectionSpyNav',
   component: SectionSpyNav,
   parameters: {
     layout: 'fullscreen',
+    meta: componentMeta,
     docs: {
       description: {
         component:

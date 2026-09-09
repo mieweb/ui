@@ -23,6 +23,8 @@
  *   - @mieweb/ui/brands/bluehive.css  (or another brand)
  */
 
+@import './effects.css';
+
 /* ── Dark Mode Variant ───────────────────────────────────────────────── */
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
