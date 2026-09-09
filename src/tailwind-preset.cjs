@@ -124,6 +124,17 @@ module.exports = {
     'rounded-ee-md',
     'rounded-es-md',
     'rtl:space-x-reverse',
+    // RTL DocScanner+media batch: detection-overlay corner pins, MediaEditor
+    // speed-marker accent/pill, ScriptPanel border, transcript alignment
+    '-end-0.5',
+    'end-0.5',
+    'rounded-ee-lg',
+    'border-e-4',
+    'border-s-[3px]',
+    'border-s-warning',
+    'ps-1.5',
+    '-start-px',
+    'md:border-e',
     // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
     // md variants that hand desktop back its original percentage cap. Purging
     // these uncaps the player on a phone, which is the bug the cap exists for.

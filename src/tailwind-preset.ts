@@ -94,7 +94,6 @@ export const miewebUISafelist = [
   'bg-success/15',
   'bg-warning/20',
   'bg-warning/40',
-  'border-l-warning',
   'border-primary-600',
   'border-warning/50',
   'dark:bg-primary-950',
@@ -481,6 +480,17 @@ export const miewebUISafelist = [
   'rounded-ee-md',
   'rounded-es-md',
   'rtl:space-x-reverse',
+  // RTL DocScanner+media batch: detection-overlay corner pins, MediaEditor
+  // speed-marker accent/pill, ScriptPanel border, transcript alignment
+  '-end-0.5',
+  'end-0.5',
+  'rounded-ee-lg',
+  'border-e-4',
+  'border-s-[3px]',
+  'border-s-warning',
+  'ps-1.5',
+  '-start-px',
+  'md:border-e',
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',
