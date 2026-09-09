@@ -59,7 +59,7 @@ src/
   hooks/  utils/  styles/  types/
   test/setup.ts         # Vitest setup
 packages/               # Git submodules with heavy/optional implementations
-  esheet/  ychart/      # (DataVis NITRO is an npm package, not a submodule)
+  datavis/  esheet/  ychart/
 .storybook/             # Storybook (react-vite) config
   taxonomy.json         # Sidebar tiers/families + tag vocabulary (single source of truth)
   CatalogDocsPage.tsx   # Autodocs template that renders the catalog metadata
