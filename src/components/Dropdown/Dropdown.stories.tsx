@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   Dropdown,
   DropdownItem,
+  DropdownSubmenu,
   DropdownSeparator,
   DropdownLabel,
 } from './Dropdown';
@@ -110,6 +111,42 @@ export const Default: Story = {
       </DropdownItem>
     </Dropdown>
   ),
+};
+
+export const WithSubmenu: Story = {
+  render: () => (
+    <Dropdown trigger={<Button>Export</Button>}>
+      <DropdownItem onClick={() => console.warn('Copy clicked')}>
+        Copy
+      </DropdownItem>
+      <DropdownSubmenu label="Copy as">
+        <DropdownItem onClick={() => console.warn('Rich text clicked')}>
+          Rich text
+        </DropdownItem>
+        <DropdownItem onClick={() => console.warn('Markdown clicked')}>
+          Markdown
+        </DropdownItem>
+        <DropdownItem onClick={() => console.warn('Plain text clicked')}>
+          Plain text
+        </DropdownItem>
+      </DropdownSubmenu>
+      <DropdownSeparator />
+      <DropdownItem
+        variant="danger"
+        onClick={() => console.warn('Delete clicked')}
+      >
+        Delete
+      </DropdownItem>
+    </Dropdown>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A `DropdownSubmenu` opens a nested flyout on hover, click, or ArrowRight; ArrowLeft/Escape closes just the flyout.',
+      },
+    },
+  },
 };
 
 export const WithIcons: Story = {
