@@ -504,7 +504,7 @@ export function OrderConfirmationWizard({
             >
               <svg
                 aria-hidden="true"
-                className="mr-1 h-4 w-4"
+                className="me-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -538,7 +538,7 @@ export function OrderConfirmationWizard({
               Continue
               <svg
                 aria-hidden="true"
-                className="ml-1 h-4 w-4"
+                className="ms-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -560,7 +560,7 @@ export function OrderConfirmationWizard({
                 <>
                   <svg
                     aria-hidden="true"
-                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                    className="-ms-1 me-2 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -585,7 +585,7 @@ export function OrderConfirmationWizard({
                   Start Service
                   <svg
                     aria-hidden="true"
-                    className="ml-1 h-4 w-4"
+                    className="ms-1 h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

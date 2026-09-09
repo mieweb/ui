@@ -524,6 +524,16 @@ export const miewebUISafelist = [
   'rounded-e-md',
   'bg-right',
   'rtl:bg-left',
+  // RTL scheduling+clinical batch: calendar insets, timeline dots, order forms
+  '-start-5',
+  'border-e-0',
+  'md:border-s',
+  'ms-2.5',
+  'pe-2',
+  'ps-1',
+  'ps-6',
+  'rounded-s-none',
+  'start-1',
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',

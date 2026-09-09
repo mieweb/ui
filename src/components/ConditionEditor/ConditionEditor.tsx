@@ -560,7 +560,7 @@ export function ConditionEditor({
                 <div className="space-y-1">
                   <span className="text-foreground block text-sm font-medium">
                     Problem name
-                    <span className="text-destructive ml-1" aria-hidden="true">
+                    <span className="text-destructive ms-1" aria-hidden="true">
                       *
                     </span>
                   </span>
@@ -742,7 +742,7 @@ export function ConditionEditor({
                         disabled={fields.severity?.known === false}
                         onClick={() => setSeverity(active ? undefined : s)}
                         className={cn(
-                          'border-border border-l px-2.5 py-1 text-xs font-medium capitalize transition-colors first:border-l-0',
+                          'border-border border-s px-2.5 py-1 text-xs font-medium capitalize transition-colors first:border-s-0',
                           'disabled:opacity-40',
                           active
                             ? 'bg-primary-600 text-white'

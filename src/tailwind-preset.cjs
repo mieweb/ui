@@ -168,6 +168,16 @@ module.exports = {
     'rounded-e-md',
     'bg-right',
     'rtl:bg-left',
+    // RTL scheduling+clinical batch: calendar insets, timeline dots, order forms
+    '-start-5',
+    'border-e-0',
+    'md:border-s',
+    'ms-2.5',
+    'pe-2',
+    'ps-1',
+    'ps-6',
+    'rounded-s-none',
+    'start-1',
     // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
     // md variants that hand desktop back its original percentage cap. Purging
     // these uncaps the player on a phone, which is the bug the cap exists for.

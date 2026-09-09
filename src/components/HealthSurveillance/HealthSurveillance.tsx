@@ -253,7 +253,7 @@ export const HealthSurveillance = React.forwardRef<
                 return (
                   <div
                     key={si}
-                    className={cn(level > 0 && 'border-border border-l-2')}
+                    className={cn(level > 0 && 'border-border border-s-2')}
                     style={
                       level > 0
                         ? { marginLeft: (level - 1) * 16 + 2 }
@@ -261,11 +261,11 @@ export const HealthSurveillance = React.forwardRef<
                     }
                   >
                     {isAlt && (
-                      <div className="text-muted-foreground pl-1 text-[11px] font-medium tracking-wide uppercase">
+                      <div className="text-muted-foreground ps-1 text-[11px] font-medium tracking-wide uppercase">
                         one of
                       </div>
                     )}
-                    <div className={cn('space-y-1', level > 0 && 'pl-3')}>
+                    <div className={cn('space-y-1', level > 0 && 'ps-3')}>
                       {spec.keys.map((o) => {
                         const isPending = item.pendingKeys.includes(o);
                         return (

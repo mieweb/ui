@@ -113,7 +113,7 @@ export function OrderSidebar({
       {/* Sidebar */}
       <div
         data-slot="order-sidebar"
-        className={`fixed top-0 right-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className}`}
+        className={`fixed end-0 top-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className}`}
         role="dialog"
         aria-modal="true"
         aria-label="Order details"
@@ -253,7 +253,7 @@ export function OrderSidebar({
         {actions.length > 0 && (
           <div
             data-slot="order-sidebar-footer"
-            className="absolute right-0 bottom-0 left-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+            className="absolute start-0 end-0 bottom-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
           >
             <div className="flex flex-wrap gap-2">
               {actions.map((action) => (

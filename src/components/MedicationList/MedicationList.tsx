@@ -321,7 +321,7 @@ function MedicationRow({
         </span>
       )}
       {(medication.note || medication.task) && (
-        <span className="flex w-full basis-full flex-col gap-0.5 pl-4">
+        <span className="flex w-full basis-full flex-col gap-0.5 ps-4">
           {medication.note && (
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <StickyNoteIcon size={12} />
