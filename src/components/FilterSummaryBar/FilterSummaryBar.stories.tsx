@@ -17,7 +17,7 @@ The **one-line answer to "why am I only seeing these rows?"** above a filtered g
 
 ### Use it when
 
-- A \`DataVisNITRO\` grid, \`Table\` or card list has filters and/or a search box whose state lives in the host, and users lose track of what is hiding rows.
+- A DataVis NITRO grid, \`Table\` or card list has filters and/or a search box whose state lives in the host, and users lose track of what is hiding rows.
 - You need a single, obvious "Clear all" that resets filters *and* search together.
 
 ### Don't use it when
@@ -41,7 +41,10 @@ const rows = useMemo(() => applyFilters(allRows, filters, query), [allRows, filt
   onClearAll={() => { setFilters([]); setQuery(''); }}
   className="mb-3"
 />
-<DataVisNITRO source={source} … />
+{/* varName names a window global holding { typeInfo, data: rows } */}
+<DataVisNitroSource type="local" varName={rowsVarName}>
+  <DataVisNitroGrid columns={columns} />
+</DataVisNitroSource>
 \`\`\`
 
 No internal state: the host owns filters, search and the reset.
