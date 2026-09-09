@@ -483,8 +483,13 @@ export const miewebUISafelist = [
   // RTL DocScanner+media batch: detection-overlay corner pins, MediaEditor
   // speed-marker accent/pill, ScriptPanel border, transcript alignment
   '-end-0.5',
+  '-start-0.5',
+  '-start-1',
   'end-0.5',
   'rounded-ee-lg',
+  'rounded-es-lg',
+  'rounded-se-lg',
+  'rounded-ss-lg',
   'border-e-4',
   'border-s-[3px]',
   'border-s-warning',
