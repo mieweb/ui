@@ -53,7 +53,13 @@ export interface UseAnchoredPositionReturn<
   floatingRef: React.RefObject<TFloating | null>;
   /** Fixed-position style for the floating element — spread onto it */
   style: React.CSSProperties;
-  /** Side of the anchor in use after flipping */
+  /**
+   * Side of the anchor in use after flipping.
+   *
+   * Widened from `'top' | 'bottom'` to {@link AnchoredSide} in 0.8.0 alongside
+   * the new horizontal (`left*` / `right*`) placements — consumers that
+   * annotate this as `'top' | 'bottom'` need to widen their annotation.
+   */
   actualSide: AnchoredSide;
   /** Recompute the position (e.g. after async content loads) */
   update: () => void;
