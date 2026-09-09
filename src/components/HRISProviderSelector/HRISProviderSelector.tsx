@@ -171,7 +171,7 @@ export function HRISProviderSelector({
               className="border-border bg-card text-foreground hover:bg-muted rounded-lg border px-4 py-2"
               data-slot="hris-connected-btn"
             >
-              <i className="fas fa-link-slash mr-2" />
+              <i className="fas fa-link-slash me-2" />
               {disconnect}
             </button>
             <button
@@ -180,7 +180,7 @@ export function HRISProviderSelector({
               className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white"
               data-slot="hris-connected-btn-primary"
             >
-              <i className="fas fa-rotate mr-2" />
+              <i className="fas fa-rotate me-2" />
               {refreshSync}
             </button>
           </div>
@@ -196,7 +196,7 @@ export function HRISProviderSelector({
       <div className="mb-4" data-slot="hris-search-wrapper">
         <div className="relative">
           <span
-            className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2"
+            className="text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2"
             data-slot="hris-search-icon"
           >
             <i className="fas fa-search" />
@@ -206,7 +206,7 @@ export function HRISProviderSelector({
             placeholder={search}
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            className="focus:border-primary focus:ring-primary border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-1 focus:outline-none"
+            className="focus:border-primary focus:ring-primary border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-lg border py-2 ps-10 pe-4 focus:ring-1 focus:outline-none"
             data-slot="hris-search-input"
           />
         </div>

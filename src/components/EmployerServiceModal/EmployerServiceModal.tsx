@@ -176,7 +176,7 @@ export function EmployerServiceModal({
 
             {!config.useBasePrice && (
               <div
-                className="border-border ml-4 border-l-2 pl-4"
+                className="border-border ms-4 border-s-2 ps-4"
                 data-slot="employer-service-indent"
               >
                 <label
@@ -188,7 +188,7 @@ export function EmployerServiceModal({
                 </label>
                 <div className="relative w-40">
                   <span
-                    className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2"
+                    className="text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2"
                     data-slot="employer-service-price-prefix"
                   >
                     $
@@ -199,7 +199,7 @@ export function EmployerServiceModal({
                     min="0"
                     step="0.01"
                     data-slot="employer-service-price-input"
-                    className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
+                    className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border py-2 ps-7 pe-4 shadow-sm focus:ring-2 focus:outline-none"
                     value={config.customPrice ?? ''}
                     onChange={(e) =>
                       setConfig((prev) => ({
@@ -302,7 +302,7 @@ export function EmployerServiceModal({
 
             {config.notifyOnOrder && (
               <div
-                className="border-border ml-4 border-l-2 pl-4"
+                className="border-border ms-4 border-s-2 ps-4"
                 data-slot="employer-service-indent"
               >
                 <Input
@@ -358,7 +358,7 @@ export function EmployerServiceModal({
               <>
                 <svg
                   aria-hidden="true"
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ms-1 me-2 h-4 w-4 animate-spin"
                   data-slot="employer-service-spinner"
                   fill="none"
                   viewBox="0 0 24 24"

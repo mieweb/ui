@@ -291,13 +291,13 @@ export function RecurringServiceCard({
         {/* State-based note */}
         {effectiveState === 'warning' && (
           <div className="bg-warning/10 text-warning-800 dark:text-warning-200 rounded-md px-3 py-2 text-xs">
-            <i className="fas fa-exclamation-triangle mr-1" />
+            <i className="fas fa-exclamation-triangle me-1" />
             {consentNote}
           </div>
         )}
         {effectiveState === 'error' && (
           <div className="bg-destructive/10 text-destructive-800 dark:text-destructive-200 rounded-md px-3 py-2 text-xs">
-            <i className="fas fa-times-circle mr-1" />
+            <i className="fas fa-times-circle me-1" />
             {consentNote}
           </div>
         )}
@@ -582,7 +582,7 @@ export function RecurringServiceSetupModal({
               />
               <span className="text-sm">{overrideConsent}</span>
             </label>
-            <p className="text-muted-foreground ml-6 text-xs">
+            <p className="text-muted-foreground ms-6 text-xs">
               {overrideConsentNote}
             </p>
           </div>

@@ -149,6 +149,21 @@ module.exports = {
     '-ms-1',
     'ps-9',
     'sm:text-end',
+    // RTL services+employer batch: wizard steps, accordion insets, provider
+    // selectors, service cards/badges
+    'border-s-0',
+    'border-s-2',
+    'ms-1.5',
+    'ms-3',
+    'ms-4',
+    'ms-6',
+    'pe-3',
+    'pe-8',
+    'pe-16',
+    'ps-0',
+    'ps-3',
+    'ps-7',
+    'ps-8',
     // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
     // md variants that hand desktop back its original percentage cap. Purging
     // these uncaps the player on a phone, which is the bug the cap exists for.

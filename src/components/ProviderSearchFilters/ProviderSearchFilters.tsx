@@ -89,7 +89,7 @@ const inputVariants = cva(
   {
     variants: {
       hasIcon: {
-        true: 'pl-10',
+        true: 'ps-10',
         false: '',
       },
     },
@@ -104,7 +104,7 @@ const selectVariants = cva([
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
   'disabled:cursor-not-allowed disabled:opacity-50',
   'dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100',
-  'appearance-none bg-no-repeat bg-right pr-8',
+  'appearance-none bg-no-repeat bg-right pe-8',
   'bg-[url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27M6 8l4 4 4-4%27/%3e%3c/svg%3e")]',
   'bg-[length:1.5em_1.5em]',
   'bg-[right_0.5rem_center]',
@@ -205,7 +205,7 @@ function InputField({ label, icon, className, id, ...props }: InputFieldProps) {
       )}
       <div className="relative">
         {icon && (
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-neutral-400">
             {icon}
           </div>
         )}
@@ -424,7 +424,7 @@ export function ServiceMultiSelect({
           aria-labelledby={label ? undefined : 'services-label'}
           className={cn(
             selectVariants(),
-            'w-full text-left',
+            'w-full text-start',
             !selectedServices.length && 'text-muted-foreground',
             disabled && 'cursor-not-allowed opacity-50'
           )}
@@ -458,11 +458,11 @@ export function ServiceMultiSelect({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search services..."
-                className={cn(inputVariants({ hasIcon: true }), 'pl-8')}
+                className={cn(inputVariants({ hasIcon: true }), 'ps-8')}
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
-              <SearchIcon className="absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400" />
+              <SearchIcon className="absolute start-4 top-1/2 -translate-y-1/2 text-neutral-400" />
             </div>
 
             {/* Service options */}
@@ -487,7 +487,7 @@ export function ServiceMultiSelect({
                           aria-selected={isSelected}
                           onClick={() => handleToggleService(service.value)}
                           className={cn(
-                            'flex w-full items-center justify-between px-3 py-2 text-left text-sm',
+                            'flex w-full items-center justify-between px-3 py-2 text-start text-sm',
                             'hover:bg-neutral-100 dark:hover:bg-neutral-700',
                             isSelected && 'bg-primary-50 dark:bg-primary-900/20'
                           )}
@@ -759,7 +759,7 @@ export function CompactFilterBar({
       {/* Search Input */}
       <div className="min-w-[150px] flex-1">
         <div className="relative">
-          <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <SearchIcon className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             placeholder="Search providers..."
@@ -767,7 +767,7 @@ export function CompactFilterBar({
             onChange={(e) => handleFieldChange('searchPhrase', e.target.value)}
             disabled={loading}
             className={cn(
-              'h-9 w-full rounded-md border border-neutral-200 pr-3 pl-9 text-sm',
+              'h-9 w-full rounded-md border border-neutral-200 ps-9 pe-3 text-sm',
               'focus:ring-primary-500 focus:ring-2 focus:outline-none',
               'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
             )}
@@ -790,7 +790,7 @@ export function CompactFilterBar({
           }}
           disabled={loading}
           className={cn(
-            'h-9 w-20 rounded-l-md border border-neutral-200 px-3 text-sm',
+            'h-9 w-20 rounded-s-md border border-neutral-200 px-3 text-sm',
             'focus:ring-primary-500 focus:z-10 focus:ring-2 focus:outline-none',
             'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
           )}
@@ -801,7 +801,7 @@ export function CompactFilterBar({
           disabled={loading}
           aria-label="Search radius"
           className={cn(
-            'h-9 rounded-r-md border border-l-0 border-neutral-200 px-2 text-sm',
+            'h-9 rounded-e-md border border-s-0 border-neutral-200 px-2 text-sm',
             'focus:ring-primary-500 focus:ring-2 focus:outline-none',
             'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
           )}
@@ -971,7 +971,7 @@ export function ActiveFilters({
           <button
             type="button"
             onClick={filter.onClear}
-            className="ml-1 rounded-full p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-600"
+            className="ms-1 rounded-full p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-600"
             aria-label={`Remove filter: ${filter.label}`}
           >
             <XMarkIcon className="h-3 w-3" />
