@@ -38,6 +38,7 @@ back here later.
 - **ESM and styles.** `@mieweb/datavis` ships ESM and publishes its semantic grid/graph styles as `@mieweb/datavis/styles.css`. The ui base stylesheet imports that entry so DataVis owns its selectors while ui supplies the design tokens.
 - Source/Grid are **coupled through React context** — a `DataVisNitroGrid` must be
   rendered inside a `DataVisNitroSource`. Don't refactor one without the other.
+- Configure grouped or aggregated views declaratively with `DataVisNitroSource`'s `groupBy` and `aggregates` props; consumers should not reach into `DataVisNitroContext` to call `setGroup` or `setAggregate`.
 - View instances are tagged (`_dvType` / `_dvUrl`) for tracking; preserve those
   when touching `useView` wiring.
 - A `TranslateFn` hook is threaded for i18n — keep labels translatable, don't
