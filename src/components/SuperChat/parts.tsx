@@ -328,6 +328,8 @@ interface MessageAction {
   /** Accessible name (footer button) and menu label. */
   label: string;
   icon: React.ReactNode;
+  /** Footer-button tooltip — e.g. to hint modifier behavior. Defaults to `label`. */
+  title?: string;
   /** Default behavior (footer click / top-level menu item). */
   onSelect: () => void;
   /** Explicit variants, rendered as a flyout submenu in the overflow menu. */
@@ -485,11 +487,7 @@ function FooterActionButton({
       type="button"
       data-slot={`superchat-action-${action.id}`}
       aria-label={action.label}
-      title={
-        action.submenu
-          ? `${action.label} (\u2318/Ctrl-click: default format)`
-          : action.label
-      }
+      title={action.title ?? action.label}
       onClick={action.submenu ? undefined : action.onSelect}
       onClickCapture={onClickCapture}
       className={actionButtonClass}
@@ -858,6 +856,7 @@ export const MessageRow = React.memo(function MessageRow({
           {
             id: 'copy',
             label: 'Copy message',
+            title: 'Copy message (\u2318/Ctrl-click: default format)',
             icon: copy.copied ? (
               <CheckIcon size={14} aria-hidden="true" />
             ) : (

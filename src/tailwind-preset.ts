@@ -544,9 +544,16 @@ export const miewebUISafelist = [
   'focus:ring-primary-500',
   'text-[10px]',
   // SuperChat message actions (footer bar + sticky overflow menu) — arbitrary
-  // touch-pointer variants and stacking above rich content (z-50 internals).
+  // touch-pointer variants and stacking above rich content (z-50 internals),
+  // plus the standard utilities of the sticky wrapper and its footer handoff
+  // (`invisible` keeps the hidden trigger out of the tab order).
   '[@media(pointer:coarse)]:opacity-100',
   'z-[60]',
+  'z-10',
+  'invisible',
+  'transition-opacity',
+  'bottom-2',
+  'self-end',
   // Dropdown submenu flyout — preferred width clamped to the viewport.
   'min-w-[min(10rem,calc(100vw-1rem))]',
   // SuperChat mermaid diagram wrapper — arbitrary variants applied to the
