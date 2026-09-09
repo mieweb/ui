@@ -500,6 +500,11 @@ export const miewebUISafelist = [
   'ps-1.5',
   '-start-px',
   'md:border-e',
+  // RTL billing+invoices batch: invoice tables/headers, search icon inset,
+  // button spinners
+  '-ms-1',
+  'ps-9',
+  'sm:text-end',
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',

@@ -287,7 +287,7 @@ export function CreateInvoiceModal({
                         type="button"
                         data-slot="invoice-modal-order"
                         onClick={() => toggleOrder(order.id)}
-                        className={`w-full rounded-lg border p-3 text-left transition-colors ${
+                        className={`w-full rounded-lg border p-3 text-start transition-colors ${
                           isSelected
                             ? 'border-primary bg-primary/10'
                             : 'border-border hover:border-border/80'
@@ -472,7 +472,7 @@ export function CreateInvoiceModal({
                     <>
                       <svg
                         aria-hidden="true"
-                        className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                        className="-ms-1 me-2 h-4 w-4 animate-spin"
                         fill="none"
                         viewBox="0 0 24 24"
                       >
