@@ -23,11 +23,80 @@ const sampleUser: UserProfile = {
 };
 
 const meta: Meta<typeof SiteHeader> = {
-  title: 'Components/Layout & Structure/SiteHeader',
+  id: 'layout-siteheader',
+  title: 'Components/Layout/SiteHeader',
   component: SiteHeader,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**The public / marketing site bar**: a \`fixed\` top \`<header>\` (with a 64px spacer so content is not covered) in \`variant\` \`primary\` (brand blue) | \`white\` | \`transparent\` | \`glass\`, containing \`logo\` (\`{ src, alt, textSrc, name, href }\`), desktop \`links: NavLink[]\` (\`{ label, href, external?, hideOnMobile? }\`), and on the end side either \`AuthButtons\` (Log In / Sign Up via \`onLogin\` / \`onSignUp\` or \`loginHref\` / \`signUpHref\`, \`showSignUp\`) or, when \`user\` is set, a self-contained \`UserMenu\` (\`onProfile\`, \`onLogout\`, \`userMenuItems\`). Below \`md\` the links collapse behind \`MobileMenuButton\` into \`MobileMenuPanel\`, whose open state the component owns. Pieces are exported for custom bars: \`SiteLogo\`, \`NavLinks\`, \`AuthButtons\`, \`UserMenu\`, \`MobileMenuButton\`, \`MobileMenuPanel\`, plus \`CompactHeader\` (\`title\`, \`backHref\` / \`onBack\`, \`rightContent\`) for focused sub-pages.
+
+### Use it when
+
+- Landing, pricing, help or sign-up pages: a handful of top-level links, brand logo, and a logged-out / logged-in switch.
+- You want the mobile menu, auth buttons and user dropdown handled for you with plain \`href\`s (server-rendered, no router needed).
+
+### Don't use it when
+
+- The **signed-in application** shell with search, notification and account triggers next to a \`Sidebar\` — \`AppHeader\` (sticky, slot-based, no nav links).
+- A **title block within a page** — \`PageHeader\`.
+- Navigation needs active-route styling, nested groups or a persistent rail — \`Sidebar\`; links are React Router / Next links — \`NavLinks\` renders plain \`<a>\` only.
+- More than ~5 links or mega-menus — there is no dropdown navigation.
+
+### Example
+
+\`\`\`tsx
+const { user, logout } = useSession();
+
+<SiteHeader
+  variant="white"
+  logo={{ name: 'BlueHive', src: '/logo.svg', alt: 'BlueHive', href: '/' }}
+  links={[
+    { label: 'Employers', href: '/employers' },
+    { label: 'Providers', href: '/providers' },
+    { label: 'Docs', href: 'https://docs.bluehive.com', external: true },
+  ]}
+  user={user ? { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl } : null}
+  loginHref="/login"
+  signUpHref="/signup"
+  onProfile={() => navigate('/account')}
+  onLogout={logout}
+  userMenuItems={[{ label: 'Billing', href: '/billing' }]}
+/>
+<main>…</main>
+<SiteFooter … />
+\`\`\`
+
+Session state is the host's; the component switches between \`AuthButtons\` and \`UserMenu\` on \`user\`.
+
+### Limitations
+
+- Accessibility: \`NavLinks\` is a \`<nav aria-label="Main navigation">\` (label prop available on the piece, not on \`SiteHeader\`); \`MobileMenuButton\` has \`aria-expanded\` + \`aria-label="Toggle menu"\`; \`UserMenu\`'s trigger has \`aria-expanded\` / \`aria-haspopup\` but the popup has **no \`role="menu"\`, no arrow-key navigation, no Escape handling** (click-outside only), and focus is not moved or returned. \`MobileMenuPanel\` is a fixed panel **without \`role="dialog"\`, focus trap, Escape or scroll lock**; its \`<nav>\` is unlabelled. The header does not mark the current page (\`aria-current\`). No \`<h1>\` except in \`CompactHeader\`. \`hideOnMobile\` on a link is **not implemented** (the type exists, nothing reads it).
+- Fixed positioning: the \`h-16\` spacer (\`h-14\` for \`CompactHeader\`) is rendered by the component, so do not add your own offset; ancestors with \`transform\` break the fixed bar.
+- i18n: hard-coded English \`"Log In"\`, \`"Sign Up"\`, \`"Log Out"\`, \`"Profile"\`, \`"Settings"\`, \`"Menu"\`, \`"Toggle menu"\`, \`"Close menu"\`, \`"Main navigation"\`; logo fallback letter is \`name[0] || 'B'\`.
+- RTL: physical classes throughout — dropdown \`right-0\`, mobile panel \`right-0\`, external icon \`ml-1\`, \`CompactHeader\` back chevron does not mirror.
+- Theming: \`primary\` variant uses \`bg-primary-800\`; everything else is hard-coded \`white\` / \`gray-*\` / \`red-*\` with \`dark:\` variants — not brand tokens. Depends on \`class-variance-authority\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'layout-appheader',
+          why: 'SiteHeader is the fixed, brand-coloured public-site bar with nav links and auth buttons; AppHeader is the sticky, slot-based chrome of a signed-in app beside a Sidebar.',
+        },
+        {
+          type: 'composes with',
+          target: 'layout-sitefooter',
+          why: 'SiteHeader and SiteFooter frame a public page: same logo/name props, same light/dark colour variants.',
+        },
+      ],
+    },
   },
   argTypes: {
     variant: {

@@ -37,21 +37,82 @@ const sampleTranscript: Transcript = {
 // ============================================================================
 
 const meta: Meta<typeof MediaEditor> = {
-  title: 'Components/Images & Media/MediaEditor',
+  id: 'media-mediaeditor',
+  title: 'Modules/Media/MediaEditor',
   component: MediaEditor,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'A media playback + editable word-level transcript surface. Composes ' +
-          'MediaPlayer with an editable transcript driven by the ' +
-          '`useTranscriptEdits` hook: delete/restore words, cut/copy/paste, ' +
-          'edit word text, split silences, remove filler words, and set ' +
-          'per-word playback-speed markers. Controlled and persistence-agnostic ' +
-          '(edits flow out via `onEditorStateChange`). Timestamps in milliseconds.',
+        component: `### What it's for
+
+**Editing a recording by editing its words.** \`MediaEditor\` stacks a \`MediaPlayer\` over (or beside, \`splitLayout="vertical"\`) a word-level transcript where every word is a selectable token: delete/restore, cut/copy/paste, edit text, split a silence, strip filler words, and pin per-word playback-speed markers. All edit state lives in the headless \`useTranscriptEdits\` hook; the component adds cursor, selection, modals and sequence playback (Space plays the *edited* timeline from the cursor, honouring deletions and speed markers). It is controlled and persistence-agnostic: seed it with \`transcript\` (+ \`initialEditedWords\`, \`initialUndoStack\`, \`initialSpeedMarkers\`, \`initialDefaultSpeed\`) and persist what comes out of \`onEditorStateChange(editedWords, undoStack)\`, \`onSpeedStateChange\`, \`onHasEditsChange\`, \`onCursorTimestampChange\`. Hosts that version the document can chain their own history through \`onUndoBeyond\` / \`canUndoBeyond\` / \`onRedo\` / \`canRedo\` so there is one Undo button. Timestamps are **milliseconds**. The dialogs are exported for advanced hosts: \`FillerWordsModal\`, \`WordEditorModal\`, \`SilenceSettingsModal\`, \`SpeedMarkerMenu\`.
+
+### Use it when
+
+- You have a **word-timestamped** \`Transcript\` (\`words[].startMs/endMs\`) and the user's job is to tighten the recording — remove "um"s, cut a tangent, fix a misheard word — for export or re-cut.
+- Edits must survive reloads and be auditable: the host stores the \`EditableWord[]\` list and undo stack, not a rendered file.
+
+### Don't use it when
+
+- The transcript is **read-only** and only needs click-to-seek and follow-along highlight — \`TranscriptView\`.
+- You only need playback — \`MediaPlayer\` or \`AudioPlayer\`.
+- You have segment-level timestamps only (no per-word times): the token model needs word times; render with \`TranscriptView\` in segment mode instead.
+- You want to *produce* the transcript — see the **MediaEditor Live Demo**, which transcribes in the browser and then opens this editor.
+
+### Example
+
+\`\`\`tsx
+const [edits, setEdits] = useState(() => loadEdits(clipId));
+const playerRef = useRef<MediaPlayerRef>(null);
+
+<div className="h-[70vh]">
+  <MediaEditor
+    src={clip.url}
+    transcript={clip.transcript}
+    initialEditedWords={edits?.editedWords}
+    initialUndoStack={edits?.undoStack}
+    initialSpeedMarkers={edits?.speedMarkers}
+    initialDefaultSpeed={edits?.defaultSpeed}
+    onEditorStateChange={(editedWords, undoStack) =>
+      setEdits((e) => ({ ...e, editedWords, undoStack }))
+    }
+    onSpeedStateChange={(speedMarkers, defaultSpeed) =>
+      setEdits((e) => ({ ...e, speedMarkers, defaultSpeed }))
+    }
+    onHasEditsChange={setDirty}
+    playerRef={playerRef}
+  />
+</div>
+\`\`\`
+
+Give it a **fixed-height** parent: the transcript scrolls inside its own box only when the editor has bounded height; otherwise the page grows.
+
+### Limitations
+
+- Accessibility: the transcript is a \`role="listbox"\` (\`aria-label="Transcript words"\`) with \`aria-activedescendant\` pointing at \`role="option"\` spans, so a screen reader hears the cursor word but not the selection range. Keyboard: Arrow keys (+Shift to extend), Home/End, Backspace/Delete toggle delete, ⌘/Ctrl+X/C/V, ⌘/Ctrl+Z and ⇧⌘Z / Ctrl+Y, Enter opens the word editor, Space plays from the cursor. **Speed markers are right-click only** (\`onContextMenu\`) and the range-select gestures (double-click anchor, drag, 500 ms long-press) have no keyboard equivalent. Toolbar buttons carry \`aria-label\`/\`title\`; nothing is announced via \`aria-live\` when words are deleted or pasted.
+- Clipboard: copy puts plain text on the system clipboard (\`clipboardData.setData\`), but **paste reads only the internal clipboard** — you cannot paste words from another editor instance or app.
+- The shortcut hints are rendered as Mac glyphs (\`⌘Z\`, \`⇧⌘Z\`, \`⌫\`) on every platform; all toolbar copy ("Speed:", "Edited", "silences", "Remove filler words", modal text) is hard-coded English. Filler defaults (\`DEFAULT_FILLER_WORDS\`) and silence thresholds (400 ms / 1500 ms) are English/heuristic.
+- Undo is a single word-level stack; there is no redo of host-level changes unless you wire \`onRedo\`. Word text edits live only in \`EditableWord\` — the audio itself is never modified; export/re-cut is the host's job (\`PlaybackSegment\` describes the edited timeline).
+- Responsive/RTL: below \`md\` the media area is capped at \`55dvh\` and the split becomes a column; the vertical split uses physical \`md:border-r\`, cursor bars use \`-left-px\` / \`right-0.5\`, and the deleted-word rule is \`border-l\`.
+- Theming: semantic tokens (\`bg-card\`, \`border-border\`, \`bg-muted\`, \`text-destructive\`, \`warning\`) plus \`primary-500\` highlights. Depends on \`MediaPlayer\`, \`Button\`, \`Select\`, \`useTranscriptEdits\`, \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'contains',
+          target: 'media-mediaplayer',
+          why: 'The media surface at the top of the editor is a MediaPlayer driven through its millisecond ref.',
+        },
+        {
+          type: 'alternative to',
+          target: 'media-transcriptview',
+          why: 'MediaEditor when the user edits words (delete, cut, speed markers); TranscriptView when the transcript is read-only click-to-seek.',
+        },
+      ],
     },
   },
   argTypes: {

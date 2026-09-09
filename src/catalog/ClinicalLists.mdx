@@ -1,0 +1,96 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Healthcare/Clinical lists/Overview" />
+
+# Clinical lists
+
+> **Whose list is it, and what scope?** The **chart** owns problems, medications and allergies
+> as durable records; an **encounter** only references them. Chart-scope problems →
+> `ProblemList`; this visit's relevance → `PresentingProblems`; the write side of a problem →
+> `ConditionEditor`. Medications to reconcile → `MedicationList` (start with
+> `MedicationReconciliation`); allergies with an explicit NKA → `AllergyList` (start with
+> `AllergyManager`). Every coded pick goes through `CodeLookup`, dependency-injected. The two
+> `…Field (eSheet)` entries are the same lists as eSheet form questions.
+
+## Which one?
+
+| Component                                                                                   | Use it when                                                                                                                                                                                                                            | Not when                                                                                                                                        |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ProblemList](?path=/docs/clinical-lists-problemlist--docs)                                 | The **chart-scope** problem list: `ConditionConcern[]` with clinical status groups, assertion history, coding chips, relationships, observations; `onAction` / `onAddProblem` / `onReorder`                                            | You need this visit's relevance — `PresentingProblems`; today's A&P — `Assessment`; to edit codes — `ConditionEditor`                           |
+| [PresentingProblems](?path=/docs/clinical-lists-presentingproblems--docs)                   | The **encounter-scope** view: pick chart concerns relevant this visit and tag **Addressed / Relevant Hx / Noted** on the encounter reference; `scope` gates the _no known problems_ negative assertion                                 | You are maintaining the chart list — `ProblemList`; you need orders under problems — `Assessment`                                               |
+| [ConditionEditor](?path=/docs/clinical-lists-conditioneditor--docs)                         | A row action needs a **form**: `add` / `refine` / `revise` / `relate` / `observe`, capture-first with three-state uncertainty; returns a `ConditionAssertionDraft` the host appends; `renderCodeSearch` injects `CodeLookup`           | Editing a medication or an order — `MedicationEditor` / `OrderEditor`; you only display conditions                                              |
+| [MedicationList](?path=/docs/clinical-lists-medicationlist--docs)                           | **Presenting medications** grouped by reconciliation status. `MedicationReconciliation` = batteries included (NCPDP `MedicationEditor`, dialogs, quick-add, `inlineAddSearch`); `MedicationList` = presentational, you own the dialogs | Allergies — `AllergyList`; placing a new order in the plan — `Assessment` + `OrderEditor`; a header summary — `PatientHeader` medication banner |
+| [AllergyList](?path=/docs/clinical-lists-allergylist--docs)                                 | Allergy / intolerance list grouped by category with severity and **tri-state NKA** ("not recorded" until _Confirm: no known allergies_). `AllergyManager` = batteries included; `AllergyList` = presentational                         | Medications — `MedicationList`; a red pill banner only — `PatientHeader`; drug–allergy checking (nothing here cross-references)                 |
+| [CodeLookup](?path=/docs/clinical-lists-codelookup--docs)                                   | Any **coded pick** — diagnosis, drug, lab, procedure, vaccine, surveillance program — searched offline in a Web Worker over pre-built shards; embed `bare` or inject app-wide via `CodeLookupProvider`                                 | Your own data or an API — `Autocomplete`; you cannot serve the shards or run a worker — every consumer falls back to plain text                 |
+| [MedicationListField (eSheet)](?path=/docs/clinical-lists-medicationlistfield-esheet--docs) | The medication list is a **question in an eSheet form**; `registerMedicationListFieldType({ codeLookup })` once, answer stored as `{ medications }` JSON                                                                               | The page is not an eSheet form — use `MedicationReconciliation` directly                                                                        |
+| [AllergyListField (eSheet)](?path=/docs/clinical-lists-allergylistfield-esheet--docs)       | The allergy question in an eSheet form, storing `{ allergies, noKnownAllergies }`; `registerAllergyListFieldType({ codeLookup })` (or `registerMieEsheetFields` for both)                                                              | The page is not an eSheet form — use `AllergyManager` directly                                                                                  |
+
+## Install / entry points
+
+| Entry               | Exports                                                                                                                                                                                      | Peers                                                                                        |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `@mieweb/ui`        | `ProblemList`, `PresentingProblems`, `ConditionEditor`, `MedicationList`, `MedicationReconciliation`, `MedicationEditor`, `AllergyList`, `AllergyManager`, `CodeLookupProvider`, model types | none                                                                                         |
+| `@mieweb/ui/esheet` | `MedicationListField`, `AllergyListField`, `registerMedicationListFieldType`, `registerAllergyListFieldType`, `registerMieEsheetFields` (+ `EsheetRenderer`, `EsheetBuilder`)                | `@esheet/renderer` or `@esheet/builder`, `@esheet/core`, `@esheet/fields` — install yourself |
+| _(source only)_     | `CodeLookup` — **not** in the package build: its module Web Worker needs your app bundler. Import from a source checkout / vendored folder and inject it                                     | shards served at `indexUrl` (`{locale}/manifest.json` + `.mcdx`)                             |
+
+## How they fit together
+
+- **Chart scope vs encounter scope is the organising idea.** `ProblemList` renders the chart's
+  `ConditionConcern[]`; `PresentingProblems` takes the _same array_ as `patientConcerns` and
+  layers encounter references (`PresentingEntry { concernId, relevance }`) on top — the
+  concern is never mutated by the encounter. [Assessment](?path=/docs/encounter-orders-assessment--docs)
+  (Encounter & orders) is the third view of the same concerns: today's assertion plus the plan.
+  Persist chart and encounter state separately; the `concernId` is the join.
+- **ConditionEditor is the only writer of assertions.** `ProblemList` and `Assessment` emit
+  intents (`refine`, `revise`, `relate`, `observe`); the editor returns a draft; the host
+  appends it (and, for a `revision`, marks the superseded assertion `refuted`). Ids and dates
+  are the host's.
+- **MedicationList and AllergyList share one layering.** A presentational, fully controlled
+  list (`MedicationList` / `AllergyList`) that renders and reports; an engine that owns dialog
+  state and can be controlled or uncontrolled (`MedicationReconciliation` / `AllergyManager`);
+  and an eSheet adapter (`…Field`) that serialises the engine's value into `response.answer`.
+  Start with the engine unless you need to own the dialogs. Both use
+  [RowActionToolbar](?path=/docs/actions-rowactiontoolbar--docs) for hover / focus-revealed row
+  actions, `useDragReorder` for same-group reordering with an Alt+↑/↓ keyboard equivalent, and
+  `useLiveAnnouncement` for the `aria-live` region — the same row pattern `ProblemList`,
+  `PresentingProblems` and `Assessment` use.
+- **CodeLookup plugs in by injection, never by import.** Because its Web Worker cannot be
+  bundled by the library build, every consumer takes it as a prop shaped for its domain:
+  `codeLookup={{ component, indexUrl, locale? }}` on `MedicationReconciliation` /
+  `MedicationEditor` / `AllergyManager` / `OrderEditor`, and a render prop
+  (`renderCodeSearch`, `renderOrderSearch`) on `ConditionEditor` / `Assessment`. Mount one
+  `CodeLookupProvider component={CodeLookup} indexUrl="/codify"` and all of them default to it;
+  pass `false` to opt a component back to plain text. Omit both and the editors still work —
+  uncoded.
+- **eSheet fields are adapters, not forks.** `MedicationListField` / `AllergyListField` map
+  `field.definition` → props and `onChange` → `onResponse({ answer: JSON })`, and are read-only
+  outside fill-out mode. Registration is global (`registerCustomFieldTypes`), so choose the
+  `codeLookup` once; `EsheetRenderer` / `EsheetBuilder` (Composite forms) declare that they
+  `contain` both fields.
+
+## Shared limitations
+
+- **Accessibility.** Every list is a `Card` of `<section aria-label>` groups over a `<ul>`;
+  rows become focus stops only when reordering is enabled, and the `RowActionToolbar` is
+  hover-revealed on fine-pointer devices (always visible on touch, Tab-reachable). Live
+  announcements cover reorders (and medication status changes) but **not** adds, removals,
+  notes or NKA / negative-assertion toggles. Dialogs inherit `Modal`'s focus trap; the
+  `CodeLookup` input's `aria-label` is fixed ("Search medical codes").
+- **No clinical decision support.** Nothing checks drug interactions, drug–allergy conflicts,
+  duplicate therapy, dose ranges, code validity or crosswalk consistency; `parseSig` /
+  `parseMedicationLabel` are English regex heuristics; `expired`, `discontinuedDate`,
+  `inactive` and `clinicalStatus` are display flags the host derives. Coded results are only as
+  complete as the codify shards (no ICD-11 rows, drug allergens only, `es` is a sample); free
+  text arrives uncoded.
+- **Offline / runtime.** `CodeLookup` needs `Worker`, `fetch`, ideally OPFS, and 14–81 MB of
+  shards served at `indexUrl`; the Storybook serves them from `.storybook/public/codify/`.
+  Nothing else in the family has a runtime requirement.
+- **Responsive / RTL.** Rows `flex-wrap`; toolbar overlays (`right-*`) and note / timeline
+  indents (`pl-*`, `ml-*`) are physical, so RTL layouts do not mirror.
+- **Theming / i18n.** Semantic tokens via `Card` / `Badge` plus a few hard-coded reds and
+  ambers (EXPIRED, allergy icon, scope banner, revise alert). `title` / `emptyMessage` style
+  props are the only externalised strings — group headings, action labels, badge text, dialog
+  copy, NCPDP field labels and `CodeLookup`'s UI strings are English constants.
+- **Persistence is yours.** Every component is controlled (or controllable): ids, dates,
+  ordering, assertion appends, NKA flags and eSheet answers are stored by the host; the eSheet
+  peers are devDependencies of `@mieweb/ui`, not peers, and `CodeLookup` is not in the build.

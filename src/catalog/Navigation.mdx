@@ -1,0 +1,92 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Navigation/Overview" />
+
+# Navigation
+
+> **Where is the user going?** Between peer views of one page → `Tabs`. Up a hierarchy →
+> `Breadcrumb`. Between sections of the page they are on → `TableOfContents` (sidebar
+> outline) or `SectionSpyNav` (sticky band), with `ReadingProgressBar` for how far they've
+> read. Through an ordered flow → `StepIndicator` (just the rail) or `OnboardingWizard` (the
+> whole takeover). Anywhere, by typing → `CommandPalette`. Between routes with a persistent
+> rail → [Sidebar](?path=/docs/overlays-sidebar--docs) (Overlays).
+
+## Which one?
+
+| Component                                                             | Use it when                                                                                                                                  | Not when                                                                                                                                                                                         |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Tabs](?path=/docs/navigation-tabs--docs)                             | 2–7 sibling views of one record/page; selection is local state (`value` / `defaultValue`); `tablist` / `tab` / `tabpanel` semantics          | App navigation between routes — [Sidebar](?path=/docs/overlays-sidebar--docs); a compact toolbar filter — `PillSelect`; readable stacked sections — `Accordion`; ordered steps — `StepIndicator` |
+| [Breadcrumb](?path=/docs/navigation-breadcrumb--docs)                 | The page is ≥ 2 levels deep in a tree the user climbs back up; `maxItems` bounds long paths; `renderLink` for your router                    | Peer views — `Tabs`; primary navigation — `Sidebar` / `AppHeader`; one level deep — a Back `Button`                                                                                              |
+| [TableOfContents](?path=/docs/navigation-tableofcontents--docs)       | A two-column long page with a sticky **nested** outline; auto-discovers `h2, h3` with ids inside `contentRef`, or takes `items`              | Single-column with a few flat sections — `SectionSpyNav`; progress only — `ReadingProgressBar`; items are pages — `Sidebar`                                                                      |
+| [SectionSpyNav](?path=/docs/navigation-sectionspynav--docs)           | A sticky horizontal band under the header for 3–8 **flat** sections, optional tiered `cta`                                                   | Nested headings with a sidebar — `TableOfContents`; content scrolls in a container (viewport-only spy); links leave the page — `AppHeader`                                                       |
+| [ReadingProgressBar](?path=/docs/navigation-readingprogressbar--docs) | A decorative top-of-viewport bar for how far the reader has scrolled the document                                                            | A value the host owns (upload, task) — [Progress](?path=/docs/loading-progress--docs); the reader needs to jump — add a TOC or `SectionSpyNav`; content scrolls in a container                   |
+| [StepIndicator](?path=/docs/navigation-stepindicator--docs)           | The numbered rail of a wizard **you** build; `currentStep` + `onStepClick`, `orientation`, `hasError` / `optional` per step                  | You want the whole flow — `OnboardingWizard`; the user only watches — [TimelineProgress](?path=/docs/data-display-timeline--docs); a percentage — `Progress`                                     |
+| [OnboardingWizard](?path=/docs/navigation-onboardingwizard--docs)     | A full-screen setup takeover with header, Back / Next / Skip / Finish, `Progress`, `loading` and `error` states; controlled by `currentStep` | Steps live inside a page — `StepIndicator`; a dialog — `Modal` + `StepIndicator`; not BlueHive — override the branding and `OnboardingCompletion` copy                                           |
+| [CommandPalette](?path=/docs/navigation-commandpalette--docs)         | ⌘K / Ctrl+K search-and-run across the app; features register items through `useCommandPalette`                                               | Actions for one element — `Dropdown`; a form value — `Autocomplete`; showing shortcuts — `KeyboardShortcutsOverlay`                                                                              |
+
+## How they fit together
+
+- **Position vs. peers vs. sections.** `Breadcrumb` answers "where am I in the tree",
+  `Tabs` answers "which view of this thing", and the in-page trio answers "where am I on this
+  page". They stack: a `PageHeader` commonly holds a `Breadcrumb` and a `TabsList` in its
+  `children`, and a long tab panel can carry its own `TableOfContents`.
+- **The in-page trio is complementary, not duplicate.** `TableOfContents` and `SectionSpyNav`
+  both sit on `useScrollSpy` (IntersectionObserver over the section ids; the topmost
+  intersecting target wins) and both mark the active link with `aria-current="location"`, but
+  they solve different layouts: the TOC is a _nested_ sidebar outline that can **discover
+  headings itself** (`selector` + `contentRef`, re-run on DOM mutations) and can observe a
+  scroll container (`root`); `SectionSpyNav` is a _flat_, sticky horizontal band for the
+  viewport with a tighter default `rootMargin` (`-22% 0px -68% 0px`) and a single tiered CTA.
+  Choose one per layout — they are declared `alternative to` each other. `ReadingProgressBar`
+  is orthogonal: it reads `document.documentElement` scroll, is `aria-hidden`, and provides no
+  links, so it `composes with` either. `ReadingProgressBar` is not a `Progress`: `Progress`
+  (Loading) is a determinate `role="progressbar"` for a value the host owns; the reading bar
+  binds to scroll and is decorative.
+- **Indicator vs. flow.** `StepIndicator` renders only the rail (`<nav aria-label="Progress">`
+  of step buttons, `aria-current="step"`); `OnboardingWizard` renders the whole screen and,
+  notably, uses a `Progress` bar ("Step 2 of 5") rather than `StepIndicator` for its footer.
+  If you need a clickable rail inside the wizard, put a `StepIndicator` in `headerContent` or
+  a step's `content` and drive both from the same `currentStep`.
+- **Tabs vs. Sidebar.** Both switch what is shown, but `Tabs` are local UI state with
+  `tablist` semantics and unmounted inactive panels, while
+  [Sidebar](?path=/docs/overlays-sidebar--docs) is the persistent rail of _routes_
+  (drawer on mobile). If the browser back button should change it, it is not a tab.
+- **CommandPalette is three parts.** `CommandPaletteProvider` (state + ⌘K),
+  `useCommandPalette` (features call `setItems` / `setCategories` / `open`), `CommandPalette`
+  (the overlay) plus `CommandPaletteTrigger` for the header. `setItems` replaces the list, so
+  aggregate across features in one place.
+
+## Shared limitations
+
+- Landmarks are labelled with **hard-coded English** that is not a prop: `Breadcrumb`
+  (`aria-label="Breadcrumb"`), `TableOfContents` (`"Table of contents"`), `StepIndicator`
+  (`"Progress"`, `"Step N: …"`). `SectionSpyNav` uses its `label` prop as the landmark name;
+  `Tabs` sets no label on the `tablist` — pass `aria-label` yourself. `OnboardingWizard`'s
+  header `<nav>` is unlabelled.
+- Overlay semantics are missing where you might expect them: `CommandPalette` and
+  `OnboardingWizard` cover the page **without `role="dialog"`, `aria-modal`, a focus trap or
+  scroll lock**; neither returns focus on close.
+- Keyboard: `Tabs` implements roving focus with arrows / Home / End but requires Enter/Space to
+  activate (manual activation); `CommandPalette` uses ArrowUp/Down / Enter / Escape and hijacks
+  **Tab** to cycle categories; everything else relies on native `<a>` / `<button>` behaviour.
+  No component here manages focus when the active section or step changes.
+- Scroll-spy caveats (TOC, `SectionSpyNav`): sections need stable `id`s (headings without one
+  are skipped), the last short section may never become active, and only `TableOfContents`
+  can observe a container other than the window; `ReadingProgressBar` is window-only too.
+- i18n: `Breadcrumb` and `Tabs` ship no strings; `SectionSpyNav` (`label`),
+  `OnboardingWizard` (`labels`, `loadingMessage`) and `CommandPalette` (`placeholder`, group
+  labels) expose some, but "Step N of M", the `OnboardingCompletion` copy, `CommandPalette`'s
+  "All" / "Other" / empty-state / footer hints, and `StepIndicator`'s " (optional)" are
+  hard-coded English.
+- RTL: `Tabs`, `StepIndicator` and `SectionSpyNav` are symmetric or measure physically in a
+  way that still tracks; `Breadcrumb`'s default chevron does not mirror; `TableOfContents`
+  indents with physical `ml-3 pl-3 border-l`; `CommandPalette` positions its icons with
+  `left-4` / `right-12`; `OnboardingWizard` uses `ml-3` / `mr-2`.
+- Theming: `Tabs`, `Breadcrumb`, `SectionSpyNav`, `ReadingProgressBar` and `TableOfContents`
+  use semantic tokens plus `primary-*` accents (TOC inactive links are `neutral-600/400`);
+  `StepIndicator` and `CommandPalette` mix `primary-*` with hard-coded `neutral-*` / `gray-*` /
+  `red-*` / `bg-white`. `OnboardingWizard`'s mobile icons need **Font Awesome CSS** that
+  `@mieweb/ui` does not bundle.
+- Dependencies: `useScrollSpy` (TOC, `SectionSpyNav`), `buttonVariants` (`SectionSpyNav`),
+  `Button` / `Alert` / `Spinner` / `Progress` (`OnboardingWizard`), `useKeyboardShortcut` /
+  `useEscapeKey` / `useClickOutside` (`CommandPalette`), `class-variance-authority` (`Tabs`).

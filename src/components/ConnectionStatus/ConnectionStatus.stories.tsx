@@ -10,11 +10,66 @@ import {
 } from './ConnectionStatus';
 
 const meta: Meta<typeof ConnectionStatusOverlay> = {
-  title: 'Components/Status Indicators/ConnectionStatus',
+  id: 'feedback-connectionstatus',
+  title: 'Components/Feedback/ConnectionStatus',
   component: ConnectionStatusOverlay,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A full-screen blocking overlay (\`fixed inset-0 z-50\`, \`role="alertdialog"\`, \`aria-live="assertive"\`) for the moments an app cannot be used: the realtime connection dropped, is retrying (\`retryCount\`, \`retryTime\`), or a new version must be loaded (\`updateInfo\` + \`onUpdateClick\`). Shown while \`isVisible\`; offers \`onReload\`.
+
+### Use it when
+
+- The application depends on a live connection (Meteor/DDP, websockets) and continuing to work offline would lose data.
+- A forced update must be applied before the user continues.
+
+### Don't use it when
+
+- Loss of connection is tolerable — show a non-blocking \`Toast\` or a status chip instead.
+- Reporting collaboration presence on a document — \`CollabStatus\` is the header chip for that.
+- The page failed to load at all — \`ErrorPage type="offline"\`.
+
+### Example
+
+\`\`\`tsx
+const connection = useConnectionStatus(); // { status: 'connecting', retryCount: 3, retryTime }
+
+<ConnectionStatusOverlay
+  connection={connection}
+  isVisible={connection.status !== 'connected'}
+  onReload={() => location.reload()}
+  updateInfo={update}
+  onUpdateClick={applyUpdate}
+/>
+\`\`\`
+
+### Limitations
+
+- Assertive live region: it interrupts screen readers by design. Do not flash it for sub-second blips — debounce \`isVisible\`.
+- Does not trap focus or set \`inert\` on the page; the backdrop blocks pointer input but keyboard users can still tab behind it.
+- Copy is English by default; there is no labels prop yet, so wrap or fork for translation.
+- Uses neutral gray tokens rather than brand colours.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-collabstatus',
+          why: 'CollabStatus is a non-blocking header chip for document presence; ConnectionStatus blocks the app when it cannot work.',
+        },
+        {
+          type: 'alternative to',
+          target: 'feedback-errorpage',
+          why: 'ErrorPage replaces a route that failed; ConnectionStatus overlays a working app until it reconnects.',
+        },
+      ],
+    },
   },
   decorators: [
     (Story) => (

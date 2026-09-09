@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Feedback/Overview" />
+
+# Feedback
+
+> **Use `Toast` for what the user just did, `Alert` for what they need to keep seeing, and
+> `AlertDialog` for what they must decide.** Toast already announces through `aria-live`; nothing
+> else in this family does, so put essential information in the page.
+
+## Which one?
+
+| Component                                                           | Use it when                                                              | Not when                                 |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------- |
+| [Alert](?path=/docs/feedback-alert--docs)                           | An inline, persistent message tied to nearby content                     | Confirming an action — `Toast`           |
+| [Toast](?path=/docs/feedback-toast--docs)                           | A transient confirmation or heads-up, optionally with Undo               | The text must be re-read or is essential |
+| [AlertDialog](?path=/docs/feedback-alertdialog--docs)               | A yes/no decision the user cannot skip (delete, discard)                 | The dialog holds a form — `Modal`        |
+| [NotificationCenter](?path=/docs/feedback-notificationcenter--docs) | A readable history with read state (bell menu, inbox)                    | The message is about the current action  |
+| [ConnectionStatus](?path=/docs/feedback-connectionstatus--docs)     | The app cannot work until the connection returns or an update is applied | Loss of connection is tolerable          |
+| [CollabStatus](?path=/docs/feedback-collabstatus--docs)             | Presence and sync state of a collaborative document, in a header chip    | There is no shared document              |
+| [ErrorPage](?path=/docs/feedback-errorpage--docs)                   | A route cannot render at all (404, 500, offline, maintenance)            | Part of the page failed — `Alert`        |
+
+Loading states are their own family: [Loading](?path=/docs/components-loading-overview--docs).
+
+## How they fit together
+
+- `AlertDialog` is a `Modal` with fixed slots and casual dismissal turned off.
+- `ErrorPage` and `LoadingPage` are the two page-level states and hand off to each other.
+- `ConnectionStatus` blocks; `CollabStatus` never does — pick by whether the app can keep working.
+
+## Shared limitations
+
+- `Alert` uses `role="alert"` and announces when it mounts; `Toast` uses a polite live region;
+  `ConnectionStatus` is assertive. Avoid mounting several announcing components at once.
+- Default button labels and messages are English; every component here exposes props to replace
+  them, but none reads a translation context.
+- Focus is not returned to the trigger when `AlertDialog` closes — handle it in `onOpenChange`.

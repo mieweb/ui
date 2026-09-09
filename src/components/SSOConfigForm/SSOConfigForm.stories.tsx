@@ -3,8 +3,9 @@ import { SSOConfigForm } from './SSOConfigForm';
 
 const meta: Meta<typeof SSOConfigForm> = {
   component: SSOConfigForm,
-  title: 'Components/Forms & Inputs/SSOConfigForm',
-  tags: ['autodocs'],
+  id: 'users-integrations-ssoconfigform',
+  title: 'BlueHive/Users & integrations/SSOConfigForm',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

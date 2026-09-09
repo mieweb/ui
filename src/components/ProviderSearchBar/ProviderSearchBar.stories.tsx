@@ -18,9 +18,10 @@ const mockPostalCode: PostalCodeInfo = {
 };
 
 const meta: Meta<typeof ProviderSearchBar> = {
-  title: 'Product/Provider/ProviderSearchBar',
+  id: 'providers-providersearchbar',
+  title: 'BlueHive/Providers/ProviderSearchBar',
   component: ProviderSearchBar,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

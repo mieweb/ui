@@ -4,21 +4,67 @@ import { Button } from '../Button';
 import { Kbd, KeyboardShortcutsOverlay } from './KeyboardShortcutsOverlay';
 
 const meta: Meta<typeof KeyboardShortcutsOverlay> = {
-  title: 'Components/Overlays & Popups/KeyboardShortcutsOverlay',
+  id: 'overlays-keyboardshortcutsoverlay',
+  title: 'Components/Overlays/KeyboardShortcutsOverlay',
   component: KeyboardShortcutsOverlay,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'The `?` keyboard-shortcuts help dialog: shortcut rows with `Kbd` chips, optionally ' +
-          'grouped into sections. Composes the library `Modal` (focus trap, Escape, overlay ' +
-          'click) and pairs with `useKeyboardShortcut`, which owns the actual bindings. The ' +
-          '`Kbd` chip is exported on its own for inline shortcut references in docs and menus.',
+        component: `### What it's for
+
+The \`?\` keyboard-shortcuts help dialog: shortcut rows rendered as \`Kbd\` chips, either a flat \`shortcuts\` list or \`groups\` with headings, plus an optional \`hint\` footer. It composes the library \`Modal\` (focus trap, Escape, overlay click) and pairs with \`useKeyboardShortcut\`, which owns the actual bindings. \`Kbd\` is exported on its own for inline shortcut references in docs and menus.
+
+### Use it when
+
+- The app has keyboard shortcuts and users need one place to discover them (conventionally opened with \`?\`).
+- You show a shortcut next to a menu item or in documentation (\`<Kbd>\` alone).
+
+### Don't use it when
+
+- Users need to *run* commands by typing — that is \`CommandPalette\`; this overlay only documents keys.
+- There are one or two shortcuts; a \`Tooltip\` with a \`Kbd\` on the control is enough.
+
+### Example
+
+\`\`\`tsx
+const [help, setHelp] = useState(false);
+useKeyboardShortcut('?', () => setHelp(true));
+
+<KeyboardShortcutsOverlay
+  open={help}
+  onClose={() => setHelp(false)}
+  groups={[
+    { title: 'Navigation', shortcuts: [{ keys: 'g o', description: 'Go to orders' }] },
+    { title: 'Editing', shortcuts: [{ keys: ['Mod+S', 'Ctrl+S'], description: 'Save' }] },
+  ]}
+/>
+\`\`\`
+
+### Limitations
+
+- Inherits \`Modal\`'s behaviour and limits (no focus return on close, fixed \`z-50\`, body scroll lock).
+- Key names are displayed as given; translate descriptions and \`alternativesLabel\` ("or") in the host.
+- Does not detect the platform — pass \`keys\` alternatives (Mod/Ctrl) yourself.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'uses',
+          target: 'overlays-modal',
+          why: 'Renders inside a Modal with its header, body and footer slots.',
+        },
+        {
+          type: 'alternative to',
+          target: 'navigation-commandpalette',
+          why: 'CommandPalette runs commands from a search box; this overlay only lists the keyboard shortcuts.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     shortcuts: { description: 'Flat list of shortcuts.', control: false },
     groups: {

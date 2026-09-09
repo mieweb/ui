@@ -3,12 +3,82 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DateInput } from './DateInput';
 
 const meta: Meta<typeof DateInput> = {
-  title: 'Components/Forms & Inputs/DateInput',
+  id: 'date-time-dateinput',
+  title: 'Inputs/Date & time/DateInput',
   component: DateInput,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A **single date (or time) field** built on \`Input\`. The user types digits and the field auto-formats to \`MM/DD/YYYY\`; \`showCalendar\` adds a calendar button that opens a portaled picker. \`inputType\` switches the value shape and picker: \`'date'\` (\`MM/DD/YYYY\`, typed or picked), \`'datetime-local'\` (\`YYYY-MM-DDTHH:mm\`, read-only field + calendar with hour/minute selects), \`'time'\` (\`HH:mm\`, read-only field + hour/minute/AM-PM selects, \`minuteStep\`), \`'month'\` (\`YYYY-MM\`, month grid) and \`'year'\` (4-digit text). \`value\` / \`onChange(value: string)\` are strings, never \`Date\`. \`mode\` (\`'dob'\` with \`minAge\` / \`maxAge\`, \`'expiration'\`, \`'past'\`, \`'future'\`) plus \`minDate\` / \`maxDate\` (also \`MM/DD/YYYY\`) drive the built-in validation when \`validateOnBlur\` is set; \`timeFormat\` (\`'12-hour'\` | \`'24-hour'\`) and \`width\` (\`'full'\` | \`'fit'\` | \`'fixed'\`) shape the display. All \`Input\` field props (\`label\`, \`labelVariant\`, \`helperText\`, \`error\`, \`required\`, \`size\`) apply. Exports: \`DateInput\`, \`DateInputProps\`, \`DateInputMode\`, \`DateInputType\`.
+
+### Use it when
+
+- A form needs **one** date — date of birth, expiration, appointment date, effective date — and the user may type it or pick it.
+- You need a wall-clock time or a month/year without a full date (\`inputType="time"\` / \`"month"\` / \`"year"\`).
+- The date must satisfy a simple rule (past, future, age band, min/max) and you want the English error text for free (\`validateOnBlur\`).
+
+### Don't use it when
+
+- The value is a **start and end** pair or a preset period ("Last 30 days") — \`DateRangePicker\`.
+- The user should pick from a **supplied list of available dates and slots** rather than any date — \`SchedulePicker\`.
+- You want to *show* appointments on a timeline — \`ScheduleCalendar\`; recurring weekly opening hours — \`BusinessHours\` / \`BusinessHoursEditor\`.
+- You are tempted to write \`<input type="date">\` — don't; this component is the library's date field.
+
+### Example
+
+\`\`\`tsx
+const [dob, setDob] = useState('');          // 'MM/DD/YYYY' string
+const [visit, setVisit] = useState('');      // 'YYYY-MM-DDTHH:mm'
+
+<DateInput label="Date of birth" mode="dob" minAge={18} validateOnBlur required value={dob} onChange={setDob} />
+
+<DateInput
+  label="Visit"
+  inputType="datetime-local"
+  timeFormat="12-hour"
+  minuteStep={15}
+  value={visit}
+  onChange={setVisit}
+/>
+
+// Convert for transport: DateTime.fromFormat(dob, 'MM/dd/yyyy', { zone: 'America/New_York' }).toISODate()
+\`\`\`
+
+### Limitations
+
+- Accessibility: the field is an \`<input type="text" inputMode="numeric">\` (never a native date input) with \`<label htmlFor>\`, \`aria-invalid\`, \`aria-describedby\` → error/helper, and \`role="alert"\` on the error. The picker trigger is a \`<button aria-haspopup="dialog" aria-expanded aria-label="Open calendar" | "Open time picker">\`; the panel is \`role="dialog"\` with an English \`aria-label\` (\`"Choose date"\`, \`"Choose month"\`, \`"Choose time"\`, \`"Choose date and time"\`). Month/year/hour/minute are native \`<select>\`s with \`aria-label\`s. **Day cells are plain \`<button>\`s with no \`aria-label\`, \`aria-pressed\` or grid semantics and no arrow-key navigation** — Tab moves through every day. Escape closes and returns focus to the trigger; click-outside closes without restoring focus. No focus trap.
+- Value formats are fixed: \`MM/DD/YYYY\` for dates (US order only, no locale formats), \`minDate\` / \`maxDate\` likewise. Nothing is ISO-8601 except \`datetime-local\` / \`month\`; convert before sending to an API. Non-\`date\` types are \`readOnly\` — the value can only be set through the picker.
+- Time zones: parsing goes through Luxon \`DateTime.fromFormat(..., { zone: 'local' })\`; \`datetime-local\` and \`time\` are naive wall-clock strings with no offset. Years outside 1900–2100 are rejected as invalid.
+- i18n: every string is hard-coded English — validation messages ("Please enter a valid date (MM/DD/YYYY)", "Must be at least N years old", …), month names, \`Su Mo Tu We Th Fr Sa\` headers, "Today", "Done", placeholders ("Select month", "Select time", …). Week starts on Sunday. \`error\` lets you supply your own message but the built-in checks still emit English.
+- Validation runs only on blur (\`validateOnBlur\`) or on calendar selection for \`inputType="date"\`; it does not block typing or submission. \`mode="dob"\` sets \`autoComplete="bday"\`, \`"expiration"\` sets \`cc-exp\`.
+- RTL: physical classes — trigger is \`absolute right-3\`, input padding \`pr-10\`; the popup places itself \`bottom-end\`. Theming: \`bg-background border-border\`, selected/today \`bg-primary-800\` / \`border-primary-800\`; the calendar-variant error text uses an inline \`color: #ef4444\`. Depends on \`luxon\`, \`lucide-react\` (Calendar / Clock icons), \`useAnchoredPosition\` and \`Input\`'s \`inputVariants\` / \`RequiredMark\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'date-time-daterangepicker',
+          why: 'DateInput captures one date (or time/month/year) as a string; DateRangePicker captures a start/end pair or preset period as Dates.',
+        },
+        {
+          type: 'alternative to',
+          target: 'date-time-schedulepicker',
+          why: 'DateInput lets the user type any date; SchedulePicker lets them choose from host-supplied available dates and time slots.',
+        },
+        {
+          type: 'uses',
+          target: 'text-inputs-input',
+          why: 'Renders Input for the plain and year variants and reuses inputVariants / floatingLabelVariants / RequiredMark for the picker variants.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     inputType: {
       control: 'select',

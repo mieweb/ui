@@ -26,12 +26,77 @@ const iconRegistry: Record<string, React.ReactElement | null> = {
 };
 
 const meta: Meta<typeof Alert> = {
-  title: 'Components/Status Indicators/Alert',
+  id: 'feedback-alert',
+  title: 'Components/Feedback/Alert',
   component: Alert,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+An inline, persistent message box with \`role="alert"\`: five intents (\`default\`, \`info\`, \`success\`, \`warning\`, \`danger\`), an \`icon\` slot, and optional \`dismissible\` × with \`onDismiss\`. Compose the body with \`AlertTitle\` and \`AlertDescription\`.
+
+### Use it when
+
+- The message belongs to the content it sits next to and should stay until the situation changes: a form-level validation summary, "this record is read-only", a deprecation notice.
+- The user must be able to re-read it; it is not a fleeting confirmation.
+
+### Don't use it when
+
+- Confirming a completed action ("Saved") — use \`Toast\`, which is transient and announced for you.
+- The user must decide before continuing — use \`AlertDialog\`.
+- The whole page is in an error state (404, offline) — use \`ErrorPage\`.
+- Asking for cookie/terms consent — \`CookieConsent\` is the persistent, positioned banner for that.
+
+### Example
+
+\`\`\`tsx
+{errors.length > 0 && (
+  <Alert variant="danger" dismissible onDismiss={clearErrors}>
+    <AlertTitle>Fix {errors.length} fields to continue</AlertTitle>
+    <AlertDescription>
+      <ul>{errors.map((e) => <li key={e.field}>{e.message}</li>)}</ul>
+    </AlertDescription>
+  </Alert>
+)}
+\`\`\`
+
+### Limitations
+
+- \`role="alert"\` makes screen readers announce the box **when it mounts**; if it is present on page load that is fine, but avoid mounting several at once or re-mounting on every render.
+- \`dismissLabel\` (\`aria-label\` of the × button) defaults to English; translate it.
+- Dismissal is not persisted — the host decides whether to show it again.
+- Colours are semantic tokens with \`dark:\` variants; the \`icon\` you pass is not recoloured.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-toast',
+          why: 'Toast is transient and stacked in a corner; Alert stays inline until the condition clears.',
+        },
+        {
+          type: 'alternative to',
+          target: 'feedback-alertdialog',
+          why: 'AlertDialog blocks and demands a decision; Alert informs without interrupting.',
+        },
+        {
+          type: 'alternative to',
+          target: 'feedback-errorpage',
+          why: 'ErrorPage replaces the whole view; Alert annotates part of a working view.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-cookieconsent',
+          why: 'CookieConsent is a fixed-position consent banner with accept/decline; Alert is inline content.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

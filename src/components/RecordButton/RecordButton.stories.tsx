@@ -354,7 +354,8 @@ function PressAndHoldDemo() {
 // ============================================================================
 
 const meta: Meta<typeof RecordButton> = {
-  title: 'Components/Images & Media/RecordButton',
+  id: 'media-recordbutton',
+  title: 'Modules/Media/RecordButton',
   component: RecordButton,
   parameters: {
     layout: 'centered',
@@ -372,30 +373,88 @@ const meta: Meta<typeof RecordButton> = {
     },
     docs: {
       description: {
-        component: `
-A voice recording button with 6 distinct states for AI applications.
-Supports multiple visual variants, sizes, and interaction patterns.
+        component: `### What it's for
 
-## States
-- **idle** — Ready to record, waiting for interaction
-- **recording** — Actively capturing audio input
-- **processing** — Transcribing or sending audio
-- **disabled** — No mic permission or unavailable
-- **error** — Recording failed or permission denied
-- **success** — Recording captured successfully
+**One round microphone button that captures a take and hands you the \`Blob\`.** \`RecordButton\` has its own \`MediaRecorder\` pipeline (it does *not* wrap \`AudioRecorder\`): click → \`getUserMedia({ audio: true })\` → record (\`mimeType\` default \`audio/webm\`, browser default if unsupported) → click again or hit \`maxDuration\` → \`onRecordingComplete(blob, duration)\` after a 200 ms \`processing\` flash, then \`success\` for 1.5 s and back to \`idle\`. Six visual states (\`idle\` | \`recording\` | \`processing\` | \`disabled\` | \`error\` | \`success\`), four \`variant\`s (\`default\` | \`outline\` | \`ghost\` | \`minimal\`), three \`size\`s. \`showPulse\` (default \`true\`) rings the button while recording, \`showWaveform\` swaps the stop icon for animated bars, \`showDuration\` prints \`m:ss\` beside it. For transcription UIs, \`transcriptionState\` (\`idle\` | \`recording\` | \`transcribing\` | \`streaming\` | \`complete\` | \`error\`) overrides the visual state and \`showTranscriptionState\` adds a "Listening…"/"Transcribing…" caption. Pass \`state\` to make it **controlled** — then the internal recorder is off and you implement capture in \`onClick\`. Precedence: \`disabled\` → \`transcriptionState\` → \`state\` → internal. Also exported: \`recordButtonVariants\`, \`formatDuration\`, types \`TranscriptionState\`, \`TranscriptionResult\`.
 
-## Features
-- 4 visual variants: default, outline, ghost, minimal
-- 3 sizes: sm, md, lg
-- Pulse ring animation during recording
-- Optional waveform visualization
-- Transcription state integration
-- Both controlled and uncontrolled modes
-        `,
+### Use it when
+
+- A **composer or toolbar** needs a talk-to-text or voice-message affordance the size of an icon button — \`AIChat\` uses it for \`talkToText\`.
+- The blob goes straight to a service and the user does not need to review it first; you show the result (text, attachment) elsewhere.
+- You already have a recorder (WebSocket streaming, native bridge) and only need the six-state visual — controlled \`state\`.
+
+### Don't use it when
+
+- The user should **listen back, pause/resume, or discard** before sending — \`AudioRecorder\` (or play the blob with \`AudioPlayer\` next to this button, as the stories do).
+- You need a waveform of the actual signal — the \`showWaveform\` bars are a fixed CSS animation, not audio data.
+- You are building the whole ambient-visit flow — \`VisitScribe\` (Voice).
+
+### Example
+
+\`\`\`tsx
+const [phase, setPhase] = useState<TranscriptionState>('idle');
+const [text, setText] = useState('');
+
+<div className="flex items-end gap-2">
+  <Textarea value={text} onChange={(e) => setText(e.target.value)} />
+  <RecordButton
+    variant="ghost"
+    size="sm"
+    showDuration
+    maxDuration={60}
+    transcriptionState={phase}
+    showTranscriptionState
+    onRecordingStart={() => setPhase('recording')}
+    onRecordingComplete={async (blob) => {
+      setPhase('transcribing');
+      try {
+        setText((t) => t + (await transcribe(blob)));
+        setPhase('complete');
+      } catch {
+        setPhase('error');
+      } finally {
+        setTimeout(() => setPhase('idle'), 1500);
+      }
+    }}
+    onRecordingError={() => setPhase('error')}
+  />
+</div>
+\`\`\`
+
+The button owns the microphone; the host owns the transcription phase and the text.
+
+### Limitations
+
+- Browser APIs: needs a secure context and the microphone permission; a refusal or missing \`MediaRecorder\` reaches \`onRecordingError\` and shows the \`error\` state for 2 s with **no message** — tell the user yourself. Output container/codec is whatever the browser supports; when \`mimeType\` is unsupported the Blob is still labelled with the requested type.
+- \`onRecordingComplete\`'s \`duration\` comes from a closure captured at record start, so as implemented it does not report the take's real length; derive it from the blob if you need it.
+- Accessibility: a single \`<button>\` whose \`aria-label\` follows the state ("Start recording", "Stop recording", "Processing recording", "Recording unavailable", "Recording failed", "Recording complete"), with \`aria-pressed\` while recording and \`aria-busy\` while processing. The duration and "Listening…"/"Transcribing…" captions are plain \`<span>\`s — no \`aria-live\`, so state changes are not announced. The button is \`disabled\` during \`processing\`, which drops focus in some browsers.
+- Controlled mode disables capture entirely: with \`state\` set, \`onRecordingComplete\`/\`maxDuration\`/\`mimeType\` are inert and only \`onClick\` fires.
+- i18n: all labels and \`m:ss\` are hard-coded English. \`showWaveform\` needs the \`animate-waveform\` keyframes from \`@mieweb/ui/styles.css\`.
+- Theming: \`primary\`, \`destructive\`, \`success\`, \`muted\` tokens but a hard-coded \`red-500\`/\`red-400\` for the recording state. RTL: the caption sits after the button in a symmetric \`inline-flex\` (\`gap-2\`). Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'media-audiorecorder',
+          why: 'AudioRecorder is a full record/pause/review panel with waveform playback; RecordButton is one toolbar button that hands off a Blob.',
+        },
+        {
+          type: 'composes with',
+          target: 'media-audioplayer',
+          why: 'RecordButton hands the host a Blob; an AudioPlayer on its object URL plays the take back.',
+        },
+        {
+          type: 'composes with',
+          target: 'chat-aichat',
+          why: 'AIChat renders a RecordButton in its composer when talkToText is on.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     state: {
       control: 'select',
