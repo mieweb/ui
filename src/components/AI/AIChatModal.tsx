@@ -25,7 +25,12 @@ export interface AIChatTriggerProps {
   pulse?: boolean;
   /** Badge count for notifications */
   badge?: number;
-  /** Position of the button. `start`/`end` aliases are direction-aware (RTL). */
+  /**
+   * Position of the button. All values are direction-aware (logical):
+   * `*-left`/`*-right` are aliases for `*-start`/`*-end` and mirror in RTL
+   * documents. Prefer `start`/`end` values for clarity; pass a physical
+   * inset via `className` if fixed positioning is required.
+   */
   position?:
     | 'bottom-right'
     | 'bottom-left'
@@ -108,7 +113,13 @@ export interface AIChatModalProps extends Omit<
   open: boolean;
   /** Callback when the modal should close */
   onOpenChange: (open: boolean) => void;
-  /** Position of the modal. `start`/`end` aliases are direction-aware (RTL). */
+  /**
+   * Position of the modal. All values are direction-aware (logical):
+   * `bottom-left`/`bottom-right` are aliases for `bottom-start`/`bottom-end`
+   * and mirror in RTL documents. Prefer `start`/`end` values for clarity;
+   * pass a physical inset via `modalClassName` if fixed positioning is
+   * required. `center` is direction-neutral.
+   */
   position?:
     | 'bottom-right'
     | 'bottom-left'
