@@ -469,6 +469,18 @@ export const miewebUISafelist = [
   'translate-x-0',
   '-translate-x-full',
   '[&:has([role=checkbox])]:pe-0',
+  // RTL messaging+AI batch: bubble tails, composer borders/paddings, corner
+  // pins (AIChatModal/AttachmentPicker/MessageList), read-receipt avatar stack
+  'end-1',
+  'end-3',
+  'end-4',
+  'start-4',
+  'me-2',
+  'pe-10',
+  'border-s-4',
+  'rounded-ee-md',
+  'rounded-es-md',
+  'rtl:space-x-reverse',
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',

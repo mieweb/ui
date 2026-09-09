@@ -129,8 +129,8 @@ function SkeletonMessage({
         className={cn(
           'animate-pulse rounded-2xl',
           isOutgoing
-            ? 'bg-primary-800/30 rounded-br-md'
-            : 'rounded-bl-md bg-neutral-200 dark:bg-neutral-700',
+            ? 'bg-primary-800/30 rounded-ee-md'
+            : 'rounded-es-md bg-neutral-200 dark:bg-neutral-700',
           'h-10 w-48'
         )}
       />
@@ -176,7 +176,7 @@ function TypingIndicator({ typingState, className }: TypingIndicatorProps) {
       aria-label={typingText}
     >
       {/* Typing bubble animation */}
-      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-neutral-200 px-4 py-3 dark:bg-neutral-700">
+      <div className="flex items-center gap-1 rounded-2xl rounded-es-md bg-neutral-200 px-4 py-3 dark:bg-neutral-700">
         <span
           className="h-2 w-2 animate-bounce rounded-full bg-neutral-500"
           style={{ animationDelay: '0ms' }}
@@ -619,7 +619,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
               bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
             }}
             className={cn(
-              'fixed right-4 bottom-24 z-10',
+              'fixed end-4 bottom-24 z-10',
               'rounded-full p-3 shadow-lg',
               'bg-white dark:bg-neutral-800',
               'border border-neutral-200 dark:border-neutral-700',
