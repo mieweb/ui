@@ -29,6 +29,7 @@ export * from './components/Button';
 export * from './components/ButtonGroup';
 export * from './components/Card';
 export * from './components/CaseManagementHeader';
+export * from './components/ChatComposer';
 export * from './components/Checkbox';
 // CodeLookup itself ships a module worker and is NOT exported here (apps import
 // it from their own bundler). Only its worker-free provider/context is safe to
@@ -227,6 +228,13 @@ export {
 
 // Hooks
 export * from './hooks';
+
+// Motion
+// Only the dependency-free half: presets, the runtime contract and the
+// `Animated` primitives. `<MotionProvider>` — the one piece that imports
+// `motion` — is published separately as @mieweb/ui/motion so the library stays
+// an optional peer dependency. See: src/motion/entry.ts
+export * from './motion';
 
 // Utilities
 export * from './utils';

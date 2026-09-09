@@ -201,12 +201,12 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
                       key={header}
                       scope="col"
                       aria-sort={ariaSort}
-                      className="px-3 py-2 text-left text-xs font-medium whitespace-nowrap text-neutral-600 dark:text-neutral-400"
+                      className="px-3 py-2 text-start text-xs font-medium whitespace-nowrap text-neutral-600 dark:text-neutral-400"
                     >
                       <button
                         type="button"
                         onClick={() => handleSort(header)}
-                        className="flex w-full cursor-pointer items-center gap-1 text-left font-medium select-none hover:text-neutral-900 dark:hover:text-neutral-200"
+                        className="flex w-full cursor-pointer items-center gap-1 text-start font-medium select-none hover:text-neutral-900 dark:hover:text-neutral-200"
                       >
                         {header}
                         {isSorted && (

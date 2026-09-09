@@ -290,7 +290,7 @@ function RowActionMenu({
                 role="menuitem"
                 type="button"
                 className={cn(
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs',
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-start text-xs',
                   'transition-colors duration-100',
                   action.variant === 'danger'
                     ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
@@ -374,7 +374,7 @@ function HoverMenu({
         data-slot="count-badge-menu-scroll"
         className="max-h-[240px] min-h-0 overflow-y-auto"
       >
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-start text-xs">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-neutral-700">
               <th className="text-muted-foreground px-3 py-1.5 font-medium">
@@ -502,12 +502,12 @@ function ViewModalActions({
           aria-expanded={shareOpen}
           aria-haspopup="menu"
         >
-          <ShareIcon size={14} className="mr-1.5" />
+          <ShareIcon size={14} className="me-1.5" />
           Share
           <ChevronDownIcon
             size={12}
             className={cn(
-              'ml-1 transition-transform duration-150',
+              'ms-1 transition-transform duration-150',
               shareOpen && 'rotate-180'
             )}
           />
@@ -529,7 +529,7 @@ function ViewModalActions({
                 role="menuitem"
                 type="button"
                 className={cn(
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm',
                   'text-neutral-700 hover:bg-neutral-100',
                   'dark:text-neutral-300 dark:hover:bg-neutral-700'
                 )}
@@ -545,7 +545,7 @@ function ViewModalActions({
                 role="menuitem"
                 type="button"
                 className={cn(
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm',
                   'text-neutral-700 hover:bg-neutral-100',
                   'dark:text-neutral-300 dark:hover:bg-neutral-700'
                 )}
@@ -561,7 +561,7 @@ function ViewModalActions({
                 role="menuitem"
                 type="button"
                 className={cn(
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm',
                   'text-neutral-700 hover:bg-neutral-100',
                   'dark:text-neutral-300 dark:hover:bg-neutral-700'
                 )}
@@ -583,7 +583,7 @@ function ViewModalActions({
         size="sm"
         onClick={() => console.warn('Export', viewTarget)}
       >
-        <DownloadIcon size={14} className="mr-1.5" />
+        <DownloadIcon size={14} className="me-1.5" />
         Export
       </Button>
       <Button
@@ -591,7 +591,7 @@ function ViewModalActions({
         size="sm"
         onClick={() => console.warn('Open in chart', viewTarget)}
       >
-        <ExternalLinkIcon size={14} className="mr-1.5" />
+        <ExternalLinkIcon size={14} className="me-1.5" />
         Open in Chart
       </Button>
     </div>

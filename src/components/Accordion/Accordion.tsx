@@ -145,6 +145,7 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
                 <button
                   type="button"
                   id={triggerId}
+                  data-slot="accordion-trigger"
                   aria-expanded={isOpen}
                   aria-controls={panelId}
                   disabled={item.disabled}
@@ -181,7 +182,10 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
                 )}
               >
                 <div className="overflow-hidden">
-                  <div className="text-muted-foreground px-5 pb-4 text-sm leading-relaxed">
+                  <div
+                    data-slot="accordion-content"
+                    className="text-muted-foreground px-5 pb-4 text-sm leading-relaxed"
+                  >
                     {item.content}
                   </div>
                 </div>

@@ -19,6 +19,7 @@ import type {
   AttachmentKind,
   ComposerAttachment,
   SuperChatConversation,
+  SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatRef,
   SuperChatRenderPlugin,
@@ -46,7 +47,8 @@ export interface SuperChatInboxProps {
   /** Disable the composer. */
   readOnly?: boolean;
   /**
-   * File categories the composer accepts for paste and the paperclip picker.
+   * File categories the composer accepts for paste, drag-and-drop, and the
+   * file picker in the `+` → “Attach files” menu.
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
@@ -58,10 +60,17 @@ export interface SuperChatInboxProps {
   showSidebar?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
+  /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
+  defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */
   className?: string;
 
   // --- callbacks (chat-component-compatible) ---
+  /**
+   * Fired when the local user sends a message. If the callback returns a
+   * promise it is awaited, and a rejected send restores the typed text into
+   * the composer (same contract as {@link SuperChatProps.onMessageSent}).
+   */
   onMessageSent?: (
     text: string,
     meta: {
@@ -101,6 +110,7 @@ export function SuperChatInbox({
   virtualized,
   showSidebar = true,
   linkBuilder,
+  defaultCopyFormat,
   className,
   onMessageSent,
   onMessageEdited,
@@ -165,6 +175,7 @@ export function SuperChatInbox({
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}
+          defaultCopyFormat={defaultCopyFormat}
           onMessageSent={onMessageSent}
           onMessageEdited={onMessageEdited}
           onConversationClosed={onConversationClosed}

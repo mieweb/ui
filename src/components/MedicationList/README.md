@@ -17,12 +17,12 @@ MedicationListField        eSheet adapter (via @mieweb/ui/esheet)
 
 Pick the **lowest layer that fits**:
 
-| You need | Use |
-|---|---|
-| Custom data flow / your own dialogs | `MedicationList` |
-| Working reconciliation UI in a React app | `MedicationReconciliation` |
-| A question type in an eSheet form | `registerMedicationListFieldType()` |
-| Just the prescription editor | `MedicationEditor` |
+| You need                                 | Use                                 |
+| ---------------------------------------- | ----------------------------------- |
+| Custom data flow / your own dialogs      | `MedicationList`                    |
+| Working reconciliation UI in a React app | `MedicationReconciliation`          |
+| A question type in an eSheet form        | `registerMedicationListFieldType()` |
+| Just the prescription editor             | `MedicationEditor`                  |
 
 ## MedicationList (presentational)
 
@@ -83,22 +83,22 @@ Modal editor capturing the NCPDP SCRIPT NewRx `MedicationPrescribed` field
 set, with CodeLookup-based drug coding. Mount with a `key` per target so a
 different medication reseeds the draft.
 
-| Editor field | `Medication` prop | NCPDP element |
-|---|---|---|
-| Medication (search/name) | `name` | DrugDescription |
-| — code (auto from lookup) | `code {system, code, display}` | DrugCoded / ProductCode / DrugDBCode |
-| Strength (auto from label) | `strength` | Strength + StrengthUnitOfMeasure |
-| Dose form (auto from label) | `doseForm` | DrugCoded/FormCode |
-| Quantity | `quantity` | Quantity/Value |
-| — unit (auto from dose form) | `quantityUnit` | Quantity/QuantityUnitOfMeasure |
-| Days supply | `daysSupply` | DaysSupply |
-| Refills | `refills` | NumberOfRefills |
-| Substitution (radio) | `substitution` (`'0'`/`'1'`) | Substitutions (DAW) |
-| Sig | `sig` | Sig/SigText |
-| — route/frequency/PRN (auto from sig) | `route`, `frequency`, `prn` | Sig structured elements |
-| Start / End date | `startDate`, `endDate` | WrittenDate / EffectiveDate |
-| Indication | `indication` | Diagnosis/Primary |
-| Pharmacy notes | `pharmacyNotes` | Note |
+| Editor field                          | `Medication` prop              | NCPDP element                        |
+| ------------------------------------- | ------------------------------ | ------------------------------------ |
+| Medication (search/name)              | `name`                         | DrugDescription                      |
+| — code (auto from lookup)             | `code {system, code, display}` | DrugCoded / ProductCode / DrugDBCode |
+| Strength (auto from label)            | `strength`                     | Strength + StrengthUnitOfMeasure     |
+| Dose form (auto from label)           | `doseForm`                     | DrugCoded/FormCode                   |
+| Quantity                              | `quantity`                     | Quantity/Value                       |
+| — unit (auto from dose form)          | `quantityUnit`                 | Quantity/QuantityUnitOfMeasure       |
+| Days supply                           | `daysSupply`                   | DaysSupply                           |
+| Refills                               | `refills`                      | NumberOfRefills                      |
+| Substitution (radio)                  | `substitution` (`'0'`/`'1'`)   | Substitutions (DAW)                  |
+| Sig                                   | `sig`                          | Sig/SigText                          |
+| — route/frequency/PRN (auto from sig) | `route`, `frequency`, `prn`    | Sig structured elements              |
+| Start / End date                      | `startDate`, `endDate`         | WrittenDate / EffectiveDate          |
+| Indication                            | `indication`                   | Diagnosis/Primary                    |
+| Pharmacy notes                        | `pharmacyNotes`                | Note                                 |
 
 Derived fields ("auto"):
 
@@ -149,8 +149,10 @@ Then a form field:
   "id": "meds",
   "fieldType": "medicationList",
   "question": "Presenting medications",
-  "medications": [ { "id": "1", "name": "calcium 500 mg tablet", "status": "unreconciled" } ],
-  "quickAddOptions": ["aspirin 81 mg tablet"]
+  "medications": [
+    { "id": "1", "name": "calcium 500 mg tablet", "status": "unreconciled" },
+  ],
+  "quickAddOptions": ["aspirin 81 mg tablet"],
 }
 ```
 
@@ -164,5 +166,5 @@ enabled) mode. Requires `@esheet/core` with the custom-field schema fix
 
 - **Healthcare/MedicationList** — presentational variants + `Reconciliation`
   (standalone engine with CodeLookup)
-- **Components/Forms & Inputs/eSheet/MedicationListField** — the field
+- **Healthcare/Clinical lists/MedicationListField (eSheet)** — the field
   running inside the real `EsheetRenderer`

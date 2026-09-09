@@ -113,19 +113,19 @@ export function PendingClaimsTable({
         <table data-slot="pending-claims-table" className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
+              <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium tracking-wider uppercase">
                 Claimant
               </th>
-              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
+              <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium tracking-wider uppercase">
                 Role
               </th>
-              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
+              <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium tracking-wider uppercase">
                 Submitted
               </th>
               <th className="text-muted-foreground px-4 py-3 text-center text-xs font-medium tracking-wider uppercase">
                 Status
               </th>
-              <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
+              <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium tracking-wider uppercase">
                 Actions
               </th>
             </tr>
@@ -165,7 +165,7 @@ export function PendingClaimsTable({
                     {claim.status}
                   </Badge>
                 </td>
-                <td className="px-4 py-4 text-right">
+                <td className="px-4 py-4 text-end">
                   <div className="flex items-center justify-end gap-2">
                     {onViewDetails && (
                       <Button

@@ -1,0 +1,59 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Inputs/Text inputs/Overview" />
+
+# Text inputs
+
+> **What is the value?** Free text on one line → `Input`; several lines → `Textarea`. A phone
+> number → `PhoneInput` (or `PhoneInputGroup` for a typed list); a URL → `WebsiteInput` (or
+> `WebsiteInputGroup`) — never a raw `type="tel"` / `type="url"`. A postal address → `AddressForm`
+> to edit, `Address` to show. Every field gets an associated label: the `label` prop where the
+> component has one, `Label` + `htmlFor` where it does not.
+
+## Which one?
+
+| Component                                                        | Use it when                                                                             | Not when                                                 |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| [Input](?path=/docs/text-inputs-input--docs)                     | One line of free text or a native type (`email`, `password`, `number`)                  | Phone / URL / date / fixed options — see the specialists |
+| [Textarea](?path=/docs/text-inputs-textarea--docs)               | A sentence or more; a visible character budget (`showCount`)                            | Formatted or collaborative text — `RichEditor`           |
+| [Label](?path=/docs/text-inputs-label--docs)                     | Labelling a control with no `label` prop (raw `<select>`, custom)                       | The control already takes `label`                        |
+| [PhoneInput](?path=/docs/text-inputs-phoneinput--docs)           | Exactly one US/Canada number stored as 10 digits                                        | Several typed numbers — `PhoneInputGroup`; international |
+| [PhoneInputGroup](?path=/docs/text-inputs-phoneinputgroup--docs) | A record holds several numbers and the type (cell, work, fax) matters                   | One number; rows need extra fields                       |
+| [WebsiteInput](?path=/docs/text-inputs-websiteinput--docs)       | A website or social link, syntax-checked on blur (`WebsiteInputGroup` for a typed list) | Anything that is not a URL                               |
+| [Address](?path=/docs/text-inputs-address--docs)                 | Showing a stored address (`block` / `inline` / `compact`, maps link)                    | Editing it — `AddressForm`                               |
+| [AddressForm](?path=/docs/text-inputs-addressform--docs)         | Collecting a full US address, optionally filled by Google Places                        | One field, non-US layouts, a state picker                |
+
+Dates go to [DateInput](?path=/docs/date-time-dateinput--docs); fixed option sets to
+[Select](?path=/docs/choice-inputs-select--docs) or
+[Autocomplete](?path=/docs/choice-inputs-autocomplete--docs).
+
+## How they fit together
+
+- `Input` is the base: `Textarea` mirrors its anatomy and borrows `RequiredMark`; `PhoneInput`,
+  `WebsiteInput` and every field of `AddressForm` _are_ `Input`s with a preset `type`,
+  `inputMode`, `autoComplete` and blur validation.
+- `PhoneInputGroup` and `WebsiteInputGroup` are the same repeater pattern (row = specialised
+  input + native type `<select>` + add/remove button, `minEntries`/`maxEntries`, `typeLabels`).
+- `Address` and `AddressForm` share the `AddressData` shape — one edits it, the other renders
+  it; the folder's formatters (`formatAddressSingleLine`, …) work on the same object.
+- `Label` reproduces the label typography that `Input`/`Textarea` render internally, for
+  controls that render nothing.
+
+## Shared limitations
+
+- Wiring, wherever an `Input` is underneath: `<label htmlFor>`, `aria-invalid` always present,
+  `aria-describedby` → error or helper text (helper hidden while an error shows), error as
+  `<p role="alert">`. No component adds an `aria-live` region of its own; `hasError` without an
+  `error` string is colour-only.
+- Built-in strings are English and mostly not overridable: `PhoneInput` / `WebsiteInput` blur
+  messages, the groups' sr-only select labels and add/remove `aria-label`s. `AddressForm` labels
+  and placeholders and the groups' option labels _are_ overridable (`labels`, `placeholders`,
+  `typeLabels`).
+- Repeater groups label only the first row, reuse `phone-type-{i}` / `website-type-{i}` ids across
+  instances, and do not manage focus when a row is removed.
+- Validation is shallow: 10-digit length for phones, `new URL()` parse (with `https://` prefixed)
+  for websites, none for addresses — validate again on the server.
+- `Input`, `Textarea`, `Label` use logical `start-*` / `ms-*` classes and semantic tokens
+  (`border-input`, `bg-background`, `text-destructive-*`). The group selects/buttons and
+  `AddressCard` use hard-coded `gray-*` / `brand-*` / `red-*` palette classes that a brand theme
+  will not recolour.

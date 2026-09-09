@@ -7,11 +7,80 @@ import {
 } from './ReportDashboard';
 
 const meta: Meta<typeof ReportDashboard> = {
-  title: 'Product/Provider/ReportDashboard',
+  id: 'dashboards-reportdashboard',
+  title: 'Modules/Dashboards/ReportDashboard',
   component: ReportDashboard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**A fixed analytics page in one component**: header (\`title\`, \`dateRangeLabel\`, a \`Select\` of \`dateRangeOptions\` bound to \`selectedDateRange\` / \`onDateRangeChange\`, an Export \`Button\` when \`onExport\` is set), a 2 → 4 column grid of \`metrics: MetricData[]\` (\`{ label, value, change?, changeLabel?, trend? }\`) in \`Card\`s, an "Order Volume" bar chart from \`chartData: ChartDataPoint[]\` (\`{ label, value, previousValue? }\`, CSS-height bars, no chart library), and two ranked lists \`topServices\` / \`topEmployers: TopItem[]\` (\`{ id, name, value, percentage? }\`) with \`Badge\` ranks and percentage bars. \`isLoading\` swaps in a pulse skeleton. Numbers are formatted with \`Intl.NumberFormat('en-US')\`; a metric whose label contains "revenue" or "amount", and every employer value, is formatted as USD.
+
+### Use it when
+
+- The provider / employer reporting page needs exactly this shape — KPIs, one period-over-period volume chart, two leaderboards — with minimal wiring.
+- Data arrives already aggregated per period and the user only switches the date range.
+
+### Don't use it when
+
+- The user should choose and arrange their own widgets — \`CustomizableDashboard\`.
+- You need real charts (axes, tooltips, series, zoom) — \`DataVisNitroGraph\` or \`YChart\` inside \`Card\`s; sparklines in metric tiles — \`Sparkline\` + \`CardStat\`.
+- The sections differ ("Top Providers", a table, filters) — headings and slots are fixed; build from \`PageHeader\`, \`Card\`, \`CardStat\` and \`DashboardWidget\` instead.
+- Currency or locale is not US dollars.
+
+### Example
+
+\`\`\`tsx
+const [range, setRange] = useState('30d');
+const { data, isLoading } = useProviderReport(range);
+
+<ReportDashboard
+  title="Reports & Analytics"
+  dateRangeLabel={RANGE_LABELS[range]}
+  selectedDateRange={range}
+  onDateRangeChange={setRange}
+  isLoading={isLoading}
+  metrics={data?.metrics ?? []}
+  chartData={data?.volumeByWeek}
+  topServices={data?.topServices}
+  topEmployers={data?.topEmployers}
+  onExport={() => downloadCsv(range)}
+/>
+\`\`\`
+
+The date range is controlled by the host and drives the query; \`dateRangeLabel\` is separate text you keep in sync.
+
+### Limitations
+
+- Accessibility: renders an \`<h1>\` for \`title\` (clashes with \`PageHeader\` / \`AppHeaderTitle\` on the same page) and \`CardTitle as="h2"\` for sections. The bar chart is **purely visual** — bars are \`div\`s with \`title\` tooltips (\`"Current: N"\`), no \`role="img"\`, no text alternative, no table fallback; percentage bars likewise carry no \`role="progressbar"\` or value. Trend arrows are \`aria-hidden\`; direction is conveyed by colour plus the signed \`change\` text. The \`Select\` gets \`aria-label="Date range"\`. Skeleton has no \`aria-busy\` / status text.
+- i18n: \`en-US\` / \`USD\` hard-coded; English \`"Reports & Analytics"\`, \`"Last 30 Days"\`, default range options, \`"Export"\`, \`"Order Volume"\`, \`"Current Period"\`, \`"Previous Period"\`, \`"Top Services"\`, \`"Top Employers"\`. Currency detection by label substring ("revenue" / "amount") is implicit.
+- Layout: metrics \`grid-cols-2 md:grid-cols-4\`, top lists \`md:grid-cols-2\`; chart labels \`truncate\`; \`chartData\` beyond ~12 points gets very thin bars.
+- RTL: Export icon uses \`mr-2\`; otherwise symmetric flex/grid. Theming: hard-coded \`gray-*\`, \`blue-500\`, \`green-*\`, \`red-*\` for text, bars and skeleton — not brand tokens. Uses \`Card\`, \`Badge\`, \`Button\`, \`Select\`; no chart dependency.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'dashboards-customizabledashboard',
+          why: 'CustomizableDashboard is an empty grid the user arranges; ReportDashboard is a fixed analytics page (metrics, bar chart, top lists) driven by data props.',
+        },
+        {
+          type: 'uses',
+          target: 'layout-card',
+          why: 'Metric tiles, the chart and both leaderboards are Cards with CardHeader / CardTitle / CardContent.',
+        },
+        {
+          type: 'uses',
+          target: 'choice-inputs-select',
+          why: 'The date-range picker in the header is a Select bound to selectedDateRange / onDateRangeChange.',
+        },
+      ],
+    },
   },
   argTypes: {
     onDateRangeChange: { action: 'date range changed' },

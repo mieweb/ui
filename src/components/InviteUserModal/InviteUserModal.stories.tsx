@@ -25,9 +25,10 @@ const sampleRoles = [
 ];
 
 const meta: Meta<typeof InviteUserModal> = {
-  title: 'Components/Forms & Inputs/InviteUserModal',
+  id: 'users-integrations-inviteusermodal',
+  title: 'BlueHive/Users & integrations/InviteUserModal',
   component: InviteUserModal,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

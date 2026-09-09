@@ -1,0 +1,80 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Inputs/Composite forms/Overview" />
+
+# Composite forms
+
+> **These are whole form sections and tools assembled from the primitives — the host still owns
+> submission and persistence.** Every component here is controlled (`value` + `onChange`, or a
+> ref you read), has no `name`, and never talks to a server. Pick by _who defines the fields and
+> when_: an author designing a reusable template → `ESheet Builder`; someone filling that template
+> → `ESheet Renderer`; the end user inventing a few extra key/value pairs → `AdditionalFields`;
+> matching a spreadsheet's columns to fields you already have → `CSVColumnMapper`; assigning a
+> user's capabilities → `PermissionsEditor`; switching the UI language → `LanguageSelector`.
+
+## Which one?
+
+| Component                                                                | Use it when                                                                                                                                                  | Not when                                                                                                                               |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| [AdditionalFields](?path=/docs/composite-forms-additionalfields--docs)   | A collapsible "extras" block where the person filling the form adds free name/value rows (`KeyValueEntry[]`, `maxEntries`)                                   | Fields should be typed, validated and reused — `ESheet Builder`; keys are a known vocabulary — per-key `Input` / `Select`              |
+| [CSVColumnMapper](?path=/docs/composite-forms-csvcolumnmapper--docs)     | The mapping step of a CSV import: one card per column with a `Select` of your fields, sub-fields, ignore/include and bulk actions; `CSVFileUpload` drop zone | You need parsing or validation (bring `papaparse` and your own rules); users are adding attributes, not mapping — `AdditionalFields`   |
+| [PermissionsEditor](?path=/docs/composite-forms-permissionseditor--docs) | Assigning a hierarchy of permissions (groups › permission › child) plus optional employer scope to a user, with a summary                                    | One role from a list — `Select` / `RadioGroup`; a flat handful of flags — `CheckboxGroup`; a roles × permissions matrix (not provided) |
+| [LanguageSelector](?path=/docs/composite-forms-languageselector--docs)   | A header/settings UI-language switcher with a built-in list, flags and native names; `LanguageSelectorNative` for mobile, `LanguageSelectorInline` for 2–5   | A country — `CountryDropdown`; a validated form value with label/error — `Select`                                                      |
+| [ESheet Builder](?path=/docs/composite-forms-esheet-builder--docs)       | An administrator designs or edits a form template (`FormDefinition` JSON) with a palette, properties and drag-and-drop                                       | You only need to display/fill a template — `ESheet Renderer`; the schema is fixed at build time — compose primitives directly          |
+| [ESheet Renderer](?path=/docs/composite-forms-esheet-renderer--docs)     | Rendering an eSheet / SurveyJS / MCP definition as live fields and reading validated answers through `getValidResponse()`                                    | Editing the definition — `ESheet Builder`; you expect a submit button or persistence (host provides both)                              |
+
+Single fields live in [Text inputs](?path=/docs/inputs-text-inputs-overview--docs),
+[Choice inputs](?path=/docs/inputs-choice-inputs-overview--docs) and
+[Date & time](?path=/docs/inputs-date-time-overview--docs). The eSheet clinical field types
+(`medicationList`, `allergyList`) are documented under Healthcare › Clinical lists.
+
+## How they fit together
+
+- **Two install surfaces.** `AdditionalFields`, `CSVColumnMapper`, `PermissionsEditor` and
+  `LanguageSelector` ship in the main `@mieweb/ui` barrel. `ESheet Builder` and `ESheet Renderer`
+  are re-exports from the optional `@esheet/builder` / `@esheet/renderer` peers behind the
+  `@mieweb/ui/esheet` entry, together with `registerMieEsheetFields()`, which plugs the
+  Healthcare list fields into both.
+- **The eSheet pair.** Builder `onChange` emits a `FormDefinition`; Renderer takes that same
+  object as `formDataInput` and hands answers back as a `FormResponse` via its ref. Neither
+  persists anything — store the definition and the response yourself.
+- **Built from the primitives.** `AdditionalFields` is rows of `Input`; `CSVColumnMapper` is
+  cards of `Select`; `PermissionsEditor` is a tree of `Checkbox`; all use `Button`. Their field
+  semantics (labels, `aria-*`) are therefore the primitives' — see the individual Limitations for
+  what the wrapper adds or omits.
+- **State ownership.** Everything is controlled: `AdditionalFields` (`value`/`onChange`),
+  `CSVColumnMapper` (per-column callbacks — you update the `columns` array),
+  `PermissionsEditor` (`assignedPermissions`/`onPermissionsChange` + employer pair),
+  `LanguageSelector` (`value`/`onChange(language)`), Builder (`definition`/`onChange`),
+  Renderer (ref). Only `LanguageSelector` (open/closed) and the collapsible headers keep local UI
+  state.
+- `LanguageSelector` returns the whole `Language` object, so `language.rtl` is available to set
+  `document.documentElement.dir`; `useDirection()` then reports the new direction to any
+  component that needs JS-level RTL logic.
+
+## Shared limitations
+
+- **No submission, no persistence, no `name`.** Nothing here posts with a `<form>` or calls an
+  API; wire your own save button and serialisation. `CSVColumnMapper` and the eSheet pair also
+  do no parsing or validation of their own beyond what `getValidResponse()` reports.
+- **Keyboard and screen-reader coverage is uneven.** `PermissionsEditor` and `AdditionalFields`
+  rely on native checkboxes/inputs (labelled, but rows are not distinguishable by name and
+  group headers lack `aria-expanded`); `LanguageSelector`'s custom popup has non-focusable
+  options and no arrow keys (use `LanguageSelectorNative`); `CSVColumnMapper` conveys mapping
+  status by colour/icon only and its progress overlay is not a dialog; the eSheet packages have
+  known upstream axe failures (contrast, unlabeled landmarks, role-less drag handles) tracked in
+  the mieweb/eSheet repo.
+- **English defaults.** Titles, button labels and placeholders are props on `AdditionalFields`,
+  `CSVColumnMapper` (`labels`), `PermissionsEditor` (`labels`) and `LanguageSelector`
+  (`placeholder`, `label`), but hidden labels, aria-labels and helper text ("Sample Data",
+  "Remove field", "Expand …") are hard-coded; the eSheet UI has no i18n hooks.
+- **RTL.** Physical classes remain: `AdditionalFields` `text-left` / `ml-1`,
+  `PermissionsEditor` `ml-4` / `pl-4` / `border-l` / `text-left`, `LanguageSelector`
+  `text-left` / `right-2` / `rounded-l|r-lg` / `mr-1`; eSheet is LTR-only. `CSVColumnMapper`
+  has no physical offsets.
+- **Theming.** `CSVColumnMapper` and `PermissionsEditor` use semantic tokens (`bg-card`,
+  `border-border`, `success-*`, `warning-*`, `info-*`); `AdditionalFields` uses `brand-*` and
+  `gray-*`, `LanguageSelector` `gray-*` / `bg-white` with `dark:` variants; eSheet has its own
+  `--msprimary` tokens and a `dark` class, independent of the @mieweb/ui `ThemeProvider`.
+- **Styling for eSheet is not bundled.** The builder/renderer `index.output.css` files are not
+  in the packages' `exports`; hosts must copy or alias them (renderer first, then builder).

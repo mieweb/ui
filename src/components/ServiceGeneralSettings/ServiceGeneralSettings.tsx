@@ -217,7 +217,7 @@ export function ServiceGeneralSettings({
                 Base Price
               </label>
               <div className="relative">
-                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                <span className="text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2">
                   $
                 </span>
                 <input
@@ -225,7 +225,7 @@ export function ServiceGeneralSettings({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 py-2 ps-7 pe-4 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={basePrice}
                   onChange={(e) =>
                     onBasePriceChange?.(parseFloat(e.target.value) || 0)
@@ -247,14 +247,14 @@ export function ServiceGeneralSettings({
                   id="turnaround-days"
                   type="number"
                   min="0"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 pr-16 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 pe-16 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={turnaroundDays ?? ''}
                   onChange={(e) =>
                     onTurnaroundDaysChange?.(parseInt(e.target.value) || 0)
                   }
                   placeholder="0"
                 />
-                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
+                <span className="text-muted-foreground absolute end-3 top-1/2 -translate-y-1/2 text-sm">
                   days
                 </span>
               </div>

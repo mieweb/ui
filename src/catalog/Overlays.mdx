@@ -1,0 +1,54 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Overlays/Overview" />
+
+# Overlays
+
+> **Does the user have to deal with it now?** Yes → `Modal` (or `AlertDialog` for a decision).
+> Beside the page → `Sheet`. Set it aside and come back → `DockablePanel`. Move it around →
+> `FloatingWindow`. Just a hint → one of the three tips.
+
+## Which one?
+
+| Component                                                                       | Use it when                                                             | Not when                              | Modal?      |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------- | ----------- |
+| [Modal](?path=/docs/overlays-modal--docs)                                       | A focused task interrupts the page: edit, pick, view details            | A yes/no decision — `AlertDialog`     | yes         |
+| [Sheet](?path=/docs/overlays-sheet--docs)                                       | Secondary detail or filters slide in from an edge; mobile menus         | The task should fully take over       | yes         |
+| [DockablePanel](?path=/docs/overlays-dockablepanel--docs)                       | A long form/editor the user parks as a strip and resumes, dirty-guarded | A quick task                          | full only   |
+| [FloatingWindow](?path=/docs/overlays-floatingwindow--docs)                     | A draggable, resizable tool window kept open while reading the page     | Touch / small screens                 | no          |
+| [Sidebar](?path=/docs/overlays-sidebar--docs)                                   | Persistent app navigation; becomes a drawer on small screens            | Transient panels — `Sheet`            | drawer only |
+| [Tooltip](?path=/docs/overlays-tooltip--docs)                                   | A few words describing a control on hover/focus                         | Links or structure inside             | no          |
+| [GlossaryTooltip](?path=/docs/overlays-glossarytooltip--docs)                   | A pinnable definition card for domain terms in prose                    | Citing where a value comes from       | no          |
+| [SourceTip](?path=/docs/overlays-sourcetip--docs)                               | A pinnable provenance card: what backs this number/claim                | Defining a term                       | no          |
+| [KeyboardShortcutsOverlay](?path=/docs/overlays-keyboardshortcutsoverlay--docs) | The `?` help dialog listing shortcuts (`Kbd` chips)                     | Running commands — `CommandPalette`   | yes         |
+| [CookieConsent](?path=/docs/overlays-cookieconsent--docs)                       | A fixed consent banner with accept/decline and policy links             | Any other message — `Alert` / `Toast` | no          |
+
+`AlertDialog` lives in [Feedback](?path=/docs/components-feedback-overview--docs) but is built on
+`Modal`.
+
+## How they fit together
+
+- `Modal` and `Sheet` share the same slot anatomy (`Header`, `Title`, `Close`, `Body`, `Footer`)
+  and the same hooks (`useFocusTrap`, `useEscapeKey`).
+- `AlertDialog` and `KeyboardShortcutsOverlay` are `Modal` compositions.
+- `GlossaryTooltip` and `SourceTip` share one interaction grammar (hover previews, tap pins,
+  Escape/outside closes); `Tooltip` is the plain, non-interactive form.
+
+## Layering
+
+| Layer                            | Components                                                     |
+| -------------------------------- | -------------------------------------------------------------- |
+| `z-[9999]` (portal)              | `Tooltip`                                                      |
+| `z-50` (fixed, not portalled)    | `Modal`, `AlertDialog`, `Sheet`, `CookieConsent`, `Toast`      |
+| `--mieweb-dockable-panel-z` (45) | `DockablePanel` (portalled), so a Modal can open above it      |
+| `z-40` / in flow                 | `Sidebar` mobile backdrop; `FloatingWindow` when not draggable |
+
+## Shared limitations
+
+- Focus traps move focus in on open but **none of them return focus to the trigger on close**.
+- `Modal` locks body scroll; `Sheet` does not. Neither sets background content `inert` — only
+  `DockablePanel` (full mode) does.
+- `Modal`, `Sheet` and `CookieConsent` are `position: fixed` inside your tree, not portalled:
+  keep them out of ancestors with `transform` or `overflow: hidden`.
+- Placement props on `Tooltip` and the corner variants of `CookieConsent` are physical
+  (left/right); `Sheet` accepts logical `start`/`end` and `DockablePanel` docks at the logical end.

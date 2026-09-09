@@ -3,8 +3,9 @@ import { EmployeeForm } from './EmployeeForm';
 
 const meta: Meta<typeof EmployeeForm> = {
   component: EmployeeForm,
-  title: 'Components/Forms & Inputs/EmployeeForm',
-  tags: ['autodocs'],
+  id: 'employers-employeeform',
+  title: 'BlueHive/Employers/EmployeeForm',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

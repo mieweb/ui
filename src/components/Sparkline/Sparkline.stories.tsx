@@ -26,21 +26,62 @@ function thirtyDays(seed = 7): SparklinePoint[] {
 }
 
 const meta: Meta<typeof Sparkline> = {
-  title: 'Components/Data Display/Sparkline',
+  id: 'grids-sparkline',
+  title: 'Components/Grids/Sparkline',
   component: Sparkline,
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component:
-          'A compact bar sparkline for activity-over-time strips. Bars scale to the series ' +
-          'maximum with a baseline stub for zero values; with `onSelect`, bars become toggle ' +
-          'buttons for filtering to one bucket. Data arrives pre-bucketed — the host owns ' +
-          'date math — keeping the component pure. For full charting, use DataVis.',
+        component: `### What it's for
+
+A compact bar strip for activity over time — timelines, table rows, dashboard headers. Bars scale to the series maximum with a baseline stub for zero values. With \`onSelect\`, bars become toggle buttons for filtering the surrounding view to one bucket (\`selectedKey\` is controlled by the host).
+
+### Use it when
+
+- You need a glanceable trend next to a label or inside a row, with no axes, legend or tooltip chrome.
+- The data is already bucketed (per day/week/month) by the host — the component does no date math, so it stays pure and dependency-free.
+
+### Don't use it when
+
+- Users must read exact values, compare series or change axes — use \`DataVisNitroGraph\`.
+- The bucket count is large (hundreds); bars become sub-pixel. Aggregate first.
+- You need a progress or load indicator — that is \`Progress\`, not a sparkline.
+
+### Example
+
+\`\`\`tsx
+const [bucket, setBucket] = useState<string | null>(null);
+
+<Sparkline
+  ariaLabel="Orders per week"
+  data={weeks.map((w) => ({ key: w.iso, label: w.label, value: w.count }))}
+  selectedKey={bucket}
+  onSelect={setBucket}
+  formatValue={(p) => \`\${p.value} orders\`}
+/>
+<OrderList filterWeek={bucket} />
+\`\`\`
+
+### Limitations
+
+- Exposes \`role="status"\` with \`aria-label\`; individual bar values are surfaced through titles, not a data table. Provide a textual summary for screen-reader users when the numbers matter.
+- No axes, thresholds or negative values; heights are relative to the maximum in the series.
+- Uses neutral tokens (\`bg-muted\`) so it inherits brand and dark mode; a highlighted bar uses the primary token.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'grids-datavis-nitro-graph',
+          why: 'Graph for interactive charts with axes and peers; Sparkline for a dependency-free inline trend.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     data: {
       description: 'Pre-bucketed points in display order.',

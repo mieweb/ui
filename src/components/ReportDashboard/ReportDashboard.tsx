@@ -206,7 +206,7 @@ export function ReportDashboard({
             <Button variant="outline" onClick={onExport}>
               <svg
                 aria-hidden="true"
-                className="mr-2 h-4 w-4"
+                className="me-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

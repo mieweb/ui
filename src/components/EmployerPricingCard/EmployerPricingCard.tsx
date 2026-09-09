@@ -86,7 +86,7 @@ export function EmployerPricingCard({
             </Badge>
           )}
         </div>
-        <div data-slot="employer-pricing-base-price" className="text-right">
+        <div data-slot="employer-pricing-base-price" className="text-end">
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatPrice(basePrice)}
           </p>
@@ -149,7 +149,7 @@ export function EmployerPricingCard({
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <svg
                   aria-hidden="true"
-                  className="mr-1 h-3.5 w-3.5"
+                  className="me-1 h-3.5 w-3.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -168,7 +168,7 @@ export function EmployerPricingCard({
               <Button variant="ghost" size="sm" onClick={onRemove}>
                 <svg
                   aria-hidden="true"
-                  className="mr-1 h-3.5 w-3.5 text-red-500"
+                  className="me-1 h-3.5 w-3.5 text-red-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

@@ -354,7 +354,7 @@ export function FileManager({
                   {hasActions && (
                     <TableCell
                       data-slot="file-manager-actions"
-                      className="text-right"
+                      className="text-end"
                     >
                       <FileRowActionMenu
                         fileId={file.id}
@@ -556,7 +556,7 @@ function FileRowActionMenu({
                 role="menuitem"
                 type="button"
                 className={cn(
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs',
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-start text-xs',
                   'transition-colors duration-100',
                   action.variant === 'danger'
                     ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'

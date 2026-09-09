@@ -3,6 +3,7 @@ import { VisuallyHidden } from './VisuallyHidden';
 import { Button } from '../Button';
 
 const meta: Meta<typeof VisuallyHidden> = {
+  id: 'foundations-visuallyhidden',
   title: 'Foundations/VisuallyHidden',
   component: VisuallyHidden,
   parameters: {
@@ -30,7 +31,7 @@ This component uses a CSS technique that:
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

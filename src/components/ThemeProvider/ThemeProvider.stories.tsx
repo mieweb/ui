@@ -3,6 +3,7 @@ import { ThemeProvider, useThemeContext } from './ThemeProvider';
 import { Button } from '../Button';
 
 const meta: Meta<typeof ThemeProvider> = {
+  id: 'foundations-themeprovider',
   title: 'Foundations/ThemeProvider',
   component: ThemeProvider,
   parameters: {
@@ -22,7 +23,7 @@ It provides context for managing and persisting theme preferences.
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     defaultTheme: {
       control: 'select',

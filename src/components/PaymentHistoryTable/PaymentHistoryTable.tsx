@@ -207,26 +207,26 @@ export function PaymentHistoryTable({
       <table data-slot="payment-history-table" className="w-full">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
+            <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium tracking-wider uppercase">
               Date
             </th>
-            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase sm:table-cell">
+            <th className="text-muted-foreground hidden px-4 py-3 text-start text-xs font-medium tracking-wider uppercase sm:table-cell">
               Invoice
             </th>
-            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase md:table-cell">
+            <th className="text-muted-foreground hidden px-4 py-3 text-start text-xs font-medium tracking-wider uppercase md:table-cell">
               Employer
             </th>
-            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase lg:table-cell">
+            <th className="text-muted-foreground hidden px-4 py-3 text-start text-xs font-medium tracking-wider uppercase lg:table-cell">
               Method
             </th>
-            <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
+            <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium tracking-wider uppercase">
               Amount
             </th>
             <th className="text-muted-foreground px-4 py-3 text-center text-xs font-medium tracking-wider uppercase">
               Status
             </th>
             {onRefund && (
-              <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
+              <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium tracking-wider uppercase">
                 Action
               </th>
             )}
@@ -279,7 +279,7 @@ export function PaymentHistoryTable({
                   </span>
                 </div>
               </td>
-              <td className="px-4 py-3 text-right">
+              <td className="px-4 py-3 text-end">
                 <p
                   className={`font-medium ${payment.status === 'refunded' ? 'text-muted-foreground line-through' : 'text-gray-900 dark:text-white'}`}
                 >
@@ -292,7 +292,7 @@ export function PaymentHistoryTable({
                 </Badge>
               </td>
               {onRefund && (
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-3 text-end">
                   {payment.status === 'completed' && (
                     <Button
                       variant="ghost"

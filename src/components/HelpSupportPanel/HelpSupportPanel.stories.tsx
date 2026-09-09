@@ -6,9 +6,10 @@ import {
 } from './HelpSupportPanel';
 
 const meta: Meta<typeof HelpSupportPanel> = {
-  title: 'Product/Provider/HelpSupportPanel',
+  id: 'operations-helpsupportpanel',
+  title: 'BlueHive/Operations/HelpSupportPanel',
   component: HelpSupportPanel,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

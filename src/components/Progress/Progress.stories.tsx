@@ -3,12 +3,65 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Progress, CircularProgress } from './Progress';
 
 const meta: Meta<typeof Progress> = {
-  title: 'Components/Loaders/Progress',
+  id: 'loading-progress',
+  title: 'Components/Loading/Progress',
   component: Progress,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+Determinate progress. \`Progress\` is a linear bar (\`value\`/\`max\`, \`label\`, \`showValue\`, \`formatValue\`, four \`size\`s, \`striped\`/\`animated\` fills) and \`CircularProgress\` is the ring form for tight spaces. Both expose \`role="progressbar"\` with \`aria-valuenow/min/max\`, and share the \`default\` / \`success\` / \`warning\` / \`danger\` variants.
+
+### Use it when
+
+- You can report how far along something is: uploads, imports, multi-step processing, storage quotas, completion of a checklist.
+- Showing a static ratio ("7 of 10 documents received") — progress bars read well as compact gauges.
+
+### Don't use it when
+
+- You cannot measure progress — an indeterminate \`Spinner\` is more honest than a bar that crawls.
+- Indicating position in a multi-step form — \`StepIndicator\` names the steps.
+- Reading position in a long article — \`ReadingProgressBar\` binds to scroll.
+
+### Example
+
+\`\`\`tsx
+<Progress
+  value={uploaded}
+  max={total}
+  label="Uploading records"
+  showValue
+  formatValue={(v, m) => \`\${v} of \${m}\`}
+  variant={failed ? 'danger' : 'default'}
+/>
+\`\`\`
+
+### Limitations
+
+- Value changes are not announced; for long operations add a polite live region with milestone messages.
+- \`animated\`/\`striped\` motion does not pause for \`prefers-reduced-motion\`.
+- Colours are semantic tokens; the track uses the neutral token in both themes.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'loading-spinner',
+          why: 'Progress needs a real value; fall back to Spinner when there is none.',
+        },
+        {
+          type: 'alternative to',
+          target: 'navigation-readingprogressbar',
+          why: 'Progress is a determinate, labelled progressbar for a value the host owns; ReadingProgressBar binds to window scroll and is decorative.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     value: {
       control: { type: 'range', min: 0, max: 100 },

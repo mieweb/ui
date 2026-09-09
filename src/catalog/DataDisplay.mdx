@@ -1,0 +1,82 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Data display/Overview" />
+
+# Data display
+
+> **Who decides what the chip means?** If the host already knows the state ("Active", "Draft")
+> → `Badge`. If the number is a count the user can click into → `CountBadge`. If the colour
+> should follow how old a date is → `FreshnessBadge`. A person → `Avatar`; long prose →
+> `ClampedText`; a process or its history → `Timeline`; the "N of M records" line above a
+> filtered grid → `FilterSummaryBar`. `YChart` is a Storybook-only demo and is not exported.
+
+## Which one?
+
+| Component                                                           | Use it when                                                                                                                                            | Not when                                                                                                                                                                      |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Badge](?path=/docs/data-display-badge--docs)                       | A static label for a state or category you map to a `variant` (`success`, `warning`, `danger`, …); optional `icon`                                     | It shows a count and opens something — `CountBadge`; the colour depends on a date — `FreshnessBadge`; it must be removable/toggleable — `Toggle` / `Button`                   |
+| [CountBadge](?path=/docs/data-display-countbadge--docs)             | A clickable "Label N" pill for queues and shortcuts; `items` opens a popover table with per-row View / Edit / Delete                                   | A label without a count — `Badge`; rows need real columns or sorting — a grid in your own `Modal`; a notification history — `NotificationCenter`                              |
+| [FreshnessBadge](?path=/docs/data-display-freshnessbadge--docs)     | "Reviewed 12d ago" bucketed into fresh / aging / stale by `thresholds`; `FreshnessDot` for tight cells; `freshnessLevel` / `daysSince` for sorting     | The state is a category, not an age — `Badge`; you need the full date or a future date — render the date with `Text`                                                          |
+| [Avatar](?path=/docs/data-display-avatar--docs)                     | A person's image with initials / glyph fallback; `AvatarGroup max` for a compact set of participants                                                   | It is not a person or needs a non-circle shape — `<img>`; it should open a menu — wrap in a `Dropdown` trigger; you need a status dot — compose a `Badge`                     |
+| [ClampedText](?path=/docs/data-display-clampedtext--docs)           | Free-text notes/messages clamped to `lines` with a Show more toggle; short text stays inline                                                           | One line with an ellipsis — [Text](?path=/docs/foundations-text--docs) `truncate`; rich content — clamp your own container; the whole section should collapse — `Collapsible` |
+| [Timeline](?path=/docs/data-display-timeline--docs)                 | `TimelineProgress` for a process the user watches; `TimelineEventList` for a record's activity feed; `OrderConfirmation` for the fixed success overlay | The user drives the steps — [StepIndicator](?path=/docs/navigation-stepindicator--docs); a percentage — `Progress`; a custom dialog — `Modal`                                 |
+| [FilterSummaryBar](?path=/docs/data-display-filtersummarybar--docs) | "1,204 of 8,911 records — 3 filters active · Clear all" above a host-filtered `DataVisNITRO` / `Table`                                                 | You need removable filter chips — render your own; there are no filters — a plain count in `PageHeader`; the count is a shortcut — `CountBadge`                               |
+| [YChart](?path=/docs/data-display-ychart--docs)                     | Evaluating the `ychart` submodule's YAML org-chart editor inside Storybook                                                                             | Anything in an application — it is **not exported**; charts — [DataVisNitroGraph](?path=/docs/grids-datavis-nitro-graph--docs)                                                |
+
+BlueHive-specific badges live in their own families and are not alternatives here:
+[ServiceBadge](?path=/docs/services-servicebadge--docs) (service types) and
+[StripeBadge](?path=/docs/billing-stripebadge--docs) (payment provider).
+
+## How they fit together
+
+- **Three badges, three sources of truth.** `Badge` is a `<span>` whose meaning is whatever
+  `variant` the host picks — it never changes on its own. `CountBadge` is a `<button>` whose
+  content is a number and whose click either navigates (`onClick`) or opens a portaled table of
+  `items`; the count chip can be recoloured independently (`countVariant`). `FreshnessBadge`
+  owns its colour: it computes `fresh` / `aging` / `stale` / `unknown` from a date and
+  `thresholds`, so every chip on a page ages by the same rule. They look alike on purpose
+  (rounded-full pills) and differ in intent, not styling.
+- **Identity + state.** `Avatar` beside a `Badge` is the header pattern (`PatientHeader`,
+  `EmployeeProfile`); neither renders the other. `TimelineEventList` accepts `authorAvatar`
+  but does not render it — compose an `Avatar` yourself if you need faces in the feed.
+- **Prose vs. lines.** `ClampedText` clamps _paragraphs_ (2–8 lines, whitespace preserved,
+  toggle to reveal) and its fade defaults to `from-card` so it sits inside `Card` content;
+  `Text truncate` (Foundations) cuts a single line. Both are CSS-only clamps.
+- **Watching vs. driving.** `TimelineProgress` and `StepIndicator` (Navigation) draw similar
+  dot-and-connector tracks; `TimelineProgress` is `role="progressbar"` with no clickable steps,
+  `StepIndicator` renders buttons with `aria-current="step"`. Pick by whether the user can move
+  between stages.
+- **Counts in context.** `FilterSummaryBar` is stateless over the host's filter state and pairs
+  with `DataVisNITRO` or `Table`; `CountBadge` is a shortcut _to_ a list. Neither filters
+  anything itself.
+- **YChart is a demo.** There is no component in `src/components/YChart/`, only a story that
+  dynamically imports the `packages/ychart` submodule; see its
+  [MAINTAINERS.md](https://github.com/mieweb/ui/blob/main/src/components/YChart/MAINTAINERS.md).
+
+## Shared limitations
+
+- Colour is the only state signal in `Badge`, `CountBadge`'s chip, `FreshnessDot` and
+  `TimelineProgress` dots — always pair with visible text or an `aria-label` (`FreshnessDot`
+  and `StepIndicator` do; `Badge`, the `CountBadge` popover and `TimelineProgress` steps do
+  not).
+- Hard-coded English: `CountBadge` popover/menu/modal copy (item(s), Label, Status, View / Edit
+  / Delete, delete confirmation, edit form fields), `FreshnessBadge` age text (`today`,
+  `yesterday`, `Nd ago`, `date unknown`) and level names, `Timeline` relative times, "by
+  {author}", "No activity yet.", the `OrderConfirmation` copy, and `TimelineProgress`'s
+  `aria-label`. Only `ClampedText` (`showMoreLabel` / `showLessLabel`) and `FilterSummaryBar`
+  (every string) are fully overridable; `Badge` and `Avatar` ship no strings.
+- Dialog semantics are uneven: `CountBadge`'s View / Edit / Delete flows use the real `Modal`
+  (focus trap, scroll lock), but its popover has no role and its trigger lacks
+  `aria-haspopup`; `OrderConfirmation` is `role="dialog"` with **no focus trap, Escape or
+  scroll lock**.
+- RTL: `Badge` (`me-1`), `FilterSummaryBar` (`ms-auto`), `FreshnessBadge` and `Avatar` are
+  logical or symmetric; `CountBadge` row menus anchor with physical `rect.right` /
+  `translateX(-100%)`, and `TimelineEventList`'s connector is `left-5`.
+- Theming: semantic tokens in `FreshnessBadge` (`success` / `warning` / `destructive` /
+  `muted`), `FilterSummaryBar`, `CountBadge` `default` / `info`, and `Badge` `default` /
+  `outline`; hard-coded `green|yellow|red|blue|purple|orange|neutral-*` in `Badge`'s other
+  variants, `CountBadge`'s `informative` / `success` / `warning` / `alert`, `Timeline` event
+  colours and error states, and `AvatarGroup` rings (`ring-white dark:ring-neutral-900`).
+- Dependencies: `luxon` (`FreshnessBadge`), `lucide-react` (`FreshnessBadge`,
+  `FilterSummaryBar`), `class-variance-authority` (`Badge`, `CountBadge`, `Avatar`);
+  `CountBadge` pulls in `Modal`, `Button`, `Input`, `useAnchoredPosition`, `useClickOutside`.

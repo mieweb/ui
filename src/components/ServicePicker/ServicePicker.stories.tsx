@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { ServicePicker, type ServiceGroup } from './ServicePicker';
 
 const meta: Meta<typeof ServicePicker> = {
-  title: 'Components/Forms & Inputs/ServicePicker',
+  id: 'services-servicepicker',
+  title: 'BlueHive/Services/ServicePicker',
   component: ServicePicker,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

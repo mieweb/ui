@@ -157,7 +157,7 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
       <div
         ref={ref}
         data-slot="avatar-group"
-        className={cn('flex -space-x-2', className)}
+        className={cn('flex -space-x-2 rtl:space-x-reverse', className)}
         {...props}
       >
         {visibleChildren.map((child, index) => {

@@ -21,9 +21,10 @@ import 'katex/dist/katex.min.css';
 // ============================================================================
 
 const meta: Meta<typeof SuperChatInbox> = {
-  title: 'Product/Feature Modules/SuperChat/Inbox',
+  id: 'superchat-inbox',
+  title: 'Modules/SuperChat/Inbox',
   component: SuperChatInbox,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     readOnly: {
       control: 'boolean',
@@ -69,17 +70,79 @@ const meta: Meta<typeof SuperChatInbox> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: [
-          '`SuperChatInbox` is the combined surface: the `SuperChatConversations` list plus the',
-          'active `SuperChat` panel. It is the drop-in equivalent of the original monolithic',
-          'component — it accepts the full `conversations` array and owns active-conversation',
-          'selection (controlled via `activeConversationId` or uncontrolled via',
-          '`defaultActiveConversationId`).',
-          '',
-          'See **SuperChat › Overview** for the full consumer guide (install, props, plugins,',
-          'accessibility).',
-        ].join('\n'),
+        component: `### What it's for
+
+**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
+
+### Use it when
+
+- You want a **finished inbox** for conversations that mix humans and AI agents — care-team threads with a triage agent, an admin console watching several agents — and are happy with list-left / panel-right.
+- You are migrating from \`mieweb/chat-component\` and want the closest API.
+- Messages are Markdown and may need code / math / Mermaid / GenUI / NITRO-table plugins; you install only the peers for the plugins you pass.
+
+### Don't use it when
+
+- You need a different arrangement (list in a drawer, panel in a modal, two panels) — compose \`SuperChatConversations\` + \`SuperChat\` yourself.
+- There is only ever one conversation on screen — \`SuperChat\` alone, or \`AIChat\` if it is one user and one assistant with plain text.
+- Human-to-human messaging with delivery states, read receipts and typing indicators — Messaging's \`MessagingSplitView\` + \`MessageThread\`; SuperChat has none of those.
+
+### Example
+
+\`\`\`tsx
+import { SuperChatInbox } from '@mieweb/ui/components/SuperChat';
+import { createCodePlugin, createNitroTablePlugin } from '@mieweb/ui/components/SuperChat/plugins';
+
+const plugins = useMemo(() => [createCodePlugin(), createNitroTablePlugin()], []);
+const [conversations, setConversations] = useState<SuperChatConversation[]>([]);
+useEffect(() => { api.listConversations().then(setConversations); }, []); // host transport + auth
+
+<div style={{ height: 'calc(100vh - 120px)' }}>
+  <SuperChatInbox
+    conversations={conversations}
+    currentParticipantId={me.id}
+    renderPlugins={plugins}
+    linkBuilder={(ref) => routes.record(ref)}
+    onConversationOpened={(c) => setConversations((all) => all.map((x) => x.id === c.id ? { ...x, unread: 0 } : x))}
+    onMessageSent={(text, { conversation, mentions, attachments }) => {
+      const msg = { id: crypto.randomUUID(), participantId: me.id, text, time: new Date().toISOString() };
+      setConversations((all) => all.map((x) => x.id === conversation.id
+        ? { ...x, thread: [...x.thread, msg], lastActivity: msg.time } : x));
+      void api.send(conversation.id, msg, attachments, mentions); // agents reply via your stream → append to thread
+    }}
+    onNewConversation={() => setConversations((all) => [newDraft(me), ...all])}
+  />
+</div>
+\`\`\`
+
+### Limitations
+
+- **Accessibility as implemented:** the root \`role="group"\` is named after the active conversation; inner semantics come from the two children (\`aside\` "Conversations", \`section\` panel, \`role="log"\` thread, \`article\` messages). On small screens hidden panes are removed with \`hidden sm:flex\`, so they are not in the tab order; switching pane does **not** move focus to the newly shown pane. With no conversations it shows an unlabelled "No conversation selected" section.
+- **Host owns everything mutable:** unread counts, appending sent messages, agent replies, edits (\`editedAt\`), and attachment upload (delivered as base64 \`dataUrl\`s). Nothing here talks to a network.
+- **Selection fallback:** if the active id is missing from \`conversations\` the first conversation is shown; the list highlight always follows the panel.
+- Needs a bounded height (\`h-full\` root) and a flex-capable parent. The sidebar is \`w-64\` on \`sm\`+ and full-width below. RTL: list border and message accents are physical (\`border-r\`, \`borderLeft\`).
+- i18n: "Conversations", "New conversation", "No conversation selected", "Chat: …" and the panel's strings are English. Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core) plus per-plugin optional peers; import from \`@mieweb/ui/components/SuperChat\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui/components/SuperChat',
+      peers: ['react-markdown', 'remark-gfm', 'rehype-sanitize'],
+      relationships: [
+        {
+          type: 'contains',
+          target: 'superchat-superchat-panel',
+          why: 'The inbox renders the active conversation with SuperChat and forwards every panel prop.',
+        },
+        {
+          type: 'contains',
+          target: 'superchat-conversations-list',
+          why: 'The sidebar is SuperChatConversations, driven by the inbox’s resolved active id.',
+        },
+        {
+          type: 'alternative to',
+          target: 'chat-messaging',
+          why: 'Messaging is a kit of human-to-human primitives you lay out yourself; SuperChatInbox is a finished multi-participant inbox with Markdown rendering.',
+        },
+      ],
     },
   },
 };

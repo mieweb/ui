@@ -210,7 +210,7 @@ export function SetupServiceModal({
               Base Price
             </label>
             <div className="relative">
-              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+              <span className="text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2">
                 $
               </span>
               <input
@@ -218,7 +218,7 @@ export function SetupServiceModal({
                 type="number"
                 min="0"
                 step="0.01"
-                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
+                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 ps-7 pe-4 shadow-sm focus:ring-2 focus:outline-none"
                 value={formData.price}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -287,7 +287,7 @@ export function SetupServiceModal({
             {formData.limitedInventory && (
               <div
                 data-slot="setup-service-inventory"
-                className="border-border ml-4 border-l-2 pl-4"
+                className="border-border ms-4 border-s-2 ps-4"
               >
                 <Input
                   label="Initial Inventory"
@@ -346,7 +346,7 @@ export function SetupServiceModal({
               <>
                 <svg
                   aria-hidden="true"
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ms-1 me-2 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

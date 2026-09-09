@@ -25,6 +25,7 @@ import type { BrandConfig } from '../src/brands/types';
 import { CodeLookup } from '../src/components/CodeLookup';
 import { CodeLookupProvider } from '../src/components/CodeLookup/context';
 import { isRtlLocale } from '../src/hooks/useDirection';
+import { CatalogDocsPage } from './CatalogDocsPage';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -456,32 +457,91 @@ const preview: Preview = {
     // `render`, Storybook shows the render snippet/args, not the full component source.
     // `canvas.withToolbar` gives every docs canvas (not just the primary story) the
     // zoom / "Open canvas in new tab" toolbar.
-    docs: { codePanel: true, canvas: { withToolbar: true } },
+    // `page` renders the catalog metadata (status banner, Related, Install) declared on each Meta.
+    docs: { codePanel: true, canvas: { withToolbar: true }, page: CatalogDocsPage },
     layout: 'padded',
     options: {
+      // Sidebar order is Tier / Family / Component with each family's Overview
+      // first. Grammar: a name followed by an array orders that name's children.
+      // Storybook parses this literal statically, so it cannot import
+      // taxonomy.json; scripts/catalog-check.mjs fails CI if the two drift.
       storySort: {
+        method: 'alphabetical',
         order: [
           'Introduction',
+          'Branding',
           'Foundations',
-          ['Components', ['Forms & Inputs', ['eSheet', '*']]],
-          'Inputs & Controls',
-          'Data Display',
-          'Navigation',
-          'Feedback & Overlays',
-          'Layout & Structure',
-          'Authentication & Permissions',
-          'Commerce & Payments',
-          'Media & Device',
-          'Feature Modules',
-          'Examples',
-          'Forms',
-          'Provider',
-          'Provider Directory',
-          'Messaging',
-          'Directory',
-          'Search',
-          'Layout',
-          '*',
+          'Inputs',
+          [
+            'Actions',
+            ['Overview', '*'],
+            'Text inputs',
+            ['Overview', '*'],
+            'Choice inputs',
+            ['Overview', '*'],
+            'Date & time',
+            ['Overview', '*'],
+            'Composite forms',
+            ['Overview', '*'],
+          ],
+          'Components',
+          [
+            'Data display',
+            ['Overview', '*'],
+            'Grids',
+            ['Overview', '*'],
+            'Feedback',
+            ['Overview', '*'],
+            'Loading',
+            ['Overview', '*'],
+            'Overlays',
+            ['Overview', '*'],
+            'Navigation',
+            ['Overview', '*'],
+            'Layout',
+            ['Overview', '*'],
+          ],
+          'Modules',
+          [
+            'Dashboards',
+            ['Overview', '*'],
+            'Media',
+            ['Overview', '*'],
+            'Editors',
+            ['Overview', '*'],
+            'Chat',
+            ['Overview', '*'],
+            'SuperChat',
+            ['Overview', '*'],
+            'Voice',
+            ['Overview', '*'],
+            'Files',
+            ['Overview', '*'],
+          ],
+          'Healthcare',
+          [
+            'Clinical lists',
+            ['Overview', '*'],
+            'Encounter & orders',
+            ['Overview', '*'],
+          ],
+          'BlueHive',
+          [
+            'Orders',
+            ['Overview', '*'],
+            'Employers',
+            ['Overview', '*'],
+            'Billing',
+            ['Overview', '*'],
+            'Providers',
+            ['Overview', '*'],
+            'Services',
+            ['Overview', '*'],
+            'Users & integrations',
+            ['Overview', '*'],
+            'Operations',
+            ['Overview', '*'],
+          ],
           'Deprecated',
         ],
       },

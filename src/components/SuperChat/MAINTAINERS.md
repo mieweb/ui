@@ -1,24 +1,24 @@
 # SuperChat — Maintainer Notes
 
-> **Provider notes** — how to *change* the SuperChat module. Consumers should read
+> **Provider notes** — how to _change_ the SuperChat module. Consumers should read
 > the [README.md](README.md) (getting started + vocabulary) and the Storybook
-> autodocs (Product › Feature Modules › SuperChat). The design rationale lives in
+> autodocs (Modules › SuperChat). The design rationale lives in
 > [Mission](#mission), below. General conventions live in
 > [CONTRIBUTING.md](../../../CONTRIBUTING.md). This module **composes** the AI
 > module — see [../AI/MAINTAINERS.md](../AI/MAINTAINERS.md).
 
 ## What's in here
 
-| Surface | File | Role |
-|---------|------|------|
-| `SuperChatInbox` | [SuperChatInbox.tsx](SuperChatInbox.tsx) | Combined surface: composes the list + panel; owns active-conversation selection (drop-in for the original monolithic component) |
-| `SuperChat` | [SuperChat.tsx](SuperChat.tsx) | Single-conversation **panel**: header + thread + composer (takes one `conversation`) |
-| `SuperChatConversations` | [SuperChatConversations.tsx](SuperChatConversations.tsx) | Conversation **list** (sidebar); controlled/uncontrolled selection |
-| shared internals | [parts.tsx](parts.tsx) | Internal-only helpers + presentational pieces (`ParticipantAvatar`, `ReferenceChip`, `MessageRow`, `Composer`, `sidebarItem`) shared by all three components — **not** exported from `index.ts` |
-| `createMarkdownRenderer` | [render/createMarkdownRenderer.tsx](render/createMarkdownRenderer.tsx) | Composes render plugins → one `renderTextContent` (Markdown core) |
-| render context | [render/renderContext.ts](render/renderContext.ts) | Threads `messageId`/`streaming` into custom nodes (GenUI) |
-| code / math / genui / mermaid / image / nitro-table plugins | [plugins/](plugins) | Opt-in rich plugins (subpath entry) |
-| types | [types.ts](types.ts) | Participant model + chat-component-compatible data model + plugin/GenUI contracts |
+| Surface                                                     | File                                                                   | Role                                                                                                                                                                                            |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SuperChatInbox`                                            | [SuperChatInbox.tsx](SuperChatInbox.tsx)                               | Combined surface: composes the list + panel; owns active-conversation selection (drop-in for the original monolithic component)                                                                 |
+| `SuperChat`                                                 | [SuperChat.tsx](SuperChat.tsx)                                         | Single-conversation **panel**: header + thread + composer (takes one `conversation`)                                                                                                            |
+| `SuperChatConversations`                                    | [SuperChatConversations.tsx](SuperChatConversations.tsx)               | Conversation **list** (sidebar); controlled/uncontrolled selection                                                                                                                              |
+| shared internals                                            | [parts.tsx](parts.tsx)                                                 | Internal-only helpers + presentational pieces (`ParticipantAvatar`, `ReferenceChip`, `MessageRow`, `Composer`, `sidebarItem`) shared by all three components — **not** exported from `index.ts` |
+| `createMarkdownRenderer`                                    | [render/createMarkdownRenderer.tsx](render/createMarkdownRenderer.tsx) | Composes render plugins → one `renderTextContent` (Markdown core)                                                                                                                               |
+| render context                                              | [render/renderContext.ts](render/renderContext.ts)                     | Threads `messageId`/`streaming` into custom nodes (GenUI)                                                                                                                                       |
+| code / math / genui / mermaid / image / nitro-table plugins | [plugins/](plugins)                                                    | Opt-in rich plugins (subpath entry)                                                                                                                                                             |
+| types                                                       | [types.ts](types.ts)                                                   | Participant model + chat-component-compatible data model + plugin/GenUI contracts                                                                                                               |
 
 > **Component split.** The three components share one folder and one import path
 > (`@mieweb/ui/components/SuperChat`) and one tsup entry. `SuperChat` owns the
@@ -76,13 +76,13 @@ The composer:
 
 - Wire format is a **fenced ```genui JSON block**, not inline. A small rehype
   transformer rewrites `<pre><code class="language-genui">` → `<genui-widget>…</genui-widget>`
-  (payload as a text child) *before* sanitize (the tag is allow-listed), which
+  (payload as a text child) _before_ sanitize (the tag is allow-listed), which
   avoids `pre`/`code` component-override conflicts with the code plugin.
 - Widgets are **host-registered, lazy, schema-validated**. Unknown widget →
   inert code-block fallback (never arbitrary HTML).
 - Prefetch is split: **component (code)** may load while streaming per policy
   (`eager`/`visible`/`idle`); **data** validation/prefetch runs only once the
-  payload parses *and* the message has stopped streaming. **Registry policy
+  payload parses _and_ the message has stopped streaming. **Registry policy
   overrides the wire hint.**
 - Versioning: key the registry by base name; resolve `version` explicitly (do not
   bake the version into the lookup key).
@@ -128,7 +128,7 @@ The composer:
 
 ## Mission
 
-> The design rationale behind SuperChat — the *why* behind the architecture above.
+> The design rationale behind SuperChat — the _why_ behind the architecture above.
 > The module is **implemented**; this section is retained as the entry point for
 > maintainers and the record of decisions (including rejected alternatives).
 
@@ -187,7 +187,7 @@ duplication); controlled-props model consistent with the rest of `@mieweb/ui`
 participant model (Decision 2). The cost is reimplementation — porting the
 sidebar, read-only mode, export/import, search — but the standalone repo's
 defining traits (self-contained UMD, bundled React, `tw-` prefix, disabled
-preflight) exist to be **framework-agnostic embeddable**, the *opposite* of a
+preflight) exist to be **framework-agnostic embeddable**, the _opposite_ of a
 tree-shakeable, theme-token-driven library component.
 
 > **Rejected — submodule (`@mieweb/ui/chat` over `mieweb/chat-component`).**
@@ -229,15 +229,15 @@ owns sanitization** of untrusted model output). Core: `react-markdown` +
 `remark-gfm`, with `rehype-sanitize` on untrusted content. Rendering is exposed as
 a **plugin registry** so consumers opt into weight:
 
-| Plugin | Handles | Impl | Notes |
-|--------|---------|------|-------|
-| **Markdown core** | headings, lists, emphasis, links, blockquote, task lists | `react-markdown` + `remark-gfm` | always on |
-| **Math** | `$…$`, `$$…$$`, bracketed `[ a^2 + b^2 = c^2 ]` | `remark-math` + `rehype-katex` (KaTeX) | lazy-load KaTeX |
-| **GenUI widgets** | fenced ` ```genui ` JSON blocks | `code` node interceptor → **widget registry** | host-registered, lazy + schema-validated; degrades to a code block |
-| **Code** | fenced code blocks | lazy `rehype-highlight` (default); `shiki` upgrade path | `.hljs-*` classes mapped to `--mieweb-*` tokens + copy button |
-| **Tables** | GFM tables | **NITRO DataVis** ([../DataVisNITRO/MAINTAINERS.md](../DataVisNITRO/MAINTAINERS.md)) | GFM table → NITRO grid; prefer NITRO over AGGrid |
-| **Mermaid** | ` ```mermaid ` fences | lazy `mermaid` | |
-| **Images** | inline images | Messaging attachment lightbox | reuse existing lightbox |
+| Plugin            | Handles                                                  | Impl                                                                                 | Notes                                                              |
+| ----------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| **Markdown core** | headings, lists, emphasis, links, blockquote, task lists | `react-markdown` + `remark-gfm`                                                      | always on                                                          |
+| **Math**          | `$…$`, `$$…$$`, bracketed `[ a^2 + b^2 = c^2 ]`          | `remark-math` + `rehype-katex` (KaTeX)                                               | lazy-load KaTeX                                                    |
+| **GenUI widgets** | fenced ` ```genui ` JSON blocks                          | `code` node interceptor → **widget registry**                                        | host-registered, lazy + schema-validated; degrades to a code block |
+| **Code**          | fenced code blocks                                       | lazy `rehype-highlight` (default); `shiki` upgrade path                              | `.hljs-*` classes mapped to `--mieweb-*` tokens + copy button      |
+| **Tables**        | GFM tables                                               | **NITRO DataVis** ([../DataVisNITRO/MAINTAINERS.md](../DataVisNITRO/MAINTAINERS.md)) | GFM table → NITRO grid; prefer NITRO over AGGrid                   |
+| **Mermaid**       | ` ```mermaid ` fences                                    | lazy `mermaid`                                                                       |                                                                    |
+| **Images**        | inline images                                            | Messaging attachment lightbox                                                        | reuse existing lightbox                                            |
 
 The detailed plugin contract, GenUI wire format/registry, prefetch semantics, and
 security model are documented in the implementation sections above
@@ -269,15 +269,15 @@ entry. None enter the base bundle; each rich plugin is a subpath/lazy import.
 
 - **Shared implementation across UMD and `@mieweb/ui`?** No — no Bootstrap/non-React
   support for the rich features; the standalone UMD stays as-is, SuperChat is built
-  natively with a compatible API shape. No headless-core split. *(Decision 1)*
+  natively with a compatible API shape. No headless-core split. _(Decision 1)_
 - **Turn-taking for concurrent agents?** `@`-mention addressing; responses target
   the last mention; concurrent replies interleave by timestamp with per-participant
-  visual cues. *(Decision 2)*
+  visual cues. _(Decision 2)_
 - **Highlighter?** `rehype-highlight` by default (lighter, `.hljs-*` classes map to
-  theme tokens); `shiki` reserved as an upgrade path. *(Decision 3)*
+  theme tokens); `shiki` reserved as an upgrade path. _(Decision 3)_
 - **GenUI format + prefetch?** Fenced ` ```genui ` JSON blocks; host-registered,
   lazy, schema-validated registry; prefetch split into component vs. data with
-  `eager`/`visible`/`idle` policies (registry overrides wire hint). *(Decision 3)*
+  `eager`/`visible`/`idle` policies (registry overrides wire hint). _(Decision 3)_
 - **Fold into the `AI` module, or a new module?** A **new `SuperChat` module** that
   composes `AI`. The `AI` module stays a lightweight building-block layer; the chat
   UI is heavier and opinionated, so consumers opt in without pulling in chat

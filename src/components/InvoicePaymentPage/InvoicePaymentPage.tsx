@@ -295,15 +295,15 @@ export function InvoicePaymentPage({
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-muted-foreground">
-                        <th className="pb-2 text-left font-medium">Item</th>
-                        <th className="pb-2 text-right font-medium">Amount</th>
+                        <th className="pb-2 text-start font-medium">Item</th>
+                        <th className="pb-2 text-end font-medium">Amount</th>
                       </tr>
                     </thead>
                     <tbody className="text-gray-700 dark:text-gray-300">
                       {invoice.lineItems.map((item) => (
                         <tr key={item.id}>
                           <td className="py-1">{item.description}</td>
-                          <td className="py-1 text-right">
+                          <td className="py-1 text-end">
                             {formatCurrency(item.total)}
                           </td>
                         </tr>
@@ -463,7 +463,7 @@ export function InvoicePaymentPage({
                       <>
                         <svg
                           aria-hidden="true"
-                          className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                          className="-ms-1 me-2 h-4 w-4 animate-spin"
                           fill="none"
                           viewBox="0 0 24 24"
                         >

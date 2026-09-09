@@ -220,7 +220,7 @@ export function VisitScribe({
         {recording ? (
           <Button variant="danger" onClick={scribe.stop}>
             <span
-              className="mr-2 inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-white"
+              className="me-2 inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-white"
               aria-hidden="true"
             />
             Stop · {mmss(elapsedMs)}
@@ -312,7 +312,7 @@ export function VisitScribe({
       >
         {recording && (
           <span
-            className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-red-500 align-middle"
+            className="me-2 inline-block h-2 w-2 animate-pulse rounded-full bg-red-500 align-middle"
             aria-hidden="true"
           />
         )}

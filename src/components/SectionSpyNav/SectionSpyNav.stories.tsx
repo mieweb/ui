@@ -2,21 +2,84 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SectionSpyNav, type SectionSpyItem } from './SectionSpyNav';
 
 const meta: Meta<typeof SectionSpyNav> = {
+  id: 'navigation-sectionspynav',
   title: 'Components/Navigation/SectionSpyNav',
   component: SectionSpyNav,
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          "Sticky horizontal in-page wayfinding: anchor links to a page's major sections, a " +
-          'sliding underline tracking the section in view (via `useScrollSpy`), and an ' +
-          'optional page-specific CTA whose `tier` sets its visual weight. The horizontal ' +
-          'complement to `TableOfContents`. Section elements need matching `id`s.',
+        component: `### What it's for
+
+**Sticky horizontal in-page wayfinding**: a band of anchor links to a page's major sections, a sliding underline tracking the section in view (via \`useScrollSpy\`), and an optional page-specific next-step CTA. Pass \`items: SectionSpyItem[]\` (\`{ id, label }\`, in page order — each \`id\` must match a \`section[id]\` on the page), an optional \`cta: SectionSpyCta\` (\`{ label, href, tier }\` where \`tier\` explore | evaluate | commit maps to ghost | outline | primary \`Button\` styling so the strip never out-shouts the page's primary CTA), \`label\` for the eyebrow (default "On this page"), \`tone\` (\`surface\` on the page background or the inverted \`brand\` band), and \`rootMargin\` to tune the observer. \`onItemClick(id)\` / \`onCtaClick(cta)\` are for analytics. Pure anchor links, so it still works if the scroll spy never runs.
+
+### Use it when
+
+- A marketing, landing or long single-column page has 3–8 flat sections and a band **under the page header** is the natural place to jump between them.
+- The page has one next-step action (book a demo, start an order) that should travel with the reader.
+
+### Don't use it when
+
+- Headings are nested or numerous and there is a sidebar — \`TableOfContents\` (tree, auto-discovery, \`contentRef\` support).
+- You want progress feedback without links — \`ReadingProgressBar\`; the two pair well.
+- The links go to other pages — \`AppHeader\` / \`Sidebar\` navigation.
+- The content scrolls inside a container rather than the window — the spy has no \`root\` option here (it observes against the viewport).
+
+### Example
+
+\`\`\`tsx
+const sections = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'faq', label: 'FAQ' },
+];
+
+<SiteHeader … />
+<SectionSpyNav
+  items={sections}
+  cta={{ label: 'Book a demo', href: '/demo', tier: 'evaluate' }}
+  onItemClick={(id) => track('section_nav', { id })}
+/>
+<main>
+  <section id="overview">…</section>
+  <section id="pricing">…</section>
+  <section id="faq">…</section>
+</main>
+\`\`\`
+
+Active state is internal (first item until the spy reports); nothing to control.
+
+### Limitations
+
+- Accessibility: \`<nav aria-label={label}>\` (so the eyebrow doubles as the landmark name; the visible eyebrow is \`aria-hidden\` and hidden below \`md\`); links are \`<a href="#id">\` with \`aria-current="location"\` on the active one; the underline marker and arrow glyphs are \`aria-hidden\`. No extra keyboard handling beyond native anchors; no skip affordance when many items overflow (the rail scrolls horizontally with the scrollbar hidden and centres the active link).
+- \`sticky top-0 z-30\` — it must be rendered inside the scrolling ancestor and below any fixed header, or pass \`className\` to offset it. Scroll-spy default \`rootMargin\` is \`'-22% 0px -68% 0px'\` (a band in the upper third), different from \`useScrollSpy\`'s default.
+- Only one CTA; its arrow is inferred from \`href\` (\`#\` ↓, \`/\` →, otherwise ↗).
+- RTL: the underline is positioned with physical \`offsetLeft\` / \`style.left\` measured against the rail, which tracks the link correctly in both directions; text itself follows \`dir\`.
+- Theming: \`surface\` uses \`bg-card/95 border-border\` + \`primary-500\` marker; \`brand\` is \`bg-primary-900 text-white\` + \`primary-400\` marker. Depends on \`buttonVariants\` from \`Button\`, \`lucide-react\`, \`useScrollSpy\`.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'navigation-tableofcontents',
+          why: 'SectionSpyNav is a flat sticky horizontal band with an optional CTA; TableOfContents is a nested sidebar outline that can auto-discover headings.',
+        },
+        {
+          type: 'composes with',
+          target: 'navigation-readingprogressbar',
+          why: 'Band for jumping between sections plus a viewport-top bar for how far through the page the reader is; they share no state.',
+        },
+        {
+          type: 'uses',
+          target: 'actions-button',
+          why: 'The CTA link is styled with buttonVariants; tier maps to ghost / outline / primary.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     items: {
       description: 'Sections to link to, in page order.',

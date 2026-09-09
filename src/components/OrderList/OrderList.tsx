@@ -143,7 +143,7 @@ export function OrderList<T>({
                     <span
                       data-slot="order-list-tab-count"
                       className={cn(
-                        'ml-2 rounded-full px-2 py-0.5 text-xs',
+                        'ms-2 rounded-full px-2 py-0.5 text-xs',
                         activeTab === tab.id
                           ? 'bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200'
                           : 'text-muted-foreground bg-gray-200 dark:bg-gray-700'
@@ -166,7 +166,7 @@ export function OrderList<T>({
               <div className="relative" data-slot="order-list-search">
                 <svg
                   aria-hidden="true"
-                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -183,7 +183,7 @@ export function OrderList<T>({
                   placeholder={searchPlaceholder}
                   value={searchValue}
                   onChange={(e) => onSearchChange?.(e.target.value)}
-                  className="rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+                  className="rounded-lg border border-gray-300 bg-white py-2 ps-9 pe-4 text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
                 />
               </div>
             )}

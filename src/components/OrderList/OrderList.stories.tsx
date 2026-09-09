@@ -10,9 +10,10 @@ import { Button } from '../Button/Button';
 import { Badge } from '../Badge/Badge';
 
 const meta: Meta<typeof OrderList> = {
-  title: 'Product/Feature Modules/OrderList',
+  id: 'orders-orderlist',
+  title: 'BlueHive/Orders/OrderList',
   component: OrderList,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
     docs: {

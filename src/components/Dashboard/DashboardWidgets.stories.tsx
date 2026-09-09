@@ -40,9 +40,80 @@ import {
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/Dashboard (Widgets)',
+  id: 'dashboards-dashboard-widgets-demo',
+  title: 'Modules/Dashboards/Dashboard Widgets (Demo)',
+  tags: ['autodocs', 'scope:application-local', 'maturity:experimental'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**A Storybook-only demo — not exported from \`@mieweb/ui\`, not an API.** Two full-page compositions of \`DashboardWidget\` and its bodies: **Business Dashboard** (stat tiles, a \`DashboardWidgetTable\` of orders with \`showHeader\` and row \`actions\`, an activity list with \`Avatar\` rows, and a \`DashboardWidgetActions\` shortcut grid) and **Patient Summary** (a \`PatientHeader\` with allergy / medication / provider banners and \`CountBadge\` actions above a widget grid of \`DashboardWidgetInfo\` demographics, encounters, \`DashboardWidgetDataCards\` vitals, quick links, allergies, medications and history). It exists to show how the widget family reads at page scale and which heading levels, counts and accents to use. Copy the layout; import the components from their own folders.
+
+### Use it when
+
+- You are building a home or patient-summary page from \`DashboardWidget\` and want a worked layout to start from.
+- You want to compare the widget bodies (\`Info\`, \`Table\`, \`Actions\`, \`DataCards\`) side by side with realistic data.
+
+### Don't use it when
+
+- You need the grid to be user-arrangeable — wrap the same widgets in \`CustomizableDashboard\`.
+- You need the patient banner itself — \`PatientHeader\` (Healthcare / Encounter & orders) has its own docs and props.
+- You need a spec for any widget prop — see the \`DashboardWidget\` docs page.
+
+### Example
+
+\`\`\`tsx
+// the page pattern this demo illustrates
+<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  {stats.map((s) => (
+    <DashboardWidget key={s.label} title={s.label} icon={<ActivityIcon className="h-4 w-4" />} headingLevel="h2">
+      <Text size="3xl" weight="bold">{s.value}</Text>
+    </DashboardWidget>
+  ))}
+</div>
+<div className="grid gap-6 lg:grid-cols-3">
+  <div className="lg:col-span-2">
+    <DashboardWidget title="Recent Orders" count={orders.length} headingLevel="h2">
+      <DashboardWidgetTable<Order> showHeader columns={orderColumns} data={orders} actions={rowActions} />
+    </DashboardWidget>
+  </div>
+  <DashboardWidget title="Recent Activity" count={activity.length} headingLevel="h2">
+    <DashboardWidgetTable<ActivityItem> columns={activityColumns} data={activity} />
+  </DashboardWidget>
+</div>
+\`\`\`
+
+Use \`headingLevel="h2"\` for top-level tiles under a page \`h1\`.
+
+### Limitations
+
+- Demo-grade: static sample data, \`noop\` / \`console.log\` handlers; nothing persists or fetches.
+- The grids are plain CSS grid — no reordering, no persistence, no hide/show (that is \`CustomizableDashboard\`).
+- Inherits every limitation of \`DashboardWidget\` (clickable rows without keyboard handling, unlabelled counts, physical \`pl-6\` accents) and of \`PatientHeader\`.
+- Hard-coded English sample content; no RTL or i18n treatment beyond what the composed components provide.`,
+      },
+    },
+    catalog: {
+      relationships: [
+        {
+          type: 'uses',
+          target: 'dashboards-dashboardwidget',
+          why: 'Both stories are grids of DashboardWidget with its Info / Table / Actions / DataCards bodies.',
+        },
+        {
+          type: 'uses',
+          target: 'encounter-orders-patientheader',
+          why: 'The Patient Summary story places a PatientHeader with banners above the widget grid.',
+        },
+        {
+          type: 'uses',
+          target: 'data-display-countbadge',
+          why: 'The Patient Summary header actions are CountBadge chips (tasks, messages, etc.).',
+        },
+      ],
+    },
   },
 };
 

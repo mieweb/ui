@@ -76,12 +76,61 @@ type QuickActionStoryArgs = Omit<
 };
 
 const meta: Meta<typeof QuickAction> = {
-  title: 'Components/Layout & Structure/QuickAction',
+  id: 'actions-quickaction',
+  title: 'Inputs/Actions/QuickAction',
   component: QuickAction,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A card-shaped shortcut button: a tinted icon tile, a \`title\` and a \`subtitle\`, in one of eight \`color\` accents. It is a native \`<button>\`, so it is keyboard-operable and focus-visible out of the box, and \`disabled\` sets \`aria-disabled\`.
+
+### Use it when
+
+- A dashboard or landing page offers a handful of primary destinations or tasks ("Schedule exam", "Import employees") that deserve more presence than a text button.
+- The action needs a one-line explanation under its name.
+
+### Don't use it when
+
+- The control sits inline with content or in a form — use \`Button\`.
+- You are listing links that only need a label — \`QuickLinksCard\` groups plain links compactly.
+- There are more than about six actions; a grid of large tiles stops being "quick". Consider a \`CommandPalette\` or navigation.
+
+### Example
+
+\`\`\`tsx
+<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  <QuickAction icon={<CalendarPlus />} color="primary" title="Schedule exam" subtitle="Book a DOT physical" onClick={openScheduler} />
+  <QuickAction icon={<Upload />} color="green" title="Import employees" subtitle="CSV or HRIS sync" onClick={openImport} />
+</div>
+\`\`\`
+
+### Limitations
+
+- The icon is decorative (\`aria-hidden\`); the accessible name is the visible title + subtitle, so keep both meaningful.
+- \`color\` picks from fixed palettes (primary + seven named hues) with \`dark:\` variants; only \`primary\` follows the brand, the others are constant.
+- Width is governed by the parent grid; the tile does not truncate long subtitles.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'actions-button',
+          why: 'Button is the inline control; QuickAction is a large, explained shortcut for dashboards.',
+        },
+        {
+          type: 'alternative to',
+          target: 'dashboards-quicklinkscard',
+          why: 'QuickLinksCard is a compact titled list of plain link rows with badges; QuickAction is a large explained tile you arrange in your own grid.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     title: {
       control: 'text',

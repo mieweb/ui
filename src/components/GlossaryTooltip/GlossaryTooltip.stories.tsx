@@ -2,22 +2,71 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { GlossaryTooltip } from './GlossaryTooltip';
 
 const meta: Meta<typeof GlossaryTooltip> = {
-  title: 'Components/Overlays & Popups/GlossaryTooltip',
+  id: 'overlays-glossarytooltip',
+  title: 'Components/Overlays/GlossaryTooltip',
   component: GlossaryTooltip,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'A rich "what does this term mean?" hover card: category badge, canonical term, ' +
-          'truncated definition, optional key fact, source link, and related-term chips. ' +
-          'The sibling of `SourceTip` ("what backs this claim?") — same interaction grammar: ' +
-          'hover previews, touch taps pin, Escape/outside-tap closes. Phrasing-content markup ' +
-          'keeps it valid inside prose; the card portals to body and stays in the viewport.',
+        component: `### What it's for
+
+A rich "what does this term mean?" hover card: \`category\` badge, canonical \`term\`, \`definition\` truncated to \`maxDefinitionLength\`, optional \`keyFact\`, \`source\` link and \`related\` term chips. Pass \`href\` to make the trigger a real link. The sibling of \`SourceTip\` ("what backs this claim?") — same interaction grammar: hover previews, a touch tap pins, Escape or an outside tap closes and returns focus. Phrasing-content markup keeps it valid inside prose; the card portals to body and stays in the viewport.
+
+### Use it when
+
+- Domain vocabulary appears in running text (regulatory terms, clinical abbreviations) and readers need a definition without leaving the page.
+- The definition has structure worth showing: category, one key fact, a source, related terms.
+
+### Don't use it when
+
+- A few words suffice — \`Tooltip\`.
+- You are explaining where a value comes from rather than what a word means — \`SourceTip\`.
+- The term needs a whole article; link to it instead and keep the card as a preview.
+
+### Example
+
+\`\`\`tsx
+<p>
+  Employers must keep an{' '}
+  <GlossaryTooltip
+    term="OSHA 300 log"
+    category="Compliance"
+    definition="The annual record of work-related injuries and illnesses…"
+    keyFact="Required for most workplaces with more than 10 employees."
+    source={{ label: '29 CFR 1904', url: 'https://www.osha.gov/recordkeeping' }}
+    related={[{ term: 'OSHA 301', href: '/glossary/osha-301' }]}
+  >
+    OSHA 300 log
+  </GlossaryTooltip>{' '}
+  for each establishment.
+</p>
+\`\`\`
+
+### Limitations
+
+- A pinned card is a non-modal dialog: focus moves into it so its links are reachable, and returns to the trigger on close. Hover-only display is not keyboard reachable until the trigger is focused.
+- Uses \`useAnchoredPosition\`; long definitions are truncated, not scrolled.
+- Neutral card tokens; the category badge colour is fixed rather than brand-driven.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'overlays-tooltip',
+          why: 'Tooltip for a few words; GlossaryTooltip for a structured, pinnable definition.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-sourcetip',
+          why: 'Same interaction grammar; GlossaryTooltip explains a term, SourceTip cites the evidence behind a claim.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     term: {
       description: 'Canonical term name — the card heading.',

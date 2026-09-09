@@ -6,7 +6,7 @@ import { cn } from '../../utils/cn';
 const alertVariants = cva(
   [
     'relative w-full rounded-lg border p-4',
-    '[&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-current',
+    '[&>svg]:absolute [&>svg]:start-4 [&>svg]:top-4 [&>svg]:text-current',
     '[&>svg+div]:translate-y-[-3px]',
   ],
   {
@@ -74,8 +74,8 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         data-slot="alert"
         className={cn(
           alertVariants({ variant }),
-          React.isValidElement(icon) && 'pl-11',
-          dismissible && 'pr-10',
+          React.isValidElement(icon) && 'ps-11',
+          dismissible && 'pe-10',
           className
         )}
         {...props}
@@ -88,7 +88,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             data-slot="alert-dismiss"
             onClick={onDismiss}
             className={cn(
-              'absolute top-2 right-2 rounded-md p-1',
+              'absolute end-2 top-2 rounded-md p-1',
               'opacity-70 hover:opacity-100',
               'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
               'transition-opacity'

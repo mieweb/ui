@@ -255,7 +255,7 @@ function BusinessHoursDaysEditor({
                         disabled={disabled}
                         className="text-xs"
                       >
-                        <CopyIcon className="mr-1 h-3 w-3" />
+                        <CopyIcon className="me-1 h-3 w-3" />
                         Copy
                       </Button>
                     }
@@ -282,7 +282,7 @@ function BusinessHoursDaysEditor({
                   disabled={disabled}
                   className="text-xs"
                 >
-                  <PlusIcon className="mr-1 h-3 w-3" />
+                  <PlusIcon className="me-1 h-3 w-3" />
                   {addHoursLabel}
                 </Button>
               </div>

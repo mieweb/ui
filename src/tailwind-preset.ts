@@ -94,7 +94,6 @@ export const miewebUISafelist = [
   'bg-success/15',
   'bg-warning/20',
   'bg-warning/40',
-  'border-l-warning',
   'border-primary-600',
   'border-warning/50',
   'dark:bg-primary-950',
@@ -469,6 +468,94 @@ export const miewebUISafelist = [
   'translate-x-0',
   '-translate-x-full',
   '[&:has([role=checkbox])]:pe-0',
+  // RTL messaging+AI batch: bubble tails, composer borders/paddings, corner
+  // pins (AIChatModal/AttachmentPicker/MessageList), read-receipt avatar stack
+  'end-1',
+  'end-3',
+  'end-4',
+  'start-4',
+  'me-2',
+  'pe-10',
+  'border-s-4',
+  'rounded-ee-md',
+  'rounded-es-md',
+  'rtl:space-x-reverse',
+  // RTL DocScanner+media batch: detection-overlay corner pins, MediaEditor
+  // speed-marker accent/pill, ScriptPanel border, transcript alignment
+  '-end-0.5',
+  '-start-0.5',
+  '-start-1',
+  'end-0.5',
+  'rounded-ee',
+  'rounded-ee-lg',
+  'rounded-es',
+  'rounded-es-lg',
+  'rounded-se',
+  'rounded-se-lg',
+  'rounded-ss',
+  'rounded-ss-lg',
+  'border-e-4',
+  'border-s-[3px]',
+  'border-s-warning',
+  'ps-1.5',
+  '-start-px',
+  'md:border-e',
+  // RTL billing+invoices batch: invoice tables/headers, search icon inset,
+  // button spinners
+  '-ms-1',
+  'ps-9',
+  'sm:text-end',
+  // RTL services+employer batch: wizard steps, accordion insets, provider
+  // selectors, service cards/badges
+  'border-s-0',
+  'border-s-2',
+  'ms-1.5',
+  'ms-3',
+  'ms-4',
+  'ms-6',
+  'pe-3',
+  'pe-8',
+  'pe-16',
+  'ps-0',
+  'ps-3',
+  'ps-7',
+  'ps-8',
+  'rounded-s-md',
+  'rounded-e-md',
+  'bg-right',
+  'rtl:bg-left',
+  // RTL scheduling+clinical batch: calendar insets, timeline dots, order forms
+  '-start-5',
+  'border-e-0',
+  'md:border-s',
+  'ms-2.5',
+  'pe-2',
+  'ps-1',
+  'ps-6',
+  'rounded-s-none',
+  'start-1',
+  'first:border-s-0',
+  'rtl:origin-right',
+  // RTL Phase 2: Toast slide-in animation + RTL mirror
+  'animate-slide-in-right',
+  'rtl:animate-slide-in-left',
+  // RTL Phase 2: directional icon mirroring (chevrons/arrows)
+  'rtl:-scale-x-100',
+  // RTL shell/misc batch: command palette, site chrome, superchat, toolbars
+  'end-12',
+  'md:end-4',
+  'md:start-auto',
+  'md:text-start',
+  'me-1.5',
+  'pe-12',
+  'pointer-fine:end-0',
+  'pointer-fine:end-1.5',
+  'ps-11',
+  'ps-12',
+  'rounded-e-lg',
+  'rounded-s-lg',
+  'sm:text-start',
+  'start-5',
   // SchedulePicker / overflow handling
   'overflow-x-auto',
   'overflow-hidden',
@@ -543,6 +630,19 @@ export const miewebUISafelist = [
   'focus:border-primary-500',
   'focus:ring-primary-500',
   'text-[10px]',
+  // SuperChat message actions (footer bar + sticky overflow menu) — arbitrary
+  // touch-pointer variants and stacking above rich content (z-50 internals),
+  // plus the standard utilities of the sticky wrapper and its footer handoff
+  // (`invisible` keeps the hidden trigger out of the tab order).
+  '[@media(pointer:coarse)]:opacity-100',
+  'z-[60]',
+  'z-10',
+  'invisible',
+  'transition-opacity',
+  'bottom-2',
+  'self-end',
+  // Dropdown submenu flyout — preferred width clamped to the viewport.
+  'min-w-[min(10rem,calc(100vw-1rem))]',
   // SuperChat mermaid diagram wrapper — arbitrary variants applied to the
   // injected <svg> so the diagram sizes naturally instead of collapsing.
   '[&_svg]:h-auto',
@@ -745,6 +845,9 @@ export const miewebUISafelist = [
   'transition-[width]',
   'duration-150',
 
+  // Sidebar — desktop collapse animates the inline size only
+  'transition-[width,min-width]',
+
   // SectionSpyNav — sticky rail, brand tone whites, sliding underline
   'sticky',
   'top-0',
@@ -763,6 +866,10 @@ export const miewebUISafelist = [
   'rounded',
   'py-2',
   'whitespace-nowrap',
+  // Button label — keep SVG icons passed as children inline (preflight
+  // makes SVGs block-level, which would stack them above the label text)
+  '[&_svg]:inline-block',
+  '[&_svg]:align-middle',
   'hover:text-white',
   'h-0.5',
   'transition-[left,width]',
@@ -919,6 +1026,31 @@ export const miewebUISafelist = [
   'font-semibold',
   'capitalize',
   'sr-only',
+  // ChatComposer responsive grid: stacked cells below md, single-row pill
+  // (md: overrides) above, plus the card surface
+  'grid-cols-[auto_minmax(0,1fr)_auto]',
+  'col-span-3',
+  'col-start-1',
+  'col-start-3',
+  'row-start-1',
+  'row-start-2',
+  'px-1',
+  'pt-1',
+  'pt-2',
+  'pb-1',
+  'rounded-2xl',
+  'dark:bg-[#1c1c1e]',
+  'dark:border-[#2e2e30]',
+  'md:col-span-1',
+  'md:col-start-2',
+  'md:row-start-1',
+  'md:self-end',
+  'md:p-1.5',
+  'md:py-1.5',
+  'md:px-0',
+  'md:pe-0.5',
+  'md:ps-0.5',
+  'md:gap-0.5',
 ];
 
 export interface MiewebUIPreset {

@@ -83,7 +83,7 @@ export function EmployerContactCard({
           <Button variant="ghost" size="sm" onClick={onAddContact}>
             <svg
               aria-hidden="true"
-              className="mr-1 h-4 w-4"
+              className="me-1 h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

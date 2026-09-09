@@ -129,18 +129,72 @@ function ToastPositionsDemo() {
 // =============================================================================
 
 const meta: Meta<typeof Toast> = {
-  title: 'Components/Messaging/Toast',
+  id: 'feedback-toast',
+  title: 'Components/Feedback/Toast',
   component: Toast,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'Toast notifications for displaying brief messages to users. Supports multiple variants, auto-dismiss, and action buttons.',
+        component: `### What it's for
+
+Transient notifications. Wrap the app once in \`ToastProvider\` (\`position\`, \`maxToasts\`, \`defaultDuration\`), then call \`useToast()\` anywhere: \`toast({ title, message, variant, action })\` or the shorthands \`success\` / \`error\` / \`warning\` / \`info\`. \`ToastContainer\` is portalled to the body and stacks toasts in the chosen corner; each toast auto-dismisses after \`duration\` ms (0 keeps it).
+
+### Use it when
+
+- Confirming that an action completed ("Saved", "Invite sent") or failed in a recoverable way.
+- Offering a quick follow-up (\`action: { label: 'Undo', onClick }\`).
+- Something happened elsewhere (background sync, remote edit) that the user should notice but not deal with now.
+
+### Don't use it when
+
+- The message must stay visible or be re-read — \`Alert\` inline, or \`NotificationCenter\` for a history.
+- The user must respond before continuing — \`AlertDialog\`.
+- The information is essential to the task (validation errors): screen-reader users may miss a toast; put it in the form.
+
+### Example
+
+\`\`\`tsx
+// App root
+<ToastProvider position="bottom-right" maxToasts={3}>
+  <App />
+</ToastProvider>
+
+// Anywhere below
+const { success, error } = useToast();
+try {
+  await save();
+  success('Changes saved', { action: { label: 'Undo', onClick: undo } });
+} catch (e) {
+  error('Could not save', { duration: 0 });
+}
+\`\`\`
+
+### Limitations
+
+- **Accessibility:** the container is \`aria-live="polite"\` / \`aria-atomic\` and each toast has \`role="alert"\`, so new toasts are announced without extra work. Auto-dismiss still means the text can vanish before a screen-reader user reaches the action — keep critical actions available elsewhere.
+- Toasts are \`fixed\` at \`z-50\`; they render above \`Modal\` in DOM order but are not focus-managed.
+- The dismiss button's \`aria-label\` ("Dismiss notification") is English; translate it in the host.
+- One provider per app: nested providers create separate stacks.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-alert',
+          why: 'Alert is inline and persistent; Toast is transient, stacked and announced.',
+        },
+        {
+          type: 'alternative to',
+          target: 'feedback-notificationcenter',
+          why: 'NotificationCenter keeps a readable history with read state; Toast disappears.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   decorators: [
     (Story) => (
       <ToastProvider>

@@ -7,6 +7,9 @@ export default defineConfig({
     'datavis': 'src/datavis.ts',
     'esheet': 'src/esheet.ts',
     'kerebron': 'src/kerebron.ts',
+    // Opt-in animation layer. Separate entry so `motion` stays out of the main
+    // bundle for apps that never import it. See: src/motion/entry.ts
+    'motion': 'src/motion/entry.ts',
     'q': 'src/q.ts',
     'hooks/index': 'src/hooks/index.ts',
     'utils/index': 'src/utils/index.ts',
@@ -103,6 +106,8 @@ export default defineConfig({
     '@mieweb/q',
     'datavis-ace',
     'mermaid',
+    'motion',
+    'motion/react',
     'papaparse',
     'js-yaml',
     'react-markdown',

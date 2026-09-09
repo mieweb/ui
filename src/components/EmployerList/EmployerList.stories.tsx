@@ -23,12 +23,13 @@ function placeholderLogo(label: string): string {
 }
 
 const meta: Meta<typeof EmployerList> = {
-  title: 'Product/Provider/EmployerList',
+  id: 'employers-employerlist',
+  title: 'BlueHive/Employers/EmployerList',
   component: EmployerList,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
 };
 
 export default meta;

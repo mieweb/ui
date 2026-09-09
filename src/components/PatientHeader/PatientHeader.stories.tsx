@@ -8,11 +8,93 @@ import { CountBadge, type CountBadgeItem } from '../CountBadge';
 import { Button } from '../Button';
 
 const meta: Meta<typeof PatientHeader> = {
-  title: 'Components/Text & Data Display/PatientHeader',
+  id: 'encounter-orders-patientheader',
+  title: 'Healthcare/Encounter & orders/PatientHeader',
   component: PatientHeader,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `### What it's for
+
+The **patient chart banner**: \`Avatar\` (hidden below \`md\`), "Last, First M." as \`<h2>\`, a status dot (\`active · inactive · deceased\`), MRN, age / sex, DOB and employer, with opt-in info rows — \`showAllergyBanner\` (red \`allergies\` pills), \`showMedicationBanner\` (\`medications\` pills with "+N more" after \`maxVisibleMeds\`), \`showCommentsBanner\` (\`comments\` joined as an **Alert** line), \`showProviderBanner\` (attending / family MD) — and an amber \`showFlagBanner\` ribbon for \`patient.flags\` (DUPLICATE, DECEASED…). The \`actions\` slot on the right is sized for \`CountBadge\`s (Tasks, Open Enc, Due List, Order Req, eSign — \`showCountBadges={false}\` hides just those). \`showOverflowMenu\` adds a patient **⋮ menu** (\`role="menu"\`, portalled) with Quick Actions (Edit Patient, Contact, Send Message, Schedule, Print, Export) and an **Add** grid (Task, Encounter, Due List Item, Order Request, eSign Request, Allergy, Medication, Alert, Condition, Vitals). Three of those open **built-in modals**: *Contact* shows \`email\` / \`phone\`, *Edit Patient* opens a demographics form → \`onEditPatient(formData)\`, every *Add …* opens a generic label / status / priority / assignee / due date / notes form → \`onAddItem(entityType, formData)\`; everything else reaches \`onOverflowAction(action)\`. \`sticky\`, \`showBackButton\` / \`onBack\` as on the other headers. Props are plain data (\`PatientData\`, \`AllergyItem\`, \`MedicationItem\`) — no FHIR or WebChart contract.
+
+### Use it when
+
+- The page **is the patient** — chart, encounter, results — and the clinician needs identity plus safety context (allergies, medications, alerts) visible at the top of every view.
+- You want the WebChart-style patient toolbar: count badges that open their own popovers and a single overflow menu for patient-level actions.
+- Your data already exists as display strings; the header formats nothing but the name and capitalises flags.
+
+### Don't use it when
+
+- The record is a **case** with the patient as context — [CaseManagementHeader](?path=/docs/encounter-orders-casemanagementheader--docs) (case number, status, days open, editing users).
+- The page is a generic titled section — [PageHeader](?path=/docs/layout-pageheader--docs) (title, subtitle, breadcrumb, tabs); the app-wide bar is [AppHeader](?path=/docs/layout-appheader--docs).
+- You need the **full** allergy or medication list with editing — [AllergyList](?path=/docs/clinical-lists-allergylist--docs) / [MedicationList](?path=/docs/clinical-lists-medicationlist--docs); the banners here are name pills only, with no severity, reaction or status.
+- The built-in Add / Edit Patient forms do not match your data model — they are fixed generic fields; use \`onOverflowAction\` and open your own dialogs instead of \`onAddItem\` / \`onEditPatient\`.
+
+### Example
+
+\`\`\`tsx
+<PatientHeader
+  sticky
+  patient={{ name: { first: p.firstName, last: p.lastName, middle: p.middleName }, mrn: p.mrn, dob: formatDate(p.dob), age: ageOf(p.dob), sex: p.sex, status: p.status, flags: p.flags, photo: p.photoUrl, email: p.email, phone: p.phone, employer: p.employer?.name, attendingProvider: p.attending?.name, familyProvider: p.pcp?.name }}
+  allergies={allergies.map((a) => ({ name: a.allergen, severity: a.severity }))}
+  medications={meds.filter((m) => m.status === 'taking').map((m) => ({ name: m.name, dose: m.strength }))}
+  comments={p.alerts}
+  showAllergyBanner showMedicationBanner showCommentsBanner showProviderBanner showFlagBanner
+  showBackButton onBack={() => navigate(-1)}
+  actions={
+    <div className="flex flex-wrap gap-2">
+      <CountBadge label="Tasks" count={tasks.length} items={tasks} onView={openTask} />
+      <CountBadge label="Due List" count={due.length} items={due} />
+    </div>
+  }
+  showOverflowMenu
+  onOverflowAction={(action) => action === 'schedule-appointment' && openScheduler(p.id)}
+  onAddItem={(type, form) => createItem(p.id, type, form)}     // built-in generic Add modal
+  onEditPatient={(form) => savePatient(p.id, form)}             // built-in Edit Patient modal
+/>
+\`\`\`
+
+The header keeps only modal open/close and form-draft state; patient data, counts and what an action does are the host's.
+
+### Limitations
+
+- **Accessibility as implemented.** Name is an \`<h2>\`; back button and the ⋮ trigger are \`aria-label\`led (\`aria-haspopup="menu"\`, \`aria-expanded\`); the portalled menu is \`role="menu"\` with \`role="menuitem"\` buttons, closes on Esc / outside click — but has **no arrow-key navigation or focus management** (Tab moves through items; focus is not moved into or returned from the menu). Modals come from \`Modal\` (focus trap, Esc). The status dot is \`aria-hidden\` with the status word beside it; allergy / med pills are \`Badge\` spans with no list semantics; the flag ribbon and Alert row are plain text. Nothing is announced.
+- **Clinical safety.** Allergy pills show names only — \`severity\` is accepted but **not rendered**; medication pills truncate at \`maxVisibleMeds\` with a non-interactive "+N more"; nothing is validated, deduplicated or cross-checked.
+- **Built-in forms are generic.** The Add modal's fields (label, status, priority, assigned to, due date, notes) and the Edit Patient fields are fixed and identical for every entity type; the Contact modal is read-only. Status / priority selects are native \`<select>\`s. There is no loading or error state after \`onAddItem\` / \`onEditPatient\` — the modal just closes.
+- **Data contract.** Display strings in, no formatting of \`dob\` (rendered verbatim), age not derived, sex rendered as the raw \`M / F / U\` letter, name always "Last, First M. Suffix".
+- **Responsive / RTL.** Avatar hidden below \`md\`; actions drop to their own row on mobile via flex \`order-*\`; the menu is \`w-[calc(100vw-2rem)]\` on mobile. Logical margins and the menu's \`bottom-end\` placement mirror in RTL; the back arrow flips (\`rtl:-scale-x-100\`).
+- **Theming / i18n.** Semantic tokens plus hard-coded red (allergies), amber (flag ribbon) and green / gray / red status dots. All labels — "Allergies", "Meds", "Alert", "Attending", "Family MD", "MRN", "DOB", menu items, modal titles and form labels — are English constants with **no \`labels\` prop** (unlike \`CaseManagementHeader\`).
+- **Dependencies / entry.** \`Avatar\`, \`Badge\`, \`Button\`, \`Input\`, \`Modal\`, \`Icons\`, \`useAnchoredPosition\`, \`useClickOutside\`, \`useEscapeKey\`, \`react-dom\` portal; main \`@mieweb/ui\` entry, no peers. \`CountBadge\` is passed in by the host.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'encounter-orders-casemanagementheader',
+          why: 'PatientHeader leads with the patient (demographics, allergies, medications, actions); CaseManagementHeader leads with the case (number, status, days open) and keeps the patient as context.',
+        },
+        {
+          type: 'alternative to',
+          target: 'layout-pageheader',
+          why: 'PageHeader titles a generic page with breadcrumb and tabs; PatientHeader is the chart banner with demographics, safety rows and a patient action menu.',
+        },
+        {
+          type: 'composes with',
+          target: 'data-display-countbadge',
+          why: 'The actions slot is styled for CountBadge chips (Tasks, Open Enc, Due List…) and showCountBadges toggles them via data-slot.',
+        },
+        {
+          type: 'uses',
+          target: 'overlays-modal',
+          why: 'The Contact, Add-item and Edit Patient dialogs are built-in Modals.',
+        },
+      ],
+    },
   },
   argTypes: {
     sticky: { control: 'boolean' },

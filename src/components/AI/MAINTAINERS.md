@@ -1,7 +1,7 @@
 # AI — Maintainer Notes
 
-> **Provider notes** — how to *change* the AI module. Consumers should read the
-> Storybook autodocs (Product › Feature Modules › AI) and the repo
+> **Provider notes** — how to _change_ the AI module. Consumers should read the
+> Storybook autodocs (Modules › Chat / Voice) and the repo
 > [README](../../../README.md). General conventions live in
 > [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
@@ -9,23 +9,26 @@
 
 A family of AI-chat building blocks exported from [index.ts](index.ts):
 
-| Surface | File | Role |
-|---------|------|------|
-| `AIChat` | [AIChat.tsx](AIChat.tsx) | Full chat interface (thread + composer + suggestions) |
-| `AIChatModal`, `AIChatTrigger`, `FloatingAIChat` | [AIChatModal.tsx](AIChatModal.tsx) | Modal / floating wrappers that forward every `AIChat` prop |
-| `AIMessageDisplay` | [AIMessage.tsx](AIMessage.tsx) | Renders a single message + its content blocks |
-| `MCPToolCallDisplay` | [MCPToolCall.tsx](MCPToolCall.tsx) | MCP tool-call card (pending/running/success/error) |
-| `Reconciliation` | [Reconciliation.tsx](Reconciliation.tsx) | Domain widget (has its own unit test) |
-| icons / types | [icons.tsx](icons.tsx), [types.ts](types.ts) | Shared glyphs and the public type surface |
+| Surface                                          | File                                         | Role                                                       |
+| ------------------------------------------------ | -------------------------------------------- | ---------------------------------------------------------- |
+| `AIChat`                                         | [AIChat.tsx](AIChat.tsx)                     | Full chat interface (thread + composer + suggestions)      |
+| `AIChatModal`, `AIChatTrigger`, `FloatingAIChat` | [AIChatModal.tsx](AIChatModal.tsx)           | Modal / floating wrappers that forward every `AIChat` prop |
+| `AIMessageDisplay`                               | [AIMessage.tsx](AIMessage.tsx)               | Renders a single message + its content blocks              |
+| `MCPToolCallDisplay`                             | [MCPToolCall.tsx](MCPToolCall.tsx)           | MCP tool-call card (pending/running/success/error)         |
+| `Reconciliation`                                 | [Reconciliation.tsx](Reconciliation.tsx)     | Domain widget (has its own unit test)                      |
+| icons / types                                    | [icons.tsx](icons.tsx), [types.ts](types.ts) | Shared glyphs and the public type surface                  |
 
 ## Extension point: `renderTextContent` (read before touching text rendering)
 
 Message `text` blocks render as **plain text by default**. Rich rendering
-(Markdown, images, Mermaid) is intentionally *not* built in — it's delegated to a
+(Markdown, images, Mermaid) is intentionally _not_ built in — it's delegated to a
 host-supplied render-prop defined in [types.ts](types.ts):
 
 ```ts
-type AIRenderTextContent = (text: string, ctx: AITextRenderContext) => React.ReactNode;
+type AIRenderTextContent = (
+  text: string,
+  ctx: AITextRenderContext
+) => React.ReactNode;
 // ctx = { messageId, streaming, role }
 ```
 

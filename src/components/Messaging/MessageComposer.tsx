@@ -1,8 +1,11 @@
 import * as React from 'react';
-import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import {
+  MentionMenu,
+  useMentionAutocomplete,
+  type MentionOption,
+} from './useMentionAutocomplete';
 import type { AttachmentType, NewMessage } from './types';
 import {
   AttachmentPicker,
@@ -27,40 +30,9 @@ interface PendingAttachment {
   error?: string;
 }
 
-/**
- * A candidate for the composer's `@mention` autocomplete. Generic so any
- * surface (multi-party chat, agent picker, …) can supply its own list.
- */
-export interface MentionOption {
-  /** Stable id (returned to the host so it can map a selection back). */
-  id: string;
-  /** Display name shown in the suggestion list. */
-  label: string;
-  /** Text inserted after `@` on selection. Defaults to the first word of `label`. */
-  value?: string;
-  /** Optional secondary text shown after the label. */
-  description?: string;
-  /** Optional leading node (e.g. an avatar). */
-  icon?: React.ReactNode;
-  /** Optional trailing meta text (e.g. a kind tag). */
-  meta?: string;
-}
-
-/**
- * Find the active `@query` immediately before the caret, if any. The `@` must
- * start the string or follow whitespace, and the token must contain no spaces
- * or further `@`.
- */
-function activeMentionQuery(
-  value: string,
-  caret: number
-): { query: string; start: number } | null {
-  const upToCaret = value.slice(0, caret);
-  const match = /(^|\s)@([^\s@]*)$/.exec(upToCaret);
-  if (!match) return null;
-  const query = match[2];
-  return { query, start: caret - query.length - 1 };
-}
+// `MentionOption` lives in the shared mention module (used by ChatComposer
+// too); re-exported here so existing deep imports keep working.
+export type { MentionOption };
 
 /**
  * Whether a file satisfies one of the accepted `<input accept>` tokens.
@@ -408,74 +380,12 @@ const MessageComposer = React.forwardRef<
     }, [replyTo]);
 
     // --- @mention autocomplete (opt-in via `mentionOptions`) ---
-    const mentionsEnabled = !!mentionOptions && mentionOptions.length > 0;
-    const [mention, setMention] = React.useState<{
-      query: string;
-      start: number;
-    } | null>(null);
-    const [mentionHighlight, setMentionHighlight] = React.useState(0);
-    const mentionListId = React.useId();
-    const mentionOptionId = (i: number) => `${mentionListId}-option-${i}`;
-
-    const mentionSuggestions = React.useMemo(() => {
-      if (!mention || !mentionOptions) return [];
-      const q = mention.query.toLowerCase();
-      return mentionOptions.filter((o) => o.label.toLowerCase().includes(q));
-    }, [mention, mentionOptions]);
-
-    const mentionMenuOpen =
-      mentionsEnabled && mention !== null && mentionSuggestions.length > 0;
-
-    // Portal + fixed positioning so the mention menu escapes overflow-hidden
-    // ancestors.
-    const {
-      anchorRef: mentionAnchorRef,
-      floatingRef: mentionFloatingRef,
-      style: mentionStyle,
-    } = useAnchoredPosition<HTMLDivElement, HTMLUListElement>({
-      open: mentionMenuOpen,
-      placement: 'top-start',
-      maxHeight: 224,
+    const mention = useMentionAutocomplete({
+      options: mentionOptions,
+      value: content,
+      setValue: setContent,
+      textareaRef,
     });
-    // Clamp the highlight to the current suggestion range so the active option
-    // never points at a stale/out-of-range index (the list can shrink while the
-    // menu is open as the query narrows). The same clamped index drives
-    // `aria-activedescendant`, `aria-selected`, and the visual highlight so they
-    // can never disagree.
-    const clampedMentionHighlight = mentionMenuOpen
-      ? Math.min(mentionHighlight, mentionSuggestions.length - 1)
-      : -1;
-    const activeMentionOptionId = mentionMenuOpen
-      ? mentionOptionId(clampedMentionHighlight)
-      : undefined;
-
-    const syncMention = React.useCallback(
-      (value: string, caret: number) => {
-        if (!mentionsEnabled) return;
-        setMention(activeMentionQuery(value, caret));
-        setMentionHighlight(0);
-      },
-      [mentionsEnabled]
-    );
-
-    const insertMention = (option: MentionOption) => {
-      if (!mention) return;
-      const insertValue = option.value ?? option.label.split(' ')[0];
-      const before = content.slice(0, mention.start);
-      const after = content.slice(mention.start + 1 + mention.query.length);
-      const insert = `@${insertValue} `;
-      setContent(before + insert + after);
-      setMention(null);
-      // Restore caret just after the inserted mention.
-      const caret = before.length + insert.length;
-      requestAnimationFrame(() => {
-        const el = textareaRef.current;
-        if (el) {
-          el.focus();
-          el.setSelectionRange(caret, caret);
-        }
-      });
-    };
 
     const canSend =
       (content.trim().length > 0 || attachments.length > 0) &&
@@ -511,35 +421,7 @@ const MessageComposer = React.forwardRef<
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
       // @mention menu navigation takes priority over send.
-      if (mentionMenuOpen) {
-        if (event.key === 'ArrowDown') {
-          event.preventDefault();
-          setMentionHighlight((h) => (h + 1) % mentionSuggestions.length);
-          return;
-        }
-        if (event.key === 'ArrowUp') {
-          event.preventDefault();
-          setMentionHighlight(
-            (h) =>
-              (h - 1 + mentionSuggestions.length) % mentionSuggestions.length
-          );
-          return;
-        }
-        if (event.key === 'Enter' || event.key === 'Tab') {
-          event.preventDefault();
-          // `mentionHighlight` can fall out of range if the list shrank while
-          // the menu was open; fall back to the first suggestion.
-          const chosen =
-            mentionSuggestions[mentionHighlight] ?? mentionSuggestions[0];
-          if (chosen) insertMention(chosen);
-          return;
-        }
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          setMention(null);
-          return;
-        }
-      }
+      if (mention.handleKeyDown(event)) return;
       // Send on Enter (without Shift)
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
@@ -636,7 +518,7 @@ const MessageComposer = React.forwardRef<
               className={cn(
                 'flex items-center gap-2 px-4 py-2',
                 'bg-neutral-50 dark:bg-neutral-800/50',
-                'border-primary-500 border-l-4'
+                'border-primary-500 border-s-4'
               )}
             >
               <div className="min-w-0 flex-1">
@@ -728,73 +610,23 @@ const MessageComposer = React.forwardRef<
             <div
               data-slot="composer-input-wrapper"
               className="relative flex-1"
-              ref={mentionAnchorRef}
+              ref={mention.anchorRef}
             >
-              {mentionMenuOpen &&
-                createPortal(
-                  <ul
-                    ref={mentionFloatingRef}
-                    style={mentionStyle}
-                    id={mentionListId}
-                    role="listbox"
-                    aria-label="Mention"
-                    data-slot="composer-mention-list"
-                    className="w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
-                  >
-                    {mentionSuggestions.map((option, i) => (
-                      <li key={option.id}>
-                        <button
-                          type="button"
-                          id={mentionOptionId(i)}
-                          role="option"
-                          aria-selected={i === clampedMentionHighlight}
-                          // onMouseDown (not onClick) so the textarea keeps focus.
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            insertMention(option);
-                          }}
-                          onMouseEnter={() => setMentionHighlight(i)}
-                          className={cn(
-                            'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
-                            i === clampedMentionHighlight
-                              ? 'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-100'
-                              : 'text-neutral-700 dark:text-neutral-200'
-                          )}
-                        >
-                          {option.icon}
-                          <span className="min-w-0 flex-1 truncate">
-                            <span className="font-medium">{option.label}</span>
-                            {option.description && (
-                              <span className="ml-1 text-xs text-neutral-400">
-                                {option.description}
-                              </span>
-                            )}
-                          </span>
-                          {option.meta && (
-                            <span className="text-[10px] text-neutral-400">
-                              {option.meta}
-                            </span>
-                          )}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>,
-                  document.body
-                )}
+              <MentionMenu mention={mention} />
               <textarea
                 ref={textareaRef}
                 data-slot="composer-input"
                 value={content}
                 onChange={(e) => {
                   setContent(e.target.value);
-                  syncMention(
+                  mention.sync(
                     e.target.value,
                     e.target.selectionStart ?? e.target.value.length
                   );
                 }}
                 onClick={(e) => {
                   const el = e.currentTarget;
-                  syncMention(el.value, el.selectionStart ?? el.value.length);
+                  mention.sync(el.value, el.selectionStart ?? el.value.length);
                 }}
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
@@ -803,7 +635,7 @@ const MessageComposer = React.forwardRef<
                 rows={1}
                 className={cn(
                   'w-full resize-none rounded-2xl py-2.5',
-                  inputTrailing ? 'pr-10 pl-4' : 'px-4',
+                  inputTrailing ? 'ps-4 pe-10' : 'px-4',
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
@@ -814,22 +646,14 @@ const MessageComposer = React.forwardRef<
                 )}
                 aria-label="Message"
                 aria-describedby={showCharacterCount ? 'char-count' : undefined}
-                {...(mentionsEnabled
-                  ? {
-                      'aria-controls': mentionMenuOpen
-                        ? mentionListId
-                        : undefined,
-                      'aria-activedescendant': activeMentionOptionId,
-                      'aria-autocomplete': 'list' as const,
-                    }
-                  : {})}
+                {...mention.inputProps}
               />
 
               {/* Trailing content (e.g. record button) */}
               {inputTrailing && (
                 <div
                   data-slot="composer-input-trailing"
-                  className="pointer-events-none absolute top-0 right-1 flex h-[44px] items-center [&>*]:pointer-events-auto"
+                  className="pointer-events-none absolute end-1 top-0 flex h-[44px] items-center [&>*]:pointer-events-auto"
                 >
                   {inputTrailing}
                 </div>
@@ -840,7 +664,7 @@ const MessageComposer = React.forwardRef<
                 <div
                   data-slot="composer-char-count"
                   id="char-count"
-                  className="absolute right-3 bottom-1.5"
+                  className="absolute end-3 bottom-1.5"
                 >
                   <CharacterCounter current={content.length} max={maxLength} />
                 </div>

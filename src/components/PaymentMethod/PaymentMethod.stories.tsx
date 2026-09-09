@@ -15,9 +15,10 @@ import {
 // =============================================================================
 
 const cardMeta: Meta<typeof PaymentMethodCard> = {
-  title: 'Product/Feature Modules/PaymentMethod',
+  id: 'billing-paymentmethod',
+  title: 'BlueHive/Billing/PaymentMethod',
   component: PaymentMethodCard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {

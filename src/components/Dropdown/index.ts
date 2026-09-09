@@ -3,11 +3,13 @@ export {
   DropdownHeader,
   DropdownContent,
   DropdownItem,
+  DropdownSubmenu,
   DropdownSeparator,
   DropdownLabel,
   type DropdownProps,
   type DropdownHeaderProps,
   type DropdownContentProps,
   type DropdownItemProps,
+  type DropdownSubmenuProps,
   type DropdownPlacement,
 } from './Dropdown';

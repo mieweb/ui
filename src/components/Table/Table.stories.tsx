@@ -29,18 +29,88 @@ import {
 } from '../Icons';
 
 const meta: Meta<typeof Table> = {
-  title: 'Components/Layout & Structure/Table',
+  id: 'grids-table',
+  title: 'Components/Grids/Table',
   component: Table,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          '> 💡 **Prefer [DataVis NITRO](?path=/docs/components-text-data-display-datavis-nitro--docs) in most cases.** NITRO is designed to be simple out of the box while exposing power-user features for the click-curious — use `Table` only in lightweight situations where that overhead is genuinely unneeded.',
+        component: `> **Tables and data grids start with DataVis NITRO.** Use \`Table\` only for a few static rows the user will not sort, filter, page or export. Never hand-roll grid features on a plain table; \`AGGrid\` is deprecated.
+
+### What it's for
+
+A semantic \`<table>\` with library styling: \`Table\`, \`TableHeader\`, \`TableBody\`, \`TableFooter\`, \`TableRow\`, \`TableHead\`, \`TableCell\` and \`TableCaption\` are thin \`forwardRef\` slots, so the markup stays yours and screen readers get real table semantics. \`responsive\` (default \`true\`) wraps it in a horizontal-scroll container.
+
+### Use it when
+
+- Presenting a small, known set of rows for reading: a pricing summary, a definition block, an invoice's line items.
+- The rows are rendered from data the page already holds and never need interaction beyond a link or a \`RowActionToolbar\`.
+- You are building a domain composition (e.g. a claims summary) whose whole point is fixed layout, and have documented why NITRO's features are not wanted.
+
+### Don't use it when
+
+- Users browse, sort, filter, group or export records — that is \`DataVisNitroGrid\`'s job, and hand-rolling those features here is out of policy.
+- The row count is unbounded or server-paged. If you must page a static table, pair it with \`Pagination\` and keep the page state in the host.
+
+### Example
+
+\`\`\`tsx
+<Table>
+  <TableCaption>Line items for invoice 1042</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Service</TableHead>
+      <TableHead className="text-end">Amount</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {items.map((item) => (
+      <TableRow key={item.id}>
+        <TableCell>{item.name}</TableCell>
+        <TableCell className="text-end">{formatMoney(item.amount)}</TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+\`\`\`
+
+The **Playground** story below deliberately hand-rolls sorting, filtering, pinned columns and column menus so you can see what that costs — it marks the point at which a real application should switch to NITRO, not a pattern to copy.
+
+### Limitations
+
+- No built-in sorting, filtering, selection, virtualisation or keyboard grid navigation; \`aria-sort\` and row selection are the host's responsibility.
+- Horizontal scrolling on narrow screens comes from the wrapper only; columns do not collapse or stack.
+- Uses logical text alignment (\`text-start\` / \`text-end\`) so RTL mirrors correctly; number alignment is up to the consumer.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'grids-datavis-nitro',
+          why: 'NITRO is the default grid; Table only for a few static rows nobody sorts, filters or exports.',
+        },
+        {
+          type: 'composes with',
+          target: 'grids-pagination',
+          why: 'When a static table must be paged, Pagination supplies the controls and the host owns the page state.',
+        },
+        {
+          type: 'composes with',
+          target: 'actions-rowactiontoolbar',
+          why: 'Per-row edit/delete icons revealed on hover, in a relative group row.',
+        },
+        {
+          type: 'composes with',
+          target: 'data-display-filtersummarybar',
+          why: 'FilterSummaryBar above a host-filtered Table shows filtered-of-total counts with one Clear all.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     responsive: {
       control: 'boolean',
@@ -574,6 +644,14 @@ function PlaygroundTable({
 }
 
 export const Playground: StoryObj<PlaygroundArgs> = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Hand-rolled sorting, filtering, pinned columns, selection and column menus on top of `Table`. This is the amount of code a plain table costs once users want grid features — at this point switch to [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs), which ships all of it. Not a pattern to copy.',
+      },
+    },
+  },
   args: {
     columnCount: 6,
     showFooter: false,

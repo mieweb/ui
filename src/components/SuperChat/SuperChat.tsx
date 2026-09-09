@@ -13,7 +13,7 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { CloseIcon } from '../AI/icons';
-import { MessageComposer } from '../Messaging/MessageComposer';
+import { ChatComposer } from '../ChatComposer/ChatComposer';
 import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
@@ -31,6 +31,7 @@ import type {
   ComposerAttachment,
   Participant,
   SuperChatConversation,
+  SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatRef,
   SuperChatRenderPlugin,
@@ -54,7 +55,8 @@ export interface SuperChatProps {
   /** Disable the composer. */
   readOnly?: boolean;
   /**
-   * File categories the composer accepts for paste and the paperclip picker.
+   * File categories the composer accepts for paste, drag-and-drop, and the
+   * file picker in the `+` → “Attach files” menu.
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
@@ -74,10 +76,22 @@ export interface SuperChatProps {
   virtualized?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
+  /**
+   * Format for a message's default copy action (Ctrl/Cmd-click on the footer
+   * copy button). All formats stay reachable per message via the copy menus.
+   * Defaults to `'rich'`.
+   */
+  defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */
   className?: string;
 
   // --- callbacks (chat-component-compatible) ---
+  /**
+   * Fired when the local user sends a message. If the callback returns a
+   * promise it is awaited, and a rejected send restores the typed text into
+   * the composer (the declared `void` return keeps every previously valid
+   * callback assignable).
+   */
   onMessageSent?: (
     text: string,
     meta: {
@@ -85,7 +99,7 @@ export interface SuperChatProps {
       mentions: string[];
       attachments: ComposerAttachment[];
     }
-  ) => void;
+  ) => void | Promise<void>;
   /**
    * Fired when the local user saves an edit to one of their own messages.
    * Providing this enables the inline "Edit" affordance on self-authored
@@ -121,6 +135,7 @@ export function SuperChat({
   order = 'asc',
   virtualized = false,
   linkBuilder,
+  defaultCopyFormat,
   className,
   onMessageSent,
   onMessageEdited,
@@ -197,16 +212,43 @@ export function SuperChat({
     [acceptedFileTypes]
   );
 
+  // Controlled composer draft so a failed send can restore the typed text
+  // (ChatComposer clears optimistically and delegates restore to the host).
+  const [draft, setDraft] = React.useState('');
+  // Bumped on every user edit (including the optimistic clear that precedes
+  // a send), so a stale failed send never overwrites newer typed input.
+  const draftEpochRef = React.useRef(0);
+  const handleDraftChange = React.useCallback((value: string) => {
+    draftEpochRef.current += 1;
+    setDraft(value);
+  }, []);
+
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
   const handleComposerSend = React.useCallback(
     async (message: NewMessage) => {
-      const text = message.content;
-      const mentions = detectMentions(text, conversation.participants);
-      const attachments = await filesToComposerAttachments(
-        message.attachments ?? []
-      );
-      onMessageSent?.(text, { conversation, mentions, attachments });
+      const epoch = draftEpochRef.current;
+      try {
+        const text = message.content;
+        const mentions = detectMentions(text, conversation.participants);
+        const attachments = await filesToComposerAttachments(
+          message.attachments ?? []
+        );
+        // The declared type is `void` for backward compatibility, but a
+        // returned promise (e.g. an async host callback) is awaited so its
+        // rejection follows the same restore path as a synchronous throw.
+        await Promise.resolve(
+          onMessageSent?.(text, { conversation, mentions, attachments })
+        );
+      } catch {
+        // Parity with the previous MessageComposer: restore the text when
+        // file conversion or the host callback fails (attachments are not
+        // restaged, matching the old behavior) — unless the user has typed
+        // a newer draft while this send was pending.
+        if (draftEpochRef.current === epoch) {
+          setDraft(message.content);
+        }
+      }
     },
     [conversation, onMessageSent]
   );
@@ -231,7 +273,7 @@ export function SuperChat({
               type="button"
               onClick={onBack}
               aria-label="Back to conversations"
-              className="-ml-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="-ms-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -291,6 +333,7 @@ export function SuperChat({
           onReferenceClick={onReferenceClick}
           editable={editable}
           onMessageEdited={handleMessageEdited}
+          defaultCopyFormat={defaultCopyFormat}
           order={order}
           conversationId={conversation.id}
           containerProps={{
@@ -329,12 +372,15 @@ export function SuperChat({
               onReferenceClick={onReferenceClick}
               editable={editable}
               onMessageEdited={handleMessageEdited}
+              defaultCopyFormat={defaultCopyFormat}
             />
           ))}
         </div>
       )}
 
-      <MessageComposer
+      <ChatComposer
+        value={draft}
+        onValueChange={handleDraftChange}
         onSend={handleComposerSend}
         disabled={readOnly}
         placeholder={
@@ -343,10 +389,12 @@ export function SuperChat({
             : 'Type a message… use @ to address an agent'
         }
         mentionOptions={mentionOptions}
-        showAttachmentPicker={!readOnly}
-        showCameraButton={false}
+        allowAttachments={!readOnly}
         acceptedFileTypes={composerAccept}
+        // Same cap MessageComposer applied by default.
+        maxFileSize={25 * 1024 * 1024}
         maxLength={100000}
+        inputLabel="Message"
       />
     </section>
   );

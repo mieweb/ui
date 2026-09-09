@@ -3,8 +3,9 @@ import { SetupServiceModal } from './SetupServiceModal';
 
 const meta: Meta<typeof SetupServiceModal> = {
   component: SetupServiceModal,
-  title: 'Components/Overlays & Layering/SetupServiceModal',
-  tags: ['autodocs'],
+  id: 'services-setupservicemodal',
+  title: 'BlueHive/Services/SetupServiceModal',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

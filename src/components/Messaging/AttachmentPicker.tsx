@@ -91,6 +91,8 @@ export interface AttachmentPreviewItemProps {
   onRemove: () => void;
   /** Called when retry is clicked */
   onRetry?: () => void;
+  /** Disables the remove/retry actions. */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -101,6 +103,7 @@ function AttachmentPreviewItem({
   attachment,
   onRemove,
   onRetry,
+  disabled = false,
   className,
 }: AttachmentPreviewItemProps) {
   const { file, previewUrl, type, state, progress } = attachment;
@@ -122,14 +125,28 @@ function AttachmentPreviewItem({
       {/* Image/Video preview */}
       {(isImage || isVideo) && previewUrl ? (
         <div className="relative h-20 w-20">
-          <img
-            src={previewUrl}
-            alt={file.name}
-            className={cn(
-              'h-full w-full object-cover',
-              (isUploading || isFailed) && 'opacity-50'
-            )}
-          />
+          {isVideo ? (
+            <video
+              src={previewUrl}
+              aria-label={file.name}
+              muted
+              playsInline
+              preload="metadata"
+              className={cn(
+                'h-full w-full object-cover',
+                (isUploading || isFailed) && 'opacity-50'
+              )}
+            />
+          ) : (
+            <img
+              src={previewUrl}
+              alt={file.name}
+              className={cn(
+                'h-full w-full object-cover',
+                (isUploading || isFailed) && 'opacity-50'
+              )}
+            />
+          )}
           {isVideo && (
             <div className="absolute inset-0 flex items-center justify-center">
               <svg
@@ -160,7 +177,7 @@ function AttachmentPreviewItem({
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <span className="mt-1 max-w-full truncate px-1 text-xs text-neutral-500">
+          <span className="mt-1 max-w-full truncate px-1 text-xs text-neutral-600 dark:text-neutral-400">
             {file.name.split('.').pop()?.toUpperCase()}
           </span>
         </div>
@@ -217,7 +234,8 @@ function AttachmentPreviewItem({
               <button
                 type="button"
                 onClick={onRetry}
-                className="mt-1 text-xs text-white underline hover:no-underline"
+                disabled={disabled}
+                className="mt-1 text-xs text-white underline hover:no-underline disabled:no-underline disabled:opacity-50"
               >
                 Retry
               </button>
@@ -230,13 +248,15 @@ function AttachmentPreviewItem({
       <button
         type="button"
         onClick={onRemove}
+        disabled={disabled}
         className={cn(
-          'absolute -top-1 -right-1 z-10',
+          'absolute -end-1 -top-1 z-10',
           'rounded-full p-1',
           'bg-neutral-900 text-white',
           'opacity-0 group-hover:opacity-100',
           'focus:ring-primary-500 focus:opacity-100 focus:ring-2 focus:outline-none',
-          'transition-opacity'
+          'transition-opacity',
+          'disabled:cursor-not-allowed disabled:group-hover:opacity-0'
         )}
         aria-label={`Remove ${file.name}`}
       >
@@ -259,7 +279,7 @@ function AttachmentPreviewItem({
       {/* File name tooltip on hover */}
       <div
         className={cn(
-          'absolute right-0 bottom-0 left-0',
+          'absolute start-0 end-0 bottom-0',
           'bg-black/70 px-1 py-0.5',
           'opacity-0 group-hover:opacity-100',
           'transition-opacity'
@@ -424,6 +444,8 @@ export interface DragDropZoneProps {
   disabled?: boolean;
   /** Called when an error occurs */
   onError?: (error: string) => void;
+  /** Overlay text shown while dragging files over the zone. @default 'Drop files here' */
+  overlayLabel?: string;
   /** Children to render inside the zone */
   children: React.ReactNode;
   className?: string;
@@ -439,6 +461,7 @@ function DragDropZone({
   maxFiles = 10,
   disabled = false,
   onError,
+  overlayLabel = 'Drop files here',
   children,
   className,
 }: DragDropZoneProps) {
@@ -540,7 +563,7 @@ function DragDropZone({
               />
             </svg>
             <p className="text-primary-700 dark:text-primary-300 mt-2 text-sm font-medium">
-              Drop files here
+              {overlayLabel}
             </p>
           </div>
         </div>

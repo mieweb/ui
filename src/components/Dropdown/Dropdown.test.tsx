@@ -9,6 +9,7 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownSeparator,
+  DropdownSubmenu,
 } from './Dropdown';
 
 describe('Dropdown', () => {
@@ -322,6 +323,38 @@ describe('Dropdown', () => {
     expect(
       screen.getByRole('menuitemcheckbox', { name: 'Gamma' })
     ).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('select all includes items nested in a submenu', async () => {
+    const user = userEvent.setup();
+    const handleSelectedValuesChange = vi.fn();
+
+    renderWithTheme(
+      <Dropdown
+        multiSelect
+        showSelectAll
+        selectedValues={[]}
+        onSelectedValuesChange={handleSelectedValuesChange}
+        trigger={<Button>Open menu</Button>}
+      >
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+        <DropdownSubmenu label="More">
+          <DropdownItem value="beta">Beta</DropdownItem>
+          <DropdownItem value="gamma">Gamma</DropdownItem>
+        </DropdownSubmenu>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    await user.click(
+      screen.getByRole('menuitemcheckbox', { name: 'Select all' })
+    );
+
+    expect(handleSelectedValuesChange).toHaveBeenCalledWith([
+      'alpha',
+      'beta',
+      'gamma',
+    ]);
   });
 
   it('shows an indeterminate select-all state when some visible items are selected', async () => {

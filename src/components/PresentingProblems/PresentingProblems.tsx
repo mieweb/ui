@@ -147,7 +147,7 @@ function RelevanceControl({
             onClick={() => onChange(active ? null : relevance)}
             className={cn(
               'px-2 py-1 text-xs font-medium transition-colors',
-              'border-border border-l first:border-l-0',
+              'border-border border-s first:border-s-0',
               active
                 ? 'bg-primary-800 text-white'
                 : 'bg-background text-muted-foreground hover:text-foreground'
@@ -302,6 +302,7 @@ export const PresentingProblems = React.forwardRef<
         /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
         <li
           key={concern.concernId}
+          data-slot="clinical-list-row"
           data-concern-id={concern.concernId}
           tabIndex={draggable ? 0 : undefined}
           onKeyDown={draggable ? handleRowKeyDown : undefined}
@@ -346,7 +347,7 @@ export const PresentingProblems = React.forwardRef<
             </Badge>
           )}
           {!readOnly && (
-            <span className="ml-auto">
+            <span className="ms-auto">
               <RelevanceControl
                 value={relevance}
                 onChange={(r) => onRelevanceChange?.(concern, r)}
@@ -394,7 +395,10 @@ export const PresentingProblems = React.forwardRef<
 
           {/* Selected / relevant this visit */}
           <section aria-label="Relevant this visit">
-            <h4 className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase">
+            <h4
+              data-slot="clinical-list-heading"
+              className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
+            >
               Relevant this visit
             </h4>
             {selected.length > 0 ? (
@@ -411,7 +415,10 @@ export const PresentingProblems = React.forwardRef<
           {/* Pick from patient problem list */}
           {unselected.length > 0 && (
             <section aria-label="Patient problem list">
-              <h4 className="border-border text-muted-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase">
+              <h4
+                data-slot="clinical-list-heading"
+                className="border-border text-muted-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
+              >
                 From patient problem list
               </h4>
               <ul className="mt-1">
@@ -425,6 +432,7 @@ export const PresentingProblems = React.forwardRef<
             <div className="flex items-center gap-1.5">
               <input
                 type="text"
+                data-slot="input"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {

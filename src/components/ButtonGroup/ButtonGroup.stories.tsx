@@ -64,12 +64,66 @@ function renderPlayground({
 }
 
 const meta: Meta<PlaygroundArgs> = {
-  title: 'Components/Forms & Inputs/ButtonGroup',
+  id: 'actions-buttongroup',
+  title: 'Inputs/Actions/ButtonGroup',
   component: ButtonGroup,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+Lays out \`Button\`s in a row and **stacks them vertically the moment a label would truncate**, then returns to a row when space allows. Each Button renders its label in a \`data-slot="button-label"\` span with \`truncate\`; the group measures \`scrollWidth > clientWidth\` through a \`ResizeObserver\` and switches \`orientation\` (\`auto\` by default, or force \`horizontal\` / \`vertical\`). \`split\` (\`true\` or a number) sends the first N buttons to the start and the rest to the end — ignored while stacked.
+
+### Use it when
+
+- Any time two or more buttons appear together: dialog footers, form actions, card CTAs.
+- A single button whose label is long, translated or user-supplied ("Permanently delete this record").
+- You want back/cancel on one side and the primary action on the other (\`split\`).
+
+### Don't use it when
+
+- The children are not \`Button\`s. The measurement relies on the label slot; wrap other controls in a plain flex container.
+- The controls form a toolbar of icon buttons with arrow-key navigation — that is \`RowActionToolbar\` (or a \`role="toolbar"\` container).
+- You need a segmented single-choice control — use \`PillSelect\` or \`Toggle\`s with shared state.
+
+### Example
+
+\`\`\`tsx
+<ModalFooter>
+  <ButtonGroup className="w-full" split>
+    <Button variant="ghost">Back</Button>
+    <Button variant="secondary">Cancel</Button>
+    <Button variant="danger">Permanently delete this record</Button>
+  </ButtonGroup>
+</ModalFooter>
+\`\`\`
+
+### Limitations
+
+- Purely a layout container: it adds no role or keyboard behaviour; tab order is DOM order.
+- Measurement happens after layout, so the first paint at a narrow width may show a row for one frame before stacking.
+- Respects \`prefers-reduced-motion\` only in that there is no animation to begin with; stacking is instant.
+- Works in RTL through flex order; \`split\` places the first buttons at the *start* edge.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'actions-button',
+          why: 'ButtonGroup exists to lay out Buttons; it measures their label slot to decide when to stack.',
+        },
+        {
+          type: 'alternative to',
+          target: 'actions-rowactiontoolbar',
+          why: 'RowActionToolbar is a hover-revealed icon toolbar for list rows; ButtonGroup is for labelled form and dialog actions.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     orientation: {
       control: 'select',

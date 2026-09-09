@@ -247,6 +247,7 @@ function WithEditableCellsComponent() {
 }
 
 const meta: Meta<typeof AGGrid> = {
+  id: 'deprecated-aggrid',
   title: 'Deprecated/AGGrid',
   component: AGGrid,
   decorators: [withDeprecationBanner],
@@ -258,6 +259,17 @@ const meta: Meta<typeof AGGrid> = {
     a11y: { test: 'off' },
     // Disable Storybook's animation waiting which conflicts with AG Grid
     chromatic: { disableSnapshot: true },
+    catalog: {
+      entry: '@mieweb/ui/ag-grid',
+      peers: ['ag-grid-community', 'ag-grid-react'],
+      relationships: [
+        {
+          type: 'superseded by',
+          target: 'grids-datavis-nitro',
+          why: 'NITRO provides theming, perspectives and column features without the ag-grid peers.',
+        },
+      ],
+    },
     docs: {
       story: {
         autoplay: false,
@@ -329,7 +341,7 @@ import {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:deprecated'],
   argTypes: {
     variant: {
       control: 'select',

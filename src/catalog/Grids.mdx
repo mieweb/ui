@@ -1,0 +1,40 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Grids/Overview" />
+
+# Grids
+
+> **Tables and data grids start with DataVis NITRO.** Use `Table` only for a few static rows the
+> user will not sort, filter, page or export. Never hand-roll grid features on a plain table;
+> `AGGrid` is deprecated.
+
+That sentence is the library's grid policy; it is repeated verbatim in
+[CONTRIBUTING](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md), the agent rules and the
+component policy, and both grid pages below carry it.
+
+## Which one?
+
+| Component                                                          | Use it when                                                                   | Not when                                           | Entry                |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------- | -------------------- |
+| [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs)             | Users browse, sort, filter, group or export records — any list that may grow  | The data is a handful of static rows               | `@mieweb/ui/datavis` |
+| [DataVis NITRO Graph](?path=/docs/grids-datavis-nitro-graph--docs) | The same records as an interactive chart; users may change axes or chart type | You need a tiny inline trend                       | `@mieweb/ui/datavis` |
+| [Table](?path=/docs/grids-table--docs)                             | A few known rows shown for reading (line items, a summary block)              | Anything interactive beyond a link or a row action | `@mieweb/ui`         |
+| [Pagination](?path=/docs/grids-pagination--docs)                   | A server-paged `Table` or card list needs page controls                       | The rows are already in a NITRO grid               | `@mieweb/ui`         |
+| [Sparkline](?path=/docs/grids-sparkline--docs)                     | A glanceable, dependency-free trend strip over pre-bucketed points            | Exact values or axes must be read                  | `@mieweb/ui`         |
+| [AGGrid](?path=/docs/deprecated-aggrid--docs) _(deprecated)_       | Never for new work                                                            | —                                                  | `@mieweb/ui/ag-grid` |
+
+## How they fit together
+
+- `DataVisNitroSource` owns the data; **Grid** and **Graph** are two renderers over the same
+  source, so a dashboard can flip between rows and a chart without refetching.
+- `RowActionToolbar` gives both `Table` rows and NITRO cells (`group="grid"`) hover-revealed
+  per-row actions.
+- `Pagination` is fully controlled: the host owns `page` and `totalPages`.
+
+## Shared limitations
+
+- The DataVis engine's DOM is not screen-reader friendly and automated a11y checks are disabled on
+  the NITRO pages. Keep critical actions reachable outside the grid and provide textual summaries
+  for charts.
+- NITRO needs the optional peers `@mieweb/datavis` and `datavis-ace`; it is only exported from the
+  `@mieweb/ui/datavis` entry so applications without grids do not pay for it.

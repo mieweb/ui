@@ -2,11 +2,72 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { NotificationCenter, type Notification } from './NotificationCenter';
 
 const meta: Meta<typeof NotificationCenter> = {
-  title: 'Product/Provider/NotificationCenter',
+  id: 'feedback-notificationcenter',
+  title: 'Components/Feedback/NotificationCenter',
   component: NotificationCenter,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'padded',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A persistent, readable list of notifications: type icon, title, message, timestamp, sender (\`Avatar\`), unread highlight and per-item dismiss, plus "mark all read", "clear all" and "see all" affordances. It renders whatever \`notifications\` you pass — fetching, storage and read state live in the host.
+
+### Use it when
+
+- Users need to catch up on things that happened while they were away (orders received, results uploaded, invoices paid) and act on them later.
+- A bell menu or inbox panel in the app header.
+
+### Don't use it when
+
+- The message is about what the user just did — \`Toast\`.
+- The list is a conversation — use the Chat components.
+- There is no notion of read/unread or history; a plain list of \`Alert\`s is simpler.
+
+### Example
+
+\`\`\`tsx
+const { notifications, markRead, markAllRead, dismiss } = useNotifications();
+
+<NotificationCenter
+  notifications={notifications}
+  maxVisible={8}
+  onNotificationClick={(n) => { markRead(n.id); if (n.actionUrl) navigate(n.actionUrl); }}
+  onMarkAllRead={markAllRead}
+  onDismiss={dismiss}
+  onSeeAll={() => navigate('/notifications')}
+/>
+\`\`\`
+
+### Limitations
+
+- Each item is a clickable card (\`role="button"\`, \`tabIndex=0\`) that also contains buttons; this intentional nested-interactive pattern is excluded from the automated a11y rule here. Keep inner actions few and give them clear \`aria-label\`s.
+- Timestamps are rendered as given — format and localise them before passing.
+- Fixed max height with internal scroll (\`max-h-[400px]\`); wrap in your own popover or \`Sheet\`.
+- \`emptyMessage\` and button labels default to English.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-toast',
+          why: 'Toast for the moment; NotificationCenter for the history users return to.',
+        },
+        {
+          type: 'uses',
+          target: 'data-display-avatar',
+          why: 'Sender avatars.',
+        },
+        {
+          type: 'uses',
+          target: 'actions-button',
+          why: 'Header and footer actions.',
+        },
+      ],
+    },
     a11y: {
       config: {
         // NotificationCenter uses a clickable card pattern (onClick on card)

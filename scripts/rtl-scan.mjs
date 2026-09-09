@@ -9,6 +9,10 @@
  * The scan fails only when a file's count INCREASES or a new file offends,
  * so the migration can proceed batch-by-batch without breaking CI.
  *
+ * Genuinely physical usages (e.g. mouse-coordinate drag math) can be exempted
+ * with an `rtl-ignore` comment on the same line or the line directly above,
+ * ideally with a reason: `// rtl-ignore -- resize handles use clientX math`.
+ *
  * Usage:
  *   node scripts/rtl-scan.mjs            # scan + compare against baseline (CI)
  *   node scripts/rtl-scan.mjs --update   # rewrite baseline after a migration batch
@@ -65,6 +69,41 @@ function isCenteringIdiom(token, lineText) {
   );
 }
 
+// An `rtl-ignore` comment (`// rtl-ignore` or `/* rtl-ignore */`) on the same
+// line or the line directly above marks a genuinely physical usage (e.g.
+// mouse-coordinate drag/resize math) as exempt. Only comment forms count, so
+// the guard cannot be bypassed by string content.
+const RTL_IGNORE = /(?:\/\/|\/\*|\{\/\*)\s*rtl-ignore\b/;
+function isExplicitlyIgnored(lines, index) {
+  return (
+    RTL_IGNORE.test(lines[index]) ||
+    (index > 0 && RTL_IGNORE.test(lines[index - 1]))
+  );
+}
+
+// Best-effort logical equivalent for an offending token, shown in failure
+// output so the fix is copy-pasteable.
+function logicalEquivalent(token) {
+  if (/^space-x-/.test(token))
+    return `${token.replace(/^space-x-/, 'gap-x-')} (or keep it and add rtl:space-x-reverse)`;
+  if (/^divide-x/.test(token)) return `${token} rtl:divide-x-reverse`;
+  return token
+    .replace(/^((?:scroll-)?[mp])l-/, '$1s-')
+    .replace(/^((?:scroll-)?[mp])r-/, '$1e-')
+    .replace(/^left-/, 'start-')
+    .replace(/^right-/, 'end-')
+    .replace(/^text-left$/, 'text-start')
+    .replace(/^text-right$/, 'text-end')
+    .replace(/^rounded-tl(?=$|-)/, 'rounded-ss')
+    .replace(/^rounded-tr(?=$|-)/, 'rounded-se')
+    .replace(/^rounded-bl(?=$|-)/, 'rounded-es')
+    .replace(/^rounded-br(?=$|-)/, 'rounded-ee')
+    .replace(/^rounded-l(?=$|-)/, 'rounded-s')
+    .replace(/^rounded-r(?=$|-)/, 'rounded-e')
+    .replace(/^border-l(?=$|-)/, 'border-s')
+    .replace(/^border-r(?=$|-)/, 'border-e');
+}
+
 function walk(dir, files = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
@@ -84,6 +123,7 @@ function scan() {
     const rel = relative(root, file);
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((text, i) => {
+      if (isExplicitlyIgnored(lines, i)) return;
       for (const match of text.matchAll(PHYSICAL_UTILITIES)) {
         if (isCenteringIdiom(match[2], text)) continue;
         if (isHandledReverse(match[2], text)) continue;
@@ -139,21 +179,45 @@ for (const [file, count] of Object.entries(counts)) {
 const cleaned = Object.keys(baseline).filter((f) => !(f in counts)).length;
 
 if (failures.length > 0) {
+  const inActions = process.env.GITHUB_ACTIONS === 'true';
+  // GitHub workflow commands require %/CR/LF escaping in data, plus :/, in
+  // property values: https://docs.github.com/actions/reference/workflow-commands-for-github-actions
+  const esc = (s) =>
+    String(s).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+  const escProp = (s) => esc(s).replace(/:/g, '%3A').replace(/,/g, '%2C');
   console.error(
     'RTL guard: new physical-direction Tailwind classes detected.\n'
   );
   for (const { file, count, allowed } of failures) {
     console.error(`  ${file}: ${count} matches (baseline allows ${allowed})`);
     for (const { line, token } of results.get(file)) {
-      console.error(`    ${file}:${line}: ${token}`);
+      console.error(
+        `    ${file}:${line}: ${token} → ${logicalEquivalent(token)}`
+      );
+      if (inActions) {
+        // Inline annotation on the offending line in the PR "Files changed" tab.
+        console.log(
+          `::error file=${escProp(file)},line=${line},title=RTL guard::` +
+            esc(
+              `'${token}' breaks RTL layouts — use '${logicalEquivalent(token)}' instead. ` +
+                `If this usage is genuinely physical (e.g. pointer-coordinate math), add a '// rtl-ignore -- <reason>' comment.`
+            )
+        );
+      }
     }
   }
-  console.error(
-    '\nUse CSS logical properties instead (ms-/me-/ps-/pe-/start-/end-/text-start/rounded-s/border-e/gap-).'
-  );
-  console.error(
-    'See RTL plan. To inspect all matches: node scripts/rtl-scan.mjs --list'
-  );
+  console.error(`
+How to fix:
+  1. Replace each class with its logical equivalent shown above
+     (physical left/right → direction-aware start/end).
+  2. If the class string is NEW (not already in the Tailwind safelist), add it
+     to BOTH src/tailwind-preset.ts and src/tailwind-preset.cjs.
+  3. Only if the usage is genuinely physical (e.g. drag/resize clientX math),
+     exempt it with a comment on the same line or the line above:
+       // rtl-ignore -- <reason>
+
+Reproduce locally: pnpm rtl:scan   (all matches: node scripts/rtl-scan.mjs --list)
+Background: https://github.com/mieweb/ui/issues/319`);
   process.exit(1);
 }
 

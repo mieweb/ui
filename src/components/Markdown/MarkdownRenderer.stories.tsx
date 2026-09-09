@@ -3,9 +3,76 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
 const meta: Meta<typeof MarkdownRenderer> = {
-  title: 'Components/Markdown/MarkdownRenderer',
+  id: 'editors-markdown',
+  title: 'Modules/Editors/Markdown',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   component: MarkdownRenderer,
-  parameters: { layout: 'padded' },
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**Rendering Markdown to sanitised HTML with rich fenced blocks — a renderer, not an editor.** \`MarkdownRenderer\` takes \`text\`, converts it with **marked** through the \`useMarkdown\` hook, sanitises with **DOMPurify**, highlights code with **highlight.js** (13 languages bundled, more lazy-loaded) and replaces special fences with React components: \`\`\`mermaid\` → \`MermaidBlock\`, \`\`\`csv\` → sortable \`CsvBlock\` with export, \`\`\`survey\` → \`SurveyBlock\` form fields, \`\`\`html\` → \`HtmlPreviewBlock\` in a sandboxed iframe, other languages → \`CodeBlock\` with copy. \`cacheKey\` (e.g. \`message._id\`) memoises renders; \`streaming\` switches to synchronous rendering so tokens appear as they arrive, then a final async pass highlights everything. All blocks, \`FenceBlock\`, \`useMarkdown\` and \`highlightCode\` are exported for custom pipelines. Import \`@mieweb/ui/markdown.css\` once.
+
+### Use it when
+
+- Displaying **assistant output, notes or documentation stored as Markdown** — pass it to \`AIMessageDisplay\` via \`renderTextContent\`, or drop it under a saved \`RichEditor\` document.
+- The content includes diagrams, CSV tables, embedded forms or HTML demos that should be interactive, not code.
+- Tokens stream in and you want progressive rendering (\`streaming\` + a stable \`cacheKey\`).
+
+### Don't use it when
+
+- The user **edits** the text — \`RichEditor\` (Markdown) or \`RichTextEditor\` (HTML).
+- The source is HTML, not Markdown — sanitise and render it yourself; this component parses Markdown syntax.
+- You cannot accept the optional peers for the fences you use: \`mermaid\` (diagrams), \`papaparse\` (CSV), \`js-yaml\` (survey). Plain Markdown and code blocks need none of them.
+
+### Example
+
+\`\`\`tsx
+function AssistantText({ message }: { message: AIMessage }) {
+  const streaming = message.status === 'streaming';
+  return (
+    <MarkdownRenderer
+      text={message.text}
+      cacheKey={message.id}
+      streaming={streaming}
+      className="text-sm"
+    />
+  );
+}
+
+<AIMessageDisplay message={m} renderTextContent={(text) => <MarkdownRenderer text={text} cacheKey={m.id} streaming={m.status === 'streaming'} />} />
+\`\`\`
+
+Keep \`cacheKey\` stable per message; the renderer appends the text length while \`streaming\` so each delta re-renders.
+
+### Limitations
+
+- Security: HTML output is DOMPurify-sanitised, links get \`target="_blank" rel="noopener noreferrer"\`, and fence markers carry a \`data-md-fence\` sentinel so raw HTML cannot spoof a block. The \`html\` preview runs in an iframe with \`allow-scripts allow-forms\` and **there is no prop to turn that fence off** — treat model-generated HTML as untrusted and strip \`\`\`html\` fences upstream if your audience should not run them.
+- Accessibility: output is plain semantic HTML from marked; headings, lists and tables carry no extra ARIA. The lazy block fallback is an unlabelled "Loading…" (no \`aria-busy\`/live region). Block toolbars (copy, sort, export, preview/code toggle) and their labels are English and live inside each block component.
+- Rendering is a two-step: \`html\` state is empty on first paint (a flash for large documents) and each HTML segment is injected with \`dangerouslySetInnerHTML\`. Interrupted fences during \`streaming\` may render as code until the closing fence arrives.
+- Styling comes from \`@mieweb/ui/markdown.css\` (\`.md-prose\`), not Tailwind utilities; forget the import and you get unstyled HTML. Theme switching re-renders Mermaid diagrams. RTL follows the document direction; tables and code blocks are LTR by nature.
+- Peers: \`marked\`, \`dompurify\` and \`highlight.js\` are bundled dependencies; \`mermaid\`, \`papaparse\`, \`js-yaml\` are optional peers loaded only when their fence renders. Entry \`@mieweb/ui\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      peers: ['mermaid', 'papaparse', 'js-yaml'],
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'editors-richeditor',
+          why: 'RichEditor emits Markdown; MarkdownRenderer displays that Markdown read-only elsewhere in the app.',
+        },
+        {
+          type: 'composes with',
+          target: 'chat-aimessage',
+          why: 'Pass MarkdownRenderer through renderTextContent to render assistant text as sanitised Markdown.',
+        },
+      ],
+    },
+  },
 };
 export default meta;
 

@@ -339,7 +339,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
                 {showValue && (
                   <span
                     data-slot="slider-value"
-                    className="text-muted-foreground ml-1"
+                    className="text-muted-foreground ms-1"
                   >
                     {displayValue}
                   </span>

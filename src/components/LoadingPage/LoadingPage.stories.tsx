@@ -201,16 +201,63 @@ function LoadingPageDemo({
 // =============================================================================
 
 const meta: Meta<typeof LoadingPageDemo> = {
-  title: 'Product/Feature Modules/LoadingPage',
+  id: 'loading-loadingpage',
+  title: 'Components/Loading/LoadingPage',
   component: LoadingPageDemo,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'Loading state components: full-page loaders, overlays, progress bars, and skeletons. Use the "Demo Mode" control to explore different loading patterns.',
+        component: `### What it's for
+
+Route-level loading states. \`LoadingPage\` centres an indicator (\`spinner\`, \`dots\`, \`bar\` with \`progress\`, or \`pulse\`) with a \`message\` and \`subMessage\`; \`LoadingOverlay\` dims and blocks a region while \`isLoading\`; \`LoadingDots\`, \`LoadingBar\`, \`LoadingSkeleton\` and \`CardSkeleton\` are the building blocks. Use the **Demo Mode** control below to compare them.
+
+### Use it when
+
+- A whole route or panel has nothing to show yet (initial data, auth check, lazy chunk).
+- A form or region must be blocked while it saves — \`LoadingOverlay\` over the content.
+
+### Don't use it when
+
+- Only part of the view is pending and its shape is known — \`Skeleton\` in place keeps the rest usable.
+- The wait is inside a control — \`Button isLoading\` or an inline \`Spinner\`.
+- Loading failed — switch to \`ErrorPage\`.
+
+### Example
+
+\`\`\`tsx
+if (status === 'loading') return <LoadingPage message="Loading your cases…" indicator="dots" />;
+if (status === 'error') return <ErrorPage type="500" />;
+return <CaseList cases={data} />;
+\`\`\`
+
+### Limitations
+
+- Indicators expose \`role="status"\` / \`role="progressbar"\`; the message itself is plain text, so keep it short and translated (\`message\` defaults to English "Loading...").
+- \`LoadingOverlay\` blocks pointer input but does not trap focus or set \`inert\`.
+- \`size\` variants control padding/min-height, not the viewport; place \`LoadingPage\` where the content would go.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'uses',
+          target: 'loading-spinner',
+          why: 'The default indicator is a Spinner.',
+        },
+        {
+          type: 'alternative to',
+          target: 'loading-skeleton',
+          why: 'Skeleton keeps the page usable while regions load; LoadingPage replaces the view.',
+        },
+        {
+          type: 'alternative to',
+          target: 'feedback-errorpage',
+          why: 'Pending vs failed: the two page-level states hand off to each other.',
+        },
+      ],
     },
   },
   args: {

@@ -66,6 +66,18 @@ export type SuperChatChannel =
   | 'auto'
   | (string & {});
 
+/**
+ * Format used when a message's copy action is triggered without picking an
+ * explicit variant (Ctrl/Cmd-click on the footer copy button).
+ * - `'rich'` (default): writes rich text (`text/html`) *and* Markdown
+ *   (`text/plain`) in one clipboard write — the paste target decides.
+ * - `'markdown'`: writes the Markdown source as plain text.
+ * - `'plain'`: writes the rendered plain text.
+ *
+ * All formats stay reachable per message via the copy menus.
+ */
+export type SuperChatCopyFormat = 'rich' | 'markdown' | 'plain';
+
 /** Reference attachment carried by a `ref` thread item. */
 export interface SuperChatRef {
   /** Kind of referenced entity. */

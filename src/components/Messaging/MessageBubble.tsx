@@ -160,7 +160,10 @@ function ReadReceiptIndicator({
 
   return (
     <div
-      className={cn('flex items-center -space-x-1', className)}
+      className={cn(
+        'flex items-center -space-x-1 rtl:space-x-reverse',
+        className
+      )}
       aria-label={`Read by ${receipts.map((r) => r.participant.name).join(', ')}`}
     >
       {visibleReceipts.map((receipt) => (
@@ -337,7 +340,7 @@ function AttachmentPreview({
           />
         </svg>
       </div>
-      <div className="min-w-0 flex-1 text-left">
+      <div className="min-w-0 flex-1 text-start">
         <p className="truncate text-sm font-medium">{attachment.filename}</p>
         <p className="text-xs opacity-70">{formatFileSize(attachment.size)}</p>
       </div>
@@ -367,12 +370,12 @@ const bubbleVariants = cva(
   {
     variants: {
       variant: {
-        outgoing: ['bg-primary-800 text-white', 'rounded-br-md', 'ml-auto'],
+        outgoing: ['bg-primary-800 text-white', 'rounded-ee-md', 'ms-auto'],
         incoming: [
           'bg-neutral-100 text-neutral-900',
           'dark:bg-neutral-800 dark:text-neutral-100',
-          'rounded-bl-md',
-          'mr-auto',
+          'rounded-es-md',
+          'me-auto',
         ],
         system: [
           'mx-auto max-w-none',
@@ -598,7 +601,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 
             {/* Edited indicator */}
             {message.isEdited && !message.isDeleted && (
-              <span className="ml-1 text-xs opacity-60">(edited)</span>
+              <span className="ms-1 text-xs opacity-60">(edited)</span>
             )}
           </div>
 

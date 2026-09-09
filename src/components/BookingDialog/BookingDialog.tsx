@@ -108,7 +108,7 @@ export function FloatingInput({
         htmlFor={inputId}
         data-slot="floating-input-label"
         className={cn(
-          'text-muted-foreground absolute top-4 left-4 origin-left transform transition-all duration-200',
+          'text-muted-foreground absolute start-4 top-4 origin-left transform transition-all duration-200 rtl:origin-right',
           'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
           'peer-focus:-translate-y-2 peer-focus:scale-75',
           'peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-75',
@@ -193,7 +193,7 @@ export function ServiceSelect({
         onClick={() => setIsOpen(!isOpen)}
         data-slot="service-select-trigger"
         className={cn(
-          'w-full rounded-lg border px-4 py-3 text-left transition-colors',
+          'w-full rounded-lg border px-4 py-3 text-start transition-colors',
           'bg-background',
           'focus:ring-2 focus:outline-none',
           error
@@ -218,7 +218,7 @@ export function ServiceSelect({
         )}
         <ChevronDownIcon
           className={cn(
-            'text-muted-foreground absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 transition-transform',
+            'text-muted-foreground absolute end-4 top-1/2 h-5 w-5 -translate-y-1/2 transition-transform',
             isOpen && 'rotate-180'
           )}
         />

@@ -1,3 +1,13 @@
+## Copilot Code Review
+
+When performing a code review, read [CONTRIBUTING.md](../CONTRIBUTING.md), apply
+its [Component PR Rationale and Evidence](../CONTRIBUTING.md#component-pr-rationale-and-evidence)
+requirements, and follow its [Reviewing Component Guidance](../CONTRIBUTING.md#reviewing-component-guidance)
+procedure. Treat missing or misleading selection guidance and crosslinks as
+review findings, not merely optional prose improvements. Scope findings to new
+or materially changed components and guidance affected by the PR; do not demand
+a catalog-wide documentation rewrite for an unrelated change.
+
 ## Code Quality Principles
 
 <!-- https://github.com/mieweb/template-mieweb-opensource/blob/main/.github/copilot-instructions.md -->

@@ -1,0 +1,74 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Files/Overview" />
+
+# Files
+
+> **Same task — get a file from the user — three shapes.** A drag target over content you
+> already render, invisible until a drag starts → `DropzoneOverlay` + `useDropzone`. A standing
+> "files on this record" card with a table, storage meter and per-row actions → `FileManager`.
+> One document that must be validated, previewed, possibly photographed, and sent to an
+> extraction endpoint → `DocumentScanner`.
+
+## Which one?
+
+| Component                                                  | Use it when                                                                                                                                                  | Not when                                                                                                                              |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [DropzoneOverlay](?path=/docs/files-dropzoneoverlay--docs) | An existing panel should accept drops; `useDropzone` gives `isDragging`, `getRootProps`, `getInputProps`, `open()` and you render the list/progress yourself | You need a visible upload area and a file table — `FileManager`; files need validation, preview or camera — `DocumentScanner`         |
+| [FileManager](?path=/docs/files-filemanager--docs)         | A record's attachment list: drop/click card, `Progress` while `isUploading`, storage used/limit, table with Preview / Download / Delete via `onPreview` etc. | Only a drag target — `DropzoneOverlay`; scanned documents with extraction — `DocumentScanner`; sortable/multi-column lists — `Table`  |
+| [DocumentScanner](?path=/docs/files-documentscanner--docs) | Intake of an ID/card/form: MIME + size validation, `FilePreview`, mobile camera or desktop `WebcamModal` with auto-capture, `onScan` → `onResult`            | Plain attachments with no server extraction step — `FileManager` / `DropzoneOverlay`; multi-page capture, cropping or client-side OCR |
+
+## How they fit together
+
+- **Three independent drag implementations.** `useDropzone` (counter-based enter/leave, no
+  flicker), `FileManager`'s inline handlers (no counter), and `DocumentScanner`'s own `DropZone`
+  (counter-based, `role="button"`, Enter/Space) do not share code. `DocumentScanner` does **not**
+  use `DropzoneOverlay`; its `DropZone` is exported separately for custom flows.
+- **Where validation lives.** Only `DocumentScanner` (`useFileUpload`) validates — exact
+  `file.type` match against `acceptedFileTypes` and a `maxFileSizeMb` cap, surfaced through
+  `onValidationError` and an inline `Alert`. `useDropzone` passes `accept` to the picker only,
+  and `FileManager` declares `maxFileSize` but never reads it: enforce limits in `onDrop` /
+  `onUpload` and report through your own UI or `errorMessage`.
+- **Stateless about files.** All three hand the host `File`/`FileList` objects and stop.
+  `FileManager` renders whatever `files` you pass back; `DocumentScanner` keeps only the
+  pending previews and clears them 2 s after a successful `onScan`. Uploading, storage and
+  deletion are host concerns.
+- **After the scan.** `DocumentScanner`'s `onResult` is untyped (`unknown`); the recommended
+  next step for AI-extracted fields is
+  [ReconciliationPanel](?path=/docs/chat-reconciliationpanel--docs) (Chat), which diffs the
+  proposed values against what is on file and lets the user accept each one.
+- **Composition seams.** `DocumentScanner` uses `Modal` (`WebcamModal`), `Alert`, `Spinner`,
+  `Button`, `Text`; `FileManager` uses `Card`, `Progress`, `Table`; `DropzoneOverlay` only
+  `lucide-react` icons.
+
+## Shared limitations
+
+- **Keyboard intake.** Drag-and-drop is pointer-only everywhere; the keyboard path is the file
+  picker. `DocumentScanner`'s `DropZone` opens it on Enter/Space; `useDropzone` gives you
+  `open()` to wire to a visible button; `FileManager`'s drop card is a clickable `div` with **no
+  role, tab stop or key handler** and a hidden unlabelled `<input>`, so keyboard users cannot
+  upload through it.
+- **Announcements.** `DropzoneOverlay` is `role="status" aria-live="polite"` (the one live
+  region in the family, and it fires only during pointer drags). Upload progress, errors,
+  validation warnings, "Analyzing…" and success states in `FileManager` and `DocumentScanner`
+  are not `aria-live`; `DocumentScanner`'s success auto-dismisses after 2 s.
+- **Permissions and devices.** `DocumentScanner` needs a secure context and camera permission
+  for the webcam path (`useCamera` reads `navigator.permissions` where available); the
+  mobile/desktop split is `useIsMobile` (viewport < 640 px), not device detection. Captured
+  photos are JPEG at quality 0.92.
+- **Validation gaps.** HEIC files with an empty `file.type` are rejected by `DocumentScanner`;
+  its helper text lists JPEG/PNG/HEIC/WebP/PDF regardless of `acceptedFileTypes`. `useDropzone`
+  keeps only the first file when `multiple: false`. `FileManager` has no dedupe, count or size
+  checks.
+- **i18n.** All copy is hard-coded English: "Drop to upload file", "Add File" / "Click or drag
+  and drop" / "No Files" / "Uploading..." / "Used Storage", column headers and menu labels,
+  every `DocumentScanner` prompt and validation message (only `title` / `description` are
+  props). File sizes are base-1024 `B/KB/MB/GB` with a dot decimal.
+- **RTL.** `FileManager`'s row menu is portalled at `left: rect.right` + `translateX(-100%)`
+  (physical right) and its actions cell is `text-right`; `DropzoneOverlay` and
+  `DocumentScanner` are centred flex layouts.
+- **Theming.** `DropzoneOverlay` uses semantic tokens; `FileManager` mixes them with
+  hard-coded `blue-*`, `gray-*`, `red-*`, `bg-white` and per-extension icon colours;
+  `DocumentScanner` uses `primary-*` accents with hard-coded `green-*` success and
+  `neutral-*` dropzone colours. All three ship on the main `@mieweb/ui` entry with no extra
+  peers.

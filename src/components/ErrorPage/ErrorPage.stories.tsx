@@ -7,16 +7,72 @@ import {
 } from './ErrorPage';
 
 const meta: Meta<typeof ErrorPage> = {
-  title: 'Product/Feature Modules/ErrorPage',
+  id: 'feedback-errorpage',
+  title: 'Components/Feedback/ErrorPage',
   component: ErrorPage,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'Error page components for 404, 500, offline, and maintenance states.',
+        component: `### What it's for
+
+A whole-view error state: \`type\` picks a preset (\`404\`, \`500\`, \`403\`, \`401\`, \`offline\`, \`maintenance\`, \`generic\`) with code, illustration, \`<h1>\` title and description; \`config\` overrides any of them. \`actionButtons\` (label + \`href\` or \`onClick\`) and \`backButton\` give the user a way out. Three \`size\`s.
+
+### Use it when
+
+- A route cannot render its content at all: unknown URL, server failure, no permission, offline, planned maintenance.
+- As the fallback of an error boundary around a page region.
+
+### Don't use it when
+
+- Part of the page failed but the rest works — use \`Alert\` in that region.
+- The page is still loading — \`LoadingPage\`.
+- An empty result set ("no orders yet") — that is an empty state, not an error; a plain message with a primary action reads better.
+
+### Example
+
+\`\`\`tsx
+<ErrorBoundary fallback={<ErrorPage type="500" actionButtons={[{ label: 'Reload', onClick: () => location.reload() }]} />}>
+  <CaseView />
+</ErrorBoundary>
+
+// Router catch-all
+<Route path="*" element={<ErrorPage type="404" backButton />} />
+\`\`\`
+
+### Limitations
+
+- Renders an \`<h1>\`; place it where it is the page's main heading. Illustrations are \`aria-hidden\`.
+- Preset titles and descriptions are English — pass \`config\` with translated strings.
+- \`backButton\` uses \`history.back()\`; in a fresh tab there may be nowhere to go, so pair it with an explicit home action.
+- Fills its container; it does not lock scrolling or cover fixed chrome such as a header.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'feedback-alert',
+          why: 'Alert for a failed part of a working page; ErrorPage when the view cannot render.',
+        },
+        {
+          type: 'alternative to',
+          target: 'loading-loadingpage',
+          why: 'The two page-level states: LoadingPage while pending, ErrorPage when it failed.',
+        },
+        {
+          type: 'alternative to',
+          target: 'feedback-connectionstatus',
+          why: 'ConnectionStatus overlays a working app until it reconnects; ErrorPage replaces a route that failed.',
+        },
+        {
+          type: 'uses',
+          target: 'actions-button',
+          why: 'actionButtons render as Buttons.',
+        },
+      ],
     },
   },
   argTypes: {

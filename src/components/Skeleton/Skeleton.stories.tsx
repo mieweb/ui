@@ -244,12 +244,70 @@ function SkeletonExample({
 // =============================================================================
 
 const meta = {
-  title: 'Components/Loaders/Skeleton',
+  id: 'loading-skeleton',
+  title: 'Components/Loading/Skeleton',
   component: SkeletonExample,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+Pulsing placeholder blocks that hold the shape of content while it loads: \`Skeleton\` with \`variant\` presets (\`text\`, \`title\`, \`avatar\`, \`button\`, \`card\`, \`image\`), explicit \`width\`/\`height\`, or \`circle\`; plus \`SkeletonText\`, \`SkeletonCard\` and \`SkeletonTable\` for common layouts. Marked \`aria-hidden\` so screen readers skip the placeholders.
+
+### Use it when
+
+- You know what the loaded view looks like (a card, a table, a profile header) and want to avoid layout shift and a blank flash.
+- Content streams in progressively; skeletons can be replaced region by region.
+
+### Don't use it when
+
+- The wait is a fraction of a second — a skeleton that flashes is worse than nothing; delay it or use nothing.
+- The shape is unknown or the wait is indefinite — \`Spinner\`.
+- Progress is measurable — \`Progress\`.
+
+### Example
+
+\`\`\`tsx
+{patient ? (
+  <PatientHeader patient={patient} />
+) : (
+  <div className="flex items-center gap-3">
+    <Skeleton variant="avatar" />
+    <div className="space-y-2">
+      <Skeleton variant="title" width={220} />
+      <Skeleton variant="text" width={160} />
+    </div>
+  </div>
+)}
+\`\`\`
+
+Mirror the real component's dimensions so the swap is invisible.
+
+### Limitations
+
+- Because the skeleton is \`aria-hidden\`, **you must announce loading elsewhere** (a \`role="status"\` message or the region's \`aria-busy\`) or screen-reader users hear nothing.
+- \`animate-pulse\` does not pause for \`prefers-reduced-motion\`.
+- Neutral grey tokens with a \`dark:\` variant; it does not take brand colour.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'loading-spinner',
+          why: 'Spinner for short, shapeless waits; Skeleton when the layout is known and shift must be avoided.',
+        },
+        {
+          type: 'alternative to',
+          target: 'loading-loadingpage',
+          why: 'LoadingPage blanks the whole route; Skeleton loads regions in place.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     example: {
       control: 'select',

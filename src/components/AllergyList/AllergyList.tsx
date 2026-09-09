@@ -196,6 +196,7 @@ function AllergyRow({
     // keyboard equivalent (Alt+↑/↓) — 508.
     /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
     <li
+      data-slot="clinical-list-row"
       data-allergy-id={allergy.id}
       tabIndex={drag.enabled ? 0 : undefined}
       onKeyDown={drag.enabled ? handleRowKeyDown : undefined}
@@ -264,7 +265,7 @@ function AllergyRow({
         </Badge>
       )}
       {allergy.note && (
-        <span className="flex w-full basis-full items-center gap-1.5 pl-4">
+        <span className="flex w-full basis-full items-center gap-1.5 ps-4">
           <StickyNoteIcon size={12} className="text-muted-foreground" />
           <span className="text-muted-foreground text-xs">{allergy.note}</span>
         </span>
@@ -425,7 +426,10 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
           ) : (
             groups.map(({ type, label, items }) => (
               <section key={type} aria-label={label}>
-                <h4 className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase">
+                <h4
+                  data-slot="clinical-list-heading"
+                  className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
+                >
                   {label}
                 </h4>
                 <ul className="mt-1">

@@ -3,55 +3,80 @@ import * as React from 'react';
 import { AudioRecorder } from './AudioRecorder';
 
 const meta: Meta<typeof AudioRecorder> = {
-  title: 'Components/Images & Media/AudioRecorder',
+  id: 'media-audiorecorder',
+  title: 'Modules/Media/AudioRecorder',
   component: AudioRecorder,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component: `
-An audio recorder component with waveform visualization using WaveSurfer.js.
+        component: `### What it's for
 
-## Features
-- **Recording states**: idle, listening, recording, paused, stopped, playback
-- **Live visualization**: Real-time audio frequency visualization during recording
-- **Waveform display**: WaveSurfer.js integration for playback visualization
-- **Theme-aware**: Uses CSS variables for colors, adapts to light/dark mode
-- **Accessible**: Full ARIA support and keyboard navigation
-- **Customizable**: Custom controls via render props, adjustable sizes and variants
+**A complete record → review → keep/discard panel for a single audio take.** \`AudioRecorder\` asks for the microphone (\`navigator.mediaDevices.getUserMedia({ audio: true })\`), records with \`MediaRecorder\` (\`mimeType\` default \`audio/webm\`, falling back to the browser default when unsupported), shows a live frequency visualiser from an \`AnalyserNode\` while recording, then loads the finished \`Blob\` into a **wavesurfer.js** waveform for playback, seek and delete. States: \`idle\` → \`recording\` ⇄ \`paused\` → \`stopped\` ⇄ \`playback\` (\`listening\` is reserved). \`onRecordingComplete(blob, duration)\` is the hand-off; \`onRecordingStart\`, \`onStateChange\`, \`onError\` report progress; \`maxDuration\` (seconds, \`0\` = unlimited) auto-stops; \`audioUrl\` opens the panel in playback mode on an existing file. \`renderControls\` replaces the default buttons with your own, fed by \`AudioRecorderControlsRenderProps\` (\`onRecord\`, \`onPause\`, \`onResume\`, \`onStop\`, \`onPlay\`, \`onSeek\`, \`formatTime\`, flags). \`state\` can be controlled. Also exported: \`audioRecorderVariants\`, \`waveformContainerVariants\`, \`controlButtonVariants\`, \`formatTime\`.
 
-## Installation
+### Use it when
 
-Requires \`wavesurfer.js\` as a peer dependency:
+- The user records a **deliberate take** they will want to listen back to before submitting — a voicemail, a dictated note, a pronunciation sample — and the recorder can own a card-sized area (\`size\`, \`variant\` \`default\` | \`minimal\` | \`elevated\`).
+- You need pause/resume and a maximum length.
 
-\`\`\`bash
-npm install wavesurfer.js
-\`\`\`
+### Don't use it when
 
-## Usage
+- You need a **single mic button** in a toolbar or chat composer that fires-and-forgets a blob (e.g. to a transcription service) — \`RecordButton\`.
+- You are only **playing** audio — \`AudioPlayer\`.
+- You want an on-device, speaker-labelled visit transcript rather than a raw blob — \`VisitScribe\` (Voice).
+- The app cannot ship \`wavesurfer.js\`: playback of the take depends on it (see Limitations).
+
+### Example
 
 \`\`\`tsx
-import { AudioRecorder } from '@mieweb/ui';
+const [take, setTake] = useState<{ blob: Blob; url: string } | null>(null);
+const [status, setStatus] = useState<AudioRecorderState>('idle');
 
-function VoiceMessage() {
-  const handleComplete = (blob: Blob, duration: number) => {
-    // Upload or process the recording
-    console.log('Recording:', blob, 'Duration:', duration);
-  };
-
-  return (
-    <AudioRecorder
-      maxDuration={60}
-      onRecordingComplete={handleComplete}
-    />
-  );
-}
+<AudioRecorder
+  maxDuration={120}
+  onStateChange={setStatus}
+  onRecordingComplete={(blob) =>
+    setTake({ blob, url: URL.createObjectURL(blob) })
+  }
+  onError={(err) =>
+    toast.error(err.name === 'NotAllowedError' ? t('mic.denied') : err.message)
+  }
+/>
+<Button disabled={!take || status === 'recording'} onClick={() => upload(take!.blob)}>
+  Save voice note
+</Button>
 \`\`\`
-        `,
+
+The host keeps the blob; the recorder keeps the UI state. Revoke the object URL when you are done with it.
+
+### Limitations
+
+- Browser APIs: requires a secure context and a microphone permission prompt; a denied prompt surfaces only through \`onError\` (state returns to \`idle\`) — there is no built-in message. \`MediaRecorder\` output formats differ by browser (Chrome/Firefox \`audio/webm\`, Safari \`audio/mp4\`), and when the requested \`mimeType\` is unsupported the recorder falls back **but still labels the Blob with the requested type**.
+- \`onRecordingComplete\`'s \`duration\` is read from a closure captured when recording *started*, so as implemented it does not reflect the take's real length — measure from the blob or the \`onStateChange\` timer yourself.
+- Playback of the take is **WaveSurfer-only**: with \`showWaveform={false}\` the Play button does nothing, and \`wavesurfer.js\` (optional peer) is dynamically imported on mount whenever the waveform is shown.
+- Accessibility: root is \`role="group"\` with \`aria-label\` (default "Audio recorder"); control buttons carry English \`aria-label\`s ("Start recording", "Pause recording", "Stop recording", "Play recording", "Delete recording"). The "Recording"/"Paused" indicator, the elapsed time and the \`<canvas>\` visualiser are **not** announced (\`aria-live\` absent, canvas has no \`aria-hidden\`). Keyboard reaches the buttons but there is no keyboard seek on the waveform.
+- i18n: indicator text, button labels and \`m:ss\` formatting are hard-coded English/Latin digits. Controlled \`state\` only mirrors the visual state — the internal \`MediaRecorder\` still runs its own lifecycle.
+- Theming: \`bg-card\`/\`border-border\` container, but \`primary-800/900\`, \`neutral-*\`, \`red-600\`, \`yellow-500\` and \`text-white\` are hard-coded; waveform colours read \`--color-primary-400/600/800\` with hex fallbacks. RTL: symmetric flex, no physical offsets. Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      peers: ['wavesurfer.js'],
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'media-recordbutton',
+          why: 'AudioRecorder is a full record/pause/review panel with waveform playback; RecordButton is one toolbar button that hands off a Blob.',
+        },
+        {
+          type: 'alternative to',
+          target: 'voice-visit-scribe',
+          why: 'AudioRecorder captures a raw Blob for the host; VisitScribe records the room and produces an on-device speaker-labelled transcript.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     state: {
       control: 'select',

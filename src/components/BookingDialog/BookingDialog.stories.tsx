@@ -29,9 +29,10 @@ const mockServices: BookingService[] = [
 ];
 
 const meta: Meta<typeof BookingDialog> = {
-  title: 'Components/Overlays & Layering/BookingDialog',
+  id: 'users-integrations-bookingdialog',
+  title: 'BlueHive/Users & integrations/BookingDialog',
   component: BookingDialog,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

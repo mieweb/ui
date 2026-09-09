@@ -13,24 +13,100 @@ import {
 } from '../ConditionEditor';
 
 const meta: Meta<typeof ProblemList> = {
-  title: 'Healthcare/ProblemList',
+  id: 'clinical-lists-problemlist',
+  title: 'Healthcare/Clinical lists/ProblemList',
   component: ProblemList,
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-Patient-level problem list built on the **concern / assertion** model.
+        component: `### What it's for
 
-- Each row is a stable \`ConditionConcern\` — the durable identity that orders and encounters reference.
-- The coded characterization evolves through an **assertion history** (refinement / revision / progression); expand a row to see the timeline. Refuted assertions render struck-through.
-- Coding chips show ICD-10-CM / ICD-11 / SNOMED codes side by side (the primary coding is filled).
-- Capture-first: the add input accepts a bare problem name.
-        `,
+The **chart-scope problem list**: one row per \`ConditionConcern\` — the durable identity (\`concernId\`) that encounters and orders reference — whose coded characterization evolves through an **assertion history** (\`assertions[]\`, oldest → newest; \`currentAssertion()\` returns the last non-refuted one). Rows group into **Unconfirmed / Active / Inactive / Resolved** (\`concernGroupKey()\`), show ICD-10 / ICD-11 codes inline with SNOMED and crosswalk provenance in a tooltip (\`CodingChips\`), verification and \`uncertainty\` badges, concern \`relationships\`, and expand into the assertion timeline (refuted assertions struck through) plus \`observations\`. Fully **controlled**: \`concerns\` in; \`onAction(concern, action)\`, \`onAddProblem(text)\` and \`onReorder(concernIds)\` out. \`actions\` trims the row toolbar (\`open · observe · refine · revise · resolve · relate · move-up · move-down\`); \`readOnly\` removes it. Also exported: \`currentAssertion\`, \`concernGroupKey\`, \`CodingChips\`, \`UncertaintyBadge\`, \`concernHistoryContent\`, \`CONCERN_STATUS_LABELS\`, \`CHANGE_TYPE_LABELS\` and the model types (\`ConditionConcern\`, \`ConditionAssertion\`, \`ConditionCoding\`, \`ConcernStatus\`, \`VerificationStatus\`, \`Uncertainty\`).
+
+### Use it when
+
+- You are rendering the **patient's longitudinal problem list** — every concern the chart knows about, not what one visit addressed.
+- The host owns the concerns as data and can persist appended assertions, status changes, relationships and ordering; the list never mutates.
+- You want capture-first entry: \`onAddProblem\` hands you a bare name to store as an \`unconfirmed\` assertion, enriched later through \`ConditionEditor\`.
+
+### Don't use it when
+
+- You need the **encounter view** — which of these concerns is relevant *this visit* and how (Addressed / Relevant Hx / Noted) — [PresentingProblems](?path=/docs/clinical-lists-presentingproblems--docs). Relevance lives on the encounter reference, never on the concern.
+- You need today's **assessment and plan**, with orders nested under problems — [Assessment](?path=/docs/encounter-orders-assessment--docs).
+- You need to **edit** an assertion (codes, severity, onset, uncertainty) — pair with [ConditionEditor](?path=/docs/clinical-lists-conditioneditor--docs); ProblemList only emits \`refine\` / \`revise\` / \`relate\` / \`observe\` intents.
+- Your data is a flat list of diagnosis strings with no history or coding — a \`Table\` or plain list is simpler; the concern/assertion model is the whole point here.
+
+### Example
+
+\`\`\`tsx
+const [concerns, setConcerns] = useState<ConditionConcern[]>(chart.problems);
+const [editor, setEditor] = useState<{ mode: ConditionEditorMode; concern?: ConditionConcern } | null>(null);
+
+<ProblemList
+  concerns={concerns}
+  onAction={(concern, action) => {
+    if (action === 'resolve') {
+      setConcerns((prev) => prev.map((c) => (c.concernId === concern.concernId ? { ...c, clinicalStatus: 'resolved' } : c)));
+    } else if (action !== 'open') {
+      setEditor({ mode: action as ConditionEditorMode, concern }); // refine | revise | relate | observe
+    }
+  }}
+  onAddProblem={(text) =>
+    setConcerns((prev) => [
+      ...prev,
+      { concernId: newId(), clinicalStatus: 'active', source: 'manuallyAdded',
+        assertions: [{ id: newId(), date: today(), text, verificationStatus: 'unconfirmed' }] },
+    ])
+  }
+  onReorder={(ids) => setConcerns((prev) => [...prev].sort((a, b) => ids.indexOf(a.concernId) - ids.indexOf(b.concernId)))}
+/>
+<ConditionEditor
+  mode={editor?.mode ?? 'refine'}
+  open={editor !== null}
+  onOpenChange={(open) => !open && setEditor(null)}
+  concern={editor?.concern}
+  relatableConcerns={concerns}
+  onSave={(draft) => appendAssertion(editor!.concern!, draft)} // for 'revision', also mark draft.supersedes refuted
+  onRelate={(rel) => addRelationship(editor!.concern!, rel)}
+  onAddObservation={(text) => addObservation(editor!.concern!, text)}
+/>
+\`\`\`
+
+The host appends the new assertion (and, for a \`revision\`, marks the superseded assertion \`refuted\`) — the list never rewrites history itself.
+
+### Limitations
+
+- **Accessibility as implemented.** Groups are \`<section aria-label>\` around a \`<ul>\`; every row is a focusable \`<li tabIndex={0}>\` whose \`aria-label\` spells out Enter (toggle history) and Alt+↑/↓ (reorder); ↑/↓ move focus between rows. Row actions are a \`RowActionToolbar\` (\`role="toolbar"\`, ←/→ inside) that is hover-revealed on fine-pointer devices, always visible on touch and reachable by Tab. Reorders (pointer drop or keyboard) are announced through \`useLiveAnnouncement\` into an \`sr-only\` \`aria-live="polite"\` region; adds, resolves and history expansion are **not** announced. Only the "N assertions" button carries \`aria-expanded\`. Coding provenance is a \`Tooltip\` on a focusable span.
+- **Clinical logic is the host's.** Nothing validates codes, dedupes concerns, checks crosswalk consistency, derives \`clinicalStatus\` transitions or defines what \`resolve\` means — \`onAction(…, 'resolve')\` is a request. \`currentAssertion()\` falls back to the newest assertion even when every assertion is refuted.
+- **Reordering** needs \`onReorder\` and is confined to the same group (a cross-group drop would imply a status change); the rendered order is whatever you feed back.
+- **Responsive / RTL.** Rows \`flex-wrap\`; nothing collapses or truncates. The timeline's \`ml-*\` / \`pl-*\` and the toolbar's \`right-*\` overlay are physical, so RTL layouts do not mirror.
+- **Theming / i18n.** Semantic tokens via \`Card\` / \`Badge\` (\`bg-muted\`, \`border-border\`, \`text-muted-foreground\`). \`title\` and \`emptyMessage\` are props; group headings, action labels, verification/uncertainty badge text, the add placeholder and "N assertions" are English constants.
+- **Dependencies.** \`Card\`, \`Badge\`, \`Button\`, \`Tooltip\`, \`RowActionToolbar\`, \`useDragReorder\`, \`useLiveAnnouncement\`; main \`@mieweb/ui\` entry, no peers.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'clinical-lists-presentingproblems',
+          why: 'PresentingProblems takes these chart concerns as patientConcerns and tags which are relevant this encounter.',
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-conditioneditor',
+          why: 'The refine / revise / relate / observe row actions open a ConditionEditor whose draft the host appends to the concern.',
+        },
+        {
+          type: 'uses',
+          target: 'actions-rowactiontoolbar',
+          why: 'Each concern row reveals its actions through a RowActionToolbar.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

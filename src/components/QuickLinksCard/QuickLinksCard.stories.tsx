@@ -3,10 +3,76 @@ import { QuickLinksCard } from './QuickLinksCard';
 
 const meta: Meta<typeof QuickLinksCard> = {
   component: QuickLinksCard,
-  title: 'Components/Layout & Structure/QuickLinksCard',
-  tags: ['autodocs'],
+  id: 'dashboards-quicklinkscard',
+  title: 'Modules/Dashboards/QuickLinksCard',
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**A titled \`Card\` of shortcut rows.** \`links: QuickLink[]\` (\`{ id, label, icon?, href?, onClick?, badge?, description?, disabled? }\`) render as ghost \`Button\`s — icon, label + \`description\`, then a \`badge\` chip or a chevron. \`layout\` \`vertical\` (default, one per row) or \`grid\` (\`columns\` 2–4, icon above label, description hidden). \`title\` defaults to **"Quick Links"**. Clicking calls \`onClick\` if present, otherwise assigns \`window.location.href = href\`.
+
+### Use it when
+
+- A dashboard sidebar or home page needs "Add employee · New order · Reports" style shortcuts with optional counts, and you do not want to build the card yourself.
+- Shortcuts are few (≤ ~8) and either navigate or open something.
+
+### Don't use it when
+
+- The shortcut deserves a large tile with a tinted icon and a subtitle — \`QuickAction\` (a real button per action; you supply the grid).
+- The shortcuts sit inside a portlet with the standard widget header, count and "+" — \`DashboardWidget\` + \`DashboardWidgetActions\`.
+- Links must be real \`<a href>\` for the router, middle-click or crawlers — every item is a \`<button>\`; \`href\` is a JS navigation.
+- You need a different card header (actions, icon) — compose \`Card\` yourself.
+
+### Example
+
+\`\`\`tsx
+const navigate = useNavigate();
+const { data: pending } = usePendingOrdersCount();
+
+<QuickLinksCard
+  title="Shortcuts"
+  links={[
+    { id: 'new-order', label: 'New order', icon: <PlusIcon className="h-5 w-5" />, onClick: () => setOrderOpen(true) },
+    { id: 'pending', label: 'Pending orders', description: 'Awaiting results', badge: pending, onClick: () => navigate('/orders?status=pending') },
+    { id: 'reports', label: 'Reports', onClick: () => navigate('/reports'), disabled: !can('reports.view') },
+  ]}
+/>
+\`\`\`
+
+Prefer \`onClick\` with your router over \`href\` so navigation stays client-side.
+
+### Limitations
+
+- Accessibility: items are \`Button\`s (keyboard / focus handled); \`disabled\` disables the button. \`href\` items are **buttons, not links** — no link semantics, no new-tab, no prefetch. Icons are not \`aria-hidden\` (pass decorative icons yourself). The chevron is \`aria-hidden\`. \`badge\` is an unlabelled span ("12" read without context). The card title is a \`CardTitle\` \`<h3>\` with no level prop.
+- Layout: in \`grid\` each item is a fixed \`h-20\` tile and \`description\` is dropped; in \`vertical\` long labels wrap, nothing truncates.
+- i18n: default \`title\` \`"Quick Links"\`; no number formatting on \`badge\`.
+- RTL: physical \`mr-3\` (icon), \`ml-2\` (badge), \`text-left\`, and the chevron points right without mirroring.
+- Theming: semantic tokens plus \`bg-primary/10\` and \`--mieweb-primary-900/400\` for the badge. Classes are concatenated with template strings, so \`className\` on the Card cannot merge-override. Uses \`Card\` and \`Button\`; no third-party dependencies.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'uses',
+          target: 'layout-card',
+          why: 'Renders a Card with CardHeader / CardTitle / CardContent around the link list.',
+        },
+        {
+          type: 'alternative to',
+          target: 'actions-quickaction',
+          why: 'QuickLinksCard is a compact titled list of plain link rows with badges; QuickAction is a large explained tile you arrange in your own grid.',
+        },
+        {
+          type: 'alternative to',
+          target: 'dashboards-dashboardwidget',
+          why: 'DashboardWidgetActions is a coloured shortcut grid inside a widget; QuickLinksCard is a standalone Card listing plain link rows with badges.',
+        },
+      ],
+    },
   },
   decorators: [
     (Story) => (

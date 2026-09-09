@@ -5,6 +5,57 @@ import { renderWithTheme } from '../../test/test-utils';
 import { CountryDropdown } from './CountryDropdown';
 
 describe('CountryDropdown', () => {
+  it('shows the placeholder and no selection by default', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<CountryDropdown />);
+    const trigger = screen.getByRole('button', { name: 'Select country' });
+    expect(trigger).toHaveTextContent('Select country…');
+    expect(trigger).not.toHaveTextContent('United States');
+
+    await user.click(trigger);
+    expect(screen.queryByRole('option', { selected: true })).toBeNull();
+  });
+
+  it('treats an empty controlled value as no selection', () => {
+    renderWithTheme(<CountryDropdown value="" placeholder="Pick one" />);
+    expect(
+      screen.getByRole('button', { name: 'Select country' })
+    ).toHaveTextContent('Pick one');
+  });
+
+  it('renders an unknown code as empty before and after the list loads', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<CountryDropdown value="ZZ" />);
+    const trigger = screen.getByRole('button', { name: 'Select country' });
+    // Pre-open fallback branch (list not built yet)
+    expect(trigger).toHaveTextContent('Select country…');
+    expect(trigger).not.toHaveTextContent('ZZ');
+
+    // Loaded-list branch: opening builds the full country list
+    await user.click(trigger);
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    expect(trigger).toHaveTextContent('Select country…');
+    expect(trigger).not.toHaveTextContent('ZZ');
+  });
+
+  it('starts with defaultValue selected when uncontrolled', () => {
+    renderWithTheme(<CountryDropdown defaultValue="US" />);
+    expect(
+      screen.getByRole('button', { name: 'Select country' })
+    ).toHaveTextContent('United States');
+  });
+
+  it('shows the picked country when uncontrolled', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<CountryDropdown />);
+    const trigger = screen.getByRole('button', { name: 'Select country' });
+
+    await user.click(trigger);
+    await user.type(screen.getByLabelText('Search countries'), 'Canada');
+    await user.click(screen.getByRole('option', { name: /Canada/ }));
+    expect(trigger).toHaveTextContent('Canada');
+  });
+
   it('shows the country name (not the dial code) on the trigger', () => {
     renderWithTheme(<CountryDropdown value="GB" />);
     const trigger = screen.getByRole('button', { name: 'Select country' });
