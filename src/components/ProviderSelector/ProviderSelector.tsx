@@ -157,7 +157,7 @@ export function ProviderSelector({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg border px-3 text-left transition-colors',
+          'flex w-full items-center gap-3 rounded-lg border px-3 text-start transition-colors',
           'bg-background text-foreground',
           'border-input',
           'hover:border-muted-foreground/50',
@@ -265,7 +265,7 @@ export function ProviderSelector({
                 <div className="relative">
                   <svg
                     aria-hidden="true"
-                    className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                    className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -283,7 +283,7 @@ export function ProviderSelector({
                     placeholder={searchPlaceholder}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-1 focus:outline-none"
+                    className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 ps-9 pe-4 text-sm focus:ring-1 focus:outline-none"
                     // eslint-disable-next-line jsx-a11y/no-autofocus
                     autoFocus
                   />
@@ -305,7 +305,7 @@ export function ProviderSelector({
                     data-slot="provider-selector-option"
                     onClick={() => handleSelect(provider)}
                     className={cn(
-                      'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+                      'flex w-full items-center gap-3 px-4 py-3 text-start transition-colors',
                       'hover:bg-muted',
                       selectedProvider?.id === provider.id && 'bg-primary/10'
                     )}
