@@ -10,6 +10,7 @@ import { Prefs } from 'datavis-ace';
 import {
   DataVisNitroContext,
   DataVisNitroGrid,
+  DataVisNitroLanguageSelector,
   DataVisNitroSource,
   type DataVisNitroGridProps,
 } from './DataVisNITRO';
@@ -130,11 +131,61 @@ export const WithControls: Story = {
           'start_date',
           'manager',
         ]}
+        mode="full"
         showControls
+        debug
         height="480px"
+        features={{
+          columnResize: true,
+          columnReorder: true,
+          stickyHeaders: true,
+          zebraStripe: true,
+          keyboardNav: true,
+          headerContextMenu: true,
+        }}
       />
     </DataVisNitroSource>
   ),
+};
+
+export const LocalizedGrid: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The public `DataVisNitroLanguageSelector` exposes the same locale picker as the standalone demo. Its selected locale updates translated DataVis labels, while the grid `locale` prop localizes date, number, and currency formatting.',
+      },
+    },
+  },
+  render: () => {
+    const LocalizedGridDemo = () => {
+      const [locale, setLocale] = useState('es-MX');
+
+      return (
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <DataVisNitroLanguageSelector
+              value={locale}
+              onLanguageChange={setLocale}
+              className="w-56"
+            />
+          </div>
+          <DataVisNitroSource type="http" url="/sample-data.json">
+            <DataVisNitroGrid
+              title="Directorio de empleados"
+              columns={EMPLOYEE_COLUMNS}
+              locale={locale}
+              mode="full"
+              showControls
+              height="480px"
+            />
+          </DataVisNitroSource>
+        </div>
+      );
+    };
+
+    return <LocalizedGridDemo />;
+  },
 };
 
 export const Operations: Story = {
