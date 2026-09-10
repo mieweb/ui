@@ -12,12 +12,20 @@ import React, {
 // =============================================================================
 
 export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
+/**
+ * Toast container position. All values are direction-aware (logical):
+ * `*-left`/`*-right` are deprecated aliases for `*-start`/`*-end`.
+ */
 export type ToastPosition =
-  | 'top-left'
+  | 'top-start'
   | 'top-center'
+  | 'top-end'
+  | 'bottom-start'
+  | 'bottom-center'
+  | 'bottom-end'
+  | 'top-left'
   | 'top-right'
   | 'bottom-left'
-  | 'bottom-center'
   | 'bottom-right';
 
 export interface ToastData {
@@ -49,6 +57,12 @@ export type ToastOptions = Omit<ToastData, 'id'>;
 export interface ToastContextValue {
   /** Currently visible toasts */
   toasts: ToastData[];
+  /**
+   * Toast container position configured on the provider. Optional so that
+   * pre-existing mocks of this interface keep compiling; ToastProvider always
+   * supplies it.
+   */
+  position?: ToastPosition;
   /** Add a new toast and return its ID */
   toast: (options: ToastOptions) => string;
   /** Shorthand for success toast */
@@ -79,7 +93,7 @@ export interface ToastProviderProps {
   children: ReactNode;
   /** Maximum number of toasts to show at once (default: 5) */
   maxToasts?: number;
-  /** Position of toasts on screen (default: 'bottom-right') */
+  /** Position of toasts on screen (default: 'bottom-end') */
   position?: ToastPosition;
   /** Default duration for toasts in ms (default: 5000) */
   defaultDuration?: number;
@@ -94,6 +108,7 @@ export function ToastProvider({
   children,
   maxToasts = 5,
   defaultDuration = 5000,
+  position = 'bottom-end',
 }: ToastProviderProps): React.JSX.Element {
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
@@ -184,6 +199,7 @@ export function ToastProvider({
   const contextValue = useMemo<ToastContextValue>(
     () => ({
       toasts,
+      position,
       toast,
       success,
       error,
@@ -192,7 +208,17 @@ export function ToastProvider({
       dismiss,
       dismissAll,
     }),
-    [toasts, toast, success, error, warning, info, dismiss, dismissAll]
+    [
+      toasts,
+      position,
+      toast,
+      success,
+      error,
+      warning,
+      info,
+      dismiss,
+      dismissAll,
+    ]
   );
 
   return (
@@ -234,4 +260,12 @@ export function useToast(): ToastContextValue {
     throw new Error('useToast must be used within a ToastProvider');
   }
   return context;
+}
+
+/**
+ * Optional variant of {@link useToast} — returns `null` when used outside a
+ * ToastProvider instead of throwing.
+ */
+export function useOptionalToast(): ToastContextValue | null {
+  return useContext(ToastContext);
 }
