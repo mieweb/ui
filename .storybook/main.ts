@@ -243,6 +243,7 @@ const config: StorybookConfig = {
       new Set([
         ...(config.resolve.dedupe ?? []),
         '@mieweb/ui',
+        'datavis-ace',
         'lucide-react',
         'react',
         'react-dom',
