@@ -24,6 +24,9 @@ const bannerVariants = cva(
       position: {
         bottom: 'bottom-0 start-0 end-0',
         top: 'top-0 start-0 end-0',
+        'bottom-start': 'bottom-4 start-4 max-w-md',
+        'bottom-end': 'bottom-4 end-4 max-w-md',
+        // Deprecated physical aliases for the logical positions above.
         'bottom-left': 'bottom-4 start-4 max-w-md',
         'bottom-right': 'bottom-4 end-4 max-w-md',
       },
@@ -48,6 +51,12 @@ const bannerVariants = cva(
 export interface CookieConsentBannerProps extends VariantProps<
   typeof bannerVariants
 > {
+  /**
+   * Position of the banner. All values are direction-aware (logical):
+   * `bottom-left`/`bottom-right` are deprecated aliases for
+   * `bottom-start`/`bottom-end`.
+   */
+  position?: VariantProps<typeof bannerVariants>['position'];
   /** Whether the banner is visible */
   isVisible?: boolean;
   /** Callback when user accepts cookies */
