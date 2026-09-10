@@ -57,8 +57,12 @@ export type ToastOptions = Omit<ToastData, 'id'>;
 export interface ToastContextValue {
   /** Currently visible toasts */
   toasts: ToastData[];
-  /** Toast container position configured on the provider */
-  position: ToastPosition;
+  /**
+   * Toast container position configured on the provider. Optional so that
+   * pre-existing mocks of this interface keep compiling; ToastProvider always
+   * supplies it.
+   */
+  position?: ToastPosition;
   /** Add a new toast and return its ID */
   toast: (options: ToastOptions) => string;
   /** Shorthand for success toast */

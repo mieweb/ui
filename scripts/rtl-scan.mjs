@@ -69,12 +69,15 @@ function isCenteringIdiom(token, lineText) {
   );
 }
 
-// An `rtl-ignore` comment on the same line or the line directly above marks a
-// genuinely physical usage (e.g. mouse-coordinate drag/resize math) as exempt.
+// An `rtl-ignore` comment (`// rtl-ignore` or `/* rtl-ignore */`) on the same
+// line or the line directly above marks a genuinely physical usage (e.g.
+// mouse-coordinate drag/resize math) as exempt. Only comment forms count, so
+// the guard cannot be bypassed by string content.
+const RTL_IGNORE = /(?:\/\/|\/\*|\{\/\*)\s*rtl-ignore\b/;
 function isExplicitlyIgnored(lines, index) {
   return (
-    lines[index].includes('rtl-ignore') ||
-    (index > 0 && lines[index - 1].includes('rtl-ignore'))
+    RTL_IGNORE.test(lines[index]) ||
+    (index > 0 && RTL_IGNORE.test(lines[index - 1]))
   );
 }
 
