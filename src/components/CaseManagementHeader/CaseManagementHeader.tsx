@@ -222,7 +222,7 @@ export const CaseContextBar = React.forwardRef<
             aria-label={l.back}
             className="-ms-2 h-6 w-6 shrink-0"
           >
-            <ArrowLeftIcon size={16} />
+            <ArrowLeftIcon size={16} className="rtl:-scale-x-100" />
           </Button>
         )}
         <span
@@ -429,7 +429,7 @@ export const CaseManagementHeader = React.forwardRef<
                 aria-label={l.back}
                 className="-ms-2 h-8 w-8 shrink-0"
               >
-                <ArrowLeftIcon size={18} />
+                <ArrowLeftIcon size={18} className="rtl:-scale-x-100" />
               </Button>
             )}
 

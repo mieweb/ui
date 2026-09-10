@@ -78,7 +78,7 @@ const [employers, setEmployers] = useState<string[]>(user.employerIds);
 - Cascading is one-directional: unchecking a parent also unchecks its children (each as a separate \`onPermissionsChange\` call, so batch or use a functional setter); checking a parent does **not** check children, and a child is disabled while its parent is unchecked. Nothing is submitted with a form — the host persists.
 - Hierarchy depth is fixed at three levels (permission › child › grandchild); deeper \`children\` are ignored when computing \`isAssigned\`.
 - i18n: section titles and "All" are \`labels\` props; "Expand/Collapse …" aria-labels and the "—" separators are hard-coded. Employer address is rendered as "street1 - city, state" (US order).
-- RTL: nested rows indent with \`ml-4\` / \`ml-6\` / \`pl-2\` / \`pl-4\` / \`-ml-2\`, group headers are \`text-left\`, the tree rule is \`border-l\`, address uses \`ml-2\` — all physical. Theming: semantic tokens (\`text-primary\`, \`hover:bg-muted/50\`, \`border-border\`, summary \`bg-info/10 border-info/30\`). Depends on \`Checkbox\` and \`lucide-react\` (Shield, Building2, chevrons).`,
+- RTL: nested rows indent with logical \`ms-*\` / \`ps-*\`, group headers use \`text-start\`, the tree rule is \`border-s\`, and the collapsed chevron mirrors (\`rtl:-scale-x-100\`). Theming: semantic tokens (\`text-primary\`, \`hover:bg-muted/50\`, \`border-border\`, summary \`bg-info/10 border-info/30\`). Depends on \`Checkbox\` and \`lucide-react\` (Shield, Building2, chevrons).`,
       },
       story: { inline: true },
     },

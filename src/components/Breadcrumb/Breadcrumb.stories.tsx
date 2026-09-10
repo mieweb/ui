@@ -5,7 +5,7 @@ import React from 'react';
 
 // Map of separator names to React elements
 const separatorMap: Record<string, React.ReactNode> = {
-  chevron: <ChevronRight className="h-4 w-4" />,
+  chevron: <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />,
   slash: <BreadcrumbSlash />,
   arrow: <span className="text-muted-foreground">→</span>,
   guillemet: <span className="text-muted-foreground">›</span>,
@@ -63,7 +63,7 @@ Stateless: the host derives the items from its router.
 - Accessibility: \`<nav aria-label="Breadcrumb">\` › \`<ol>\` › \`<li>\`; separators are \`aria-hidden\`; the current page is a \`<span aria-current="page">\` (not a link). The collapsed "…" is a plain \`<span>\` — **not a button**, so hidden ancestors are unreachable; use a \`Dropdown\` in \`renderLink\` or a larger \`maxItems\` when they matter. The hard-coded English \`aria-label="Breadcrumb"\` is not a prop.
 - Default links are plain \`<a href>\` (full navigation); pass \`renderLink\` for client-side routing. \`renderLink\` is *not* used for the last item.
 - \`maxItems\` below 2 still shows at least the first item and the ellipsis; \`icon\` is rendered as-is (add \`aria-hidden\` yourself).
-- RTL: the default chevron is a fixed right-pointing SVG and does not mirror; pass \`separator\` for RTL layouts. Items \`flex-wrap\` onto new lines rather than truncating.
+- RTL: the default chevron separator mirrors (\`rtl:-scale-x-100\`); custom \`separator\` content is your responsibility. Items \`flex-wrap\` onto new lines rather than truncating.
 - Theming: semantic tokens only (\`text-muted-foreground\`, \`text-foreground\`, \`ring-ring\`). No dependencies beyond \`cn\`.`,
       },
     },

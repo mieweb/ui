@@ -1044,7 +1044,7 @@ function DropdownSubmenu({
         <ChevronRightIcon
           size={16}
           aria-hidden="true"
-          className="shrink-0 text-neutral-400"
+          className="shrink-0 text-neutral-400 rtl:-scale-x-100"
         />
       </button>
       {open &&

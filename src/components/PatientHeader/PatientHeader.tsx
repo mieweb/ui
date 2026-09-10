@@ -665,7 +665,7 @@ export const PatientHeader = React.forwardRef<
               aria-label="Go back"
               className="-ms-2 mt-1 h-8 w-8 shrink-0"
             >
-              <ArrowLeftIcon size={18} />
+              <ArrowLeftIcon size={18} className="rtl:-scale-x-100" />
             </Button>
           )}
 

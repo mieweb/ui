@@ -780,7 +780,7 @@ export function CompactHeader({
       href={backHref}
       className="rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800"
     >
-      <ChevronLeftIcon className="h-5 w-5" />
+      <ChevronLeftIcon className="h-5 w-5 rtl:-scale-x-100" />
     </a>
   ) : onBack ? (
     <button
@@ -788,7 +788,7 @@ export function CompactHeader({
       onClick={onBack}
       className="rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800"
     >
-      <ChevronLeftIcon className="h-5 w-5" />
+      <ChevronLeftIcon className="h-5 w-5 rtl:-scale-x-100" />
     </button>
   ) : null;
 

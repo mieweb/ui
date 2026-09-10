@@ -64,7 +64,7 @@ const { rows, totalPages } = useInvoices({ page, pageSize: 25 });
 ### Limitations
 
 - The \`nav\` has a default \`aria-label\` of "Pagination" and the current page is marked with \`data-active\`; pass \`label\`/\`labels\` for translation, as button text is not externalised for you.
-- Arrows use chevron icons that do not auto-mirror in RTL — check the direction of first/last icons when \`dir="rtl"\`.
+- First/prev/next/last chevron icons mirror in RTL (\`rtl:-scale-x-100\`).
 - Does not fetch or slice data; page size and total count come from the host.`,
       },
     },
