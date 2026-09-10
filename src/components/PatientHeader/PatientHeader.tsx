@@ -419,7 +419,7 @@ function PatientOverflowMenu({
               </div>
 
               {/* Divider: horizontal on mobile, vertical on desktop */}
-              <div className="border-border my-1 border-t md:my-0 md:border-t-0 md:border-l" />
+              <div className="border-border my-1 border-t md:my-0 md:border-s md:border-t-0" />
 
               {/* Add column */}
               <div className="md:min-w-[26rem]">
@@ -663,7 +663,7 @@ export const PatientHeader = React.forwardRef<
               onClick={onBack}
               disabled={!onBack}
               aria-label="Go back"
-              className="mt-1 -ml-2 h-8 w-8 shrink-0"
+              className="-ms-2 mt-1 h-8 w-8 shrink-0"
             >
               <ArrowLeftIcon size={18} />
             </Button>
@@ -787,7 +787,7 @@ export const PatientHeader = React.forwardRef<
 
         {/* ─── Flag ribbon (e.g. Duplicate) ─── */}
         {showFlagBanner && patient.flags && patient.flags.length > 0 && (
-          <div className="border-t border-amber-200 bg-amber-50 px-5 py-1.5 text-left text-xs font-medium tracking-wide text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-300">
+          <div className="border-t border-amber-200 bg-amber-50 px-5 py-1.5 text-start text-xs font-medium tracking-wide text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-300">
             {patient.flags
               .map(
                 (flag) =>

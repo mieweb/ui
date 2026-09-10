@@ -679,11 +679,11 @@ export function DateRangePicker({
                   inRange && 'bg-muted',
                   // Start date
                   start &&
-                    'bg-foreground text-background hover:bg-foreground rounded-l-md font-semibold',
+                    'bg-foreground text-background hover:bg-foreground rounded-s-md font-semibold',
                   // End date
                   end &&
                     !start &&
-                    'border-foreground text-foreground rounded-r-md border font-semibold',
+                    'border-foreground text-foreground rounded-e-md border font-semibold',
                   // Today indicator (only if not start/end)
                   today && !start && !end && 'font-semibold'
                 )}
@@ -716,7 +716,7 @@ export function DateRangePicker({
         data-slot="date-range-trigger"
         className={cn(
           'border-input bg-background hover:bg-muted',
-          'inline-flex w-[300px] items-center gap-2 rounded-md border px-4 py-2 text-left text-sm font-normal',
+          'inline-flex w-[300px] items-center gap-2 rounded-md border px-4 py-2 text-start text-sm font-normal',
           'focus:ring-ring focus:ring-2 focus:outline-none',
           'transition-colors',
           !displayValue && 'text-muted-foreground'
@@ -851,7 +851,7 @@ export function DateRangePicker({
               {showPresets && (
                 <div
                   className={cn(
-                    'border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3',
+                    'border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-e p-3',
                     isResponsive && 'hidden md:flex'
                   )}
                   data-slot="date-range-presets"
@@ -863,7 +863,7 @@ export function DateRangePicker({
                       onClick={() => handlePresetSelect(preset.key)}
                       data-slot="date-range-preset"
                       className={cn(
-                        'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
+                        'rounded-md px-3 py-1.5 text-start text-sm transition-colors',
                         'hover:bg-muted',
                         activePreset === preset.key &&
                           'bg-primary-800 text-white'
@@ -1015,9 +1015,9 @@ export function DateRangeFilter({
     <Dropdown
       trigger={
         <Button variant={variant} size="md" className={className}>
-          <Calendar className="mr-2 h-4 w-4" />
+          <Calendar className="me-2 h-4 w-4" />
           {activeLabel || labels.filter || 'Filter by Date'}
-          <ChevronDown className="ml-2 h-3 w-3" />
+          <ChevronDown className="ms-2 h-3 w-3" />
         </Button>
       }
       className="w-56"

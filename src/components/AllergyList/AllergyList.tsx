@@ -264,7 +264,7 @@ function AllergyRow({
         </Badge>
       )}
       {allergy.note && (
-        <span className="flex w-full basis-full items-center gap-1.5 pl-4">
+        <span className="flex w-full basis-full items-center gap-1.5 ps-4">
           <StickyNoteIcon size={12} className="text-muted-foreground" />
           <span className="text-muted-foreground text-xs">{allergy.note}</span>
         </span>

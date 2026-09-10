@@ -716,7 +716,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       <div className="relative" ref={anchorRef}>
         <SearchIcon
           size={16}
-          className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
+          className="text-muted-foreground absolute start-3 top-5 -translate-y-1/2"
         />
         <input
           type="text"
@@ -742,7 +742,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           disabled={status.state === 'error'}
           className={cn(
             'border-border bg-background text-foreground placeholder:text-muted-foreground',
-            'h-10 w-full rounded-md border pr-3 pl-9 text-sm',
+            'h-10 w-full rounded-md border ps-9 pe-3 text-sm',
             'focus:ring-ring focus:ring-2 focus:outline-none'
           )}
         />
@@ -821,7 +821,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       onClick={() => pick(r)}
                       onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
                       className={cn(
-                        'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-left text-sm',
+                        'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-start text-sm',
                         'hover:bg-muted/60 focus:bg-muted/60 focus:outline-none',
                         i === activeIndex && 'bg-muted/60'
                       )}
@@ -890,7 +890,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       tabIndex={-1}
                       onClick={submitFreeText}
                       className={cn(
-                        'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
+                        'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-start text-sm italic',
                         'focus:bg-muted/60 focus:outline-none'
                       )}
                     >

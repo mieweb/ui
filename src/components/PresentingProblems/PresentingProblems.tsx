@@ -147,7 +147,7 @@ function RelevanceControl({
             onClick={() => onChange(active ? null : relevance)}
             className={cn(
               'px-2 py-1 text-xs font-medium transition-colors',
-              'border-border border-l first:border-l-0',
+              'border-border border-s first:border-s-0',
               active
                 ? 'bg-primary-800 text-white'
                 : 'bg-background text-muted-foreground hover:text-foreground'
@@ -346,7 +346,7 @@ export const PresentingProblems = React.forwardRef<
             </Badge>
           )}
           {!readOnly && (
-            <span className="ml-auto">
+            <span className="ms-auto">
               <RelevanceControl
                 value={relevance}
                 onChange={(r) => onRelevanceChange?.(concern, r)}

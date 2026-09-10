@@ -413,7 +413,7 @@ function DayScheduleRow({
       >
         {dayName}
         {isToday && highlightToday && (
-          <span className="text-primary-800 dark:text-primary-300 ml-1 text-xs">
+          <span className="text-primary-800 dark:text-primary-300 ms-1 text-xs">
             (Today)
           </span>
         )}
@@ -421,7 +421,7 @@ function DayScheduleRow({
 
       <div
         data-slot="business-hours-day-hours"
-        className={cn('text-right', hasMultipleRanges && 'flex flex-col gap-1')}
+        className={cn('text-end', hasMultipleRanges && 'flex flex-col gap-1')}
         data-cy={`provider-hours-${dayHours.day}`}
       >
         {hasHours ? (

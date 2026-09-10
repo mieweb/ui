@@ -1026,7 +1026,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   hasError: showError,
                   labelVariant: isFloating ? 'floating' : 'stacked',
                 }),
-                'pr-10',
+                'pe-10',
                 className
               )}
               {...inputProps}
@@ -1050,7 +1050,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               type="button"
               onClick={() => setIsCalendarOpen(!isCalendarOpen)}
               className={cn(
-                'absolute top-1/2 right-3 -translate-y-1/2',
+                'absolute end-3 top-1/2 -translate-y-1/2',
                 'text-muted-foreground hover:text-foreground',
                 'focus:text-foreground focus:outline-none',
                 'transition-colors'

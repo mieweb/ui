@@ -452,7 +452,7 @@ function AssertionTimeline({ concern }: { concern: ConditionConcern }) {
   return (
     <ol
       aria-label="Assertion history"
-      className="border-border mt-2 ml-1.5 space-y-2 border-l pl-4"
+      className="border-border ms-1.5 mt-2 space-y-2 border-s ps-4"
     >
       {items.map((a) => {
         const refuted =
@@ -463,7 +463,7 @@ function AssertionTimeline({ concern }: { concern: ConditionConcern }) {
           <li key={a.id} className="relative text-sm">
             <span
               aria-hidden
-              className="bg-border absolute top-1.5 -left-5 h-2 w-2 rounded-full"
+              className="bg-border absolute -start-5 top-1.5 h-2 w-2 rounded-full"
             />
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="text-muted-foreground text-xs tabular-nums">
@@ -597,7 +597,7 @@ function ConcernRow({
         <UncertaintyBadge uncertainty={current.uncertainty} />
         {concern.relationships?.map((r) => (
           <Badge key={`${r.type}:${r.concernId}`} variant="outline" size="sm">
-            <LinkIcon size={10} className="mr-1" />
+            <LinkIcon size={10} className="me-1" />
             {r.type.replace(/-/g, ' ')}
             {r.display ? `: ${r.display}` : ''}
           </Badge>
@@ -640,7 +640,7 @@ function ConcernRow({
         <>
           <AssertionTimeline concern={concern} />
           {concern.observations && concern.observations.length > 0 && (
-            <div className="mt-2 ml-1.5 pl-4">
+            <div className="ms-1.5 mt-2 ps-4">
               <h5 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                 Observations
               </h5>
