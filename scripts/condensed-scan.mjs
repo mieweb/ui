@@ -18,7 +18,7 @@
  *   node scripts/condensed-scan.mjs --list   # include every uncovered slot
  */
 import { readFileSync, readdirSync } from 'node:fs';
-import { join, relative, dirname } from 'node:path';
+import { join, relative, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -51,11 +51,11 @@ const isSource = (path) =>
 
 /** component folder name directly under src/components */
 const componentOf = (path) =>
-  relative(COMPONENTS_DIR, path).split('/')[0];
+  relative(COMPONENTS_DIR, path).split(sep)[0];
 
 const emitted = new Map(); // component -> Set of literal slot names
 const dynamic = new Map(); // component -> count of data-slot={...} usages
-const slotless = []; // components with no data-slot at all
+const slotless = new Map(); // component -> sibling components it composes
 
 const files = [...walk(COMPONENTS_DIR)].filter(isSource);
 const byComponent = new Map();
@@ -67,16 +67,25 @@ for (const file of files) {
 
 for (const [component, componentFiles] of byComponent) {
   const slots = new Set();
+  const composes = new Set();
   let dynamicCount = 0;
   for (const file of componentFiles) {
     const text = readFileSync(file, 'utf8');
-    for (const m of text.matchAll(/data-slot=["']([^"']+)["']/g)) {
+    // JSX attribute only (preceded by whitespace) — not selector strings or
+    // Tailwind arbitrary variants like [&_[data-slot="ai-tool-call"]]:p-2.
+    for (const m of text.matchAll(/(?<=\s)data-slot=["']([^"']+)["']/g)) {
       slots.add(m[1]);
     }
     // data-slot={expr} — literal value can't be extracted statically
-    dynamicCount += [...text.matchAll(/data-slot=\{/g)].length;
+    dynamicCount += [...text.matchAll(/(?<=\s)data-slot=\{/g)].length;
+    // Sibling-component imports: a wrapper composing another component may
+    // render its slots without emitting any itself (e.g. CountryDropdown →
+    // CountryDropdownBase), so "slotless" needs manual verification.
+    for (const m of text.matchAll(/from\s+['"]\.\.\/([\w-]+)/g)) {
+      if (m[1] !== component && byComponent.has(m[1])) composes.add(m[1]);
+    }
   }
-  if (slots.size === 0 && dynamicCount === 0) slotless.push(component);
+  if (slots.size === 0 && dynamicCount === 0) slotless.set(component, composes);
   if (slots.size > 0) emitted.set(component, slots);
   if (dynamicCount > 0) dynamic.set(component, dynamicCount);
 }
@@ -97,12 +106,19 @@ const sortedUncovered = [...uncovered.entries()].sort(
 console.log(`Condensed coverage audit (src/components vs condensed-view.css)`);
 console.log(`  components scanned:        ${byComponent.size}`);
 console.log(`  slots covered by CSS:      ${coveredSlots.size}`);
-console.log(`  components w/o any slot:   ${slotless.length}`);
+console.log(`  components w/o any slot:   ${slotless.size}`);
 console.log(`  components w/ uncovered:   ${uncovered.size}\n`);
 
-if (slotless.length > 0) {
+if (slotless.size > 0) {
   console.log(`── No data-slot attributes at all (invisible to condensed) ──`);
-  for (const component of slotless.sort()) console.log(`  ${component}`);
+  for (const [component, composes] of [...slotless.entries()].sort()) {
+    console.log(
+      `  ${component}` +
+        (composes.size > 0
+          ? ` (composes ${[...composes].sort().join(', ')} — verify manually)`
+          : '')
+    );
+  }
   console.log();
 }
 
