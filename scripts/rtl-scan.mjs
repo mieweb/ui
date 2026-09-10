@@ -180,6 +180,11 @@ const cleaned = Object.keys(baseline).filter((f) => !(f in counts)).length;
 
 if (failures.length > 0) {
   const inActions = process.env.GITHUB_ACTIONS === 'true';
+  // GitHub workflow commands require %/CR/LF escaping in data, plus :/, in
+  // property values: https://docs.github.com/actions/reference/workflow-commands-for-github-actions
+  const esc = (s) =>
+    String(s).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+  const escProp = (s) => esc(s).replace(/:/g, '%3A').replace(/,/g, '%2C');
   console.error(
     'RTL guard: new physical-direction Tailwind classes detected.\n'
   );
@@ -192,9 +197,11 @@ if (failures.length > 0) {
       if (inActions) {
         // Inline annotation on the offending line in the PR "Files changed" tab.
         console.log(
-          `::error file=${file},line=${line},title=RTL guard::` +
-            `'${token}' breaks RTL layouts — use '${logicalEquivalent(token)}' instead. ` +
-            `If this usage is genuinely physical (e.g. pointer-coordinate math), add a '// rtl-ignore -- <reason>' comment.`
+          `::error file=${escProp(file)},line=${line},title=RTL guard::` +
+            esc(
+              `'${token}' breaks RTL layouts — use '${logicalEquivalent(token)}' instead. ` +
+                `If this usage is genuinely physical (e.g. pointer-coordinate math), add a '// rtl-ignore -- <reason>' comment.`
+            )
         );
       }
     }
