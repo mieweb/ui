@@ -41,7 +41,7 @@ export const DEFAULT_LANGUAGES: Language[] = [
 // Variants
 // =============================================================================
 
-const selectorVariants = cva('relative inline-block text-left', {
+const selectorVariants = cva('relative inline-block text-start', {
   variants: {
     size: {
       sm: '',
@@ -321,7 +321,7 @@ export function LanguageSelectorNative({
         disabled={disabled}
         aria-label={label}
         className={cn(
-          'w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 pr-8 text-sm',
+          'w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 pe-8 text-sm',
           'focus:border-primary-500 focus:ring-primary-500 text-gray-700 focus:ring-2 focus:outline-none',
           'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200',
           disabled && 'cursor-not-allowed opacity-50',
@@ -338,7 +338,7 @@ export function LanguageSelectorNative({
           </option>
         ))}
       </select>
-      <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+      <ChevronDownIcon className="pointer-events-none absolute end-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
     </div>
   );
 }
@@ -405,16 +405,16 @@ export function LanguageSelectorInline({
           data-slot="language-selector-inline-option"
           className={cn(
             'px-3 py-1.5 text-sm transition-colors',
-            index === 0 && 'rounded-l-lg',
-            index === languages.length - 1 && 'rounded-r-lg',
-            index > 0 && 'border-l border-gray-200 dark:border-gray-700',
+            index === 0 && 'rounded-s-lg',
+            index === languages.length - 1 && 'rounded-e-lg',
+            index > 0 && 'border-s border-gray-200 dark:border-gray-700',
             language.code === value
               ? 'bg-primary-800 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
           )}
         >
           {showFlags && language.flag && (
-            <span className="mr-1">{language.flag}</span>
+            <span className="me-1">{language.flag}</span>
           )}
           {language.code.toUpperCase()}
         </button>

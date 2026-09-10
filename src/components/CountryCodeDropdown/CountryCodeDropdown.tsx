@@ -421,7 +421,7 @@ function CountryDropdownBase({
                     aria-selected={country.code === selected.code}
                     onClick={() => handleSelect(country)}
                     className={cn(
-                      'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
+                      'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start text-sm',
                       'transition-colors duration-150',
                       'focus:outline-none',
                       country.code === selected.code

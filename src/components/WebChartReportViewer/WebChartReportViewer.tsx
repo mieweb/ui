@@ -192,7 +192,7 @@ export function WebChartReportViewer({
                 onClick={onReconnect}
                 className="mt-2"
               >
-                <Link className="mr-2 h-4 w-4" />
+                <Link className="me-2 h-4 w-4" />
                 {reconnect}
               </Button>
             )}
@@ -203,7 +203,7 @@ export function WebChartReportViewer({
       {/* Refresh Button */}
       {!error && !loading && (
         <Button onClick={onRefreshReports} className="mb-4">
-          <RefreshCw className="mr-2 h-4 w-4" />
+          <RefreshCw className="me-2 h-4 w-4" />
           {refreshReports}
         </Button>
       )}

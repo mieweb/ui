@@ -70,7 +70,7 @@ export function SuperChatConversations({
       data-slot="superchat-conversations"
       aria-label="Conversations"
       className={cn(
-        'flex w-64 shrink-0 flex-col border-r border-neutral-200 dark:border-neutral-700',
+        'flex w-64 shrink-0 flex-col border-e border-neutral-200 dark:border-neutral-700',
         className
       )}
     >
@@ -114,7 +114,7 @@ export function SuperChatConversations({
                   )}
                 </span>
                 {!!c.unread && (
-                  <span className="bg-primary-600 ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white">
+                  <span className="bg-primary-600 ms-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white">
                     {c.unread}
                     <span className="sr-only"> unread messages</span>
                   </span>

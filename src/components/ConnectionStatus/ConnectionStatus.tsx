@@ -130,7 +130,7 @@ export function ConnectionStatusOverlay({
         data-slot="connection-overlay-card"
         className={cn(cardVariants({ animate }))}
       >
-        <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
+        <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-start">
           {/* Icon */}
           <div className="shrink-0">
             <ConnectionIcon status={connection.status} className="h-12 w-12" />
@@ -226,7 +226,7 @@ export function UpdateAvailableOverlay({
         data-slot="update-overlay-card"
         className={cn(cardVariants({ animate: true }))}
       >
-        <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
+        <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-start">
           {/* Logo */}
           <div className="shrink-0">
             {logoUrl ? (
@@ -388,7 +388,7 @@ export function ConnectionStatusBar({
       aria-live="polite"
       data-slot="connection-bar"
       className={cn(
-        'fixed right-0 left-0 z-40 px-4 py-2',
+        'fixed start-0 end-0 z-40 px-4 py-2',
         position === 'top' ? 'top-0' : 'bottom-0',
         isConnecting
           ? 'bg-warning-500 text-warning-900'

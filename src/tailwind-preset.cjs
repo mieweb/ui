@@ -180,6 +180,21 @@ module.exports = {
     'start-1',
     'first:border-s-0',
     'rtl:origin-right',
+    // RTL shell/misc batch: command palette, site chrome, superchat, toolbars
+    'end-12',
+    'md:end-4',
+    'md:start-auto',
+    'md:text-start',
+    'me-1.5',
+    'pe-12',
+    'pointer-fine:end-0',
+    'pointer-fine:end-1.5',
+    'ps-11',
+    'ps-12',
+    'rounded-e-lg',
+    'rounded-s-lg',
+    'sm:text-start',
+    'start-5',
     // MediaEditor media-surface height cap: the small-screen `dvh` cap, and the
     // md variants that hand desktop back its original percentage cap. Purging
     // these uncaps the player on a phone, which is the bug the cap exists for.
