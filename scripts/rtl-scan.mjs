@@ -9,6 +9,10 @@
  * The scan fails only when a file's count INCREASES or a new file offends,
  * so the migration can proceed batch-by-batch without breaking CI.
  *
+ * Genuinely physical usages (e.g. mouse-coordinate drag math) can be exempted
+ * with an `rtl-ignore` comment on the same line or the line directly above,
+ * ideally with a reason: `// rtl-ignore -- resize handles use clientX math`.
+ *
  * Usage:
  *   node scripts/rtl-scan.mjs            # scan + compare against baseline (CI)
  *   node scripts/rtl-scan.mjs --update   # rewrite baseline after a migration batch
@@ -65,6 +69,15 @@ function isCenteringIdiom(token, lineText) {
   );
 }
 
+// An `rtl-ignore` comment on the same line or the line directly above marks a
+// genuinely physical usage (e.g. mouse-coordinate drag/resize math) as exempt.
+function isExplicitlyIgnored(lines, index) {
+  return (
+    lines[index].includes('rtl-ignore') ||
+    (index > 0 && lines[index - 1].includes('rtl-ignore'))
+  );
+}
+
 function walk(dir, files = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
@@ -84,6 +97,7 @@ function scan() {
     const rel = relative(root, file);
     const lines = readFileSync(file, 'utf8').split('\n');
     lines.forEach((text, i) => {
+      if (isExplicitlyIgnored(lines, i)) return;
       for (const match of text.matchAll(PHYSICAL_UTILITIES)) {
         if (isCenteringIdiom(match[2], text)) continue;
         if (isHandledReverse(match[2], text)) continue;

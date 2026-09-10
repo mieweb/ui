@@ -174,6 +174,31 @@
   /* ── Typography ────────────────────────────────────────────────────── */
   --font-sans: var(--mieweb-font-sans, ui-sans-serif);
   --font-mono: var(--mieweb-font-mono, ui-monospace);
+
+  /* ── Animations (Toast slide-in; mirrored via rtl: variant) ────────── */
+  --animate-slide-in-right: slide-in-right 300ms ease-out;
+  --animate-slide-in-left: slide-in-left 300ms ease-out;
+
+  @keyframes slide-in-right {
+    0% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slide-in-left {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 }
 
 /* ── BlueHive Brand Tokens (Default) ─────────────────────────────────── */

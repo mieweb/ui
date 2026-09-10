@@ -150,7 +150,7 @@ export function Toast({
       className={cn(
         'flex items-start gap-3 rounded-lg border p-4 shadow-lg',
         'max-w-[420px] min-w-[300px]',
-        'animate-slide-in-right',
+        'animate-slide-in-right rtl:animate-slide-in-left',
         styles.container
       )}
     >
@@ -200,12 +200,17 @@ export function Toast({
 // =============================================================================
 
 const positionStyles: Record<ToastPosition, string> = {
-  'top-left': 'top-4 left-4 items-start',
+  'top-start': 'top-4 start-4 items-start',
   'top-center': 'top-4 left-1/2 -translate-x-1/2 items-center',
-  'top-right': 'top-4 right-4 items-end',
-  'bottom-left': 'bottom-4 left-4 items-start',
+  'top-end': 'top-4 end-4 items-end',
+  'bottom-start': 'bottom-4 start-4 items-start',
   'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 items-center',
-  'bottom-right': 'bottom-4 right-4 items-end',
+  'bottom-end': 'bottom-4 end-4 items-end',
+  // Deprecated physical aliases for the logical positions above.
+  'top-left': 'top-4 start-4 items-start',
+  'top-right': 'top-4 end-4 items-end',
+  'bottom-left': 'bottom-4 start-4 items-start',
+  'bottom-right': 'bottom-4 end-4 items-end',
 };
 
 // =============================================================================
@@ -215,7 +220,11 @@ const positionStyles: Record<ToastPosition, string> = {
 export interface ToastContainerProps {
   /** Toasts to display */
   toasts: ToastData[];
-  /** Position of the toast container (default: 'bottom-right') */
+  /**
+   * Position of the toast container (default: 'bottom-end'). All values are
+   * direction-aware: `*-left`/`*-right` are deprecated aliases for
+   * `*-start`/`*-end`.
+   */
   position?: ToastPosition;
   /** Called when a toast should be dismissed */
   onDismiss: (id: string) => void;
@@ -223,7 +232,7 @@ export interface ToastContainerProps {
 
 export function ToastContainer({
   toasts,
-  position = 'bottom-right',
+  position = 'bottom-end',
   onDismiss,
 }: ToastContainerProps): React.JSX.Element | null {
   if (toasts.length === 0) return null;

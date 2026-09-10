@@ -12,12 +12,20 @@ import React, {
 // =============================================================================
 
 export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
+/**
+ * Toast container position. All values are direction-aware (logical):
+ * `*-left`/`*-right` are deprecated aliases for `*-start`/`*-end`.
+ */
 export type ToastPosition =
-  | 'top-left'
+  | 'top-start'
   | 'top-center'
+  | 'top-end'
+  | 'bottom-start'
+  | 'bottom-center'
+  | 'bottom-end'
+  | 'top-left'
   | 'top-right'
   | 'bottom-left'
-  | 'bottom-center'
   | 'bottom-right';
 
 export interface ToastData {
@@ -79,7 +87,7 @@ export interface ToastProviderProps {
   children: ReactNode;
   /** Maximum number of toasts to show at once (default: 5) */
   maxToasts?: number;
-  /** Position of toasts on screen (default: 'bottom-right') */
+  /** Position of toasts on screen (default: 'bottom-end') */
   position?: ToastPosition;
   /** Default duration for toasts in ms (default: 5000) */
   defaultDuration?: number;
