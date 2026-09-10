@@ -200,7 +200,7 @@ function AdditionalFields({
         data-slot="additional-fields-header"
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
-          'flex w-full items-center gap-2 text-left text-sm font-medium',
+          'flex w-full items-center gap-2 text-start text-sm font-medium',
           'text-gray-700 hover:text-gray-900',
           'dark:text-gray-300 dark:hover:text-gray-100',
           'transition-colors'
@@ -216,7 +216,7 @@ function AdditionalFields({
           )}
         />
         {value.length > 0 && (
-          <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 ml-1 rounded-full px-2 py-0.5 text-xs">
+          <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 ms-1 rounded-full px-2 py-0.5 text-xs">
             {value.length}
           </span>
         )}

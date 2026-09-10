@@ -355,7 +355,7 @@ function Autocomplete<T>({
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => commitRow(row)}
                       className={cn(
-                        'w-full px-4 py-3 text-left text-sm transition-colors',
+                        'w-full px-4 py-3 text-start text-sm transition-colors',
                         'border-border border-b last:border-b-0',
                         'focus:outline-none',
                         isActive

@@ -209,7 +209,7 @@ function baseComponents(): Components {
         <table
           {...props}
           className={cn(
-            'w-full border-collapse text-sm [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1 dark:[&_td]:border-neutral-700 [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left dark:[&_th]:border-neutral-700',
+            'w-full border-collapse text-sm [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1 dark:[&_td]:border-neutral-700 [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:text-start dark:[&_th]:border-neutral-700',
             props.className
           )}
         />

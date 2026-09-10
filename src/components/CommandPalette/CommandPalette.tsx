@@ -378,7 +378,7 @@ export function CommandPalette({
             data-slot="command-palette-search"
             className="relative border-b border-gray-200 dark:border-gray-700"
           >
-            <div className="text-muted-foreground absolute top-1/2 left-4 -translate-y-1/2">
+            <div className="text-muted-foreground absolute start-4 top-1/2 -translate-y-1/2">
               <SearchIcon />
             </div>
             <input
@@ -392,7 +392,7 @@ export function CommandPalette({
               autoFocus
               data-testid={`${testId}-input`}
               className={cn(
-                'w-full bg-transparent py-4 pr-12 pl-12 text-base',
+                'w-full bg-transparent py-4 ps-12 pe-12 text-base',
                 'focus:outline-none dark:text-white dark:placeholder-gray-400'
               )}
             />
@@ -400,14 +400,14 @@ export function CommandPalette({
               <button
                 onClick={() => setQuery('')}
                 data-testid={`${testId}-clear`}
-                className="text-muted-foreground absolute top-1/2 right-12 -translate-y-1/2 hover:text-gray-700 dark:hover:text-gray-200"
+                className="text-muted-foreground absolute end-12 top-1/2 -translate-y-1/2 hover:text-gray-700 dark:hover:text-gray-200"
                 aria-label="Clear search"
               >
                 <XIcon />
               </button>
             )}
             {isLoading && (
-              <div className="text-primary-800 absolute top-1/2 right-4 -translate-y-1/2">
+              <div className="text-primary-800 absolute end-4 top-1/2 -translate-y-1/2">
                 <SpinnerIcon />
               </div>
             )}
@@ -494,7 +494,7 @@ export function CommandPalette({
                         {categoryInfo?.icon && (
                           <span
                             className={cn(
-                              'mr-2 inline-block h-4 w-4 align-middle',
+                              'me-2 inline-block h-4 w-4 align-middle',
                               categoryInfo.colorClass
                             )}
                           >
@@ -547,7 +547,7 @@ export function CommandPalette({
                             onMouseEnter={() => setSelectedIndex(currentIndex)}
                             disabled={item.disabled}
                             className={cn(
-                              'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
+                              'flex w-full items-start gap-3 px-4 py-3 text-start transition-colors',
                               isSelected
                                 ? 'bg-primary-50 dark:bg-primary-900/20'
                                 : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
@@ -619,11 +619,11 @@ export function CommandPalette({
                   ↑↓
                 </kbd>
                 <span>navigate</span>
-                <kbd className="ml-2 rounded border border-gray-200 bg-white px-1 py-0.5 dark:border-gray-600 dark:bg-gray-700">
+                <kbd className="ms-2 rounded border border-gray-200 bg-white px-1 py-0.5 dark:border-gray-600 dark:bg-gray-700">
                   ↵
                 </kbd>
                 <span>select</span>
-                <kbd className="ml-2 rounded border border-gray-200 bg-white px-1 py-0.5 dark:border-gray-600 dark:bg-gray-700">
+                <kbd className="ms-2 rounded border border-gray-200 bg-white px-1 py-0.5 dark:border-gray-600 dark:bg-gray-700">
                   esc
                 </kbd>
                 <span>close</span>
@@ -677,7 +677,7 @@ export function CommandPaletteTrigger({
       {children ?? (
         <>
           <SearchIcon />
-          <span className="flex-1 text-left whitespace-nowrap">
+          <span className="flex-1 text-start whitespace-nowrap">
             {placeholder}
           </span>
           <kbd

@@ -174,7 +174,7 @@ export function AuthDialog({
         <button
           type="button"
           onClick={onClose}
-          className="text-muted-foreground absolute top-4 right-4 rounded-full p-1 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="text-muted-foreground absolute end-4 top-4 rounded-full p-1 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           aria-label="Close"
         >
           <CloseIcon className="h-5 w-5" />
@@ -454,13 +454,13 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pe-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
+            className="text-muted-foreground absolute end-3 top-1/2 -translate-y-1/2 hover:text-gray-700"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
@@ -477,7 +477,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
             type="checkbox"
             className="text-primary-800 focus:ring-primary-500 rounded border-gray-300"
           />
-          <span className="text-muted-foreground ml-2 text-sm">
+          <span className="text-muted-foreground ms-2 text-sm">
             Remember me
           </span>
         </label>
@@ -563,13 +563,13 @@ function SignupForm({
             required
             autoComplete="new-password"
             minLength={8}
-            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pe-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
+            className="text-muted-foreground absolute end-3 top-1/2 -translate-y-1/2 hover:text-gray-700"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
@@ -614,7 +614,7 @@ function SignupForm({
           required
           className="text-primary-800 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
         />
-        <span className="text-muted-foreground ml-2 text-sm">
+        <span className="text-muted-foreground ms-2 text-sm">
           I agree to the{' '}
           <a
             href={termsUrl}
@@ -746,13 +746,13 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
             required
             autoComplete="new-password"
             minLength={8}
-            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pe-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
+            className="text-muted-foreground absolute end-3 top-1/2 -translate-y-1/2 hover:text-gray-700"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (

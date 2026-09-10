@@ -37,9 +37,9 @@ export function toolbarKeyNav(e: React.KeyboardEvent<HTMLElement>) {
 const ALIGN = {
   /** Vertically centered on the row's right edge (single-line rows). */
   center:
-    'pointer-fine:top-1/2 pointer-fine:right-0 pointer-fine:-translate-y-1/2',
+    'pointer-fine:top-1/2 pointer-fine:end-0 pointer-fine:-translate-y-1/2',
   /** Pinned near the row's top-right corner (multi-line rows). */
-  top: 'pointer-fine:top-1.5 pointer-fine:right-1.5',
+  top: 'pointer-fine:top-1.5 pointer-fine:end-1.5',
 } as const;
 
 // Which hover scope reveals the toolbar. Rows nested inside another `group`
@@ -87,7 +87,7 @@ export interface RowActionToolbarProps {
  * On hover-capable (fine pointer) devices it floats over the row's right
  * edge as a card-styled overlay, hidden until the row is hovered or
  * keyboard-focused. Touch devices can't hover, so the toolbar stays in
- * flow at the end of the row (`ml-auto`) and is always visible.
+ * flow at the end of the row (`ms-auto`) and is always visible.
  *
  * Implements WAI-ARIA toolbar arrow-key navigation. The parent row must be
  * `relative` and carry the matching `group` (or `group/order`) class.
@@ -105,10 +105,10 @@ export function RowActionToolbar({
       aria-label={label}
       onKeyDown={toolbarKeyNav}
       className={cn(
-        'z-10 ml-auto flex items-center gap-0.5 transition-opacity',
+        'z-10 ms-auto flex items-center gap-0.5 transition-opacity',
         // Inside a grid cell the column already reserves the space, so the
         // toolbar stays in flow — no absolute overlay. It keeps the card
-        // chrome, though: pair with a `sticky right-0` actions column and it
+        // chrome, though: pair with a `sticky end-0` actions column and it
         // floats over scrolled-under content at the grid's right edge.
         group !== 'grid' && [
           'pointer-fine:absolute',

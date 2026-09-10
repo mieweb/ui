@@ -315,7 +315,7 @@ export function FooterLinkSection({
             >
               {link.label}
               {link.external && (
-                <ExternalLinkIcon className="ml-1 inline-block h-3 w-3 opacity-50" />
+                <ExternalLinkIcon className="ms-1 inline-block h-3 w-3 opacity-50" />
               )}
             </a>
           </li>
@@ -728,7 +728,7 @@ export function SimpleFooter({
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+        <div className="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-start">
           <CopyrightText companyName={companyName} variant={variant} />
           <div className="flex items-center justify-center gap-4 sm:justify-end">
             <a

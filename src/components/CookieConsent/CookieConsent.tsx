@@ -22,10 +22,10 @@ const bannerVariants = cva(
   {
     variants: {
       position: {
-        bottom: 'bottom-0 left-0 right-0',
-        top: 'top-0 left-0 right-0',
-        'bottom-left': 'bottom-4 left-4 max-w-md',
-        'bottom-right': 'bottom-4 right-4 max-w-md',
+        bottom: 'bottom-0 start-0 end-0',
+        top: 'top-0 start-0 end-0',
+        'bottom-left': 'bottom-4 start-4 max-w-md',
+        'bottom-right': 'bottom-4 end-4 max-w-md',
       },
       variant: {
         default:
@@ -294,7 +294,7 @@ export function CompactCookieBanner({
       aria-label="Cookie consent"
       data-slot="compact-cookie-banner"
       className={cn(
-        'fixed right-4 bottom-4 left-4 md:right-4 md:left-auto md:max-w-sm',
+        'fixed start-4 end-4 bottom-4 md:start-auto md:end-4 md:max-w-sm',
         'z-50 rounded-lg bg-gray-900 p-4 text-white shadow-xl',
         className
       )}
