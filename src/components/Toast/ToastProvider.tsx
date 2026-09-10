@@ -57,6 +57,8 @@ export type ToastOptions = Omit<ToastData, 'id'>;
 export interface ToastContextValue {
   /** Currently visible toasts */
   toasts: ToastData[];
+  /** Toast container position configured on the provider */
+  position: ToastPosition;
   /** Add a new toast and return its ID */
   toast: (options: ToastOptions) => string;
   /** Shorthand for success toast */
@@ -102,6 +104,7 @@ export function ToastProvider({
   children,
   maxToasts = 5,
   defaultDuration = 5000,
+  position = 'bottom-end',
 }: ToastProviderProps): React.JSX.Element {
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
@@ -192,6 +195,7 @@ export function ToastProvider({
   const contextValue = useMemo<ToastContextValue>(
     () => ({
       toasts,
+      position,
       toast,
       success,
       error,
@@ -200,7 +204,17 @@ export function ToastProvider({
       dismiss,
       dismissAll,
     }),
-    [toasts, toast, success, error, warning, info, dismiss, dismissAll]
+    [
+      toasts,
+      position,
+      toast,
+      success,
+      error,
+      warning,
+      info,
+      dismiss,
+      dismissAll,
+    ]
   );
 
   return (
@@ -242,4 +256,12 @@ export function useToast(): ToastContextValue {
     throw new Error('useToast must be used within a ToastProvider');
   }
   return context;
+}
+
+/**
+ * Optional variant of {@link useToast} — returns `null` when used outside a
+ * ToastProvider instead of throwing.
+ */
+export function useOptionalToast(): ToastContextValue | null {
+  return useContext(ToastContext);
 }

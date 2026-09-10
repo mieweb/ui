@@ -180,7 +180,8 @@ module.exports = {
     'start-1',
     'first:border-s-0',
     'rtl:origin-right',
-    // RTL Phase 2: Toast slide-in mirror
+    // RTL Phase 2: Toast slide-in animation + RTL mirror
+    'animate-slide-in-right',
     'rtl:animate-slide-in-left',
     // RTL shell/misc batch: command palette, site chrome, superchat, toolbars
     'end-12',

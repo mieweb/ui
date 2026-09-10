@@ -7,6 +7,7 @@ export {
 export {
   ToastProvider,
   useToast,
+  useOptionalToast,
   type ToastData,
   type ToastOptions,
   type ToastVariant,

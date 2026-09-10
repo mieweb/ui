@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
+import { useOptionalToast } from './ToastProvider';
 import type { ToastData, ToastVariant, ToastPosition } from './ToastProvider';
 
 // =============================================================================
@@ -221,7 +222,8 @@ export interface ToastContainerProps {
   /** Toasts to display */
   toasts: ToastData[];
   /**
-   * Position of the toast container (default: 'bottom-end'). All values are
+   * Position of the toast container. Defaults to the enclosing
+   * ToastProvider's `position`, else 'bottom-end'. All values are
    * direction-aware: `*-left`/`*-right` are deprecated aliases for
    * `*-start`/`*-end`.
    */
@@ -232,9 +234,11 @@ export interface ToastContainerProps {
 
 export function ToastContainer({
   toasts,
-  position = 'bottom-end',
+  position,
   onDismiss,
 }: ToastContainerProps): React.JSX.Element | null {
+  const context = useOptionalToast();
+  const resolvedPosition = position ?? context?.position ?? 'bottom-end';
   if (toasts.length === 0) return null;
 
   return (
@@ -242,7 +246,7 @@ export function ToastContainer({
       data-slot="toast-container"
       className={cn(
         'pointer-events-none fixed z-50 flex flex-col gap-2',
-        positionStyles[position]
+        positionStyles[resolvedPosition]
       )}
       aria-live="polite"
       aria-atomic="true"
