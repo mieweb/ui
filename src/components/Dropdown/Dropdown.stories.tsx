@@ -119,7 +119,7 @@ Choosing an item does **not** close the menu by itself — close it from \`onCli
 - \`searchable\` filtering inspects rendered children (\`getNodeText\` + \`searchText\`) — it only understands \`DropdownItem\`, \`DropdownContent\`, \`DropdownSeparator\`, \`DropdownLabel\`, \`DropdownHeader\` and fragments; arbitrary wrappers are filtered by their nested children.
 - Not a form control: no \`name\`, nothing submits; \`multiSelect\` values live in state only.
 - Strings default to English but are props: \`searchPlaceholder\` ("Search..."), \`searchAriaLabel\` ("Search dropdown items"), \`searchEmptyState\` ("No results found"), \`selectAllLabel\` ("Select all").
-- RTL: \`placement\` uses logical \`start\` / \`end\`, but item text is \`text-left\`. Theming: panel and items use hard-coded \`neutral-*\` / \`red-*\` palette classes with \`dark:\` variants, not semantic tokens; the checkbox glyph uses \`primary-*\`. Depends on \`Input\`'s \`inputVariants\` for the search box.`,
+- RTL: \`placement\` uses logical \`start\` / \`end\`, item text uses \`text-start\`, and the submenu chevron mirrors (\`rtl:-scale-x-100\`). Theming: panel and items use hard-coded \`neutral-*\` / \`red-*\` palette classes with \`dark:\` variants, not semantic tokens; the checkbox glyph uses \`primary-*\`. Depends on \`Input\`'s \`inputVariants\` for the search box.`,
       },
     },
     catalog: {

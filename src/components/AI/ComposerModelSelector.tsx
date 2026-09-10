@@ -561,7 +561,7 @@ export function ComposerModelSelector({
                       )}
                       <ChevronRight
                         aria-hidden="true"
-                        className="text-muted-foreground h-4 w-4 shrink-0"
+                        className="text-muted-foreground h-4 w-4 shrink-0 rtl:-scale-x-100"
                       />
                     </button>
                   </div>
@@ -584,7 +584,10 @@ export function ComposerModelSelector({
                       'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none'
                     )}
                   >
-                    <ChevronLeft aria-hidden="true" className="h-3.5 w-3.5" />
+                    <ChevronLeft
+                      aria-hidden="true"
+                      className="h-3.5 w-3.5 rtl:-scale-x-100"
+                    />
                     {effortLabel}
                   </button>
                 </div>

@@ -219,7 +219,7 @@ export const HealthSurveillance = React.forwardRef<
                 {isOpen ? (
                   <ChevronDownIcon size={14} />
                 ) : (
-                  <ChevronRightIcon size={14} />
+                  <ChevronRightIcon size={14} className="rtl:-scale-x-100" />
                 )}
               </button>
             ) : (
@@ -256,7 +256,7 @@ export const HealthSurveillance = React.forwardRef<
                     className={cn(level > 0 && 'border-border border-s-2')}
                     style={
                       level > 0
-                        ? { marginLeft: (level - 1) * 16 + 2 }
+                        ? { marginInlineStart: (level - 1) * 16 + 2 }
                         : undefined
                     }
                   >

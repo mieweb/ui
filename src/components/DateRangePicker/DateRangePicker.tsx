@@ -782,7 +782,7 @@ export function DateRangePicker({
                 aria-label="Previous month"
                 data-slot="date-range-nav"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
               </button>
               <div
                 className="text-sm font-medium"
@@ -797,7 +797,7 @@ export function DateRangePicker({
                 aria-label="Next month"
                 data-slot="date-range-nav"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
               </button>
             </div>
 
@@ -903,7 +903,7 @@ export function DateRangePicker({
                         aria-label="Previous month"
                         data-slot="date-range-nav"
                       >
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
                       </button>
                       <div
                         className="flex-1 text-center text-sm font-medium"
@@ -920,7 +920,7 @@ export function DateRangePicker({
                           aria-label="Next month"
                           data-slot="date-range-nav"
                         >
-                          <ChevronRight className="h-4 w-4" />
+                          <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
                         </button>
                       )}
                     </div>
@@ -946,7 +946,7 @@ export function DateRangePicker({
                         aria-label="Next month"
                         data-slot="date-range-nav"
                       >
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
                       </button>
                     </div>
                     {renderMonthGrid(rightMonth, rightYear)}

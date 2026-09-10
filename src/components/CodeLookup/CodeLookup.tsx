@@ -768,7 +768,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                     aria-label="Back to search results"
                     className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
                   >
-                    <ChevronLeftIcon size={14} />
+                    <ChevronLeftIcon size={14} className="rtl:-scale-x-100" />
                     Back
                   </button>
                   <span className="text-foreground text-xs font-semibold">
@@ -869,7 +869,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                             : 'opacity-40'
                         )}
                       >
-                        <ChevronRightIcon size={14} />
+                        <ChevronRightIcon
+                          size={14}
+                          className="rtl:-scale-x-100"
+                        />
                       </button>
                     )}
                   </li>

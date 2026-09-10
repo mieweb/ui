@@ -183,6 +183,8 @@ module.exports = {
     // RTL Phase 2: Toast slide-in animation + RTL mirror
     'animate-slide-in-right',
     'rtl:animate-slide-in-left',
+    // RTL Phase 2: directional icon mirroring (chevrons/arrows)
+    'rtl:-scale-x-100',
     // RTL shell/misc batch: command palette, site chrome, superchat, toolbars
     'end-12',
     'md:end-4',

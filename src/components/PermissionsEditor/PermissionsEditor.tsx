@@ -134,7 +134,7 @@ function PermissionItem({
             {isExpanded ? (
               <ChevronDown className="text-muted-foreground h-4 w-4" />
             ) : (
-              <ChevronRight className="text-muted-foreground h-4 w-4" />
+              <ChevronRight className="text-muted-foreground h-4 w-4 rtl:-scale-x-100" />
             )}
           </button>
         )}
@@ -325,7 +325,7 @@ export function PermissionsEditor({
                 {expandedGroups.has(group.id) ? (
                   <ChevronDown className="text-muted-foreground h-4 w-4" />
                 ) : (
-                  <ChevronRight className="text-muted-foreground h-4 w-4" />
+                  <ChevronRight className="text-muted-foreground h-4 w-4 rtl:-scale-x-100" />
                 )}
                 <span className="font-semibold" data-slot="perm-group-name">
                   {group.name}
