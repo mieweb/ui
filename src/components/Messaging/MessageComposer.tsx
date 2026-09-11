@@ -345,6 +345,24 @@ export interface SendButtonContext {
   disabled: boolean;
 }
 
+/**
+ * Class name overrides for the composer's internal elements. Merged with
+ * `tailwind-merge`, so an override replaces the conflicting built-in utility
+ * rather than stacking with it — enough for a host to reskin the composer
+ * without forking its markup.
+ */
+export interface MessageComposerClassNames {
+  /** The row (or column, when stacked) holding the input and its controls. */
+  inputArea?: string;
+  /** The wrapper around the textarea; also the positioning context for a
+   * host-rendered mention menu. */
+  inputWrapper?: string;
+  /** The textarea itself. */
+  input?: string;
+  /** The control row rendered by `layout="stacked"`. */
+  toolbar?: string;
+}
+
 export interface MessageComposerProps {
   /** Called when a message is sent */
   onSend: (message: NewMessage) => void | Promise<void>;
@@ -464,6 +482,8 @@ export interface MessageComposerProps {
   mentionMenuHasOptions?: boolean;
   /** Additional class name */
   className?: string;
+  /** Class name overrides for the composer's internal elements. */
+  classNames?: MessageComposerClassNames;
 }
 
 /**
@@ -519,6 +539,7 @@ const MessageComposer = React.forwardRef<
       renderMentionMenu,
       mentionMenuHasOptions = false,
       className,
+      classNames,
     },
     ref
   ) => {
@@ -980,7 +1001,8 @@ const MessageComposer = React.forwardRef<
               layout === 'stacked' ? 'flex-col' : 'items-center',
               'bg-white dark:bg-neutral-900',
               variant === 'default' &&
-                'border-t border-neutral-200 dark:border-neutral-700'
+                'border-t border-neutral-200 dark:border-neutral-700',
+              classNames?.inputArea
             )}
           >
             {/* Attachment buttons. The stacked layout moves them onto the
@@ -992,7 +1014,8 @@ const MessageComposer = React.forwardRef<
               data-slot="composer-input-wrapper"
               className={cn(
                 'relative',
-                layout === 'stacked' ? 'w-full min-w-0' : 'flex-1'
+                layout === 'stacked' ? 'w-full min-w-0' : 'flex-1',
+                classNames?.inputWrapper
               )}
               ref={mentionAnchorRef}
             >
@@ -1075,7 +1098,8 @@ const MessageComposer = React.forwardRef<
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
                   'focus:ring-primary-500 focus:ring-2 focus:outline-none',
                   'disabled:cursor-not-allowed disabled:opacity-50',
-                  'transition-colors'
+                  'transition-colors',
+                  classNames?.input
                 )}
                 style={{
                   maxHeight:
@@ -1136,7 +1160,10 @@ const MessageComposer = React.forwardRef<
             {layout === 'stacked' ? (
               <div
                 data-slot="composer-toolbar"
-                className="flex w-full min-w-0 items-center gap-2"
+                className={cn(
+                  'flex w-full min-w-0 items-center gap-2',
+                  classNames?.toolbar
+                )}
               >
                 {attachmentControls}
                 {toolbarStart}

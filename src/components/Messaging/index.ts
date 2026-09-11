@@ -42,6 +42,7 @@ export {
   replaceMentionToken,
   type MessageComposerProps,
   type MessageComposerLabels,
+  type MessageComposerClassNames,
   type CharacterCounterProps,
   type SendButtonProps,
   type SendButtonContext,
