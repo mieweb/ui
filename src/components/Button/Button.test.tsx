@@ -121,6 +121,21 @@ describe('Button', () => {
     );
   });
 
+  it('renders SVG icons passed as children inside the inline-flow label', () => {
+    renderWithTheme(
+      <Button>
+        <svg data-testid="child-icon" />
+        Filter by Date
+      </Button>
+    );
+
+    const label = screen
+      .getByRole('button')
+      .querySelector("[data-slot='button-label']");
+    expect(label).toContainElement(screen.getByTestId('child-icon'));
+    expect(label).toHaveClass('[&_svg]:inline-block', '[&_svg]:align-middle');
+  });
+
   describe('accessibility', () => {
     it('has proper ARIA attributes', () => {
       renderWithTheme(<Button aria-label="Custom label">Button</Button>);
