@@ -23,6 +23,12 @@ const CRITICAL_CSS = [
   `:where(button[data-slot='button']) > :where([data-slot='button-icon'],svg){flex-shrink:0;}`,
   // Label truncates instead of wrapping/overflowing (matches truncate).
   `:where(button[data-slot='button']) > :where([data-slot='button-label']){min-width:0;overflow:hidden;text-overflow:ellipsis;}`,
+  // Icons passed as children land inside the label span; Tailwind preflight
+  // makes SVGs display:block, which forces line breaks inside the inline
+  // label. Restore inline flow. Specificity (0,1,1) intentionally beats
+  // preflight's `svg{display:block}` (0,0,1), matching the specificity of
+  // the [&_svg]:inline-block utility used on the label.
+  `button[data-slot='button'] [data-slot='button-label'] svg{display:inline-block;vertical-align:middle;}`,
 ].join('');
 
 /** Injects the critical Button styles once per document. SSR-safe. */

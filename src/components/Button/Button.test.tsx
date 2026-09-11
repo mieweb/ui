@@ -115,6 +115,10 @@ describe('Button', () => {
       ":where(button[data-slot='button'])"
     );
     expect(styles[0].textContent).toContain('white-space:nowrap');
+    // Icons passed as children must flow inline within the label span
+    expect(styles[0].textContent).toContain(
+      "[data-slot='button-label'] svg{display:inline-block"
+    );
   });
 
   describe('accessibility', () => {

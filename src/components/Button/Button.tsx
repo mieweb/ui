@@ -76,6 +76,14 @@ const buttonVariants = cva(
   }
 );
 
+/**
+ * Label wrapper classes. Icons passed as `children` (rather than
+ * leftIcon/rightIcon) land inside this span; preflight makes SVGs
+ * display:block which would force line breaks inside the inline span,
+ * so restore inline flow for them.
+ */
+const labelClasses = 'truncate [&_svg]:inline-block [&_svg]:align-middle';
+
 export interface ButtonProps
   extends
     React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -168,7 +176,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {isLoading ? (
           <>
             <LoadingSpinner />
-            <span ref={labelRef} data-slot="button-label" className="truncate">
+            <span
+              ref={labelRef}
+              data-slot="button-label"
+              className={labelClasses}
+            >
               {loadingText || children}
             </span>
           </>
@@ -179,7 +191,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 {leftIcon}
               </span>
             )}
-            <span ref={labelRef} data-slot="button-label" className="truncate">
+            <span
+              ref={labelRef}
+              data-slot="button-label"
+              className={labelClasses}
+            >
               {children}
             </span>
             {React.isValidElement(rightIcon) && (
