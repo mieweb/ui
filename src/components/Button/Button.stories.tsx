@@ -329,6 +329,28 @@ export const WithBothIcons: Story = {
   },
 };
 
+/**
+ * Icons passed through `children` (instead of the leftIcon/rightIcon props)
+ * land inside the truncating label span. The label keeps SVGs inline so the
+ * icon, text, and trailing chevron always share one line — the pattern
+ * DateRangePicker's trigger uses. Covered by visual regression tests.
+ */
+export const IconsInChildren: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button variant="primary">
+        <Calendar aria-hidden="true" className="me-2 h-4 w-4" />
+        Filter by Date
+        <ChevronDown aria-hidden="true" className="ms-2 h-3 w-3" />
+      </Button>
+      <Button variant="outline">
+        <Send aria-hidden="true" className="me-2 h-4 w-4" />
+        Submit
+      </Button>
+    </div>
+  ),
+};
+
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-wrap gap-4">
