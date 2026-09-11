@@ -11742,3 +11742,14 @@ body.condensed [data-slot='transcript-row'] {
 body.condensed [data-slot='transcript-content'][role='list'] > * + * {
   margin-top: 0.25rem !important;
 }
+
+/* Card-variant container: tighter padding (plain variant has none) */
+body.condensed [data-slot='transcript-view'].bg-card {
+  padding: 0.5rem !important;
+}
+
+/* Actions bar: tighter spacing */
+body.condensed [data-slot='transcript-actions'] {
+  margin-bottom: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}

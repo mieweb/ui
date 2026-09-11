@@ -318,9 +318,16 @@ export const TranscriptView = React.forwardRef<
     };
 
     return (
-      <div ref={ref} className={transcriptViewVariants({ variant, className })}>
+      <div
+        ref={ref}
+        data-slot="transcript-view"
+        className={transcriptViewVariants({ variant, className })}
+      >
         {actions && (
-          <div className="border-border mb-2 flex items-center justify-end gap-2 border-b pb-2">
+          <div
+            data-slot="transcript-actions"
+            className="border-border mb-2 flex items-center justify-end gap-2 border-b pb-2"
+          >
             {actions}
           </div>
         )}
