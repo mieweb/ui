@@ -59,8 +59,8 @@ export interface MentionToken {
  * start the string or follow whitespace, and the token must contain no spaces
  * or further `@`.
  *
- * Exported so hosts supplying their own mention menu can reuse the parsing
- * rather than reimplement it, and so a custom `mentionQuery` can build on it.
+ * Exported as a plain utility: apps that own their own mention UI can reuse the
+ * parsing, or build on it, instead of reimplementing it.
  */
 export function activeMentionQuery(
   value: string,
@@ -325,16 +325,6 @@ SendButton.displayName = 'SendButton';
 // Message Composer Component
 // ============================================================================
 
-/** Handles a host-rendered mention menu gets to drive the composer's text. */
-export interface MentionMenuContext {
-  /** The token currently under the caret. */
-  token: MentionToken;
-  /** Replace the token with `@text ` and restore focus after the mention. */
-  insert: (text: string) => void;
-  /** Dismiss the menu without changing the text. */
-  close: () => void;
-}
-
 /** Context handed to `renderSendButton` so a custom button can drive sending. */
 export interface SendButtonContext {
   /** Whether the composer currently has something worth sending. */
@@ -354,9 +344,6 @@ export interface SendButtonContext {
 export interface MessageComposerClassNames {
   /** The row (or column, when stacked) holding the input and its controls. */
   inputArea?: string;
-  /** The wrapper around the textarea; also the positioning context for a
-   * host-rendered mention menu. */
-  inputWrapper?: string;
   /** The textarea itself. */
   input?: string;
   /** The control row rendered by `layout="stacked"`. */
@@ -454,39 +441,17 @@ export interface MessageComposerProps {
    */
   labels?: Partial<MessageComposerLabels>;
   /**
-   * Called before the composer's own paste handling. Call `preventDefault()`
-   * to take over the paste entirely (e.g. to read images as base64 rather than
-   * staging `File`s).
+   * Extra props spread onto the textarea. The composer's own handlers run
+   * after any handler supplied here, and bail if it called `preventDefault()`
+   * — enough for a host to take over pasting, or to claim keys while its own
+   * overlay is open, without the composer needing to know why.
    */
-  onPaste?: React.ClipboardEventHandler<HTMLTextAreaElement>;
+  inputProps?: React.TextareaHTMLAttributes<HTMLTextAreaElement>;
   /**
    * Candidates for `@mention` autocomplete. When provided (non-empty), typing
    * `@` opens a picker. Omit to disable mentions entirely (default).
    */
   mentionOptions?: MentionOption[];
-  /**
-   * Overrides how the `@token` under the caret is located. Defaults to
-   * {@link activeMentionQuery}; supply your own to widen what counts as a
-   * mention (e.g. to allow an email address).
-   */
-  mentionQuery?: (value: string, caret: number) => MentionToken | null;
-  /** Called whenever the token under the caret changes. */
-  onMentionChange?: (token: MentionToken | null) => void;
-  /**
-   * Replaces the built-in suggestion list with a host-rendered menu, which is
-   * what surfaces that need to search a backend or run a follow-up flow
-   * require. Rendered inside the (relatively positioned) input wrapper, so the
-   * menu positions itself. Enables mentions on its own — `mentionOptions` is
-   * ignored when set.
-   */
-  renderMentionMenu?: (context: MentionMenuContext) => React.ReactNode;
-  /**
-   * Whether a host-rendered mention menu currently has selectable options. The
-   * composer yields Arrow/Enter/Tab/Escape to the menu while this is true, so
-   * Enter picks a suggestion instead of sending. With no options it must be
-   * `false` or a literal `@foo` could never be sent.
-   */
-  mentionMenuHasOptions?: boolean;
   /** Additional class name */
   className?: string;
   /** Class name overrides for the composer's internal elements. */
@@ -540,12 +505,8 @@ const MessageComposer = React.forwardRef<
       renderSendButton,
       maxHeight = '40vh',
       labels: labelOverrides,
-      onPaste,
+      inputProps,
       mentionOptions,
-      mentionQuery = activeMentionQuery,
-      onMentionChange,
-      renderMentionMenu,
-      mentionMenuHasOptions = false,
       className,
       classNames,
     },
@@ -653,31 +614,20 @@ const MessageComposer = React.forwardRef<
     }, [replyTo]);
 
     // --- @mention autocomplete (opt-in via `mentionOptions`) ---
-    // A host-rendered menu enables mentions on its own and takes over the list.
-    const hostMentionMenu = !!renderMentionMenu;
-    const mentionsEnabled =
-      hostMentionMenu || (!!mentionOptions && mentionOptions.length > 0);
+    const mentionsEnabled = !!mentionOptions && mentionOptions.length > 0;
     const [mention, setMention] = React.useState<MentionToken | null>(null);
     const [mentionHighlight, setMentionHighlight] = React.useState(0);
     const mentionListId = React.useId();
     const mentionOptionId = (i: number) => `${mentionListId}-option-${i}`;
 
     const mentionSuggestions = React.useMemo(() => {
-      if (hostMentionMenu || !mention || !mentionOptions) return [];
+      if (!mention || !mentionOptions) return [];
       const q = mention.query.toLowerCase();
       return mentionOptions.filter((o) => o.label.toLowerCase().includes(q));
-    }, [hostMentionMenu, mention, mentionOptions]);
+    }, [mention, mentionOptions]);
 
     const mentionMenuOpen =
-      mentionsEnabled &&
-      !hostMentionMenu &&
-      mention !== null &&
-      mentionSuggestions.length > 0;
-
-    /** Whether a mention menu — built-in or host-rendered — owns the keyboard. */
-    const mentionMenuCapturesKeys = hostMentionMenu
-      ? mention !== null && mentionMenuHasOptions
-      : mentionMenuOpen;
+      mentionsEnabled && mention !== null && mentionSuggestions.length > 0;
 
     // Portal + fixed positioning so the mention menu escapes overflow-hidden
     // ancestors.
@@ -705,24 +655,22 @@ const MessageComposer = React.forwardRef<
     const syncMention = React.useCallback(
       (value: string, caret: number) => {
         if (!mentionsEnabled) return;
-        const token = mentionQuery(value, caret);
-        setMention(token);
+        setMention(activeMentionQuery(value, caret));
         setMentionHighlight(0);
-        onMentionChange?.(token);
       },
-      [mentionsEnabled, mentionQuery, onMentionChange]
+      [mentionsEnabled]
     );
 
-    const closeMention = React.useCallback(() => {
-      setMention(null);
-      onMentionChange?.(null);
-    }, [onMentionChange]);
-
-    /** Swaps the active token for `@text ` and puts the caret after it. */
-    const insertMentionText = (token: MentionToken, text: string) => {
-      const next = replaceMentionToken(content, token, text);
+    const insertMention = (option: MentionOption) => {
+      if (!mention) return;
+      const next = replaceMentionToken(
+        content,
+        mention,
+        option.value ?? option.label.split(' ')[0]
+      );
       setContent(next.value);
-      closeMention();
+      setMention(null);
+      // Restore caret just after the inserted mention.
       requestAnimationFrame(() => {
         const el = textareaRef.current;
         if (el) {
@@ -730,11 +678,6 @@ const MessageComposer = React.forwardRef<
           el.setSelectionRange(next.caret, next.caret);
         }
       });
-    };
-
-    const insertMention = (option: MentionOption) => {
-      if (!mention) return;
-      insertMentionText(mention, option.value ?? option.label.split(' ')[0]);
     };
 
     const canSend =
@@ -772,17 +715,13 @@ const MessageComposer = React.forwardRef<
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      // A host-rendered menu handles its own navigation; step aside entirely so
-      // Enter picks a suggestion rather than sending.
-      if (hostMentionMenu) {
-        if (
-          mentionMenuCapturesKeys &&
-          ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)
-        ) {
-          return;
-        }
-      } else if (mentionMenuOpen) {
-        // @mention menu navigation takes priority over send.
+      // The host gets first refusal so an overlay of its own can claim a key
+      // before Enter would send.
+      inputProps?.onKeyDown?.(event);
+      if (event.defaultPrevented) return;
+
+      // @mention menu navigation takes priority over send.
+      if (mentionMenuOpen) {
         if (event.key === 'ArrowDown') {
           event.preventDefault();
           setMentionHighlight((h) => (h + 1) % mentionSuggestions.length);
@@ -807,7 +746,7 @@ const MessageComposer = React.forwardRef<
         }
         if (event.key === 'Escape') {
           event.preventDefault();
-          closeMention();
+          setMention(null);
           return;
         }
       }
@@ -851,7 +790,7 @@ const MessageComposer = React.forwardRef<
     // Paste-to-attach: route pasted files through the same path as the picker.
     const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
       // The host gets first refusal so it can stage pasted files its own way.
-      onPaste?.(event);
+      inputProps?.onPaste?.(event);
       if (event.defaultPrevented) return;
       if (!showAttachmentPicker || disabled) return;
       const pasted = Array.from(event.clipboardData.items)
@@ -1024,8 +963,7 @@ const MessageComposer = React.forwardRef<
               data-slot="composer-input-wrapper"
               className={cn(
                 'relative',
-                layout === 'stacked' ? 'w-full min-w-0' : 'flex-1',
-                classNames?.inputWrapper
+                layout === 'stacked' ? 'w-full min-w-0' : 'flex-1'
               )}
               ref={mentionAnchorRef}
             >
@@ -1081,17 +1019,22 @@ const MessageComposer = React.forwardRef<
                   document.body
                 )}
               <textarea
+                // Spread first: the composer's own attributes and composed
+                // handlers below must win over anything the host passes.
+                {...inputProps}
                 ref={textareaRef}
                 data-slot="composer-input"
                 value={content}
                 onChange={(e) => {
+                  inputProps?.onChange?.(e);
                   setContent(e.target.value);
                   syncMention(
                     e.target.value,
                     e.target.selectionStart ?? e.target.value.length
                   );
                 }}
-                onClick={(e) => {
+                onSelect={(e) => {
+                  inputProps?.onSelect?.(e);
                   const el = e.currentTarget;
                   syncMention(el.value, el.selectionStart ?? el.value.length);
                 }}
@@ -1154,16 +1097,6 @@ const MessageComposer = React.forwardRef<
                   />
                 </div>
               )}
-
-              {/* Host-rendered mention menu. Positioned by the host against
-                  this relatively-positioned wrapper. */}
-              {hostMentionMenu &&
-                mention &&
-                renderMentionMenu({
-                  token: mention,
-                  insert: (text) => insertMentionText(mention, text),
-                  close: closeMention,
-                })}
             </div>
 
             {/* Send button, on its own control row when stacked */}

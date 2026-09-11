@@ -111,78 +111,63 @@ describe('MessageComposer extension points', () => {
     expect(textarea.style.maxHeight).toBe('40vh');
   });
 
-  it('reports the token under the caret through a custom mentionQuery', () => {
-    const onMentionChange = vi.fn();
-    // Widened to allow one extra `@` so an email address can be mentioned.
-    const emailMentionQuery = (value: string, caret: number) => {
-      const match = /(^|\s)@([^\s@]*(?:@[^\s@]*)?)$/.exec(
-        value.slice(0, caret)
-      );
-      if (!match) return null;
-      return { query: match[2], start: caret - match[2].length - 1 };
-    };
-
-    renderWithTheme(
-      <MessageComposer
-        onSend={vi.fn()}
-        mentionQuery={emailMentionQuery}
-        onMentionChange={onMentionChange}
-        renderMentionMenu={({ token }) => <div>menu:{token.query}</div>}
-      />
-    );
-
-    fireEvent.change(screen.getByLabelText('Message'), {
-      target: { value: '@a@example.com' },
-    });
-
-    expect(onMentionChange).toHaveBeenLastCalledWith({
-      query: 'a@example.com',
-      start: 0,
-    });
-    expect(screen.getByText('menu:a@example.com')).toBeTruthy();
-  });
-
-  it('yields Enter to a host mention menu that has options', () => {
+  it('lets an inputProps key handler claim a key before Enter would send', () => {
     const onSend = vi.fn();
     renderWithTheme(
       <MessageComposer
         onSend={onSend}
-        mentionMenuHasOptions
-        renderMentionMenu={() => <div>menu</div>}
+        inputProps={{
+          onKeyDown: (event) => {
+            // Stands in for a host overlay that owns Enter while it is open.
+            if (event.key === 'Enter') event.preventDefault();
+          },
+        }}
       />
     );
 
     const textarea = screen.getByLabelText('Message');
-    fireEvent.change(textarea, { target: { value: '@al' } });
+    fireEvent.change(textarea, { target: { value: 'hello' } });
     fireEvent.keyDown(textarea, { key: 'Enter' });
 
     expect(onSend).not.toHaveBeenCalled();
   });
 
-  it('sends on Enter when the host mention menu has no options', () => {
+  it('still sends on Enter when the inputProps key handler declines', () => {
     const onSend = vi.fn();
+    const onKeyDown = vi.fn();
     renderWithTheme(
-      <MessageComposer
-        onSend={onSend}
-        renderMentionMenu={() => <div>menu</div>}
-      />
+      <MessageComposer onSend={onSend} inputProps={{ onKeyDown }} />
     );
 
     const textarea = screen.getByLabelText('Message');
-    fireEvent.change(textarea, { target: { value: '@al' } });
+    fireEvent.change(textarea, { target: { value: 'hello' } });
     fireEvent.keyDown(textarea, { key: 'Enter' });
 
+    expect(onKeyDown).toHaveBeenCalled();
     expect(onSend).toHaveBeenCalledWith(
-      expect.objectContaining({ content: '@al' })
+      expect.objectContaining({ content: 'hello' })
     );
   });
 
-  it('lets a host paste handler opt out of the built-in paste-to-attach', () => {
+  it('reports caret movement to an inputProps select handler', () => {
+    const onSelect = vi.fn();
+    renderWithTheme(
+      <MessageComposer onSend={vi.fn()} inputProps={{ onSelect }} />
+    );
+
+    fireEvent.select(screen.getByLabelText('Message'));
+
+    expect(onSelect).toHaveBeenCalled();
+  });
+
+  it('lets an inputProps paste handler opt out of the built-in paste-to-attach', () => {
     const onPaste = vi.fn((event: React.ClipboardEvent) => {
       event.preventDefault();
     });
 
-    renderWithTheme(<MessageComposer onSend={vi.fn()} onPaste={onPaste} />);
+    renderWithTheme(
+      <MessageComposer onSend={vi.fn()} inputProps={{ onPaste }} />
+    );
     fireEvent.paste(screen.getByLabelText('Message'), {
       clipboardData: { items: [] },
     });

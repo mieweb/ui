@@ -48,7 +48,6 @@ export {
   type SendButtonContext,
   type MentionOption,
   type MentionToken,
-  type MentionMenuContext,
 } from './MessageComposer';
 
 export {
