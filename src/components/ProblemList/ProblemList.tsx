@@ -555,6 +555,7 @@ function ConcernRow({
     // Alt+↑/↓ reorders — required for 508 keyboard operability.
     /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
     <li
+      data-slot="clinical-list-row"
       data-concern-id={concern.concernId}
       tabIndex={0}
       onKeyDown={handleRowKeyDown}
@@ -818,7 +819,10 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
         <CardContent className="space-y-6 px-4 py-4">
           {groups.map(({ key, label, items }) => (
             <section key={key} aria-label={label}>
-              <h4 className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase">
+              <h4
+                data-slot="clinical-list-heading"
+                className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
+              >
                 {label}
               </h4>
               {items.length > 0 ? (
@@ -847,6 +851,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
             <div className="flex items-center gap-1.5">
               <input
                 type="text"
+                data-slot="input"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {
