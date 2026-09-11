@@ -4,12 +4,64 @@ import { Button } from '../Button';
 import { Tooltip } from './Tooltip';
 
 const meta: Meta<typeof Tooltip> = {
-  title: 'Components/Overlays & Layering/Tooltip',
+  id: 'overlays-tooltip',
+  title: 'Components/Overlays/Tooltip',
   component: Tooltip,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A short label that appears on hover or keyboard focus of a single child element. Portalled to \`document.body\`, positioned with \`placement\` (auto-flips to stay on screen), \`delay\` (200 ms), \`offset\`, \`maxWidth\`. The trigger receives \`aria-describedby\` pointing at the \`role="tooltip"\` element, so the text is read as the control's description.
+
+### Use it when
+
+- Naming an icon-only control ("Delete", "Copy MRN") or clarifying an abbreviation — a few words, no interaction inside.
+- The information is helpful but not required to operate the control.
+
+### Don't use it when
+
+- The content is a definition with structure (category, source, related terms) — \`GlossaryTooltip\`.
+- You are citing where a number or claim comes from — \`SourceTip\`.
+- The content contains links or buttons: tooltips are not focusable. Use a pinned card (the two above) or a \`Modal\`.
+- On touch devices the tooltip cannot be hovered; make sure the child has a visible label or \`aria-label\` of its own.
+
+### Example
+
+\`\`\`tsx
+<Tooltip content="Delete allergy">
+  <Button variant="ghost" size="icon" aria-label="Delete allergy" onClick={remove}>
+    <TrashIcon />
+  </Button>
+</Tooltip>
+\`\`\`
+
+### Limitations
+
+- The child must accept \`onFocus\` / \`onBlur\` / \`aria-describedby\` props (any \`Button\` or native element does). A disabled button fires no events, so wrap it in a span.
+- The tooltip is a description, not a name: an icon button still needs \`aria-label\`.
+- Respects \`prefers-reduced-motion\` by skipping the fade.
+- Rendered at \`z-[9999]\` so it clears modals; \`placement\` is physical (\`left\`/\`right\`), not logical.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'overlays-glossarytooltip',
+          why: 'GlossaryTooltip is a rich, pinnable definition card; Tooltip is a few words of description.',
+        },
+        {
+          type: 'alternative to',
+          target: 'overlays-sourcetip',
+          why: 'SourceTip cites provenance with links; Tooltip cannot hold interactive content.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     placement: {
       control: 'select',

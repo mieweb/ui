@@ -354,7 +354,7 @@ export function EmployerView({
                           {order.services.join(', ')}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <Badge variant={getStatusVariant(order.status)}>
                           {order.status}
                         </Badge>
@@ -411,7 +411,7 @@ export function EmployerView({
                           Due: {formatDate(invoice.dueDate)}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <p className="font-semibold text-gray-900 dark:text-white">
                           {formatCurrency(invoice.amount)}
                         </p>

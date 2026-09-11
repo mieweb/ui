@@ -4,12 +4,102 @@ import { RichEditor, type RichEditorHandle } from './RichEditor';
 import { CodeEditor } from './CodeEditor';
 
 const meta: Meta<typeof RichEditor> = {
-  title: 'Components/Forms & Inputs/RichEditor',
+  id: 'editors-richeditor',
+  title: 'Modules/Editors/RichEditor',
   component: RichEditor,
   parameters: {
     layout: 'padded',
+    docs: {
+      description: {
+        component: `### What it's for
+
+**A Markdown document editor built on Kerebron's \`CoreEditor\` (ProseMirror), with optional live collaboration.** \`RichEditor\` loads \`value\` as Markdown (\`text/x-markdown\`), renders the Kerebron **AdvancedEditorKit** toolbar and surface, and reports Markdown back through \`onChange\` on every transaction. \`RichEditorHandle\` gives \`getContent()\` (awaits the initial load — read this on submit, \`onChange\` can lag a keystroke) and \`focus()\`. \`collab={{ room, wsUrl?, params?, user?, WebSocketPolyfill? }}\` switches to a Yjs CRDT document shared by every peer in the room (the Yjs kit is lazy-loaded; \`history\` is swapped for CRDT undo). \`disabled\` makes the surface read-only and dims it; \`id\`, \`aria-label\`, \`aria-labelledby\`, \`className\` land on the host; \`showPreview\` prints the Markdown under the editor; \`assetLoad\` redirects the tree-sitter WASM grammars. The same entry exports \`CodeEditor\` (\`value\`, \`onChange\`, \`lang\` default \`typescript\`) over Kerebron's **CodeEditorKit**, plus the \`CollabConfig\` type.
+
+Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: install the peers \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (plus \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\` for \`collab\`), import \`@mieweb/ui/kerebron.css\` beside \`@mieweb/ui/styles.css\`, and serve \`@kerebron/wasm\`'s \`assets/\` directory at \`/kerebron-wasm\`.
+
+### Use it when
+
+- The stored format is **Markdown** — notes, templates with \`{{placeholders}}\`, documentation — and the writer needs headings, lists, tables, code blocks and a real toolbar.
+- Several people edit the **same document at once** (\`collab.room\`), with a \`CollabStatus\` chip showing presence and sync.
+- You need syntax-highlighted source editing — \`CodeEditor\` from the same entry.
+
+### Don't use it when
+
+- The stored format is **HTML**, or you need template-variable insertion and dictation from a toolbar — \`RichTextEditor\` (main barrel, no peers).
+- Plain multi-line text is enough — \`Textarea\`.
+- You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
+- The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
+
+### Example
+
+\`\`\`tsx
+const editorRef = useRef<RichEditorHandle>(null);
+const [saving, setSaving] = useState(false);
+
+async function save() {
+  setSaving(true);
+  const markdown = await editorRef.current!.getContent();
+  await api.saveNote(note.id, markdown);
+  setSaving(false);
+}
+
+<span id="note-label">Progress note</span>
+<RichEditor
+  ref={editorRef}
+  id="note-body"
+  aria-labelledby="note-label"
+  value={note.markdown}
+  disabled={saving}
+  collab={{ room: \`note/\${note.id}\`, wsUrl: \`\${wsBase}/yjs\`, params: { token }, user: me }}
+/>
+<CollabStatus {...presence} />
+<Button onClick={save} disabled={saving}>Save</Button>
+\`\`\`
+
+\`value\` and \`collab\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
+
+### Limitations
+
+- Accessibility: the contenteditable surface gets \`role="textbox" aria-multiline\` **only when** you pass \`aria-label\` or \`aria-labelledby\`; the host is a \`div\`, so \`<label htmlFor>\` does not associate. Toolbar buttons, menus and keyboard shortcuts come from \`@kerebron/extension-menu\` and are outside this component's control (\`@mieweb/ui/kerebron.css\` carries layout workarounds for its overflow menu). \`disabled\` sets \`aria-disabled\` and \`pointer-events: none\` but does not remove the surface from the tab order.
+- Runtime: tree-sitter WASM grammars load from \`/kerebron-wasm\` (or \`assetLoad\`); the first load per editor is serialised, so many editors on one page start one after another. \`autocomplete\` and \`hover\` extensions are removed from the kit for teardown safety. The editor mounts into a disposable child \`div\` because \`CoreEditor.destroy()\` clones its host.
+- Collaboration: \`wsUrl\` defaults to \`<ws|wss>://<host>/yjs\` and the room is appended by the provider; the host must run a Yjs websocket relay. Joining an empty room seeds it from \`value\`; the component re-seeds if the sync lands as a blank overwrite (observed with extension-yjs 0.8.x). There is no offline queue, permissions or comment model.
+- \`showPreview\` renders an unstyled \`<h5>Markdown Output</h5><pre>\` for debugging, not for end users. No \`placeholder\`, character count or validation props.
+- i18n/RTL/theming: toolbar labels and menus are Kerebron's (English); direction and colours follow Kerebron's CSS with \`kb-component--dark\` toggled by \`useIsDarkMode\`. Peers: \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (\`>=0.8.6\`), optional \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\`. Entry \`@mieweb/ui/kerebron\` + \`@mieweb/ui/kerebron.css\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui/kerebron',
+      peers: ['@kerebron/editor', '@kerebron/editor-kits', '@kerebron/wasm'],
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'feedback-collabstatus',
+          why: 'CollabStatus shows who else is editing and whether the Yjs document is in sync.',
+        },
+        {
+          type: 'alternative to',
+          target: 'text-inputs-textarea',
+          why: 'RichEditor when the text needs formatting or collaboration; Textarea for plain multi-line text.',
+        },
+        {
+          type: 'alternative to',
+          target: 'editors-richtexteditor',
+          why: 'RichEditor stores Markdown on ProseMirror via the @mieweb/ui/kerebron entry with Yjs collab; RichTextEditor stores HTML from a contentEditable div on the main barrel with variables and dictation.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-markdown',
+          why: 'RichEditor emits Markdown; MarkdownRenderer displays that Markdown read-only elsewhere in the app.',
+        },
+        {
+          type: 'alternative to',
+          target: 'editors-q',
+          why: 'RichEditor edits free-form Markdown prose; Q edits a structured agent configuration through a generated form plus YAML/JSON view.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
 };
 
 export default meta;

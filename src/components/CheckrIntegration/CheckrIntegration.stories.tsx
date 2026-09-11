@@ -84,9 +84,10 @@ const sampleReports: BackgroundCheckReport[] = [
 ];
 
 const meta: Meta<typeof CheckrIntegration> = {
-  title: 'Product/Feature Modules/CheckrIntegration',
+  id: 'users-integrations-checkrintegration',
+  title: 'BlueHive/Users & integrations/CheckrIntegration',
   component: CheckrIntegration,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   argTypes: {
     connected: {
       control: 'boolean',

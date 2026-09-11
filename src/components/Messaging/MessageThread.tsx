@@ -75,7 +75,7 @@ function LightboxModal({ attachment, onClose }: LightboxModalProps) {
         type="button"
         onClick={onClose}
         className={cn(
-          'absolute right-4 top-4 z-10',
+          'absolute end-4 top-4 z-10',
           'rounded-full p-2',
           'bg-white/10 text-white',
           'hover:bg-white/20',
@@ -437,7 +437,7 @@ function MessagingSplitView({
         data-slot="messaging-list-pane"
         className={cn(
           'h-full w-full flex-shrink-0',
-          'border-r border-neutral-200 dark:border-neutral-700',
+          'border-e border-neutral-200 dark:border-neutral-700',
           hideMobileClasses[mobileBreakpoint]
         )}
         style={{

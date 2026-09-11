@@ -1,0 +1,83 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Editors/Overview" />
+
+# Editors
+
+> **What is the stored format, and who edits it?** Markdown that people write (and maybe
+> co-write) → `RichEditor`. HTML for templated letters with merge fields and dictation →
+> `RichTextEditor`. Markdown that is only **read** → `MarkdownRenderer`. A structured agent
+> configuration with a YAML/JSON pane → `Q`. Plain text → [Textarea](?path=/docs/text-inputs-textarea--docs)
+> (Text inputs).
+
+## Which one?
+
+| Component                                                  | Use it when                                                                                                                                        | Not when                                                                                                                                   |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [RichEditor](?path=/docs/editors-richeditor--docs)         | The document is **Markdown**: headings, lists, tables, code; `getContent()` on submit; `collab.room` for Yjs co-editing; `CodeEditor` for source   | The stored format is HTML or you need merge variables/dictation — `RichTextEditor`; the host cannot add the Kerebron peers and WASM assets |
+| [RichTextEditor](?path=/docs/editors-richtexteditor--docs) | The document is **HTML**: bold/italic/underline, lists, alignment, `variableGroups` inserting `{{tokens}}`, Web Speech dictation; no peers         | You need Markdown, real undo history, headings/tables or collaboration — `RichEditor`; plain text — `Textarea`                             |
+| [Markdown](?path=/docs/editors-markdown--docs)             | **Displaying** Markdown: sanitised HTML, code highlighting, `mermaid` / `csv` / `survey` / `html` fences, `streaming` for token-by-token AI output | The user edits the text — `RichEditor` / `RichTextEditor`; the source is HTML                                                              |
+| [Q](?path=/docs/editors-q--docs)                           | Admins configure an **agent** (prompt, tools, telephony) through a schema-generated form and see the YAML/JSON; `onSubmit(yaml)`, `onConfigChange` | Free-form prose — `RichEditor`; general clinical/business forms — ESheet (Composite forms)                                                 |
+
+## Install / entry points
+
+| Entry                 | Exports                                                                        | Peers (all optional in `package.json`)                                                                                                   | Styles                                                                       |
+| --------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `@mieweb/ui`          | `RichTextEditor`, `MarkdownRenderer` + blocks, `useMarkdown`, `Textarea`       | `mermaid`, `papaparse`, `js-yaml` — only for the matching Markdown fence                                                                 | `@mieweb/ui/styles.css`, `@mieweb/ui/markdown.css`                           |
+| `@mieweb/ui/kerebron` | `RichEditor`, `CodeEditor`, `CollabConfig`                                     | `@kerebron/editor`, `@kerebron/editor-kits`, `@kerebron/wasm` (`>=0.8.6`); for `collab`: `@kerebron/extension-yjs`, `yjs`, `y-protocols` | `@mieweb/ui/kerebron.css`; serve `@kerebron/wasm/assets` at `/kerebron-wasm` |
+| `@mieweb/ui/q`        | `Q`, presets (`qAgentSchema`, `qTwilioAgentSchema`, …), `@mieweb/q` re-exports | `@mieweb/q` (`1.0.0`)                                                                                                                    | `@mieweb/q/style.css`                                                        |
+
+The main barrel deliberately excludes the Kerebron and Q entries so consumers who never render
+those editors do not pay for ProseMirror, WASM grammars or Q's form engine.
+
+## How they fit together
+
+- **RichEditor vs RichTextEditor is a format decision, not a feature tier.** `RichEditor`
+  is Kerebron's ProseMirror `CoreEditor` with the AdvancedEditorKit: Markdown in
+  (`text/x-markdown`), Markdown out, structured undo, and Yjs collaboration. `RichTextEditor`
+  is a `contentEditable` div driving `document.execCommand`: HTML in, HTML out, browser-native
+  undo, plus the two things `RichEditor` lacks — a searchable **Variables** `Dropdown` for
+  `{{merge.fields}}` and a **Dictate** button on the Web Speech API. Pick by what you store and
+  whether the note needs merge fields; they are declared `alternative to` each other.
+- **Markdown closes the loop with RichEditor.** `RichEditor` produces Markdown;
+  `MarkdownRenderer` displays it read-only — in a record view, an AI reply
+  (`AIMessageDisplay renderTextContent`), or a preview pane. `RichTextEditor`'s HTML output
+  does not go through `MarkdownRenderer`; sanitise and render it yourself.
+- **Collaboration is a composition.** `RichEditor collab` joins a Yjs room over a websocket
+  relay the host runs (`wsUrl` defaults to `/yjs` on the current host); pair it with
+  [CollabStatus](?path=/docs/feedback-collabstatus--docs) (Feedback) for presence and sync
+  state. The Yjs kit is lazy-loaded so plain-mode consumers never download it.
+- **Q is an editor of configuration.** It sits here for its YAML/JSON `ConfigEditor` pane, but
+  its real job is generating a form from a `mieforms-v1.0` schema; the component is a thin
+  wrapper around `@mieweb/q`'s `AgentConfigGenerator`.
+
+## Shared limitations
+
+- **Labelling.** None of the editors is a labelable form control: `RichEditor`'s host is a
+  `div` and only becomes `role="textbox"` when you pass `aria-label` / `aria-labelledby`;
+  `RichTextEditor` falls back to the placeholder as its accessible name; `Q`'s wrapper accepts
+  no label. Use `aria-labelledby` pointing at visible text.
+- **Announcements and state.** No `aria-live` anywhere: dictation start/stop and errors
+  (`onDictationError`), collaboration join/sync, Markdown block loading ("Loading…") and
+  `Q`'s validation are silent to screen readers. `RichTextEditor`'s toolbar exposes no
+  `aria-pressed` for active formatting; `RichEditor`'s toolbar semantics belong to
+  `@kerebron/extension-menu`.
+- **Third-party DOM.** `RichEditor`/`CodeEditor` (Kerebron), `Q` (`@mieweb/q`) and the
+  `html` fence (an iframe with `allow-scripts allow-forms`) render markup this library does
+  not control; `@mieweb/ui/kerebron.css` carries layout workarounds for Kerebron's overflow
+  menu, and the Q story disables one axe rule for upstream tab markup.
+- **Security is the host's.** `RichTextEditor` emits raw `innerHTML` unsanitised;
+  `MarkdownRenderer` sanitises with DOMPurify but cannot disable the `html` fence; `Q`'s
+  Twilio preset includes an `authToken` field.
+- **i18n.** Every built-in string is English: Kerebron menus, `RichTextEditor`'s toolbar and
+  its dictation `lang="en-US"` with English punctuation heuristics, Markdown block toolbars,
+  Q's form and validation copy.
+- **RTL and theming.** `RichTextEditor` alignment commands are physical
+  (`justifyLeft`/`justifyRight`) and its placeholder is `left-0`; its `prose` classes are
+  inert without `@tailwindcss/typography`. `RichEditor` and `Q` follow their own stylesheets
+  (`kb-component--dark` toggled by `useIsDarkMode`; `@mieweb/q/style.css`), not `@mieweb/ui`
+  tokens. `MarkdownRenderer` is styled by `@mieweb/ui/markdown.css` (`.md-prose`).
+- **Runtime requirements.** `RichEditor` needs WASM grammars served at `/kerebron-wasm`
+  (or `assetLoad`) and serialises each editor's first load; `collab` needs a Yjs websocket
+  relay; `RichTextEditor` dictation needs `SpeechRecognition` (not Firefox) and streams audio
+  to the browser vendor; `Q` needs `@mieweb/q` and its CSS or renders nothing.

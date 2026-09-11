@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PaymentHistoryTable } from './PaymentHistoryTable';
 
 const meta: Meta<typeof PaymentHistoryTable> = {
-  title: 'Product/Provider/PaymentHistoryTable',
+  id: 'billing-paymenthistorytable',
+  title: 'BlueHive/Billing/PaymentHistoryTable',
   component: PaymentHistoryTable,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
 };
 
 export default meta;

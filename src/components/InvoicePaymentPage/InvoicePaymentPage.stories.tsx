@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { InvoicePaymentPage } from './InvoicePaymentPage';
 
 const meta: Meta<typeof InvoicePaymentPage> = {
-  title: 'Product/Provider/InvoicePaymentPage',
+  id: 'billing-invoicepaymentpage',
+  title: 'BlueHive/Billing/InvoicePaymentPage',
   component: InvoicePaymentPage,
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
 };
 
 export default meta;

@@ -194,7 +194,7 @@ export function OrderCard({
             </p>
           </div>
           {totalAmount !== undefined && (
-            <div className="flex-shrink-0 text-right">
+            <div className="flex-shrink-0 text-end">
               <p className="text-foreground font-semibold">
                 {formatCurrency(totalAmount, currency)}
               </p>
@@ -284,7 +284,7 @@ export function OrderCard({
             </button>
           )}
           {showActions && (
-            <div className="ml-auto flex gap-2">
+            <div className="ms-auto flex gap-2">
               {onReject && (
                 <button
                   type="button"

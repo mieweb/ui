@@ -34,10 +34,14 @@ export default defineConfig({
       'src/components/CustomizableDashboard/index.ts',
     'components/DateInput/index': 'src/components/DateInput/index.ts',
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
+    'components/FilterSummaryBar/index':
+      'src/components/FilterSummaryBar/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
     'components/FreshnessBadge/index': 'src/components/FreshnessBadge/index.ts',
     'components/GlossaryTooltip/index': 'src/components/GlossaryTooltip/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
+    'components/KeyboardShortcutsOverlay/index':
+      'src/components/KeyboardShortcutsOverlay/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
     'components/Markdown/index': 'src/components/Markdown/index.ts',
     'components/MediaEditor/index': 'src/components/MediaEditor/index.ts',
@@ -62,6 +66,7 @@ export default defineConfig({
     'components/Skeleton/index': 'src/components/Skeleton/index.ts',
     'components/Slider/index': 'src/components/Slider/index.ts',
     'components/SourceTip/index': 'src/components/SourceTip/index.ts',
+    'components/Sparkline/index': 'src/components/Sparkline/index.ts',
     'components/Spinner/index': 'src/components/Spinner/index.ts',
     'components/SuperChat/index': 'src/components/SuperChat/index.ts',
     'components/SuperChat/plugins/index': 'src/components/SuperChat/plugins/index.ts',

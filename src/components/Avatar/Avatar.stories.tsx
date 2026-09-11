@@ -28,12 +28,67 @@ function avatarDataUri(
 }
 
 const meta: Meta<typeof Avatar> = {
-  title: 'Components/Text & Data Display/Avatar',
+  id: 'data-display-avatar',
+  title: 'Components/Data display/Avatar',
   component: Avatar,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A **round identity image with graceful fallback**. \`Avatar\` renders \`src\` when it loads, otherwise \`fallback\` (any element), otherwise initials from \`name\` (\`getInitials\`: first letter of the first two words, upper-cased), otherwise a generic person glyph. A failed image flips to the fallback via \`onError\` and resets when \`src\` changes. \`size\` is \`xs\` | \`sm\` | \`md\` | \`lg\` | \`xl\`; \`ring\` adds a faint primary halo. \`AvatarGroup\` overlaps its children (\`-space-x-2\`), forces one \`size\` on all of them and collapses the rest into a "+N" disc after \`max\`. \`avatarVariants\` and \`getInitials\` are exported.
+
+### Use it when
+
+- A person (patient, employee, provider, chat sender) is identified in a header, list row, comment or message bubble.
+- A small set of participants should be shown compactly — \`AvatarGroup max={3}\`.
+
+### Don't use it when
+
+- The thing is not a person or you need an arbitrary aspect ratio — use a plain \`<img>\` or a \`Card\` media slot.
+- The avatar must open a menu or profile — wrap it in a \`Button\` / \`Dropdown\` trigger; \`Avatar\` has no interactive states.
+- You need presence or status (online dot, unread count) — compose a \`Badge\` / \`CountBadge\` beside it; there is no status slot.
+
+### Example
+
+\`\`\`tsx
+<div className="flex items-center gap-3">
+  <Avatar src={patient.photoUrl} name={patient.displayName} size="lg" ring />
+  <div>
+    <Text weight="semibold">{patient.displayName}</Text>
+    <Badge variant="success" size="sm">Active</Badge>
+  </div>
+</div>
+
+<AvatarGroup max={3} size="sm">
+  {careTeam.map((m) => <Avatar key={m.id} src={m.photoUrl} name={m.name} />)}
+</AvatarGroup>
+\`\`\`
+
+Image-error state is internal; everything else comes from props.
+
+### Limitations
+
+- Accessibility: the \`<img>\` gets \`alt={alt ?? name ?? 'Avatar'}\` — pass \`alt=""\` when a visible name sits next to it so screen readers do not hear the name twice. The initials and the person glyph (\`aria-hidden\`) have **no accessible name**; when there is no image the surrounding text must identify the person. The "+N" disc in \`AvatarGroup\` is a plain \`<div>\` with no label listing who is hidden.
+- \`getInitials\` takes the first letter of each space-separated word and keeps the first two, so "Mary Anne Smith" → "MA" (not "MS"); pre-format the name if you want first + last.
+- RTL: \`AvatarGroup\` uses physical \`-space-x-2\`, which still overlaps correctly in RTL because \`space-x\` flips with \`dir\`; the ring/overlap order follows DOM order.
+- Theming: the fallback disc is \`bg-primary-800 text-white\`; \`AvatarGroup\` rings are hard-coded \`ring-white dark:ring-neutral-900\` and the "+N" disc \`neutral-200/700\` — they assume a white/neutral page background.
+- No lazy loading, no \`srcSet\`, no shape other than a circle. Depends on \`class-variance-authority\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'data-display-badge',
+          why: 'Identity plus state: an Avatar with a status Badge beside it is the header pattern in PatientHeader and EmployeeProfile.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   args: {
     ring: false,
   },

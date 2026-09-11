@@ -4,12 +4,58 @@ import { Button } from '../Button';
 import { Spinner, SpinnerWithLabel } from './Spinner';
 
 const meta: Meta<typeof Spinner> = {
-  title: 'Components/Loaders/Spinner',
+  id: 'loading-spinner',
+  title: 'Components/Loading/Spinner',
   component: Spinner,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+An indeterminate "working" indicator: a spinning ring in five \`size\`s and three \`variant\`s (\`default\` uses the current text colour, \`muted\`, \`white\` for dark buttons). \`SpinnerWithLabel\` adds visible text; \`FullPageSpinner\` centres one in the viewport. It announces itself with \`role="status"\` and a visually hidden \`label\` (default "Loading").
+
+### Use it when
+
+- A wait is short (under a few seconds) and you cannot predict the shape of what will arrive: a button submitting, a small panel refreshing, a search running.
+- Inline in a control — \`Button isLoading\` already does this for you.
+
+### Don't use it when
+
+- The layout of the incoming content is known — use \`Skeleton\` so nothing jumps when data lands.
+- Progress is measurable (upload, import) — \`Progress\` / \`CircularProgress\` with a real value.
+- The entire route is loading — \`LoadingPage\` composes the spinner with a message and layout.
+
+### Example
+
+\`\`\`tsx
+{isSearching ? <SpinnerWithLabel size="sm" label="Searching…" /> : <ResultCount n={results.length} />}
+\`\`\`
+
+### Limitations
+
+- Pure CSS \`animate-spin\`; it does not currently pause for \`prefers-reduced-motion\`.
+- \`label\` is the only text and defaults to English — translate it; several spinners on one screen each announce.
+- Sized in fixed steps; for a custom size pass \`className\` with \`h-*/w-*\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'loading-skeleton',
+          why: 'Skeleton preserves the layout of known content; Spinner for short waits of unknown shape.',
+        },
+        {
+          type: 'alternative to',
+          target: 'loading-progress',
+          why: 'Progress when you can report a real percentage; Spinner when you cannot.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     size: {
       control: 'select',

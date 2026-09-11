@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ServiceGrid, ServiceGridProps } from './ServiceGrid';
 
 const meta: Meta<typeof ServiceGrid> = {
-  title: 'Components/Text & Data Display/ServiceGrid',
+  id: 'services-servicegrid',
+  title: 'BlueHive/Services/ServiceGrid',
   component: ServiceGrid,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

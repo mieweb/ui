@@ -1,0 +1,92 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Healthcare/Encounter & orders/Overview" />
+
+# Encounter & orders
+
+> **What does the page lead with, and what data does it get?** Today's conclusions and the
+> orders placed for each problem → `Assessment` (plain props: concerns, items, orders). One
+> order in full → `OrderEditor` (morphs by type). What is _due_ from surveillance programs
+> and quality measures → `HealthSurveillance` (`PatientHistory` + `programs.json`). The banner
+> at the top of a **patient** page → `PatientHeader`; of a **case** page → `CaseManagementHeader`.
+> Canned reports from a WebChart-style backend → `WebChartReportViewer`. None of them talks to a
+> server — every backend contract is props in, callbacks out.
+
+## Which one?
+
+| Component                                                                       | Use it when                                                                                                                                                                                                                                       | Not when                                                                                                                                                    |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Assessment](?path=/docs/encounter-orders-assessment--docs)                     | The visit's **A&P**: `items` point at today's assertion of each concern; `orders` nest under problems via `concernId` (the durable IndicationLink); unified coded add row; unlinked bucket; drag to re-link                                       | The chart problem list — `ProblemList`; relevance tagging — `PresentingProblems`; full order edits — `OrderEditor`; a due list — `HealthSurveillance`       |
+| [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs)                   | Editing one `AssessmentOrder` in full. Morphs: `medication` → `MedicationEditor` (NCPDP); `lab` / `imaging` / `procedure` / `referral` → typed editors with coded search, priority, timing, body site / refer-to                                  | The inline display / detail edit Assessment already offers; reconciling presenting meds — `MedicationReconciliation`                                        |
+| [HealthSurveillance](?path=/docs/encounter-orders-healthsurveillance--docs)     | Showing what is **overdue / due / pending / done** for OSHA / DOT programs (`enrolledKeys`) and CMS eCQMs, from `evaluateDue(history, programs)`; each item is a picklist of satisfying orders → `onOrderMany`                                    | You need the plan itself — `Assessment`; an order-history grid — the story-only `ChartOrdersGrid` demo on NITRO; rules beyond periodicity + age / sex gates |
+| [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)               | The page **is the patient**: demographics, status dot, allergy / medication / alert / provider rows, flag ribbon, `CountBadge` actions, ⋮ menu with built-in Contact / Add / Edit Patient modals                                                  | The page is a case — `CaseManagementHeader`; a generic titled page — `PageHeader`; you need the full editable lists — `AllergyList` / `MedicationList`      |
+| [CaseManagementHeader](?path=/docs/encounter-orders-casemanagementheader--docs) | The page **is a case**: `CaseContextBar` (case #, status, type, editing users, `collabStatus` slot) over the patient identity row, Add Case Note / Close Case, collapsible details grid with Days Open, `alert` slot, fully translatable `labels` | The page is the patient's chart — `PatientHeader`; a generic titled page — `PageHeader`                                                                     |
+| [WebChartReportViewer](?path=/docs/encounter-orders-webchartreportviewer--docs) | Browsing **canned system reports** (grid of cards) and viewing one in a modal with a date range; result rendered by shape — HTML string, rows → `Table`, object → key/value                                                                       | Interactive analysis of rows — DataVis NITRO; a single fixed dataset — `Table`; untrusted HTML results (rendered unsanitised)                               |
+
+## Data contracts
+
+| Component              | Input                                                                                                                                                                           | Output                                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Assessment`           | `concerns: ConditionConcern[]` (chart), `items: AssessmentItem[]` + `orders: AssessmentOrder[]` (encounter) — plain props, no FHIR                                              | `onAddOrder`, `onAddAssessment`, `onLinkOrder`, `onEditOrder(Start)`, `onRemoveOrder`, `onReorder*` — host persists                  |
+| `OrderEditor`          | one `AssessmentOrder` (or `defaultType`), injected `codeLookup`                                                                                                                 | `onSave(AssessmentOrder)`                                                                                                            |
+| `HealthSurveillance`   | `PatientHistory` (orders / observations / procedures / immunizations / conditions / age / sex — host maps chart data) + `ProgramsMap` (`programs.json` from codify or your own) | `onOrder` / `onOrderMany(SurveillanceOrderPick[])` with `programKey`                                                                 |
+| `PatientHeader`        | `PatientData`, `AllergyItem[]`, `MedicationItem[]`, `comments: string[]` — display strings                                                                                      | `onOverflowAction`, `onAddItem(type, formData)`, `onEditPatient(formData)`                                                           |
+| `CaseManagementHeader` | `CaseInfo`, `CasePatient`, `CaseDetailItem[]`, `editingUsers`, `labels`                                                                                                         | `onAddCaseNote`, `onCloseCase`, `onExpandedChange`, `onBack`                                                                         |
+| `WebChartReportViewer` | `SystemReport[]`, `currentReport`, `reportResult: { data?: string \| object \| object[]; error?; success? }`, loading flags, `dateRange`                                        | `onReportSelect`, `onRefreshReports` / `onRefreshReport`, `onDateRangeChange`, `onReconnect` — the host calls WebChart (or anything) |
+
+All six ship from the main `@mieweb/ui` entry with no peers. `CodeLookup` (injected into
+`Assessment` and `OrderEditor`) is **not** in the package build — see
+[Clinical lists](?path=/docs/healthcare-clinical-lists-overview--docs).
+
+## How they fit together
+
+- **The encounter is three views of one concern model.** `PresentingProblems` (Clinical
+  lists) tags relevance at the start of the visit; `Assessment` records today's assertion and
+  plan at the end; both point into the chart's `ConditionConcern[]` by `concernId`, and orders
+  keep that `concernId` as their indication so recoding a problem never orphans them.
+- **OrderEditor vs Assessment is scope, not preference.** `Assessment` edits an order's
+  `display` / `detail` inline; return `true` from `onEditOrderStart` to hand the order to
+  `OrderEditor` for priority, timing, body site, refer-to or the full NCPDP prescription, then
+  feed the saved order back through `orders`. Both default to an ambient `CodeLookupProvider`.
+- **HealthSurveillance proposes, Assessment records.** `onOrderMany` picks carry `programKey`;
+  the host turns them into `AssessmentOrder`s (`orderTypeForCodetype` infers the type) linked
+  to the program's concern — `isConditionCodetype` already treats OSHA / FMCSA / NFPA / FAA
+  programs as concerns, so a program can sit in the A&P with its required orders beneath it.
+  `dueForOrder()` gives any ordering UI a "due for OSHA 1910.95" prompt.
+- **PatientHeader vs CaseManagementHeader is what the record is.** Same slots (`sticky`,
+  `showBackButton` / `onBack`, `actions`), different lead: the patient (demographics and safety
+  rows, `CountBadge`s, patient action menu) or the case (`CaseContextBar`, case actions,
+  details grid). Both are record banners, so the Layout family's
+  [PageHeader](?path=/docs/layout-pageheader--docs) (page title + breadcrumb + tabs) and
+  [AppHeader](?path=/docs/layout-appheader--docs) (app-wide bar) declare them as alternatives.
+  Each is a `div` with an `<h2>` — wrap in `<header>` and place under the `AppHeader`.
+- **WebChartReportViewer is the only "backend-named" component, and it has no backend.** It
+  renders whatever `reports` / `reportResult` the host fetched from WebChart's system-report
+  API — or a proxy, a FHIR operation, static JSON. Pair `ReportTimeRange` with your own
+  fetch to drive `dateRange`.
+
+## Shared limitations
+
+- **Accessibility.** `Assessment` order rows and `CaseManagementHeader`'s details toggle are
+  fully keyboard-operable, but `Assessment` problem blocks reorder by drag only, and
+  `PatientHeader`'s ⋮ menu has `role="menu"` without arrow-key navigation or focus return.
+  Live announcements exist only in `Assessment` (reorders, re-links, edits, removals); the
+  headers, `HealthSurveillance` and the report viewer announce nothing. Modals inherit `Modal`'s
+  focus trap. `WebChartReportViewer`'s date labels lack `htmlFor`.
+- **No clinical decision support.** No duplicate-order, indication-required, interaction,
+  allergy or dose checks; `orderTypeForCodetype` is a heuristic (imaging is never inferred);
+  `evaluateDue` is periodicity arithmetic over `ProgramMeta` and trusts `history` completely.
+  `PatientHeader` renders allergy names without severity.
+- **Security.** `WebChartReportViewer` injects string results with `dangerouslySetInnerHTML`
+  unsanitised — trusted backends only, or sanitise first.
+- **Responsive / RTL.** Headers adapt (avatar hidden below `md`, actions swap to icons or drop
+  to a row); `CaseManagementHeader` uses logical margins and mirrors, the others use physical
+  `ml-* / mr-* / right-*` and do not. Nested plan indents and the surveillance picklist's
+  dependency lanes are physical.
+- **Theming / i18n.** Semantic tokens plus hard-coded ambers (unlinked bucket, flag ribbon) and
+  status greens / reds. Only `CaseManagementHeader` (`labels`) and `WebChartReportViewer`
+  (partial `labels`) externalise strings; `Assessment`, `OrderEditor`, `HealthSurveillance` and
+  `PatientHeader` are English constants.
+- **Persistence and fetching are yours.** Every component is controlled; nothing here calls
+  WebChart, FHIR or any API, and `HealthSurveillance`'s `programs.json` and `CodeLookup`'s
+  shards must be served by the host.

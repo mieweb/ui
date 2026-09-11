@@ -45,7 +45,8 @@ const mockServices = [
 ];
 
 const meta: Meta<typeof CreateReferralModal> = {
-  title: 'Components/Forms & Inputs/CreateReferralModal',
+  id: 'users-integrations-createreferralmodal',
+  title: 'BlueHive/Users & integrations/CreateReferralModal',
   component: CreateReferralModal,
   parameters: {
     layout: 'fullscreen',
@@ -53,7 +54,7 @@ const meta: Meta<typeof CreateReferralModal> = {
       story: { autoplay: false },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   decorators: [
     (Story) => (
       <div

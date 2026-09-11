@@ -31,7 +31,7 @@ const quickActionIconVariants = cva(
 
 const quickActionVariants = cva(
   [
-    'flex items-center gap-3 rounded-xl border p-4 text-left',
+    'flex items-center gap-3 rounded-xl border p-4 text-start',
     'transition-colors duration-200',
     'border-neutral-200 bg-white',
     'hover:border-primary-300 hover:bg-primary-50',

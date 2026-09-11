@@ -105,12 +105,74 @@ type SchedulePickerStoryArgs = Omit<
 };
 
 const meta = {
-  title: 'Components/Forms & Inputs/SchedulePicker',
+  id: 'date-time-schedulepicker',
+  title: 'Inputs/Date & time/SchedulePicker',
   component: SchedulePicker,
   parameters: {
     layout: 'padded',
+    docs: {
+      description: {
+        component: `### What it's for
+
+An **appointment-slot chooser**: a horizontally scrolling strip of available dates, then a grid of available times for the chosen date. The host supplies availability — \`dates: Date[]\` and \`times: string[]\` (opaque display strings such as \`"8:30 AM"\`) — and owns the selection through \`selectedDate\` / \`onDateSelect(date)\` and \`selectedTime\` / \`onTimeSelect(time)\`. \`showTimePicker\` (default \`true\`) reveals the time grid only once a date is selected; \`timeColumns\` is \`4\` | \`6\`; \`dateLabel\` / \`timeLabel\` caption the two sections. The folder also exports the building blocks so you can lay out your own flow: \`DatePicker\` (the date strip), \`TimePicker\` (the time grid), \`DateButton\`, \`TimeButton\`, \`RadioOption\` (a selectable card with title/description, used for e.g. provider or visit-type choice), and their \`cva\` variants (\`dateButtonVariants\`, \`timeButtonVariants\`, \`radioOptionVariants\`).
+
+### Use it when
+
+- The user books from a **finite set of open slots** you already computed (clinic scheduling, DOT physicals, drug-screen appointments).
+- You want a touch-friendly "pick a day, then pick a time" step inside a booking wizard, possibly with \`RadioOption\` cards for the preceding choice.
+
+### Don't use it when
+
+- Any date may be typed and validated — \`DateInput\`.
+- The user picks a **period** for filtering — \`DateRangePicker\`.
+- You need to *show* booked appointments on a timeline, or let staff click an empty hour — \`ScheduleCalendar\` (\`onAddAppointment\`).
+- Times are values you must parse or compare — this component treats \`times\` as labels; keep a parallel array of real slots in the host.
+
+### Example
+
+\`\`\`tsx
+const [date, setDate] = useState<Date | null>(null);
+const [time, setTime] = useState<string | null>(null);
+const slots = useMemo(() => (date ? availability.get(date.toDateString()) ?? [] : []), [date]);
+
+<SchedulePicker
+  dates={openDays}                 // Date[] from your availability API
+  times={slots.map((s) => s.label)}
+  selectedDate={date}
+  selectedTime={time}
+  onDateSelect={(d) => { setDate(d); setTime(null); }}
+  onTimeSelect={setTime}
+  dateLabel="Pick a day"
+  timeLabel="Available times"
+/>
+\`\`\`
+
+### Limitations
+
+- Accessibility: \`DateButton\` / \`TimeButton\` are \`<button type="button">\`s whose **selected state is visual only** — no \`aria-pressed\`, no \`role="radiogroup"\`/\`radio\`, no \`aria-selected\`; the \`dateLabel\` / \`timeLabel\` \`<label>\`s have no \`htmlFor\` and are not associated with the groups. Keyboard is Tab through every button (no arrow keys, no roving focus); Enter/Space activate natively. \`RadioOption\` is a \`<div role="button" tabIndex={0}>\` handling Enter/Space — it does not expose radio semantics or \`aria-checked\` despite the name.
+- State: fully controlled; nothing is stored or submitted (\`no name\`). Date equality uses \`toDateString()\`, so two \`Date\`s on the same local calendar day match regardless of time.
+- i18n / time zones: date buttons print weekday and month with \`toLocaleDateString('en-US', …)\` (English abbreviations); \`times\` are whatever strings you pass — no parsing, formatting or zone conversion happens here. Defaults \`"Select Date"\` / \`"Select Time"\` are English.
+- Layout/RTL: the date strip scrolls horizontally (\`overflow-x-auto\`, no scroll buttons); no physical \`left/right\` offsets. Time grid is 4 columns below \`sm\` even when \`timeColumns={6}\`.
+- Theming: hard-coded \`border-neutral-200/700\`, \`text-neutral-900 dark:text-white\`; selected uses \`border-primary-500 bg-primary-50 dark:bg-primary-900/20\`; \`RadioOption\` indicator \`bg-primary-800\`. Only dependency is \`class-variance-authority\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'date-time-dateinput',
+          why: 'SchedulePicker lets the user choose from host-supplied available dates and time slots; DateInput lets them type any date.',
+        },
+        {
+          type: 'composes with',
+          target: 'date-time-schedulecalendar',
+          why: 'In a booking flow ScheduleCalendar shows what is already booked while SchedulePicker offers the remaining open slots.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     dateLabel: {
       control: 'text',

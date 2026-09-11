@@ -43,14 +43,17 @@ export interface FloatingWindowProps {
   'aria-label'?: string;
 }
 
+// Resize handles are genuinely physical: their geometry is tied to mouse
+// clientX/clientY drag math, and every edge/corner has a handle, so RTL users
+// lose nothing. Exempt from the RTL guard.
 const RESIZE_HANDLES: { dir: ResizeDirection; className: string }[] = [
-  { dir: 'nw', className: 'top-0 left-0 h-2 w-2 cursor-nw-resize' },
-  { dir: 'ne', className: 'top-0 right-0 h-2 w-2 cursor-ne-resize' },
-  { dir: 'sw', className: 'bottom-0 left-0 h-2 w-2 cursor-sw-resize' },
-  { dir: 'n', className: 'top-0 left-2 right-2 h-1 cursor-n-resize' },
-  { dir: 's', className: 'bottom-0 left-2 right-2 h-1 cursor-s-resize' },
-  { dir: 'w', className: 'left-0 top-2 bottom-2 w-1 cursor-w-resize' },
-  { dir: 'e', className: 'right-0 top-2 bottom-2 w-1 cursor-e-resize' },
+  { dir: 'nw', className: 'top-0 left-0 h-2 w-2 cursor-nw-resize' }, // rtl-ignore
+  { dir: 'ne', className: 'top-0 right-0 h-2 w-2 cursor-ne-resize' }, // rtl-ignore
+  { dir: 'sw', className: 'bottom-0 left-0 h-2 w-2 cursor-sw-resize' }, // rtl-ignore
+  { dir: 'n', className: 'top-0 left-2 right-2 h-1 cursor-n-resize' }, // rtl-ignore
+  { dir: 's', className: 'bottom-0 left-2 right-2 h-1 cursor-s-resize' }, // rtl-ignore
+  { dir: 'w', className: 'left-0 top-2 bottom-2 w-1 cursor-w-resize' }, // rtl-ignore
+  { dir: 'e', className: 'right-0 top-2 bottom-2 w-1 cursor-e-resize' }, // rtl-ignore
 ];
 
 /**
@@ -230,6 +233,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
         {resizable && (
           <div
             aria-hidden="true"
+            // rtl-ignore -- physical se-corner grip, paired with clientX resize math
             className="hover:bg-muted/50 absolute right-0 bottom-0 z-10 h-4 w-4 cursor-se-resize rounded-tl"
             onMouseDown={(e) => handleResizeStart(e, 'se')}
           >
@@ -368,14 +372,14 @@ const MinimizedWindow = React.forwardRef<HTMLDivElement, MinimizedWindowProps>(
         className="h-6 px-2"
         onClick={onRestore}
       >
-        <Square className="mr-1 h-3 w-3" />
+        <Square className="me-1 h-3 w-3" />
         <span className="truncate text-sm">{title}</span>
       </Button>
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="ml-auto h-6 w-6 p-0"
+        className="ms-auto h-6 w-6 p-0"
         onClick={onClose}
         aria-label="Close"
         title="Close"

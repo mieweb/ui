@@ -7,6 +7,8 @@ export {
   DropdownItem,
   type DropdownItemProps,
   DropdownLabel,
+  DropdownSubmenu,
+  type DropdownSubmenuProps,
   type DropdownPlacement,
   type DropdownProps,
   DropdownSeparator,

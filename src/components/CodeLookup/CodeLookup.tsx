@@ -684,6 +684,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       <div
         role="radiogroup"
         aria-label="Coding system"
+        data-slot="code-lookup-codetypes"
         className="flex flex-wrap items-center gap-1"
       >
         {codetypeOptions!.map((opt, i) => (
@@ -713,10 +714,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     );
 
     const searchBox = (
-      <div className="relative" ref={anchorRef}>
+      <div data-slot="code-lookup-search" className="relative" ref={anchorRef}>
         <SearchIcon
           size={16}
-          className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
+          className="text-muted-foreground absolute start-3 top-5 -translate-y-1/2"
         />
         <input
           type="text"
@@ -740,9 +741,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           onBlur={() => setOpen(false)}
           placeholder={effectivePlaceholder}
           disabled={status.state === 'error'}
+          // The shared Input slot: condensed-view.css keys density off it.
+          data-slot="input"
           className={cn(
             'border-border bg-background text-foreground placeholder:text-muted-foreground',
-            'h-10 w-full rounded-md border pr-3 pl-9 text-sm',
+            'h-10 w-full rounded-md border ps-9 pe-3 text-sm',
             'focus:ring-ring focus:ring-2 focus:outline-none'
           )}
         />
@@ -753,6 +756,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
               ref={floatingRef}
               style={style}
               role="presentation"
+              data-slot="code-lookup-dropdown"
               className={cn(
                 'bg-card border-border flex flex-col',
                 'overflow-hidden rounded-md border shadow-lg'
@@ -761,14 +765,17 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
               onMouseDown={(e) => e.preventDefault()}
             >
               {drill && (
-                <div className="border-border bg-muted/50 flex shrink-0 items-center gap-1.5 border-b px-2 py-1.5">
+                <div
+                  data-slot="code-lookup-drill"
+                  className="border-border bg-muted/50 flex shrink-0 items-center gap-1.5 border-b px-2 py-1.5"
+                >
                   <button
                     type="button"
                     onClick={closeDrill}
                     aria-label="Back to search results"
                     className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
                   >
-                    <ChevronLeftIcon size={14} />
+                    <ChevronLeftIcon size={14} className="rtl:-scale-x-100" />
                     Back
                   </button>
                   <span className="text-foreground text-xs font-semibold">
@@ -793,11 +800,13 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       ? 'Frequently used codes'
                       : 'Code search results'
                 }
+                data-slot="code-lookup-results"
                 className="divide-border max-h-80 min-h-0 divide-y overflow-y-auto"
               >
                 {showMemory && (
                   <li
                     role="presentation"
+                    data-slot="code-lookup-group-header"
                     className="text-muted-foreground bg-muted/50 px-3 py-1 text-[11px] font-semibold tracking-wide uppercase"
                   >
                     Frequently used
@@ -820,8 +829,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       tabIndex={-1}
                       onClick={() => pick(r)}
                       onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
+                      data-slot="code-lookup-option"
                       className={cn(
-                        'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-left text-sm',
+                        'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-start text-sm',
                         'hover:bg-muted/60 focus:bg-muted/60 focus:outline-none',
                         i === activeIndex && 'bg-muted/60'
                       )}
@@ -869,7 +879,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                             : 'opacity-40'
                         )}
                       >
-                        <ChevronRightIcon size={14} />
+                        <ChevronRightIcon
+                          size={14}
+                          className="rtl:-scale-x-100"
+                        />
                       </button>
                     )}
                   </li>
@@ -877,7 +890,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 {drill &&
                   drill.results !== null &&
                   drill.results.length === 0 && (
-                    <li className="text-muted-foreground px-3 py-2 text-sm">
+                    <li
+                      data-slot="code-lookup-empty"
+                      className="text-muted-foreground px-3 py-2 text-sm"
+                    >
                       No related entries found — press ← to go back.
                     </li>
                   )}
@@ -889,8 +905,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                       // options — focus is managed on the input
                       tabIndex={-1}
                       onClick={submitFreeText}
+                      data-slot="code-lookup-free-text"
                       className={cn(
-                        'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
+                        'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-start text-sm italic',
                         'focus:bg-muted/60 focus:outline-none'
                       )}
                     >
@@ -934,6 +951,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
 
           {/* status line */}
           <div
+            data-slot="code-lookup-status"
             className="text-muted-foreground flex items-center gap-2 text-xs"
             aria-live="polite"
           >

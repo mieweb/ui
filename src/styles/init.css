@@ -183,6 +183,31 @@
   --shadow-elevated-hover: var(--mieweb-shadow-elevated-hover);
   --shadow-glow: var(--mieweb-shadow-glow);
   --shadow-glow-hover: var(--mieweb-shadow-glow-hover);
+
+  /* ── Animations (Toast slide-in; mirrored via rtl: variant) ────────── */
+  --animate-slide-in-right: slide-in-right 300ms ease-out;
+  --animate-slide-in-left: slide-in-left 300ms ease-out;
+
+  @keyframes slide-in-right {
+    0% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slide-in-left {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 }
 
 /* ── BlueHive Brand Tokens (Default) ─────────────────────────────────── */

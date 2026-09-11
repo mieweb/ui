@@ -6,9 +6,10 @@ import { Input } from '../Input';
 import { StripeBadge, StripeSecureBadge } from './StripeBadge';
 
 const meta: Meta<typeof StripeBadge> = {
-  title: 'Components/Text & Data Display/StripeBadge',
+  id: 'billing-stripebadge',
+  title: 'BlueHive/Billing/StripeBadge',
   component: StripeBadge,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     docs: {
       description: {

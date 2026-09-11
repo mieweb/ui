@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { type EmployerDetails, EmployerView } from './EmployerView';
 
 const meta: Meta<typeof EmployerView> = {
-  title: 'Product/Provider/EmployerView',
+  id: 'employers-employerview',
+  title: 'BlueHive/Employers/EmployerView',
   component: EmployerView,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

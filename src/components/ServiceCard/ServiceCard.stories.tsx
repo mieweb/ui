@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { AddServiceCard, ServiceCard } from './ServiceCard';
 
 const meta: Meta<typeof ServiceCard> = {
-  title: 'Product/Provider/ServiceCard',
+  id: 'services-servicecard',
+  title: 'BlueHive/Services/ServiceCard',
   component: ServiceCard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

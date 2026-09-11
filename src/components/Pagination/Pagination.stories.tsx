@@ -29,12 +29,57 @@ function PaginationWithState({
 }
 
 const meta: Meta<typeof Pagination> = {
-  title: 'Components/Navigation/Pagination',
+  id: 'grids-pagination',
+  title: 'Components/Grids/Pagination',
   component: Pagination,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+Page controls for a list the host already pages: first/previous/next/last arrows, numbered buttons with ellipses around the current page, and \`onPageChange\`. It is fully controlled — you own \`page\` and \`totalPages\`.
+
+### Use it when
+
+- A \`Table\` or card list is fed by a server-paged endpoint and you need the standard control strip.
+- A wizard-like reading flow moves through numbered pages of content.
+
+### Don't use it when
+
+- The rows are in a \`DataVisNitroGrid\` — the grid's own scrolling and view features replace paging; adding a second pager confuses users.
+- The list is short enough to show in full, or infinite scroll fits the task better.
+- You are indicating progress through steps rather than pages — use \`StepIndicator\`.
+
+### Example
+
+\`\`\`tsx
+const [page, setPage] = useState(1);
+const { rows, totalPages } = useInvoices({ page, pageSize: 25 });
+
+<Table>…</Table>
+<Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+\`\`\`
+
+### Limitations
+
+- The \`nav\` has a default \`aria-label\` of "Pagination" and the current page is marked with \`data-active\`; pass \`label\`/\`labels\` for translation, as button text is not externalised for you.
+- First/prev/next/last chevron icons mirror in RTL (\`rtl:-scale-x-100\`).
+- Does not fetch or slice data; page size and total count come from the host.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'grids-table',
+          why: 'The standard pager for a server-paged static Table.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     page: {
       control: { type: 'number', min: 1 },

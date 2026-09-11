@@ -45,9 +45,10 @@ const sampleUser = {
 };
 
 const meta: Meta<typeof EditUserRoleModal> = {
-  title: 'Components/Forms & Inputs/EditUserRoleModal',
+  id: 'users-integrations-edituserrolemodal',
+  title: 'BlueHive/Users & integrations/EditUserRoleModal',
   component: EditUserRoleModal,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

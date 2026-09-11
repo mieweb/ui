@@ -6,6 +6,7 @@ export {
 } from './Toast';
 export {
   type ToastContextValue,
+  useOptionalToast,
   type ToastData,
   type ToastOptions,
   type ToastPosition,

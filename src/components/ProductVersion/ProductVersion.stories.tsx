@@ -4,15 +4,72 @@ import { Card } from '../Card';
 import { ProductVersion, ProductVersionBadge } from './ProductVersion';
 
 const meta: Meta<typeof ProductVersion> = {
-  title: 'Product/Feature Modules/ProductVersion',
+  id: 'layout-productversion',
+  title: 'Components/Layout/ProductVersion',
   component: ProductVersion,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     docs: {
       description: {
-        component:
-          'Displays product version information, typically used in footers, settings pages, or about dialogs.',
+        component: `### What it's for
+
+**The "BlueHive v2.1.0 (abc1234) · © 2026 MIE" line** for footers, About dialogs and settings pages. \`ProductVersion\` takes \`name\`, \`version\` (a \`v\` prefix is added if missing), optional \`build\`, \`environment\` (\`development\` | \`staging\` | \`production\` | any string — known values get yellow / blue / green pills), copyright via \`author\` + \`year\` (default current year) or a literal \`copyright\`, \`variant\` (\`inline\` | \`stacked\` | \`minimal\`), \`size\` (\`sm\` | \`md\` | \`lg\`). With \`changelogUrl\` it renders as an \`<a target="_blank">\`; with only \`onClick\` as a \`<button>\`; otherwise a \`div\`. \`ProductVersionBadge\` is the compact monospace chip: \`version\`, \`build\` (first 7 chars), \`environment\` (first 3 letters, upper-cased) on a tinted border.
+
+### Use it when
+
+- A site or app footer, About sheet or diagnostics panel must show what is deployed, ideally linking to release notes.
+- A header or status bar needs a small environment indicator (\`ProductVersionBadge\` with \`environment="staging"\`) so testers know where they are.
+
+### Don't use it when
+
+- You need the whole footer — \`SiteFooter\` / \`SimpleFooter\` (they render their own \`CopyrightText\`; drop \`ProductVersion\` into the footer's content instead of duplicating the © line).
+- The label is a generic status, not a version — \`Badge\`.
+- Copy must be localised — the separators and "Build:" prefix are fixed English (see Limitations).
+
+### Example
+
+\`\`\`tsx
+// values come from the build, not from state
+const { name, version, commit, env } = window.__APP_INFO__;
+
+<SimpleFooter companyName="MIE" />
+<div className="container mx-auto flex justify-center py-2">
+  <ProductVersion
+    name={name}
+    version={version}
+    build={commit.slice(0, 7)}
+    environment={env}
+    changelogUrl={\`https://github.com/mieweb/ui/releases/tag/v\${version}\`}
+    variant="minimal"
+    size="sm"
+  />
+</div>
+\`\`\`
+
+\`minimal\` omits the environment pill and copyright; use \`inline\` when the footer has no separate © line.
+
+### Limitations
+
+- Accessibility: the link form opens a new tab (\`target="_blank" rel="noopener noreferrer"\`) with **no visible or spoken "opens in new tab" hint**; when \`changelogUrl\` and \`onClick\` are both set the anchor gets the click handler too. The \`<button>\` form has no \`aria-label\` beyond its text. \`ProductVersionBadge\` truncates \`environment\` to three letters (\`"pro"\`, \`"sta"\`) with no expansion for AT.
+- i18n: hard-coded English \`"Build:"\`, \`"©"\` + year ordering, the \`•\` separator and the \`v\` prefix; \`year\` is not formatted with \`Intl\`.
+- RTL: \`minimal\` uses physical \`ml-1\` for the build suffix; other variants use symmetric flex gaps. \`stacked\` always centres.
+- Theming: text uses \`text-muted-foreground\`; environment pills and badge borders are hard-coded \`yellow-*\` / \`blue-*\` / \`green-*\` (with \`dark:\` variants), not brand tokens. No dependencies beyond \`cn\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'layout-sitefooter',
+          why: 'ProductVersion sits in or under SiteFooter / SimpleFooter to show the deployed version next to the copyright line.',
+        },
+        {
+          type: 'alternative to',
+          target: 'data-display-badge',
+          why: 'ProductVersionBadge is a fixed monospace version + environment chip; Badge is the generic status label with variants you choose.',
+        },
+      ],
     },
   },
   argTypes: {

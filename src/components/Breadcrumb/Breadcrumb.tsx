@@ -73,7 +73,7 @@ function Breadcrumb({
   }, [items, maxItems]);
 
   const defaultSeparator = (
-    <ChevronRightIcon className="text-muted-foreground h-4 w-4 shrink-0" />
+    <ChevronRightIcon className="text-muted-foreground h-4 w-4 shrink-0 rtl:-scale-x-100" />
   );
 
   return (

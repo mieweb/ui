@@ -4,8 +4,9 @@ import { ClaimProviderForm } from './ClaimProviderForm';
 
 const meta: Meta<typeof ClaimProviderForm> = {
   component: ClaimProviderForm,
-  title: 'Components/Forms & Inputs/ClaimProviderForm',
-  tags: ['autodocs'],
+  id: 'providers-claimproviderform',
+  title: 'BlueHive/Providers/ClaimProviderForm',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

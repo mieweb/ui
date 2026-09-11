@@ -5,9 +5,10 @@ import { Button } from '../Button/Button';
 import { AddContactModal, ContactFormData } from './AddContactModal';
 
 const meta: Meta<typeof AddContactModal> = {
-  title: 'Components/Forms & Inputs/AddContactModal',
+  id: 'users-integrations-addcontactmodal',
+  title: 'BlueHive/Users & integrations/AddContactModal',
   component: AddContactModal,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     docs: {

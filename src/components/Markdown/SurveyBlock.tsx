@@ -151,7 +151,7 @@ export const SurveyBlock: React.FC<SurveyBlockProps> = ({ code, id }) => {
               >
                 {field.title ?? field.label ?? field.name}
                 {field.isRequired && (
-                  <span className="ml-1 text-red-500">*</span>
+                  <span className="ms-1 text-red-500">*</span>
                 )}
               </label>
 

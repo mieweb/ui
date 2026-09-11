@@ -12,26 +12,79 @@ import {
 // =============================================================================
 
 const meta: Meta<typeof WebsiteInput> = {
-  title: 'Components/Forms & Inputs/WebsiteInput',
+  id: 'text-inputs-websiteinput',
+  title: 'Inputs/Text inputs/WebsiteInput',
   component: WebsiteInput,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'URL input component with validation for websites and social media links.',
+        component: `### What it's for
+
+The URL field. \`WebsiteInput\` is an \`Input\` with \`type="url"\`, \`inputMode="url"\`, \`autoComplete="url"\` and a \`https://example.com\` placeholder; \`onChange(value: string)\` hands back the raw string, and \`validateOnBlur\` shows an error when the text cannot be parsed as a URL even after prefixing \`https://\`. All other \`Input\` props pass through. The folder also exports \`WebsiteInputGroup\` (a repeater with a \`WebsiteType\` select — \`website\`, \`blog\`, \`facebook\`, \`instagram\`, \`linkedin\`, \`pinterest\`, \`twitter\`, \`yelp\`, \`youtube\` — and add/remove buttons, \`minEntries\` 1 / \`maxEntries\` 10), the \`WEBSITE_TYPES\` option list, the \`isValidUrl\` helper and the \`WebsiteEntry\` / \`WebsiteType\` types.
+
+### Use it when
+
+- A form collects a website or social-profile link and should reject obvious non-URLs.
+- A record holds several links with a type — \`WebsiteInputGroup\`, which picks a type-specific placeholder per row.
+
+### Don't use it when
+
+- The value is not a URL — plain \`Input\` (never a raw \`type="url"\`).
+- You must guarantee a scheme or a reachable host — validation is syntactic only; normalise (\`https://\` prefix) and verify on the server.
+- The list is of phone numbers — \`PhoneInputGroup\`.
+
+### Example
+
+\`\`\`tsx
+const [site, setSite] = React.useState('');
+
+<WebsiteInput
+  label="Practice website"
+  value={site}
+  onChange={setSite}
+  validateOnBlur
+  helperText="Include https:// if you have it."
+/>
+\`\`\`
+
+Both components are controlled: \`WebsiteInput\` defaults \`value\` to \`''\`; \`WebsiteInputGroup\` requires \`value: WebsiteEntry[]\` and \`onChange\` and pads the array to \`minEntries\`.
+
+### Limitations
+
+- Inherits \`Input\`'s wiring (\`<label htmlFor>\`, \`aria-invalid\`, \`aria-describedby\` → \`<p role="alert">\` error / helper text). Because \`type="url"\`, the browser's own constraint validation may also fire on form submit if the value has no scheme.
+- \`isValidUrl\` accepts anything \`new URL()\` can parse with \`https://\` prepended — \`"example"\` passes; \`""\` is treated as valid. The value is **not** rewritten with the scheme; the host decides.
+- Hard-coded English: the blur error \`"Please enter a valid URL"\`, the default placeholders, the group's sr-only \`"URL type"\` label and the \`"Add website"\` / \`"Remove website"\` button labels. Only option labels are translatable, via \`typeLabels\`.
+- In the group only the first row gets the visible \`label\`; later rows are unlabelled. Type select ids are \`website-type-{index}\` (duplicates across two groups). Removing a row does not manage focus or announce.
+- The group's select and buttons use hard-coded palette classes (\`border-gray-300\`, \`text-brand-600\`, \`text-red-600\`, \`dark:bg-gray-800\`) rather than semantic tokens. Layouts are flex/\`gap-2\` — RTL-safe. No external dependencies.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'text-inputs-input',
+          why: 'WebsiteInput validates URLs on blur; never use a raw Input type="url".',
+        },
+        {
+          type: 'uses',
+          target: 'text-inputs-input',
+          why: 'Renders an Input with type="url" and inherits its label/error wiring.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     value: {
       control: 'text',
-      description: 'The URL value',
+      description: 'The URL value (controlled; defaults to an empty string)',
     },
     validateOnBlur: {
       control: 'boolean',
-      description: 'Whether to validate and show error state for invalid URLs',
+      description:
+        'Show "Please enter a valid URL" on blur when the value cannot be parsed even with https:// prefixed',
     },
     disabled: {
       control: 'boolean',

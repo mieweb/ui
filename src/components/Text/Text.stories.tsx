@@ -3,12 +3,23 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SmallMuted, Text } from './Text';
 
 const meta: Meta<typeof Text> = {
+  id: 'foundations-text',
   title: 'Foundations/Text',
   component: Text,
   parameters: {
     layout: 'centered',
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'data-display-clampedtext',
+          why: 'Text truncate cuts a single line with an ellipsis and no reveal; ClampedText clamps prose to N lines with a Show more toggle.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

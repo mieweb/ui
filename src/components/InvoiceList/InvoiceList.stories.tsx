@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { InvoiceList } from './InvoiceList';
 
 const meta: Meta<typeof InvoiceList> = {
-  title: 'Product/Provider/InvoiceList',
+  id: 'billing-invoicelist',
+  title: 'BlueHive/Billing/InvoiceList',
   component: InvoiceList,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
 };
 
 export default meta;

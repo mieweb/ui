@@ -5,3 +5,5 @@ storybook-static
 *.log
 .DS_Store
 coverage
+# Prettier rewrites the MDX `{/* */}` comment into invalid syntax
+src/components/SuperChat/SuperChat.mdx

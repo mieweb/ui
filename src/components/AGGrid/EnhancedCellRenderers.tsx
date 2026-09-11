@@ -193,7 +193,7 @@ export const EnhancedActionsRenderer = memo<ActionsRendererProps>((params) => {
           className="h-8 px-2"
         >
           {action.icon}
-          <span className="ml-1">{action.label}</span>
+          <span className="ms-1">{action.label}</span>
         </Button>
       ))}
     </div>
@@ -262,7 +262,7 @@ export const EnhancedCurrencyRenderer = memo<ICellRendererParams>((params) => {
   return (
     <span
       className={cn(
-        'text-right font-mono',
+        'text-end font-mono',
         numericValue >= 0 ? 'text-foreground' : 'text-destructive'
       )}
     >

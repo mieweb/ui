@@ -535,7 +535,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
           {isEmpty && placeholder && (
             <div
               aria-hidden="true"
-              className="text-muted-foreground pointer-events-none absolute top-0 left-0 p-4"
+              className="text-muted-foreground pointer-events-none absolute start-0 top-0 p-4"
             >
               {placeholder}
             </div>

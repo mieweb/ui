@@ -1,0 +1,34 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Inputs/Actions/Overview" />
+
+# Actions
+
+> **Two or more buttons, or one button with a long, translated or user-supplied label, always go
+> in a `ButtonGroup`.** Its default `orientation="auto"` stacks before any label truncates.
+
+## Which one?
+
+| Component                                                      | Use it when                                                                   | Not when                                         |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------ |
+| [Button](?path=/docs/actions-button--docs)                     | The user triggers an action: submit, open, save, delete                       | The control keeps an on/off state                |
+| [ButtonGroup](?path=/docs/actions-buttongroup--docs)           | Laying out any set of Buttons (dialog footers, form actions, card CTAs)       | Children are not Buttons                         |
+| [Toggle](?path=/docs/actions-toggle--docs)                     | A pressed/unpressed option that applies immediately (toolbar, view filter)    | The setting is saved with a form — use `Switch`  |
+| [CopyButton](?path=/docs/actions-copybutton--docs)             | Copying a value (ID, email, key) to the clipboard, even inside clickable rows | Anything other than plain-text copy              |
+| [QuickAction](?path=/docs/actions-quickaction--docs)           | A large, explained shortcut tile on a dashboard                               | Inline in content or forms                       |
+| [RowActionToolbar](?path=/docs/actions-rowactiontoolbar--docs) | Per-row icon actions revealed on hover/focus in lists and NITRO grids         | Labelled actions in a footer — use `ButtonGroup` |
+
+## How they fit together
+
+- `Button` is the primitive; `CopyButton` and `RowActionToolbar`'s `RowIconButton` are icon-size
+  Buttons with a `Tooltip` label.
+- `ButtonGroup` measures each Button's `data-slot="button-label"` to decide when to stack, so it
+  only works with Buttons as direct children.
+- Boolean state lives in three places by intent: `Toggle` (immediate, `aria-pressed`),
+  `Switch` (form on/off), `Checkbox` (form selection). Pick by where the value is saved.
+
+## Shared limitations
+
+- Icon-only controls need an explicit `aria-label`; a `Tooltip` is a description, not a name.
+- Default labels (`Copy`, `Copied`, loading text) are English and must be translated by the host.
+- `RowActionToolbar`'s hover reveal depends on a fine pointer; on touch it is always visible.

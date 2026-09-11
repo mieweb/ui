@@ -192,18 +192,93 @@ type AppHeaderStoryProps = React.ComponentProps<typeof AppHeader> &
 // =============================================================================
 
 const meta: Meta<AppHeaderStoryProps> = {
-  title: 'Components/Layout & Structure/AppHeader',
+  id: 'layout-appheader',
+  title: 'Components/Layout/AppHeader',
   component: AppHeader,
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'A composable application header with support for search, notifications, user menus, and custom actions.',
+        component: `### What it's for
+
+**The top bar of an authenticated application** — the chrome that sits beside a \`Sidebar\` on every route. \`AppHeader\` is a sticky \`<header>\` (\`sticky\`, \`bordered\`, \`height\` class, default \`h-16\`) that only lays out what you put in it. Slots: \`AppHeaderSection\` (\`align\` \`left\` | \`center\` | \`right\` via logical auto-margins), \`AppHeaderBrand\` (\`logo\` + name, name hidden below \`sm\`), \`AppHeaderTitle\` (an \`<h1>\` + \`subtitle\`), \`AppHeaderActions\`, \`AppHeaderDivider\`, \`AppHeaderIconButton\` (\`icon\`, required \`label\`, \`badge\` count, \`isActive\`), \`AppHeaderSearch\` (a **button** showing \`placeholder\` and a ⌘K / Ctrl+K hint — the trigger for \`CommandPalette\`, not an input) and \`AppHeaderUserMenu\` (avatar/initials + name/email, a **trigger** with \`isOpen\` chevron — the menu itself is yours).
+
+### Use it when
+
+- Signed-in app shell: brand or page title on the start side, search / notifications / settings / user trigger on the end side, next to a \`Sidebar\`.
+- You need per-page titles in the bar (\`AppHeaderTitle\`) rather than a marketing nav.
+
+### Don't use it when
+
+- A **public / marketing** page with nav links, Log In / Sign Up and a mobile menu — \`SiteHeader\` (fixed, brand-coloured, self-contained).
+- A **title block inside the page body** with actions, breadcrumb and tabs — \`PageHeader\`.
+- A record-scoped banner (patient, case, provider) — the domain headers (\`PatientHeader\`, \`CaseManagementHeader\`, \`ProviderDetailHeader\`).
+- You need the dropdowns themselves — \`AppHeaderUserMenu\` and \`AppHeaderIconButton\` only fire \`onClick\`; wrap them in \`Dropdown\` / \`Popover\` / \`NotificationCenter\`.
+
+### Example
+
+\`\`\`tsx
+const [menuOpen, setMenuOpen] = useState(false);
+const { open: openPalette } = useCommandPalette();
+
+<AppHeader>
+  <AppHeaderSection align="left">
+    <SidebarMobileToggle />
+    <AppHeaderBrand logo={<Logo className="h-8 w-8" />}>WebChart</AppHeaderBrand>
+  </AppHeaderSection>
+  <AppHeaderSection align="right">
+    <AppHeaderSearch onClick={openPalette} placeholder="Search patients…" />
+    <AppHeaderActions>
+      <AppHeaderIconButton icon={<BellIcon />} label="Notifications" badge={unread} onClick={openNotifications} />
+      <AppHeaderDivider />
+      <Dropdown open={menuOpen} onOpenChange={setMenuOpen} trigger={
+        <AppHeaderUserMenu name={user.name} email={user.email} avatarUrl={user.avatarUrl} isOpen={menuOpen} />
+      }>
+        …
+      </Dropdown>
+    </AppHeaderActions>
+  </AppHeaderSection>
+</AppHeader>
+\`\`\`
+
+Open state for menus and the palette lives in the host; the header pieces are stateless triggers.
+
+### Limitations
+
+- Accessibility: a \`<header>\` landmark with **no \`aria-label\`** (add one if the page has more than one \`header\`). \`AppHeaderIconButton\` sets \`aria-label\` + \`title\` from \`label\` and shows \`badge\` (\`99+\` cap) visually only — the count is **not in the accessible name**. \`AppHeaderUserMenu\` is a button with no \`aria-expanded\` / \`aria-haspopup\` — set them via the wrapping menu. \`AppHeaderSearch\` is a button, not a search landmark. \`AppHeaderTitle\` renders an \`<h1>\` on every page it appears on — avoid a second \`h1\` in \`PageHeader\`. Brand name (\`< sm\`) and user name/email (\`< lg\`) are hidden visually and from AT.
+- No built-in mobile collapse: nothing hides at breakpoints except the brand text, user text and \`AppHeaderSearch\` (\`hidden sm:flex\` unless \`showOnMobile\`).
+- i18n: \`AppHeaderSearch\` defaults to \`"Search..."\`; the ⌘/Ctrl hint is decided once at module load from \`navigator.platform\` (SSR renders \`Ctrl\`).
+- RTL: sections use logical \`me-auto\` / \`ms-auto\`, badge \`-end-1\`, \`text-start\`; \`AppHeaderDivider\` uses symmetric \`mx-2\`.
+- Theming: mixes semantic tokens (\`text-muted-foreground\`) with hard-coded \`bg-white dark:bg-gray-900\`, \`gray-*\` borders/hover and \`bg-red-700\` badge — not brand tokens. No third-party dependencies.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'layout-siteheader',
+          why: 'AppHeader is the sticky, slot-based chrome of a signed-in app beside a Sidebar; SiteHeader is the fixed, brand-coloured public-site bar with nav links and auth buttons.',
+        },
+        {
+          type: 'alternative to',
+          target: 'layout-pageheader',
+          why: 'AppHeader is the app-wide top bar (brand, search, user); PageHeader is the title block inside one page with its actions, breadcrumb and tabs.',
+        },
+        {
+          type: 'composes with',
+          target: 'overlays-sidebar',
+          why: 'Sidebar + AppHeader form the app shell: the rail owns route navigation, the header owns brand, search and account triggers (SidebarMobileToggle lives in the header).',
+        },
+        {
+          type: 'composes with',
+          target: 'navigation-commandpalette',
+          why: 'AppHeaderSearch is the ⌘K placeholder button whose onClick opens the CommandPalette.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
     sticky: {
       control: 'boolean',

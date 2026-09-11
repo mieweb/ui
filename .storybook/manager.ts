@@ -163,12 +163,60 @@ function createBrandTheme(brandKey: BrandKey, isDark = false) {
   });
 }
 
+// Sidebar badges derived from the catalog tags on each Meta (see
+// .storybook/taxonomy.json and CONTRIBUTING → "Stories & documentation").
+// Scope is expressed by the root (Components / Healthcare / BlueHive), so only
+// maturity and demo-only entries get a badge; stable is the default.
+const TAG_BADGES: Record<string, { label: string; color: string }> = {
+  'maturity:deprecated': { label: 'Deprecated', color: '#dc2626' },
+  'maturity:retired': { label: 'Retired', color: '#6b7280' },
+  'maturity:experimental': { label: 'Experimental', color: '#d97706' },
+  'maturity:alpha': { label: 'Alpha', color: '#d97706' },
+  'maturity:beta': { label: 'Beta', color: '#2563eb' },
+  'scope:application-local': { label: 'Demo', color: '#6b7280' },
+};
+
+function renderSidebarLabel(item: { name: string; tags?: string[]; type: string }) {
+  const badges = (item.tags ?? []).filter((tag) => tag in TAG_BADGES);
+  // Badge the component node only; its docs/story children repeat the same tags.
+  if (badges.length === 0 || item.type !== 'component') {
+    return item.name;
+  }
+  return React.createElement(
+    'span',
+    { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } },
+    item.name,
+    ...badges.map((tag) =>
+      React.createElement(
+        'span',
+        {
+          key: tag,
+          'aria-label': TAG_BADGES[tag].label,
+          style: {
+            fontSize: 9,
+            lineHeight: '14px',
+            fontWeight: 700,
+            letterSpacing: 0.3,
+            textTransform: 'uppercase',
+            padding: '0 5px',
+            borderRadius: 999,
+            color: '#fff',
+            background: TAG_BADGES[tag].color,
+          },
+        },
+        TAG_BADGES[tag].label
+      )
+    )
+  );
+}
+
 // Set initial theme (BlueHive as default)
 addons.setConfig({
   theme: createBrandTheme('bluehive'),
   sidebar: {
     showRoots: true,
-    collapsedRoots: ['examples'],
+    collapsedRoots: ['bluehive', 'deprecated'],
+    renderLabel: renderSidebarLabel,
   },
   toolbar: {
     title: { hidden: false },

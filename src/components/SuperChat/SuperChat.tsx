@@ -31,6 +31,7 @@ import type {
   ComposerAttachment,
   Participant,
   SuperChatConversation,
+  SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatRef,
   SuperChatRenderPlugin,
@@ -74,6 +75,12 @@ export interface SuperChatProps {
   virtualized?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
+  /**
+   * Format for a message's default copy action (Ctrl/Cmd-click on the footer
+   * copy button). All formats stay reachable per message via the copy menus.
+   * Defaults to `'rich'`.
+   */
+  defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */
   className?: string;
 
@@ -121,6 +128,7 @@ export function SuperChat({
   order = 'asc',
   virtualized = false,
   linkBuilder,
+  defaultCopyFormat,
   className,
   onMessageSent,
   onMessageEdited,
@@ -231,7 +239,7 @@ export function SuperChat({
               type="button"
               onClick={onBack}
               aria-label="Back to conversations"
-              className="-ml-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="-ms-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -291,6 +299,7 @@ export function SuperChat({
           onReferenceClick={onReferenceClick}
           editable={editable}
           onMessageEdited={handleMessageEdited}
+          defaultCopyFormat={defaultCopyFormat}
           order={order}
           conversationId={conversation.id}
           containerProps={{
@@ -329,6 +338,7 @@ export function SuperChat({
               onReferenceClick={onReferenceClick}
               editable={editable}
               onMessageEdited={handleMessageEdited}
+              defaultCopyFormat={defaultCopyFormat}
             />
           ))}
         </div>

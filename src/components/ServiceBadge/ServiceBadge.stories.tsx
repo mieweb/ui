@@ -40,12 +40,13 @@ const mockServices = [
 ];
 
 const meta: Meta<ServiceBadgeStoryArgs> = {
-  title: 'Components/Status Indicators/ServiceBadge',
+  id: 'services-servicebadge',
+  title: 'BlueHive/Services/ServiceBadge',
   component: ServiceBadge,
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   argTypes: {
     variant: {
       control: 'select',

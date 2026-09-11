@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { OrderCard } from './OrderCard';
 
 const meta: Meta<typeof OrderCard> = {
-  title: 'Product/Provider/OrderCard',
+  id: 'orders-ordercard',
+  title: 'BlueHive/Orders/OrderCard',
   component: OrderCard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

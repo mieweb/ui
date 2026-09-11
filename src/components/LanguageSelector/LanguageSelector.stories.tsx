@@ -67,11 +67,73 @@ function LanguageSelectorWithState({
 }
 
 const meta: Meta<typeof LanguageSelectorWithState> = {
-  title: 'Components/Forms & Inputs/LanguageSelector',
+  id: 'composite-forms-languageselector',
+  title: 'Inputs/Composite forms/LanguageSelector',
   component: LanguageSelectorWithState,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A **UI-language / locale switcher** with a built-in list. \`Language = { code, name, englishName?, flag?, rtl? }\`; \`DEFAULT_LANGUAGES\` ships 12 entries (en, es, fr, de, it, pt, zh, ja, ko, ar, hi, ru) with native names and flag emoji. Three renderings share \`value\` (a code), \`onChange(language)\` (the whole object, so you get \`code\` and \`rtl\`) and \`languages\`: **\`LanguageSelector\`** — a button that opens a portaled \`role="listbox"\` (\`showFlags\`, \`flagOnly\`, \`size\` \`sm\`|\`md\`|\`lg\`, \`variant\` \`default\`|\`ghost\`|\`minimal\`, \`label\`, \`placeholder\`, \`disabled\`); **\`LanguageSelectorNative\`** — a real \`<select>\`, best on mobile; **\`LanguageSelectorInline\`** — a \`role="radiogroup"\` of code buttons (EN | ES | FR) for 2–5 languages. Exports: the three components, \`DEFAULT_LANGUAGES\`, types \`Language\`, \`LanguageSelectorProps\`, \`LanguageSelectorNativeProps\`, \`LanguageSelectorInlineProps\`.
+
+### Use it when
+
+- The app header, login page or settings needs a **language picker** whose result drives your i18n library and the document \`dir\`.
+- You want native-name labels and flags without building the list; pass \`languages\` to trim it to what you actually translate.
+
+### Don't use it when
+
+- The value is a **country** for an address or nationality — \`CountryDropdown\`; a dial code — \`CountryCodeDropdown\`.
+- It is an arbitrary form value with label, helper and error — \`Select\`.
+- The choice is a patient's *spoken* language stored on the record with validation — use \`Select\` with your own option list; this component has no \`error\` / \`required\` / \`name\`.
+
+### Example
+
+\`\`\`tsx
+const { i18n } = useTranslation();
+
+<LanguageSelector
+  value={i18n.language}
+  languages={DEFAULT_LANGUAGES.filter((l) => ['en', 'es', 'ar'].includes(l.code))}
+  variant="ghost"
+  onChange={(language) => {
+    i18n.changeLanguage(language.code);
+    document.documentElement.dir = language.rtl ? 'rtl' : 'ltr'; // useDirection() picks this up
+  }}
+/>
+
+// compact header or mobile
+<LanguageSelectorNative value={i18n.language} onChange={(l) => i18n.changeLanguage(l.code)} />
+\`\`\`
+
+### Limitations
+
+- Accessibility: \`LanguageSelector\`'s trigger is \`<button aria-haspopup="listbox" aria-expanded aria-label={label}>\` and the popup a \`<ul role="listbox" aria-label>\` of \`<li role="option" aria-selected>\`; but **options are not focusable** (\`<li>\` without \`tabIndex\`), there is no arrow-key navigation, no \`aria-activedescendant\`, and the \`onKeyDown\` Enter handler can never fire — the custom popup is mouse/touch only. Escape closes it (listener attached for the component's lifetime, not just while open) but focus is not returned to the trigger. \`LanguageSelectorNative\` inherits full native keyboard support. \`LanguageSelectorInline\` uses \`role="radiogroup"\` / \`role="radio" aria-checked\` with a hard-coded \`aria-label="Language"\`, and Tab (not arrow keys) moves between the radios.
+- No form-field anatomy: no visible label, \`helperText\`, \`error\`, \`required\` or \`name\`; \`label\` is used only as \`aria-label\`. The \`rtl\` flag is data for your handler — the component does not read \`useDirection\` or set \`dir\` itself.
+- Filtering/search is not available; \`englishName\` is in the type but unused by the components.
+- i18n: language names are the native names from \`DEFAULT_LANGUAGES\` (not localized to the current UI language); \`placeholder\` defaults to English "Select language"; flags are emoji and render per-platform (Windows shows letter codes). Default flag for \`en\` is 🇺🇸.
+- RTL: \`selectorVariants\` sets \`text-left\`; the native chevron is \`absolute right-2\` with \`pr-8\`; inline options use \`rounded-l-lg\` / \`rounded-r-lg\` / \`border-l\` / \`mr-1\` — all physical.
+- Theming: trigger, popup and native select use hard-coded \`gray-*\` / \`bg-white\` classes with \`dark:\` variants; selected option \`bg-primary-50 text-primary-700\`, inline selected \`bg-primary-800 text-white\`, focus ring \`ring-primary-500\`. Depends on \`class-variance-authority\`, \`useAnchoredPosition\`, \`useClickOutside\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-select',
+          why: 'LanguageSelector is a header/settings switcher with a built-in language list; Select is a labelled, validated form field for arbitrary values.',
+        },
+        {
+          type: 'alternative to',
+          target: 'choice-inputs-countrydropdown',
+          why: 'LanguageSelector picks a language/locale code; CountryDropdown picks a country for an address or nationality.',
+        },
+      ],
+    },
   },
   args: {
     value: 'en',

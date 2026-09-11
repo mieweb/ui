@@ -4,8 +4,9 @@ import { EmployerServiceModal } from './EmployerServiceModal';
 
 const meta: Meta<typeof EmployerServiceModal> = {
   component: EmployerServiceModal,
-  title: 'Components/Forms & Inputs/EmployerServiceModal',
-  tags: ['autodocs'],
+  id: 'employers-employerservicemodal',
+  title: 'BlueHive/Employers/EmployerServiceModal',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

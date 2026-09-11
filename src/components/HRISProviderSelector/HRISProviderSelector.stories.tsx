@@ -95,9 +95,10 @@ const connectedProvider: HRISProvider = {
 };
 
 const meta: Meta<typeof HRISProviderSelector> = {
-  title: 'Components/Forms & Inputs/HRISProviderSelector',
+  id: 'users-integrations-hrisproviderselector',
+  title: 'BlueHive/Users & integrations/HRISProviderSelector',
   component: HRISProviderSelector,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   args: {
     providers: sampleProviders,
     loading: false,

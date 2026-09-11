@@ -4,8 +4,9 @@ import { OrderLookupForm } from './OrderLookupForm';
 
 const meta: Meta<typeof OrderLookupForm> = {
   component: OrderLookupForm,
-  title: 'Product/Feature Modules/OrderLookupForm',
-  tags: ['autodocs'],
+  id: 'orders-orderlookupform',
+  title: 'BlueHive/Orders/OrderLookupForm',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

@@ -65,9 +65,10 @@ const sampleProviders: Provider[] = [
 ];
 
 const meta: Meta<typeof ProviderCard> = {
-  title: 'Product/Provider/ProviderCard',
+  id: 'providers-providercard',
+  title: 'BlueHive/Providers/ProviderCard',
   component: ProviderCard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     a11y: {

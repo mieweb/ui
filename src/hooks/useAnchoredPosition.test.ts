@@ -138,6 +138,45 @@ describe('useAnchoredPosition', () => {
     expect(result.current.style.left).toBe(VIEWPORT_WIDTH - 250 - 8);
   });
 
+  it('positions beside the anchor for right-start', () => {
+    const { result } = setup({
+      options: { placement: 'right-start' },
+      anchorRect: { top: 100, left: 200, width: 150, height: 40 },
+    });
+    expect(result.current.actualSide).toBe('right');
+    expect(result.current.style).toMatchObject({
+      position: 'fixed',
+      top: 100, // -start aligns top edges
+      left: 350 + 4, // anchor right + default offset
+      transition: 'none',
+    });
+    // Available space to the right: 1024 - 8 (padding) - 350 - 4 (offset)
+    expect(result.current.style.maxWidth).toBe(662);
+  });
+
+  it('flips to the left when the right side is cramped', () => {
+    const { result } = setup({
+      options: { placement: 'right-start' },
+      anchorRect: { top: 100, left: 700, width: 100, height: 40 },
+      floatingSize: { width: 250, height: 200 },
+    });
+    // Space right: 1016 - 800 - 4 = 212 < 250; space left is larger → flip
+    expect(result.current.actualSide).toBe('left');
+    expect(result.current.style.left).toBeUndefined();
+    // Anchored to the anchor's left edge via `right`
+    expect(result.current.style.right).toBe(VIEWPORT_WIDTH - 700 + 4);
+  });
+
+  it('clamps a horizontal flyout vertically to the viewport padding', () => {
+    const { result } = setup({
+      options: { placement: 'right-start' },
+      anchorRect: { top: 700, left: 200, width: 150, height: 40 },
+      floatingSize: { width: 250, height: 400 },
+    });
+    // Top-aligned would be 700, but 700 + 400 overflows → 768 - 8 - 400
+    expect(result.current.style.top).toBe(360);
+  });
+
   it('matches the anchor width with matchWidth', () => {
     const { result } = setup({
       options: { matchWidth: true },

@@ -1,5 +1,6 @@
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Plus } from 'lucide-react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { renderWithTheme } from '../../test/test-utils';
@@ -100,6 +101,50 @@ describe('Button', () => {
     expect(screen.getByTestId('left-icon')).toBeInTheDocument();
     expect(screen.getByTestId('right-icon')).toBeInTheDocument();
     expect(screen.getByText('Button Text')).toBeInTheDocument();
+  });
+
+  it('keeps inline icon children in the button flex layout', () => {
+    const handleClick = vi.fn();
+    renderWithTheme(
+      <Button onClick={handleClick}>
+        <Plus data-testid="inline-icon" aria-hidden="true" />
+        Add Employee
+      </Button>
+    );
+
+    const button = screen.getByRole('button', { name: 'Add Employee' });
+    const icon = screen.getByTestId('inline-icon');
+    expect(icon.parentElement).toBe(button);
+    fireEvent.click(icon);
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves wrapped icons and text supplied through a fragment', () => {
+    renderWithTheme(
+      <Button>
+        <>
+          <span data-testid="icon-slot" aria-hidden="true">
+            <Plus />
+          </span>
+          Order Testing
+        </>
+      </Button>
+    );
+
+    const button = screen.getByRole('button', { name: 'Order Testing' });
+    expect(screen.getByTestId('icon-slot').parentElement).toBe(button);
+  });
+
+  it('retains truncation for text labels with explicit icon props', () => {
+    renderWithTheme(
+      <Button leftIcon={<Plus aria-hidden="true" />}>A long label</Button>
+    );
+
+    const button = screen.getByRole('button', { name: 'A long label' });
+    const label = button.querySelector('[data-slot="button-label"]');
+    expect(label).toHaveClass('truncate');
+    expect(label).toHaveTextContent('A long label');
+    expect(label?.querySelector('svg')).toBeNull();
   });
 
   describe('accessibility', () => {

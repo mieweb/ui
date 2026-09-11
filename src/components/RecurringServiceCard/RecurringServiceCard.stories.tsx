@@ -12,9 +12,10 @@ import {
 } from './RecurringServiceCard';
 
 const meta: Meta<typeof RecurringServiceCard> = {
-  title: 'Product/Provider/RecurringServiceCard',
+  id: 'services-recurringservicecard',
+  title: 'BlueHive/Services/RecurringServiceCard',
   component: RecurringServiceCard,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   argTypes: {
     state: {
       control: 'select',

@@ -76,6 +76,7 @@ export * from './components/EmployerView';
 export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
+export * from './components/FilterSummaryBar';
 export * from './components/FloatingWindow';
 export * from './components/HeroActionCard';
 export * from './components/FreshnessBadge';
@@ -89,6 +90,7 @@ export * from './components/InventoryManager';
 export * from './components/Label';
 export * from './components/InviteUserModal';
 export * from './components/InvoiceList';
+export * from './components/KeyboardShortcutsOverlay';
 export * from './components/InvoicePaymentPage';
 // InvoiceView exports InvoiceLineItem which conflicts with InvoicePaymentPage
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
@@ -174,6 +176,7 @@ export * from './components/Separator';
 export * from './components/Sheet';
 export * from './components/SectionSpyNav';
 export * from './components/SourceTip';
+export * from './components/Sparkline';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,

@@ -35,9 +35,10 @@ const sampleContacts: ProviderContact[] = [
 ];
 
 const meta: Meta<typeof ResultsEntryForm> = {
-  title: 'Components/Forms & Inputs/ResultsEntryForm',
+  id: 'operations-resultsentryform',
+  title: 'BlueHive/Operations/ResultsEntryForm',
   component: ResultsEntryForm,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     docs: {
       description: {

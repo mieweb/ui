@@ -1,0 +1,93 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Dashboards/Overview" />
+
+# Dashboards
+
+> **Widget or container?** The tile is `DashboardWidget` (a `Card` with a fixed title bar and
+> four body shapes). The thing that arranges tiles is `CustomizableDashboard` (user-draggable,
+> hide/show, persisted) — or plain CSS grid when the layout is fixed by design.
+> `ReportDashboard` is a finished analytics _page_, not a container. `QuickLinksCard` is a
+> titled list of shortcuts; `DashboardCustomizePanel` is the show/hide sheet, exported
+> standalone. The two **(Demo)** entries are Storybook-only compositions to copy from, not
+> exports.
+
+## Which one?
+
+| Component                                                                       | Use it when                                                                                                                                                                                                            | Not when                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [DashboardWidget](?path=/docs/dashboards-dashboardwidget--docs)                 | A portlet tile: `title`, `icon`, `count`, `onAdd` / `headerAction`, `loading`, `accent`, `headingLevel`; body is `DashboardWidgetInfo`, `DashboardWidgetTable`, `DashboardWidgetActions` or `DashboardWidgetDataCards` | Free-form surface, media or selection — [Card](?path=/docs/layout-card--docs); a long sortable list — [Table](?path=/docs/grids-table--docs) / `DataVisNitroGrid` in a Card                                                |
+| [CustomizableDashboard](?path=/docs/dashboards-customizabledashboard--docs)     | Users drag portlets between 3 / 2 / 1 columns, hide widgets, and have it remembered (`storageKey` or controlled `order` / `layout` / `hiddenIds`); `toolbarSlot` portals the toolbar into a `PageHeader`               | The layout is fixed — CSS grid of `DashboardWidget`; a flat single list — `useDragReorder`; widgets must resize or span columns                                                                                            |
+| [DashboardCustomizePanel](?path=/docs/dashboards-dashboardcustomizepanel--docs) | You render your own dashboard shell but want the same show/hide `Sheet` (`widgets`, `hiddenIds`, `onToggleWidget`, `onReset`)                                                                                          | You already pass `widgets` to `CustomizableDashboard` (it renders this itself); users must reorder or configure widgets in the panel                                                                                       |
+| [QuickLinksCard](?path=/docs/dashboards-quicklinkscard--docs)                   | A titled `Card` of ≤ ~8 shortcut rows with icon, `description`, `badge`; `layout="grid"` for icon tiles                                                                                                                | Large explained tiles — [QuickAction](?path=/docs/actions-quickaction--docs); shortcuts inside a portlet — `DashboardWidgetActions`; real `<a href>` links for routing / crawlers                                          |
+| [ReportDashboard](?path=/docs/dashboards-reportdashboard--docs)                 | The provider / employer analytics page exactly as shipped: KPI `metrics`, an "Order Volume" bar chart, `topServices` / `topEmployers`, date-range `Select`, Export                                                     | Users arrange widgets — `CustomizableDashboard`; real charts — [DataVisNitroGraph](?path=/docs/grids-datavis-nitro-graph--docs), [Sparkline](?path=/docs/grids-sparkline--docs); non-USD / non-English; different sections |
+| [Dashboard (Demo)](?path=/docs/dashboards-dashboard-demo--docs)                 | You want to see a whole signed-in shell (`Sidebar`, header, routed pages, forms, grids) composed from library parts                                                                                                    | You need an importable component — it is not exported; a real top bar — [AppHeader](?path=/docs/layout-appheader--docs)                                                                                                    |
+| [Dashboard Widgets (Demo)](?path=/docs/dashboards-dashboard-widgets-demo--docs) | You want a page-scale reference of `DashboardWidget` bodies (business stats + orders; patient summary under a `PatientHeader`)                                                                                         | You need an importable component — it is not exported; a spec for a widget prop — the `DashboardWidget` docs                                                                                                               |
+
+## How they fit together
+
+- **Widget vs. container.** `DashboardWidget` knows nothing about position; it renders one
+  tile. `CustomizableDashboard` knows nothing about content; it takes `columns` of
+  `{ id, node }` and arranges them, appending a drag handle into the first element matching
+  `dragHandleSelector` — by default the widget's `data-slot="dashboard-widget-header"`. That
+  selector is the whole contract between the two: any node with that slot (or any selector you
+  pass) works, and nodes without one get a floating handle. `ReportDashboard` is neither a
+  widget nor a container — it is a complete page that _uses_ `Card`s internally and exposes only
+  data props; put it on a route, not inside a portlet grid.
+- **Card → DashboardWidget → QuickLinksCard.** All three are `Card`s. `Card` is the raw
+  surface; `DashboardWidget` fixes the header (title, count, "+") and offers four bodies;
+  `QuickLinksCard` fixes header _and_ body (a list of ghost-button rows) for one purpose.
+  Choose the most specific one that fits, and drop to `Card` when you need media, selection or
+  a custom header. `DashboardWidgetActions` and `QuickLinksCard` overlap on "shortcuts":
+  the former is a coloured icon-tile grid _inside a widget_, the latter a standalone titled
+  list with badges; [QuickAction](?path=/docs/actions-quickaction--docs) (Inputs / Actions) is
+  the large single tile you arrange yourself.
+- **Visibility state has one owner.** `CustomizableDashboard` keeps hidden ids alongside order
+  and layout (all three under `storageKey`, or each controlled) and hides at render time so a
+  re-shown widget returns to its slot. When you use `DashboardCustomizePanel` standalone,
+  _you_ own `hiddenIds` and filter your grid — the panel is a controlled view. `onOrderChange`
+  / `onHiddenChange` fire at commit points, so server persistence does not thrash.
+- **Headings in a grid.** Under a page `h1` (`PageHeader`), give top-level widgets
+  `headingLevel="h2"`; `ReportDashboard` renders its own `h1`, so do not stack it under a
+  `PageHeader`. `CustomizableDashboard`'s `title` is an `h2`.
+- **Demos are patterns.** Both demo entries compose exported components with mock data and
+  local state; copy the layout and state ownership, import the parts from their own folders,
+  and read each part's docs for the real API.
+
+## Shared limitations
+
+- **Accessibility.** `DashboardWidget` counts and `QuickLinksCard` badges are unlabelled
+  numbers; `DashboardWidgetTable` clickable rows have no keyboard handler or role and its row
+  menu (`role="menu"`) lacks arrow-key navigation; `QuickLinksCard` `href` items are buttons,
+  not links. `CustomizableDashboard`'s layout toggle is a `radiogroup` without arrow keys, and
+  drag announcements are dnd-kit's default English live region. `ReportDashboard`'s chart and
+  percentage bars are purely visual (`title` tooltips only, no `role="img"` / text
+  alternative), and its skeleton has no `aria-busy`. `DashboardCustomizePanel` inherits
+  `Sheet`: dialog semantics and focus trap, but focus is not returned on close and body scroll
+  is not locked.
+- **Responsive.** `CustomizableDashboard` hides its column toggle below `md` and flattens
+  3-column mode below `lg` with `display: contents`, so drops into an _empty_ column fail at
+  those widths. `DashboardWidget` bodies have no max height (wrap in
+  [ScrollArea](?path=/docs/layout-scrollarea--docs)); `QuickLinksCard` grid tiles are a fixed
+  `h-20`; `ReportDashboard` bars get thin past ~12 points.
+- **RTL.** `CustomizableDashboard` and `DashboardCustomizePanel` are logical (`ms-auto`,
+  `end-2`, `side="end"`). `DashboardWidget` uses physical `pl-6` for accents, `text-right`
+  alignment, `ml-0.5` units and positions its row menu from `rect.right`; `QuickLinksCard`
+  uses `mr-3` / `ml-2` / `text-left` and a non-mirroring chevron; `ReportDashboard` uses
+  `mr-2`.
+- **Theming.** `CustomizableDashboard`, `DashboardCustomizePanel` and the `DashboardWidget`
+  frame use semantic tokens; `DashboardWidgetActions` colours, the row menu, `QuickLinksCard`'s
+  badge and all of `ReportDashboard` (`gray-*`, `blue-500`, `green-*`, `red-*`) are fixed
+  palettes with `dark:` variants. `QuickLinksCard` concatenates class strings without `cn`.
+- **i18n.** Hard-coded English: `DashboardWidget` (`"Add"`, `"No items"`, `"Actions"`, `"Row
+actions for row N"`), `CustomizableDashboard` (`"Dashboard"`, `"Column layout"`, `"N column
+layout"`, `"Drag to reorder"`; only `customizeLabel` is a prop), `DashboardCustomizePanel`
+  (`"Customize dashboard"`, `"N of M widgets shown"`, `"Show …"`, `"Reset layout"`),
+  `QuickLinksCard` (`"Quick Links"`), `ReportDashboard` (all section titles, default ranges,
+  `en-US` / `USD` formatting, currency detection by label substring).
+- **Dependencies.** `@dnd-kit/core` + `sortable` + `utilities` (regular dependencies, pulled in
+  by `CustomizableDashboard`), `lucide-react` (`CustomizableDashboard`, `DashboardCustomizePanel`,
+  `DashboardWidget` via `Icons`), `class-variance-authority` (`DashboardWidget`), `react-dom`
+  `createPortal` (`DashboardWidget` row menu, `CustomizableDashboard` `toolbarSlot`). Internally:
+  `Card`, `Button`, `Table` (`DashboardWidget`); `Sheet`, `Switch` (`DashboardCustomizePanel`);
+  `Card`, `Badge`, `Button`, `Select` (`ReportDashboard`).

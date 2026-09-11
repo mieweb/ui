@@ -4,16 +4,84 @@ import { useState } from 'react';
 import { type PhoneEntry, PhoneInputGroup } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInputGroup> = {
-  title: 'Components/Forms & Inputs/PhoneInputGroup',
+  id: 'text-inputs-phoneinputgroup',
+  title: 'Inputs/Text inputs/PhoneInputGroup',
   component: PhoneInputGroup,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'A group of phone inputs with type selection and add/remove functionality. Supports multiple phone entries with different types (cell, landline, home, work, fax).',
+        component: `### What it's for
+
+A repeating list of phone numbers, each row a \`PhoneInput\` plus a native \`<select>\` for the \`PhoneType\` (\`cell\` | \`landline\` | \`home\` | \`work\` | \`fax\`) and an add (first row) or remove (later rows) button. Fully controlled through \`value: PhoneEntry[]\` / \`onChange\`; \`minEntries\` (default 1) and \`maxEntries\` (default 5) bound the list, \`required\` applies to the first row only, \`validateOnBlur\` and \`disabled\` fan out to every row, \`typeLabels\` relabels the type options. Exported from the \`PhoneInput\` folder alongside \`PhoneInput\`, \`PhoneEntry\` and \`PhoneType\`.
+
+### Use it when
+
+- A contact, patient or employer record stores several numbers and the type matters (which one is the fax?).
+- You want the list to be padded to \`minEntries\` automatically so the form never renders empty.
+
+### Don't use it when
+
+- Exactly one number is collected — \`PhoneInput\`.
+- The list is of URLs — \`WebsiteInputGroup\` (same pattern, exported from \`WebsiteInput\`).
+- Rows need extra fields (extension, preferred flag, consent) — build your own repeater from \`PhoneInput\`; this component's row shape is fixed.
+
+### Example
+
+\`\`\`tsx
+const [phones, setPhones] = React.useState<PhoneEntry[]>([{ number: '', type: 'cell' }]);
+
+<PhoneInputGroup
+  label="Phone numbers"
+  value={phones}
+  onChange={setPhones}
+  required
+  validateOnBlur
+  maxEntries={3}
+/>
+\`\`\`
+
+\`number\` holds unformatted digits (what \`PhoneInput\` emits); persist the array as-is.
+
+### Limitations
+
+- Each \`PhoneInput\` keeps its own \`<label htmlFor>\` / \`aria-invalid\` / \`role="alert"\` error wiring, but only the first row receives the visible \`label\`; later rows have no label at all (not even sr-only), so screen readers hear just "telephone, edit text".
+- The type \`<select>\` has an sr-only \`"Phone type"\` label and the buttons have \`aria-label\` \`"Add phone number"\` / \`"Remove phone number"\` — all hard-coded English, not covered by \`typeLabels\`. Ids are \`phone-type-{index}\`, so two groups on one page produce duplicate ids.
+- Removing a row does not move focus or announce the change; no \`aria-live\`. The list is not a \`<fieldset>\`.
+- The type select and buttons use hard-coded palette classes (\`border-gray-300 bg-white dark:bg-gray-800\`, \`text-brand-600\`, \`text-red-600\`) rather than the semantic tokens \`Input\` uses, so they can drift from a brand theme. Layout is flex with \`gap-2\` — RTL-safe.
+- Depends on \`PhoneInput\` (and therefore \`Input\` and \`utils/phone\`); the type selector is a plain \`<select>\`, not \`Select\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'contains',
+          target: 'text-inputs-phoneinput',
+          why: 'Every row is a PhoneInput; the group adds the type select and add/remove controls.',
+        },
+        {
+          type: 'alternative to',
+          target: 'text-inputs-phoneinput',
+          why: 'PhoneInputGroup when a record holds several typed numbers; PhoneInput for exactly one.',
+        },
+      ],
+    },
+  },
+  argTypes: {
+    minEntries: {
+      control: 'number',
+      description:
+        'The list is padded with empty cell entries up to this count.',
+    },
+    maxEntries: {
+      control: 'number',
+      description: 'The add button disables at this count.',
+    },
+    required: {
+      control: 'boolean',
+      description: 'Marks only the first row required.',
     },
   },
   decorators: [

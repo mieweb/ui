@@ -427,7 +427,7 @@ export function AddContactModal({
                   size="sm"
                   onClick={handleAddCustomField}
                 >
-                  <PlusIcon className="mr-1 h-4 w-4" />
+                  <PlusIcon className="me-1 h-4 w-4" />
                   Add Field
                 </Button>
               </div>
@@ -486,7 +486,7 @@ export function AddContactModal({
           <Button type="submit" disabled={isSaving}>
             {isSaving ? (
               <>
-                <SpinnerIcon className="mr-2 h-4 w-4 animate-spin" />
+                <SpinnerIcon className="me-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : (

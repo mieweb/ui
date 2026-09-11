@@ -293,7 +293,7 @@ export function ServerErrorPage({
     <ErrorPage type="500" {...props}>
       {showErrorDetails && errorMessage && (
         <div
-          className="mt-4 max-w-2xl text-left"
+          className="mt-4 max-w-2xl text-start"
           data-slot="error-page-details"
         >
           <details className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">

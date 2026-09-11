@@ -1,0 +1,35 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Loading/Overview" />
+
+# Loading
+
+> **Known shape → `Skeleton`. Unknown shape, short wait → `Spinner`. Measurable → `Progress`.
+> Whole route → `LoadingPage`.** Skeletons are hidden from screen readers, so announce loading
+> elsewhere when you use them.
+
+## Which one?
+
+| Component                                            | Use it when                                                                        | Not when                           |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------- |
+| [Spinner](?path=/docs/loading-spinner--docs)         | A short wait whose result has no predictable layout (submit, search)               | The layout is known — `Skeleton`   |
+| [Skeleton](?path=/docs/loading-skeleton--docs)       | The loaded view's shape is known and layout shift must be avoided                  | The wait is a fraction of a second |
+| [Progress](?path=/docs/loading-progress--docs)       | You can report a real percentage (upload, import, quota)                           | Progress cannot be measured        |
+| [LoadingPage](?path=/docs/loading-loadingpage--docs) | A whole route or panel has nothing to show yet; `LoadingOverlay` to block a region | Only one region is pending         |
+
+Related, in other families: `Button isLoading` (inline spinner), `ReadingProgressBar`
+(scroll position, Navigation), `StepIndicator` (steps, Navigation), `ErrorPage` (Feedback).
+
+## How they fit together
+
+- `LoadingPage` composes `Spinner`, `LoadingDots` or `LoadingBar` with a message; `LoadingOverlay`
+  puts the same over existing content.
+- `Skeleton` presets (`avatar`, `title`, `text`, `card`, `image`) mirror the real components'
+  sizes so the swap is invisible.
+
+## Shared limitations
+
+- None of the animations pause for `prefers-reduced-motion` yet.
+- `Spinner`, `LoadingDots` and `LoadingBar` expose `role="status"` / `role="progressbar"`;
+  `Skeleton` is `aria-hidden` — pair it with `aria-busy` or a status message.
+- Default labels ("Loading", "Loading...") are English.

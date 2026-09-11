@@ -176,7 +176,7 @@ const ConversationHeader = React.forwardRef<
               type="button"
               onClick={onBack}
               className={cn(
-                '-ml-2 rounded-full p-2',
+                '-ms-2 rounded-full p-2',
                 'text-neutral-500 hover:text-neutral-700',
                 'dark:text-neutral-400 dark:hover:text-neutral-200',
                 'hover:bg-neutral-100 dark:hover:bg-neutral-800',
@@ -227,7 +227,7 @@ const ConversationHeader = React.forwardRef<
           {showOnlineStatus && isOnline && (
             <span
               className={cn(
-                'absolute right-0 bottom-0',
+                'absolute end-0 bottom-0',
                 'h-3 w-3 rounded-full',
                 'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
               )}
@@ -334,7 +334,7 @@ const ConversationListItem = React.forwardRef<
       data-slot="conversation-list-item"
       className={cn(
         'flex w-full items-center gap-3 px-4 py-3',
-        'text-left transition-colors',
+        'text-start transition-colors',
         isSelected
           ? 'bg-primary-50 dark:bg-primary-900/20'
           : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50',
@@ -368,7 +368,7 @@ const ConversationListItem = React.forwardRef<
         {participant?.isOnline && (
           <span
             className={cn(
-              'absolute right-0 bottom-0',
+              'absolute end-0 bottom-0',
               'h-3 w-3 rounded-full',
               'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
             )}

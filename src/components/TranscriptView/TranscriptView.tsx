@@ -293,9 +293,10 @@ export const TranscriptView = React.forwardRef<
         <div key={index} role="listitem">
           <button
             type="button"
+            data-slot="transcript-row"
             data-transcript-index={index}
             aria-current={isActive ? 'true' : undefined}
-            className={`hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer gap-3 rounded px-2 py-1 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+            className={`hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer gap-3 rounded px-2 py-1 text-start text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
               isActive ? 'bg-primary-500/20' : ''
             }`}
             onClick={() => seekTo(row.startMs)}
@@ -317,14 +318,22 @@ export const TranscriptView = React.forwardRef<
     };
 
     return (
-      <div ref={ref} className={transcriptViewVariants({ variant, className })}>
+      <div
+        ref={ref}
+        data-slot="transcript-view"
+        className={transcriptViewVariants({ variant, className })}
+      >
         {actions && (
-          <div className="border-border mb-2 flex items-center justify-end gap-2 border-b pb-2">
+          <div
+            data-slot="transcript-actions"
+            className="border-border mb-2 flex items-center justify-end gap-2 border-b pb-2"
+          >
             {actions}
           </div>
         )}
         <div
           ref={contentRef}
+          data-slot="transcript-content"
           aria-label={ariaLabel}
           onMouseEnter={() => {
             isHoveringRef.current = true;

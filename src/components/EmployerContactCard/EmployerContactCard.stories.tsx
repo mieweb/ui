@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EmployerContactCard } from './EmployerContactCard';
 
 const meta: Meta<typeof EmployerContactCard> = {
-  title: 'Product/Provider/EmployerContactCard',
+  id: 'employers-employercontactcard',
+  title: 'BlueHive/Employers/EmployerContactCard',
   component: EmployerContactCard,
   parameters: {
     layout: 'centered',
@@ -13,7 +14,7 @@ const meta: Meta<typeof EmployerContactCard> = {
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   decorators: [
     (Story) => (
       <div style={{ width: '320px' }}>

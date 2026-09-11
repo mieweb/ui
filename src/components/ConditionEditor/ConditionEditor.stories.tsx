@@ -20,31 +20,95 @@ import type {
 } from '../ProblemList';
 
 const meta: Meta<typeof ConditionEditor> = {
-  title: 'Healthcare/ConditionEditor',
+  id: 'clinical-lists-conditioneditor',
+  title: 'Healthcare/Clinical lists/ConditionEditor',
   component: ConditionEditor,
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `
-Dialog editor for **condition assertions** — the condition analog of the planned MedicationEditor.
+        component: `### What it's for
 
-- **Capture-first:** only the problem name is required; ICD-10-CM / ICD-11 / SNOMED codings, severity, and onset are progressive enrichment.
-- **Three-state uncertainty (§4.1):** every optional field has an *Unknown* toggle (explicitly unknown — distinct from untouched) and a low/med/high confidence control, written to the assertion's \`uncertainty\` block.
-- **Fuzzy onset:** an exact date *or* a human string ("since her twenties").
-- **Modes:** \`add\` / \`refine\` (with a progression checkbox) / \`revise\` (warns the prior assertion will be refuted) / \`relate\` (relationship type + target concern).
-- **Code search:** \`renderCodeSearch\` dependency-injects a [CodeLookup](?path=/docs/healthcare-codelookup--docs) into the coding section (same pattern as Assessment's \`renderOrderSearch\`) — picking a result appends a coding row and fills an empty problem name.
+The **modal editor for a condition assertion** — the write side of the concern / assertion model that \`ProblemList\` and \`Assessment\` display. One component, five \`mode\`s: \`add\` (new concern, first assertion), \`refine\` (new assertion, \`changeType: 'refinement'\`, or \`'progression'\` via a checkbox), \`revise\` (\`'revision'\`; a \`role="alert"\` warns that the prior assertion will be refuted), \`relate\` (relationship type + target from \`relatableConcerns\` → \`onRelate\`), \`observe\` (dated progress note → \`onAddObservation\`, with the past observations listed). **Capture-first:** the problem name is the only required field; ICD-10-CM / ICD-11 / SNOMED coding rows, verification status, severity, exact or fuzzy onset ("since her twenties") and a note are progressive enrichment. Every optional field carries the **three-state uncertainty** affordance — an *Unknown* toggle (explicitly unknown, distinct from untouched) and a low / medium / high confidence control — written to the draft's \`uncertainty.fields\`. \`renderCodeSearch\` dependency-injects a code search into the coding section (a pick appends a coding row and fills an empty name; free text fills the name); it defaults to the ambient \`CodeLookupProvider\` (condition shard, ICD-10 preferred) and \`false\` leaves manual code entry only. \`onSave\` returns a \`ConditionAssertionDraft\` (no \`id\` / \`date\` — the host assigns them); the draft is reseeded from \`concern\`'s current assertion whenever \`open\`, \`mode\` or \`concern\` changes.
 
-The story is one **NITRO grid** of the patient's conditions — spanning severities,
-verification statuses, exact and fuzzy onsets, concern relationships, and coding
-maturity (uncoded capture → ICD-10-CM / ICD-11 / SNOMED with crosswalk provenance).
-Each row carries **Observe / Refine / Revise / Relate** operations; **Add problem**
-sits below the grid. Every operation writes back to the grid.
-        `,
+### Use it when
+
+- A \`ProblemList\` or \`Assessment\` row action (\`refine\` / \`revise\` / \`relate\` / \`observe\`) or an "Add problem" button needs a form, and the host will append the resulting assertion to the concern.
+- You want uncertainty recorded as data (\`known: false\`, \`reason\`, \`confidence\`) rather than lost in a free-text note.
+- You can supply a coded search (\`CodeLookup\` or your own) or accept manual system / code / display rows.
+
+### Don't use it when
+
+- You are editing a **medication** or an **order** — [MedicationList](?path=/docs/clinical-lists-medicationlist--docs)'s \`MedicationEditor\` (NCPDP fields) or [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs). The field sets do not overlap.
+- You only need to **display** conditions — [ProblemList](?path=/docs/clinical-lists-problemlist--docs) (chart) or [PresentingProblems](?path=/docs/clinical-lists-presentingproblems--docs) (encounter relevance); neither needs this editor to render.
+- The task is just picking a code with no assertion semantics — use [CodeLookup](?path=/docs/clinical-lists-codelookup--docs) directly.
+
+### Example
+
+\`\`\`tsx
+const [editor, setEditor] = useState<{ mode: ConditionEditorMode; concernId?: string } | null>(null);
+const concern = concerns.find((c) => c.concernId === editor?.concernId);
+
+<ConditionEditor
+  mode={editor?.mode ?? 'add'}
+  open={editor !== null}
+  onOpenChange={(open) => !open && setEditor(null)}
+  concern={editor?.mode === 'add' ? undefined : concern}
+  relatableConcerns={concerns.filter((c) => c.concernId !== editor?.concernId)}
+  onSave={(draft) => {
+    const assertion: ConditionAssertion = { ...draft, id: newId(), date: today() };
+    if (editor?.mode === 'add') return addConcern(assertion);
+    // a revision refutes the assertion it supersedes; a refinement keeps it
+    appendAssertion(editor!.concernId!, assertion, { refute: draft.changeType === 'revision' ? draft.supersedes : undefined });
+  }}
+  onRelate={(rel) => addRelationship(editor!.concernId!, rel)}
+  onAddObservation={(text) => addObservation(editor!.concernId!, { id: newId(), date: today(), text })}
+  renderCodeSearch={({ placeholder, onPick, onFreeText }) => (
+    <CodeLookup indexUrl="/codify" searchDomains={['condition']} preferCodetypes={['ICD10']} bare placeholder={placeholder} onSelect={onPick} onFreeText={onFreeText} />
+  )}
+/>
+\`\`\`
+
+The host owns the concern list, ids and dates; the editor only produces a draft. Omit \`renderCodeSearch\` inside a \`CodeLookupProvider\` to inherit the app-wide lookup.
+
+### Limitations
+
+- **Accessibility as implemented.** Built on \`Modal\` (\`size="lg"\`), so focus trapping, Esc and overlay dismissal are inherited. Fields use \`Input\` / \`Textarea\` / \`Select\` labels; coding rows, uncertainty toggles (\`role="group"\`, \`aria-pressed\`), severity (\`role="group"\`) and remove buttons are individually \`aria-label\`led. The revise warning is \`role="alert"\`; nothing else is announced (a save simply closes the dialog). There is no \`ModalClose\` button — cancel is the footer button, Esc or the overlay.
+- **Clinical safety.** No code validation (any string is accepted as a code), no check that a picked code matches the typed name, no duplicate-concern detection, and the *coding unknown* flag silently drops any codes on save. Injected lookups return whatever the shards contain — see CodeLookup's dataset caveats.
+- **Progression** is a checkbox that only exists in \`refine\` mode; \`reattribution\` cannot be produced by this editor.
+- **Reseeding** happens on every \`open\` / \`mode\` / \`concern\` change: unsaved edits are lost if the host swaps the concern while open.
+- **Responsive / RTL.** Sections stack vertically; coding and onset rows \`flex-wrap\`. No breakpoint variants and no RTL-specific handling beyond the underlying inputs.
+- **Theming / i18n.** Semantic tokens plus hard-coded amber for the revise alert. All titles, labels, placeholders, option labels and helper copy are English constants — no \`labels\` prop.
+- **Dependencies.** \`Modal\`, \`Input\`, \`Textarea\`, \`Select\`, \`Badge\`, \`Button\`, the \`ProblemList\` model types and \`currentAssertion\`, \`CodeLookupProvider\` context; main \`@mieweb/ui\` entry. \`CodeLookup\` itself is not in the package — see its page.`,
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'clinical-lists-problemlist',
+          why: 'Opens from ProblemList row actions and returns the assertion draft the host appends to that concern.',
+        },
+        {
+          type: 'composes with',
+          target: 'encounter-orders-assessment',
+          why: "Assessment's refine / revise actions open the editor to record today's assertion for an assessed problem.",
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-codelookup',
+          why: 'renderCodeSearch injects a condition-shard CodeLookup into the coding section; a pick appends an ICD-10 / SNOMED coding row.',
+        },
+        {
+          type: 'uses',
+          target: 'overlays-modal',
+          why: 'The editor is a size="lg" Modal.',
+        },
+      ],
+    },
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:stable'],
 };
 
 export default meta;

@@ -43,7 +43,7 @@ function CopyablePre({
         type="button"
         onClick={onCopy}
         aria-label={copied ? 'Copied' : 'Copy code'}
-        className="absolute top-2 right-2 rounded-md border border-neutral-300 bg-white/80 px-2 py-1 text-xs text-neutral-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-neutral-100 focus-visible:opacity-100 dark:border-neutral-600 dark:bg-neutral-700/80 dark:text-neutral-100 dark:hover:bg-neutral-600"
+        className="absolute end-2 top-2 rounded-md border border-neutral-300 bg-white/80 px-2 py-1 text-xs text-neutral-700 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-neutral-100 focus-visible:opacity-100 dark:border-neutral-600 dark:bg-neutral-700/80 dark:text-neutral-100 dark:hover:bg-neutral-600"
       >
         {copied ? 'Copied' : 'Copy'}
       </button>

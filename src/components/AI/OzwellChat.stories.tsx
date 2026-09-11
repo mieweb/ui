@@ -336,34 +336,85 @@ function InteractivePlaygroundDemo({
 }
 
 const meta = {
-  title: 'Product/Feature Modules/AI/OzwellChat',
+  id: 'chat-ozwellchat',
+  title: 'Modules/Chat/OzwellChat',
   component: OzwellChatStoryDemo,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component: [
-          '`OzwellChat` is the visible, single-assistant Ozwell widget shell. It keeps the current widget’s',
-          'thinking menu, message thread, compact composer/model picker, warning toast, and footer while',
-          'letting a host supply all conversation state and callbacks.',
-          '',
-          '### Use this page',
-          'Use **State Explorer** to switch between the widget’s supplied states and adjust its visible',
-          'controls. Use **Interactive Playground** to send a local mock message and see the thinking-to-',
-          'Markdown-response flow. The remaining stories isolate the important widget states for review.',
-          '',
-          '### Host responsibilities',
-          'The Ozwell adapter supplies messages, pending/streaming status, tool calls and results, available',
-          'models, warnings, and callback implementations. It also decides how assistant text is rendered',
-          '(for example, with a sanitized Markdown renderer).',
-          '',
-          '### Outside this component',
-          'Networking, streaming parsing, model fetching, authentication, tool execution, iframe behavior,',
-          'window configuration, and parent-window messaging remain in the Ozwell application—not in',
-          '`mieweb/ui`.',
-        ].join('\n'),
+        component: `### What it's for
+
+**The Ozwell-branded widget shell around \`AIChat\`: thinking-mode menu, message jump list, warning strip, model picker in the composer, queued follow-up editing and a "Powered by Ozwell" footer — with every piece of state supplied by the host's Ozwell adapter.** \`OzwellChat\` takes \`messages: AIMessage[]\`, \`isGenerating\`, \`onSendMessage(text)\`, \`inputPlaceholder\` (default "Ask a question..."), \`renderTextContent\`, \`footer\` and: \`thinking={{ enabled, mode, onModeChange }}\` (\`OzwellThinkingMode\` \`never\` | \`collapsed\` | \`auto\` | \`expanded\` — applied client-side by filtering or collapsing \`thinking\` blocks before they reach \`AIChat\`); \`models={{ options, value, onChange, providerFilter?, onProviderFilterChange? }}\` (renders \`ComposerModelSelector\` in the composer's trailing slot when there is more than one option); \`queuedMessage\` / \`onQueuedMessageChange\` / \`onCancelQueuedMessage\` (shows the pending follow-up as a \`status: 'pending'\` user bubble with edit / save / cancel icon buttons via \`renderMessageFooter\`); \`warning\` / \`onDismissWarning\` (an inline \`Toast variant="warning"\`). A **Messages** dropdown appears once there are three or more user messages and scrolls the thread to the chosen one. It renders \`AIChat\` with \`showHeader={false}\`, \`variant="embedded"\`, and — unlike plain \`AIChat\` — keeps the composer **enabled while generating** so the next question can be typed and queued. Types exported: \`OzwellChatProps\`, \`OzwellThinkingMode\`, \`OzwellModelOption\`, \`OzwellModelValue\`.
+
+### Use it when
+
+- You are the **Ozwell application** (or embedding its widget) and already have an adapter that produces messages, streaming status, tool results, model lists and warnings — this component is that widget's visible layer, kept in \`@mieweb/ui\` so it tracks the design system.
+- You need reasoning visibility controls (\`thinking\` modes) and a provider-aware model switcher without writing the chrome yourself.
+
+### Don't use it when
+
+- You need a general assistant chat in your own product — plain \`AIChat\` (or \`FloatingAIChat\`) is lighter and unbranded; the Ozwell footer, thinking menu and queued-message semantics are widget conventions.
+- The conversation is multi-participant or needs a conversation list — \`SuperChatInbox\`.
+- You want the component to talk to a backend: networking, SSE parsing, model fetching, auth, tool execution and parent-window messaging stay in the host (the \`askOzwellStream\` helper exists for demos, not for this component).
+
+### Example
+
+\`\`\`tsx
+// The adapter owns transport; the base URL and credentials come from host config, never from props.
+const adapter = useOzwellAdapter({ baseURL: config.ozwellUrl });
+const [thinkingMode, setThinkingMode] = useState<OzwellThinkingMode>('auto');
+const [queued, setQueued] = useState<string | null>(null);
+
+<OzwellChat
+  messages={adapter.messages}
+  isGenerating={adapter.isGenerating}
+  onSendMessage={(text) => (adapter.isGenerating ? setQueued(text) : adapter.send(text))}
+  queuedMessage={queued}
+  onQueuedMessageChange={setQueued}
+  onCancelQueuedMessage={() => setQueued(null)}
+  thinking={{ enabled: true, mode: thinkingMode, onModeChange: setThinkingMode }}
+  models={{ options: adapter.models, value: adapter.model, onChange: adapter.setModel }}
+  warning={adapter.fallbackWarning}
+  onDismissWarning={adapter.clearWarning}
+  renderTextContent={(text, { streaming }) => <MarkdownRenderer content={text} streaming={streaming} />}
+/>
+\`\`\`
+
+### Limitations
+
+- **Queueing is host logic.** The component never sends \`queuedMessage\` itself; you must dispatch it when generation finishes. Because the composer stays enabled during generation, \`onSendMessage\` can fire mid-stream — decide whether to queue or interrupt.
+- **Accessibility as implemented:** inherits \`AIChat\`'s lack of a live region; the warning \`Toast\` and the thinking/Messages dropdowns come from the shared \`Toast\` / \`Dropdown\` primitives. Queued-message controls are icon \`Button\`s with English \`aria-label\`s and \`Tooltip\`s; the inline editor is a \`<textarea aria-label="Edit queued message">\` (Enter saves, Escape cancels) and receives focus when editing starts. The Messages jump list scrolls with \`scrollIntoView\` but does not move focus to the message. The user's avatar is hidden with CSS in this shell.
+- **i18n.** "Show thinking: Auto", the four thinking option labels and descriptions, "Messages", "Powered by Ozwell", "Ask a question..." and the queued-message labels are hard-coded English (only \`footer\` and \`inputPlaceholder\` are props).
+- **Layout.** Designed for a narrow embedded frame: the model selector is capped at \`max-w-[min(142px,38vw)]\` and the composer gets \`pe-[min(160px,44vw)]\` padding to make room; the shell expects a bounded-height container (\`h-full min-h-0\`). Physical/RTL: the composer's trailing slot is positioned with \`right-1\`.
+- **Theming.** Uses semantic tokens (\`bg-background\`, \`bg-card\`, \`border-border\`, \`text-muted-foreground\`) plus \`primary-50/800\`, \`warning-*\` and the \`animate-ozwell-message-flare\` keyframe from the library stylesheet. Depends on \`class-variance-authority\`; entry \`@mieweb/ui\`.`,
       },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'contains',
+          target: 'chat-aichat',
+          why: 'OzwellChat renders AIChat headerless and embedded, adding the widget chrome around it.',
+        },
+        {
+          type: 'contains',
+          target: 'chat-composermodelselector',
+          why: 'The `models` prop mounts ComposerModelSelector in the composer’s trailing slot.',
+        },
+        {
+          type: 'uses',
+          target: 'feedback-toast',
+          why: 'The adapter-supplied `warning` is shown as an inline warning Toast.',
+        },
+        {
+          type: 'uses',
+          target: 'choice-inputs-dropdown',
+          why: 'The thinking-mode and Messages menus are Dropdown instances.',
+        },
+      ],
     },
   },
   argTypes: {

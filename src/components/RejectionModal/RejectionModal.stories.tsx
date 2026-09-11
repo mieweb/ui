@@ -5,9 +5,10 @@ import { Button } from '../Button/Button';
 import { RejectionModal, RejectionReason } from './RejectionModal';
 
 const meta: Meta<typeof RejectionModal> = {
-  title: 'Components/Overlays & Layering/RejectionModal',
+  id: 'users-integrations-rejectionmodal',
+  title: 'BlueHive/Users & integrations/RejectionModal',
   component: RejectionModal,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
   },

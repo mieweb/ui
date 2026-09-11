@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { OrderConfirmationWizard } from './OrderConfirmationWizard';
 
 const meta: Meta<typeof OrderConfirmationWizard> = {
-  title: 'Components/Forms & Inputs/OrderConfirmationWizard',
+  id: 'orders-orderconfirmationwizard',
+  title: 'BlueHive/Orders/OrderConfirmationWizard',
   component: OrderConfirmationWizard,
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
 };
 
 export default meta;

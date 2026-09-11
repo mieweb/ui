@@ -716,10 +716,11 @@ function AddOrderForm({
     <div
       role="form"
       aria-label={`Add order for ${problemText}`}
-      className="border-border bg-muted/40 mt-1.5 ml-2.5 flex flex-wrap items-center gap-1.5 rounded-md border border-dashed p-2"
+      className="border-border bg-muted/40 ms-2.5 mt-1.5 flex flex-wrap items-center gap-1.5 rounded-md border border-dashed p-2"
     >
       <select
         aria-label="Order type filter"
+        data-slot="select-trigger"
         value={type}
         onChange={(e) => setType(e.target.value as 'auto' | OrderType)}
         onKeyDown={(e) => {
@@ -761,6 +762,7 @@ function AddOrderForm({
           <input
             ref={inputRef}
             type="text"
+            data-slot="input"
             value={display}
             onChange={(e) => setDisplay(e.target.value)}
             onKeyDown={(e) => {
@@ -1158,6 +1160,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               return (
                 <li
                   key={item.concernId}
+                  data-slot="assessment-problem"
                   data-concern-id={item.concernId}
                   {...bp}
                   // While the add-order form is open the block body must yield
@@ -1247,7 +1250,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   </div>
 
                   {item.note && (
-                    <p className="text-muted-foreground mt-1 pl-6 text-sm">
+                    <p className="text-muted-foreground mt-1 ps-6 text-sm">
                       {item.note}
                     </p>
                   )}
@@ -1255,7 +1258,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   {showPlan && linkedOrders.length > 0 && (
                     <ul
                       aria-label={`Plan for ${assertion.text}`}
-                      className="border-border mt-1.5 ml-2.5 border-l pl-4"
+                      className="border-border ms-2.5 mt-1.5 border-s ps-4"
                     >
                       {linkedOrders.map((order) => (
                         <OrderRow
@@ -1294,6 +1297,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               >
                 <select
                   aria-label="What to add"
+                  data-slot="select-trigger"
                   value={addMode}
                   onChange={(e) => {
                     setAddMode(e.target.value as typeof addMode);
@@ -1385,7 +1389,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   <div
                     role="group"
                     aria-label={`Add "${pendingFreeText}" as`}
-                    className="flex w-full flex-wrap items-center gap-1.5 pl-1"
+                    className="flex w-full flex-wrap items-center gap-1.5 ps-1"
                   >
                     <span className="text-muted-foreground text-sm">
                       Add{' '}

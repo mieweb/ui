@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { type PendingClaim, PendingClaimsTable } from './PendingClaimsTable';
 
 const meta: Meta<typeof PendingClaimsTable> = {
-  title: 'Product/Provider/PendingClaimsTable',
+  id: 'billing-pendingclaimstable',
+  title: 'BlueHive/Billing/PendingClaimsTable',
   component: PendingClaimsTable,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },

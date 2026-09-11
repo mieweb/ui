@@ -4,8 +4,9 @@ import { ServiceShippingSettings } from './ServiceShippingSettings';
 
 const meta: Meta<typeof ServiceShippingSettings> = {
   component: ServiceShippingSettings,
-  title: 'Product/Feature Modules/ServiceShippingSettings',
-  tags: ['autodocs'],
+  id: 'services-serviceshippingsettings',
+  title: 'BlueHive/Services/ServiceShippingSettings',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

@@ -362,7 +362,7 @@ export const ResultsEntryForm = React.forwardRef<
         <div data-slot="ref-file-upload">
           <div className="flex items-center gap-2" data-slot="ref-file-row">
             <span
-              className="bg-muted border-input rounded-l-md border border-r-0 px-3 py-2 text-sm font-medium"
+              className="bg-muted border-input rounded-s-md border border-e-0 px-3 py-2 text-sm font-medium"
               data-slot="ref-file-badge"
             >
               {results}
@@ -370,7 +370,7 @@ export const ResultsEntryForm = React.forwardRef<
             <Input
               value={files.map((f) => f.name).join(', ')}
               readOnly
-              className="rounded-none border-r-0 border-l-0"
+              className="rounded-none border-s-0 border-e-0"
               placeholder="No files selected"
             />
             <input
@@ -383,10 +383,10 @@ export const ResultsEntryForm = React.forwardRef<
             <Button
               type="button"
               variant="secondary"
-              className="rounded-l-none"
+              className="rounded-s-none"
               onClick={() => fileInputRef.current?.click()}
             >
-              <FileUp className="mr-2 h-4 w-4" />
+              <FileUp className="me-2 h-4 w-4" />
               {browseFiles}
             </Button>
           </div>
@@ -404,7 +404,7 @@ export const ResultsEntryForm = React.forwardRef<
                   <button
                     type="button"
                     onClick={() => removeFile(index)}
-                    className="text-muted-foreground hover:text-destructive ml-2"
+                    className="text-muted-foreground hover:text-destructive ms-2"
                     data-slot="ref-file-remove"
                   >
                     <X className="h-4 w-4" />
@@ -596,7 +596,7 @@ export function ResultsEntryModal({
             <>
               <svg
                 aria-hidden="true"
-                className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                className="-ms-1 me-2 h-4 w-4 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"
               >

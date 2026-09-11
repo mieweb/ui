@@ -10,11 +10,85 @@ import {
 } from '../Icons';
 
 const meta: Meta<typeof CountBadge> = {
-  title: 'Components/Text & Data Display/CountBadge',
+  id: 'data-display-countbadge',
+  title: 'Components/Data display/CountBadge',
   component: CountBadge,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `### What it's for
+
+A **clickable "Label N" pill** for navigation shortcuts and work queues — "Tasks 3", "Open Enc 5", "eSign 7". It is a real \`<button>\` (\`CountBadgeProps\` extends \`ButtonHTMLAttributes\`) with a \`label\`, a \`count\` chip and an optional \`icon\`. Six \`variant\`s (\`default\` | \`info\` | \`informative\` | \`success\` | \`warning\` | \`alert\`); \`countVariant\` recolours just the chip. Badges with \`count === 0\` render nothing unless \`showZero\`. Pass \`items: CountBadgeItem[]\` (\`{ id, label, status }\`, \`status\` ∈ \`CountBadgeItemStatus\`) and clicking opens a portaled popover table with one row per item and a "⋯" menu per row. Row actions come from \`actions: CountBadgeAction[]\` or, when omitted, from whichever of \`onView\` / \`onEdit\` / \`onDelete\` you supply — each of those opens a built-in \`Modal\` (detail view, edit form, delete confirmation with \`deleteLabel\`). \`countBadgeVariants\` and \`countChipVariants\` are exported.
+
+### Use it when
+
+- A header, sidebar or dashboard needs a **count the user can act on**: click to navigate (\`onClick\`) or to peek at the items behind the number (\`items\`).
+- Several queues sit side by side and need consistent colour semantics (\`warning\` for due, \`alert\` for overdue).
+
+### Don't use it when
+
+- The chip is just a **label** with no count and no click — \`Badge\`.
+- The number is a **recency** signal ("Reviewed 12d ago") — \`FreshnessBadge\`.
+- You need a list of notifications with read state and history — \`NotificationCenter\`.
+- The rows need real columns, sorting or more than a label + status — render a grid (\`DataVisNITRO\`) in your own \`Modal\` or \`Sheet\`; the popover table is fixed to #, Label, Status.
+
+### Example
+
+\`\`\`tsx
+const { data: tasks } = useTasks(); // [{ id, label, status }]
+
+<CountBadge
+  label="Tasks"
+  count={tasks.length}
+  variant={tasks.some((t) => t.status === 'overdue') ? 'alert' : 'info'}
+  items={tasks}
+  onView={(task) => navigate('/tasks/' + task.id)}
+  onDelete={(task) => deleteTask.mutate(task.id)}
+  deleteLabel="task"
+/>
+
+// Navigation-only: no items, so the click just fires onClick
+<CountBadge label="Open Enc" count={openEncounters} variant="warning" onClick={() => navigate('/encounters?open=1')} />
+\`\`\`
+
+The host owns the items and the mutations; the component owns popover open state and the three modals.
+
+### Limitations
+
+- Accessibility: the trigger sets \`aria-expanded\` when \`items\` exist but **no \`aria-haspopup\` or \`aria-controls\`**, and the popover has no role or label — it is a plain \`<div>\` with a \`<table>\`. Row "⋯" buttons are \`aria-haspopup="menu"\` + \`aria-label="Actions for {label}"\` and open a \`role="menu"\` of \`menuitem\`s. Escape and outside-click close the popover and menus; **no arrow-key navigation** inside either, and focus is not returned to the trigger.
+- Built-in English strings that are **not props**: popover header "N item(s)", column heads "#", "Label", "Status", status labels (Active / Pending / Overdue / Completed / Cancelled), action labels View / Edit / Delete, the delete-confirmation copy, and the edit form's fields (Label, Status, Priority, Assigned To, Due Date, Notes). The edit form seeds \`priority: 'Normal'\` and \`assignedTo: 'Dr. Smith'\` and returns everything through \`onEdit(item, formData)\`; the view modal's Share / Export / Open in Chart buttons only \`console.warn\`. Treat the default modals as a prototype — pass your own \`actions\` for production flows.
+- Layout: popover is portaled to \`<body>\` via \`useAnchoredPosition\` (\`bottom-end\`, 320px wide, 240px scroll area); row menus are \`position: fixed\` at \`rect.right\` with \`translateX(-100%)\` — physical, so they anchor to the wrong edge in RTL. Table cells are \`text-left\`.
+- Theming: pill and chip use \`primary-*\` for \`info\`, semantic \`border-border\` / \`text-muted-foreground\` for \`default\`, but \`informative\` / \`success\` / \`warning\` / \`alert\` are hard-coded \`blue|green|yellow|red-*\`; popover surfaces are \`bg-white\` / \`dark:bg-neutral-800\`.
+- Depends on \`Modal\`, \`Button\`, \`Input\`, \`Icons\`, \`class-variance-authority\`, \`useAnchoredPosition\`, \`useClickOutside\`.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'data-display-badge',
+          why: 'CountBadge is a button with a count chip that can open a popover table of items; Badge is a static label span.',
+        },
+        {
+          type: 'composes with',
+          target: 'encounter-orders-patientheader',
+          why: "PatientHeader's actions slot is sized for CountBadge chips (Tasks, Open Enc, Due List…) and toggles them with showCountBadges.",
+        },
+        {
+          type: 'uses',
+          target: 'overlays-modal',
+          why: 'The default View / Edit / Delete row actions open built-in Modals.',
+        },
+        {
+          type: 'uses',
+          target: 'actions-button',
+          why: 'Modal footers and the view modal action bar render Buttons.',
+        },
+      ],
+    },
   },
   argTypes: {
     variant: {

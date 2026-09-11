@@ -419,7 +419,7 @@ export function TimelineEventList({
       {/* Continuous vertical connector line */}
       {events.length > 1 && (
         <div
-          className="absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700"
+          className="absolute start-5 top-0 bottom-0 w-px bg-neutral-200 dark:bg-neutral-700"
           aria-hidden="true"
         />
       )}

@@ -4,8 +4,9 @@ import { ServiceGeneralSettings } from './ServiceGeneralSettings';
 
 const meta: Meta<typeof ServiceGeneralSettings> = {
   component: ServiceGeneralSettings,
-  title: 'Product/Feature Modules/ServiceGeneralSettings',
-  tags: ['autodocs'],
+  id: 'services-servicegeneralsettings',
+  title: 'BlueHive/Services/ServiceGeneralSettings',
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
   },

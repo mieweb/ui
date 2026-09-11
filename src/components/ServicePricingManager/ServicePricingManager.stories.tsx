@@ -6,9 +6,10 @@ import {
 } from './ServicePricingManager';
 
 const meta: Meta<typeof ServicePricingManager> = {
-  title: 'Product/Provider/ServicePricingManager',
+  id: 'services-servicepricingmanager',
+  title: 'BlueHive/Services/ServicePricingManager',
   component: ServicePricingManager,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'padded',
   },
