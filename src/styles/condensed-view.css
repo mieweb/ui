@@ -11786,6 +11786,22 @@ body.condensed [data-slot='collapsible-content'] {
   font-size: 0.75rem !important;
 }
 
+/* ── Accordion ── */
+
+/* Trigger keeps its own text-sm span; condense both padding and title */
+body.condensed [data-slot='accordion-trigger'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='accordion-trigger'] span {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='accordion-content'] {
+  padding: 0 0.75rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
 /* ── AlertDialog ── */
 
 /* Shares Modal slots (already condensed); only its own text needs rules */
