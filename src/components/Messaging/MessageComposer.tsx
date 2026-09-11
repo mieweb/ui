@@ -384,6 +384,13 @@ export interface MessageComposerProps {
   disabled?: boolean;
   /** Whether a message is currently being sent */
   isSending?: boolean;
+  /**
+   * Allows sending with no text and no attachments of the composer's own. A
+   * host that stages content elsewhere (its own attachment strip, a recorded
+   * clip) sets this while that content exists, so the send button and
+   * Enter-to-send stay live.
+   */
+  canSendWhenEmpty?: boolean;
   /** Show attachment picker */
   showAttachmentPicker?: boolean;
   /** Show camera button (mobile) */
@@ -515,6 +522,7 @@ const MessageComposer = React.forwardRef<
       showCharacterCount = false,
       disabled = false,
       isSending = false,
+      canSendWhenEmpty = false,
       showAttachmentPicker = true,
       showCameraButton = false,
       acceptedFileTypes = ['image/*', 'video/*', '.pdf', '.doc', '.docx'],
@@ -730,7 +738,9 @@ const MessageComposer = React.forwardRef<
     };
 
     const canSend =
-      (content.trim().length > 0 || attachments.length > 0) &&
+      (content.trim().length > 0 ||
+        attachments.length > 0 ||
+        canSendWhenEmpty) &&
       content.length <= maxLength &&
       !disabled &&
       !isSending;
