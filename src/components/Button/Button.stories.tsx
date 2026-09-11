@@ -333,7 +333,10 @@ export const WithBothIcons: Story = {
  * Icons passed through `children` (instead of the leftIcon/rightIcon props)
  * land inside the truncating label span. The label keeps SVGs inline so the
  * icon, text, and trailing chevron always share one line — the pattern
- * DateRangePicker's trigger uses. Covered by visual regression tests.
+ * DateRangePicker's trigger uses. The width-constrained example shows the
+ * behavior when a (possibly translated, longer) label runs out of room:
+ * the text truncates with an ellipsis on one line rather than wrapping.
+ * Covered by visual regression tests.
  */
 export const IconsInChildren: Story = {
   render: () => (
@@ -347,6 +350,13 @@ export const IconsInChildren: Story = {
         <Send aria-hidden="true" className="me-2 h-4 w-4" />
         Submit
       </Button>
+      <div style={{ width: '180px' }}>
+        <Button variant="secondary" fullWidth>
+          <Calendar aria-hidden="true" className="me-2 h-4 w-4" />
+          Filtrar por intervalo de fechas
+          <ChevronDown aria-hidden="true" className="ms-2 h-3 w-3" />
+        </Button>
+      </div>
     </div>
   ),
 };
