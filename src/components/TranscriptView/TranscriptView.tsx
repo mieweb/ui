@@ -293,6 +293,7 @@ export const TranscriptView = React.forwardRef<
         <div key={index} role="listitem">
           <button
             type="button"
+            data-slot="transcript-row"
             data-transcript-index={index}
             aria-current={isActive ? 'true' : undefined}
             className={`hover:bg-muted focus-visible:ring-ring flex w-full cursor-pointer gap-3 rounded px-2 py-1 text-start text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
@@ -325,6 +326,7 @@ export const TranscriptView = React.forwardRef<
         )}
         <div
           ref={contentRef}
+          data-slot="transcript-content"
           aria-label={ariaLabel}
           onMouseEnter={() => {
             isHoveringRef.current = true;

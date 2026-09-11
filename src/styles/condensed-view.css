@@ -11688,3 +11688,57 @@ body.condensed .wcdv-aggregate-entry {
   font-size: 0.6875rem !important;
   border-radius: 3px !important;
 }
+
+/* ── Clinical lists ── */
+/* Shared row/heading slots used by ProblemList, PresentingProblems,
+   AllergyList and MedicationList. Row text, badges and buttons already
+   condense via the card-content and primitive slots; these rules shrink the
+   row shell (min-height + vertical padding) and the group headings. */
+
+body.condensed [data-slot='clinical-list-row'] {
+  min-height: 1.75rem !important;
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+}
+
+/* ProblemList keeps its min-height on an inner flex wrapper */
+body.condensed [data-slot='clinical-list-row'] .min-h-9 {
+  min-height: 1.5rem !important;
+}
+
+body.condensed [data-slot='clinical-list-heading'] {
+  padding-bottom: 0.125rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Assessment ── */
+
+/* Problem blocks: tighter box padding and stacking gap */
+body.condensed [data-slot='assessment-problem'] {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='assessment-problem']
+  + [data-slot='assessment-problem'] {
+  margin-top: 0.375rem !important;
+}
+
+/* ── TranscriptView ── */
+
+/* Word- and segment-mode text: one notch smaller */
+body.condensed [data-slot='transcript-content'] {
+  font-size: 0.75rem !important;
+}
+
+/* Segment rows: tighter padding and stacking gap */
+body.condensed [data-slot='transcript-row'] {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='transcript-content'][role='list'] > * + * {
+  margin-top: 0.25rem !important;
+}

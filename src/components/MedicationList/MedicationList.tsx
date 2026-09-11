@@ -272,6 +272,7 @@ function MedicationRow({
     // keyboard equivalent (Alt+↑/↓) — 508.
     /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
     <li
+      data-slot="clinical-list-row"
       data-medication-id={medication.id}
       tabIndex={drag.enabled ? 0 : undefined}
       onKeyDown={drag.enabled ? handleRowKeyDown : undefined}
@@ -507,7 +508,10 @@ export const MedicationList = React.forwardRef<
         <CardContent className="space-y-6 px-4 py-4">
           {groups.map(({ status, label, items }) => (
             <section key={status} aria-label={label}>
-              <h4 className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase">
+              <h4
+                data-slot="clinical-list-heading"
+                className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
+              >
                 {label}
               </h4>
               {items.length > 0 ? (

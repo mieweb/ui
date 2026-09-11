@@ -1158,6 +1158,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               return (
                 <li
                   key={item.concernId}
+                  data-slot="assessment-problem"
                   data-concern-id={item.concernId}
                   {...bp}
                   // While the add-order form is open the block body must yield
