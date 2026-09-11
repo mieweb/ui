@@ -35,10 +35,11 @@ const CRITICAL_CSS = [
   // Icons passed as children land inside the label span; Tailwind preflight
   // makes SVGs display:block, which forces line breaks inside the inline
   // label. Restore inline flow. This rule is deliberately UNLAYERED at
-  // specificity (0,1,1): it must beat Tailwind 3's unlayered preflight
+  // specificity (0,2,2): it must beat Tailwind 3's unlayered preflight
   // `svg{display:block}` (0,0,1) — layering it would neuter the fix for
-  // exactly the broken-TW3 apps it exists for. It matches the specificity
-  // of the [&_svg]:inline-block utility used on the label. Known tradeoff:
+  // exactly the broken-TW3 apps it exists for. It also outranks the
+  // (0,1,1) [&_svg]:inline-block utility on the label, but both declare
+  // the same values, so they never conflict. Known tradeoff:
   // display utilities on an SVG inside the label slot won't win; consumers
   // should conditionally render icons instead.
   `button[data-slot='button'] [data-slot='button-label'] svg{display:inline-block;vertical-align:middle;}`,
