@@ -11822,12 +11822,14 @@ body.condensed [data-slot='dockable-panel-header'] {
   padding: 0.375rem 0.5rem !important;
 }
 
-body.condensed [data-slot='dockable-panel-title'] {
+body.condensed [data-slot='dockable-panel-title'],
+body.condensed [data-slot='dockable-panel-summary'] {
   font-size: 0.8125rem !important;
 }
 
-/* Collapse/close controls: compact hit area */
+/* Collapse/restore/close controls: compact hit area */
 body.condensed [data-slot='dockable-panel-collapse'],
+body.condensed [data-slot='dockable-panel-restore'],
 body.condensed [data-slot='dockable-panel-close'] {
   height: 1.5rem !important;
   padding: 0 0.5rem !important;
