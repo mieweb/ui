@@ -11800,6 +11800,11 @@ body.condensed [data-slot='alert-dialog-description'] {
 
 /* ── Sheet ── */
 
+/* Root: tighter gap between header/body/footer */
+body.condensed [data-slot='sheet'] {
+  gap: 0.5rem !important;
+}
+
 /* Chrome: tighter padding, smaller title (matches condensed Modal) */
 body.condensed [data-slot='sheet-header'],
 body.condensed [data-slot='sheet-body'],
