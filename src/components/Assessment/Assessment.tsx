@@ -720,6 +720,7 @@ function AddOrderForm({
     >
       <select
         aria-label="Order type filter"
+        data-slot="select-trigger"
         value={type}
         onChange={(e) => setType(e.target.value as 'auto' | OrderType)}
         onKeyDown={(e) => {
@@ -761,6 +762,7 @@ function AddOrderForm({
           <input
             ref={inputRef}
             type="text"
+            data-slot="input"
             value={display}
             onChange={(e) => setDisplay(e.target.value)}
             onKeyDown={(e) => {
@@ -1295,6 +1297,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               >
                 <select
                   aria-label="What to add"
+                  data-slot="select-trigger"
                   value={addMode}
                   onChange={(e) => {
                     setAddMode(e.target.value as typeof addMode);
