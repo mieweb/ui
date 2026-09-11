@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { injectButtonCriticalStyles } from './button-critical';
 
 const buttonVariants = cva(
   // Base styles
@@ -75,6 +76,14 @@ const buttonVariants = cva(
   }
 );
 
+/**
+ * Label wrapper classes. Icons passed as `children` (rather than
+ * leftIcon/rightIcon) land inside this span; preflight makes SVGs
+ * display:block which would force line breaks inside the inline span,
+ * so restore inline flow for them.
+ */
+const labelClasses = 'truncate [&_svg]:inline-block [&_svg]:align-middle';
+
 export interface ButtonProps
   extends
     React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -122,6 +131,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const innerRef = React.useRef<HTMLButtonElement>(null);
     React.useImperativeHandle(ref, () => innerRef.current as HTMLButtonElement);
 
+    // Guarantees correct icon/label layout even when the consumer's Tailwind
+    // build is missing our utility classes. See button-critical.ts.
+    React.useInsertionEffect(() => {
+      injectButtonCriticalStyles();
+    }, []);
+
     // When the label truncates, expose the full text as a native tooltip.
     // A consumer-provided `title` always takes precedence.
     React.useLayoutEffect(() => {
@@ -161,20 +176,32 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {isLoading ? (
           <>
             <LoadingSpinner />
-            <span ref={labelRef} data-slot="button-label" className="truncate">
+            <span
+              ref={labelRef}
+              data-slot="button-label"
+              className={labelClasses}
+            >
               {loadingText || children}
             </span>
           </>
         ) : (
           <>
             {React.isValidElement(leftIcon) && (
-              <span className="shrink-0">{leftIcon}</span>
+              <span data-slot="button-icon" className="shrink-0">
+                {leftIcon}
+              </span>
             )}
-            <span ref={labelRef} data-slot="button-label" className="truncate">
+            <span
+              ref={labelRef}
+              data-slot="button-label"
+              className={labelClasses}
+            >
               {children}
             </span>
             {React.isValidElement(rightIcon) && (
-              <span className="shrink-0">{rightIcon}</span>
+              <span data-slot="button-icon" className="shrink-0">
+                {rightIcon}
+              </span>
             )}
           </>
         )}

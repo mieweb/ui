@@ -863,6 +863,10 @@ export const miewebUISafelist = [
   'rounded',
   'py-2',
   'whitespace-nowrap',
+  // Button label — keep SVG icons passed as children inline (preflight
+  // makes SVGs block-level, which would stack them above the label text)
+  '[&_svg]:inline-block',
+  '[&_svg]:align-middle',
   'hover:text-white',
   'h-0.5',
   'transition-[left,width]',

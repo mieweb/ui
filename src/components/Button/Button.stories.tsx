@@ -122,6 +122,8 @@ const meta: Meta<typeof Button> = {
 
 The one clickable control for actions: six intents (\`primary\`, \`secondary\`, \`outline\`, \`ghost\`, \`danger\`, \`link\`), four sizes (\`sm\`, \`md\`, \`lg\`, \`icon\`), \`leftIcon\` / \`rightIcon\` slots and an \`isLoading\` state that swaps in a spinner and \`loadingText\`. It is a real \`<button>\` with \`forwardRef\`, so every native attribute (\`type\`, \`disabled\`, \`aria-*\`) passes through.
 
+**Icon placement:** prefer the \`leftIcon\` / \`rightIcon\` props — they render outside the truncating label, never shrink, and inherit the button's \`gap\`. Icons inside \`children\` are also supported (the label keeps SVGs inline so they never wrap onto their own line), but they truncate together with the text; use the props when the icon must stay visible.
+
 ### Use it when
 
 - The user triggers an action (submit, open, save, delete). One \`primary\` per view; \`secondary\`/\`outline\` for the rest; \`danger\` for destructive actions that are confirmed elsewhere.
@@ -154,7 +156,8 @@ The one clickable control for actions: six intents (\`primary\`, \`secondary\`, 
 - Keyboard and focus are native; a visible \`focus-visible\` ring is always rendered. An \`icon\` button has no text, so **you must pass \`aria-label\`**.
 - While \`isLoading\`, the button is disabled and announces \`loadingText\` — keep that text short and translated.
 - Labels render in a \`data-slot="button-label"\` span with \`truncate\`; without a \`ButtonGroup\` a long label is silently clipped.
-- Colours are brand tokens with \`dark:\` variants; there is no per-brand override API beyond \`className\`.`,
+- Colours are brand tokens with \`dark:\` variants; there is no per-brand override API beyond \`className\`.
+- Button self-heals its layout (icon/label on one line) by injecting a small fallback stylesheet for apps whose Tailwind build is missing the library's utilities. Under a strict CSP without \`style-src 'unsafe-inline'\` the injection is blocked and layout falls back to your app's generated CSS — configure \`@source\` (Tailwind 4) or the exported safelist (Tailwind 3) so the utilities exist. Display utilities on an SVG inside the label slot won't win over the fallback; conditionally render icons instead of hiding them with classes.`,
       },
     },
     catalog: {
@@ -324,6 +327,38 @@ export const WithBothIcons: Story = {
     leftIcon: <Settings size={16} />,
     rightIcon: <ChevronDown size={16} />,
   },
+};
+
+/**
+ * Icons passed through `children` (instead of the leftIcon/rightIcon props)
+ * land inside the truncating label span. The label keeps SVGs inline so the
+ * icon, text, and trailing chevron always share one line — the pattern
+ * DateRangePicker's trigger uses. The width-constrained example shows the
+ * behavior when a (possibly translated, longer) label runs out of room:
+ * the text truncates with an ellipsis on one line rather than wrapping.
+ * Covered by visual regression tests.
+ */
+export const IconsInChildren: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button variant="primary">
+        <Calendar aria-hidden="true" className="me-2 h-4 w-4" />
+        Filter by Date
+        <ChevronDown aria-hidden="true" className="ms-2 h-3 w-3" />
+      </Button>
+      <Button variant="outline">
+        <Send aria-hidden="true" className="me-2 h-4 w-4" />
+        Submit
+      </Button>
+      <div style={{ width: '180px' }}>
+        <Button variant="secondary" fullWidth>
+          <Calendar aria-hidden="true" className="me-2 h-4 w-4" />
+          Filtrar por intervalo de fechas
+          <ChevronDown aria-hidden="true" className="ms-2 h-3 w-3" />
+        </Button>
+      </div>
+    </div>
+  ),
 };
 
 export const AllVariants: Story = {
