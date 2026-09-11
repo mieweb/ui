@@ -101,6 +101,22 @@ describe('Button', () => {
     expect(screen.getByText('Button Text')).toBeInTheDocument();
   });
 
+  it('injects critical structural styles exactly once', () => {
+    renderWithTheme(
+      <>
+        <Button>One</Button>
+        <Button>Two</Button>
+      </>
+    );
+
+    const styles = document.querySelectorAll('#mieweb-ui-button-critical');
+    expect(styles).toHaveLength(1);
+    expect(styles[0].textContent).toContain(
+      ":where(button[data-slot='button'])"
+    );
+    expect(styles[0].textContent).toContain('white-space:nowrap');
+  });
+
   describe('accessibility', () => {
     it('has proper ARIA attributes', () => {
       renderWithTheme(<Button aria-label="Custom label">Button</Button>);

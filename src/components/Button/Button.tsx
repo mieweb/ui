@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { injectButtonCriticalStyles } from './button-critical';
 
 const buttonVariants = cva(
   // Base styles
@@ -122,6 +123,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const innerRef = React.useRef<HTMLButtonElement>(null);
     React.useImperativeHandle(ref, () => innerRef.current as HTMLButtonElement);
 
+    // Guarantees correct icon/label layout even when the consumer's Tailwind
+    // build is missing our utility classes. See button-critical.ts.
+    React.useInsertionEffect(() => {
+      injectButtonCriticalStyles();
+    }, []);
+
     // When the label truncates, expose the full text as a native tooltip.
     // A consumer-provided `title` always takes precedence.
     React.useLayoutEffect(() => {
@@ -168,13 +175,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           <>
             {React.isValidElement(leftIcon) && (
-              <span className="shrink-0">{leftIcon}</span>
+              <span data-slot="button-icon" className="shrink-0">
+                {leftIcon}
+              </span>
             )}
             <span ref={labelRef} data-slot="button-label" className="truncate">
               {children}
             </span>
             {React.isValidElement(rightIcon) && (
-              <span className="shrink-0">{rightIcon}</span>
+              <span data-slot="button-icon" className="shrink-0">
+                {rightIcon}
+              </span>
             )}
           </>
         )}
