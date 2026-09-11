@@ -1,6 +1,6 @@
-export { SetupServiceModal } from './SetupServiceModal';
 export type {
-  SetupServiceModalProps,
-  ServiceFormData,
   ServiceCategory,
+  ServiceFormData,
+  SetupServiceModalProps,
 } from './SetupServiceModal';
+export { SetupServiceModal } from './SetupServiceModal';

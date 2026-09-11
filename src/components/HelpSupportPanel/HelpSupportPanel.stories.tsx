@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import {
-  HelpSupportPanel,
   type FAQItem,
+  HelpSupportPanel,
   type SupportContact,
 } from './HelpSupportPanel';
 

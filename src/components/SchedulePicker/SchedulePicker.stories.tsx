@@ -1,12 +1,13 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import {
-  SchedulePicker,
-  DatePicker,
-  TimePicker,
   DateButton,
-  TimeButton,
+  DatePicker,
   RadioOption,
+  SchedulePicker,
+  TimeButton,
+  TimePicker,
 } from './SchedulePicker';
 
 // Generate sample dates for the next N days
@@ -190,6 +191,11 @@ const slots = useMemo(() => (date ? availability.get(date.toDateString()) ?? [] 
       control: 'boolean',
       description: 'Whether to show time picker (shows after date is selected)',
     },
+    allowCustomDate: {
+      control: 'boolean',
+      description:
+        'Show a calendar trigger at the end of the strip for picking dates beyond the visible range',
+    },
     // Hide internal props
     dates: { table: { disable: true } },
     times: { table: { disable: true } },
@@ -235,6 +241,16 @@ export const MoreDates: Story = {
   args: {
     ...Default.args,
     dateCount: 21,
+  },
+};
+
+export const WithCalendarPicker: Story = {
+  args: {
+    ...Default.args,
+    dateCount: 14,
+    allowCustomDate: true,
+    customDateLabel: 'More dates',
+    minDate: new Date(),
   },
 };
 

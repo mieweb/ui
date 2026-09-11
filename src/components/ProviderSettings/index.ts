@@ -1,5 +1,5 @@
 export {
   ProviderSettings,
-  type ProviderSettingsProps,
   type ProviderSettingsData,
+  type ProviderSettingsProps,
 } from './ProviderSettings';

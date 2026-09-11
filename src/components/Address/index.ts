@@ -1,25 +1,24 @@
 export {
   Address,
   AddressCard,
-  AddressInline,
+  type AddressCardProps,
   AddressCompact,
-  // Utility functions
-  formatAddressSingleLine,
-  formatAddressLines,
-  formatCityStateZip,
-  formatCityState,
-  getGoogleMapsUrl,
-  getGoogleMapsSearchUrl,
+  type AddressCompactProps,
   // Types
   type AddressData,
-  type AddressProps,
-  type AddressCardProps,
+  AddressInline,
   type AddressInlineProps,
-  type AddressCompactProps,
+  type AddressProps,
+  formatAddressLines,
+  // Utility functions
+  formatAddressSingleLine,
+  formatCityState,
+  formatCityStateZip,
+  getGoogleMapsSearchUrl,
+  getGoogleMapsUrl,
 } from './Address';
-
 export {
   AddressForm,
-  type AddressFormProps,
   type AddressFormData,
+  type AddressFormProps,
 } from './AddressForm';

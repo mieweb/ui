@@ -1,5 +1,5 @@
-export { InventoryManager } from './InventoryManager';
 export type {
-  InventoryManagerProps,
   InventoryLogEntry,
+  InventoryManagerProps,
 } from './InventoryManager';
+export { InventoryManager } from './InventoryManager';

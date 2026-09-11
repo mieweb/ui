@@ -1,7 +1,7 @@
-export { InvoicePaymentPage } from './InvoicePaymentPage';
 export type {
-  InvoicePaymentPageProps,
-  InvoicePaymentDetails,
   InvoiceLineItem,
+  InvoicePaymentDetails,
+  InvoicePaymentPageProps,
   PaymentFormData,
 } from './InvoicePaymentPage';
+export { InvoicePaymentPage } from './InvoicePaymentPage';

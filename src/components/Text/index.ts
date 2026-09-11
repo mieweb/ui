@@ -1,1 +1,1 @@
-export { Text, SmallMuted, textVariants, type TextProps } from './Text';
+export { SmallMuted, Text, type TextProps, textVariants } from './Text';

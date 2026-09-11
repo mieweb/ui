@@ -1,5 +1,5 @@
 export {
+  type ServicePrice,
   ServicePricingManager,
   type ServicePricingManagerProps,
-  type ServicePrice,
 } from './ServicePricingManager';

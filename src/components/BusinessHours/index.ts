@@ -1,12 +1,12 @@
 export {
   BusinessHours,
-  CompactHours,
-  HoursSummary,
-  OpenStatusBadge,
   type BusinessHoursProps,
-  type CompactHoursProps,
-  type HoursSummaryProps,
   type BusinessHoursSchedule,
+  CompactHours,
+  type CompactHoursProps,
   type DayHours,
+  HoursSummary,
+  type HoursSummaryProps,
+  OpenStatusBadge,
   type TimeRange,
 } from './BusinessHours';

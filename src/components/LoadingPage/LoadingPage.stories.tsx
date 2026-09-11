@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+
 import {
-  LoadingDots,
-  LoadingBar,
-  LoadingPage,
-  LoadingOverlay,
-  LoadingSkeleton,
   CardSkeleton,
+  LoadingBar,
+  LoadingDots,
+  LoadingOverlay,
+  LoadingPage,
+  LoadingSkeleton,
 } from './LoadingPage';
 
 // =============================================================================
@@ -90,13 +91,13 @@ function LoadingPageDemo({
       return (
         <div className="p-8">
           <LoadingOverlay isLoading={overlayLoading} message="Saving...">
-            <div className="bg-card border-border max-w-md rounded-lg border p-6">
-              <h3 className="text-foreground mb-4 text-lg font-semibold">
+            <div className="max-w-md rounded-lg border border-border bg-card p-6">
+              <h3 className="mb-4 text-lg font-semibold text-foreground">
                 Edit Profile
               </h3>
               <input
                 placeholder="Name"
-                className="border-border bg-background mb-4 w-full rounded border px-3 py-2"
+                className="mb-4 w-full rounded border border-border bg-background px-3 py-2"
               />
               <button
                 onClick={() => {
@@ -145,15 +146,15 @@ function LoadingPageDemo({
           <div className="flex items-center gap-8">
             <div className="text-center">
               <LoadingDots size="sm" />
-              <p className="text-muted-foreground mt-2 text-xs">Small</p>
+              <p className="mt-2 text-xs text-muted-foreground">Small</p>
             </div>
             <div className="text-center">
               <LoadingDots size="md" />
-              <p className="text-muted-foreground mt-2 text-xs">Medium</p>
+              <p className="mt-2 text-xs text-muted-foreground">Medium</p>
             </div>
             <div className="text-center">
               <LoadingDots size="lg" />
-              <p className="text-muted-foreground mt-2 text-xs">Large</p>
+              <p className="mt-2 text-xs text-muted-foreground">Large</p>
             </div>
           </div>
         </div>
@@ -163,19 +164,19 @@ function LoadingPageDemo({
       return (
         <div className="max-w-md space-y-4 p-8">
           <div>
-            <p className="text-muted-foreground mb-1 text-sm">Primary</p>
+            <p className="mb-1 text-sm text-muted-foreground">Primary</p>
             <LoadingBar progress={60} color="primary" />
           </div>
           <div>
-            <p className="text-muted-foreground mb-1 text-sm">Success</p>
+            <p className="mb-1 text-sm text-muted-foreground">Success</p>
             <LoadingBar progress={60} color="success" />
           </div>
           <div>
-            <p className="text-muted-foreground mb-1 text-sm">Warning</p>
+            <p className="mb-1 text-sm text-muted-foreground">Warning</p>
             <LoadingBar progress={60} color="warning" />
           </div>
           <div>
-            <p className="text-muted-foreground mb-1 text-sm">Error</p>
+            <p className="mb-1 text-sm text-muted-foreground">Error</p>
             <LoadingBar progress={60} color="error" />
           </div>
         </div>

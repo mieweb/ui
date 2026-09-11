@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useTheme, type Theme, type ResolvedTheme } from '../../hooks/useTheme';
+
+import { type ResolvedTheme, type Theme, useTheme } from '../../hooks/useTheme';
 
 export interface ThemeProviderContextValue {
   theme: Theme;
@@ -35,9 +36,9 @@ export interface ThemeProviderProps {
  */
 function ThemeProvider({
   children,
-  defaultTheme: _defaultTheme = 'system',
+  defaultTheme = 'system',
 }: ThemeProviderProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme(defaultTheme);
 
   const value = React.useMemo(
     () => ({ theme, setTheme, resolvedTheme }),

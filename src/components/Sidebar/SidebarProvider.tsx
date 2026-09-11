@@ -1,12 +1,13 @@
 import React, {
   createContext,
-  useContext,
-  useCallback,
-  useState,
-  useMemo,
-  useEffect,
   type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from 'react';
+
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 // =============================================================================
@@ -88,6 +89,10 @@ export function SidebarProvider({
   const [expandedGroup, setExpandedGroup] = useState<string | null>(
     defaultExpandedGroup
   );
+
+  useEffect(() => {
+    setExpandedGroup(defaultExpandedGroup);
+  }, [defaultExpandedGroup]);
 
   // Persist collapsed state
   useEffect(() => {

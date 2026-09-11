@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const buttonVariants = cva(
@@ -19,6 +20,11 @@ const buttonVariants = cva(
           'bg-primary-800 text-white',
           'hover:bg-primary-900',
           'active:bg-primary-950',
+        ],
+        brand: [
+          'bg-gradient-brand text-white shadow-glow',
+          'hover:-translate-y-0.5 hover:shadow-glow-hover',
+          'active:translate-y-0 active:shadow-glow',
         ],
         secondary: [
           'bg-neutral-200 text-neutral-900',
@@ -95,6 +101,7 @@ export interface ButtonProps
  * @example
  * ```tsx
  * <Button variant="primary" size="md">Click me</Button>
+ * <Button variant="brand" size="lg">Get started</Button>
  * <Button variant="danger" leftIcon={<TrashIcon />}>Delete</Button>
  * <Button variant="ghost" isLoading loadingText="Saving...">Save</Button>
  * ```
@@ -127,7 +134,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     React.useLayoutEffect(() => {
       const label = labelRef.current;
       const button = innerRef.current;
-      if (!label || !button || title !== undefined) return;
+      if (!button || title !== undefined) return;
+      if (!label) {
+        button.removeAttribute('title');
+        return;
+      }
 
       const update = () => {
         if (label.scrollWidth > label.clientWidth) {
@@ -143,6 +154,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       observer.observe(label);
       return () => observer.disconnect();
     }, [title, children, isLoading, loadingText]);
+
+    const content = isLoading ? loadingText || children : children;
+    const textOnly = React.Children.toArray(content).every(
+      (child) => typeof child === 'string' || typeof child === 'number'
+    );
+    const labelContent = textOnly ? (
+      <span ref={labelRef} data-slot="button-label" className="truncate">
+        {content}
+      </span>
+    ) : (
+      content
+    );
 
     return (
       <button
@@ -161,18 +184,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {isLoading ? (
           <>
             <LoadingSpinner />
-            <span ref={labelRef} data-slot="button-label" className="truncate">
-              {loadingText || children}
-            </span>
+            {labelContent}
           </>
         ) : (
           <>
             {React.isValidElement(leftIcon) && (
               <span className="shrink-0">{leftIcon}</span>
             )}
-            <span ref={labelRef} data-slot="button-label" className="truncate">
-              {children}
-            </span>
+            {labelContent}
             {React.isValidElement(rightIcon) && (
               <span className="shrink-0">{rightIcon}</span>
             )}

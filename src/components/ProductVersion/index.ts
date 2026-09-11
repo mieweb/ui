@@ -1,6 +1,5 @@
-export { ProductVersion, ProductVersionBadge, default } from './ProductVersion';
-
 export type {
-  ProductVersionProps,
   ProductVersionBadgeProps,
+  ProductVersionProps,
 } from './ProductVersion';
+export { default, ProductVersion, ProductVersionBadge } from './ProductVersion';

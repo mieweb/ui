@@ -22,6 +22,8 @@ export interface SelectableService {
   description?: string;
   /** Price or cost */
   price?: number;
+  /** Small label pill rendered next to the name (e.g. "Questionnaire") */
+  badge?: string;
   /** Whether the service is disabled */
   disabled?: boolean;
 }
@@ -525,6 +527,14 @@ function ServiceItem({
                 className="text-muted-foreground text-xs"
               >
                 ({service.code})
+              </span>
+            )}
+            {service.badge && (
+              <span
+                data-slot="service-picker-item-badge"
+                className="bg-primary-800/10 text-primary-800 dark:bg-primary-200/10 dark:text-primary-200 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+              >
+                {service.badge}
               </span>
             )}
           </div>

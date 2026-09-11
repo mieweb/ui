@@ -1,12 +1,12 @@
 export {
-  TimelineProgress,
-  TimelineEventList,
   OrderConfirmation,
-  type TimelineProgressProps,
-  type TimelineEventListProps,
   type OrderConfirmationProps,
+  type TimelineEvent,
+  TimelineEventList,
+  type TimelineEventListProps,
+  TimelineProgress,
+  type TimelineProgressProps,
+  type TimelineSize,
   type TimelineStep,
   type TimelineStepState,
-  type TimelineSize,
-  type TimelineEvent,
 } from './Timeline';

@@ -1,9 +1,9 @@
 export {
+  type EmployerAddress,
+  type EmployerContact,
+  type EmployerDetails,
+  type EmployerInvoice,
+  type EmployerOrder,
   EmployerView,
   type EmployerViewProps,
-  type EmployerDetails,
-  type EmployerContact,
-  type EmployerAddress,
-  type EmployerOrder,
-  type EmployerInvoice,
 } from './EmployerView';

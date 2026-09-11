@@ -1,5 +1,5 @@
-export { EmployerServiceModal } from './EmployerServiceModal';
 export type {
-  EmployerServiceModalProps,
   EmployerServiceConfig,
+  EmployerServiceModalProps,
 } from './EmployerServiceModal';
+export { EmployerServiceModal } from './EmployerServiceModal';

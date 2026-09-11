@@ -1,54 +1,55 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button } from './Button';
 import {
-  Plus,
-  Minus,
-  Check,
-  X,
-  ChevronRight,
-  ChevronLeft,
-  ChevronDown,
-  ChevronUp,
-  ArrowRight,
   ArrowLeft,
-  Search,
-  Settings,
-  User,
-  Users,
-  Mail,
-  Phone,
-  Calendar,
-  Clock,
-  Heart,
-  Star,
-  Trash2,
-  Edit,
-  Copy,
-  Download,
-  Upload,
-  Share,
-  Send,
-  Save,
-  Loader2,
-  RefreshCw,
-  ExternalLink,
-  Link as LinkIcon,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
+  ArrowRight,
   Bell,
   BellOff,
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Clock,
+  Copy,
+  Download,
+  Edit,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Filter,
+  Heart,
   Home,
+  Link as LinkIcon,
+  Loader2,
+  Lock,
+  type LucideIcon,
+  Mail,
   Menu,
+  Minus,
   MoreHorizontal,
   MoreVertical,
-  Filter,
+  Phone,
+  Plus,
+  RefreshCw,
+  Save,
+  Search,
+  Send,
+  Settings,
+  Share,
   SortAsc,
   SortDesc,
+  Star,
+  Trash2,
+  Unlock,
+  Upload,
+  User,
+  Users,
+  X,
   Zap,
-  type LucideIcon,
 } from 'lucide-react';
+
+import { Button } from './Button';
 
 // Icon registry for Storybook controls
 const iconRegistry: Record<string, LucideIcon | undefined> = {
@@ -153,7 +154,7 @@ The one clickable control for actions: six intents (\`primary\`, \`secondary\`, 
 
 - Keyboard and focus are native; a visible \`focus-visible\` ring is always rendered. An \`icon\` button has no text, so **you must pass \`aria-label\`**.
 - While \`isLoading\`, the button is disabled and announces \`loadingText\` — keep that text short and translated.
-- Labels render in a \`data-slot="button-label"\` span with \`truncate\`; without a \`ButtonGroup\` a long label is silently clipped.
+- Text-only labels render in a \`data-slot="button-label"\` span with \`truncate\`; use \`ButtonGroup\` to stack before clipping. Mixed children retain their flex layout; prefer \`leftIcon\` / \`rightIcon\` with text children when automatic truncation is needed.
 - Colours are brand tokens with \`dark:\` variants; there is no per-brand override API beyond \`className\`.`,
       },
     },
@@ -182,7 +183,15 @@ The one clickable control for actions: six intents (\`primary\`, \`secondary\`, 
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'ghost', 'outline', 'danger', 'link'],
+      options: [
+        'primary',
+        'brand',
+        'secondary',
+        'ghost',
+        'outline',
+        'danger',
+        'link',
+      ],
     },
     size: {
       control: 'select',
@@ -223,6 +232,22 @@ export const Primary: Story = {
   args: {
     children: 'Primary Button',
     variant: 'primary',
+  },
+};
+
+export const Brand: Story = {
+  args: {
+    children: 'Get started',
+    variant: 'brand',
+    size: 'lg',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'High-emphasis brand action with a gradient fill, brand-tinted glow, and a subtle lift on hover. Use for hero CTAs and auth flows — not for routine actions.',
+      },
+    },
   },
 };
 
@@ -308,6 +333,19 @@ export const WithIcons: Story = {
   args: {
     children: 'Add Item',
     leftIcon: <Plus size={16} />,
+  },
+};
+
+export const InlineIconChildren: Story = {
+  args: {
+    children: (
+      <>
+        <span className="h-5 w-5" aria-hidden="true">
+          <Plus size={20} />
+        </span>
+        Order Testing
+      </>
+    ),
   },
 };
 

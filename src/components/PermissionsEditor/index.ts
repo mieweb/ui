@@ -1,8 +1,7 @@
-export { PermissionsEditor, default } from './PermissionsEditor';
-
 export type {
+  EmployerAccess,
   Permission,
   PermissionGroup,
-  EmployerAccess,
   PermissionsEditorProps,
 } from './PermissionsEditor';
+export { default, PermissionsEditor } from './PermissionsEditor';

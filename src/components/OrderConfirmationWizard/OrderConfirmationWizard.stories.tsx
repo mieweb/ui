@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { OrderConfirmationWizard } from './OrderConfirmationWizard';
 
 const meta: Meta<typeof OrderConfirmationWizard> = {

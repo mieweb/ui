@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
 import {
   BusinessHours,
+  type BusinessHoursSchedule,
   CompactHours,
   HoursSummary,
   OpenStatusBadge,
-  type BusinessHoursSchedule,
 } from './BusinessHours';
 
 // Sample data

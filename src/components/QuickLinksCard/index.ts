@@ -1,2 +1,2 @@
+export type { QuickLink, QuickLinksCardProps } from './QuickLinksCard';
 export { QuickLinksCard } from './QuickLinksCard';
-export type { QuickLinksCardProps, QuickLink } from './QuickLinksCard';

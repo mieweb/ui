@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { EmployerList } from './EmployerList';
 
 function placeholderLogo(label: string): string {

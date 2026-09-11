@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+
 import {
+  type WebsiteEntry,
   WebsiteInput,
   WebsiteInputGroup,
-  type WebsiteEntry,
 } from './WebsiteInput';
 
 // =============================================================================

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ProductVersion, ProductVersionBadge } from './ProductVersion';
+
 import { Card } from '../Card';
+import { ProductVersion, ProductVersionBadge } from './ProductVersion';
 
 const meta: Meta<typeof ProductVersion> = {
   id: 'layout-productversion',
@@ -195,7 +196,7 @@ export const LargeSize: Story = {
 // In a footer context
 export const InFooter: Story = {
   render: () => (
-    <footer className="border-border bg-muted/30 border-t px-4 py-6">
+    <footer className="bg-muted/30 border-t border-border px-4 py-6">
       <div className="flex flex-col items-center gap-2">
         <ProductVersion
           name="BlueHive"
@@ -204,7 +205,7 @@ export const InFooter: Story = {
           variant="minimal"
           size="sm"
         />
-        <div className="text-muted-foreground flex gap-4 text-xs">
+        <div className="flex gap-4 text-xs text-muted-foreground">
           <button type="button" className="hover:underline">
             Privacy Policy
           </button>
@@ -267,19 +268,19 @@ export const Badge: StoryObj<typeof ProductVersionBadge> = {
 export const MultipleProducts: Story = {
   render: () => (
     <div className="space-y-4">
-      <div className="border-border flex items-center justify-between rounded-lg border p-3">
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <span className="font-medium">Consumer Portal</span>
         <ProductVersionBadge version="2.1.0" environment="production" />
       </div>
-      <div className="border-border flex items-center justify-between rounded-lg border p-3">
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <span className="font-medium">Provider Portal</span>
         <ProductVersionBadge version="2.0.5" environment="production" />
       </div>
-      <div className="border-border flex items-center justify-between rounded-lg border p-3">
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <span className="font-medium">Employer Portal</span>
         <ProductVersionBadge version="2.2.0-beta" environment="staging" />
       </div>
-      <div className="border-border flex items-center justify-between rounded-lg border p-3">
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <span className="font-medium">API Server</span>
         <ProductVersionBadge
           version="1.5.0"

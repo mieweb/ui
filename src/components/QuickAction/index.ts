@@ -1,10 +1,10 @@
 export {
   QuickAction,
+  type QuickActionColor,
   QuickActionGroup,
+  type QuickActionGroupProps,
   QuickActionIcons,
-  quickActionVariants,
   quickActionIconVariants,
   type QuickActionProps,
-  type QuickActionGroupProps,
-  type QuickActionColor,
+  quickActionVariants,
 } from './QuickAction';

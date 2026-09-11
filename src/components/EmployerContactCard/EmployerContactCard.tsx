@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
-import { Button } from '../Button/Button';
+
 import { Avatar } from '../Avatar/Avatar';
+import { Button } from '../Button/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 
 export interface Contact {
   id: string;

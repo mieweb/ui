@@ -1,6 +1,6 @@
 export {
   Breadcrumb,
-  BreadcrumbSlash,
-  type BreadcrumbProps,
   type BreadcrumbItem,
+  type BreadcrumbProps,
+  BreadcrumbSlash,
 } from './Breadcrumb';

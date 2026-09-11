@@ -1,7 +1,8 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
+import { type Theme, useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
-import { useTheme, type Theme } from '../../hooks/useTheme';
 import { Tooltip } from '../Tooltip';
 
 // ============================================================================
@@ -136,8 +137,7 @@ const THEME_LABELS: Record<Theme, string> = {
 // ============================================================================
 
 export interface ThemeToggleProps
-  extends
-    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
     VariantProps<typeof themeToggleVariants> {
   /**
    * What themes to cycle through.
@@ -298,4 +298,4 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
 
 ThemeToggle.displayName = 'ThemeToggle';
 
-export { ThemeToggle, themeToggleVariants, themeToggleIconVariants };
+export { ThemeToggle, themeToggleIconVariants, themeToggleVariants };

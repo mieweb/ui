@@ -1,2 +1,2 @@
+export type { Invoice, InvoiceListProps } from './InvoiceList';
 export { InvoiceList } from './InvoiceList';
-export type { InvoiceListProps, Invoice } from './InvoiceList';

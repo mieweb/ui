@@ -120,6 +120,30 @@ export interface BrandBoxShadow {
   card: string;
   dropdown: string;
   modal: string;
+  /** Soft, high-blur elevation for floating surfaces (e.g. auth cards) */
+  elevated?: string;
+  /** Elevated shadow on hover */
+  elevatedHover?: string;
+  /** Brand-tinted glow for primary/hero actions */
+  glow?: string;
+  /** Brand glow on hover */
+  glowHover?: string;
+  /** Optional dark-mode override for `elevated` */
+  elevatedDark?: string;
+  /** Optional dark-mode override for `elevatedHover` */
+  elevatedHoverDark?: string;
+}
+
+/**
+ * Brand gradient definitions used for hero panels and primary actions.
+ */
+export interface BrandGradients {
+  /** Primary action gradient (e.g. brand buttons) */
+  brand: string;
+  /** Strong hero / marketing gradient (e.g. auth side panels, dashboard heroes) */
+  brandStrong: string;
+  /** Optional dark-mode override for `brandStrong` */
+  brandStrongDark?: string;
 }
 
 /**
@@ -140,6 +164,8 @@ export interface BrandConfig {
   borderRadius: BrandBorderRadius;
   /** Box shadow definitions */
   boxShadow: BrandBoxShadow;
+  /** Brand gradient definitions (optional — falls back to library defaults) */
+  gradients?: BrandGradients;
 }
 
 // ============================================================================
@@ -151,7 +177,7 @@ export interface BrandConfig {
  * This creates a standalone CSS file that can be imported into any project.
  */
 export function generateBrandCSS(brand: BrandConfig): string {
-  const { colors, typography, borderRadius, boxShadow } = brand;
+  const { colors, typography, borderRadius, boxShadow, gradients } = brand;
 
   // Collect all color scales (primary + any optional scales)
   const scaleNames = [
@@ -235,7 +261,23 @@ ${scaleBlocks}
   /* Shadows */
   --mieweb-shadow-card: ${boxShadow.card};
   --mieweb-shadow-dropdown: ${boxShadow.dropdown};
-  --mieweb-shadow-modal: ${boxShadow.modal};
+  --mieweb-shadow-modal: ${boxShadow.modal};${
+    boxShadow.elevated
+      ? `\n  --mieweb-shadow-elevated: ${boxShadow.elevated};`
+      : ''
+  }${
+    boxShadow.elevatedHover
+      ? `\n  --mieweb-shadow-elevated-hover: ${boxShadow.elevatedHover};`
+      : ''
+  }${boxShadow.glow ? `\n  --mieweb-shadow-glow: ${boxShadow.glow};` : ''}${
+    boxShadow.glowHover
+      ? `\n  --mieweb-shadow-glow-hover: ${boxShadow.glowHover};`
+      : ''
+  }${
+    gradients
+      ? `\n\n  /* Brand Gradients */\n  --mieweb-gradient-brand: ${gradients.brand};\n  --mieweb-gradient-brand-strong: ${gradients.brandStrong};`
+      : ''
+  }
 }
 
 /* Dark Mode */
@@ -255,7 +297,19 @@ ${scaleBlocks}
   --mieweb-success: ${colors.dark.success};
   --mieweb-success-foreground: ${colors.dark.successForeground};
   --mieweb-warning: ${colors.dark.warning};
-  --mieweb-warning-foreground: ${colors.dark.warningForeground};
+  --mieweb-warning-foreground: ${colors.dark.warningForeground};${
+    gradients?.brandStrongDark
+      ? `\n  --mieweb-gradient-brand-strong: ${gradients.brandStrongDark};`
+      : ''
+  }${
+    boxShadow.elevatedDark
+      ? `\n  --mieweb-shadow-elevated: ${boxShadow.elevatedDark};`
+      : ''
+  }${
+    boxShadow.elevatedHoverDark
+      ? `\n  --mieweb-shadow-elevated-hover: ${boxShadow.elevatedHoverDark};`
+      : ''
+  }
 }
 `;
 }
@@ -314,6 +368,12 @@ export function generateTailwindTheme(brand: BrandConfig) {
       card: boxShadow.card,
       dropdown: boxShadow.dropdown,
       modal: boxShadow.modal,
+      ...(boxShadow.elevated ? { elevated: boxShadow.elevated } : {}),
+      ...(boxShadow.elevatedHover
+        ? { 'elevated-hover': boxShadow.elevatedHover }
+        : {}),
+      ...(boxShadow.glow ? { glow: boxShadow.glow } : {}),
+      ...(boxShadow.glowHover ? { 'glow-hover': boxShadow.glowHover } : {}),
     },
   };
 }

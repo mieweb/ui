@@ -1,7 +1,7 @@
 export {
-  RadioGroup,
   Radio,
-  radioVariants,
+  RadioGroup,
   type RadioGroupProps,
   type RadioProps,
+  radioVariants,
 } from './Radio';

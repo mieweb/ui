@@ -1,32 +1,33 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableRow,
-  TableHead,
-  TableCell,
-  TableCaption,
-} from './Table';
+import * as React from 'react';
+
 import { Badge } from '../Badge';
 import { Checkbox } from '../Checkbox';
 import {
   Dropdown,
   DropdownContent,
   DropdownItem,
-  DropdownSeparator,
   DropdownLabel,
+  DropdownSeparator,
 } from '../Dropdown';
 import {
-  FilterIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   EyeOffIcon,
+  FilterIcon,
   LockIcon,
   XIcon,
 } from '../Icons';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './Table';
 
 const meta: Meta<typeof Table> = {
   id: 'grids-table',
@@ -388,7 +389,7 @@ function PlaygroundTable({
       return (
         <TableHead
           key={col.key}
-          className={isPinned ? 'bg-background min-w-[140px]' : 'min-w-[140px]'}
+          className={isPinned ? 'min-w-[140px] bg-background' : 'min-w-[140px]'}
           style={getPinnedStyle(index, col.key)}
         >
           {col.label}
@@ -421,10 +422,10 @@ function PlaygroundTable({
             className="z-[100]"
             trigger={
               <button
-                className="hover:bg-muted rounded p-0.5 transition-colors"
+                className="rounded p-0.5 transition-colors hover:bg-muted"
                 aria-label={`Options for ${col.label}`}
               >
-                <ChevronDownIcon className="text-muted-foreground h-4 w-4" />
+                <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
               </button>
             }
           >
@@ -458,7 +459,7 @@ function PlaygroundTable({
                           [col.key]: e.target.value,
                         }))
                       }
-                      className="border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-md border px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
@@ -499,7 +500,7 @@ function PlaygroundTable({
       {/* Show hidden columns restore UI */}
       {hiddenColumns.size > 0 && (
         <div className="mb-4 flex flex-wrap gap-2">
-          <span className="text-muted-foreground text-sm">Hidden columns:</span>
+          <span className="text-sm text-muted-foreground">Hidden columns:</span>
           {Array.from(hiddenColumns).map((key) => {
             const col = allColumns.find((c) => c.key === key);
             return (
@@ -512,7 +513,7 @@ function PlaygroundTable({
                     return newSet;
                   })
                 }
-                className="bg-muted hover:bg-muted/80 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors"
+                className="hover:bg-muted/80 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs transition-colors"
               >
                 {col?.label}
                 <XIcon className="h-3 w-3" />
@@ -526,7 +527,7 @@ function PlaygroundTable({
           <TableRow>
             {selectable && (
               <TableHead
-                className="bg-background w-12"
+                className="w-12 bg-background"
                 style={getCheckboxPinnedStyle()}
               >
                 <Checkbox
@@ -547,7 +548,7 @@ function PlaygroundTable({
             <TableRow>
               <TableCell
                 colSpan={visibleColumns.length + (selectable ? 1 : 0)}
-                className="text-muted-foreground h-24 text-center"
+                className="h-24 text-center text-muted-foreground"
               >
                 No results found.
               </TableCell>
@@ -578,7 +579,7 @@ function PlaygroundTable({
                       key={col.key}
                       className={`${index === 0 ? 'font-medium' : ''} ${
                         isPinned
-                          ? 'bg-background min-w-[140px]'
+                          ? 'min-w-[140px] bg-background'
                           : 'min-w-[140px]'
                       }`}
                       style={getPinnedStyle(index, col.key)}
@@ -635,7 +636,7 @@ function PlaygroundTable({
         )}
       </Table>
       {selectable && (
-        <p className="text-muted-foreground mt-4 text-sm">
+        <p className="mt-4 text-sm text-muted-foreground">
           {selectedIds.size} of {filteredData.length} row(s) selected.
         </p>
       )}
@@ -965,7 +966,7 @@ function SelectableTableDemo() {
           ))}
         </TableBody>
       </Table>
-      <p className="text-muted-foreground mt-4 text-sm">
+      <p className="mt-4 text-sm text-muted-foreground">
         {selectedIds.size} of {users.length} row(s) selected.
       </p>
     </div>
@@ -991,7 +992,7 @@ export const Empty: Story = {
           <TableRow>
             <TableCell
               colSpan={3}
-              className="text-muted-foreground h-24 text-center"
+              className="h-24 text-center text-muted-foreground"
             >
               No results found.
             </TableCell>

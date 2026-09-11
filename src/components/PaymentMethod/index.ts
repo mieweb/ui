@@ -1,11 +1,11 @@
 export {
-  PaymentMethodCard,
-  PaymentMethodBank,
-  PaymentMethodList,
-  type CreditCardData,
   type BankAccountData,
+  type CreditCardData,
   type PaymentMethod,
-  type PaymentMethodCardProps,
+  PaymentMethodBank,
   type PaymentMethodBankProps,
+  PaymentMethodCard,
+  type PaymentMethodCardProps,
+  PaymentMethodList,
   type PaymentMethodListProps,
 } from './PaymentMethod';

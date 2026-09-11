@@ -1,15 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import {
-  RecordButton,
-  type RecordButtonState,
-  type RecordButtonVariant,
-  type RecordButtonSize,
-  type TranscriptionState,
-} from './RecordButton';
+
+import { AudioPlayer } from '../AudioPlayer';
 import { Input } from '../Input';
 import { Textarea } from '../Textarea';
-import { AudioPlayer } from '../AudioPlayer';
+import {
+  RecordButton,
+  type RecordButtonSize,
+  type RecordButtonState,
+  type RecordButtonVariant,
+  type TranscriptionState,
+} from './RecordButton';
 
 // ============================================================================
 // Mock Transcription Service
@@ -155,7 +156,7 @@ function StateCard({
   showPulse?: boolean;
 }) {
   return (
-    <div className="bg-card flex flex-col items-center gap-3 rounded-xl border p-4">
+    <div className="flex flex-col items-center gap-3 rounded-xl border bg-card p-4">
       <RecordButton
         state={state}
         variant={variant}
@@ -165,7 +166,7 @@ function StateCard({
       />
       <div className="space-y-0.5 text-center">
         <p className="text-sm font-medium">{label}</p>
-        <p className="text-muted-foreground max-w-[140px] text-xs">
+        <p className="max-w-[140px] text-xs text-muted-foreground">
           {description}
         </p>
       </div>
@@ -197,7 +198,7 @@ function VariantRow({
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">{label}</span>
-        <code className="bg-muted rounded px-1.5 py-0.5 text-xs">
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
           variant=&quot;{variant}&quot;
         </code>
       </div>
@@ -205,7 +206,7 @@ function VariantRow({
         {states.map((state) => (
           <div key={state} className="flex flex-col items-center gap-2">
             <RecordButton state={state} variant={variant} />
-            <span className="text-muted-foreground text-xs">{state}</span>
+            <span className="text-xs text-muted-foreground">{state}</span>
           </div>
         ))}
       </div>
@@ -256,7 +257,7 @@ function InteractiveDemo() {
   }, []);
 
   return (
-    <div className="bg-card flex flex-col items-center gap-6 rounded-xl border p-8">
+    <div className="flex flex-col items-center gap-6 rounded-xl border bg-card p-8">
       <RecordButton
         state={state}
         variant="default"
@@ -271,9 +272,9 @@ function InteractiveDemo() {
           {state === 'processing' && 'Processing audio...'}
           {state === 'success' && 'Done!'}
         </p>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           Current state:{' '}
-          <code className="bg-muted rounded px-1 py-0.5">{state}</code>
+          <code className="rounded bg-muted px-1 py-0.5">{state}</code>
         </p>
       </div>
     </div>
@@ -321,7 +322,7 @@ function PressAndHoldDemo() {
   }, []);
 
   return (
-    <div className="bg-card flex flex-col items-center gap-6 rounded-xl border p-8">
+    <div className="flex flex-col items-center gap-6 rounded-xl border bg-card p-8">
       <RecordButton
         state={state}
         variant="default"
@@ -341,7 +342,7 @@ function PressAndHoldDemo() {
           {state === 'processing' && 'Processing...'}
           {state === 'success' && 'Sent!'}
         </p>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           Shows waveform animation while recording
         </p>
       </div>
@@ -566,7 +567,7 @@ export const LiveRecording: Story = {
           showPulse
           showDuration
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Click to start recording
         </p>
         {lastRecording && (
@@ -630,7 +631,7 @@ export const AllStates: Story = {
     <div className="space-y-4">
       <div className="space-y-1">
         <h2 className="text-lg font-semibold tracking-tight">All States</h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           The 6 essential states a mic button needs to cover all use cases.
         </p>
       </div>
@@ -682,11 +683,11 @@ export const Variants: Story = {
     <div className="space-y-4">
       <div className="space-y-1">
         <h2 className="text-lg font-semibold tracking-tight">Variants</h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Four visual styles to match different UI contexts.
         </p>
       </div>
-      <div className="bg-card space-y-8 rounded-xl border p-6">
+      <div className="space-y-8 rounded-xl border bg-card p-6">
         <VariantRow variant="default" label="Default" />
         <VariantRow variant="outline" label="Outline" />
         <VariantRow variant="ghost" label="Ghost" />
@@ -708,17 +709,17 @@ export const Sizes: Story = {
     <div className="space-y-4">
       <div className="space-y-1">
         <h2 className="text-lg font-semibold tracking-tight">Sizes</h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Three sizes for different contexts and layouts.
         </p>
       </div>
-      <div className="bg-card flex flex-wrap items-end gap-8 rounded-xl border p-6">
+      <div className="flex flex-wrap items-end gap-8 rounded-xl border bg-card p-6">
         {(['sm', 'md', 'lg'] as RecordButtonSize[]).map((size) => (
           <div key={size} className="flex flex-col items-center gap-3">
             <RecordButton size={size} />
             <div className="text-center">
               <p className="text-sm font-medium">{size.toUpperCase()}</p>
-              <code className="text-muted-foreground text-xs">
+              <code className="text-xs text-muted-foreground">
                 size=&quot;{size}&quot;
               </code>
             </div>
@@ -743,34 +744,34 @@ export const RecordingAnimations: Story = {
         <h2 className="text-lg font-semibold tracking-tight">
           Recording Animations
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Different visual feedback options for the recording state.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="bg-card flex flex-col items-center gap-4 rounded-xl border p-6">
+        <div className="flex flex-col items-center gap-4 rounded-xl border bg-card p-6">
           <RecordButton state="recording" showPulse showWaveform={false} />
           <div className="space-y-1 text-center">
             <p className="text-sm font-medium">Pulse + Stop Icon</p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               Default recording state with pulse rings
             </p>
           </div>
         </div>
-        <div className="bg-card flex flex-col items-center gap-4 rounded-xl border p-6">
+        <div className="flex flex-col items-center gap-4 rounded-xl border bg-card p-6">
           <RecordButton state="recording" showPulse showWaveform />
           <div className="space-y-1 text-center">
             <p className="text-sm font-medium">Pulse + Waveform</p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               Shows audio activity with waveform bars
             </p>
           </div>
         </div>
-        <div className="bg-card flex flex-col items-center gap-4 rounded-xl border p-6">
+        <div className="flex flex-col items-center gap-4 rounded-xl border bg-card p-6">
           <RecordButton state="recording" showPulse={false} showWaveform />
           <div className="space-y-1 text-center">
             <p className="text-sm font-medium">Waveform Only</p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               Subtle animation without pulse rings
             </p>
           </div>
@@ -794,7 +795,7 @@ export const InteractiveDemos: Story = {
         <h2 className="text-lg font-semibold tracking-tight">
           Interactive Demos
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Try the different interaction patterns.
         </p>
       </div>
@@ -802,7 +803,7 @@ export const InteractiveDemos: Story = {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Toggle Pattern</span>
-            <span className="bg-muted rounded-full px-2 py-0.5 text-xs">
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
               Click to toggle
             </span>
           </div>
@@ -811,7 +812,7 @@ export const InteractiveDemos: Story = {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Press & Hold Pattern</span>
-            <span className="bg-muted rounded-full px-2 py-0.5 text-xs">
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
               Hold to record
             </span>
           </div>
@@ -833,7 +834,7 @@ export const WithDuration: Story = {
   render: function WithDurationStory() {
     return (
       <div className="space-y-4">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Click to start recording and see the duration timer.
         </p>
         <RecordButton showDuration maxDuration={30} />
@@ -859,7 +860,7 @@ export const InInputField: Story = {
 
     return (
       <div className="w-96 space-y-4">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           RecordButton embedded in an input field. Click the mic to record.
         </p>
         <div className="relative">
@@ -869,7 +870,7 @@ export const InInputField: Story = {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
-          <div className="absolute top-1/2 right-2 -translate-y-1/2">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
             <RecordButton
               size="sm"
               variant="ghost"
@@ -878,8 +879,8 @@ export const InInputField: Story = {
           </div>
         </div>
         {inputValue && (
-          <p className="text-muted-foreground text-xs">
-            Value: <code className="bg-muted rounded px-1">{inputValue}</code>
+          <p className="text-xs text-muted-foreground">
+            Value: <code className="rounded bg-muted px-1">{inputValue}</code>
           </p>
         )}
       </div>
@@ -915,7 +916,7 @@ export const BatchTranscription: Story = {
       <div className="w-96 space-y-4">
         <div className="space-y-1">
           <h3 className="text-sm font-medium">Batch Transcription</h3>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             Record audio, then transcribe after recording completes.
           </p>
         </div>
@@ -939,7 +940,7 @@ export const BatchTranscription: Story = {
               reset();
               setText('');
             }}
-            className="text-muted-foreground hover:text-foreground text-xs"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             Reset
           </button>
@@ -982,7 +983,7 @@ export const StreamingTranscription: Story = {
       <div className="w-96 space-y-4">
         <div className="space-y-1">
           <h3 className="text-sm font-medium">Streaming Transcription</h3>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             See text appear word-by-word as you speak.
           </p>
         </div>
@@ -1016,7 +1017,7 @@ export const StreamingTranscription: Story = {
               reset();
               setText('');
             }}
-            className="text-muted-foreground hover:text-foreground text-xs"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             Reset
           </button>

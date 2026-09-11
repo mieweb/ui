@@ -18,7 +18,7 @@ import { FileUp, X, AlertCircle } from 'lucide-react';
 // Types
 // ============================================================================
 
-export type ResultStatus = 'passed' | 'failed' | null;
+export type ResultStatus = 'passed' | 'failed' | 'sent_to_lab' | null;
 
 export interface ProviderContact {
   /** Contact ID */
@@ -73,6 +73,8 @@ export interface ResultsEntryFormProps {
   showFileUpload?: boolean;
   /** Whether to show "apply to all services" option */
   showApplyToAll?: boolean;
+  /** Whether to offer the preliminary "Sent to Lab" result */
+  showSentToLab?: boolean;
   /** Callback when form is submitted */
   onSubmit: (data: ResultsEntryData) => void;
   /** Callback when form is cancelled */
@@ -82,6 +84,7 @@ export interface ResultsEntryFormProps {
     testResults?: string;
     passed?: string;
     failed?: string;
+    sentToLab?: string;
     alternateResultsText?: string;
     dateDrawn?: string;
     dateCompleted?: string;
@@ -134,6 +137,7 @@ export const ResultsEntryForm = React.forwardRef<
     providerContacts = [],
     showFileUpload = false,
     showApplyToAll = true,
+    showSentToLab = false,
     onSubmit,
     labels = {},
     className,
@@ -144,6 +148,7 @@ export const ResultsEntryForm = React.forwardRef<
     testResults = 'Test Results',
     passed = 'Passed',
     failed = 'Failed',
+    sentToLab = 'Sent to Lab',
     alternateResultsText = 'Alternate Results Text',
     dateDrawn = 'Date Drawn',
     dateCompleted = 'Date Completed',
@@ -275,6 +280,7 @@ export const ResultsEntryForm = React.forwardRef<
           >
             <Radio value="passed" label={passed} />
             <Radio value="failed" label={failed} />
+            {showSentToLab && <Radio value="sent_to_lab" label={sentToLab} />}
           </RadioGroup>
         </div>
         <div className="sm:w-1/2">

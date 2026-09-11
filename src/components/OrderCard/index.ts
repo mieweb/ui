@@ -1,8 +1,8 @@
-export { OrderCard } from './OrderCard';
 export type {
   OrderCardProps,
-  OrderStatus,
-  OrderService,
   OrderEmployee,
   OrderEmployer,
+  OrderService,
+  OrderStatus,
 } from './OrderCard';
+export { OrderCard } from './OrderCard';

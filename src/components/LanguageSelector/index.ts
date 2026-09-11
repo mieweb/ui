@@ -1,10 +1,10 @@
 export {
-  LanguageSelector,
-  LanguageSelectorNative,
-  LanguageSelectorInline,
   DEFAULT_LANGUAGES,
   type Language,
-  type LanguageSelectorProps,
-  type LanguageSelectorNativeProps,
+  LanguageSelector,
+  LanguageSelectorInline,
   type LanguageSelectorInlineProps,
+  LanguageSelectorNative,
+  type LanguageSelectorNativeProps,
+  type LanguageSelectorProps,
 } from './LanguageSelector';
