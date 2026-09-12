@@ -582,6 +582,88 @@ export const ComposerSending: StoryObj<typeof MessageComposer> = {
   ),
 };
 
+export const ComposerStacked: StoryObj<typeof MessageComposer> = {
+  name: 'MessageComposer (Stacked layout)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The stacked layout gives the textarea a full-width row and moves the ' +
+          'attachment picker and toolbar slots onto a control row beneath it. ' +
+          'On narrow screens this leaves the message the whole width instead of ' +
+          'sharing it with the controls.',
+      },
+    },
+  },
+  render: () => (
+    <div className="w-[360px] border-t">
+      <MessageComposer
+        onSend={() => {
+          // Message sent
+        }}
+        layout="stacked"
+        placeholder="How can I help you?"
+        toolbarStart={
+          <button
+            type="button"
+            className="rounded-full px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          >
+            Auto
+          </button>
+        }
+        toolbarEnd={
+          <button
+            type="button"
+            aria-label="Start recording"
+            className="rounded-full p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          >
+            🎤
+          </button>
+        }
+      />
+    </div>
+  ),
+};
+
+export const ComposerLocalized: StoryObj<typeof MessageComposer> = {
+  name: 'MessageComposer (Localized labels)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Every user-facing string the composer renders can be overridden via ' +
+          '`labels`, so hosts running a translation layer do not have to fork ' +
+          'the component to localize it.',
+      },
+    },
+  },
+  render: () => (
+    <div className="w-[400px] border-t">
+      <MessageComposer
+        onSend={() => {
+          // Message sent
+        }}
+        placeholder="Schreiben Sie eine Nachricht…"
+        labels={{
+          message: 'Nachricht',
+          send: 'Nachricht senden',
+          sending: 'Nachricht wird gesendet',
+          cancelReply: 'Antwort abbrechen',
+          replyingTo: (senderName) => `Antwort an ${senderName}`,
+        }}
+        replyTo={{
+          id: '1',
+          content: mockMessages[0].content,
+          senderName: otherUser.name,
+        }}
+        onCancelReply={() => {
+          // Cancel reply
+        }}
+      />
+    </div>
+  ),
+};
+
 // ============================================================================
 // ConversationHeader Stories
 // ============================================================================

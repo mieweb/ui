@@ -38,10 +38,16 @@ export {
   CharacterCounter,
   SendButton,
   sendButtonVariants,
+  activeMentionQuery,
+  replaceMentionToken,
   type MessageComposerProps,
+  type MessageComposerLabels,
+  type MessageComposerClassNames,
   type CharacterCounterProps,
   type SendButtonProps,
+  type SendButtonContext,
   type MentionOption,
+  type MentionToken,
 } from './MessageComposer';
 
 export {

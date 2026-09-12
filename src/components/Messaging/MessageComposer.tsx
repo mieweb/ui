@@ -46,20 +46,48 @@ export interface MentionOption {
   meta?: string;
 }
 
+/** An in-progress `@mention` token located under the caret. */
+export interface MentionToken {
+  /** Text typed after the `@`. */
+  query: string;
+  /** Index of the `@` within the value. */
+  start: number;
+}
+
 /**
  * Find the active `@query` immediately before the caret, if any. The `@` must
  * start the string or follow whitespace, and the token must contain no spaces
  * or further `@`.
+ *
+ * Exported as a plain utility: apps that own their own mention UI can reuse the
+ * parsing, or build on it, instead of reimplementing it.
  */
-function activeMentionQuery(
+export function activeMentionQuery(
   value: string,
   caret: number
-): { query: string; start: number } | null {
+): MentionToken | null {
   const upToCaret = value.slice(0, caret);
   const match = /(^|\s)@([^\s@]*)$/.exec(upToCaret);
   if (!match) return null;
   const query = match[2];
   return { query, start: caret - query.length - 1 };
+}
+
+/**
+ * Replace the token at `token.start` with `@text ` and report where the caret
+ * should land afterwards. Counterpart to {@link activeMentionQuery}.
+ */
+export function replaceMentionToken(
+  value: string,
+  token: MentionToken,
+  text: string
+): { value: string; caret: number } {
+  const mention = `@${text} `;
+  const end = token.start + token.query.length + 1;
+  return {
+    value: value.slice(0, token.start) + mention + value.slice(end),
+    caret: token.start + mention.length,
+  };
 }
 
 /**
@@ -81,6 +109,48 @@ function isFileAccepted(file: File, accepted: string[]): boolean {
 }
 
 // ============================================================================
+// Labels
+// ============================================================================
+
+/**
+ * User-facing strings the composer renders. Every entry is optional and falls
+ * back to English, so the component stays dependency-free while hosts that run
+ * a translation layer can supply localized text.
+ */
+export interface MessageComposerLabels {
+  /** `aria-label` for the textarea. */
+  message: string;
+  /** `aria-label` for the send button at rest. */
+  send: string;
+  /** `aria-label` for the send button while a message is in flight. */
+  sending: string;
+  /** `aria-label` for the cancel-reply button. */
+  cancelReply: string;
+  /** Heading above the reply preview. */
+  replyingTo: (senderName: string) => string;
+  /** `aria-label` for the mention suggestion listbox. */
+  mentionList: string;
+  /** `aria-label` for the character counter. */
+  characterCount: (current: number, max: number) => string;
+  /** Error surfaced when `onSend` rejects. */
+  sendFailed: string;
+  /** Error surfaced when more files are added than `maxAttachments` allows. */
+  tooManyAttachments: (max: number) => string;
+}
+
+const defaultLabels: MessageComposerLabels = {
+  message: 'Message',
+  send: 'Send message',
+  sending: 'Sending message',
+  cancelReply: 'Cancel reply',
+  replyingTo: (senderName) => `Replying to ${senderName}`,
+  mentionList: 'Mention',
+  characterCount: (current, max) => `${current} of ${max} characters`,
+  sendFailed: 'Failed to send message',
+  tooManyAttachments: (max) => `Maximum ${max} attachments allowed`,
+};
+
+// ============================================================================
 // Character Counter Component
 // ============================================================================
 
@@ -89,6 +159,8 @@ export interface CharacterCounterProps {
   max: number;
   showWarningAt?: number;
   className?: string;
+  /** Overrides the default `"{current} of {max} characters"` label. */
+  label?: string;
 }
 
 /**
@@ -99,6 +171,7 @@ function CharacterCounter({
   max,
   showWarningAt = 0.9,
   className,
+  label,
 }: CharacterCounterProps) {
   const percentage = current / max;
   const isWarning = percentage >= showWarningAt && percentage < 1;
@@ -116,7 +189,7 @@ function CharacterCounter({
         className
       )}
       aria-live="polite"
-      aria-label={`${current} of ${max} characters`}
+      aria-label={label ?? defaultLabels.characterCount(current, max)}
     >
       {current}/{max}
     </span>
@@ -167,13 +240,29 @@ export interface SendButtonProps
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof sendButtonVariants> {
   isLoading?: boolean;
+  /** Overrides the default `"Send message"` label. */
+  label?: string;
+  /** Overrides the default `"Sending message"` label used while loading. */
+  loadingLabel?: string;
 }
 
 /**
  * Send button with loading state.
  */
 const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
-  ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      canSend,
+      isLoading,
+      disabled,
+      label,
+      loadingLabel,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <button
         ref={ref}
@@ -181,7 +270,11 @@ const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
         disabled={disabled || !canSend || isLoading}
         data-slot="composer-send-button"
         className={cn(sendButtonVariants({ variant, canSend }), className)}
-        aria-label={isLoading ? 'Sending message' : 'Send message'}
+        aria-label={
+          isLoading
+            ? (loadingLabel ?? defaultLabels.sending)
+            : (label ?? defaultLabels.send)
+        }
         {...props}
       >
         {isLoading ? (
@@ -232,6 +325,31 @@ SendButton.displayName = 'SendButton';
 // Message Composer Component
 // ============================================================================
 
+/** Context handed to `renderSendButton` so a custom button can drive sending. */
+export interface SendButtonContext {
+  /** Whether the composer currently has something worth sending. */
+  canSend: boolean;
+  /** Whether a previous send is still in flight. */
+  isSending: boolean;
+  /** Whether the composer is disabled. */
+  disabled: boolean;
+}
+
+/**
+ * Class name overrides for the composer's internal elements. Merged with
+ * `tailwind-merge`, so an override replaces the conflicting built-in utility
+ * rather than stacking with it — enough for a host to reskin the composer
+ * without forking its markup.
+ */
+export interface MessageComposerClassNames {
+  /** The row (or column, when stacked) holding the input and its controls. */
+  inputArea?: string;
+  /** The textarea itself. */
+  input?: string;
+  /** The control row rendered by `layout="stacked"`. */
+  toolbar?: string;
+}
+
 export interface MessageComposerProps {
   /** Called when a message is sent */
   onSend: (message: NewMessage) => void | Promise<void>;
@@ -253,6 +371,13 @@ export interface MessageComposerProps {
   disabled?: boolean;
   /** Whether a message is currently being sent */
   isSending?: boolean;
+  /**
+   * Allows sending with no text and no attachments of the composer's own. A
+   * host that stages content elsewhere (its own attachment strip, a recorded
+   * clip) sets this while that content exists, so the send button and
+   * Enter-to-send stay live.
+   */
+  canSendWhenEmpty?: boolean;
   /** Show attachment picker */
   showAttachmentPicker?: boolean;
   /** Show camera button (mobile) */
@@ -277,8 +402,51 @@ export interface MessageComposerProps {
   onCancelReply?: () => void;
   /** Visual variant - 'default' shows border-t, 'minimal' has no border */
   variant?: 'default' | 'minimal';
+  /**
+   * How the input and its controls are arranged. `'inline'` (default) keeps
+   * everything on one row. `'stacked'` gives the textarea a full-width row of
+   * its own and moves the attachment picker, toolbar slots, and send button to
+   * a control row beneath it — the shape narrow screens need.
+   */
+  layout?: 'inline' | 'stacked';
   /** Content to render inside the input wrapper (e.g. a mic button) */
   inputTrailing?: React.ReactNode;
+  /**
+   * Controls placed at the leading edge of the control row (e.g. a model
+   * picker). `layout="stacked"` only.
+   */
+  toolbarStart?: React.ReactNode;
+  /**
+   * Controls placed at the trailing edge of the control row, before the send
+   * button (e.g. a mic button). `layout="stacked"` only.
+   */
+  toolbarEnd?: React.ReactNode;
+  /**
+   * Replaces the built-in send button. Return `null` to drop it entirely and
+   * supply your own via `toolbarEnd`. A custom button should use
+   * `type="submit"` so it still submits the composer's form.
+   */
+  renderSendButton?: (context: SendButtonContext) => React.ReactNode;
+  /**
+   * Cap on the textarea's auto-grow height. Accepts any CSS length; the
+   * viewport-relative default lets long drafts use a short screen instead of
+   * being pinned to a fixed pixel height.
+   *
+   * @default '40vh'
+   */
+  maxHeight?: number | string;
+  /**
+   * Overrides for the composer's user-facing strings. Unspecified entries fall
+   * back to English.
+   */
+  labels?: Partial<MessageComposerLabels>;
+  /**
+   * Extra props spread onto the textarea. The composer's own handlers run
+   * after any handler supplied here, and bail if it called `preventDefault()`
+   * — enough for a host to take over pasting, or to claim keys while its own
+   * overlay is open, without the composer needing to know why.
+   */
+  inputProps?: React.TextareaHTMLAttributes<HTMLTextAreaElement>;
   /**
    * Candidates for `@mention` autocomplete. When provided (non-empty), typing
    * `@` opens a picker. Omit to disable mentions entirely (default).
@@ -286,6 +454,8 @@ export interface MessageComposerProps {
   mentionOptions?: MentionOption[];
   /** Additional class name */
   className?: string;
+  /** Class name overrides for the composer's internal elements. */
+  classNames?: MessageComposerClassNames;
 }
 
 /**
@@ -317,6 +487,7 @@ const MessageComposer = React.forwardRef<
       showCharacterCount = false,
       disabled = false,
       isSending = false,
+      canSendWhenEmpty = false,
       showAttachmentPicker = true,
       showCameraButton = false,
       acceptedFileTypes = ['image/*', 'video/*', '.pdf', '.doc', '.docx'],
@@ -327,12 +498,24 @@ const MessageComposer = React.forwardRef<
       replyTo = null,
       onCancelReply,
       variant = 'default',
+      layout = 'inline',
       inputTrailing,
+      toolbarStart,
+      toolbarEnd,
+      renderSendButton,
+      maxHeight = '40vh',
+      labels: labelOverrides,
+      inputProps,
       mentionOptions,
       className,
+      classNames,
     },
     ref
   ) => {
+    const labels = React.useMemo(
+      () => ({ ...defaultLabels, ...labelOverrides }),
+      [labelOverrides]
+    );
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const [internalContent, setInternalContent] = React.useState('');
     const isControlled = controlledValue !== undefined;
@@ -357,14 +540,37 @@ const MessageComposer = React.forwardRef<
     // Combine refs
     React.useImperativeHandle(ref, () => textareaRef.current!);
 
-    // Auto-resize textarea
-    React.useEffect(() => {
+    // Auto-resize textarea. The cap is read back from the resolved `max-height`
+    // so a viewport-relative value (the default) yields real pixels.
+    const resizeTextarea = React.useCallback(() => {
       const textarea = textareaRef.current;
-      if (textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
-      }
-    }, [content]);
+      if (!textarea) return;
+      const resolved = parseFloat(
+        window.getComputedStyle(textarea).maxHeight ?? ''
+      );
+      textarea.style.height = 'auto';
+      textarea.style.height = `${
+        Number.isNaN(resolved)
+          ? textarea.scrollHeight
+          : Math.min(textarea.scrollHeight, resolved)
+      }px`;
+    }, []);
+
+    React.useEffect(() => {
+      resizeTextarea();
+    }, [content, maxHeight, resizeTextarea]);
+
+    // A viewport-relative cap goes stale on rotation, address-bar collapse, and
+    // on-screen keyboard show/hide, none of which re-render the composer.
+    React.useEffect(() => {
+      const viewport = window.visualViewport;
+      window.addEventListener('resize', resizeTextarea);
+      viewport?.addEventListener('resize', resizeTextarea);
+      return () => {
+        window.removeEventListener('resize', resizeTextarea);
+        viewport?.removeEventListener('resize', resizeTextarea);
+      };
+    }, [resizeTextarea]);
 
     // Handle typing indicators
     React.useEffect(() => {
@@ -409,10 +615,7 @@ const MessageComposer = React.forwardRef<
 
     // --- @mention autocomplete (opt-in via `mentionOptions`) ---
     const mentionsEnabled = !!mentionOptions && mentionOptions.length > 0;
-    const [mention, setMention] = React.useState<{
-      query: string;
-      start: number;
-    } | null>(null);
+    const [mention, setMention] = React.useState<MentionToken | null>(null);
     const [mentionHighlight, setMentionHighlight] = React.useState(0);
     const mentionListId = React.useId();
     const mentionOptionId = (i: number) => `${mentionListId}-option-${i}`;
@@ -460,25 +663,27 @@ const MessageComposer = React.forwardRef<
 
     const insertMention = (option: MentionOption) => {
       if (!mention) return;
-      const insertValue = option.value ?? option.label.split(' ')[0];
-      const before = content.slice(0, mention.start);
-      const after = content.slice(mention.start + 1 + mention.query.length);
-      const insert = `@${insertValue} `;
-      setContent(before + insert + after);
+      const next = replaceMentionToken(
+        content,
+        mention,
+        option.value ?? option.label.split(' ')[0]
+      );
+      setContent(next.value);
       setMention(null);
       // Restore caret just after the inserted mention.
-      const caret = before.length + insert.length;
       requestAnimationFrame(() => {
         const el = textareaRef.current;
         if (el) {
           el.focus();
-          el.setSelectionRange(caret, caret);
+          el.setSelectionRange(next.caret, next.caret);
         }
       });
     };
 
     const canSend =
-      (content.trim().length > 0 || attachments.length > 0) &&
+      (content.trim().length > 0 ||
+        attachments.length > 0 ||
+        canSendWhenEmpty) &&
       content.length <= maxLength &&
       !disabled &&
       !isSending;
@@ -505,11 +710,16 @@ const MessageComposer = React.forwardRef<
         // Restore content on failure
         setContent(message.content);
         // Note: attachments would need to be re-added manually
-        onError?.('Failed to send message');
+        onError?.(labels.sendFailed);
       }
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // The host gets first refusal so an overlay of its own can claim a key
+      // before Enter would send.
+      inputProps?.onKeyDown?.(event);
+      if (event.defaultPrevented) return;
+
       // @mention menu navigation takes priority over send.
       if (mentionMenuOpen) {
         if (event.key === 'ArrowDown') {
@@ -554,7 +764,7 @@ const MessageComposer = React.forwardRef<
       const filesToAdd = files.slice(0, remainingSlots);
 
       if (files.length > remainingSlots) {
-        onError?.(`Maximum ${maxAttachments} attachments allowed`);
+        onError?.(labels.tooManyAttachments(maxAttachments));
       }
 
       const newAttachments: PendingAttachment[] = filesToAdd.map((file) => {
@@ -579,6 +789,9 @@ const MessageComposer = React.forwardRef<
 
     // Paste-to-attach: route pasted files through the same path as the picker.
     const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      // The host gets first refusal so it can stage pasted files its own way.
+      inputProps?.onPaste?.(event);
+      if (event.defaultPrevented) return;
       if (!showAttachmentPicker || disabled) return;
       const pasted = Array.from(event.clipboardData.items)
         .filter((item) => item.kind === 'file')
@@ -614,6 +827,40 @@ const MessageComposer = React.forwardRef<
       };
     }, [attachments]);
 
+    const attachmentControls = (
+      <>
+        {showAttachmentPicker && (
+          <AttachmentPicker
+            onFilesSelected={handleFilesSelected}
+            acceptedTypes={acceptedFileTypes}
+            maxFileSize={maxFileSize}
+            maxFiles={maxAttachments - attachments.length}
+            disabled={disabled || attachments.length >= maxAttachments}
+            onError={onError}
+          />
+        )}
+
+        {showCameraButton && (
+          <CameraButton
+            onCapture={(file) => handleFilesSelected([file])}
+            disabled={disabled || attachments.length >= maxAttachments}
+          />
+        )}
+      </>
+    );
+
+    const sendButton = renderSendButton ? (
+      renderSendButton({ canSend, isSending, disabled })
+    ) : (
+      <SendButton
+        canSend={canSend}
+        isLoading={isSending}
+        disabled={disabled}
+        label={labels.send}
+        loadingLabel={labels.sending}
+      />
+    );
+
     return (
       <DragDropZone
         onFilesDropped={handleFilesSelected}
@@ -641,7 +888,7 @@ const MessageComposer = React.forwardRef<
             >
               <div className="min-w-0 flex-1">
                 <span className="text-primary-800 dark:text-primary-400 text-xs font-medium">
-                  Replying to {replyTo.senderName}
+                  {labels.replyingTo(replyTo.senderName)}
                 </span>
                 <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">
                   {replyTo.content}
@@ -656,7 +903,7 @@ const MessageComposer = React.forwardRef<
                   'dark:text-neutral-400 dark:hover:text-neutral-200',
                   'focus:ring-primary-500 focus:ring-2 focus:outline-none'
                 )}
-                aria-label="Cancel reply"
+                aria-label={labels.cancelReply}
               >
                 <svg
                   aria-hidden="true"
@@ -699,35 +946,25 @@ const MessageComposer = React.forwardRef<
           <div
             data-slot="composer-input-area"
             className={cn(
-              'flex items-center gap-2 p-3',
+              'flex gap-2 p-3',
+              layout === 'stacked' ? 'flex-col' : 'items-center',
               'bg-white dark:bg-neutral-900',
               variant === 'default' &&
-                'border-t border-neutral-200 dark:border-neutral-700'
+                'border-t border-neutral-200 dark:border-neutral-700',
+              classNames?.inputArea
             )}
           >
-            {/* Attachment buttons */}
-            {showAttachmentPicker && (
-              <AttachmentPicker
-                onFilesSelected={handleFilesSelected}
-                acceptedTypes={acceptedFileTypes}
-                maxFileSize={maxFileSize}
-                maxFiles={maxAttachments - attachments.length}
-                disabled={disabled || attachments.length >= maxAttachments}
-                onError={onError}
-              />
-            )}
-
-            {showCameraButton && (
-              <CameraButton
-                onCapture={(file) => handleFilesSelected([file])}
-                disabled={disabled || attachments.length >= maxAttachments}
-              />
-            )}
+            {/* Attachment buttons. The stacked layout moves them onto the
+                control row below the textarea instead. */}
+            {layout === 'inline' && attachmentControls}
 
             {/* Text input */}
             <div
               data-slot="composer-input-wrapper"
-              className="relative flex-1"
+              className={cn(
+                'relative',
+                layout === 'stacked' ? 'w-full min-w-0' : 'flex-1'
+              )}
               ref={mentionAnchorRef}
             >
               {mentionMenuOpen &&
@@ -737,7 +974,7 @@ const MessageComposer = React.forwardRef<
                     style={mentionStyle}
                     id={mentionListId}
                     role="listbox"
-                    aria-label="Mention"
+                    aria-label={labels.mentionList}
                     data-slot="composer-mention-list"
                     className="w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
                   >
@@ -782,17 +1019,22 @@ const MessageComposer = React.forwardRef<
                   document.body
                 )}
               <textarea
+                // Spread first: the composer's own attributes and composed
+                // handlers below must win over anything the host passes.
+                {...inputProps}
                 ref={textareaRef}
                 data-slot="composer-input"
                 value={content}
                 onChange={(e) => {
+                  inputProps?.onChange?.(e);
                   setContent(e.target.value);
                   syncMention(
                     e.target.value,
                     e.target.selectionStart ?? e.target.value.length
                   );
                 }}
-                onClick={(e) => {
+                onSelect={(e) => {
+                  inputProps?.onSelect?.(e);
                   const el = e.currentTarget;
                   syncMention(el.value, el.selectionStart ?? el.value.length);
                 }}
@@ -810,9 +1052,15 @@ const MessageComposer = React.forwardRef<
                   'focus:ring-primary-500 focus:ring-2 focus:outline-none',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                   'transition-colors',
-                  'max-h-[150px]'
+                  classNames?.input
                 )}
-                aria-label="Message"
+                style={{
+                  maxHeight:
+                    typeof maxHeight === 'number'
+                      ? `${maxHeight}px`
+                      : maxHeight,
+                }}
+                aria-label={labels.message}
                 aria-describedby={showCharacterCount ? 'char-count' : undefined}
                 {...(mentionsEnabled
                   ? {
@@ -842,17 +1090,37 @@ const MessageComposer = React.forwardRef<
                   id="char-count"
                   className="absolute end-3 bottom-1.5"
                 >
-                  <CharacterCounter current={content.length} max={maxLength} />
+                  <CharacterCounter
+                    current={content.length}
+                    max={maxLength}
+                    label={labels.characterCount(content.length, maxLength)}
+                  />
                 </div>
               )}
             </div>
 
-            {/* Send button */}
-            <SendButton
-              canSend={canSend}
-              isLoading={isSending}
-              disabled={disabled}
-            />
+            {/* Send button, on its own control row when stacked */}
+            {layout === 'stacked' ? (
+              <div
+                data-slot="composer-toolbar"
+                className={cn(
+                  'flex w-full min-w-0 items-center gap-2',
+                  classNames?.toolbar
+                )}
+              >
+                {attachmentControls}
+                {toolbarStart}
+                <div
+                  data-slot="composer-toolbar-end"
+                  className="ms-auto flex shrink-0 items-center gap-2"
+                >
+                  {toolbarEnd}
+                  {sendButton}
+                </div>
+              </div>
+            ) : (
+              sendButton
+            )}
           </div>
         </form>
       </DragDropZone>
