@@ -187,8 +187,12 @@ describe('ChatComposer', () => {
       ref.current?.addFiles([b]);
     });
 
-    expect(screen.getByText('a.png')).toBeInTheDocument();
-    expect(screen.queryByText('b.png')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /remove a\.png/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /remove b\.png/i })
+    ).not.toBeInTheDocument();
   });
 
   it('creates preview URLs for video attachments and renders a video element', () => {
@@ -215,10 +219,14 @@ describe('ChatComposer', () => {
 
     const image = new File(['data'], 'a.png', { type: 'image/png' });
     React.act(() => ref.current?.addFiles([image]));
-    expect(screen.getByText('a.png')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /remove a\.png/i })
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /remove a\.png/i }));
-    expect(screen.queryByText('a.png')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /remove a\.png/i })
+    ).not.toBeInTheDocument();
     expect(revokeSpy).toHaveBeenCalledTimes(1);
     revokeSpy.mockRestore();
   });

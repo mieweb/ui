@@ -525,34 +525,37 @@ export const ChatComposer = React.forwardRef<
         </div>
       )}
 
-      <textarea
-        ref={textareaRef}
-        data-slot="chat-composer-input"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        onKeyDown={handleKeyDown}
-        onPaste={handlePaste}
-        placeholder={placeholder}
-        disabled={disabled}
-        // Host-opt-in only; off by default.
-        // eslint-disable-next-line jsx-a11y/no-autofocus
-        autoFocus={autoFocus}
-        rows={1}
-        aria-label={inputLabel}
-        className={cn(
-          // Inset from the shell (mx/mt) with a matching inner radius so
-          // focus outlines / a11y highlights render as a clean nested
-          // rounded rect instead of stacking on the shell's border. The
-          // padding split (m-1 + p-2 = the original p-3) keeps the text
-          // in the same place.
-          'block w-[calc(100%-0.5rem)] resize-none bg-transparent',
-          'mx-1 mt-1 rounded-lg px-2 pt-2 pb-1 text-sm',
-          'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
-          // Ring the input itself on focus rather than the whole shell.
-          'focus:ring-primary-500 focus:ring-1 focus:outline-none',
-          'disabled:cursor-not-allowed'
-        )}
-      />
+      {/* Inset wrapper: the textarea sits 4px inside the shell with a
+          matching inner radius so focus outlines / a11y highlights render
+          as a clean nested rounded rect instead of stacking on the shell's
+          border. The padding split (wrapper p-1 + textarea p-2 = the
+          original p-3) keeps the text in the same place, using only
+          standard utilities (no arbitrary width). */}
+      <div className="px-1 pt-1">
+        <textarea
+          ref={textareaRef}
+          data-slot="chat-composer-input"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
+          placeholder={placeholder}
+          disabled={disabled}
+          // Host-opt-in only; off by default.
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus={autoFocus}
+          rows={1}
+          aria-label={inputLabel}
+          className={cn(
+            'block w-full resize-none bg-transparent',
+            'rounded-lg px-2 pt-2 pb-1 text-sm',
+            'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
+            // Ring the input itself on focus rather than the whole shell.
+            'focus:ring-primary-500 focus:ring-1 focus:outline-none',
+            'disabled:cursor-not-allowed'
+          )}
+        />
+      </div>
 
       <div
         data-slot="chat-composer-toolbar"
