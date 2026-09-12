@@ -18,6 +18,7 @@ import {
   BotIcon,
   CheckIcon,
   ChevronUpIcon,
+  LoaderIcon,
   MicIcon,
   PaperclipIcon,
   PlusIcon,
@@ -46,7 +47,10 @@ export interface ChatComposerMenuItem {
   icon?: React.ReactNode;
   /** Whether the item is disabled. */
   disabled?: boolean;
-  /** Renders a trailing check for toggleable items. */
+  /**
+   * Toggle state. When set (true or false) the item renders as a
+   * `menuitemcheckbox` with `aria-checked` and a leading checkbox.
+   */
   checked?: boolean;
   /** Danger styling for destructive actions. */
   variant?: 'default' | 'danger';
@@ -72,6 +76,13 @@ export interface ChatComposerHandle {
   addFiles: (files: File[]) => void;
   /** Focus the text input. */
   focus: () => void;
+}
+
+/** Structured context passed to `onError` so hosts can localize by reason. */
+export interface ChatComposerError {
+  reason: 'file-type' | 'file-size' | 'attachment-limit' | 'send-failed';
+  /** The rejected file, when the error concerns a single file. */
+  file?: File;
 }
 
 export interface ChatComposerProps {
@@ -138,8 +149,18 @@ export interface ChatComposerProps {
   /** Notice text shown when `readOnly` is set. */
   readOnlyMessage?: string;
 
-  /** Called with a human-readable message when a file is rejected. */
-  onError?: (error: string) => void;
+  /**
+   * Called when a file is rejected or a send fails. `message` is a default
+   * English string; `context.reason` lets hosts substitute localized copy.
+   */
+  onError?: (message: string, context?: ChatComposerError) => void;
+
+  /** Message reported when the attachment limit is hit. Overrides the English default. */
+  attachmentLimitLabel?: string;
+  /** Message reported when an async `onSend` rejects. @default 'Failed to send message' */
+  sendFailedLabel?: string;
+  /** Accessible label for the send button while `isSending`. @default 'Sending message…' */
+  sendingLabel?: string;
 
   /** Accessible label for the text input. @default 'Message input' */
   inputLabel?: string;
@@ -226,6 +247,9 @@ export const ChatComposer = React.forwardRef<
     readOnly = false,
     readOnlyMessage = 'You have read-only access and cannot send messages.',
     onError,
+    attachmentLimitLabel,
+    sendFailedLabel = 'Failed to send message',
+    sendingLabel = 'Sending message…',
     inputLabel = 'Message input',
     addMenuLabel = 'Add to message',
     attachFilesLabel = 'Attach files',
@@ -248,11 +272,20 @@ export const ChatComposer = React.forwardRef<
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const [addMenuOpen, setAddMenuOpen] = React.useState(false);
+  const [agentMenuOpen, setAgentMenuOpen] = React.useState(false);
+
   const hasText = value.trim().length > 0;
   const hasContent = hasText || attachments.length > 0;
   const isOverLimit = maxLength !== undefined && value.length > maxLength;
+  // Without an onSend handler, sending would silently discard the draft.
   const canSend =
-    hasContent && !disabled && !isSending && !isStreaming && !isOverLimit;
+    hasContent &&
+    onSend !== undefined &&
+    !disabled &&
+    !isSending &&
+    !isStreaming &&
+    !isOverLimit;
 
   // --------------------------------------------------------------------
   // Input handling
@@ -281,35 +314,57 @@ export const ChatComposer = React.forwardRef<
   const addFiles = React.useCallback(
     (files: File[]) => {
       if (!allowAttachments || files.length === 0) return;
-      setAttachments((current) => {
-        const room = maxAttachments - current.length;
-        if (room <= 0) {
-          onError?.(`Maximum ${maxAttachments} attachments allowed`);
-          return current;
-        }
-        if (files.length > room) {
-          onError?.(`Maximum ${maxAttachments} attachments allowed`);
-        }
-        const staged: StagedAttachment[] = [];
-        for (const file of files.slice(0, room)) {
-          const validation = validateFile(file, acceptedFileTypes, maxFileSize);
-          if (!validation.valid) {
-            onError?.(`${file.name}: ${validation.error}`);
-            continue;
-          }
-          const type = getFileType(file.type);
-          staged.push({
-            id: generateAttachmentId(),
+      // Staging happens outside the state updater so object-URL creation,
+      // id generation and onError stay out of a function React may re-invoke.
+      const limitMessage =
+        attachmentLimitLabel ??
+        `Attachment limit reached (max ${maxAttachments})`;
+      const room = maxAttachments - attachmentsRef.current.length;
+      if (files.length > room) {
+        onError?.(limitMessage, { reason: 'attachment-limit' });
+        if (room <= 0) return;
+      }
+      const staged: StagedAttachment[] = [];
+      for (const file of files.slice(0, Math.max(room, 0))) {
+        const typeCheck = validateFile(file, acceptedFileTypes, undefined);
+        if (!typeCheck.valid) {
+          onError?.(`${file.name}: ${typeCheck.error}`, {
+            reason: 'file-type',
             file,
-            type,
-            previewUrl:
-              type === 'image' ? URL.createObjectURL(file) : undefined,
           });
+          continue;
         }
-        return staged.length > 0 ? [...current, ...staged] : current;
-      });
+        const sizeCheck = validateFile(file, undefined, maxFileSize);
+        if (!sizeCheck.valid) {
+          onError?.(`${file.name}: ${sizeCheck.error}`, {
+            reason: 'file-size',
+            file,
+          });
+          continue;
+        }
+        const type = getFileType(file.type);
+        staged.push({
+          id: generateAttachmentId(),
+          file,
+          type,
+          previewUrl:
+            type === 'image' || type === 'video'
+              ? URL.createObjectURL(file)
+              : undefined,
+        });
+      }
+      if (staged.length > 0) {
+        setAttachments((current) => [...current, ...staged]);
+      }
     },
-    [allowAttachments, maxAttachments, acceptedFileTypes, maxFileSize, onError]
+    [
+      allowAttachments,
+      maxAttachments,
+      acceptedFileTypes,
+      maxFileSize,
+      onError,
+      attachmentLimitLabel,
+    ]
   );
 
   const removeAttachment = React.useCallback((id: string) => {
@@ -360,7 +415,7 @@ export const ChatComposer = React.forwardRef<
   // --------------------------------------------------------------------
 
   const handleSend = () => {
-    if (!canSend) return;
+    if (!canSend || !onSend) return;
     const message: NewMessage = {
       content: value.trim(),
       attachments: attachments.map((attachment) => attachment.file),
@@ -370,7 +425,11 @@ export const ChatComposer = React.forwardRef<
     }
     setAttachments([]);
     setValue('');
-    void onSend?.(message);
+    // The draft is cleared optimistically; hosts own retry/restore. A
+    // rejected send is surfaced through onError instead of being swallowed.
+    Promise.resolve(onSend(message)).catch(() => {
+      onError?.(sendFailedLabel, { reason: 'send-failed' });
+    });
     textareaRef.current?.focus();
   };
 
@@ -433,6 +492,7 @@ export const ChatComposer = React.forwardRef<
               key={attachment.id}
               attachment={{ ...attachment, state: 'pending' }}
               onRemove={() => removeAttachment(attachment.id)}
+              className={disabled ? 'pointer-events-none' : undefined}
             />
           ))}
         </div>
@@ -466,6 +526,8 @@ export const ChatComposer = React.forwardRef<
         {showAddMenu && (
           <Dropdown
             placement="top-start"
+            open={addMenuOpen}
+            onOpenChange={setAddMenuOpen}
             trigger={
               <button
                 type="button"
@@ -481,7 +543,10 @@ export const ChatComposer = React.forwardRef<
             {allowAttachments && (
               <DropdownItem
                 icon={<PaperclipIcon className="h-4 w-4" aria-hidden="true" />}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                  setAddMenuOpen(false);
+                  fileInputRef.current?.click();
+                }}
               >
                 {attachFilesLabel}
               </DropdownItem>
@@ -495,17 +560,13 @@ export const ChatComposer = React.forwardRef<
                 icon={item.icon}
                 disabled={item.disabled}
                 variant={item.variant}
-                onClick={item.onSelect}
+                checked={item.checked}
+                onClick={() => {
+                  setAddMenuOpen(false);
+                  item.onSelect?.();
+                }}
               >
-                <span className="flex w-full items-center justify-between gap-2">
-                  <span className="min-w-0 truncate">{item.label}</span>
-                  {item.checked && (
-                    <CheckIcon
-                      className="text-primary-600 dark:text-primary-400 h-4 w-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                  )}
-                </span>
+                <span className="min-w-0 truncate">{item.label}</span>
               </DropdownItem>
             ))}
           </Dropdown>
@@ -559,6 +620,7 @@ export const ChatComposer = React.forwardRef<
               type="button"
               data-slot="chat-composer-stop-button"
               aria-label={stopLabel}
+              disabled={disabled}
               onClick={onStop}
               className={cn(
                 iconButtonClasses,
@@ -574,7 +636,8 @@ export const ChatComposer = React.forwardRef<
             <button
               type="button"
               data-slot="chat-composer-send-button"
-              aria-label={sendLabel}
+              aria-label={isSending ? sendingLabel : sendLabel}
+              aria-busy={isSending || undefined}
               disabled={!canSend}
               onClick={handleSend}
               className={cn(
@@ -583,7 +646,14 @@ export const ChatComposer = React.forwardRef<
                   'bg-primary-800 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white hover:text-white dark:hover:text-white'
               )}
             >
-              <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
+              {isSending ? (
+                <LoaderIcon
+                  className="h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
+              )}
             </button>
           )}
         </div>
@@ -597,6 +667,8 @@ export const ChatComposer = React.forwardRef<
           {showAgentSelector ? (
             <Dropdown
               placement="top-start"
+              open={agentMenuOpen}
+              onOpenChange={setAgentMenuOpen}
               trigger={
                 <button
                   type="button"
@@ -622,7 +694,12 @@ export const ChatComposer = React.forwardRef<
                 <DropdownItem
                   key={agent.id}
                   icon={agent.icon}
-                  onClick={() => onAgentChange?.(agent.id)}
+                  role="menuitemradio"
+                  aria-checked={agent.id === selectedAgent}
+                  onClick={() => {
+                    setAgentMenuOpen(false);
+                    onAgentChange?.(agent.id);
+                  }}
                 >
                   <span className="flex w-full items-center justify-between gap-2">
                     <span className="min-w-0">
@@ -648,7 +725,11 @@ export const ChatComposer = React.forwardRef<
           )}
 
           {showModelSelector && modelSelectorProps && (
-            <ComposerModelSelector variant="ghost" {...modelSelectorProps} />
+            <ComposerModelSelector
+              variant="ghost"
+              {...modelSelectorProps}
+              disabled={disabled || modelSelectorProps.disabled}
+            />
           )}
         </div>
       )}

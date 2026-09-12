@@ -96,6 +96,27 @@ describe('ChatComposer', () => {
 
     fireEvent.click(screen.getByText('Take photo'));
     expect(onSelect).toHaveBeenCalled();
+    // Selecting an item closes the menu.
+    expect(screen.queryByText('Take photo')).not.toBeInTheDocument();
+  });
+
+  it('renders checked menu items as menuitemcheckbox', () => {
+    renderWithTheme(
+      <ChatComposer
+        addMenuItems={[
+          { id: 'web', label: 'Search web', checked: true },
+          { id: 'think', label: 'Think longer', checked: false },
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /add to message/i }));
+    expect(
+      screen.getByRole('menuitemcheckbox', { name: /search web/i })
+    ).toHaveAttribute('aria-checked', 'true');
+    expect(
+      screen.getByRole('menuitemcheckbox', { name: /think longer/i })
+    ).toHaveAttribute('aria-checked', 'false');
   });
 
   it('hides the + menu entirely when attachments and menu items are absent', () => {
@@ -141,15 +162,30 @@ describe('ChatComposer', () => {
 
     const doc = new File(['data'], 'notes.txt', { type: 'text/plain' });
     React.act(() => ref.current?.addFiles([doc]));
-    expect(onError).toHaveBeenCalledWith(expect.stringContaining('notes.txt'));
+    expect(onError).toHaveBeenCalledWith(expect.stringContaining('notes.txt'), {
+      reason: 'file-type',
+      file: doc,
+    });
 
     const image = new File(['data'], 'a.png', { type: 'image/png' });
     const image2 = new File(['data'], 'b.png', { type: 'image/png' });
     React.act(() => ref.current?.addFiles([image]));
     React.act(() => ref.current?.addFiles([image2]));
-    expect(onError).toHaveBeenCalledWith(
-      expect.stringContaining('Maximum 1 attachments')
-    );
+    expect(onError).toHaveBeenCalledWith('Attachment limit reached (max 1)', {
+      reason: 'attachment-limit',
+    });
+  });
+
+  it('creates preview URLs for video attachments', () => {
+    const spy = vi.spyOn(URL, 'createObjectURL');
+    const ref = React.createRef<ChatComposerHandle>();
+    renderWithTheme(<ChatComposer ref={ref} />);
+
+    const video = new File(['data'], 'clip.mp4', { type: 'video/mp4' });
+    React.act(() => ref.current?.addFiles([video]));
+
+    expect(spy).toHaveBeenCalledWith(video);
+    spy.mockRestore();
   });
 
   it('stages pasted files', () => {
@@ -209,6 +245,48 @@ describe('ChatComposer', () => {
     expect(onStop).toHaveBeenCalled();
   });
 
+  it('disables the stop button when the composer is disabled', () => {
+    renderWithTheme(<ChatComposer isStreaming onStop={vi.fn()} disabled />);
+
+    expect(
+      screen.getByRole('button', { name: /stop generating/i })
+    ).toBeDisabled();
+  });
+
+  it('shows a busy send button while isSending', () => {
+    renderWithTheme(<ChatComposer onSend={vi.fn()} isSending />);
+
+    const sendButton = screen.getByRole('button', {
+      name: /sending message/i,
+    });
+    expect(sendButton).toBeDisabled();
+    expect(sendButton).toHaveAttribute('aria-busy', 'true');
+  });
+
+  it('keeps send disabled when no onSend handler is provided', () => {
+    renderWithTheme(<ChatComposer />);
+
+    fireEvent.change(getInput(), { target: { value: 'Hi' } });
+    expect(
+      screen.getByRole('button', { name: /send message/i })
+    ).toBeDisabled();
+  });
+
+  it('reports a rejected async onSend through onError', async () => {
+    const onError = vi.fn();
+    const onSend = vi.fn().mockRejectedValue(new Error('boom'));
+    renderWithTheme(<ChatComposer onSend={onSend} onError={onError} />);
+
+    fireEvent.change(getInput(), { target: { value: 'Hi' } });
+    fireEvent.keyDown(getInput(), { key: 'Enter' });
+
+    await vi.waitFor(() =>
+      expect(onError).toHaveBeenCalledWith('Failed to send message', {
+        reason: 'send-failed',
+      })
+    );
+  });
+
   it('selects an agent from the agent menu', () => {
     const onAgentChange = vi.fn();
     renderWithTheme(
@@ -224,8 +302,15 @@ describe('ChatComposer', () => {
     expect(trigger).toHaveTextContent('General assistant');
 
     fireEvent.click(trigger);
+    const selected = screen.getByRole('menuitemradio', {
+      name: /general assistant/i,
+    });
+    expect(selected).toHaveAttribute('aria-checked', 'true');
+
     fireEvent.click(screen.getByText('Code helper'));
     expect(onAgentChange).toHaveBeenCalledWith('coder');
+    // Selecting an agent closes the menu.
+    expect(screen.queryByText('Writes code')).not.toBeInTheDocument();
   });
 
   it('renders the model selector when enabled', () => {
