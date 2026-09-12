@@ -191,8 +191,10 @@ describe('ChatComposer', () => {
     expect(screen.queryByText('b.png')).not.toBeInTheDocument();
   });
 
-  it('creates preview URLs for video attachments', () => {
-    const spy = vi.spyOn(URL, 'createObjectURL');
+  it('creates preview URLs for video attachments and renders a video element', () => {
+    const spy = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:clip-preview');
     const ref = React.createRef<ChatComposerHandle>();
     renderWithTheme(<ChatComposer ref={ref} />);
 
@@ -200,6 +202,9 @@ describe('ChatComposer', () => {
     React.act(() => ref.current?.addFiles([video]));
 
     expect(spy).toHaveBeenCalledWith(video);
+    const videoEl = screen.getByLabelText('clip.mp4');
+    expect(videoEl.tagName).toBe('VIDEO');
+    expect(videoEl).toHaveAttribute('src', 'blob:clip-preview');
     spy.mockRestore();
   });
 

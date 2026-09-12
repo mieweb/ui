@@ -125,14 +125,28 @@ function AttachmentPreviewItem({
       {/* Image/Video preview */}
       {(isImage || isVideo) && previewUrl ? (
         <div className="relative h-20 w-20">
-          <img
-            src={previewUrl}
-            alt={file.name}
-            className={cn(
-              'h-full w-full object-cover',
-              (isUploading || isFailed) && 'opacity-50'
-            )}
-          />
+          {isVideo ? (
+            <video
+              src={previewUrl}
+              aria-label={file.name}
+              muted
+              playsInline
+              preload="metadata"
+              className={cn(
+                'h-full w-full object-cover',
+                (isUploading || isFailed) && 'opacity-50'
+              )}
+            />
+          ) : (
+            <img
+              src={previewUrl}
+              alt={file.name}
+              className={cn(
+                'h-full w-full object-cover',
+                (isUploading || isFailed) && 'opacity-50'
+              )}
+            />
+          )}
           {isVideo && (
             <div className="absolute inset-0 flex items-center justify-center">
               <svg
