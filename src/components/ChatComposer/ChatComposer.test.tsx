@@ -176,6 +176,21 @@ describe('ChatComposer', () => {
     });
   });
 
+  it('enforces maxAttachments across addFiles calls in the same batch', () => {
+    const ref = React.createRef<ChatComposerHandle>();
+    renderWithTheme(<ChatComposer ref={ref} maxAttachments={1} />);
+
+    const a = new File(['data'], 'a.png', { type: 'image/png' });
+    const b = new File(['data'], 'b.png', { type: 'image/png' });
+    React.act(() => {
+      ref.current?.addFiles([a]);
+      ref.current?.addFiles([b]);
+    });
+
+    expect(screen.getByText('a.png')).toBeInTheDocument();
+    expect(screen.queryByText('b.png')).not.toBeInTheDocument();
+  });
+
   it('creates preview URLs for video attachments', () => {
     const spy = vi.spyOn(URL, 'createObjectURL');
     const ref = React.createRef<ChatComposerHandle>();
@@ -287,6 +302,21 @@ describe('ChatComposer', () => {
     );
   });
 
+  it('reports a synchronously throwing onSend through onError', () => {
+    const onError = vi.fn();
+    const onSend = vi.fn(() => {
+      throw new Error('boom');
+    });
+    renderWithTheme(<ChatComposer onSend={onSend} onError={onError} />);
+
+    fireEvent.change(getInput(), { target: { value: 'Hi' } });
+    fireEvent.keyDown(getInput(), { key: 'Enter' });
+
+    expect(onError).toHaveBeenCalledWith('Failed to send message', {
+      reason: 'send-failed',
+    });
+  });
+
   it('selects an agent from the agent menu', () => {
     const onAgentChange = vi.fn();
     renderWithTheme(
@@ -352,5 +382,31 @@ describe('ChatComposer', () => {
     expect(
       screen.getByRole('button', { name: /start voice input/i })
     ).toBeDisabled();
+  });
+
+  it('disables attachment removal when disabled', () => {
+    const ref = React.createRef<ChatComposerHandle>();
+    const { rerender } = renderWithTheme(<ChatComposer ref={ref} />);
+
+    const file = new File(['data'], 'notes.txt', { type: 'text/plain' });
+    React.act(() => ref.current?.addFiles([file]));
+    expect(
+      screen.getByRole('button', { name: /remove notes\.txt/i })
+    ).toBeEnabled();
+
+    rerender(<ChatComposer ref={ref} disabled />);
+    expect(
+      screen.getByRole('button', { name: /remove notes\.txt/i })
+    ).toBeDisabled();
+  });
+
+  it('includes the selected agent in the trigger accessible name', () => {
+    renderWithTheme(
+      <ChatComposer showAgentSelector agents={agents} selectedAgent="coder" />
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Select agent: Code helper' })
+    ).toBeInTheDocument();
   });
 });

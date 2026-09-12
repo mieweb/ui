@@ -152,7 +152,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
 
 - **No @mention autocomplete yet** — planned for a follow-up; use \`MessageComposer\` if mentions are required now.
 - **No reply-to preview row yet** — same plan as mentions.
-- The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`.
+- The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. Slot content is rendered as-is — disable your own control when the composer is \`disabled\`.
 - Attachment upload state is the host's job: files are staged locally and handed over on send as \`File[]\`; there is no built-in upload progress.
 - i18n: all strings are props with English defaults (\`placeholder\`, \`inputLabel\`, \`addMenuLabel\`, \`attachFilesLabel\`, \`micLabel\`, \`sendLabel\`, \`sendingLabel\`, \`stopLabel\`, \`agentSelectorLabel\`, \`readOnlyMessage\`, \`attachmentLimitLabel\`, \`sendFailedLabel\`); file-validation messages from \`onError\` carry a machine-readable \`context.reason\` so hosts can substitute localized copy. RTL: uses logical properties (\`ms-auto\`, \`pe-*\`) throughout.
 - Accessibility: every icon button has an \`aria-label\`; the \`+\` and agent menus are \`Dropdown\`s with full keyboard support that close on selection; \`addMenuItems\` with \`checked\` render as \`menuitemcheckbox\`, agent options as \`menuitemradio\`; the send button exposes \`aria-busy\` while \`isSending\`; the character counter is \`aria-live="polite"\`. The textarea is labelled via \`inputLabel\`.

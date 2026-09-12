@@ -91,6 +91,8 @@ export interface AttachmentPreviewItemProps {
   onRemove: () => void;
   /** Called when retry is clicked */
   onRetry?: () => void;
+  /** Disables the remove/retry actions. */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -101,6 +103,7 @@ function AttachmentPreviewItem({
   attachment,
   onRemove,
   onRetry,
+  disabled = false,
   className,
 }: AttachmentPreviewItemProps) {
   const { file, previewUrl, type, state, progress } = attachment;
@@ -217,7 +220,8 @@ function AttachmentPreviewItem({
               <button
                 type="button"
                 onClick={onRetry}
-                className="mt-1 text-xs text-white underline hover:no-underline"
+                disabled={disabled}
+                className="mt-1 text-xs text-white underline hover:no-underline disabled:no-underline disabled:opacity-50"
               >
                 Retry
               </button>
@@ -230,13 +234,15 @@ function AttachmentPreviewItem({
       <button
         type="button"
         onClick={onRemove}
+        disabled={disabled}
         className={cn(
           'absolute -end-1 -top-1 z-10',
           'rounded-full p-1',
           'bg-neutral-900 text-white',
           'opacity-0 group-hover:opacity-100',
           'focus:ring-primary-500 focus:opacity-100 focus:ring-2 focus:outline-none',
-          'transition-opacity'
+          'transition-opacity',
+          'disabled:cursor-not-allowed disabled:group-hover:opacity-0'
         )}
         aria-label={`Remove ${file.name}`}
       >

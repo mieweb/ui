@@ -94,7 +94,11 @@ export interface ChatComposerProps {
   onValueChange?: (value: string) => void;
   /** Placeholder text for the input. */
   placeholder?: string;
-  /** Disables all interaction. */
+  /**
+   * Disables all built-in interaction. Custom content (`micSlot`,
+   * `addMenuItems` icons) is rendered as-is — hosts must disable their own
+   * controls when they disable the composer.
+   */
   disabled?: boolean;
   /** Shows the send button in a busy state and prevents duplicate sends. */
   isSending?: boolean;
@@ -120,7 +124,11 @@ export interface ChatComposerProps {
   showMic?: boolean;
   /** Called when the built-in mic button is clicked. */
   onMicClick?: () => void;
-  /** Custom node rendered in place of the built-in mic button (e.g. `RecordButton`). */
+  /**
+   * Custom node rendered in place of the built-in mic button (e.g.
+   * `RecordButton`). Rendered as-is: pass your own disabled state when the
+   * composer is `disabled`.
+   */
   micSlot?: React.ReactNode;
   /** When to show the mic: always, or only while the composer is empty. @default 'always' */
   micBehavior?: 'always' | 'whenEmpty';
@@ -354,6 +362,10 @@ export const ChatComposer = React.forwardRef<
         });
       }
       if (staged.length > 0) {
+        // Reserve slots synchronously: a second addFiles call in the same
+        // React batch reads attachmentsRef before re-render, so without this
+        // both calls could see the same free room and overshoot the cap.
+        attachmentsRef.current = [...attachmentsRef.current, ...staged];
         setAttachments((current) => [...current, ...staged]);
       }
     },
@@ -425,11 +437,16 @@ export const ChatComposer = React.forwardRef<
     }
     setAttachments([]);
     setValue('');
-    // The draft is cleared optimistically; hosts own retry/restore. A
-    // rejected send is surfaced through onError instead of being swallowed.
-    Promise.resolve(onSend(message)).catch(() => {
+    // The draft is cleared optimistically; hosts own retry/restore. Both a
+    // synchronous throw and a rejected promise surface through onError
+    // instead of being swallowed.
+    try {
+      Promise.resolve(onSend(message)).catch(() => {
+        onError?.(sendFailedLabel, { reason: 'send-failed' });
+      });
+    } catch {
       onError?.(sendFailedLabel, { reason: 'send-failed' });
-    });
+    }
     textareaRef.current?.focus();
   };
 
@@ -492,7 +509,7 @@ export const ChatComposer = React.forwardRef<
               key={attachment.id}
               attachment={{ ...attachment, state: 'pending' }}
               onRemove={() => removeAttachment(attachment.id)}
-              className={disabled ? 'pointer-events-none' : undefined}
+              disabled={disabled}
             />
           ))}
         </div>
@@ -673,7 +690,11 @@ export const ChatComposer = React.forwardRef<
                 <button
                   type="button"
                   data-slot="chat-composer-agent-trigger"
-                  aria-label={agentSelectorLabel}
+                  aria-label={
+                    selectedAgentOption
+                      ? `${agentSelectorLabel}: ${selectedAgentOption.label}`
+                      : agentSelectorLabel
+                  }
                   disabled={disabled}
                   className={selectorTriggerClasses}
                 >

@@ -19,8 +19,10 @@ If you add a new path that drops attachments, revoke their `previewUrl`s.
 
 All side effects (URL creation, id generation, `onError`) happen **outside**
 the `setAttachments` updater — React may invoke updaters more than once in
-StrictMode. Room is computed from `attachmentsRef.current`; the updater itself
-is a pure array merge. Keep it that way.
+StrictMode. Room is computed from `attachmentsRef.current`, which is also
+**reserved synchronously** when staging so two `addFiles` calls in the same
+React batch can't overshoot `maxAttachments`. The updater itself is a pure
+array merge. Keep it that way.
 
 ## Menus are controlled
 
@@ -38,7 +40,9 @@ change reason strings without a major-version note.
 
 ## Extension points (instead of new props)
 
-- `micSlot` — replaces the built-in mic button (e.g. `RecordButton`).
+- `micSlot` — replaces the built-in mic button (e.g. `RecordButton`). Rendered
+  as-is: `disabled` does **not** propagate into custom slot content — that's
+  the documented contract, not an oversight.
 - `addMenuItems` — host actions in the `+` menu; `checked` items render as
   `menuitemcheckbox` via `DropdownItem`'s native `checked` prop.
 - `modelSelectorProps` — passed through to `ComposerModelSelector`
