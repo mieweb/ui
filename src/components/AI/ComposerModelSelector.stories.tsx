@@ -73,6 +73,7 @@ type ComposerModelSelectorStoryArgs = {
   emptyLabel?: string;
   ariaLabel?: string;
   disabled?: boolean;
+  variant?: 'default' | 'ghost';
   className?: string;
 };
 
@@ -89,6 +90,7 @@ function SelectorDemo({
   anyLabel,
   emptyLabel,
   ariaLabel,
+  variant,
   className,
 }: SelectorDemoProps) {
   const [value, setValue] = React.useState<ProviderModelValue | null>(
@@ -128,6 +130,7 @@ function SelectorDemo({
       anyLabel={anyLabel}
       emptyLabel={emptyLabel}
       ariaLabel={ariaLabel}
+      variant={variant}
       className={className}
     />
   );
@@ -173,6 +176,7 @@ function ComposerModelSelectorStoryDemo({
   anyLabel,
   emptyLabel,
   ariaLabel,
+  variant,
   className,
 }: ComposerModelSelectorStoryArgs) {
   return (
@@ -183,6 +187,7 @@ function ComposerModelSelectorStoryDemo({
       anyLabel={anyLabel}
       emptyLabel={emptyLabel}
       ariaLabel={ariaLabel}
+      variant={variant}
       className={className}
     />
   );
@@ -199,7 +204,7 @@ const meta = {
       description: {
         component: `### What it's for
 
-**A compact, provider-aware model picker sized for a chat composer's action row.** \`ComposerModelSelector\` renders a pill trigger showing the selected model (\`label ?? model ?? placeholder\`) and, on click or Arrow Up/Down, a portaled menu anchored **above** the trigger (\`useAnchoredPosition\`, \`top-start\`, no flip, clipped to \`boundaryRef\`). The menu has a provider filter strip (\`anyLabel\` + one \`aria-pressed\` chip per distinct \`provider\`, using \`providerLabel\` when present), a \`role="listbox"\` grouped by provider (\`role="group"\` per provider) and an optional **Effort** drill-down: pass \`effortOptions: { value, label, description? }[]\` with \`effort\`, \`defaultEffort\`, \`onEffortChange\` to expose reasoning levels for the selected model; the effort list replaces the model list in the same surface (\`backLabel\`, \`effortLabel\`, \`effortHint\`, \`defaultBadgeLabel\`). Props: \`models: ProviderModelOption[]\` (\`{ provider, model, label?, providerLabel?, id? }\`), \`value: ProviderModelValue | null\`, \`onChange({ provider, model })\`, \`providerFilter\` / \`onProviderFilterChange\` (controlled, or uncontrolled when \`providerFilter\` is omitted), \`disabled\`, \`placeholder\`, \`emptyLabel\`, \`ariaLabel\`, \`className\`. The host owns the model list, labels and selection. Types exported: \`ComposerModelSelectorProps\`, \`ProviderModelOption\`, \`ProviderModelValue\`, \`ComposerEffortOption\`.
+**A compact, provider-aware model picker sized for a chat composer's action row.** \`ComposerModelSelector\` renders a pill trigger showing the selected model (\`label ?? model ?? placeholder\`) and, on click or Arrow Up/Down, a portaled menu anchored **above** the trigger (\`useAnchoredPosition\`, \`top-start\`, no flip, clipped to \`boundaryRef\`). The menu has a provider filter strip (\`anyLabel\` + one \`aria-pressed\` chip per distinct \`provider\`, using \`providerLabel\` when present), a \`role="listbox"\` grouped by provider (\`role="group"\` per provider) and an optional **Effort** drill-down: pass \`effortOptions: { value, label, description? }[]\` with \`effort\`, \`defaultEffort\`, \`onEffortChange\` to expose reasoning levels for the selected model; the effort list replaces the model list in the same surface (\`backLabel\`, \`effortLabel\`, \`effortHint\`, \`defaultBadgeLabel\`). Props: \`models: ProviderModelOption[]\` (\`{ provider, model, label?, providerLabel?, id? }\`), \`value: ProviderModelValue | null\`, \`onChange({ provider, model })\`, \`providerFilter\` / \`onProviderFilterChange\` (controlled, or uncontrolled when \`providerFilter\` is omitted), \`disabled\`, \`variant\` (\`'default'\` bordered pill or \`'ghost'\` quiet text trigger — what \`ChatComposer\`'s selector row uses), \`placeholder\`, \`emptyLabel\`, \`ariaLabel\`, \`className\`. The host owns the model list, labels and selection. Types exported: \`ComposerModelSelectorProps\`, \`ProviderModelOption\`, \`ProviderModelValue\`, \`ComposerEffortOption\`.
 
 ### Use it when
 
@@ -312,6 +317,15 @@ const composerRef = useRef<HTMLDivElement>(null);
       control: 'boolean',
       description: 'Disable the selector trigger.',
     },
+    variant: {
+      control: 'select',
+      options: ['default', 'ghost'],
+      description:
+        "Trigger appearance: bordered pill or a quiet ghost text trigger (used by ChatComposer's selector row).",
+      table: {
+        defaultValue: { summary: 'default' },
+      },
+    },
     className: {
       control: 'text',
       description: 'Additional classes applied to the selector trigger.',
@@ -340,6 +354,18 @@ export const MultipleProviders: Story = {
     anyLabel: 'Any',
     emptyLabel: 'No models',
     ariaLabel: 'Model',
+    disabled: false,
+  },
+};
+
+export const Ghost: Story = {
+  args: {
+    modelsKey: 'multipleProviders',
+    placeholder: 'Model',
+    anyLabel: 'Any',
+    emptyLabel: 'No models',
+    ariaLabel: 'Model',
+    variant: 'ghost',
     disabled: false,
   },
 };

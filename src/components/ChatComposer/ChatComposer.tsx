@@ -17,7 +17,7 @@ import {
   ArrowUpIcon,
   BotIcon,
   CheckIcon,
-  ChevronDownIcon,
+  ChevronUpIcon,
   MicIcon,
   PaperclipIcon,
   PlusIcon,
@@ -611,7 +611,7 @@ export const ChatComposer = React.forwardRef<
                   <span className="min-w-0 truncate">
                     {selectedAgentOption?.label ?? agentSelectorLabel}
                   </span>
-                  <ChevronDownIcon
+                  <ChevronUpIcon
                     className="h-3 w-3 shrink-0"
                     aria-hidden="true"
                   />
@@ -648,7 +648,7 @@ export const ChatComposer = React.forwardRef<
           )}
 
           {showModelSelector && modelSelectorProps && (
-            <ComposerModelSelector {...modelSelectorProps} />
+            <ComposerModelSelector variant="ghost" {...modelSelectorProps} />
           )}
         </div>
       )}
