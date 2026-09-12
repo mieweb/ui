@@ -504,7 +504,6 @@ export const ChatComposer = React.forwardRef<
       data-slot="chat-composer"
       className={cn(
         'rounded-xl border border-neutral-200 bg-white shadow-sm',
-        'focus-within:border-primary-500 focus-within:ring-primary-500 focus-within:ring-1',
         'dark:border-neutral-700 dark:bg-neutral-800',
         disabled && 'opacity-60',
         className
@@ -541,12 +540,17 @@ export const ChatComposer = React.forwardRef<
         rows={1}
         aria-label={inputLabel}
         className={cn(
-          'block w-full resize-none bg-transparent px-3 pt-3 pb-1 text-sm',
-          // Match the container's top corners so focus outlines / a11y
-          // highlights follow the rounded shape instead of overshooting it.
-          'rounded-t-xl',
+          // Inset from the shell (mx/mt) with a matching inner radius so
+          // focus outlines / a11y highlights render as a clean nested
+          // rounded rect instead of stacking on the shell's border. The
+          // padding split (m-1 + p-2 = the original p-3) keeps the text
+          // in the same place.
+          'block w-[calc(100%-0.5rem)] resize-none bg-transparent',
+          'mx-1 mt-1 rounded-lg px-2 pt-2 pb-1 text-sm',
           'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
-          'focus:outline-none disabled:cursor-not-allowed'
+          // Ring the input itself on focus rather than the whole shell.
+          'focus:ring-primary-500 focus:ring-1 focus:outline-none',
+          'disabled:cursor-not-allowed'
         )}
       />
 
