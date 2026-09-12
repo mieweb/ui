@@ -542,6 +542,9 @@ export const ChatComposer = React.forwardRef<
         aria-label={inputLabel}
         className={cn(
           'block w-full resize-none bg-transparent px-3 pt-3 pb-1 text-sm',
+          // Match the container's top corners so focus outlines / a11y
+          // highlights follow the rounded shape instead of overshooting it.
+          'rounded-t-xl',
           'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
           'focus:outline-none disabled:cursor-not-allowed'
         )}
