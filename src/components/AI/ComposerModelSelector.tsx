@@ -30,6 +30,11 @@ type ComposerModelSelectorBaseProps = {
   value: ProviderModelValue | null;
   onChange: (value: ProviderModelValue) => void;
   disabled?: boolean;
+  /**
+   * Trigger appearance: 'default' is the bordered pill; 'ghost' is a quiet
+   * text trigger that matches ChatComposer's selector-row controls.
+   */
+  variant?: 'default' | 'ghost';
   className?: string;
   boundaryRef?: React.RefObject<HTMLElement | null>;
   placeholder?: string;
@@ -113,6 +118,7 @@ export function ComposerModelSelector({
   onProviderFilterChange,
   onChange,
   disabled = false,
+  variant = 'default',
   className,
   boundaryRef,
   placeholder = 'Model',
@@ -407,11 +413,22 @@ export function ComposerModelSelector({
         onKeyDown={handleTriggerKeyDown}
         data-slot="composer-model-selector-trigger"
         className={cn(
-          'inline-flex h-8 max-w-full items-center gap-1.5 rounded-full border px-2.5 text-sm font-medium',
-          'border-border bg-background text-foreground shadow-sm',
-          'hover:bg-muted/50',
-          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-          'disabled:cursor-not-allowed disabled:opacity-50',
+          variant === 'ghost'
+            ? [
+                'inline-flex max-w-full min-w-0 items-center gap-1 rounded-md px-2 py-1 text-xs',
+                'text-neutral-600 dark:text-neutral-400',
+                'transition-colors duration-150',
+                'hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-700 dark:hover:text-white',
+                'focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:outline-none',
+                'disabled:pointer-events-none disabled:opacity-40',
+              ]
+            : [
+                'inline-flex h-8 max-w-full items-center gap-1.5 rounded-full border px-2.5 text-sm font-medium',
+                'border-border bg-background text-foreground shadow-sm',
+                'hover:bg-muted/50',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+                'disabled:cursor-not-allowed disabled:opacity-50',
+              ],
           className
         )}
       >
@@ -426,7 +443,13 @@ export function ComposerModelSelector({
             {selectedEffortOption.label}
           </span>
         )}
-        <ChevronUp aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+        <ChevronUp
+          aria-hidden="true"
+          className={cn(
+            'shrink-0',
+            variant === 'ghost' ? 'h-3 w-3' : 'h-3.5 w-3.5'
+          )}
+        />
       </button>
 
       {open &&
