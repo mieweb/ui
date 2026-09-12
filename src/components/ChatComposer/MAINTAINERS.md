@@ -17,12 +17,12 @@ If you add a new path that drops attachments, revoke their `previewUrl`s.
 
 ## `addFiles` stays pure-ish
 
-All side effects (URL creation, id generation, `onError`) happen **outside**
-the `setAttachments` updater — React may invoke updaters more than once in
-StrictMode. Room is computed from `attachmentsRef.current`, which is also
-**reserved synchronously** when staging so two `addFiles` calls in the same
-React batch can't overshoot `maxAttachments`. The updater itself is a pure
-array merge. Keep it that way.
+All side effects (URL creation/revocation, id generation, `onError`) happen
+**outside** the state updaters — React may invoke updaters more than once in
+StrictMode. `attachmentsRef.current` is updated **synchronously** on every
+add/remove/send so same-batch calls see accurate room and the unmount cleanup
+never re-revokes. The updaters themselves are pure merges/filters. Keep it
+that way.
 
 ## Menus are controlled
 

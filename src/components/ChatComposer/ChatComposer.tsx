@@ -380,11 +380,18 @@ export const ChatComposer = React.forwardRef<
   );
 
   const removeAttachment = React.useCallback((id: string) => {
-    setAttachments((current) => {
-      const target = current.find((attachment) => attachment.id === id);
-      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
-      return current.filter((attachment) => attachment.id !== id);
-    });
+    // Same discipline as addFiles: revoke and update the ref synchronously,
+    // keep the state updater pure (StrictMode may re-invoke it).
+    const target = attachmentsRef.current.find(
+      (attachment) => attachment.id === id
+    );
+    if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+    attachmentsRef.current = attachmentsRef.current.filter(
+      (attachment) => attachment.id !== id
+    );
+    setAttachments((current) =>
+      current.filter((attachment) => attachment.id !== id)
+    );
   }, []);
 
   // Revoke any outstanding preview URLs on unmount.

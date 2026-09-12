@@ -203,6 +203,21 @@ describe('ChatComposer', () => {
     spy.mockRestore();
   });
 
+  it('removes a staged attachment and revokes its preview URL', () => {
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+    const ref = React.createRef<ChatComposerHandle>();
+    renderWithTheme(<ChatComposer ref={ref} />);
+
+    const image = new File(['data'], 'a.png', { type: 'image/png' });
+    React.act(() => ref.current?.addFiles([image]));
+    expect(screen.getByText('a.png')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /remove a\.png/i }));
+    expect(screen.queryByText('a.png')).not.toBeInTheDocument();
+    expect(revokeSpy).toHaveBeenCalledTimes(1);
+    revokeSpy.mockRestore();
+  });
+
   it('stages pasted files', () => {
     renderWithTheme(<ChatComposer />);
 
