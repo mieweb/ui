@@ -90,6 +90,11 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('input-default.png');
   });
 
+  test('ChatComposer - With selectors', async ({ page }) => {
+    await gotoStory(page, 'chat-chatcomposer--with-selectors');
+    await expect(page).toHaveScreenshot('chat-composer-with-selectors.png');
+  });
+
   test('Avatar - Default', async ({ page }) => {
     await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');

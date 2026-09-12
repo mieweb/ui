@@ -61,6 +61,7 @@ export {
   ThumbsUp as ThumbsUpIcon,
   ThumbsDown as ThumbsDownIcon,
   Ban as BanIcon,
+  ArrowUp as ArrowUpIcon,
   ArrowUpDown as ArrowUpDownIcon,
   GripVertical as GripVerticalIcon,
   StickyNote as StickyNoteIcon,
@@ -81,10 +82,13 @@ export {
 export {
   Bell as BellIcon,
   BellOff as BellOffIcon,
+  Bot as BotIcon,
   Mail as MailIcon,
   MessageSquare as MessageIcon,
+  Mic as MicIcon,
   Phone as PhoneIcon,
   Send as SendIcon,
+  Square as StopIcon,
 } from 'lucide-react';
 
 // Media & Files

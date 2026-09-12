@@ -266,6 +266,11 @@ const composerRef = useRef<HTMLDivElement>(null);
           target: 'choice-inputs-dropdown',
           why: 'Dropdown holds arbitrary menu items; ComposerModelSelector adds provider grouping, a filter strip and an effort drill-down for LLM choice.',
         },
+        {
+          type: 'composes with',
+          target: 'chat-chatcomposer',
+          why: 'ChatComposer embeds ComposerModelSelector in its bottom selector row via showModelSelector + modelSelectorProps.',
+        },
       ],
     },
   },

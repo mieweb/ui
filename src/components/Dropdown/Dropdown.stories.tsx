@@ -145,6 +145,11 @@ Choosing an item does **not** close the menu by itself — close it from \`onCli
           target: 'chat-composermodelselector',
           why: 'Dropdown holds arbitrary menu items; ComposerModelSelector adds provider grouping, a filter strip and an effort drill-down for LLM choice.',
         },
+        {
+          type: 'composes with',
+          target: 'chat-chatcomposer',
+          why: "ChatComposer's + menu and agent selector are Dropdown menus opening above the composer.",
+        },
       ],
     },
   },

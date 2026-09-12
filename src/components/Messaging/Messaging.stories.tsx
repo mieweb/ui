@@ -322,6 +322,11 @@ const { messages, sendMessage, retryMessage, loadMore } = useMessages({
           target: 'superchat-inbox',
           why: 'Messaging is a kit of human-to-human primitives you lay out yourself; SuperChatInbox is a finished multi-participant inbox with Markdown rendering.',
         },
+        {
+          type: 'alternative to',
+          target: 'chat-chatcomposer',
+          why: 'MessageComposer keeps @mentions and reply-to for existing messaging threads; ChatComposer is the standardized input (+ menu, mic, stop, agent/model selectors) preferred for new work.',
+        },
       ],
     },
   },

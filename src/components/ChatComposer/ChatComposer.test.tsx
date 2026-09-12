@@ -1,0 +1,271 @@
+import { describe, expect, it, vi } from 'vitest';
+import * as React from 'react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithTheme } from '../../test/test-utils';
+import {
+  ChatComposer,
+  type ChatComposerHandle,
+  type ChatComposerAgentOption,
+} from './ChatComposer';
+
+const agents: ChatComposerAgentOption[] = [
+  { id: 'general', label: 'General assistant' },
+  { id: 'coder', label: 'Code helper', description: 'Writes code' },
+];
+
+function getInput() {
+  return screen.getByRole('textbox', { name: /message input/i });
+}
+
+describe('ChatComposer', () => {
+  it('sends trimmed text on Enter and clears the input', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} />);
+
+    const input = getInput();
+    fireEvent.change(input, { target: { value: '  Hello world  ' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend).toHaveBeenCalledWith({
+      content: 'Hello world',
+      attachments: [],
+    });
+    expect(input).toHaveValue('');
+  });
+
+  it('does not send on Shift+Enter', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} />);
+
+    const input = getInput();
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
+
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('disables the send button while empty and enables it with text', () => {
+    renderWithTheme(<ChatComposer onSend={vi.fn()} />);
+
+    const sendButton = screen.getByRole('button', { name: /send message/i });
+    expect(sendButton).toBeDisabled();
+
+    fireEvent.change(getInput(), { target: { value: 'Hi' } });
+    expect(sendButton).toBeEnabled();
+  });
+
+  it('supports controlled value', () => {
+    const onValueChange = vi.fn();
+    renderWithTheme(
+      <ChatComposer value="Controlled" onValueChange={onValueChange} />
+    );
+
+    const input = getInput();
+    expect(input).toHaveValue('Controlled');
+
+    fireEvent.change(input, { target: { value: 'Changed' } });
+    expect(onValueChange).toHaveBeenCalledWith('Changed');
+    // Still controlled by the prop.
+    expect(input).toHaveValue('Controlled');
+  });
+
+  it('blocks sending while over maxLength and shows the counter', () => {
+    const onSend = vi.fn();
+    renderWithTheme(
+      <ChatComposer onSend={onSend} maxLength={5} showCharacterCount />
+    );
+
+    const input = getInput();
+    fireEvent.change(input, { target: { value: 'Too long' } });
+
+    expect(screen.getByText('8/5')).toBeInTheDocument();
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('opens the + menu with the built-in attach item and custom items', () => {
+    const onSelect = vi.fn();
+    renderWithTheme(
+      <ChatComposer
+        addMenuItems={[{ id: 'photo', label: 'Take photo', onSelect }]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /add to message/i }));
+    expect(screen.getByText('Attach files')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Take photo'));
+    expect(onSelect).toHaveBeenCalled();
+  });
+
+  it('hides the + menu entirely when attachments and menu items are absent', () => {
+    renderWithTheme(<ChatComposer allowAttachments={false} />);
+
+    expect(
+      screen.queryByRole('button', { name: /add to message/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('stages files via the imperative handle and includes them on send', () => {
+    const onSend = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    renderWithTheme(<ChatComposer ref={ref} onSend={onSend} />);
+
+    const file = new File(['data'], 'notes.txt', { type: 'text/plain' });
+    React.act(() => ref.current?.addFiles([file]));
+
+    expect(screen.getByText('notes.txt')).toBeInTheDocument();
+
+    // Attachments alone should enable send.
+    const sendButton = screen.getByRole('button', { name: /send message/i });
+    expect(sendButton).toBeEnabled();
+    fireEvent.click(sendButton);
+
+    expect(onSend).toHaveBeenCalledWith({
+      content: '',
+      attachments: [file],
+    });
+  });
+
+  it('rejects files over the limits and reports via onError', () => {
+    const onError = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        onError={onError}
+        maxAttachments={1}
+        acceptedFileTypes={['image/*']}
+      />
+    );
+
+    const doc = new File(['data'], 'notes.txt', { type: 'text/plain' });
+    React.act(() => ref.current?.addFiles([doc]));
+    expect(onError).toHaveBeenCalledWith(expect.stringContaining('notes.txt'));
+
+    const image = new File(['data'], 'a.png', { type: 'image/png' });
+    const image2 = new File(['data'], 'b.png', { type: 'image/png' });
+    React.act(() => ref.current?.addFiles([image]));
+    React.act(() => ref.current?.addFiles([image2]));
+    expect(onError).toHaveBeenCalledWith(
+      expect.stringContaining('Maximum 1 attachments')
+    );
+  });
+
+  it('stages pasted files', () => {
+    renderWithTheme(<ChatComposer />);
+
+    const file = new File(['data'], 'pasted.png', { type: 'image/png' });
+    fireEvent.paste(getInput(), {
+      clipboardData: { files: [file], getData: () => '' },
+    });
+
+    expect(screen.getByText('pasted.png')).toBeInTheDocument();
+  });
+
+  it('shows the mic button and fires onMicClick', () => {
+    const onMicClick = vi.fn();
+    renderWithTheme(<ChatComposer onMicClick={onMicClick} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /start voice input/i }));
+    expect(onMicClick).toHaveBeenCalled();
+  });
+
+  it("hides the mic while typing when micBehavior is 'whenEmpty'", () => {
+    renderWithTheme(
+      <ChatComposer onMicClick={vi.fn()} micBehavior="whenEmpty" />
+    );
+
+    expect(
+      screen.getByRole('button', { name: /start voice input/i })
+    ).toBeInTheDocument();
+
+    fireEvent.change(getInput(), { target: { value: 'Hi' } });
+    expect(
+      screen.queryByRole('button', { name: /start voice input/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders a custom micSlot instead of the built-in button', () => {
+    renderWithTheme(
+      <ChatComposer micSlot={<button type="button">Custom mic</button>} />
+    );
+
+    expect(screen.getByText('Custom mic')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /start voice input/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('swaps send for stop while streaming', () => {
+    const onStop = vi.fn();
+    renderWithTheme(<ChatComposer isStreaming onStop={onStop} />);
+
+    expect(
+      screen.queryByRole('button', { name: /send message/i })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /stop generating/i }));
+    expect(onStop).toHaveBeenCalled();
+  });
+
+  it('selects an agent from the agent menu', () => {
+    const onAgentChange = vi.fn();
+    renderWithTheme(
+      <ChatComposer
+        showAgentSelector
+        agents={agents}
+        selectedAgent="general"
+        onAgentChange={onAgentChange}
+      />
+    );
+
+    const trigger = screen.getByRole('button', { name: /select agent/i });
+    expect(trigger).toHaveTextContent('General assistant');
+
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByText('Code helper'));
+    expect(onAgentChange).toHaveBeenCalledWith('coder');
+  });
+
+  it('renders the model selector when enabled', () => {
+    renderWithTheme(
+      <ChatComposer
+        showModelSelector
+        modelSelectorProps={{
+          models: [
+            {
+              provider: 'openai',
+              providerLabel: 'OpenAI',
+              model: 'gpt-5',
+              label: 'GPT-5',
+            },
+          ],
+          value: { provider: 'openai', model: 'gpt-5' },
+          onChange: vi.fn(),
+        }}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /gpt-5/i })).toBeInTheDocument();
+  });
+
+  it('shows a read-only notice instead of the input', () => {
+    renderWithTheme(<ChatComposer readOnly readOnlyMessage="No access" />);
+
+    expect(screen.getByText('No access')).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('disables interaction when disabled', () => {
+    renderWithTheme(<ChatComposer disabled onMicClick={vi.fn()} />);
+
+    expect(getInput()).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /add to message/i })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /start voice input/i })
+    ).toBeDisabled();
+  });
+});
