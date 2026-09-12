@@ -435,6 +435,10 @@ export const ChatComposer = React.forwardRef<
     for (const attachment of attachments) {
       if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
     }
+    // Clear the ref alongside the state: the unmount cleanup reads the ref,
+    // so if onSend unmounts the composer synchronously it must not see (and
+    // re-revoke) the already-revoked preview URLs.
+    attachmentsRef.current = [];
     setAttachments([]);
     setValue('');
     // The draft is cleared optimistically; hosts own retry/restore. Both a
