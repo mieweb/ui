@@ -60,6 +60,8 @@ function stopTrimLeadIn(): number {
 }
 
 export interface UseHeyOzwellOptions {
+  /** Isolates persisted enrollment from other users of the same browser profile. */
+  voiceprintNamespace?: string;
   /** ON: "hey ozwell" opens the chat AND starts dictating. OFF: it just opens the chat and waits. */
   autoDictateOnWake?: boolean;
   /** Close the chat popup after "ozwell I'm done" transcribes + sends. */
@@ -243,6 +245,7 @@ export function useHeyOzwell(
   options: UseHeyOzwellOptions = {}
 ): UseHeyOzwellResult {
   const {
+    voiceprintNamespace,
     autoDictateOnWake = false,
     closeChatOnDone = false,
     transcription = 'browser',
@@ -314,7 +317,7 @@ export function useHeyOzwell(
 
   // Doctor-only gate (loads the ~50 MB speaker runtime only when requireDoctor). A rolling recorder is
   // the 2nd consumer of the shared stream, giving the WHO check the wake-utterance audio.
-  const sv = useSpeakerVerify({ enabled: requireDoctor });
+  const sv = useSpeakerVerify({ enabled: requireDoctor, voiceprintNamespace });
   const svRef = React.useRef(sv);
   svRef.current = sv;
   const rollRef = React.useRef<RollingRecorder | null>(null);
@@ -595,7 +598,9 @@ export function useHeyOzwell(
     if (!requireDoctor || !active || !wake.ready) return;
     let cancelled = false;
     let tries = 0;
-    void loadWhatPrints().then((loaded) => {
+    wakeRef.current?.setVoiceprint('hey-ozwell', []);
+    wakeRef.current?.setVoiceprint("ozwell-i'm-done", []);
+    void loadWhatPrints(voiceprintNamespace).then((loaded) => {
       if (cancelled) return;
       for (const k in loaded) wakeRef.current?.setVoiceprint(k, loaded[k]);
     });
@@ -608,10 +613,12 @@ export function useHeyOzwell(
     tryOpen();
     return () => {
       cancelled = true;
+      wakeRef.current?.setVoiceprint('hey-ozwell', []);
+      wakeRef.current?.setVoiceprint("ozwell-i'm-done", []);
       rollRef.current?.close();
       rollRef.current = null;
     };
-  }, [requireDoctor, active, wake.ready]);
+  }, [requireDoctor, active, wake.ready, voiceprintNamespace]);
 
   // Header octopus load state, split into two rings so the slow transcription warm-up never makes
   // the octopus look unavailable (primary ring = wake pre-warm; secondary arc = transcription).

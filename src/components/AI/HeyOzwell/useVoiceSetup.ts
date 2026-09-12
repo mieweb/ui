@@ -34,6 +34,8 @@ const VP_CAP = 18;
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms)); // global setTimeout — safe to import in SSR/Node
 
 export interface UseVoiceSetupOptions {
+  /** Isolates persisted enrollment from other users of the same browser profile. */
+  voiceprintNamespace?: string;
   /** Start directly in "add a voice" (append) mode instead of a fresh enroll — for the settings menu's
    *  "Add a voice", which appends another authorized voice / condition to the existing voiceprints. */
   startAdding?: boolean;
@@ -70,7 +72,7 @@ export interface UseVoiceSetupResult {
 export function useVoiceSetup(
   options: UseVoiceSetupOptions = {}
 ): UseVoiceSetupResult {
-  const { startAdding = false, voiceId, label } = options;
+  const { startAdding = false, voiceId, label, voiceprintNamespace } = options;
   // Resolve the voice id once: the caller's, else "you" for a fresh enroll, else a fresh id (add mode).
   const [enrollVoiceId] = React.useState(
     () =>
@@ -79,7 +81,7 @@ export function useVoiceSetup(
         ? `voice-${Date.now()}-${Math.floor(Math.random() * 1e4)}`
         : 'you')
   );
-  const sv = useSpeakerVerify();
+  const sv = useSpeakerVerify({ voiceprintNamespace });
   const expectRef = React.useRef<string | null>(null);
   const resolveRef = React.useRef<((n: string) => void) | null>(null);
   const whatRef = React.useRef<Record<string, Float32Array[]>>({});
@@ -106,10 +108,15 @@ export function useVoiceSetup(
   // persisted WHAT templates so "Add another spot" appends across reloads.
   React.useEffect(() => {
     warmWhisper();
-    void loadWhatPrints().then((w) => {
-      whatRef.current = w;
+    let cancelled = false;
+    whatRef.current = {};
+    void loadWhatPrints(voiceprintNamespace).then((w) => {
+      if (!cancelled) whatRef.current = w;
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [voiceprintNamespace]);
 
   // Rolling recorder (for the enrollment clips) + a room-volume analyser for the octopus pulse — both as
   // second consumers of the detector's shared stream (no extra getUserMedia).
@@ -236,10 +243,10 @@ export function useVoiceSetup(
       whatRef.current[ph.key] = merged;
       wakeRef.current.setVoiceprint(ph.key, merged);
     }
-    void saveWhatPrints(whatRef.current);
+    void saveWhatPrints(whatRef.current, voiceprintNamespace);
     setAdding(false);
     setPhase('done');
-  }, [bothReady, phase, adding, sv, enrollVoiceId, label]);
+  }, [bothReady, phase, adding, sv, enrollVoiceId, label, voiceprintNamespace]);
 
   const addAnotherSpot = React.useCallback(() => {
     setAdding(true);

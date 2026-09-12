@@ -15,6 +15,13 @@ const DB_NAME = 'ozwell-voice';
 const STORE = 'voiceprints';
 const DB_VERSION = 1;
 
+export function voiceprintStorageKey(key: string, namespace?: string): string {
+  if (namespace === undefined) return key;
+  if (namespace.trim().length === 0)
+    throw new Error('Voiceprint namespace must not be empty');
+  return `${key}:${encodeURIComponent(namespace)}`;
+}
+
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -194,19 +201,22 @@ function parseLegacyWhat(raw: string): Record<string, Float32Array[]> {
   return out;
 }
 
-export function loadWhatPrints(): Promise<Record<string, Float32Array[]>> {
+export function loadWhatPrints(
+  namespace?: string
+): Promise<Record<string, Float32Array[]>> {
   return getVoiceprints<Record<string, Float32Array[]>>(
-    WHAT_KEY,
-    parseLegacyWhat
+    voiceprintStorageKey(WHAT_KEY, namespace),
+    namespace === undefined ? parseLegacyWhat : undefined
   ).then((v) => v ?? {});
 }
 
 export function saveWhatPrints(
-  map: Record<string, Float32Array[]>
+  map: Record<string, Float32Array[]>,
+  namespace?: string
 ): Promise<void> {
-  return setVoiceprints(WHAT_KEY, map);
+  return setVoiceprints(voiceprintStorageKey(WHAT_KEY, namespace), map);
 }
 
-export function clearWhatPrints(): Promise<void> {
-  return clearVoiceprints(WHAT_KEY);
+export function clearWhatPrints(namespace?: string): Promise<void> {
+  return clearVoiceprints(voiceprintStorageKey(WHAT_KEY, namespace));
 }
