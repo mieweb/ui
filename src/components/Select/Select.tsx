@@ -833,6 +833,10 @@ function SelectOptionItem({
   onSelect,
   onMouseEnter,
 }: SelectOptionItemProps) {
+  const stopPressPropagation = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -851,6 +855,8 @@ function SelectOptionItem({
       data-highlighted={isHighlighted}
       data-disabled={option.disabled}
       tabIndex={isHighlighted ? 0 : -1}
+      onMouseDown={stopPressPropagation}
+      onTouchStart={stopPressPropagation}
       onClick={option.disabled ? undefined : onSelect}
       onKeyDown={handleKeyDown}
       onMouseEnter={option.disabled ? undefined : onMouseEnter}

@@ -66,6 +66,10 @@ const localUiAliases = [
     replacement: path.join(workspaceRoot, 'src/styles/base.css'),
   },
   {
+    find: /^@mieweb\/ui\/utils$/,
+    replacement: path.join(workspaceRoot, 'src/utils/index.ts'),
+  },
+  {
     find: /^@mieweb\/ui$/,
     replacement: path.join(workspaceRoot, 'src/index.ts'),
   },
@@ -235,6 +239,16 @@ const config: StorybookConfig = {
       ...pnpmVirtualCjsInteropAliases,
       ...esheetSourceAliases,
     ];
+    config.resolve.dedupe = Array.from(
+      new Set([
+        ...(config.resolve.dedupe ?? []),
+        '@mieweb/ui',
+        'datavis-ace',
+        'lucide-react',
+        'react',
+        'react-dom',
+      ]),
+    );
 
     // Add ychart virtual:git-info plugin
     config.plugins ??= [];

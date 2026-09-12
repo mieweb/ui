@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
+import { Dropdown, DropdownContent } from '../Dropdown';
 import { Select, type SelectOption } from './Select';
 
 const LOCATION_TYPES: SelectOption[] = [
@@ -13,6 +14,81 @@ const LOCATION_TYPES: SelectOption[] = [
   { value: 'dermatology', label: 'Dermatology' },
   { value: 'family-care', label: 'Family Care Clinic' },
 ];
+
+describe('Select portals', () => {
+  it('selects an option when nested inside a Dropdown portal', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Dropdown trigger={<button type="button">Actions</button>}>
+        <DropdownContent>
+          <Select
+            aria-label="Perspective"
+            value="main"
+            options={[
+              { value: 'new', label: 'New Perspective' },
+              { value: 'main', label: 'Main Perspective' },
+            ]}
+            onValueChange={onValueChange}
+          />
+        </DropdownContent>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Actions' }));
+    await user.click(screen.getByRole('combobox', { name: 'Perspective' }));
+    await user.click(screen.getByRole('option', { name: 'New Perspective' }));
+
+    expect(onValueChange).toHaveBeenCalledWith('new');
+  });
+
+  it('does not select on touchstart while preparing a touch scroll', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Dropdown trigger={<button type="button">Actions</button>}>
+        <DropdownContent>
+          <Select
+            aria-label="Perspective"
+            options={[{ value: 'new', label: 'New Perspective' }]}
+            onValueChange={onValueChange}
+          />
+        </DropdownContent>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Actions' }));
+    await user.click(screen.getByRole('combobox', { name: 'Perspective' }));
+    fireEvent.touchStart(
+      screen.getByRole('option', { name: 'New Perspective' })
+    );
+
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('option', { name: 'New Perspective' })
+    ).toBeVisible();
+  });
+
+  it('supports programmatic click activation', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderWithTheme(
+      <Select
+        aria-label="Perspective"
+        options={[{ value: 'new', label: 'New Perspective' }]}
+        onValueChange={onValueChange}
+      />
+    );
+
+    await user.click(screen.getByRole('combobox', { name: 'Perspective' }));
+    fireEvent.click(screen.getByRole('option', { name: 'New Perspective' }));
+
+    expect(onValueChange).toHaveBeenCalledWith('new');
+  });
+});
 
 describe('Select typeahead', () => {
   it('jumps to and selects the option matching the typed characters', async () => {
