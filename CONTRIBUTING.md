@@ -338,6 +338,7 @@ Current notes:
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | [AI](src/components/AI/MAINTAINERS.md)                                       | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer                                              |
 | [AGGrid (deprecated)](src/components/AGGrid/MAINTAINERS.md)                  | Legacy maintenance only; retained for existing consumers. Use [DataVis NITRO](src/components/DataVisNITRO/MAINTAINERS.md) for new work. |
+| [ChatComposer](src/components/ChatComposer/MAINTAINERS.md)                   | Object-URL lifecycle with an `attachmentsRef` mirror; pure state updaters; controlled menus; stable `onError` reason keys               |
 | [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                |
 | [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                          |
 | [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring                                                     |

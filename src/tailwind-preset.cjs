@@ -414,6 +414,10 @@ module.exports = {
     'px-2.5',
     'py-2',
     'whitespace-nowrap',
+    // Button label keeps child SVGs in inline flow (preflight makes SVGs
+    // block-level, which would force line breaks inside the label span).
+    '[&_svg]:inline-block',
+    '[&_svg]:align-middle',
     'transition-colors',
     'hover:text-white',
     'hover:text-foreground',
