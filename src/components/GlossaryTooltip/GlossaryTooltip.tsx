@@ -379,7 +379,10 @@ export function GlossaryTooltip({
                         className="text-muted-foreground hover:text-foreground inline-flex shrink-0 items-center gap-0.5 text-[11px] font-medium"
                       >
                         Full definition
-                        <ArrowRight aria-hidden="true" className="h-3 w-3" />
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="h-3 w-3 rtl:-scale-x-100"
+                        />
                       </a>
                     )}
                   </span>

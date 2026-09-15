@@ -103,7 +103,7 @@ export function ProductVersion({
           data-slot="product-version-minimal"
         >
           {name} {versionDisplay}
-          {build && <span className="ml-1">({build})</span>}
+          {build && <span className="ms-1">({build})</span>}
         </span>
       );
     }

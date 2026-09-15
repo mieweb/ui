@@ -160,7 +160,7 @@ function Pagination({
           aria-label={labels?.first || 'Go to first page'}
           className={cn(paginationButtonVariants({ variant, size }))}
         >
-          <ChevronsLeftIcon className="h-4 w-4" />
+          <ChevronsLeftIcon className="h-4 w-4 rtl:-scale-x-100" />
           <span className="sr-only">{labels?.first || 'First'}</span>
         </button>
       )}
@@ -175,7 +175,7 @@ function Pagination({
           aria-label={labels?.previous || 'Go to previous page'}
           className={cn(paginationButtonVariants({ variant, size }))}
         >
-          <ChevronLeftIcon className="h-4 w-4" />
+          <ChevronLeftIcon className="h-4 w-4 rtl:-scale-x-100" />
           <span className="sr-only sm:not-sr-only">
             {labels?.previous || 'Previous'}
           </span>
@@ -231,7 +231,7 @@ function Pagination({
           <span className="sr-only sm:not-sr-only">
             {labels?.next || 'Next'}
           </span>
-          <ChevronRightIcon className="h-4 w-4" />
+          <ChevronRightIcon className="h-4 w-4 rtl:-scale-x-100" />
         </button>
       )}
 
@@ -246,7 +246,7 @@ function Pagination({
           className={cn(paginationButtonVariants({ variant, size }))}
         >
           <span className="sr-only">{labels?.last || 'Last'}</span>
-          <ChevronsRightIcon className="h-4 w-4" />
+          <ChevronsRightIcon className="h-4 w-4 rtl:-scale-x-100" />
         </button>
       )}
     </nav>
@@ -317,7 +317,7 @@ function SimplePagination({
         aria-label="Go to previous page"
         className={cn(paginationButtonVariants({ variant, size }))}
       >
-        <ChevronLeftIcon className="h-4 w-4" />
+        <ChevronLeftIcon className="h-4 w-4 rtl:-scale-x-100" />
         <span>Previous</span>
       </button>
 
@@ -339,7 +339,7 @@ function SimplePagination({
         className={cn(paginationButtonVariants({ variant, size }))}
       >
         <span>Next</span>
-        <ChevronRightIcon className="h-4 w-4" />
+        <ChevronRightIcon className="h-4 w-4 rtl:-scale-x-100" />
       </button>
     </nav>
   );

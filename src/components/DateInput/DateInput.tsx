@@ -1026,7 +1026,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   hasError: showError,
                   labelVariant: isFloating ? 'floating' : 'stacked',
                 }),
-                'pr-10',
+                'pe-10',
                 className
               )}
               {...inputProps}
@@ -1050,7 +1050,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               type="button"
               onClick={() => setIsCalendarOpen(!isCalendarOpen)}
               className={cn(
-                'absolute top-1/2 right-3 -translate-y-1/2',
+                'absolute end-3 top-1/2 -translate-y-1/2',
                 'text-muted-foreground hover:text-foreground',
                 'focus:text-foreground focus:outline-none',
                 'transition-colors'
@@ -1119,6 +1119,7 @@ function ChevronLeftIcon() {
   return (
     <svg
       aria-hidden="true"
+      className="rtl:-scale-x-100"
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -1137,6 +1138,7 @@ function ChevronRightIcon() {
   return (
     <svg
       aria-hidden="true"
+      className="rtl:-scale-x-100"
       width="16"
       height="16"
       viewBox="0 0 24 24"

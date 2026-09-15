@@ -61,9 +61,38 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('button-all-variants.png');
   });
 
+  test('Button - Icons in children stay on one line', async ({ page }) => {
+    await gotoStory(page, 'actions-button--icons-in-children');
+    await expect(page).toHaveScreenshot('button-icons-in-children.png');
+  });
+
+  test('Button - Missing-utilities fallback keeps icon and label inline', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'actions-button--icons-in-children');
+    // Simulate a consumer whose Tailwind build never generated the
+    // library's utility classes: only the injected critical CSS remains.
+    await page.evaluate(() => {
+      document
+        .querySelectorAll("button[data-slot='button']")
+        .forEach((button) => {
+          button.removeAttribute('class');
+          button
+            .querySelectorAll('[class]')
+            .forEach((el) => el.removeAttribute('class'));
+        });
+    });
+    await expect(page).toHaveScreenshot('button-missing-utilities.png');
+  });
+
   test('Input - Default', async ({ page }) => {
     await gotoStory(page, 'text-inputs-input--default');
     await expect(page).toHaveScreenshot('input-default.png');
+  });
+
+  test('ChatComposer - With selectors', async ({ page }) => {
+    await gotoStory(page, 'chat-chatcomposer--with-selectors');
+    await expect(page).toHaveScreenshot('chat-composer-with-selectors.png');
   });
 
   test('Avatar - Default', async ({ page }) => {

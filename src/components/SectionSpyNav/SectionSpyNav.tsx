@@ -62,7 +62,9 @@ function CtaArrow({ href }: { href: string }) {
     : href.startsWith('/')
       ? ArrowRight
       : ArrowUpRight;
-  return <Icon aria-hidden="true" className="h-3.5 w-3.5" />;
+  // rtl:-scale-x-100 mirrors ArrowRight and ArrowUpRight for RTL reading
+  // direction; ArrowDown is horizontally symmetric so the flip is a no-op.
+  return <Icon aria-hidden="true" className="h-3.5 w-3.5 rtl:-scale-x-100" />;
 }
 
 const CTA_TIER_VARIANT = {

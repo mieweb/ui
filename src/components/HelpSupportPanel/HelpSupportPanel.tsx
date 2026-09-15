@@ -163,7 +163,7 @@ export function HelpSupportPanel({
             >
               <svg
                 aria-hidden="true"
-                className="mr-2 h-4 w-4"
+                className="me-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -182,7 +182,7 @@ export function HelpSupportPanel({
             <Button onClick={onStartChat}>
               <svg
                 aria-hidden="true"
-                className="mr-2 h-4 w-4"
+                className="me-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -232,7 +232,7 @@ export function HelpSupportPanel({
                         className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
                       >
                         <button
-                          className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                          className="flex w-full items-center justify-between px-4 py-3 text-start transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                           onClick={() =>
                             setExpandedFaq(
                               expandedFaq === faq.id ? null : faq.id

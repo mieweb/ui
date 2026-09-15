@@ -843,7 +843,7 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
         disabled={disabled}
         data-slot="dropdown-item"
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start text-sm',
           'transition-colors duration-150',
           'focus:outline-none',
           variant === 'default' && [
@@ -1044,7 +1044,7 @@ function DropdownSubmenu({
         <ChevronRightIcon
           size={16}
           aria-hidden="true"
-          className="shrink-0 text-neutral-400"
+          className="shrink-0 text-neutral-400 rtl:-scale-x-100"
         />
       </button>
       {open &&

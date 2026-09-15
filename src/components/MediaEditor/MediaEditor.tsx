@@ -272,7 +272,7 @@ function wordClassName(s: WordVisualState): string {
   }
 
   if (s.hasSpeedMarker) {
-    parts.push('ml-0.5 border-l-[3px] border-l-warning pl-1.5');
+    parts.push('ms-0.5 border-s-[3px] border-s-warning ps-1.5');
   }
 
   // A dotted warning underline spans every word of a re-timed region, so the
@@ -291,7 +291,7 @@ const Caret: React.FC<{ side: 'before' | 'after' }> = ({ side }) => (
   <span
     aria-hidden="true"
     className={`bg-primary-500 absolute top-0.5 bottom-0.5 w-0.5 motion-safe:animate-pulse ${
-      side === 'before' ? '-left-px' : 'right-0.5'
+      side === 'before' ? '-start-px' : 'end-0.5'
     }`}
   />
 );
@@ -1386,7 +1386,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           {showCursorBefore && isFocused && <Caret side="before" />}
           {hasSpeedMarker && (
             <span
-              className="border-warning/50 bg-warning/20 text-warning-foreground mr-1 inline-block rounded-sm border px-0.5 align-middle text-[9px] leading-snug font-semibold"
+              className="border-warning/50 bg-warning/20 text-warning-foreground me-1 inline-block rounded-sm border px-0.5 align-middle text-[9px] leading-snug font-semibold"
               title={`Speed: ${speedMarker.speed}x from here`}
             >
               {speedMarker.speed}x
@@ -1432,7 +1432,7 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           <div
             className={`border-border bg-background flex min-h-0 shrink-0 ${
               splitLayout === 'vertical'
-                ? 'max-h-[55dvh] md:max-h-none md:w-1/2 md:border-r'
+                ? 'max-h-[55dvh] md:max-h-none md:w-1/2 md:border-e'
                 : 'max-h-[55dvh] border-b md:max-h-[50%]'
             }`}
           >

@@ -242,7 +242,7 @@ export function ServicePicker({
 
         {showSearch && (
           <div data-slot="service-picker-search" className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
               <SearchIcon className="text-muted-foreground h-5 w-5" />
             </div>
             <Input
@@ -250,7 +250,7 @@ export function ServicePicker({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="pl-10"
+              className="ps-10"
               data-cy="input-search-services"
             />
           </div>
@@ -373,10 +373,10 @@ function ServiceGroupItem({
         onClick={() => onToggleGroup(group.id)}
         className={cn(
           'flex w-full items-center justify-between rounded-lg px-3 py-2',
-          'text-muted-foreground text-left text-sm font-medium',
+          'text-muted-foreground text-start text-sm font-medium',
           'hover:bg-muted',
           'transition-colors',
-          depth > 0 && 'ml-4'
+          depth > 0 && 'ms-4'
         )}
         aria-expanded={isExpanded}
       >
@@ -404,7 +404,7 @@ function ServiceGroupItem({
       {isExpanded && (
         <ul
           data-slot="service-picker-group-list"
-          className="mt-1 space-y-1 pl-4"
+          className="mt-1 space-y-1 ps-4"
         >
           {/* Direct services */}
           {group.services.map((service) => (

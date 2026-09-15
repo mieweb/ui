@@ -239,7 +239,7 @@ export function SuperChat({
               type="button"
               onClick={onBack}
               aria-label="Back to conversations"
-              className="-ml-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="-ms-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
             >
               <svg
                 viewBox="0 0 24 24"

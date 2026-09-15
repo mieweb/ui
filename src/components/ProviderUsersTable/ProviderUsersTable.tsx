@@ -224,7 +224,7 @@ export function ProviderUsersTable({
                       <p className="font-medium text-gray-900 dark:text-white">
                         {user.name}
                         {isCurrentUser && (
-                          <span className="text-muted-foreground ml-1.5 text-xs">
+                          <span className="text-muted-foreground ms-1.5 text-xs">
                             (you)
                           </span>
                         )}
@@ -253,7 +253,7 @@ export function ProviderUsersTable({
                   </span>
                 </TableCell>
                 {showActions && (
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <RowActionsMenu
                       user={user}
                       isCurrentUser={isCurrentUser}

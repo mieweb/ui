@@ -101,6 +101,41 @@ describe('Button', () => {
     expect(screen.getByText('Button Text')).toBeInTheDocument();
   });
 
+  it('injects critical structural styles exactly once', () => {
+    renderWithTheme(
+      <>
+        <Button>One</Button>
+        <Button>Two</Button>
+      </>
+    );
+
+    const styles = document.querySelectorAll('#mieweb-ui-button-critical');
+    expect(styles).toHaveLength(1);
+    expect(styles[0].textContent).toContain(
+      ":where(button[data-slot='button'])"
+    );
+    expect(styles[0].textContent).toContain('white-space:nowrap');
+    // Icons passed as children must flow inline within the label span
+    expect(styles[0].textContent).toContain(
+      "[data-slot='button-label'] svg{display:inline-block"
+    );
+  });
+
+  it('renders SVG icons passed as children inside the inline-flow label', () => {
+    renderWithTheme(
+      <Button>
+        <svg data-testid="child-icon" />
+        Filter by Date
+      </Button>
+    );
+
+    const label = screen
+      .getByRole('button')
+      .querySelector("[data-slot='button-label']");
+    expect(label).toContainElement(screen.getByTestId('child-icon'));
+    expect(label).toHaveClass('[&_svg]:inline-block', '[&_svg]:align-middle');
+  });
+
   describe('accessibility', () => {
     it('has proper ARIA attributes', () => {
       renderWithTheme(<Button aria-label="Custom label">Button</Button>);

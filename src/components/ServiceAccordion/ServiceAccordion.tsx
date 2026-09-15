@@ -79,7 +79,7 @@ const accordionVariants = cva(
 
 const categoryHeaderVariants = cva(
   [
-    'w-full flex items-center justify-between py-4 px-4 text-left',
+    'w-full flex items-center justify-between py-4 px-4 text-start',
     'transition-colors',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
   ],
@@ -204,7 +204,7 @@ export function ServiceLink({
       <LinkIcon className="flex-shrink-0 text-neutral-400" />
       <span className="flex-grow">{service.name}</span>
       {service.providerCount !== undefined && (
-        <span className="text-muted-foreground ml-2 text-xs">
+        <span className="text-muted-foreground ms-2 text-xs">
           ({service.providerCount})
         </span>
       )}
@@ -237,7 +237,7 @@ function SubCategoryAccordion({
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
           'flex w-full items-center justify-between px-3 py-2',
-          'text-left font-medium text-neutral-700 dark:text-neutral-200',
+          'text-start font-medium text-neutral-700 dark:text-neutral-200',
           'hover:text-primary-800 dark:hover:text-primary-400',
           'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
         )}
@@ -262,7 +262,7 @@ function SubCategoryAccordion({
         )}
         inert={!isExpanded || undefined}
       >
-        <div className="space-y-1 pb-2 pl-4">
+        <div className="space-y-1 ps-4 pb-2">
           {subCategory.services.map((service, serviceIdx) => (
             <ServiceLink
               key={serviceIdx}

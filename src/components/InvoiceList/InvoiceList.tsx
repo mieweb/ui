@@ -158,7 +158,7 @@ export function InvoiceList({
         <div data-slot="invoice-list-search" className="relative flex-1">
           <svg
             aria-hidden="true"
-            className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+            className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -175,7 +175,7 @@ export function InvoiceList({
             placeholder="Search invoices..."
             value={searchQuery}
             onChange={handleSearch}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <div data-slot="invoice-list-actions" className="flex gap-2">
@@ -202,7 +202,7 @@ export function InvoiceList({
             <Button onClick={onCreateInvoice} size="sm">
               <svg
                 aria-hidden="true"
-                className="mr-1 h-4 w-4"
+                className="me-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -292,19 +292,19 @@ export function InvoiceList({
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
+                <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium tracking-wider uppercase">
                   Invoice
                 </th>
-                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase sm:table-cell">
+                <th className="text-muted-foreground hidden px-4 py-3 text-start text-xs font-medium tracking-wider uppercase sm:table-cell">
                   Employer
                 </th>
-                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase md:table-cell">
+                <th className="text-muted-foreground hidden px-4 py-3 text-start text-xs font-medium tracking-wider uppercase md:table-cell">
                   Issued
                 </th>
-                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase md:table-cell">
+                <th className="text-muted-foreground hidden px-4 py-3 text-start text-xs font-medium tracking-wider uppercase md:table-cell">
                   Due
                 </th>
-                <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
+                <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium tracking-wider uppercase">
                   Amount
                 </th>
                 <th className="text-muted-foreground px-4 py-3 text-center text-xs font-medium tracking-wider uppercase">
@@ -345,7 +345,7 @@ export function InvoiceList({
                       {formatDate(invoice.dueDate)}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-end">
                     <p className="font-medium text-gray-900 dark:text-white">
                       {formatCurrency(invoice.amount)}
                     </p>

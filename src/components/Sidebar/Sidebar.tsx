@@ -15,7 +15,7 @@ import { useSidebar } from './SidebarProvider';
 const ChevronLeftIcon = () => (
   <svg
     aria-hidden="true"
-    className="h-4 w-4"
+    className="h-4 w-4 rtl:-scale-x-100"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -28,7 +28,7 @@ const ChevronLeftIcon = () => (
 const ChevronRightIcon = () => (
   <svg
     aria-hidden="true"
-    className="h-4 w-4"
+    className="h-4 w-4 rtl:-scale-x-100"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"

@@ -470,7 +470,7 @@ export const ProviderSearchBar = React.forwardRef<
                 className={cn(
                   'border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
                   'w-full',
-                  onGeolocate ? 'pl-0' : 'pl-3'
+                  onGeolocate ? 'ps-0' : 'ps-3'
                 )}
               />
             </div>

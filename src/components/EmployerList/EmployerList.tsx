@@ -110,7 +110,7 @@ export function EmployerList({
           <div data-slot="employer-list-search" className="relative flex-1">
             <svg
               aria-hidden="true"
-              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+              className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -127,7 +127,7 @@ export function EmployerList({
               placeholder="Search employers..."
               value={searchQuery}
               onChange={handleSearch}
-              className="pl-9"
+              className="ps-9"
             />
           </div>
         )}
@@ -135,7 +135,7 @@ export function EmployerList({
           <Button onClick={onAddEmployer} size="sm">
             <svg
               aria-hidden="true"
-              className="mr-1 h-4 w-4"
+              className="me-1 h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

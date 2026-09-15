@@ -271,7 +271,7 @@ function ProgressBar({
       }}
     >
       <div
-        className="bg-primary-800 absolute inset-y-0 left-0 rounded-full transition-all"
+        className="bg-primary-800 absolute inset-y-0 start-0 rounded-full transition-all"
         style={{ width: `${progress}%` }}
       />
       <div

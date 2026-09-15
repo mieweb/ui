@@ -335,8 +335,8 @@ function TocList({
     <ul
       className={cn(
         'space-y-1',
-        depth > 0 && indentLines && 'border-border ml-3 border-l pl-3',
-        depth > 0 && !indentLines && 'ml-4'
+        depth > 0 && indentLines && 'border-border ms-3 border-s ps-3',
+        depth > 0 && !indentLines && 'ms-4'
       )}
     >
       {items.map((item) => (

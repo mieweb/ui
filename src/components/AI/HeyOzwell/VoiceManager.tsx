@@ -146,7 +146,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
             {voices.map((v) => (
               <div
                 key={v.id}
-                className="border-border bg-card flex items-center gap-3 rounded-2xl border px-4 py-3 text-left"
+                className="border-border bg-card flex items-center gap-3 rounded-2xl border px-4 py-3 text-start"
               >
                 <div className="min-w-0 flex-1">
                   {editingId === v.id ? (

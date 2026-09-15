@@ -165,7 +165,7 @@ export function OrderLookupForm({
                 <>
                   <svg
                     aria-hidden="true"
-                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                    className="-ms-1 me-2 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >

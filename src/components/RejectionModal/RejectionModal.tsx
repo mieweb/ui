@@ -202,7 +202,7 @@ export function RejectionModal({
               <label className="text-foreground mb-1 block text-sm font-medium">
                 {detailsLabel}
                 {needsDetails && (
-                  <span className="text-destructive ml-1">*</span>
+                  <span className="text-destructive ms-1">*</span>
                 )}
               </label>
               <textarea
@@ -240,7 +240,7 @@ export function RejectionModal({
               <>
                 <svg
                   aria-hidden="true"
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ms-1 me-2 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

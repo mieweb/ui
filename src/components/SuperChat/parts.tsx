@@ -1094,7 +1094,7 @@ export const MessageRow = React.memo(function MessageRow({
 // ============================================================================
 
 export const sidebarItem = cva(
-  'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
+  'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-sm transition-colors',
   {
     variants: {
       active: {

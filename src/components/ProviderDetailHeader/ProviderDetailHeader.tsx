@@ -210,7 +210,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
         {items.map((item, index) => (
           <li key={item.href} className="flex items-center">
             {index > 0 && (
-              <ChevronRightIcon className="text-muted-foreground mx-2 h-4 w-4" />
+              <ChevronRightIcon className="text-muted-foreground mx-2 h-4 w-4 rtl:-scale-x-100" />
             )}
             {index === items.length - 1 ? (
               <span className="max-w-[200px] truncate font-medium text-gray-900 dark:text-white">
@@ -255,7 +255,7 @@ export function MobileBackButton({
         href={href}
         className="bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
       >
-        <ChevronLeftIcon className="h-4 w-4" />
+        <ChevronLeftIcon className="h-4 w-4 rtl:-scale-x-100" />
         {label}
       </a>
     </div>

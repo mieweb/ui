@@ -120,7 +120,7 @@ export function ServiceBadge({
 
   const content = (
     <>
-      {icon && <span className="mr-1 flex-shrink-0">{icon}</span>}
+      {icon && <span className="me-1 flex-shrink-0">{icon}</span>}
       <span className="truncate">{children}</span>
       {removable && onRemove && (
         <button
@@ -131,7 +131,7 @@ export function ServiceBadge({
             e.stopPropagation();
             onRemove();
           }}
-          className="ml-1 flex-shrink-0 rounded-full p-0.5 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+          className="ms-1 flex-shrink-0 rounded-full p-0.5 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
           aria-label={`Remove ${children}`}
         >
           <CloseIcon className="h-3 w-3" />
@@ -312,7 +312,7 @@ export function ServiceTagCloudBadges({
         >
           {service.name}
           {showCounts && service.count !== undefined && (
-            <span className="text-muted-foreground ml-1">
+            <span className="text-muted-foreground ms-1">
               ({service.count})
             </span>
           )}
@@ -376,7 +376,7 @@ export function SelectedServicesBadges({
         <button
           type="button"
           onClick={onClearAll}
-          className="text-muted-foreground ml-1 text-xs underline hover:text-gray-700 dark:hover:text-gray-200"
+          className="text-muted-foreground ms-1 text-xs underline hover:text-gray-700 dark:hover:text-gray-200"
         >
           Clear all
         </button>
@@ -463,7 +463,7 @@ export function DOTBadge({
       )}
       {...props}
     >
-      <DOTIcon className="mr-1 h-3.5 w-3.5" />
+      <DOTIcon className="me-1 h-3.5 w-3.5" />
       {children || config.label}
     </span>
   );

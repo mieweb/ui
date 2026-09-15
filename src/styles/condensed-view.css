@@ -1406,6 +1406,93 @@ body.condensed [data-slot='date-input-trigger'] svg {
   height: 0.875rem !important;
 }
 
+/* ── Autocomplete ── */
+
+/* Shares the Input field slot; label and listbox need their own overrides. */
+body.condensed [data-slot='autocomplete-label'] {
+  margin-bottom: 0.25rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Result rows & "create new" action: tighter padding, smaller text */
+body.condensed [data-slot='autocomplete-option'],
+body.condensed [data-slot='autocomplete-create'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Empty message: compact */
+body.condensed [data-slot='autocomplete-empty'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── CodeLookup ── */
+
+/* Card body: tighter padding (Card uses padding="none" + explicit px-4 py-4) */
+body.condensed
+  [data-slot='card-content']:has([data-slot='code-lookup-search']) {
+  padding: 0.5rem 0.625rem !important;
+}
+
+/* Codetype filter pills: smaller */
+body.condensed [data-slot='code-lookup-codetypes'] button {
+  padding: 0.0625rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Search icon: recenter on the 1.75rem condensed field, slightly smaller */
+body.condensed [data-slot='code-lookup-search'] > svg {
+  top: 0.875rem !important;
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* Search input shares the Input slot; only the icon inset needs tightening */
+body.condensed [data-slot='code-lookup-search'] input {
+  padding-inline-start: 2rem !important;
+}
+
+/* Drill-down header bar: compact */
+body.condensed [data-slot='code-lookup-drill'] {
+  padding: 0.125rem 0.375rem !important;
+}
+
+body.condensed [data-slot='code-lookup-drill'] button,
+body.condensed [data-slot='code-lookup-drill'] span {
+  font-size: 0.6875rem !important;
+}
+
+/* Results list: shorter cap */
+body.condensed [data-slot='code-lookup-results'] {
+  max-height: 16rem !important;
+}
+
+/* "Frequently used" group header: compact */
+body.condensed [data-slot='code-lookup-group-header'] {
+  padding: 0.125rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+/* Result rows, drill-empty row & free-text action: tighter, smaller text */
+body.condensed [data-slot='code-lookup-option'],
+body.condensed [data-slot='code-lookup-empty'],
+body.condensed [data-slot='code-lookup-free-text'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Code/memory annotations inside rows: one notch smaller */
+body.condensed [data-slot='code-lookup-option'] .text-\[11px\] {
+  font-size: 0.625rem !important;
+}
+
+/* Status line: smaller */
+body.condensed [data-slot='code-lookup-status'] {
+  font-size: 0.6875rem !important;
+}
+
 /* ── Textarea ── */
 
 /* Wrapper: tighter gap between label/textarea/footer */
@@ -11600,4 +11687,172 @@ body.condensed .wcdv-aggregate-entry {
   padding: 2px 6px !important;
   font-size: 0.6875rem !important;
   border-radius: 3px !important;
+}
+
+/* ── Clinical lists ── */
+/* Shared row/heading slots used by ProblemList, PresentingProblems,
+   AllergyList and MedicationList. Row text, badges and buttons already
+   condense via the card-content and primitive slots; these rules shrink the
+   row shell (min-height + vertical padding) and the group headings. */
+
+body.condensed [data-slot='clinical-list-row'] {
+  min-height: 1.75rem !important;
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+}
+
+/* ProblemList keeps its min-height on an inner flex wrapper */
+body.condensed [data-slot='clinical-list-row'] .min-h-9 {
+  min-height: 1.5rem !important;
+}
+
+body.condensed [data-slot='clinical-list-heading'] {
+  padding-bottom: 0.125rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Assessment ── */
+
+/* Problem blocks: tighter box padding and stacking gap */
+body.condensed [data-slot='assessment-problem'] {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='assessment-problem']
+  + [data-slot='assessment-problem'] {
+  margin-top: 0.375rem !important;
+}
+
+/* ── TranscriptView ── */
+
+/* Word- and segment-mode text: one notch smaller */
+body.condensed [data-slot='transcript-content'] {
+  font-size: 0.75rem !important;
+}
+
+/* Segment rows: tighter padding and stacking gap */
+body.condensed [data-slot='transcript-row'] {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='transcript-content'][role='list'] > * + * {
+  margin-top: 0.25rem !important;
+}
+
+/* Card-variant container: tighter padding (plain variant has none) */
+body.condensed [data-slot='transcript-view'].bg-card {
+  padding: 0.5rem !important;
+}
+
+/* Actions bar: tighter spacing */
+body.condensed [data-slot='transcript-actions'] {
+  margin-bottom: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+/* ── Toggle ── */
+
+/* Single condensed size matching Button */
+body.condensed [data-slot='toggle'] {
+  height: 1.75rem !important;
+  min-width: 1.75rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* ── Label ── */
+
+/* Match condensed input-label */
+body.condensed [data-slot='label'] {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Collapsible ── */
+
+body.condensed [data-slot='collapsible-trigger'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='collapsible-content'] {
+  padding: 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Accordion ── */
+
+/* Trigger keeps its own text-sm span; condense both padding and title */
+body.condensed [data-slot='accordion-trigger'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='accordion-trigger'] > span {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='accordion-content'] {
+  padding: 0 0.75rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── AlertDialog ── */
+
+/* Shares Modal slots (already condensed); only its own text needs rules */
+body.condensed [data-slot='alert-dialog-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='alert-dialog-description'] {
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+}
+
+/* ── Sheet ── */
+
+/* Root: tighter gap between header/body/footer */
+body.condensed [data-slot='sheet'] {
+  gap: 0.5rem !important;
+}
+
+/* Chrome: tighter padding, smaller title (matches condensed Modal) */
+body.condensed [data-slot='sheet-header'],
+body.condensed [data-slot='sheet-body'],
+body.condensed [data-slot='sheet-footer'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='sheet-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='sheet-description'] {
+  font-size: 0.75rem !important;
+}
+
+/* ── DockablePanel ── */
+
+/* Header bar: tighter padding, smaller title */
+body.condensed [data-slot='dockable-panel-header'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='dockable-panel-title'],
+body.condensed [data-slot='dockable-panel-summary'] {
+  font-size: 0.8125rem !important;
+}
+
+/* Collapse/restore/close controls: compact hit area */
+body.condensed [data-slot='dockable-panel-collapse'],
+body.condensed [data-slot='dockable-panel-restore'],
+body.condensed [data-slot='dockable-panel-close'] {
+  height: 1.5rem !important;
+  padding: 0 0.5rem !important;
+  font-size: 0.6875rem !important;
 }
