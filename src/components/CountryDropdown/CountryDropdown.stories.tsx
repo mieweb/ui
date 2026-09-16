@@ -34,7 +34,7 @@ const [country, setCountry] = useState<CountryData | undefined>();
   <Label htmlFor="billing-country">Country</Label>
   <CountryDropdown
     id="billing-country"
-    value={country?.code}
+    value={country?.code ?? ''}
     onChange={setCountry}
     aria-label="Billing country"
   />
@@ -42,13 +42,12 @@ const [country, setCountry] = useState<CountryData | undefined>();
 // persist country?.code ("GB"), display country?.name
 \`\`\`
 
-\`value\` is the ISO code; the component gives you back the whole \`CountryData\` so you can store the code and show the name.
+\`value\` is the ISO code; the component gives you back the whole \`CountryData\` so you can store the code and show the name. Nothing is selected until the user picks a country — the trigger shows \`placeholder\` (\`"Select country…"\`). Pass \`defaultValue="US"\` (uncontrolled) or \`value="US"\` (controlled) to start with a country selected.
 
 ### Limitations
 
 - Accessibility: identical to \`CountryCodeDropdown\` — \`<button aria-haspopup="listbox" aria-expanded aria-controls aria-label>\` trigger, \`role="listbox"\` panel with \`<button role="option" aria-selected>\` rows, search box focused on open, ArrowUp/Down between options once inside the panel, Escape / outside click close. Focus is not returned to the trigger on close; the flag is \`aria-hidden\`. Pass \`id\` to bind a visible \`Label\`.
-- Uncontrolled default and the fallback for an unknown \`value\` are \`"US"\` — there is no empty / placeholder state, so "no country chosen yet" must be modelled outside the component.
-- Not a form control: no \`name\`, \`error\` or \`required\`; nothing submits.
+- Not a form control: no \`name\`, \`error\` or \`required\`; nothing submits. An unknown \`value\` renders as the empty/placeholder state.
 - i18n: country names follow \`navigator.languages\` via \`Intl.DisplayNames\` (ISO code fallback) and sort with \`localeCompare\`; \`searchPlaceholder\` defaults to \`"Search countries…"\` and is overridable, while the search \`aria-label\` \`"Search countries"\` and \`"No countries found"\` are hard-coded English. Search matches name and ISO code (not dial code in this mode).
 - RTL: logical \`placement\`, but option text is \`text-left\` and the panel width is fixed (\`w-72\`). Theming: trigger on semantic tokens, panel on hard-coded \`neutral-*\` / \`white\` with \`dark:\` variants.
 - Dependency: \`google-libphonenumber\` (list built lazily on first open); emoji flags render as letter pairs on Windows.`,
@@ -88,6 +87,18 @@ export const Default: Story = {
 export const PreselectedCountry: Story = {
   args: {
     value: 'GB',
+  },
+};
+
+export const DefaultValue: Story = {
+  args: {
+    defaultValue: 'US',
+  },
+};
+
+export const CustomPlaceholder: Story = {
+  args: {
+    placeholder: 'Choose a country',
   },
 };
 
@@ -132,7 +143,7 @@ export const InAForm: Story = {
         </label>
         <CountryDropdown
           id="country-select"
-          value={country?.code}
+          value={country?.code ?? ''}
           onChange={setCountry}
         />
       </div>

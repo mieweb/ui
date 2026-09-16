@@ -1023,6 +1023,31 @@ export const miewebUISafelist = [
   'font-semibold',
   'capitalize',
   'sr-only',
+  // ChatComposer responsive grid: stacked cells below md, single-row pill
+  // (md: overrides) above, plus the card surface
+  'grid-cols-[auto_minmax(0,1fr)_auto]',
+  'col-span-3',
+  'col-start-1',
+  'col-start-3',
+  'row-start-1',
+  'row-start-2',
+  'px-1',
+  'pt-1',
+  'pt-2',
+  'pb-1',
+  'rounded-2xl',
+  'dark:bg-[#1c1c1e]',
+  'dark:border-[#2e2e30]',
+  'md:col-span-1',
+  'md:col-start-2',
+  'md:row-start-1',
+  'md:self-end',
+  'md:p-1.5',
+  'md:py-1.5',
+  'md:px-0',
+  'md:pe-0.5',
+  'md:ps-0.5',
+  'md:gap-0.5',
 ];
 
 export interface MiewebUIPreset {

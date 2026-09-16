@@ -40,9 +40,11 @@ change reason strings without a major-version note.
 
 ## Extension points (instead of new props)
 
-- `micSlot` — replaces the built-in mic button (e.g. `RecordButton`). Rendered
-  as-is: `disabled` does **not** propagate into custom slot content — that's
-  the documented contract, not an oversight.
+- `micSlot` — replaces the built-in mic button (e.g. `RecordButton`). The slot
+  is wrapped in an `h-8` flex row (`data-slot="chat-composer-mic-slot"`) so
+  taller content overflow-centers instead of inflating the control row.
+  `disabled` does **not** propagate into custom slot content — that's the
+  documented contract, not an oversight.
 - `addMenuItems` — host actions in the `+` menu; `checked` items render as
   `menuitemcheckbox` via `DropdownItem`'s native `checked` prop.
 - `modelSelectorProps` — passed through to `ComposerModelSelector`

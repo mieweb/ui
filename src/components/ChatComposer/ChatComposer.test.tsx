@@ -276,6 +276,72 @@ describe('ChatComposer', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('defers the ResizeObserver re-measure to the next frame and cancels it on unmount', () => {
+    // Mutating the observed textarea's height synchronously inside the
+    // observer callback triggers the browser's "ResizeObserver loop
+    // completed with undelivered notifications" error, so the re-measure
+    // must be scheduled via requestAnimationFrame and the pending frame
+    // canceled on unmount. The jsdom ResizeObserver stub (test/setup.ts)
+    // fires its callback once during observe(), exercising this path.
+    const frameCallbacks: Array<(time: number) => void> = [];
+    const raf = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback) => {
+        frameCallbacks.push(callback);
+        return frameCallbacks.length;
+      });
+    const caf = vi
+      .spyOn(window, 'cancelAnimationFrame')
+      .mockImplementation(() => {});
+
+    // Control the measured content height — jsdom always reports 0, which
+    // makes resizeTextarea bail — and count reads so a synchronous
+    // re-measure inside the observer callback is detectable.
+    let measuredScrollHeight = 120;
+    let scrollHeightReads = 0;
+    Object.defineProperty(HTMLTextAreaElement.prototype, 'scrollHeight', {
+      configurable: true,
+      get() {
+        scrollHeightReads += 1;
+        return measuredScrollHeight;
+      },
+    });
+
+    try {
+      const { unmount } = renderWithTheme(<ChatComposer onSend={vi.fn()} />);
+      const textarea = getInput();
+
+      // The mount layout effect (typing path) measures synchronously —
+      // exactly two reads: the visibility check and the applied value.
+      expect(textarea.style.height).toBe('120px');
+      expect(scrollHeightReads).toBe(2);
+
+      // The observer fired during observe() but must only have scheduled a
+      // frame: no further scrollHeight reads means no synchronous
+      // re-measure — the loop-error regression this test guards against.
+      expect(raf).toHaveBeenCalled();
+      expect(frameCallbacks).toHaveLength(1);
+      expect(scrollHeightReads).toBe(2);
+
+      // Driving the queued frame performs the actual re-measure using the
+      // height at flush time, not at observation time.
+      measuredScrollHeight = 160;
+      frameCallbacks.splice(0).forEach((callback) => callback(0));
+      expect(textarea.style.height).toBe('160px');
+
+      const lastResult = raf.mock.results[raf.mock.results.length - 1];
+      const scheduledFrame = lastResult.value as number;
+
+      unmount();
+      expect(caf).toHaveBeenCalledWith(scheduledFrame);
+    } finally {
+      delete (HTMLTextAreaElement.prototype as { scrollHeight?: number })
+        .scrollHeight;
+      raf.mockRestore();
+      caf.mockRestore();
+    }
+  });
+
   it('swaps send for stop while streaming', () => {
     const onStop = vi.fn();
     renderWithTheme(<ChatComposer isStreaming onStop={onStop} />);
@@ -396,7 +462,9 @@ describe('ChatComposer', () => {
   it('shows a read-only notice instead of the input', () => {
     renderWithTheme(<ChatComposer readOnly readOnlyMessage="No access" />);
 
-    expect(screen.getByText('No access')).toBeInTheDocument();
+    // role="status" makes the notice a live region so the change is
+    // announced when readOnly flips at runtime.
+    expect(screen.getByRole('status')).toHaveTextContent('No access');
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
@@ -518,5 +586,30 @@ describe('ChatComposer', () => {
 
     rerender(<ChatComposer maxHeight="40vh" />);
     expect(getInput()).toHaveStyle({ maxHeight: '40vh' });
+  });
+
+  it('renders the selector row outside the card', () => {
+    const { container } = renderWithTheme(
+      <ChatComposer
+        showModelSelector
+        modelSelectorProps={{
+          models: [{ provider: 'openai', model: 'gpt-5', label: 'GPT-5' }],
+          value: { provider: 'openai', model: 'gpt-5' },
+          onChange: vi.fn(),
+        }}
+      />
+    );
+
+    const card = container.querySelector('[data-slot="chat-composer-card"]');
+    expect(card).not.toBeNull();
+    const selectors = container.querySelector(
+      '[data-slot="chat-composer-selectors"]'
+    );
+    // Selector row is a sibling of the card, not inside it.
+    expect(card?.contains(selectors)).toBe(false);
+    expect(selectors?.parentElement).toHaveAttribute(
+      'data-slot',
+      'chat-composer'
+    );
   });
 });

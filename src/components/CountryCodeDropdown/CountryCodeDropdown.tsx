@@ -29,8 +29,18 @@ export interface CountryData {
 }
 
 export interface CountryCodeDropdownProps {
-  /** The currently selected country code (ISO alpha-2, e.g. "US") */
+  /**
+   * The currently selected country code (ISO alpha-2, e.g. "US").
+   * Pass `""` for a controlled component with no selection.
+   */
   value?: string;
+  /**
+   * Initial selection when uncontrolled (`value` undefined).
+   * `CountryCodeDropdown` defaults to "US"; `CountryDropdown` defaults to no selection.
+   */
+  defaultValue?: string;
+  /** Trigger text shown when nothing is selected */
+  placeholder?: string;
   /** Called when a country is selected */
   onChange?: (country: CountryData) => void;
   /** Whether the dropdown is disabled */
@@ -62,17 +72,26 @@ function isoToEmoji(code: string): string {
 function buildCountryList(): CountryData[] {
   const phoneUtil = PhoneNumberUtil.getInstance();
   const regions = phoneUtil.getSupportedRegions() as string[];
-  const list: CountryData[] = regions.map((code: string) => {
-    const callingCode = phoneUtil.getCountryCodeForRegion(code);
-    return {
-      code,
-      name: regionDisplayName(code),
-      dialCode: `+${callingCode}`,
-      flag: isoToEmoji(code),
-    };
-  });
+  const list: CountryData[] = regions.map(countryFromCode);
   list.sort((a, b) => a.name.localeCompare(b.name));
   return list;
+}
+
+/** Build a single country's data without loading the full list. */
+function countryFromCode(code: string): CountryData {
+  return {
+    code,
+    name: regionDisplayName(code),
+    dialCode: `+${PhoneNumberUtil.getInstance().getCountryCodeForRegion(code)}`,
+    flag: isoToEmoji(code),
+  };
+}
+
+/** Whether libphonenumber knows this ISO alpha-2 region. */
+function isSupportedRegion(code: string): boolean {
+  return (
+    PhoneNumberUtil.getInstance().getSupportedRegions() as string[]
+  ).includes(code);
 }
 
 /** Lazy singleton so we only build the list once. */
@@ -171,6 +190,8 @@ interface CountryDropdownBaseProps extends CountryCodeDropdownProps {
  */
 function CountryDropdownBase({
   value,
+  defaultValue = 'US',
+  placeholder = 'Select country…',
   onChange,
   disabled = false,
   className,
@@ -182,7 +203,7 @@ function CountryDropdownBase({
 }: CountryDropdownBaseProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [search, setSearch] = React.useState('');
-  const [internalValue, setInternalValue] = React.useState(value ?? 'US');
+  const [internalValue, setInternalValue] = React.useState(defaultValue);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
@@ -202,20 +223,13 @@ function CountryDropdownBase({
     if (isOpen && !countriesLoaded) setCountriesLoaded(true);
   }, [isOpen, countriesLoaded]);
 
-  const selected = React.useMemo(() => {
+  const selected = React.useMemo<CountryData | null>(() => {
+    if (!activeValue) return null;
     if (countries.length) {
-      return (
-        countries.find((c) => c.code === activeValue) ??
-        countries.find((c) => c.code === 'US')!
-      );
+      return countries.find((c) => c.code === activeValue) ?? null;
     }
     // Lightweight fallback while list hasn't loaded yet
-    return {
-      code: activeValue ?? 'US',
-      name: regionDisplayName(activeValue ?? 'US'),
-      dialCode: `+${PhoneNumberUtil.getInstance().getCountryCodeForRegion(activeValue ?? 'US')}`,
-      flag: isoToEmoji(activeValue ?? 'US'),
-    };
+    return isSupportedRegion(activeValue) ? countryFromCode(activeValue) : null;
   }, [activeValue, countries]);
 
   const filtered = React.useMemo(() => {
@@ -332,9 +346,16 @@ function CountryDropdownBase({
           className="text-base leading-none"
           aria-hidden="true"
         >
-          {selected.flag}
+          {selected?.flag ?? '🌐'}
         </span>
-        {showDialCode ? (
+        {!selected ? (
+          <span
+            data-slot="country-dropdown-placeholder"
+            className="text-muted-foreground min-w-0 truncate"
+          >
+            {placeholder}
+          </span>
+        ) : showDialCode ? (
           <span data-slot="country-dropdown-dialcode">{selected.dialCode}</span>
         ) : (
           <span data-slot="country-dropdown-name" className="min-w-0 truncate">
@@ -418,13 +439,13 @@ function CountryDropdownBase({
                     type="button"
                     role="option"
                     data-slot="country-dropdown-option"
-                    aria-selected={country.code === selected.code}
+                    aria-selected={country.code === selected?.code}
                     onClick={() => handleSelect(country)}
                     className={cn(
                       'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start text-sm',
                       'transition-colors duration-150',
                       'focus:outline-none',
-                      country.code === selected.code
+                      country.code === selected?.code
                         ? 'bg-neutral-100 font-medium text-neutral-900 dark:bg-neutral-700 dark:text-white'
                         : 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-700/50',
                       'focus:bg-neutral-100 dark:focus:bg-neutral-700'

@@ -155,8 +155,10 @@ export interface ChatComposerProps {
   onMicClick?: () => void;
   /**
    * Custom node rendered in place of the built-in mic button (e.g.
-   * `RecordButton`). Rendered as-is: pass your own disabled state when the
-   * composer is `disabled`.
+   * `RecordButton`). The slot is wrapped in a 32px-tall (`h-8`) flex row so it
+   * aligns with the other composer controls; taller content overflows and
+   * stays vertically centered without inflating the row. Interaction state is
+   * not managed: pass your own disabled state when the composer is `disabled`.
    */
   micSlot?: React.ReactNode;
   /** When to show the mic: always, or only while the composer is empty. @default 'always' */
@@ -246,9 +248,10 @@ const MAX_INPUT_HEIGHT = 160;
 // ============================================================================
 
 /**
- * Standardized chat input: an always-available text area on top, a quiet icon
- * toolbar below it (`+` menu, mic, send/stop), and an optional bottom row with
- * agent and model selectors.
+ * Standardized chat input. At `md+` it renders as a single-row pill — `+`
+ * menu, text input and actions (mic, send/stop) side by side; below `md` the
+ * input stacks above the icon row. The optional agent/model selector row
+ * hangs below the card on the page background.
  */
 export const ChatComposer = React.forwardRef<
   ChatComposerHandle,
@@ -341,12 +344,41 @@ export const ChatComposer = React.forwardRef<
 
   // Auto-grow the textarea. The cap is enforced with CSS max-height so it
   // can be any CSS length (e.g. '40vh'), not just a pixel number.
-  React.useLayoutEffect(() => {
+  const resizeTextarea = React.useCallback(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = 'auto';
+    // While the textarea is not laid out (hidden container, e.g. a
+    // just-mounted Storybook story or a closed panel) scrollHeight is 0 —
+    // keep height auto and let the ResizeObserver below re-measure once
+    // the element becomes visible.
+    if (textarea.scrollHeight === 0) return;
     textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [value]);
+  }, []);
+
+  React.useLayoutEffect(resizeTextarea, [resizeTextarea, value]);
+
+  // Re-measure when the textarea's box changes for reasons other than
+  // typing: the container becoming visible, width changes, font loading,
+  // or crossing the md breakpoint (different paddings).
+  React.useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || typeof ResizeObserver === 'undefined') return;
+    // Defer the re-measure to the next frame: mutating the observed
+    // element's height synchronously inside the observer callback triggers
+    // the browser's "ResizeObserver loop completed with undelivered
+    // notifications" error, which dev overlays surface as a runtime error.
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(resizeTextarea);
+    });
+    observer.observe(textarea);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [resizeTextarea]);
 
   // --------------------------------------------------------------------
   // Attachments
@@ -510,7 +542,10 @@ export const ChatComposer = React.forwardRef<
     return (
       <div
         data-slot="chat-composer"
-        role="note"
+        // A live status region (implicit aria-live="polite"): readOnly can
+        // flip at runtime (e.g. after permissions resolve), and screen-reader
+        // users must be told the input became read-only.
+        role="status"
         className={cn(
           'flex items-center gap-2 rounded-xl border px-4 py-3 text-sm',
           'border-amber-300 bg-amber-50 text-amber-900',
@@ -533,16 +568,21 @@ export const ChatComposer = React.forwardRef<
   const selectedAgentOption =
     agents.find((agent) => agent.id === selectedAgent) ?? null;
 
-  return (
-    <div
-      data-slot="chat-composer"
-      className={cn(
-        'rounded-xl border border-neutral-200 bg-white shadow-sm',
-        'dark:border-neutral-700 dark:bg-neutral-800',
-        disabled && 'opacity-60',
-        className
-      )}
-    >
+  // One responsive grid: below `md` the input sits on row 1 spanning all
+  // columns with the `+`/actions on row 2; at `md+` the `+`, input and
+  // actions sit side by side on row 1 as a single pill (actions pin to the
+  // bottom via self-end as the input grows).
+  const cells = {
+    input:
+      'col-span-3 col-start-1 row-start-1 px-1 pt-1 md:col-span-1 md:col-start-2 md:self-end md:px-0 md:py-1.5',
+    textarea: 'px-2 pt-2 pb-1 md:py-1.5',
+    add: 'col-start-1 row-start-2 pb-2 ps-2 md:row-start-1 md:self-end md:p-1.5 md:pe-0.5',
+    actions:
+      'col-start-3 row-start-2 flex items-center gap-1 pb-2 pe-2 md:row-start-1 md:self-end md:gap-0.5 md:p-1.5 md:ps-0.5',
+  };
+
+  const composerCard = (
+    <>
       {attachments.length > 0 && (
         <div
           data-slot="chat-composer-attachments"
@@ -559,109 +599,110 @@ export const ChatComposer = React.forwardRef<
         </div>
       )}
 
-      {/* Inset wrapper: the textarea sits 4px inside the shell with a
-          matching inner radius so focus outlines / a11y highlights render
-          as a clean nested rounded rect instead of stacking on the shell's
-          border. The padding split (wrapper p-1 + textarea p-2 = the
-          original p-3) keeps the text in the same place, using only
-          standard utilities (no arbitrary width). */}
-      <div className="px-1 pt-1">
-        <textarea
-          {...textareaProps}
-          ref={textareaRef}
-          data-slot="chat-composer-input"
-          value={value}
-          onChange={(event) => {
-            textareaProps?.onChange?.(event);
-            setValue(event.target.value);
-          }}
-          // Host handlers run first; preventDefault() opts out of the
-          // built-in behavior (Enter-to-send, paste-to-attach).
-          onKeyDown={(event) => {
-            textareaProps?.onKeyDown?.(event);
-            if (event.defaultPrevented) return;
-            handleKeyDown(event);
-          }}
-          onPaste={(event) => {
-            textareaProps?.onPaste?.(event);
-            if (event.defaultPrevented) return;
-            handlePaste(event);
-          }}
-          placeholder={placeholder}
-          disabled={disabled}
-          // Host-opt-in only; off by default.
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus={autoFocus}
-          rows={1}
-          aria-label={inputLabel}
-          style={{
-            ...textareaProps?.style,
-            maxHeight:
-              typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
-          }}
-          className={cn(
-            'block w-full resize-none bg-transparent',
-            'rounded-lg px-2 pt-2 pb-1 text-sm',
-            'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
-            // Ring the input itself on focus rather than the whole shell.
-            'focus:ring-primary-500 focus:ring-1 focus:outline-none',
-            'disabled:cursor-not-allowed',
-            textareaProps?.className
-          )}
-        />
-      </div>
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto]">
+        {/* Inset cell: the textarea sits inside the card with a matching
+            inner radius so focus outlines / a11y highlights render as a
+            clean nested rounded rect instead of stacking on the card's
+            border. The padding split (cell + textarea) keeps the text in
+            place using only standard utilities. */}
+        <div className={cells.input}>
+          <textarea
+            {...textareaProps}
+            ref={textareaRef}
+            data-slot="chat-composer-input"
+            value={value}
+            onChange={(event) => {
+              textareaProps?.onChange?.(event);
+              setValue(event.target.value);
+            }}
+            // Host handlers run first; preventDefault() opts out of the
+            // built-in behavior (Enter-to-send, paste-to-attach).
+            onKeyDown={(event) => {
+              textareaProps?.onKeyDown?.(event);
+              if (event.defaultPrevented) return;
+              handleKeyDown(event);
+            }}
+            onPaste={(event) => {
+              textareaProps?.onPaste?.(event);
+              if (event.defaultPrevented) return;
+              handlePaste(event);
+            }}
+            placeholder={placeholder}
+            disabled={disabled}
+            // Host-opt-in only; off by default.
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus={autoFocus}
+            rows={1}
+            aria-label={inputLabel}
+            style={{
+              ...textareaProps?.style,
+              maxHeight:
+                typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
+            }}
+            className={cn(
+              'block w-full resize-none bg-transparent',
+              'rounded-lg text-sm',
+              cells.textarea,
+              'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
+              // Ring the input itself on focus rather than the whole shell.
+              'focus:ring-primary-500 focus:ring-1 focus:outline-none',
+              'disabled:cursor-not-allowed',
+              textareaProps?.className
+            )}
+          />
+        </div>
 
-      <div
-        data-slot="chat-composer-toolbar"
-        className="flex items-center gap-1 px-2 pb-2"
-      >
         {showAddMenu && (
-          <Dropdown
-            placement="top-start"
-            open={addMenuOpen}
-            onOpenChange={setAddMenuOpen}
-            trigger={
-              <button
-                type="button"
-                data-slot="chat-composer-add-button"
-                aria-label={addMenuLabel}
-                disabled={disabled}
-                className={iconButtonClasses}
-              >
-                <PlusIcon className="h-4 w-4" aria-hidden="true" />
-              </button>
-            }
-          >
-            {allowAttachments && (
-              <DropdownItem
-                icon={<PaperclipIcon className="h-4 w-4" aria-hidden="true" />}
-                onClick={() => {
-                  setAddMenuOpen(false);
-                  fileInputRef.current?.click();
-                }}
-              >
-                {attachFilesLabel}
-              </DropdownItem>
-            )}
-            {allowAttachments && addMenuItems && addMenuItems.length > 0 && (
-              <DropdownSeparator />
-            )}
-            {addMenuItems?.map((item) => (
-              <DropdownItem
-                key={item.id}
-                icon={item.icon}
-                disabled={item.disabled}
-                variant={item.variant}
-                checked={item.checked}
-                onClick={() => {
-                  setAddMenuOpen(false);
-                  item.onSelect?.();
-                }}
-              >
-                <span className="min-w-0 truncate">{item.label}</span>
-              </DropdownItem>
-            ))}
-          </Dropdown>
+          <div className={cells.add}>
+            <Dropdown
+              placement="top-start"
+              open={addMenuOpen}
+              onOpenChange={setAddMenuOpen}
+              trigger={
+                <button
+                  type="button"
+                  data-slot="chat-composer-add-button"
+                  aria-label={addMenuLabel}
+                  disabled={disabled}
+                  className={iconButtonClasses}
+                >
+                  <PlusIcon className="h-4 w-4" aria-hidden="true" />
+                </button>
+              }
+            >
+              {allowAttachments && (
+                <DropdownItem
+                  icon={
+                    <PaperclipIcon className="h-4 w-4" aria-hidden="true" />
+                  }
+                  onClick={() => {
+                    setAddMenuOpen(false);
+                    fileInputRef.current?.click();
+                  }}
+                >
+                  {attachFilesLabel}
+                </DropdownItem>
+              )}
+              {allowAttachments && addMenuItems && addMenuItems.length > 0 && (
+                <DropdownSeparator />
+              )}
+              {addMenuItems?.map((item) => (
+                <DropdownItem
+                  key={item.id}
+                  icon={item.icon}
+                  disabled={item.disabled}
+                  variant={item.variant}
+                  checked={item.checked}
+                  onClick={() => {
+                    setAddMenuOpen(false);
+                    item.onSelect?.();
+                  }}
+                >
+                  <span className="min-w-0 truncate">{item.label}</span>
+                </DropdownItem>
+              ))}
+            </Dropdown>
+          </div>
         )}
 
         {allowAttachments && (
@@ -677,7 +718,7 @@ export const ChatComposer = React.forwardRef<
           />
         )}
 
-        <div className="ms-auto flex items-center gap-1">
+        <div className={cells.actions}>
           {showCharacterCount && maxLength !== undefined && (
             <span
               data-slot="chat-composer-char-count"
@@ -694,7 +735,18 @@ export const ChatComposer = React.forwardRef<
           )}
 
           {micVisible &&
-            (micSlot ?? (
+            (micSlot != null ? (
+              // Normalize slot content (e.g. a RecordButton) to the 32px
+              // control row: taller content overflow-centers instead of
+              // inflating the pill and pushing the other cells apart. A div
+              // so block-level slot content stays valid HTML.
+              <div
+                data-slot="chat-composer-mic-slot"
+                className="flex h-8 shrink-0 items-center"
+              >
+                {micSlot}
+              </div>
+            ) : (
               <button
                 type="button"
                 data-slot="chat-composer-mic-button"
@@ -750,85 +802,106 @@ export const ChatComposer = React.forwardRef<
           )}
         </div>
       </div>
+    </>
+  );
 
-      {showSelectorRow && (
-        <div
-          data-slot="chat-composer-selectors"
-          className="flex items-center justify-between gap-2 border-t border-neutral-100 px-2 py-1.5 dark:border-neutral-700"
+  const selectorsRow = showSelectorRow && (
+    <div
+      data-slot="chat-composer-selectors"
+      className="flex items-center justify-between gap-2 px-2 pt-1"
+    >
+      {showAgentSelector ? (
+        <Dropdown
+          placement="top-start"
+          open={agentMenuOpen}
+          onOpenChange={setAgentMenuOpen}
+          trigger={
+            <button
+              type="button"
+              data-slot="chat-composer-agent-trigger"
+              aria-label={
+                selectedAgentOption
+                  ? `${agentSelectorLabel}: ${selectedAgentOption.label}`
+                  : agentSelectorLabel
+              }
+              disabled={disabled}
+              className={selectorTriggerClasses}
+            >
+              {selectedAgentOption?.icon ?? (
+                <BotIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              <span className="min-w-0 truncate">
+                {selectedAgentOption?.label ?? agentSelectorLabel}
+              </span>
+              <ChevronUpIcon className="h-3 w-3 shrink-0" aria-hidden="true" />
+            </button>
+          }
         >
-          {showAgentSelector ? (
-            <Dropdown
-              placement="top-start"
-              open={agentMenuOpen}
-              onOpenChange={setAgentMenuOpen}
-              trigger={
-                <button
-                  type="button"
-                  data-slot="chat-composer-agent-trigger"
-                  aria-label={
-                    selectedAgentOption
-                      ? `${agentSelectorLabel}: ${selectedAgentOption.label}`
-                      : agentSelectorLabel
-                  }
-                  disabled={disabled}
-                  className={selectorTriggerClasses}
-                >
-                  {selectedAgentOption?.icon ?? (
-                    <BotIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          {agents.map((agent) => (
+            <DropdownItem
+              key={agent.id}
+              icon={agent.icon}
+              role="menuitemradio"
+              aria-checked={agent.id === selectedAgent}
+              onClick={() => {
+                setAgentMenuOpen(false);
+                onAgentChange?.(agent.id);
+              }}
+            >
+              <span className="flex w-full items-center justify-between gap-2">
+                <span className="min-w-0">
+                  <span className="block truncate">{agent.label}</span>
+                  {agent.description && (
+                    <span className="block truncate text-xs text-neutral-500 dark:text-neutral-400">
+                      {agent.description}
+                    </span>
                   )}
-                  <span className="min-w-0 truncate">
-                    {selectedAgentOption?.label ?? agentSelectorLabel}
-                  </span>
-                  <ChevronUpIcon
-                    className="h-3 w-3 shrink-0"
+                </span>
+                {agent.id === selectedAgent && (
+                  <CheckIcon
+                    className="text-primary-600 dark:text-primary-400 h-4 w-4 shrink-0"
                     aria-hidden="true"
                   />
-                </button>
-              }
-            >
-              {agents.map((agent) => (
-                <DropdownItem
-                  key={agent.id}
-                  icon={agent.icon}
-                  role="menuitemradio"
-                  aria-checked={agent.id === selectedAgent}
-                  onClick={() => {
-                    setAgentMenuOpen(false);
-                    onAgentChange?.(agent.id);
-                  }}
-                >
-                  <span className="flex w-full items-center justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block truncate">{agent.label}</span>
-                      {agent.description && (
-                        <span className="block truncate text-xs text-neutral-500 dark:text-neutral-400">
-                          {agent.description}
-                        </span>
-                      )}
-                    </span>
-                    {agent.id === selectedAgent && (
-                      <CheckIcon
-                        className="text-primary-600 dark:text-primary-400 h-4 w-4 shrink-0"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </span>
-                </DropdownItem>
-              ))}
-            </Dropdown>
-          ) : (
-            <span aria-hidden="true" />
-          )}
-
-          {showModelSelector && modelSelectorProps && (
-            <ComposerModelSelector
-              variant="ghost"
-              {...modelSelectorProps}
-              disabled={disabled || modelSelectorProps.disabled}
-            />
-          )}
-        </div>
+                )}
+              </span>
+            </DropdownItem>
+          ))}
+        </Dropdown>
+      ) : (
+        <span aria-hidden="true" />
       )}
+
+      {showModelSelector && modelSelectorProps && (
+        <ComposerModelSelector
+          variant="ghost"
+          {...modelSelectorProps}
+          disabled={disabled || modelSelectorProps.disabled}
+        />
+      )}
+    </div>
+  );
+
+  // The bordered card holds only the input row(s); the selector row hangs
+  // below it on the page background.
+  return (
+    <div
+      data-slot="chat-composer"
+      className={cn(
+        'flex w-full flex-col',
+        disabled && 'opacity-60',
+        className
+      )}
+    >
+      <div
+        data-slot="chat-composer-card"
+        className={cn(
+          'rounded-2xl border border-neutral-200 bg-white shadow-sm',
+          'dark:border-[#2e2e30] dark:bg-[#1c1c1e]'
+        )}
+      >
+        {composerCard}
+      </div>
+      {selectorsRow}
     </div>
   );
 });

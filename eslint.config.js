@@ -98,6 +98,7 @@ export default [
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         queueMicrotask: 'readonly',
+        ResizeObserver: 'readonly',
         getComputedStyle: 'readonly',
         // File APIs
         File: 'readonly',

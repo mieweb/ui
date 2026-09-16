@@ -17,7 +17,7 @@ const meta: Meta<typeof CountryCodeDropdown> = {
       description: {
         component: `### What it's for
 
-A **dial-code picker to sit beside a phone number field**. The trigger shows the flag and dial code (🇺🇸 +1); clicking it opens a portaled, searchable \`role="listbox"\` of every region \`google-libphonenumber\` knows, with flag, localized name and dial code. \`value\` is the ISO alpha-2 code (\`"US"\`), \`onChange\` receives the full \`CountryData\` (\`{ code, name, dialCode, flag }\`). Also exports the helpers \`validatePhoneNumber(number, code)\` and \`formatE164(number, code)\` for the adjacent input. Props: \`disabled\`, \`placement\` \`bottom-start\` | \`bottom-end\`, \`searchPlaceholder\`, \`id\` (for \`<label htmlFor>\`), \`aria-label\`, \`className\`.
+A **dial-code picker to sit beside a phone number field**. The trigger shows the flag and dial code (🇺🇸 +1); clicking it opens a portaled, searchable \`role="listbox"\` of every region \`google-libphonenumber\` knows, with flag, localized name and dial code. \`value\` is the ISO alpha-2 code (\`"US"\`), \`onChange\` receives the full \`CountryData\` (\`{ code, name, dialCode, flag }\`). Also exports the helpers \`validatePhoneNumber(number, code)\` and \`formatE164(number, code)\` for the adjacent input. Props: \`disabled\`, \`placement\` \`bottom-start\` | \`bottom-end\`, \`searchPlaceholder\`, \`defaultValue\` (uncontrolled initial code, default \`"US"\`), \`placeholder\` (trigger text when nothing is selected), \`id\` (for \`<label htmlFor>\`), \`aria-label\`, \`className\`.
 
 ### Use it when
 
@@ -53,7 +53,7 @@ const invalid = national !== '' && !validatePhoneNumber(national, country.code);
 ### Limitations
 
 - Accessibility: trigger \`<button aria-haspopup="listbox" aria-expanded aria-controls aria-label>\` (default \`"Select country code"\`); panel \`role="listbox"\` with \`<button role="option" aria-selected>\` rows; the search box is focused on open. ArrowUp/Down move focus between options (wrapping) once focus is inside the panel; Escape and outside click close and clear the search. Focus is not returned to the trigger on close. The flag emoji is \`aria-hidden\`, so the trigger's name comes from \`aria-label\`, not the visible dial code.
-- Uncontrolled default and the fallback for an unknown \`value\` are both \`"US"\`. Not a form control: no \`name\`, nothing submits — post \`country.code\` / \`formatE164(...)\` yourself. No \`error\` prop.
+- Uncontrolled default is \`"US"\` (override with \`defaultValue\`). \`value=""\` or an unknown code renders the empty state with \`placeholder\` instead of falling back to US. Not a form control: no \`name\`, nothing submits — post \`country.code\` / \`formatE164(...)\` yourself. No \`error\` prop.
 - i18n: country **names** are localized through \`Intl.DisplayNames\` using \`navigator.languages\` (falls back to the ISO code); the strings \`"Search countries…"\` (\`searchPlaceholder\`, overridable), \`"Search countries"\` (search \`aria-label\`) and \`"No countries found"\` are hard-coded English. Search matches name, dial code and ISO code, case-insensitive.
 - RTL: panel placement is logical (\`bottom-start\` / \`bottom-end\` via \`useAnchoredPosition\`) but option text is \`text-left\`. Panel width is fixed at \`w-72\`.
 - Theming: trigger uses \`border-input bg-background text-foreground\`; the panel and options use hard-coded \`neutral-*\` / \`white\` with \`dark:\` variants rather than semantic tokens.

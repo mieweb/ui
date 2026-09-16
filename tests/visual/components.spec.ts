@@ -95,6 +95,23 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('chat-composer-with-selectors.png');
   });
 
+  test('ChatComposer - With selectors (mobile stacked)', async ({ page }) => {
+    // Below the md breakpoint the composer stacks the input above the icon
+    // row instead of the single-row pill.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'chat-chatcomposer--with-selectors');
+    await expect(page).toHaveScreenshot(
+      'chat-composer-with-selectors-mobile.png'
+    );
+  });
+
+  test('ChatComposer - With record button', async ({ page }) => {
+    // The 40px RecordButton in micSlot must overflow-center in the h-8
+    // control row without inflating the pill height.
+    await gotoStory(page, 'chat-chatcomposer--with-record-button');
+    await expect(page).toHaveScreenshot('chat-composer-with-record-button.png');
+  });
+
   test('Avatar - Default', async ({ page }) => {
     await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');
@@ -123,6 +140,21 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('Select - Default', async ({ page }) => {
     await gotoStory(page, 'choice-inputs-select--default');
     await expect(page).toHaveScreenshot('select-default.png');
+  });
+
+  test('CountryDropdown - Default (empty placeholder)', async ({ page }) => {
+    await gotoStory(page, 'choice-inputs-countrydropdown--default');
+    await expect(page).toHaveScreenshot('countrydropdown-default.png');
+  });
+
+  test('CountryDropdown - Default value', async ({ page }) => {
+    await gotoStory(page, 'choice-inputs-countrydropdown--default-value');
+    await expect(page).toHaveScreenshot('countrydropdown-default-value.png');
+  });
+
+  test('CountryCodeDropdown - Default (US)', async ({ page }) => {
+    await gotoStory(page, 'choice-inputs-countrycodedropdown--default');
+    await expect(page).toHaveScreenshot('countrycodedropdown-default.png');
   });
 
   test('Table - Default', async ({ page }) => {
