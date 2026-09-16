@@ -229,6 +229,13 @@ export {
 // Hooks
 export * from './hooks';
 
+// Motion
+// Only the dependency-free half: presets, the runtime contract and the
+// `Animated` primitives. `<MotionProvider>` — the one piece that imports
+// `motion` — is published separately as @mieweb/ui/motion so the library stays
+// an optional peer dependency. See: src/motion/entry.ts
+export * from './motion';
+
 // Utilities
 export * from './utils';
 

@@ -6,6 +6,8 @@ import React, {
   useEffect,
 } from 'react';
 import { cn } from '../../utils/cn';
+import { useDirection } from '../../hooks/useDirection';
+import { Animated, AnimatedPresence } from '../../motion';
 import { useSidebar } from './SidebarProvider';
 
 // =============================================================================
@@ -131,6 +133,18 @@ export function Sidebar({
   const { isCollapsed, isMobileOpen, closeMobile, isMobileViewport } =
     useSidebar();
 
+  // The off-canvas drawer slides along the inline axis, so its direction has to
+  // be resolved in JS for the motion path — CSS logical properties cover the
+  // fallback, but a transform value cannot be expressed logically.
+  //
+  // Resolved from the nav itself rather than `<html>`: the CSS fallback uses
+  // `rtl:` variants, which follow the nearest inherited `dir`. Reading the
+  // document would disagree with that under a local `dir="rtl"` subtree and
+  // spring the drawer off the wrong edge — so the two paths must resolve
+  // direction the same way.
+  const navRef = useRef<HTMLElement>(null);
+  const isRtl = useDirection(navRef) === 'rtl';
+
   // Determine effective width
   const width = isMobileViewport
     ? expandedWidth
@@ -141,32 +155,65 @@ export function Sidebar({
   return (
     <>
       {/* Mobile backdrop */}
-      {isMobileViewport && isMobileOpen && (
-        <div
-          data-slot="sidebar-backdrop"
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={closeMobile}
-          aria-hidden="true"
-        />
+      {isMobileViewport && (
+        <AnimatedPresence>
+          {isMobileOpen && (
+            <Animated
+              key="sidebar-backdrop"
+              preset="overlay"
+              mode="presence"
+              data-slot="sidebar-backdrop"
+              // No `lg:hidden` here: this only renders when `isMobileViewport`
+              // is true, which follows the provider's configurable
+              // `mobileBreakpoint`. A hardcoded 1024px CSS gate on top of that
+              // disagrees with any custom breakpoint and hides the backdrop
+              // while the drawer is open, leaving no way to dismiss it.
+              className="fixed inset-0 z-40 bg-black/50"
+              onClick={closeMobile}
+              aria-hidden="true"
+            />
+          )}
+        </AnimatedPresence>
       )}
 
       {/* Sidebar */}
-      <nav
+      <Animated
+        ref={navRef}
+        as="nav"
+        preset="drawerStart"
+        mode="toggle"
+        // Only the mobile drawer slides. On desktop the sidebar sits in normal
+        // flow, so it renders as a plain nav rather than being pinned at rest
+        // by a transform that would capture `position: fixed` descendants.
+        // Crossing the breakpoint therefore remounts the nav — deliberate; see
+        // the render branches in `Animated` for why the alternative is worse.
+        enabled={isMobileViewport}
+        open={isMobileOpen}
+        custom={isRtl}
         data-slot="sidebar"
         data-testid={testId}
         className={cn(
           'flex h-screen flex-col',
           'border-e border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
-          'transition-all duration-300 ease-in-out',
           // Mobile positioning (start-pinned; off-canvas direction flips in RTL)
           isMobileViewport && 'fixed start-0 top-0 z-50',
+          // Desktop positioning. Collapsing animates `width`, which motion does
+          // not drive, so this transition belongs on both paths — but scoped to
+          // desktop, where width is the only thing that changes.
+          !isMobileViewport &&
+            'relative transition-[width,min-width] duration-300 ease-in-out',
+          className
+        )}
+        // CSS path only, and only on mobile. `transition-transform` rather than
+        // the `transition-all` this used to carry: `width` is set inline, and
+        // animating it during the slide forces layout every frame, which is what
+        // made the drawer stutter. Transforms alone stay on the compositor.
+        fallbackClassName={cn(
+          isMobileViewport && 'transition-transform duration-300 ease-in-out',
           isMobileViewport &&
             (isMobileOpen
               ? 'translate-x-0'
-              : '-translate-x-full rtl:translate-x-full'),
-          // Desktop positioning
-          !isMobileViewport && 'relative',
-          className
+              : '-translate-x-full rtl:translate-x-full')
         )}
         style={{
           width,
@@ -176,7 +223,7 @@ export function Sidebar({
         aria-label="Main navigation"
       >
         {children}
-      </nav>
+      </Animated>
     </>
   );
 }
@@ -221,7 +268,10 @@ export function SidebarHeader({
       {showMobileClose && isMobileViewport && (
         <button
           onClick={closeMobile}
-          className="-me-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800"
+          // See the backdrop in `Sidebar`: `isMobileViewport` already gates
+          // this, so a hardcoded `lg:hidden` would only ever contradict a
+          // custom `mobileBreakpoint` and strip the drawer's close affordance.
+          className="-me-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
           aria-label="Close navigation"
         >
           <XIcon />
@@ -378,19 +428,33 @@ export function SidebarNavGroup({
             {icon}
           </span>
         )}
-        {!showCollapsed && (
-          <>
-            <span className="flex-1 truncate text-start">{label}</span>
-            <span
+        <AnimatedPresence initial={false}>
+          {!showCollapsed && (
+            <Animated
+              key="label"
+              as="span"
+              preset="sidebarLabel"
+              mode="presence"
+              className="flex-1 truncate text-start"
+            >
+              {label}
+            </Animated>
+          )}
+          {!showCollapsed && (
+            <Animated
+              key="chevron"
+              as="span"
+              preset="sidebarLabel"
+              mode="presence"
               className={cn(
                 'ms-2 flex-shrink-0 transition-transform duration-200',
                 effectiveExpanded && 'rotate-180'
               )}
             >
               <ChevronDownIcon />
-            </span>
-          </>
-        )}
+            </Animated>
+          )}
+        </AnimatedPresence>
       </button>
 
       {/* Group Items */}
@@ -473,23 +537,46 @@ export function SidebarNavItem({
           {icon}
         </span>
       )}
-      {!showCollapsed && (
-        <>
-          <span className="flex-1 truncate text-start">{label}</span>
-          {badge && (
-            <span
-              className={cn(
-                'ms-2 rounded-full px-2 py-0.5 text-xs font-medium',
-                isActive
-                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                  : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
-              )}
-            >
-              {badge}
-            </span>
-          )}
-        </>
-      )}
+      {/*
+        Labels fade out rather than vanishing on the frame the rail starts
+        collapsing. The accessible name is unaffected: once collapsed the
+        control carries `aria-label`, which takes precedence over text content,
+        so a label still finishing its exit is never read twice.
+
+        `initial={false}` because this animates a *state change*, not arrival.
+        Without it every label fades up on first paint, which makes the whole
+        sidebar look like it is loading and leaves the text mid-transparency
+        while assistive tooling and contrast checks are reading it.
+      */}
+      <AnimatedPresence initial={false}>
+        {!showCollapsed && (
+          <Animated
+            key="label"
+            as="span"
+            preset="sidebarLabel"
+            mode="presence"
+            className="flex-1 truncate text-start"
+          >
+            {label}
+          </Animated>
+        )}
+        {!showCollapsed && badge && (
+          <Animated
+            key="badge"
+            as="span"
+            preset="sidebarLabel"
+            mode="presence"
+            className={cn(
+              'ms-2 rounded-full px-2 py-0.5 text-xs font-medium',
+              isActive
+                ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
+            )}
+          >
+            {badge}
+          </Animated>
+        )}
+      </AnimatedPresence>
     </>
   );
 

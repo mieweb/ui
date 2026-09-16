@@ -14,6 +14,10 @@ import {
   SidebarProvider,
   useSidebar,
 } from './index';
+import { Button } from '../Button';
+// Story-only import. Stories are not tsup entries, so this never reaches dist
+// and `motion` stays an optional peer dependency for consumers.
+import { MotionProvider } from '../../motion/MotionProvider';
 
 // =============================================================================
 // Icons
@@ -430,7 +434,18 @@ The application's primary navigation rail. \`SidebarProvider\` holds collapsed /
 - Collapsed items expose their label through \`aria-label\`; icons are decorative. The mobile drawer has a backdrop and close button but no focus trap.
 - Active state is controlled (\`isActive\`); the sidebar does not read the router.
 - Positioned with logical properties (\`start-0\`), so it mirrors in RTL; widths are CSS strings you supply.
-- Only one group expands at a time (accordion); \`defaultExpanded\` seeds the initial one.`,
+- Only one group expands at a time (accordion); \`defaultExpanded\` seeds the initial one.
+
+### Motion
+
+An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--docs) gets animation on both layouts, and they are different animations:
+
+- **Desktop** — labels, badges and group chevrons fade as the rail collapses instead of vanishing on the first frame while the width is still moving. See the **Motion** story.
+- **Mobile** — the drawer springs in and its backdrop fades on both enter and exit. On the CSS path the drawer still slides, as a 300ms transform transition, but the backdrop appears and disappears instantly. See **Motion Drawer**.
+
+The split is deliberate. Motion holds elements at rest with a \`transform\`, and a transformed nav would become the containing block for every \`position: fixed\` descendant inside it — so on desktop the nav itself opts out and its *contents* animate instead. Desktop collapse still animates \`width\` on both paths.
+
+One consequence of opting in: crossing the mobile breakpoint remounts the nav, resetting local state inside it (an uncontrolled search input, scroll position). State that must survive a breakpoint cross — like the provider's own \`isCollapsed\` and \`isMobileOpen\` — belongs above the sidebar. The CSS path never remounts.`,
       },
     },
     catalog: {
@@ -450,6 +465,11 @@ The application's primary navigation rail. \`SidebarProvider\` holds collapsed /
           type: 'composes with',
           target: 'layout-appheader',
           why: 'Sidebar + AppHeader form the app shell: the rail owns route navigation, the header owns brand, search and account triggers (SidebarMobileToggle lives in the header).',
+        },
+        {
+          type: 'composes with',
+          target: 'foundations-motion',
+          why: 'MotionProvider fades the rail\u2019s labels on desktop collapse and upgrades the mobile drawer to a spring slide with a fading backdrop.',
         },
       ],
     },
@@ -589,6 +609,94 @@ export const MobileView: Story = {
       description: {
         story:
           'On mobile viewports, the sidebar becomes a slide-out drawer with a backdrop.',
+      },
+    },
+  },
+};
+
+// ============================================================================
+// Motion
+// ============================================================================
+
+/**
+ * A/B harness for the motion opt-in.
+ *
+ * Identical to `Default` apart from the switch — same provider, same
+ * `ConfigurableSidebarDemo`, no breakpoint override — so both stories below
+ * show the component as it is actually documented.
+ *
+ * Flipping `disabled` remounts the `Animated` elements (they swap between
+ * motion components and plain tags), so compare by repeating the gesture with
+ * the switch set each way rather than flipping it mid-animation.
+ */
+function MotionDemo(args: SidebarStoryArgs & { hint: string }) {
+  const [motionEnabled, setMotionEnabled] = React.useState(true);
+
+  return (
+    <MotionProvider disabled={!motionEnabled}>
+      <SidebarProvider
+        defaultExpandedGroup={
+          args.defaultExpandedGroup === 'none'
+            ? undefined
+            : args.defaultExpandedGroup
+        }
+      >
+        <div className={args.darkMode ? 'dark' : ''}>
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setMotionEnabled((enabled) => !enabled)}
+              aria-pressed={motionEnabled}
+            >
+              Motion: {motionEnabled ? 'on' : 'off'}
+            </Button>
+            <p className="text-muted-foreground text-xs">{args.hint}</p>
+          </div>
+          <ConfigurableSidebarDemo
+            expandedWidth={args.expandedWidth}
+            collapsedWidth={args.collapsedWidth}
+            showSearch={args.showSearch}
+            showBadges={args.showBadges}
+          />
+        </div>
+      </SidebarProvider>
+    </MotionProvider>
+  );
+}
+
+export const Motion: Story = {
+  render: (args) => (
+    <MotionDemo
+      {...args}
+      hint="Collapse the rail with the chevron in the footer, then flip the switch and collapse it again."
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The desktop rail, at the same width and composition as Default. With motion on, labels and badges fade as the rail collapses; with it off they vanish on the first frame while the width is still animating. The provider is normally mounted once at the app root — it is local here so the comparison can be toggled. See Motion Drawer for the mobile half.',
+      },
+    },
+  },
+};
+
+export const MotionDrawer: Story = {
+  render: (args) => (
+    <MotionDemo
+      {...args}
+      hint="Open the drawer with the menu button, then flip the switch and open it again. Dismiss by clicking the backdrop."
+    />
+  ),
+  parameters: {
+    viewport: {
+      defaultViewport: 'mobile1',
+    },
+    docs: {
+      description: {
+        story:
+          'The same demo at a mobile viewport, where the sidebar is an off-canvas drawer. With motion on, the drawer springs in and its backdrop fades on both enter and exit. With it off the drawer still slides, on a 300ms CSS transform transition, but the backdrop appears and disappears instantly — it has no CSS fallback, because an element that unmounts on close cannot fade out. The drawer is the one element that opts out of motion above this breakpoint, so that a transformed nav never becomes the containing block for `position: fixed` descendants — which is why the desktop story animates labels instead.',
       },
     },
   },
