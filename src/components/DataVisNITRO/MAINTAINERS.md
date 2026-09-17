@@ -26,7 +26,7 @@ back here later.
 ## Dependencies — two moving parts
 
 1. **`datavis-ace`** (optional peer dep) — provides `ComputedView`, `Source`.
-2. **`@mieweb/datavis`** (optional peer dep, developed in the `packages/datavis` git submodule) — owns the high-level source/grid/graph wrappers and lower-level DataVis components. Local development links the submodule; published consumers still install it alongside `datavis-ace` and import the supported surface from `@mieweb/ui/datavis`.
+2. **`@mieweb/datavis`** (the bundled implementation, developed in the `packages/datavis` git submodule) — owns the high-level source/grid/graph wrappers and lower-level DataVis components. Local development links the submodule; published consumers import the bundled surface from `@mieweb/ui/datavis` and still install `datavis-ace` as its external peer.
 
 ## Gotchas
 
