@@ -110,9 +110,9 @@ const meta = {
 
 **The standardized chat input.** At \`md+\` \`ChatComposer\` renders as a single-row pill — a \`+\` menu (built-in "Attach files" plus host-supplied \`addMenuItems\`), an auto-growing textarea, an optional mic, and a send button that swaps to **stop** while \`isStreaming\`, side by side with the icon actions pinned to the bottom as the input grows. Below the \`md\` breakpoint the input stacks above the icon row. An optional row below the card holds an **agent selector** (\`showAgentSelector\` + \`agents\`) and a **model selector** (\`showModelSelector\` + \`modelSelectorProps\`, an embedded \`ComposerModelSelector\` rendered with \`variant="ghost"\` so it matches the agent selector — override via \`modelSelectorProps.variant\`), rendered as quiet text on the page background. No large filled buttons: every control is a small ghost icon; the send button fills with the primary color only when there is content to send (or always, with \`canSendWhenEmpty\` — see below).
 
-Sending: Enter sends, Shift+Enter inserts a newline; \`onSend({ content, attachments })\` receives the trimmed text and staged \`File\`s (the \`NewMessage\` shape shared with \`MessageComposer\`, so hosts can migrate mechanically). \`onSend\` may return a promise — the draft clears optimistically and a rejection is reported through \`onError\` with \`reason: 'send-failed'\` (hosts own retry/restore). Attachments arrive from the \`+\` menu picker, paste, or the imperative \`ChatComposerHandle.addFiles()\` (for page-level drop zones); they are validated against \`acceptedFileTypes\` / \`maxFileSize\` / \`maxAttachments\` with failures reported through \`onError(message, { reason, file })\`. \`readOnly\` replaces the whole composer with a notice (\`readOnlyMessage\`). The value is controlled (\`value\` + \`onValueChange\`) or uncontrolled. The textarea auto-grows up to \`maxHeight\` (default 160px; any CSS length works, e.g. \`'40vh'\`).
+Sending: Enter sends, Shift+Enter inserts a newline; \`onSend({ content, attachments })\` receives the trimmed text and staged \`File\`s (the \`NewMessage\` shape shared with \`MessageComposer\`, so hosts can migrate mechanically). \`onSend\` may return a promise — the draft clears optimistically and a rejection is reported through \`onError\` with \`reason: 'send-failed'\` (hosts own retry/restore). Attachments arrive from the \`+\` menu picker, paste, drag-and-drop onto the card, or the imperative \`ChatComposerHandle.addFiles()\` (for page-level drop zones); they are validated against \`acceptedFileTypes\` / \`maxFileSize\` / \`maxAttachments\` with failures reported through \`onError(message, { reason, file })\`. \`mentionOptions\` enables the built-in \`@mention\` autocomplete — the same shared module \`MessageComposer\` uses (typing \`@\` opens a filtered listbox; arrows navigate, Enter/Tab insert, Escape dismisses). \`readOnly\` replaces the whole composer with a notice (\`readOnlyMessage\`). The value is controlled (\`value\` + \`onValueChange\`) or uncontrolled. The textarea auto-grows up to \`maxHeight\` (default 160px; any CSS length works, e.g. \`'40vh'\`).
 
-Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. arrow/Enter navigation for a mention menu, or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting a mention). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding.
+Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. a custom autocomplete overlay's arrow/Enter navigation — host key handling takes priority over the built-in mention menu and Enter-to-send — or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting into the text). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding.
 
 ### Use it when
 
@@ -121,8 +121,9 @@ Host integration escape hatches: \`textareaProps\` spreads extra props onto the 
 
 ### Don't use it when
 
+- You want the **complete multi-participant chat surface** — \`SuperChat\` mounts this composer internally (participants become \`mentionOptions\`, attachments reach the host as base64 \`dataUrl\`s) and adds the thread, header, and Markdown pipeline.
 - You are maintaining an existing \`MessageComposer\` surface and don't need the toolbar/selector rows — migrating is encouraged but not required.
-- You need @mention autocomplete **today** — that still lives in \`MessageComposer\` (planned here; see Limitations).
+- You need a **reply-to preview row** today — that still lives in \`MessageComposer\` (planned here; see Limitations).
 - A single-line command input fits better — \`CommandPalette\` or a plain \`Input\`.
 
 ### Example
@@ -152,13 +153,12 @@ const composerRef = useRef<ChatComposerHandle>(null);
 
 ### Limitations
 
-- **No built-in @mention autocomplete yet** — planned for a follow-up. In the meantime hosts can wire their own overlay via \`textareaProps\` (claim navigation keys with \`preventDefault\`, track the caret with \`onSelect\`) and \`getTextarea()\` (restore the caret after inserting), or use \`MessageComposer\` if its built-in mentions fit.
-- **No reply-to preview row yet** — same plan as mentions.
+- **No reply-to preview row yet** — planned for a follow-up; \`MessageComposer\` has one today.
 - The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. The slot is constrained to a 32px-tall row so it lines up with the other controls; taller content (like \`RecordButton\`) overflows and stays vertically centered without inflating the composer. Interaction state is yours — disable your own control when the composer is \`disabled\`.
 - Attachment upload state is the host's job: files are staged locally and handed over on send as \`File[]\`; there is no built-in upload progress.
-- i18n: all strings are props with English defaults (\`placeholder\`, \`inputLabel\`, \`addMenuLabel\`, \`attachFilesLabel\`, \`micLabel\`, \`sendLabel\`, \`sendingLabel\`, \`stopLabel\`, \`agentSelectorLabel\`, \`readOnlyMessage\`, \`attachmentLimitLabel\`, \`sendFailedLabel\`); file-validation messages from \`onError\` carry a machine-readable \`context.reason\` so hosts can substitute localized copy. RTL: uses logical properties (\`ms-auto\`, \`pe-*\`) throughout.
-- Accessibility: every icon button has an \`aria-label\`; the \`+\` and agent menus are \`Dropdown\`s (Tab-based item access, Escape/outside-click to close — no arrow-key navigation or typeahead yet) that close on selection; \`addMenuItems\` with \`checked\` render as \`menuitemcheckbox\`, agent options as \`menuitemradio\`; the send button exposes \`aria-busy\` while \`isSending\`; the character counter is \`aria-live="polite"\`. The textarea is labelled via \`inputLabel\`.
-- Types exported: \`ChatComposerProps\`, \`ChatComposerHandle\`, \`ChatComposerError\`, \`ChatComposerMenuItem\`, \`ChatComposerAgentOption\`; the send payload reuses \`NewMessage\` from the Messaging module. Entry \`@mieweb/ui\`.`,
+- i18n: all strings are props with English defaults (\`placeholder\`, \`inputLabel\`, \`addMenuLabel\`, \`attachFilesLabel\`, \`micLabel\`, \`sendLabel\`, \`sendingLabel\`, \`stopLabel\`, \`agentSelectorLabel\`, \`readOnlyMessage\`, \`attachmentLimitLabel\`, \`sendFailedLabel\`, \`mentionListLabel\`, \`dropFilesLabel\`); file-validation messages from \`onError\` carry a machine-readable \`context.reason\` so hosts can substitute localized copy. RTL: uses logical properties (\`ms-auto\`, \`pe-*\`) throughout.
+- Accessibility: every icon button has an \`aria-label\`; the \`+\` and agent menus are \`Dropdown\`s (Tab-based item access, Escape/outside-click to close — no arrow-key navigation or typeahead yet) that close on selection; \`addMenuItems\` with \`checked\` render as \`menuitemcheckbox\`, agent options as \`menuitemradio\`; the send button exposes \`aria-busy\` while \`isSending\`; the character counter is \`aria-live="polite"\`. The textarea is labelled via \`inputLabel\`; with \`mentionOptions\` it gains \`aria-autocomplete="list"\` plus \`aria-controls\` / \`aria-activedescendant\` into the mention \`listbox\` (labelled via \`mentionListLabel\`).
+- Types exported: \`ChatComposerProps\`, \`ChatComposerHandle\`, \`ChatComposerError\`, \`ChatComposerMenuItem\`, \`ChatComposerAgentOption\`, \`MentionOption\` (shared with Messaging); the send payload reuses \`NewMessage\` from the Messaging module. Entry \`@mieweb/ui\`.`,
       },
     },
     catalog: {
@@ -167,7 +167,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
         {
           type: 'alternative to',
           target: 'chat-messaging',
-          why: 'MessageComposer is the earlier messaging-thread composer with @mentions and reply-to; ChatComposer is the standardized input with + menu, mic, stop, and agent/model selector rows — prefer it for new work.',
+          why: 'MessageComposer is the earlier messaging-thread composer with reply-to; both share the same @mention autocomplete module; ChatComposer is the standardized input with + menu, mic, stop, drag-and-drop and agent/model selector rows — prefer it for new work.',
         },
         {
           type: 'composes with',
@@ -231,6 +231,33 @@ export const WithAttachments: Story = {
   ),
 };
 
+export const WithMentions: Story = {
+  render: () => (
+    <ChatComposerDemo
+      onSend={() => {}}
+      placeholder="Type @ to mention a participant…"
+      mentionOptions={[
+        {
+          id: 'a1',
+          label: 'Triage Agent',
+          description: 'agent',
+          meta: 'AI',
+        },
+        { id: 'u1', label: 'Dr. Sarah Chen', description: 'physician' },
+        { id: 'u2', label: 'Tom Rivera', description: 'nurse' },
+      ]}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Typing `@` opens the same mention autocomplete used by `MessageComposer` (arrow keys to navigate, Enter/Tab to insert, Escape to dismiss).',
+      },
+    },
+  },
+};
+
 export const Streaming: Story = {
   render: () => (
     <ChatComposerDemo onSend={() => {}} isStreaming onStop={() => {}} />
@@ -269,8 +296,7 @@ export const CharacterLimit: Story = {
       onSend={() => {}}
       maxLength={200}
       showCharacterCount
-      value="Controlled text near the limit…"
-      onValueChange={() => {}}
+      placeholder="Type to see the character counter…"
     />
   ),
 };

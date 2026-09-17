@@ -6020,6 +6020,128 @@ body.condensed [data-slot='composer-send-button'] svg {
   height: 0.875rem !important;
 }
 
+/* @mention suggestion listbox (shared by MessageComposer and ChatComposer) –
+   narrower menu, tighter options */
+body.condensed [data-slot='composer-mention-list'],
+body.condensed [data-slot='chat-composer-mention-list'] {
+  width: 14rem !important;
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='composer-mention-list'] [role='option'],
+body.condensed [data-slot='chat-composer-mention-list'] [role='option'] {
+  padding: 0.25rem 0.5rem !important;
+  gap: 0.375rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='composer-mention-list'] [role='option'] .text-xs,
+body.condensed
+  [data-slot='chat-composer-mention-list']
+  [role='option']
+  .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* --- ChatComposer --- */
+
+/* Card – tighter radius to match the shorter row */
+body.condensed [data-slot='chat-composer-card'] {
+  border-radius: 0.75rem !important;
+}
+
+/* Attachment previews – smaller thumbnails (mirrors composer-attachments) */
+body.condensed [data-slot='chat-composer-attachments'] {
+  padding: 0.375rem 0.375rem 0 !important;
+  gap: 0.25rem !important;
+}
+
+/* Textarea – smaller text, tighter padding */
+body.condensed [data-slot='chat-composer-input'] {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+  padding: 0.375rem 0.5rem 0.25rem !important;
+}
+
+/* Icon buttons (+ / mic / send / stop) – 1.5rem square, smaller glyphs */
+body.condensed [data-slot='chat-composer-add-button'],
+body.condensed [data-slot='chat-composer-mic-button'],
+body.condensed [data-slot='chat-composer-send-button'],
+body.condensed [data-slot='chat-composer-stop-button'] {
+  height: 1.5rem !important;
+  width: 1.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='chat-composer-add-button'] svg,
+body.condensed [data-slot='chat-composer-mic-button'] svg,
+body.condensed [data-slot='chat-composer-send-button'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+body.condensed [data-slot='chat-composer-stop-button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Mic slot (e.g. RecordButton) – match the shorter control row */
+body.condensed [data-slot='chat-composer-mic-slot'] {
+  height: 1.5rem !important;
+}
+
+/* Character counter – smaller */
+body.condensed [data-slot='chat-composer-char-count'] {
+  font-size: 0.5625rem !important;
+}
+
+/* Selector row (agent / model) – tighter row and trigger */
+body.condensed [data-slot='chat-composer-selectors'] {
+  padding: 0.125rem 0.375rem 0 !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='chat-composer-agent-trigger'] {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='chat-composer-agent-trigger'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Embedded model selector (ghost trigger) – match the agent trigger
+   scale; its chevron is already 0.75rem, same as the icon size above. */
+body.condensed
+  [data-slot='chat-composer-selectors']
+  [data-slot='composer-model-selector-trigger'] {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.625rem !important;
+}
+
+/* Read-only banner – compact */
+body.condensed [data-slot='chat-composer'][role='status'] {
+  padding: 0.375rem 0.625rem !important;
+  gap: 0.375rem !important;
+  border-radius: 0.5rem !important;
+}
+
+body.condensed [data-slot='chat-composer'][role='status'] > svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+body.condensed [data-slot='chat-composer-readonly'] {
+  font-size: 0.6875rem !important;
+  /* Explicit: Tailwind 3's text-sm on the root sets a fixed 1.25rem
+     line-height that the span would inherit regardless of its smaller
+     font (Tailwind 4 uses a unitless ratio, so only TW3 needs this). */
+  line-height: 1rem !important;
+}
+
 /* ============================================================================
    Toast – condensed overrides
    ============================================================================ */

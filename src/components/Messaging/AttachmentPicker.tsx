@@ -444,6 +444,8 @@ export interface DragDropZoneProps {
   disabled?: boolean;
   /** Called when an error occurs */
   onError?: (error: string) => void;
+  /** Overlay text shown while dragging files over the zone. @default 'Drop files here' */
+  overlayLabel?: string;
   /** Children to render inside the zone */
   children: React.ReactNode;
   className?: string;
@@ -459,6 +461,7 @@ function DragDropZone({
   maxFiles = 10,
   disabled = false,
   onError,
+  overlayLabel = 'Drop files here',
   children,
   className,
 }: DragDropZoneProps) {
@@ -560,7 +563,7 @@ function DragDropZone({
               />
             </svg>
             <p className="text-primary-700 dark:text-primary-300 mt-2 text-sm font-medium">
-              Drop files here
+              {overlayLabel}
             </p>
           </div>
         </div>

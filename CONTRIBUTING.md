@@ -354,6 +354,7 @@ Current notes:
 | [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                          |
 | [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring                                                     |
 | [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                     |
+| [Messaging](src/components/Messaging/MAINTAINERS.md)                         | Shared @mention module consumed by both `MessageComposer` and `ChatComposer` (run both suites); `DragDropZone` reused as a pure drop target |
 | [Motion](src/motion/MAINTAINERS.md)                                          | Optional `motion` peer isolated to the `@mieweb/ui/motion` entry; cross-entry context pinned to `globalThis`; CSS fallback contract      |
 | [SuperChat](src/components/SuperChat/MAINTAINERS.md)                         | Conversation/inbox/panel surfaces, sanitization contract, plugin dependencies; design rationale in its Mission section                  |
 | [YChart](src/components/YChart/MAINTAINERS.md)                               | Vanilla editor in a submodule, dynamically imported; not in the public API                                                              |

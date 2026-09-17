@@ -119,7 +119,7 @@ const append = (m: SuperChatMessage) =>
 
 ### Limitations
 
-- **Accessibility as implemented:** panel is a \`section role="group"\` labelled by its \`<h2>\`; the thread is \`role="log" aria-label="Messages" aria-live="polite"\` and focusable; each message is \`role="article"\` named "author, time"; system messages are \`role="status"\`. The composer is Messaging's \`MessageComposer\` (textarea "Message", mention listbox "Mention", Enter sends). Copy / Edit / Close / Back are icon buttons with English \`aria-label\`s; the Copy menu appears on hover **or** focus. Nothing moves focus after send.
+- **Accessibility as implemented:** panel is a \`section role="group"\` labelled by its \`<h2>\`; the thread is \`role="log" aria-label="Messages" aria-live="polite"\` and focusable; each message is \`role="article"\` named "author, time"; system messages are \`role="status"\`. The composer is the shared \`ChatComposer\` (textarea "Message", mention listbox "Mention", Enter sends; attachments live behind the \`+\` menu "Add to message" → "Attach files"; internals expose \`chat-composer-*\` data-slots). Copy / Edit / Close / Back are icon buttons with English \`aria-label\`s; the Copy menu appears on hover **or** focus. Nothing moves focus after send.
 - **Security is shared.** Default rendering sanitises with \`rehype-sanitize\`; \`trustedContent\`, a custom \`renderTextContent\`, the Mermaid plugin (\`dangerouslySetInnerHTML\` under \`securityLevel: 'strict'\`) and any plugin's \`sanitizeSchema\` widen the trust boundary — you own it. GenUI widgets render only host-registered, schema-validated components.
 - Copy uses \`navigator.clipboard.write\` (secure context; plain-text fallback). Attachments are delivered to the host as base64 \`dataUrl\`s — upload and swap URLs yourself; \`attachmentCache\` (IndexedDB) is opt-in.
 - **Layout.** Fills its flex parent (\`h-full\`); you must give it a bounded height. Non-virtualised threads render every row (rows are \`React.memo\`; keep message objects referentially stable). \`order="desc"\` anchors to the top.
@@ -148,8 +148,8 @@ const append = (m: SuperChatMessage) =>
         },
         {
           type: 'uses',
-          target: 'chat-messaging',
-          why: 'The compose box is Messaging’s MessageComposer with mentionOptions built from the participants.',
+          target: 'chat-chatcomposer',
+          why: 'The compose box is the shared ChatComposer (attachments behind its `+` menu, `chat-composer-*` data-slots) with mentionOptions built from the participants.',
         },
       ],
     },

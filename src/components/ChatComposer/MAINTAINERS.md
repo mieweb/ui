@@ -38,6 +38,24 @@ Dropdown.tsx `handleClick`). Every item `onClick` must call the corresponding
 'send-failed'`) is the stable machine-readable key hosts localize on. Don't
 change reason strings without a major-version note.
 
+## Shared mention module
+
+`mentionOptions` delegates to `useMentionAutocomplete` / `MentionMenu` in
+`../Messaging/useMentionAutocomplete.tsx` — the **same** module MessageComposer
+uses; its invariants live in
+[Messaging/MAINTAINERS.md](../Messaging/MAINTAINERS.md). ChatComposer-specific
+contract: keyboard priority in the textarea `onKeyDown` is host
+`textareaProps.onKeyDown` (preventDefault claims the event) → mention menu
+navigation → Enter-to-send. Don't reorder.
+
+## Drag-and-drop delegates validation
+
+The card is wrapped in `DragDropZone` (from `../Messaging/AttachmentPicker`)
+purely as a drop target/overlay: no `acceptedTypes`/`maxFileSize`/`onError`
+are passed and `maxFiles` is effectively unbounded, so **all** validation and
+error reporting happen once, in `addFiles`, with the structured error contract
+above. Don't add validation props to the zone — you'd double-report.
+
 ## Extension points (instead of new props)
 
 - `micSlot` — replaces the built-in mic button (e.g. `RecordButton`). The slot

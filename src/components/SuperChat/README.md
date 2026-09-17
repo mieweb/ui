@@ -234,8 +234,8 @@ they map one-to-one to the regions you see on screen.
 │ │                          │ │ │ │        │ │ rendered Markdown       │ │ │ │ │
 │ │                          │ │ │ │        │ └─────────────────────────┘ │ │ │ │
 │ │                          │ │ │ └────────┴─────────────────────────────┘ │ │ │
-│ │                          │ │ ┌─ message-composer ───────────────────────┐ │ │
-│ │                          │ │ │ [ combobox "Message" ……………… ] [ ▷ Send ] │ │ │
+│ │                          │ │ ┌─ chat-composer ──────────────────────────┐ │ │
+│ │                          │ │ │ [+] [ textarea "Message" …… ] [ ▷ Send ] │ │ │
 │ │                          │ │ │    listbox "Mention"                     │ │ │
 │ │                          │ │ └──────────────────────────────────────────┘ │ │
 │ └──────────────────────────┘ └──────────────────────────────────────────────┘ │
@@ -274,7 +274,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | **Header**                   | `superchat-header`            | `header`                      | —                             | `SuperChat`              | Title, participant face-pile, and close affordance.                                |
 | **Participants** (face-pile) | `superchat-participants`      | `div` · `group`               | `Participants`                | `SuperChat`              | Avatars of (up to 6) participants.                                                 |
 | **Thread** (log)             | `superchat-thread`            | `div` · `log`                 | `Messages`                    | `SuperChat`              | Scrollable, append-only message history; `aria-live="polite"`, keyboard-focusable. |
-| **Composer**                 | `message-composer`            | `form`                        | —                             | `SuperChat`              | The input region: mention-aware textarea + send button.                            |
+| **Composer**                 | `chat-composer`               | `div`                         | —                             | `SuperChat`              | The shared `ChatComposer`: `+` menu, mention-aware textarea, send button (sub-parts expose `chat-composer-*` slots). |
 
 ### Message parts
 
@@ -291,6 +291,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 
 | Term               | Element / role          | Accessible name         | Purpose                                                             |
 | ------------------ | ----------------------- | ----------------------- | ------------------------------------------------------------------- |
+| **Add menu**       | `button` → menu         | `Add to message`        | The `+` menu; its **Attach files** `menuitem` opens the file picker. |
 | **Message input**  | `textarea`              | `Message`               | Draft input; mention suggestions appear in the adjacent listbox.      |
 | **Mention menu**   | `ul` · `listbox`        | `Mention`               | `@`-mention autocomplete (keyboard: ↑/↓, Enter/Tab, Esc).           |
 | **Mention option** | `button` · `option`     | participant name        | A single suggestion; `aria-selected` tracks the highlight.          |
@@ -436,11 +437,12 @@ get Markdown. No host wiring is required — the copy control is always availabl
 
 ## Attaching files
 
-Paste a file into the composer (⌘V / Ctrl+V from a screenshot or copied file) and
-it appears as a removable chip above the input. You can also click the **paperclip**
-button next to the send action to pick files from disk (multiple selection
-supported). Images show a thumbnail; other files show a type icon with the file
-name. A draft can be sent with attachments only (no text required).
+Paste a file into the composer (⌘V / Ctrl+V from a screenshot or copied file),
+or drag it onto the composer card, and it appears as a removable chip above the
+input. You can also open the **+** menu ("Add to message") and choose **Attach
+files** to pick files from disk (multiple selection supported). Images show a
+thumbnail; other files show a type icon with the file name. A draft can be sent
+with attachments only (no text required). Files over 25 MiB are rejected.
 
 ### Supported types
 
@@ -462,8 +464,8 @@ the allowed categories with `acceptedFileTypes` (on `SuperChat` or `SuperChatInb
 | `audio`          | `audio/*`         | `audio/*`         |
 | `pdf`            | `application/pdf` | `application/pdf` |
 
-The chosen types drive both the paperclip picker's `accept` filter and which
-pasted files are accepted; anything else is ignored.
+The chosen types drive the file picker's `accept` filter and which pasted or
+dragged-and-dropped files are accepted; anything else is ignored.
 
 Because SuperChat is **controlled**, the component never mutates the thread itself —
 attached files are surfaced to the host through `onMessageSent` so it can embed,

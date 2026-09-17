@@ -527,6 +527,95 @@ describe('SuperChat', () => {
     );
   });
 
+  it('restores the typed text when onMessageSent throws', async () => {
+    const onMessageSent = vi.fn(() => {
+      throw new Error('backend down');
+    });
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const input = screen.getByLabelText('Message');
+    await user.type(input, 'important note');
+    await user.click(screen.getByLabelText('Send message'));
+    // The composer clears optimistically; SuperChat restores the draft on
+    // failure (MessageComposer parity — attachments are not restaged).
+    await waitFor(() => expect(input).toHaveValue('important note'));
+  });
+
+  it('restores the typed text when an async onMessageSent rejects', async () => {
+    const onMessageSent = vi.fn(() =>
+      Promise.reject(new Error('backend down'))
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const input = screen.getByLabelText('Message');
+    await user.type(input, 'important note');
+    await user.click(screen.getByLabelText('Send message'));
+    // The rejection is awaited (not a floating promise), so the draft is
+    // restored just like a synchronous throw.
+    await waitFor(() => expect(input).toHaveValue('important note'));
+  });
+
+  it('does not clobber newer input when a stale send fails', async () => {
+    let rejectSend!: (reason: Error) => void;
+    const onMessageSent = vi.fn(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          rejectSend = reject;
+        })
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const input = screen.getByLabelText('Message');
+    await user.type(input, 'first message');
+    await user.click(screen.getByLabelText('Send message'));
+    // While the send is pending, the user starts a newer draft.
+    await user.type(input, 'newer draft');
+    rejectSend(new Error('backend down'));
+    // The failed send must not overwrite the newer input.
+    await waitFor(() => expect(onMessageSent).toHaveBeenCalledTimes(1));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(input).toHaveValue('newer draft');
+  });
+
+  it('rejects files over the 25 MiB cap', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat conversation={conversation} currentParticipantId="u1" />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const big = new File(['x'], 'huge.png', { type: 'image/png' });
+    Object.defineProperty(big, 'size', { value: 25 * 1024 * 1024 + 1 });
+    const small = new File(['ok'], 'small.png', { type: 'image/png' });
+    await user.upload(fileInput, [big, small]);
+    // The in-cap file stages; the oversize one is rejected (old default cap).
+    await screen.findByLabelText('Remove small.png');
+    expect(screen.queryByLabelText('Remove huge.png')).toBeNull();
+  });
+
   it('attaches a pasted image and sends it with the message', async () => {
     const onMessageSent = vi.fn();
     const { fireEvent } = await import('@testing-library/react');
@@ -541,15 +630,10 @@ describe('SuperChat', () => {
     );
     const input = screen.getByLabelText('Message');
     const file = new File(['fake-bytes'], 'shot.png', { type: 'image/png' });
+    // Browsers expose pasted files via `clipboardData.files`.
     fireEvent.paste(input, {
       clipboardData: {
-        items: [
-          {
-            kind: 'file',
-            type: 'image/png',
-            getAsFile: () => file,
-          },
-        ],
+        files: [file],
       },
     });
     // The pasted image shows up as a removable preview thumbnail.
@@ -573,7 +657,7 @@ describe('SuperChat', () => {
     );
   });
 
-  it('attaches a file chosen via the paperclip and sends it', async () => {
+  it('attaches a file chosen via the + menu file picker and sends it', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
@@ -584,7 +668,9 @@ describe('SuperChat', () => {
         onMessageSent={onMessageSent}
       />
     );
-    expect(screen.getByLabelText('Attach files')).toBeInTheDocument();
+    // Attaching now goes through the composer's `+` menu.
+    await user.click(screen.getByLabelText('Add to message'));
+    await user.click(screen.getByRole('menuitem', { name: 'Attach files' }));
     const fileInput = container.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;

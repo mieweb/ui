@@ -47,7 +47,8 @@ export interface SuperChatInboxProps {
   /** Disable the composer. */
   readOnly?: boolean;
   /**
-   * File categories the composer accepts for paste and the paperclip picker.
+   * File categories the composer accepts for paste, drag-and-drop, and the
+   * file picker in the `+` → “Attach files” menu.
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
@@ -65,6 +66,11 @@ export interface SuperChatInboxProps {
   className?: string;
 
   // --- callbacks (chat-component-compatible) ---
+  /**
+   * Fired when the local user sends a message. If the callback returns a
+   * promise it is awaited, and a rejected send restores the typed text into
+   * the composer (same contract as {@link SuperChatProps.onMessageSent}).
+   */
   onMessageSent?: (
     text: string,
     meta: {

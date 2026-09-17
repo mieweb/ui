@@ -7,10 +7,16 @@ import {
 } from '../AI/ComposerModelSelector';
 import {
   AttachmentPreviewItem,
+  DragDropZone,
   getFileType,
   validateFile,
   generateAttachmentId,
 } from '../Messaging/AttachmentPicker';
+import {
+  MentionMenu,
+  useMentionAutocomplete,
+  type MentionOption,
+} from '../Messaging/useMentionAutocomplete';
 import type { AttachmentType, NewMessage } from '../Messaging/types';
 import {
   AlertTriangleIcon,
@@ -140,7 +146,7 @@ export interface ChatComposerProps {
 
   /** Extra entries for the `+` menu, rendered after the built-in items. */
   addMenuItems?: ChatComposerMenuItem[];
-  /** Enable file attachments (built-in "Attach files" menu item, paste-to-attach, chips). @default true */
+  /** Enable file attachments (built-in "Attach files" menu item, paste-to-attach, drag-and-drop, chips). @default true */
   allowAttachments?: boolean;
   /** Accepted file types for the picker/paste validation (native `accept` tokens). */
   acceptedFileTypes?: string[];
@@ -148,6 +154,13 @@ export interface ChatComposerProps {
   maxFileSize?: number;
   /** Maximum number of staged attachments. @default 10 */
   maxAttachments?: number;
+
+  /**
+   * Candidates for `@mention` autocomplete. When provided (non-empty), typing
+   * `@` opens a suggestion listbox (same behavior as `MessageComposer`).
+   * Omit to disable mentions entirely (default).
+   */
+  mentionOptions?: MentionOption[];
 
   /** Show the built-in mic button. @default false */
   showMic?: boolean;
@@ -215,6 +228,10 @@ export interface ChatComposerProps {
   stopLabel?: string;
   /** Accessible label / empty-state text for the agent selector. @default 'Select agent' */
   agentSelectorLabel?: string;
+  /** Accessible label for the `@mention` suggestion listbox. @default 'Mention' */
+  mentionListLabel?: string;
+  /** Overlay text shown while dragging files over the composer. @default 'Drop files here' */
+  dropFilesLabel?: string;
 
   className?: string;
 }
@@ -275,6 +292,7 @@ export const ChatComposer = React.forwardRef<
     acceptedFileTypes,
     maxFileSize,
     maxAttachments = 10,
+    mentionOptions,
     showMic = false,
     onMicClick,
     micSlot,
@@ -300,6 +318,8 @@ export const ChatComposer = React.forwardRef<
     sendLabel = 'Send message',
     stopLabel = 'Stop generating',
     agentSelectorLabel = 'Select agent',
+    mentionListLabel = 'Mention',
+    dropFilesLabel = 'Drop files here',
     className,
   },
   ref
@@ -341,6 +361,15 @@ export const ChatComposer = React.forwardRef<
     },
     [isControlled, onValueChange]
   );
+
+  // @mention autocomplete (opt-in via `mentionOptions`) — shared with
+  // MessageComposer so both composers behave identically.
+  const mention = useMentionAutocomplete({
+    options: mentionOptions,
+    value,
+    setValue,
+    textareaRef,
+  });
 
   // Auto-grow the textarea. The cap is enforced with CSS max-height so it
   // can be any CSS length (e.g. '40vh'), not just a pixel number.
@@ -528,6 +557,8 @@ export const ChatComposer = React.forwardRef<
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // @mention menu navigation takes priority over send.
+    if (mention.handleKeyDown(event)) return;
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleSend();
@@ -605,7 +636,12 @@ export const ChatComposer = React.forwardRef<
             clean nested rounded rect instead of stacking on the card's
             border. The padding split (cell + textarea) keeps the text in
             place using only standard utilities. */}
-        <div className={cells.input}>
+        <div className={cells.input} ref={mention.anchorRef}>
+          <MentionMenu
+            mention={mention}
+            label={mentionListLabel}
+            dataSlot="chat-composer-mention-list"
+          />
           <textarea
             {...textareaProps}
             ref={textareaRef}
@@ -614,13 +650,24 @@ export const ChatComposer = React.forwardRef<
             onChange={(event) => {
               textareaProps?.onChange?.(event);
               setValue(event.target.value);
+              mention.sync(
+                event.target.value,
+                event.target.selectionStart ?? event.target.value.length
+              );
             }}
             // Host handlers run first; preventDefault() opts out of the
-            // built-in behavior (Enter-to-send, paste-to-attach).
+            // built-in behavior (mention menu, Enter-to-send,
+            // paste-to-attach).
             onKeyDown={(event) => {
               textareaProps?.onKeyDown?.(event);
               if (event.defaultPrevented) return;
               handleKeyDown(event);
+            }}
+            onClick={(event) => {
+              textareaProps?.onClick?.(event);
+              if (event.defaultPrevented) return;
+              const el = event.currentTarget;
+              mention.sync(el.value, el.selectionStart ?? el.value.length);
             }}
             onPaste={(event) => {
               textareaProps?.onPaste?.(event);
@@ -634,6 +681,7 @@ export const ChatComposer = React.forwardRef<
             autoFocus={autoFocus}
             rows={1}
             aria-label={inputLabel}
+            {...mention.inputProps}
             style={{
               ...textareaProps?.style,
               maxHeight:
@@ -882,7 +930,22 @@ export const ChatComposer = React.forwardRef<
   );
 
   // The bordered card holds only the input row(s); the selector row hangs
-  // below it on the page background.
+  // below it on the page background. When attachments are enabled the card
+  // doubles as a drop target; all dropped files run through `addFiles` so
+  // validation and structured `onError` reporting stay in one place (the
+  // zone itself does not validate).
+  const card = (
+    <div
+      data-slot="chat-composer-card"
+      className={cn(
+        'rounded-2xl border border-neutral-200 bg-white shadow-sm',
+        'dark:border-[#2e2e30] dark:bg-[#1c1c1e]'
+      )}
+    >
+      {composerCard}
+    </div>
+  );
+
   return (
     <div
       data-slot="chat-composer"
@@ -892,15 +955,18 @@ export const ChatComposer = React.forwardRef<
         className
       )}
     >
-      <div
-        data-slot="chat-composer-card"
-        className={cn(
-          'rounded-2xl border border-neutral-200 bg-white shadow-sm',
-          'dark:border-[#2e2e30] dark:bg-[#1c1c1e]'
-        )}
-      >
-        {composerCard}
-      </div>
+      {allowAttachments ? (
+        <DragDropZone
+          onFilesDropped={addFiles}
+          maxFiles={Number.MAX_SAFE_INTEGER}
+          disabled={disabled}
+          overlayLabel={dropFilesLabel}
+        >
+          {card}
+        </DragDropZone>
+      ) : (
+        card
+      )}
       {selectorsRow}
     </div>
   );

@@ -612,4 +612,235 @@ describe('ChatComposer', () => {
       'chat-composer'
     );
   });
+
+  describe('@mentions', () => {
+    const mentionOptions = [
+      { id: 'a1', label: 'Triage Agent', description: 'agent' },
+      { id: 'u1', label: 'Trish Nurse' },
+      { id: 'u2', label: 'Sam Clerk' },
+    ];
+
+    it('does not expose combobox semantics when mentionOptions is absent', () => {
+      renderWithTheme(<ChatComposer />);
+      const input = getInput();
+      expect(input).not.toHaveAttribute('aria-autocomplete');
+
+      fireEvent.change(input, { target: { value: 'Hi @tri' } });
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+
+    it('opens a filtered mention menu on @ with combobox ARIA wiring', () => {
+      renderWithTheme(<ChatComposer mentionOptions={mentionOptions} />);
+      const input = getInput();
+      expect(input).toHaveAttribute('aria-autocomplete', 'list');
+
+      fireEvent.change(input, { target: { value: 'Hi @tri' } });
+
+      const menu = screen.getByRole('listbox', { name: 'Mention' });
+      const options = screen.getAllByRole('option');
+      expect(options).toHaveLength(2);
+      expect(options[0]).toHaveAccessibleName(/Triage Agent/);
+      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+      expect(input).toHaveAttribute('aria-controls', menu.id);
+      expect(input).toHaveAttribute('aria-activedescendant', options[0].id);
+    });
+
+    it('navigates with arrows and inserts the highlighted option on Enter without sending', () => {
+      const onSend = vi.fn();
+      renderWithTheme(
+        <ChatComposer onSend={onSend} mentionOptions={mentionOptions} />
+      );
+      const input = getInput();
+      fireEvent.change(input, { target: { value: 'Hi @tri' } });
+
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      expect(screen.getAllByRole('option')[1]).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(onSend).not.toHaveBeenCalled();
+      expect(input).toHaveValue('Hi @Trish ');
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+
+    it('inserts the visibly highlighted option after the list shrinks under the highlight', () => {
+      // Regression: when the host swaps mentionOptions while the menu is open
+      // and the highlight index falls out of range, Enter must insert the
+      // option the clamped highlight points at — the one the user sees.
+      const { rerender } = renderWithTheme(
+        <ChatComposer mentionOptions={mentionOptions} />
+      );
+      const input = getInput();
+      fireEvent.change(input, { target: { value: '@' } });
+      expect(screen.getAllByRole('option')).toHaveLength(3);
+
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      expect(screen.getAllByRole('option')[2]).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      // Host shrinks the option list; highlight (2) is now out of range.
+      rerender(<ChatComposer mentionOptions={mentionOptions.slice(0, 2)} />);
+      const options = screen.getAllByRole('option');
+      expect(options).toHaveLength(2);
+      expect(options[1]).toHaveAttribute('aria-selected', 'true');
+      expect(input).toHaveAttribute('aria-activedescendant', options[1].id);
+
+      fireEvent.keyDown(input, { key: 'Enter' });
+      // Trish Nurse (index 1, the visible highlight) — not Triage Agent (0).
+      expect(input).toHaveValue('@Trish ');
+    });
+
+    it('inserts a mention on mouse down so the textarea keeps focus', () => {
+      renderWithTheme(<ChatComposer mentionOptions={mentionOptions} />);
+      const input = getInput();
+      fireEvent.change(input, { target: { value: '@sam' } });
+
+      fireEvent.mouseDown(screen.getByRole('option', { name: /Sam Clerk/ }));
+      expect(input).toHaveValue('@Sam ');
+    });
+
+    it('closes the menu on Escape without clearing the draft', () => {
+      renderWithTheme(<ChatComposer mentionOptions={mentionOptions} />);
+      const input = getInput();
+      fireEvent.change(input, { target: { value: '@tri' } });
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      expect(input).toHaveValue('@tri');
+    });
+
+    it('labels the listbox via mentionListLabel', () => {
+      renderWithTheme(
+        <ChatComposer
+          mentionOptions={mentionOptions}
+          mentionListLabel="Mencionar"
+        />
+      );
+      fireEvent.change(getInput(), { target: { value: '@tri' } });
+      expect(
+        screen.getByRole('listbox', { name: 'Mencionar' })
+      ).toBeInTheDocument();
+    });
+
+    it('lets host textareaProps handlers claim key events before the mention menu', () => {
+      const onKeyDown = vi.fn((event: React.KeyboardEvent) =>
+        event.preventDefault()
+      );
+      const onSend = vi.fn();
+      renderWithTheme(
+        <ChatComposer
+          onSend={onSend}
+          mentionOptions={mentionOptions}
+          textareaProps={{ onKeyDown }}
+        />
+      );
+      const input = getInput();
+      fireEvent.change(input, { target: { value: '@tri' } });
+
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(onKeyDown).toHaveBeenCalled();
+      // Host claimed the event: no mention insertion, no send.
+      expect(input).toHaveValue('@tri');
+      expect(onSend).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('drag-and-drop', () => {
+    function getCard(container: HTMLElement) {
+      return container.querySelector('[data-slot="chat-composer-card"]')!;
+    }
+
+    it('stages dropped files', () => {
+      const { container } = renderWithTheme(<ChatComposer />);
+      const file = new File(['data'], 'dropped.png', { type: 'image/png' });
+
+      fireEvent.drop(getCard(container), {
+        dataTransfer: { files: [file], items: [], types: ['Files'] },
+      });
+
+      expect(screen.getByText('dropped.png')).toBeInTheDocument();
+    });
+
+    it('shows the drop overlay while dragging, with a customizable label', () => {
+      const { container } = renderWithTheme(
+        <ChatComposer dropFilesLabel="Soltar archivos aquí" />
+      );
+
+      fireEvent.dragEnter(getCard(container), {
+        dataTransfer: {
+          items: [{ kind: 'file' }],
+          files: [],
+          types: ['Files'],
+        },
+      });
+      expect(screen.getByText('Soltar archivos aquí')).toBeInTheDocument();
+
+      fireEvent.dragLeave(getCard(container), {
+        dataTransfer: { items: [], files: [], types: [] },
+      });
+      expect(
+        screen.queryByText('Soltar archivos aquí')
+      ).not.toBeInTheDocument();
+    });
+
+    it('validates dropped files through the standard onError path', () => {
+      const onError = vi.fn();
+      const { container } = renderWithTheme(
+        <ChatComposer acceptedFileTypes={['image/*']} onError={onError} />
+      );
+      const doc = new File(['data'], 'notes.txt', { type: 'text/plain' });
+
+      fireEvent.drop(getCard(container), {
+        dataTransfer: { files: [doc], items: [], types: ['Files'] },
+      });
+
+      expect(onError).toHaveBeenCalledWith(
+        expect.stringContaining('notes.txt'),
+        { reason: 'file-type', file: doc }
+      );
+      expect(screen.queryByText('notes.txt')).not.toBeInTheDocument();
+    });
+
+    it('enforces maxAttachments on drop with the structured limit error', () => {
+      const onError = vi.fn();
+      const { container } = renderWithTheme(
+        <ChatComposer maxAttachments={1} onError={onError} />
+      );
+      const a = new File(['data'], 'a.png', { type: 'image/png' });
+      const b = new File(['data'], 'b.png', { type: 'image/png' });
+
+      fireEvent.drop(getCard(container), {
+        dataTransfer: { files: [a, b], items: [], types: ['Files'] },
+      });
+
+      expect(
+        screen.getByRole('button', { name: /remove a\.png/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /remove b\.png/i })
+      ).not.toBeInTheDocument();
+      expect(onError).toHaveBeenCalledWith('Attachment limit reached (max 1)', {
+        reason: 'attachment-limit',
+      });
+    });
+
+    it('does not stage dropped files when attachments are disabled', () => {
+      const { container } = renderWithTheme(
+        <ChatComposer allowAttachments={false} />
+      );
+      const file = new File(['data'], 'dropped.png', { type: 'image/png' });
+
+      fireEvent.drop(getCard(container), {
+        dataTransfer: { files: [file], items: [], types: ['Files'] },
+      });
+
+      expect(screen.queryByText('dropped.png')).not.toBeInTheDocument();
+    });
+  });
 });
