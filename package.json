@@ -310,9 +310,6 @@
     "yjs": {
       "optional": true
     },
-    "@mieweb/datavis": {
-      "optional": true
-    },
     "@mieweb/q": {
       "optional": true
     },
