@@ -4,13 +4,13 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     'ag-grid': 'src/ag-grid.ts',
-    'datavis': 'src/datavis.ts',
-    'esheet': 'src/esheet.ts',
-    'kerebron': 'src/kerebron.ts',
+    datavis: 'src/datavis.ts',
+    esheet: 'src/esheet.ts',
+    kerebron: 'src/kerebron.ts',
     // Opt-in animation layer. Separate entry so `motion` stays out of the main
     // bundle for apps that never import it. See: src/motion/entry.ts
-    'motion': 'src/motion/entry.ts',
-    'q': 'src/q.ts',
+    motion: 'src/motion/entry.ts',
+    q: 'src/q.ts',
     'hooks/index': 'src/hooks/index.ts',
     'utils/index': 'src/utils/index.ts',
     'tailwind-preset': 'src/tailwind-preset.ts',
@@ -41,7 +41,8 @@ export default defineConfig({
       'src/components/FilterSummaryBar/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
     'components/FreshnessBadge/index': 'src/components/FreshnessBadge/index.ts',
-    'components/GlossaryTooltip/index': 'src/components/GlossaryTooltip/index.ts',
+    'components/GlossaryTooltip/index':
+      'src/components/GlossaryTooltip/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
     'components/KeyboardShortcutsOverlay/index':
       'src/components/KeyboardShortcutsOverlay/index.ts',
@@ -72,7 +73,8 @@ export default defineConfig({
     'components/Sparkline/index': 'src/components/Sparkline/index.ts',
     'components/Spinner/index': 'src/components/Spinner/index.ts',
     'components/SuperChat/index': 'src/components/SuperChat/index.ts',
-    'components/SuperChat/plugins/index': 'src/components/SuperChat/plugins/index.ts',
+    'components/SuperChat/plugins/index':
+      'src/components/SuperChat/plugins/index.ts',
     'components/Switch/index': 'src/components/Switch/index.ts',
     'components/Table/index': 'src/components/Table/index.ts',
     'components/Tabs/index': 'src/components/Tabs/index.ts',
@@ -92,7 +94,9 @@ export default defineConfig({
   },
   format: ['esm', 'cjs'],
   target: 'es2022',
-  dts: true,
+  // Inline @mieweb/datavis's types (it's a bundled submodule, not an installed
+  // package) so the datavis entry's .d.ts does not re-export from it.
+  dts: { resolve: [/^@mieweb\/datavis/] },
   tsconfig: 'tsconfig.build.json',
   sourcemap: true,
   clean: true,
@@ -102,7 +106,10 @@ export default defineConfig({
     'ag-grid-community',
     'ag-grid-react',
     '@mieweb/ui',
-    '@mieweb/datavis',
+    // @mieweb/datavis is a git submodule (link:), not a published package, so it
+    // is bundled into the datavis entry — like its CSS — instead of externalized.
+    // Its shared peers (react*, datavis-ace, @dnd-kit/*, lucide-react) stay
+    // external below/via root deps; datavis-only libs are baked in.
     '@mieweb/q',
     'datavis-ace',
     'mermaid',
