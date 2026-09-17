@@ -387,7 +387,7 @@ export const CombinedGraphAndGrid: Story = {
     docs: {
       description: {
         story:
-          'Matches the primary standalone demo layout: graph controls and a full-featured grid share one source/view, so filters, grouping, pivoting, aggregates, perspectives, and chart exploration can be exercised together.',
+          'Matches the primary standalone demo layout: graph controls and a full-featured grid share one source/view, so filters, grouping, pivoting, aggregates, and chart exploration can be exercised together. Saved perspectives require a bound `Prefs` instance — see the **DataVis NITRO** perspectives story.',
       },
     },
   },
