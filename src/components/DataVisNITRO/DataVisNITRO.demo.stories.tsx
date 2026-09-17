@@ -237,11 +237,19 @@ const AVERAGE_SALARY: DataVisNitroAggregate[] = [
 ];
 
 const meta: Meta<typeof DataVisNitroGrid> = {
-  title: 'Components/Text & Data Display/DataVis NITRO/Demo Coverage',
+  id: 'grids-datavis-nitro-demos',
+  title: 'Components/Grids/DataVis NITRO Demos',
   component: DataVisNitroGrid,
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
     a11y: { disable: true },
+    docs: {
+      description: {
+        component:
+          'Standalone demo coverage for DataVis NITRO: wide column sets, grouping and aggregates rendered from local datasets so the declarative demo APIs stay exercised in Storybook. See **Components/Grids/DataVis NITRO** for the primary component documentation and selection guidance.',
+      },
+    },
   },
   decorators: [
     (Story) => (
