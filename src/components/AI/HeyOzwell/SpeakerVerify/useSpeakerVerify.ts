@@ -83,40 +83,59 @@ export interface SpeakerVerifyHandle {
 
 interface SVApi {
   ready: () => Promise<unknown>;
+  loadNamespace: (namespace?: string) => Promise<void>;
   enroll: (
     phrase: string,
     u: { samples: Float32Array; sampleRate: number }[],
-    opts?: EnrollOpts
+    opts?: EnrollOpts,
+    namespace?: string
   ) => { n: number; conditions: number; voiceId: string };
-  verify: (phrase: string, s: Float32Array, sr: number) => VerifyResult;
-  conditionCount: (phrase: string) => number;
+  verify: (
+    phrase: string,
+    s: Float32Array,
+    sr: number,
+    namespace?: string
+  ) => VerifyResult;
+  conditionCount: (phrase: string, namespace?: string) => number;
   embed: (samples: Float32Array, sampleRate: number) => Float32Array | null;
-  identify: (samples: Float32Array, sampleRate: number) => VoiceMatch | null;
-  listVoices: () => VoiceInfo[];
-  removeVoice: (voiceId: string) => void;
-  renameVoice: (voiceId: string, label: string) => void;
-  clearEnrollment: () => void;
-  threshold: number; // raw-cosine gate (default 0.45)
-  znormThreshold: number; // z-score (AS-norm) gate (default 1.5)
-  useAsnorm: boolean; // gate on z-score instead of raw cosine
+  identify: (
+    samples: Float32Array,
+    sampleRate: number,
+    namespace?: string
+  ) => VoiceMatch | null;
+  listVoices: (namespace?: string) => VoiceInfo[];
+  removeVoice: (voiceId: string, namespace?: string) => void;
+  renameVoice: (voiceId: string, label: string, namespace?: string) => void;
+  clearEnrollment: (namespace?: string) => void;
+  threshold: number;
+  znormThreshold: number;
+  useAsnorm: boolean;
 }
 
 export interface UseSpeakerVerifyOpts {
   /** Set false to skip loading the ~50 MB sherpa/TitaNet runtime (e.g. when the doctor-only gate is off).
    *  Defaults to true so existing callers are unchanged. */
   enabled?: boolean;
+  /** Isolates persisted enrollment from other users of the same browser profile. */
+  voiceprintNamespace?: string;
 }
 
 export function useSpeakerVerify(
   opts: UseSpeakerVerifyOpts = {}
 ): SpeakerVerifyHandle {
-  const { enabled = true } = opts;
+  const { enabled = true, voiceprintNamespace } = opts;
   const [ready, setReady] = React.useState(false);
+  const [loadedNamespace, setLoadedNamespace] = React.useState<
+    string | undefined
+  >();
   const [error, setError] = React.useState<string | null>(null);
   const svRef = React.useRef<SVApi | null>(null);
 
   React.useEffect(() => {
     if (!enabled) return;
+    setReady(false);
+    setError(null);
+    svRef.current = null;
     let cancelled = false;
     (async () => {
       try {
@@ -126,8 +145,10 @@ export function useSpeakerVerify(
           .SpeakerVerify;
         if (!sv) throw new Error('SpeakerVerify failed to initialize');
         await sv.ready();
+        await sv.loadNamespace(voiceprintNamespace);
         if (cancelled) return;
         svRef.current = sv;
+        setLoadedNamespace(voiceprintNamespace);
         console.log('[speaker] TitaNet ready');
         setReady(true);
       } catch (e) {
@@ -137,26 +158,35 @@ export function useSpeakerVerify(
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [enabled, voiceprintNamespace]);
+
+  const scopedApi =
+    enabled && ready && loadedNamespace === voiceprintNamespace
+      ? svRef.current
+      : null;
 
   return {
-    ready,
+    ready: scopedApi !== null,
     error,
     enroll: (phrase, utterances, opts) =>
-      svRef.current?.enroll(phrase, utterances, opts) ?? null,
+      scopedApi?.enroll(phrase, utterances, opts, voiceprintNamespace) ?? null,
     verify: (phrase, samples, sampleRate) =>
-      svRef.current?.verify(phrase, samples, sampleRate) ?? null,
-    conditionCount: (phrase) => svRef.current?.conditionCount(phrase) ?? 0,
+      scopedApi?.verify(phrase, samples, sampleRate, voiceprintNamespace) ??
+      null,
+    conditionCount: (phrase) =>
+      scopedApi?.conditionCount(phrase, voiceprintNamespace) ?? 0,
     embed: (samples, sampleRate) =>
-      svRef.current?.embed(samples, sampleRate) ?? null,
+      scopedApi?.embed(samples, sampleRate) ?? null,
     identify: (samples, sampleRate) =>
-      svRef.current?.identify(samples, sampleRate) ?? null,
-    listVoices: () => svRef.current?.listVoices() ?? [],
-    removeVoice: (voiceId) => svRef.current?.removeVoice(voiceId),
-    renameVoice: (voiceId, label) => svRef.current?.renameVoice(voiceId, label),
-    clear: () => svRef.current?.clearEnrollment(),
+      scopedApi?.identify(samples, sampleRate, voiceprintNamespace) ?? null,
+    listVoices: () => scopedApi?.listVoices(voiceprintNamespace) ?? [],
+    removeVoice: (voiceId) =>
+      scopedApi?.removeVoice(voiceId, voiceprintNamespace),
+    renameVoice: (voiceId, label) =>
+      scopedApi?.renameVoice(voiceId, label, voiceprintNamespace),
+    clear: () => scopedApi?.clearEnrollment(voiceprintNamespace),
     setGates: (g) => {
-      const sv = svRef.current;
+      const sv = scopedApi;
       if (!sv) return;
       if (g.cosine != null) sv.threshold = g.cosine;
       if (g.znorm != null) sv.znormThreshold = g.znorm;
