@@ -2,11 +2,13 @@ import React, {
   type ReactNode,
   useRef,
   useCallback,
+  useId,
   useState,
   useEffect,
 } from 'react';
 import { cn } from '../../utils/cn';
 import { useDirection } from '../../hooks/useDirection';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { Animated, AnimatedPresence } from '../../motion';
 import { useSidebar } from './SidebarProvider';
 
@@ -374,6 +376,21 @@ export interface SidebarNavGroupProps {
   groupId?: string;
   /** Additional CSS classes */
   className?: string;
+  /**
+   * Keep items mounted when the group is collapsed, hidden via `hidden`.
+   *
+   * For groups whose children own DOM state that a remount would destroy —
+   * uncontrolled inputs, media playback position, an editor instance — or that
+   * need to stay findable by in-page search.
+   *
+   * Mirrors `CollapsibleContent`'s prop of the same name, and carries the same
+   * caveat: this path does **not** animate. `hidden` is `display: none`, which
+   * an animated height cannot run through, and dropping it for the duration
+   * would let keyboard users tab into content that is visually collapsed. Not
+   * animating is the safe answer until `hidden` can be sequenced around the
+   * animation.
+   */
+  forceMount?: boolean;
 }
 
 export function SidebarNavGroup({
@@ -383,10 +400,16 @@ export function SidebarNavGroup({
   defaultExpanded = false,
   groupId,
   className,
+  forceMount,
 }: SidebarNavGroupProps): React.JSX.Element {
   const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } =
     useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  const contentId = useId();
+  const groupRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Determine if this group is expanded
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
@@ -395,20 +418,86 @@ export function SidebarNavGroup({
   const [localExpanded, setLocalExpanded] = useState(defaultExpanded);
   const effectiveExpanded = groupId ? isExpanded : localExpanded;
 
+  /*
+   * Collapsing unmounts the panel, which destroys whatever inside it had focus.
+   * Left alone, focus falls back to `<body>` and the next Tab restarts from the
+   * top of the document — a silent loss of keyboard position.
+   *
+   * Reachable without the user doing anything unusual: in `groupId` accordion
+   * mode, expanding one group collapses its siblings, so focus parked in a
+   * sibling evaporates on a click the user made somewhere else entirely.
+   *
+   * Whether focus was inside has to be recorded *before* the collapse. By the
+   * time an effect can observe it, React has already removed the focused node
+   * and `activeElement` is `<body>`, so a check made there always answers "no"
+   * and the restore never fires.
+   *
+   * Two recorders, because neither covers both cases:
+   *
+   * - `captureFocusInside()` runs synchronously in the toggle handler, before
+   *   the state change. This is the common path and it depends on nothing but
+   *   `document.activeElement`, so it still works where focus events do not
+   *   fire at all — an unfocused window, which is also what most automated
+   *   browsers run in.
+   * - the `focusin` listener covers collapses this component did not initiate,
+   *   where there is no handler to hook: an accordion sibling opening, or a
+   *   controlled `groupId` changing underneath it.
+   */
+  const focusWasInsideRef = useRef(false);
+
+  const captureFocusInside = useCallback(() => {
+    const active = document.activeElement;
+    focusWasInsideRef.current =
+      active !== triggerRef.current &&
+      groupRef.current?.contains(active) === true;
+  }, []);
+
+  useEffect(() => {
+    if (!effectiveExpanded) return;
+
+    function trackFocus(event: FocusEvent) {
+      const target = event.target as Node | null;
+      focusWasInsideRef.current =
+        target !== triggerRef.current &&
+        groupRef.current?.contains(target) === true;
+    }
+
+    document.addEventListener('focusin', trackFocus);
+    return () => document.removeEventListener('focusin', trackFocus);
+  }, [effectiveExpanded]);
+
+  useEffect(() => {
+    if (effectiveExpanded || forceMount) return;
+    if (focusWasInsideRef.current) {
+      focusWasInsideRef.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [effectiveExpanded, forceMount]);
+
   const handleToggle = useCallback(() => {
+    captureFocusInside();
     if (groupId) {
       toggleGroup(groupId);
     } else {
       setLocalExpanded((prev) => !prev);
     }
-  }, [groupId, toggleGroup]);
+  }, [captureFocusInside, groupId, toggleGroup]);
+
+  const items = <div className="mt-1 ps-2">{children}</div>;
 
   return (
-    <div data-slot="sidebar-nav-group" className={cn('mb-2', className)}>
+    <div
+      ref={groupRef}
+      data-slot="sidebar-nav-group"
+      className={cn('mb-2', className)}
+    >
       {/* Group Header */}
       <button
+        ref={triggerRef}
         data-slot="sidebar-nav-group-button"
         onClick={handleToggle}
+        aria-expanded={showCollapsed ? undefined : effectiveExpanded}
+        aria-controls={showCollapsed ? undefined : contentId}
         className={cn(
           'flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold',
           'text-neutral-700 dark:text-neutral-300',
@@ -458,18 +547,46 @@ export function SidebarNavGroup({
       </button>
 
       {/* Group Items */}
-      {!showCollapsed && (
-        <div
-          className={cn(
-            'overflow-hidden transition-all duration-300',
-            effectiveExpanded
-              ? 'mt-1 max-h-[1000px] opacity-100'
-              : 'max-h-0 opacity-0'
-          )}
-        >
-          <div className="ps-2">{children}</div>
-        </div>
-      )}
+      {!showCollapsed &&
+        (forceMount ? (
+          <div
+            id={contentId}
+            data-slot="sidebar-nav-group-items"
+            data-state={effectiveExpanded ? 'open' : 'closed'}
+            hidden={!effectiveExpanded}
+          >
+            {items}
+          </div>
+        ) : (
+          <AnimatedPresence initial={false}>
+            {effectiveExpanded && (
+              <Animated
+                key="items"
+                id={contentId}
+                data-slot="sidebar-nav-group-items"
+                data-state="open"
+                preset="collapse"
+                mode="presence"
+                /*
+                 * `collapse` animates height, which `MotionConfig
+                 * reducedMotion="user"` does not treat as a transform or layout
+                 * animation and so leaves running. Honouring the preference is
+                 * the component's job here.
+                 */
+                enabled={!prefersReducedMotion}
+                /*
+                 * Required by the preset — without it the items spill past the
+                 * box while its height is still travelling. The group's own
+                 * `mt-1` lives on the inner wrapper so the margin collapses
+                 * with the height instead of surviving it.
+                 */
+                className="overflow-hidden"
+              >
+                {items}
+              </Animated>
+            )}
+          </AnimatedPresence>
+        ))}
     </div>
   );
 }
