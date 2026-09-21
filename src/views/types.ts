@@ -122,45 +122,57 @@ export function toDate(value: Date | string | null | undefined): Date | null {
  * records contain — "results ready" is a plausible status — and a space inside
  * an `aria-labelledby` target is read as a separator, silently unlabelling the
  * element it points at.
+ *
+ * Leading and trailing dashes are left alone: trimming them needs an anchored
+ * `-+$`, which backtracks polynomially on a run of dashes, and the prefix
+ * already guarantees the id starts with a letter.
  */
 export function domId(prefix: string, raw: string): string {
-  const safe = raw.replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '');
+  const safe = raw.replace(/[^\w-]+/g, '-');
   return `${prefix}-${safe || 'all'}`;
 }
 
-/** Tailwind classes per accent, so every view tints the same way. */
+/**
+ * Tailwind classes per accent, so every view tints the same way.
+ *
+ * There is deliberately no text colour here. `--mieweb-success` and friends are
+ * fill tokens: as ink on a surface — even their own 10% wash — they fail WCAG AA
+ * contrast, which axe catches as a serious violation. So an accent is carried by
+ * a wash, a border and a solid marker, and label text always uses a foreground
+ * token. That also means colour is never the only signal.
+ */
 export const accentClasses: Record<
   Accent,
-  { text: string; bg: string; border: string }
+  { tint: string; border: string; marker: string }
 > = {
   primary: {
-    text: 'text-primary-600 dark:text-primary-400',
-    bg: 'bg-primary-500/10',
+    tint: 'bg-primary-500/10',
     border: 'border-primary-500/40',
+    marker: 'bg-primary-500',
   },
   success: {
-    text: 'text-success',
-    bg: 'bg-success/10',
+    tint: 'bg-success/10',
     border: 'border-success/40',
+    marker: 'bg-success',
   },
   warning: {
-    text: 'text-warning',
-    bg: 'bg-warning/10',
+    tint: 'bg-warning/10',
     border: 'border-warning/40',
+    marker: 'bg-warning',
   },
   destructive: {
-    text: 'text-destructive',
-    bg: 'bg-destructive/10',
+    tint: 'bg-destructive/10',
     border: 'border-destructive/40',
+    marker: 'bg-destructive',
   },
   info: {
-    text: 'text-info',
-    bg: 'bg-info/10',
+    tint: 'bg-info/10',
     border: 'border-info/40',
+    marker: 'bg-info',
   },
   neutral: {
-    text: 'text-muted-foreground',
-    bg: 'bg-muted',
+    tint: 'bg-muted',
     border: 'border-border',
+    marker: 'bg-muted-foreground',
   },
 };

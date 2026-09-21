@@ -227,11 +227,8 @@ export function ListView<T>({
                 }
                 data-slot="list-view-group-header"
                 className={cn(
-                  'border-border bg-muted flex w-full items-center gap-2 border-b px-3 py-2 text-start text-xs font-semibold tracking-wide uppercase',
+                  'border-border bg-muted text-muted-foreground flex w-full items-center gap-2 border-b px-3 py-2 text-start text-xs font-semibold tracking-wide uppercase',
                   'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset',
-                  group.accent
-                    ? accentClasses[group.accent].text
-                    : 'text-muted-foreground',
                   classNames?.groupHeader
                 )}
               >
@@ -242,6 +239,15 @@ export function ListView<T>({
                   />
                 ) : (
                   <ChevronDownIcon className="size-3.5" aria-hidden />
+                )}
+                {group.accent && (
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'size-2 shrink-0 rounded-full',
+                      accentClasses[group.accent].marker
+                    )}
+                  />
                 )}
                 <span>{group.label}</span>
                 <span className="ms-auto font-normal tabular-nums">
@@ -264,9 +270,7 @@ export function ListView<T>({
                         aria-hidden
                         className={cn(
                           'mt-1.5 size-2 shrink-0 rounded-full',
-                          accentClasses[accent].bg,
-                          'ring-1',
-                          accentClasses[accent].border
+                          accentClasses[accent].marker
                         )}
                       />
                     )}

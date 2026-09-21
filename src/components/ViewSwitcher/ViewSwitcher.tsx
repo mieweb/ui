@@ -66,7 +66,7 @@ const VIEW_META: Record<
 const viewSwitcherVariants = cva(
   [
     'inline-flex items-center gap-0.5',
-    'rounded-lg border border-border bg-card p-0.5',
+    'rounded-lg border border-border bg-muted p-0.5',
     'overflow-x-auto',
   ],
   {
@@ -95,8 +95,10 @@ const optionVariants = cva(
         md: 'min-h-10 px-2.5 py-2 sm:min-h-0 sm:px-3 sm:py-1.5',
       },
       active: {
-        true: 'bg-primary-500/10 text-primary-600 dark:text-primary-400',
-        false: 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        // A raised surface rather than tinted ink: an accent colour as text on
+        // its own wash fails AA contrast. Same treatment as Tabs' pills.
+        true: 'bg-background text-foreground shadow-sm',
+        false: 'text-muted-foreground hover:text-foreground',
       },
     },
     defaultVariants: { size: 'md', active: false },

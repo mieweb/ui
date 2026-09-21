@@ -328,9 +328,8 @@ export function CalendarView<T>({
                         </span>
                       );
                       const classes = cn(
-                        'block w-full rounded px-1 py-0.5 text-start text-xs',
-                        accentClasses[accent].bg,
-                        accentClasses[accent].text,
+                        'block w-full rounded px-1 py-0.5 text-start text-xs text-foreground',
+                        accentClasses[accent].tint,
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                         classNames?.entry,
                         selected &&

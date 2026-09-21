@@ -173,9 +173,8 @@ function BoardCard({
                 <span
                   aria-hidden
                   className={cn(
-                    'mt-1.5 size-2 shrink-0 rounded-full ring-1',
-                    accentClasses[accent].bg,
-                    accentClasses[accent].border
+                    'mt-1.5 size-2 shrink-0 rounded-full',
+                    accentClasses[accent].marker
                   )}
                 />
               )}
@@ -233,11 +232,17 @@ function BoardColumn({
           id={domId('board-view-column', stage.id)}
           data-slot="board-view-column-header"
           className={cn(
-            'border-border flex items-center gap-2 border-b px-3 py-2 text-xs font-semibold tracking-wide uppercase',
-            accentClasses[accent].text,
+            'border-border text-muted-foreground flex items-center gap-2 border-b px-3 py-2 text-xs font-semibold tracking-wide uppercase',
             classNames?.columnHeader
           )}
         >
+          <span
+            aria-hidden
+            className={cn(
+              'size-2 shrink-0 rounded-full',
+              accentClasses[accent].marker
+            )}
+          />
           <span>{stage.label}</span>
           <span className="ms-auto font-normal tabular-nums">{count}</span>
         </span>

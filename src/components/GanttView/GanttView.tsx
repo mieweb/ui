@@ -289,9 +289,8 @@ export function GanttView<T>({
                     </span>
                   );
                   const classes = cn(
-                    'flex h-6 items-center rounded-full border',
-                    accentClasses[accent].bg,
-                    accentClasses[accent].text,
+                    'flex h-6 items-center rounded-full border text-foreground',
+                    accentClasses[accent].tint,
                     accentClasses[accent].border,
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     classNames?.bar,

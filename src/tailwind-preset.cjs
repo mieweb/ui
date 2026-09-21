@@ -457,13 +457,16 @@ module.exports = {
     'border-dashed',
     'border-2',
     'bg-primary-500/10',
-    // Modules/Views — accentClasses resolves an Accent token name to this set,
-    // so none of them appear literally in a consumer's own source.
+    // Modules/Views — accentClasses resolves an Accent token name to a wash, a
+    // border and a solid marker, so none of them appear literally in a
+    // consumer's own source. The wash and marker classes are listed elsewhere
+    // in this file; these borders and the neutral marker are not.
     'border-primary-500/40',
     'border-success/40',
     'border-warning/40',
     'border-destructive/40',
     'border-info/40',
+    'bg-muted-foreground',
     'gap-0.5',
     'p-0.5',
     // DockablePanel — full-screen dialog that collapses to a bottom-right dock:
