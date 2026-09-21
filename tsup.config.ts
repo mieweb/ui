@@ -46,6 +46,7 @@ export default defineConfig({
     'components/KeyboardShortcutsOverlay/index':
       'src/components/KeyboardShortcutsOverlay/index.ts',
     'components/Label/index': 'src/components/Label/index.ts',
+    'components/ListView/index': 'src/components/ListView/index.ts',
     'components/Markdown/index': 'src/components/Markdown/index.ts',
     'components/MediaEditor/index': 'src/components/MediaEditor/index.ts',
     'components/MediaPlayer/index': 'src/components/MediaPlayer/index.ts',
@@ -81,6 +82,7 @@ export default defineConfig({
     'components/ThemeProvider/index': 'src/components/ThemeProvider/index.ts',
     'components/Toggle/index': 'src/components/Toggle/index.ts',
     'components/Tooltip/index': 'src/components/Tooltip/index.ts',
+    'components/ViewSwitcher/index': 'src/components/ViewSwitcher/index.ts',
     'components/TranscriptView/index': 'src/components/TranscriptView/index.ts',
     'components/VisuallyHidden/index': 'src/components/VisuallyHidden/index.ts',
     // Brand system entries for tree-shaking

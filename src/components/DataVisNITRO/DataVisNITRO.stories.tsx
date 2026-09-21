@@ -112,6 +112,11 @@ The source owns the data lifecycle; the grid is presentational. Keep application
       relationships: [
         {
           type: 'alternative to',
+          target: 'views-listview',
+          why: 'ListView is a read-down layout of the same records; NITRO whenever they must be sorted, filtered, paged or exported.',
+        },
+        {
+          type: 'alternative to',
           target: 'grids-table',
           why: 'Table is for a few static rows; NITRO whenever users browse, sort, filter or export records.',
         },

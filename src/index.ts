@@ -92,6 +92,7 @@ export * from './components/InvoicePaymentPage';
 // InvoiceView exports InvoiceLineItem which conflicts with InvoicePaymentPage
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
+export * from './components/ListView';
 export * from './components/LoadingPage';
 export * from './components/Markdown';
 export * from './components/MedicationList';
@@ -194,6 +195,9 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
+export * from './components/ViewSwitcher';
+// The contract every Modules/Views component reads through.
+export * from './views/types';
 export * from './components/TranscriptView';
 // `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
 // TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
