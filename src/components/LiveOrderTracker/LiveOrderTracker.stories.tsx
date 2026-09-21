@@ -20,6 +20,11 @@ const minutesAgo = (m: number) => new Date(now - m * 60_000).toISOString();
 
 const sample: LiveOrderItem[] = [
   {
+    id: 'o6', orderNumber: 'BH-10239', status: 'order_refused',
+    employeeName: 'Casey Green', serviceSummary: 'DOT Physical',
+    providerName: 'Midwest Occ Health', updatedAt: minutesAgo(30),
+  },
+  {
     id: 'o1',
     orderNumber: 'BH-10234',
     status: 'order_sent',

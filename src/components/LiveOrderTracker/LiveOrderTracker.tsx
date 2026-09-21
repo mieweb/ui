@@ -365,11 +365,14 @@ export function LiveOrderTracker({
     return map;
   }, [orders, columns]);
 
+  const desktopColumns = columns.length === 6 ? 'xl:grid-cols-6' : 'xl:grid-cols-5';
+
   if (loading) {
     return (
       <div
         className={cn(
-          'grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
+          'grid gap-3 sm:grid-cols-2 lg:grid-cols-3',
+          desktopColumns,
           className
         )}
       >
@@ -391,10 +394,10 @@ export function LiveOrderTracker({
     <div
       className={cn(
         // Mobile-first: stack columns vertically so there is no horizontal
-        // scrolling on phones/tablets. On lg+ switch to a 2-up layout and
-        // graduate to the full 5-column Kanban at xl so narrower desktops
-        // (laptops + sidebars) don't overflow their container.
-        'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
+        // scrolling on phones/tablets. Use three columns at lg and keep all
+        // six default statuses on one row at xl.
+        'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3',
+        desktopColumns,
         className
       )}
     >

@@ -39,6 +39,7 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+    'xl:grid-cols-6',
   'end-16', 'end-24',
   'bg-gradient-brand', 'bg-gradient-brand-strong', 'shadow-glow', 'hover:shadow-glow-hover',
 

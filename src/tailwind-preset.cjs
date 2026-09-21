@@ -10,6 +10,7 @@ module.exports = {
   // Safelist classes used by @mieweb/ui components that may not be detected
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
+    'xl:grid-cols-6',
     'bg-gradient-brand', 'bg-gradient-brand-strong', 'shadow-glow', 'hover:shadow-glow-hover', 'end-16', 'end-24',
     // CaseManagementHeader — logical spacing, details grid, responsive
     // built-in actions (icon-only below md):

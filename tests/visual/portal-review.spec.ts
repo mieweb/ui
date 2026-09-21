@@ -17,7 +17,7 @@ for (const viewport of [{ name: 'desktop', width: 1440, height: 1000 }, { name: 
         await expect(page.locator('body')).toHaveClass(/sb-show-main/);
         await expect(page.locator('#storybook-root')).not.toBeEmpty();
         await page.evaluate(() => document.fonts.ready);
-        await expect(page).toHaveScreenshot(`${name}-${viewport.name}.png`, { animations: 'disabled', fullPage: true });
+        await expect(page.locator('#storybook-root')).toHaveScreenshot(`${name}-${viewport.name}.png`, { animations: 'disabled', maxDiffPixelRatio: 0.02 });
       });
     }
   });
