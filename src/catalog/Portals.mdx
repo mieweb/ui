@@ -1,0 +1,14 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Portals/Overview" />
+
+# Portals
+
+Use PortalShell for workspace structure and HeroActionCard for a prominent task inside that structure. Neither component authorizes access or fetches application data.
+
+| Component | Choose it when | Caller owns |
+| --- | --- | --- |
+| [PortalShell](?path=/docs/layout-portalshell--docs) | Desktop sidebar and mobile navigation need a shared frame | Route state, permitted navigation and page content |
+| [HeroActionCard](?path=/docs/dashboard-heroactioncard--docs) | A primary workspace task needs an introduction and action | Translated copy, callbacks and permission checks |
+
+Use [AppHeader](?path=/docs/layout-appheader--docs) alone for surfaces without persistent navigation. Use [Card](?path=/docs/layout-card--docs) for neutral information.

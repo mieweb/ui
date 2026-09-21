@@ -336,6 +336,8 @@ Current notes:
 
 | Module                                                                       | Why it has notes                                                                                                                        |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [PortalShell](src/components/PortalShell/MAINTAINERS.md) | SidebarProvider coupling, recursive navigation, persistence, responsive focus and inert content |
+| [ProviderMap](src/components/ProviderMap/MAINTAINERS.md) | Optional Mapbox peer/CDN loading, text-safe popups, shared assets and map lifecycle |
 | [AI](src/components/AI/MAINTAINERS.md)                                       | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer                                              |
 | [AGGrid (deprecated)](src/components/AGGrid/MAINTAINERS.md)                  | Legacy maintenance only; retained for existing consumers. Use [DataVis NITRO](src/components/DataVisNITRO/MAINTAINERS.md) for new work. |
 | [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                |
