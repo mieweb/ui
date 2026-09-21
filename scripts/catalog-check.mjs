@@ -398,6 +398,26 @@ for (const e of csfEntries) {
     );
 }
 
+// Deep links. `?path=/docs/<id>--docs` is the documented way to link a page, so
+// a typo silently produces a Storybook 404 that nobody notices until a reader
+// hits it. Every target must be a known Meta id or a landing page's derived id.
+{
+  const pageIds = new Set(
+    entries
+      .filter((e) => e.kind === 'mdx')
+      .map((e) => e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))
+  );
+  for (const file of walk(SRC)) {
+    const code = readFileSync(file, 'utf8');
+    for (const [, id] of code.matchAll(/\?path=\/docs\/([a-z0-9-]+)--docs/g)) {
+      if (!byId.has(id) && !pageIds.has(id))
+        errors.push(
+          `${rel(file)}: deep link "?path=/docs/${id}--docs" matches no Meta id or landing page`
+        );
+    }
+  }
+}
+
 function slug(s) {
   return String(s)
     .toLowerCase()

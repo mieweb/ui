@@ -220,6 +220,8 @@ Set `parameters.catalog.collection: true` on the Meta. `pnpm catalog:check` then
 
 `SuperChatInbox` for the data/callback split, `ChatComposer` for extension points (`labels`, `classNames`, `inputProps`, render slots), and the `Modules/Views` family for the accessor pattern.
 
+Consuming one: [wiring-headless-modules.md](wiring-headless-modules.md) is the adapter recipe for Meteor and for TanStack Query.
+
 ---
 
 ## Tier 3: Contribute Upstream to @mieweb/ui

@@ -176,6 +176,9 @@ Never fetch, subscribe, read a store, or import a router or app framework inside
 Declare it with `parameters.catalog.collection: true`; `pnpm catalog:check` then requires an **Empty**, **Loading** and **Error** story. Full contract:
 [component-policy → Tier 2.5](https://github.com/mieweb/ui/blob/main/lessons/component-policy.md#tier-25-headless-modules).
 
+Wiring one to an app's data layer — accessors, awaited mutations, `onOpen` plus `getHref`, where filter state lives:
+[wiring-headless-modules.md](https://github.com/mieweb/ui/blob/main/lessons/wiring-headless-modules.md).
+
 ## Rule 15: When existing components do not meet the need
 
 Before creating or materially extending a reusable component, read the
