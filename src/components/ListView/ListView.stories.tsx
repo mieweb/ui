@@ -80,6 +80,11 @@ The page owns \`items\`, \`selectedId\` and the fetch; the view owns how they lo
         },
         {
           type: 'alternative to',
+          target: 'views-boardview',
+          why: 'The board exists for moving items between stages; the list is the denser read when they do not move.',
+        },
+        {
+          type: 'alternative to',
           target: 'grids-datavis-nitro',
           why: 'Reach for the grid when rows need sorting, filtering, paging or export; ListView is a read-down layout.',
         },

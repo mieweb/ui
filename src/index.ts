@@ -21,6 +21,7 @@ export * from './components/AuthDialog';
 export * from './components/Autocomplete';
 export * from './components/Avatar';
 export * from './components/Badge';
+export * from './components/BoardView';
 export * from './components/BookingDialog';
 export * from './components/Breadcrumb';
 export * from './components/BusinessHours';

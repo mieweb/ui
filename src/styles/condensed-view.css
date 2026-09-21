@@ -11968,3 +11968,33 @@ body.condensed [data-slot='list-view'] {
 body.condensed [data-slot='list-view-group'] {
   font-size: 0.8125rem !important;
 }
+
+/* ── Views: BoardView ── */
+
+body.condensed [data-slot='board-view'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='board-view-column'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='board-view-column-header'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='board-view-card'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='board-view-state'] {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Visually hidden either way; listed so the slot is accounted for. */
+body.condensed [data-slot='board-view-announcer'] {
+  font-size: inherit !important;
+}

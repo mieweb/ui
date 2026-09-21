@@ -23,6 +23,7 @@ export default defineConfig({
     'components/Autocomplete/index': 'src/components/Autocomplete/index.ts',
     'components/Avatar/index': 'src/components/Avatar/index.ts',
     'components/Badge/index': 'src/components/Badge/index.ts',
+    'components/BoardView/index': 'src/components/BoardView/index.ts',
     'components/Breadcrumb/index': 'src/components/Breadcrumb/index.ts',
     'components/Button/index': 'src/components/Button/index.ts',
     'components/Card/index': 'src/components/Card/index.ts',
