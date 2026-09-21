@@ -199,6 +199,7 @@ export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
 export * from './components/ViewSwitcher';
+export * from './components/ViewSet';
 // The contract every Modules/Views component reads through.
 export * from './views/types';
 export * from './components/TranscriptView';
