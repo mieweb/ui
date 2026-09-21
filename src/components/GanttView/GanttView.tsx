@@ -32,6 +32,8 @@ export type GanttViewSlot =
   | 'state';
 
 export interface GanttLabels extends ViewLabels {
+  /** Accessible name of the scrollable chart region. */
+  chart: string;
   /** Footnote for records a time axis cannot place. `{count}` is substituted. */
   undated: string;
 }
@@ -39,6 +41,7 @@ export interface GanttLabels extends ViewLabels {
 export const defaultGanttLabels: GanttLabels = {
   ...defaultViewLabels,
   empty: 'Nothing to place on the timeline',
+  chart: 'Timeline',
   undated: '{count} without dates',
 };
 
@@ -241,7 +244,16 @@ export function GanttView<T>({
         className
       )}
     >
-      <div className="overflow-x-auto">
+      {/* Scrollable content must be keyboard operable (WCAG 2.1.1), which axe
+          enforces as scrollable-region-focusable. jsx-a11y disagrees for
+          non-interactive elements; the success criterion wins. */}
+      <div
+        className="overflow-x-auto"
+        role="group"
+        aria-label={text.chart}
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
+      >
         <div className="min-w-max">
           <div
             data-slot="gantt-view-header"

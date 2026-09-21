@@ -142,6 +142,11 @@ export function CalendarView<T>({
     [gridStart]
   );
 
+  const weeks = React.useMemo(
+    () => Array.from({ length: 6 }, (_, i) => days.slice(i * 7, i * 7 + 7)),
+    [days]
+  );
+
   const placed = React.useMemo<Placed<T>[]>(() => {
     const out: Placed<T>[] = [];
     for (const item of items) {
@@ -266,149 +271,163 @@ export function CalendarView<T>({
       {nothingPlaced && emptyState ? (
         emptyState
       ) : (
-        <>
-          <div
-            role="grid"
-            aria-label={monthLabel}
-            className="border-border grid grid-cols-7 border-b"
-          >
-            {weekdayNames.map((name) => (
-              <div
-                key={name}
-                role="columnheader"
-                data-slot="calendar-view-weekday"
-                className={cn(
-                  'text-muted-foreground px-2 py-1.5 text-center text-xs font-medium tracking-wide uppercase',
-                  classNames?.weekday
-                )}
-              >
-                {name}
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {days.map((day) => {
-              const key = day.toISODate() ?? '';
-              const entries = byDay.get(key) ?? [];
-              const outside = day.month !== current.month;
-              const isToday = day.hasSame(today, 'day');
-              const visible = entries.slice(0, maxPerDay);
-              const overflow = entries.length - visible.length;
-              return (
+        // `table`, not `grid`: a grid promises arrow-key navigation between
+        // cells, which this does not implement. Rows are explicit because a
+        // columnheader or cell outside one is invalid ARIA, not just untidy.
+        <div role="table" aria-label={monthLabel}>
+          <div role="rowgroup">
+            <div role="row" className="border-border grid grid-cols-7 border-b">
+              {weekdayNames.map((name) => (
                 <div
-                  key={key}
-                  role="gridcell"
-                  data-slot="calendar-view-day"
-                  data-outside={outside || undefined}
-                  data-today={isToday || undefined}
+                  key={name}
+                  role="columnheader"
+                  data-slot="calendar-view-weekday"
                   className={cn(
-                    'border-border min-h-24 border-e border-b p-1 last:border-e-0',
-                    outside && cn('bg-muted/30', classNames?.outsideDay),
-                    isToday && classNames?.today,
-                    classNames?.day
+                    'text-muted-foreground px-2 py-1.5 text-center text-xs font-medium tracking-wide uppercase',
+                    classNames?.weekday
                   )}
                 >
-                  <div
-                    className={cn(
-                      'mb-1 flex h-5 w-5 items-center justify-center rounded-full text-xs tabular-nums',
-                      outside ? 'text-muted-foreground' : 'text-foreground',
-                      isToday && 'bg-primary-500 font-semibold text-white'
-                    )}
-                  >
-                    <time dateTime={key}>{day.day}</time>
-                    {isToday && <span className="sr-only">{text.today}</span>}
-                  </div>
-                  <ul className="space-y-0.5">
-                    {visible.map(({ id, item, start, end }) => {
-                      const accent = accessors.getAccent?.(item) ?? 'primary';
-                      const selected = id === selectedId;
-                      const body = renderItem?.(item, { view: 'calendar' }) ?? (
-                        <span className="block truncate">
-                          {accessors.getTitle(item)}
-                        </span>
-                      );
-                      const classes = cn(
-                        'block w-full rounded px-1 py-0.5 text-start text-xs text-foreground',
-                        accentClasses[accent].tint,
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                        classNames?.entry,
-                        selected &&
-                          cn(
-                            'ring-1',
-                            accentClasses[accent].border,
-                            classNames?.selectedEntry
-                          )
-                      );
-                      // A multi-day item repeats on each day it covers; the
-                      // range is in the accessible name, not in the geometry.
-                      const spanLabel = start.hasSame(end, 'day')
-                        ? undefined
-                        : `${accessors.getTitle(item)}, ${start.toISODate()} to ${end.toISODate()}`;
-                      const href = getHref?.(id, item);
-                      return (
-                        <li key={id}>
-                          {href ? (
-                            <a
-                              href={href}
-                              aria-label={spanLabel}
-                              aria-current={selected ? 'true' : undefined}
-                              data-slot="calendar-view-entry"
-                              className={classes}
-                              onClick={(event) => {
-                                if (
-                                  !onOpen ||
-                                  event.defaultPrevented ||
-                                  event.metaKey ||
-                                  event.ctrlKey ||
-                                  event.shiftKey ||
-                                  event.button !== 0
-                                )
-                                  return;
-                                event.preventDefault();
-                                onOpen(id, item);
-                              }}
-                            >
-                              {body}
-                            </a>
-                          ) : onOpen ? (
-                            <button
-                              type="button"
-                              aria-label={spanLabel}
-                              aria-current={selected ? 'true' : undefined}
-                              data-slot="calendar-view-entry"
-                              className={classes}
-                              onClick={() => onOpen(id, item)}
-                            >
-                              {body}
-                            </button>
-                          ) : (
-                            <span
-                              aria-label={spanLabel}
-                              data-slot="calendar-view-entry"
-                              className={classes}
-                            >
-                              {body}
-                            </span>
-                          )}
-                        </li>
-                      );
-                    })}
-                    {overflow > 0 && (
-                      <li className="text-muted-foreground px-1 text-xs">
-                        {text.more.replace('{count}', String(overflow))}
-                      </li>
-                    )}
-                  </ul>
+                  {name}
                 </div>
-              );
-            })}
+              ))}
+            </div>
+          </div>
+          <div role="rowgroup">
+            {weeks.map((week) => (
+              <div
+                key={week[0].toISODate()}
+                role="row"
+                className="grid grid-cols-7"
+              >
+                {week.map((day) => {
+                  const key = day.toISODate() ?? '';
+                  const entries = byDay.get(key) ?? [];
+                  const outside = day.month !== current.month;
+                  const isToday = day.hasSame(today, 'day');
+                  const visible = entries.slice(0, maxPerDay);
+                  const overflow = entries.length - visible.length;
+                  return (
+                    <div
+                      key={key}
+                      role="cell"
+                      data-slot="calendar-view-day"
+                      data-outside={outside || undefined}
+                      data-today={isToday || undefined}
+                      className={cn(
+                        'border-border min-h-24 border-e border-b p-1 last:border-e-0',
+                        outside && cn('bg-muted/30', classNames?.outsideDay),
+                        isToday && classNames?.today,
+                        classNames?.day
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'mb-1 flex h-5 w-5 items-center justify-center rounded-full text-xs tabular-nums',
+                          outside ? 'text-muted-foreground' : 'text-foreground',
+                          isToday && 'bg-primary-500 font-semibold text-white'
+                        )}
+                      >
+                        <time dateTime={key}>{day.day}</time>
+                        {isToday && (
+                          <span className="sr-only">{text.today}</span>
+                        )}
+                      </div>
+                      <ul className="space-y-0.5">
+                        {visible.map(({ id, item, start, end }) => {
+                          const accent =
+                            accessors.getAccent?.(item) ?? 'primary';
+                          const selected = id === selectedId;
+                          const body = renderItem?.(item, {
+                            view: 'calendar',
+                          }) ?? (
+                            <span className="block truncate">
+                              {accessors.getTitle(item)}
+                            </span>
+                          );
+                          const classes = cn(
+                            'block w-full rounded px-1 py-0.5 text-start text-xs text-foreground',
+                            accentClasses[accent].tint,
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            classNames?.entry,
+                            selected &&
+                              cn(
+                                'ring-1',
+                                accentClasses[accent].border,
+                                classNames?.selectedEntry
+                              )
+                          );
+                          // A multi-day item repeats on each day it covers; the
+                          // range is in the accessible name, not in the geometry.
+                          const spanLabel = start.hasSame(end, 'day')
+                            ? undefined
+                            : `${accessors.getTitle(item)}, ${start.toISODate()} to ${end.toISODate()}`;
+                          const href = getHref?.(id, item);
+                          return (
+                            <li key={id}>
+                              {href ? (
+                                <a
+                                  href={href}
+                                  aria-label={spanLabel}
+                                  aria-current={selected ? 'true' : undefined}
+                                  data-slot="calendar-view-entry"
+                                  className={classes}
+                                  onClick={(event) => {
+                                    if (
+                                      !onOpen ||
+                                      event.defaultPrevented ||
+                                      event.metaKey ||
+                                      event.ctrlKey ||
+                                      event.shiftKey ||
+                                      event.button !== 0
+                                    )
+                                      return;
+                                    event.preventDefault();
+                                    onOpen(id, item);
+                                  }}
+                                >
+                                  {body}
+                                </a>
+                              ) : onOpen ? (
+                                <button
+                                  type="button"
+                                  aria-label={spanLabel}
+                                  aria-current={selected ? 'true' : undefined}
+                                  data-slot="calendar-view-entry"
+                                  className={classes}
+                                  onClick={() => onOpen(id, item)}
+                                >
+                                  {body}
+                                </button>
+                              ) : (
+                                <span
+                                  aria-label={spanLabel}
+                                  data-slot="calendar-view-entry"
+                                  className={classes}
+                                >
+                                  {body}
+                                </span>
+                              )}
+                            </li>
+                          );
+                        })}
+                        {overflow > 0 && (
+                          <li className="text-muted-foreground px-1 text-xs">
+                            {text.more.replace('{count}', String(overflow))}
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
           {nothingPlaced && (
             <p className="text-muted-foreground px-3 py-2 text-center text-sm">
               {text.empty}
             </p>
           )}
-        </>
+        </div>
       )}
     </div>
   );

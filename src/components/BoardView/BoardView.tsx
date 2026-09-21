@@ -38,6 +38,8 @@ export type BoardViewSlot =
   | 'state';
 
 export interface BoardLabels extends ViewLabels {
+  /** Accessible name of the scrollable board region. */
+  board: string;
   /** Announced when a card starts moving. `{item}` and `{stage}` are substituted. */
   moved: string;
   /** Announced when `onMove` rejects. */
@@ -49,6 +51,7 @@ export interface BoardLabels extends ViewLabels {
 export const defaultBoardLabels: BoardLabels = {
   ...defaultViewLabels,
   empty: 'Nothing in this stage',
+  board: 'Board',
   moved: '{item} moved to {stage}',
   moveFailed: 'Could not move {item}',
   moveHint: 'Press Control with the arrow keys to move between stages',
@@ -416,6 +419,13 @@ export function BoardView<T>({
     >
       <div
         data-slot="board-view"
+        // Scrollable content must be keyboard operable (WCAG 2.1.1), which axe
+        // enforces as scrollable-region-focusable. jsx-a11y disagrees for
+        // non-interactive elements; the success criterion wins.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
+        role="group"
+        aria-label={text.board}
         className={cn(
           // Columns on one scrolling row once there is room; stacked below it,
           // because five 288px columns on a phone is a horizontal maze.

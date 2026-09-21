@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { Button } from '../Button';
 import { Spinner } from '../Spinner';
 import { ChevronDownIcon, ChevronRightIcon } from '../Icons';
 import {
@@ -181,13 +182,9 @@ export function ListView<T>({
           {text.error}
         </p>
         {onRetry && (
-          <button
-            type="button"
-            onClick={onRetry}
-            className="text-primary-600 hover:bg-muted focus-visible:ring-ring dark:text-primary-400 rounded-md px-2 py-1 font-medium focus-visible:ring-2 focus-visible:outline-none"
-          >
+          <Button variant="ghost" size="sm" onClick={onRetry}>
             {text.retry}
-          </button>
+          </Button>
         )}
       </>
     );

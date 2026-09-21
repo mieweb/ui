@@ -18,19 +18,19 @@ const base = {
   timeZone: 'UTC',
 };
 
-const grid = () => screen.getByRole('grid');
+const grid = () => screen.getByRole('table');
 const cellFor = (isoDate: string) =>
   screen
     .getByText(
       (_, el) =>
         el?.tagName === 'TIME' && el.getAttribute('dateTime') === isoDate
     )
-    .closest('[role="gridcell"]') as HTMLElement;
+    .closest('[role="cell"]') as HTMLElement;
 
 describe('CalendarView', () => {
   it('renders a six-week grid so the height does not change between months', () => {
     render(<CalendarView {...base} />);
-    expect(screen.getAllByRole('gridcell')).toHaveLength(42);
+    expect(screen.getAllByRole('cell')).toHaveLength(42);
   });
 
   it('labels the grid with the month it is showing', () => {
