@@ -27,6 +27,7 @@ export default defineConfig({
     'components/Breadcrumb/index': 'src/components/Breadcrumb/index.ts',
     'components/Button/index': 'src/components/Button/index.ts',
     'components/Card/index': 'src/components/Card/index.ts',
+    'components/CalendarView/index': 'src/components/CalendarView/index.ts',
     'components/Checkbox/index': 'src/components/Checkbox/index.ts',
     'components/ClampedText/index': 'src/components/ClampedText/index.ts',
     'components/CollabStatus/index': 'src/components/CollabStatus/index.ts',

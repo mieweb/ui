@@ -29,6 +29,7 @@ export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/ButtonGroup';
 export * from './components/Card';
+export * from './components/CalendarView';
 export * from './components/CaseManagementHeader';
 export * from './components/ChatComposer';
 export * from './components/Checkbox';

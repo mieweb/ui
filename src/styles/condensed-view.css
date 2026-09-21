@@ -11998,3 +11998,33 @@ body.condensed [data-slot='board-view-state'] {
 body.condensed [data-slot='board-view-announcer'] {
   font-size: inherit !important;
 }
+
+/* ── Views: CalendarView ── */
+
+body.condensed [data-slot='calendar-view'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='calendar-view-toolbar'] {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='calendar-view-weekday'] {
+  padding: 0.125rem 0.25rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='calendar-view-day'] {
+  min-height: 4rem !important;
+  padding: 0.125rem !important;
+}
+
+body.condensed [data-slot='calendar-view-entry'] {
+  padding: 0 0.25rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='calendar-view-state'] {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
