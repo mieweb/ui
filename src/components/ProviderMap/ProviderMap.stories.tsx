@@ -8,7 +8,7 @@ const meta: Meta<typeof ProviderMap> = {
   tags: ['autodocs', 'scope:product-specific', 'maturity:beta'],
   parameters: {
     layout: 'padded',
-    catalog: { entry: '@mieweb/ui', peers: ['mapbox-gl (optional)'], relationships: [] },
+    catalog: { entry: '@mieweb/ui', peers: ['mapbox-gl (optional)'], relationships: [{"type": "alternative to", "target": "providers-nearbyprovidercard", "why": "Use the map for directions; use the card to compare clinics in a list."}] },
     docs: { description: { component: `### What it's for
 
 A clinic location map with optional directions and Mapbox navigation controls.

@@ -39,7 +39,7 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
-    'xl:grid-cols-6',
+    'xl:grid-cols-6', 'active:scale-[0.97]',
   '-end-16', 'end-16', 'end-24',
   'bg-primary-800/10', 'dark:bg-primary-200/10',
   '[&>svg]:h-4', '[&>svg]:w-4', '[&>svg]:h-6', '[&>svg]:w-6',

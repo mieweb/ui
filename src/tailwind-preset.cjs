@@ -10,7 +10,7 @@ module.exports = {
   // Safelist classes used by @mieweb/ui components that may not be detected
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
-    'xl:grid-cols-6', '-end-16',
+    'xl:grid-cols-6', 'active:scale-[0.97]', '-end-16',
     'bg-primary-800/10', 'dark:bg-primary-200/10',
     '[&>svg]:h-4', '[&>svg]:w-4', '[&>svg]:h-6', '[&>svg]:w-6',
     '[&>svg]:h-7', '[&>svg]:w-7', '[&>svg]:h-8', '[&>svg]:w-8',
@@ -568,8 +568,8 @@ module.exports = {
       },
       // Tailwind 3 cannot apply alpha modifiers to hex-valued CSS variables.
       backgroundColor: {
-        'primary-800/10': 'color-mix(in srgb, var(--mieweb-primary-800, #0f6086) 10%, transparent)',
-        'primary-200/10': 'color-mix(in srgb, var(--mieweb-primary-200, #b9eafd) 10%, transparent)',
+        'primary-800/10': 'color-mix(in srgb, var(--mieweb-primary-800, #0f749c) 10%, transparent)',
+        'primary-200/10': 'color-mix(in srgb, var(--mieweb-primary-200, #80d5f0) 10%, transparent)',
       },
       backgroundImage: {
         'gradient-brand': 'var(--mieweb-gradient-brand)',

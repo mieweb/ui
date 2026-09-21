@@ -8,7 +8,7 @@ const meta: Meta<typeof NearbyProviderCard> = {
   tags: ['autodocs', 'scope:product-specific', 'maturity:beta'],
   parameters: {
     layout: 'padded',
-    catalog: { entry: '@mieweb/ui', relationships: [] },
+    catalog: { entry: '@mieweb/ui', relationships: [{"type": "alternative to", "target": "providers-providermap", "why": "Use the card to compare contact details; use the map to locate one clinic."}] },
     docs: { description: { component: `### What it's for
 
 A nearby clinic summary with location, distance, phone and a provider-profile link.
