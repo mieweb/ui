@@ -16,7 +16,7 @@ import {
   type SidebarNavItemProps,
   SidebarToggle,
 } from '../Sidebar/Sidebar';
-import { SidebarProvider } from '../Sidebar/SidebarProvider';
+import { SidebarProvider, useSidebar } from '../Sidebar/SidebarProvider';
 
 // =============================================================================
 // Types
@@ -183,12 +183,15 @@ export function PortalShell({
       storageKey={storageKey}
       defaultExpandedGroup={activeGroup ?? null}
     >
-      <div className="flex h-screen overflow-hidden bg-background text-foreground">
+      <div className="flex h-dvh overflow-hidden bg-background text-foreground">
         {/* Keyboard skip link — first focusable element so keyboard/AT users
          *  can jump past the sidebar straight to the page content. */}
         <a
           href="#portal-main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-md focus:bg-primary-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/60"
+          onClick={() =>
+            document.getElementById('portal-main-content')?.focus()
+          }
+          className="focus:ring-primary/60 sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-md focus:bg-primary-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none focus:ring-2"
         >
           Skip to content
         </a>
@@ -228,7 +231,7 @@ export function PortalShell({
           )}
         </Sidebar>
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <PortalBody>
           <AppHeader>
             <AppHeaderSection align="left">
               <SidebarMobileToggle className="lg:hidden" />
@@ -258,8 +261,9 @@ export function PortalShell({
           )}
 
           <main
-            className="bg-muted/30 flex-1 overflow-y-auto"
+            className="bg-muted/30 min-h-0 flex-1 overflow-y-auto focus:outline-none"
             id="portal-main-content"
+            tabIndex={-1}
           >
             <div
               className={cn(
@@ -272,9 +276,21 @@ export function PortalShell({
             </div>
           </main>
 
-          {bottomNav && <div className="lg:hidden">{bottomNav}</div>}
-        </div>
+          {bottomNav && <div className="shrink-0 lg:hidden">{bottomNav}</div>}
+        </PortalBody>
       </div>
     </SidebarProvider>
+  );
+}
+
+function PortalBody({ children }: { children: React.ReactNode }) {
+  const { isMobileViewport, isMobileOpen } = useSidebar();
+  return (
+    <div
+      className="flex min-w-0 flex-1 flex-col"
+      inert={isMobileViewport && isMobileOpen ? true : undefined}
+    >
+      {children}
+    </div>
   );
 }

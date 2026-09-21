@@ -32,7 +32,7 @@ export function AppHeader({
       data-slot="app-header"
       data-testid={testId}
       className={cn(
-        'flex items-center justify-between px-4 lg:px-6',
+        'flex shrink-0 items-center justify-between gap-3 px-4 lg:px-6',
         'bg-white dark:bg-gray-900',
         height,
         sticky && 'sticky top-0 z-30',
@@ -66,7 +66,7 @@ export function AppHeaderSection({
     <div
       data-slot="app-header-section"
       className={cn(
-        'flex items-center gap-3',
+        'flex min-w-0 items-center gap-3',
         align === 'left' && 'me-auto',
         align === 'center' && 'mx-auto',
         align === 'right' && 'ms-auto',
@@ -104,7 +104,7 @@ export function AppHeaderBrand({
       {logo && <div data-slot="app-header-brand-logo">{logo}</div>}
       <span
         data-slot="app-header-brand-name"
-        className="hidden font-semibold text-gray-900 sm:block dark:text-white"
+        className="hidden font-semibold text-gray-900 dark:text-white sm:block"
       >
         {children}
       </span>
@@ -135,7 +135,7 @@ export function AppHeaderTitle({
         {children}
       </h1>
       {subtitle && (
-        <p className="text-muted-foreground truncate text-sm">{subtitle}</p>
+        <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
       )}
     </div>
   );
@@ -190,7 +190,7 @@ export function AppHeaderDivider({
 // AppHeaderIconButton Component
 // =============================================================================
 
-export interface AppHeaderIconButtonProps {
+export interface AppHeaderIconButtonProps extends React.AriaAttributes {
   /** Button icon */
   icon: ReactNode;
   /** Accessible label */
@@ -215,6 +215,7 @@ export function AppHeaderIconButton({
   isActive = false,
   className,
   'data-testid': testId,
+  ...ariaProps
 }: AppHeaderIconButtonProps): React.JSX.Element {
   return (
     <button
@@ -226,13 +227,14 @@ export function AppHeaderIconButton({
         'relative rounded-lg p-2 transition-colors',
         'text-muted-foreground',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         isActive &&
-          'text-primary-800 dark:text-primary-400 bg-gray-100 dark:bg-gray-800',
+          'bg-gray-100 text-primary-800 dark:bg-gray-800 dark:text-primary-400',
         className
       )}
       aria-label={label}
       title={label}
+      {...ariaProps}
     >
       <span className="h-5 w-5">{icon}</span>
       {typeof badge === 'number' && badge > 0 && (
@@ -305,21 +307,21 @@ export function AppHeaderSearch({
       data-testid={testId}
       className={cn(
         'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-600',
-        'bg-white px-4 py-2 text-sm text-neutral-600 dark:bg-gray-700 dark:text-neutral-400',
+        'bg-white px-4 py-2 text-sm text-neutral-600 dark:bg-gray-700 dark:text-neutral-200',
         'hover:border-gray-400 dark:hover:border-gray-500',
         'transition-colors hover:bg-gray-50 dark:hover:bg-gray-600',
         !showOnMobile && 'hidden sm:flex',
-        'min-w-[200px] lg:min-w-[300px]',
+        'w-48 min-w-0 xl:w-60 2xl:w-[300px]',
         className
       )}
     >
       <SearchIcon />
-      <span className="flex-1 text-start whitespace-nowrap">{placeholder}</span>
+      <span className="flex-1 whitespace-nowrap text-start">{placeholder}</span>
       <kbd
         className={cn(
-          'hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex',
+          'hidden items-center gap-0.5 px-2 py-0.5 xl:inline-flex',
           'rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600',
-          'flex-shrink-0 text-xs text-neutral-600 dark:text-neutral-400'
+          'flex-shrink-0 text-xs text-neutral-600 dark:text-neutral-200'
         )}
       >
         {isMac ? '⌘' : 'Ctrl'}+K
@@ -332,7 +334,7 @@ export function AppHeaderSearch({
 // AppHeaderUserMenu Component
 // =============================================================================
 
-export interface AppHeaderUserMenuProps {
+export interface AppHeaderUserMenuProps extends React.AriaAttributes {
   /** User's name */
   name: string;
   /** User's email or subtitle */
@@ -360,6 +362,7 @@ export function AppHeaderUserMenu({
   onClick,
   className,
   'data-testid': testId = 'app-header-user-menu',
+  ...ariaProps
 }: AppHeaderUserMenuProps): React.JSX.Element {
   const displayInitials =
     initials ??
@@ -376,10 +379,12 @@ export function AppHeaderUserMenu({
       onClick={onClick}
       data-slot="app-header-user-menu"
       data-testid={testId}
+      aria-expanded={isOpen}
+      {...ariaProps}
       className={cn(
         'flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         isOpen && 'bg-gray-100 dark:bg-gray-800',
         className
       )}
@@ -389,7 +394,7 @@ export function AppHeaderUserMenu({
         data-slot="app-header-user-avatar"
         className={cn(
           'flex h-8 w-8 items-center justify-center overflow-hidden rounded-full',
-          'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 text-sm font-medium'
+          'bg-primary-100 text-sm font-medium text-primary-900 dark:bg-primary-900 dark:text-primary-100'
         )}
       >
         {avatarUrl ? (
@@ -404,7 +409,7 @@ export function AppHeaderUserMenu({
       </div>
 
       {/* Name (hidden on small screens) */}
-      <div className="hidden min-w-0 text-start lg:block">
+      <div className="hidden min-w-0 text-start xl:block">
         <div
           data-slot="app-header-user-name"
           className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white"
@@ -414,7 +419,7 @@ export function AppHeaderUserMenu({
         {email && (
           <div
             data-slot="app-header-user-email"
-            className="text-muted-foreground max-w-[150px] truncate text-xs"
+            className="max-w-[150px] truncate text-xs text-muted-foreground"
           >
             {email}
           </div>
@@ -425,7 +430,7 @@ export function AppHeaderUserMenu({
       <svg
         aria-hidden="true"
         className={cn(
-          'hidden h-4 w-4 text-gray-400 transition-transform lg:block',
+          'hidden h-4 w-4 text-gray-400 transition-transform xl:block',
           isOpen && 'rotate-180'
         )}
         fill="none"

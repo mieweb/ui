@@ -37,6 +37,8 @@ export interface HeroActionCardProps {
   illustration?: React.ReactNode;
   /** Additional CSS classes. */
   className?: string;
+  /** Denser layout for task dashboards, especially on phones. */
+  compact?: boolean;
   /** Optional children rendered below the actions (e.g. inline helper). */
   children?: React.ReactNode;
 }
@@ -60,6 +62,7 @@ export function HeroActionCard({
   secondaryActions,
   illustration,
   className,
+  compact = false,
   children,
 }: HeroActionCardProps): React.JSX.Element {
   return (
@@ -82,14 +85,24 @@ export function HeroActionCard({
         className="bg-primary-300/30 dark:bg-primary-500/10 pointer-events-none absolute -bottom-20 right-24 h-40 w-40 rounded-full blur-3xl"
       />
 
-      <div className="relative flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center md:justify-between">
+      <div
+        className={cn(
+          'relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between',
+          compact ? 'p-5 sm:p-6' : 'p-6 sm:p-8'
+        )}
+      >
         <div className="min-w-0 max-w-2xl">
           {eyebrow && (
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary-700 dark:text-primary-300">
               {eyebrow}
             </p>
           )}
-          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+          <h2
+            className={cn(
+              'font-bold text-foreground',
+              compact ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'
+            )}
+          >
             {title}
           </h2>
           {description && (
@@ -101,7 +114,8 @@ export function HeroActionCard({
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Button
               variant={primaryAction.variant ?? 'primary'}
-              size="lg"
+              size={compact ? 'md' : 'lg'}
+              className={compact ? 'min-h-11' : undefined}
               onClick={primaryAction.onClick}
               disabled={primaryAction.disabled}
             >
@@ -116,7 +130,8 @@ export function HeroActionCard({
               <Button
                 key={action.label}
                 variant={action.variant ?? 'outline'}
-                size="md"
+                size={compact ? 'sm' : 'md'}
+                className={compact ? 'min-h-11' : undefined}
                 onClick={action.onClick}
                 disabled={action.disabled}
               >

@@ -130,6 +130,57 @@ export function Sidebar({
 }: SidebarProps): React.JSX.Element {
   const { isCollapsed, isMobileOpen, closeMobile, isMobileViewport } =
     useSidebar();
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!isMobileViewport || !isMobileOpen) return;
+    const trigger = document.activeElement as HTMLElement | null;
+    const nav = navRef.current;
+    if (!nav) return;
+    const focusable = () =>
+      Array.from(
+        nav.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), [tabindex="0"]'
+        )
+      ).filter(
+        (element) =>
+          element.getClientRects().length > 0 && !element.closest('[inert]')
+      );
+    (
+      nav.querySelector<HTMLElement>('[aria-label="Close navigation"]') ??
+      focusable()[0]
+    )?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMobile();
+      }
+      if (event.key !== 'Tab') return;
+      const elements = focusable();
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (
+        event.shiftKey &&
+        (document.activeElement === first ||
+          !nav.contains(document.activeElement))
+      ) {
+        event.preventDefault();
+        last?.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === last ||
+          !nav.contains(document.activeElement))
+      ) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      trigger?.focus();
+    };
+  }, [isMobileViewport, isMobileOpen, closeMobile]);
 
   // Determine effective width
   const width = isMobileViewport
@@ -152,10 +203,13 @@ export function Sidebar({
 
       {/* Sidebar */}
       <nav
+        ref={navRef}
+        inert={isMobileViewport && !isMobileOpen ? true : undefined}
+        aria-hidden={isMobileViewport && !isMobileOpen ? true : undefined}
         data-slot="sidebar"
         data-testid={testId}
         className={cn(
-          'flex h-screen flex-col',
+          'flex h-dvh flex-col',
           'border-e border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
           'transition-all duration-300 ease-in-out',
           // Mobile positioning (start-pinned; off-canvas direction flips in RTL)
@@ -221,7 +275,7 @@ export function SidebarHeader({
       {showMobileClose && isMobileViewport && (
         <button
           onClick={closeMobile}
-          className="-me-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800"
+          className="-me-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 lg:hidden"
           aria-label="Close navigation"
         >
           <XIcon />
@@ -371,7 +425,7 @@ export function SidebarNavGroup({
         {icon && (
           <span
             className={cn(
-              'text-muted-foreground h-5 w-5 flex-shrink-0',
+              'h-5 w-5 flex-shrink-0 text-muted-foreground',
               !showCollapsed && 'me-3'
             )}
           >
@@ -396,6 +450,8 @@ export function SidebarNavGroup({
       {/* Group Items */}
       {!showCollapsed && (
         <div
+          inert={!effectiveExpanded ? true : undefined}
+          aria-hidden={!effectiveExpanded ? true : undefined}
           className={cn(
             'overflow-hidden transition-all duration-300',
             effectiveExpanded
@@ -498,7 +554,7 @@ export function SidebarNavItem({
               className={cn(
                 'ms-2 rounded-full px-2 py-0.5 text-xs font-medium',
                 isActive
-                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                  ? 'dark:bg-primary-900/30 bg-primary-100 text-primary-700 dark:text-primary-300'
                   : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
               )}
             >
@@ -575,9 +631,9 @@ export function SidebarToggle({
     <button
       onClick={toggleCollapsed}
       className={cn(
-        'text-muted-foreground rounded-lg p-2',
+        'rounded-lg p-2 text-muted-foreground',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         className
       )}
       aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -621,9 +677,9 @@ export function SidebarMobileToggle({
     <button
       onClick={openMobile}
       className={cn(
-        'text-muted-foreground rounded-lg p-2',
+        'rounded-lg p-2 text-muted-foreground',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         className
       )}
       aria-label="Open navigation"
@@ -709,10 +765,10 @@ export function SidebarSearch({
           placeholder={`${placeholder} (${shortcutHint})`}
           data-testid={testId}
           className={cn(
-            'w-full rounded-lg py-2 ps-10 pe-4 text-sm',
+            'w-full rounded-lg py-2 pe-4 ps-10 text-sm',
             'border-transparent bg-neutral-100 dark:bg-neutral-800',
             'text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500',
-            'focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-neutral-700',
+            'focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:bg-neutral-700',
             'transition-colors'
           )}
         />

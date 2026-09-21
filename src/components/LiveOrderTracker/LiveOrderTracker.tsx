@@ -194,8 +194,7 @@ function OrderCardItem({
         <span
           aria-hidden="true"
           className={cn(
-            'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white',
-            meta.dot
+            'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-foreground'
           )}
         >
           {initialsOf(order.employeeName)}
