@@ -127,6 +127,11 @@ All three are stateless; the host maps its domain model to steps/events and owns
       relationships: [
         {
           type: 'alternative to',
+          target: 'views-ganttview',
+          why: 'Timeline walks one record through named steps or events; GanttView places many records on a shared time axis.',
+        },
+        {
+          type: 'alternative to',
           target: 'navigation-stepindicator',
           why: 'TimelineProgress shows the status of a process the user watches; StepIndicator has clickable steps for a flow the user drives.',
         },

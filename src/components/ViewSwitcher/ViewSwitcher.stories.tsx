@@ -78,6 +78,11 @@ Persist it by lifting \`view\` into a URL search param or storage — the compon
           why: 'Chooses which view renders the collection below it.',
         },
         {
+          type: 'composes with',
+          target: 'views-ganttview',
+          why: 'Chooses which view renders the collection below it, including as the "Roadmap" option.',
+        },
+        {
           type: 'alternative to',
           target: 'navigation-tabs',
           why: 'Tabs switch between different content; this switches the layout of one collection.',

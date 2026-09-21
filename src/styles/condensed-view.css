@@ -12028,3 +12028,38 @@ body.condensed [data-slot='calendar-view-state'] {
   padding: 1rem 0.75rem !important;
   font-size: 0.75rem !important;
 }
+
+/* ── Views: GanttView ── */
+
+body.condensed [data-slot='gantt-view'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='gantt-view-header'] > div {
+  padding: 0.125rem 0.25rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-group-label'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-row'] {
+  padding-block: 0.125rem !important;
+}
+
+body.condensed [data-slot='gantt-view-bar'] {
+  height: 1.125rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-undated'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-state'] {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}

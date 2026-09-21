@@ -71,6 +71,11 @@ Headless: it never fetches. Days are computed with Luxon in an explicit \`timeZo
         },
         {
           type: 'alternative to',
+          target: 'views-ganttview',
+          why: 'The calendar answers "what falls in March"; the Gantt answers "what overlaps what, and for how long".',
+        },
+        {
+          type: 'alternative to',
           target: 'date-time-schedulecalendar',
           why: 'ScheduleCalendar books timed appointments into an hour axis; CalendarView places dated records, including ones spanning days, on a month grid.',
         },

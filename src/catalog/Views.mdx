@@ -17,19 +17,26 @@ which field held the start date ([#482](https://github.com/mieweb/ui/issues/482)
 ## Which one?
 
 Members land incrementally. [ViewSwitcher](?path=/docs/views-viewswitcher--docs),
-[ListView](?path=/docs/views-listview--docs), [BoardView](?path=/docs/views-boardview--docs) and
-[CalendarView](?path=/docs/views-calendarview--docs) have shipped; the rest are named here so the boundaries between them are settled before they
-arrive.
+[ListView](?path=/docs/views-listview--docs), [BoardView](?path=/docs/views-boardview--docs),
+[CalendarView](?path=/docs/views-calendarview--docs) and
+[GanttView](?path=/docs/views-ganttview--docs) have shipped; `ViewSet` is named here so the
+boundary is settled before it arrives.
 
-| Component                                      | Use it when                                                                                      | Not when                                                                                                |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `ViewSwitcher`                                 | Users pick between the layouts below; persisted per user (`storageKey`) or driven by a URL param | Two unrelated pages, not two views of one collection — [Tabs](?path=/docs/navigation-tabs--docs)        |
-| `ListView`                                     | A scannable vertical list, optionally grouped by status or group, with a row slot you own        | Rows need sorting, filtering, paging or export — [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs) |
-| [BoardView](?path=/docs/views-boardview--docs) | Items move between named stages and the stage is the primary fact                                | Stages are fixed and items never move — [ListView](?path=/docs/views-listview--docs) grouped by status  |
-| `CalendarView`                                 | Items land on, or span, calendar days and the month grid is the point                            | Timed appointments in day/week slots — [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs) |
-| `GanttView`                                    | Items have a start and an end and overlap matters across a date range                            | A single item's progress through steps — `Timeline`                                                     |
-| `RoadmapView`                                  | Coarse cadence (month / quarter) across swimlanes, for planning rather than scheduling           | Day-level precision — `GanttView`; one year of dated items with no swimlanes — `YearTimeline`           |
-| `ViewSet`                                      | A whole page: switcher, the enabled views, and shared filter / overview / detail / toolbar slots | You render exactly one layout forever — use that view directly                                          |
+| Component                                            | Use it when                                                                                      | Not when                                                                                                |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| [ViewSwitcher](?path=/docs/views-viewswitcher--docs) | Users pick between the layouts below; persisted per user or driven by a URL param                | Two unrelated pages, not two views of one collection — [Tabs](?path=/docs/navigation-tabs--docs)        |
+| [ListView](?path=/docs/views-listview--docs)         | A scannable vertical list, optionally grouped by status or group, with a row slot you own        | Rows need sorting, filtering, paging or export — [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs) |
+| [BoardView](?path=/docs/views-boardview--docs)       | Items move between named stages and the stage is the primary fact                                | Stages are fixed and items never move — [ListView](?path=/docs/views-listview--docs) grouped by status  |
+| [CalendarView](?path=/docs/views-calendarview--docs) | Items land on, or span, calendar days and the month grid is the point                            | Timed appointments in day/week slots — [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs) |
+| [GanttView](?path=/docs/views-ganttview--docs)       | Items have a start and an end and overlap matters across a date range — including as a roadmap   | One record's progress through steps — [Timeline](?path=/docs/data-display-timeline--docs)               |
+| `ViewSet`                                            | A whole page: switcher, the enabled views, and shared filter / overview / detail / toolbar slots | You render exactly one layout forever — use that view directly                                          |
+
+**A roadmap is not its own component.** It is
+[GanttView](?path=/docs/views-ganttview--docs) at `cadence="month"` or `"quarter"` with
+`groupByLane`. A `RoadmapView` was planned and dropped: it would have been the same chart
+with wider columns, and two near-identical timeline components is exactly the duplication
+this family exists to remove. The `roadmap` view id remains, so a switcher can still offer
+"Roadmap" as a labelled option.
 
 **Tables are not a view here.** A tabular layout of the same collection is
 `DataVisNitroGrid` (see [Grids](?path=/docs/components-grids-overview--docs)); `ViewSet`

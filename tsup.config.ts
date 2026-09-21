@@ -43,6 +43,7 @@ export default defineConfig({
       'src/components/FilterSummaryBar/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
     'components/FreshnessBadge/index': 'src/components/FreshnessBadge/index.ts',
+    'components/GanttView/index': 'src/components/GanttView/index.ts',
     'components/GlossaryTooltip/index': 'src/components/GlossaryTooltip/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
     'components/KeyboardShortcutsOverlay/index':
