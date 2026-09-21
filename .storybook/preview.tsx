@@ -505,6 +505,8 @@ const preview: Preview = {
           [
             'Dashboards',
             ['Overview', '*'],
+            'Views',
+            ['Overview', '*'],
             'Media',
             ['Overview', '*'],
             'Editors',

@@ -164,6 +164,30 @@ export default [
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': ['error', { allow: ['warn', 'error'] }],
       'react-hooks/exhaustive-deps': 'error',
+      // The library is framework-agnostic: components receive data through props
+      // and hand changes back through callbacks. Importing an app's data layer or
+      // router here would pin every consumer to that stack.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['meteor/*', 'next/*', 'react-router', 'react-router-dom'],
+              message:
+                'Components must not depend on an app framework or router. Take data through props and navigate through an `onOpen` / `getHref` prop (module contract, CONTRIBUTING).',
+            },
+            {
+              group: ['@tanstack/react-query', '@tanstack/query-*'],
+              message:
+                'Components must not fetch. Take `items` / `loading` / `error` as props and let the app own the query (module contract, CONTRIBUTING).',
+            },
+            {
+              group: ['@fortawesome/*'],
+              message: 'Icons come from `lucide-react`.',
+            },
+          ],
+        },
+      ],
     },
     settings: {
       react: {

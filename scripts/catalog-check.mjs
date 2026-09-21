@@ -12,6 +12,8 @@
  *   - a missing / duplicate / malformed stable `id`
  *   - a missing `parameters.docs.description.component`, unless the id is
  *     grandfathered in catalog-baseline.json (ratchet — entries can only leave)
+ *   - a `parameters.catalog.collection` entry without an Empty / Loading / Error
+ *     story (the module contract — see CONTRIBUTING)
  *   - a `parameters.catalog.relationships[]` item with an unknown type, an
  *     unknown target, no `why`, or a reciprocal type that the target does not
  *     return
@@ -317,6 +319,34 @@ if (updateBaseline) {
         `scripts/catalog-baseline.json: "${id}" is documented (or gone) — remove it (run with --update-baseline)`
       );
   }
+}
+
+// Module state stories. A component that renders a caller-supplied collection
+// owns "no data", "not loaded yet" and "the call failed" as part of its API, and
+// a consumer cannot tell whether they are handled without a story for each.
+// Opting in with `parameters.catalog.collection` is the module contract; it also
+// tells the catalog (#421) which entries are data-driven.
+const STATE_STORIES = {
+  Empty: /empty|no\s?(data|items|results)/i,
+  Loading: /loading|skeleton|pending/i,
+  Error: /error|failed|failure/i,
+};
+for (const e of csfEntries) {
+  if (e.catalog?.collection === undefined) continue;
+  const loc = rel(e.file);
+  if (e.catalog.collection !== true) {
+    errors.push(
+      `${loc}: parameters.catalog.collection must be \`true\` when present (omit it otherwise)`
+    );
+    continue;
+  }
+  const missing = Object.entries(STATE_STORIES)
+    .filter(([, re]) => !e.stories.some((s) => re.test(s)))
+    .map(([name]) => name);
+  if (missing.length)
+    errors.push(
+      `${loc}: "${e.id}" renders a collection but has no ${missing.join(' / ')} story — every collection state needs one (module contract, CONTRIBUTING)`
+    );
 }
 
 // Relationships.

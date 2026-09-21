@@ -167,7 +167,16 @@ Tailwind: on Tailwind 4, add an `@source` for `@mieweb/ui` so library classes ar
 
 If JSDoc, the console, or the docs mark something deprecated (`AGGrid` today), do not use it in new code and do not suppress the warning. Use the documented replacement.
 
-## Rule 14: When existing components do not meet the need
+## Rule 14: A component that renders a collection takes it through props
+
+Anything that displays a list, board, calendar, timeline or inbox of records the caller owns is a **headless module**. It receives `items` / `loading` / `error` as props, hands changes back through `on*` callbacks typed `void | Promise<void>`, and navigates through `onOpen(id)` / `getHref(id)`.
+
+Never fetch, subscribe, read a store, or import a router or app framework inside such a component — `meteor/*`, `next/*`, `react-router*`, `@tanstack/react-query` and `@fortawesome/*` are blocked by ESLint. Make it generic over the item type with accessor props (`getId`, `getStatus`, `getStart`, …), put domain rendering in `render*` slots, return a token _name_ for colour (never a class string), and make every user-facing string overridable through `labels`.
+
+Declare it with `parameters.catalog.collection: true`; `pnpm catalog:check` then requires an **Empty**, **Loading** and **Error** story. Full contract:
+[component-policy → Tier 2.5](https://github.com/mieweb/ui/blob/main/lessons/component-policy.md#tier-25-headless-modules).
+
+## Rule 15: When existing components do not meet the need
 
 Before creating or materially extending a reusable component, read the
 [upstream contribution guide](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md)

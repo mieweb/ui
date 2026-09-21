@@ -1,0 +1,82 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Views/Overview" />
+
+# Views
+
+> **One set of accessors, every view.** A page that shows a collection of things describes
+> that collection once — `getId`, `getTitle`, `getStatus`, `getStart`, `getEnd`, `getGroup` —
+> and every view in this family reads through it. Switching from a list to a board to a Gantt
+> is a prop, not another component to build. The views are **headless**: they never fetch,
+> subscribe, or navigate. Data arrives as `items`; changes leave through `on*` callbacks.
+
+This family exists because the same six layouts get re-implemented per entity in every app —
+one consumer had five Gantts, five boards and three month calendars whose only difference was
+which field held the start date ([#482](https://github.com/mieweb/ui/issues/482)).
+
+## Which one?
+
+Members land incrementally; unlinked rows are not built yet.
+
+| Component      | Use it when                                                                                      | Not when                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `ViewSwitcher` | Users pick between the layouts below; persisted per user (`storageKey`) or driven by a URL param | Two unrelated pages, not two views of one collection — `Tabs`                                               |
+| `ListView`     | A scannable vertical list, optionally grouped by status or group, with a row slot you own        | Rows need sorting, filtering, paging or export — `DataVisNitroGrid`; fixed tabs over one list — `OrderList` |
+| `BoardView`    | Items move between named stages and the stage is the primary fact                                | Stages are fixed and items never move — `ListView` grouped by status                                        |
+| `CalendarView` | Items land on, or span, calendar days and the month grid is the point                            | Timed appointments in day/week slots — `ScheduleCalendar`                                                   |
+| `GanttView`    | Items have a start and an end and overlap matters across a date range                            | A single item's progress through steps — `Timeline`                                                         |
+| `RoadmapView`  | Coarse cadence (month / quarter) across swimlanes, for planning rather than scheduling           | Day-level precision — `GanttView`; one year of dated items with no swimlanes — `YearTimeline`               |
+| `ViewSet`      | A whole page: switcher, the enabled views, and shared filter / overview / detail / toolbar slots | You render exactly one layout forever — use that view directly                                              |
+
+**Tables are not a view here.** A tabular layout of the same collection is
+`DataVisNitroGrid` (see [Grids](?path=/docs/components-grids-overview--docs)); `ViewSet`
+renders it in the `table` slot rather than wrapping it. Tables and data grids start with
+DataVis NITRO.
+
+**Overview is not a view either.** It is domain content — KPI tiles, charts, next actions —
+so `ViewSet` exposes an `overview` slot that a page fills with
+[CustomizableDashboard](?path=/docs/dashboards-customizabledashboard--docs) and
+[DashboardWidget](?path=/docs/dashboards-dashboardwidget--docs).
+
+## The accessor contract
+
+Every view reads the collection through the same optional accessors, so one adapter per
+entity serves all of them. A view uses only the accessors it needs and says so in its docs —
+`BoardView` requires `getStatus`, `GanttView` requires `getStart`.
+
+```ts
+const accessors: ViewAccessors<WorkItem> = {
+  getId: (w) => w.id,
+  getTitle: (w) => w.title,
+  getStatus: (w) => w.status, // board column · list group
+  getStart: (w) => w.startDate, // gantt bar · calendar day
+  getEnd: (w) => w.dueDate,
+  getGroup: (w) => w.team, // swimlane · gantt row group
+  getAccent: (w) => PRIORITY_ACCENT[w.priority], // a token name, never a class
+};
+```
+
+`getAccent` returns a name from the `Accent` union, which each view maps to `--mieweb-*`
+tokens. Callers never pass colour classes, so views stay correct across brands and dark mode.
+
+## How they fit together
+
+- **State has one owner: the caller.** Views are controlled. `selectedId`, the active view and
+  filter state live in the page; the views render them. `ViewSet` adds persistence helpers
+  (`storageKey`, search-param binding) but still hands every change back.
+- **Mutations are the app's.** `onMove` and `onReschedule` return `void | Promise<void>`. The
+  view shows the pending state, awaits, and restores the previous position if the promise
+  rejects — the app never has to re-render it back.
+- **Navigation is a prop.** `onOpen(id)` for router navigation, `getHref(id)` to render a real
+  `<a>`. Pass both: the anchor is what makes rows middle-clickable and crawlable.
+- **Domain rendering is a slot.** `renderItem(item, { view })` receives the active view, so a
+  page can return a dense row in the list and a card on the board from one function.
+
+## Shared limitations
+
+- Views assume the whole collection is in memory. Server-side paging is the caller's job —
+  pass the page you have and render your own pager; `@tanstack/react-virtual` handles the row
+  count, not the fetch.
+- Dates go through Luxon. Pass ISO strings or `Date`s; pass `now` to pin "today" in tests and
+  visual snapshots.
+- Every user-facing string is overridable through `labels`, but the defaults are English.

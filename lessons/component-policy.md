@@ -191,6 +191,37 @@ export { MyWidget, myWidgetVariants, type MyWidgetProps };
 
 ---
 
+## Tier 2.5: Headless Modules
+
+**A component that renders a collection the caller owns is a _module_, and modules follow a stricter contract than an ordinary Tier 2 component.**
+
+A module knows what a conversation, an order or a work item looks like. It does not know where one comes from. That single distinction is why `SuperChatInbox` can ship in a library while an app's inbox page cannot: the page holds subscriptions, mutations and routing; the module holds layout, interaction and state rendering.
+
+Get this wrong and the component is unportable — it pins every consumer to one data layer, one router and one framework. Get it right and the app shrinks to an adapter.
+
+### The contract
+
+| Rule                                                                                                                                             | Why                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| **No data access.** No fetching, subscriptions, stores, routers, or framework imports. Data arrives as `items` / `loading` / `error` props.      | Enforced by `no-restricted-imports` in the library's ESLint config.          |
+| **Mutations leave as callbacks** typed `(…args) => void \| Promise<void>`. The module renders pending and failure state and restores on reject.  | The app owns the write; the module owns what the user sees while it happens. |
+| **Navigation is a prop** — `onOpen(id)` and/or `getHref(id)`. Never a router hook.                                                               | `getHref` also makes rows middle-clickable and crawlable.                    |
+| **Generic over the item** — `<T>` plus accessor props (`getId`, `getStatus`, …) or a `columns` / `stages` config. No library-owned domain types. | An app's `Order` type never has to match the library's.                      |
+| **Domain rendering is a slot** — `renderItem`, `renderDetail`, `toolbar`. Colour comes from a token _name_ (`accent`), never a class string.     | Keeps brand and dark-mode correctness inside the library.                    |
+| **Every user-facing string is overridable** through a `labels` prop.                                                                             | An English default is a regression for any host shipping other locales.      |
+| **Styled elements carry `data-slot`**, with matching rules in `src/styles/condensed-view.css`, and `classNames` keyed by the same names.         | Density is CSS-only; `pnpm condensed:scan` reports uncovered slots.          |
+| **Logical direction only** (`ms-`, `ps-`, `start-`); read direction from the element, not `document.documentElement`.                            | `pnpm rtl:scan` fails on physical utilities.                                 |
+
+### Declare it, and prove the states
+
+Set `parameters.catalog.collection: true` on the Meta. `pnpm catalog:check` then requires an **Empty**, **Loading** and **Error** story, because "no data", "not loaded yet" and "the call failed" are part of a module's API and a consumer cannot tell whether they are handled from the props table alone. Also give the story `Data` / `Callbacks` / `Slots` argType categories and a `Mobile` story.
+
+### Reference implementations
+
+`SuperChatInbox` for the data/callback split, `ChatComposer` for extension points (`labels`, `classNames`, `inputProps`, render slots), and the `Modules/Views` family for the accessor pattern.
+
+---
+
 ## Tier 3: Contribute Upstream to @mieweb/ui
 
 **When a local component is stable, well-tested, and useful beyond your project, contribute it to `@mieweb/ui`.**
@@ -202,6 +233,7 @@ A component is ready for upstream contribution when:
 - [ ] **Used in production** — it's been running in at least one real project
 - [ ] **API is stable** — the props interface hasn't changed significantly in 2+ weeks
 - [ ] **Follows Tier 2 standards** — CVA variants, forwardRef, CN utility, theme variables
+- [ ] **Follows the Tier 2.5 contract** if it renders a caller-owned collection — no data access, router or framework import; `parameters.catalog.collection` with Empty / Loading / Error stories
 - [ ] **Has accessibility** — ARIA labels, keyboard nav, focus indicators
 - [ ] **Has dark mode support** — tested with light and dark themes
 - [ ] **Has brand support** — tested with at least 2 brands
@@ -293,7 +325,10 @@ flowchart TD
     Check -->|No| Similar{Similar component<br/>in @mieweb/ui?}
     Similar -->|Yes| Compose[Compose from existing<br/>@mieweb/ui primitives]
     Similar -->|No| Build[Tier 2: Build locally<br/>in @mieweb/ui style]
-    Build --> Stable{Stable + generic<br/>enough?}
+    Build --> Collection{Renders a collection<br/>the caller owns?}
+    Collection -->|Yes| Module[Tier 2.5: Headless module<br/>props in, callbacks out]
+    Collection -->|No| Stable
+    Module --> Stable{Stable + generic<br/>enough?}
     Stable -->|Yes| Contribute[Tier 3: Contribute<br/>to @mieweb/ui]
     Stable -->|No| Keep[Keep as local<br/>component]
     Contribute --> Remove[Remove local copy,<br/>import from @mieweb/ui]
@@ -303,7 +338,7 @@ flowchart TD
     classDef tier3 fill:#e0e7ff,stroke:#4f46e5
 
     class Use,Compose tier1
-    class Build,Keep tier2
+    class Build,Keep,Module tier2
     class Contribute,Remove tier3
 ```
 
@@ -311,8 +346,9 @@ flowchart TD
 
 ## Summary
 
-| Tier              | When                                | What                                                                            |
-| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
-| **1. Use**        | Component exists in `@mieweb/ui`    | `import { X } from '@mieweb/ui'`                                                |
-| **2. Build**      | No equivalent exists yet            | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
-| **3. Contribute** | Local component is stable + generic | PR to `mieweb/ui`, then replace local with import                               |
+| Tier              | When                                    | What                                                                            |
+| ----------------- | --------------------------------------- | ------------------------------------------------------------------------------- |
+| **1. Use**        | Component exists in `@mieweb/ui`        | `import { X } from '@mieweb/ui'`                                                |
+| **2. Build**      | No equivalent exists yet                | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
+| **2.5. Module**   | It renders a collection the caller owns | Props in, callbacks out; no data access, router or framework import             |
+| **3. Contribute** | Local component is stable + generic     | PR to `mieweb/ui`, then replace local with import                               |
