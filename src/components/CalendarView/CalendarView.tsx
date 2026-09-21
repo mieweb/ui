@@ -324,7 +324,9 @@ export function CalendarView<T>({
                         className={cn(
                           'mb-1 flex h-5 w-5 items-center justify-center rounded-full text-xs tabular-nums',
                           outside ? 'text-muted-foreground' : 'text-foreground',
-                          isToday && 'bg-primary-500 font-semibold text-white'
+                          // primary-800, not 500: white on the mid scale is
+                          // about 2:1 and fails AA. Same pair Button uses.
+                          isToday && 'bg-primary-800 font-semibold text-white'
                         )}
                       >
                         <time dateTime={key}>{day.day}</time>
