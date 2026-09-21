@@ -183,11 +183,13 @@ export function ViewSet<T>({
       <div
         data-slot="view-set-body"
         className={cn(
-          detail && 'gap-3 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]',
+          // Plain column spans rather than an arbitrary grid template, so a
+          // Tailwind 3 consumer needs no extra safelist entry.
+          detail && 'gap-3 lg:grid lg:grid-cols-3',
           classNames?.body
         )}
       >
-        <div className="min-w-0">{body}</div>
+        <div className={cn('min-w-0', detail && 'lg:col-span-2')}>{body}</div>
         {detail && (
           <aside
             data-slot="view-set-detail"

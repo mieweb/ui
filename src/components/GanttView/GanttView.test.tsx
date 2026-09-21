@@ -103,6 +103,22 @@ describe('GanttView', () => {
     expect(screen.getAllByText(/Jan|Feb|Mar|Apr/)).toHaveLength(4);
   });
 
+  it('draws one column when an explicit range is given backwards', () => {
+    render(
+      <GanttView
+        {...base}
+        items={[
+          dated('A', 'A', '2026-03-09T00:00:00Z', '2026-03-09T00:00:00Z'),
+        ]}
+        cadence="month"
+        rangeStart={new Date('2026-04-30T00:00:00Z')}
+        rangeEnd={new Date('2026-01-01T00:00:00Z')}
+      />
+    );
+    expect(screen.getAllByText(/Jan|Feb|Mar|Apr/)).toHaveLength(1);
+    expect(screen.queryByText('Nothing to place on the timeline')).toBeNull();
+  });
+
   it('clamps a backwards range to one column', () => {
     render(
       <GanttView

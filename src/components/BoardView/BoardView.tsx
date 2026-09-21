@@ -19,6 +19,7 @@ import { Spinner } from '../Spinner';
 import {
   accentClasses,
   defaultViewLabels,
+  domId,
   type Accent,
   type Stage,
   type ViewBaseProps,
@@ -229,7 +230,7 @@ function BoardColumn({
     >
       <Heading>
         <span
-          id={`board-view-column-${stage.id}`}
+          id={domId('board-view-column', stage.id)}
           data-slot="board-view-column-header"
           className={cn(
             'border-border flex items-center gap-2 border-b px-3 py-2 text-xs font-semibold tracking-wide uppercase',
@@ -293,7 +294,11 @@ export function BoardView<T>({
       const key = stageOf(item) ?? '';
       const bucket = buckets.get(key);
       if (bucket) bucket.push(item);
-      else extra.set(key, [...(extra.get(key) ?? []), item]);
+      else {
+        const spill = extra.get(key);
+        if (spill) spill.push(item);
+        else extra.set(key, [item]);
+      }
     }
     return [
       ...stages.map((stage) => ({ stage, items: buckets.get(stage.id) ?? [] })),
@@ -422,7 +427,7 @@ export function BoardView<T>({
             classNames={classNames}
           >
             <ul
-              aria-labelledby={`board-view-column-${column.stage.id}`}
+              aria-labelledby={domId('board-view-column', column.stage.id)}
               className="flex flex-1 flex-col gap-2 p-2"
             >
               {column.items.map((item) => {

@@ -171,7 +171,7 @@ Headless: it never fetches, and this release never writes — there is no drag-t
     },
     classNames: {
       description:
-        'Class overrides for `header`, `rowLabel`, `groupLabel`, `row`, `bar`, `selectedBar` and `state`.',
+        'Class overrides for `header`, `groupLabel`, `row`, `bar`, `selectedBar` and `state`.',
       table: { category: 'Slots' },
       control: false,
     },

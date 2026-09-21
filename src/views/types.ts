@@ -117,6 +117,17 @@ export function toDate(value: Date | string | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/**
+ * Builds a DOM `id` from caller data. A status or group is whatever the app's
+ * records contain — "results ready" is a plausible status — and a space inside
+ * an `aria-labelledby` target is read as a separator, silently unlabelling the
+ * element it points at.
+ */
+export function domId(prefix: string, raw: string): string {
+  const safe = raw.replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '');
+  return `${prefix}-${safe || 'all'}`;
+}
+
 /** Tailwind classes per accent, so every view tints the same way. */
 export const accentClasses: Record<
   Accent,

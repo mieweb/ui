@@ -923,6 +923,13 @@ export const miewebUISafelist = [
   'border-dashed',
   'border-2',
   'bg-primary-500/10',
+  // Modules/Views — accentClasses resolves an Accent token name to this set,
+  // so none of them appear literally in a consumer's own source.
+  'border-primary-500/40',
+  'border-success/40',
+  'border-warning/40',
+  'border-destructive/40',
+  'border-info/40',
   'gap-0.5',
   'p-0.5',
   // Floating labels (labelVariant="floating" on Input / Textarea / DateInput /

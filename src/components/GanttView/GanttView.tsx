@@ -25,7 +25,6 @@ export type GanttCadence = 'day' | 'week' | 'month' | 'quarter';
 
 export type GanttViewSlot =
   | 'header'
-  | 'rowLabel'
   | 'groupLabel'
   | 'row'
   | 'bar'
@@ -35,14 +34,12 @@ export type GanttViewSlot =
 export interface GanttLabels extends ViewLabels {
   /** Footnote for records a time axis cannot place. `{count}` is substituted. */
   undated: string;
-  today: string;
 }
 
 export const defaultGanttLabels: GanttLabels = {
   ...defaultViewLabels,
   empty: 'Nothing to place on the timeline',
   undated: '{count} without dates',
-  today: 'Today',
 };
 
 export interface GanttViewProps<T> extends ViewBaseProps<T> {
@@ -153,6 +150,9 @@ export function GanttView<T>({
     const out: DateTime[] = [];
     let cursor = first.startOf(unit);
     const stop = last.startOf(unit);
+    // An explicit range given backwards is caller data, not a crash: draw the
+    // column it starts in rather than falling through to the empty state.
+    if (stop < cursor) return [cursor];
     // Guard rather than trust the range: a decade of days is 3,650 columns and
     // would hang the page rather than draw a chart.
     while (cursor <= stop && out.length < 200) {
@@ -183,7 +183,9 @@ export function GanttView<T>({
     const buckets = new Map<string, Bar<T>[]>();
     for (const d of dated) {
       const key = accessors.getGroup(d.item) ?? '';
-      buckets.set(key, [...(buckets.get(key) ?? []), toBar(d)]);
+      const bucket = buckets.get(key);
+      if (bucket) bucket.push(toBar(d));
+      else buckets.set(key, [toBar(d)]);
     }
     return [...buckets].map(([key, bars]) => ({
       id: key,

@@ -173,7 +173,8 @@ function LiveBoard({
       onOpen={(id) => setSelectedId(id)}
       onMove={async (id, toStage) => {
         await new Promise((resolve) => setTimeout(resolve, 400));
-        if (fail) throw new Error('Rejected by the server');
+        // `Error` is shadowed by this module's story export of the same name.
+        if (fail) throw new globalThis.Error('Rejected by the server');
         setItems((prev) =>
           prev.map((w) => (w.id === id ? { ...w, status: toStage } : w))
         );

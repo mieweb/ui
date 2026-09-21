@@ -6,6 +6,7 @@ import { ChevronDownIcon, ChevronRightIcon } from '../Icons';
 import {
   accentClasses,
   defaultViewLabels,
+  domId,
   type Stage,
   type ViewBaseProps,
 } from '../../views/types';
@@ -99,7 +100,9 @@ function buildGroups<T>(
   const buckets = new Map<string, T[]>();
   for (const item of items) {
     const key = read(item) ?? '';
-    buckets.set(key, [...(buckets.get(key) ?? []), item]);
+    const bucket = buckets.get(key);
+    if (bucket) bucket.push(item);
+    else buckets.set(key, [item]);
   }
 
   const groups: Group<T>[] = [];
@@ -202,7 +205,7 @@ export function ListView<T>({
   } else {
     body = groups.map((group) => {
       const isCollapsed = collapsed.has(group.id);
-      const headerId = `list-view-group-${group.id || 'all'}`;
+      const headerId = domId('list-view-group', group.id);
       return (
         <section
           key={group.id}

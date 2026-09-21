@@ -85,6 +85,20 @@ describe('BoardView', () => {
     expect(column(/archived/i)).toBeInTheDocument();
   });
 
+  it('labels a column whose stage id contains spaces', () => {
+    // `aria-labelledby` splits on whitespace, so a raw status would unlabel it.
+    render(
+      <BoardView
+        {...base}
+        stages={[{ id: 'results ready', label: 'Results ready' }]}
+        items={[{ ...workItems[0], id: 'S1', status: 'results ready' }]}
+      />
+    );
+    expect(
+      within(column(/Results ready/i)).getAllByRole('listitem')
+    ).toHaveLength(1);
+  });
+
   it('is read-only without onMove: no drag handles, no hint', () => {
     render(<BoardView {...base} />);
     const card = screen

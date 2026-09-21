@@ -31,6 +31,19 @@ describe('ListView', () => {
     expect(within(list).getAllByRole('listitem')).toHaveLength(1);
   });
 
+  it('labels a group whose id contains spaces', () => {
+    // `aria-labelledby` splits on whitespace, so a raw status would unlabel it.
+    render(
+      <ListView
+        {...base}
+        groupBy="status"
+        items={[{ ...workItems[0], id: 'S1', status: 'results ready' }]}
+      />
+    );
+    const list = screen.getByRole('list', { name: /results ready/i });
+    expect(within(list).getAllByRole('listitem')).toHaveLength(1);
+  });
+
   it('collapses and reopens a group', async () => {
     render(<ListView {...base} stages={workItemStages} />);
     const header = screen.getByRole('button', { name: /Backlog/i });
