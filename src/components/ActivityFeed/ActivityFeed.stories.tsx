@@ -3,10 +3,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ActivityFeed, type ActivityItem } from './ActivityFeed';
 
 const meta: Meta<typeof ActivityFeed> = {
-  title: 'Dashboard/ActivityFeed',
+  id: 'dashboard-activityfeed',
+  title: 'Modules/Dashboards/ActivityFeed',
   component: ActivityFeed,
-  tags: ['autodocs'],
-  parameters: { layout: 'padded' },
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
+  parameters: { docs: { description: { component: 'Displays recent activity with timestamps and grouped timeline entries.' } }, layout: 'padded' },
 };
 
 export default meta;

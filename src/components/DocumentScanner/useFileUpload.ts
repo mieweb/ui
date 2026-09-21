@@ -107,13 +107,14 @@ export function useFileUpload({
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [files, setFiles] = React.useState<PreviewFile[]>([]);
 
-  // Cleanup preview URLs on unmount
+  const filesRef = React.useRef(files);
+  React.useEffect(() => { filesRef.current = files; }, [files]);
+
+  // Cleanup the latest previews, including files added after mount.
   React.useEffect(() => {
     return () => {
-      files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+      filesRef.current.forEach((f) => URL.revokeObjectURL(f.previewUrl));
     };
-    // Only run on unmount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addFiles = React.useCallback(
@@ -144,6 +145,7 @@ export function useFileUpload({
           // If not multiple, revoke old URLs and replace
           if (!multiple) {
             prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+            newFiles.slice(1).forEach((f) => URL.revokeObjectURL(f.previewUrl));
             return newFiles.slice(0, 1);
           }
           return [...prev, ...newFiles];

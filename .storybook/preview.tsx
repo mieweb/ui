@@ -488,6 +488,8 @@ const preview: Preview = {
           [
             'Data display',
             ['Overview', '*'],
+            'Identity',
+            ['Overview', '*'],
             'Grids',
             ['Overview', '*'],
             'Feedback',
@@ -504,6 +506,8 @@ const preview: Preview = {
           'Modules',
           [
             'Dashboards',
+            ['Overview', '*'],
+            'Portals',
             ['Overview', '*'],
             'Media',
             ['Overview', '*'],

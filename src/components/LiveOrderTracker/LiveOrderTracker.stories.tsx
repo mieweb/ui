@@ -4,10 +4,11 @@ import React from 'react';
 import { type LiveOrderItem, LiveOrderTracker } from './LiveOrderTracker';
 
 const meta: Meta<typeof LiveOrderTracker> = {
-  title: 'Dashboard/LiveOrderTracker',
+  id: 'dashboard-liveordertracker',
+  title: 'Modules/Dashboards/LiveOrderTracker',
   component: LiveOrderTracker,
-  tags: ['autodocs'],
-  parameters: { layout: 'padded' },
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
+  parameters: { docs: { description: { component: 'Responsive status board for monitoring orders across their lifecycle.' } }, layout: 'padded' },
 };
 
 export default meta;

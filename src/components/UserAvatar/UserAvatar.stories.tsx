@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { UserAvatar } from './UserAvatar';
 
 const meta: Meta<typeof UserAvatar> = {
-  title: 'Components/UserAvatar',
+  id: 'components-useravatar',
+  title: 'Components/Identity/UserAvatar',
   component: UserAvatar,
-  parameters: {
+  parameters: { docs: { description: { component: 'User identity image with an initials fallback.' } },
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   argTypes: {
     size: {
       control: 'select',

@@ -78,11 +78,11 @@ export function HeroActionCard({
       {/* Decorative blobs */}
       <div
         aria-hidden="true"
-        className="bg-primary-200/40 dark:bg-primary-700/20 pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl"
+        className="bg-primary-200/40 dark:bg-primary-700/20 pointer-events-none absolute -end-16 -top-16 h-56 w-56 rounded-full blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="bg-primary-300/30 dark:bg-primary-500/10 pointer-events-none absolute -bottom-20 right-24 h-40 w-40 rounded-full blur-3xl"
+        className="bg-primary-300/30 dark:bg-primary-500/10 pointer-events-none absolute -bottom-20 end-24 h-40 w-40 rounded-full blur-3xl"
       />
 
       <div

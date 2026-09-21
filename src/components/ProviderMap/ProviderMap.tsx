@@ -134,13 +134,16 @@ export function ProviderMap({
             zoom,
           });
 
+          // Provider data must stay text, never executable popup markup.
+          const popup = document.createElement('div');
+          const heading = document.createElement('strong');
+          heading.textContent = providerName;
+          popup.append(heading, document.createElement('br'), document.createTextNode(address));
           // Add marker
           new mapboxgl.Marker({ color: '#0ea5e9' })
             .setLngLat([coordinates.longitude, coordinates.latitude])
             .setPopup(
-              new mapboxgl.Popup({ offset: 25 }).setHTML(
-                `<strong>${providerName}</strong><br/>${address}`
-              )
+              new mapboxgl.Popup({ offset: 25 }).setDOMContent(popup)
             )
             .addTo(map);
 
@@ -272,7 +275,7 @@ export function ProviderMap({
           onClick={() =>
             setMapStyle((s) => (s === 'streets' ? 'satellite' : 'streets'))
           }
-          className="absolute right-2 top-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="absolute end-2 top-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           {mapStyle === 'streets' ? 'Satellite view' : 'Map view'}
         </button>
@@ -284,7 +287,7 @@ export function ProviderMap({
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute left-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
+          className="absolute start-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
         >
           GET DIRECTIONS
         </a>
@@ -334,7 +337,7 @@ function StaticMapFallback({
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute left-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
+          className="absolute start-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
         >
           GET DIRECTIONS
         </a>
@@ -380,7 +383,7 @@ interface MapboxMarker {
 }
 
 interface MapboxPopup {
-  setHTML: (html: string) => MapboxPopup;
+  setDOMContent: (node: HTMLElement) => MapboxPopup;
 }
 
 export default ProviderMap;

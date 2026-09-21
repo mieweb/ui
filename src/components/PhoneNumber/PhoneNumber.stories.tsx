@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PhoneNumber } from './PhoneNumber';
 
 const meta: Meta<typeof PhoneNumber> = {
-  title: 'Components/PhoneNumber',
+  id: 'components-phonenumber',
+  title: 'Components/Data display/PhoneNumber',
   component: PhoneNumber,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   parameters: {
     layout: 'centered',
     docs: {

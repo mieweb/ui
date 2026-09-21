@@ -238,9 +238,9 @@ export function PhoneNumber({
       {iconEl}
       <span className="truncate">
         {formatted}
-        {ext ? <span className="ml-1 opacity-80">ext. {ext}</span> : null}
+        {ext ? <span className="ms-1 opacity-80">ext. {ext}</span> : null}
         {derivedLabel ? (
-          <span className="ml-1 text-xs opacity-70">({derivedLabel})</span>
+          <span className="ms-1 text-xs opacity-70">({derivedLabel})</span>
         ) : null}
       </span>
     </>

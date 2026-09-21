@@ -10,15 +10,18 @@ function Harness({
   onComplete,
   length,
   initial = '',
+  pattern,
 }: {
   onComplete?: (value: string) => void;
   length?: number;
   initial?: string;
+  pattern?: RegExp;
 }) {
   const [value, setValue] = useState(initial);
   return (
     <OTPInput
       label="Verification code"
+      pattern={pattern}
       value={value}
       onChange={setValue}
       onComplete={onComplete}
@@ -28,6 +31,15 @@ function Harness({
 }
 
 describe('OTPInput', () => {
+  it.each([/\d/g, /\d/y])('accepts repeated characters with stateful pattern %s', async (pattern) => {
+    const user = userEvent.setup();
+    const onComplete = vi.fn();
+    renderWithTheme(<Harness length={4} pattern={pattern} onComplete={onComplete} />);
+    screen.getAllByRole('textbox')[0].focus();
+    await user.keyboard('1111');
+    expect(onComplete).toHaveBeenCalledWith('1111');
+  });
+
   it('renders one cell per length', () => {
     renderWithTheme(<Harness length={4} />);
     expect(screen.getAllByRole('textbox')).toHaveLength(4);
@@ -93,6 +105,7 @@ describe('OTPInput', () => {
     renderWithTheme(
       <OTPInput
         label="Verification code"
+
         value="0000"
         onChange={() => {}}
         error="Invalid code"

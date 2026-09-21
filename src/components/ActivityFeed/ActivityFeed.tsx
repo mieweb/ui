@@ -226,7 +226,7 @@ export function ActivityFeed({
             {!isLast && (
               <span
                 aria-hidden="true"
-                className="absolute left-[15px] top-8 h-[calc(100%-1rem)] w-px bg-border"
+                className="absolute start-[15px] top-8 h-[calc(100%-1rem)] w-px bg-border"
               />
             )}
             <span
@@ -267,7 +267,7 @@ export function ActivityFeed({
               <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
                 {item.actor && <span className="truncate">{item.actor}</span>}
                 {item.timestamp && (
-                  <span className="ml-auto whitespace-nowrap">
+                  <span className="ms-auto whitespace-nowrap">
                     {relativeTime(item.timestamp)}
                   </span>
                 )}

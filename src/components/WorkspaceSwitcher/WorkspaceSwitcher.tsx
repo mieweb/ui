@@ -152,7 +152,7 @@ export function WorkspaceSwitcher({
       type="button"
       className={cn(
         'flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5',
-        'text-left transition-colors hover:bg-muted',
+        'text-start transition-colors hover:bg-muted',
         'focus:outline-none focus:ring-2 focus:ring-primary-500',
         className
       )}

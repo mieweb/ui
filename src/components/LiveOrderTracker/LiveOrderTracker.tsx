@@ -44,7 +44,7 @@ export interface LiveOrderTrackerProps {
   onOrderClick?: (order: LiveOrderItem) => void;
   /** Loading state — renders skeleton columns. */
   loading?: boolean;
-  /** Override the status columns shown (defaults to the standard 5). */
+  /** Override the status columns shown (defaults to the standard 6). */
   columns?: LiveOrderStatus[];
   /** Empty state node rendered when there are zero orders and not loading. */
   emptyState?: React.ReactNode;
@@ -62,6 +62,7 @@ const DEFAULT_COLUMNS: LiveOrderStatus[] = [
   'order_in_progress',
   'order_results_ready',
   'order_completed',
+  'order_refused',
 ];
 
 const STATUS_META: Record<
@@ -245,7 +246,7 @@ function OrderCardItem({
               </span>
             )}
             {order.updatedAt && (
-              <span className="ml-auto flex-shrink-0 whitespace-nowrap">
+              <span className="ms-auto flex-shrink-0 whitespace-nowrap">
                 {relativeTime(order.updatedAt)}
               </span>
             )}

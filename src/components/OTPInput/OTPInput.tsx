@@ -148,7 +148,7 @@ const OTPInput = React.forwardRef<HTMLInputElement, OTPInputProps>(
 
     const handleChange = (index: number, raw: string) => {
       const char = raw.slice(-1);
-      if (char && !pattern.test(char)) return;
+      if (char && !new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, '')).test(char)) return;
       const arr = value.split('');
       while (arr.length < length) arr.push('');
       arr[index] = char;

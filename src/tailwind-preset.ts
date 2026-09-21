@@ -39,6 +39,9 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+  'end-16', 'end-24',
+  'bg-gradient-brand', 'bg-gradient-brand-strong', 'shadow-glow', 'hover:shadow-glow-hover',
+
   // CaseManagementHeader — logical spacing, details grid, responsive
   // built-in actions (icon-only below md):
   '-ms-2',
@@ -1190,7 +1193,14 @@ export const miewebUIPreset: MiewebUIPreset = {
         sm: 'var(--mieweb-radius-sm, 0.25rem)',
         xl: 'var(--mieweb-radius-xl, 1rem)',
       },
+      backgroundImage: {
+        'gradient-brand': 'var(--mieweb-gradient-brand)',
+        'gradient-brand-strong': 'var(--mieweb-gradient-brand-strong)',
+      },
       boxShadow: {
+        glow: 'var(--mieweb-shadow-glow)',
+        'glow-hover': 'var(--mieweb-shadow-glow-hover)',
+
         card: 'var(--mieweb-shadow-card, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1))',
       },
       keyframes: {

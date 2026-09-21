@@ -4,12 +4,13 @@ import { HeartPulse, Mail, Send, ShieldCheck } from 'lucide-react';
 import { IconBadge } from './IconBadge';
 
 const meta: Meta<typeof IconBadge> = {
-  title: 'Components/Data Display/IconBadge',
+  id: 'components-data-display-iconbadge',
+  title: 'Components/Data display/IconBadge',
   component: IconBadge,
-  parameters: {
+  parameters: { docs: { description: { component: 'Brand-aware icon container with tonal, solid and gradient treatments.' } },
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   argTypes: {
     variant: {
       control: 'select',

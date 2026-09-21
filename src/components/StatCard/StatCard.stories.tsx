@@ -4,10 +4,11 @@ import React from 'react';
 import { StatCard } from './StatCard';
 
 const meta: Meta<typeof StatCard> = {
-  title: 'Dashboard/StatCard',
+  id: 'dashboard-statcard',
+  title: 'Modules/Dashboards/StatCard',
   component: StatCard,
-  tags: ['autodocs'],
-  parameters: {
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
+  parameters: { docs: { description: { component: 'Compact dashboard metric with optional trend and supporting context.' } },
     layout: 'padded',
   },
 };

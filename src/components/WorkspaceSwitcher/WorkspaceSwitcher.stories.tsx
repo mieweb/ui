@@ -3,10 +3,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 const meta: Meta<typeof WorkspaceSwitcher> = {
-  title: 'Layout/WorkspaceSwitcher',
+  id: 'layout-workspaceswitcher',
+  title: 'Components/Navigation/WorkspaceSwitcher',
   component: WorkspaceSwitcher,
-  tags: ['autodocs'],
-  parameters: { layout: 'padded' },
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
+  parameters: { docs: { description: { component: 'Searchable organization selector for switching between accessible workspaces.' } }, layout: 'padded' },
 };
 
 export default meta;

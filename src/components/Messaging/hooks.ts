@@ -431,6 +431,7 @@ export function useReadReceipts(options: UseReadReceiptsOptions) {
   const observedMessagesRef = React.useRef<Set<string>>(new Set());
 
   React.useEffect(() => {
+    if (!onMarkRead || typeof IntersectionObserver === 'undefined') return;
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

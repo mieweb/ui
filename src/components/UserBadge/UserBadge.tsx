@@ -200,7 +200,7 @@ export const UserBadge = React.forwardRef<HTMLSpanElement, UserBadgeProps>(
     );
 
     const triggerClass = cn(
-      'inline-flex items-center gap-2 rounded-md text-left align-middle',
+      'inline-flex items-center gap-2 rounded-md text-start align-middle',
       href &&
         'group/userbadge cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 focus-visible:ring-offset-background',
       className,
@@ -247,12 +247,12 @@ export const UserBadge = React.forwardRef<HTMLSpanElement, UserBadgeProps>(
             aria-label={`${name} preview`}
             className={cn(
               'absolute top-full z-50 w-72 max-w-[calc(100vw-2rem)] pt-2',
-              align === 'right' ? 'right-0' : 'left-0',
+              align === 'right' ? 'end-0' : 'start-0',
             )}
             onMouseEnter={scheduleOpen}
             onMouseLeave={scheduleClose}
           >
-            <span className="block rounded-xl border border-border bg-card p-4 text-left shadow-lg">
+            <span className="block rounded-xl border border-border bg-card p-4 text-start shadow-lg">
               <span className="flex items-start gap-3">
                 <UserAvatar
                   src={avatarSrc ?? undefined}
@@ -301,7 +301,7 @@ export const UserBadge = React.forwardRef<HTMLSpanElement, UserBadgeProps>(
                   {lastActiveLabel && (
                     <span className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Last active</span>
-                      <span className="text-right font-medium text-foreground">
+                      <span className="text-end font-medium text-foreground">
                         {lastActiveLabel}
                       </span>
                     </span>
@@ -314,7 +314,7 @@ export const UserBadge = React.forwardRef<HTMLSpanElement, UserBadgeProps>(
                       <span className="text-muted-foreground">
                         {detail.label}
                       </span>
-                      <span className="text-right font-medium text-foreground">
+                      <span className="text-end font-medium text-foreground">
                         {detail.value}
                       </span>
                     </span>

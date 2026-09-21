@@ -562,7 +562,7 @@ const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
           <div
             ref={popoverRef}
             data-slot="schedule-date-calendar-popover"
-            className="absolute right-0 top-full z-50 mt-2"
+            className="absolute end-0 top-full z-50 mt-2"
           >
             <MiniCalendar
               selectedDate={selectedDate ?? null}

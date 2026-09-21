@@ -258,22 +258,18 @@ export function useDocumentDetection(
   stopDetection: () => void;
   resetDetection: () => void;
 } {
-  const mergedConfig = useMemo(
-    () => ({ ...DEFAULT_CONFIG, ...config }),
-    // Intentionally depend on individual properties to avoid unnecessary re-renders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      config.minFocusScore,
-      config.minBrightness,
-      config.maxBrightness,
-      config.minDocumentCoverage,
-      config.maxDocumentCoverage,
-      config.stabilityDuration,
-      config.captureCountdown,
-      config.detectionFps,
-      config.enableAutoCapture,
-    ]
-  );
+  const { minFocusScore, minBrightness, maxBrightness, minDocumentCoverage, maxDocumentCoverage, stabilityDuration, captureCountdown, detectionFps, enableAutoCapture } = config;
+  const mergedConfig = useMemo(() => ({
+    minFocusScore: minFocusScore ?? DEFAULT_CONFIG.minFocusScore,
+    minBrightness: minBrightness ?? DEFAULT_CONFIG.minBrightness,
+    maxBrightness: maxBrightness ?? DEFAULT_CONFIG.maxBrightness,
+    minDocumentCoverage: minDocumentCoverage ?? DEFAULT_CONFIG.minDocumentCoverage,
+    maxDocumentCoverage: maxDocumentCoverage ?? DEFAULT_CONFIG.maxDocumentCoverage,
+    stabilityDuration: stabilityDuration ?? DEFAULT_CONFIG.stabilityDuration,
+    captureCountdown: captureCountdown ?? DEFAULT_CONFIG.captureCountdown,
+    detectionFps: detectionFps ?? DEFAULT_CONFIG.detectionFps,
+    enableAutoCapture: enableAutoCapture ?? DEFAULT_CONFIG.enableAutoCapture,
+  }), [minFocusScore, minBrightness, maxBrightness, minDocumentCoverage, maxDocumentCoverage, stabilityDuration, captureCountdown, detectionFps, enableAutoCapture]);
 
   const [state, setState] = useState<DetectionState>(INITIAL_STATE);
 

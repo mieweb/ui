@@ -4,10 +4,11 @@ import React from 'react';
 import { HeroActionCard } from './HeroActionCard';
 
 const meta: Meta<typeof HeroActionCard> = {
-  title: 'Dashboard/HeroActionCard',
+  id: 'dashboard-heroactioncard',
+  title: 'Modules/Portals/HeroActionCard',
   component: HeroActionCard,
-  tags: ['autodocs'],
-  parameters: { layout: 'padded' },
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
+  parameters: { docs: { description: { component: 'Prominent action card for a dashboard, with a heading, description and primary action.' } }, layout: 'padded' },
 };
 
 export default meta;

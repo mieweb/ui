@@ -51,6 +51,7 @@
       "scope": "scope:general-purpose",
       "families": [
         "Data display",
+        "Identity",
         "Grids",
         "Feedback",
         "Loading",
@@ -64,6 +65,7 @@
       "scope": "scope:general-purpose",
       "families": [
         "Dashboards",
+        "Portals",
         "Media",
         "Editors",
         "Chat",

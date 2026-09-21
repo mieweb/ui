@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { UserBadge } from './UserBadge';
 
 const meta: Meta<typeof UserBadge> = {
-  title: 'Components/UserBadge',
+  id: 'components-userbadge',
+  title: 'Components/Identity/UserBadge',
   component: UserBadge,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   parameters: {
     docs: {
       description: {

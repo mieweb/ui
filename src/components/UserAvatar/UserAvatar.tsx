@@ -79,7 +79,7 @@ const UserAvatar = React.forwardRef<HTMLDivElement, UserAvatarProps>(
           <span
             aria-hidden="true"
             className={cn(
-              'absolute bottom-0 right-0 rounded-full ring-2 ring-background',
+              'absolute bottom-0 end-0 rounded-full ring-2 ring-background',
               dotSizeClasses[effectiveSize],
               dotColor
             )}

@@ -5,9 +5,10 @@ import { Button } from '../Button/Button';
 import { ConfirmDialog } from './ConfirmDialog';
 
 const meta: Meta<typeof ConfirmDialog> = {
-  title: 'Components/ConfirmDialog',
+  id: 'components-confirmdialog',
+  title: 'Components/Feedback/ConfirmDialog',
   component: ConfirmDialog,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   parameters: {
     docs: {
       description: {

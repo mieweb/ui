@@ -67,6 +67,9 @@ export default [
         process: 'readonly',
         // Browser APIs
         confirm: 'readonly',
+        alert: 'readonly',
+        ImageData: 'readonly',
+        ResizeObserver: 'readonly',
         // Google Maps API (loaded externally)
         google: 'readonly',
         // Audio/Media APIs

@@ -1,6 +1,7 @@
 import React, {
   type ReactNode,
   useRef,
+  useId,
   useCallback,
   useState,
   useEffect,
@@ -392,6 +393,8 @@ export function SidebarNavGroup({
     useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
 
+  const contentId = useId();
+
   // Determine if this group is expanded
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
 
@@ -412,6 +415,9 @@ export function SidebarNavGroup({
       {/* Group Header */}
       <button
         data-slot="sidebar-nav-group-button"
+        type="button"
+        aria-expanded={!showCollapsed && effectiveExpanded}
+        aria-controls={!showCollapsed ? contentId : undefined}
         onClick={handleToggle}
         className={cn(
           'flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold',
@@ -450,6 +456,7 @@ export function SidebarNavGroup({
       {/* Group Items */}
       {!showCollapsed && (
         <div
+          id={contentId}
           inert={!effectiveExpanded ? true : undefined}
           aria-hidden={!effectiveExpanded ? true : undefined}
           className={cn(

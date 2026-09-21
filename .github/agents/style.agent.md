@@ -75,21 +75,21 @@ The `tailwind-preset.ts` maps CSS variables to Tailwind classes:
 
 ```tsx
 // These bypass the branding system:
-className = 'bg-violet-500'; // Hardcoded violet
-className = 'bg-purple-600'; // Hardcoded purple
-className = 'bg-blue-500'; // Hardcoded blue
-className = 'text-indigo-600'; // Hardcoded indigo
-className = 'from-violet-500 to-purple-600'; // Hardcoded gradients
+<div className="bg-violet-500" /> // Hardcoded violet
+<div className="bg-purple-600" /> // Hardcoded purple
+<div className="bg-blue-500" /> // Hardcoded blue
+<div className="text-indigo-600" /> // Hardcoded indigo
+<div className="from-violet-500 to-purple-600" /> // Hardcoded gradients
 ```
 
 ### ✅ Brand-Aware Colors (GOOD)
 
 ```tsx
 // These respect the active brand:
-className = 'bg-primary-500'; // Uses brand primary
-className = 'text-primary-600'; // Uses brand primary
-className = 'bg-secondary-500'; // Uses brand secondary
-className = 'text-neutral-700'; // Uses brand neutral
+<div className="bg-primary-500" /> // Uses brand primary
+<div className="text-primary-600" /> // Uses brand primary
+<div className="bg-secondary-500" /> // Uses brand secondary
+<div className="text-neutral-700" /> // Uses brand neutral
 ```
 
 ### Exceptions - Semantic Colors (OKAY)
@@ -105,10 +105,10 @@ These are intentionally hardcoded for consistent meaning across brands:
 
 ```tsx
 // Check if these use brand radius variables:
-className = 'rounded-lg'; // ✅ Mapped to --mieweb-radius-lg
-className = 'rounded-2xl'; // ✅ Mapped to --mieweb-radius-2xl
-className = 'rounded-full'; // ✅ OK for circular elements (avatars, pills)
-className = 'rounded-[20px]'; // ❌ Hardcoded - should use brand token
+<div className="rounded-lg" /> // ✅ Mapped to --mieweb-radius-lg
+<div className="rounded-2xl" /> // ✅ Mapped to --mieweb-radius-2xl
+<div className="rounded-full" /> // ✅ OK for circular elements (avatars, pills)
+<div className="rounded-[20px]" /> // ❌ Hardcoded - should use brand token
 ```
 
 ## Audit Process

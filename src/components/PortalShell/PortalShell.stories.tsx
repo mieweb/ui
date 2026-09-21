@@ -9,10 +9,11 @@ import {
 import { type PortalNavGroup, PortalShell } from './PortalShell';
 
 const meta: Meta<typeof PortalShell> = {
-  title: 'Layout/PortalShell',
+  id: 'layout-portalshell',
+  title: 'Modules/Portals/PortalShell',
   component: PortalShell,
-  tags: ['autodocs'],
-  parameters: { layout: 'fullscreen' },
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
+  parameters: { docs: { description: { component: 'Responsive portal frame combining navigation, header, content and mobile controls.' } }, layout: 'fullscreen' },
 };
 
 export default meta;
@@ -20,7 +21,7 @@ export default meta;
 type Story = StoryObj<typeof PortalShell>;
 
 const DashIcon = (
-  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -53,7 +54,7 @@ const groups: PortalNavGroup[] = [
 ];
 
 const BellIcon = (
-  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
     <path
       strokeLinecap="round"
       strokeLinejoin="round"

@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { OTPInput } from './OTPInput';
 
 const meta: Meta<typeof OTPInput> = {
-  title: 'Components/Forms & Inputs/OTPInput',
+  id: 'components-forms-inputs-otpinput',
+  title: 'Inputs/Text inputs/OTPInput',
   component: OTPInput,
-  parameters: {
+  parameters: { docs: { description: { component: 'Accessible one-time-code input with keyboard navigation and paste support.' } },
     layout: 'centered',
   },
-  tags: ['autodocs'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   argTypes: {
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
     length: { control: { type: 'number', min: 4, max: 8 } },

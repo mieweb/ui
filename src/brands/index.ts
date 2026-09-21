@@ -10,6 +10,7 @@ export type {
   BrandBoxShadow,
   BrandColors,
   BrandConfig,
+  BrandGradients,
   BrandTypography,
   ColorScale,
   SemanticColors,

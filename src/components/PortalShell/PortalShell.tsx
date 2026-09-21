@@ -153,10 +153,12 @@ export function PortalShell({
   contentClassName,
   contentMaxWidth = '7xl',
 }: PortalShellProps): React.JSX.Element {
+  const containsActive = (item: PortalNavItem): boolean =>
+    !item.hidden && (isItemActive(item) || !!item.children?.some(containsActive));
   const activeGroup = navGroups.find(
     (group) =>
       group.label &&
-      group.items.some((item) => !item.hidden && isItemActive(item))
+      group.items.some(containsActive)
   )?.label;
 
   const handleActivate = (item: PortalNavItem) => {
@@ -166,6 +168,13 @@ export function PortalShell({
 
   const renderItem = (item: PortalNavItem): React.ReactNode => {
     if (item.hidden) return null;
+    if (item.children?.length) {
+      return (
+        <SidebarNavGroup key={item.key} defaultExpanded={containsActive(item)} label={item.label} icon={item.icon}>
+          {item.children.map(renderItem)}
+        </SidebarNavGroup>
+      );
+    }
     const active = isItemActive(item);
     const props: SidebarNavItemProps = {
       label: item.label,
@@ -173,7 +182,7 @@ export function PortalShell({
       href: item.href,
       isActive: active,
       badge: item.badge,
-      onClick: () => handleActivate(item),
+      onClick: item.onClick || onNavigate ? () => handleActivate(item) : undefined,
     };
     return <SidebarNavItem key={item.key} {...props} />;
   };
@@ -191,7 +200,7 @@ export function PortalShell({
           onClick={() =>
             document.getElementById('portal-main-content')?.focus()
           }
-          className="focus:ring-primary/60 sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-md focus:bg-primary-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none focus:ring-2"
+          className="focus:ring-primary/60 sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-3 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-md focus:bg-primary-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none focus:ring-2"
         >
           Skip to content
         </a>

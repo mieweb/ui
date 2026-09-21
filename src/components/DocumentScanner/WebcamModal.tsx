@@ -268,6 +268,8 @@ export function WebcamModal({
     }
   }, [isReady, videoRef]);
 
+  const { startDetection, stopDetection } = detection;
+
   // Start camera and detection when modal opens
   React.useEffect(() => {
     if (open && permission !== 'denied' && permission !== 'unavailable') {
@@ -278,7 +280,7 @@ export function WebcamModal({
     } else if (!open) {
       hasStartedRef.current = false;
       stopCamera();
-      detection.stopDetection();
+      stopDetection();
       // Reset captured state
       setCapturedFile(null);
       setPreviewUrl((prev) => {
@@ -288,19 +290,17 @@ export function WebcamModal({
         return null;
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, permission]);
+  }, [open, permission, startCamera, stopCamera, stopDetection]);
 
   // Start detection when camera is ready
   React.useEffect(() => {
     if (isReady && autoDetectEnabled && !capturedFile) {
-      detection.startDetection();
+      startDetection();
     }
     return () => {
-      detection.stopDetection();
+      stopDetection();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady, autoDetectEnabled, capturedFile]);
+  }, [isReady, autoDetectEnabled, capturedFile, startDetection, stopDetection]);
 
   const handleCapture = React.useCallback(() => {
     const file = capturePhoto();

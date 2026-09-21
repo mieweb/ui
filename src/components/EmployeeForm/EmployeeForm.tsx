@@ -240,14 +240,14 @@ export function EmployeeForm({
     }
   }, [address.postalCode, address.country, validatePostalCode]);
 
-  const validate = (): boolean => {
+  const validate = (postalCodeError: string | null): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!firstName.trim()) newErrors.firstName = firstNameRequired;
     if (!lastName.trim()) newErrors.lastName = lastNameRequired;
     if (!email.trim()) newErrors.email = emailRequired;
     if (!dob) newErrors.dob = dobRequired;
-    if (errors.postalCode) newErrors.postalCode = errors.postalCode;
+    if (postalCodeError) newErrors.postalCode = postalCodeError;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -256,14 +256,8 @@ export function EmployeeForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validatePostalCode && (address.postalCode ?? '').trim()) {
-      const zipError = await checkPostalCode();
-      if (zipError) {
-        validate();
-        return;
-      }
-    }
-    if (!validate()) return;
+    const zipError = await checkPostalCode();
+    if (!validate(zipError)) return;
 
     onSubmit({
       firstName,

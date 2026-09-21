@@ -10,6 +10,7 @@ module.exports = {
   // Safelist classes used by @mieweb/ui components that may not be detected
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
+    'bg-gradient-brand', 'bg-gradient-brand-strong', 'shadow-glow', 'hover:shadow-glow-hover', 'end-16', 'end-24',
     // CaseManagementHeader — logical spacing, details grid, responsive
     // built-in actions (icon-only below md):
     '-ms-2',
@@ -561,7 +562,13 @@ module.exports = {
         sm: 'var(--mieweb-radius-sm, 0.25rem)',
         xl: 'var(--mieweb-radius-xl, 1rem)',
       },
+      backgroundImage: {
+        'gradient-brand': 'var(--mieweb-gradient-brand)',
+        'gradient-brand-strong': 'var(--mieweb-gradient-brand-strong)',
+      },
       boxShadow: {
+        glow: 'var(--mieweb-shadow-glow)',
+        'glow-hover': 'var(--mieweb-shadow-glow-hover)',
         card: 'var(--mieweb-shadow-card, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1))',
       },
       keyframes: {
