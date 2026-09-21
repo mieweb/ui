@@ -7,7 +7,8 @@ const meta: Meta<typeof OTPInput> = {
   id: 'components-forms-inputs-otpinput',
   title: 'Inputs/Text inputs/OTPInput',
   component: OTPInput,
-  parameters: { docs: { description: { component: 'Accessible one-time-code input with keyboard navigation and paste support.' } },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": []}, docs: { description: { component: "### What it's for\n\nA labeled group of one-character inputs for a fixed-length verification code.\n\n### Use it when\n\nAuthentication asks for a short code that users may type or paste.\n\n### Don't use it when\n\nUse Input for passwords, free text or variable-length identifiers.\n\n### Example\n\nKeep the code in parent state with value and onChange; submit from onComplete and pass the server validation error back.\n\n### Limitations\n\nKeyboard navigation and paste filtering are built in. Supply a label and translated error text. The component does not verify a code, rate-limit attempts or implement authentication." } },
     layout: 'centered',
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],

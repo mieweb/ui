@@ -7,7 +7,8 @@ const meta: Meta<typeof IconBadge> = {
   id: 'components-data-display-iconbadge',
   title: 'Components/Data display/IconBadge',
   component: IconBadge,
-  parameters: { docs: { description: { component: 'Brand-aware icon container with tonal, solid and gradient treatments.' } },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": []}, docs: { description: { component: "### What it's for\n\nA decorative or labeled icon container with size, shape and brand-tone variants.\n\n### Use it when\n\nAn icon needs a consistent background in a hero, feature list or status summary.\n\n### Don't use it when\n\nUse Badge for a text status or Button for an actionable icon.\n\n### Example\n\nPlace a decorative lucide icon inside IconBadge next to a visible heading; put the action on a separate Button.\n\n### Limitations\n\nIt is a span, not an interactive control. Mark decorative icons aria-hidden or give meaningful icons an accessible name. SVG child sizing is supplied by each size variant." } },
     layout: 'centered',
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],

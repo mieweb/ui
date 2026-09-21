@@ -128,6 +128,7 @@ export function WorkspaceSwitcher({
   className,
   alwaysRender = false,
 }: WorkspaceSwitcherProps): React.JSX.Element | null {
+  const [open, setOpen] = React.useState(false);
   const current =
     workspaces.find((w) => w.id === currentId) ?? workspaces[0] ?? null;
   if (!current) return null;
@@ -174,7 +175,7 @@ export function WorkspaceSwitcher({
   );
 
   return (
-    <Dropdown trigger={trigger} placement="bottom-start" width={260}>
+    <Dropdown open={open} onOpenChange={setOpen} trigger={trigger} placement="bottom-start" width={260}>
       <DropdownContent>
         <div className="border-b border-border px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Workspaces
@@ -185,6 +186,7 @@ export function WorkspaceSwitcher({
             <DropdownItem
               key={ws.id}
               onClick={() => {
+                setOpen(false);
                 if (!selected) onSelect?.(ws);
               }}
             >
@@ -208,7 +210,7 @@ export function WorkspaceSwitcher({
         {onCreate && (
           <>
             <div className="my-1 h-px bg-border" role="separator" />
-            <DropdownItem onClick={onCreate}>
+            <DropdownItem onClick={() => { setOpen(false); onCreate(); }}>
               <span className="flex w-full items-center gap-2 text-sm text-primary-700 dark:text-primary-300">
                 <svg
                   className="h-4 w-4"

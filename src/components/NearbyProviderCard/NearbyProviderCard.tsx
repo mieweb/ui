@@ -52,6 +52,8 @@ export function NearbyProviderCard({
   className,
 }: NearbyProviderCardProps) {
   const { name, slug, logoUrl, address, phoneNumber, distance } = provider;
+  const [failedLogo, setFailedLogo] = React.useState<string>();
+  const showLogo = Boolean(logoUrl && failedLogo !== logoUrl);
 
   // Use custom Link component or default anchor
   const LinkWrapper = LinkComponent
@@ -99,26 +101,20 @@ export function NearbyProviderCard({
       <div className="flex items-start gap-4">
         {/* Logo */}
         <LinkWrapper to={`/provider/${slug}`} className="shrink-0">
-          {logoUrl ? (
+          {showLogo ? (
             <img
               src={logoUrl}
               alt={`${name} logo`}
               className="h-14 w-14 rounded-xl bg-white object-contain p-1 ring-1 ring-gray-100 dark:bg-gray-700 dark:ring-gray-600"
-              onError={(e) => {
-                // Hide broken image and show fallback
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-              }}
+              onError={() => setFailedLogo(logoUrl)}
             />
-          ) : null}
+          ) : (
           <div
-            className={cn(
-              'shadow-primary-500/20 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 text-lg font-bold text-white shadow-sm',
-              logoUrl && 'hidden'
-            )}
+            className="shadow-primary-500/20 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 text-lg font-bold text-white shadow-sm"
           >
             {initials}
           </div>
+          )}
         </LinkWrapper>
 
         {/* Content */}

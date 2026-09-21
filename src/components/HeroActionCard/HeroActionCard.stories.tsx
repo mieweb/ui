@@ -8,7 +8,8 @@ const meta: Meta<typeof HeroActionCard> = {
   title: 'Modules/Portals/HeroActionCard',
   component: HeroActionCard,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
-  parameters: { docs: { description: { component: 'Prominent action card for a dashboard, with a heading, description and primary action.' } }, layout: 'padded' },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": [{"type": "uses", "target": "actions-button", "why": "Actions are rendered as standard Buttons."}]}, docs: { description: { component: "### What it's for\n\nA dashboard introduction with one prominent primary action and optional secondary actions.\n\n### Use it when\n\nOne frequent task deserves emphasis at the start of a workspace.\n\n### Don't use it when\n\nUse Card for neutral information and Button for an ordinary inline action.\n\n### Example\n\nPass an order-creation callback as primaryAction and employee-management shortcuts as secondaryActions.\n\n### Limitations\n\nIt owns no data or routing. Provide translated text and action labels; compact mode reduces vertical space. Brand gradients depend on the active theme." } }, layout: 'padded' },
 };
 
 export default meta;

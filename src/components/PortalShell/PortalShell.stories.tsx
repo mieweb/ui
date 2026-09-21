@@ -13,7 +13,8 @@ const meta: Meta<typeof PortalShell> = {
   title: 'Modules/Portals/PortalShell',
   component: PortalShell,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
-  parameters: { docs: { description: { component: 'Responsive portal frame combining navigation, header, content and mobile controls.' } }, layout: 'fullscreen' },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": [{"type": "uses", "target": "overlays-sidebar", "why": "Sidebar supplies desktop navigation and the mobile drawer."}]}, docs: { description: { component: "### What it's for\n\nA responsive application frame composing AppHeader and Sidebar with grouped navigation and main content.\n\n### Use it when\n\nAn employer or provider workspace needs a consistent desktop sidebar and mobile navigation.\n\n### Don't use it when\n\nUse AppHeader alone for a single-page surface or a custom layout when there is no persistent workspace navigation.\n\n### Example\n\nThe router owns the active path and navigation callbacks; pass navigation groups and render the current page as children.\n\n### Limitations\n\nIt does not authorize routes or load workspace data. Nested groups have independent expansion state. Provide translated labels and accessible names for custom header controls." } }, layout: 'fullscreen' },
 };
 
 export default meta;

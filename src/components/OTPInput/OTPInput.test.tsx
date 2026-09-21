@@ -40,6 +40,13 @@ describe('OTPInput', () => {
     expect(onComplete).toHaveBeenCalledWith('1111');
   });
 
+  it.each([/\d/g, /\d/y])('pastes every digit with stateful pattern %s', (pattern) => {
+    const onComplete = vi.fn();
+    renderWithTheme(<Harness length={4} pattern={pattern} onComplete={onComplete} />);
+    fireEvent.paste(screen.getAllByRole('textbox')[0], { clipboardData: { getData: () => '1a234' } });
+    expect(onComplete).toHaveBeenCalledWith('1234');
+  });
+
   it('renders one cell per length', () => {
     renderWithTheme(<Harness length={4} />);
     expect(screen.getAllByRole('textbox')).toHaveLength(4);

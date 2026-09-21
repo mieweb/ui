@@ -10,10 +10,10 @@ const meta: Meta<typeof ConfirmDialog> = {
   component: ConfirmDialog,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": [{"type": "uses", "target": "overlays-modal", "why": "Modal supplies the dialog, focus management and overlay."}]},
     docs: {
       description: {
-        component:
-          'A confirmation dialog built on top of `Modal`. Supports an optional custom-message textarea — used for invites, enrollment emails, and other actions where the sender may include a personal note.',
+        component: "### What it's for\n\nA focused confirmation step, composed from Modal and Buttons, with an optional message field.\n\n### Use it when\n\nThe user must confirm one consequential action or add a note before sending an invitation.\n\n### Don't use it when\n\nUse Modal for a multi-step form, or Button directly for a reversible routine action.\n\n### Example\n\nThe parent owns open and isSubmitting; onConfirm performs the request and closes only after success.\n\n### Limitations\n\nModal manages focus and Escape. The caller owns request errors, translated labels and permission checks. Keep the body short enough for mobile.",
       },
     },
   },

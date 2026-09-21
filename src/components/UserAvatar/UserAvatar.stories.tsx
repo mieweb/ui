@@ -6,7 +6,8 @@ const meta: Meta<typeof UserAvatar> = {
   id: 'components-useravatar',
   title: 'Components/Identity/UserAvatar',
   component: UserAvatar,
-  parameters: { docs: { description: { component: 'User identity image with an initials fallback.' } },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": [{"type": "uses", "target": "data-display-avatar", "why": "Avatar handles the image and fallback."}]}, docs: { description: { component: "### What it's for\n\nAn Avatar with an optional, labeled presence indicator and fallback content.\n\n### Use it when\n\nA compact identity image needs presence context beside a name.\n\n### Don't use it when\n\nUse Avatar for a plain image, or UserBadge when the user should also see a name and profile preview.\n\n### Example\n\nPass name and src from the user record; update status from the page and localize statusLabel.\n\n### Limitations\n\nPresence is supplied by the caller and is not a connectivity measurement. Do not convey identity or permission using the dot alone." } },
     layout: 'centered',
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],

@@ -8,10 +8,10 @@ const meta: Meta<typeof UserBadge> = {
   component: UserBadge,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
   parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": [{"type": "uses", "target": "components-useravatar", "why": "UserAvatar supplies the compact identity image."}]},
     docs: {
       description: {
-        component:
-          'The canonical inline user identity: avatar + name with a hover preview card and a click-through to the user profile. Hover (or focus) the badge to reveal email, presence, roles, last-active and a "View full profile" link.',
+        component: "### What it's for\n\nAn inline identity with avatar, name, optional profile navigation and a hover/focus preview.\n\n### Use it when\n\nA person appears in a row and users need quick profile context without leaving it.\n\n### Don't use it when\n\nUse UserAvatar for an image-only treatment, or a full profile page for editing or lengthy details.\n\n### Example\n\nPass name, email and href from an authorized user record; the router can handle onNavigate.\n\n### Limitations\n\nThe caller controls visible personal data and localized labels. Essential actions must remain available outside the hover preview, especially on touch devices.",
       },
     },
   },

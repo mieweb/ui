@@ -7,7 +7,8 @@ const meta: Meta<typeof WorkspaceSwitcher> = {
   title: 'Components/Navigation/WorkspaceSwitcher',
   component: WorkspaceSwitcher,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
-  parameters: { docs: { description: { component: 'Searchable organization selector for switching between accessible workspaces.' } }, layout: 'padded' },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": [{"type": "uses", "target": "choice-inputs-dropdown", "why": "Dropdown provides menu positioning and keyboard interaction."}]}, docs: { description: { component: "### What it's for\n\nA compact organization selector using Dropdown, with an optional workspace-creation action.\n\n### Use it when\n\nThe authenticated user can move between employer or provider workspaces.\n\n### Don't use it when\n\nUse Dropdown for arbitrary commands or a full selection page for first-time onboarding.\n\n### Example\n\nThe parent supplies authorized workspaces and currentId; onSelect updates the application context and route.\n\n### Limitations\n\nIt closes after selection or creation. It does not authorize access or persist the current workspace. A single workspace is static unless alwaysRender or onCreate is supplied." } }, layout: 'padded' },
 };
 
 export default meta;

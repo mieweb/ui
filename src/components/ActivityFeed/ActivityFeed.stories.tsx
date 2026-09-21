@@ -7,7 +7,8 @@ const meta: Meta<typeof ActivityFeed> = {
   title: 'Modules/Dashboards/ActivityFeed',
   component: ActivityFeed,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
-  parameters: { docs: { description: { component: 'Displays recent activity with timestamps and grouped timeline entries.' } }, layout: 'padded' },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": []}, docs: { description: { component: "### What it's for\n\nRecent events with timestamps, event icons, empty states and optional actions in ActivityFeed.\n\n### Use it when\n\nA dashboard needs a short, chronological summary linked to full records.\n\n### Don't use it when\n\nUse Timeline for a general process chronology or a table for searching an audit history.\n\n### Example\n\nFetch events in the page, pass items and loading, and use each item onClick to open its record.\n\n### Limitations\n\nIt does not fetch, paginate or authorize events. Supply localized titles. Relative timestamps are display text; provide a full audit screen for precise historical review." } }, layout: 'padded' },
 };
 
 export default meta;

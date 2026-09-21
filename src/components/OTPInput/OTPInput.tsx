@@ -202,7 +202,7 @@ const OTPInput = React.forwardRef<HTMLInputElement, OTPInputProps>(
       const text = event.clipboardData.getData('text');
       const filtered = text
         .split('')
-        .filter((c) => pattern.test(c))
+        .filter((c) => new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, '')).test(c))
         .join('')
         .slice(0, length);
       if (!filtered) return;

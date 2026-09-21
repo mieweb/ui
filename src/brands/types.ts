@@ -349,6 +349,10 @@ export function generateTailwindTheme(brand: BrandConfig) {
 
   return {
     colors: colorConfig,
+    ...(brand.gradients ? { backgroundImage: {
+      'gradient-brand': `var(--mieweb-gradient-brand, ${brand.gradients.brand})`,
+      'gradient-brand-strong': `var(--mieweb-gradient-brand-strong, ${brand.gradients.brandStrong})`,
+    } } : {}),
     fontFamily: {
       sans: typography.fontFamily.sans,
       ...(typography.fontFamily.mono

@@ -63,6 +63,9 @@ export function ProviderMap({
 
   // Load Mapbox GL JS dynamically
   React.useEffect(() => {
+    let cancelled = false;
+    setMapLoaded(false);
+    setError(null);
     if (!mapboxToken) {
       return;
     }
@@ -121,6 +124,7 @@ export function ProviderMap({
           throw new Error('Mapbox GL JS failed to load');
         }
 
+        if (cancelled) return;
         mapboxgl.accessToken = mapboxToken;
 
         if (mapContainerRef.current && !mapRef.current) {
@@ -168,20 +172,28 @@ export function ProviderMap({
           );
 
           map.on('load', () => {
-            setMapLoaded(true);
+            if (!cancelled) setMapLoaded(true);
+          });
+          map.on('error', () => {
+            if (!cancelled) {
+              map.remove();
+              if (mapRef.current === map) mapRef.current = null;
+              setError('Failed to load map');
+            }
           });
 
           mapRef.current = map;
         }
       } catch (err) {
         console.error('Failed to load map:', err);
-        setError('Failed to load map');
+        if (!cancelled) setError('Failed to load map');
       }
     };
 
     loadMapbox();
 
     return () => {
+      cancelled = true;
       if (mapRef.current) {
         (mapRef.current as { remove: () => void }).remove();
         mapRef.current = null;
@@ -233,14 +245,14 @@ export function ProviderMap({
 
   if (error) {
     return (
-      <div
+      <div key="map-error"
         className={cn(
           'relative flex items-center justify-center overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800',
           height || 'aspect-video',
           className
         )}
       >
-        <div className="text-center text-gray-500 dark:text-gray-400">
+        <div role="alert" className="text-center text-gray-500 dark:text-gray-400">
           <p>Map unavailable</p>
           {directionsUrl && (
             <a
@@ -258,7 +270,7 @@ export function ProviderMap({
   }
 
   return (
-    <div
+    <div key="interactive-map"
       className={cn(
         'relative overflow-hidden rounded-lg',
         height || 'aspect-video',
@@ -295,7 +307,7 @@ export function ProviderMap({
 
       {/* Loading State */}
       {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+        <div role="status" aria-label="Loading map" className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
         </div>
       )}

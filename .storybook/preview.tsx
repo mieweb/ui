@@ -539,6 +539,8 @@ const preview: Preview = {
             ['Overview', '*'],
             'Providers',
             ['Overview', '*'],
+            'Provider discovery',
+            ['Overview', '*'],
             'Services',
             ['Overview', '*'],
             'Users & integrations',

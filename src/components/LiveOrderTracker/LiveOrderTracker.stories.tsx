@@ -8,7 +8,8 @@ const meta: Meta<typeof LiveOrderTracker> = {
   title: 'Modules/Dashboards/LiveOrderTracker',
   component: LiveOrderTracker,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:beta'],
-  parameters: { docs: { description: { component: 'Responsive status board for monitoring orders across their lifecycle.' } }, layout: 'padded' },
+  parameters: {
+    catalog: {"entry": "@mieweb/ui", "relationships": [{"type": "uses", "target": "layout-card", "why": "Order summaries are composed from Cards."}]}, docs: { description: { component: "### What it's for\n\nAn order-status board and compact list built from Card and Badge, with six default status columns.\n\n### Use it when\n\nA workspace needs a recent-order overview with click-through to details.\n\n### Don't use it when\n\nUse a paginated table for the complete history or an editable workflow board for drag-and-drop transitions.\n\n### Example\n\nThe page fetches a bounded recent-order list, maps statuses, passes loading, and navigates from onOrderClick.\n\n### Limitations\n\nIt does not fetch or change status. Counts reflect only supplied orders; fetch full totals separately. Desktop columns reflow on small screens, and custom columns must include the statuses you want visible." } }, layout: 'padded' },
 };
 
 export default meta;
