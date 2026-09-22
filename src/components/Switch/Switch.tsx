@@ -11,7 +11,7 @@ const switchTrackVariants = cva(
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
     'bg-neutral-200 dark:bg-neutral-700',
-    'data-[state=checked]:bg-primary-800',
+    'data-[state=checked]:bg-primary-800 dark:data-[state=checked]:bg-primary-800',
   ],
   {
     variants: {
@@ -48,7 +48,8 @@ const switchThumbVariants = cva(
 );
 
 export interface SwitchProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'>,
+  extends
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'>,
     VariantProps<typeof switchTrackVariants> {
   /** Controlled checked state */
   checked?: boolean;
@@ -167,7 +168,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           htmlFor={switchId}
           data-slot="switch-label"
           className={cn(
-            'cursor-pointer select-none font-medium text-foreground',
+            'text-foreground cursor-pointer font-medium select-none',
             labelSizeClasses[size || 'md'],
             disabled && 'cursor-not-allowed opacity-50'
           )}

@@ -106,6 +106,21 @@ export interface AddressFormProps {
   };
   /** Custom className for the container */
   className?: string;
+  /**
+   * Replace the Address Line 1 input, e.g. with an app-level address
+   * autocomplete. Call `onAddressSelect` to fill the remaining fields.
+   */
+  renderStreet1?: (field: {
+    id: string;
+    label: string;
+    placeholder: string;
+    value: string;
+    onChange: (value: string) => void;
+    onAddressSelect: (address: Partial<AddressFormData>) => void;
+    disabled: boolean;
+    required: boolean;
+    error?: string;
+  }) => React.ReactNode;
   /** Google Places autocomplete options (requires Google Maps API) */
   googlePlaces?: {
     /** Whether to enable autocomplete on street1 field */
@@ -199,6 +214,7 @@ export function AddressForm({
   placeholders = {},
   className,
   googlePlaces,
+  renderStreet1,
 }: AddressFormProps) {
   const generatedId = React.useId();
   const idPrefix = id || generatedId;
@@ -313,20 +329,40 @@ export function AddressForm({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Street Address Line 1 */}
-      <Input
-        ref={inputRef}
-        id={`${idPrefix}-street1`}
-        label={mergedLabels.street1}
-        placeholder={mergedPlaceholders.street1}
-        value={value.street1 || ''}
-        onChange={(e) => handleChange('street1', e.target.value)}
-        disabled={disabled}
-        required={required}
-        hasError={!!errors.street1}
-        error={errors.street1}
-        autoComplete="address-line1"
-        data-cy="input-address-line-1"
-      />
+      {renderStreet1 ? (
+        renderStreet1({
+          id: `${idPrefix}-street1`,
+          label: mergedLabels.street1,
+          placeholder: mergedPlaceholders.street1,
+          value: value.street1 || '',
+          onChange: (street1) => handleChange('street1', street1),
+          onAddressSelect: (selected) =>
+            onChange({
+              ...value,
+              ...Object.fromEntries(
+                Object.entries(selected).filter(([, v]) => Boolean(v))
+              ),
+            }),
+          disabled,
+          required,
+          error: errors.street1,
+        })
+      ) : (
+        <Input
+          ref={inputRef}
+          id={`${idPrefix}-street1`}
+          label={mergedLabels.street1}
+          placeholder={mergedPlaceholders.street1}
+          value={value.street1 || ''}
+          onChange={(e) => handleChange('street1', e.target.value)}
+          disabled={disabled}
+          required={required}
+          hasError={!!errors.street1}
+          error={errors.street1}
+          autoComplete="address-line1"
+          data-cy="input-address-line-1"
+        />
+      )}
 
       {/* Street Address Line 2 */}
       <Input

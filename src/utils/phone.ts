@@ -10,9 +10,10 @@
  * - 11 digits w/ `1`   → `+1 (XXX) XXX-XXXX` (E.164 US/Canada)
  * - 12+ digits         → `+CC (XXX) XXX-XXXX...` (best-effort intl)
  * - partial (typing)   → progressive `(`, `(XXX`, `(XXX) X`, etc.
+ * - input beyond 15 digits (the E.164 maximum) is dropped
  */
 export function formatPhoneNumber(value: string): string {
-  const allDigits = value.replace(/\D/g, '');
+  const allDigits = value.replace(/\D/g, '').slice(0, 15);
   if (allDigits.length === 0) return '';
 
   // E.164 with US/Canada country code (1XXXXXXXXXX). Show the country code

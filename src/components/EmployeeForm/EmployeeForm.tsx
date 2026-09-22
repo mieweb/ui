@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Input } from '../Input';
+import { PhoneInput } from '../PhoneInput';
 import { Textarea } from '../Textarea';
 import { Switch } from '../Switch';
 import { Select } from '../Select';
@@ -90,6 +91,16 @@ export interface EmployeeFormProps {
     postalCode: string,
     country?: string
   ) => Promise<string | null>;
+  /**
+   * Replace the Address Line 1 input, e.g. with an app-level address
+   * autocomplete. Call `onAddressSelect` to fill the remaining address fields.
+   */
+  renderAddressLine1?: (field: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    onAddressSelect: (address: EmployeeAddress) => void;
+  }) => React.ReactNode;
   /** Labels for i18n */
   labels?: {
     required?: string;
@@ -161,6 +172,7 @@ export function EmployeeForm({
   onCancel,
   customFields,
   validatePostalCode,
+  renderAddressLine1,
   labels = {},
   className,
 }: EmployeeFormProps) {
@@ -218,7 +230,9 @@ export function EmployeeForm({
   const zipCheckRef = React.useRef(0);
 
   /** Run the async postal-code check; resolves to the error message (or null). */
-  const checkPostalCode = React.useCallback(async (): Promise<string | null> => {
+  const checkPostalCode = React.useCallback(async (): Promise<
+    string | null
+  > => {
     const value = (address.postalCode ?? '').trim();
     if (!validatePostalCode || !value) return null;
     const token = ++zipCheckRef.current;
@@ -396,13 +410,29 @@ export function EmployeeForm({
         </h3>
 
         <div className="space-y-4" data-slot="employee-form-address">
-          <Input
-            label="Address Line 1"
-            value={address.street1 ?? ''}
-            onChange={(e) =>
-              setAddress((prev) => ({ ...prev, street1: e.target.value }))
-            }
-          />
+          {renderAddressLine1 ? (
+            renderAddressLine1({
+              label: 'Address Line 1',
+              value: address.street1 ?? '',
+              onChange: (street1) =>
+                setAddress((prev) => ({ ...prev, street1 })),
+              onAddressSelect: (selected) =>
+                setAddress((prev) => ({
+                  ...prev,
+                  ...Object.fromEntries(
+                    Object.entries(selected).filter(([, v]) => Boolean(v))
+                  ),
+                })),
+            })
+          ) : (
+            <Input
+              label="Address Line 1"
+              value={address.street1 ?? ''}
+              onChange={(e) =>
+                setAddress((prev) => ({ ...prev, street1: e.target.value }))
+              }
+            />
+          )}
           <Input
             label="Address Line 2"
             value={address.street2 ?? ''}
@@ -475,11 +505,13 @@ export function EmployeeForm({
               data-slot="employee-form-phone-row"
             >
               <div className="flex-1">
-                <Input
+                <PhoneInput
                   label={index === 0 ? 'Phone Number' : undefined}
+                  aria-label={index > 0 ? 'Phone number' : undefined}
                   value={phone.number}
-                  onChange={(e) => updatePhone(index, 'number', e.target.value)}
-                  placeholder="(555) 555-5555"
+                  onFormattedChange={(formatted) =>
+                    updatePhone(index, 'number', formatted)
+                  }
                 />
               </div>
               <div className="w-32">
