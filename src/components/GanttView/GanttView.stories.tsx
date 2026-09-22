@@ -56,6 +56,7 @@ Headless: it never fetches, and this release never writes — there is no drag-t
 - Accessibility: bars are a \`<ul>\` per lane, each bar an \`<a>\` when \`getHref\` is given, a \`<button>\` when only \`onOpen\` is, and inert markup when neither — so a read-only chart has no phantom tab stops. The selected bar carries \`aria-current\`. **The bar's position is not conveyed to a screen reader**: a bar reads as its title, and the range is not yet in its accessible name the way it is in \`CalendarView\`. Treat the chart as a visual summary with an accessible list underneath it, not as the only route to the dates.
 - Read-only: no drag to move or resize. \`onOpen\` is the only interaction, so there is no pending or failure state to render.
 - The column count is capped at 200. A decade at \`cadence="day"\` is 3,650 columns, which hangs a page rather than drawing a chart; pass \`rangeStart\` / \`rangeEnd\`, or a coarser cadence, when the span is long.
+- With an explicit range, only the part of a record that intersects it is drawn. A record entirely outside the range is omitted rather than pinned to the first or last column, where it would read as data instead of as the rounding it is.
 - Undated records cannot be placed, so they are counted in a footnote rather than dropped silently.
 - A range that ends before it starts is clamped to a single column.
 - Time zone is a business fact — pass \`timeZone\` when the collection belongs somewhere other than the viewer. Column labels follow \`locale\`.

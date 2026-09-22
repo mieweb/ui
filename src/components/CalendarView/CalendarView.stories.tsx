@@ -31,7 +31,7 @@ Headless: it never fetches. Days are computed with Luxon in an explicit \`timeZo
 
 - The records are timed appointments in day or week slots — [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs) draws an hour axis and books into it; this one has no hours at all.
 - The user is picking a date rather than reading a collection — that is a date input, not a view.
-- The range matters more than the calendar — [ListView](?path=/docs/views-listview--docs) grouped by status, or a Gantt once that ships.
+- The range matters more than the calendar — [GanttView](?path=/docs/views-ganttview--docs) puts the same records on a time axis, where overlap is the point.
 
 ### Example
 
@@ -54,7 +54,7 @@ Headless: it never fetches. Days are computed with Luxon in an explicit \`timeZo
 - The grid is always six weeks, so paging does not change its height.
 - A day shows \`maxPerDay\` entries (3 by default) and then "{count} more"; the overflow is a count, not a popover.
 - Items with no \`getStart\` are skipped — a calendar cannot place an undated record. A range that ends before it starts is clamped to a single day rather than disappearing.
-- Time zone is a business fact: pass \`timeZone\` whenever the collection belongs somewhere other than the viewer, or the day boundary is the runtime's and an item at 23:30 lands on the wrong square. Month, weekday and day-number formatting follow \`locale\`.
+- Time zone is a business fact: pass \`timeZone\` whenever the collection belongs somewhere other than the viewer, or the day boundary is the runtime's and an item at 23:30 lands on the wrong square. A **date-only** accessor value (\`2026-03-10\`) is read as that calendar day in \`timeZone\`, not as UTC midnight — otherwise it would land on the 9th everywhere behind UTC. A full timestamp is an instant and is converted. Month, weekday and day-number formatting follow \`locale\`.
 - Motion: the calendar does not use the [motion](?path=/docs/foundations-motion--docs) layer. Paging swaps the grid's contents rather than transitioning between open and closed states.
 - Theming: entry tint resolves from \`getAccent\`'s token name, today's marker from \`bg-primary-500\`. Default strings are English and overridable through \`labels\`, including the "{count} more" template.
 - Dependencies: \`luxon\` (a regular dependency of \`@mieweb/ui\`).`,

@@ -19,7 +19,6 @@ import { Spinner } from '../Spinner';
 import {
   accentClasses,
   defaultViewLabels,
-  domId,
   type Accent,
   type Stage,
   type ViewBaseProps,
@@ -117,6 +116,7 @@ interface CardProps {
   pending: boolean;
   draggable: boolean;
   hint?: string;
+  href?: string;
   className?: string;
   children?: React.ReactNode;
   onOpen?: () => void;
@@ -132,6 +132,7 @@ function BoardCard({
   pending,
   draggable,
   hint,
+  href,
   className,
   children,
   onOpen,
@@ -142,59 +143,90 @@ function BoardCard({
     disabled: !draggable,
   });
 
+  const body = children ?? (
+    <span className="flex items-start gap-2">
+      {accent && (
+        <span
+          aria-hidden
+          className={cn(
+            'mt-1.5 size-2 shrink-0 rounded-full',
+            accentClasses[accent].marker
+          )}
+        />
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="text-foreground block text-sm font-medium">
+          {title}
+        </span>
+        {subtitle && (
+          <span className="text-muted-foreground block truncate text-xs">
+            {subtitle}
+          </span>
+        )}
+      </span>
+    </span>
+  );
+
+  const onCardKeyDown = (event: React.KeyboardEvent) => {
+    if (onOpen && !href && (event.key === 'Enter' || event.key === ' ')) {
+      // Space is dnd-kit's pick-up key only while dragging; here the card is at
+      // rest, so it activates like any other button.
+      if (!event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        onOpen();
+        return;
+      }
+    }
+    onKeyDown?.(event);
+  };
+
+  const shared = {
+    ref: setNodeRef,
+    ...(draggable ? attributes : {}),
+    ...(draggable ? listeners : {}),
+    'aria-current': selected ? ('true' as const) : undefined,
+    'aria-describedby': hint,
+    'aria-busy': pending || undefined,
+    'data-slot': 'board-view-card',
+    className: cn(className, isDragging && 'opacity-40'),
+  };
+
   return (
     <li>
-      <div
-        ref={setNodeRef}
-        {...(draggable ? attributes : {})}
-        {...(draggable ? listeners : {})}
-        role={onOpen ? 'button' : undefined}
-        tabIndex={draggable || onOpen ? 0 : undefined}
-        aria-current={selected ? 'true' : undefined}
-        aria-describedby={hint}
-        aria-busy={pending || undefined}
-        data-slot="board-view-card"
-        className={cn(className, isDragging && 'opacity-40')}
-        onClick={onOpen}
-        onKeyDown={(event) => {
-          if (onOpen && (event.key === 'Enter' || event.key === ' ')) {
-            // Space is dnd-kit's pick-up key only while dragging; here the card
-            // is at rest, so it activates like any other button.
-            if (!event.ctrlKey && !event.metaKey) {
-              event.preventDefault();
-              onOpen();
+      {href ? (
+        // An anchor, like every other view: the card stays middle-clickable and
+        // "copy link" works. dnd-kit's listeners still own the drag.
+        <a
+          {...shared}
+          href={href}
+          onKeyDown={onCardKeyDown}
+          onClick={(event) => {
+            if (
+              !onOpen ||
+              event.defaultPrevented ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.button !== 0
+            )
               return;
-            }
-          }
-          onKeyDown?.(event);
-        }}
-      >
-        {children ?? (
-          <>
-            <span className="flex items-start gap-2">
-              {accent && (
-                <span
-                  aria-hidden
-                  className={cn(
-                    'mt-1.5 size-2 shrink-0 rounded-full',
-                    accentClasses[accent].marker
-                  )}
-                />
-              )}
-              <span className="min-w-0 flex-1">
-                <span className="text-foreground block text-sm font-medium">
-                  {title}
-                </span>
-                {subtitle && (
-                  <span className="text-muted-foreground block truncate text-xs">
-                    {subtitle}
-                  </span>
-                )}
-              </span>
-            </span>
-          </>
-        )}
-      </div>
+            event.preventDefault();
+            onOpen();
+          }}
+        >
+          {body}
+        </a>
+      ) : (
+        <div
+          {...shared}
+          role={onOpen ? 'button' : undefined}
+          tabIndex={draggable || onOpen ? 0 : undefined}
+          onKeyDown={onCardKeyDown}
+          onClick={onOpen}
+        >
+          {body}
+        </div>
+      )}
     </li>
   );
 }
@@ -205,12 +237,14 @@ function BoardCard({
 
 function BoardColumn({
   stage,
+  headerId,
   count,
   headingLevel: Heading,
   classNames,
   children,
 }: {
   stage: Stage;
+  headerId: string;
   count: number;
   headingLevel: 'h2' | 'h3' | 'h4';
   classNames?: BoardViewProps<unknown>['classNames'];
@@ -232,7 +266,7 @@ function BoardColumn({
     >
       <Heading>
         <span
-          id={domId('board-view-column', stage.id)}
+          id={headerId}
           data-slot="board-view-column-header"
           className={cn(
             'border-border text-muted-foreground flex items-center gap-2 border-b px-3 py-2 text-xs font-semibold tracking-wide uppercase',
@@ -267,6 +301,7 @@ export function BoardView<T>({
   error = null,
   selectedId = null,
   onOpen,
+  getHref,
   onMove,
   renderItem,
   emptyState,
@@ -278,6 +313,10 @@ export function BoardView<T>({
 }: BoardViewProps<T>) {
   const text = { ...defaultBoardLabels, ...labels };
   const hintId = React.useId();
+  // Ids come from position, not from the stage id: two distinct statuses can
+  // normalise to the same string, and a duplicate id makes `aria-labelledby`
+  // resolve to the wrong heading.
+  const baseId = React.useId();
   const [announcement, setAnnouncement] = React.useState('');
   const [draggingId, setDraggingId] = React.useState<string | null>(null);
   // Where a card is shown while its move is in flight, so the column it landed
@@ -312,16 +351,20 @@ export function BoardView<T>({
       ...stages.map((stage) => ({ stage, items: buckets.get(stage.id) ?? [] })),
       // Never silently drop a record whose status matches no stage.
       ...[...extra].map(([key, bucket]) => ({
-        stage: { id: key, label: key || 'Ungrouped' } as Stage,
+        stage: { id: key, label: key || text.ungrouped } as Stage,
         items: bucket,
       })),
     ];
-  }, [items, stages, stageOf]);
+  }, [items, stages, stageOf, text.ungrouped]);
 
   const commit = React.useCallback(
     async (id: string, toStage: string) => {
       const item = byId.get(id);
       if (!item || !onMove) return;
+      // One move per card at a time: a second would overwrite the first's
+      // pending stage, and the first `finally` would then clear it, snapping
+      // the card home while the second mutation is still in flight.
+      if (id in pending) return;
       const from = accessors.getStatus?.(item);
       if (from === toStage) return;
       const stage = stages.find((s) => s.id === toStage);
@@ -343,7 +386,7 @@ export function BoardView<T>({
         });
       }
     },
-    [byId, onMove, accessors, stages, text.moved, text.moveFailed]
+    [byId, onMove, pending, accessors, stages, text.moved, text.moveFailed]
   );
 
   const sensors = useSensors(
@@ -437,12 +480,13 @@ export function BoardView<T>({
           <BoardColumn
             key={column.stage.id}
             stage={column.stage}
+            headerId={`${baseId}-col-${columnIndex}`}
             count={column.items.length}
             headingLevel={headingLevel}
             classNames={classNames}
           >
             <ul
-              aria-labelledby={domId('board-view-column', column.stage.id)}
+              aria-labelledby={`${baseId}-col-${columnIndex}`}
               className="flex flex-1 flex-col gap-2 p-2"
             >
               {column.items.map((item) => {
@@ -458,6 +502,7 @@ export function BoardView<T>({
                     pending={id in pending}
                     draggable={Boolean(onMove)}
                     hint={onMove ? hintId : undefined}
+                    href={getHref?.(id, item)}
                     className={cn(
                       cardVariants({
                         density,

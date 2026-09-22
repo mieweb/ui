@@ -7,7 +7,6 @@ import { ChevronDownIcon, ChevronRightIcon } from '../Icons';
 import {
   accentClasses,
   defaultViewLabels,
-  domId,
   type Stage,
   type ViewBaseProps,
 } from '../../views/types';
@@ -91,6 +90,7 @@ function buildGroups<T>(
   items: T[],
   groupBy: 'status' | 'group' | 'none',
   accessors: ListViewProps<T>['accessors'],
+  ungrouped: string,
   stages?: readonly Stage[]
 ): Group<T>[] {
   if (groupBy === 'none') return [{ id: '', label: '', items }];
@@ -119,7 +119,7 @@ function buildGroups<T>(
     buckets.delete(stage.id);
   }
   for (const [key, bucket] of buckets) {
-    groups.push({ id: key, label: key || 'Ungrouped', items: bucket });
+    groups.push({ id: key, label: key || ungrouped, items: bucket });
   }
   return groups;
 }
@@ -153,13 +153,17 @@ export function ListView<T>({
   headingLevel: Heading = 'h3',
 }: ListViewProps<T>) {
   const text = { ...defaultViewLabels, ...labels };
+  // Ids come from position, not from the status text: two distinct statuses can
+  // normalise to the same string, and a duplicate id makes `aria-labelledby`
+  // resolve to the wrong heading.
+  const baseId = React.useId();
   const [collapsed, setCollapsed] = React.useState<Set<string>>(
     () => new Set(defaultCollapsedGroups ?? [])
   );
 
   const groups = React.useMemo(
-    () => buildGroups(items, groupBy, accessors, stages),
-    [items, groupBy, accessors, stages]
+    () => buildGroups(items, groupBy, accessors, text.ungrouped, stages),
+    [items, groupBy, accessors, text.ungrouped, stages]
   );
 
   const state = (content: React.ReactNode) => (
@@ -200,9 +204,9 @@ export function ListView<T>({
   } else if (items.length === 0) {
     body = emptyState ?? state(text.empty);
   } else {
-    body = groups.map((group) => {
+    body = groups.map((group, groupIndex) => {
       const isCollapsed = collapsed.has(group.id);
-      const headerId = domId('list-view-group', group.id);
+      const headerId = `${baseId}-group-${groupIndex}`;
       return (
         <section
           key={group.id}

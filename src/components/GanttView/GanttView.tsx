@@ -7,7 +7,7 @@ import { Spinner } from '../Spinner';
 import {
   accentClasses,
   defaultViewLabels,
-  toDate,
+  toDateTime,
   type ViewBaseProps,
   type ViewLabels,
 } from '../../views/types';
@@ -120,13 +120,12 @@ export function GanttView<T>({
   const dated = React.useMemo(() => {
     const out: { id: string; item: T; start: DateTime; end: DateTime }[] = [];
     for (const item of items) {
-      const startDate = toDate(accessors.getStart?.(item));
-      if (!startDate) continue;
-      const start = DateTime.fromJSDate(startDate, { zone }).startOf('day');
-      const endDate = toDate(accessors.getEnd?.(item));
-      const end = endDate
-        ? DateTime.fromJSDate(endDate, { zone }).startOf('day')
-        : start;
+      const start = toDateTime(accessors.getStart?.(item), zone)?.startOf(
+        'day'
+      );
+      if (!start) continue;
+      const rawEnd = toDateTime(accessors.getEnd?.(item), zone)?.startOf('day');
+      const end = rawEnd ?? start;
       out.push({
         id: accessors.getId(item),
         item,
@@ -141,15 +140,19 @@ export function GanttView<T>({
 
   const columns = React.useMemo(() => {
     if (dated.length === 0 && !rangeStart) return [];
-    const first = rangeStart
+    const explicitStart = rangeStart
       ? DateTime.fromJSDate(rangeStart, { zone })
-      : dated.reduce(
-          (min, d) => (d.start < min ? d.start : min),
-          dated[0].start
-        );
+      : null;
+    // `dated` can be empty here when only a range was given, so every reduce
+    // needs a seed that does not come from it.
+    const first =
+      explicitStart ??
+      dated.reduce((min, d) => (d.start < min ? d.start : min), dated[0].start);
     const last = rangeEnd
       ? DateTime.fromJSDate(rangeEnd, { zone })
-      : dated.reduce((max, d) => (d.end > max ? d.end : max), dated[0].end);
+      : dated.length > 0
+        ? dated.reduce((max, d) => (d.end > max ? d.end : max), dated[0].end)
+        : first;
     const out: DateTime[] = [];
     let cursor = first.startOf(unit);
     const stop = last.startOf(unit);
@@ -165,39 +168,56 @@ export function GanttView<T>({
     return out;
   }, [dated, rangeStart, rangeEnd, unit, zone]);
 
+  // Returns null for a moment outside the drawn columns. Clamping it to an edge
+  // would draw a record that does not intersect the range as though it started
+  // or ended exactly at the boundary, which reads as data rather than as the
+  // rounding it is.
   const columnOf = React.useCallback(
     (moment: DateTime) => {
       const target = moment.startOf(unit);
       const index = columns.findIndex((c) => c.hasSame(target, unit));
-      if (index >= 0) return index;
-      return target < (columns[0] ?? target) ? 0 : columns.length - 1;
+      return index >= 0 ? index : null;
     },
     [columns, unit]
   );
 
   const lanes = React.useMemo(() => {
-    const toBar = (d: (typeof dated)[number]): Bar<T> => {
+    const toBar = (d: (typeof dated)[number]): Bar<T> | null => {
+      const last = columns.length - 1;
       const from = columnOf(d.start);
       const to = columnOf(d.end);
-      return { id: d.id, item: d.item, column: from + 1, span: to - from + 1 };
+      // Only the part that intersects the range is drawn; a record entirely
+      // outside it is omitted rather than pinned to an edge.
+      const start = from ?? (d.start < columns[0] ? 0 : null);
+      const end = to ?? (d.end > columns[last] ? last : null);
+      if (start === null || end === null || end < start) return null;
+      return {
+        id: d.id,
+        item: d.item,
+        column: start + 1,
+        span: end - start + 1,
+      };
     };
+    const bars = (source: typeof dated) =>
+      source.map(toBar).filter((b): b is Bar<T> => b !== null);
+
     if (!groupByLane || !accessors.getGroup)
-      return [{ id: '', label: '', bars: dated.map(toBar) }];
-    const buckets = new Map<string, Bar<T>[]>();
+      return [{ id: '', label: '', bars: bars(dated) }];
+    const buckets = new Map<string, (typeof dated)[number][]>();
     for (const d of dated) {
       const key = accessors.getGroup(d.item) ?? '';
       const bucket = buckets.get(key);
-      if (bucket) bucket.push(toBar(d));
-      else buckets.set(key, [toBar(d)]);
+      if (bucket) bucket.push(d);
+      else buckets.set(key, [d]);
     }
-    return [...buckets].map(([key, bars]) => ({
+    return [...buckets].map(([key, bucket]) => ({
       id: key,
-      label: key || 'Ungrouped',
-      bars,
+      label: key || text.ungrouped,
+      bars: bars(bucket),
     }));
-  }, [dated, groupByLane, accessors, columnOf]);
+  }, [dated, groupByLane, accessors, columnOf, columns, text.ungrouped]);
 
-  const todayColumn = columns.length > 0 ? columnOf(today) + 1 : 0;
+  const todayColumn = (columnOf(today) ?? -1) + 1;
   const showToday =
     columns.length > 0 &&
     today >= columns[0] &&

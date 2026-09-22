@@ -27,6 +27,14 @@ export interface ViewSetProps<T> extends ViewBaseProps<T> {
   /** Stages for the board and for list grouping. */
   stages?: readonly Stage[];
   onMove?: BoardViewProps<T>['onMove'];
+  /**
+   * IANA zone the date views read day boundaries in. Shared, because a page
+   * showing one collection as a calendar and as a Gantt must place it on the
+   * same days in both.
+   */
+  timeZone?: string;
+  /** Locale for date formatting in the calendar and Gantt. */
+  locale?: string;
 
   /** Rendered above the switcher row. */
   toolbar?: React.ReactNode;
@@ -39,11 +47,15 @@ export interface ViewSetProps<T> extends ViewBaseProps<T> {
   /** Rendered beside the view, for a list-plus-detail layout. */
   detail?: React.ReactNode;
 
-  /** Per-view escape hatches for props this shell does not surface. */
-  listProps?: Partial<ListViewProps<T>>;
-  boardProps?: Partial<BoardViewProps<T>>;
-  calendarProps?: Partial<CalendarViewProps<T>>;
-  ganttProps?: Partial<GanttViewProps<T>>;
+  /**
+   * Per-view escape hatches for props this shell does not surface. Shared props
+   * are excluded: one collection rendered several ways means switching view can
+   * never change the records, the selection or the load state.
+   */
+  listProps?: Omit<Partial<ListViewProps<T>>, keyof ViewBaseProps<T>>;
+  boardProps?: Omit<Partial<BoardViewProps<T>>, keyof ViewBaseProps<T>>;
+  calendarProps?: Omit<Partial<CalendarViewProps<T>>, keyof ViewBaseProps<T>>;
+  ganttProps?: Omit<Partial<GanttViewProps<T>>, keyof ViewBaseProps<T>>;
 
   classNames?: Partial<
     Record<'toolbar' | 'switcher' | 'body' | 'detail', string>

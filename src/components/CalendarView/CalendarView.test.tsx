@@ -232,6 +232,29 @@ describe('CalendarView', () => {
     expect(screen.getByText('Clear month')).toBeInTheDocument();
   });
 
+  it('treats a date-only value as a wall date, not UTC midnight', () => {
+    // `new Date('2026-03-10')` is UTC midnight, which is the 9th in New York.
+    render(
+      <CalendarView
+        {...base}
+        timeZone="America/New_York"
+        items={[
+          {
+            ...workItems[0],
+            id: 'WALL',
+            title: 'Wall date',
+            startDate: '2026-03-10',
+            dueDate: '2026-03-10',
+          },
+        ]}
+      />
+    );
+    expect(
+      within(cellFor('2026-03-10')).getByText('Wall date')
+    ).toBeInTheDocument();
+    expect(within(cellFor('2026-03-09')).queryByText('Wall date')).toBeNull();
+  });
+
   it('stays on the right month in a zone behind UTC', () => {
     render(<CalendarView {...base} timeZone="America/New_York" />);
     expect(grid()).toHaveAccessibleName('March 2026');

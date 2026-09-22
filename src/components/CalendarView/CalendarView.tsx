@@ -9,7 +9,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '../Icons';
 import {
   accentClasses,
   defaultViewLabels,
-  toDate,
+  toDateTime,
   type ViewBaseProps,
   type ViewLabels,
 } from '../../views/types';
@@ -150,13 +150,12 @@ export function CalendarView<T>({
   const placed = React.useMemo<Placed<T>[]>(() => {
     const out: Placed<T>[] = [];
     for (const item of items) {
-      const startDate = toDate(accessors.getStart?.(item));
-      if (!startDate) continue;
-      const start = DateTime.fromJSDate(startDate, { zone }).startOf('day');
-      const endDate = toDate(accessors.getEnd?.(item));
-      const end = endDate
-        ? DateTime.fromJSDate(endDate, { zone }).startOf('day')
-        : start;
+      const start = toDateTime(accessors.getStart?.(item), zone)?.startOf(
+        'day'
+      );
+      if (!start) continue;
+      const rawEnd = toDateTime(accessors.getEnd?.(item), zone)?.startOf('day');
+      const end = rawEnd ?? start;
       out.push({
         id: accessors.getId(item),
         item,

@@ -10,6 +10,7 @@
  * See CONTRIBUTING → "Modules: headless data components".
  */
 import type * as React from 'react';
+import { DateTime } from 'luxon';
 
 /**
  * Which layout is on screen. `overview` and `table` are rendered by the host
@@ -76,6 +77,8 @@ export interface ViewLabels {
   error: string;
   /** Action on the error state. */
   retry: string;
+  /** Heading for the group a record with no status or group falls into. */
+  ungrouped: string;
 }
 
 export const defaultViewLabels: ViewLabels = {
@@ -84,6 +87,7 @@ export const defaultViewLabels: ViewLabels = {
   empty: 'Nothing to show',
   error: 'Could not load this view',
   retry: 'Try again',
+  ungrouped: 'Ungrouped',
 };
 
 /**
@@ -110,26 +114,26 @@ export interface ViewBaseProps<T> {
   className?: string;
 }
 
-/** Normalises the several shapes an accessor may return into a `Date`. */
-export function toDate(value: Date | string | null | undefined): Date | null {
-  if (value == null) return null;
-  const date = value instanceof Date ? value : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
 /**
- * Builds a DOM `id` from caller data. A status or group is whatever the app's
- * records contain — "results ready" is a plausible status — and a space inside
- * an `aria-labelledby` target is read as a separator, silently unlabelling the
- * element it points at.
+ * Reads an accessor's date in the view's zone.
  *
- * Leading and trailing dashes are left alone: trimming them needs an anchored
- * `-+$`, which backtracks polynomially on a run of dashes, and the prefix
- * already guarantees the id starts with a letter.
+ * `DateTime.fromISO` is what makes this correct for both shapes an accessor may
+ * return. A date-only string is a wall date — `2026-03-10` means that calendar
+ * day where the collection lives, not UTC midnight, which is the 9th in the
+ * Americas — while a full timestamp is an instant and gets converted. Going via
+ * `new Date()` would collapse the first case into the second and shift the item
+ * onto the previous day in every zone behind UTC.
  */
-export function domId(prefix: string, raw: string): string {
-  const safe = raw.replace(/[^\w-]+/g, '-');
-  return `${prefix}-${safe || 'all'}`;
+export function toDateTime(
+  value: Date | string | null | undefined,
+  zone: string
+): DateTime | null {
+  if (value == null) return null;
+  const dt =
+    value instanceof Date
+      ? DateTime.fromJSDate(value, { zone })
+      : DateTime.fromISO(value, { zone });
+  return dt.isValid ? dt : null;
 }
 
 /**

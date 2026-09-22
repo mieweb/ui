@@ -172,6 +172,38 @@ describe('BoardView', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders cards as anchors when getHref is given, and still calls onOpen', async () => {
+    const user = userEvent.setup();
+    const onOpen = vi.fn();
+    render(
+      <BoardView {...base} getHref={(id) => `/work/${id}`} onOpen={onOpen} />
+    );
+    const link = screen.getByRole('link', { name: /fax intake queue/i });
+    expect(link).toHaveAttribute('href', '/work/WGL-106');
+    await user.click(link);
+    expect(onOpen).toHaveBeenCalledWith('WGL-106', workItems[5]);
+  });
+
+  it('ignores a second move while the first is still in flight', async () => {
+    const user = userEvent.setup();
+    let settle: () => void = () => {};
+    const onMove = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          settle = resolve;
+        })
+    );
+    render(<BoardView {...base} onMove={onMove} />);
+    const card = screen
+      .getByText('Retire the legacy fax intake queue')
+      .closest('[data-slot="board-view-card"]') as HTMLElement;
+    card.focus();
+    await user.keyboard('{Control>}{ArrowRight}{/Control}');
+    await user.keyboard('{Control>}{ArrowRight}{/Control}');
+    expect(onMove).toHaveBeenCalledTimes(1);
+    settle();
+  });
+
   it('opens a card on click and on Enter', async () => {
     const user = userEvent.setup();
     const onOpen = vi.fn();

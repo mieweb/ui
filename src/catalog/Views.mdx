@@ -75,12 +75,15 @@ tokens. Callers never pass colour classes, so views stay correct across brands a
 
 ## How they fit together
 
-- **State has one owner: the caller.** Views are controlled. `selectedId`, the active view and
-  filter state live in the page; the views render them. `ViewSet` adds persistence helpers
-  (`storageKey`, search-param binding) but still hands every change back.
-- **Mutations are the app's.** `onMove` and `onReschedule` return `void | Promise<void>`. The
-  view shows the pending state, awaits, and restores the previous position if the promise
-  rejects — the app never has to re-render it back.
+- **State has one owner: the caller.** Views are controlled. `selectedId`, filter state and
+  pagination live in the page; the views render them. `ViewSet` owns exactly one thing —
+  which view is showing — and will remember it under `storageKey` if you do not control
+  `view` yourself. URL state is yours: control `view` from your router and `storageKey` steps
+  aside, so there is one source of truth rather than two that disagree.
+- **Mutations are the app's.** `onMove` returns `void | Promise<void>`. The board shows the
+  pending state, awaits, and puts the card back if the promise rejects — the app never has to
+  re-render it home. The date views are read-only in this release: there is no rescheduling
+  callback, by drag or otherwise.
 - **Navigation is a prop.** `onOpen(id)` for router navigation, `getHref(id)` to render a real
   `<a>`. Pass both: the anchor is what makes rows middle-clickable and crawlable.
 - **Domain rendering is a slot.** `renderItem(item, { view })` receives the active view, so a

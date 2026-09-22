@@ -137,6 +137,62 @@ describe('GanttView', () => {
     expect(bar('Backwards')).toHaveStyle({ gridColumn: '1 / span 1' });
   });
 
+  it('draws the requested range when nothing is dated yet', () => {
+    render(
+      <GanttView
+        {...base}
+        items={[]}
+        cadence="month"
+        rangeStart={new Date('2026-01-01T00:00:00Z')}
+        rangeEnd={new Date('2026-03-31T00:00:00Z')}
+      />
+    );
+    expect(screen.getAllByText(/Jan|Feb|Mar/)).toHaveLength(3);
+  });
+
+  it('omits a record that falls entirely outside an explicit range', () => {
+    render(
+      <GanttView
+        {...base}
+        items={[
+          dated('IN', 'Inside', '2026-02-10T00:00:00Z', '2026-02-20T00:00:00Z'),
+          dated(
+            'OUT',
+            'Outside',
+            '2025-06-01T00:00:00Z',
+            '2025-06-10T00:00:00Z'
+          ),
+        ]}
+        cadence="month"
+        rangeStart={new Date('2026-01-01T00:00:00Z')}
+        rangeEnd={new Date('2026-03-31T00:00:00Z')}
+      />
+    );
+    expect(screen.getByText('Inside')).toBeInTheDocument();
+    // Clamping would have drawn it on January as though it belonged there.
+    expect(screen.queryByText('Outside')).toBeNull();
+  });
+
+  it('clips a record that only partly overlaps the range', () => {
+    render(
+      <GanttView
+        {...base}
+        items={[
+          dated(
+            'OVER',
+            'Overlaps',
+            '2025-12-01T00:00:00Z',
+            '2026-02-15T00:00:00Z'
+          ),
+        ]}
+        cadence="month"
+        rangeStart={new Date('2026-01-01T00:00:00Z')}
+        rangeEnd={new Date('2026-03-31T00:00:00Z')}
+      />
+    );
+    expect(bar('Overlaps')).toHaveStyle({ gridColumn: '1 / span 2' });
+  });
+
   it('counts the records a time axis cannot place', () => {
     render(<GanttView {...base} />);
     // WGL-103 and WGL-106 have no start date.
