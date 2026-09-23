@@ -12,9 +12,13 @@ import { CoreEditor, type AssetLoad } from '@kerebron/editor';
 import { createAssetLoad } from '@kerebron/wasm/web';
 
 import { useIsDarkMode } from '../../hooks/useIsDarkMode';
-import { createEditorKits, type CollabConfig } from './editorKits';
+import {
+  createEditorKits,
+  type CollabConfig,
+  type MediaUploadOptions,
+} from './editorKits';
 
-export type { CollabConfig } from './editorKits';
+export type { CollabConfig, MediaUploadOptions } from './editorKits';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 
@@ -68,6 +72,26 @@ export interface RichEditorProps {
    * `@kerebron/wasm`'s `assets/` somewhere else.
    */
   assetLoad?: AssetLoad;
+  /**
+   * How files pasted or dropped into the editor are handled.
+   *
+   * **Set `uploadHandler` if your documents are persisted anywhere.** Without
+   * it, a pasted image is embedded in the document as a base64 `data:` URL and
+   * a video as a blob object URL: a 4 MB screenshot becomes ~5.8 MB of
+   * markdown, which most APIs will refuse, and an object URL is dead as soon as
+   * the page reloads. `uploadHandler` receives the file and returns the URL to
+   * reference it by, so the document carries a link instead of the bytes.
+   *
+   * ```tsx
+   * <RichEditor
+   *   mediaUpload={{ uploadHandler: (file) => uploadToMyMediaStore(file) }}
+   * />
+   * ```
+   *
+   * Read once, when the editor mounts — like {@link collab}, remount via `key`
+   * to change it.
+   */
+  mediaUpload?: MediaUploadOptions;
 }
 
 export interface RichEditorHandle {
@@ -101,6 +125,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       assetLoad,
+      mediaUpload,
     },
     ref
   ) {
@@ -117,6 +142,14 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     const disabledRef = useRef(disabled);
 
     const [md, setMd] = useState<string>('');
+    // Serializing the document is the expensive part of a transaction, so the
+    // last doc that was serialized is kept to recognise the transactions that
+    // did not change it. ProseMirror documents are immutable, so identity is an
+    // exact test.
+    const lastSerializedDoc = useRef<unknown>(null);
+    // Read inside the transaction handler, which is created once on mount.
+    const showPreviewRef = useRef(showPreview);
+    showPreviewRef.current = showPreview;
 
     useEffect(() => {
       disabledRef.current = disabled;
@@ -161,15 +194,29 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         // caller's own `value` back through `onChange`.
         if (loadingRef.current || !editorInstance.current) return;
 
+        // ProseMirror fires a transaction for every selection change too —
+        // arrow keys, clicks, a blur. Serializing the whole document to
+        // markdown for those costs a full tree-sitter pass and two React
+        // renders for a caret move, so only a changed document is re-read.
+        const { doc } = editorInstance.current.view.state;
+        if (doc === lastSerializedDoc.current) return;
+        lastSerializedDoc.current = doc;
+
         try {
           const buffer =
             await editorInstance.current.saveDocument(MARKDOWN_TYPE);
           const markdown = new globalThis.TextDecoder().decode(buffer);
           if (disposed) return;
           valueRef.current = markdown;
-          setMd(markdown);
+          // `md` only feeds the preview pane; setting it with the preview off
+          // re-renders the editor on every keystroke for nothing.
+          if (showPreviewRef.current) setMd(markdown);
           onChangeRef.current?.(markdown);
         } catch (err) {
+          // The document was marked as serialized before the attempt, to keep
+          // selection-only transactions arriving mid-save from re-entering.
+          // A failure has to undo that, or this document is never retried.
+          lastSerializedDoc.current = null;
           console.error('Failed to save markdown:', err);
         }
       };
@@ -181,8 +228,10 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         // `collaborative` is false when a room was asked for but the Yjs kit
         // could not be loaded — the editor is still created, just a local one,
         // so there is no room to join below.
-        const { kits: editorKits, collaborative } =
-          await createEditorKits(collab);
+        const { kits: editorKits, collaborative } = await createEditorKits(
+          collab,
+          mediaUpload
+        );
         if (disposed) return;
 
         editor = CoreEditor.create({
