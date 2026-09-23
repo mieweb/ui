@@ -145,6 +145,11 @@ A year on one Gantt-style timeline. Twelve month columns; rows grouped by cadenc
           target: 'data-display-timeline',
           why: 'YearTimeline lays a whole year of scheduled/continuous items on one Gantt grid; Timeline tracks a single process\u2019s milestones and events.',
         },
+        {
+          type: 'alternative to',
+          target: 'views-ganttview',
+          why: 'YearTimeline is authored a year at a time for editorial use; GanttView drives bars from your own records through accessors over any range, and is switchable with the other Views layouts.',
+        },
       ],
     },
   },

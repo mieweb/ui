@@ -71,6 +71,11 @@ Controlled here so the tab can be synced to a URL query param; \`defaultValue\` 
       relationships: [
         {
           type: 'alternative to',
+          target: 'views-viewswitcher',
+          why: 'Tabs switch between different content; ViewSwitcher switches the layout of one collection.',
+        },
+        {
+          type: 'alternative to',
           target: 'overlays-sidebar',
           why: 'Tabs switch peer views inside one page (local state); Sidebar is the persistent app navigation rail between routes.',
         },

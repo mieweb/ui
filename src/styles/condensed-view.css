@@ -11921,3 +11921,163 @@ body.condensed [data-slot='dockable-panel-close'] {
   padding: 0 0.5rem !important;
   font-size: 0.6875rem !important;
 }
+
+/* ── Views: ViewSwitcher ── */
+
+body.condensed [data-slot='view-switcher'] {
+  padding: 0.0625rem !important;
+}
+
+body.condensed [data-slot='view-switcher-option'] {
+  min-height: 0 !important;
+  padding: 0.1875rem 0.375rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='view-switcher-option'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Views: ListView ── */
+
+body.condensed [data-slot='list-view-group-header'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='list-view-item'] {
+  padding: 0.25rem 0.5rem !important;
+  gap: 0.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='list-view-state'] {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='view-switcher-label'] {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='list-view'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='list-view-group'] {
+  font-size: 0.8125rem !important;
+}
+
+/* ── Views: BoardView ── */
+
+body.condensed [data-slot='board-view'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='board-view-column'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='board-view-column-header'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='board-view-card'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='board-view-state'] {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Visually hidden either way; listed so the slot is accounted for. */
+body.condensed [data-slot='board-view-announcer'] {
+  font-size: inherit !important;
+}
+
+/* ── Views: CalendarView ── */
+
+body.condensed [data-slot='calendar-view'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='calendar-view-toolbar'] {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='calendar-view-weekday'] {
+  padding: 0.125rem 0.25rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='calendar-view-day'] {
+  min-height: 4rem !important;
+  padding: 0.125rem !important;
+}
+
+body.condensed [data-slot='calendar-view-entry'] {
+  padding: 0 0.25rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='calendar-view-state'] {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Views: GanttView ── */
+
+body.condensed [data-slot='gantt-view'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='gantt-view-header'] > div {
+  padding: 0.125rem 0.25rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-group-label'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-row'] {
+  padding-block: 0.125rem !important;
+}
+
+body.condensed [data-slot='gantt-view-bar'] {
+  height: 1.125rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-undated'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='gantt-view-state'] {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Views: ViewSet ── */
+
+body.condensed [data-slot='view-set'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='view-set-toolbar'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='view-set-body'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='view-set-detail'] {
+  font-size: 0.8125rem !important;
+}

@@ -15,17 +15,18 @@ These documents capture pitfalls, workarounds, and recommended changes discovere
 
 ## Start Here
 
-| File | Audience | Summary |
-|------|----------|---------|
-| [adopting-mieweb-ui.md](adopting-mieweb-ui.md) | Consumers | **Generic adoption guide** — audit, resolution, testing (brand/dark mode), gap detection for any project |
-| [execution-plan.md](execution-plan.md) | AI / Consumers | **Step-by-step execution plan** — ordered migration steps for AI agents or developers to convert any project |
-| [component-policy.md](component-policy.md) | Organizations | **Component policy** — use first → build locally → contribute upstream |
-| [compliance-prompt.md](compliance-prompt.md) | AI / Consumers | **Reusable AI prompt** — paste into any coding session to audit and migrate a project |
+| File                                           | Audience       | Summary                                                                                                      |
+| ---------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| [adopting-mieweb-ui.md](adopting-mieweb-ui.md) | Consumers      | **Generic adoption guide** — audit, resolution, testing (brand/dark mode), gap detection for any project     |
+| [execution-plan.md](execution-plan.md)         | AI / Consumers | **Step-by-step execution plan** — ordered migration steps for AI agents or developers to convert any project |
+| [component-policy.md](component-policy.md)     | Organizations  | **Component policy** — use first → build locally → contribute upstream                                       |
+| [compliance-prompt.md](compliance-prompt.md)   | AI / Consumers | **Reusable AI prompt** — paste into any coding session to audit and migrate a project                        |
 
 ## Reference
 
-| File | Audience | Summary |
-|------|----------|---------|
-| [tailwind4-integration.md](tailwind4-integration.md) | Consumers + Maintainers | Tailwind CSS 4 setup, dark mode, brand switching, `@source`, CSS variable fallbacks |
-| [migration-meteor-blaze-to-react.md](migration-meteor-blaze-to-react.md) | Consumers | Meteor-specific migration playbook: Meteor 2 Blaze → Meteor 3 React + TypeScript + Tailwind 4 + @mieweb/ui |
-| [recommended-changes.md](recommended-changes.md) | Maintainers | Proposed library changes to eliminate consumer-side workarounds |
+| File                                                                     | Audience                | Summary                                                                                                                                      |
+| ------------------------------------------------------------------------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| [tailwind4-integration.md](tailwind4-integration.md)                     | Consumers + Maintainers | Tailwind CSS 4 setup, dark mode, brand switching, `@source`, CSS variable fallbacks                                                          |
+| [migration-meteor-blaze-to-react.md](migration-meteor-blaze-to-react.md) | Consumers               | Meteor-specific migration playbook: Meteor 2 Blaze → Meteor 3 React + TypeScript + Tailwind 4 + @mieweb/ui                                   |
+| [wiring-headless-modules.md](wiring-headless-modules.md)                 | Consumers               | How to connect a headless module (`ViewSet`, `SuperChatInbox`) to Meteor or TanStack Query — accessors, awaited mutations, where state lives |
+| [recommended-changes.md](recommended-changes.md)                         | Maintainers             | Proposed library changes to eliminate consumer-side workarounds                                                                              |

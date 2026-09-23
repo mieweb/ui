@@ -1,0 +1,102 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Views/Overview" />
+
+# Views
+
+> **One set of accessors, every view.** A page that shows a collection of things describes
+> that collection once — `getId`, `getTitle`, `getStatus`, `getStart`, `getEnd`, `getGroup` —
+> and every view in this family reads through it. Switching from a list to a board to a Gantt
+> is a prop, not another component to build. The views are **headless**: they never fetch,
+> subscribe, or navigate. Data arrives as `items`; changes leave through `on*` callbacks.
+
+This family exists because the same six layouts get re-implemented per entity in every app —
+one consumer had five Gantts, five boards and three month calendars whose only difference was
+which field held the start date ([#482](https://github.com/mieweb/ui/issues/482)).
+
+## Which one?
+
+Members land incrementally. [ViewSwitcher](?path=/docs/views-viewswitcher--docs),
+[ListView](?path=/docs/views-listview--docs), [BoardView](?path=/docs/views-boardview--docs),
+[CalendarView](?path=/docs/views-calendarview--docs),
+[GanttView](?path=/docs/views-ganttview--docs) and
+[ViewSet](?path=/docs/views-viewset--docs) have all shipped.
+
+Most pages want `ViewSet` and nothing else from this table: it renders the switcher and the
+views, and leaves you the slots. Reach for an individual view when a page draws exactly one
+layout forever.
+
+| Component                                            | Use it when                                                                                      | Not when                                                                                                |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| [ViewSwitcher](?path=/docs/views-viewswitcher--docs) | Users pick between the layouts below; persisted per user or driven by a URL param                | Two unrelated pages, not two views of one collection — [Tabs](?path=/docs/navigation-tabs--docs)        |
+| [ListView](?path=/docs/views-listview--docs)         | A scannable vertical list, optionally grouped by status or group, with a row slot you own        | Rows need sorting, filtering, paging or export — [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs) |
+| [BoardView](?path=/docs/views-boardview--docs)       | Items move between named stages and the stage is the primary fact                                | Stages are fixed and items never move — [ListView](?path=/docs/views-listview--docs) grouped by status  |
+| [CalendarView](?path=/docs/views-calendarview--docs) | Items land on, or span, calendar days and the month grid is the point                            | Timed appointments in day/week slots — [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs) |
+| [GanttView](?path=/docs/views-ganttview--docs)       | Items have a start and an end and overlap matters across a date range — including as a roadmap   | One record's progress through steps — [Timeline](?path=/docs/data-display-timeline--docs)               |
+| [ViewSet](?path=/docs/views-viewset--docs)           | A whole page: switcher, the enabled views, and shared filter / overview / detail / toolbar slots | You render exactly one layout forever — use that view directly                                          |
+
+**A roadmap is not its own component.** It is
+[GanttView](?path=/docs/views-ganttview--docs) at `cadence="month"` or `"quarter"` with
+`groupByLane`. A `RoadmapView` was planned and dropped: it would have been the same chart
+with wider columns, and two near-identical timeline components is exactly the duplication
+this family exists to remove. The `roadmap` view id remains, so a switcher can still offer
+"Roadmap" as a labelled option. For an editorial, hand-authored calendar year — a
+compliance calendar on a marketing page — reach for
+[YearTimeline](?path=/docs/data-display-yeartimeline--docs) instead: it is
+authored a year at a time rather than driven from records through accessors.
+
+**Tables are not a view here.** A tabular layout of the same collection is
+`DataVisNitroGrid` (see [Grids](?path=/docs/components-grids-overview--docs)); `ViewSet`
+renders it in the `table` slot rather than wrapping it. Tables and data grids start with
+DataVis NITRO.
+
+**Overview is not a view either.** It is domain content — KPI tiles, charts, next actions —
+so `ViewSet` exposes an `overview` slot that a page fills with
+[CustomizableDashboard](?path=/docs/dashboards-customizabledashboard--docs) and
+[DashboardWidget](?path=/docs/dashboards-dashboardwidget--docs).
+
+## The accessor contract
+
+Every view reads the collection through the same optional accessors, so one adapter per
+entity serves all of them. A view uses only the accessors it needs and says so in its docs —
+`BoardView` requires `getStatus`, `GanttView` requires `getStart`.
+
+```ts
+const accessors: ViewAccessors<WorkItem> = {
+  getId: (w) => w.id,
+  getTitle: (w) => w.title,
+  getStatus: (w) => w.status, // board column · list group
+  getStart: (w) => w.startDate, // gantt bar · calendar day
+  getEnd: (w) => w.dueDate,
+  getGroup: (w) => w.team, // swimlane · gantt row group
+  getAccent: (w) => PRIORITY_ACCENT[w.priority], // a token name, never a class
+};
+```
+
+`getAccent` returns a name from the `Accent` union, which each view maps to `--mieweb-*`
+tokens. Callers never pass colour classes, so views stay correct across brands and dark mode.
+
+## How they fit together
+
+- **State has one owner: the caller.** Views are controlled. `selectedId`, filter state and
+  pagination live in the page; the views render them. `ViewSet` owns exactly one thing —
+  which view is showing — and will remember it under `storageKey` if you do not control
+  `view` yourself. URL state is yours: control `view` from your router and `storageKey` steps
+  aside, so there is one source of truth rather than two that disagree.
+- **Mutations are the app's.** `onMove` returns `void | Promise<void>`. The board shows the
+  pending state, awaits, and puts the card back if the promise rejects — the app never has to
+  re-render it home. The date views are read-only in this release: there is no rescheduling
+  callback, by drag or otherwise.
+- **Navigation is a prop.** `onOpen(id)` for router navigation, `getHref(id)` to render a real
+  `<a>`. Pass both: the anchor is what makes rows middle-clickable and crawlable.
+- **Domain rendering is a slot.** `renderItem(item, { view })` receives the active view, so a
+  page can return a dense row in the list and a card on the board from one function.
+
+## Shared limitations
+
+- Views assume the whole collection is in memory, and **nothing here virtualizes** — every
+  row, card and bar renders. Both the row count and the fetch are the caller's job: pass the
+  page you have and render your own pager.
+- Dates go through Luxon. Pass ISO strings or `Date`s; pass `now` to pin "today" in tests and
+  visual snapshots.
+- Every user-facing string is overridable through `labels`, but the defaults are English.

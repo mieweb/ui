@@ -1,0 +1,607 @@
+'use client';
+
+import * as React from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  pointerWithin,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../../utils/cn';
+import { Spinner } from '../Spinner';
+import {
+  accentClasses,
+  defaultViewLabels,
+  type Accent,
+  type Stage,
+  type ViewBaseProps,
+  type ViewLabels,
+} from '../../views/types';
+
+// =============================================================================
+// Types
+// =============================================================================
+
+export type BoardViewSlot =
+  | 'column'
+  | 'columnHeader'
+  | 'card'
+  | 'selectedCard'
+  | 'state';
+
+export interface BoardLabels extends ViewLabels {
+  /** Accessible name of the scrollable board region. */
+  board: string;
+  /** Announced when a card starts moving. `{item}` and `{stage}` are substituted. */
+  moved: string;
+  /** Announced when `onMove` rejects. */
+  moveFailed: string;
+  /** Hint on a focusable card describing the keyboard move. */
+  moveHint: string;
+}
+
+export const defaultBoardLabels: BoardLabels = {
+  ...defaultViewLabels,
+  empty: 'Nothing in this stage',
+  board: 'Board',
+  moved: '{item} moved to {stage}',
+  moveFailed: 'Could not move {item}',
+  moveHint: 'Press Control with the arrow keys to move between stages',
+};
+
+export interface BoardViewProps<T>
+  extends ViewBaseProps<T>, VariantProps<typeof cardVariants> {
+  /** Columns, in order. A board without stages has nothing to draw. */
+  stages: readonly Stage[];
+  /**
+   * Commits a move. The board shows the card in its new column while this is
+   * pending and puts it back if the promise rejects, so the caller never has to
+   * re-render it home.
+   */
+  onMove?: (id: string, toStage: string, item: T) => void | Promise<void>;
+  labels?: Partial<BoardLabels>;
+  classNames?: Partial<Record<BoardViewSlot, string>>;
+  /** Heading level for column headers, under the page's own heading. */
+  headingLevel?: 'h2' | 'h3' | 'h4';
+}
+
+// =============================================================================
+// Variants
+// =============================================================================
+
+const cardVariants = cva(
+  [
+    'w-full rounded-md border border-border bg-card p-2 text-start',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+  ],
+  {
+    variants: {
+      density: {
+        comfortable: 'p-3',
+        compact: 'p-2',
+      },
+      interactive: { true: 'hover:border-primary-500/40', false: '' },
+      selected: { true: 'ring-2 ring-primary-500/50', false: '' },
+      pending: { true: 'opacity-60', false: '' },
+    },
+    defaultVariants: {
+      density: 'comfortable',
+      interactive: false,
+      selected: false,
+      pending: false,
+    },
+  }
+);
+
+const fill = (template: string, values: Record<string, string>) =>
+  template.replace(/\{(\w+)\}/g, (_, key) => values[key] ?? '');
+
+// =============================================================================
+// Card
+// =============================================================================
+
+interface CardProps {
+  id: string;
+  title: string;
+  subtitle?: string;
+  accent?: Accent;
+  selected: boolean;
+  pending: boolean;
+  draggable: boolean;
+  hint?: string;
+  href?: string;
+  className?: string;
+  children?: React.ReactNode;
+  onOpen?: () => void;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
+}
+
+function BoardCard({
+  id,
+  title,
+  subtitle,
+  accent,
+  selected,
+  pending,
+  draggable,
+  hint,
+  href,
+  className,
+  children,
+  onOpen,
+  onKeyDown,
+}: CardProps) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id,
+    disabled: !draggable,
+  });
+
+  const body = children ?? (
+    <span className="flex items-start gap-2">
+      {accent && (
+        <span
+          aria-hidden
+          className={cn(
+            'mt-1.5 size-2 shrink-0 rounded-full',
+            accentClasses[accent].marker
+          )}
+        />
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="text-foreground block text-sm font-medium">
+          {title}
+        </span>
+        {subtitle && (
+          <span className="text-muted-foreground block truncate text-xs">
+            {subtitle}
+          </span>
+        )}
+      </span>
+    </span>
+  );
+
+  const onCardKeyDown = (event: React.KeyboardEvent) => {
+    if (onOpen && !href && (event.key === 'Enter' || event.key === ' ')) {
+      // Space is dnd-kit's pick-up key only while dragging; here the card is at
+      // rest, so it activates like any other button.
+      if (!event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        onOpen();
+        return;
+      }
+    }
+    onKeyDown?.(event);
+  };
+
+  const shared = {
+    ref: setNodeRef,
+    // Only the pointer listeners are shared. dnd-kit's `attributes` carry
+    // `role="button"` and a `tabIndex`, which on an `<a href>` would override
+    // the native link role — the card would announce as a button, and the
+    // middle-click / "copy link" affordance this branch exists to preserve
+    // would no longer be what assistive tech describes. The non-link card takes
+    // them below, where button semantics are the correct answer.
+    ...(draggable ? listeners : {}),
+    'aria-current': selected ? ('true' as const) : undefined,
+    'aria-describedby': hint,
+    'aria-busy': pending || undefined,
+    'data-slot': 'board-view-card',
+    className: cn(className, isDragging && 'opacity-40'),
+  };
+
+  return (
+    <li>
+      {href ? (
+        // An anchor, like every other view: the card stays middle-clickable and
+        // "copy link" works. dnd-kit's listeners still own the drag.
+        <a
+          {...shared}
+          href={href}
+          onKeyDown={onCardKeyDown}
+          onClick={(event) => {
+            if (
+              !onOpen ||
+              event.defaultPrevented ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.button !== 0
+            )
+              return;
+            event.preventDefault();
+            onOpen();
+          }}
+        >
+          {body}
+        </a>
+      ) : (
+        <div
+          {...shared}
+          {...(draggable ? attributes : {})}
+          role={onOpen ? 'button' : undefined}
+          tabIndex={draggable || onOpen ? 0 : undefined}
+          onKeyDown={onCardKeyDown}
+          onClick={onOpen}
+        >
+          {body}
+        </div>
+      )}
+    </li>
+  );
+}
+
+// =============================================================================
+// Column
+// =============================================================================
+
+function BoardColumn({
+  stage,
+  headerId,
+  count,
+  headingLevel: Heading,
+  droppable,
+  classNames,
+  children,
+}: {
+  stage: Stage;
+  droppable: boolean;
+  headerId: string;
+  count: number;
+  headingLevel: 'h2' | 'h3' | 'h4';
+  classNames?: BoardViewProps<unknown>['classNames'];
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: stage.id,
+    disabled: !droppable,
+  });
+  const accent = stage.accent ?? 'neutral';
+  return (
+    <section
+      ref={setNodeRef}
+      data-slot="board-view-column"
+      data-over={isOver || undefined}
+      className={cn(
+        'bg-muted/40 flex min-w-0 flex-col rounded-lg border',
+        isOver ? accentClasses[accent].border : 'border-border',
+        'sm:w-72 sm:shrink-0',
+        classNames?.column
+      )}
+    >
+      <Heading>
+        <span
+          id={headerId}
+          data-slot="board-view-column-header"
+          className={cn(
+            'border-border text-muted-foreground flex items-center gap-2 border-b px-3 py-2 text-xs font-semibold tracking-wide uppercase',
+            classNames?.columnHeader
+          )}
+        >
+          <span
+            aria-hidden
+            className={cn(
+              'size-2 shrink-0 rounded-full',
+              accentClasses[accent].marker
+            )}
+          />
+          <span>{stage.label}</span>
+          <span className="ms-auto font-normal tabular-nums">{count}</span>
+        </span>
+      </Heading>
+      {children}
+    </section>
+  );
+}
+
+// =============================================================================
+// Component
+// =============================================================================
+
+export function BoardView<T>({
+  items,
+  accessors,
+  stages,
+  loading = false,
+  error = null,
+  selectedId = null,
+  onOpen,
+  getHref,
+  onMove,
+  renderItem,
+  emptyState,
+  labels,
+  density,
+  className,
+  classNames,
+  headingLevel = 'h3',
+}: BoardViewProps<T>) {
+  const text = { ...defaultBoardLabels, ...labels };
+  const hintId = React.useId();
+  // Ids come from position, not from the stage id: two distinct statuses can
+  // normalise to the same string, and a duplicate id makes `aria-labelledby`
+  // resolve to the wrong heading.
+  const baseId = React.useId();
+  const [announcement, setAnnouncement] = React.useState('');
+  const [draggingId, setDraggingId] = React.useState<string | null>(null);
+  // Where a card is shown while its move is in flight, so the column it landed
+  // in is the one the user sees before the caller's data catches up.
+  // A Map, not an object. Ids come from the caller's `getId` and are only
+  // typed `string`, so a collection keyed by user data can legitimately produce
+  // `toString`, `constructor` or `__proto__`. On a plain object `'toString' in
+  // pending` is true before anything is pending, which would pin that card as
+  // permanently in-flight and make it impossible to move.
+  const [pending, setPending] = React.useState<Map<string, string>>(
+    () => new Map()
+  );
+
+  const byId = React.useMemo(() => {
+    const map = new Map<string, T>();
+    for (const item of items) map.set(accessors.getId(item), item);
+    return map;
+  }, [items, accessors]);
+
+  const stageOf = React.useCallback(
+    (item: T) =>
+      pending.get(accessors.getId(item)) ?? accessors.getStatus?.(item),
+    [pending, accessors]
+  );
+
+  const columns = React.useMemo(() => {
+    const buckets = new Map<string, T[]>(stages.map((s) => [s.id, []]));
+    const extra = new Map<string, T[]>();
+    for (const item of items) {
+      const key = stageOf(item) ?? '';
+      const bucket = buckets.get(key);
+      if (bucket) bucket.push(item);
+      else {
+        const spill = extra.get(key);
+        if (spill) spill.push(item);
+        else extra.set(key, [item]);
+      }
+    }
+    return [
+      ...stages.map((stage) => ({
+        stage,
+        declared: true,
+        items: buckets.get(stage.id) ?? [],
+      })),
+      // Never silently drop a record whose status matches no stage. These are
+      // shown so the record stays visible, but they are not drop targets: their
+      // ids were never declared, and `onMove` promises a named stage.
+      ...[...extra].map(([key, bucket]) => ({
+        stage: { id: key, label: key || text.ungrouped } as Stage,
+        declared: false,
+        items: bucket,
+      })),
+    ];
+  }, [items, stages, stageOf, text.ungrouped]);
+
+  const commit = React.useCallback(
+    async (id: string, toStage: string) => {
+      const item = byId.get(id);
+      if (!item || !onMove) return;
+      // One move per card at a time: a second would overwrite the first's
+      // pending stage, and the first `finally` would then clear it, snapping
+      // the card home while the second mutation is still in flight.
+      if (pending.has(id)) return;
+      const stage = stages.find((s) => s.id === toStage);
+      // `onMove` promises a move to a stage the caller declared. Columns
+      // synthesized for unknown statuses exist so a record is never silently
+      // dropped, not as somewhere to put things — accepting a drop there would
+      // hand back an id that was never in `stages`.
+      if (!stage) return;
+      const from = accessors.getStatus?.(item);
+      if (from === toStage) return;
+      const title = accessors.getTitle(item);
+
+      setPending((prev) => new Map(prev).set(id, toStage));
+      setAnnouncement(
+        fill(text.moved, { item: title, stage: stage.label ?? toStage })
+      );
+      try {
+        await onMove(id, toStage, item);
+      } catch {
+        setAnnouncement(fill(text.moveFailed, { item: title }));
+      } finally {
+        setPending((prev) => {
+          const next = new Map(prev);
+          next.delete(id);
+          return next;
+        });
+      }
+    },
+    [byId, onMove, pending, accessors, stages, text.moved, text.moveFailed]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const onDragStart = (event: DragStartEvent) =>
+    setDraggingId(String(event.active.id));
+
+  const onDragEnd = (event: DragEndEvent) => {
+    setDraggingId(null);
+    if (event.over) void commit(String(event.active.id), String(event.over.id));
+  };
+
+  // Pointer drag has no keyboard equivalent that is pleasant to use, so moving
+  // by keyboard is its own command on the focused card rather than a simulated
+  // drag: Ctrl/Cmd with the arrow keys steps it between adjacent stages.
+  const onCardKeyDown = (
+    event: React.KeyboardEvent,
+    id: string,
+    columnIndex: number
+  ) => {
+    if (!onMove || !(event.ctrlKey || event.metaKey)) return;
+    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    let delta = 0;
+    if (event.key === 'ArrowRight') delta = rtl ? -1 : 1;
+    else if (event.key === 'ArrowLeft') delta = rtl ? 1 : -1;
+    else return;
+    // Step to the next *declared* stage. A fallback column is not a move
+    // target, so stopping on one would strand the card there; skipping it
+    // keeps arrowing continuous and still lets a card leave one.
+    let target;
+    for (
+      let i = columnIndex + delta;
+      i >= 0 && i < columns.length;
+      i += delta
+    ) {
+      if (columns[i].declared) {
+        target = columns[i];
+        break;
+      }
+    }
+    if (!target) return;
+    event.preventDefault();
+    void commit(id, target.stage.id);
+  };
+
+  const state = (content: React.ReactNode) => (
+    <div
+      data-slot="board-view-state"
+      className={cn(
+        'border-border bg-card text-muted-foreground flex flex-col items-center justify-center gap-2 rounded-lg border px-4 py-10 text-center text-sm',
+        classNames?.state
+      )}
+    >
+      {content}
+    </div>
+  );
+
+  if (error) {
+    return state(
+      <p role="alert" className="text-destructive">
+        {text.error}
+      </p>
+    );
+  }
+  if (loading) {
+    return state(
+      <span className="flex items-center gap-2">
+        <Spinner size="sm" label={text.loading} />
+        <span aria-hidden>{text.loading}</span>
+      </span>
+    );
+  }
+  if (items.length === 0 && emptyState) return <>{emptyState}</>;
+
+  const draggingItem = draggingId ? byId.get(draggingId) : undefined;
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={pointerWithin}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragCancel={() => setDraggingId(null)}
+    >
+      <div
+        data-slot="board-view"
+        // Scrollable content must be keyboard operable (WCAG 2.1.1), which axe
+        // enforces as scrollable-region-focusable. jsx-a11y disagrees for
+        // non-interactive elements; the success criterion wins.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
+        role="group"
+        aria-label={text.board}
+        className={cn(
+          // Columns on one scrolling row once there is room; stacked below it,
+          // because five 288px columns on a phone is a horizontal maze.
+          'flex flex-col gap-3 sm:flex-row sm:overflow-x-auto sm:pb-2',
+          className
+        )}
+      >
+        {columns.map((column, columnIndex) => (
+          <BoardColumn
+            key={column.stage.id}
+            stage={column.stage}
+            droppable={column.declared && Boolean(onMove)}
+            headerId={`${baseId}-col-${columnIndex}`}
+            count={column.items.length}
+            headingLevel={headingLevel}
+            classNames={classNames}
+          >
+            <ul
+              aria-labelledby={`${baseId}-col-${columnIndex}`}
+              className="flex flex-1 flex-col gap-2 p-2"
+            >
+              {column.items.map((item) => {
+                const id = accessors.getId(item);
+                return (
+                  <BoardCard
+                    key={id}
+                    id={id}
+                    title={accessors.getTitle(item)}
+                    subtitle={accessors.getSubtitle?.(item)}
+                    accent={accessors.getAccent?.(item)}
+                    selected={id === selectedId}
+                    pending={pending.has(id)}
+                    draggable={Boolean(onMove)}
+                    hint={onMove ? hintId : undefined}
+                    href={getHref?.(id, item)}
+                    className={cn(
+                      cardVariants({
+                        density,
+                        interactive: Boolean(onOpen),
+                        selected: id === selectedId,
+                        pending: pending.has(id),
+                      }),
+                      classNames?.card,
+                      id === selectedId && classNames?.selectedCard
+                    )}
+                    onOpen={onOpen ? () => onOpen(id, item) : undefined}
+                    onKeyDown={(event) => onCardKeyDown(event, id, columnIndex)}
+                  >
+                    {renderItem?.(item, { view: 'board' })}
+                  </BoardCard>
+                );
+              })}
+              {column.items.length === 0 && (
+                <li className="text-muted-foreground px-1 py-2 text-xs">
+                  {text.empty}
+                </li>
+              )}
+            </ul>
+          </BoardColumn>
+        ))}
+      </div>
+
+      {onMove && (
+        <span id={hintId} className="sr-only">
+          {text.moveHint}
+        </span>
+      )}
+      {/* Separate from dnd-kit's own drag live region: this announces moves
+          made by keyboard command, which are not drags. */}
+      <span
+        data-slot="board-view-announcer"
+        role="status"
+        aria-live="polite"
+        className="sr-only"
+      >
+        {announcement}
+      </span>
+
+      <DragOverlay>
+        {draggingItem && (
+          <div className={cn(cardVariants({ density }), 'shadow-lg')}>
+            <span className="text-foreground block text-sm font-medium">
+              {accessors.getTitle(draggingItem)}
+            </span>
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
+export { cardVariants as boardViewCardVariants };

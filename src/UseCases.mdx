@@ -1,0 +1,62 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction/Use cases" />
+
+# Use cases
+
+The catalog answers _"which Card?"_. This page answers _"how do I build the thing I was
+asked for?"_ — intent first, then the parts, then a composition to copy.
+
+Each family's **Overview** compares its members; the **(Demo)** entries are Storybook-only
+compositions, not exports.
+
+## Show one collection several ways
+
+**Track work through stages · triage a queue · plan a programme**
+
+| You want                                                    | Reach for                                                                                                  | Copy from                                                                       |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| A whole page with a view switcher and shared slots          | [ViewSet](?path=/docs/views-viewset--docs)                                                                 | [Order Inbox (Demo)](?path=/docs/orders-order-inbox-demo--docs)                 |
+| Items that move between named stages                        | [BoardView](?path=/docs/views-boardview--docs)                                                             | [ViewSet](?path=/docs/views-viewset--docs) stories                              |
+| A scannable list, optionally grouped                        | [ListView](?path=/docs/views-listview--docs)                                                               | "                                                                               |
+| Records on, or spanning, calendar days                      | [CalendarView](?path=/docs/views-calendarview--docs)                                                       | "                                                                               |
+| Overlap across a date range, or a quarter roadmap           | [GanttView](?path=/docs/views-ganttview--docs)                                                             | "                                                                               |
+| The same records as a sortable, filterable, exportable grid | [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs) in `ViewSet`'s `table` slot                         | [Grids](?path=/docs/components-grids-overview--docs)                            |
+| A KPI surface above the views                               | [CustomizableDashboard](?path=/docs/dashboards-customizabledashboard--docs) in `ViewSet`'s `overview` slot | [Dashboard Widgets (Demo)](?path=/docs/dashboards-dashboard-widgets-demo--docs) |
+
+Describe the records **once** with `ViewAccessors<T>` and every view understands them —
+see the [Views overview](?path=/docs/modules-views-overview--docs). Connecting it to Meteor
+or TanStack Query: [wiring-headless-modules](https://github.com/mieweb/ui/blob/main/lessons/wiring-headless-modules.md).
+
+## Build a signed-in application shell
+
+| You want                               | Reach for                                                                                       | Copy from                                                       |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Nav rail, header, routed pages         | [Sidebar](?path=/docs/overlays-sidebar--docs) + [AppHeader](?path=/docs/layout-appheader--docs) | [Dashboard (Demo)](?path=/docs/dashboards-dashboard-demo--docs) |
+| A page title, description and actions  | [PageHeader](?path=/docs/layout-pageheader--docs)                                               | "                                                               |
+| Portlets the user can arrange and hide | [CustomizableDashboard](?path=/docs/dashboards-customizabledashboard--docs)                     | [Dashboards](?path=/docs/modules-dashboards-overview--docs)     |
+
+## Converse
+
+| You want                                   | Reach for                                           | Copy from                                                 |
+| ------------------------------------------ | --------------------------------------------------- | --------------------------------------------------------- |
+| A threaded inbox of human conversations    | [SuperChatInbox](?path=/docs/superchat-inbox--docs) | [SuperChat](?path=/docs/modules-superchat-overview--docs) |
+| An assistant panel                         | [AIChat](?path=/docs/chat-aichat--docs)             | [Chat](?path=/docs/modules-chat-overview--docs)           |
+| Just the composer, inside your own surface | [ChatComposer](?path=/docs/chat-chatcomposer--docs) | "                                                         |
+
+## Capture and review
+
+| You want                                | Reach for                                                                           | Copy from                                                            |
+| --------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| A form built from a schema              | [EsheetBuilder / EsheetRenderer](?path=/docs/composite-forms-esheet-renderer--docs) | [Composite forms](?path=/docs/inputs-composite-forms-overview--docs) |
+| Timed appointments in day or week slots | [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs)                    | [Date & time](?path=/docs/inputs-date-time-overview--docs)           |
+| One record's progress through steps     | [Timeline](?path=/docs/data-display-timeline--docs)                                 | [Data display](?path=/docs/components-data-display-overview--docs)   |
+
+## When nothing here fits
+
+Read the family Overview closest to your intent before building: it states the boundary
+between its members and usually names the component you actually wanted. If a real gap
+remains, [CONTRIBUTING → Developing Components From a Consuming
+Application](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md#developing-components-from-a-consuming-application)
+is the path upstream, and [component-policy](https://github.com/mieweb/ui/blob/main/lessons/component-policy.md)
+is how to build it locally so it can get there.
