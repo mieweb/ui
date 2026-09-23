@@ -56,7 +56,23 @@ async function save() {
 <Button onClick={save} disabled={saving}>Save</Button>
 \`\`\`
 
-\`value\` and \`collab\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
+### Pasted and dropped files
+
+Images and videos can be pasted or dropped straight onto the surface. **Set \`mediaUpload.uploadHandler\` if the document is persisted anywhere** — without it the file is embedded in the document itself, an image as a base64 \`data:\` URL and a video as an object URL. A 4 MB screenshot becomes roughly 5.8 MB of Markdown, which most APIs will refuse, and an object URL is dead as soon as the page reloads.
+
+\`\`\`tsx
+<RichEditor
+  value={note.markdown}
+  mediaUpload={{
+    // Return the URL the document should reference the file by.
+    uploadHandler: async (file) => (await api.uploadMedia(file)).url,
+  }}
+/>
+\`\`\`
+
+The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters.
+
+\`value\`, \`collab\` and \`mediaUpload\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
 
 ### Limitations
 

@@ -12,6 +12,12 @@
  */
 import type { EditorKit } from '@kerebron/editor';
 import { AdvancedEditorKit } from '@kerebron/editor-kits/AdvancedEditorKit';
+import {
+  ExtensionMediaUpload,
+  type MediaUploadOptions,
+} from '@kerebron/extension-basic-editor/ExtensionMediaUpload';
+
+export type { MediaUploadOptions };
 
 export interface CollabConfig {
   /** Room id — one shared document per room (e.g. a post id). */
@@ -83,22 +89,37 @@ export interface EditorKits {
  */
 const unsafeExtensions = ['autocomplete', 'hover'] as const;
 
-/** {@link AdvancedEditorKit} minus {@link unsafeExtensions} (and, for collab
- * mode, minus `history`). */
+/**
+ * {@link AdvancedEditorKit} minus {@link unsafeExtensions} (and, for collab
+ * mode, minus `history`), with `mediaUpload` reconfigured when the host asks.
+ *
+ * `AdvancedEditorKit` constructs `ExtensionMediaUpload` with no options, and an
+ * extension's options are fixed at construction — so the only way to configure
+ * it is to drop that instance and append one of our own.
+ */
 class SafeAdvancedEditorKit implements EditorKit {
   name = 'advanced-editor';
-  constructor(private readonly forCollab: boolean) {}
+  constructor(
+    private readonly forCollab: boolean,
+    private readonly mediaUpload?: MediaUploadOptions
+  ) {}
 
   getExtensions() {
     const dropped: string[] = [...unsafeExtensions];
     if (this.forCollab) dropped.push('history');
+    if (this.mediaUpload) dropped.push('mediaUpload');
 
-    return new AdvancedEditorKit()
+    const extensions = new AdvancedEditorKit()
       .getExtensions()
       .filter(
         (extension) =>
           !('name' in extension && dropped.includes(extension.name))
       );
+
+    if (this.mediaUpload) {
+      extensions.push(new ExtensionMediaUpload(this.mediaUpload));
+    }
+    return extensions;
   }
 }
 
@@ -106,7 +127,9 @@ class SafeAdvancedEditorKit implements EditorKit {
 
 /**
  * Build the editor kits for a session. Pass `config` to join a collaborative
- * room; omit it for a plain local editor.
+ * room; omit it for a plain local editor. Pass `mediaUpload` to configure how
+ * pasted/dropped files are handled — most importantly `uploadHandler`, without
+ * which every image is embedded in the document as a base64 `data:` URL.
  *
  * Async because collaborative mode lazy-loads the Yjs kit (and its optional
  * peer deps) on first use; plain mode resolves immediately.
@@ -121,10 +144,14 @@ class SafeAdvancedEditorKit implements EditorKit {
  * than rejecting.
  */
 export async function createEditorKits(
-  config?: CollabConfig
+  config?: CollabConfig,
+  mediaUpload?: MediaUploadOptions
 ): Promise<EditorKits> {
   if (!config) {
-    return { kits: [new SafeAdvancedEditorKit(false)], collaborative: false };
+    return {
+      kits: [new SafeAdvancedEditorKit(false, mediaUpload)],
+      collaborative: false,
+    };
   }
 
   try {
@@ -132,7 +159,7 @@ export async function createEditorKits(
     const url = config.wsUrl ?? defaultWsUrl();
     return {
       kits: [
-        new SafeAdvancedEditorKit(true),
+        new SafeAdvancedEditorKit(true, mediaUpload),
         new HuddleYjsKit(
           url,
           config.params ?? {},
@@ -148,6 +175,11 @@ export async function createEditorKits(
       error
     );
     config.onUnavailable?.(error);
-    return { kits: [new SafeAdvancedEditorKit(false)], collaborative: false };
+    // Degrading to a local editor must not also drop `mediaUpload`: without it
+    // the stock extension comes back and pasted files are embedded as base64.
+    return {
+      kits: [new SafeAdvancedEditorKit(false, mediaUpload)],
+      collaborative: false,
+    };
   }
 }
