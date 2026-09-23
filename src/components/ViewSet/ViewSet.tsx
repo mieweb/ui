@@ -103,6 +103,26 @@ const FIRST_ID = (views: ViewSetProps<unknown>['views']) => {
   return (typeof first === 'string' ? first : first?.id) ?? 'list';
 };
 
+// Remembering the view is an enhancement, never a requirement. `localStorage`
+// can exist and still throw — Safari private browsing and a blocked third-party
+// storage policy both raise on access — so optional chaining is not enough; an
+// unguarded read would take the whole page down to save a preference.
+const readStored = (key: string): ViewId | null => {
+  try {
+    return (globalThis.localStorage?.getItem(key) as ViewId | null) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writeStored = (key: string, value: ViewId) => {
+  try {
+    globalThis.localStorage?.setItem(key, value);
+  } catch {
+    // Fall back to in-memory state for the session.
+  }
+};
+
 // =============================================================================
 // Component
 // =============================================================================
@@ -154,9 +174,7 @@ export function ViewSet<T>({
   // agree, and localStorage is not available to the former.
   React.useEffect(() => {
     if (!storageKey || view) return;
-    const stored = globalThis.localStorage?.getItem(
-      storageKey
-    ) as ViewId | null;
+    const stored = readStored(storageKey);
     if (
       stored &&
       offered.some((v) => (typeof v === 'string' ? v : v.id) === stored)
@@ -173,7 +191,7 @@ export function ViewSet<T>({
 
   const changeView = (next: ViewId) => {
     if (!view) setInternalView(next);
-    if (storageKey && !view) globalThis.localStorage?.setItem(storageKey, next);
+    if (storageKey && !view) writeStored(storageKey, next);
     onViewChange?.(next);
   };
 

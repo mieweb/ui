@@ -246,17 +246,22 @@ function BoardColumn({
   headerId,
   count,
   headingLevel: Heading,
+  droppable,
   classNames,
   children,
 }: {
   stage: Stage;
+  droppable: boolean;
   headerId: string;
   count: number;
   headingLevel: 'h2' | 'h3' | 'h4';
   classNames?: BoardViewProps<unknown>['classNames'];
   children: React.ReactNode;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: stage.id });
+  const { setNodeRef, isOver } = useDroppable({
+    id: stage.id,
+    disabled: !droppable,
+  });
   const accent = stage.accent ?? 'neutral';
   return (
     <section
@@ -327,7 +332,14 @@ export function BoardView<T>({
   const [draggingId, setDraggingId] = React.useState<string | null>(null);
   // Where a card is shown while its move is in flight, so the column it landed
   // in is the one the user sees before the caller's data catches up.
-  const [pending, setPending] = React.useState<Record<string, string>>({});
+  // A Map, not an object. Ids come from the caller's `getId` and are only
+  // typed `string`, so a collection keyed by user data can legitimately produce
+  // `toString`, `constructor` or `__proto__`. On a plain object `'toString' in
+  // pending` is true before anything is pending, which would pin that card as
+  // permanently in-flight and make it impossible to move.
+  const [pending, setPending] = React.useState<Map<string, string>>(
+    () => new Map()
+  );
 
   const byId = React.useMemo(() => {
     const map = new Map<string, T>();
@@ -336,7 +348,8 @@ export function BoardView<T>({
   }, [items, accessors]);
 
   const stageOf = React.useCallback(
-    (item: T) => pending[accessors.getId(item)] ?? accessors.getStatus?.(item),
+    (item: T) =>
+      pending.get(accessors.getId(item)) ?? accessors.getStatus?.(item),
     [pending, accessors]
   );
 
@@ -354,10 +367,17 @@ export function BoardView<T>({
       }
     }
     return [
-      ...stages.map((stage) => ({ stage, items: buckets.get(stage.id) ?? [] })),
-      // Never silently drop a record whose status matches no stage.
+      ...stages.map((stage) => ({
+        stage,
+        declared: true,
+        items: buckets.get(stage.id) ?? [],
+      })),
+      // Never silently drop a record whose status matches no stage. These are
+      // shown so the record stays visible, but they are not drop targets: their
+      // ids were never declared, and `onMove` promises a named stage.
       ...[...extra].map(([key, bucket]) => ({
         stage: { id: key, label: key || text.ungrouped } as Stage,
+        declared: false,
         items: bucket,
       })),
     ];
@@ -370,15 +390,20 @@ export function BoardView<T>({
       // One move per card at a time: a second would overwrite the first's
       // pending stage, and the first `finally` would then clear it, snapping
       // the card home while the second mutation is still in flight.
-      if (id in pending) return;
+      if (pending.has(id)) return;
+      const stage = stages.find((s) => s.id === toStage);
+      // `onMove` promises a move to a stage the caller declared. Columns
+      // synthesized for unknown statuses exist so a record is never silently
+      // dropped, not as somewhere to put things — accepting a drop there would
+      // hand back an id that was never in `stages`.
+      if (!stage) return;
       const from = accessors.getStatus?.(item);
       if (from === toStage) return;
-      const stage = stages.find((s) => s.id === toStage);
       const title = accessors.getTitle(item);
 
-      setPending((prev) => ({ ...prev, [id]: toStage }));
+      setPending((prev) => new Map(prev).set(id, toStage));
       setAnnouncement(
-        fill(text.moved, { item: title, stage: stage?.label ?? toStage })
+        fill(text.moved, { item: title, stage: stage.label ?? toStage })
       );
       try {
         await onMove(id, toStage, item);
@@ -386,8 +411,8 @@ export function BoardView<T>({
         setAnnouncement(fill(text.moveFailed, { item: title }));
       } finally {
         setPending((prev) => {
-          const next = { ...prev };
-          delete next[id];
+          const next = new Map(prev);
+          next.delete(id);
           return next;
         });
       }
@@ -421,7 +446,20 @@ export function BoardView<T>({
     if (event.key === 'ArrowRight') delta = rtl ? -1 : 1;
     else if (event.key === 'ArrowLeft') delta = rtl ? 1 : -1;
     else return;
-    const target = columns[columnIndex + delta];
+    // Step to the next *declared* stage. A fallback column is not a move
+    // target, so stopping on one would strand the card there; skipping it
+    // keeps arrowing continuous and still lets a card leave one.
+    let target;
+    for (
+      let i = columnIndex + delta;
+      i >= 0 && i < columns.length;
+      i += delta
+    ) {
+      if (columns[i].declared) {
+        target = columns[i];
+        break;
+      }
+    }
     if (!target) return;
     event.preventDefault();
     void commit(id, target.stage.id);
@@ -486,6 +524,7 @@ export function BoardView<T>({
           <BoardColumn
             key={column.stage.id}
             stage={column.stage}
+            droppable={column.declared && Boolean(onMove)}
             headerId={`${baseId}-col-${columnIndex}`}
             count={column.items.length}
             headingLevel={headingLevel}
@@ -505,7 +544,7 @@ export function BoardView<T>({
                     subtitle={accessors.getSubtitle?.(item)}
                     accent={accessors.getAccent?.(item)}
                     selected={id === selectedId}
-                    pending={id in pending}
+                    pending={pending.has(id)}
                     draggable={Boolean(onMove)}
                     hint={onMove ? hintId : undefined}
                     href={getHref?.(id, item)}
@@ -514,7 +553,7 @@ export function BoardView<T>({
                         density,
                         interactive: Boolean(onOpen),
                         selected: id === selectedId,
-                        pending: id in pending,
+                        pending: pending.has(id),
                       }),
                       classNames?.card,
                       id === selectedId && classNames?.selectedCard

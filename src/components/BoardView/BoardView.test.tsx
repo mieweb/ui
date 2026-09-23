@@ -85,6 +85,56 @@ describe('BoardView', () => {
     expect(column(/archived/i)).toBeInTheDocument();
   });
 
+  it('never reports a move into an undeclared stage', async () => {
+    // A synthesized column exists so the record stays visible, not so things
+    // can be put in it — `onMove` promises a stage the caller declared.
+    const user = userEvent.setup();
+    const onMove = vi.fn();
+    render(
+      <BoardView
+        {...base}
+        onMove={onMove}
+        items={[
+          { ...workItems[0], id: 'X-1', status: 'archived' },
+          { ...workItems[1], id: 'X-2', status: 'done' },
+        ]}
+      />
+    );
+    // 'done' is the last declared stage and 'archived' sorts after it, so a
+    // right-step from Done would land on the fallback column.
+    const card = screen
+      .getByText(workItems[1].title)
+      .closest('[data-slot="board-view-card"]') as HTMLElement;
+    card.focus();
+    await user.keyboard('{Control>}{ArrowRight}{/Control}');
+    expect(onMove).not.toHaveBeenCalled();
+  });
+
+  it('survives an id that collides with Object.prototype', async () => {
+    // `getId` is only typed `string`; a collection keyed by user data can
+    // produce `toString`. On a plain object `'toString' in pending` is true
+    // before anything is pending, which would pin the card as in-flight.
+    const user = userEvent.setup();
+    const onMove = vi.fn();
+    render(
+      <BoardView
+        {...base}
+        onMove={onMove}
+        items={[{ ...workItems[0], id: 'toString', status: 'backlog' }]}
+      />
+    );
+    const card = screen
+      .getByText(workItems[0].title)
+      .closest('[data-slot="board-view-card"]') as HTMLElement;
+    card.focus();
+    await user.keyboard('{Control>}{ArrowRight}{/Control}');
+    expect(onMove).toHaveBeenCalledWith('toString', 'in-progress', {
+      ...workItems[0],
+      id: 'toString',
+      status: 'backlog',
+    });
+  });
+
   it('labels a column whose stage id contains spaces', () => {
     // `aria-labelledby` splits on whitespace, so a raw status would unlabel it.
     render(

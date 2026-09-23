@@ -550,9 +550,13 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
   });
 
   test('ListView - Condensed', async ({ page }) => {
-    // Density is CSS-only, keyed off data-slot. This is the guard that the
-    // condensed rules still reach the rows.
-    await gotoStory(page, 'views-listview--compact');
+    // Density is CSS-only, keyed off data-slot, so this has to be driven by the
+    // `density` global — the Compact story only sets the component's own prop,
+    // which would leave the `body.condensed` rules in condensed-view.css
+    // inactive and let a regression in them pass.
+    await gotoStory(page, 'views-listview--grouped-by-stage', {
+      globals: 'density:condensed',
+    });
     await expect(page).toHaveScreenshot('listview-condensed.png', {
       animations: 'disabled',
     });

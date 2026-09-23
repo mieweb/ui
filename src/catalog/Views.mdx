@@ -94,9 +94,9 @@ tokens. Callers never pass colour classes, so views stay correct across brands a
 
 ## Shared limitations
 
-- Views assume the whole collection is in memory. Server-side paging is the caller's job —
-  pass the page you have and render your own pager; `@tanstack/react-virtual` handles the row
-  count, not the fetch.
+- Views assume the whole collection is in memory, and **nothing here virtualizes** — every
+  row, card and bar renders. Both the row count and the fetch are the caller's job: pass the
+  page you have and render your own pager.
 - Dates go through Luxon. Pass ISO strings or `Date`s; pass `now` to pin "today" in tests and
   visual snapshots.
 - Every user-facing string is overridable through `labels`, but the defaults are English.
