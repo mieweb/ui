@@ -120,6 +120,43 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('chat-composer-with-record-button.png');
   });
 
+  test('ChatComposer - With leading slot', async ({ page }) => {
+    await gotoStory(page, 'chat-chatcomposer--with-leading-slot');
+    const leading = page.locator("[data-slot='chat-composer-leading-slot']");
+    const add = page.locator("[data-slot='chat-composer-add-button']");
+    await expect(leading).toBeVisible();
+    await expect(add).toBeVisible();
+    const [leadingBox, addBox] = await Promise.all([
+      leading.boundingBox(),
+      add.boundingBox(),
+    ]);
+    expect(leadingBox?.y).toBe(addBox?.y);
+    expect(leadingBox?.x).toBeLessThan(addBox?.x ?? 0);
+  });
+
+  test('ChatComposer - With leading slot (mobile stacked)', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'chat-chatcomposer--with-leading-slot');
+    const leading = page.locator("[data-slot='chat-composer-leading-slot']");
+    const input = page.locator("[data-slot='chat-composer-input']");
+    const [leadingBox, inputBox] = await Promise.all([
+      leading.boundingBox(),
+      input.boundingBox(),
+    ]);
+    expect(leadingBox?.y).toBeGreaterThan(inputBox?.y ?? Infinity);
+  });
+
+  test('ChatComposer - With leading slot (condensed)', async ({ page }) => {
+    await gotoStory(page, 'chat-chatcomposer--with-leading-slot', {
+      globals: 'density:condensed',
+    });
+    await expect(
+      page.locator("[data-slot='chat-composer-leading-slot']")
+    ).toHaveCSS('height', '24px');
+  });
+
   test('ChatComposer - With selectors (condensed)', async ({ page }) => {
     // Condensed density: 24px icon buttons, 12px input text, tighter
     // selector row (body.condensed rules in condensed-view.css).
@@ -137,7 +174,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'chat-chatcomposer--read-only', {
       globals: 'density:condensed',
     });
-    await expect(page).toHaveScreenshot('chat-composer-read-only-condensed.png');
+    await expect(page).toHaveScreenshot(
+      'chat-composer-read-only-condensed.png'
+    );
   });
 
   test('ChatComposer - Mention menu open (condensed)', async ({ page }) => {
@@ -228,7 +267,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'chat-chatcomposer--streaming', {
       globals: 'density:condensed',
     });
-    await expect(page).toHaveScreenshot('chat-composer-streaming-condensed.png');
+    await expect(page).toHaveScreenshot(
+      'chat-composer-streaming-condensed.png'
+    );
   });
 
   test('ChatComposer - Character limit (condensed)', async ({ page }) => {
