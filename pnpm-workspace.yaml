@@ -5,6 +5,10 @@
 packages: []
 
 overrides:
+  # The DataVis submodule is linked here rather than in package.json: `link:`
+  # is pnpm-only, and npm consumers of this package (e.g. ozwell-workspace via
+  # `file:`) parse its devDependencies and reject the protocol outright.
+  "@mieweb/datavis": "link:./packages/datavis"
   datavis-ace: "=4.1.0"
   "esbuild@<0.28.1": "0.28.1"
   "axios@>=1.0.0 <1.16.0": "1.16.0"

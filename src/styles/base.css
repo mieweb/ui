@@ -1,8 +1,12 @@
 @import 'tailwindcss';
 @import './condensed-view.css';
-@import '@mieweb/datavis/styles.css';
+/* DataVis is built from the packages/datavis submodule. Import its output by
+   path, not by package name: an npm consumer installing this package via
+   `file:` resolves `@mieweb/datavis` to the published release, which predates
+   the styles.css export. */
+@import '../../packages/datavis/dist/styles.css';
 @import './effects.css';
-@source "../../node_modules/@mieweb/datavis/dist";
+@source "../../packages/datavis/dist";
 
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
