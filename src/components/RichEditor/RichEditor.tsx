@@ -43,6 +43,10 @@ export interface RichEditorProps {
    * editor connects to the `/yjs` websocket relay and every peer in the same
    * `room` co-edits one shared document. Uncontrolled like `value` — remount via
    * `key` to switch rooms.
+   *
+   * Best-effort: if the Yjs kit cannot be loaded the editor still mounts, as a
+   * local one, and `collab.onUnavailable` is called. Pass that callback if
+   * unshared editing is something your users need to be told about.
    */
   collab?: CollabConfig;
   /** Read-only surface: no typing, and the content dims. */
@@ -174,7 +178,11 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       // collaborative mode additionally swaps `history` for the Yjs CRDT sync
       // and lazy-loads the Yjs kit (see `editorKits.ts` for why).
       const setup = async () => {
-        const editorKits = await createEditorKits(collab);
+        // `collaborative` is false when a room was asked for but the Yjs kit
+        // could not be loaded — the editor is still created, just a local one,
+        // so there is no room to join below.
+        const { kits: editorKits, collaborative } =
+          await createEditorKits(collab);
         if (disposed) return;
 
         editor = CoreEditor.create({
@@ -213,7 +221,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         // shared content when the room already has edits — so the stored
         // markdown is the starting point without ever double-inserting.
         const joinRoom = () => {
-          if (collab && editor && !disposed) {
+          if (collaborative && collab && editor && !disposed) {
             (
               editor.run as Record<string, (...args: unknown[]) => boolean>
             ).changeRoom?.(collab.room);

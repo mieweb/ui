@@ -33,6 +33,7 @@ const meta: Meta<typeof Collapsible> = {
 - Several labelled sections stack in one list — \`Accordion\` (styled, single/multiple, heading levels, animated).
 - The user switches between peer views rather than revealing extra content — \`Tabs\`.
 - Inside a \`Card\` you just need a "Show more" tail — \`CardCollapsible\`.
+- The disclosure is a navigation group inside the sidebar rail — [\`SidebarNavGroup\`](?path=/docs/overlays-sidebar--docs). It shares this component's measured-height animation and \`forceMount\` trade-off, but adds the rail styling, the icon-only collapsed state, and the sidebar's accordion (\`groupId\`).
 
 ### Example
 
