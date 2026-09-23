@@ -101,6 +101,8 @@ interface HandsFreeArgs {
   conversationMode: boolean;
   /** Put the transcript in the box to edit before sending, instead of auto-sending. */
   reviewBeforeSend: boolean;
+  /** Isolates persisted enrollment per user of a shared browser profile (empty = unscoped). */
+  voiceprintNamespace: string;
 }
 
 /** Say "hey ozwell" to dictate, "ozwell I'm done" to send. Use the Controls panel to configure it. */
@@ -112,6 +114,7 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
     liveTranscript: false,
     conversationMode: false,
     reviewBeforeSend: false,
+    voiceprintNamespace: '',
   },
   argTypes: {
     requireDoctor: {
@@ -155,6 +158,14 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
         'On “done”, drop the transcript into the message box to review/edit before sending, instead of ' +
         'auto-sending. An accuracy safety net; off keeps the flow fully hands-free.',
     },
+    voiceprintNamespace: {
+      name: 'Voiceprint namespace',
+      control: 'text',
+      description:
+        'Scopes the on-device enrollment (WHO + WHAT prints) so users sharing a browser profile ' +
+        'don’t hear each other’s voiceprints. Empty = the legacy unscoped store. Isolation only — ' +
+        'not authentication.',
+    },
   },
   render: (args) => (
     <HandsFreeChat
@@ -166,6 +177,7 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
       liveTranscript={args.liveTranscript}
       conversationMode={args.conversationMode}
       reviewBeforeSend={args.reviewBeforeSend}
+      voiceprintNamespace={args.voiceprintNamespace.trim() || undefined}
     />
   ),
 };

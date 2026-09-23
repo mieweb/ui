@@ -436,12 +436,44 @@ The application's primary navigation rail. \`SidebarProvider\` holds collapsed /
 - Positioned with logical properties (\`start-0\`), so it mirrors in RTL; widths are CSS strings you supply.
 - Only one group expands at a time (accordion); \`defaultExpanded\` seeds the initial one.
 
+### Group items: unmounted by default
+
+\`SidebarNavGroup\` **unmounts** its items while collapsed. That is what keeps collapsed links out of the tab order and the accessibility tree, and it is why the group can animate to its real height rather than a hard-coded \`max-height\` ceiling.
+
+The cost is that anything inside a collapsed group loses DOM state: uncontrolled inputs, media playback position, an editor instance, scroll position.
+
+Pass \`forceMount\` when that matters:
+
+\`\`\`tsx
+<SidebarNavGroup label="Filters" forceMount>
+  <input placeholder="Search orders…" />
+</SidebarNavGroup>
+\`\`\`
+
+\`forceMount\` keeps the items in the DOM and hides them with \`hidden\` instead — through the group's own collapse *and* the desktop rail collapsing. \`hidden\` is \`display: none\`, so the items still stay out of the tab order and the accessibility tree.
+
+Two things it does **not** do:
+
+- It does not make collapsed items findable by in-page search. Browsers do not match text inside \`display: none\`. (\`hidden="until-found"\` would, but it is not portable enough to build the API on yet.)
+- It does not animate. An animated height cannot run through \`display: none\`, and dropping \`hidden\` for the animation's duration would let keyboard users tab into content they cannot see. Pick state preservation or the animation, not both.
+
+Either way the trigger carries \`aria-expanded\`, and \`aria-controls\` whenever the panel is in the DOM.
+
+### Group vs. Collapsible
+
+\`SidebarNavGroup\` is a *navigation* disclosure: it is styled for the rail, participates in the sidebar's accordion (\`groupId\`), collapses to an icon when the rail does, and expects \`SidebarNavItem\` children.
+
+Reach for [\`Collapsible\`](?path=/docs/layout-collapsible--docs) instead when you want a disclosure that is not navigation — an unstyled, headless single section you compose yourself, anywhere in the page. It offers the same \`forceMount\` trade-off and the same measured-height animation, without the rail behaviour or the accordion coupling.
+
+Rule of thumb: inside \`SidebarNav\`, use \`SidebarNavGroup\`. Anywhere else, use \`Collapsible\`.
+
 ### Motion
 
 An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--docs) gets animation on both layouts, and they are different animations:
 
 - **Desktop** — labels, badges and group chevrons fade as the rail collapses instead of vanishing on the first frame while the width is still moving. See the **Motion** story.
 - **Mobile** — the drawer springs in and its backdrop fades on both enter and exit. On the CSS path the drawer still slides, as a 300ms transform transition, but the backdrop appears and disappears instantly. See **Motion Drawer**.
+- **Group expand / collapse** — \`SidebarNavGroup\` animates its items to their measured height. Without the motion entry the items simply appear and disappear; there is no CSS fallback for this one, because the only way to fake it in CSS is the \`max-height\` clamp this replaced, which stalls on short groups and clips tall ones.
 
 The split is deliberate. Motion holds elements at rest with a \`transform\`, and a transformed nav would become the containing block for every \`position: fixed\` descendant inside it — so on desktop the nav itself opts out and its *contents* animate instead. Desktop collapse still animates \`width\` on both paths.
 

@@ -1,0 +1,39 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Showcase/Overview" />
+
+# Showcase
+
+> **Hero and front-door set pieces.** These components exist to make a first
+> impression — a global footprint, an orbiting ecosystem, an explorable product
+> ring. They are self-running, motion-driven and decorative by design: if the
+> visitor must _read, compare or navigate_ the content, reach for Data display,
+> Navigation or a plain layout instead.
+
+## Which one?
+
+| Component                                                       | Use it when                                                                            | Not when                                                                       |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| [Globe](?path=/docs/showcase-globe--docs)                       | A hero shows a **global footprint** — offices, customers, deployments — with hub arcs   | Values must be read or compared — chart it with the DataVis components          |
+| [OrbitRing](?path=/docs/showcase-orbitring--docs)               | Partner/integration logos should **orbit** your product mark as a living ecosystem      | The items carry data or must be browsed — a logo wall or `Card` grid            |
+| [RadialExplorer](?path=/docs/showcase-radialexplorer--docs)     | Visitors **preview each module** in place: tiles around a core, media + CTA per pick    | Users navigate to the sections rather than preview them — `MegaMenu` or links   |
+
+## How they fit together
+
+- `RadialExplorer` is the interactive one — its detail panel pairs with
+  `VideoCard variant="plate"` for a muted video preview per spoke; `Globe` and
+  `OrbitRing` are ambient visuals with hover/focus affordances only.
+- `Globe` ships on the separate `@mieweb/ui/globe` entry with `react-globe.gl`
+  and `three` as optional peers, so the default install never pays for WebGL.
+- All three read the brand tokens (`--mieweb-primary-*`, `--mieweb-accent*`), so
+  every brand gets its own front door for free.
+
+## Shared limitations
+
+- Motion is central: every animation is `motion-safe` and each component holds
+  still (or skips its attract loop) under `prefers-reduced-motion`.
+- Geometry is physical — orbital and radial placement is trigonometric and
+  rotationally symmetric, so these components are exempt from RTL mirroring.
+- They are client-side showpieces: `Globe` is WebGL-only (render behind
+  `ssr: false`), and none of them are meant to be primary navigation or the
+  only path to their content.

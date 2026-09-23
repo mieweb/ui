@@ -1,20 +1,19 @@
 # DataVisNITRO — Maintainer Notes
 
-> **Provider notes** — how to *change* the DataVis NITRO grid. Consumers should
+> **Provider notes** — how to _change_ the DataVis NITRO grid. Consumers should
 > read the Storybook stories and use `@mieweb/ui/datavis`. General conventions:
 > [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## What's in here
 
-A React adapter over MIE's **datavis** engine, exported from a **separate entry**
-([src/datavis.ts](../../datavis.ts) → `@mieweb/ui/datavis`):
+Compatibility re-exports and Storybook examples for MIE's **datavis** engine, exported from a **separate entry** ([src/datavis.ts](../../datavis.ts) → `@mieweb/ui/datavis`):
 
 - `DataVisNitroSource` — declares a data source (`type: 'http' | 'local' | 'file'`)
   and publishes a view through `DataVisNitroContext`.
 - `DataVisNitroGrid` — consumes the context and renders the grid/table.
 - `DataVisNitroContext` — the shared view context.
 
-Implementation: [DataVisNITRO.tsx](DataVisNITRO.tsx); exports in [index.ts](index.ts).
+The implementation lives in `packages/datavis/src/components/DataVisNitro.tsx` and `DataVisNitroGraph.tsx`. [DataVisNITRO.tsx](DataVisNITRO.tsx) and [DataVisNitroGraph.tsx](DataVisNitroGraph.tsx) preserve local import compatibility by re-exporting those public DataVis components.
 
 ## Prefer NITRO over AGGrid
 
@@ -26,13 +25,13 @@ back here later.
 
 ## Dependencies — two moving parts
 
-1. **`datavis-ace`** (optional peer dep) — provides `ComputedView`, `Source`.
-2. **`@mieweb/datavis`** (optional peer dep, published npm package) — provides
-   `DataGrid`, `determineColumns`, `useView`, `TableRenderer`, and the related
-   types. This was previously a `packages/datavis` git submodule consumed via
-   deep `datavis/src/...` paths; it is now an optional peer dependency (declared
-   in `package.json`), so no submodule init/link step is required. Consumers who
-   use `@mieweb/ui/datavis` install it alongside `datavis-ace`.
+1. **`datavis-ace`** — the data engine (fetch/parse/type-inference + aggregation
+   math; provides `Source`, `ComputedView`). Kept **external** in the bundle (it
+   drags in core-js/moment/UMD deps that must not be inlined) but declared as a
+   regular **dependency** of `@mieweb/ui`, so consumers get it automatically and
+   never install or import it directly. It is a hard runtime requirement of
+   `DataVisNitroSource` (`datavis_ace.Source is not a constructor` if missing).
+2. **`@mieweb/datavis`** (the bundled implementation, developed in the `packages/datavis` git submodule) — owns the high-level source/grid/graph wrappers and lower-level DataVis components. Local development links the submodule; published consumers get the surface **bundled into** `@mieweb/ui/datavis` (no separate install) and receive `datavis-ace` transitively via `@mieweb/ui`'s `dependencies` (kept external in the bundle) — they never install either package themselves.
 
 ## Gotchas
 
@@ -41,13 +40,10 @@ back here later.
   base URL at runtime — set `localStorage['ozwellConfig']` as described in
   [../AI/OZWELL-BACKEND.md](../AI/OZWELL-BACKEND.md); without it the chat falls
   back to a "not configured" reply.
-- **CJS/ESM interop.** `@mieweb/datavis` ships CJS, so
-  [.storybook/main.ts](../../../.storybook/main.ts) force pre-bundles it (and its
-  deps) via `optimizeDeps` and aliases them from the pnpm virtual store so
-  Storybook resolves them. If a DataVis import breaks in Storybook, check that
-  wiring first.
+- **ESM and styles.** `@mieweb/datavis` ships ESM and publishes its semantic grid/graph styles as `@mieweb/datavis/styles.css`. The ui base stylesheet imports that entry so DataVis owns its selectors while ui supplies the design tokens.
 - Source/Grid are **coupled through React context** — a `DataVisNitroGrid` must be
   rendered inside a `DataVisNitroSource`. Don't refactor one without the other.
+- Configure grouped or aggregated views declaratively with `DataVisNitroSource`'s `groupBy` and `aggregates` props; consumers should not reach into `DataVisNitroContext` to call `setGroup` or `setAggregate`.
 - View instances are tagged (`_dvType` / `_dvUrl`) for tracking; preserve those
   when touching `useView` wiring.
 - A `TranslateFn` hook is threaded for i18n — keep labels translatable, don't

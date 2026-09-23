@@ -45,6 +45,12 @@ export {
 } from './useDragReorder';
 export { useLiveAnnouncement } from './useLiveAnnouncement';
 export {
+  useYouTubeHoverPreview,
+  type HoverPreviewState,
+  type UseYouTubeHoverPreviewOptions,
+  type UseYouTubeHoverPreviewReturn,
+} from './useYouTubeHoverPreview';
+export {
   useMediaTransport,
   type MediaTransportState,
   type UseMediaTransportOptions,

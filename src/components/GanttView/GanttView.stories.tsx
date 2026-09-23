@@ -84,6 +84,11 @@ Headless: it never fetches, and this release never writes — there is no drag-t
           target: 'data-display-timeline',
           why: 'Timeline walks one record through named steps or events; GanttView places many records on a shared time axis.',
         },
+        {
+          type: 'alternative to',
+          target: 'data-display-yeartimeline',
+          why: 'YearTimeline is an editorial fixed-calendar-year chart with hand-authored month spans; GanttView renders your own records over an arbitrary range through accessors, inside a switchable ViewSet.',
+        },
       ],
     },
   },

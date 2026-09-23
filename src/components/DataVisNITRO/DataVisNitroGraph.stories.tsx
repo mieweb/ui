@@ -44,12 +44,12 @@ Charting the same record set a NITRO grid shows. Wraps \`@mieweb/datavis\`'s \`G
 
 - Same accessibility caveats as the grid: the engine's SVG/DOM is not screen-reader friendly and automated a11y checks are disabled here. Pair charts with a grid or a textual summary of the numbers.
 - Colours come from the DataVis scheme, which follows brand and dark mode; individual series colours are not brand tokens.
-- Requires the optional peers \`@mieweb/datavis\` and \`datavis-ace\`; only available from the \`@mieweb/ui/datavis\` entry.`,
+- \`@mieweb/datavis\` is bundled into the \`@mieweb/ui/datavis\` entry and \`datavis-ace\` ships as a dependency of \`@mieweb/ui\`; charts are only available from that entry, so apps without grids/charts do not pay for it.`,
       },
     },
     catalog: {
       entry: '@mieweb/ui/datavis',
-      peers: ['@mieweb/datavis', 'datavis-ace'],
+      peers: [],
       relationships: [
         {
           type: 'composes with',

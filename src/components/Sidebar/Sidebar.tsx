@@ -2,11 +2,13 @@ import React, {
   type ReactNode,
   useRef,
   useCallback,
+  useId,
   useState,
   useEffect,
 } from 'react';
 import { cn } from '../../utils/cn';
 import { useDirection } from '../../hooks/useDirection';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { Animated, AnimatedPresence } from '../../motion';
 import { useSidebar } from './SidebarProvider';
 
@@ -374,6 +376,25 @@ export interface SidebarNavGroupProps {
   groupId?: string;
   /** Additional CSS classes */
   className?: string;
+  /**
+   * Keep items mounted when the group is collapsed, hidden via `hidden`.
+   *
+   * For groups whose children own DOM state that a remount would destroy —
+   * uncontrolled inputs, media playback position, an editor instance. State
+   * survives the group's own collapse *and* the desktop rail collapsing.
+   *
+   * Does **not** make collapsed items findable by in-page search: `hidden` is
+   * `display: none`, and browsers do not match text inside it. `hidden="until-found"`
+   * would deliver that, but it is not portable enough to build the API on yet.
+   *
+   * Mirrors `CollapsibleContent`'s prop of the same name, and carries the same
+   * caveat: this path does **not** animate. `hidden` is `display: none`, which
+   * an animated height cannot run through, and dropping it for the duration
+   * would let keyboard users tab into content that is visually collapsed. Not
+   * animating is the safe answer until `hidden` can be sequenced around the
+   * animation.
+   */
+  forceMount?: boolean;
 }
 
 export function SidebarNavGroup({
@@ -383,10 +404,16 @@ export function SidebarNavGroup({
   defaultExpanded = false,
   groupId,
   className,
+  forceMount,
 }: SidebarNavGroupProps): React.JSX.Element {
   const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } =
     useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  const contentId = useId();
+  const groupRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Determine if this group is expanded
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
@@ -395,20 +422,121 @@ export function SidebarNavGroup({
   const [localExpanded, setLocalExpanded] = useState(defaultExpanded);
   const effectiveExpanded = groupId ? isExpanded : localExpanded;
 
+  /*
+   * Whether the items are actually reachable right now.
+   *
+   * Three different things can take them away and every one of them strands
+   * focus, so they are collapsed into a single predicate rather than checked
+   * individually at each site:
+   *
+   * - the group is collapsed (panel unmounts, or goes `hidden` under
+   *   `forceMount`);
+   * - the desktop rail is collapsed, which hides the panel whatever the group's
+   *   own state says.
+   *
+   * `forceMount` does not exempt anything here. It avoids *remounting*, not the
+   * need to move focus: `hidden` is `display: none`, and a focused element
+   * inside a `display: none` subtree is blurred by the browser just as surely
+   * as one that was removed.
+   */
+  const itemsVisible = !showCollapsed && effectiveExpanded;
+
+  /*
+   * Hiding the items destroys whatever inside them had focus. Left alone, focus
+   * falls back to `<body>` and the next Tab restarts from the top of the
+   * document — a silent loss of keyboard position.
+   *
+   * Reachable without the user doing anything unusual: in `groupId` accordion
+   * mode, expanding one group collapses its siblings, so focus parked in a
+   * sibling evaporates on a click the user made somewhere else entirely. The
+   * rail collapsing does the same thing to every group at once.
+   *
+   * Whether focus was inside has to be recorded *before* the panel goes. By the
+   * time an effect can observe it, the browser has already moved focus and
+   * `activeElement` is `<body>`, so a check made there always answers "no" and
+   * the restore never fires.
+   *
+   * Two recorders, because neither covers both cases:
+   *
+   * - `captureFocusInside()` runs synchronously in the toggle handler, before
+   *   the state change. This is the common path and it depends on nothing but
+   *   `document.activeElement`, so it still works where focus events do not
+   *   fire at all — an unfocused window, which is also what most automated
+   *   browsers run in.
+   * - the `focusin` listener covers changes this component did not initiate,
+   *   where there is no handler to hook: an accordion sibling opening, a
+   *   controlled `groupId` changing underneath it, or the rail collapsing.
+   */
+  const focusWasInsideRef = useRef(false);
+
+  const captureFocusInside = useCallback(() => {
+    const active = document.activeElement;
+    focusWasInsideRef.current =
+      active !== triggerRef.current &&
+      groupRef.current?.contains(active) === true;
+  }, []);
+
+  useEffect(() => {
+    if (!itemsVisible) return;
+
+    function trackFocus(event: FocusEvent) {
+      const target = event.target as Node | null;
+      focusWasInsideRef.current =
+        target !== triggerRef.current &&
+        groupRef.current?.contains(target) === true;
+    }
+
+    document.addEventListener('focusin', trackFocus);
+    return () => document.removeEventListener('focusin', trackFocus);
+  }, [itemsVisible]);
+
+  useEffect(() => {
+    if (itemsVisible) return;
+    if (focusWasInsideRef.current) {
+      focusWasInsideRef.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [itemsVisible]);
+
   const handleToggle = useCallback(() => {
+    captureFocusInside();
     if (groupId) {
       toggleGroup(groupId);
     } else {
       setLocalExpanded((prev) => !prev);
     }
-  }, [groupId, toggleGroup]);
+  }, [captureFocusInside, groupId, toggleGroup]);
+
+  const items = <div className="mt-1 ps-2">{children}</div>;
+
+  /*
+   * `aria-controls` tracks whether the panel is in the DOM, not whether it is
+   * visible, because it may only reference an element that exists — pointing at
+   * an id that is not in the document is a dangling reference. `forceMount`
+   * renders outside the rail gate so its panel is always present; the animated
+   * branch is inside it, so that one is present exactly when it is visible.
+   *
+   * `aria-expanded` tracks `itemsVisible` instead, since that is what the user
+   * can actually see. It stays present while the rail is collapsed: the trigger
+   * is still rendered and still toggles the group, so dropping its disclosure
+   * state would leave the control undiscoverable to a screen reader while
+   * remaining operable.
+   */
+  const panelInDom = forceMount || itemsVisible;
 
   return (
-    <div data-slot="sidebar-nav-group" className={cn('mb-2', className)}>
+    <div
+      ref={groupRef}
+      data-slot="sidebar-nav-group"
+      className={cn('mb-2', className)}
+    >
       {/* Group Header */}
       <button
+        ref={triggerRef}
         data-slot="sidebar-nav-group-button"
         onClick={handleToggle}
+        aria-expanded={itemsVisible}
+        aria-controls={panelInDom ? contentId : undefined}
         className={cn(
           'flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold',
           'text-neutral-700 dark:text-neutral-300',
@@ -458,17 +586,53 @@ export function SidebarNavGroup({
       </button>
 
       {/* Group Items */}
-      {!showCollapsed && (
+      {forceMount ? (
+        /*
+         * Deliberately outside the rail-collapsed gate. Gating it there would
+         * unmount the items whenever the sidebar collapsed, destroying exactly
+         * the state this prop exists to preserve — the prop would hold its
+         * promise for the group's own toggle and quietly break it for the
+         * rail's, which is worse than not offering it.
+         */
         <div
-          className={cn(
-            'overflow-hidden transition-all duration-300',
-            effectiveExpanded
-              ? 'mt-1 max-h-[1000px] opacity-100'
-              : 'max-h-0 opacity-0'
-          )}
+          id={contentId}
+          data-slot="sidebar-nav-group-items"
+          data-state={itemsVisible ? 'open' : 'closed'}
+          hidden={!itemsVisible}
         >
-          <div className="ps-2">{children}</div>
+          {items}
         </div>
+      ) : (
+        !showCollapsed && (
+          <AnimatedPresence initial={false}>
+            {effectiveExpanded && (
+              <Animated
+                key="items"
+                id={contentId}
+                data-slot="sidebar-nav-group-items"
+                data-state="open"
+                preset="collapse"
+                mode="presence"
+                /*
+                 * `collapse` animates height, which `MotionConfig
+                 * reducedMotion="user"` does not treat as a transform or layout
+                 * animation and so leaves running. Honouring the preference is
+                 * the component's job here.
+                 */
+                enabled={!prefersReducedMotion}
+                /*
+                 * Required by the preset — without it the items spill past the
+                 * box while its height is still travelling. The group's own
+                 * `mt-1` lives on the inner wrapper so the margin collapses
+                 * with the height instead of surviving it.
+                 */
+                className="overflow-hidden"
+              >
+                {items}
+              </Animated>
+            )}
+          </AnimatedPresence>
+        )
       )}
     </div>
   );

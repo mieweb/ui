@@ -36,5 +36,5 @@ component policy, and both grid pages below carry it.
 - The DataVis engine's DOM is not screen-reader friendly and automated a11y checks are disabled on
   the NITRO pages. Keep critical actions reachable outside the grid and provide textual summaries
   for charts.
-- NITRO needs the optional peers `@mieweb/datavis` and `datavis-ace`; it is only exported from the
-  `@mieweb/ui/datavis` entry so applications without grids do not pay for it.
+- NITRO is exported only from the `@mieweb/ui/datavis` entry (with `@mieweb/datavis`
+  bundled in and `datavis-ace` as a dependency), so applications without grids do not pay for it.

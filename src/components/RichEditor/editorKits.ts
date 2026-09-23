@@ -36,6 +36,29 @@ export interface CollabConfig {
    * Defaults to `globalThis.WebSocket`.
    */
   WebSocketPolyfill?: typeof globalThis.WebSocket;
+  /**
+   * Called when collaborative editing could not be started at all — the Yjs
+   * kit failed to load (see {@link createEditorKits}). The editor mounts
+   * anyway, as a local one; this is how the host finds out that edits are no
+   * longer shared, so it can say so, or tear its own editor down if unshared
+   * editing would be unsafe.
+   *
+   * Not for connection trouble: a room that is reachable but currently
+   * disconnected still has the Yjs kit loaded, and the provider retries on its
+   * own. This fires once, before the editor is created.
+   */
+  onUnavailable?: (error: unknown) => void;
+}
+
+/** What {@link createEditorKits} resolves to. */
+export interface EditorKits {
+  kits: EditorKit[];
+  /**
+   * Whether the returned kits can actually collaborate. False when `config`
+   * asked for a room but the Yjs kit could not be loaded, so callers know not
+   * to join one.
+   */
+  collaborative: boolean;
 }
 
 /**
@@ -87,21 +110,44 @@ class SafeAdvancedEditorKit implements EditorKit {
  *
  * Async because collaborative mode lazy-loads the Yjs kit (and its optional
  * peer deps) on first use; plain mode resolves immediately.
+ *
+ * That lazy load is allowed to fail. `@kerebron/extension-yjs`, `yjs` and
+ * `y-protocols` are optional peers, so the chunk can be absent (peers never
+ * installed), stale (a dev server's dependency hash moved under a running
+ * page) or simply unreachable (a partial deploy, an offline client). None of
+ * that is a reason to leave the caller without an editor: collaboration is an
+ * enhancement, editing is the feature. So a failed load degrades to the local
+ * kit and reports itself through {@link CollabConfig.onUnavailable} rather
+ * than rejecting.
  */
 export async function createEditorKits(
   config?: CollabConfig
-): Promise<EditorKit[]> {
-  if (!config) return [new SafeAdvancedEditorKit(false)];
+): Promise<EditorKits> {
+  if (!config) {
+    return { kits: [new SafeAdvancedEditorKit(false)], collaborative: false };
+  }
 
-  const { HuddleYjsKit, defaultWsUrl } = await import('./collabKit');
-  const url = config.wsUrl ?? defaultWsUrl();
-  return [
-    new SafeAdvancedEditorKit(true),
-    new HuddleYjsKit(
-      url,
-      config.params ?? {},
-      config.WebSocketPolyfill,
-      config.user
-    ),
-  ];
+  try {
+    const { HuddleYjsKit, defaultWsUrl } = await import('./collabKit');
+    const url = config.wsUrl ?? defaultWsUrl();
+    return {
+      kits: [
+        new SafeAdvancedEditorKit(true),
+        new HuddleYjsKit(
+          url,
+          config.params ?? {},
+          config.WebSocketPolyfill,
+          config.user
+        ),
+      ],
+      collaborative: true,
+    };
+  } catch (error) {
+    console.warn(
+      '[RichEditor] Collaborative editing unavailable — the Yjs kit failed to load. Continuing as a local editor.',
+      error
+    );
+    config.onUnavailable?.(error);
+    return { kits: [new SafeAdvancedEditorKit(false)], collaborative: false };
+  }
 }

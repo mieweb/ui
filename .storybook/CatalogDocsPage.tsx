@@ -10,6 +10,7 @@ import {
   useOf,
 } from '@storybook/addon-docs/blocks';
 import taxonomy from './taxonomy.json';
+import { ComponentMetaBlock } from './blocks/ComponentMetaBlock';
 
 /**
  * Autodocs template that renders the catalog metadata declared on each Meta
@@ -218,6 +219,8 @@ export function CatalogDocsPage() {
       <CatalogBanner tags={tags} relationships={relationships} titles={titles} />
       <Subtitle />
       <Description />
+      {/* "In production" strip driven by `parameters.meta` (src/docs/component-meta.ts). */}
+      <ComponentMetaBlock />
       <RelatedList relationships={relationships} titles={titles} />
       <InstallBlock entry={catalog.entry} peers={catalog.peers} component={componentName} />
       <Primary />

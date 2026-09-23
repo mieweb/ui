@@ -59,7 +59,7 @@ src/
   hooks/  utils/  styles/  types/
   test/setup.ts         # Vitest setup
 packages/               # Git submodules with heavy/optional implementations
-  esheet/  ychart/      # (DataVis NITRO is an npm package, not a submodule)
+  datavis/  esheet/  ychart/
 .storybook/             # Storybook (react-vite) config
   taxonomy.json         # Sidebar tiers/families + tag vocabulary (single source of truth)
   CatalogDocsPage.tsx   # Autodocs template that renders the catalog metadata
@@ -299,9 +299,10 @@ sentences live there and are quoted verbatim elsewhere.
   bundled (they're peers). Legacy `ag-grid-*` peers remain external for compatibility.
 - **CSS:** `pnpm build:css` compiles `src/styles/base.css` → `dist/styles.css`
   via the Tailwind CLI; brand CSS is copied into `dist/brands/`.
-- **Submodule builds:** `prebuild` runs `build:esheet`, which builds the
-  `@esheet/*` packages (nx) before the main build. The full build runs with
-  `--max-old-space-size=8192` because the type graph is large.
+- **Submodule builds:** `prebuild` runs `build:esheet` and `build:datavis`,
+  which build the `@esheet/*` packages (nx) and the `@mieweb/datavis` submodule
+  before the main build. The full build runs with `--max-old-space-size=8192`
+  because the type graph is large.
 
 ## Testing
 
@@ -327,20 +328,22 @@ sentences live there and are quoted verbatim elsewhere.
   Test brand switching via `ThemeProvider`.
 - Deep reference: [lessons/tailwind4-integration.md](lessons/tailwind4-integration.md).
 
-## Submodules (esheet, ychart)
+## Submodules (datavis, esheet, ychart)
 
-Two heavy capabilities live in **git submodules** under `packages/`, not in
+Three heavy capabilities live in **git submodules** under `packages/`, not in
 `src/`. This is the most common source of "it builds on CI but not locally"
 confusion, so know which is which:
 
-| Submodule         | Backs                              | Exposed as          | Notes                                                                                                 |
-| ----------------- | ---------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `packages/esheet` | `EsheetBuilder` / `EsheetRenderer` | `@mieweb/ui/esheet` | nx monorepo (`core/fields/adapters/builder/renderer`); built by `build:esheet` before the main build. |
-| `packages/ychart` | `YChart` (Storybook only)          | _not exported_      | A vanilla editor class dynamically imported by the story only.                                        |
+| Submodule          | Backs                              | Exposed as           | Notes                                                                                                                                                                           |
+| ------------------ | ---------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/datavis` | `DataVisNITRO` wrappers + styles   | `@mieweb/ui/datavis` | Built by `build:datavis` before the main build; bundled into the entry (consumers do not install `@mieweb/datavis`); its `datavis-ace` engine ships as a transitive dependency. |
+| `packages/esheet`  | `EsheetBuilder` / `EsheetRenderer` | `@mieweb/ui/esheet`  | nx monorepo (`core/fields/adapters/builder/renderer`); built by `build:esheet` before the main build.                                                                           |
+| `packages/ychart`  | `YChart` (Storybook only)          | _not exported_       | A vanilla editor class dynamically imported by the story only.                                                                                                                  |
 
-DataVis NITRO is **not** a submodule: it's consumed from the published
-`@mieweb/datavis` npm package (plus the `datavis-ace` peer), exposed as
-`@mieweb/ui/datavis`.
+DataVis NITRO is bundled into `@mieweb/ui/datavis` from the `packages/datavis`
+submodule: consumers do **not** install `@mieweb/datavis` separately, and its
+`datavis-ace` engine ships as a regular (transitive) dependency of `@mieweb/ui`
+rather than a peer they must add.
 
 If a submodule-backed component fails to resolve, run
 `git submodule update --init --recursive` then `pnpm install`.
@@ -374,20 +377,28 @@ submodule, a module-level side effect, or a non-obvious extension point.
 
 Current notes:
 
-| Module                                                                       | Why it has notes                                                                                                                                                |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [AI](src/components/AI/MAINTAINERS.md)                                       | `renderTextContent` extension point; host owns sanitization; reuses `ChatComposer` (legacy composerProps keys mapped)                                           |
-| [AGGrid (deprecated)](src/components/AGGrid/MAINTAINERS.md)                  | Legacy maintenance only; retained for existing consumers. Use [DataVis NITRO](src/components/DataVisNITRO/MAINTAINERS.md) for new work.                         |
-| [ChatComposer](src/components/ChatComposer/MAINTAINERS.md)                   | Object-URL lifecycle with an `attachmentsRef` mirror; pure state updaters; controlled menus; stable `onError` reason keys                                       |
-| [CountryCodeDropdown](src/components/CountryCodeDropdown/MAINTAINERS.md)     | Base shared with `CountryDropdown` with diverging defaults (US vs. empty); empty-state contract; lazy `google-libphonenumber` singletons                        |
-| [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                                        |
-| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                                                  |
-| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring                                                                             |
-| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                                             |
-| [Messaging](src/components/Messaging/MAINTAINERS.md)                         | Shared @mention module consumed by both `MessageComposer` and `ChatComposer` (run all affected suites — see notes); `DragDropZone` reused as a pure drop target |
-| [Motion](src/motion/MAINTAINERS.md)                                          | Optional `motion` peer isolated to the `@mieweb/ui/motion` entry; cross-entry context pinned to `globalThis`; CSS fallback contract                             |
-| [SuperChat](src/components/SuperChat/MAINTAINERS.md)                         | Conversation/inbox/panel surfaces, sanitization contract, plugin dependencies; design rationale in its Mission section                                          |
-| [YChart](src/components/YChart/MAINTAINERS.md)                               | Vanilla editor in a submodule, dynamically imported; not in the public API                                                                                      |
+| Module                                                                       | Why it has notes                                                                                                                                                                                                |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [AI](src/components/AI/MAINTAINERS.md)                                       | `renderTextContent` extension point; host owns sanitization; reuses `ChatComposer` (legacy composerProps keys mapped)                                                                                           |
+| [AGGrid (deprecated)](src/components/AGGrid/MAINTAINERS.md)                  | Legacy maintenance only; retained for existing consumers. Use [DataVis NITRO](src/components/DataVisNITRO/MAINTAINERS.md) for new work.                                                                         |
+| [ChatComposer](src/components/ChatComposer/MAINTAINERS.md)                   | Object-URL lifecycle with an `attachmentsRef` mirror; pure state updaters; controlled menus; stable `onError` reason keys                                                                                       |
+| [CountryCodeDropdown](src/components/CountryCodeDropdown/MAINTAINERS.md)     | Base shared with `CountryDropdown` with diverging defaults (US vs. empty); empty-state contract; lazy `google-libphonenumber` singletons                                                                        |
+| [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                                                                                        |
+| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                                                                                                  |
+| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Implementation is the `packages/datavis` submodule (`@mieweb/datavis`, bundled) + the `datavis-ace` dependency (transitive, external); needs `build:datavis`; context/source/grid wiring                        |
+| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                                                                                             |
+| [Globe](src/components/Globe/MAINTAINERS.md)                                 | Optional `three`/`react-globe.gl` peers isolated to the `@mieweb/ui/globe` entry; WebGL palette + escaped tooltip HTML; pointer-only canvas (hosts add the keyboard path via `selectedId`)                      |
+| [MegaMenu](src/components/MegaMenu/MAINTAINERS.md)                           | Shared open state across `MegaMenuBar`; viewport re-clamping incl. featured-layout swaps; `normalizePath` shared with `SiteHeader`'s mobile drawer                                                              |
+| [Messaging](src/components/Messaging/MAINTAINERS.md)                         | Shared @mention module consumed by both `MessageComposer` and `ChatComposer` (run all affected suites — see notes); `DragDropZone` reused as a pure drop target                                                 |
+| [Motion](src/motion/MAINTAINERS.md)                                          | Optional `motion` peer isolated to the `@mieweb/ui/motion` entry; cross-entry context pinned to `globalThis`; CSS fallback contract                                                                             |
+| [OrbitRing](src/components/OrbitRing/MAINTAINERS.md)                         | Pure-CSS rotation with counter-spinning chips; `motion-safe` reduced-motion contract; container-driven sizing; safelisted arbitrary-value utilities                                                             |
+| [RadialExplorer](src/components/RadialExplorer/MAINTAINERS.md)               | Controlled/uncontrolled `activeId` (attract loop never runs controlled); trig geometry exempt from RTL flipping; safelisted radius math                                                                         |
+| [Sidebar](src/components/Sidebar/MAINTAINERS.md)                             | `SidebarNavGroup` unmounts its items by design (a11y + measured-height collapse); focus must be captured before the panel goes, via two recorders; `forceMount` sits outside the rail gate and does not animate |
+| [SliderCalculator](src/components/SliderCalculator/MAINTAINERS.md)           | `values`-keyed notify effect via `notifyRef` (inline `compute`/`onChange` must not loop); settled-only live announcement; `AnimatedNumber` reduced-motion branch                                                |
+| [SuperChat](src/components/SuperChat/MAINTAINERS.md)                         | Conversation/inbox/panel surfaces, sanitization contract, plugin dependencies; design rationale in its Mission section                                                                                          |
+| [VideoCard](src/components/VideoCard/MAINTAINERS.md)                         | YouTube IFrame API lifecycle in `useYouTubeHoverPreview` (shared promise with error/timeout retry); dwell-hover contract; touch/reduced-motion opt-outs                                                         |
+| [YChart](src/components/YChart/MAINTAINERS.md)                               | Vanilla editor in a submodule, dynamically imported; not in the public API                                                                                                                                      |
+| [YearTimeline](src/components/YearTimeline/MAINTAINERS.md)                   | Cadence-driven lanes with inferred defaults; SSR-safe playhead; brand-token `color-mix` fills; deliberate 800-shade contrast; separate mobile visual baseline                                                   |
 
 ## Commits, versioning & releases
 

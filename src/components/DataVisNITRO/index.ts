@@ -1,12 +1,16 @@
 export {
   DataVisNitroContext,
   DataVisNitroGrid,
+  DataVisNitroLanguageSelector,
   DataVisNitroSource,
 } from './DataVisNITRO';
 
 export type {
+  DataVisNitroAggregate,
   DataVisNitroColumn,
+  DataVisNitroGroupField,
   DataVisNitroGridProps,
+  DataVisNitroLanguageSelectorProps,
   DataVisNitroSourceProps,
 } from './DataVisNITRO';
 

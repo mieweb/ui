@@ -30,6 +30,12 @@ import { useHeyOzwell } from './useHeyOzwell';
 import type { AISuggestedAction } from '../types';
 
 export interface HandsFreeChatProps {
+  /** Isolates persisted enrollment (WHO + WHAT prints) from other users of the same browser profile —
+   *  e.g. pass the signed-in user's id (`voiceprintNamespace={user.id}`). Scopes both the wake
+   *  verifier and the embedded VoiceManager; a scoped store starts empty (it does NOT inherit legacy
+   *  unscoped records). Omit to keep the original shared store. Any standalone `VoiceSetup` /
+   *  `VoiceManager` the host renders must receive the SAME value. */
+  voiceprintNamespace?: string;
   /** Chat header title. */
   title?: string;
   /** Suggested-action chips for the empty state. */
@@ -57,6 +63,7 @@ export interface HandsFreeChatProps {
 
 /** Say "hey ozwell" to dictate, "ozwell I'm done" to send — wake + speaker-verify + dictation + AIChat. */
 export function HandsFreeChat({
+  voiceprintNamespace,
   title = 'Ozwell Assistant — hands-free',
   suggestions,
   userName,
@@ -71,6 +78,7 @@ export function HandsFreeChat({
   // Props flow straight through — the host (or the Storybook Controls panel) drives them live; there's no
   // runtime toggle UI for them, since they're deployment config, not end-user controls.
   const oz = useHeyOzwell({
+    voiceprintNamespace,
     autoStart: true, // always listening while mounted
     autoDictateOnWake,
     requireDoctor,
@@ -167,7 +175,10 @@ export function HandsFreeChat({
           <ModalClose />
         </ModalHeader>
         <ModalBody>
-          <VoiceManager logoSrc={logoSrc} />
+          <VoiceManager
+            logoSrc={logoSrc}
+            voiceprintNamespace={voiceprintNamespace}
+          />
         </ModalBody>
       </Modal>
     </div>

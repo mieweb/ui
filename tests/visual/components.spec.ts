@@ -434,3 +434,98 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('aggrid-default.png');
   });
 });
+
+// EH frontdoor ports (ui#420). Globe is intentionally not covered: it renders
+// through WebGL (react-globe.gl/three optional peers), which is not
+// pixel-deterministic across machines.
+test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
+  test('Button - Hover effects (sheen/orbit)', async ({ page }) => {
+    // The `effect` prop layers mie-fx-* plain CSS (styles/effects.css) on the
+    // button; the resting frame must match a plain button.
+    await gotoStory(page, 'actions-button--hover-effects');
+    await expect(page).toHaveScreenshot('button-hover-effects.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('MegaMenu - Open panel with feature column', async ({ page }) => {
+    // Brand-sensitive: primary-950 feature gradient, viewport-clamped
+    // 880px panel, aria-current route marker.
+    await gotoStory(page, 'navigation-megamenu--smart-featured');
+    await expect(page).toHaveScreenshot('megamenu-smart-featured.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('MegaMenuBar - Dark header bar', async ({ page }) => {
+    // The light-variant triggers on a primary-800 bar — the SiteHeader
+    // building block.
+    await gotoStory(page, 'navigation-megamenu--bar');
+    await expect(page).toHaveScreenshot('megamenu-bar.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('VideoCard - Default', async ({ page }) => {
+    // Mask the YouTube thumbnail (external i.ytimg.com fetch is not
+    // deterministic); the play button, duration pill, and copy stack are.
+    await gotoStory(page, 'media-videocard--default');
+    await expect(page).toHaveScreenshot('videocard-default.png', {
+      animations: 'disabled',
+      mask: [page.locator('img')],
+    });
+  });
+
+  test('PlayButton - Sizes and ring modes', async ({ page }) => {
+    // Brand-sensitive: white disc, primary triangle, conic progress ring.
+    await gotoStory(page, 'media-videocard--play-button-only');
+    await expect(page).toHaveScreenshot('playbutton-only.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('YearTimeline - Default (desktop rail)', async ({ page }) => {
+    // md+ layout: grid-cols-[var(--yt-label)_1fr] label rail beside the
+    // gradient spine.
+    await gotoStory(page, 'data-display-yeartimeline--default');
+    await expect(page).toHaveScreenshot('yeartimeline-default.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('YearTimeline - Default (mobile stacked)', async ({ page }) => {
+    // Below md the label rail collapses and rows stack on grid-cols-12.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'data-display-yeartimeline--default');
+    await expect(page).toHaveScreenshot('yeartimeline-default-mobile.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('SliderCalculator - ROI panel', async ({ page }) => {
+    // Brand-sensitive: primary-800→950 radial panel, accent-gradient slider
+    // fill, tabular-nums results.
+    await gotoStory(page, 'composite-forms-slidercalculator--roi');
+    await expect(page).toHaveScreenshot('slidercalculator-roi.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('OrbitRing - Default', async ({ page }) => {
+    // The mie-spin rotation is frozen; layout, glow ring, and satellite
+    // chips are what we pin.
+    await gotoStory(page, 'showcase-orbitring--default');
+    await expect(page).toHaveScreenshot('orbitring-default.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('RadialExplorer - Static spoke', async ({ page }) => {
+    // attractMs: 0 with a fixed active spoke — no attract-loop rotation, so
+    // the detail card is deterministic.
+    await gotoStory(page, 'showcase-radialexplorer--static');
+    await expect(page).toHaveScreenshot('radialexplorer-static.png', {
+      animations: 'disabled',
+    });
+  });
+});

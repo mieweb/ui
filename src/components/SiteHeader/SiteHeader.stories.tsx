@@ -45,7 +45,7 @@ const meta: Meta<typeof SiteHeader> = {
 - The **signed-in application** shell with search, notification and account triggers next to a \`Sidebar\` — \`AppHeader\` (sticky, slot-based, no nav links).
 - A **title block within a page** — \`PageHeader\`.
 - Navigation needs active-route styling, nested groups or a persistent rail — \`Sidebar\`; links are React Router / Next links — \`NavLinks\` renders plain \`<a>\` only.
-- More than ~5 links or mega-menus — there is no dropdown navigation.
+- Sections need dropdown panels with grouped links and feature promos — pass \`menus\` (see \`MegaMenu\`); beyond that, compose your own bar from the pieces.
 
 ### Example
 
@@ -94,6 +94,11 @@ Session state is the host's; the component switches between \`AuthButtons\` and 
           type: 'composes with',
           target: 'layout-sitefooter',
           why: 'SiteHeader and SiteFooter frame a public page: same logo/name props, same light/dark colour variants.',
+        },
+        {
+          type: 'composes with',
+          target: 'navigation-megamenu',
+          why: 'SiteHeader accepts `menus` directly, rendering a MegaMenuBar on desktop and flattening the same config into its mobile drawer.',
         },
       ],
     },
@@ -149,6 +154,56 @@ export const Default: Story = {};
 export const LoggedIn: Story = {
   args: {
     user: sampleUser,
+  },
+};
+
+/**
+ * `menus` renders a `MegaMenuBar` before `links` on desktop; below `md`
+ * the same config flattens into labelled groups in the mobile drawer
+ * (narrow the viewport to see it).
+ */
+export const WithMegaMenus: Story = {
+  args: {
+    links: [{ label: 'Contact Us', href: '/contact' }],
+    menus: [
+      {
+        key: 'platform',
+        label: 'Platform',
+        href: '/platform/',
+        items: [
+          {
+            label: 'Health surveillance',
+            href: '/platform/health-surveillance/',
+            description: 'Schedule, track and document surveillance programs.',
+          },
+          {
+            label: 'Injury & illness',
+            href: '/platform/injury-illness/',
+            description: 'OSHA recordables and case management.',
+          },
+          {
+            label: 'Clinic operations',
+            href: '/platform/clinic-operations/',
+            description: 'Orders, results and clinic workflow.',
+          },
+        ],
+      },
+      {
+        key: 'resources',
+        label: 'Resources',
+        href: '/resources/',
+        items: [
+          { label: 'Blog', href: '/blog/' },
+          { label: 'Whitepapers', href: '/whitepapers/' },
+          {
+            label: 'Docs',
+            href: 'https://docs.example.com',
+            external: true,
+          },
+        ],
+      },
+    ],
+    currentPath: '/blog/',
   },
 };
 

@@ -47,14 +47,22 @@ const huddleYjsKit = vi.fn(function (
   this.params = params;
   this.getExtensions = () => [];
 });
+// Set to simulate the lazy chunk failing to load: reading the export throws
+// where the real `await import('./collabKit')` would reject. Cleared between
+// tests by `beforeEach`.
+let collabKitLoadError: Error | null = null;
 vi.mock('./collabKit', () => ({
-  HuddleYjsKit: huddleYjsKit,
+  get HuddleYjsKit() {
+    if (collabKitLoadError) throw collabKitLoadError;
+    return huddleYjsKit;
+  },
   defaultWsUrl: () => 'ws://localhost/yjs',
 }));
 
 describe('RichEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    collabKitLoadError = null;
   });
 
   it('renders without throwing', async () => {
@@ -176,6 +184,75 @@ describe('RichEditor', () => {
     finishLoad();
   });
 
+  // The Yjs kit is an optional peer behind a dynamic import, so it can be
+  // absent, stale or unreachable at runtime. It must not take the editor with
+  // it: before this was handled, a failed load rejected `setup()` and the
+  // consumer was left with an empty container — no editor, no error it could
+  // see, and no way to edit the document at all.
+  describe('when the collab kit fails to load', () => {
+    it('still mounts an editor, as a local one', async () => {
+      collabKitLoadError = new Error(
+        'Failed to fetch dynamically imported module'
+      );
+
+      const { container } = renderWithTheme(
+        <RichEditor value="# shared" collab={{ room: 'room-1' }} />
+      );
+
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+      expect(container.querySelector('.kb-component')).not.toBeNull();
+      const kits = (
+        coreEditorCreate.mock.calls[0][0] as { editorKits: { name: string }[] }
+      ).editorKits;
+      expect(kits.map((k) => k.name)).toEqual(['advanced-editor']);
+    });
+
+    it('does not try to join a room it has no kit for', async () => {
+      collabKitLoadError = new Error(
+        'Failed to fetch dynamically imported module'
+      );
+
+      renderWithTheme(
+        <RichEditor value="# shared" collab={{ room: 'room-1' }} />
+      );
+
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(editorMock.loadDocumentText).toHaveBeenCalled()
+      );
+      expect(changeRoom).not.toHaveBeenCalled();
+    });
+
+    it('tells the host through onUnavailable', async () => {
+      const failure = new Error('Failed to fetch dynamically imported module');
+      collabKitLoadError = failure;
+      const onUnavailable = vi.fn();
+
+      renderWithTheme(
+        <RichEditor
+          value="# shared"
+          collab={{ room: 'room-1', onUnavailable }}
+        />
+      );
+
+      await waitFor(() => expect(onUnavailable).toHaveBeenCalledWith(failure));
+    });
+
+    it('leaves onUnavailable alone when collaboration starts normally', async () => {
+      const onUnavailable = vi.fn();
+
+      renderWithTheme(
+        <RichEditor
+          value="# shared"
+          collab={{ room: 'room-1', onUnavailable }}
+        />
+      );
+
+      await waitFor(() => expect(changeRoom).toHaveBeenCalledWith('room-1'));
+      expect(onUnavailable).not.toHaveBeenCalled();
+    });
+  });
+
   it('collab mode ignores value changes so the CRDT stays authoritative', async () => {
     const { rerender } = renderWithTheme(
       <RichEditor value="# one" collab={{ room: 'room-1' }} />
@@ -248,6 +325,7 @@ describe('RichEditor', () => {
 describe('CodeEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    collabKitLoadError = null;
   });
 
   it('renders without throwing', () => {

@@ -140,6 +140,11 @@ All three are stateless; the host maps its domain model to steps/events and owns
           target: 'overlays-modal',
           why: 'OrderConfirmation is a fixed one-button success overlay without focus management; Modal is the general dialog with slots, focus trap and scroll lock.',
         },
+        {
+          type: 'alternative to',
+          target: 'data-display-yeartimeline',
+          why: 'Timeline tracks a single process\u2019s milestones and events; YearTimeline lays a whole year of scheduled/continuous items on one Gantt grid.',
+        },
       ],
     },
   },

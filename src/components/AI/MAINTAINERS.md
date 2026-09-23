@@ -63,6 +63,14 @@ should plug into — don't fork the message renderer.
   the type union and `AIMessageDisplay`'s switch.
 - Modal variants render `role="dialog"` + `aria-modal`, trap focus, and close on
   `Escape`. Preserve that if you refactor the wrappers.
+- **Voiceprint namespacing** (`voiceprintNamespace` on `HandsFreeChat` /
+  `VoiceManager` / `VoiceSetup` / the hooks): `voiceprintStorageKey` in
+  `voiceprintStore.ts` is the single source of truth for scoped IndexedDB keys
+  (`key:encodeURIComponent(ns)`). Scoped namespaces must **never** run the
+  legacy localStorage migration — only the unscoped (`undefined`) path does —
+  so users of a shared browser profile can't inherit another user's
+  pre-namespace enrollment. The unscoped behavior is frozen for back-compat;
+  isolation is per-browser convenience, not authentication.
 
 ## Testing
 
