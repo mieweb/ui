@@ -71,6 +71,11 @@ auto-clear-on-send; hosts own the state.
   taller content overflow-centers instead of inflating the control row.
   `disabled` does **not** propagate into custom slot content — that's the
   documented contract, not an oversight.
+- `leadingSlot` — custom control at the leading edge (e.g. a voice-activation
+  toggle). It shares the `+` menu's grid cell rather than adding a column, so
+  it inherits the cell's responsive row placement; the cell renders even when
+  the `+` menu is hidden. Same `h-8` wrapper and `disabled` contract as
+  `micSlot` (`data-slot="chat-composer-leading-slot"`).
 - `addMenuItems` — host actions in the `+` menu; `checked` items render as
   `menuitemcheckbox` via `DropdownItem`'s native `checked` prop.
 - `modelSelectorProps` — passed through to `ComposerModelSelector`

@@ -127,6 +127,31 @@ describe('ChatComposer', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('renders a leadingSlot alongside the + menu', () => {
+    renderWithTheme(
+      <ChatComposer leadingSlot={<button type="button">Voice</button>} />
+    );
+
+    expect(screen.getByText('Voice')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /add to message/i })
+    ).toBeInTheDocument();
+  });
+
+  it('renders a leadingSlot when the + menu is hidden', () => {
+    renderWithTheme(
+      <ChatComposer
+        allowAttachments={false}
+        leadingSlot={<button type="button">Voice</button>}
+      />
+    );
+
+    expect(screen.getByText('Voice')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /add to message/i })
+    ).not.toBeInTheDocument();
+  });
+
   it('stages files via the imperative handle and includes them on send', () => {
     const onSend = vi.fn();
     const ref = React.createRef<ChatComposerHandle>();
