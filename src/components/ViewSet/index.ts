@@ -1,1 +1,1 @@
-export { ViewSet, type ViewSetProps } from './ViewSet';
+export { ViewSet, type ViewSetProps, type ViewSetLabels } from './ViewSet';

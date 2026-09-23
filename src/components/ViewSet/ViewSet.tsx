@@ -4,14 +4,30 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { ViewSwitcher, type ViewOption } from '../ViewSwitcher';
 import { ListView, type ListViewProps } from '../ListView';
-import { BoardView, type BoardViewProps } from '../BoardView';
-import { CalendarView, type CalendarViewProps } from '../CalendarView';
-import { GanttView, type GanttViewProps } from '../GanttView';
+import { BoardView, type BoardLabels, type BoardViewProps } from '../BoardView';
+import {
+  CalendarView,
+  type CalendarLabels,
+  type CalendarViewProps,
+} from '../CalendarView';
+import { GanttView, type GanttLabels, type GanttViewProps } from '../GanttView';
 import type { Stage, ViewBaseProps, ViewId } from '../../views/types';
 
 // =============================================================================
 // Types
 // =============================================================================
+
+/**
+ * Every string any layout in the set can render.
+ *
+ * Each view extends `ViewLabels` with its own — the calendar's month arrows and
+ * "+n more", the board's move announcements, the Gantt's undated footnote. They
+ * are all shared props, so the per-view escape hatches below exclude `labels`;
+ * without widening here a non-English host could translate the common strings
+ * and nothing else, which would break the contract that every user-facing
+ * string is overridable. A view ignores the keys it does not know.
+ */
+export type ViewSetLabels = Partial<CalendarLabels & BoardLabels & GanttLabels>;
 
 /**
  * Props `ViewSet` passes to every layout itself, beyond `ViewBaseProps`. Named
@@ -26,6 +42,8 @@ type ViewOverrides<P, T> = Omit<
 >;
 
 export interface ViewSetProps<T> extends ViewBaseProps<T> {
+  /** Every string any offered layout can render, not just the shared ones. */
+  labels?: ViewSetLabels;
   /** Views to offer, in order. The first is the default when uncontrolled. */
   views: readonly (ViewId | ViewOption)[];
   view?: ViewId;

@@ -179,6 +179,23 @@ describe('ViewSet', () => {
     ).toBeInTheDocument();
   });
 
+  it('carries labels a single layout adds, not just the shared ones', () => {
+    // Each view extends ViewLabels with its own strings. They are shared props,
+    // so the per-view escape hatches cannot reach them — the shell has to be
+    // able to carry them or a non-English host could translate the common
+    // strings and nothing else.
+    render(
+      <ViewSet
+        {...base}
+        defaultView="calendar"
+        labels={{ nextMonth: 'Mois suivant' }}
+      />
+    );
+    expect(
+      screen.getByRole('button', { name: 'Mois suivant' })
+    ).toBeInTheDocument();
+  });
+
   it('gives the board its move handler', async () => {
     const user = userEvent.setup();
     const onMove = vi.fn();
