@@ -54,7 +54,7 @@ Persist it by lifting \`view\` into a URL search param or storage — the compon
 - Accessibility: \`role="radiogroup"\` with \`role="radio"\` options and a single tab stop on the active one. Arrow keys move **and** select, which is the radio-group pattern — every option is visible, so there is nothing to commit afterwards. \`Home\` / \`End\` jump to the ends, disabled options are skipped, and focus follows the selection. When labels are hidden the accessible name comes from \`aria-label\`; a \`title\` provides the tooltip in both modes.
 - RTL: arrow direction is read from the focused button's computed \`direction\`, so it stays correct inside a locally flipped subtree. Layout uses logical spacing and the row scrolls horizontally rather than wrapping.
 - Responsive: \`showLabels="responsive"\` (the default) hides labels below \`sm\`, leaving icon-only buttons that keep a 40px touch target; pass \`true\` or \`false\` to pin it.
-- Theming: \`bg-card\` / \`border-border\` with a \`bg-primary-500/10\` active tint, so it follows the brand and dark mode without overrides. Condensed density is covered through \`data-slot="view-switcher"\`.
+- Theming: a \`bg-muted\` / \`border-border\` container with the active option lifted on \`bg-background\` and \`shadow-sm\`, so it follows the brand and dark mode without overrides. Condensed density is covered through \`data-slot="view-switcher"\`.
 - The seven built-in labels are English. Override per option with \`ViewOption.label\`, and name the group with \`label\`.
 - Not a data component: it renders no items and takes no accessors.`,
       },

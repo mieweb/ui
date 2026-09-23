@@ -147,6 +147,15 @@ It replaces the \`{view === 'x' && …}\` ladder that every such page grows. One
       table: { category: 'Data' },
       control: false,
     },
+    timeZone: {
+      description:
+        'IANA zone the calendar and Gantt read day boundaries in — shared so both place an item on the same days.',
+      table: { category: 'Data' },
+    },
+    locale: {
+      description: 'Locale for date formatting in the calendar and Gantt.',
+      table: { category: 'Data' },
+    },
     onViewChange: {
       description: 'Called with the view the user asked for.',
       table: { category: 'Callbacks' },
@@ -159,6 +168,12 @@ It replaces the \`{view === 'x' && …}\` ladder that every such page grows. One
     },
     onOpen: {
       description: 'Passed to every view.',
+      table: { category: 'Callbacks' },
+      control: false,
+    },
+    getHref: {
+      description:
+        'Passed to every view so items render as real links. Pass alongside `onOpen`.',
       table: { category: 'Callbacks' },
       control: false,
     },
@@ -189,8 +204,39 @@ It replaces the \`{view === 'x' && …}\` ladder that every such page grows. One
       table: { category: 'Slots' },
       control: false,
     },
+    renderItem: {
+      description:
+        'Replaces the built-in item body in every view. Receives the active view, so one function can serve several.',
+      table: { category: 'Slots' },
+      control: false,
+    },
+    emptyState: {
+      description: 'Replaces the built-in empty state in every view.',
+      table: { category: 'Slots' },
+      control: false,
+    },
+    labels: {
+      description:
+        'Overrides the English strings — every string any offered view can render.',
+      table: { category: 'Slots' },
+    },
     listProps: {
-      description: 'Per-view overrides the shell does not surface.',
+      description: 'List-only overrides the shell does not surface.',
+      table: { category: 'Slots' },
+      control: false,
+    },
+    boardProps: {
+      description: 'Board-only overrides the shell does not surface.',
+      table: { category: 'Slots' },
+      control: false,
+    },
+    calendarProps: {
+      description: 'Calendar-only overrides the shell does not surface.',
+      table: { category: 'Slots' },
+      control: false,
+    },
+    ganttProps: {
+      description: 'Gantt-only overrides the shell does not surface.',
       table: { category: 'Slots' },
       control: false,
     },

@@ -400,12 +400,18 @@ export function CalendarView<T>({
                                   {body}
                                 </button>
                               ) : (
+                                // `aria-label` is prohibited on role `generic`,
+                                // so the range rides along as hidden text here.
                                 <span
-                                  aria-label={spanLabel}
                                   data-slot="calendar-view-entry"
                                   className={classes}
                                 >
                                   {body}
+                                  {spanLabel && (
+                                    <span className="sr-only">
+                                      {`, ${start.toISODate()} to ${end.toISODate()}`}
+                                    </span>
+                                  )}
                                 </span>
                               )}
                             </li>
