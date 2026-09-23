@@ -215,13 +215,16 @@ export function ViewSet<T>({
       case 'gantt':
         return <GanttView {...shared} {...ganttProps} />;
       case 'roadmap':
-        // A roadmap is the Gantt at a coarse cadence; see Views.mdx.
+        // A roadmap is the Gantt at a coarse cadence; see Views.mdx. The two
+        // props that make it one come last: `ganttProps` is shared with the
+        // plain `gantt` case, so a `cadence: 'day'` meant for that view must
+        // not quietly turn the Roadmap option into a daily chart.
         return (
           <GanttView
             {...shared}
+            {...ganttProps}
             cadence="quarter"
             groupByLane
-            {...ganttProps}
           />
         );
       case 'list':
@@ -237,7 +240,10 @@ export function ViewSet<T>({
         className={cn('flex flex-wrap items-center gap-2', classNames?.toolbar)}
       >
         {toolbar}
-        <div className={cn('ms-auto', classNames?.switcher)}>
+        <div
+          data-slot="view-set-switcher"
+          className={cn('ms-auto', classNames?.switcher)}
+        >
           <ViewSwitcher
             views={offered}
             value={active}

@@ -107,6 +107,21 @@ describe('ViewSet', () => {
     expect(screen.getAllByText(/^Q\d 20\d\d$/).length).toBeGreaterThan(0);
   });
 
+  it('keeps the roadmap coarse even when ganttProps sets a fine cadence', async () => {
+    // `ganttProps` is shared with the plain `gantt` view, so a cadence meant
+    // for that one must not redefine what the Roadmap option means.
+    const user = userEvent.setup();
+    render(
+      <ViewSet
+        {...base}
+        views={['list', 'roadmap']}
+        ganttProps={{ cadence: 'day', groupByLane: false }}
+      />
+    );
+    await user.click(pick('Roadmap'));
+    expect(screen.getAllByText(/^Q\d 20\d\d$/).length).toBeGreaterThan(0);
+  });
+
   it('renders toolbar, filters and detail slots', () => {
     render(
       <ViewSet
