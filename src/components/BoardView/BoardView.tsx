@@ -182,7 +182,12 @@ function BoardCard({
 
   const shared = {
     ref: setNodeRef,
-    ...(draggable ? attributes : {}),
+    // Only the pointer listeners are shared. dnd-kit's `attributes` carry
+    // `role="button"` and a `tabIndex`, which on an `<a href>` would override
+    // the native link role — the card would announce as a button, and the
+    // middle-click / "copy link" affordance this branch exists to preserve
+    // would no longer be what assistive tech describes. The non-link card takes
+    // them below, where button semantics are the correct answer.
     ...(draggable ? listeners : {}),
     'aria-current': selected ? ('true' as const) : undefined,
     'aria-describedby': hint,
@@ -219,6 +224,7 @@ function BoardCard({
       ) : (
         <div
           {...shared}
+          {...(draggable ? attributes : {})}
           role={onOpen ? 'button' : undefined}
           tabIndex={draggable || onOpen ? 0 : undefined}
           onKeyDown={onCardKeyDown}

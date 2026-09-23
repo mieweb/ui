@@ -108,8 +108,12 @@ function buildGroups<T>(
 
   const groups: Group<T>[] = [];
   // Stages fix the order, and an empty stage still shows — a board column that
-  // disappears when it empties hides the fact that the stage exists.
-  for (const stage of stages ?? []) {
+  // disappears when it empties hides the fact that the stage exists. This only
+  // applies to `groupBy="status"`: stages name statuses, so seeding them under
+  // `groupBy="group"` would print an empty "Backlog"/"In progress" above the
+  // real buckets. `ViewSet` always passes its shared stages, so that case is
+  // reachable with nothing more than `listProps={{ groupBy: 'group' }}`.
+  for (const stage of (groupBy === 'status' ? stages : undefined) ?? []) {
     groups.push({
       id: stage.id,
       label: stage.label,

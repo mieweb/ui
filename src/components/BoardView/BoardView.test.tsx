@@ -184,6 +184,28 @@ describe('BoardView', () => {
     expect(onOpen).toHaveBeenCalledWith('WGL-106', workItems[5]);
   });
 
+  it('keeps a draggable card a link, not a button', async () => {
+    // dnd-kit's `attributes` carry role="button" and a tabIndex. Spreading them
+    // onto the anchor made a draggable card announce as a button, losing the
+    // link semantics the href branch exists to provide. Only the pointer
+    // listeners belong on an anchor.
+    const user = userEvent.setup();
+    const onOpen = vi.fn();
+    render(
+      <BoardView
+        {...base}
+        onMove={vi.fn()}
+        getHref={(id) => `/work/${id}`}
+        onOpen={onOpen}
+      />
+    );
+    const link = screen.getByRole('link', { name: /fax intake queue/i });
+    expect(link).toHaveAttribute('href', '/work/WGL-106');
+    expect(link).not.toHaveAttribute('role');
+    await user.click(link);
+    expect(onOpen).toHaveBeenCalledWith('WGL-106', workItems[5]);
+  });
+
   it('ignores a second move while the first is still in flight', async () => {
     const user = userEvent.setup();
     let settle: () => void = () => {};

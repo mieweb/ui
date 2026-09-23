@@ -155,6 +155,30 @@ describe('ViewSet', () => {
     ).toBeInTheDocument();
   });
 
+  it('does not seed status stages when a view groups by group', () => {
+    // The shell always passes its shared `stages`, so grouping by group used to
+    // print an empty heading for every status above the real buckets.
+    render(
+      <ViewSet {...base} views={['list']} listProps={{ groupBy: 'group' }} />
+    );
+    expect(
+      screen.queryByRole('button', { name: /Backlog/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('lets a caller rename the switcher group', () => {
+    render(
+      <ViewSet
+        {...base}
+        views={['list', 'board']}
+        labels={{ viewSwitcher: 'Affichage' }}
+      />
+    );
+    expect(
+      screen.getByRole('radiogroup', { name: 'Affichage' })
+    ).toBeInTheDocument();
+  });
+
   it('gives the board its move handler', async () => {
     const user = userEvent.setup();
     const onMove = vi.fn();

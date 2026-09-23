@@ -190,6 +190,16 @@ export const ViewSwitcher = React.forwardRef<HTMLDivElement, ViewSwitcherProps>(
       }
     };
 
+    // The roving tab stop has to land on an option the browser will actually
+    // focus. A disabled `<button>` is unfocusable, so if the active option is
+    // also disabled — a controlled caller, or a `defaultView` that later got
+    // disabled — putting the only `tabIndex={0}` on it leaves the radiogroup
+    // with no keyboard entry point at all. Fall back to the first enabled
+    // option; arrows then move from there.
+    const tabStopId =
+      options.find((o) => o.id === value && !o.disabled)?.id ??
+      options.find((o) => !o.disabled)?.id;
+
     return (
       <div
         ref={ref}
@@ -216,7 +226,7 @@ export const ViewSwitcher = React.forwardRef<HTMLDivElement, ViewSwitcherProps>(
               aria-label={showLabels === true ? undefined : text}
               title={text}
               disabled={option.disabled}
-              tabIndex={active ? 0 : -1}
+              tabIndex={option.id === tabStopId ? 0 : -1}
               data-slot="view-switcher-option"
               data-view={option.id}
               className={cn(

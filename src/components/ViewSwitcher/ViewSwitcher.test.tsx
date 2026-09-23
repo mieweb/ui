@@ -109,4 +109,18 @@ describe('ViewSwitcher', () => {
       screen.getByRole('radiogroup', { name: 'Layout' })
     ).toBeInTheDocument();
   });
+
+  it('keeps a keyboard entry point when the active option is disabled', async () => {
+    // A disabled button is unfocusable. Putting the only tabIndex=0 on it left
+    // the whole radiogroup unreachable by Tab, with every enabled option at -1.
+    const user = userEvent.setup();
+    render(
+      <Controlled
+        views={[{ id: 'list', disabled: true }, 'board', 'calendar']}
+        value="list"
+      />
+    );
+    await user.tab();
+    expect(screen.getByRole('radio', { name: 'Board' })).toHaveFocus();
+  });
 });

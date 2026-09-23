@@ -172,7 +172,17 @@ export default [
         {
           patterns: [
             {
-              group: ['meteor/*', 'next/*', 'react-router', 'react-router-dom'],
+              group: [
+                'meteor',
+                'meteor/*',
+                'next',
+                'next/*',
+                // Wildcards, not the two exact names: `react-router-dom` is one
+                // of several router packages, and `react-router-dom/server` is
+                // a subpath a bare-name pattern would let straight through.
+                'react-router*',
+                'react-router*/*',
+              ],
               message:
                 'Components must not depend on an app framework or router. Take data through props and navigate through an `onOpen` / `getHref` prop (module contract, CONTRIBUTING).',
             },

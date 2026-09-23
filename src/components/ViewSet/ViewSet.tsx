@@ -13,6 +13,18 @@ import type { Stage, ViewBaseProps, ViewId } from '../../views/types';
 // Types
 // =============================================================================
 
+/**
+ * Props `ViewSet` passes to every layout itself, beyond `ViewBaseProps`. Named
+ * here so the per-view escape hatches below can exclude them by key rather than
+ * by a hand-kept list that would drift the moment a shared prop is added.
+ */
+type ViewSetOwned = 'stages' | 'onMove' | 'timeZone' | 'locale';
+
+type ViewOverrides<P, T> = Omit<
+  Partial<P>,
+  keyof ViewBaseProps<T> | ViewSetOwned
+>;
+
 export interface ViewSetProps<T> extends ViewBaseProps<T> {
   /** Views to offer, in order. The first is the default when uncontrolled. */
   views: readonly (ViewId | ViewOption)[];
@@ -51,11 +63,17 @@ export interface ViewSetProps<T> extends ViewBaseProps<T> {
    * Per-view escape hatches for props this shell does not surface. Shared props
    * are excluded: one collection rendered several ways means switching view can
    * never change the records, the selection or the load state.
+   *
+   * `ViewSetOwned` covers the props the shell passes itself but that are not on
+   * `ViewBaseProps`. They are spread after the shared ones, so leaving them open
+   * would let one layout carry different stages, a different mutation callback
+   * or a different time zone from its neighbours — the same collection quietly
+   * disagreeing with itself as you switch tabs.
    */
-  listProps?: Omit<Partial<ListViewProps<T>>, keyof ViewBaseProps<T>>;
-  boardProps?: Omit<Partial<BoardViewProps<T>>, keyof ViewBaseProps<T>>;
-  calendarProps?: Omit<Partial<CalendarViewProps<T>>, keyof ViewBaseProps<T>>;
-  ganttProps?: Omit<Partial<GanttViewProps<T>>, keyof ViewBaseProps<T>>;
+  listProps?: ViewOverrides<ListViewProps<T>, T>;
+  boardProps?: ViewOverrides<BoardViewProps<T>, T>;
+  calendarProps?: ViewOverrides<CalendarViewProps<T>, T>;
+  ganttProps?: ViewOverrides<GanttViewProps<T>, T>;
 
   classNames?: Partial<
     Record<'toolbar' | 'switcher' | 'body' | 'detail', string>
@@ -188,6 +206,7 @@ export function ViewSet<T>({
             views={offered}
             value={active}
             onValueChange={changeView}
+            label={shared.labels?.viewSwitcher}
           />
         </div>
       </div>
