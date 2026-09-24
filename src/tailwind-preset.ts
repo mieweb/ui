@@ -663,7 +663,7 @@ export const miewebUISafelist = [
   'invisible',
   'transition-opacity',
   'bottom-2',
-  'self-end',
+  'mt-auto',
   // Dropdown submenu flyout — preferred width clamped to the viewport.
   'min-w-[min(10rem,calc(100vw-1rem))]',
   // SuperChat mermaid diagram wrapper — arbitrary variants applied to the
