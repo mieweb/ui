@@ -282,8 +282,9 @@ sentences live there and are quoted verbatim elsewhere.
   `src/esheet.ts`, `src/kerebron.ts`, `src/q.ts` and dedicated `tsup` entries.
   The deprecated `@mieweb/ui/ag-grid` entry remains for existing consumers only;
   do not use it as a starting point for new integrations.
-- Individually tree-shakeable components are listed explicitly in the `entry`
-  map in [tsup.config.ts](tsup.config.ts). Add yours there if it should be
+- Individually tree-shakeable components are listed explicitly in the entry
+  map in [tsup.entries.mjs](tsup.entries.mjs) (shared by the JS and
+  declaration builds). Add yours there if it should be
   importable as `@mieweb/ui/components/<Name>`.
 - `package.json` `sideEffects` is `["**/*.css"]` — CSS is intentionally
   side-effectful so it isn't tree-shaken away. Keep JS/TS modules side-effect
@@ -293,8 +294,13 @@ sentences live there and are quoted verbatim elsewhere.
 ## Build & bundle
 
 - **Bundler:** [tsup](tsup.config.ts) → dual **ESM + CJS**, `target: es2022`,
-  `.d.ts` emitted, sourcemaps, `treeshake` + `splitting` on. JSX is `automatic`.
+  sourcemaps, `treeshake` + `splitting` on. JSX is `automatic`.
   Types build against [tsconfig.build.json](tsconfig.build.json).
+- **Declarations:** `pnpm build:dts` ([scripts/build-dts.mjs](scripts/build-dts.mjs))
+  emits `.d.ts` / `.d.cts` after the JS build, in sequential batches of entries
+  (one tsup process each). A single pass over every entry exhausts an 8 GB heap;
+  batches peak around 2 GB. `datavis` builds alone because it is the only entry
+  that inlines dependency types (`dts.resolve`).
 - **External:** `react`, `react-dom`, `datavis-ace`, and `@esheet/*` are never
   bundled (they're peers). Legacy `ag-grid-*` peers remain external for compatibility.
 - **CSS:** `pnpm build:css` compiles `src/styles/base.css` → `dist/styles.css`
