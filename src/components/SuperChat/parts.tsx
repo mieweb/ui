@@ -666,6 +666,10 @@ export const MessageRow = React.memo(function MessageRow({
   const hasBody = !!message.text || (message.content?.length ?? 0) > 0;
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
+  // Keeps the bubble from shrinking when it flips into edit mode: the rendered
+  // content width, captured on edit start, becomes the editor's min-width
+  // (w-80 stays the floor for short messages, max-w-full the cap).
+  const [editMinWidth, setEditMinWidth] = React.useState<number>();
   const editRef = React.useRef<HTMLTextAreaElement>(null);
   // The rendered bubble content, read at copy time for the rich-text payload.
   const bubbleRef = React.useRef<HTMLDivElement>(null);
@@ -787,6 +791,15 @@ export const MessageRow = React.memo(function MessageRow({
   const authorName = participant?.name ?? 'Unknown';
 
   const startEdit = () => {
+    const el = bubbleRef.current;
+    if (el) {
+      const cs = getComputedStyle(el);
+      const contentWidth =
+        el.clientWidth -
+        parseFloat(cs.paddingLeft) -
+        parseFloat(cs.paddingRight);
+      setEditMinWidth(contentWidth > 0 ? contentWidth : undefined);
+    }
     setDraft(message.text ?? '');
     setIsEditing(true);
   };
@@ -986,6 +999,7 @@ export const MessageRow = React.memo(function MessageRow({
               <div
                 data-slot="superchat-message-editor"
                 className="flex w-80 max-w-full flex-col gap-2"
+                style={editMinWidth ? { minWidth: editMinWidth } : undefined}
               >
                 <textarea
                   value={draft}
