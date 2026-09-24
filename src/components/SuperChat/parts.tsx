@@ -520,9 +520,9 @@ function FooterActionButton({
 }
 
 /**
- * The hover-revealed row of action icon buttons under a message bubble. Each
- * button runs its action's default behavior; explicit variants live in the
- * sticky overflow menu ({@link MessageOverflowMenu}).
+ * The hover-revealed stack of action icon buttons in the avatar gutter, at the
+ * end of a message. Each button runs its action's default behavior; explicit
+ * variants live in the sticky overflow menu ({@link MessageOverflowMenu}).
  */
 const MessageActionsBar = React.forwardRef<
   HTMLDivElement,
@@ -532,11 +532,7 @@ const MessageActionsBar = React.forwardRef<
     <div
       ref={ref}
       data-slot="superchat-message-actions"
-      className={cn(
-        'flex items-center gap-0.5',
-        isSelf && 'justify-end',
-        actionRevealClass
-      )}
+      className={cn('flex flex-col items-center gap-0.5', actionRevealClass)}
     >
       {actions.map((action) => (
         <FooterActionButton key={action.id} action={action} isSelf={isSelf} />
@@ -558,9 +554,9 @@ interface MessageOverflowMenuProps {
 }
 
 /**
- * The sticky overflow (⋯) control beside the bubble. On long messages it
+ * The sticky overflow (⋯) control in the avatar gutter. On long messages it
  * follows the scroll (sticky within the thread) so actions stay reachable, and
- * hands off to the footer bar once the message end scrolls into view.
+ * hands off to the actions bar once the message end scrolls into view.
  */
 function MessageOverflowMenu({
   isSelf,
@@ -576,13 +572,13 @@ function MessageOverflowMenu({
 
   return (
     <div
-      // Self-align to the bottom of the (possibly tall) message row and stick
-      // to the viewport bottom: on long messages the control follows the
-      // scroll and settles at the message's end once it is fully in view.
-      // Raise the whole (sticky) stacking context above the sibling bubble
-      // while open so the menu sits over rich content like tables.
+      // Push to the bottom of the (possibly tall) avatar gutter and stick to
+      // the viewport bottom: on long messages the control follows the scroll
+      // and settles at the message's end once it is fully in view. Raise the
+      // whole (sticky) stacking context above the sibling bubble while open so
+      // the menu sits over rich content like tables.
       className={cn(
-        'sticky bottom-2 shrink-0 self-end transition-opacity',
+        'sticky bottom-2 mt-auto shrink-0 transition-opacity',
         // Rich content (e.g. NITRO tables) layers internals up to z-50, so the
         // open menu's stacking context must clear that.
         open ? 'z-[60]' : 'z-10',
@@ -909,8 +905,38 @@ export const MessageRow = React.memo(function MessageRow({
         isSelf ? 'flex-row-reverse' : 'flex-row'
       )}
     >
-      <ParticipantAvatar participant={participant} />
-      <div className={cn('flex min-w-0 flex-col gap-1', isSelf && 'items-end')}>
+      {/* Avatar gutter: the sticky overflow (⋯) and the end-of-message action
+          bar live under the avatar so the bubble aligns with the author name
+          instead of being indented by an action slot. */}
+      <div
+        data-slot="superchat-message-gutter"
+        className="flex shrink-0 flex-col items-center gap-1"
+      >
+        <ParticipantAvatar participant={participant} />
+        {hasActions && (
+          <>
+            <MessageOverflowMenu
+              isSelf={isSelf}
+              actions={actions}
+              footerVisible={footerVisible}
+            />
+            <MessageActionsBar
+              ref={actionsBarRef}
+              actions={actions}
+              isSelf={isSelf}
+            />
+          </>
+        )}
+      </div>
+      {/* flex-1 makes the column span the remaining row width so the bubble's
+          max-w-[85%] resolves against the thread, not a shrink-wrapped column
+          (which would clamp complex content toward its min-content width). */}
+      <div
+        className={cn(
+          'flex min-w-0 flex-1 flex-col gap-1',
+          isSelf && 'items-end'
+        )}
+      >
         <div
           data-slot="superchat-message-meta"
           className="flex items-baseline gap-2"
@@ -940,19 +966,15 @@ export const MessageRow = React.memo(function MessageRow({
           )}
         </div>
 
+        {/* w-full keeps this row at thread width even under the column's
+            items-end (self messages), preserving the 85% cap's meaning; the
+            row direction places the bubble on the correct side. */}
         <div
           className={cn(
-            'flex items-center gap-1',
+            'flex w-full items-center gap-1',
             isSelf ? 'flex-row-reverse' : 'flex-row'
           )}
         >
-          {hasActions && (
-            <MessageOverflowMenu
-              isSelf={isSelf}
-              actions={actions}
-              footerVisible={footerVisible}
-            />
-          )}
           <ChatBubble
             ref={bubbleRef}
             data-slot="superchat-bubble"
@@ -1077,13 +1099,6 @@ export const MessageRow = React.memo(function MessageRow({
             )}
           </ChatBubble>
         </div>
-        {hasActions && (
-          <MessageActionsBar
-            ref={actionsBarRef}
-            actions={actions}
-            isSelf={isSelf}
-          />
-        )}
       </div>
     </div>
   );
