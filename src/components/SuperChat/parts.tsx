@@ -733,7 +733,13 @@ export const MessageRow = React.memo(function MessageRow({
     (!!message.content?.length ||
       (typeof message.text === 'string' && message.text.length > 0));
 
-  const hasActions = canCopy || (canEdit && !isEditing);
+  const showEditAction = canEdit && !isEditing;
+  const actionCount = (canCopy ? 1 : 0) + (showEditAction ? 1 : 0);
+  const hasActions = actionCount > 0;
+  // A lone action shows its icon directly (with the sticky ⋯ hand-off on long
+  // messages); multiple actions collapse into the ⋯ menu alone so the gutter
+  // never stacks a pile of icons.
+  const collapseToMenu = actionCount > 1;
 
   const copy = useMessageCopy({
     markdown: markdownSource,
@@ -758,7 +764,10 @@ export const MessageRow = React.memo(function MessageRow({
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasActions]);
+    // Re-attach whenever the bar's presence changes: it renders only for a
+    // lone action (`hasActions && !collapseToMenu`), and a bar mounted after
+    // e.g. a readOnly/editable toggle would otherwise never be observed.
+  }, [hasActions, collapseToMenu]);
 
   if (message.type === 'system') {
     return (
@@ -897,7 +906,7 @@ export const MessageRow = React.memo(function MessageRow({
           } satisfies MessageAction,
         ]
       : []),
-    ...(canEdit && !isEditing
+    ...(showEditAction
       ? [
           {
             id: 'edit',
@@ -908,11 +917,6 @@ export const MessageRow = React.memo(function MessageRow({
         ]
       : []),
   ];
-
-  // A lone action shows its icon directly (with the sticky ⋯ hand-off on long
-  // messages); multiple actions collapse into the ⋯ menu alone so the gutter
-  // never stacks a pile of icons.
-  const collapseToMenu = actions.length > 1;
 
   return (
     <div
