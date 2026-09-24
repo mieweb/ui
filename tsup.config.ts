@@ -132,6 +132,9 @@ export default defineConfig({
   // Inline @mieweb/datavis's types (it's a bundled submodule, not an installed
   // package) so the datavis entry's .d.ts does not re-export from it.
   dts: { resolve: true },
+  // tsconfig.build.json maps @mieweb/datavis to packages/datavis, so both the
+  // JS bundle and the inlined types come from the submodule under pnpm and npm
+  // alike. Without it, an npm install bundles the registry release instead.
   tsconfig: 'tsconfig.build.json',
   sourcemap: true,
   clean: true,
