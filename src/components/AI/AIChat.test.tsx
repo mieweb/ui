@@ -65,10 +65,14 @@ describe('AIChat (ChatComposer integration)', () => {
       Object.defineProperty(list, 'scrollHeight', { value: 1000 });
       Object.defineProperty(list, 'clientHeight', {
         value: 400,
-        writable: true,
+        configurable: true,
       });
       Object.defineProperty(list, 'scrollTop', { value: 600, writable: true });
       return list;
+    }
+
+    function shrinkList(list: HTMLElement) {
+      Object.defineProperty(list, 'clientHeight', { value: 200 });
     }
 
     afterEach(() => {
@@ -80,7 +84,7 @@ describe('AIChat (ChatComposer integration)', () => {
       fireEvent.scroll(list);
 
       // Keyboard opens: the visible list is shorter, scrollTop unchanged.
-      list.clientHeight = 200;
+      shrinkList(list);
       resize();
 
       expect(list.scrollTop).toBe(1000);
@@ -91,7 +95,7 @@ describe('AIChat (ChatComposer integration)', () => {
       list.scrollTop = 100;
       fireEvent.scroll(list);
 
-      list.clientHeight = 200;
+      shrinkList(list);
       resize();
 
       expect(list.scrollTop).toBe(100);

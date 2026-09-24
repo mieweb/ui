@@ -62,6 +62,25 @@ contract: keyboard priority in the textarea `onKeyDown` is host
 `textareaProps.onKeyDown` (preventDefault claims the event) → mention menu
 navigation → Enter-to-send. Don't reorder.
 
+## Mobile keyboard behavior
+
+- **Enter.** `submitOnEnter="desktop"` (default) keys off
+  `(hover: none) and (pointer: coarse)`: touch devices get a newline on
+  Return. The `isComposing` guard sits before the send check so Enter that
+  confirms an IME candidate never sends — keep it there.
+- **Send/stop keep focus via `onMouseDown` preventDefault**, not
+  `onPointerDown`: cancelling pointerdown does not stop the focus change in
+  every browser. Removing it brings back the keyboard close/reopen bounce on
+  iOS, because `handleSend` refocuses after the blur has started.
+- **Card tap-to-focus** skips anything matching the interactive selector
+  (buttons, links, inputs, menus). New interactive children must match it or
+  a tap on them will be swallowed.
+- **`autoFocus` is ignored on touch** (it would pop the keyboard on every
+  navigation). `replyTo` still focuses on touch — it follows a user tap.
+- **Keyboard inset is the host's job.** The composer doesn't measure the
+  keyboard; hosts mount `useKeyboardInset()` and size their shell from its
+  CSS variables (see the *Mobile Keyboard Shell* story).
+
 ## Drag-and-drop delegates validation
 
 The card is wrapped in `DragDropZone` (from `../Messaging/AttachmentPicker`)
