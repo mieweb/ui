@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
@@ -42,6 +42,75 @@ describe('ChatComposer', () => {
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
 
     expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('does not send on Enter during IME composition', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} />);
+
+    const input = getInput();
+    fireEvent.change(input, { target: { value: 'こんにちは' } });
+    fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  describe('on touch devices', () => {
+    beforeEach(() => {
+      vi.spyOn(window, 'matchMedia').mockImplementation(
+        (query: string) =>
+          ({
+            matches: query.includes('pointer: coarse'),
+            media: query,
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+          }) as MediaQueryList
+      );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('inserts a newline on Enter instead of sending', () => {
+      const onSend = vi.fn();
+      renderWithTheme(<ChatComposer onSend={onSend} />);
+
+      const input = getInput();
+      fireEvent.change(input, { target: { value: 'Hello' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onSend).not.toHaveBeenCalled();
+      expect(input).toHaveAttribute('enterkeyhint', 'enter');
+    });
+
+    it('sends on Enter when submitOnEnter is "always"', () => {
+      const onSend = vi.fn();
+      renderWithTheme(<ChatComposer onSend={onSend} submitOnEnter="always" />);
+
+      const input = getInput();
+      fireEvent.change(input, { target: { value: 'Hello' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onSend).toHaveBeenCalled();
+      expect(input).toHaveAttribute('enterkeyhint', 'send');
+    });
+  });
+
+  it('never sends on Enter when submitOnEnter is "never"', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} submitOnEnter="never" />);
+
+    const input = getInput();
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend).not.toHaveBeenCalled();
+    expect(input).toHaveAttribute('enterkeyhint', 'enter');
   });
 
   it('disables the send button while empty and enables it with text', () => {

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import {
   ComposerModelSelector,
@@ -133,6 +134,14 @@ export interface ChatComposerProps {
    * @default false
    */
   canSendWhenEmpty?: boolean;
+  /**
+   * When the Enter key sends. `'desktop'` sends on Enter only on devices
+   * with a fine pointer; on touch devices Return inserts a newline and the
+   * send button sends (claude.ai / chatgpt.com parity). Shift+Enter always
+   * inserts a newline, and Enter never sends mid IME composition.
+   * @default 'desktop'
+   */
+  submitOnEnter?: 'desktop' | 'always' | 'never';
   /**
    * Maximum height of the auto-growing input: a pixel number or any CSS
    * length (e.g. `'40vh'`).
@@ -286,6 +295,9 @@ const selectorTriggerClasses = cn(
 
 const MAX_INPUT_HEIGHT = 160;
 
+/** Touch-first devices (phones, tablets without a trackpad). */
+const TOUCH_DEVICE_QUERY = '(hover: none) and (pointer: coarse)';
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -311,6 +323,7 @@ export const ChatComposer = React.forwardRef<
     maxLength,
     showCharacterCount = false,
     canSendWhenEmpty = false,
+    submitOnEnter = 'desktop',
     maxHeight = MAX_INPUT_HEIGHT,
     textareaProps,
     addMenuItems,
@@ -367,6 +380,11 @@ export const ChatComposer = React.forwardRef<
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const [agentMenuOpen, setAgentMenuOpen] = React.useState(false);
+
+  const isTouchDevice = useMediaQuery(TOUCH_DEVICE_QUERY);
+  const sendsOnEnter =
+    submitOnEnter === 'always' ||
+    (submitOnEnter === 'desktop' && !isTouchDevice);
 
   // Focus the input when a reply target is set (MessageComposer parity).
   // Keyed on the id, not the object: hosts often build `replyTo` inline, so
@@ -605,7 +623,9 @@ export const ChatComposer = React.forwardRef<
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // @mention menu navigation takes priority over send.
     if (mention.handleKeyDown(event)) return;
-    if (event.key === 'Enter' && !event.shiftKey) {
+    // Enter confirms an IME candidate (CJK input) rather than sending.
+    if (event.nativeEvent.isComposing) return;
+    if (event.key === 'Enter' && !event.shiftKey && sendsOnEnter) {
       event.preventDefault();
       handleSend();
     }
@@ -723,6 +743,8 @@ export const ChatComposer = React.forwardRef<
             dataSlot="chat-composer-mention-list"
           />
           <textarea
+            // Mobile keyboard hints; overridable via `textareaProps`.
+            enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
             {...textareaProps}
             ref={textareaRef}
             data-slot="chat-composer-input"
