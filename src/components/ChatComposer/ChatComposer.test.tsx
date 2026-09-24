@@ -101,6 +101,26 @@ describe('ChatComposer', () => {
     });
   });
 
+  it('keeps focus on the input when pressing send', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} />);
+
+    const input = getInput();
+    input.focus();
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    const sendButton = screen.getByRole('button', { name: /send message/i });
+
+    // A cancelled mousedown is what stops the browser moving focus.
+    expect(fireEvent.mouseDown(sendButton)).toBe(false);
+    // Complete the press: React suppresses onSelect between mousedown and
+    // mouseup module-wide, which would leak into later tests.
+    fireEvent.mouseUp(sendButton);
+    fireEvent.click(sendButton);
+
+    expect(onSend).toHaveBeenCalled();
+    expect(input).toHaveFocus();
+  });
+
   it('never sends on Enter when submitOnEnter is "never"', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} submitOnEnter="never" />);

@@ -620,6 +620,14 @@ export const ChatComposer = React.forwardRef<
     textareaRef.current?.focus();
   };
 
+  // Pressing a button moves focus off the textarea, which on mobile starts
+  // dismissing the keyboard before `handleSend` refocuses it (a visible
+  // close/reopen bounce). Cancelling mousedown keeps focus where it is; the
+  // click still fires, and keyboard users can still tab to the button.
+  const keepInputFocus = (event: React.MouseEvent) => {
+    event.preventDefault();
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // @mention menu navigation takes priority over send.
     if (mention.handleKeyDown(event)) return;
@@ -915,6 +923,7 @@ export const ChatComposer = React.forwardRef<
               data-slot="chat-composer-stop-button"
               aria-label={stopLabel}
               disabled={disabled}
+              onMouseDown={keepInputFocus}
               onClick={onStop}
               className={cn(
                 iconButtonClasses,
@@ -933,6 +942,7 @@ export const ChatComposer = React.forwardRef<
               aria-label={isSending ? sendingLabel : sendLabel}
               aria-busy={isSending || undefined}
               disabled={!canSend}
+              onMouseDown={keepInputFocus}
               onClick={handleSend}
               className={cn(
                 iconButtonClasses,
