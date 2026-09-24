@@ -36,7 +36,7 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
-import { JumpToBottomButton } from '../SuperChat/parts';
+import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { useStickToBottom } from '../../hooks/useStickToBottom';
 import { RecordButton } from '../RecordButton';

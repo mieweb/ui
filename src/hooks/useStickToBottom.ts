@@ -77,10 +77,27 @@ export function useStickToBottom({
   // without re-subscribing them on every scroll.
   const pinnedRef = React.useRef(true);
 
+  // Hosts can re-attach the refs to new DOM nodes without remounting (e.g.
+  // SuperChat swapping its plain thread for the virtualized one when the
+  // conversation grows). Mirror the current nodes into state so the listener
+  // and observer effects below re-bind whenever the target changes.
+  const [containerEl, setContainerEl] = React.useState<HTMLDivElement | null>(
+    null
+  );
+  const [contentEl, setContentEl] = React.useState<HTMLDivElement | null>(null);
+  // Intentionally dep-less: ref mutations don't trigger renders, so this must
+  // check after every render. The inequality guards make it settle immediately.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  React.useEffect(() => {
+    if (containerRef.current !== containerEl)
+      setContainerEl(containerRef.current);
+    if (contentRef.current !== contentEl) setContentEl(contentRef.current);
+  });
+
   // Track the user's position: at (or near) the bottom means "pinned".
   React.useEffect(() => {
     if (disabled) return;
-    const el = containerRef.current;
+    const el = containerEl;
     if (!el) return;
 
     const handleScroll = () => {
@@ -93,7 +110,7 @@ export function useStickToBottom({
     handleScroll(); // initial position
     el.addEventListener('scroll', handleScroll, { passive: true });
     return () => el.removeEventListener('scroll', handleScroll);
-  }, [threshold, disabled]);
+  }, [containerEl, threshold, disabled]);
 
   // While pinned, follow growth of the content (streaming tokens, appended
   // rows) and shrinking of the container (on-screen keyboard, composer
@@ -101,17 +118,16 @@ export function useStickToBottom({
   // observer never touches the scroll position.
   React.useEffect(() => {
     if (disabled) return;
-    const el = containerRef.current;
+    const el = containerEl;
     if (!el || typeof globalThis.ResizeObserver === 'undefined') return;
 
     const observer = new globalThis.ResizeObserver(() => {
       if (pinnedRef.current) pinToBottom(el);
     });
     observer.observe(el);
-    const content = contentRef.current;
-    if (content) observer.observe(content);
+    if (contentEl) observer.observe(contentEl);
     return () => observer.disconnect();
-  }, [disabled]);
+  }, [containerEl, contentEl, disabled]);
 
   const scrollToBottom = React.useCallback(
     (behavior: ScrollBehavior = 'auto') => {

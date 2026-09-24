@@ -17,12 +17,12 @@ import { useStickToBottom } from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
 import { ChatComposer } from '../ChatComposer/ChatComposer';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
+import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
 import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
   ParticipantAvatar,
   MessageRow,
-  JumpToBottomButton,
   byTime,
   detectMentions,
   filesToComposerAttachments,
@@ -451,6 +451,7 @@ export function SuperChat({
         )}
         {order !== 'desc' && !isAtBottom && (
           <JumpToBottomButton
+            dataSlot="superchat-jump-to-bottom"
             hasNewMessages={hasNewBelow}
             onClick={handleJumpToBottom}
           />
