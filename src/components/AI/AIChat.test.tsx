@@ -38,6 +38,66 @@ afterEach(() => {
 });
 
 describe('AIChat (ChatComposer integration)', () => {
+  describe('bottom anchoring when the message list resizes', () => {
+    let resize: () => void = () => {};
+
+    function renderWithGeometry() {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          private callback: () => void;
+          constructor(callback: () => void) {
+            this.callback = callback;
+          }
+          // The composer observes its textarea too; capture only the list.
+          observe(target: Element) {
+            if (target.getAttribute('data-slot') === 'ai-chat-messages') {
+              resize = () => act(this.callback);
+            }
+          }
+          disconnect() {}
+        }
+      );
+      const { container } = render(<AIChat messages={messages} />);
+      const list = container.querySelector<HTMLElement>(
+        '[data-slot="ai-chat-messages"]'
+      )!;
+      Object.defineProperty(list, 'scrollHeight', { value: 1000 });
+      Object.defineProperty(list, 'clientHeight', {
+        value: 400,
+        writable: true,
+      });
+      Object.defineProperty(list, 'scrollTop', { value: 600, writable: true });
+      return list;
+    }
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('stays pinned to the latest message when the list shrinks', () => {
+      const list = renderWithGeometry();
+      fireEvent.scroll(list);
+
+      // Keyboard opens: the visible list is shorter, scrollTop unchanged.
+      list.clientHeight = 200;
+      resize();
+
+      expect(list.scrollTop).toBe(1000);
+    });
+
+    it('does not yank a reader who scrolled up', () => {
+      const list = renderWithGeometry();
+      list.scrollTop = 100;
+      fireEvent.scroll(list);
+
+      list.clientHeight = 200;
+      resize();
+
+      expect(list.scrollTop).toBe(100);
+    });
+  });
+
   it('keeps the "Message" input label and sends trimmed text', async () => {
     const onSendMessage = vi.fn();
     const user = await setupUser();
