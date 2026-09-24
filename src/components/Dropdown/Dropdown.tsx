@@ -60,6 +60,7 @@ export interface DropdownProps {
 const placementOffset = 8; // matches the previous mt-2/mb-2 gap
 
 interface DropdownContextValue {
+  close: () => void;
   multiSelect: boolean;
   selectedValues: string[];
   toggleSelectedValue: (value: string) => void;
@@ -431,8 +432,9 @@ function Dropdown({
       selectedValues,
       toggleSelectedValue,
       registerOutsideRef,
+      close: handleClose,
     }),
-    [multiSelect, selectedValues, toggleSelectedValue, registerOutsideRef]
+    [multiSelect, selectedValues, toggleSelectedValue, registerOutsideRef, handleClose]
   );
 
   useEscapeKey(handleClose, isOpen);
@@ -819,6 +821,7 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
           onCheckedChange?.(!isChecked);
         }
 
+        if (!disabled && !isMultiSelectItem) dropdownContext?.close();
         onClick?.(event);
       },
       [

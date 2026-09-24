@@ -79,6 +79,8 @@ export interface ResultsEntryFormProps {
   onSubmit: (data: ResultsEntryData) => void;
   /** Callback when form is cancelled */
   onCancel?: () => void;
+  /** Open contact management without discarding the result draft. */
+  onAddProviderContact?: () => void;
   /** Labels for i18n */
   labels?: {
     testResults?: string;
@@ -139,6 +141,7 @@ export const ResultsEntryForm = React.forwardRef<
     showApplyToAll = true,
     showSentToLab = false,
     onSubmit,
+    onAddProviderContact,
     labels = {},
     className,
   },
@@ -360,19 +363,22 @@ export const ResultsEntryForm = React.forwardRef<
       {/* File Upload */}
       {showFileUpload && (
         <div data-slot="ref-file-upload">
-          <div className="flex items-center gap-2" data-slot="ref-file-row">
+          <div className="flex items-stretch gap-0" data-slot="ref-file-row">
             <span
               className="bg-muted border-input rounded-s-md border border-e-0 px-3 py-2 text-sm font-medium"
               data-slot="ref-file-badge"
             >
               {results}
             </span>
-            <Input
-              value={files.map((f) => f.name).join(', ')}
-              readOnly
-              className="rounded-none border-s-0 border-e-0"
-              placeholder="No files selected"
-            />
+            <div className="min-w-0 flex-1">
+              <Input
+                value={files.map((f) => f.name).join(', ')}
+                readOnly
+                className="h-full rounded-none border-s-0 border-e-0"
+                aria-label="Selected result files"
+                placeholder="No files selected"
+              />
+            </div>
             <input
               ref={fileInputRef}
               type="file"
@@ -477,12 +483,15 @@ export const ResultsEntryForm = React.forwardRef<
             <p className="text-muted-foreground mt-1 text-sm">
               {noProviderContactsMessage}
             </p>
-            <button
-              type="button"
-              className="text-primary-800 dark:text-primary-400 mt-2 inline-block text-sm hover:underline"
-            >
-              {addProviderContact}
-            </button>
+            {onAddProviderContact && (
+              <button
+                type="button"
+                onClick={onAddProviderContact}
+                className="text-primary-800 dark:text-primary-400 mt-2 inline-block text-sm hover:underline"
+              >
+                {addProviderContact}
+              </button>
+            )}
           </div>
         )
       )}

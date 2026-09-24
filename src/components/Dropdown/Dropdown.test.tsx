@@ -13,6 +13,16 @@ import {
 } from './Dropdown';
 
 describe('Dropdown', () => {
+  it('closes an action menu when an item opens another interface', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    renderWithTheme(<Dropdown trigger={<Button>Actions</Button>}><DropdownItem onClick={onClick}>Edit role</DropdownItem></Dropdown>);
+    await user.click(screen.getByRole('button', { name: 'Actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit role' }));
+    expect(onClick).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
   it('renders a search input when searchable is enabled', async () => {
     const user = userEvent.setup();
 
