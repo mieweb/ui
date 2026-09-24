@@ -140,8 +140,20 @@ function speakerActivitiesForSegment(
   }
   const normalized = speakerActivities.map((activity) => ({
     speakerId: activity.speakerId.trim(),
-    start: activity.start,
-    end: activity.end,
+    start: Math.min(
+      segment.end,
+      Math.max(segment.start, Math.min(activity.start, activity.end))
+    ),
+    end: Math.max(
+      Math.min(
+        segment.end,
+        Math.max(segment.start, Math.max(activity.start, activity.end))
+      ),
+      Math.min(
+        segment.end,
+        Math.max(segment.start, Math.min(activity.start, activity.end))
+      )
+    ),
     confidence: activity.confidence,
   }));
   const nonBlank = normalized.filter(
@@ -279,15 +291,21 @@ export function useDiarization(
           anonymous = defaultAttributions(segments, segCluster);
         }
 
-        const orderedSpeakerIds: string[] = [];
-        const registerSpeakerId = (speakerId: string) => {
+        const speakerStartById = new Map<string, number>();
+        const registerSpeakerId = (speakerId: string, start: number) => {
           const id = speakerId.trim();
           if (!id) throw new Error('diarization returned an empty speaker id');
-          if (!orderedSpeakerIds.includes(id)) orderedSpeakerIds.push(id);
+          speakerStartById.set(
+            id,
+            Math.min(speakerStartById.get(id) ?? Infinity, start)
+          );
           return id;
         };
         const normalized = anonymous.map((entry, i) => {
-          const speakerId = registerSpeakerId(entry.speakerId);
+          const speakerId = registerSpeakerId(
+            entry.speakerId,
+            segments[i].start
+          );
           const speakerActivities = speakerActivitiesForSegment(
             segments[i],
             speakerId,
@@ -295,7 +313,7 @@ export function useDiarization(
             entry.confidence
           ).map((activity) => ({
             ...activity,
-            speakerId: registerSpeakerId(activity.speakerId),
+            speakerId: registerSpeakerId(activity.speakerId, activity.start),
           }));
           return {
             speakerId,
@@ -308,6 +326,9 @@ export function useDiarization(
             provisional: entry.provisional,
           };
         });
+        const orderedSpeakerIds = [...speakerStartById.entries()]
+          .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))
+          .map(([speakerId]) => speakerId);
         const clusterBySpeakerId = new Map(
           orderedSpeakerIds.map((speakerId, cluster) => [speakerId, cluster])
         );
