@@ -19,4 +19,13 @@ describe('getDtsEntryBatches', () => {
       entryKeys.length % DTS_BATCH_SIZE || DTS_BATCH_SIZE
     );
   });
+
+  it('rejects non-positive batch sizes', () => {
+    expect(() => getDtsEntryBatches(0)).toThrow(
+      'batchSize must be greater than 0'
+    );
+    expect(() => getDtsEntryBatches(-1)).toThrow(
+      'batchSize must be greater than 0'
+    );
+  });
 });

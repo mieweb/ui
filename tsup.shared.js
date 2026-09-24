@@ -179,6 +179,10 @@ const sharedConfig = {
 export const DTS_BATCH_SIZE = 12;
 
 export function getDtsEntryBatches(batchSize = DTS_BATCH_SIZE) {
+  if (batchSize <= 0) {
+    throw new Error('batchSize must be greater than 0');
+  }
+
   const entryPairs = Object.entries(tsupEntries);
   const batches = [];
 
