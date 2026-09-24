@@ -144,8 +144,11 @@ function speakerActivitiesForSegment(
     end: activity.end,
     confidence: activity.confidence,
   }));
-  return normalized.some((activity) => activity.speakerId === primarySpeakerId)
-    ? normalized
+  const nonBlank = normalized.filter(
+    (activity) => activity.speakerId.length > 0
+  );
+  return nonBlank.some((activity) => activity.speakerId === primarySpeakerId)
+    ? nonBlank
     : [
         {
           speakerId: primarySpeakerId,
@@ -153,7 +156,7 @@ function speakerActivitiesForSegment(
           end: segment.end,
           confidence,
         },
-        ...normalized,
+        ...nonBlank,
       ];
 }
 

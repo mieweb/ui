@@ -301,12 +301,15 @@ export async function inferSpeakerRoles(
   return segments.map((s) => {
     const speaker =
       isGeneric(s.speaker) && map[s.speaker] ? map[s.speaker] : s.speaker;
-    const speakerActivities = s.speakerActivities.map((activity) =>
-      isGeneric(activity.speaker) && map[activity.speaker]
-        ? { ...activity, speaker: map[activity.speaker] }
-        : activity
-    );
-    return speaker !== s.speaker || speakerActivities !== s.speakerActivities
+    let changedActivities = false;
+    const speakerActivities = s.speakerActivities.map((activity) => {
+      if (isGeneric(activity.speaker) && map[activity.speaker]) {
+        changedActivities = true;
+        return { ...activity, speaker: map[activity.speaker] };
+      }
+      return activity;
+    });
+    return speaker !== s.speaker || changedActivities
       ? { ...s, speaker, speakerActivities }
       : s;
   });
@@ -314,7 +317,8 @@ export async function inferSpeakerRoles(
 
 function sameSpeakerActivities(
   a: DiarizedSpeakerActivity[],
-  b: DiarizedSpeakerActivity[]
+  b: DiarizedSpeakerActivity[],
+  includeBounds: boolean
 ): boolean {
   return (
     a.length === b.length &&
@@ -323,7 +327,9 @@ function sameSpeakerActivities(
         activity.speakerId === b[i]?.speakerId &&
         activity.cluster === b[i]?.cluster &&
         activity.speaker === b[i]?.speaker &&
-        activity.confidence === b[i]?.confidence
+        activity.confidence === b[i]?.confidence &&
+        (!includeBounds ||
+          (activity.start === b[i]?.start && activity.end === b[i]?.end))
     )
   );
 }
@@ -339,7 +345,11 @@ export function mergeTurns(segments: DiarizedSegment[]): DiarizedSegment[] {
       last.speakerId === seg.speakerId &&
       last.attribution === seg.attribution &&
       last.provisional === seg.provisional &&
-      sameSpeakerActivities(last.speakerActivities, seg.speakerActivities)
+      sameSpeakerActivities(
+        last.speakerActivities,
+        seg.speakerActivities,
+        last.attribution !== 'single'
+      )
     ) {
       last.end = seg.end;
       last.text = `${last.text} ${seg.text}`.trim();

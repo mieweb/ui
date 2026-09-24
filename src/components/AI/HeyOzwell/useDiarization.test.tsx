@@ -65,6 +65,7 @@ describe('useDiarization experimental adapter', () => {
           confidence: 0.62,
           speakerActivities: [
             { speakerId: 'doctor', start: 1.2, end: 2.5, confidence: 0.62 },
+            { speakerId: '   ', start: 1.25, end: 2.4, confidence: 0.1 },
             { speakerId: 'patient', start: 1.3, end: 2.3, confidence: 0.58 },
           ],
         },
