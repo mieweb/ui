@@ -374,6 +374,19 @@ module.exports = {
     'max-h-52',
     'text-primary-100/90',
     'text-[10px]',
+    // SuperChat message actions (footer bar + sticky overflow menu) — arbitrary
+    // touch-pointer variants and stacking above rich content (z-50 internals),
+    // plus the standard utilities of the sticky wrapper and its footer handoff
+    // (`invisible` keeps the hidden trigger out of the tab order).
+    '[@media(pointer:coarse)]:opacity-100',
+    'z-[60]',
+    'z-10',
+    'invisible',
+    'transition-opacity',
+    'bottom-2',
+    'mt-auto',
+    // Dropdown submenu flyout — preferred width clamped to the viewport.
+    'min-w-[min(10rem,calc(100vw-1rem))]',
     'text-[11px]',
     'text-[13px]',
     'px-3.5',
