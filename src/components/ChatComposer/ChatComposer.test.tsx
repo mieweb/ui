@@ -121,6 +121,22 @@ describe('ChatComposer', () => {
     expect(input).toHaveFocus();
   });
 
+  it('sets mobile keyboard attributes that textareaProps can override', () => {
+    renderWithTheme(
+      <ChatComposer textareaProps={{ autoCapitalize: 'off', dir: 'rtl' }} />
+    );
+
+    const input = getInput();
+    expect(input).toHaveAttribute('inputmode', 'text');
+    expect(input).toHaveAttribute('autocorrect', 'on');
+    expect(input).toHaveAttribute('spellcheck', 'true');
+    expect(input).toHaveAttribute('enterkeyhint', 'send');
+    expect(input).toHaveAttribute('autocapitalize', 'off');
+    expect(input).toHaveAttribute('dir', 'rtl');
+    // 16px on small screens prevents iOS zoom-on-focus.
+    expect(input).toHaveClass('text-base', 'sm:text-sm');
+  });
+
   it('never sends on Enter when submitOnEnter is "never"', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} submitOnEnter="never" />);

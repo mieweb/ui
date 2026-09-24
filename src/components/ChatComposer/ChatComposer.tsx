@@ -144,7 +144,8 @@ export interface ChatComposerProps {
   submitOnEnter?: 'desktop' | 'always' | 'never';
   /**
    * Maximum height of the auto-growing input: a pixel number or any CSS
-   * length (e.g. `'40vh'`).
+   * length. Prefer small-viewport units (e.g. `'30svh'`) over `vh`: on iOS
+   * `vh` is the full screen and ignores the on-screen keyboard.
    * @default 160
    */
   maxHeight?: number | string;
@@ -753,6 +754,12 @@ export const ChatComposer = React.forwardRef<
           <textarea
             // Mobile keyboard hints; overridable via `textareaProps`.
             enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
+            inputMode="text"
+            autoCapitalize="sentences"
+            autoCorrect="on"
+            spellCheck
+            // Follows the typed script, so RTL text aligns correctly.
+            dir="auto"
             {...textareaProps}
             ref={textareaRef}
             data-slot="chat-composer-input"
@@ -799,7 +806,9 @@ export const ChatComposer = React.forwardRef<
             }}
             className={cn(
               'block w-full resize-none bg-transparent',
-              'rounded-lg text-sm',
+              // 16px below `sm`: iOS zooms the page when focusing an input
+              // with a smaller font.
+              'rounded-lg text-base sm:text-sm',
               cells.textarea,
               'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
               // Ring the input itself on focus rather than the whole shell.
