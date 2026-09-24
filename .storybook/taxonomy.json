@@ -65,6 +65,7 @@
       "scope": "scope:general-purpose",
       "families": [
         "Dashboards",
+        "Views",
         "Media",
         "Editors",
         "Chat",

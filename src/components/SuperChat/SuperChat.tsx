@@ -388,6 +388,9 @@ export function SuperChat({
         onValueChange={handleDraftChange}
         onSend={handleComposerSend}
         disabled={readOnly}
+        // Matches the thread's p-4 gutter so the composer card lines up with
+        // the messages instead of running flush against the panel edges.
+        className="px-4 pb-4"
         placeholder={
           readOnly
             ? 'Read-only conversation'

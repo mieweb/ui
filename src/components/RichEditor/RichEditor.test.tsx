@@ -10,6 +10,10 @@ import { CodeEditor } from './CodeEditor';
 // smoke tests that just verify the wrappers mount/unmount without throwing.
 const changeRoom = vi.fn();
 const setProps = vi.fn();
+// Stands in for the ProseMirror document. Identity is what the component uses
+// to tell an edit from a selection change, so tests swap the object to mean
+// "the document changed" and leave it alone to mean "only the caret moved".
+const docMock = { current: { id: 'doc-0' } as object };
 const editorMock = {
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
@@ -19,18 +23,62 @@ const editorMock = {
     .fn()
     .mockResolvedValue(new globalThis.TextEncoder().encode('# hello')),
   run: { changeRoom },
-  view: { setProps },
+  view: {
+    setProps,
+    get state() {
+      return { doc: docMock.current };
+    },
+  },
 };
+
+/** Extension names the kit handed to `CoreEditor.create` produces. */
+const extensionNames = () => {
+  const { editorKits } = coreEditorCreate.mock.calls[0][0] as {
+    editorKits: { getExtensions: () => { name: string }[] }[];
+  };
+  return editorKits[0].getExtensions().map((extension) => extension.name);
+};
+
+/** The `transaction` handler the component registered on mount. */
+const transactionHandler = () =>
+  editorMock.addEventListener.mock.calls.find(
+    ([event]) => event === 'transaction'
+  )?.[1] as () => Promise<void>;
 
 const coreEditorCreate = vi.fn((_opts: unknown) => editorMock);
 vi.mock('@kerebron/editor', () => ({
   CoreEditor: { create: (opts: unknown) => coreEditorCreate(opts) },
 }));
+// A stand-in for the real kit's extension list: enough of it to observe which
+// extensions the wrapper drops and which it replaces.
 vi.mock('@kerebron/editor-kits/AdvancedEditorKit', () => ({
-  AdvancedEditorKit: vi.fn(() => ({ getExtensions: () => [] })),
+  AdvancedEditorKit: vi.fn(() => ({
+    getExtensions: () => [
+      { name: 'mediaUpload' },
+      { name: 'history' },
+      { name: 'autocomplete' },
+      { name: 'hover' },
+      { name: 'bold' },
+    ],
+  })),
 }));
 vi.mock('@kerebron/editor-kits/CodeEditorKit', () => ({
   CodeEditorKit: vi.fn(),
+}));
+// `vi.hoisted` because this module is imported statically by editorKits.ts, so
+// the mock factory runs before a plain top-level const would be initialized.
+// (The collab kit below escapes this only because it is imported dynamically.)
+const { extensionMediaUpload } = vi.hoisted(() => ({
+  extensionMediaUpload: vi.fn(function (
+    this: Record<string, unknown>,
+    config: unknown
+  ) {
+    this.name = 'mediaUpload';
+    this.config = config;
+  }),
+}));
+vi.mock('@kerebron/extension-basic-editor/ExtensionMediaUpload', () => ({
+  ExtensionMediaUpload: extensionMediaUpload,
 }));
 vi.mock('@kerebron/wasm/web', () => ({
   createAssetLoad: vi.fn(() => vi.fn()),
@@ -63,6 +111,7 @@ describe('RichEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     collabKitLoadError = null;
+    docMock.current = { id: 'doc-0' };
   });
 
   it('renders without throwing', async () => {
@@ -175,10 +224,7 @@ describe('RichEditor', () => {
       )
     );
 
-    const onTransaction = editorMock.addEventListener.mock.calls.find(
-      ([event]) => event === 'transaction'
-    )?.[1] as () => Promise<void>;
-    await onTransaction();
+    await transactionHandler()();
     expect(onChange).not.toHaveBeenCalled();
 
     finishLoad();
@@ -223,6 +269,31 @@ describe('RichEditor', () => {
       expect(changeRoom).not.toHaveBeenCalled();
     });
 
+    // The fallback builds a second, local kit. Handing it `mediaUpload` is
+    // easy to forget, and forgetting is silent: the stock extension returns
+    // and pasted images go back to being embedded as base64.
+    it('keeps the configured media upload when it degrades to local', async () => {
+      collabKitLoadError = new Error(
+        'Failed to fetch dynamically imported module'
+      );
+      const uploadHandler = vi.fn().mockResolvedValue('https://cdn.test/a.png');
+
+      renderWithTheme(
+        <RichEditor
+          value="# shared"
+          collab={{ room: 'room-1' }}
+          mediaUpload={{ uploadHandler }}
+        />
+      );
+
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+      // `getExtensions` is lazy, so read the names first — that is what
+      // constructs the extensions this asserts on.
+      const names = extensionNames();
+      expect(extensionMediaUpload).toHaveBeenCalledWith({ uploadHandler });
+      expect(names.filter((name) => name === 'mediaUpload')).toHaveLength(1);
+    });
+
     it('tells the host through onUnavailable', async () => {
       const failure = new Error('Failed to fetch dynamically imported module');
       collabKitLoadError = failure;
@@ -261,6 +332,74 @@ describe('RichEditor', () => {
     editorMock.loadDocumentText.mockClear();
     rerender(<RichEditor value="# two" collab={{ room: 'room-1' }} />);
     expect(editorMock.loadDocumentText).not.toHaveBeenCalled();
+  });
+
+  it('skips re-serializing when only the selection changed', async () => {
+    // ProseMirror fires a transaction for arrow keys, clicks and blurs too.
+    // Serializing the document for those costs a tree-sitter pass and a React
+    // render per caret move.
+    const onChange = vi.fn();
+    renderWithTheme(<RichEditor onChange={onChange} />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    editorMock.saveDocument.mockClear();
+    onChange.mockClear();
+
+    await transactionHandler()();
+    await transactionHandler()();
+
+    expect(editorMock.saveDocument).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('re-serializes when the document actually changed', async () => {
+    const onChange = vi.fn();
+    renderWithTheme(<RichEditor onChange={onChange} />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    editorMock.saveDocument.mockClear();
+    onChange.mockClear();
+
+    docMock.current = { id: 'doc-1' };
+    await transactionHandler()();
+
+    expect(editorMock.saveDocument).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith('# hello');
+  });
+
+  it('replaces the media-upload extension with a configured one', async () => {
+    // Without an uploadHandler the extension embeds pasted images in the
+    // document as base64 `data:` URLs, so a host that persists its documents
+    // has to be able to configure it. The kit builds its extensions with no
+    // options, and options are fixed at construction, so the stock instance has
+    // to be dropped rather than adjusted.
+    const uploadHandler = vi.fn().mockResolvedValue('https://cdn.test/a.png');
+    renderWithTheme(<RichEditor mediaUpload={{ uploadHandler }} />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+    const names = extensionNames();
+    expect(extensionMediaUpload).toHaveBeenCalledWith({ uploadHandler });
+    // Exactly one — the stock instance is gone, not shadowed by a second.
+    expect(names.filter((name) => name === 'mediaUpload')).toHaveLength(1);
+  });
+
+  it('leaves the default media-upload extension alone when unconfigured', async () => {
+    renderWithTheme(<RichEditor />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+    expect(extensionMediaUpload).not.toHaveBeenCalled();
+    expect(extensionNames()).toContain('mediaUpload');
+  });
+
+  it('drops the teardown-unsafe extensions, and keeps history in plain mode', async () => {
+    renderWithTheme(<RichEditor />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+    const names = extensionNames();
+    // `autocomplete`/`hover` fire debounced callbacks at a destroyed view.
+    expect(names).not.toContain('autocomplete');
+    expect(names).not.toContain('hover');
+    // `history` only conflicts with the Yjs CRDT, so plain mode keeps undo.
+    expect(names).toContain('history');
+    expect(names).toContain('bold');
   });
 
   it('disabled makes the surface read-only and labelled', async () => {

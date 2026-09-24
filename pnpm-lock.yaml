@@ -113,6 +113,9 @@ importers:
       '@kerebron/editor-kits':
         specifier: ^0.8.6
         version: 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/extension-basic-editor':
+        specifier: ^0.8.6
+        version: 0.8.9
       '@kerebron/extension-yjs':
         specifier: ^0.8.6
         version: 0.8.9

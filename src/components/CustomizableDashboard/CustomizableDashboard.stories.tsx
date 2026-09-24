@@ -73,6 +73,11 @@ const [toolbarEl, setToolbarEl] = useState<HTMLElement | null>(null);
       relationships: [
         {
           type: 'composes with',
+          target: 'views-viewset',
+          why: "A dashboard of widgets is the usual filling for ViewSet's overview slot.",
+        },
+        {
+          type: 'composes with',
           target: 'dashboards-dashboardwidget',
           why: 'DashboardWidget is the expected portlet node: its data-slot="dashboard-widget-header" is where CustomizableDashboard appends the drag handle.',
         },
