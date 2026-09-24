@@ -299,6 +299,24 @@ const MAX_INPUT_HEIGHT = 160;
 /** Touch-first devices (phones, tablets without a trackpad). */
 const TOUCH_DEVICE_QUERY = '(hover: none) and (pointer: coarse)';
 
+/**
+ * Card descendants that keep their own pointer behavior (and text that
+ * stays selectable) instead of forwarding a tap to the textarea.
+ */
+const CARD_INTERACTIVE_SELECTOR = [
+  'button',
+  'a',
+  'input',
+  'textarea',
+  'select',
+  'label',
+  'video',
+  '[role="listbox"]',
+  '[role="menu"]',
+  '[data-slot="chat-composer-reply-preview"]',
+  '[data-slot="chat-composer-attachments"]',
+].join(',');
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -629,6 +647,17 @@ export const ChatComposer = React.forwardRef<
     event.preventDefault();
   };
 
+  // Tapping the card's padding or empty toolbar space focuses the input
+  // (claude.ai / chatgpt.com parity) instead of doing nothing — or, with the
+  // keyboard open, blurring the input and dismissing it.
+  const focusInputFromCard = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    const target = event.target as HTMLElement;
+    if (target.closest(CARD_INTERACTIVE_SELECTOR)) return;
+    event.preventDefault();
+    textareaRef.current?.focus();
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // @mention menu navigation takes priority over send.
     if (mention.handleKeyDown(event)) return;
@@ -793,9 +822,11 @@ export const ChatComposer = React.forwardRef<
             }}
             placeholder={placeholder}
             disabled={disabled}
-            // Host-opt-in only; off by default.
+            // Host-opt-in only; off by default. Skipped on touch devices,
+            // where focusing pops the on-screen keyboard over the page the
+            // user just navigated to.
             // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus={autoFocus}
+            autoFocus={autoFocus && !isTouchDevice}
             rows={1}
             aria-label={inputLabel}
             {...mention.inputProps}
@@ -1056,10 +1087,13 @@ export const ChatComposer = React.forwardRef<
   // validation and structured `onError` reporting stay in one place (the
   // zone itself does not validate).
   const card = (
+    // Pointer-only convenience: the textarea stays the keyboard/AT target.
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       data-slot="chat-composer-card"
+      onMouseDown={focusInputFromCard}
       className={cn(
-        'rounded-2xl border border-neutral-200 bg-white shadow-sm',
+        'cursor-text rounded-2xl border border-neutral-200 bg-white shadow-sm',
         'dark:border-[#2e2e30] dark:bg-[#1c1c1e]'
       )}
     >

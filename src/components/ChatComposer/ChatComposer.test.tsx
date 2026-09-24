@@ -99,6 +99,36 @@ describe('ChatComposer', () => {
       expect(onSend).toHaveBeenCalled();
       expect(input).toHaveAttribute('enterkeyhint', 'send');
     });
+
+    it('ignores autoFocus so the keyboard does not pop on navigation', () => {
+      // eslint-disable-next-line jsx-a11y/no-autofocus
+      renderWithTheme(<ChatComposer autoFocus />);
+      expect(getInput()).not.toHaveFocus();
+    });
+  });
+
+  it('honors autoFocus on fine-pointer devices', () => {
+    // eslint-disable-next-line jsx-a11y/no-autofocus
+    renderWithTheme(<ChatComposer autoFocus />);
+    expect(getInput()).toHaveFocus();
+  });
+
+  it('focuses the input when pressing empty card space', () => {
+    const { container } = renderWithTheme(<ChatComposer onSend={vi.fn()} />);
+    const card = container.querySelector('[data-slot="chat-composer-card"]')!;
+
+    expect(fireEvent.mouseDown(card)).toBe(false);
+    fireEvent.mouseUp(card);
+    expect(getInput()).toHaveFocus();
+  });
+
+  it('leaves presses on card buttons alone', () => {
+    renderWithTheme(<ChatComposer />);
+    const addButton = screen.getByRole('button', { name: /add to message/i });
+
+    expect(fireEvent.mouseDown(addButton)).toBe(true);
+    fireEvent.mouseUp(addButton);
+    expect(getInput()).not.toHaveFocus();
   });
 
   it('keeps focus on the input when pressing send', () => {
