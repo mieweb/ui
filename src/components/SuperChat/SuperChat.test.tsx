@@ -852,7 +852,9 @@ describe('SuperChat', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('only offers editing on the local user’s own messages', () => {
+  it('only offers editing on the local user’s own messages', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
     render(
       <div style={{ height: 400 }}>
         <SuperChat
@@ -862,10 +864,42 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    // u1 authored m1; a1 authored m2 — only one edit button should exist.
-    const editButtons = screen.getAllByRole('button', { name: 'Edit message' });
-    expect(editButtons).toHaveLength(1);
+    // Editable messages collapse copy + edit into the ⋯ menu, so there is no
+    // direct edit button; only u1's own message (m1, first) offers the entry.
+    expect(
+      screen.queryByRole('button', { name: 'Edit message' })
+    ).not.toBeInTheDocument();
+    const overflows = screen.getAllByRole('button', {
+      name: 'Message actions',
+    });
+    await user.click(overflows[0]);
+    expect(
+      await screen.findByRole('menuitem', { name: 'Edit message' })
+    ).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    await user.click(overflows[1]);
+    await screen.findByRole('menuitem', { name: 'Copy as' });
+    expect(
+      screen.queryByRole('menuitem', { name: 'Edit message' })
+    ).not.toBeInTheDocument();
   });
+
+  /**
+   * Starts editing the local user's own message (m1, the first overflow
+   * trigger): with copy + edit collapsed into the ⋯ menu, editing begins from
+   * its menu item rather than a direct icon button.
+   */
+  async function startEditViaMenu(user: {
+    click: (element: Element) => Promise<void>;
+  }) {
+    const [selfOverflow] = screen.getAllByRole('button', {
+      name: 'Message actions',
+    });
+    await user.click(selfOverflow);
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Edit message' })
+    );
+  }
 
   it('edits a message and fires onMessageEdited with the new text', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -880,7 +914,7 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    await startEditViaMenu(user);
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     await user.clear(editor);
     await user.type(editor, 'edited body');
@@ -906,7 +940,7 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    await startEditViaMenu(user);
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     const file = new File(['fake-bytes'], 'edited.png', { type: 'image/png' });
     fireEvent.paste(editor, {
@@ -938,7 +972,7 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    await startEditViaMenu(user);
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     await user.type(editor, ' extra');
     await user.click(screen.getByRole('button', { name: 'Cancel' }));

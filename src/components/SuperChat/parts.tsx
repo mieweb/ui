@@ -520,9 +520,10 @@ function FooterActionButton({
 }
 
 /**
- * The hover-revealed stack of action icon buttons in the avatar gutter, at the
- * end of a message. Each button runs its action's default behavior; explicit
- * variants live in the sticky overflow menu ({@link MessageOverflowMenu}).
+ * The hover-revealed action icon button in the avatar gutter, at the end of a
+ * message. Rendered only when a message has a single action — multiple actions
+ * collapse into the sticky overflow menu ({@link MessageOverflowMenu}), which
+ * also hosts each action's explicit variants.
  */
 const MessageActionsBar = React.forwardRef<
   HTMLDivElement,
@@ -908,6 +909,11 @@ export const MessageRow = React.memo(function MessageRow({
       : []),
   ];
 
+  // A lone action shows its icon directly (with the sticky ⋯ hand-off on long
+  // messages); multiple actions collapse into the ⋯ menu alone so the gutter
+  // never stacks a pile of icons.
+  const collapseToMenu = actions.length > 1;
+
   return (
     <div
       data-slot="superchat-message"
@@ -931,13 +937,15 @@ export const MessageRow = React.memo(function MessageRow({
             <MessageOverflowMenu
               isSelf={isSelf}
               actions={actions}
-              footerVisible={footerVisible}
+              footerVisible={collapseToMenu ? false : footerVisible}
             />
-            <MessageActionsBar
-              ref={actionsBarRef}
-              actions={actions}
-              isSelf={isSelf}
-            />
+            {!collapseToMenu && (
+              <MessageActionsBar
+                ref={actionsBarRef}
+                actions={actions}
+                isSelf={isSelf}
+              />
+            )}
           </>
         )}
       </div>
