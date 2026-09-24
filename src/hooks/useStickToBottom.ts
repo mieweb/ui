@@ -107,6 +107,10 @@ export function useStickToBottom({
       setIsAtBottom(atBottom);
     };
 
+    // A freshly attached node starts at `scrollTop` 0 — re-assert carried-over
+    // pinning (e.g. across SuperChat's plain ⇄ virtualized swap) instead of
+    // letting the initial read demote a pinned reader to "scrolled up".
+    if (pinnedRef.current) pinToBottom(el);
     handleScroll(); // initial position
     el.addEventListener('scroll', handleScroll, { passive: true });
     return () => el.removeEventListener('scroll', handleScroll);

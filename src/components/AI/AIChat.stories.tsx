@@ -343,7 +343,7 @@ function StreamingChat() {
     },
   ]);
   const [generating, setGenerating] = React.useState(false);
-  const intervalRef = React.useRef<number>(undefined);
+  const intervalRef = React.useRef<number | undefined>(undefined);
   const timeoutsRef = React.useRef<number[]>([]);
 
   const streamResponse = React.useCallback(() => {

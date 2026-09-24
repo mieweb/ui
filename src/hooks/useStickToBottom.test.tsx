@@ -41,17 +41,24 @@ class MockResizeObserver {
 function Harness({
   disabled = false,
   containerKey = 'a',
+  initialMetrics,
 }: {
   disabled?: boolean;
   containerKey?: string;
+  /** Applied via callback ref so the node has geometry before effects run. */
+  initialMetrics?: { scrollHeight?: number; clientHeight?: number };
 }) {
   const { containerRef, contentRef, isAtBottom, scrollToBottom } =
     useStickToBottom({ disabled });
+  const attachContainer = (node: HTMLDivElement | null) => {
+    if (node && initialMetrics) mockMetrics(node, initialMetrics);
+    containerRef.current = node;
+  };
   return (
     <div>
       {/* `key` swaps the container DOM node without remounting the hook —
           the same shape as SuperChat toggling its virtualized thread. */}
-      <div key={containerKey} data-testid="container" ref={containerRef}>
+      <div key={containerKey} data-testid="container" ref={attachContainer}>
         <div ref={contentRef} />
       </div>
       <output data-testid="at-bottom">{String(isAtBottom)}</output>
@@ -167,6 +174,41 @@ describe('useStickToBottom', () => {
     mockMetrics(second, { scrollHeight: 1400 });
     act(() => MockResizeObserver.trigger());
     expect(second.scrollTop).toBe(1400);
+  });
+
+  it('keeps a pinned reader at the bottom across a node swap', () => {
+    const metrics = { scrollHeight: 1000, clientHeight: 400 };
+    const { rerender } = render(
+      <Harness containerKey="plain" initialMetrics={metrics} />
+    );
+    const first = screen.getByTestId('container');
+    first.scrollTop = 600;
+    fireEvent.scroll(first); // pinned at the bottom
+
+    rerender(<Harness containerKey="virtualized" initialMetrics={metrics} />);
+    const second = screen.getByTestId('container');
+    expect(second).not.toBe(first);
+
+    // The fresh node starts at scrollTop 0 — the hook must re-anchor it to the
+    // bottom instead of demoting the reader to "scrolled up".
+    expect(second.scrollTop).toBe(1000);
+    expect(screen.getByTestId('at-bottom').textContent).toBe('true');
+  });
+
+  it('does not move a scrolled-up reader to the bottom across a node swap', () => {
+    const metrics = { scrollHeight: 1000, clientHeight: 400 };
+    const { rerender } = render(
+      <Harness containerKey="plain" initialMetrics={metrics} />
+    );
+    const first = screen.getByTestId('container');
+    first.scrollTop = 100;
+    fireEvent.scroll(first); // reading older messages
+
+    rerender(<Harness containerKey="virtualized" initialMetrics={metrics} />);
+    const second = screen.getByTestId('container');
+
+    expect(second.scrollTop).toBe(0); // not yanked to the bottom
+    expect(screen.getByTestId('at-bottom').textContent).toBe('false');
   });
 
   it('does nothing while disabled', () => {

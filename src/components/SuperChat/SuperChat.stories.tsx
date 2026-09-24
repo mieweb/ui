@@ -596,7 +596,7 @@ function StreamingPanel(
   props: Partial<React.ComponentProps<typeof SuperChat>>
 ) {
   const [convo, setConvo] = React.useState(streamingInitial);
-  const intervalRef = React.useRef<number>(undefined);
+  const intervalRef = React.useRef<number | undefined>(undefined);
   const timeoutsRef = React.useRef<number[]>([]);
 
   const streamResponse = React.useCallback(() => {
