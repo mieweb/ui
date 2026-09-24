@@ -24,7 +24,7 @@ const meta: Meta<typeof AIChat> = {
       description: {
         component: `### What it's for
 
-**A controlled, single-assistant chat surface: thread + composer + suggestion chips, with the host owning every message.** \`AIChat\` takes \`messages: AIMessage[]\` (or a \`session\`), renders one \`AIMessageDisplay\` per message inside a scrolling \`data-slot="ai-chat-messages"\` region that auto-scrolls to the newest message, and renders the standardized \`ChatComposer\` (attachments off, 1600-char cap, \`aria-label="Message"\`) as its input. Anatomy: a **header** (\`title\`, default "AI Assistant"; a red **Stop** button while \`isGenerating && onCancel\`; icon buttons for \`onClear\` and \`onClose\`; hide it with \`showHeader={false}\`), the **thread** (empty state "How can I help you today?" with \`suggestions\` chips; \`showTimestamps\`), a **suggestions row** above the composer once the thread is non-empty and not generating, and the **composer** (\`inputPlaceholder\`; \`composerProps\` passes \`ChatComposerProps\` through — legacy \`MessageComposerProps\` keys such as \`showAttachmentPicker\` and \`inputTrailing\` are still accepted and mapped; \`talkToText\` adds a \`RecordButton\` in the composer's mic slot wired to \`onRecordingStart\` / \`onRecordingComplete(blob, duration)\`). Suggestions are \`{ id, label, prompt, icon }\`; \`icon\` maps to a built-in glyph set (\`patient\`, \`search\`, \`appointment\`, \`document\`, \`help\`, \`default\`); selecting one calls \`onSuggestedAction\` or, if absent, \`onSendMessage(prompt)\`. \`renderTextContent(text, { messageId, streaming, role })\` and \`renderMessageFooter(message)\` are threaded to every message. Also exported: \`SuggestedActions\`, and the wrappers \`AIChatModal\` (\`open\`, \`onOpenChange\`, \`position\` \`bottom-right\` | \`bottom-left\` | \`center\`, \`width\`, \`height\`), \`AIChatTrigger\` and \`FloatingAIChat\` (trigger + modal, controlled or \`defaultOpen\`), which forward every \`AIChat\` prop. Variants: \`variant\` \`default\` | \`embedded\` | \`floating\`; \`size\` \`sm\`…\`full\`; \`height\`.
+**A controlled, single-assistant chat surface: thread + composer + suggestion chips, with the host owning every message.** \`AIChat\` takes \`messages: AIMessage[]\` (or a \`session\`), renders one \`AIMessageDisplay\` per message inside a scrolling \`data-slot="ai-chat-messages"\` region that pins to the newest message while the reader is at the bottom (scrolling up preserves the position and shows a floating \u2193 jump-to-bottom button \u2014 see the Streaming Response story), and renders the standardized \`ChatComposer\` (attachments off, 1600-char cap, \`aria-label="Message"\`) as its input. Anatomy: a **header** (\`title\`, default "AI Assistant"; a red **Stop** button while \`isGenerating && onCancel\`; icon buttons for \`onClear\` and \`onClose\`; hide it with \`showHeader={false}\`), the **thread** (empty state "How can I help you today?" with \`suggestions\` chips; \`showTimestamps\`), a **suggestions row** above the composer once the thread is non-empty and not generating, and the **composer** (\`inputPlaceholder\`; \`composerProps\` passes \`ChatComposerProps\` through — legacy \`MessageComposerProps\` keys such as \`showAttachmentPicker\` and \`inputTrailing\` are still accepted and mapped; \`talkToText\` adds a \`RecordButton\` in the composer's mic slot wired to \`onRecordingStart\` / \`onRecordingComplete(blob, duration)\`). Suggestions are \`{ id, label, prompt, icon }\`; \`icon\` maps to a built-in glyph set (\`patient\`, \`search\`, \`appointment\`, \`document\`, \`help\`, \`default\`); selecting one calls \`onSuggestedAction\` or, if absent, \`onSendMessage(prompt)\`. \`renderTextContent(text, { messageId, streaming, role })\` and \`renderMessageFooter(message)\` are threaded to every message. Also exported: \`SuggestedActions\`, and the wrappers \`AIChatModal\` (\`open\`, \`onOpenChange\`, \`position\` \`bottom-right\` | \`bottom-left\` | \`center\`, \`width\`, \`height\`), \`AIChatTrigger\` and \`FloatingAIChat\` (trigger + modal, controlled or \`defaultOpen\`), which forward every \`AIChat\` prop. Variants: \`variant\` \`default\` | \`embedded\` | \`floating\`; \`size\` \`sm\`…\`full\`; \`height\`.
 
 ### Use it when
 
@@ -287,6 +287,189 @@ export const GeneratingResponse: Story = {
   },
 };
 
+// ============================================================================
+// Streaming response (scroll anchoring + jump to bottom)
+// ============================================================================
+// A long AI answer streams in chunk by chunk. While the user is at the bottom
+// the thread follows the stream; the moment they scroll up to read, their
+// position is preserved and the floating ↓ button appears. A follow-up
+// message lands after the stream completes, so scrolling up also demos the
+// "New messages" hint on the button.
+
+const streamedAnswer = `Here is the full visit summary — no detail spared.
+
+Presenting concerns: the patient presented with a two-week history of intermittent palpitations, most noticeable in the evening and after caffeine. No syncope, no chest pain, no dyspnea on exertion. Symptoms are non-positional and resolve spontaneously within minutes.
+
+History: hypertension, well controlled on lisinopril 10 mg daily. No prior arrhythmia and no structural heart disease on the last echo (2024). Family history is notable for a father with atrial fibrillation at age 62. Social history: two espressos daily, no tobacco, alcohol 2–3 drinks per week.
+
+Examination: BP 128/82, HR 76 regular, afebrile. Cardiac exam unremarkable — no murmurs, rubs, or gallops. Lungs clear bilaterally. No peripheral edema.
+
+Data review: the 12-lead ECG from today shows normal sinus rhythm with no ectopy. CBC from last week is within normal limits. TSH is 2.1 mIU/L (normal). Potassium today is 4.6 mmol/L.
+
+Assessment: palpitations, most consistent with benign premature beats provoked by caffeine. Low suspicion for sustained arrhythmia given the normal ECG, normal thyroid function, and absence of red-flag features. The family history of AF warrants a documented rhythm before fully closing the loop.
+
+Plan: a 14-day ambulatory rhythm monitor to capture a symptomatic episode; a trial of caffeine reduction (one espresso daily) with a symptom diary; continue lisinopril unchanged and recheck BP at follow-up; return precautions reviewed — syncope, chest pain, or sustained rapid palpitations prompt urgent evaluation; follow-up visit in three weeks to review the monitor data.
+
+The rhythm monitor referral has been queued and the symptom diary template added to the patient portal. All of today's findings are documented in the encounter note.`;
+
+/** Word-sized chunks so the stream reads naturally. */
+const streamChunks = streamedAnswer.match(/[^ ]+( |$)/g) ?? [streamedAnswer];
+
+function StreamingChat() {
+  const [messages, setMessages] = React.useState<AIMessage[]>([
+    {
+      id: 'seed-1',
+      role: 'assistant',
+      status: 'complete',
+      timestamp: new Date(),
+      content: [
+        {
+          type: 'text',
+          text: 'The encounter note is ready for review. Want the highlights or the full summary?',
+        },
+      ],
+    },
+    {
+      id: 'seed-2',
+      role: 'user',
+      status: 'complete',
+      timestamp: new Date(),
+      content: [
+        {
+          type: 'text',
+          text: 'Give me the full summary — don’t spare any detail.',
+        },
+      ],
+    },
+  ]);
+  const [generating, setGenerating] = React.useState(false);
+  const intervalRef = React.useRef<number>(undefined);
+  const timeoutsRef = React.useRef<number[]>([]);
+
+  const streamResponse = React.useCallback(() => {
+    const messageId = `stream-${Date.now()}`;
+    setGenerating(true);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: messageId,
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date(),
+        content: [],
+      },
+    ]);
+    let cursor = 0;
+    window.clearInterval(intervalRef.current);
+    intervalRef.current = window.setInterval(() => {
+      // A few words per tick ≈ token streaming.
+      cursor = Math.min(cursor + 4, streamChunks.length);
+      const done = cursor >= streamChunks.length;
+      const text = streamChunks.slice(0, cursor).join('');
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId
+            ? {
+                ...m,
+                content: [{ type: 'text' as const, text }],
+                status: done ? ('complete' as const) : ('streaming' as const),
+              }
+            : m
+        )
+      );
+      if (done) {
+        window.clearInterval(intervalRef.current);
+        setGenerating(false);
+        // A trailing message a beat later — scrolled-up users get the
+        // "New messages" hint on the jump-to-bottom button.
+        timeoutsRef.current.push(
+          window.setTimeout(() => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `after-${Date.now()}`,
+                role: 'assistant',
+                status: 'complete',
+                timestamp: new Date(),
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Anything else you’d like me to pull from the chart?',
+                  },
+                ],
+              },
+            ]);
+          }, 1200)
+        );
+      }
+    }, 120);
+  }, []);
+
+  // Kick off the demo stream shortly after mount; clean up on unmount.
+  React.useEffect(() => {
+    const kickoff = window.setTimeout(streamResponse, 800);
+    const timeouts = timeoutsRef.current;
+    return () => {
+      window.clearTimeout(kickoff);
+      window.clearInterval(intervalRef.current);
+      timeouts.forEach((t) => window.clearTimeout(t));
+    };
+  }, [streamResponse]);
+
+  return (
+    <AIChat
+      messages={messages}
+      isGenerating={generating}
+      height="100%"
+      userName="Dr. Jane"
+      onSendMessage={(text) => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `m-${Date.now()}`,
+            role: 'user',
+            status: 'complete',
+            timestamp: new Date(),
+            content: [{ type: 'text', text }],
+          },
+        ]);
+        // Every send triggers another long streamed answer.
+        timeoutsRef.current.push(window.setTimeout(streamResponse, 600));
+      }}
+    />
+  );
+}
+
+export const StreamingResponse: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'A long AI answer **streams in** while the user reads. Scroll behavior:',
+          '',
+          '- **At the bottom** — the thread stays pinned and follows the stream',
+          '  (content growth *and* container resizes re-pin via `useStickToBottom`).',
+          '- **Scrolled up** — the position is preserved exactly; nothing yanks the',
+          '  reader down. A floating **↓ jump-to-bottom** button appears over the',
+          '  thread (`data-slot="ai-chat-jump-to-bottom"`).',
+          '- When messages arrive while scrolled up, the button grows a',
+          '  **“New messages”** hint. Clicking it returns to the newest message and',
+          '  resumes pinning. Sending your own message always scrolls to the bottom.',
+          '',
+          'Try it: while the answer streams, scroll up — then click ↓. Sending any',
+          'message triggers another long streamed answer. Same policy as SuperChat;',
+          'the behavior is reusable via the exported `useStickToBottom` hook.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: () => (
+    <div className="h-[600px]">
+      <StreamingChat />
+    </div>
+  ),
+};
+
 /** Talk-to-text: the composer exposes a microphone for voice input. */
 export const TalkToText: Story = {
   render: () => (
@@ -304,7 +487,6 @@ export const TalkToText: Story = {
     </div>
   ),
 };
-
 /**
  * The **Suggested Actions** bar in isolation. These are the quick-prompt pill
  * buttons rendered by `AIChat` via its `suggestions` prop; each `icon` key maps

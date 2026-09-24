@@ -508,3 +508,213 @@ export const MarkdownShowcase: Story = {
     </div>
   ),
 };
+
+// ============================================================================
+// Streaming response (scroll anchoring + jump to bottom)
+// ============================================================================
+// A long AI answer streams in chunk by chunk. While the user is at the bottom
+// the thread follows the stream; the moment they scroll up to read, their
+// position is preserved and the floating ↓ button appears. A follow-up
+// message lands after the stream completes, so scrolling up also demos the
+// "New messages" hint on the button.
+
+const streamParticipants = [
+  {
+    id: 'u1',
+    kind: 'human' as const,
+    name: 'Dr. Alice Reyes',
+    color: '#0e7490',
+  },
+  { id: 'a1', kind: 'agent' as const, name: 'Summary Agent', color: '#2563eb' },
+];
+
+const streamedAnswer = `Here is the **full visit summary** — no detail spared.
+
+## Presenting concerns
+
+The patient presented with a two-week history of intermittent palpitations, most noticeable in the evening and after caffeine. No syncope, no chest pain, no dyspnea on exertion. Symptoms are non-positional and resolve spontaneously within minutes.
+
+## History
+
+- Hypertension, well controlled on lisinopril 10 mg daily
+- No prior arrhythmia, no structural heart disease on last echo (2024)
+- Family history: father with atrial fibrillation at age 62
+- Social: two espressos daily, no tobacco, alcohol 2–3 drinks/week
+
+## Examination
+
+Vitals today: BP **128/82**, HR 76 regular, afebrile. Cardiac exam unremarkable — no murmurs, rubs, or gallops. Lungs clear bilaterally. No peripheral edema.
+
+## Data review
+
+| Study | Date | Result |
+| --- | --- | --- |
+| 12-lead ECG | today | Normal sinus rhythm, no ectopy |
+| CBC | last week | Within normal limits |
+| TSH | last week | 2.1 mIU/L (normal) |
+| Potassium | today | 4.6 mmol/L |
+
+## Assessment
+
+Palpitations, most consistent with benign premature beats provoked by caffeine. Low suspicion for sustained arrhythmia given the normal ECG, normal thyroid function, and absence of red-flag features. Family history of AF warrants a documented rhythm before fully closing the loop.
+
+## Plan
+
+1. 14-day ambulatory rhythm monitor to capture a symptomatic episode
+2. Trial of caffeine reduction (one espresso daily) with a symptom diary
+3. Continue lisinopril unchanged; recheck BP at follow-up
+4. Return precautions reviewed — syncope, chest pain, or sustained rapid palpitations prompt urgent evaluation
+5. Follow-up visit in three weeks to review the monitor data
+
+The rhythm monitor referral has been queued and the symptom diary template added to the patient portal. All of today's findings are documented in the encounter note.`;
+
+/** Sentence-ish chunks so the stream reads naturally. */
+const streamChunks = streamedAnswer.match(/[^ ]+( |$)/g) ?? [streamedAnswer];
+
+const streamingInitial: SuperChatConversation = {
+  id: 'streaming-demo',
+  title: 'Visit summary',
+  reference_id: 'patient/4821',
+  participants: streamParticipants,
+  thread: [
+    {
+      id: 'sm-1',
+      participantId: 'a1',
+      text: 'The encounter note is ready for review. Want the highlights or the full summary?',
+      time: '2026-06-01T09:00:00Z',
+    },
+    {
+      id: 'sm-2',
+      participantId: 'u1',
+      text: '@Summary give me the **full** summary — don’t spare any detail.',
+      time: '2026-06-01T09:00:30Z',
+    },
+  ],
+};
+
+function StreamingPanel(
+  props: Partial<React.ComponentProps<typeof SuperChat>>
+) {
+  const [convo, setConvo] = React.useState(streamingInitial);
+  const intervalRef = React.useRef<number>(undefined);
+  const timeoutsRef = React.useRef<number[]>([]);
+
+  const streamResponse = React.useCallback(() => {
+    const messageId = `stream-${Date.now()}`;
+    setConvo((prev) => ({
+      ...prev,
+      thread: [
+        ...prev.thread,
+        {
+          id: messageId,
+          participantId: 'a1',
+          text: '',
+          status: 'streaming' as const,
+          time: new Date().toISOString(),
+        },
+      ],
+    }));
+    let cursor = 0;
+    window.clearInterval(intervalRef.current);
+    intervalRef.current = window.setInterval(() => {
+      // A few words per tick ≈ token streaming.
+      cursor = Math.min(cursor + 4, streamChunks.length);
+      const done = cursor >= streamChunks.length;
+      const text = streamChunks.slice(0, cursor).join('');
+      setConvo((prev) => ({
+        ...prev,
+        thread: prev.thread.map((m) =>
+          m.id === messageId
+            ? { ...m, text, status: done ? undefined : ('streaming' as const) }
+            : m
+        ),
+      }));
+      if (done) {
+        window.clearInterval(intervalRef.current);
+        // A trailing message a beat later — scrolled-up users get the
+        // "New messages" hint on the jump-to-bottom button.
+        timeoutsRef.current.push(
+          window.setTimeout(() => {
+            setConvo((prev) => ({
+              ...prev,
+              thread: [
+                ...prev.thread,
+                {
+                  id: `after-${Date.now()}`,
+                  participantId: 'a1',
+                  text: 'Anything else you’d like me to pull from the chart?',
+                  time: new Date().toISOString(),
+                },
+              ],
+            }));
+          }, 1200)
+        );
+      }
+    }, 120);
+  }, []);
+
+  // Kick off the demo stream shortly after mount; clean up on unmount.
+  React.useEffect(() => {
+    const kickoff = window.setTimeout(streamResponse, 800);
+    const timeouts = timeoutsRef.current;
+    return () => {
+      window.clearTimeout(kickoff);
+      window.clearInterval(intervalRef.current);
+      timeouts.forEach((t) => window.clearTimeout(t));
+    };
+  }, [streamResponse]);
+
+  return (
+    <SuperChat
+      {...props}
+      conversation={convo}
+      currentParticipantId="u1"
+      onMessageSent={(text) => {
+        setConvo((prev) => ({
+          ...prev,
+          thread: [
+            ...prev.thread,
+            {
+              id: `m-${Date.now()}`,
+              participantId: 'u1',
+              text,
+              time: new Date().toISOString(),
+            },
+          ],
+        }));
+        // Every send triggers another long streamed answer.
+        timeoutsRef.current.push(window.setTimeout(streamResponse, 600));
+      }}
+    />
+  );
+}
+
+export const StreamingResponse: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'A long AI answer **streams in** while the user reads. Scroll behavior:',
+          '',
+          '- **At the bottom** — the thread stays pinned and follows the stream',
+          '  (content growth *and* container resizes re-pin via `useStickToBottom`).',
+          '- **Scrolled up** — the position is preserved exactly; nothing yanks the',
+          '  reader down. A floating **↓ jump-to-bottom** button appears over the',
+          '  thread (`data-slot="superchat-jump-to-bottom"`).',
+          '- When messages arrive while scrolled up, the button grows a',
+          '  **“New messages”** hint. Clicking it returns to the newest message and',
+          '  resumes pinning. Sending your own message always scrolls to the bottom.',
+          '',
+          'Try it: while the answer streams, scroll up — then click ↓. Sending any',
+          'message triggers another long streamed answer. The same behavior is',
+          'reusable via the exported `useStickToBottom` hook.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
+      <StreamingPanel {...args} />
+    </div>
+  ),
+};

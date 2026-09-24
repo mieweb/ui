@@ -1128,6 +1128,179 @@ describe('SuperChat', () => {
     );
     expect(container.querySelector('code')).toHaveTextContent('const x = 1;');
   });
+
+  describe('scroll anchoring', () => {
+    // jsdom has no layout, so scroll metrics are mocked directly on the
+    // thread element and position changes are driven with scroll events.
+    function getThread(container: HTMLElement): HTMLDivElement {
+      const el = container.querySelector<HTMLDivElement>(
+        '[data-slot="superchat-thread"]'
+      );
+      if (!el) throw new Error('thread not found');
+      return el;
+    }
+
+    function mockMetrics(
+      el: HTMLElement,
+      { scrollHeight = 1000, clientHeight = 400 } = {}
+    ) {
+      Object.defineProperty(el, 'scrollHeight', {
+        configurable: true,
+        value: scrollHeight,
+      });
+      Object.defineProperty(el, 'clientHeight', {
+        configurable: true,
+        value: clientHeight,
+      });
+    }
+
+    function appended(
+      from: string,
+      base: SuperChatConversation = conversation
+    ): SuperChatConversation {
+      return {
+        ...base,
+        thread: [
+          ...base.thread,
+          {
+            id: `new-${from}`,
+            participantId: from,
+            text: 'more content below',
+            time: '2026-06-07T09:05:00Z',
+          },
+        ],
+      };
+    }
+
+    it('shows the jump-to-bottom button only while scrolled up', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+
+      // At the bottom (1000 - 600 - 400 = 0): no button.
+      thread.scrollTop = 600;
+      fireEvent.scroll(thread);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+      // Scrolled up: the button appears.
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+      expect(screen.getByLabelText('Scroll to bottom')).toBeInTheDocument();
+    });
+
+    it('preserves the reading position when a message arrives while scrolled up, and flags it', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      // Position untouched; the button now carries the new-messages hint.
+      expect(thread.scrollTop).toBe(100);
+      expect(screen.getByText('New messages')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('New messages — scroll to bottom')
+      ).toBeInTheDocument();
+    });
+
+    it('follows an incoming message while at the bottom', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+    });
+
+    it('always scrolls to the bottom for the local user’s own message', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('u1')} currentParticipantId="u1" />
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+    });
+
+    it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      await user.click(
+        screen.getByLabelText('New messages — scroll to bottom')
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+    });
+
+    it('keeps the top anchor and offers no jump button when order="desc"', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 300;
+      fireEvent.scroll(thread);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+      rerender(
+        <SuperChat
+          conversation={appended('a1')}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      );
+
+      // New message re-anchors to the top (feed style), still no button.
+      expect(thread.scrollTop).toBe(0);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+    });
+  });
 });
 
 describe('SuperChatConversations', () => {

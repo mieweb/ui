@@ -640,3 +640,134 @@ describe('AIChat (ChatComposer integration)', () => {
     });
   });
 });
+
+describe('AIChat scroll anchoring', () => {
+  // jsdom has no layout, so scroll metrics are mocked directly on the
+  // messages container and position changes are driven with scroll events.
+  function getMessagesEl(container: HTMLElement): HTMLDivElement {
+    const el = container.querySelector<HTMLDivElement>(
+      '[data-slot="ai-chat-messages"]'
+    );
+    if (!el) throw new Error('messages container not found');
+    return el;
+  }
+
+  function mockMetrics(
+    el: HTMLElement,
+    { scrollHeight = 1000, clientHeight = 400 } = {}
+  ) {
+    Object.defineProperty(el, 'scrollHeight', {
+      configurable: true,
+      value: scrollHeight,
+    });
+    Object.defineProperty(el, 'clientHeight', {
+      configurable: true,
+      value: clientHeight,
+    });
+  }
+
+  function appended(role: 'user' | 'assistant'): AIMessage[] {
+    return [
+      ...messages,
+      {
+        id: `new-${role}`,
+        role,
+        status: 'complete',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'more content below' }],
+      },
+    ];
+  }
+
+  afterEach(() => cleanup());
+
+  it('shows the jump-to-bottom button only while scrolled up', () => {
+    const { container } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+
+    // At the bottom (1000 - 600 - 400 = 0): no button.
+    thread.scrollTop = 600;
+    fireEvent.scroll(thread);
+    expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+    // Scrolled up: the button appears.
+    thread.scrollTop = 100;
+    fireEvent.scroll(thread);
+    expect(screen.getByLabelText('Scroll to bottom')).toBeInTheDocument();
+  });
+
+  it('preserves the reading position when a reply arrives while scrolled up, and flags it', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100;
+    fireEvent.scroll(thread);
+
+    rerender(
+      <AIChat messages={appended('assistant')} onSendMessage={vi.fn()} />
+    );
+
+    // Position untouched; the button now carries the new-messages hint.
+    expect(thread.scrollTop).toBe(100);
+    expect(screen.getByText('New messages')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('New messages — scroll to bottom')
+    ).toBeInTheDocument();
+  });
+
+  it('follows an incoming reply while at the bottom', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    rerender(
+      <AIChat messages={appended('assistant')} onSendMessage={vi.fn()} />
+    );
+
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+    expect(screen.queryByText('New messages')).toBeNull();
+  });
+
+  it('always scrolls to the bottom for the user’s own message', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // scrolled up
+    fireEvent.scroll(thread);
+
+    rerender(<AIChat messages={appended('user')} onSendMessage={vi.fn()} />);
+
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+  });
+
+  it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {
+    const user = await setupUser();
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100;
+    fireEvent.scroll(thread);
+    rerender(
+      <AIChat messages={appended('assistant')} onSendMessage={vi.fn()} />
+    );
+
+    await user.click(screen.getByLabelText('New messages — scroll to bottom'));
+
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+    expect(screen.queryByText('New messages')).toBeNull();
+    expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+  });
+});

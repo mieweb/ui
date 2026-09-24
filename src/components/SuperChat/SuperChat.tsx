@@ -12,6 +12,8 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useStickToBottom } from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
 import { ChatComposer } from '../ChatComposer/ChatComposer';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
@@ -20,10 +22,12 @@ import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
   ParticipantAvatar,
   MessageRow,
+  JumpToBottomButton,
   byTime,
   detectMentions,
   filesToComposerAttachments,
   acceptTokensFor,
+  lastMessageByTime,
 } from './parts';
 import { VirtualThread } from './VirtualThread';
 import type {
@@ -160,15 +164,72 @@ export function SuperChat({
     [renderTextContent, renderPlugins, trustedContent]
   );
 
-  const threadRef = React.useRef<HTMLDivElement>(null);
+  // --- Scroll anchoring -----------------------------------------------------
+  // The thread pins to the newest message only while the user is at the
+  // bottom. Once they scroll up to read, streaming growth and appended
+  // messages leave their position alone; a floating "jump to bottom" button
+  // offers the way back (and flags unseen messages). `desc` (feed-style)
+  // threads keep their top anchor and skip the affordance.
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const {
+    containerRef: threadRef,
+    contentRef: threadContentRef,
+    isAtBottom,
+    scrollToBottom,
+  } = useStickToBottom({ disabled: order === 'desc' });
+  const [hasNewBelow, setHasNewBelow] = React.useState(false);
+
+  // Anchor to the newest message on mount and when switching conversations:
+  // bottom for ascending order, top for descending (feed-style) order.
   React.useEffect(() => {
-    if (virtualized) return; // VirtualThread manages its own scroll anchoring.
-    const el = threadRef.current;
-    if (!el) return;
-    // Anchor to the newest message: bottom for ascending order, top for
-    // descending (feed-style) order.
-    el.scrollTop = order === 'desc' ? 0 : el.scrollHeight;
-  }, [conversation.thread.length, conversation.id, order, virtualized]);
+    if (order === 'desc') {
+      const el = threadRef.current;
+      if (el) el.scrollTop = 0;
+    } else {
+      scrollToBottom('auto');
+    }
+    setHasNewBelow(false);
+    // `threadRef`/`scrollToBottom` are stable for the hook instance.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversation.id, order]);
+
+  const threadLength = conversation.thread.length;
+  const lastMessage = React.useMemo(
+    () => lastMessageByTime(conversation.thread),
+    [conversation.thread]
+  );
+  const lastIsSelf =
+    !!currentParticipantId &&
+    lastMessage?.participantId === currentParticipantId;
+
+  // New-message policy: follow while pinned, always follow the local user's
+  // own sends, otherwise flag that unseen content arrived below.
+  const prevThreadLengthRef = React.useRef(threadLength);
+  React.useEffect(() => {
+    if (threadLength === prevThreadLengthRef.current) return;
+    const grew = threadLength > prevThreadLengthRef.current;
+    prevThreadLengthRef.current = threadLength;
+    if (order === 'desc') {
+      const el = threadRef.current;
+      if (el) el.scrollTop = 0;
+      return;
+    }
+    if (isAtBottom || lastIsSelf) {
+      scrollToBottom('auto');
+    } else if (grew) {
+      setHasNewBelow(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threadLength, order, isAtBottom, lastIsSelf]);
+
+  // The hint clears once the user reaches the bottom again.
+  React.useEffect(() => {
+    if (isAtBottom) setHasNewBelow(false);
+  }, [isAtBottom]);
+
+  const handleJumpToBottom = React.useCallback(() => {
+    scrollToBottom(prefersReducedMotion ? 'auto' : 'smooth');
+  }, [scrollToBottom, prefersReducedMotion]);
 
   const participantById = React.useMemo(() => {
     const map = new Map<string, Participant>();
@@ -328,60 +389,73 @@ export function SuperChat({
         )}
       </header>
 
-      {virtualized ? (
-        <VirtualThread
-          items={orderedThread}
-          participantById={participantById}
-          currentParticipantId={currentParticipantId}
-          renderText={renderText}
-          linkBuilder={linkBuilder}
-          onReferenceClick={onReferenceClick}
-          editable={editable}
-          onMessageEdited={handleMessageEdited}
-          defaultCopyFormat={defaultCopyFormat}
-          order={order}
-          conversationId={conversation.id}
-          containerProps={{
-            'data-slot': 'superchat-thread',
-            role: 'log',
-            'aria-label': 'Messages',
-            'aria-live': 'polite',
+      <div
+        data-slot="superchat-thread-viewport"
+        className="relative flex min-h-0 flex-1 flex-col"
+      >
+        {virtualized ? (
+          <VirtualThread
+            items={orderedThread}
+            participantById={participantById}
+            currentParticipantId={currentParticipantId}
+            renderText={renderText}
+            linkBuilder={linkBuilder}
+            onReferenceClick={onReferenceClick}
+            editable={editable}
+            onMessageEdited={handleMessageEdited}
+            defaultCopyFormat={defaultCopyFormat}
+            scrollRef={threadRef}
+            contentRef={threadContentRef}
+            containerProps={{
+              'data-slot': 'superchat-thread',
+              role: 'log',
+              'aria-label': 'Messages',
+              'aria-live': 'polite',
+              // Focusable so keyboard-only users can scroll the message history.
+              tabIndex: 0,
+              className: 'flex-1 overflow-y-auto p-4',
+            }}
+          />
+        ) : (
+          <div
+            data-slot="superchat-thread"
+            ref={threadRef}
+            role="log"
+            aria-label="Messages"
+            aria-live="polite"
             // Focusable so keyboard-only users can scroll the message history.
-            tabIndex: 0,
-            className: 'flex-1 overflow-y-auto p-4',
-          }}
-        />
-      ) : (
-        <div
-          data-slot="superchat-thread"
-          ref={threadRef}
-          role="log"
-          aria-label="Messages"
-          aria-live="polite"
-          // Focusable so keyboard-only users can scroll the message history.
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-          tabIndex={0}
-          className="flex-1 space-y-4 overflow-y-auto p-4"
-        >
-          {orderedThread.map((m) => (
-            <MessageRow
-              key={m.id}
-              message={m}
-              participant={participantById.get(m.participantId)}
-              isSelf={
-                !!currentParticipantId &&
-                m.participantId === currentParticipantId
-              }
-              renderText={renderText}
-              linkBuilder={linkBuilder}
-              onReferenceClick={onReferenceClick}
-              editable={editable}
-              onMessageEdited={handleMessageEdited}
-              defaultCopyFormat={defaultCopyFormat}
-            />
-          ))}
-        </div>
-      )}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={0}
+            className="flex-1 overflow-y-auto p-4"
+          >
+            <div ref={threadContentRef} className="space-y-4">
+              {orderedThread.map((m) => (
+                <MessageRow
+                  key={m.id}
+                  message={m}
+                  participant={participantById.get(m.participantId)}
+                  isSelf={
+                    !!currentParticipantId &&
+                    m.participantId === currentParticipantId
+                  }
+                  renderText={renderText}
+                  linkBuilder={linkBuilder}
+                  onReferenceClick={onReferenceClick}
+                  editable={editable}
+                  onMessageEdited={handleMessageEdited}
+                  defaultCopyFormat={defaultCopyFormat}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {order !== 'desc' && !isAtBottom && (
+          <JumpToBottomButton
+            hasNewMessages={hasNewBelow}
+            onClick={handleJumpToBottom}
+          />
+        )}
+      </div>
 
       <ChatComposer
         value={draft}

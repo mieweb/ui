@@ -45,6 +45,11 @@ export {
 } from './useDragReorder';
 export { useLiveAnnouncement } from './useLiveAnnouncement';
 export {
+  useStickToBottom,
+  type UseStickToBottomOptions,
+  type UseStickToBottomReturn,
+} from './useStickToBottom';
+export {
   useYouTubeHoverPreview,
   type HoverPreviewState,
   type UseYouTubeHoverPreviewOptions,

@@ -274,6 +274,8 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | **Header**                   | `superchat-header`            | `header`                      | —                             | `SuperChat`              | Title, participant face-pile, and close affordance.                                                                  |
 | **Participants** (face-pile) | `superchat-participants`      | `div` · `group`               | `Participants`                | `SuperChat`              | Avatars of (up to 6) participants.                                                                                   |
 | **Thread** (log)             | `superchat-thread`            | `div` · `log`                 | `Messages`                    | `SuperChat`              | Scrollable, append-only message history; `aria-live="polite"`, keyboard-focusable.                                   |
+| **Thread viewport**          | `superchat-thread-viewport`   | `div`                         | —                             | `SuperChat`              | Positioning wrapper around the thread; anchors the floating jump-to-bottom button.                                    |
+| **Jump to bottom**           | `superchat-jump-to-bottom`    | `button`                      | `Scroll to bottom`            | `SuperChat`              | Floating ↓ shown while scrolled up; returns to the newest message (label gains a “New messages” hint — see [Scrolling & streaming](#scrolling--streaming)). |
 | **Composer**                 | `chat-composer`               | `div`                         | —                             | `SuperChat`              | The shared `ChatComposer`: `+` menu, mention-aware textarea, send button (sub-parts expose `chat-composer-*` slots). |
 
 ### Message parts
@@ -632,9 +634,44 @@ SuperChat ships with assistive-tech support built in:
   wired to a `listbox` via `aria-controls` / `aria-activedescendant`. Keyboard:
   `↑`/`↓` move, `Enter`/`Tab` accept, `Esc` dismisses; `Enter` (no `Shift`) sends.
 - **Active conversation** — marked with `aria-current` in the list.
+- **Jump to bottom** — the floating ↓ button is labelled `Scroll to bottom`
+  (or `New messages — scroll to bottom` when unseen messages arrived below) and
+  shows a visible focus ring; because the log is `aria-live`, arriving messages
+  are announced even while the user reads earlier history.
 
 When supplying `trustedContent` or custom plugins, you remain responsible for the
 safety of any HTML those plugins allow through the sanitizer.
+
+---
+
+## Scrolling & streaming
+
+The thread pins to the newest message **only while the user is at the bottom**
+(within ~100px). The moment they scroll up to read, their position is
+preserved exactly — streamed tokens and newly arriving messages never yank the
+view down. This matters most for long AI responses: set a message's `status`
+to `'streaming'` and grow its `text` as tokens arrive; readers at the bottom
+follow the stream, readers who scrolled up stay put.
+
+While scrolled up, a floating **jump-to-bottom** button
+(`data-slot="superchat-jump-to-bottom"`) appears over the thread. If messages
+arrive in the meantime it gains a **“New messages”** hint. Activating it
+scrolls to the newest message and resumes pinning. Two exceptions always
+scroll regardless of position: the local user sending a message, and switching
+conversations. `order="desc"` (feed-style) threads keep their top anchor and
+skip the affordance.
+
+Pinning survives container resizes too (an on-screen keyboard appearing, the
+composer growing): a `ResizeObserver` on the thread and its content re-pins
+while the user is at the bottom. The behavior is reusable outside SuperChat
+via the exported hook:
+
+```tsx
+import { useStickToBottom } from '@mieweb/ui';
+
+const { containerRef, contentRef, isAtBottom, scrollToBottom } =
+  useStickToBottom();
+```
 
 ---
 
@@ -649,7 +686,7 @@ For long histories (hundreds to thousands of messages), set **`virtualized`** to
 window the thread: only the rows near the viewport are mounted (with dynamic
 height measurement), so first render, memory, and Markdown parse cost are bounded
 by what's on screen rather than by the total history length. Scroll anchoring
-(bottom for `order="asc"`, top for `order="desc"`) is handled automatically.
+works the same in both modes — see [Scrolling & streaming](#scrolling--streaming).
 
 ```tsx
 <SuperChat conversation={conversation} virtualized order="asc" />

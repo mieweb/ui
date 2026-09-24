@@ -36,6 +36,9 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
+import { JumpToBottomButton } from '../SuperChat/parts';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useStickToBottom } from '../../hooks/useStickToBottom';
 import { RecordButton } from '../RecordButton';
 import { SparklesIcon, CloseIcon, RefreshIcon } from './icons';
 
@@ -366,8 +369,6 @@ export function AIChat({
   renderTextContent,
   renderMessageFooter,
 }: AIChatProps) {
-  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
-
   React.useEffect(() => {
     notifyComposerMigrationOnce('AIChat');
   }, []);
@@ -378,11 +379,51 @@ export function AIChat({
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
 
-  // Auto-scroll to bottom on new messages
+  // The thread pins to the newest message only while the user is at the
+  // bottom. Once they scroll up to read, streaming growth (handled by
+  // useStickToBottom's ResizeObserver) and appended messages leave their
+  // position alone; a floating "jump to bottom" button offers the way back
+  // (and flags unseen messages). Same policy as SuperChat.
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const {
+    containerRef: messagesContainerRef,
+    contentRef: messagesContentRef,
+    isAtBottom,
+    scrollToBottom,
+  } = useStickToBottom();
+  const [hasNewBelow, setHasNewBelow] = React.useState(false);
+
+  // Anchor to the newest message on mount and when the session changes.
   React.useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (container) container.scrollTop = container.scrollHeight;
-  }, [messages]);
+    scrollToBottom('auto');
+    setHasNewBelow(false);
+  }, [session?.id, scrollToBottom]);
+
+  // New-message policy: follow while pinned, always follow the user's own
+  // sends, otherwise flag that unseen content arrived below.
+  const messageCount = messages.length;
+  const lastIsSelf = messages[messages.length - 1]?.role === 'user';
+  const prevMessageCountRef = React.useRef(messageCount);
+  React.useEffect(() => {
+    if (messageCount === prevMessageCountRef.current) return;
+    const grew = messageCount > prevMessageCountRef.current;
+    prevMessageCountRef.current = messageCount;
+    if (isAtBottom || lastIsSelf) {
+      scrollToBottom('auto');
+    } else if (grew) {
+      setHasNewBelow(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messageCount, isAtBottom, lastIsSelf]);
+
+  // The hint clears once the user reaches the bottom again.
+  React.useEffect(() => {
+    if (isAtBottom) setHasNewBelow(false);
+  }, [isAtBottom]);
+
+  const handleJumpToBottom = React.useCallback(() => {
+    scrollToBottom(prefersReducedMotion ? 'auto' : 'smooth');
+  }, [scrollToBottom, prefersReducedMotion]);
 
   // Split legacy MessageComposer-era keys (mapped below) and the keys AIChat
   // must own (value/onValueChange for draft restore) from the passthrough.
@@ -569,31 +610,48 @@ export function AIChat({
         </div>
       )}
 
-      {/* Messages */}
+      {/* Messages — the viewport wrapper hosts the floating jump-to-bottom
+          button (absolute, never fixed, so it stays inside embedded layouts) */}
       <div
-        ref={messagesContainerRef}
-        data-slot="ai-chat-messages"
-        className="flex-1 overflow-y-auto px-4 py-4"
+        data-slot="ai-chat-messages-viewport"
+        className="relative flex min-h-0 flex-1 flex-col"
       >
-        {messages.length === 0 ? (
-          <AIEmptyState
-            suggestions={suggestions}
-            onSuggestionSelect={handleSuggestionSelect}
-          />
-        ) : (
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <AIMessageDisplay
-                key={message.id}
-                message={message}
-                userName={userName}
-                showTimestamp={showTimestamps}
-                onLinkClick={handleLinkClick}
-                renderTextContent={renderTextContent}
-                renderMessageFooter={renderMessageFooter}
+        <div
+          ref={messagesContainerRef}
+          data-slot="ai-chat-messages"
+          className="flex-1 overflow-y-auto px-4 py-4"
+        >
+          {/* Always-mounted content wrapper so useStickToBottom's
+              ResizeObserver is attached before the first message arrives. */}
+          <div ref={messagesContentRef}>
+            {messages.length === 0 ? (
+              <AIEmptyState
+                suggestions={suggestions}
+                onSuggestionSelect={handleSuggestionSelect}
               />
-            ))}
+            ) : (
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <AIMessageDisplay
+                    key={message.id}
+                    message={message}
+                    userName={userName}
+                    showTimestamp={showTimestamps}
+                    onLinkClick={handleLinkClick}
+                    renderTextContent={renderTextContent}
+                    renderMessageFooter={renderMessageFooter}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+        {!isAtBottom && (
+          <JumpToBottomButton
+            dataSlot="ai-chat-jump-to-bottom"
+            hasNewMessages={hasNewBelow}
+            onClick={handleJumpToBottom}
+          />
         )}
       </div>
 
