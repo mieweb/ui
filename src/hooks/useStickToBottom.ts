@@ -229,6 +229,9 @@ export function useStickToBottom({
           el.scrollTop,
         el.scrollHeight - el.clientHeight
       );
+      // Already there: `scrollTo` emits no scroll event, so tracking an
+      // in-flight animation would swallow observer updates forever.
+      if (Math.abs(el.scrollTop - top) < 2) return;
       anchorTargetRef.current = top;
       anchorDistanceRef.current = Infinity;
       if (typeof el.scrollTo === 'function') {

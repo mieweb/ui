@@ -312,6 +312,27 @@ describe('useStickToBottom', () => {
     expect(screen.getByTestId('at-bottom').textContent).toBe('false');
   });
 
+  it('an anchor that is already in place still lets growth update the state', () => {
+    render(<Harness />);
+    const container = screen.getByTestId('container');
+    mockMetrics(container);
+    container.scrollTop = 600; // at the bottom
+    fireEvent.scroll(container);
+
+    // The turn already sits at the viewport top: `scrollTo` would be a no-op
+    // and emit no scroll event — the anchor must not wait for one.
+    mockRectTop(container, 0);
+    mockRectTop(screen.getByTestId('turn'), 0);
+    fireEvent.click(screen.getByText('anchor'));
+
+    // Growth past the reserve still surfaces the jump-to-bottom affordance
+    // (the observer is not stuck waiting on a phantom animation).
+    mockMetrics(container, { scrollHeight: 1400 });
+    act(() => MockResizeObserver.trigger());
+    expect(container.scrollTop).toBe(600);
+    expect(screen.getByTestId('at-bottom').textContent).toBe('false');
+  });
+
   it('stopFollowing holds the position while a stream grows past the fold', () => {
     render(<Harness />);
     const container = screen.getByTestId('container');
