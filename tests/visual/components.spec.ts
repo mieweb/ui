@@ -356,7 +356,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(pill).toHaveAttribute('aria-expanded', 'true');
 
     const collapsed = page.getByRole('button', {
-      name: /^thought( for \ds)?$/i,
+      name: /^thought( for \d+s)?$/i,
     });
     await expect(collapsed).toHaveAttribute('aria-expanded', 'false', {
       timeout: 10000,
