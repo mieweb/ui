@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import {
   ComposerModelSelector,
@@ -134,8 +135,17 @@ export interface ChatComposerProps {
    */
   canSendWhenEmpty?: boolean;
   /**
+   * When the Enter key sends. `'desktop'` sends on Enter only on devices
+   * with a fine pointer; on touch devices Return inserts a newline and the
+   * send button sends (claude.ai / chatgpt.com parity). Shift+Enter always
+   * inserts a newline, and Enter never sends mid IME composition.
+   * @default 'desktop'
+   */
+  submitOnEnter?: 'desktop' | 'always' | 'never';
+  /**
    * Maximum height of the auto-growing input: a pixel number or any CSS
-   * length (e.g. `'40vh'`).
+   * length. Prefer small-viewport units (e.g. `'30svh'`) over `vh`: on iOS
+   * `vh` is the full screen and ignores the on-screen keyboard.
    * @default 160
    */
   maxHeight?: number | string;
@@ -286,6 +296,27 @@ const selectorTriggerClasses = cn(
 
 const MAX_INPUT_HEIGHT = 160;
 
+/** Touch-first devices (phones, tablets without a trackpad). */
+const TOUCH_DEVICE_QUERY = '(hover: none) and (pointer: coarse)';
+
+/**
+ * Card descendants that keep their own pointer behavior (and text that
+ * stays selectable) instead of forwarding a tap to the textarea.
+ */
+const CARD_INTERACTIVE_SELECTOR = [
+  'button',
+  'a',
+  'input',
+  'textarea',
+  'select',
+  'label',
+  'video',
+  '[role="listbox"]',
+  '[role="menu"]',
+  '[data-slot="chat-composer-reply-preview"]',
+  '[data-slot="chat-composer-attachments"]',
+].join(',');
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -311,6 +342,7 @@ export const ChatComposer = React.forwardRef<
     maxLength,
     showCharacterCount = false,
     canSendWhenEmpty = false,
+    submitOnEnter = 'desktop',
     maxHeight = MAX_INPUT_HEIGHT,
     textareaProps,
     addMenuItems,
@@ -367,6 +399,11 @@ export const ChatComposer = React.forwardRef<
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const [agentMenuOpen, setAgentMenuOpen] = React.useState(false);
+
+  const isTouchDevice = useMediaQuery(TOUCH_DEVICE_QUERY);
+  const sendsOnEnter =
+    submitOnEnter === 'always' ||
+    (submitOnEnter === 'desktop' && !isTouchDevice);
 
   // Focus the input when a reply target is set (MessageComposer parity).
   // Keyed on the id, not the object: hosts often build `replyTo` inline, so
@@ -602,10 +639,31 @@ export const ChatComposer = React.forwardRef<
     textareaRef.current?.focus();
   };
 
+  // Pressing a button moves focus off the textarea, which on mobile starts
+  // dismissing the keyboard before `handleSend` refocuses it (a visible
+  // close/reopen bounce). Cancelling mousedown keeps focus where it is; the
+  // click still fires, and keyboard users can still tab to the button.
+  const keepInputFocus = (event: React.MouseEvent) => {
+    event.preventDefault();
+  };
+
+  // Tapping the card's padding or empty toolbar space focuses the input
+  // (claude.ai / chatgpt.com parity) instead of doing nothing — or, with the
+  // keyboard open, blurring the input and dismissing it.
+  const focusInputFromCard = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    const target = event.target as HTMLElement;
+    if (target.closest(CARD_INTERACTIVE_SELECTOR)) return;
+    event.preventDefault();
+    textareaRef.current?.focus();
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // @mention menu navigation takes priority over send.
     if (mention.handleKeyDown(event)) return;
-    if (event.key === 'Enter' && !event.shiftKey) {
+    // Enter confirms an IME candidate (CJK input) rather than sending.
+    if (event.nativeEvent.isComposing) return;
+    if (event.key === 'Enter' && !event.shiftKey && sendsOnEnter) {
       event.preventDefault();
       handleSend();
     }
@@ -723,6 +781,14 @@ export const ChatComposer = React.forwardRef<
             dataSlot="chat-composer-mention-list"
           />
           <textarea
+            // Mobile keyboard hints; overridable via `textareaProps`.
+            enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
+            inputMode="text"
+            autoCapitalize="sentences"
+            autoCorrect="on"
+            spellCheck
+            // Follows the typed script, so RTL text aligns correctly.
+            dir="auto"
             {...textareaProps}
             ref={textareaRef}
             data-slot="chat-composer-input"
@@ -756,9 +822,11 @@ export const ChatComposer = React.forwardRef<
             }}
             placeholder={placeholder}
             disabled={disabled}
-            // Host-opt-in only; off by default.
+            // Host-opt-in only; off by default. Skipped on touch devices,
+            // where focusing pops the on-screen keyboard over the page the
+            // user just navigated to.
             // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus={autoFocus}
+            autoFocus={autoFocus && !isTouchDevice}
             rows={1}
             aria-label={inputLabel}
             {...mention.inputProps}
@@ -769,7 +837,9 @@ export const ChatComposer = React.forwardRef<
             }}
             className={cn(
               'block w-full resize-none bg-transparent',
-              'rounded-lg text-sm',
+              // 16px below `sm`: iOS zooms the page when focusing an input
+              // with a smaller font.
+              'rounded-lg text-base sm:text-sm',
               cells.textarea,
               'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
               // Ring the input itself on focus rather than the whole shell.
@@ -893,6 +963,7 @@ export const ChatComposer = React.forwardRef<
               data-slot="chat-composer-stop-button"
               aria-label={stopLabel}
               disabled={disabled}
+              onMouseDown={keepInputFocus}
               onClick={onStop}
               className={cn(
                 iconButtonClasses,
@@ -911,6 +982,7 @@ export const ChatComposer = React.forwardRef<
               aria-label={isSending ? sendingLabel : sendLabel}
               aria-busy={isSending || undefined}
               disabled={!canSend}
+              onMouseDown={keepInputFocus}
               onClick={handleSend}
               className={cn(
                 iconButtonClasses,
@@ -1015,10 +1087,13 @@ export const ChatComposer = React.forwardRef<
   // validation and structured `onError` reporting stay in one place (the
   // zone itself does not validate).
   const card = (
+    // Pointer-only convenience: the textarea stays the keyboard/AT target.
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       data-slot="chat-composer-card"
+      onMouseDown={focusInputFromCard}
       className={cn(
-        'rounded-2xl border border-neutral-200 bg-white shadow-sm',
+        'cursor-text rounded-2xl border border-neutral-200 bg-white shadow-sm',
         'dark:border-[#2e2e30] dark:bg-[#1c1c1e]'
       )}
     >

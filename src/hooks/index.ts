@@ -17,6 +17,15 @@ export {
 export { useEscapeKey } from './useEscapeKey';
 export { useFocusTrap } from './useFocusTrap';
 export {
+  useKeyboardInset,
+  KEYBOARD_INSET_VAR,
+  VISUAL_VIEWPORT_HEIGHT_VAR,
+  VISUAL_VIEWPORT_OFFSET_TOP_VAR,
+  KEYBOARD_OPEN_ATTRIBUTE,
+  type KeyboardInsetState,
+  type UseKeyboardInsetOptions,
+} from './useKeyboardInset';
+export {
   useKeyboardShortcut,
   useCommandK,
   type KeyboardShortcutOptions,

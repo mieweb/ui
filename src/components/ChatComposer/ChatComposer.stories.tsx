@@ -8,6 +8,7 @@ import {
 } from './ChatComposer';
 import type { ProviderModelValue } from '../AI/ComposerModelSelector';
 import { RecordButton } from '../RecordButton';
+import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { CameraIcon, FileTextIcon, GlobeIcon } from '../Icons';
 
 const sampleAgents: ChatComposerAgentOption[] = [
@@ -110,7 +111,9 @@ const meta = {
 
 **The standardized chat input.** At \`md+\` \`ChatComposer\` renders as a single-row pill — a \`+\` menu (built-in "Attach files" plus host-supplied \`addMenuItems\`), an auto-growing textarea, an optional mic, and a send button that swaps to **stop** while \`isStreaming\`, side by side with the icon actions pinned to the bottom as the input grows. Below the \`md\` breakpoint the input stacks above the icon row. An optional row below the card holds an **agent selector** (\`showAgentSelector\` + \`agents\`) and a **model selector** (\`showModelSelector\` + \`modelSelectorProps\`, an embedded \`ComposerModelSelector\` rendered with \`variant="ghost"\` so it matches the agent selector — override via \`modelSelectorProps.variant\`), rendered as quiet text on the page background. No large filled buttons: every control is a small ghost icon; the send button fills with the primary color only when there is content to send (or always, with \`canSendWhenEmpty\` — see below).
 
-Sending: Enter sends, Shift+Enter inserts a newline; \`onSend({ content, attachments })\` receives the trimmed text and staged \`File\`s (the \`NewMessage\` shape from the Messaging module, so hosts can migrate mechanically). \`onSend\` may return a promise — the draft clears optimistically and a rejection is reported through \`onError\` with \`reason: 'send-failed'\` (hosts own retry/restore). \`replyTo\` (\`{ id, content, senderName }\`) renders a dismissible preview row at the top of the card, focuses the input, and stamps \`replyToId\` onto the sent message; the host owns the state — clear it in \`onSend\`, and \`onCancelReply\` fires from the row's close button. Attachments arrive from the \`+\` menu picker, paste, drag-and-drop onto the card, or the imperative \`ChatComposerHandle.addFiles()\` (for page-level drop zones); they are validated against \`acceptedFileTypes\` / \`maxFileSize\` / \`maxAttachments\` with failures reported through \`onError(message, { reason, file })\`. \`mentionOptions\` enables the built-in \`@mention\` autocomplete — the shared Messaging mention module (typing \`@\` opens a filtered listbox; arrows navigate, Enter/Tab insert, Escape dismisses). \`readOnly\` replaces the whole composer with a notice (\`readOnlyMessage\`). The value is controlled (\`value\` + \`onValueChange\`) or uncontrolled. The textarea auto-grows up to \`maxHeight\` (default 160px; any CSS length works, e.g. \`'40vh'\`).
+Sending: on devices with a mouse or trackpad Enter sends and Shift+Enter inserts a newline; on touch devices Return inserts a newline and only the send button sends (\`submitOnEnter\`: \`'desktop'\` default, \`'always'\`, \`'never'\`). Enter never sends while an IME composition (CJK input) is in progress. \`onSend({ content, attachments })\` receives the trimmed text and staged \`File\`s (the \`NewMessage\` shape from the Messaging module, so hosts can migrate mechanically). \`onSend\` may return a promise — the draft clears optimistically and a rejection is reported through \`onError\` with \`reason: 'send-failed'\` (hosts own retry/restore). \`replyTo\` (\`{ id, content, senderName }\`) renders a dismissible preview row at the top of the card, focuses the input, and stamps \`replyToId\` onto the sent message; the host owns the state — clear it in \`onSend\`, and \`onCancelReply\` fires from the row's close button. Attachments arrive from the \`+\` menu picker, paste, drag-and-drop onto the card, or the imperative \`ChatComposerHandle.addFiles()\` (for page-level drop zones); they are validated against \`acceptedFileTypes\` / \`maxFileSize\` / \`maxAttachments\` with failures reported through \`onError(message, { reason, file })\`. \`mentionOptions\` enables the built-in \`@mention\` autocomplete — the shared Messaging mention module (typing \`@\` opens a filtered listbox; arrows navigate, Enter/Tab insert, Escape dismisses). \`readOnly\` replaces the whole composer with a notice (\`readOnlyMessage\`). The value is controlled (\`value\` + \`onValueChange\`) or uncontrolled. The textarea auto-grows up to \`maxHeight\` (default 160px; any CSS length works — prefer small-viewport units such as \`'30svh'\`, since on iOS \`vh\` ignores the on-screen keyboard).
+
+Mobile keyboard: the input uses a 16px font below \`sm\` (no iOS zoom-on-focus), \`dir="auto"\`, sentence autocapitalization and an \`enterKeyHint\` matching \`submitOnEnter\`. Tapping send or stop keeps focus in the input so the keyboard stays open, tapping empty parts of the card focuses the input, and \`autoFocus\` is ignored on touch devices so navigating to a chat does not pop the keyboard. iOS Safari and WKWebView do not resize the page for the keyboard — mount \`useKeyboardInset()\` once in the app shell and size the shell from \`--mieweb-visual-viewport-height\` so the composer sits on top of the keyboard (see the *Mobile Keyboard Shell* story).
 
 Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. a custom autocomplete overlay's arrow/Enter navigation — host key handling takes priority over the built-in mention menu and Enter-to-send — or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting into the text). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding.
 
@@ -337,6 +340,82 @@ export const CharacterLimit: Story = {
 
 export const ReadOnly: Story = {
   render: () => <ChatComposerDemo readOnly />,
+};
+
+export const SubmitOnEnter: Story = {
+  args: { submitOnEnter: 'always' },
+  render: (args) => (
+    <ChatComposerDemo
+      onSend={() => {}}
+      submitOnEnter={args.submitOnEnter}
+      placeholder="Press Enter…"
+    />
+  ),
+  argTypes: {
+    submitOnEnter: {
+      control: 'inline-radio',
+      options: ['desktop', 'always', 'never'],
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`'desktop'` (default) sends on Enter only with a mouse or trackpad — on touch devices Return inserts a newline. `'always'` restores Enter-to-send everywhere; `'never'` makes the send button the only way to send.",
+      },
+    },
+  },
+};
+
+function MobileKeyboardShellDemo() {
+  const { keyboardInset, isKeyboardOpen } = useKeyboardInset();
+  return (
+    <div
+      className="flex flex-col bg-neutral-50 dark:bg-neutral-900"
+      style={{
+        height: 'var(--mieweb-visual-viewport-height, 100dvh)',
+        transform: 'translateY(var(--mieweb-visual-viewport-offset-top, 0px))',
+      }}
+    >
+      <header className="shrink-0 border-b border-neutral-200 px-4 py-3 text-sm font-medium dark:border-neutral-700">
+        Keyboard {isKeyboardOpen ? `open (${keyboardInset}px)` : 'closed'}
+      </header>
+      <div className="min-h-0 flex-1 overflow-y-auto p-4 text-sm text-neutral-600 dark:text-neutral-300">
+        {Array.from({ length: 30 }, (_, index) => (
+          <p key={index} className="py-1">
+            Message {index + 1}
+          </p>
+        ))}
+      </div>
+      <div
+        className="shrink-0 px-3 pt-2"
+        style={{
+          paddingBottom: isKeyboardOpen
+            ? '0.5rem'
+            : 'max(1rem, env(safe-area-inset-bottom))',
+        }}
+      >
+        <ChatComposer
+          onSend={() => {}}
+          onMicClick={() => {}}
+          maxHeight="30svh"
+        />
+      </div>
+    </div>
+  );
+}
+
+export const MobileKeyboardShell: Story = {
+  render: () => <MobileKeyboardShellDemo />,
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        story:
+          'Reference wiring for mobile hosts. `useKeyboardInset()` publishes the visible viewport on `<html>`; the shell sizes itself from `--mieweb-visual-viewport-height` and follows iOS panning via `--mieweb-visual-viewport-offset-top`, so on iOS the composer sits directly on the keyboard, and drops the home-indicator padding while the keyboard is open. Open this story on a phone (or the iOS Simulator) to try it.',
+      },
+    },
+  },
 };
 
 export const Disabled: Story = {

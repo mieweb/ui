@@ -238,6 +238,9 @@ function AIEmptyState({
 // AI Chat Component
 // ============================================================================
 
+/** How close to the bottom (px) still counts as "reading the latest message". */
+const BOTTOM_PIN_THRESHOLD_PX = 32;
+
 const chatVariants = cva('flex flex-col', {
   variants: {
     variant: {
@@ -536,6 +539,32 @@ export function AIChat({
       renderMessageFooter={renderMessageFooter}
     />
   );
+
+  // Keep the latest message in view when the list itself shrinks (mobile
+  // keyboard opening, composer growing) — but only if the reader was already
+  // at the bottom, so scrolling back through history is never interrupted.
+  React.useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    let pinnedToBottom = true;
+    const handleScroll = () => {
+      pinnedToBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <=
+        BOTTOM_PIN_THRESHOLD_PX;
+    };
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    const observer =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => {
+            if (pinnedToBottom) container.scrollTop = container.scrollHeight;
+          });
+    observer?.observe(container);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      observer?.disconnect();
+    };
+  }, []);
 
   // Split legacy MessageComposer-era keys (mapped below) and the keys AIChat
   // must own (value/onValueChange for draft restore) from the passthrough.

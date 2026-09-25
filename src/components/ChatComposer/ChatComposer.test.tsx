@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
@@ -42,6 +42,141 @@ describe('ChatComposer', () => {
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
 
     expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('does not send on Enter during IME composition', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} />);
+
+    const input = getInput();
+    fireEvent.change(input, { target: { value: 'こんにちは' } });
+    fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  describe('on touch devices', () => {
+    beforeEach(() => {
+      vi.spyOn(window, 'matchMedia').mockImplementation(
+        (query: string) =>
+          ({
+            matches: query.includes('pointer: coarse'),
+            media: query,
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+          }) as MediaQueryList
+      );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('inserts a newline on Enter instead of sending', () => {
+      const onSend = vi.fn();
+      renderWithTheme(<ChatComposer onSend={onSend} />);
+
+      const input = getInput();
+      fireEvent.change(input, { target: { value: 'Hello' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onSend).not.toHaveBeenCalled();
+      expect(input).toHaveAttribute('enterkeyhint', 'enter');
+    });
+
+    it('sends on Enter when submitOnEnter is "always"', () => {
+      const onSend = vi.fn();
+      renderWithTheme(<ChatComposer onSend={onSend} submitOnEnter="always" />);
+
+      const input = getInput();
+      fireEvent.change(input, { target: { value: 'Hello' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onSend).toHaveBeenCalled();
+      expect(input).toHaveAttribute('enterkeyhint', 'send');
+    });
+
+    it('ignores autoFocus so the keyboard does not pop on navigation', () => {
+      // eslint-disable-next-line jsx-a11y/no-autofocus
+      renderWithTheme(<ChatComposer autoFocus />);
+      expect(getInput()).not.toHaveFocus();
+    });
+  });
+
+  it('honors autoFocus on fine-pointer devices', () => {
+    // eslint-disable-next-line jsx-a11y/no-autofocus
+    renderWithTheme(<ChatComposer autoFocus />);
+    expect(getInput()).toHaveFocus();
+  });
+
+  it('focuses the input when pressing empty card space', () => {
+    const { container } = renderWithTheme(<ChatComposer onSend={vi.fn()} />);
+    const card = container.querySelector('[data-slot="chat-composer-card"]')!;
+
+    expect(fireEvent.mouseDown(card)).toBe(false);
+    fireEvent.mouseUp(card);
+    expect(getInput()).toHaveFocus();
+  });
+
+  it('leaves presses on card buttons alone', () => {
+    renderWithTheme(<ChatComposer />);
+    const addButton = screen.getByRole('button', { name: /add to message/i });
+
+    expect(fireEvent.mouseDown(addButton)).toBe(true);
+    fireEvent.mouseUp(addButton);
+    expect(getInput()).not.toHaveFocus();
+  });
+
+  it('keeps focus on the input when pressing send', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} />);
+
+    const input = getInput();
+    input.focus();
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    const sendButton = screen.getByRole('button', { name: /send message/i });
+
+    // A cancelled mousedown is what stops the browser moving focus.
+    expect(fireEvent.mouseDown(sendButton)).toBe(false);
+    // Complete the press: React suppresses onSelect between mousedown and
+    // mouseup module-wide, which would leak into later tests.
+    fireEvent.mouseUp(sendButton);
+    fireEvent.click(sendButton);
+
+    expect(onSend).toHaveBeenCalled();
+    expect(input).toHaveFocus();
+  });
+
+  it('sets mobile keyboard attributes that textareaProps can override', () => {
+    renderWithTheme(
+      <ChatComposer textareaProps={{ autoCapitalize: 'off', dir: 'rtl' }} />
+    );
+
+    const input = getInput();
+    expect(input).toHaveAttribute('inputmode', 'text');
+    expect(input).toHaveAttribute('autocorrect', 'on');
+    expect(input).toHaveAttribute('spellcheck', 'true');
+    expect(input).toHaveAttribute('enterkeyhint', 'send');
+    expect(input).toHaveAttribute('autocapitalize', 'off');
+    expect(input).toHaveAttribute('dir', 'rtl');
+    // 16px on small screens prevents iOS zoom-on-focus.
+    expect(input).toHaveClass('text-base', 'sm:text-sm');
+  });
+
+  it('never sends on Enter when submitOnEnter is "never"', () => {
+    const onSend = vi.fn();
+    renderWithTheme(<ChatComposer onSend={onSend} submitOnEnter="never" />);
+
+    const input = getInput();
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend).not.toHaveBeenCalled();
+    expect(input).toHaveAttribute('enterkeyhint', 'enter');
   });
 
   it('disables the send button while empty and enables it with text', () => {
