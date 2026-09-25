@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { AudioWaveform } from 'lucide-react';
 import {
   ChatComposer,
   type ChatComposerHandle,
@@ -117,7 +118,7 @@ Host integration escape hatches: \`textareaProps\` spreads extra props onto the 
 ### Use it when
 
 - Building **any new chat surface** — AI assistants, patient messaging, support chat. This is the canonical composer (the legacy \`MessageComposer\` was retired in 0.10.0 — see \`MIGRATION.md#chat-composer\`).
-- The surface needs per-message **agent or model choice** (AI chat), a \`+\` action menu, or voice input (\`onMicClick\` for a simple hook, \`micSlot\` to embed \`RecordButton\` for real recording).
+- The surface needs per-message **agent or model choice** (AI chat), a \`+\` action menu, or voice input (\`onMicClick\` for a simple hook, \`micSlot\` to embed \`RecordButton\` for real recording, or \`leadingSlot\` for a host-owned control before the \`+\` menu).
 
 ### Don't use it when
 
@@ -138,6 +139,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
   onStop={cancelGeneration}
   onMicClick={openVoiceInput}
   micBehavior="whenEmpty"
+  leadingSlot={<VoiceActivationToggle disabled={isGenerating} />}
   addMenuItems={[
     { id: 'photo', label: t('chat.takePhoto'), icon: <CameraIcon />, onSelect: openCamera },
   ]}
@@ -153,7 +155,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
 
 ### Limitations
 
-- The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. The slot is constrained to a 32px-tall row so it lines up with the other controls; taller content (like \`RecordButton\`) overflows and stays vertically centered without inflating the composer. Interaction state is yours — disable your own control when the composer is \`disabled\`.
+- The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. Use \`leadingSlot\` for a host control before the \`+\` menu. Both slots are constrained to a 32px-tall row so they line up with the other controls; taller content (like \`RecordButton\`) overflows and stays vertically centered without inflating the composer. Interaction state is yours — disable your own control when the composer is \`disabled\`.
 - Attachment upload state is the host's job: files are staged locally and handed over on send as \`File[]\`; there is no built-in upload progress.
 - i18n: all strings are props with English defaults (\`placeholder\`, \`inputLabel\`, \`addMenuLabel\`, \`attachFilesLabel\`, \`micLabel\`, \`sendLabel\`, \`sendingLabel\`, \`stopLabel\`, \`agentSelectorLabel\`, \`readOnlyMessage\`, \`attachmentLimitLabel\`, \`sendFailedLabel\`, \`mentionListLabel\`, \`dropFilesLabel\`, \`replyingToLabel\`, \`cancelReplyLabel\`); file-validation messages from \`onError\` carry a machine-readable \`context.reason\` so hosts can substitute localized copy. RTL: uses logical properties (\`ms-auto\`, \`pe-*\`, the reply preview's \`border-s-4\` accent) throughout.
 - Accessibility: every icon button has an \`aria-label\`; the \`+\` and agent menus are \`Dropdown\`s (Tab-based item access, Escape/outside-click to close — no arrow-key navigation or typeahead yet) that close on selection; \`addMenuItems\` with \`checked\` render as \`menuitemcheckbox\`, agent options as \`menuitemradio\`; the send button exposes \`aria-busy\` while \`isSending\`; the character counter is \`aria-live="polite"\`. The textarea is labelled via \`inputLabel\`; with \`mentionOptions\` it gains \`aria-autocomplete="list"\` plus \`aria-controls\` / \`aria-activedescendant\` into the mention \`listbox\` (labelled via \`mentionListLabel\`).
@@ -183,6 +185,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
   },
   argTypes: {
     onSend: { table: { disable: true } },
+    leadingSlot: { table: { disable: true } },
     micSlot: { table: { disable: true } },
     modelSelectorProps: { table: { disable: true } },
   },
@@ -311,6 +314,31 @@ export const WithRecordButton: Story = {
       }
     />
   ),
+};
+
+export const WithLeadingSlot: Story = {
+  render: () => (
+    <ChatComposerDemo
+      onSend={() => {}}
+      leadingSlot={
+        <button
+          type="button"
+          aria-label="Toggle voice activation"
+          className="text-primary-600 hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-950 flex h-8 w-8 items-center justify-center rounded-lg"
+        >
+          <AudioWaveform className="h-4 w-4" aria-hidden="true" />
+        </button>
+      }
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use `leadingSlot` for a host-owned control before the `+` menu. The host owns interaction state, including disabling the control when the composer is disabled.',
+      },
+    },
+  },
 };
 
 export const MicOnlyWhenEmpty: Story = {

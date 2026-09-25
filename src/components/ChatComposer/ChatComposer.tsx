@@ -151,6 +151,14 @@ export interface ChatComposerProps {
     'value' | 'defaultValue'
   >;
 
+  /**
+   * Custom node rendered at the leading edge, before the `+` menu (e.g. a
+   * voice-activation toggle). Wrapped in a 32px-tall (`h-8`) flex row so it
+   * aligns with the other controls; taller content overflows and stays
+   * vertically centered. Interaction state is not managed: pass your own
+   * disabled state when the composer is `disabled`.
+   */
+  leadingSlot?: React.ReactNode;
   /** Extra entries for the `+` menu, rendered after the built-in items. */
   addMenuItems?: ChatComposerMenuItem[];
   /** Enable file attachments (built-in "Attach files" menu item, paste-to-attach, drag-and-drop, chips). @default true */
@@ -313,6 +321,7 @@ export const ChatComposer = React.forwardRef<
     canSendWhenEmpty = false,
     maxHeight = MAX_INPUT_HEIGHT,
     textareaProps,
+    leadingSlot,
     addMenuItems,
     allowAttachments = true,
     acceptedFileTypes,
@@ -780,56 +789,72 @@ export const ChatComposer = React.forwardRef<
           />
         </div>
 
-        {showAddMenu && (
-          <div className={cells.add}>
-            <Dropdown
-              placement="top-start"
-              open={addMenuOpen}
-              onOpenChange={setAddMenuOpen}
-              trigger={
-                <button
-                  type="button"
-                  data-slot="chat-composer-add-button"
-                  aria-label={addMenuLabel}
-                  disabled={disabled}
-                  className={iconButtonClasses}
-                >
-                  <PlusIcon className="h-4 w-4" aria-hidden="true" />
-                </button>
-              }
-            >
-              {allowAttachments && (
-                <DropdownItem
-                  icon={
-                    <PaperclipIcon className="h-4 w-4" aria-hidden="true" />
-                  }
-                  onClick={() => {
-                    setAddMenuOpen(false);
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  {attachFilesLabel}
-                </DropdownItem>
-              )}
-              {allowAttachments && addMenuItems && addMenuItems.length > 0 && (
-                <DropdownSeparator />
-              )}
-              {addMenuItems?.map((item) => (
-                <DropdownItem
-                  key={item.id}
-                  icon={item.icon}
-                  disabled={item.disabled}
-                  variant={item.variant}
-                  checked={item.checked}
-                  onClick={() => {
-                    setAddMenuOpen(false);
-                    item.onSelect?.();
-                  }}
-                >
-                  <span className="min-w-0 truncate">{item.label}</span>
-                </DropdownItem>
-              ))}
-            </Dropdown>
+        {(showAddMenu || leadingSlot != null) && (
+          <div
+            className={cn(
+              cells.add,
+              leadingSlot != null && 'flex items-center gap-0.5'
+            )}
+          >
+            {leadingSlot != null && (
+              <div
+                data-slot="chat-composer-leading-slot"
+                className="flex h-8 shrink-0 items-center"
+              >
+                {leadingSlot}
+              </div>
+            )}
+
+            {showAddMenu && (
+              <Dropdown
+                placement="top-start"
+                open={addMenuOpen}
+                onOpenChange={setAddMenuOpen}
+                trigger={
+                  <button
+                    type="button"
+                    data-slot="chat-composer-add-button"
+                    aria-label={addMenuLabel}
+                    disabled={disabled}
+                    className={iconButtonClasses}
+                  >
+                    <PlusIcon className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                }
+              >
+                {allowAttachments && (
+                  <DropdownItem
+                    icon={
+                      <PaperclipIcon className="h-4 w-4" aria-hidden="true" />
+                    }
+                    onClick={() => {
+                      setAddMenuOpen(false);
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    {attachFilesLabel}
+                  </DropdownItem>
+                )}
+                {allowAttachments &&
+                  addMenuItems &&
+                  addMenuItems.length > 0 && <DropdownSeparator />}
+                {addMenuItems?.map((item) => (
+                  <DropdownItem
+                    key={item.id}
+                    icon={item.icon}
+                    disabled={item.disabled}
+                    variant={item.variant}
+                    checked={item.checked}
+                    onClick={() => {
+                      setAddMenuOpen(false);
+                      item.onSelect?.();
+                    }}
+                  >
+                    <span className="min-w-0 truncate">{item.label}</span>
+                  </DropdownItem>
+                ))}
+              </Dropdown>
+            )}
           </div>
         )}
 

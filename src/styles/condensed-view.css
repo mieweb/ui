@@ -6024,7 +6024,8 @@ body.condensed [data-slot='chat-composer-stop-button'] svg {
   height: 0.75rem !important;
 }
 
-/* Mic slot (e.g. RecordButton) – match the shorter control row */
+/* Host slots – match the shorter control row */
+body.condensed [data-slot='chat-composer-leading-slot'],
 body.condensed [data-slot='chat-composer-mic-slot'] {
   height: 1.5rem !important;
 }
