@@ -640,3 +640,359 @@ describe('AIChat (ChatComposer integration)', () => {
     });
   });
 });
+
+describe('AIChat scroll anchoring', () => {
+  // jsdom has no layout, so scroll metrics are mocked directly on the
+  // messages container and position changes are driven with scroll events.
+  function getMessagesEl(container: HTMLElement): HTMLDivElement {
+    const el = container.querySelector<HTMLDivElement>(
+      '[data-slot="ai-chat-messages"]'
+    );
+    if (!el) throw new Error('messages container not found');
+    return el;
+  }
+
+  function mockMetrics(
+    el: HTMLElement,
+    { scrollHeight = 1000, clientHeight = 400 } = {}
+  ) {
+    Object.defineProperty(el, 'scrollHeight', {
+      configurable: true,
+      value: scrollHeight,
+    });
+    Object.defineProperty(el, 'clientHeight', {
+      configurable: true,
+      value: clientHeight,
+    });
+  }
+
+  function appended(role: 'user' | 'assistant'): AIMessage[] {
+    return [
+      ...messages,
+      {
+        id: `new-${role}`,
+        role,
+        status: 'complete',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'more content below' }],
+      },
+    ];
+  }
+
+  afterEach(() => cleanup());
+
+  it('shows the jump-to-bottom button only while scrolled up', () => {
+    const { container } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+
+    // At the bottom (1000 - 600 - 400 = 0): no button.
+    thread.scrollTop = 600;
+    fireEvent.scroll(thread);
+    expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+    // Scrolled up: the button appears.
+    thread.scrollTop = 100;
+    fireEvent.scroll(thread);
+    expect(screen.getByLabelText('Scroll to bottom')).toBeInTheDocument();
+  });
+
+  it('preserves the reading position when a reply arrives while scrolled up, and flags it', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100;
+    fireEvent.scroll(thread);
+
+    rerender(
+      <AIChat messages={appended('assistant')} onSendMessage={vi.fn()} />
+    );
+
+    // Position untouched; the button now carries the new-messages hint.
+    expect(thread.scrollTop).toBe(100);
+    expect(screen.getByText('New messages')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('New messages — scroll to bottom')
+    ).toBeInTheDocument();
+  });
+
+  it('follows an incoming reply while at the bottom', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    rerender(
+      <AIChat messages={appended('assistant')} onSendMessage={vi.fn()} />
+    );
+
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+    expect(screen.queryByText('New messages')).toBeNull();
+  });
+
+  it('opens an anchored turn for the user’s own message instead of pinning to the bottom', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // scrolled up
+    fireEvent.scroll(thread);
+
+    rerender(<AIChat messages={appended('user')} onSendMessage={vi.fn()} />);
+
+    // The new turn reserves a viewport of space (clientHeight 400 − px-4/py-4
+    // padding) so its start can anchor to the top edge…
+    const turn = container.querySelector<HTMLElement>(
+      '[data-slot="ai-chat-turn"]'
+    );
+    expect(turn).not.toBeNull();
+    expect(turn!.style.minHeight).toBe('368px');
+    expect(turn!.textContent).toContain('more content below');
+    // …and the thread is NOT yanked to the bottom (reading mode).
+    expect(thread.scrollTop).not.toBe(thread.scrollHeight);
+  });
+
+  it('does not anchor a turn for user messages arriving with a session switch', () => {
+    const { container, rerender } = render(
+      <AIChat
+        session={{
+          id: 's1',
+          messages,
+          createdAt: new Date('2026-01-01T10:00:00Z'),
+          updatedAt: new Date('2026-01-01T10:00:00Z'),
+          isGenerating: false,
+        }}
+        onSendMessage={vi.fn()}
+      />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // scrolled up in the old session
+    fireEvent.scroll(thread);
+
+    // The replacement session is longer and contains the user's messages —
+    // that's history, not a fresh send: reset to the bottom, no turn.
+    rerender(
+      <AIChat
+        session={{
+          id: 's2',
+          messages: appended('user'),
+          createdAt: new Date('2026-01-01T10:00:00Z'),
+          updatedAt: new Date('2026-01-01T10:05:00Z'),
+          isGenerating: false,
+        }}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(container.querySelector('[data-slot="ai-chat-turn"]')).toBeNull();
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+  });
+
+  it('holds instead of following when mounted with a streaming reply', () => {
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'live',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'tokens…' }],
+      },
+    ];
+    const { container, rerender } = render(
+      <AIChat messages={streaming} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    // The mount established a stream hold, so the next growth must not
+    // push the view to the bottom (a pinned follow would set scrollTop to
+    // scrollHeight).
+    rerender(
+      <AIChat
+        messages={[
+          ...streaming,
+          {
+            id: 'more',
+            role: 'assistant',
+            status: 'complete',
+            timestamp: new Date('2026-01-01T10:06:00Z'),
+            content: [{ type: 'text', text: 'more content below' }],
+          },
+        ]}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(thread.scrollTop).toBe(600);
+  });
+
+  it('anchors the new turn when a batch append ends with an assistant placeholder', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // scrolled up
+    fireEvent.scroll(thread);
+
+    // Optimistic send: the user's message and the assistant placeholder land
+    // in a single update, so the final message is not the user's.
+    const batch: AIMessage[] = [
+      ...messages,
+      {
+        id: 'new-user',
+        role: 'user',
+        status: 'complete',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'a question' }],
+      },
+      {
+        id: 'new-assistant',
+        role: 'assistant',
+        status: 'complete',
+        timestamp: new Date('2026-01-01T10:05:01Z'),
+        content: [{ type: 'text', text: 'thinking…' }],
+      },
+    ];
+    rerender(<AIChat messages={batch} onSendMessage={vi.fn()} />);
+
+    // The turn starts at the user's message and carries the placeholder.
+    const turn = container.querySelector<HTMLElement>(
+      '[data-slot="ai-chat-turn"]'
+    );
+    expect(turn).not.toBeNull();
+    expect(turn!.textContent).toContain('a question');
+    expect(turn!.textContent).toContain('thinking…');
+    expect(thread.scrollTop).not.toBe(thread.scrollHeight);
+  });
+
+  it('upgrades the jump button to “New messages” when a stream finishes below the fold', () => {
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'stream-1',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'partial answer…' }],
+      },
+    ];
+    const { container, rerender } = render(
+      <AIChat messages={streaming} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // the end of the reply is below the fold
+    fireEvent.scroll(thread);
+    expect(screen.queryByText('New messages')).toBeNull(); // still streaming
+
+    const finished: AIMessage[] = [
+      ...messages,
+      { ...streaming.at(-1)!, status: 'complete' },
+    ];
+    rerender(<AIChat messages={finished} onSendMessage={vi.fn()} />);
+
+    expect(screen.getByText('New messages')).toBeInTheDocument();
+  });
+
+  it('raises no hint when a stream finishes while the reader is at the bottom', () => {
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'stream-1',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'partial answer…' }],
+      },
+    ];
+    const { container, rerender } = render(
+      <AIChat messages={streaming} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    const finished: AIMessage[] = [
+      ...messages,
+      { ...streaming.at(-1)!, status: 'complete' },
+    ];
+    rerender(<AIChat messages={finished} onSendMessage={vi.fn()} />);
+
+    expect(screen.queryByText('New messages')).toBeNull();
+  });
+
+  it('resumes following after a short stream that ended at the bottom', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    // A streaming reply appends: its first line is revealed, then the view
+    // holds (no following) while it streams.
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'stream-1',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'short answer' }],
+      },
+    ];
+    rerender(<AIChat messages={streaming} onSendMessage={vi.fn()} />);
+    expect(thread.scrollTop).toBe(thread.scrollHeight); // revealed
+
+    // It finishes above the fold → following resumes: the next append is
+    // followed instead of raising the hint.
+    const finished: AIMessage[] = [
+      ...messages,
+      { ...streaming.at(-1)!, status: 'complete' },
+    ];
+    rerender(<AIChat messages={finished} onSendMessage={vi.fn()} />);
+    rerender(
+      <AIChat
+        messages={[...finished, ...appended('assistant').slice(-1)]}
+        onSendMessage={vi.fn()}
+      />
+    );
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+    expect(screen.queryByText('New messages')).toBeNull();
+  });
+
+  it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {
+    const user = await setupUser();
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100;
+    fireEvent.scroll(thread);
+    rerender(
+      <AIChat messages={appended('assistant')} onSendMessage={vi.fn()} />
+    );
+
+    await user.click(screen.getByLabelText('New messages — scroll to bottom'));
+
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+    expect(screen.queryByText('New messages')).toBeNull();
+    expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+  });
+});

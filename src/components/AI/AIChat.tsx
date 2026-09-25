@@ -36,6 +36,12 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
+import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import {
+  useStickToBottom,
+  useStreamEndedBelowFold,
+} from '../../hooks/useStickToBottom';
 import { RecordButton } from '../RecordButton';
 import { SparklesIcon, CloseIcon, RefreshIcon } from './icons';
 
@@ -366,8 +372,6 @@ export function AIChat({
   renderTextContent,
   renderMessageFooter,
 }: AIChatProps) {
-  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
-
   React.useEffect(() => {
     notifyComposerMigrationOnce('AIChat');
   }, []);
@@ -378,11 +382,160 @@ export function AIChat({
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
 
-  // Auto-scroll to bottom on new messages
+  // The thread pins to the newest message only while the user is at the
+  // bottom. Once they scroll up to read, streaming growth (handled by
+  // useStickToBottom's ResizeObserver) and appended messages leave their
+  // position alone; a floating "jump to bottom" button offers the way back
+  // (and flags unseen messages). Same policy as SuperChat.
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const {
+    containerRef: messagesContainerRef,
+    contentRef: messagesContentRef,
+    isAtBottom,
+    scrollToBottom,
+    anchorToTurnStart,
+    followIfPinned,
+    stopFollowing,
+  } = useStickToBottom();
+  const [hasNewBelow, setHasNewBelow] = React.useState(false);
+  // Own-send turn anchoring (ChatGPT/Claude-style): the freshly sent user
+  // message opens a "turn" that reserves a viewport of space, anchored so the
+  // bubble sits at the top and the reply streams into the space below.
+  const [turnStartId, setTurnStartId] = React.useState<string | null>(null);
+  const [turnMinHeight, setTurnMinHeight] = React.useState<number>();
+  const anchoredTurnRef = React.useRef<string | null>(null);
+
+  // Anchor to the newest message on mount and when the session changes.
   React.useEffect(() => {
+    setTurnStartId(null);
+    anchoredTurnRef.current = null;
+    scrollToBottom('auto');
+    setHasNewBelow(false);
+  }, [session?.id, scrollToBottom]);
+
+  // New-message policy: follow while pinned, always follow the user's own
+  // sends, otherwise flag that unseen content arrived below.
+  const messageCount = messages.length;
+  const prevMessageCountRef = React.useRef(messageCount);
+  const policySessionRef = React.useRef(session?.id);
+  const policyBaselinedRef = React.useRef(false);
+  React.useEffect(() => {
+    // A session switch replaces the thread wholesale: the reset effect above
+    // owns the scroll, so rebase the append baseline instead of mistaking the
+    // replacement's user messages for a fresh send. The first run baselines
+    // the mount the same way.
+    if (
+      !policyBaselinedRef.current ||
+      policySessionRef.current !== session?.id
+    ) {
+      policyBaselinedRef.current = true;
+      policySessionRef.current = session?.id;
+      prevMessageCountRef.current = messageCount;
+      // A thread that arrives mid-stream (restored session, in-progress host
+      // stream) must hold like an appended stream: the reset effect revealed
+      // the bottom, so hold there and let useStreamEndedBelowFold release
+      // the hold on completion.
+      if (messages.at(-1)?.status === 'streaming') stopFollowing();
+      return;
+    }
+    const prevCount = prevMessageCountRef.current;
+    if (messageCount === prevCount) return;
+    const grew = messageCount > prevCount;
+    prevMessageCountRef.current = messageCount;
+    // A batch update can append the user's message together with an assistant
+    // placeholder — an own send anywhere in the appended slice counts.
+    const ownMessage = grew
+      ? messages
+          .slice(prevCount)
+          .filter((m) => m.role === 'user')
+          .at(-1)
+      : undefined;
+    if (ownMessage) {
+      // Own send: open a new anchored turn (the layout effect below scrolls
+      // it to the top of the viewport once the reserve is in place).
+      setTurnStartId(ownMessage.id);
+    } else if (grew && messages.at(-1)?.status === 'streaming') {
+      // An incoming stream fills below the fold instead of pushing the view:
+      // reveal its first line if we were following, then hold position. On
+      // completion useStreamEndedBelowFold raises the hint (below the fold)
+      // or resumes following (the reply never outgrew the viewport).
+      followIfPinned('auto');
+      stopFollowing();
+    } else if (!followIfPinned('auto') && grew) {
+      setHasNewBelow(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messageCount, isAtBottom, session?.id]);
+
+  // Apply the turn reserve, then anchor the turn's start to the viewport top.
+  // Two passes: the first render after a send measures the viewport and sets
+  // the min-height; once it's in place there is room to scroll the bubble to
+  // the top, so the re-run performs the actual anchor.
+  React.useLayoutEffect(() => {
+    if (!turnStartId || anchoredTurnRef.current === turnStartId) return;
     const container = messagesContainerRef.current;
-    if (container) container.scrollTop = container.scrollHeight;
-  }, [messages]);
+    if (!container) return;
+    // Just under a full viewport (minus the py-4 padding) so the anchored
+    // bubble's top lands at the top edge of the scroll area.
+    const reserve = Math.max(0, container.clientHeight - 32);
+    if (turnMinHeight !== reserve) {
+      setTurnMinHeight(reserve);
+      return;
+    }
+    const target = container.querySelector<HTMLElement>(
+      '[data-slot="ai-chat-turn"]'
+    );
+    if (target) {
+      anchorToTurnStart(target, prefersReducedMotion ? 'auto' : 'smooth');
+      anchoredTurnRef.current = turnStartId;
+    }
+  }, [
+    turnStartId,
+    turnMinHeight,
+    anchorToTurnStart,
+    prefersReducedMotion,
+    messagesContainerRef,
+  ]);
+
+  const turnIndex = React.useMemo(
+    () => (turnStartId ? messages.findIndex((m) => m.id === turnStartId) : -1),
+    [messages, turnStartId]
+  );
+
+  // The hint clears once the user reaches the bottom again.
+  React.useEffect(() => {
+    if (isAtBottom) setHasNewBelow(false);
+  }, [isAtBottom]);
+
+  // A reply that finishes streaming below the fold upgrades the jump button
+  // to the "New messages" hint — the reader hasn't seen the end of it.
+  const raiseNewBelow = React.useCallback(() => setHasNewBelow(true), []);
+  const resumeFollowing = React.useCallback(
+    () => scrollToBottom('auto'),
+    [scrollToBottom]
+  );
+  useStreamEndedBelowFold(
+    messages.at(-1),
+    isAtBottom,
+    raiseNewBelow,
+    resumeFollowing
+  );
+
+  const handleJumpToBottom = React.useCallback(() => {
+    scrollToBottom(prefersReducedMotion ? 'auto' : 'smooth');
+  }, [scrollToBottom, prefersReducedMotion]);
+
+  const renderMessageItem = (message: AIMessage) => (
+    <AIMessageDisplay
+      key={message.id}
+      message={message}
+      userName={userName}
+      showTimestamp={showTimestamps}
+      onLinkClick={handleLinkClick}
+      renderTextContent={renderTextContent}
+      renderMessageFooter={renderMessageFooter}
+    />
+  );
 
   // Split legacy MessageComposer-era keys (mapped below) and the keys AIChat
   // must own (value/onValueChange for draft restore) from the passthrough.
@@ -569,31 +722,50 @@ export function AIChat({
         </div>
       )}
 
-      {/* Messages */}
+      {/* Messages — the viewport wrapper hosts the floating jump-to-bottom
+          button (absolute, never fixed, so it stays inside embedded layouts) */}
       <div
-        ref={messagesContainerRef}
-        data-slot="ai-chat-messages"
-        className="flex-1 overflow-y-auto px-4 py-4"
+        data-slot="ai-chat-messages-viewport"
+        className="relative flex min-h-0 flex-1 flex-col"
       >
-        {messages.length === 0 ? (
-          <AIEmptyState
-            suggestions={suggestions}
-            onSuggestionSelect={handleSuggestionSelect}
-          />
-        ) : (
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <AIMessageDisplay
-                key={message.id}
-                message={message}
-                userName={userName}
-                showTimestamp={showTimestamps}
-                onLinkClick={handleLinkClick}
-                renderTextContent={renderTextContent}
-                renderMessageFooter={renderMessageFooter}
+        <div
+          ref={messagesContainerRef}
+          data-slot="ai-chat-messages"
+          className="flex-1 overflow-y-auto px-4 py-4"
+        >
+          {/* Always-mounted content wrapper so useStickToBottom's
+              ResizeObserver is attached before the first message arrives. */}
+          <div ref={messagesContentRef}>
+            {messages.length === 0 ? (
+              <AIEmptyState
+                suggestions={suggestions}
+                onSuggestionSelect={handleSuggestionSelect}
               />
-            ))}
+            ) : (
+              <div className="space-y-4">
+                {(turnIndex === -1
+                  ? messages
+                  : messages.slice(0, turnIndex)
+                ).map(renderMessageItem)}
+                {turnIndex !== -1 && (
+                  <div
+                    data-slot="ai-chat-turn"
+                    className="space-y-4"
+                    style={{ minHeight: turnMinHeight }}
+                  >
+                    {messages.slice(turnIndex).map(renderMessageItem)}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+        </div>
+        {!isAtBottom && (
+          <JumpToBottomButton
+            dataSlot="ai-chat-jump-to-bottom"
+            hasNewMessages={hasNewBelow}
+            onClick={handleJumpToBottom}
+          />
         )}
       </div>
 

@@ -1128,6 +1128,368 @@ describe('SuperChat', () => {
     );
     expect(container.querySelector('code')).toHaveTextContent('const x = 1;');
   });
+
+  describe('scroll anchoring', () => {
+    // jsdom has no layout, so scroll metrics are mocked directly on the
+    // thread element and position changes are driven with scroll events.
+    function getThread(container: HTMLElement): HTMLDivElement {
+      const el = container.querySelector<HTMLDivElement>(
+        '[data-slot="superchat-thread"]'
+      );
+      if (!el) throw new Error('thread not found');
+      return el;
+    }
+
+    function mockMetrics(
+      el: HTMLElement,
+      { scrollHeight = 1000, clientHeight = 400 } = {}
+    ) {
+      Object.defineProperty(el, 'scrollHeight', {
+        configurable: true,
+        value: scrollHeight,
+      });
+      Object.defineProperty(el, 'clientHeight', {
+        configurable: true,
+        value: clientHeight,
+      });
+    }
+
+    function appended(
+      from: string,
+      base: SuperChatConversation = conversation
+    ): SuperChatConversation {
+      return {
+        ...base,
+        thread: [
+          ...base.thread,
+          {
+            id: `new-${from}`,
+            participantId: from,
+            text: 'more content below',
+            time: '2026-06-07T09:05:00Z',
+          },
+        ],
+      };
+    }
+
+    it('shows the jump-to-bottom button only while scrolled up', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+
+      // At the bottom (1000 - 600 - 400 = 0): no button.
+      thread.scrollTop = 600;
+      fireEvent.scroll(thread);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+      // Scrolled up: the button appears.
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+      expect(screen.getByLabelText('Scroll to bottom')).toBeInTheDocument();
+    });
+
+    it('preserves the reading position when a message arrives while scrolled up, and flags it', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      // Position untouched; the button now carries the new-messages hint.
+      expect(thread.scrollTop).toBe(100);
+      expect(screen.getByText('New messages')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('New messages — scroll to bottom')
+      ).toBeInTheDocument();
+    });
+
+    it('follows an incoming message while at the bottom', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+    });
+
+    it('opens an anchored turn for the local user’s own message instead of pinning to the bottom', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('u1')} currentParticipantId="u1" />
+      );
+
+      // The new turn reserves a viewport of space (clientHeight 400 − p-4
+      // padding) so its start can anchor to the top edge…
+      const turn = container.querySelector<HTMLElement>(
+        '[data-slot="superchat-turn"]'
+      );
+      expect(turn).not.toBeNull();
+      expect(turn!.style.minHeight).toBe('368px');
+      expect(turn!.textContent).toContain('more content below');
+      // …and the thread is NOT yanked to the bottom (reading mode).
+      expect(thread.scrollTop).not.toBe(thread.scrollHeight);
+    });
+
+    it('does not anchor a turn for own messages arriving with a conversation switch', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up in the old conversation
+      fireEvent.scroll(thread);
+
+      // The replacement conversation is longer and includes the local user's
+      // messages — that's history, not a fresh send: reset to the bottom.
+      rerender(
+        <SuperChat
+          conversation={{ ...appended('u1'), id: 'c2' }}
+          currentParticipantId="u1"
+        />
+      );
+
+      expect(
+        container.querySelector('[data-slot="superchat-turn"]')
+      ).toBeNull();
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+    });
+
+    it('holds instead of following when mounted with a streaming reply', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const streamingConversation: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'live',
+            participantId: 'a1',
+            text: 'tokens…',
+            time: '2026-06-07T09:04:00Z',
+            status: 'streaming',
+          },
+        ],
+      };
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={streamingConversation}
+          currentParticipantId="u1"
+        />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      // The mount established a stream hold, so the next growth must not
+      // push the view to the bottom (a pinned follow would set scrollTop to
+      // scrollHeight).
+      rerender(
+        <SuperChat
+          conversation={appended('a1', streamingConversation)}
+          currentParticipantId="u1"
+        />
+      );
+
+      expect(thread.scrollTop).toBe(600);
+    });
+
+    it('anchors the turn at the own message when a batch append ends with another sender', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up
+      fireEvent.scroll(thread);
+
+      // Optimistic send: the local user's message and the peer's reply land
+      // in a single update, so the newest message is not the local user's.
+      rerender(
+        <SuperChat
+          conversation={appended('a1', appended('u1'))}
+          currentParticipantId="u1"
+        />
+      );
+
+      // The turn starts at the own message and carries the peer's reply.
+      const turn = container.querySelector<HTMLElement>(
+        '[data-slot="superchat-turn"]'
+      );
+      expect(turn).not.toBeNull();
+      expect(
+        turn!.querySelectorAll('[data-slot="superchat-message"]')
+      ).toHaveLength(2);
+      expect(thread.scrollTop).not.toBe(thread.scrollHeight);
+    });
+
+    it('upgrades the jump button to “New messages” when a stream finishes below the fold', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const streaming: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'stream-1',
+            participantId: 'a1',
+            text: 'partial answer…',
+            time: '2026-06-07T09:06:00Z',
+            status: 'streaming',
+          },
+        ],
+      };
+      const { container, rerender } = render(
+        <SuperChat conversation={streaming} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // the end of the reply is below the fold
+      fireEvent.scroll(thread);
+      expect(screen.queryByText('New messages')).toBeNull(); // still streaming
+
+      const finished: SuperChatConversation = {
+        ...streaming,
+        thread: [
+          ...conversation.thread,
+          { ...streaming.thread.at(-1)!, status: 'complete' },
+        ],
+      };
+      rerender(<SuperChat conversation={finished} currentParticipantId="u1" />);
+
+      expect(screen.getByText('New messages')).toBeInTheDocument();
+    });
+
+    it('resumes following after a short stream that ended at the bottom', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      // A streaming reply appends: its first line is revealed, then the view
+      // holds (no following) while it streams.
+      const streaming: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'stream-1',
+            participantId: 'a1',
+            text: 'short answer',
+            time: '2026-06-07T09:06:00Z',
+            status: 'streaming',
+          },
+        ],
+      };
+      rerender(
+        <SuperChat conversation={streaming} currentParticipantId="u1" />
+      );
+      expect(thread.scrollTop).toBe(thread.scrollHeight); // revealed
+
+      // It finishes above the fold → following resumes: the next append is
+      // followed instead of raising the hint.
+      const finished: SuperChatConversation = {
+        ...streaming,
+        thread: [
+          ...conversation.thread,
+          { ...streaming.thread.at(-1)!, status: 'complete' },
+        ],
+      };
+      rerender(<SuperChat conversation={finished} currentParticipantId="u1" />);
+      rerender(
+        <SuperChat
+          conversation={appended('a1', finished)}
+          currentParticipantId="u1"
+        />
+      );
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+    });
+
+    it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      await user.click(
+        screen.getByLabelText('New messages — scroll to bottom')
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+    });
+
+    it('keeps the top anchor and offers no jump button when order="desc"', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 300;
+      fireEvent.scroll(thread);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+      rerender(
+        <SuperChat
+          conversation={appended('a1')}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      );
+
+      // New message re-anchors to the top (feed style), still no button.
+      expect(thread.scrollTop).toBe(0);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+    });
+  });
 });
 
 describe('SuperChatConversations', () => {

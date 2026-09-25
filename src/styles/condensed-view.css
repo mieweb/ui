@@ -6347,10 +6347,12 @@ body.condensed [data-slot='ai-chat-messages'] {
   padding: 0.5rem 0.75rem !important;
 }
 
-/* Messages list – tighter gap (space-y-4 → margin override) */
+/* Messages list – tighter gap (space-y-4 → margin override). Target the
+   space-y-4 lists themselves: the sticky-scroll content wrapper adds a depth
+   level, and the anchored turn nests a second list. */
 body.condensed
   [data-slot='ai-chat-messages']
-  > div
+  .space-y-4
   > :not([hidden])
   ~ :not([hidden]) {
   margin-top: 0.5rem !important;
