@@ -418,13 +418,24 @@ export function AIChat({
   const messageCount = messages.length;
   const prevMessageCountRef = React.useRef(messageCount);
   const policySessionRef = React.useRef(session?.id);
+  const policyBaselinedRef = React.useRef(false);
   React.useEffect(() => {
     // A session switch replaces the thread wholesale: the reset effect above
     // owns the scroll, so rebase the append baseline instead of mistaking the
-    // replacement's user messages for a fresh send.
-    if (policySessionRef.current !== session?.id) {
+    // replacement's user messages for a fresh send. The first run baselines
+    // the mount the same way.
+    if (
+      !policyBaselinedRef.current ||
+      policySessionRef.current !== session?.id
+    ) {
+      policyBaselinedRef.current = true;
       policySessionRef.current = session?.id;
       prevMessageCountRef.current = messageCount;
+      // A thread that arrives mid-stream (restored session, in-progress host
+      // stream) must hold like an appended stream: the reset effect revealed
+      // the bottom, so hold there and let useStreamEndedBelowFold release
+      // the hold on completion.
+      if (messages.at(-1)?.status === 'streaming') stopFollowing();
       return;
     }
     const prevCount = prevMessageCountRef.current;

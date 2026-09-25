@@ -222,16 +222,31 @@ export function SuperChat({
     new Set(conversation.thread.map((message) => message.id))
   );
   const policyConversationRef = React.useRef(conversation.id);
+  const policyBaselinedRef = React.useRef(false);
   React.useEffect(() => {
     // A conversation switch replaces the thread wholesale: the reset effect
     // above owns the scroll, so rebase the diff baselines instead of
-    // mistaking the replacement's own messages for a fresh send.
-    if (policyConversationRef.current !== conversation.id) {
+    // mistaking the replacement's own messages for a fresh send. The first
+    // run baselines the mount the same way.
+    if (
+      !policyBaselinedRef.current ||
+      policyConversationRef.current !== conversation.id
+    ) {
+      policyBaselinedRef.current = true;
       policyConversationRef.current = conversation.id;
       prevThreadLengthRef.current = threadLength;
       prevMessageIdsRef.current = new Set(
         conversation.thread.map((message) => message.id)
       );
+      // A thread that arrives mid-stream must hold like an appended stream:
+      // the reset effect revealed the newest message, so hold there and let
+      // useStreamEndedBelowFold release the hold on completion.
+      if (
+        order !== 'desc' &&
+        [...conversation.thread].sort(byTime).at(-1)?.status === 'streaming'
+      ) {
+        stopFollowing();
+      }
       return;
     }
     if (threadLength === prevThreadLengthRef.current) return;

@@ -1282,6 +1282,45 @@ describe('SuperChat', () => {
       expect(thread.scrollTop).toBe(thread.scrollHeight);
     });
 
+    it('holds instead of following when mounted with a streaming reply', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const streamingConversation: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'live',
+            participantId: 'a1',
+            text: 'tokens…',
+            time: '2026-06-07T09:04:00Z',
+            status: 'streaming',
+          },
+        ],
+      };
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={streamingConversation}
+          currentParticipantId="u1"
+        />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      // The mount established a stream hold, so the next growth must not
+      // push the view to the bottom (a pinned follow would set scrollTop to
+      // scrollHeight).
+      rerender(
+        <SuperChat
+          conversation={appended('a1', streamingConversation)}
+          currentParticipantId="u1"
+        />
+      );
+
+      expect(thread.scrollTop).toBe(600);
+    });
+
     it('anchors the turn at the own message when a batch append ends with another sender', async () => {
       const { fireEvent } = await import('@testing-library/react');
       const { container, rerender } = render(

@@ -797,6 +797,47 @@ describe('AIChat scroll anchoring', () => {
     expect(thread.scrollTop).toBe(thread.scrollHeight);
   });
 
+  it('holds instead of following when mounted with a streaming reply', () => {
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'live',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'tokens…' }],
+      },
+    ];
+    const { container, rerender } = render(
+      <AIChat messages={streaming} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    // The mount established a stream hold, so the next growth must not
+    // push the view to the bottom (a pinned follow would set scrollTop to
+    // scrollHeight).
+    rerender(
+      <AIChat
+        messages={[
+          ...streaming,
+          {
+            id: 'more',
+            role: 'assistant',
+            status: 'complete',
+            timestamp: new Date('2026-01-01T10:06:00Z'),
+            content: [{ type: 'text', text: 'more content below' }],
+          },
+        ]}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(thread.scrollTop).toBe(600);
+  });
+
   it('anchors the new turn when a batch append ends with an assistant placeholder', () => {
     const { container, rerender } = render(
       <AIChat messages={messages} onSendMessage={vi.fn()} />
