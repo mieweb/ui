@@ -760,6 +760,43 @@ describe('AIChat scroll anchoring', () => {
     expect(thread.scrollTop).not.toBe(thread.scrollHeight);
   });
 
+  it('does not anchor a turn for user messages arriving with a session switch', () => {
+    const { container, rerender } = render(
+      <AIChat
+        session={{
+          id: 's1',
+          messages,
+          createdAt: new Date('2026-01-01T10:00:00Z'),
+          updatedAt: new Date('2026-01-01T10:00:00Z'),
+          isGenerating: false,
+        }}
+        onSendMessage={vi.fn()}
+      />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // scrolled up in the old session
+    fireEvent.scroll(thread);
+
+    // The replacement session is longer and contains the user's messages —
+    // that's history, not a fresh send: reset to the bottom, no turn.
+    rerender(
+      <AIChat
+        session={{
+          id: 's2',
+          messages: appended('user'),
+          createdAt: new Date('2026-01-01T10:00:00Z'),
+          updatedAt: new Date('2026-01-01T10:05:00Z'),
+          isGenerating: false,
+        }}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(container.querySelector('[data-slot="ai-chat-turn"]')).toBeNull();
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+  });
+
   it('anchors the new turn when a batch append ends with an assistant placeholder', () => {
     const { container, rerender } = render(
       <AIChat messages={messages} onSendMessage={vi.fn()} />

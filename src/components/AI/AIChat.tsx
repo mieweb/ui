@@ -417,7 +417,16 @@ export function AIChat({
   // sends, otherwise flag that unseen content arrived below.
   const messageCount = messages.length;
   const prevMessageCountRef = React.useRef(messageCount);
+  const policySessionRef = React.useRef(session?.id);
   React.useEffect(() => {
+    // A session switch replaces the thread wholesale: the reset effect above
+    // owns the scroll, so rebase the append baseline instead of mistaking the
+    // replacement's user messages for a fresh send.
+    if (policySessionRef.current !== session?.id) {
+      policySessionRef.current = session?.id;
+      prevMessageCountRef.current = messageCount;
+      return;
+    }
     const prevCount = prevMessageCountRef.current;
     if (messageCount === prevCount) return;
     const grew = messageCount > prevCount;
@@ -445,7 +454,7 @@ export function AIChat({
       setHasNewBelow(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messageCount, isAtBottom]);
+  }, [messageCount, isAtBottom, session?.id]);
 
   // Apply the turn reserve, then anchor the turn's start to the viewport top.
   // Two passes: the first render after a send measures the viewport and sets

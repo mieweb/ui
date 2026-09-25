@@ -221,7 +221,19 @@ export function SuperChat({
   const prevMessageIdsRef = React.useRef<Set<string>>(
     new Set(conversation.thread.map((message) => message.id))
   );
+  const policyConversationRef = React.useRef(conversation.id);
   React.useEffect(() => {
+    // A conversation switch replaces the thread wholesale: the reset effect
+    // above owns the scroll, so rebase the diff baselines instead of
+    // mistaking the replacement's own messages for a fresh send.
+    if (policyConversationRef.current !== conversation.id) {
+      policyConversationRef.current = conversation.id;
+      prevThreadLengthRef.current = threadLength;
+      prevMessageIdsRef.current = new Set(
+        conversation.thread.map((message) => message.id)
+      );
+      return;
+    }
     if (threadLength === prevThreadLengthRef.current) return;
     const grew = threadLength > prevThreadLengthRef.current;
     prevThreadLengthRef.current = threadLength;
@@ -269,7 +281,7 @@ export function SuperChat({
       followIfPinned('auto');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadLength, order, isAtBottom]);
+  }, [threadLength, order, isAtBottom, conversation.id]);
 
   // Apply the turn reserve, then anchor the turn's start to the viewport top.
   // Two passes: the first render after a send measures the viewport and sets

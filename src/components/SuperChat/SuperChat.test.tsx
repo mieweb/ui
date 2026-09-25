@@ -1257,6 +1257,31 @@ describe('SuperChat', () => {
       expect(thread.scrollTop).not.toBe(thread.scrollHeight);
     });
 
+    it('does not anchor a turn for own messages arriving with a conversation switch', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up in the old conversation
+      fireEvent.scroll(thread);
+
+      // The replacement conversation is longer and includes the local user's
+      // messages — that's history, not a fresh send: reset to the bottom.
+      rerender(
+        <SuperChat
+          conversation={{ ...appended('u1'), id: 'c2' }}
+          currentParticipantId="u1"
+        />
+      );
+
+      expect(
+        container.querySelector('[data-slot="superchat-turn"]')
+      ).toBeNull();
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+    });
+
     it('anchors the turn at the own message when a batch append ends with another sender', async () => {
       const { fireEvent } = await import('@testing-library/react');
       const { container, rerender } = render(
