@@ -1248,6 +1248,28 @@ describe('SuperChat', () => {
       expect(thread.scrollTop).toBe(thread.scrollHeight);
     });
 
+    it('scrolls to the bottom when a batch append includes an own message but ends with another sender', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up
+      fireEvent.scroll(thread);
+
+      // Optimistic send: the local user's message and the peer's reply land
+      // in a single update, so the newest message is not the local user's.
+      rerender(
+        <SuperChat
+          conversation={appended('a1', appended('u1'))}
+          currentParticipantId="u1"
+        />
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+    });
+
     it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {
       const { fireEvent } = await import('@testing-library/react');
       const { default: userEvent } =

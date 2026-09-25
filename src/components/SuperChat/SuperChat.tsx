@@ -27,7 +27,6 @@ import {
   detectMentions,
   filesToComposerAttachments,
   acceptTokensFor,
-  lastMessageByTime,
 } from './parts';
 import { VirtualThread } from './VirtualThread';
 import type {
@@ -194,17 +193,17 @@ export function SuperChat({
   }, [conversation.id, order]);
 
   const threadLength = conversation.thread.length;
-  const lastMessage = React.useMemo(
-    () => lastMessageByTime(conversation.thread),
-    [conversation.thread]
-  );
-  const lastIsSelf =
-    !!currentParticipantId &&
-    lastMessage?.participantId === currentParticipantId;
 
   // New-message policy: follow while pinned, always follow the local user's
-  // own sends, otherwise flag that unseen content arrived below.
+  // own sends, otherwise flag that unseen content arrived below. Own sends
+  // are detected by diffing message ids: a batch update can append the local
+  // user's message together with someone else's (or a placeholder), and
+  // timestamps can reorder the batch, so the newest message alone is not a
+  // reliable signal.
   const prevThreadLengthRef = React.useRef(threadLength);
+  const prevMessageIdsRef = React.useRef<Set<string>>(
+    new Set(conversation.thread.map((message) => message.id))
+  );
   React.useEffect(() => {
     if (threadLength === prevThreadLengthRef.current) return;
     const grew = threadLength > prevThreadLengthRef.current;
@@ -214,13 +213,30 @@ export function SuperChat({
       if (el) el.scrollTop = 0;
       return;
     }
-    if (isAtBottom || lastIsSelf) {
+    const prevIds = prevMessageIdsRef.current;
+    const sentOwn =
+      grew &&
+      !!currentParticipantId &&
+      conversation.thread.some(
+        (message) =>
+          !prevIds.has(message.id) &&
+          message.participantId === currentParticipantId
+      );
+    if (isAtBottom || sentOwn) {
       scrollToBottom('auto');
     } else if (grew) {
       setHasNewBelow(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadLength, order, isAtBottom, lastIsSelf]);
+  }, [threadLength, order, isAtBottom]);
+
+  // Snapshot the ids after the policy effect above so it always diffs against
+  // the pre-render thread.
+  React.useEffect(() => {
+    prevMessageIdsRef.current = new Set(
+      conversation.thread.map((message) => message.id)
+    );
+  });
 
   // The hint clears once the user reaches the bottom again.
   React.useEffect(() => {

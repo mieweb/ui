@@ -402,19 +402,23 @@ export function AIChat({
   // New-message policy: follow while pinned, always follow the user's own
   // sends, otherwise flag that unseen content arrived below.
   const messageCount = messages.length;
-  const lastIsSelf = messages[messages.length - 1]?.role === 'user';
   const prevMessageCountRef = React.useRef(messageCount);
   React.useEffect(() => {
-    if (messageCount === prevMessageCountRef.current) return;
-    const grew = messageCount > prevMessageCountRef.current;
+    const prevCount = prevMessageCountRef.current;
+    if (messageCount === prevCount) return;
+    const grew = messageCount > prevCount;
     prevMessageCountRef.current = messageCount;
-    if (isAtBottom || lastIsSelf) {
+    // A batch update can append the user's message together with an assistant
+    // placeholder — an own send anywhere in the appended slice counts.
+    const sentOwn =
+      grew && messages.slice(prevCount).some((m) => m.role === 'user');
+    if (isAtBottom || sentOwn) {
       scrollToBottom('auto');
     } else if (grew) {
       setHasNewBelow(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messageCount, isAtBottom, lastIsSelf]);
+  }, [messageCount, isAtBottom]);
 
   // The hint clears once the user reaches the bottom again.
   React.useEffect(() => {

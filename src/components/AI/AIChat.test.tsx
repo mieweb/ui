@@ -751,6 +751,39 @@ describe('AIChat scroll anchoring', () => {
     expect(thread.scrollTop).toBe(thread.scrollHeight);
   });
 
+  it('scrolls to the bottom when a batch append ends with an assistant placeholder', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // scrolled up
+    fireEvent.scroll(thread);
+
+    // Optimistic send: the user's message and the assistant placeholder land
+    // in a single update, so the final message is not the user's.
+    const batch: AIMessage[] = [
+      ...messages,
+      {
+        id: 'new-user',
+        role: 'user',
+        status: 'complete',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'a question' }],
+      },
+      {
+        id: 'new-assistant',
+        role: 'assistant',
+        status: 'complete',
+        timestamp: new Date('2026-01-01T10:05:01Z'),
+        content: [{ type: 'text', text: 'thinking…' }],
+      },
+    ];
+    rerender(<AIChat messages={batch} onSendMessage={vi.fn()} />);
+
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+  });
+
   it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {
     const user = await setupUser();
     const { container, rerender } = render(
