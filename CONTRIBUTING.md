@@ -300,7 +300,8 @@ sentences live there and are quoted verbatim elsewhere.
   emits `.d.ts` / `.d.cts` after the JS build, in sequential batches of entries
   (one tsup process each). A single pass over every entry exhausts an 8 GB heap;
   batches peak around 2 GB. `datavis` builds alone because it is the only entry
-  that inlines dependency types (`dts.resolve`).
+  that inlines dependency types (`dts.resolve`). `pnpm dev` (`tsup --watch`)
+  rebuilds JS only; run `pnpm build:dts` when you need fresh declarations.
 - **External:** `react`, `react-dom`, `datavis-ace`, and `@esheet/*` are never
   bundled (they're peers). Legacy `ag-grid-*` peers remain external for compatibility.
 - **CSS:** `pnpm build:css` compiles `src/styles/base.css` → `dist/styles.css`

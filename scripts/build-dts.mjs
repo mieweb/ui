@@ -24,7 +24,18 @@ import { entries } from '../tsup.entries.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const tsupCli = join(root, 'node_modules', 'tsup', 'dist', 'cli-default.js');
-const batchSize = Number(process.env.MIEWEB_DTS_BATCH_SIZE) || 20;
+const DEFAULT_BATCH_SIZE = 20;
+const rawBatchSize = process.env.MIEWEB_DTS_BATCH_SIZE;
+const batchSize =
+  rawBatchSize === undefined || rawBatchSize === ''
+    ? DEFAULT_BATCH_SIZE
+    : Number(rawBatchSize);
+if (!Number.isInteger(batchSize) || batchSize < 1) {
+  console.error(
+    `MIEWEB_DTS_BATCH_SIZE must be a positive integer (got "${rawBatchSize}").`
+  );
+  process.exit(1);
+}
 
 const SOLO = ['datavis', 'index'];
 const rest = Object.keys(entries).filter((name) => !SOLO.includes(name));

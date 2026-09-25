@@ -27,7 +27,8 @@ const useSyncExternalStoreEsmShim: Plugin = {
 // Bundling every entry's .d.ts in one rollup-plugin-dts pass exhausts an 8 GB
 // heap (#496), while each batch on its own is small. The script re-runs tsup
 // with MIEWEB_DTS_ENTRIES set to one batch of entry names; without it, this
-// config builds JS only.
+// config builds JS only — including `pnpm dev` (`tsup --watch`), which does
+// not refresh declarations. Run `pnpm build:dts` for up-to-date types.
 const dtsBatch = process.env.MIEWEB_DTS_ENTRIES?.split(',').filter(Boolean);
 
 function pickEntries(names: string[]): Record<string, string> {
