@@ -12,9 +12,15 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import {
+  useStickToBottom,
+  useStreamEndedBelowFold,
+} from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
 import { ChatComposer } from '../ChatComposer/ChatComposer';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
+import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
 import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
@@ -34,6 +40,7 @@ import type {
   SuperChatConversation,
   SuperChatCopyFormat,
   SuperChatLinkBuilder,
+  SuperChatMessage,
   SuperChatRef,
   SuperChatRenderPlugin,
 } from './types';
@@ -160,15 +167,202 @@ export function SuperChat({
     [renderTextContent, renderPlugins, trustedContent]
   );
 
-  const threadRef = React.useRef<HTMLDivElement>(null);
+  // --- Scroll anchoring -----------------------------------------------------
+  // The thread pins to the newest message only while the user is at the
+  // bottom. Once they scroll up to read, streaming growth and appended
+  // messages leave their position alone; a floating "jump to bottom" button
+  // offers the way back (and flags unseen messages). `desc` (feed-style)
+  // threads keep their top anchor and skip the affordance.
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const {
+    containerRef: threadRef,
+    contentRef: threadContentRef,
+    isAtBottom,
+    scrollToBottom,
+    anchorToTurnStart,
+    followIfPinned,
+    stopFollowing,
+  } = useStickToBottom({ disabled: order === 'desc' });
+  const [hasNewBelow, setHasNewBelow] = React.useState(false);
+  // Own-send turn anchoring (ChatGPT/Claude-style): the freshly sent message
+  // opens a "turn" that reserves a viewport of space, anchored so the bubble
+  // sits at the top and replies stream into the space below. Plain thread
+  // only — the virtualizer owns row layout, so virtualized mode keeps the
+  // pin-to-bottom behavior for own sends.
+  const [turnStartId, setTurnStartId] = React.useState<string | null>(null);
+  const [turnMinHeight, setTurnMinHeight] = React.useState<number>();
+  const anchoredTurnRef = React.useRef<string | null>(null);
+
+  // Anchor to the newest message on mount and when switching conversations:
+  // bottom for ascending order, top for descending (feed-style) order.
   React.useEffect(() => {
-    if (virtualized) return; // VirtualThread manages its own scroll anchoring.
-    const el = threadRef.current;
-    if (!el) return;
-    // Anchor to the newest message: bottom for ascending order, top for
-    // descending (feed-style) order.
-    el.scrollTop = order === 'desc' ? 0 : el.scrollHeight;
-  }, [conversation.thread.length, conversation.id, order, virtualized]);
+    setTurnStartId(null);
+    anchoredTurnRef.current = null;
+    if (order === 'desc') {
+      const el = threadRef.current;
+      if (el) el.scrollTop = 0;
+    } else {
+      scrollToBottom('auto');
+    }
+    setHasNewBelow(false);
+    // `threadRef`/`scrollToBottom` are stable for the hook instance.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversation.id, order]);
+
+  const threadLength = conversation.thread.length;
+
+  // New-message policy: follow while pinned, always follow the local user's
+  // own sends, otherwise flag that unseen content arrived below. Own sends
+  // are detected by diffing message ids: a batch update can append the local
+  // user's message together with someone else's (or a placeholder), and
+  // timestamps can reorder the batch, so the newest message alone is not a
+  // reliable signal.
+  const prevThreadLengthRef = React.useRef(threadLength);
+  const prevMessageIdsRef = React.useRef<Set<string>>(
+    new Set(conversation.thread.map((message) => message.id))
+  );
+  const policyConversationRef = React.useRef(conversation.id);
+  const policyBaselinedRef = React.useRef(false);
+  React.useEffect(() => {
+    // A conversation switch replaces the thread wholesale: the reset effect
+    // above owns the scroll, so rebase the diff baselines instead of
+    // mistaking the replacement's own messages for a fresh send. The first
+    // run baselines the mount the same way.
+    if (
+      !policyBaselinedRef.current ||
+      policyConversationRef.current !== conversation.id
+    ) {
+      policyBaselinedRef.current = true;
+      policyConversationRef.current = conversation.id;
+      prevThreadLengthRef.current = threadLength;
+      prevMessageIdsRef.current = new Set(
+        conversation.thread.map((message) => message.id)
+      );
+      // A thread that arrives mid-stream must hold like an appended stream:
+      // the reset effect revealed the newest message, so hold there and let
+      // useStreamEndedBelowFold release the hold on completion.
+      if (
+        order !== 'desc' &&
+        [...conversation.thread].sort(byTime).at(-1)?.status === 'streaming'
+      ) {
+        stopFollowing();
+      }
+      return;
+    }
+    if (threadLength === prevThreadLengthRef.current) return;
+    const grew = threadLength > prevThreadLengthRef.current;
+    prevThreadLengthRef.current = threadLength;
+    if (order === 'desc') {
+      const el = threadRef.current;
+      if (el) el.scrollTop = 0;
+      return;
+    }
+    const prevIds = prevMessageIdsRef.current;
+    // The latest newly appended own message (in thread order) starts a turn.
+    let turnStart: string | undefined;
+    if (grew && currentParticipantId) {
+      for (const message of [...conversation.thread].sort(byTime)) {
+        if (
+          !prevIds.has(message.id) &&
+          message.participantId === currentParticipantId
+        ) {
+          turnStart = message.id;
+        }
+      }
+    }
+    if (turnStart) {
+      if (virtualized) {
+        // No turn reserve under the virtualizer — pin the own send instead.
+        scrollToBottom('auto');
+      } else {
+        // Own send: open a new anchored turn (the layout effect below scrolls
+        // it to the top of the viewport once the reserve is in place).
+        setTurnStartId(turnStart);
+      }
+    } else if (grew) {
+      const newest = [...conversation.thread].sort(byTime).at(-1);
+      if (newest?.status === 'streaming') {
+        // An incoming stream fills below the fold instead of pushing the
+        // view: reveal its first line if we were following, then hold
+        // position. On completion useStreamEndedBelowFold raises the hint
+        // (below the fold) or resumes following (the reply never outgrew
+        // the viewport).
+        followIfPinned('auto');
+        stopFollowing();
+      } else if (!followIfPinned('auto')) {
+        setHasNewBelow(true);
+      }
+    } else {
+      followIfPinned('auto');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threadLength, order, isAtBottom, conversation.id]);
+
+  // Apply the turn reserve, then anchor the turn's start to the viewport top.
+  // Two passes: the first render after a send measures the viewport and sets
+  // the min-height; once it's in place there is room to scroll the bubble to
+  // the top, so the re-run performs the actual anchor.
+  React.useLayoutEffect(() => {
+    if (!turnStartId || anchoredTurnRef.current === turnStartId) return;
+    const container = threadRef.current;
+    if (!container) return;
+    // Just under a full viewport (minus the p-4 padding) so the anchored
+    // bubble's top lands at the top edge of the scroll area.
+    const reserve = Math.max(0, container.clientHeight - 32);
+    if (turnMinHeight !== reserve) {
+      setTurnMinHeight(reserve);
+      return;
+    }
+    const target = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-turn"]'
+    );
+    if (target) {
+      anchorToTurnStart(target, prefersReducedMotion ? 'auto' : 'smooth');
+      anchoredTurnRef.current = turnStartId;
+    }
+  }, [
+    turnStartId,
+    turnMinHeight,
+    anchorToTurnStart,
+    prefersReducedMotion,
+    threadRef,
+  ]);
+
+  // Snapshot the ids after the policy effect above so it always diffs against
+  // the pre-render thread.
+  React.useEffect(() => {
+    prevMessageIdsRef.current = new Set(
+      conversation.thread.map((message) => message.id)
+    );
+  });
+
+  // The hint clears once the user reaches the bottom again.
+  React.useEffect(() => {
+    if (isAtBottom) setHasNewBelow(false);
+  }, [isAtBottom]);
+
+  // A reply that finishes streaming below the fold upgrades the jump button
+  // to the "New messages" hint — the reader hasn't seen the end of it.
+  const newestMessage = React.useMemo(
+    () => [...conversation.thread].sort(byTime).at(-1),
+    [conversation]
+  );
+  const raiseNewBelow = React.useCallback(() => {
+    if (order !== 'desc') setHasNewBelow(true);
+  }, [order]);
+  const resumeFollowing = React.useCallback(() => {
+    if (order !== 'desc') scrollToBottom('auto');
+  }, [order, scrollToBottom]);
+  useStreamEndedBelowFold(
+    newestMessage,
+    isAtBottom,
+    raiseNewBelow,
+    resumeFollowing
+  );
+
+  const handleJumpToBottom = React.useCallback(() => {
+    scrollToBottom(prefersReducedMotion ? 'auto' : 'smooth');
+  }, [scrollToBottom, prefersReducedMotion]);
 
   const participantById = React.useMemo(() => {
     const map = new Map<string, Participant>();
@@ -180,6 +374,31 @@ export function SuperChat({
     const sorted = [...conversation.thread].sort(byTime);
     return order === 'desc' ? sorted.reverse() : sorted;
   }, [conversation, order]);
+
+  const turnIndex = React.useMemo(
+    () =>
+      turnStartId && order !== 'desc'
+        ? orderedThread.findIndex((message) => message.id === turnStartId)
+        : -1,
+    [orderedThread, turnStartId, order]
+  );
+
+  const renderMessageRow = (m: SuperChatMessage) => (
+    <MessageRow
+      key={m.id}
+      message={m}
+      participant={participantById.get(m.participantId)}
+      isSelf={
+        !!currentParticipantId && m.participantId === currentParticipantId
+      }
+      renderText={renderText}
+      linkBuilder={linkBuilder}
+      onReferenceClick={onReferenceClick}
+      editable={editable}
+      onMessageEdited={handleMessageEdited}
+      defaultCopyFormat={defaultCopyFormat}
+    />
+  );
 
   // Stable edit handler so memoized rows don't re-render when the conversation
   // changes. Latest `onMessageEdited`/`conversation` are read from refs.
@@ -328,60 +547,70 @@ export function SuperChat({
         )}
       </header>
 
-      {virtualized ? (
-        <VirtualThread
-          items={orderedThread}
-          participantById={participantById}
-          currentParticipantId={currentParticipantId}
-          renderText={renderText}
-          linkBuilder={linkBuilder}
-          onReferenceClick={onReferenceClick}
-          editable={editable}
-          onMessageEdited={handleMessageEdited}
-          defaultCopyFormat={defaultCopyFormat}
-          order={order}
-          conversationId={conversation.id}
-          containerProps={{
-            'data-slot': 'superchat-thread',
-            role: 'log',
-            'aria-label': 'Messages',
-            'aria-live': 'polite',
+      <div
+        data-slot="superchat-thread-viewport"
+        className="relative flex min-h-0 flex-1 flex-col"
+      >
+        {virtualized ? (
+          <VirtualThread
+            items={orderedThread}
+            participantById={participantById}
+            currentParticipantId={currentParticipantId}
+            renderText={renderText}
+            linkBuilder={linkBuilder}
+            onReferenceClick={onReferenceClick}
+            editable={editable}
+            onMessageEdited={handleMessageEdited}
+            defaultCopyFormat={defaultCopyFormat}
+            scrollRef={threadRef}
+            contentRef={threadContentRef}
+            containerProps={{
+              'data-slot': 'superchat-thread',
+              role: 'log',
+              'aria-label': 'Messages',
+              'aria-live': 'polite',
+              // Focusable so keyboard-only users can scroll the message history.
+              tabIndex: 0,
+              className: 'flex-1 overflow-y-auto p-4',
+            }}
+          />
+        ) : (
+          <div
+            data-slot="superchat-thread"
+            ref={threadRef}
+            role="log"
+            aria-label="Messages"
+            aria-live="polite"
             // Focusable so keyboard-only users can scroll the message history.
-            tabIndex: 0,
-            className: 'flex-1 overflow-y-auto p-4',
-          }}
-        />
-      ) : (
-        <div
-          data-slot="superchat-thread"
-          ref={threadRef}
-          role="log"
-          aria-label="Messages"
-          aria-live="polite"
-          // Focusable so keyboard-only users can scroll the message history.
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-          tabIndex={0}
-          className="flex-1 space-y-4 overflow-y-auto p-4"
-        >
-          {orderedThread.map((m) => (
-            <MessageRow
-              key={m.id}
-              message={m}
-              participant={participantById.get(m.participantId)}
-              isSelf={
-                !!currentParticipantId &&
-                m.participantId === currentParticipantId
-              }
-              renderText={renderText}
-              linkBuilder={linkBuilder}
-              onReferenceClick={onReferenceClick}
-              editable={editable}
-              onMessageEdited={handleMessageEdited}
-              defaultCopyFormat={defaultCopyFormat}
-            />
-          ))}
-        </div>
-      )}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={0}
+            className="flex-1 overflow-y-auto p-4"
+          >
+            <div ref={threadContentRef} className="space-y-4">
+              {(turnIndex === -1
+                ? orderedThread
+                : orderedThread.slice(0, turnIndex)
+              ).map(renderMessageRow)}
+              {turnIndex !== -1 && (
+                <div
+                  data-slot="superchat-turn"
+                  className="space-y-4"
+                  style={{ minHeight: turnMinHeight }}
+                >
+                  {orderedThread.slice(turnIndex).map(renderMessageRow)}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {order !== 'desc' && !isAtBottom && (
+          <JumpToBottomButton
+            dataSlot="superchat-jump-to-bottom"
+            hasNewMessages={hasNewBelow}
+            onClick={handleJumpToBottom}
+          />
+        )}
+      </div>
 
       <ChatComposer
         value={draft}

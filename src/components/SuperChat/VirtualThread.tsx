@@ -44,12 +44,12 @@ export interface VirtualThreadProps {
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
   defaultCopyFormat?: SuperChatCopyFormat;
   /**
-   * Thread ordering. `'asc'` anchors new messages to the bottom; `'desc'`
-   * anchors them to the top (feed style).
+   * Host-owned ref for the scroll container. {@link SuperChat} owns all
+   * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
    */
-  order: 'asc' | 'desc';
-  /** Conversation id — changing it re-anchors scroll to the newest message. */
-  conversationId: string;
+  scrollRef: React.RefObject<HTMLDivElement | null>;
+  /** Host-owned ref for the inner sizer — its growth re-pins the scroll. */
+  contentRef: React.RefObject<HTMLDivElement | null>;
   /** Props forwarded to the scroll container (role/aria/tabIndex/className). */
   containerProps: React.HTMLAttributes<HTMLDivElement> & {
     'data-slot'?: string;
@@ -66,41 +66,25 @@ export function VirtualThread({
   editable,
   onMessageEdited,
   defaultCopyFormat,
-  order,
-  conversationId,
+  scrollRef,
+  contentRef,
   containerProps,
 }: VirtualThreadProps) {
-  const parentRef = React.useRef<HTMLDivElement>(null);
-
   const virtualizer = useVirtualizer({
     count: items.length,
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => scrollRef.current,
     // Rough first guess; real heights are measured via measureElement.
     estimateSize: () => 88,
     overscan: 10,
     getItemKey: (index) => items[index]?.id ?? index,
   });
 
-  // Anchor to the newest message: bottom for ascending order, top for
-  // descending (feed-style) order. Runs on mount, when the conversation
-  // changes, and when a message is appended.
-  const count = items.length;
-  React.useEffect(() => {
-    if (count === 0) return;
-    if (order === 'desc') {
-      virtualizer.scrollToIndex(0, { align: 'start' });
-    } else {
-      virtualizer.scrollToIndex(count - 1, { align: 'end' });
-    }
-    // `virtualizer` is stable across renders for a given instance.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, conversationId, order]);
-
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
-    <div {...containerProps} ref={parentRef}>
+    <div {...containerProps} ref={scrollRef}>
       <div
+        ref={contentRef}
         style={{
           height: virtualizer.getTotalSize(),
           position: 'relative',
