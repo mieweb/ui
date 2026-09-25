@@ -178,11 +178,19 @@ function ThinkingBlock({
 }) {
   const startedAt = React.useRef(Date.now());
   const [elapsed, setElapsed] = React.useState<number | null>(null);
+  // Set once on the streaming → done transition so the pill auto-collapses
+  // when thinking finishes; the user can still re-expand it afterwards.
+  const [autoCollapsed, setAutoCollapsed] = React.useState(false);
   const prevStreaming = React.useRef(streaming);
 
   React.useEffect(() => {
     if (prevStreaming.current && !streaming) {
       setElapsed(Math.round((Date.now() - startedAt.current) / 1000));
+      setAutoCollapsed(true);
+    } else if (!prevStreaming.current && streaming) {
+      // Re-streaming in the same block: re-expand for the new thinking pass.
+      startedAt.current = Date.now();
+      setAutoCollapsed(false);
     }
     prevStreaming.current = streaming;
   }, [streaming]);
@@ -205,7 +213,7 @@ function ThinkingBlock({
       <CollapsiblePill
         label={label}
         leadingIcon={dot}
-        defaultOpen={!defaultCollapsed}
+        defaultOpen={!defaultCollapsed && !autoCollapsed}
         pillClassName="bg-violet-50 border-violet-200 text-violet-600 hover:bg-violet-100 dark:bg-violet-950/30 dark:border-violet-800 dark:text-violet-400 dark:hover:bg-violet-950/50 focus-visible:ring-violet-500"
       >
         <div className="border-s-2 border-violet-200 ps-3 text-[13px] leading-relaxed text-neutral-600 italic dark:border-violet-700 dark:text-neutral-400">

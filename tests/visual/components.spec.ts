@@ -333,6 +333,42 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('ai-chat-playground-condensed.png');
   });
 
+  test('AIMessage - Thinking active (streaming)', async ({ page }) => {
+    // Expanded violet "Thinking" pill with the reasoning text visible.
+    await gotoStory(page, 'chat-aimessage--thinking-active');
+    await expect(page).toHaveScreenshot('ai-message-thinking-active.png');
+  });
+
+  test('AIMessage - Thinking complete', async ({ page }) => {
+    // Collapsed "Thought" pill above the answer text.
+    await gotoStory(page, 'chat-aimessage--thinking-complete');
+    await expect(page).toHaveScreenshot('ai-message-thinking-complete.png');
+  });
+
+  test('AIMessage - Thinking auto-collapses when streaming finishes', async ({
+    page,
+  }) => {
+    // The story streams for ~3s, then completes: the pill must start
+    // expanded and auto-collapse on the transition (ThinkingBlock's
+    // autoCollapsed state driving CollapsiblePill's defaultOpen resync).
+    await gotoStory(page, 'chat-aimessage--thinking-auto-collapse');
+    const pill = page.getByRole('button', { name: /^thinking$/i });
+    await expect(pill).toHaveAttribute('aria-expanded', 'true');
+
+    const collapsed = page.getByRole('button', {
+      name: /^thought( for \d+s)?$/i,
+    });
+    await expect(collapsed).toHaveAttribute('aria-expanded', 'false', {
+      timeout: 10000,
+    });
+    // Settled collapsed state (collapse animation is 300ms; screenshot
+    // auto-disables animations). The elapsed label is timing-dependent
+    // ("Thought for 3s"), well inside the 5% diff tolerance.
+    await expect(page).toHaveScreenshot(
+      'ai-message-thinking-auto-collapse.png'
+    );
+  });
+
   test('Avatar - Default', async ({ page }) => {
     await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');
