@@ -737,7 +737,7 @@ describe('AIChat scroll anchoring', () => {
     expect(screen.queryByText('New messages')).toBeNull();
   });
 
-  it('always scrolls to the bottom for the user’s own message', () => {
+  it('opens an anchored turn for the user’s own message instead of pinning to the bottom', () => {
     const { container, rerender } = render(
       <AIChat messages={messages} onSendMessage={vi.fn()} />
     );
@@ -748,10 +748,19 @@ describe('AIChat scroll anchoring', () => {
 
     rerender(<AIChat messages={appended('user')} onSendMessage={vi.fn()} />);
 
-    expect(thread.scrollTop).toBe(thread.scrollHeight);
+    // The new turn reserves a viewport of space (clientHeight 400 − px-4/py-4
+    // padding) so its start can anchor to the top edge…
+    const turn = container.querySelector<HTMLElement>(
+      '[data-slot="ai-chat-turn"]'
+    );
+    expect(turn).not.toBeNull();
+    expect(turn!.style.minHeight).toBe('368px');
+    expect(turn!.textContent).toContain('more content below');
+    // …and the thread is NOT yanked to the bottom (reading mode).
+    expect(thread.scrollTop).not.toBe(thread.scrollHeight);
   });
 
-  it('scrolls to the bottom when a batch append ends with an assistant placeholder', () => {
+  it('anchors the new turn when a batch append ends with an assistant placeholder', () => {
     const { container, rerender } = render(
       <AIChat messages={messages} onSendMessage={vi.fn()} />
     );
@@ -781,7 +790,112 @@ describe('AIChat scroll anchoring', () => {
     ];
     rerender(<AIChat messages={batch} onSendMessage={vi.fn()} />);
 
+    // The turn starts at the user's message and carries the placeholder.
+    const turn = container.querySelector<HTMLElement>(
+      '[data-slot="ai-chat-turn"]'
+    );
+    expect(turn).not.toBeNull();
+    expect(turn!.textContent).toContain('a question');
+    expect(turn!.textContent).toContain('thinking…');
+    expect(thread.scrollTop).not.toBe(thread.scrollHeight);
+  });
+
+  it('upgrades the jump button to “New messages” when a stream finishes below the fold', () => {
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'stream-1',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'partial answer…' }],
+      },
+    ];
+    const { container, rerender } = render(
+      <AIChat messages={streaming} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 100; // the end of the reply is below the fold
+    fireEvent.scroll(thread);
+    expect(screen.queryByText('New messages')).toBeNull(); // still streaming
+
+    const finished: AIMessage[] = [
+      ...messages,
+      { ...streaming.at(-1)!, status: 'complete' },
+    ];
+    rerender(<AIChat messages={finished} onSendMessage={vi.fn()} />);
+
+    expect(screen.getByText('New messages')).toBeInTheDocument();
+  });
+
+  it('raises no hint when a stream finishes while the reader is at the bottom', () => {
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'stream-1',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'partial answer…' }],
+      },
+    ];
+    const { container, rerender } = render(
+      <AIChat messages={streaming} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    const finished: AIMessage[] = [
+      ...messages,
+      { ...streaming.at(-1)!, status: 'complete' },
+    ];
+    rerender(<AIChat messages={finished} onSendMessage={vi.fn()} />);
+
+    expect(screen.queryByText('New messages')).toBeNull();
+  });
+
+  it('resumes following after a short stream that ended at the bottom', () => {
+    const { container, rerender } = render(
+      <AIChat messages={messages} onSendMessage={vi.fn()} />
+    );
+    const thread = getMessagesEl(container);
+    mockMetrics(thread);
+    thread.scrollTop = 600; // at the bottom
+    fireEvent.scroll(thread);
+
+    // A streaming reply appends: its first line is revealed, then the view
+    // holds (no following) while it streams.
+    const streaming: AIMessage[] = [
+      ...messages,
+      {
+        id: 'stream-1',
+        role: 'assistant',
+        status: 'streaming',
+        timestamp: new Date('2026-01-01T10:05:00Z'),
+        content: [{ type: 'text', text: 'short answer' }],
+      },
+    ];
+    rerender(<AIChat messages={streaming} onSendMessage={vi.fn()} />);
+    expect(thread.scrollTop).toBe(thread.scrollHeight); // revealed
+
+    // It finishes above the fold → following resumes: the next append is
+    // followed instead of raising the hint.
+    const finished: AIMessage[] = [
+      ...messages,
+      { ...streaming.at(-1)!, status: 'complete' },
+    ];
+    rerender(<AIChat messages={finished} onSendMessage={vi.fn()} />);
+    rerender(
+      <AIChat
+        messages={[...finished, ...appended('assistant').slice(-1)]}
+        onSendMessage={vi.fn()}
+      />
+    );
     expect(thread.scrollTop).toBe(thread.scrollHeight);
+    expect(screen.queryByText('New messages')).toBeNull();
   });
 
   it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {

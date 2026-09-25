@@ -48,8 +48,15 @@ function Harness({
   /** Applied via callback ref so the node has geometry before effects run. */
   initialMetrics?: { scrollHeight?: number; clientHeight?: number };
 }) {
-  const { containerRef, contentRef, isAtBottom, scrollToBottom } =
-    useStickToBottom({ disabled });
+  const {
+    containerRef,
+    contentRef,
+    isAtBottom,
+    scrollToBottom,
+    anchorToTurnStart,
+    stopFollowing,
+  } = useStickToBottom({ disabled });
+  const turnRef = React.useRef<HTMLDivElement>(null);
   const attachContainer = (node: HTMLDivElement | null) => {
     if (node && initialMetrics) mockMetrics(node, initialMetrics);
     containerRef.current = node;
@@ -59,10 +66,18 @@ function Harness({
       {/* `key` swaps the container DOM node without remounting the hook —
           the same shape as SuperChat toggling its virtualized thread. */}
       <div key={containerKey} data-testid="container" ref={attachContainer}>
-        <div ref={contentRef} />
+        <div ref={contentRef}>
+          <div data-testid="turn" ref={turnRef} />
+        </div>
       </div>
       <output data-testid="at-bottom">{String(isAtBottom)}</output>
       <button onClick={() => scrollToBottom()}>jump</button>
+      <button onClick={() => stopFollowing()}>hold</button>
+      <button
+        onClick={() => turnRef.current && anchorToTurnStart(turnRef.current)}
+      >
+        anchor
+      </button>
     </div>
   );
 }
@@ -79,6 +94,11 @@ function mockMetrics(
     configurable: true,
     value: clientHeight,
   });
+}
+
+function mockRectTop(el: HTMLElement, top: number) {
+  el.getBoundingClientRect = () =>
+    ({ top }) as ReturnType<HTMLElement['getBoundingClientRect']>;
 }
 
 describe('useStickToBottom', () => {
@@ -225,5 +245,137 @@ describe('useStickToBottom', () => {
     mockMetrics(container, { scrollHeight: 1400 });
     act(() => MockResizeObserver.trigger());
     expect(container.scrollTop).toBe(100);
+  });
+
+  it('anchorToTurnStart aligns the turn with the top of the viewport', () => {
+    render(<Harness />);
+    const container = screen.getByTestId('container');
+    mockMetrics(container);
+    container.scrollTop = 100;
+    fireEvent.scroll(container);
+
+    mockRectTop(container, 0);
+    mockRectTop(screen.getByTestId('turn'), 500); // 500px below the top edge
+    fireEvent.click(screen.getByText('anchor'));
+
+    expect(container.scrollTop).toBe(600); // 100 current + 500 delta
+  });
+
+  it('keeps reading mode through the anchor’s own smooth-scroll events', () => {
+    render(<Harness />);
+    const container = screen.getByTestId('container');
+    mockMetrics(container);
+    container.scrollTop = 100;
+    fireEvent.scroll(container);
+
+    mockRectTop(container, 0);
+    mockRectTop(screen.getByTestId('turn'), 500); // target: 600 (the bottom)
+    fireEvent.click(screen.getByText('anchor'));
+
+    // A smooth scroll fires intermediate events that are neither the user's
+    // nor at the bottom — they must not end reading mode…
+    container.scrollTop = 300;
+    fireEvent.scroll(container);
+    // …and the arrival event, at the geometric bottom, must not re-pin.
+    container.scrollTop = 600;
+    fireEvent.scroll(container);
+    expect(screen.getByTestId('at-bottom').textContent).toBe('true');
+
+    // Still reading: the streaming reply outgrows the reserve without moving
+    // the reader, and the jump affordance appears.
+    mockMetrics(container, { scrollHeight: 1400 });
+    act(() => MockResizeObserver.trigger());
+    expect(container.scrollTop).toBe(600);
+    expect(screen.getByTestId('at-bottom').textContent).toBe('false');
+  });
+
+  it('does not follow growth after anchoring, even at the geometric bottom (reading mode)', () => {
+    render(<Harness />);
+    const container = screen.getByTestId('container');
+    mockMetrics(container);
+    container.scrollTop = 600;
+    fireEvent.scroll(container); // pinned at the bottom
+
+    // Anchor in place (zero delta — the reserve already fills the viewport).
+    mockRectTop(container, 0);
+    mockRectTop(screen.getByTestId('turn'), 0);
+    fireEvent.click(screen.getByText('anchor'));
+    // The programmatic move fires a scroll event at the geometric bottom —
+    // it must not re-pin while reading.
+    fireEvent.scroll(container);
+
+    // The reply streams past the reserved space: the reader stays put and the
+    // jump-to-bottom affordance appears (isAtBottom recomputed sans scroll).
+    mockMetrics(container, { scrollHeight: 1400 });
+    act(() => MockResizeObserver.trigger());
+    expect(container.scrollTop).toBe(600);
+    expect(screen.getByTestId('at-bottom').textContent).toBe('false');
+  });
+
+  it('stopFollowing holds the position while a stream grows past the fold', () => {
+    render(<Harness />);
+    const container = screen.getByTestId('container');
+    mockMetrics(container);
+    container.scrollTop = 600; // at the bottom — following
+    fireEvent.scroll(container);
+
+    fireEvent.click(screen.getByText('hold')); // a streaming reply appended
+
+    // Growth no longer follows; once it passes the threshold the
+    // jump-to-bottom affordance appears.
+    mockMetrics(container, { scrollHeight: 1400 });
+    act(() => MockResizeObserver.trigger());
+    expect(container.scrollTop).toBe(600);
+    expect(screen.getByTestId('at-bottom').textContent).toBe('false');
+
+    // scrollToBottom (jump / stream ended at the bottom) resumes following.
+    fireEvent.click(screen.getByText('jump'));
+    mockMetrics(container, { scrollHeight: 1600 });
+    act(() => MockResizeObserver.trigger());
+    expect(container.scrollTop).toBe(1600);
+  });
+
+  it('reading mode ends when the reader returns to the bottom by hand', () => {
+    render(<Harness />);
+    const container = screen.getByTestId('container');
+    mockMetrics(container);
+    container.scrollTop = 600;
+    fireEvent.scroll(container);
+
+    mockRectTop(container, 0);
+    mockRectTop(screen.getByTestId('turn'), 0);
+    fireEvent.click(screen.getByText('anchor'));
+    fireEvent.scroll(container);
+    mockMetrics(container, { scrollHeight: 1400 });
+    act(() => MockResizeObserver.trigger()); // content outgrew the reserve
+
+    container.scrollTop = 1000; // 1400 - 1000 - 400 = 0 → back at the bottom
+    fireEvent.scroll(container);
+    expect(screen.getByTestId('at-bottom').textContent).toBe('true');
+
+    // Pinned again: further growth follows.
+    mockMetrics(container, { scrollHeight: 1600 });
+    act(() => MockResizeObserver.trigger());
+    expect(container.scrollTop).toBe(1600);
+  });
+
+  it('scrollToBottom exits reading mode and resumes following', () => {
+    render(<Harness />);
+    const container = screen.getByTestId('container');
+    mockMetrics(container);
+    container.scrollTop = 600;
+    fireEvent.scroll(container);
+
+    mockRectTop(container, 0);
+    mockRectTop(screen.getByTestId('turn'), 0);
+    fireEvent.click(screen.getByText('anchor'));
+    fireEvent.scroll(container);
+
+    fireEvent.click(screen.getByText('jump'));
+    expect(container.scrollTop).toBe(container.scrollHeight);
+
+    mockMetrics(container, { scrollHeight: 1400 });
+    act(() => MockResizeObserver.trigger());
+    expect(container.scrollTop).toBe(1400); // following again
   });
 });

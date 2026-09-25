@@ -46,6 +46,7 @@ export {
 export { useLiveAnnouncement } from './useLiveAnnouncement';
 export {
   useStickToBottom,
+  useStreamEndedBelowFold,
   type UseStickToBottomOptions,
   type UseStickToBottomReturn,
 } from './useStickToBottom';

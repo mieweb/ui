@@ -275,6 +275,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | **Participants** (face-pile) | `superchat-participants`      | `div` · `group`               | `Participants`                | `SuperChat`              | Avatars of (up to 6) participants.                                                                                   |
 | **Thread** (log)             | `superchat-thread`            | `div` · `log`                 | `Messages`                    | `SuperChat`              | Scrollable, append-only message history; `aria-live="polite"`, keyboard-focusable.                                   |
 | **Thread viewport**          | `superchat-thread-viewport`   | `div`                         | —                             | `SuperChat`              | Positioning wrapper around the thread; anchors the floating jump-to-bottom button.                                    |
+| **Active turn**              | `superchat-turn`              | `div`                         | —                                | `SuperChat`              | Wraps the freshly sent message and everything after it; reserves a viewport of space so the send anchors to the top (plain thread only). |
 | **Jump to bottom**           | `superchat-jump-to-bottom`    | `button`                      | `Scroll to bottom`            | `SuperChat`              | Floating ↓ shown while scrolled up; returns to the newest message (label gains a “New messages” hint — see [Scrolling & streaming](#scrolling--streaming)). |
 | **Composer**                 | `chat-composer`               | `div`                         | —                             | `SuperChat`              | The shared `ChatComposer`: `+` menu, mention-aware textarea, send button (sub-parts expose `chat-composer-*` slots). |
 
@@ -649,17 +650,27 @@ safety of any HTML those plugins allow through the sanitizer.
 The thread pins to the newest message **only while the user is at the bottom**
 (within ~100px). The moment they scroll up to read, their position is
 preserved exactly — streamed tokens and newly arriving messages never yank the
-view down. This matters most for long AI responses: set a message's `status`
-to `'streaming'` and grow its `text` as tokens arrive; readers at the bottom
-follow the stream, readers who scrolled up stay put.
+view down. **Streaming replies never push the view either**: when a message
+with `status: 'streaming'` appends, its first line is revealed (if the reader
+was at the bottom) and the scroll then holds while tokens grow the reply below
+the fold. A reply that finishes above the fold resumes normal pinning; one
+that ran past it leaves the reader in place with the jump-to-bottom button
+upgraded to its “New messages” hint.
 
 While scrolled up, a floating **jump-to-bottom** button
 (`data-slot="superchat-jump-to-bottom"`) appears over the thread. If messages
 arrive in the meantime it gains a **“New messages”** hint. Activating it
-scrolls to the newest message and resumes pinning. Two exceptions always
-scroll regardless of position: the local user sending a message, and switching
-conversations. `order="desc"` (feed-style) threads keep their top anchor and
-skip the affordance.
+scrolls to the newest message and resumes pinning. Switching conversations
+always re-anchors to the newest message. `order="desc"` (feed-style) threads
+keep their top anchor and skip the affordance.
+
+**Sending a message opens an anchored turn** (the ChatGPT/Claude UX): the
+freshly sent bubble scrolls to the **top** of the viewport and the reply
+streams into reserved space below it (`data-slot="superchat-turn"`, sized to
+one viewport). While the reader digests the response the view stays put — even
+as the reply grows past the fold; a jump-to-bottom press or scrolling to the
+bottom by hand resumes normal pinning. In `virtualized` mode the virtualizer
+owns row layout, so own sends fall back to pinning to the bottom there.
 
 Pinning survives container resizes too (an on-screen keyboard appearing, the
 composer growing): a `ResizeObserver` on the thread and its content re-pins
@@ -669,8 +680,15 @@ via the exported hook:
 ```tsx
 import { useStickToBottom } from '@mieweb/ui';
 
-const { containerRef, contentRef, isAtBottom, scrollToBottom } =
-  useStickToBottom();
+const {
+  containerRef,
+  contentRef,
+  isAtBottom,
+  scrollToBottom,
+  anchorToTurnStart, // scroll a fresh turn to the viewport top, pause following
+  followIfPinned, // scroll to bottom only while actually following
+  stopFollowing, // hold position (incoming stream fills below the fold)
+} = useStickToBottom();
 ```
 
 ---
