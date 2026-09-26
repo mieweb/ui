@@ -680,6 +680,8 @@ test.describe('Visual Regression Tests - Templates', () => {
     ['content-comparisonsection--two-columns', 'template-comparison.png'],
     ['social-proof-statssection--cards', 'template-stats-cards.png'],
     ['social-proof-testimonialsection--cards', 'template-testimonials.png'],
+    // Pinned at the first frame by `animations: 'disabled'`: track, mask and duplicate copy.
+    ['social-proof-logocloudsection--marquee', 'template-logocloud-marquee.png'],
   ];
 
   for (const [storyId, file, options] of sections) {

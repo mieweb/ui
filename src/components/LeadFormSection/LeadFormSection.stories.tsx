@@ -64,7 +64,8 @@ An inline lead-capture section: heading and pitch beside (or above) a form of co
   argTypes: {
     action: { description: 'Form action: a URL or a React form action.' },
     fields: {
-      description: 'Form fields; defaults to name, work email and company.',
+      description:
+        'Form fields. Defaults to `defaultLeadFormFields`: `firstName`, `lastName`, `email` (work email) and `company`, all required.',
     },
     hiddenFields: { description: 'Name/value pairs posted with the form.' },
     layout: { control: 'inline-radio', options: ['split', 'stacked'] },

@@ -87,12 +87,11 @@ describe('LandingPage', () => {
     ).toHaveLength(1);
   });
 
-  it('passes site icons to icon sections, letting a block override them', () => {
-    const Page = () => <svg data-testid="page-icon" />;
-    const Block = () => <svg data-testid="block-icon" />;
+  it('passes site icons to every icon section', () => {
+    const Crew = () => <svg data-testid="crew-icon" />;
     render(
       <LandingPage
-        icons={{ crew: Page }}
+        icons={{ crew: Crew }}
         blocks={[
           {
             type: 'features',
@@ -100,18 +99,25 @@ describe('LandingPage', () => {
           },
           {
             type: 'process',
-            icons: { crew: Block },
             steps: [{ title: 'B', description: 'b', icon: 'crew' }],
           },
         ]}
       />
     );
-    expect(screen.getByTestId('page-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('block-icon')).toBeInTheDocument();
+    expect(screen.getAllByTestId('crew-icon')).toHaveLength(2);
   });
 });
 
 describe('validateLandingPage', () => {
+  it('keeps block data serializable at the type level', () => {
+    const block: LandingBlock = {
+      type: 'cta',
+      title: 'Go',
+      // @ts-expect-error -- handlers belong to the app, not page data
+      onClick: () => undefined,
+    };
+    expect(block.type).toBe('cta');
+  });
   const hero: LandingBlock = { type: 'hero', title: 'Hi' };
   const faq: LandingBlock = { type: 'faq', id: 'faq', items: [] };
 

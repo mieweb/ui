@@ -45,22 +45,28 @@ export interface CustomBlock {
   id?: string;
 }
 
+/** Section props as page data: no event handlers, children or components, so a block survives JSON. */
+type BlockData<P> = Omit<
+  P,
+  keyof React.DOMAttributes<HTMLElement> | 'components' | 'icons'
+>;
+
 /** One entry of a page's `blocks` array: a section's props tagged with its `type`. */
 export type LandingBlock =
-  | ({ type: 'hero' } & HeroSectionProps)
-  | ({ type: 'logos' } & LogoCloudSectionProps)
-  | ({ type: 'features' } & FeatureGridSectionProps)
-  | ({ type: 'split' } & SplitContentSectionProps)
-  | ({ type: 'process' } & ProcessStepsSectionProps)
-  | ({ type: 'stats' } & StatsSectionProps)
-  | ({ type: 'comparison' } & ComparisonSectionProps)
-  | ({ type: 'pricing' } & PricingSectionProps)
-  | ({ type: 'video' } & VideoSectionProps)
-  | ({ type: 'testimonials' } & TestimonialSectionProps)
-  | ({ type: 'resources' } & ResourceCardsSectionProps)
-  | ({ type: 'faq' } & FaqSectionProps)
-  | ({ type: 'lead-form' } & LeadFormSectionProps)
-  | ({ type: 'cta' } & CtaSectionProps)
+  | ({ type: 'hero' } & BlockData<HeroSectionProps>)
+  | ({ type: 'logos' } & BlockData<LogoCloudSectionProps>)
+  | ({ type: 'features' } & BlockData<FeatureGridSectionProps>)
+  | ({ type: 'split' } & BlockData<SplitContentSectionProps>)
+  | ({ type: 'process' } & BlockData<ProcessStepsSectionProps>)
+  | ({ type: 'stats' } & BlockData<StatsSectionProps>)
+  | ({ type: 'comparison' } & BlockData<ComparisonSectionProps>)
+  | ({ type: 'pricing' } & BlockData<PricingSectionProps>)
+  | ({ type: 'video' } & BlockData<VideoSectionProps>)
+  | ({ type: 'testimonials' } & BlockData<TestimonialSectionProps>)
+  | ({ type: 'resources' } & BlockData<ResourceCardsSectionProps>)
+  | ({ type: 'faq' } & BlockData<FaqSectionProps>)
+  | ({ type: 'lead-form' } & BlockData<LeadFormSectionProps>)
+  | ({ type: 'cta' } & BlockData<CtaSectionProps>)
   | CustomBlock;
 
 export type LandingBlockType = LandingBlock['type'];

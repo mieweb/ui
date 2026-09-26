@@ -106,7 +106,7 @@ export default function Page() {
 - **Custom blocks** name a component in the \`custom\` map; an unknown name renders nothing.
 - **Images and links.** Sections render \`<img>\` and \`<a>\` unless you pass \`components={{ Image, Link }}\`. \`Image\` receives \`{ src, alt, width?, height?, className, priority? }\` — \`priority\` is set on the hero image only — so a three-line adapter maps it onto \`next/image\`. \`next/link\` works as \`Link\` directly. Logos stay plain \`<img>\` because they carry no intrinsic size.
 - **Analytics.** Give any link a \`trackingId\` (and \`LeadFormSection\` a \`submitTrackingId\`); it renders as \`data-track\` for the site's own click tracking. There are no click callbacks.
-- **Styles.** Tailwind 4 apps must scan the library (\`@source "../node_modules/@mieweb/ui/dist"\`) and import \`@mieweb/ui/init.css\`, which also brings the marquee keyframes. Tailwind 3 apps include \`./node_modules/@mieweb/ui/dist/**/*.js\` in \`content\`; every template class is a literal string, so no safelist entries are needed.`,
+- **Styles.** Tailwind 4 apps must scan the library (\`@source "../node_modules/@mieweb/ui/dist"\`) and import \`@mieweb/ui/init.css\`, which also brings the marquee keyframes. Tailwind 3 apps include \`./node_modules/@mieweb/ui/dist/**/*.js\` in \`content\`; the tier's arbitrary values, opacity modifiers and variants are also in \`miewebUISafelist\`.`,
       },
     },
     catalog: {
