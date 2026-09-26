@@ -1,0 +1,28 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Templates/Content/Overview" />
+
+# Content
+
+> **The body of a marketing page.** What the product does, how it works, how it compares, what
+> people ask, and where to read more — each as a heading plus plain-data items.
+
+## Which one?
+
+| Component                                                               | Use it when                                                     | Not when                                                                                          |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [FeatureGridSection](?path=/docs/content-featuregridsection--docs)       | Three to eight parallel capabilities or benefits, one line each | One idea needs an image and an argument — [SplitContentSection](?path=/docs/content-splitcontentsection--docs) |
+| [SplitContentSection](?path=/docs/content-splitcontentsection--docs)     | One argument made beside an image, with proof points            | Several parallel points — [FeatureGridSection](?path=/docs/content-featuregridsection--docs)      |
+| [ProcessStepsSection](?path=/docs/content-processstepssection--docs)     | Two to four ordered steps: "how it works", "get started"        | A record's progress over time in an app — [Timeline](?path=/docs/data-display-timeline--docs)     |
+| [ComparisonSection](?path=/docs/content-comparisonsection--docs)         | Your product against an alternative or the status quo, by row   | Users sort or filter the rows — [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs)            |
+| [FaqSection](?path=/docs/content-faqsection--docs)                       | Plain-text questions and answers that should be in the HTML     | Rich or single-open panels in an app — [Accordion](?path=/docs/layout-accordion--docs)            |
+| [ResourceCardsSection](?path=/docs/content-resourcecardssection--docs)   | Linked cards to guides, articles, case studies, reports         | Video cards with previews — [VideoCard](?path=/docs/media-videocard--docs)                        |
+| [VideoSection](?path=/docs/content-videosection--docs)                   | One walkthrough or explainer embedded in place                  | Several videos to choose from — [VideoCard](?path=/docs/media-videocard--docs)                    |
+
+## Shared limitations
+
+- Every section renders its heading as an `h2` and its items' titles as `h3`.
+- `FeatureGridSection` and `ProcessStepsSection` name icons by token; see the icon rules on the
+  [Pages overview](?path=/docs/templates-pages-overview--docs).
+- Structured data belongs to the page: emit `FAQPage` JSON-LD from the same `items` you pass to
+  `FaqSection`, and `ItemList` from the cards if you want it.

@@ -1,0 +1,67 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Templates/Pages/Overview" />
+
+# Pages
+
+> **A marketing page is data.** `LandingPage` renders an array of `blocks` — each a section's
+> props tagged with a `type` — so an industry hub, a service page or a campaign page is a content
+> file, not a component. Everything in the Templates tier is plain data in, static HTML out, and
+> safe to render from a React Server Component via `@mieweb/ui/templates`.
+
+This tier exists because the BlueHive and Enterprise Health marketing sites each hand-built the
+same page shapes across hundreds of routes — several hero components doing one job on one site, and
+a typed `VerticalHub` template on the other that only its industry pages could use.
+
+## Which one?
+
+| Component                                         | Use it when                                                                     | Not when                                                                                   |
+| ------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [LandingPage](?path=/docs/pages-landingpage--docs) | A page is a stack of standard sections and you want to describe it as data      | The page is mostly bespoke layout — compose the sections, or build one with `SectionShell` |
+
+## Presets
+
+`landingPresets` records the six archetypes both sites repeat — `vertical-hub`, `service-detail`,
+`campaign`, `comparison`, `resource` and `pricing` — as a recommended block order plus the blocks a page is
+incomplete without. They are guidance, not enforcement: run `validateLandingPage(blocks, preset)` in
+a test or build step to catch a missing FAQ or a second `h1`.
+
+## Building your own section
+
+A site-specific section (an ROI calculator, a compliance calendar) joins a page as
+`{ type: 'custom', component: 'roi', props }` and is rendered from the `custom` map you pass to
+`LandingPage`. To make it sit flush with the library's sections, wrap it in `SectionShell` — the
+same `<section>`, container, spacing, tone and `h2` heading every section uses — and use
+`SectionHeading` for any extra openers.
+
+```tsx
+import { SectionShell } from '@mieweb/ui/templates';
+
+export function RoiCalculatorSection({ preset }: { preset: string }) {
+  return (
+    <SectionShell eyebrow="ROI" title="Estimate your savings" tone="muted">
+      <RoiCalculator preset={preset} />
+    </SectionShell>
+  );
+}
+```
+
+## Shared contract
+
+- **Headings.** The hero renders the page's only `h1`; every other section an `h2`; items inside
+  a section `h3`. Headings always set their own colour, so a host site's base heading styles never
+  turn them dark-on-dark on a `brand` band.
+- **Tones.** `default`, `muted` and `brand`. Alternate `default` and `muted` down a page and save
+  `brand` for the hero or closing call to action.
+- **Icons are tokens.** `"shield-check"`, not a component, so page data stays serializable. Pass
+  `icons` to `LandingPage` to add your own tokens; a short unknown token such as `"EHR"` renders
+  as a lettermark.
+- **Links are anchors.** Every call to action is a real anchor with no click callback. Give it a
+  `trackingId` and it renders as `data-track` for your analytics to pick up.
+- **Images and links are swappable.** Pass `components={{ Image, Link }}` to `LandingPage` (or any
+  section) to render the site's `next/image` adapter and `next/link` instead of `<img>` and `<a>`.
+  The hero image receives `priority`; logos stay plain `<img>`.
+- **The head is the app's.** Metadata, canonical URLs, JSON-LD, sitemaps and analytics stay in the
+  site; the blocks carry the data to build them from.
+- **Text is the app's.** Every visible string is a prop. The few built-in strings (breadcrumb label,
+  table cell labels, rating text) have English defaults and a `labels` override.

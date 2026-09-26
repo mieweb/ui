@@ -87,6 +87,11 @@ A video thumbnail card: poster image, the branded \`PlayButton\` (white disc, br
           target: 'showcase-radialexplorer',
           why: '`VideoCard variant="plate"` is the intended media block for RadialExplorer\'s detail panel.',
         },
+        {
+          type: 'alternative to',
+          target: 'content-videosection',
+          why: 'VideoCard is an interactive card for choosing among several videos; VideoSection embeds one video in place on a server-rendered page.',
+        },
       ],
     },
   },

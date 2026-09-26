@@ -1271,6 +1271,26 @@ export const miewebUISafelist = [
   'text-primary-900',
   'dark:bg-primary-900',
   'dark:text-primary-100',
+  // Templates tier (ui#506) — arbitrary values, opacity modifiers and variants
+  '[&::-webkit-details-marker]:hidden',
+  '[mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]',
+  'inset-x-[25%]',
+  'inset-x-[16.667%]',
+  'inset-x-[12.5%]',
+  'max-w-[9rem]',
+  'min-w-[36rem]',
+  'bg-white/25',
+  'border-white/70',
+  'dark:border-white/70',
+  'dark:bg-primary-900/60',
+  'dark:hover:bg-white/10',
+  'group-open:rotate-180',
+  'rtl:-scale-x-100',
+  'after:absolute',
+  'after:inset-0',
+  'motion-reduce:transition-none',
+  'text-balance',
+  'text-pretty',
 ];
 
 export interface MiewebUIPreset {
