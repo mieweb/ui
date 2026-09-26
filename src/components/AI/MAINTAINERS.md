@@ -61,6 +61,10 @@ should plug into — don't fork the message renderer.
 - Content block types live in `AIMessageContent` (`text` / `tool_use` /
   `tool_result` / `thinking` / `code`). Adding a block type means updating both
   the type union and `AIMessageDisplay`'s switch.
+- `ThinkingBlock` auto-collapses its `CollapsiblePill` on the streaming → done
+  transition (one-shot `autoCollapsed` state; the user can re-expand). Blocks
+  that mount already-complete keep the host's `content.collapsed` default —
+  don't turn the transition collapse into an always-collapsed default.
 - Modal variants render `role="dialog"` + `aria-modal`, trap focus, and close on
   `Escape`. Preserve that if you refactor the wrappers.
 - **Voiceprint namespacing** (`voiceprintNamespace` on `HandsFreeChat` /

@@ -24,7 +24,7 @@ const meta: Meta<typeof AIMessageDisplay> = {
       description: {
         component: `### What it's for
 
-**Renders one \`AIMessage\` — avatar, bubble and its ordered content blocks — for any role.** \`AIMessageDisplay\` takes \`message: AIMessage\` (\`role\` \`user\` | \`assistant\` | \`system\` | \`tool\`, \`status\` \`pending\` | \`streaming\` | \`complete\` | \`error\`, \`content: AIMessageContent[]\`) plus \`userName\` (initials for the user avatar), \`showAvatar\`, \`showTimestamp\`, \`onLinkClick(link)\` for resource links inside tool results, \`renderTextContent\` and \`renderMessageFooter\`. Each block type has a fixed renderer: \`text\` → \`whitespace-pre-wrap\` paragraph or your \`renderTextContent(text, { messageId, streaming, role })\`; \`tool_use\` → an embedded \`MCPToolCallDisplay\`; \`thinking\` → a violet \`CollapsiblePill\` ("Thinking" while streaming, then "Thought for Ns"); \`code\` → \`<pre><code class="language-…">\`; \`image\` → lazy \`<img>\` inside a new-tab link; \`file\` → card with name and formatted size, linked when \`fileUrl\` is set; \`audio\` → \`AudioPlayer variant="waveform"\`; \`video\` → native \`<video controls>\`. A \`streaming\` message with no blocks shows \`AITypingIndicator\`; \`status: 'error'\` adds a red border and "Failed to send" / "An error occurred". \`tool\` messages render bubble-less. Also exported: \`ChatBubble\` (the shared bubble shell with \`variant\`, \`hasError\`, \`accent\`), \`MessageAvatar\`, \`AITypingIndicator\`, \`bubbleVariants\`.
+**Renders one \`AIMessage\` — avatar, bubble and its ordered content blocks — for any role.** \`AIMessageDisplay\` takes \`message: AIMessage\` (\`role\` \`user\` | \`assistant\` | \`system\` | \`tool\`, \`status\` \`pending\` | \`streaming\` | \`complete\` | \`error\`, \`content: AIMessageContent[]\`) plus \`userName\` (initials for the user avatar), \`showAvatar\`, \`showTimestamp\`, \`onLinkClick(link)\` for resource links inside tool results, \`renderTextContent\` and \`renderMessageFooter\`. Each block type has a fixed renderer: \`text\` → \`whitespace-pre-wrap\` paragraph or your \`renderTextContent(text, { messageId, streaming, role })\`; \`tool_use\` → an embedded \`MCPToolCallDisplay\`; \`thinking\` → a violet \`CollapsiblePill\` ("Thinking" while streaming, then "Thought for Ns"; auto-collapses when streaming finishes, click to re-open); \`code\` → \`<pre><code class="language-…">\`; \`image\` → lazy \`<img>\` inside a new-tab link; \`file\` → card with name and formatted size, linked when \`fileUrl\` is set; \`audio\` → \`AudioPlayer variant="waveform"\`; \`video\` → native \`<video controls>\`. A \`streaming\` message with no blocks shows \`AITypingIndicator\`; \`status: 'error'\` adds a red border and "Failed to send" / "An error occurred". \`tool\` messages render bubble-less. Also exported: \`ChatBubble\` (the shared bubble shell with \`variant\`, \`hasError\`, \`accent\`), \`MessageAvatar\`, \`AITypingIndicator\`, \`bubbleVariants\`.
 
 ### Use it when
 
@@ -229,7 +229,7 @@ export const ThinkingActive: Story = {
   },
 };
 
-/** Thinking pill after the model finished — "Thought" label, no dot, collapsed by default. */
+/** Thinking pill after the model finished — "Thought" label, no dot, collapsed (a live stream auto-collapses on finish). */
 export const ThinkingComplete: Story = {
   render: () => {
     const message: AIMessage = {
@@ -275,6 +275,59 @@ export const ThinkingExpanded: Story = {
     };
     return <AIMessageDisplay message={message} />;
   },
+};
+
+function ThinkingAutoCollapseDemo() {
+  const [streaming, setStreaming] = React.useState(true);
+  const [run, setRun] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setStreaming(false), 3000);
+    return () => clearTimeout(timer);
+  }, [run]);
+
+  const message: AIMessage = {
+    id: `5d-${run}`,
+    role: 'assistant',
+    content: [
+      {
+        type: 'thinking',
+        text: 'The user wants to add a new patient. I should use the create_patient tool with the provided information. I need to validate the date format and ensure all required fields are present.',
+        collapsed: false,
+      },
+      ...(streaming
+        ? []
+        : [
+            {
+              type: 'text' as const,
+              text: "I'll create a new patient record for John Smith.",
+            },
+          ]),
+    ],
+    timestamp: new Date(),
+    status: streaming ? 'streaming' : 'complete',
+  };
+
+  return (
+    <div className="space-y-4">
+      <AIMessageDisplay key={run} message={message} />
+      <button
+        type="button"
+        onClick={() => {
+          setStreaming(true);
+          setRun((n) => n + 1);
+        }}
+        className="rounded-lg border border-neutral-300 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+      >
+        Replay
+      </button>
+    </div>
+  );
+}
+
+/** Live demo: thinking streams for ~3s, then the pill auto-collapses on completion. Click the pill to re-expand, or Replay to run it again. */
+export const ThinkingAutoCollapse: Story = {
+  render: () => <ThinkingAutoCollapseDemo />,
 };
 
 /**

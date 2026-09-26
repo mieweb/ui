@@ -131,7 +131,11 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: test-results/
+          # playwright.config.ts: html report -> playwright-report/,
+          # outputDir (failure screenshots, diffs, traces) -> playwright-results/
+          path: |
+            playwright-report/
+            playwright-results/
           retention-days: 30
 
   build-test:

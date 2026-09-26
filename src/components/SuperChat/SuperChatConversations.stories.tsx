@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChatConversations } from './index';
 import { conversations } from './storyData';
+import { fullHeightChat } from '../../../.storybook/full-height';
 
 // ============================================================================
 // Meta
@@ -12,6 +13,8 @@ const meta: Meta<typeof SuperChatConversations> = {
   title: 'Modules/SuperChat/Conversations (List)',
   component: SuperChatConversations,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  // The list is a page-level sidebar: fill the canvas height (#504).
+  decorators: [fullHeightChat],
   argTypes: {
     defaultActiveConversationId: {
       control: 'select',
@@ -28,6 +31,7 @@ const meta: Meta<typeof SuperChatConversations> = {
   },
   parameters: {
     layout: 'fullscreen',
+    githubSourceFooter: false,
     docs: {
       description: {
         component: `### What it's for
@@ -99,27 +103,23 @@ export const Playground: Story = {
     defaultActiveConversationId: 'c1',
   },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <SuperChatConversations
-        {...args}
-        conversations={conversations}
-        onConversationOpened={(c) => console.log('opened', c.id)}
-        onNewConversation={() => console.log('new conversation')}
-      />
-    </div>
+    <SuperChatConversations
+      {...args}
+      conversations={conversations}
+      onConversationOpened={(c) => console.log('opened', c.id)}
+      onNewConversation={() => console.log('new conversation')}
+    />
   ),
 };
 
 export const Default: Story = {
   render: () => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <SuperChatConversations
-        conversations={conversations}
-        defaultActiveConversationId="c1"
-        onConversationOpened={(c) => console.log('opened', c.id)}
-        onNewConversation={() => console.log('new conversation')}
-      />
-    </div>
+    <SuperChatConversations
+      conversations={conversations}
+      defaultActiveConversationId="c1"
+      onConversationOpened={(c) => console.log('opened', c.id)}
+      onNewConversation={() => console.log('new conversation')}
+    />
   ),
 };
 
@@ -127,14 +127,12 @@ export const Default: Story = {
 function ControlledList() {
   const [activeId, setActiveId] = React.useState('c1');
   return (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <SuperChatConversations
-        conversations={conversations}
-        activeConversationId={activeId}
-        onConversationOpened={(c) => setActiveId(c.id)}
-        onNewConversation={() => console.log('new conversation')}
-      />
-    </div>
+    <SuperChatConversations
+      conversations={conversations}
+      activeConversationId={activeId}
+      onConversationOpened={(c) => setActiveId(c.id)}
+      onNewConversation={() => console.log('new conversation')}
+    />
   );
 }
 

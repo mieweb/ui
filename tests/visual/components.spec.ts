@@ -249,6 +249,11 @@ test.describe('Visual Regression Tests - Core Components', () => {
     // MessageThread now embeds the shared ChatComposer in its border-t frame
     // (composer unification #465). Message footers show wall-clock times, so
     // mask them to keep the snapshot deterministic.
+    // Story data timestamps messages relative to Date.now(); near midnight
+    // UTC the "N hours ago" messages cross a day boundary and grow an extra
+    // Today/Yesterday separator, shifting the whole thread (CI-only flake).
+    // Freeze the clock at midday so the separators are deterministic.
+    await page.clock.setFixedTime(new Date('2026-01-15T12:00:00'));
     await gotoStory(page, 'chat-messaging--full-thread');
     await page
       .locator("[data-slot='chat-composer-input']")
@@ -263,6 +268,11 @@ test.describe('Visual Regression Tests - Core Components', () => {
   }) => {
     // Dark-mode composer frame (border-t dark:border-neutral-700) around the
     // shared ChatComposer card.
+    // Story data timestamps messages relative to Date.now(); near midnight
+    // UTC the "N hours ago" messages cross a day boundary and grow an extra
+    // Today/Yesterday separator, shifting the whole thread (CI-only flake).
+    // Freeze the clock at midday so the separators are deterministic.
+    await page.clock.setFixedTime(new Date('2026-01-15T12:00:00'));
     await gotoStory(page, 'chat-messaging--full-thread', {
       globals: 'theme:dark',
     });
@@ -331,6 +341,42 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .locator("[data-slot='chat-composer-input']")
       .waitFor({ state: 'visible' });
     await expect(page).toHaveScreenshot('ai-chat-playground-condensed.png');
+  });
+
+  test('AIMessage - Thinking active (streaming)', async ({ page }) => {
+    // Expanded violet "Thinking" pill with the reasoning text visible.
+    await gotoStory(page, 'chat-aimessage--thinking-active');
+    await expect(page).toHaveScreenshot('ai-message-thinking-active.png');
+  });
+
+  test('AIMessage - Thinking complete', async ({ page }) => {
+    // Collapsed "Thought" pill above the answer text.
+    await gotoStory(page, 'chat-aimessage--thinking-complete');
+    await expect(page).toHaveScreenshot('ai-message-thinking-complete.png');
+  });
+
+  test('AIMessage - Thinking auto-collapses when streaming finishes', async ({
+    page,
+  }) => {
+    // The story streams for ~3s, then completes: the pill must start
+    // expanded and auto-collapse on the transition (ThinkingBlock's
+    // autoCollapsed state driving CollapsiblePill's defaultOpen resync).
+    await gotoStory(page, 'chat-aimessage--thinking-auto-collapse');
+    const pill = page.getByRole('button', { name: /^thinking$/i });
+    await expect(pill).toHaveAttribute('aria-expanded', 'true');
+
+    const collapsed = page.getByRole('button', {
+      name: /^thought( for \d+s)?$/i,
+    });
+    await expect(collapsed).toHaveAttribute('aria-expanded', 'false', {
+      timeout: 10000,
+    });
+    // Settled collapsed state (collapse animation is 300ms; screenshot
+    // auto-disables animations). The elapsed label is timing-dependent
+    // ("Thought for 3s"), well inside the 5% diff tolerance.
+    await expect(page).toHaveScreenshot(
+      'ai-message-thinking-auto-collapse.png'
+    );
   });
 
   test('Avatar - Default', async ({ page }) => {
