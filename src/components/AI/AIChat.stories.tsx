@@ -8,6 +8,7 @@ import {
   type AIMessage,
 } from './index';
 import { sampleMessages, suggestedActions } from './storyData';
+import { fullHeightChat } from '../../../.storybook/full-height';
 
 // ============================================================================
 // AI Chat Stories
@@ -222,46 +223,46 @@ type Story = StoryObj<typeof AIChat>;
 
 /** Interactive playground — adjust props from the Controls panel. */
 export const Playground: Story = {
-  render: (args) => (
-    <div className="h-[600px]">
-      <AIChat {...args} height="100%" />
-    </div>
-  ),
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
+  render: (args) => <AIChat {...args} height="100%" />,
 };
 
 /** Empty state: suggestions surface as a getting-started prompt grid. */
 export const EmptyChat: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: () => (
-    <div className="h-[600px]">
-      <AIChat
-        messages={[]}
-        suggestions={suggestedActions}
-        height="100%"
-        onSendMessage={(msg) => console.log('Send:', msg)}
-      />
-    </div>
+    <AIChat
+      messages={[]}
+      suggestions={suggestedActions}
+      height="100%"
+      onSendMessage={(msg) => console.log('Send:', msg)}
+    />
   ),
 };
 
 /** A populated conversation, including an inline tool call. */
 export const ChatWithMessages: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: () => (
-    <div className="h-[600px]">
-      <AIChat
-        messages={sampleMessages}
-        suggestions={suggestedActions}
-        height="100%"
-        userName="Dr. Jane"
-        onSendMessage={(msg) => console.log('Send:', msg)}
-        onResourceClick={(link) => console.log('Link clicked:', link)}
-        onClear={() => console.log('Clear chat')}
-      />
-    </div>
+    <AIChat
+      messages={sampleMessages}
+      suggestions={suggestedActions}
+      height="100%"
+      userName="Dr. Jane"
+      onSendMessage={(msg) => console.log('Send:', msg)}
+      onResourceClick={(link) => console.log('Link clicked:', link)}
+      onClear={() => console.log('Clear chat')}
+    />
   ),
 };
 
 /** The assistant is streaming a response — note the typing indicator. */
 export const GeneratingResponse: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: () => {
     const messages: AIMessage[] = [
       ...sampleMessages.slice(0, 3),
@@ -274,15 +275,13 @@ export const GeneratingResponse: Story = {
       },
     ];
     return (
-      <div className="h-[600px]">
-        <AIChat
-          messages={messages}
-          isGenerating={true}
-          height="100%"
-          onSendMessage={(msg) => console.log('Send:', msg)}
-          onCancel={() => console.log('Cancel generation')}
-        />
-      </div>
+      <AIChat
+        messages={messages}
+        isGenerating={true}
+        height="100%"
+        onSendMessage={(msg) => console.log('Send:', msg)}
+        onCancel={() => console.log('Cancel generation')}
+      />
     );
   },
 };
@@ -441,7 +440,9 @@ function StreamingChat() {
 }
 
 export const StreamingResponse: Story = {
+  decorators: [fullHeightChat],
   parameters: {
+    githubSourceFooter: false,
     docs: {
       description: {
         story: [
@@ -473,28 +474,24 @@ export const StreamingResponse: Story = {
       },
     },
   },
-  render: () => (
-    <div className="h-[600px]">
-      <StreamingChat />
-    </div>
-  ),
+  render: () => <StreamingChat />,
 };
 
 /** Talk-to-text: the composer exposes a microphone for voice input. */
 export const TalkToText: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: () => (
-    <div className="h-[600px]">
-      <AIChat
-        messages={[]}
-        suggestions={suggestedActions}
-        height="100%"
-        talkToText
-        onSendMessage={(msg) => console.log('Send:', msg)}
-        onRecordingComplete={(blob, duration) =>
-          console.log('Recording complete:', { size: blob.size, duration })
-        }
-      />
-    </div>
+    <AIChat
+      messages={[]}
+      suggestions={suggestedActions}
+      height="100%"
+      talkToText
+      onSendMessage={(msg) => console.log('Send:', msg)}
+      onRecordingComplete={(blob, duration) =>
+        console.log('Recording complete:', { size: blob.size, duration })
+      }
+    />
   ),
 };
 /**

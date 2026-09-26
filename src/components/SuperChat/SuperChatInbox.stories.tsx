@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChatInbox, createMarkdownRenderer } from './index';
+import { fullHeightChat } from '../../../.storybook/full-height';
 import {
   createCodePlugin,
   createMathPlugin,
@@ -244,23 +245,26 @@ export const Playground: Story = {
     trustedContent: false,
     defaultActiveConversationId: 'c1',
   },
+  // Page-level inbox: fill the canvas height (#504). SourcesAndGuards below is
+  // a scrolling reference page, so the decorator is per-story, not meta-level.
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)' }}>
-      <InteractiveInbox
-        {...args}
-        initial={[richConversation, secondConversation]}
-        renderPlugins={[
-          createCodePlugin(),
-          createMathPlugin(),
-          createGenUIPlugin(registry),
-          createMermaidPlugin(),
-          createImagePlugin(),
-          createNitroTablePlugin(),
-          createAttachmentPlugin(),
-        ]}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractiveInbox
+      {...args}
+      className="w-full"
+      initial={[richConversation, secondConversation]}
+      renderPlugins={[
+        createCodePlugin(),
+        createMathPlugin(),
+        createGenUIPlugin(registry),
+        createMermaidPlugin(),
+        createImagePlugin(),
+        createNitroTablePlugin(),
+        createAttachmentPlugin(),
+      ]}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 

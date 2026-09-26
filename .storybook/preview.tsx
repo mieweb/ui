@@ -218,10 +218,18 @@ const withGitHubSource: Decorator = (Story, context) => {
     return `https://github.com/mieweb/ui/blob/main/${stripped}`;
   })();
 
+  // Full-height stories (parameters.githubSourceFooter === false) fill the
+  // canvas exactly; a trailing footer would only add a page scrollbar. The
+  // link still renders in docs view, where examples are bounded.
+  const showFooter = !(
+    context.viewMode === 'story' &&
+    context.parameters?.githubSourceFooter === false
+  );
+
   return (
     <>
       <Story />
-      {githubUrl && (
+      {githubUrl && showFooter && (
         <div
           style={{
             marginTop: '12px',

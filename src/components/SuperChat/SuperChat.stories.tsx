@@ -15,6 +15,7 @@ import {
 import type { SuperChatConversation } from './index';
 import { conversation, richConversation, registry } from './storyData';
 import { markdownShowcaseConversation } from './storyData';
+import { fullHeightChat } from '../../../.storybook/full-height';
 import 'katex/dist/katex.min.css';
 
 // ============================================================================
@@ -26,6 +27,8 @@ const meta: Meta<typeof SuperChat> = {
   title: 'Modules/SuperChat/SuperChat (Panel)',
   component: SuperChat,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  // Every story is a page-level panel: fill the canvas height (#504).
+  decorators: [fullHeightChat],
   argTypes: {
     readOnly: {
       control: 'boolean',
@@ -69,6 +72,7 @@ const meta: Meta<typeof SuperChat> = {
   },
   parameters: {
     layout: 'fullscreen',
+    githubSourceFooter: false,
     docs: {
       description: {
         component: `### What it's for
@@ -324,23 +328,21 @@ export const Playground: Story = {
     trustedContent: false,
   },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        {...args}
-        initial={richConversation}
-        renderPlugins={[
-          createCodePlugin(),
-          createMathPlugin(),
-          createGenUIPlugin(registry),
-          createMermaidPlugin(),
-          createImagePlugin(),
-          createNitroTablePlugin(),
-          createAttachmentPlugin(),
-        ]}
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      {...args}
+      initial={richConversation}
+      renderPlugins={[
+        createCodePlugin(),
+        createMathPlugin(),
+        createGenUIPlugin(registry),
+        createMermaidPlugin(),
+        createImagePlugin(),
+        createNitroTablePlugin(),
+        createAttachmentPlugin(),
+      ]}
+      onReferenceClick={(ref) => console.log('ref', ref)}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 
@@ -367,23 +369,21 @@ export const Reverse: Story = {
     },
   },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        {...args}
-        initial={richConversation}
-        renderPlugins={[
-          createCodePlugin(),
-          createMathPlugin(),
-          createGenUIPlugin(registry),
-          createMermaidPlugin(),
-          createImagePlugin(),
-          createNitroTablePlugin(),
-          createAttachmentPlugin(),
-        ]}
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      {...args}
+      initial={richConversation}
+      renderPlugins={[
+        createCodePlugin(),
+        createMathPlugin(),
+        createGenUIPlugin(registry),
+        createMermaidPlugin(),
+        createImagePlugin(),
+        createNitroTablePlugin(),
+        createAttachmentPlugin(),
+      ]}
+      onReferenceClick={(ref) => console.log('ref', ref)}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 
@@ -411,11 +411,7 @@ export const Long: Story = {
       },
     },
   },
-  render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel {...args} initial={longConversation} />
-    </div>
-  ),
+  render: (args) => <InteractivePanel {...args} initial={longConversation} />,
 };
 
 // The same 300-message thread, newest-first (social-feed style, top-anchored).
@@ -437,11 +433,7 @@ export const LongReverse: Story = {
       },
     },
   },
-  render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel {...args} initial={longConversation} />
-    </div>
-  ),
+  render: (args) => <InteractivePanel {...args} initial={longConversation} />,
 };
 
 // The only plugin-less example. Math (`$$ … $$`, `$x$`) and the ```genui``` block
@@ -464,14 +456,12 @@ export const CoreNoPlugins: Story = {
     },
   },
   render: () => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        initial={conversation}
-        currentParticipantId="u1"
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      initial={conversation}
+      currentParticipantId="u1"
+      onReferenceClick={(ref) => console.log('ref', ref)}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 
@@ -498,14 +488,12 @@ export const MarkdownShowcase: Story = {
     },
   },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        {...args}
-        initial={markdownShowcaseConversation}
-        renderPlugins={[createCodePlugin()]}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      {...args}
+      initial={markdownShowcaseConversation}
+      renderPlugins={[createCodePlugin()]}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 
@@ -722,9 +710,5 @@ export const StreamingResponse: Story = {
       },
     },
   },
-  render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <StreamingPanel {...args} />
-    </div>
-  ),
+  render: (args) => <StreamingPanel {...args} />,
 };
