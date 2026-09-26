@@ -2,6 +2,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'esbuild';
 import { defineConfig } from 'tsup';
+import { entries } from './tsup.entries.mjs';
 
 const shimDir = join(dirname(fileURLToPath(import.meta.url)), 'build-shims');
 
@@ -22,119 +23,36 @@ const useSyncExternalStoreEsmShim: Plugin = {
   },
 };
 
+// Declarations are built separately, in batches, by scripts/build-dts.mjs.
+// Bundling every entry's .d.ts in one rollup-plugin-dts pass exhausts an 8 GB
+// heap (#496), while each batch on its own is small. The script re-runs tsup
+// with MIEWEB_DTS_ENTRIES set to one batch of entry names; without it, this
+// config builds JS only — including `pnpm dev` (`tsup --watch`), which does
+// not refresh declarations. Run `pnpm build:dts` for up-to-date types.
+const dtsBatch = process.env.MIEWEB_DTS_ENTRIES?.split(',').filter(Boolean);
+
+function pickEntries(names: string[]): Record<string, string> {
+  return Object.fromEntries(
+    names.map((name) => {
+      const source = entries[name];
+      if (!source) throw new Error(`Unknown tsup entry: ${name}`);
+      return [name, source];
+    })
+  );
+}
+
 export default defineConfig({
-  entry: {
-    index: 'src/index.ts',
-    'ag-grid': 'src/ag-grid.ts',
-    globe: 'src/globe.ts',
-    datavis: 'src/datavis.ts',
-    esheet: 'src/esheet.ts',
-    kerebron: 'src/kerebron.ts',
-    // Opt-in animation layer. Separate entry so `motion` stays out of the main
-    // bundle for apps that never import it. See: src/motion/entry.ts
-    motion: 'src/motion/entry.ts',
-    q: 'src/q.ts',
-    'hooks/index': 'src/hooks/index.ts',
-    'utils/index': 'src/utils/index.ts',
-    'tailwind-preset': 'src/tailwind-preset.ts',
-    // Individual component entries for tree-shaking
-    'components/Accordion/index': 'src/components/Accordion/index.ts',
-    'components/Alert/index': 'src/components/Alert/index.ts',
-    'components/AlertDialog/index': 'src/components/AlertDialog/index.ts',
-    'components/AudioPlayer/index': 'src/components/AudioPlayer/index.ts',
-    'components/AudioRecorder/index': 'src/components/AudioRecorder/index.ts',
-    'components/Autocomplete/index': 'src/components/Autocomplete/index.ts',
-    'components/Avatar/index': 'src/components/Avatar/index.ts',
-    'components/Badge/index': 'src/components/Badge/index.ts',
-    'components/BoardView/index': 'src/components/BoardView/index.ts',
-    'components/Breadcrumb/index': 'src/components/Breadcrumb/index.ts',
-    'components/Button/index': 'src/components/Button/index.ts',
-    'components/Card/index': 'src/components/Card/index.ts',
-    'components/CalendarView/index': 'src/components/CalendarView/index.ts',
-    'components/Checkbox/index': 'src/components/Checkbox/index.ts',
-    'components/ClampedText/index': 'src/components/ClampedText/index.ts',
-    'components/CollabStatus/index': 'src/components/CollabStatus/index.ts',
-    'components/Collapsible/index': 'src/components/Collapsible/index.ts',
-    'components/CopyButton/index': 'src/components/CopyButton/index.ts',
-    'components/CountryCodeDropdown/index':
-      'src/components/CountryCodeDropdown/index.ts',
-    'components/CustomizableDashboard/index':
-      'src/components/CustomizableDashboard/index.ts',
-    'components/DateInput/index': 'src/components/DateInput/index.ts',
-    'components/Dropdown/index': 'src/components/Dropdown/index.ts',
-    'components/FilterSummaryBar/index':
-      'src/components/FilterSummaryBar/index.ts',
-    'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
-    'components/FreshnessBadge/index': 'src/components/FreshnessBadge/index.ts',
-    'components/GanttView/index': 'src/components/GanttView/index.ts',
-    'components/GlossaryTooltip/index':
-      'src/components/GlossaryTooltip/index.ts',
-    'components/Input/index': 'src/components/Input/index.ts',
-    'components/KeyboardShortcutsOverlay/index':
-      'src/components/KeyboardShortcutsOverlay/index.ts',
-    'components/Label/index': 'src/components/Label/index.ts',
-    'components/ListView/index': 'src/components/ListView/index.ts',
-    'components/Markdown/index': 'src/components/Markdown/index.ts',
-    'components/MediaEditor/index': 'src/components/MediaEditor/index.ts',
-    'components/MediaPlayer/index': 'src/components/MediaPlayer/index.ts',
-    'components/MegaMenu/index': 'src/components/MegaMenu/index.ts',
-    'components/Modal/index': 'src/components/Modal/index.ts',
-    'components/OrbitRing/index': 'src/components/OrbitRing/index.ts',
-    'components/RadialExplorer/index': 'src/components/RadialExplorer/index.ts',
-    'components/Pagination/index': 'src/components/Pagination/index.ts',
-    'components/PhoneInput/index': 'src/components/PhoneInput/index.ts',
-    'components/Progress/index': 'src/components/Progress/index.ts',
-    'components/Q/index': 'src/components/Q/index.ts',
-    'components/QuickAction/index': 'src/components/QuickAction/index.ts',
-    'components/Radio/index': 'src/components/Radio/index.ts',
-    'components/ReadingProgressBar/index':
-      'src/components/ReadingProgressBar/index.ts',
-    'components/RecordButton/index': 'src/components/RecordButton/index.ts',
-    'components/RichTextEditor/index': 'src/components/RichTextEditor/index.ts',
-    'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
-    'components/ScrollArea/index': 'src/components/ScrollArea/index.ts',
-    'components/SectionSpyNav/index': 'src/components/SectionSpyNav/index.ts',
-    'components/SliderCalculator/index': 'src/components/SliderCalculator/index.ts',
-    'components/Select/index': 'src/components/Select/index.ts',
-    'components/Separator/index': 'src/components/Separator/index.ts',
-    'components/Sheet/index': 'src/components/Sheet/index.ts',
-    'components/Skeleton/index': 'src/components/Skeleton/index.ts',
-    'components/Slider/index': 'src/components/Slider/index.ts',
-    'components/SourceTip/index': 'src/components/SourceTip/index.ts',
-    'components/Sparkline/index': 'src/components/Sparkline/index.ts',
-    'components/Spinner/index': 'src/components/Spinner/index.ts',
-    'components/SuperChat/index': 'src/components/SuperChat/index.ts',
-    'components/SuperChat/plugins/index':
-      'src/components/SuperChat/plugins/index.ts',
-    'components/Switch/index': 'src/components/Switch/index.ts',
-    'components/Table/index': 'src/components/Table/index.ts',
-    'components/Tabs/index': 'src/components/Tabs/index.ts',
-    'components/Text/index': 'src/components/Text/index.ts',
-    'components/Textarea/index': 'src/components/Textarea/index.ts',
-    'components/ThemeProvider/index': 'src/components/ThemeProvider/index.ts',
-    'components/Toggle/index': 'src/components/Toggle/index.ts',
-    'components/Tooltip/index': 'src/components/Tooltip/index.ts',
-    'components/ViewSwitcher/index': 'src/components/ViewSwitcher/index.ts',
-    'components/ViewSet/index': 'src/components/ViewSet/index.ts',
-    'components/TranscriptView/index': 'src/components/TranscriptView/index.ts',
-    'components/VideoCard/index': 'src/components/VideoCard/index.ts',
-    'components/VisuallyHidden/index': 'src/components/VisuallyHidden/index.ts',
-    'components/YearTimeline/index': 'src/components/YearTimeline/index.ts',
-    // Brand system entries for tree-shaking
-    'brands/index': 'src/brands/index.ts',
-    'brands/types': 'src/brands/types.ts',
-    'brands/bluehive': 'src/brands/bluehive.ts',
-    'brands/ccme': 'src/brands/ccme.ts',
-    'brands/ozwell': 'src/brands/ozwell.ts',
-  },
+  entry: dtsBatch ? pickEntries(dtsBatch) : entries,
   format: ['esm', 'cjs'],
   target: 'es2022',
   // Inline @mieweb/datavis's types (it's a bundled submodule, not an installed
-  // package) so the datavis entry's .d.ts does not re-export from it.
-  dts: { resolve: true },
+  // package) so the datavis entry's .d.ts does not re-export from it. Only the
+  // datavis batch resolves: resolving for every entry is far more expensive.
+  dts: dtsBatch ? { only: true, resolve: dtsBatch.includes('datavis') } : false,
   tsconfig: 'tsconfig.build.json',
   sourcemap: true,
-  clean: true,
+  // Only the JS build cleans; declaration batches write into the same dist/.
+  clean: !dtsBatch,
   external: [
     'react',
     'react-dom',
