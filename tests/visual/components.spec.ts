@@ -249,6 +249,11 @@ test.describe('Visual Regression Tests - Core Components', () => {
     // MessageThread now embeds the shared ChatComposer in its border-t frame
     // (composer unification #465). Message footers show wall-clock times, so
     // mask them to keep the snapshot deterministic.
+    // Story data timestamps messages relative to Date.now(); near midnight
+    // UTC the "N hours ago" messages cross a day boundary and grow an extra
+    // Today/Yesterday separator, shifting the whole thread (CI-only flake).
+    // Freeze the clock at midday so the separators are deterministic.
+    await page.clock.setFixedTime(new Date('2026-01-15T12:00:00'));
     await gotoStory(page, 'chat-messaging--full-thread');
     await page
       .locator("[data-slot='chat-composer-input']")
@@ -263,6 +268,11 @@ test.describe('Visual Regression Tests - Core Components', () => {
   }) => {
     // Dark-mode composer frame (border-t dark:border-neutral-700) around the
     // shared ChatComposer card.
+    // Story data timestamps messages relative to Date.now(); near midnight
+    // UTC the "N hours ago" messages cross a day boundary and grow an extra
+    // Today/Yesterday separator, shifting the whole thread (CI-only flake).
+    // Freeze the clock at midday so the separators are deterministic.
+    await page.clock.setFixedTime(new Date('2026-01-15T12:00:00'));
     await gotoStory(page, 'chat-messaging--full-thread', {
       globals: 'theme:dark',
     });
