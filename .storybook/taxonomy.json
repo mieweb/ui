@@ -75,6 +75,11 @@
       ]
     },
     {
+      "name": "Templates",
+      "scope": "scope:general-purpose",
+      "families": ["Pages", "Conversion", "Content", "Social proof"]
+    },
+    {
       "name": "Healthcare",
       "scope": "scope:domain-specific",
       "families": ["Clinical lists", "Encounter & orders"]

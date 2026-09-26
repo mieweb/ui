@@ -126,3 +126,36 @@
     transform: none;
   }
 }
+
+/* ── Marquee: seamless loop for LogoCloudSection (track holds two copies) ── */
+@keyframes mie-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes mie-marquee-rtl {
+  to {
+    transform: translateX(50%);
+  }
+}
+.mie-marquee {
+  animation: mie-marquee var(--mie-marquee-duration, 40s) linear infinite;
+}
+[dir='rtl'] .mie-marquee {
+  animation-name: mie-marquee-rtl;
+}
+.mie-marquee-host:hover .mie-marquee,
+.mie-marquee-host:focus-within .mie-marquee {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mie-marquee {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: auto;
+  }
+  .mie-marquee [data-duplicate] {
+    display: none;
+  }
+}

@@ -1,0 +1,26 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Templates/Conversion/Overview" />
+
+# Conversion
+
+> **Where a marketing page asks for something.** The hero makes the first ask, the call-to-action
+> band makes the last, and the lead form converts without leaving the page. All three render real
+> anchors or a real `<form>` — no client state.
+
+## Which one?
+
+| Component                                                     | Use it when                                                        | Not when                                                                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| [HeroSection](?path=/docs/conversion-herosection--docs)         | The first screen of a public page: the `h1`, the pitch, two CTAs   | A screen inside an app — [PageHeader](?path=/docs/layout-pageheader--docs)                |
+| [CtaSection](?path=/docs/conversion-ctasection--docs)           | The next step is another page (demo booking, pricing, contact)     | Visitors should convert here — [LeadFormSection](?path=/docs/conversion-leadformsection--docs) |
+| [LeadFormSection](?path=/docs/conversion-leadformsection--docs) | Campaign, ABM and lead-magnet pages that capture the lead in place | App forms with steps, drafts or rich validation — the Inputs tier                         |
+| [PricingSection](?path=/docs/conversion-pricingsection--docs)   | Two to four plans a buyer chooses between                          | A monthly/annual toggle — needs client state; render one section per period                |
+
+## How they fit together
+
+- A page usually opens with `HeroSection` and closes with `CtaSection`, both pointing at the same
+  destination.
+- `LeadFormSection` posts to a URL or a React form action (a Next.js Server Action works). Spam
+  protection, validation beyond the browser's, and success/error states are the app's.
+- Buttons wrap their labels instead of overflowing, so translated copy stays inside the viewport.

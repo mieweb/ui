@@ -110,6 +110,11 @@ const subscribe = useMutation(subscribeToNewsletter);
         },
         {
           type: 'composes with',
+          target: 'pages-landingpage',
+          why: 'SiteFooter closes the public page that SiteHeader and LandingPage open.',
+        },
+        {
+          type: 'composes with',
           target: 'layout-productversion',
           why: 'ProductVersion sits in or under SiteFooter / SimpleFooter to show the deployed version next to the copyright line.',
         },

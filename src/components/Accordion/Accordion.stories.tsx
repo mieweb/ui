@@ -67,6 +67,11 @@ Controlled so sections with validation errors can be forced open; \`defaultOpenI
           target: 'layout-collapsible',
           why: 'Accordion renders a styled stack of panels from an items array and owns the single/multiple rule; Collapsible is one headless trigger + content you style.',
         },
+        {
+          type: 'alternative to',
+          target: 'content-faqsection',
+          why: 'Accordion is a styled, stateful panel stack for app content; FaqSection is a server-rendered <details> list of plain-text Q&A for marketing pages.',
+        },
       ],
     },
   },

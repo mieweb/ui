@@ -662,3 +662,44 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     });
   });
 });
+
+test.describe('Visual Regression Tests - Templates', () => {
+  // Sections are taller than the viewport, so capture the whole story.
+  const sections: [string, string, { globals?: string }?][] = [
+    ['conversion-herosection--split', 'template-hero-split.png'],
+    ['conversion-herosection--rtl', 'template-hero-rtl.png'],
+    ['conversion-ctasection--band', 'template-cta-band.png'],
+    [
+      'conversion-leadformsection--split',
+      'template-leadform-dark.png',
+      { globals: 'theme:dark' },
+    ],
+    ['conversion-pricingsection--default', 'template-pricing.png'],
+    ['content-featuregridsection--cards', 'template-featuregrid.png'],
+    ['content-processstepssection--four-steps', 'template-processsteps.png'],
+    ['content-comparisonsection--two-columns', 'template-comparison.png'],
+    ['social-proof-statssection--cards', 'template-stats-cards.png'],
+    ['social-proof-testimonialsection--cards', 'template-testimonials.png'],
+  ];
+
+  for (const [storyId, file, options] of sections) {
+    test(`Templates - ${storyId}`, async ({ page }) => {
+      await gotoStory(page, storyId, options);
+      await expect(page).toHaveScreenshot(file, {
+        animations: 'disabled',
+        fullPage: true,
+      });
+    });
+  }
+
+  test('Templates - Campaign page (mobile)', async ({ page }) => {
+    // The assembled page at phone width: stacked CTAs, one-column grids,
+    // the lead form under its heading.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'pages-landingpage--campaign');
+    await expect(page).toHaveScreenshot('template-campaign-mobile.png', {
+      animations: 'disabled',
+      fullPage: true,
+    });
+  });
+});

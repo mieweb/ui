@@ -106,6 +106,13 @@ Concentric rings of satellite chips orbiting a centre mark at different speeds a
     },
     catalog: {
       entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'social-proof-logocloudsection',
+          why: 'OrbitRing is a decorative hero visual of logos orbiting a centre mark; LogoCloudSection is a compact recognition strip.',
+        },
+      ],
     },
   },
   argTypes: {

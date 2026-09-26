@@ -209,6 +209,9 @@ export * from './views/types';
 export * from './components/TranscriptView';
 export * from './components/VideoCard';
 export * from './components/YearTimeline';
+// Landing-page sections + LandingPage. Server Components import the same API
+// from @mieweb/ui/templates, whose graph avoids client-only React APIs.
+export * from './templates';
 // `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
 // TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
 // type at the root barrel; import the media-schema type from the subpath
