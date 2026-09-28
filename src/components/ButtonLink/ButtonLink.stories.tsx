@@ -122,7 +122,7 @@ export const WithIcons: Story = {
       <ButtonLink
         href="https://ui.mieweb.org"
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
         variant="outline"
         rightIcon={<ExternalLink size={16} />}
       >
