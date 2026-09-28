@@ -29,6 +29,7 @@ export const entries = {
   'components/BoardView/index': 'src/components/BoardView/index.ts',
   'components/Breadcrumb/index': 'src/components/Breadcrumb/index.ts',
   'components/Button/index': 'src/components/Button/index.ts',
+  'components/ButtonLink/index': 'src/components/ButtonLink/index.ts',
   'components/Card/index': 'src/components/Card/index.ts',
   'components/CalendarView/index': 'src/components/CalendarView/index.ts',
   'components/Checkbox/index': 'src/components/Checkbox/index.ts',

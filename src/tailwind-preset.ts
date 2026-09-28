@@ -328,6 +328,11 @@ export const miewebUISafelist = [
   'dark:text-neutral-400',
   'dark:border-neutral-600',
   'dark:border-neutral-700',
+  // Ghost Button hover/active states
+  'hover:bg-neutral-200',
+  'active:bg-neutral-300',
+  'dark:hover:bg-neutral-700',
+  'dark:active:bg-neutral-600',
   // Indigo (StripeBadge)
   'bg-indigo-500/10',
   'dark:bg-indigo-400/20',
