@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { MarkdownRenderer } from '../Markdown';
 import type { AIMessage, AIRenderTextContent, MCPToolCall } from './types';
 import {
@@ -538,12 +538,15 @@ export const Playground: Story = {
     );
     await userEvent.keyboard('{Enter}');
     await expect(canvas.findAllByText('Follow-up')).resolves.toHaveLength(1);
-    await expect(
-      canvas.findByRole('heading', { name: 'Hello' })
-    ).resolves.toBeVisible();
-    await expect(
-      canvas.findByText('This reply is rendered as Markdown.')
-    ).resolves.toBeVisible();
+    // The Markdown reply can re-render after first paint, so re-query on each retry.
+    await waitFor(() =>
+      expect(canvas.getByRole('heading', { name: 'Hello' })).toBeVisible()
+    );
+    await waitFor(() =>
+      expect(
+        canvas.getByText('This reply is rendered as Markdown.')
+      ).toBeVisible()
+    );
     await expect(
       canvas.getByRole('button', { name: /Thought/ })
     ).toHaveAttribute('aria-expanded', 'false');
