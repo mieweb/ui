@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CountBadge, type CountBadgeItem } from './CountBadge';
-import locoSamplePack from '../../i18n/i18n-translations.json';
-import { createLocoTranslator } from '../../utils/i18n';
 import {
   CheckCircleIcon,
   AlertCircleIcon,
@@ -113,13 +111,6 @@ The host owns the items and the mutations; the component owns popover open state
 export default meta;
 type Story = StoryObj<typeof CountBadge>;
 
-function getTranslator(context: { globals?: Record<string, unknown> }) {
-  const locale = String(context.globals?.locale || 'en');
-  return createLocoTranslator(locoSamplePack, locale, {
-    fallbackLanguage: 'en',
-  });
-}
-
 /** Default gray variant. */
 export const Default: Story = {
   args: {
@@ -177,9 +168,10 @@ export const Warning: Story = {
 
 /** Alert variant (red). */
 export const Alert: Story = {
-  render: (_, context) => {
-    const t = getTranslator(context);
-    return <CountBadge label={t('eSign')} count={7} variant="alert" />;
+  args: {
+    label: 'eSign',
+    count: 7,
+    variant: 'alert',
   },
 };
 
@@ -308,25 +300,17 @@ export const HoverMenuInfo: Story = {
 
 /** Alert variant with many items showing scroll behavior. */
 export const HoverMenuAlert: Story = {
-  render: (_, context) => {
-    const t = getTranslator(context);
-    const translatedItems = sampleEsigns.map((item) => ({
-      ...item,
-      label: t(item.label),
-    }));
-
-    return (
-      <CountBadge
-        label={t('eSign')}
-        count={7}
-        variant="alert"
-        items={translatedItems}
-        onView={(item) => console.log('View:', item)}
-        onEdit={(item) => console.log('Edit:', item)}
-        onDelete={(item) => console.log('Delete:', item)}
-      />
-    );
-  },
+  render: () => (
+    <CountBadge
+      label="eSign"
+      count={7}
+      variant="alert"
+      items={sampleEsigns}
+      onView={(item) => console.log('View:', item)}
+      onEdit={(item) => console.log('Edit:', item)}
+      onDelete={(item) => console.log('Delete:', item)}
+    />
+  ),
 };
 
 /** Custom actions in the overflow menu. */

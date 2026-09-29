@@ -1,6 +1,23 @@
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+
+// Node 20 lacks --env-file-if-exists, so read .env.local here; real env vars win.
+async function loadEnvLocal() {
+  let content;
+  try {
+    content = await readFile(path.resolve(process.cwd(), '.env.local'), 'utf8');
+  } catch {
+    return;
+  }
+  for (const line of content.split(/\r?\n/)) {
+    const match = line.match(/^\s*(?:export\s+)?([A-Za-z_][\w]*)\s*=\s*(.*)\s*$/);
+    if (!match) continue;
+    const [, key, rawValue] = match;
+    if (process.env[key] !== undefined) continue;
+    process.env[key] = rawValue.replace(/^(['"])(.*)\1$/, '$2');
+  }
+}
 
 function parseArgs(argv) {
   const options = {};
@@ -25,7 +42,7 @@ Options:
   --contextMode=<mode>   Context mode (default: ignore)
   --help                 Show this message
 
-Environment variables:
+Environment variables (also read from .env.local; shell env wins):
   LOCO_SERVER_URL
   LOCO_API_KEY
   VITE_LOCO_SERVER_URL
@@ -39,6 +56,7 @@ async function main() {
     printHelp();
     return;
   }
+  await loadEnvLocal();
   const server = (
     args.server ||
     process.env.LOCO_SERVER_URL ||

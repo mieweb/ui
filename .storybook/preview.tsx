@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import type { Preview, Decorator } from '@storybook/react-vite';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import '../src/styles/kerebron.css';
@@ -41,7 +41,6 @@ const LOCO_RUNTIME_URL = '/i18n/loco.min.js';
 const LOCO_LIVE_LANG_CACHE_KEY = 'mieweb:loco:languages';
 const LOCO_LIVE_LANG_RELOAD_FLAG = 'mieweb:loco:languages:reloaded';
 const LOCO_TOOLBAR_MODE_KEY = 'mieweb:loco:toolbar-mode';
-const LOCO_RESOLVED_API_KEY_CACHE_KEY = 'mieweb:loco:resolved-api-key';
 const DEFAULT_LOCALE = 'en';
 const locoPackLanguages: string[] = Array.isArray((locoI18nPack as { languages?: string[] }).languages)
   ? (locoI18nPack as { languages: string[] }).languages
@@ -60,12 +59,6 @@ type LocoLanguageInfo = {
   code: string;
   name?: string;
   dir?: 'ltr' | 'rtl';
-};
-
-type LocoProjectInfo = {
-  id?: number;
-  name?: string;
-  api_key?: string;
 };
 
 function getCurrentLocoModeFromUrl(): 'package' | 'live' | 'disable' {
@@ -207,85 +200,6 @@ async function fetchLiveLocoLanguages(
     }));
 
   return apiLanguages;
-}
-
-async function resolveLiveApiKey(
-  serverUrl: string,
-  candidateApiKey?: string,
-  projectName?: string,
-): Promise<string | undefined> {
-  const baseUrl = serverUrl.replace(/\/$/, '');
-
-  const isValidKey = async (key: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`${baseUrl}/api/project`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': key,
-        },
-      });
-      return response.ok;
-    } catch {
-      return false;
-    }
-  };
-
-  const normalizedCandidate = String(candidateApiKey || '').trim();
-  if (normalizedCandidate && (await isValidKey(normalizedCandidate))) {
-    return normalizedCandidate;
-  }
-
-  try {
-    const projectsResponse = await fetch(`${baseUrl}/api/projects`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (projectsResponse.ok) {
-      const payload = await projectsResponse.json();
-      if (Array.isArray(payload)) {
-        const projects = payload as LocoProjectInfo[];
-        const normalizedProjectName = String(projectName || '').trim().toLowerCase();
-
-        const preferred = normalizedProjectName
-          ? projects.find((project) =>
-              String(project?.name || '').trim().toLowerCase() === normalizedProjectName
-            )
-          : undefined;
-
-        const defaultMiewebProject = !normalizedProjectName
-          ? projects.find(
-              (project) => String(project?.name || '').trim().toLowerCase() === 'miewebui'
-            )
-          : undefined;
-
-        const fallback = preferred || defaultMiewebProject || projects[0];
-        const resolved = String(fallback?.api_key || '').trim();
-        if (resolved) return resolved;
-      }
-    }
-  } catch {
-    // Ignore fallback lookup failures.
-  }
-
-  try {
-    const projectResponse = await fetch(`${baseUrl}/api/project`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!projectResponse.ok) return undefined;
-
-    const payload = (await projectResponse.json()) as LocoProjectInfo;
-    const fallbackKey = String(payload?.api_key || '').trim();
-    return fallbackKey || undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 type LocoRuntime = {
@@ -561,13 +475,12 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
-// Default Loco configuration from environment variables.
-// Production fallback points at hosted Loco + miewebui project, while local
-// testing can override via .env.local (VITE_LOCO_*) or URL query params.
+// Loco configuration comes only from .env.local (VITE_LOCO_*); no keys live in the repo.
 const defaultLocoServer = (import.meta.env.VITE_LOCO_SERVER_URL as string | undefined)?.trim() || 'https://loco.os.mieweb.org';
-const defaultLocoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || '84ad26c4d9934e638f206ae8';
-const defaultLocoProject = (import.meta.env.VITE_LOCO_PROJECT_NAME as string | undefined)?.trim() || 'miewebui';
+const locoApiKey = (import.meta.env.VITE_LOCO_API_KEY as string | undefined)?.trim() || undefined;
 const isLocoDisabled = (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
+// Live sync posts rendered text to the server, so it is only offered when a key is configured.
+const isLiveSyncEnabled = Boolean(locoApiKey);
 
 // Appends a "View source on GitHub" link below each story, derived from the
 // story file's absolute path on disk (context.parameters.fileName).
@@ -701,56 +614,20 @@ const withCodeLookup: Decorator = (Story, context) => {
 };
 
 const withLocoLiveSync: Decorator = (Story, context) => {
-  const locoMode = String(context.globals?.locoMode || 'package');
+  const requestedMode = String(context.globals?.locoMode || 'package');
+  const locoMode =
+    requestedMode === 'live' && !isLiveSyncEnabled ? 'package' : requestedMode;
   const locale = String(context.globals?.locale || 'en');
-  const queryParams =
-    typeof window !== 'undefined'
-      ? new URLSearchParams(window.location.search)
-      : null;
-  const queryLocoServer = queryParams?.get('locoServerUrl')?.trim() || '';
-  const queryLocoApiKey = queryParams?.get('locoApiKey')?.trim() || '';
-  const queryLocoProject = queryParams?.get('locoProject')?.trim() || '';
-  const configuredServer = String(context.globals?.locoServer || '').trim();
-  const configuredApiKey = String(context.globals?.locoApiKey || '').trim();
-  const configuredProject = String(context.globals?.locoProject || '').trim();
-  const serverUrl = queryLocoServer || configuredServer || defaultLocoServer;
-  const apiKey = queryLocoApiKey || configuredApiKey || defaultLocoApiKey || undefined;
-  const projectName = queryLocoProject || configuredProject || defaultLocoProject || undefined;
-  const [resolvedApiKey, setResolvedApiKey] = useState<string | undefined>(() => {
-    if (typeof window === 'undefined') return apiKey;
-    const cached = window.sessionStorage.getItem(LOCO_RESOLVED_API_KEY_CACHE_KEY);
-    return cached || apiKey;
-  });
-  const activeApiKey = resolvedApiKey || apiKey;
+  const serverUrl = defaultLocoServer;
+  const activeApiKey = locoApiKey;
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (apiKey) {
-      setResolvedApiKey(apiKey);
-      window.sessionStorage.setItem(LOCO_RESOLVED_API_KEY_CACHE_KEY, apiKey);
-      return;
+    if (requestedMode === 'live' && !isLiveSyncEnabled) {
+      console.warn(
+        '[loco-live] Live sync is off: set VITE_LOCO_API_KEY (and optionally VITE_LOCO_SERVER_URL) in .env.local.'
+      );
     }
-
-    const cached = window.sessionStorage.getItem(LOCO_RESOLVED_API_KEY_CACHE_KEY);
-    setResolvedApiKey(cached || undefined);
-  }, [apiKey, serverUrl]);
-
-  useEffect(() => {
-    if (locoMode !== 'live' || isLocoDisabled || typeof window === 'undefined') return;
-
-    let cancelled = false;
-    void resolveLiveApiKey(serverUrl, apiKey, projectName)
-      .then((key) => {
-        if (cancelled || !key) return;
-        setResolvedApiKey(key);
-        window.sessionStorage.setItem(LOCO_RESOLVED_API_KEY_CACHE_KEY, key);
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [locoMode, serverUrl, apiKey, projectName]);
+  }, [requestedMode]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -815,7 +692,10 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     const keys = collectLocoKeysFromElement(root);
     if (keys.length === 0) return;
 
-    const signature = `${context.id}:${serverUrl}:${keys.map((entry) => entry.key).join('|')}`;
+    const signature = `${context.id}:${serverUrl}:${keys
+      .map((entry) => entry.key)
+      .sort()
+      .join('|')}`;
     if (postedLiveSyncSignatures.has(signature)) return;
     postedLiveSyncSignatures.add(signature);
 
@@ -894,8 +774,6 @@ const preview: Preview = {
     user: 'anonymous',
     device: 'public',
     locoMode: 'package',
-    locoServer: defaultLocoServer,
-    locoApiKey: defaultLocoApiKey,
   },
   // The bar stays one glyph wide but still shows the current value: `title` is
   // the emoji (or a per-item icon) and the wording moves to the dropdown's
@@ -955,12 +833,14 @@ const preview: Preview = {
     locoMode: {
       name: 'Loco i18n',
       description:
-        'Use Loco i18n package for preview, Loco Sync Text to post discovered phrases to Loco pending list, or disable Loco.',
+        'Use the Loco i18n package for preview, disable Loco, or (when VITE_LOCO_API_KEY is set) sync discovered phrases to the Loco pending list.',
       toolbar: {
         icon: 'sync',
         items: [
           { value: 'package', title: '📦', right: 'Loco i18n' },
-          { value: 'live', title: '🔄', right: 'Loco Sync Text' },
+          ...(isLiveSyncEnabled
+            ? [{ value: 'live', title: '🔄', right: 'Loco Sync Text' }]
+            : []),
           { value: 'disable', title: '🚫', right: 'Disable' },
         ],
       },

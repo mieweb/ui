@@ -26,13 +26,20 @@ function normalizeText(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+// Text that may carry PII (emails, URLs, IDs/MRNs, phone/SSN, dates) is never synced.
+const SENSITIVE_PATTERNS = [
+  /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
+  /(https?:\/\/|www\.)/i,
+  /\d{4,}/,
+  /\d{3}[\s.-]\d{2,}/,
+  /\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/,
+];
+
 function isUsefulPhrase(value: string): boolean {
   if (!value) return false;
   if (value.length < 2 || value.length > 180) return false;
   if (/^[\d\s.,:%+-/()]+$/.test(value)) return false;
-  if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(value)) return false;
-  if (/(https?:\/\/|www\.)/i.test(value)) return false;
-  return true;
+  return !SENSITIVE_PATTERNS.some((pattern) => pattern.test(value));
 }
 
 export function collectLocoKeysFromElement(root: HTMLElement): LocoKeyEntry[] {
