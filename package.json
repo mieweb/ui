@@ -276,6 +276,7 @@
     "test:watch": "vitest",
     "prestorybook": "npm run build:esheet && npm run build:datavis",
     "storybook": "node scripts/build-ozwell-docs.mjs && storybook dev -p 6006",
+    "loco:pack:sync": "node --env-file-if-exists=.env.local scripts/sync-loco-pack.mjs",
     "build-storybook": "npm run build:esheet && npm run build:datavis && node scripts/build-ozwell-docs.mjs && storybook build && npm run catalog:manifest",
     "test:coverage": "vitest run --coverage",
     "playwright:install": "playwright install --with-deps",
