@@ -45,6 +45,8 @@ const meta: Meta<typeof Q> = {
 
 **A generated form for writing an AI agent's configuration, with a YAML/JSON view beside it.** \`Q\` wraps \`@mieweb/q\`'s \`AgentConfigGenerator\`: it renders a questionnaire from a \`schema\` (\`mieforms-v1.0\` sections and fields), keeps a \`QConfig\` object in sync, and — when \`showEditor\` (default \`true\`) — shows the same config as editable YAML/JSON. Hosts own persistence through \`initialConfig\`, \`onConfigChange(config)\`, \`onSubmit(yamlString)\` and \`onDownload(content, mode)\`. \`className\` / \`style\` size the wrapper. The entry also re-exports Q's building blocks (\`FormBuilder\`, \`ConfigEditor\`, \`ToolBuilder\`, \`Header\`, \`configToYaml\`, \`yamlToConfig\`, \`validateConfig\`, \`deriveDefaultConfig\`, \`TIMEZONES\`, \`GENERIC_TOOLS\`…) and two presets: \`qAgentSchema\` / \`qLandingPageAgentConfig\` (name, instructions, temperature) and \`qTwilioAgentSchema\` / \`createQTwilioAgentConfig()\` (phone, Twilio credentials, welcome, system prompt).
 
+**Why "Q"?** The name is a nod to Q from the James Bond films — the quartermaster who equips agents before each mission. This component equips AI agents with their configuration. It is not affiliated with or endorsed by the James Bond franchise or its rights holders.
+
 Ships from the optional **\`@mieweb/ui/q\`** entry: install the peer \`@mieweb/q\` (\`1.0.0\`) and import \`@mieweb/q/style.css\` beside \`@mieweb/ui/styles.css\`.
 
 ### Use it when
