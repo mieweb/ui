@@ -25,6 +25,7 @@ Before writing any UI code, check [ui.mieweb.org](https://ui.mieweb.org) (Storyb
 | **Layout**       | `Card` (+ CardHeader/Content), `Accordion`, `AppHeader`, `SiteHeader`, `SiteFooter`, `PageHeader`, `ThemeProvider`, `VisuallyHidden`                                                   |
 | **Overlays**     | `Modal` (+ ModalHeader/Body/Footer), `Sheet`, `Tooltip`, `DockablePanel`, `Sidebar`                                                                                                    |
 | **Modules**      | Media (`AudioPlayer`, `AudioRecorder`, `DocumentScanner`), Editors (`RichEditor`, `Markdown`), Chat (`MessageBubble`, `AIChat`, `SuperChat`), Files (`DropzoneOverlay`, `FileManager`) |
+| **Templates**    | Public marketing pages from data: `LandingPage` + presets, and sections (`HeroSection`, `FeatureGridSection`, `FaqSection`, `PricingSection`, …) from `@mieweb/ui/templates`, which is Server-Component safe |
 | **Healthcare**   | `ProblemList`, `MedicationList`, `AllergyList`, `CodeLookup`, `OrderEditor`, `Assessment`, `PatientHeader`                                                                             |
 | **Charts**       | `DataVisNitroGraph`; chart colors via `--mieweb-chart-1` through `--mieweb-chart-5` CSS variables                                                                                      |
 

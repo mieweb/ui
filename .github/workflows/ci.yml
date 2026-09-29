@@ -167,6 +167,9 @@ jobs:
         env:
           NODE_OPTIONS: '--max-old-space-size=8192'
 
+      - name: Check @mieweb/ui/templates is Server Component safe
+        run: pnpm check:templates-rsc
+
       - name: Build Storybook
         run: pnpm build-storybook
         env:

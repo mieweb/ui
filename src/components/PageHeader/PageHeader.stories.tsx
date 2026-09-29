@@ -124,6 +124,11 @@ Tab state stays in the page; the header is a pure layout wrapper.
       entry: '@mieweb/ui',
       relationships: [
         {
+          type: 'alternative to',
+          target: 'conversion-herosection',
+          why: 'PageHeader titles a screen inside an app with actions and tabs; HeroSection opens a public marketing page with an h1 and CTAs.',
+        },
+        {
           type: 'composes with',
           target: 'navigation-tabs',
           why: 'A TabsList in PageHeader children sits under the title as the section switcher for the page.',

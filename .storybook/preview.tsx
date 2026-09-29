@@ -539,6 +539,17 @@ const preview: Preview = {
             'Files',
             ['Overview', '*'],
           ],
+          'Templates',
+          [
+            'Pages',
+            ['Overview', '*'],
+            'Conversion',
+            ['Overview', '*'],
+            'Content',
+            ['Overview', '*'],
+            'Social proof',
+            ['Overview', '*'],
+          ],
           'Healthcare',
           [
             'Clinical lists',

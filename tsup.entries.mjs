@@ -14,6 +14,8 @@ export const entries = {
   // bundle for apps that never import it. See: src/motion/entry.ts
   motion: 'src/motion/entry.ts',
   q: 'src/q.ts',
+  // Landing-page sections; Server Components import from here. See src/templates.ts
+  templates: 'src/templates.ts',
   'hooks/index': 'src/hooks/index.ts',
   'utils/index': 'src/utils/index.ts',
   'tailwind-preset': 'src/tailwind-preset.ts',

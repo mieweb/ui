@@ -151,6 +151,16 @@
         "default": "./dist/globe.cjs"
       }
     },
+    "./templates": {
+      "import": {
+        "types": "./dist/templates.d.ts",
+        "default": "./dist/templates.js"
+      },
+      "require": {
+        "types": "./dist/templates.d.cts",
+        "default": "./dist/templates.cjs"
+      }
+    },
     "./datavis": {
       "import": {
         "types": "./dist/datavis.d.ts",
@@ -254,6 +264,7 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "rtl:scan": "node scripts/rtl-scan.mjs",
+    "check:templates-rsc": "node --conditions=react-server scripts/check-templates-rsc.mjs",
     "rtl:scan:update": "node scripts/rtl-scan.mjs --update",
     "condensed:scan": "node scripts/condensed-scan.mjs",
     "catalog:check": "node scripts/catalog-check.mjs",

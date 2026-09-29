@@ -97,6 +97,11 @@ Session state is the host's; the component switches between \`AuthButtons\` and 
         },
         {
           type: 'composes with',
+          target: 'pages-landingpage',
+          why: 'SiteHeader sits above a LandingPage and SiteFooter below it; together they make a complete public page.',
+        },
+        {
+          type: 'composes with',
           target: 'navigation-megamenu',
           why: 'SiteHeader accepts `menus` directly, rendering a MegaMenuBar on desktop and flattening the same config into its mobile drawer.',
         },
