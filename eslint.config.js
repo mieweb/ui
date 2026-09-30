@@ -8,7 +8,11 @@ import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 export default [
   eslint.configs.recommended,
   {
-    files: ['src/**/*.{ts,tsx}'],
+    files: [
+      'src/**/*.{ts,tsx}',
+      // DataVis NITRO stories live in the datavis submodule but are linted here.
+      'packages/datavis/stories/**/*.{ts,tsx}',
+    ],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
@@ -207,7 +211,10 @@ export default [
   },
   // Allow console logs in Storybook stories for development/testing
   {
-    files: ['src/**/*.stories.{ts,tsx}'],
+    files: [
+      'src/**/*.stories.{ts,tsx}',
+      'packages/datavis/stories/**/*.stories.{ts,tsx}',
+    ],
     rules: {
       'no-console': 'off',
     },
