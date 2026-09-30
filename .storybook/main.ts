@@ -204,7 +204,13 @@ function ychartGitInfoPlugin(): Plugin {
 const ychartDependencyNames = readDependencyNames('ychart');
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    // DataVis NITRO stories live in the datavis submodule but are catalogued
+    // here; their id/title keep the Components/Grids/DataVis NITRO hierarchy.
+    '../packages/datavis/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
   // Deprecated/retired entries are hidden from both the sidebar tree and
   // search (one filtered dataset drives both — there is no search-only mode).
   // Their docs pages stay built and reachable by direct URL; the Deprecated
