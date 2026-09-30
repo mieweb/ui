@@ -202,8 +202,6 @@ const config: StorybookConfig = {
   stories: [
     '../src/**/*.mdx',
     '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
-    // DataVis NITRO stories live in the datavis submodule but are catalogued
-    // here; their id/title keep the Components/Grids/DataVis NITRO hierarchy.
     '../packages/datavis/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
   addons: [
