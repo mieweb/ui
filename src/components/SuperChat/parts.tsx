@@ -1023,7 +1023,12 @@ export const MessageRow = React.memo(function MessageRow({
                   }}
                   onPaste={handleEditPaste}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
+                    // Plain Enter inserts a newline (edits are often
+                    // multi-line); Ctrl/Cmd+Enter is the save shortcut. Skip
+                    // while an IME is composing so confirming a candidate
+                    // never saves or cancels.
+                    if (e.nativeEvent.isComposing) return;
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                       e.preventDefault();
                       saveEdit();
                     } else if (e.key === 'Escape') {
