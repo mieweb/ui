@@ -50,6 +50,11 @@
     - get_component_stories   -> the stories (variants) of one component
     - get_component_docs      -> usage docs: what it is, examples, when to use
     - open_story              -> navigate this Storybook to a story/docs page
+
+  Every tool result carries absolute page urls (and a linkNote reminder) so
+  the assistant can hyperlink each component, story, and docs page it
+  mentions. Urls must be absolute: the widget renders inside a cross-origin
+  iframe, where relative hrefs would resolve against the widget's own host.
 -->
 <script>
   (function () {
@@ -82,6 +87,19 @@
       return docsPromise;
     }
 
+    // Absolute url of a docs/story page in this Storybook. Links handed to
+    // the assistant must be absolute: it renders inside a cross-origin
+    // iframe, so a relative href would resolve against the widget's host.
+    function pageUrl(type, id) {
+      return new URL('./?path=/' + type + '/' + id, window.location.href).href;
+    }
+
+    // Reminder attached to every tool result so the assistant links what it
+    // talks about (tool results steer it far more reliably than the tool
+    // descriptions alone).
+    var LINK_NOTE =
+      'Format every component, story, or docs page you mention as a markdown link to its url from this result.';
+
     // Group entries by title: { 'Actions/Button': { docsId, stories: [{id, name}] } }
     function componentsFrom(entries) {
       var byTitle = {};
@@ -102,7 +120,7 @@
           function: {
             name: 'list_components',
             description:
-              'List everything in this Storybook: every component and docs page grouped by section, each with its story (variant) count.',
+              'List everything in this Storybook: every component and docs page grouped by section, each with its story (variant) count and docs page url. When you mention a component in your answer, render its name as a markdown link to that url.',
             parameters: { type: 'object', properties: {}, required: [] },
           },
         },
@@ -111,7 +129,7 @@
           function: {
             name: 'get_component_stories',
             description:
-              'Get the stories (variants) of one component by name, e.g. "Button" or "Actions/Button". Returns each story name and its id.',
+              'Get the stories (variants) of one component by name, e.g. "Button" or "Actions/Button". Returns each story name, its id, and its page url — link every story you mention to its url.',
             parameters: {
               type: 'object',
               properties: {
@@ -126,7 +144,7 @@
           function: {
             name: 'get_component_docs',
             description:
-              'Get usage documentation for one component by name, e.g. "Button": what it is, code examples, and guidance on when to use it versus related components. Always call this before answering "how do I use…" questions.',
+              'Get usage documentation for one component by name, e.g. "Button": what it is, code examples, and guidance on when to use it versus related components. Always call this before answering "how do I use…" questions, and link the component name in your answer to the returned docsUrl.',
             parameters: {
               type: 'object',
               properties: {
@@ -141,7 +159,7 @@
           function: {
             name: 'open_story',
             description:
-              'Navigate this Storybook to a story or docs page by id from get_component_stories (e.g. "actions-button--danger"). Warn the user first: navigation reloads the page and ends this chat conversation.',
+              'Navigate this Storybook to a story or docs page by id from get_component_stories (e.g. "actions-button--danger"). Warn the user first: navigation reloads the page and ends this chat conversation. Prefer answering with the page\'s markdown link (the url from the other tools) unless the user explicitly asks to navigate.',
             parameters: {
               type: 'object',
               properties: { id: { type: 'string', description: 'Story or docs id' } },
@@ -170,11 +188,18 @@
               var parts = title.split('/');
               var section = parts.length > 1 ? parts[0] : 'Other';
               var label = parts.slice(1).join('/') || parts[0];
-              (sections[section] = sections[section] || []).push(
-                label + ' (' + comps[title].stories.length + ' stories)'
-              );
+              var c0 = comps[title];
+              (sections[section] = sections[section] || []).push({
+                name: label,
+                stories: c0.stories.length,
+                url: c0.docsId
+                  ? pageUrl('docs', c0.docsId)
+                  : c0.stories.length
+                    ? pageUrl('story', c0.stories[0].id)
+                    : null,
+              });
             });
-            respond({ success: true, sections: sections });
+            respond({ success: true, sections: sections, linkNote: LINK_NOTE });
           } else if (name === 'get_component_stories') {
             var q = String(args.component || '').toLowerCase();
             var matches = Object.keys(comps).filter(function (title) {
@@ -196,8 +221,12 @@
                 success: true,
                 component: matches[0],
                 storyCount: c.stories.length,
-                stories: c.stories,
+                stories: c.stories.map(function (s) {
+                  return { id: s.id, name: s.name, url: pageUrl('story', s.id) };
+                }),
                 docsId: c.docsId,
+                docsUrl: c.docsId ? pageUrl('docs', c.docsId) : null,
+                linkNote: LINK_NOTE,
               });
             }
           } else if (name === 'get_component_docs') {
@@ -243,6 +272,7 @@
                     error: 'No docs for "' + args.component + '"',
                   });
                 }
+                var docsPageId = title && comps[title] ? comps[title].docsId : null;
                 respond({
                   success: true,
                   component: (storyDoc && storyDoc.component) || compName || args.component,
@@ -253,7 +283,9 @@
                   examples: jsdoc ? jsdoc.examples : [],
                   category: category || null,
                   categoryGuidance: guidance ? guidance.content : null,
-                  docsPageId: title && comps[title] ? comps[title].docsId : null,
+                  docsPageId: docsPageId,
+                  docsUrl: docsPageId ? pageUrl('docs', docsPageId) : null,
+                  linkNote: LINK_NOTE,
                 });
               })
               .catch(fail);
