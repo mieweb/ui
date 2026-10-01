@@ -126,39 +126,29 @@ function resolveLocaleTitle(code: string, explicitName?: string): string {
 
 type LocaleToolbarItem = { value: string; title: string; right: string };
 
-// Built-in preview locales (CodeLookup shards, RTL sample); Loco languages are appended.
-const sampleLocaleItems: LocaleToolbarItem[] = [
+// Flag/label overrides for well-known locales; listed first when the active source offers them.
+const pinnedLocaleItems: LocaleToolbarItem[] = [
   { value: 'en', title: '🇺🇸', right: 'English' },
-  { value: 'es', title: '🇪🇸', right: 'Español (sample)' },
-  { value: 'ar', title: '🇸🇦', right: 'العربية (RTL sample)' },
+  { value: 'es', title: '🇪🇸', right: 'Español' },
+  { value: 'ar', title: '🇸🇦', right: 'العربية (RTL)' },
 ];
 
+// Live mode lists the server's languages; package/disable list the committed pack's.
 function buildLocaleToolbarItems(
   mode: 'package' | 'live' | 'disable'
 ): LocaleToolbarItem[] {
-  const merged = new Map<string, string>();
+  const liveLanguages = mode === 'live' ? parseCachedLiveLanguages() : [];
+  const available = new Map<string, string | undefined>(
+    liveLanguages.length > 0
+      ? liveLanguages.map((lang) => [lang.code, lang.name])
+      : locoPackLanguages.map((code) => [code, locoPackLanguageNames[code]])
+  );
+  available.set(DEFAULT_LOCALE, available.get(DEFAULT_LOCALE));
 
-  for (const code of locoPackLanguages) {
-    if (!code) continue;
-    merged.set(code, locoPackLanguageNames[code] || merged.get(code) || code);
-  }
-
-  if (mode === 'live') {
-    for (const liveLang of parseCachedLiveLanguages()) {
-      if (!liveLang.code) continue;
-      merged.set(
-        liveLang.code,
-        liveLang.name ||
-          locoPackLanguageNames[liveLang.code] ||
-          merged.get(liveLang.code) ||
-          liveLang.code
-      );
-    }
-  }
-
-  const sampleCodes = new Set(sampleLocaleItems.map((item) => item.value));
-  const locoItems = Array.from(merged.entries())
-    .filter(([value]) => !sampleCodes.has(value))
+  const pinned = pinnedLocaleItems.filter((item) => available.has(item.value));
+  const pinnedCodes = new Set(pinned.map((item) => item.value));
+  const others = Array.from(available.entries())
+    .filter(([value]) => value && !pinnedCodes.has(value))
     .map(([value, name]) => ({
       value,
       title: value,
@@ -166,7 +156,7 @@ function buildLocaleToolbarItems(
     }))
     .sort((a, b) => a.right.localeCompare(b.right));
 
-  return [...sampleLocaleItems, ...locoItems];
+  return [...pinned, ...others];
 }
 
 const localeToolbarItems = buildLocaleToolbarItems(getCurrentLocoModeFromUrl());
@@ -565,8 +555,7 @@ const withCodeLookup: Decorator = (Story, context) => {
   const locale = (context.globals.locale as string) || 'en';
   const userId = (context.globals.user as string) || 'anonymous';
   const trusted = context.globals.device === 'trusted';
-  // Codify shards only exist for these locales; fall back to English for
-  // preview-only locales (e.g. the RTL Arabic sample).
+  // Codify shards only exist for these locales; fall back to English otherwise.
   const lookupLocale = ['en', 'es'].includes(locale) ? locale : 'en';
   return (
     <CodeLookupProvider

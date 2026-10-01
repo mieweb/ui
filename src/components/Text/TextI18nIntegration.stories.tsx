@@ -23,7 +23,13 @@ export default meta;
 
 type Story = StoryObj;
 
-const PackageDrivenTranslationsDemo = ({ locale }: { locale: string }) => {
+const PackageDrivenTranslationsDemo = ({
+  locale,
+  live,
+}: {
+  locale: string;
+  live: boolean;
+}) => {
   const [isLocaleChanging, setIsLocaleChanging] = useState(false);
   const previousLocale = useRef(locale);
 
@@ -36,14 +42,18 @@ const PackageDrivenTranslationsDemo = ({ locale }: { locale: string }) => {
     return () => window.clearTimeout(timer);
   }, [locale]);
 
-  const t = createLocoTranslator(locoSamplePack, locale, {
+  // Live mode: render English source and let the Loco runtime translate from the server pack.
+  const t = createLocoTranslator(locoSamplePack, live ? 'en' : locale, {
     fallbackLanguage: 'en',
   });
 
   return (
-    // Translated by createLocoTranslator; keep the DOM runtime from rewriting (and later "restoring") it.
-    <div className="min-w-[420px] space-y-3" data-notranslate="">
-      <Text size="sm" variant="muted">
+    // Package mode translates in React; keep the DOM runtime from rewriting (and later "restoring") it.
+    <div
+      className="min-w-[420px] space-y-3"
+      data-notranslate={live ? undefined : ''}
+    >
+      <Text size="sm" variant="muted" translate="no">
         Active Locale: {locale}
       </Text>
       <Text
@@ -79,6 +89,7 @@ export const PackageDrivenTranslations: Story = {
   render: (_, context) => (
     <PackageDrivenTranslationsDemo
       locale={String(context.globals.locale || 'en')}
+      live={context.globals.locoMode === 'live'}
     />
   ),
 };

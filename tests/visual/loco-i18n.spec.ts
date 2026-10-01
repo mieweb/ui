@@ -60,6 +60,40 @@ test.describe('Loco i18n toolbar', () => {
     await expect(root(page)).not.toContainText('编辑联系人');
   });
 
+  for (const { locale, badge, heading, dir } of [
+    {
+      locale: 'es',
+      badge: 'Predeterminado',
+      heading: 'Editar contacto',
+      dir: 'ltr',
+    },
+    {
+      locale: 'ar',
+      badge: 'افتراضي',
+      heading: 'تعديل جهة الاتصال',
+      dir: 'rtl',
+    },
+  ]) {
+    test(`package mode translates the ${locale} sample locale`, async ({
+      page,
+    }) => {
+      await gotoStory(
+        page,
+        'data-display-badge--all-variants',
+        `locale:${locale};locoMode:package`
+      );
+      await expect(root(page)).toContainText(badge);
+      await expect(page.locator('html')).toHaveAttribute('dir', dir);
+
+      await gotoStory(
+        page,
+        'showcase-appheader-loco-i18n--package-translated-header',
+        `locale:${locale};locoMode:package`
+      );
+      await expect(root(page)).toContainText(heading);
+    });
+  }
+
   test('disable mode never loads the runtime', async ({ page }) => {
     await gotoStory(
       page,
