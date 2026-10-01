@@ -99,7 +99,11 @@ const PackageTranslatedHeaderDemo = ({ locale }: { locale: string }) => {
   });
 
   return (
-    <div className="min-h-[180px] bg-[var(--mieweb-background)] p-0">
+    // Translated by createLocoTranslator; keep the DOM runtime from rewriting (and later "restoring") it.
+    <div
+      className="min-h-[180px] bg-[var(--mieweb-background)] p-0"
+      data-notranslate=""
+    >
       <AppHeader className="w-full">
         <AppHeaderSection align="left">
           <AppHeaderBrand>{t('AddContactModal')}</AppHeaderBrand>
@@ -125,10 +129,13 @@ const PackageTranslatedHeaderDemo = ({ locale }: { locale: string }) => {
             <button className="bg-primary-800 hover:bg-primary-900 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors">
               {t('Add Contact')}
             </button>
-            <AppHeaderUserMenu
-              name="Dr. Jamie Rivera"
-              email="jamie.rivera@bluehive.com"
-            />
+            {/* Personal data is never translated or synced to Loco. */}
+            <span translate="no" className="contents">
+              <AppHeaderUserMenu
+                name="Dr. Jamie Rivera"
+                email="jamie.rivera@bluehive.com"
+              />
+            </span>
           </AppHeaderActions>
         </AppHeaderSection>
       </AppHeader>

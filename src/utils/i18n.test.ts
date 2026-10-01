@@ -18,6 +18,7 @@ const samplePack: LocoI18nPackage = {
         ui: {
           actions: {
             save: 'Save',
+            cancel: 'Cancel',
           },
           title: 'Settings',
         },
@@ -50,11 +51,14 @@ describe('loco i18n utils', () => {
 
   it('falls back to fallback language when missing', () => {
     expect(
+      resolveLocoTranslation(samplePack, 'fr', 'ui.actions.cancel', 'en')
+    ).toBe('Cancel');
+    expect(
+      resolveLocoTranslation(samplePack, 'fr', 'ui.actions.cancel')
+    ).toBeUndefined();
+    expect(
       resolveLocoTranslation(samplePack, 'fr', 'ui.missing', 'en')
     ).toBeUndefined();
-    expect(resolveLocoTranslation(samplePack, 'fr', 'ui.title', 'en')).toBe(
-      'Parametres'
-    );
   });
 
   it('creates translator with key fallback behavior', () => {
@@ -111,5 +115,24 @@ describe('loco i18n utils', () => {
     const t = createLocoTranslator(locoPack, 'zh-Hans');
     expect(t('Save')).toBe('保存');
     expect(t('Untranslated phrase')).toBe('Untranslated phrase');
+  });
+
+  it('prefers the contextless master over contextual variants', () => {
+    const locoPack: LocoI18nPackage = {
+      languages: ['zh-Hans'],
+      translations: {
+        'zh-Hans': [
+          { key: 'Open', context: 'Menu', value: '打开菜单' },
+          { key: 'Open', context: '', value: '打开' },
+          { key: 'Close', context: 'Dialog', value: '关闭对话框' },
+          { key: 'Close', context: 'Tab', value: '关闭标签' },
+        ],
+      },
+    };
+
+    expect(getLocoDictionary(locoPack, 'zh-Hans')).toEqual({
+      Open: '打开',
+      Close: '关闭对话框',
+    });
   });
 });

@@ -41,7 +41,8 @@ const PackageDrivenTranslationsDemo = ({ locale }: { locale: string }) => {
   });
 
   return (
-    <div className="min-w-[420px] space-y-3">
+    // Translated by createLocoTranslator; keep the DOM runtime from rewriting (and later "restoring") it.
+    <div className="min-w-[420px] space-y-3" data-notranslate="">
       <Text size="sm" variant="muted">
         Active Locale: {locale}
       </Text>

@@ -32,10 +32,18 @@ describe('collectLocoKeysFromElement', () => {
     ).toEqual(['Save']);
   });
 
-  it('honors data-loco-ignore regions', () => {
+  it('skips text nested anywhere under code, pre or svg', () => {
     expect(
       collect(
-        '<p>Patient</p><div data-loco-ignore="true"><p>Jane Doe</p></div>'
+        '<pre><code><span>const x</span></code></pre><svg><text>Chart label</text></svg><p>Save</p>'
+      )
+    ).toEqual(['Save']);
+  });
+
+  it('honors data-loco-ignore and translate="no" regions', () => {
+    expect(
+      collect(
+        '<p>Patient</p><div data-loco-ignore="true"><p>Jane Doe</p></div><span translate="no">Dr. Jamie Rivera</span>'
       )
     ).toEqual(['Patient']);
   });

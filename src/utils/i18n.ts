@@ -73,7 +73,10 @@ export function getLocoDictionary(
         typeof entry.key === 'string' &&
         typeof entry.value === 'string'
       ) {
-        dictionary[entry.key] = entry.value;
+        // A contextless master wins; otherwise keep the first contextual entry.
+        if (!entry.context || !(entry.key in dictionary)) {
+          dictionary[entry.key] = entry.value;
+        }
       }
     }
     return dictionary;

@@ -9,18 +9,11 @@ type LocoSyncResponse = {
   error?: string;
 };
 
-const SKIP_TAGS = new Set([
-  'SCRIPT',
-  'STYLE',
-  'NOSCRIPT',
-  'CODE',
-  'PRE',
-  'SVG',
-  'PATH',
-  'KBD',
-  'META',
-  'LINK',
-]);
+// Text anywhere inside these (e.g. <pre><code><span>, <svg><text>) is never UI copy.
+const SKIP_SELECTOR = 'script, style, noscript, code, pre, svg, kbd';
+
+// translate="no" excludes text from sync; data-notranslate alone only stops runtime DOM rewrites.
+const IGNORE_SELECTOR = `${SKIP_SELECTOR}, [data-loco-ignore="true"], [translate="no"], [data-loco-translated]`;
 
 function normalizeText(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
@@ -61,14 +54,8 @@ export function collectLocoKeysFromElement(root: HTMLElement): LocoKeyEntry[] {
   while (node) {
     const textNode = node as Text;
     const parent = textNode.parentElement;
-    if (parent) {
-      const tagName = parent.tagName;
-      if (
-        !SKIP_TAGS.has(tagName) &&
-        !parent.closest('[data-loco-ignore="true"]')
-      ) {
-        addPhrase(textNode.nodeValue || '');
-      }
+    if (parent && !parent.closest(IGNORE_SELECTOR)) {
+      addPhrase(textNode.nodeValue || '');
     }
     node = walker.nextNode();
   }
@@ -77,7 +64,7 @@ export function collectLocoKeysFromElement(root: HTMLElement): LocoKeyEntry[] {
     '[aria-label], [title], [placeholder]'
   );
   for (const el of attrNodes) {
-    if (el.closest('[data-loco-ignore="true"]')) continue;
+    if (el.closest(IGNORE_SELECTOR)) continue;
     const ariaLabel = el.getAttribute('aria-label');
     const title = el.getAttribute('title');
     const placeholder = (el as HTMLInputElement).placeholder;

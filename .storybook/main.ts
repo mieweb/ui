@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 
 import type { StorybookConfig } from '@storybook/react-vite';
-import type { Plugin } from 'vite';
+import { loadEnv, type Plugin } from 'vite';
 import remarkGfm from 'remark-gfm';
 
 const storybookDir = path.dirname(fileURLToPath(import.meta.url));
@@ -198,6 +198,92 @@ function ychartGitInfoPlugin(): Plugin {
 // YChart dependency names for optimizeDeps
 const ychartDependencyNames = readDependencyNames('ychart');
 
+// --- Loco live sync: dev-server-only proxy so the API key never reaches the browser bundle ---
+const locoEnv = loadEnv('development', workspaceRoot, ['LOCO_', 'VITE_LOCO_']);
+const locoServerUrl = (
+  locoEnv.LOCO_SERVER_URL ||
+  locoEnv.VITE_LOCO_SERVER_URL ||
+  'https://loco.os.mieweb.org'
+).replace(/\/$/, '');
+const locoApiKey = locoEnv.LOCO_API_KEY || locoEnv.VITE_LOCO_API_KEY || '';
+
+function locoDevProxyPlugin(): Plugin {
+  const upstream = (pathAndQuery: string, init: RequestInit = {}) =>
+    fetch(`${locoServerUrl}${pathAndQuery}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': locoApiKey,
+      },
+    });
+
+  // The runtime only loads http(s) file packs, so assemble one from live translations.
+  async function buildLivePack() {
+    const langRes = await upstream('/api/languages');
+    if (!langRes.ok) throw new Error(`languages ${langRes.status}`);
+    const languages = (await langRes.json()) as Array<{
+      code: string;
+      name?: string;
+      dir?: string;
+    }>;
+    const translations: Record<string, unknown> = {};
+    await Promise.all(
+      languages.map(async ({ code }) => {
+        const res = await upstream(
+          `/api/translations?lang=${encodeURIComponent(code)}`,
+        );
+        if (res.ok) translations[code] = await res.json();
+      }),
+    );
+    return {
+      languages: Object.keys(translations).sort(),
+      languageNames: Object.fromEntries(
+        languages.map((l) => [l.code, l.name || l.code]),
+      ),
+      languageDirections: Object.fromEntries(
+        languages.map((l) => [l.code, l.dir === 'rtl' ? 'rtl' : 'ltr']),
+      ),
+      translations,
+      timestamp: Date.now(),
+    };
+  }
+
+  return {
+    name: 'loco-dev-proxy',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__loco', async (req, res) => {
+        const send = (status: number, body: unknown) => {
+          res.statusCode = status;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(typeof body === 'string' ? body : JSON.stringify(body));
+        };
+        try {
+          if (req.method === 'GET' && req.url === '/pack.json') {
+            return send(200, await buildLivePack());
+          }
+          if (req.method === 'GET' && req.url === '/api/languages') {
+            const upstreamRes = await upstream('/api/languages');
+            return send(upstreamRes.status, await upstreamRes.text());
+          }
+          if (req.method === 'POST' && req.url === '/api/textnodes') {
+            const chunks: Buffer[] = [];
+            for await (const chunk of req) chunks.push(chunk as Buffer);
+            const upstreamRes = await upstream('/api/textnodes', {
+              method: 'POST',
+              body: Buffer.concat(chunks).toString('utf8'),
+            });
+            return send(upstreamRes.status, await upstreamRes.text());
+          }
+          return send(404, { error: 'Not found' });
+        } catch (error) {
+          return send(502, { error: (error as Error).message });
+        }
+      });
+    },
+  };
+}
+
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   addons: [
@@ -225,7 +311,7 @@ const config: StorybookConfig = {
     // in file (package) mode: Loco.init({ file: '/i18n/i18n-translations.json' })
     { from: '../src/i18n', to: '/i18n' },
   ],
-  async viteFinal(config) {
+  async viteFinal(config, { configType }) {
     const optimizeDepNames = [
       ...datavisDependencyNames,
       ...datavisCjsInteropDependencies,
@@ -260,9 +346,13 @@ const config: StorybookConfig = {
     config.plugins ??= [];
     (config.plugins as Plugin[]).push(ychartGitInfoPlugin());
 
+    const locoLiveSync = configType === 'DEVELOPMENT' && Boolean(locoApiKey);
+    if (locoLiveSync) (config.plugins as Plugin[]).push(locoDevProxyPlugin());
+
     // Define __YCHART_VERSION__ global for ychart
     config.define = {
       ...config.define,
+      __LOCO_LIVE_SYNC__: JSON.stringify(locoLiveSync),
       __YCHART_VERSION__: JSON.stringify(
         (() => {
           try {
