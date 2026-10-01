@@ -105,6 +105,13 @@ test.describe('Loco i18n toolbar', () => {
     expect(await page.evaluate(() => 'Loco' in window)).toBe(false);
   });
 
+  test('Loco is disabled by default', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--all-variants', 'locale:zh-Hans');
+    await page.waitForTimeout(1000);
+    await expect(root(page)).toContainText('Default');
+    expect(await page.evaluate(() => 'Loco' in window)).toBe(false);
+  });
+
   test('live mode falls back to package mode without a dev-server key', async ({
     page,
   }) => {

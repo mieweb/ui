@@ -64,7 +64,7 @@ type LocoLanguageInfo = {
 };
 
 function getCurrentLocoModeFromUrl(): 'package' | 'live' | 'disable' {
-  if (typeof window === 'undefined') return 'package';
+  if (typeof window === 'undefined') return 'disable';
   try {
     const params = new URLSearchParams(window.location.search);
     const globalsParam = params.get('globals') || '';
@@ -72,14 +72,14 @@ function getCurrentLocoModeFromUrl(): 'package' | 'live' | 'disable' {
     for (const pair of entries) {
       const [key, value] = pair.split(':');
       if (key === 'locoMode') {
-        if (value === 'live' || value === 'disable') return value;
-        return 'package';
+        if (value === 'live' || value === 'package') return value;
+        return 'disable';
       }
     }
   } catch {
     // Ignore parse errors.
   }
-  return 'package';
+  return 'disable';
 }
 
 function parseCachedLiveLanguages(): LocoLanguageInfo[] {
@@ -570,7 +570,7 @@ const withCodeLookup: Decorator = (Story, context) => {
 };
 
 const withLocoLiveSync: Decorator = (Story, context) => {
-  const requestedMode = String(context.globals?.locoMode || 'package');
+  const requestedMode = String(context.globals?.locoMode || 'disable');
   const locoMode =
     requestedMode === 'live' && !isLiveSyncEnabled ? 'package' : requestedMode;
   const locale = String(context.globals?.locale || 'en');
@@ -724,7 +724,8 @@ const preview: Preview = {
     direction: 'auto',
     user: 'anonymous',
     device: 'public',
-    locoMode: 'package',
+    // Loco is opt-in: stories render untouched until a mode is picked from the toolbar.
+    locoMode: 'disable',
   },
   // The bar stays one glyph wide but still shows the current value: `title` is
   // the emoji (or a per-item icon) and the wording moves to the dropdown's
@@ -788,11 +789,11 @@ const preview: Preview = {
       toolbar: {
         icon: 'sync',
         items: [
+          { value: 'disable', title: '🚫', right: 'Disable' },
           { value: 'package', title: '📦', right: 'Loco i18n' },
           ...(isLiveSyncEnabled
             ? [{ value: 'live', title: '🔄', right: 'Loco Sync Text' }]
             : []),
-          { value: 'disable', title: '🚫', right: 'Disable' },
         ],
       },
     },
