@@ -312,6 +312,16 @@ function resolveGlobalDirection(
   return isRtlLocale((globals?.locale as string) || 'en') ? 'rtl' : 'ltr';
 }
 
+// Apply text direction (RTL preview) and language at the document level so CSS logical
+// properties, `rtl:` variants, screen readers and text shaping follow the toolbar.
+function applyDocumentLocale(globals: Record<string, unknown>) {
+  document.documentElement.setAttribute('dir', resolveGlobalDirection(globals));
+  document.documentElement.setAttribute(
+    'lang',
+    (globals?.locale as string) || 'en'
+  );
+}
+
 /*
  * Global theme listener — ensures data-theme and brand styles are applied
  * even on docs-only MDX pages (like Introduction) where no story decorator runs.
@@ -338,15 +348,7 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
     document.body.classList.remove('condensed');
   }
 
-  // Apply text direction (RTL preview) at the document level so CSS logical
-  // properties and `rtl:` variants respond everywhere, including docs pages.
-  document.documentElement.setAttribute('dir', resolveGlobalDirection(globals));
-  // Keep the document language in sync with the locale global so screen
-  // readers and locale-sensitive text shaping reflect the selected locale.
-  document.documentElement.setAttribute(
-    'lang',
-    (globals?.locale as string) || 'en'
-  );
+  applyDocumentLocale(globals);
 
   document.body.style.backgroundColor = semanticColors.background;
   document.body.style.color = semanticColors.foreground;
@@ -727,7 +729,10 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     // Disabled: undo any runtime translations and do nothing else.
     if (locoMode === 'disable' || isLocoDisabled) {
       const runtime = (window as any).Loco as LocoRuntime | undefined;
-      if (runtime) void queueLocoLocale(runtime, null);
+      if (runtime) {
+        // The runtime rewrites <html lang/dir> on apply/restore; the toolbar owns them.
+        void queueLocoLocale(runtime, null).then(() => applyDocumentLocale(context.globals));
+      }
       return;
     }
 
@@ -746,6 +751,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
       if (!runtime || cancelled) return;
 
       await queueLocoLocale(runtime, shouldRestore ? null : locale);
+      if (!cancelled) applyDocumentLocale(context.globals);
     })().catch((error) => {
       console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
     });
