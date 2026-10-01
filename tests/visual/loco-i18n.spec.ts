@@ -30,6 +30,26 @@ async function setGlobals(page: Page, globals: Record<string, string>) {
 const root = (page: Page) => page.locator('#storybook-root');
 
 test.describe('Loco i18n toolbar', () => {
+  test('visual: translated package state and restored English', async ({
+    page,
+  }) => {
+    await gotoStory(
+      page,
+      'showcase-appheader-loco-i18n--package-translated-header',
+      'locale:es;locoMode:package'
+    );
+    await expect(root(page)).toContainText('Editar contacto');
+    await expect(page).toHaveScreenshot('loco-appheader-es.png', {
+      animations: 'disabled',
+    });
+
+    await setGlobals(page, { locale: 'en' });
+    await expect(root(page)).toContainText('Edit Contact');
+    await page.waitForTimeout(400); // locale-change fade is 260ms
+    await expect(page).toHaveScreenshot('loco-appheader-en-restored.png', {
+      animations: 'disabled',
+    });
+  });
   test('package mode translates from the committed pack and restores English', async ({
     page,
   }) => {

@@ -23,7 +23,9 @@ function parseArgs(argv) {
   const options = {};
   for (const raw of argv) {
     if (!raw.startsWith('--')) continue;
-    const [key, value] = raw.slice(2).split('=');
+    const separator = raw.indexOf('=');
+    const key = separator === -1 ? raw.slice(2) : raw.slice(2, separator);
+    const value = separator === -1 ? undefined : raw.slice(separator + 1);
     if (!key) continue;
     options[key] = value ?? 'true';
   }

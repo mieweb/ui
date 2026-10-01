@@ -232,7 +232,8 @@ function locoDevProxyPlugin(): Plugin {
         const res = await upstream(
           `/api/translations?lang=${encodeURIComponent(code)}`,
         );
-        if (res.ok) translations[code] = await res.json();
+        if (!res.ok) throw new Error(`translations (${code}) ${res.status}`);
+        translations[code] = await res.json();
       }),
     );
     return {

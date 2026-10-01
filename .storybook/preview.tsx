@@ -26,7 +26,7 @@ import { CodeLookup } from '../src/components/CodeLookup';
 import { CodeLookupProvider } from '../src/components/CodeLookup/context';
 import { isRtlLocale } from '../src/hooks/useDirection';
 import { CatalogDocsPage } from './CatalogDocsPage';
-import { collectLocoKeysFromElement, postLocoTextnodes } from '../src/utils/loco-live';
+import { filterLocoTextnodes, postLocoTextnodes, type LocoTextnode } from '../src/utils/loco-live';
 import locoI18nPack from '../src/i18n/i18n-translations.json';
 
 const postedLiveSyncSignatures = new Set<string>();
@@ -184,7 +184,31 @@ type LocoRuntime = {
   apply?: (lang: string) => Promise<unknown> | unknown;
   restore?: () => Promise<unknown> | unknown;
   languages?: () => Promise<unknown> | unknown;
+  rescan?: () => Promise<unknown>;
+  textnodes?: () => LocoTextnode[];
 };
+
+// The runtime drops apply() calls made while one is in flight, so run locale changes
+// one at a time and skip any that a newer request has superseded.
+let locoLatestRequest = 0;
+let locoQueue: Promise<void> = Promise.resolve();
+// rescan() re-applies the last loaded translations (restore() keeps them), so only rescan before any apply.
+let locoHasApplied = false;
+
+function queueLocoLocale(runtime: LocoRuntime, locale: string | null): Promise<void> {
+  const request = ++locoLatestRequest;
+  if (locale) locoHasApplied = true;
+  locoQueue = locoQueue
+    .then(async () => {
+      if (request !== locoLatestRequest) return;
+      if (locale) await Promise.resolve(runtime.apply?.(locale));
+      else await Promise.resolve(runtime.restore?.());
+    })
+    .catch((error) => {
+      console.warn(`[loco] Unable to ${locale ? `apply "${locale}"` : 'restore English'}.`, error);
+    });
+  return locoQueue;
+}
 
 // The runtime singleton holds one pack (committed or live) — switching modes reloads the iframe.
 // Both modes use the vendored runtime in file mode: API mode would crawl document.body,
@@ -244,6 +268,8 @@ async function ensureLocoInitialized(
     if (!runtime?.init) return runtime ?? null;
 
     const file = mode === 'package' ? LOCO_PACK_URL : `${LOCO_PROXY_BASE}/pack.json`;
+    // The toolbar owns the locale; stop init() from auto-applying the runtime's remembered one.
+    window.localStorage.removeItem('loco-lang');
     await Promise.resolve(runtime.init({ file }));
     // languages() resolves once the pack is loaded — a readiness barrier before the first apply().
     if (runtime.languages) {
@@ -618,9 +644,12 @@ const withLocoLiveSync: Decorator = (Story, context) => {
       // Toolbar options are static at module load: reload once per distinct server language set.
       const languageSignature = nextCodes.join(',');
       const reloadedFor = window.sessionStorage.getItem(LOCO_LIVE_LANG_RELOAD_FLAG);
-      const toolbarCodes = new Set(localeToolbarItems.map((item) => item.value));
-      const toolbarIsStale = nextCodes.some((code) => !toolbarCodes.has(code));
-      if (toolbarIsStale && reloadedFor !== languageSignature) {
+      const toolbarSignature = localeToolbarItems
+        .map((item) => item.value)
+        .filter((code) => code !== DEFAULT_LOCALE || nextCodes.includes(DEFAULT_LOCALE))
+        .sort()
+        .join(',');
+      if (toolbarSignature !== languageSignature && reloadedFor !== languageSignature) {
         window.sessionStorage.setItem(LOCO_LIVE_LANG_RELOAD_FLAG, languageSignature);
         window.location.reload();
       }
@@ -640,27 +669,56 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     const root = document.querySelector('[data-loco-scan-root="true"]') as HTMLElement | null;
     if (!root) return;
 
-    const keys = collectLocoKeysFromElement(root);
-    if (keys.length === 0) return;
+    let cancelled = false;
+    let timer: number | undefined;
 
-    const signature = `${context.id}:${keys
-      .map((entry) => entry.key)
-      .sort()
-      .join('|')}`;
-    if (postedLiveSyncSignatures.has(signature)) return;
-    postedLiveSyncSignatures.add(signature);
+    // Reuse the runtime's own scan so posted keys/contexts match what apply() looks up.
+    const harvest = async () => {
+      const runtime = await ensureLocoInitialized('live');
+      if (!runtime?.textnodes || cancelled) return;
+      await locoQueue;
+      if (!locoHasApplied) await runtime.rescan?.();
+      if (cancelled) return;
 
-    void postLocoTextnodes({
-      serverUrl: LOCO_PROXY_BASE,
-      keys,
-      pageUrl: window.location.href,
-    }).catch((error) => {
-      postedLiveSyncSignatures.delete(signature);
-      console.warn(
-        '[loco-live-sync] Unable to post phrases to Loco. Check LOCO_SERVER_URL and LOCO_API_KEY.',
-        error,
-      );
-    });
+      const keys = filterLocoTextnodes(runtime.textnodes(), root);
+      if (keys.length === 0) return;
+
+      const signature = `${context.id}:${keys
+        .map((entry) => `${entry.key}\u0000${entry.context}`)
+        .sort()
+        .join('|')}`;
+      if (postedLiveSyncSignatures.has(signature)) return;
+      postedLiveSyncSignatures.add(signature);
+
+      await postLocoTextnodes({
+        serverUrl: LOCO_PROXY_BASE,
+        keys,
+        pageUrl: window.location.href,
+      }).catch((error) => {
+        postedLiveSyncSignatures.delete(signature);
+        console.warn(
+          '[loco-live-sync] Unable to post phrases to Loco. Check LOCO_SERVER_URL and LOCO_API_KEY.',
+          error,
+        );
+      });
+    };
+
+    // Re-harvest when the story renders more text later (async data, interactions).
+    const schedule = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        void harvest().catch((error) => console.warn('[loco-live-sync] Harvest failed.', error));
+      }, 500);
+    };
+    schedule();
+    const observer = new MutationObserver(schedule);
+    observer.observe(root, { childList: true, subtree: true, characterData: true });
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+      window.clearTimeout(timer);
+    };
   }, [locoMode, locale, context.id]);
 
   useEffect(() => {
@@ -669,9 +727,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     // Disabled: undo any runtime translations and do nothing else.
     if (locoMode === 'disable' || isLocoDisabled) {
       const runtime = (window as any).Loco as LocoRuntime | undefined;
-      if (runtime?.restore) {
-        void Promise.resolve(runtime.restore()).catch(() => undefined);
-      }
+      if (runtime) void queueLocoLocale(runtime, null);
       return;
     }
 
@@ -689,16 +745,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
       const runtime = await ensureLocoInitialized(mode);
       if (!runtime || cancelled) return;
 
-      if (shouldRestore) {
-        if (runtime.restore) {
-          await Promise.resolve(runtime.restore());
-        }
-        return;
-      }
-
-      if (runtime.apply) {
-        await Promise.resolve(runtime.apply(locale));
-      }
+      await queueLocoLocale(runtime, shouldRestore ? null : locale);
     })().catch((error) => {
       console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
     });

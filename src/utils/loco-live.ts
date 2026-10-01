@@ -15,11 +15,7 @@ const SKIP_SELECTOR = 'script, style, noscript, code, pre, svg, kbd';
 // translate="no" excludes text from sync; data-notranslate alone only stops runtime DOM rewrites.
 const IGNORE_SELECTOR = `${SKIP_SELECTOR}, [data-loco-ignore="true"], [translate="no"], [data-loco-translated]`;
 
-function normalizeText(value: string): string {
-  return value.replace(/\s+/g, ' ').trim();
-}
-
-// Text that may carry PII (emails, URLs, IDs/MRNs, phone/SSN, dates) is never synced.
+// Best-effort net only — live sync is a dev-server opt-in, so mark sensitive regions translate="no".
 const SENSITIVE_PATTERNS = [
   /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
   /(https?:\/\/|www\.)/i,
@@ -35,45 +31,39 @@ function isUsefulPhrase(value: string): boolean {
   return !SENSITIVE_PATTERNS.some((pattern) => pattern.test(value));
 }
 
-export function collectLocoKeysFromElement(root: HTMLElement): LocoKeyEntry[] {
-  const doc = root.ownerDocument;
-  const nodeFilter = doc?.defaultView?.NodeFilter;
-  if (!doc || !nodeFilter) return [];
+/** A phrase as discovered by the Loco runtime (`Loco.textnodes()`). */
+export type LocoTextnode = {
+  key: string;
+  context?: string;
+  element?: Element | null;
+};
 
-  const collected = new Map<string, LocoKeyEntry>();
-
-  const addPhrase = (raw: string) => {
-    const phrase = normalizeText(raw);
-    if (!isUsefulPhrase(phrase)) return;
-    if (collected.has(phrase)) return;
-    collected.set(phrase, { key: phrase, context: '' });
-  };
-
-  const walker = doc.createTreeWalker(root, nodeFilter.SHOW_TEXT);
-  let node = walker.nextNode();
-  while (node) {
-    const textNode = node as Text;
-    const parent = textNode.parentElement;
-    if (parent && !parent.closest(IGNORE_SELECTOR)) {
-      addPhrase(textNode.nodeValue || '');
+/**
+ * Keeps runtime-discovered phrases that sit inside `root` and outside ignored or
+ * sensitive regions. Keys/contexts are passed through unchanged so they match
+ * what `Loco.apply()` looks up (including `{{text:N}}` placeholders).
+ */
+export function filterLocoTextnodes(
+  nodes: LocoTextnode[],
+  root: Element
+): LocoKeyEntry[] {
+  const seen = new Set<string>();
+  const entries: LocoKeyEntry[] = [];
+  for (const { key, context = '', element } of nodes) {
+    if (
+      !element ||
+      !root.contains(element) ||
+      element.closest(IGNORE_SELECTOR)
+    ) {
+      continue;
     }
-    node = walker.nextNode();
+    if (!isUsefulPhrase(key)) continue;
+    const id = `${key}\0${context}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    entries.push({ key, context });
   }
-
-  const attrNodes = root.querySelectorAll<HTMLElement>(
-    '[aria-label], [title], [placeholder]'
-  );
-  for (const el of attrNodes) {
-    if (el.closest(IGNORE_SELECTOR)) continue;
-    const ariaLabel = el.getAttribute('aria-label');
-    const title = el.getAttribute('title');
-    const placeholder = (el as HTMLInputElement).placeholder;
-    if (ariaLabel) addPhrase(ariaLabel);
-    if (title) addPhrase(title);
-    if (placeholder) addPhrase(placeholder);
-  }
-
-  return Array.from(collected.values());
+  return entries;
 }
 
 export async function postLocoTextnodes(params: {
