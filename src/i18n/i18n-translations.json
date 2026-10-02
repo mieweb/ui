@@ -1,0 +1,1558 @@
+{
+  "languages": [
+    "ar",
+    "es",
+    "zh-Hans"
+  ],
+  "languageNames": {
+    "ar": "العربية",
+    "es": "Español",
+    "zh-Hans": "Chinese (Simplified)"
+  },
+  "languageDirections": {
+    "ar": "rtl",
+    "es": "ltr",
+    "zh-Hans": "ltr"
+  },
+  "translations": {
+    "zh-Hans": [
+      {
+        "key": "\"Add Contact\"",
+        "context": "",
+        "value": "添加联系人"
+      },
+      {
+        "key": "(contact: ContactFormData) => void",
+        "context": "",
+        "value": "(contact: ContactFormData) => void"
+      },
+      {
+        "key": "(open: boolean) => void",
+        "context": "",
+        "value": "（open：布尔值）=> void"
+      },
+      {
+        "key": "A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields.",
+        "context": "",
+        "value": "用于添加或编辑医疗服务提供者/雇主联系人的模态框，包含姓名、性别、职位、学位、电子邮箱、地址以及自定义字段等字段。"
+      },
+      {
+        "key": "Add Contact",
+        "context": "",
+        "value": "添加联系人"
+      },
+      {
+        "key": "Add Field",
+        "context": "",
+        "value": "添加字段"
+      },
+      {
+        "key": "AddContactModal",
+        "context": "",
+        "value": "添加联系人弹窗"
+      },
+      {
+        "key": "Additional CSS classes",
+        "context": "",
+        "value": "附加 CSS 类"
+      },
+      {
+        "key": "Address",
+        "context": "",
+        "value": "地址"
+      },
+      {
+        "key": "Apt, Suite, etc. (optional)",
+        "context": "",
+        "value": "公寓、套房等（可选）"
+      },
+      {
+        "key": "Callback when contact is saved",
+        "context": "",
+        "value": "联系人已保存时回拨"
+      },
+      {
+        "key": "Callback when modal open state changes",
+        "context": "",
+        "value": "当模态框打开状态发生变化时回调"
+      },
+      {
+        "key": "Cancel",
+        "context": "",
+        "value": "取消"
+      },
+      {
+        "key": "City",
+        "context": "",
+        "value": "城市"
+      },
+      {
+        "key": "Click Save to see validation errors",
+        "context": "",
+        "value": "单击“保存”以查看验证错误"
+      },
+      {
+        "key": "ContactFormData",
+        "context": "",
+        "value": "联系表单数据"
+      },
+      {
+        "key": "Control",
+        "context": "",
+        "value": "控制"
+      },
+      {
+        "key": "Custom Fields",
+        "context": "",
+        "value": "自定义字段"
+      },
+      {
+        "key": "Decorators documentation",
+        "context": "",
+        "value": "装饰器文档"
+      },
+      {
+        "key": "Default",
+        "context": "",
+        "value": "默认"
+      },
+      {
+        "key": "Degree",
+        "context": "",
+        "value": "学位"
+      },
+      {
+        "key": "Description",
+        "context": "",
+        "value": "描述"
+      },
+      {
+        "key": "Edit Contact",
+        "context": "",
+        "value": "编辑联系人"
+      },
+      {
+        "key": "Edit Mode",
+        "context": "",
+        "value": "编辑模式"
+      },
+      {
+        "key": "Email",
+        "context": "",
+        "value": "电子邮件"
+      },
+      {
+        "key": "Email{{text:0}}",
+        "context": "",
+        "value": "电子邮件{{text:0}}"
+      },
+      {
+        "key": "Environment Variables documentation",
+        "context": "",
+        "value": "环境变量文档"
+      },
+      {
+        "key": "Existing contact data for editing",
+        "context": "",
+        "value": "现有联系人数据可供编辑"
+      },
+      {
+        "key": "False",
+        "context": "",
+        "value": "假"
+      },
+      {
+        "key": "Field name",
+        "context": "",
+        "value": "字段名称"
+      },
+      {
+        "key": "First Name",
+        "context": "",
+        "value": "名字"
+      },
+      {
+        "key": "First Name{{text:0}}",
+        "context": "",
+        "value": "名字{{text:0}}"
+      },
+      {
+        "key": "First name",
+        "context": "",
+        "value": "名字"
+      },
+      {
+        "key": "If the problem persists, check the browser console, or the terminal you've run Storybook from.",
+        "context": "",
+        "value": "如果问题仍然存在，请检查浏览器控制台，或你运行 Storybook 的终端。"
+      },
+      {
+        "key": "Last Name",
+        "context": "",
+        "value": "姓"
+      },
+      {
+        "key": "Last Name{{text:0}}",
+        "context": "",
+        "value": "姓氏{{text:0}}"
+      },
+      {
+        "key": "Last name",
+        "context": "",
+        "value": "姓氏"
+      },
+      {
+        "key": "Minimal Fields",
+        "context": "",
+        "value": "最少字段"
+      },
+      {
+        "key": "Misconfigured Webpack or Vite",
+        "context": "",
+        "value": "Webpack 或 Vite 配置不当"
+      },
+      {
+        "key": "Missing Context/Providers",
+        "context": "",
+        "value": "缺少上下文/提供方"
+      },
+      {
+        "key": "Missing Environment Variables",
+        "context": "",
+        "value": "缺少环境变量"
+      },
+      {
+        "key": "Mobile",
+        "context": "",
+        "value": "移动端"
+      },
+      {
+        "key": "Modal title",
+        "context": "",
+        "value": "模态标题"
+      },
+      {
+        "key": "Name",
+        "context": "",
+        "value": "姓名"
+      },
+      {
+        "key": "No Preview",
+        "context": "",
+        "value": "无预览"
+      },
+      {
+        "key": "No custom fields added. Click \"Add Field\" to add custom information.",
+        "context": "",
+        "value": "未添加任何自定义字段。点击“添加字段”以添加自定义信息。"
+      },
+      {
+        "key": "Phone",
+        "context": "",
+        "value": "电话"
+      },
+      {
+        "key": "Please check the Storybook config.",
+        "context": "",
+        "value": "请检查 Storybook 配置。"
+      },
+      {
+        "key": "Position Title",
+        "context": "",
+        "value": "职位名称"
+      },
+      {
+        "key": "Provider Contact",
+        "context": "",
+        "value": "提供者联系方式"
+      },
+      {
+        "key": "Save Contact",
+        "context": "",
+        "value": "保存联系人"
+      },
+      {
+        "key": "Saving State",
+        "context": "",
+        "value": "保存状态"
+      },
+      {
+        "key": "Saving...",
+        "context": "",
+        "value": "正在保存..."
+      },
+      {
+        "key": "Select...",
+        "context": "",
+        "value": "选择..."
+      },
+      {
+        "key": "Set object",
+        "context": "",
+        "value": "设置对象"
+      },
+      {
+        "key": "Set string",
+        "context": "",
+        "value": "设置字符串"
+      },
+      {
+        "key": "Sex",
+        "context": "",
+        "value": "性别"
+      },
+      {
+        "key": "Show code",
+        "context": "",
+        "value": "显示代码"
+      },
+      {
+        "key": "Sorry, but you either have no stories or none are selected somehow.",
+        "context": "",
+        "value": "抱歉，但你要么没有任何故事，要么不知为何没有选中任何故事。"
+      },
+      {
+        "key": "State",
+        "context": "",
+        "value": "州"
+      },
+      {
+        "key": "Stories",
+        "context": "",
+        "value": "故事"
+      },
+      {
+        "key": "Street Address",
+        "context": "",
+        "value": "街道地址"
+      },
+      {
+        "key": "The component failed to render properly, likely due to a configuration issue in Storybook. Here are some common causes and how you can address them:",
+        "context": "",
+        "value": "该组件未能正确渲染，可能是由于 Storybook 中的配置问题。以下是一些常见原因以及你可以如何解决它们："
+      },
+      {
+        "key": "This is a short description",
+        "context": "",
+        "value": "这是一个简短的描述"
+      },
+      {
+        "key": "True",
+        "context": "",
+        "value": "真"
+      },
+      {
+        "key": "Try reloading the page.",
+        "context": "",
+        "value": "尝试重新加载页面。"
+      },
+      {
+        "key": "Value",
+        "context": "",
+        "value": "值"
+      },
+      {
+        "key": "View source on GitHub ↗",
+        "context": "",
+        "value": "在 GitHub 上查看源代码 ↗"
+      },
+      {
+        "key": "Vite",
+        "context": "",
+        "value": "Vite"
+      },
+      {
+        "key": "Webpack",
+        "context": "",
+        "value": "Webpack"
+      },
+      {
+        "key": "Whether save is in progress",
+        "context": "",
+        "value": "保存是否正在进行中"
+      },
+      {
+        "key": "Whether the modal is open",
+        "context": "",
+        "value": "无论模态框是否打开"
+      },
+      {
+        "key": "Whether to show address fields",
+        "context": "",
+        "value": "是否显示地址字段"
+      },
+      {
+        "key": "Whether to show custom fields section",
+        "context": "",
+        "value": "是否显示自定义字段部分"
+      },
+      {
+        "key": "Whether to show phone field",
+        "context": "",
+        "value": "是否显示电话字段"
+      },
+      {
+        "key": "With Phone Only",
+        "context": "",
+        "value": "仅限手机"
+      },
+      {
+        "key": "With Validation Errors",
+        "context": "",
+        "value": "含验证错误"
+      },
+      {
+        "key": "ZIP",
+        "context": "",
+        "value": "邮政编码"
+      },
+      {
+        "key": "boolean",
+        "context": "",
+        "value": "布尔值"
+      },
+      {
+        "key": "className",
+        "context": "",
+        "value": "className"
+      },
+      {
+        "key": "contact",
+        "context": "",
+        "value": "联系"
+      },
+      {
+        "key": "defaultValue",
+        "context": "",
+        "value": "defaultValue"
+      },
+      {
+        "key": "e.g., MD, RN, PA",
+        "context": "",
+        "value": "例如：MD、RN、PA"
+      },
+      {
+        "key": "e.g., Office Manager",
+        "context": "",
+        "value": "例如，办公室经理"
+      },
+      {
+        "key": "email@example.com",
+        "context": "",
+        "value": "email@example.com"
+      },
+      {
+        "key": "false",
+        "context": "",
+        "value": "假"
+      },
+      {
+        "key": "isSaving",
+        "context": "",
+        "value": "正在保存"
+      },
+      {
+        "key": "null",
+        "context": "",
+        "value": "null"
+      },
+      {
+        "key": "onOpenChange",
+        "context": "",
+        "value": "onOpenChange"
+      },
+      {
+        "key": "onSave",
+        "context": "",
+        "value": "保存时"
+      },
+      {
+        "key": "open",
+        "context": "",
+        "value": "打开"
+      },
+      {
+        "key": "propertyName",
+        "context": "",
+        "value": "propertyName"
+      },
+      {
+        "key": "showAddress",
+        "context": "",
+        "value": "显示地址"
+      },
+      {
+        "key": "showCustomFields",
+        "context": "",
+        "value": "showCustomFields"
+      },
+      {
+        "key": "showPhone",
+        "context": "",
+        "value": "显示电话"
+      },
+      {
+        "key": "string",
+        "context": "",
+        "value": "字符串"
+      },
+      {
+        "key": "summary",
+        "context": "",
+        "value": "摘要"
+      },
+      {
+        "key": "title",
+        "context": "",
+        "value": "标题"
+      },
+      {
+        "key": "true",
+        "context": "",
+        "value": "true"
+      },
+      {
+        "key": "{{text:0}}: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters. You can find step-by-step guides for configuring{{text:1}}or{{text:2}}with Storybook.",
+        "context": "",
+        "value": "{{text:0}}: 验证 Storybook 已获取加载器、插件以及其他相关参数所需的全部设置。你可以找到关于使用 Storybook 配置 {{text:1}} 或 {{text:2}} 的分步指南。"
+      },
+      {
+        "key": "{{text:0}}: You can use decorators to supply specific contexts or providers, which are sometimes necessary for components to render correctly. For detailed instructions on using decorators, please visit the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: 您可以使用装饰器来提供特定的上下文或提供程序，这在某些情况下是组件正确渲染所必需的。有关使用装饰器的详细说明，请访问{{text:1}}。"
+      },
+      {
+        "key": "{{text:0}}: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: 您的 Storybook 可能需要特定的环境变量才能按预期运行。您可以按照 {{text:1}} 中所述设置自定义环境变量。"
+      }
+    ],
+    "es": [
+      {
+        "key": "\"Add Contact\"",
+        "context": "",
+        "value": "\"Agregar contacto\""
+      },
+      {
+        "key": "(contact: ContactFormData) => void",
+        "context": "",
+        "value": "(contact: ContactFormData) => void"
+      },
+      {
+        "key": "(open: boolean) => void",
+        "context": "",
+        "value": "(open: boolean) => void"
+      },
+      {
+        "key": "A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields.",
+        "context": "",
+        "value": "Un modal para agregar o editar contactos de proveedores/empleadores con campos para nombre, sexo, cargo, título, correo electrónico, dirección y campos personalizados."
+      },
+      {
+        "key": "Add Contact",
+        "context": "",
+        "value": "Agregar contacto"
+      },
+      {
+        "key": "Add Field",
+        "context": "",
+        "value": "Agregar campo"
+      },
+      {
+        "key": "AddContactModal",
+        "context": "",
+        "value": "Modal de agregar contacto"
+      },
+      {
+        "key": "Additional CSS classes",
+        "context": "",
+        "value": "Clases CSS adicionales"
+      },
+      {
+        "key": "Address",
+        "context": "",
+        "value": "Dirección"
+      },
+      {
+        "key": "Apt, Suite, etc. (optional)",
+        "context": "",
+        "value": "Apto., suite, etc. (opcional)"
+      },
+      {
+        "key": "Callback when contact is saved",
+        "context": "",
+        "value": "Callback al guardar el contacto"
+      },
+      {
+        "key": "Callback when modal open state changes",
+        "context": "",
+        "value": "Callback cuando cambia el estado de apertura del modal"
+      },
+      {
+        "key": "Cancel",
+        "context": "",
+        "value": "Cancelar"
+      },
+      {
+        "key": "City",
+        "context": "",
+        "value": "Ciudad"
+      },
+      {
+        "key": "Click Save to see validation errors",
+        "context": "",
+        "value": "Haz clic en Guardar para ver los errores de validación"
+      },
+      {
+        "key": "ContactFormData",
+        "context": "",
+        "value": "ContactFormData"
+      },
+      {
+        "key": "Control",
+        "context": "",
+        "value": "Control"
+      },
+      {
+        "key": "Custom Fields",
+        "context": "",
+        "value": "Campos personalizados"
+      },
+      {
+        "key": "Decorators documentation",
+        "context": "",
+        "value": "Documentación de decoradores"
+      },
+      {
+        "key": "Default",
+        "context": "",
+        "value": "Predeterminado"
+      },
+      {
+        "key": "Degree",
+        "context": "",
+        "value": "Título"
+      },
+      {
+        "key": "Description",
+        "context": "",
+        "value": "Descripción"
+      },
+      {
+        "key": "Edit Contact",
+        "context": "",
+        "value": "Editar contacto"
+      },
+      {
+        "key": "Edit Mode",
+        "context": "",
+        "value": "Modo de edición"
+      },
+      {
+        "key": "Email",
+        "context": "",
+        "value": "Correo electrónico"
+      },
+      {
+        "key": "Email{{text:0}}",
+        "context": "",
+        "value": "Correo electrónico{{text:0}}"
+      },
+      {
+        "key": "Environment Variables documentation",
+        "context": "",
+        "value": "Documentación de variables de entorno"
+      },
+      {
+        "key": "Existing contact data for editing",
+        "context": "",
+        "value": "Datos de contacto existentes para editar"
+      },
+      {
+        "key": "False",
+        "context": "",
+        "value": "Falso"
+      },
+      {
+        "key": "Field name",
+        "context": "",
+        "value": "Nombre del campo"
+      },
+      {
+        "key": "First Name",
+        "context": "",
+        "value": "Nombre"
+      },
+      {
+        "key": "First Name{{text:0}}",
+        "context": "",
+        "value": "Nombre{{text:0}}"
+      },
+      {
+        "key": "First name",
+        "context": "",
+        "value": "Nombre"
+      },
+      {
+        "key": "If the problem persists, check the browser console, or the terminal you've run Storybook from.",
+        "context": "",
+        "value": "Si el problema persiste, revisa la consola del navegador o la terminal desde la que ejecutaste Storybook."
+      },
+      {
+        "key": "Last Name",
+        "context": "",
+        "value": "Apellido"
+      },
+      {
+        "key": "Last Name{{text:0}}",
+        "context": "",
+        "value": "Apellido{{text:0}}"
+      },
+      {
+        "key": "Last name",
+        "context": "",
+        "value": "Apellido"
+      },
+      {
+        "key": "Minimal Fields",
+        "context": "",
+        "value": "Campos mínimos"
+      },
+      {
+        "key": "Misconfigured Webpack or Vite",
+        "context": "",
+        "value": "Webpack o Vite mal configurado"
+      },
+      {
+        "key": "Missing Context/Providers",
+        "context": "",
+        "value": "Faltan contextos/proveedores"
+      },
+      {
+        "key": "Missing Environment Variables",
+        "context": "",
+        "value": "Faltan variables de entorno"
+      },
+      {
+        "key": "Mobile",
+        "context": "",
+        "value": "Móvil"
+      },
+      {
+        "key": "Modal title",
+        "context": "",
+        "value": "Título del modal"
+      },
+      {
+        "key": "Name",
+        "context": "",
+        "value": "Nombre"
+      },
+      {
+        "key": "No Preview",
+        "context": "",
+        "value": "Sin vista previa"
+      },
+      {
+        "key": "No custom fields added. Click \"Add Field\" to add custom information.",
+        "context": "",
+        "value": "No se han agregado campos personalizados. Haz clic en \"Agregar campo\" para añadir información personalizada."
+      },
+      {
+        "key": "Phone",
+        "context": "",
+        "value": "Teléfono"
+      },
+      {
+        "key": "Please check the Storybook config.",
+        "context": "",
+        "value": "Revisa la configuración de Storybook."
+      },
+      {
+        "key": "Position Title",
+        "context": "",
+        "value": "Cargo"
+      },
+      {
+        "key": "Provider Contact",
+        "context": "",
+        "value": "Contacto del proveedor"
+      },
+      {
+        "key": "Save Contact",
+        "context": "",
+        "value": "Guardar contacto"
+      },
+      {
+        "key": "Saving State",
+        "context": "",
+        "value": "Estado de guardado"
+      },
+      {
+        "key": "Saving...",
+        "context": "",
+        "value": "Guardando..."
+      },
+      {
+        "key": "Select...",
+        "context": "",
+        "value": "Seleccionar..."
+      },
+      {
+        "key": "Set object",
+        "context": "",
+        "value": "Definir objeto"
+      },
+      {
+        "key": "Set string",
+        "context": "",
+        "value": "Definir cadena"
+      },
+      {
+        "key": "Sex",
+        "context": "",
+        "value": "Sexo"
+      },
+      {
+        "key": "Show code",
+        "context": "",
+        "value": "Mostrar código"
+      },
+      {
+        "key": "Sorry, but you either have no stories or none are selected somehow.",
+        "context": "",
+        "value": "Lo sentimos, no tienes historias o ninguna está seleccionada."
+      },
+      {
+        "key": "State",
+        "context": "",
+        "value": "Estado"
+      },
+      {
+        "key": "Stories",
+        "context": "",
+        "value": "Historias"
+      },
+      {
+        "key": "Street Address",
+        "context": "",
+        "value": "Dirección postal"
+      },
+      {
+        "key": "The component failed to render properly, likely due to a configuration issue in Storybook. Here are some common causes and how you can address them:",
+        "context": "",
+        "value": "El componente no se pudo renderizar correctamente, probablemente por un problema de configuración en Storybook. Estas son algunas causas comunes y cómo solucionarlas:"
+      },
+      {
+        "key": "This is a short description",
+        "context": "",
+        "value": "Esta es una descripción breve"
+      },
+      {
+        "key": "True",
+        "context": "",
+        "value": "Verdadero"
+      },
+      {
+        "key": "Try reloading the page.",
+        "context": "",
+        "value": "Intenta recargar la página."
+      },
+      {
+        "key": "Value",
+        "context": "",
+        "value": "Valor"
+      },
+      {
+        "key": "View source on GitHub ↗",
+        "context": "",
+        "value": "Ver código fuente en GitHub ↗"
+      },
+      {
+        "key": "Vite",
+        "context": "",
+        "value": "Vite"
+      },
+      {
+        "key": "Webpack",
+        "context": "",
+        "value": "Webpack"
+      },
+      {
+        "key": "Whether save is in progress",
+        "context": "",
+        "value": "Si el guardado está en curso"
+      },
+      {
+        "key": "Whether the modal is open",
+        "context": "",
+        "value": "Si el modal está abierto"
+      },
+      {
+        "key": "Whether to show address fields",
+        "context": "",
+        "value": "Si se muestran los campos de dirección"
+      },
+      {
+        "key": "Whether to show custom fields section",
+        "context": "",
+        "value": "Si se muestra la sección de campos personalizados"
+      },
+      {
+        "key": "Whether to show phone field",
+        "context": "",
+        "value": "Si se muestra el campo de teléfono"
+      },
+      {
+        "key": "With Phone Only",
+        "context": "",
+        "value": "Solo con teléfono"
+      },
+      {
+        "key": "With Validation Errors",
+        "context": "",
+        "value": "Con errores de validación"
+      },
+      {
+        "key": "ZIP",
+        "context": "",
+        "value": "Código postal"
+      },
+      {
+        "key": "boolean",
+        "context": "",
+        "value": "boolean"
+      },
+      {
+        "key": "className",
+        "context": "",
+        "value": "className"
+      },
+      {
+        "key": "contact",
+        "context": "",
+        "value": "contacto"
+      },
+      {
+        "key": "defaultValue",
+        "context": "",
+        "value": "defaultValue"
+      },
+      {
+        "key": "e.g., MD, RN, PA",
+        "context": "",
+        "value": "p. ej., MD, RN, PA"
+      },
+      {
+        "key": "e.g., Office Manager",
+        "context": "",
+        "value": "p. ej., Gerente de oficina"
+      },
+      {
+        "key": "email@example.com",
+        "context": "",
+        "value": "email@example.com"
+      },
+      {
+        "key": "false",
+        "context": "",
+        "value": "false"
+      },
+      {
+        "key": "isSaving",
+        "context": "",
+        "value": "isSaving"
+      },
+      {
+        "key": "null",
+        "context": "",
+        "value": "null"
+      },
+      {
+        "key": "onOpenChange",
+        "context": "",
+        "value": "onOpenChange"
+      },
+      {
+        "key": "onSave",
+        "context": "",
+        "value": "onSave"
+      },
+      {
+        "key": "open",
+        "context": "",
+        "value": "open"
+      },
+      {
+        "key": "propertyName",
+        "context": "",
+        "value": "propertyName"
+      },
+      {
+        "key": "showAddress",
+        "context": "",
+        "value": "showAddress"
+      },
+      {
+        "key": "showCustomFields",
+        "context": "",
+        "value": "showCustomFields"
+      },
+      {
+        "key": "showPhone",
+        "context": "",
+        "value": "showPhone"
+      },
+      {
+        "key": "string",
+        "context": "",
+        "value": "string"
+      },
+      {
+        "key": "summary",
+        "context": "",
+        "value": "resumen"
+      },
+      {
+        "key": "title",
+        "context": "",
+        "value": "título"
+      },
+      {
+        "key": "true",
+        "context": "",
+        "value": "true"
+      },
+      {
+        "key": "{{text:0}}: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters. You can find step-by-step guides for configuring{{text:1}}or{{text:2}}with Storybook.",
+        "context": "",
+        "value": "{{text:0}}: Verifica que Storybook cargue todos los ajustes necesarios para loaders, plugins y otros parámetros relevantes. Encontrarás guías paso a paso para configurar {{text:1}} o {{text:2}} con Storybook."
+      },
+      {
+        "key": "{{text:0}}: You can use decorators to supply specific contexts or providers, which are sometimes necessary for components to render correctly. For detailed instructions on using decorators, please visit the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: Puedes usar decoradores para proporcionar contextos o proveedores específicos, que a veces son necesarios para que los componentes se rendericen correctamente. Para instrucciones detalladas sobre el uso de decoradores, visita la {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: Tu Storybook puede requerir variables de entorno específicas para funcionar como se espera. Puedes configurar variables de entorno personalizadas como se describe en la {{text:1}}."
+      }
+    ],
+    "ar": [
+      {
+        "key": "\"Add Contact\"",
+        "context": "",
+        "value": "\"إضافة جهة اتصال\""
+      },
+      {
+        "key": "(contact: ContactFormData) => void",
+        "context": "",
+        "value": "(contact: ContactFormData) => void"
+      },
+      {
+        "key": "(open: boolean) => void",
+        "context": "",
+        "value": "(open: boolean) => void"
+      },
+      {
+        "key": "A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields.",
+        "context": "",
+        "value": "نافذة منبثقة لإضافة جهات اتصال مقدمي الخدمة/أصحاب العمل أو تعديلها، تتضمن حقولًا للاسم والجنس والمسمى الوظيفي والدرجة العلمية والبريد الإلكتروني والعنوان والحقول المخصصة."
+      },
+      {
+        "key": "Add Contact",
+        "context": "",
+        "value": "إضافة جهة اتصال"
+      },
+      {
+        "key": "Add Field",
+        "context": "",
+        "value": "إضافة حقل"
+      },
+      {
+        "key": "AddContactModal",
+        "context": "",
+        "value": "نافذة إضافة جهة اتصال"
+      },
+      {
+        "key": "Additional CSS classes",
+        "context": "",
+        "value": "فئات CSS إضافية"
+      },
+      {
+        "key": "Address",
+        "context": "",
+        "value": "العنوان"
+      },
+      {
+        "key": "Apt, Suite, etc. (optional)",
+        "context": "",
+        "value": "شقة، جناح، إلخ (اختياري)"
+      },
+      {
+        "key": "Callback when contact is saved",
+        "context": "",
+        "value": "دالة تُستدعى عند حفظ جهة الاتصال"
+      },
+      {
+        "key": "Callback when modal open state changes",
+        "context": "",
+        "value": "دالة تُستدعى عند تغيّر حالة فتح النافذة"
+      },
+      {
+        "key": "Cancel",
+        "context": "",
+        "value": "إلغاء"
+      },
+      {
+        "key": "City",
+        "context": "",
+        "value": "المدينة"
+      },
+      {
+        "key": "Click Save to see validation errors",
+        "context": "",
+        "value": "انقر على حفظ لعرض أخطاء التحقق"
+      },
+      {
+        "key": "ContactFormData",
+        "context": "",
+        "value": "ContactFormData"
+      },
+      {
+        "key": "Control",
+        "context": "",
+        "value": "عنصر التحكم"
+      },
+      {
+        "key": "Custom Fields",
+        "context": "",
+        "value": "حقول مخصصة"
+      },
+      {
+        "key": "Decorators documentation",
+        "context": "",
+        "value": "توثيق المزخرفات"
+      },
+      {
+        "key": "Default",
+        "context": "",
+        "value": "افتراضي"
+      },
+      {
+        "key": "Degree",
+        "context": "",
+        "value": "الدرجة العلمية"
+      },
+      {
+        "key": "Description",
+        "context": "",
+        "value": "الوصف"
+      },
+      {
+        "key": "Edit Contact",
+        "context": "",
+        "value": "تعديل جهة الاتصال"
+      },
+      {
+        "key": "Edit Mode",
+        "context": "",
+        "value": "وضع التعديل"
+      },
+      {
+        "key": "Email",
+        "context": "",
+        "value": "البريد الإلكتروني"
+      },
+      {
+        "key": "Email{{text:0}}",
+        "context": "",
+        "value": "البريد الإلكتروني{{text:0}}"
+      },
+      {
+        "key": "Environment Variables documentation",
+        "context": "",
+        "value": "توثيق متغيرات البيئة"
+      },
+      {
+        "key": "Existing contact data for editing",
+        "context": "",
+        "value": "بيانات جهة الاتصال الحالية للتعديل"
+      },
+      {
+        "key": "False",
+        "context": "",
+        "value": "خطأ"
+      },
+      {
+        "key": "Field name",
+        "context": "",
+        "value": "اسم الحقل"
+      },
+      {
+        "key": "First Name",
+        "context": "",
+        "value": "الاسم الأول"
+      },
+      {
+        "key": "First Name{{text:0}}",
+        "context": "",
+        "value": "الاسم الأول{{text:0}}"
+      },
+      {
+        "key": "First name",
+        "context": "",
+        "value": "الاسم الأول"
+      },
+      {
+        "key": "If the problem persists, check the browser console, or the terminal you've run Storybook from.",
+        "context": "",
+        "value": "إذا استمرت المشكلة، فتحقق من وحدة تحكم المتصفح أو الطرفية التي شغّلت منها Storybook."
+      },
+      {
+        "key": "Last Name",
+        "context": "",
+        "value": "اسم العائلة"
+      },
+      {
+        "key": "Last Name{{text:0}}",
+        "context": "",
+        "value": "اسم العائلة{{text:0}}"
+      },
+      {
+        "key": "Last name",
+        "context": "",
+        "value": "اسم العائلة"
+      },
+      {
+        "key": "Minimal Fields",
+        "context": "",
+        "value": "الحد الأدنى من الحقول"
+      },
+      {
+        "key": "Misconfigured Webpack or Vite",
+        "context": "",
+        "value": "إعداد غير صحيح لـ Webpack أو Vite"
+      },
+      {
+        "key": "Missing Context/Providers",
+        "context": "",
+        "value": "سياقات/موفّرات مفقودة"
+      },
+      {
+        "key": "Missing Environment Variables",
+        "context": "",
+        "value": "متغيرات بيئة مفقودة"
+      },
+      {
+        "key": "Mobile",
+        "context": "",
+        "value": "الجوال"
+      },
+      {
+        "key": "Modal title",
+        "context": "",
+        "value": "عنوان النافذة"
+      },
+      {
+        "key": "Name",
+        "context": "",
+        "value": "الاسم"
+      },
+      {
+        "key": "No Preview",
+        "context": "",
+        "value": "لا توجد معاينة"
+      },
+      {
+        "key": "No custom fields added. Click \"Add Field\" to add custom information.",
+        "context": "",
+        "value": "لم تتم إضافة حقول مخصصة. انقر على \"إضافة حقل\" لإضافة معلومات مخصصة."
+      },
+      {
+        "key": "Phone",
+        "context": "",
+        "value": "الهاتف"
+      },
+      {
+        "key": "Please check the Storybook config.",
+        "context": "",
+        "value": "يرجى التحقق من إعدادات Storybook."
+      },
+      {
+        "key": "Position Title",
+        "context": "",
+        "value": "المسمى الوظيفي"
+      },
+      {
+        "key": "Provider Contact",
+        "context": "",
+        "value": "جهة اتصال مقدم الخدمة"
+      },
+      {
+        "key": "Save Contact",
+        "context": "",
+        "value": "حفظ جهة الاتصال"
+      },
+      {
+        "key": "Saving State",
+        "context": "",
+        "value": "حالة الحفظ"
+      },
+      {
+        "key": "Saving...",
+        "context": "",
+        "value": "جارٍ الحفظ..."
+      },
+      {
+        "key": "Select...",
+        "context": "",
+        "value": "اختر..."
+      },
+      {
+        "key": "Set object",
+        "context": "",
+        "value": "تعيين كائن"
+      },
+      {
+        "key": "Set string",
+        "context": "",
+        "value": "تعيين نص"
+      },
+      {
+        "key": "Sex",
+        "context": "",
+        "value": "الجنس"
+      },
+      {
+        "key": "Show code",
+        "context": "",
+        "value": "عرض الشيفرة"
+      },
+      {
+        "key": "Sorry, but you either have no stories or none are selected somehow.",
+        "context": "",
+        "value": "عذرًا، إما أنه لا توجد لديك قصص أو لم يتم تحديد أي منها."
+      },
+      {
+        "key": "State",
+        "context": "",
+        "value": "الولاية"
+      },
+      {
+        "key": "Stories",
+        "context": "",
+        "value": "القصص"
+      },
+      {
+        "key": "Street Address",
+        "context": "",
+        "value": "عنوان الشارع"
+      },
+      {
+        "key": "The component failed to render properly, likely due to a configuration issue in Storybook. Here are some common causes and how you can address them:",
+        "context": "",
+        "value": "تعذّر عرض المكوّن بشكل صحيح، غالبًا بسبب مشكلة في إعدادات Storybook. إليك بعض الأسباب الشائعة وكيفية معالجتها:"
+      },
+      {
+        "key": "This is a short description",
+        "context": "",
+        "value": "هذا وصف قصير"
+      },
+      {
+        "key": "True",
+        "context": "",
+        "value": "صحيح"
+      },
+      {
+        "key": "Try reloading the page.",
+        "context": "",
+        "value": "حاول إعادة تحميل الصفحة."
+      },
+      {
+        "key": "Value",
+        "context": "",
+        "value": "القيمة"
+      },
+      {
+        "key": "View source on GitHub ↗",
+        "context": "",
+        "value": "عرض المصدر على GitHub ↗"
+      },
+      {
+        "key": "Vite",
+        "context": "",
+        "value": "Vite"
+      },
+      {
+        "key": "Webpack",
+        "context": "",
+        "value": "Webpack"
+      },
+      {
+        "key": "Whether save is in progress",
+        "context": "",
+        "value": "ما إذا كان الحفظ قيد التنفيذ"
+      },
+      {
+        "key": "Whether the modal is open",
+        "context": "",
+        "value": "ما إذا كانت النافذة مفتوحة"
+      },
+      {
+        "key": "Whether to show address fields",
+        "context": "",
+        "value": "ما إذا كانت حقول العنوان ظاهرة"
+      },
+      {
+        "key": "Whether to show custom fields section",
+        "context": "",
+        "value": "ما إذا كان قسم الحقول المخصصة ظاهرًا"
+      },
+      {
+        "key": "Whether to show phone field",
+        "context": "",
+        "value": "ما إذا كان حقل الهاتف ظاهرًا"
+      },
+      {
+        "key": "With Phone Only",
+        "context": "",
+        "value": "بالهاتف فقط"
+      },
+      {
+        "key": "With Validation Errors",
+        "context": "",
+        "value": "مع أخطاء التحقق"
+      },
+      {
+        "key": "ZIP",
+        "context": "",
+        "value": "الرمز البريدي"
+      },
+      {
+        "key": "boolean",
+        "context": "",
+        "value": "boolean"
+      },
+      {
+        "key": "className",
+        "context": "",
+        "value": "className"
+      },
+      {
+        "key": "contact",
+        "context": "",
+        "value": "جهة اتصال"
+      },
+      {
+        "key": "defaultValue",
+        "context": "",
+        "value": "defaultValue"
+      },
+      {
+        "key": "e.g., MD, RN, PA",
+        "context": "",
+        "value": "مثال: MD، RN، PA"
+      },
+      {
+        "key": "e.g., Office Manager",
+        "context": "",
+        "value": "مثال: مدير المكتب"
+      },
+      {
+        "key": "email@example.com",
+        "context": "",
+        "value": "email@example.com"
+      },
+      {
+        "key": "false",
+        "context": "",
+        "value": "false"
+      },
+      {
+        "key": "isSaving",
+        "context": "",
+        "value": "isSaving"
+      },
+      {
+        "key": "null",
+        "context": "",
+        "value": "null"
+      },
+      {
+        "key": "onOpenChange",
+        "context": "",
+        "value": "onOpenChange"
+      },
+      {
+        "key": "onSave",
+        "context": "",
+        "value": "onSave"
+      },
+      {
+        "key": "open",
+        "context": "",
+        "value": "open"
+      },
+      {
+        "key": "propertyName",
+        "context": "",
+        "value": "propertyName"
+      },
+      {
+        "key": "showAddress",
+        "context": "",
+        "value": "showAddress"
+      },
+      {
+        "key": "showCustomFields",
+        "context": "",
+        "value": "showCustomFields"
+      },
+      {
+        "key": "showPhone",
+        "context": "",
+        "value": "showPhone"
+      },
+      {
+        "key": "string",
+        "context": "",
+        "value": "string"
+      },
+      {
+        "key": "summary",
+        "context": "",
+        "value": "ملخص"
+      },
+      {
+        "key": "title",
+        "context": "",
+        "value": "العنوان"
+      },
+      {
+        "key": "true",
+        "context": "",
+        "value": "true"
+      },
+      {
+        "key": "{{text:0}}: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters. You can find step-by-step guides for configuring{{text:1}}or{{text:2}}with Storybook.",
+        "context": "",
+        "value": "{{text:0}}: تحقق من أن Storybook يلتقط جميع الإعدادات اللازمة للمحمّلات والإضافات والمعلمات الأخرى ذات الصلة. يمكنك العثور على أدلة خطوة بخطوة لإعداد {{text:1}} أو {{text:2}} مع Storybook."
+      },
+      {
+        "key": "{{text:0}}: You can use decorators to supply specific contexts or providers, which are sometimes necessary for components to render correctly. For detailed instructions on using decorators, please visit the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: يمكنك استخدام المزخرفات لتوفير سياقات أو موفّرات محددة، وهي ضرورية أحيانًا لعرض المكوّنات بشكل صحيح. للحصول على تعليمات مفصلة حول استخدام المزخرفات، يرجى زيارة {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: قد يتطلب Storybook لديك متغيرات بيئة محددة ليعمل كما هو متوقع. يمكنك إعداد متغيرات بيئة مخصصة كما هو موضح في {{text:1}}."
+      }
+    ]
+  },
+  "glossary": {},
+  "aria": [],
+  "timestamp": 1784842843881
+}

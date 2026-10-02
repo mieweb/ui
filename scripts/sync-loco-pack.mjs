@@ -1,0 +1,104 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
+
+// Node 20 lacks --env-file-if-exists, so read .env.local here; real env vars win.
+async function loadEnvLocal() {
+  let content;
+  try {
+    content = await readFile(path.resolve(process.cwd(), '.env.local'), 'utf8');
+  } catch {
+    return;
+  }
+  for (const line of content.split(/\r?\n/)) {
+    const match = line.match(/^\s*(?:export\s+)?([A-Za-z_][\w]*)\s*=\s*(.*)\s*$/);
+    if (!match) continue;
+    const [, key, rawValue] = match;
+    if (process.env[key] !== undefined) continue;
+    process.env[key] = rawValue.replace(/^(['"])(.*)\1$/, '$2');
+  }
+}
+
+function parseArgs(argv) {
+  const options = {};
+  for (const raw of argv) {
+    if (!raw.startsWith('--')) continue;
+    const separator = raw.indexOf('=');
+    const key = separator === -1 ? raw.slice(2) : raw.slice(2, separator);
+    const value = separator === -1 ? undefined : raw.slice(separator + 1);
+    if (!key) continue;
+    options[key] = value ?? 'true';
+  }
+  return options;
+}
+
+function printHelp() {
+  console.log(`Usage: node scripts/sync-loco-pack.mjs [options]
+
+Options:
+  --server=<url>         Loco server URL (default: https://loco.os.mieweb.org)
+  --apiKey=<key>         Loco API key (or set LOCO_API_KEY / VITE_LOCO_API_KEY)
+  --out=<path>           Output file path (default: src/i18n/i18n-translations.json)
+  --format=<name>        Export format (default: loco — consumable by both the
+                         Loco runtime file mode and createLocoTranslator)
+  --contextMode=<mode>   Context mode (default: ignore)
+  --help                 Show this message
+
+Environment variables (also read from .env.local; shell env wins):
+  LOCO_SERVER_URL
+  LOCO_API_KEY
+  VITE_LOCO_SERVER_URL
+  VITE_LOCO_API_KEY
+`);
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help === 'true') {
+    printHelp();
+    return;
+  }
+  await loadEnvLocal();
+  const server = (
+    args.server ||
+    process.env.LOCO_SERVER_URL ||
+    process.env.VITE_LOCO_SERVER_URL ||
+    'https://loco.os.mieweb.org'
+  ).replace(/\/$/, '');
+  const apiKey =
+    args.apiKey ||
+    process.env.LOCO_API_KEY ||
+    process.env.VITE_LOCO_API_KEY ||
+    '';
+  const outPath = args.out || 'src/i18n/i18n-translations.json';
+  const format = args.format || 'loco';
+  const contextMode = args.contextMode || 'ignore';
+
+  const exportUrl = new URL(`${server}/api/export`);
+  exportUrl.searchParams.set('format', format);
+  exportUrl.searchParams.set('contextMode', contextMode);
+
+  const headers = {};
+  if (apiKey) {
+    headers['x-api-key'] = apiKey;
+  }
+
+  console.log(`[loco-sync] Fetching ${exportUrl.toString()}`);
+  const response = await fetch(exportUrl, { headers });
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Loco export failed (${response.status}): ${body}`);
+  }
+
+  const payload = await response.json();
+  const output = `${JSON.stringify(payload, null, 2)}\n`;
+  const absoluteOut = path.resolve(process.cwd(), outPath);
+  await writeFile(absoluteOut, output, 'utf8');
+
+  console.log(`[loco-sync] Wrote package to ${absoluteOut}`);
+}
+
+main().catch((error) => {
+  console.error('[loco-sync] Failed:', error.message);
+  process.exit(1);
+});
