@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { useUrlSearchParam } from '../../hooks/useUrlTab';
 
 // ============================================================================
 // Tabs Context
@@ -37,6 +38,17 @@ export interface TabsProps {
   onValueChange?: (value: string) => void;
   /** Visual variant of the tabs */
   variant?: 'underline' | 'pills' | 'enclosed';
+  /**
+   * Query parameter that mirrors the selected tab (uncontrolled only). Written
+   * with `history.replaceState`; omitted from the URL when it equals
+   * `defaultValue`.
+   */
+  urlParam?: string;
+  /**
+   * Values `urlParam` may select. Anything else in the URL falls back to
+   * `defaultValue`; without it, any non-empty value is accepted.
+   */
+  urlValues?: readonly string[];
   /** Tab content */
   children: React.ReactNode;
   /** Additional class name */
@@ -63,6 +75,8 @@ function Tabs({
   defaultValue,
   onValueChange,
   variant = 'underline',
+  urlParam,
+  urlValues,
   children,
   className,
 }: TabsProps) {
@@ -71,16 +85,25 @@ function Tabs({
   );
 
   const isControlled = controlledValue !== undefined;
-  const value = isControlled ? controlledValue : uncontrolledValue;
+  const syncsUrl = !isControlled && Boolean(urlParam);
+  const [urlValue, setUrlValue] = useUrlSearchParam(
+    syncsUrl ? urlParam : undefined,
+    defaultValue || '',
+    (v) => (urlValues ? urlValues.includes(v) : v !== '')
+  );
+  const value = isControlled
+    ? controlledValue
+    : syncsUrl
+      ? urlValue
+      : uncontrolledValue;
 
   const handleValueChange = React.useCallback(
     (newValue: string) => {
-      if (!isControlled) {
-        setUncontrolledValue(newValue);
-      }
+      if (syncsUrl) setUrlValue(newValue);
+      else if (!isControlled) setUncontrolledValue(newValue);
       onValueChange?.(newValue);
     },
-    [isControlled, onValueChange]
+    [isControlled, syncsUrl, setUrlValue, onValueChange]
   );
 
   return (

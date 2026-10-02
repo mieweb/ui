@@ -70,6 +70,15 @@ const meta: Meta<typeof EmployeeProfileCard> = {
   tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   parameters: {
     layout: 'centered',
+    catalog: {
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'record-details-recordheader',
+          why: 'For a page-width header on any record rather than an employee card, use RecordHeader.',
+        },
+      ],
+    },
   },
   argTypes: {
     showPhotoEdit: { control: 'boolean' },

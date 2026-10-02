@@ -49,11 +49,23 @@ export {
 export {
   useDragReorder,
   reorderIds,
+  moveIdBy,
   dragIndicatorClasses,
+  DEFAULT_DRAG_REORDER_LABELS,
+  type DragReorderLabels,
   type UseDragReorderOptions,
   type UseDragReorderReturn,
   type DragOverState,
 } from './useDragReorder';
+export {
+  useOrderPersistence,
+  localStorageOrderAdapter,
+  mergeOrder,
+  type OrderPersistenceAdapter,
+  type UseOrderPersistenceOptions,
+  type UseOrderPersistenceReturn,
+} from './useOrderPersistence';
+export { useUrlTab } from './useUrlTab';
 export { useLiveAnnouncement } from './useLiveAnnouncement';
 export {
   useStickToBottom,

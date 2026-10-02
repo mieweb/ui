@@ -57,6 +57,7 @@
         "Overlays",
         "Navigation",
         "Layout",
+        "Record details",
         "Showcase"
       ]
     },
@@ -71,7 +72,8 @@
         "Chat",
         "SuperChat",
         "Voice",
-        "Files"
+        "Files",
+        "Records"
       ]
     },
     {

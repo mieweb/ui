@@ -125,6 +125,11 @@ Tab state stays in the page; the header is a pure layout wrapper.
       relationships: [
         {
           type: 'alternative to',
+          target: 'record-details-recordheader',
+          why: 'When the page is about one record, RecordHeader adds avatar, badges, meta and overflow actions.',
+        },
+        {
+          type: 'alternative to',
           target: 'conversion-herosection',
           why: 'PageHeader titles a screen inside an app with actions and tabs; HeroSection opens a public marketing page with an h1 and CTAs.',
         },

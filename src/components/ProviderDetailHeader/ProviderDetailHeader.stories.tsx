@@ -51,6 +51,15 @@ const meta: Meta<typeof ProviderDetailHeader> = {
   component: ProviderDetailHeader,
   parameters: {
     layout: 'fullscreen',
+    catalog: {
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'record-details-recordheader',
+          why: 'For record types other than provider profiles, use the generic RecordHeader.',
+        },
+      ],
+    },
   },
   tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
   argTypes: {

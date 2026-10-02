@@ -1,0 +1,38 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Records/Overview" />
+
+# Records
+
+> **The collections around one record, and the frame that holds them.** `RecordLayout` places
+> the header, fields and tabs; the modules fill the tabs and side columns with what happened
+> (`ActivityFeed`), what changed (`FieldHistory`), what's related (`AssociationList`), what's
+> next (`ActionPlan`) and who's who (`OrgChart`). Each renders data you pass in and reports
+> changes through callbacks — none of them fetches.
+
+## Which one?
+
+| Component                                                    | Use it when                                                                         | Not when                                                                    |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [RecordLayout](?path=/docs/records-recordlayout--docs)       | A record page: header, fields sidebar, tabbed main column, optional aside           | A dashboard the user rearranges — `CustomizableDashboard`                   |
+| [ActivityFeed](?path=/docs/records-activityfeed--docs)       | Mixed events (calls, notes, emails, meetings) grouped by day, with filters and pins | Steps in a fixed process — `Timeline`; field-level changes — `FieldHistory` |
+| [FieldHistory](?path=/docs/records-fieldhistory--docs)       | Who changed which field, from what to what, and when                                | Business events — `ActivityFeed`                                            |
+| [AssociationList](?path=/docs/records-associationlist--docs) | Related records (contacts at a company, deals for a contact) with add/remove        | Many rows the user sorts or filters — DataVis NITRO                         |
+| [ActionPlan](?path=/docs/records-actionplan--docs)           | A shared checklist with owners, due dates and overdue flags                         | A project board — `BoardView`; a dated schedule — `GanttView`               |
+| [OrgChart](?path=/docs/records-orgchart--docs)               | Reporting lines or a location hierarchy, with search, filter and a list view        | A flat list of people — `AssociationList`                                   |
+
+## How they fit together
+
+- `RecordLayout` renders its `tabs` with `Tabs`; set `tabsUrlParam` so each tab has a link.
+- `ActivityFeed` and `FieldHistory` group by day the same way. Pins, removals and status
+  changes are optimistic: the change shows at once and is rolled back if your callback rejects.
+- `OrgChart` ships from **`@mieweb/ui/org-chart`**, not the main entry, because it needs the
+  optional `@xyflow/react` and `elkjs` peers and `@xyflow/react/dist/style.css`.
+
+## Shared limitations
+
+- Each module is a collection: pass `loading` and `error`, and an empty array shows the empty
+  state. Paging is a `hasMore` / `onLoadMore` button where it exists, not infinite scroll.
+- Dates are formatted with Luxon in the `locale` and `timeZone` you pass; default strings are
+  English and every module takes `labels`.
+- `OrgChart`'s canvas is pointer-first; its list view is the keyboard and screen-reader path.
