@@ -12,6 +12,7 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import {
   useStickToBottom,
@@ -603,13 +604,27 @@ export function SuperChat({
             </div>
           </div>
         )}
-        {order !== 'desc' && !isAtBottom && (
-          <JumpToBottomButton
-            dataSlot="superchat-jump-to-bottom"
-            hasNewMessages={hasNewBelow}
-            onClick={handleJumpToBottom}
-          />
-        )}
+        {/* The wrapper is a zero-height strip pinned to the viewport bottom:
+            the button keeps its own absolute placement (now relative to the
+            strip, which lands it in the same spot) and the strip carries the
+            fade, so the button's `-translate-x-1/2` never meets a motion
+            transform. */}
+        <AnimatedPresence>
+          {order !== 'desc' && !isAtBottom && (
+            <Animated
+              key="jump-to-bottom"
+              preset="fade"
+              mode="presence"
+              className="absolute inset-x-0 bottom-0 z-20"
+            >
+              <JumpToBottomButton
+                dataSlot="superchat-jump-to-bottom"
+                hasNewMessages={hasNewBelow}
+                onClick={handleJumpToBottom}
+              />
+            </Animated>
+          )}
+        </AnimatedPresence>
       </div>
 
       <ChatComposer

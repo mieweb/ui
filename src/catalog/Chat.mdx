@@ -53,6 +53,13 @@ import { Meta } from '@storybook/addon-docs/blocks';
   invoked). The `askOzwell*` / `isOzwellConfigured` helpers exist for demos and read a
   browser-held config (`localStorage.ozwellConfig` / `window.__ozwell`) — never commit a key, and
   proxy it server-side for anything public (see `src/components/AI/OZWELL-BACKEND.md`).
+- **Want the hosted, page-aware Ozwell (not a UI shell you wire yourself)?** Use the embedded
+  assistant from **ozwellai-api** (`@ozwell/react`) — a drop-in that can
+  read and act on your page via tool calls (`tools` + `onToolCall`). It authenticates with a
+  **site-approved agent key** (`agnt_key-…`, passed as `VITE_OZWELL_AGENT_KEY`; never a parent or
+  provider key). That is a different package from this library's `OzwellChat`; follow the guide
+  (with a full Vite + MIE UI "Click Hello World" example) at
+  [the Ozwell React guide](https://mieweb.github.io/ozwellai-api/frontend/react/).
 - **Reconciliation closes the loop with extraction.** [DocumentScanner](?path=/docs/files-documentscanner--docs)
   (Files) produces fields; `AIReconciliationPanel` is where a human accepts them.
 

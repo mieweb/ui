@@ -113,6 +113,33 @@ The composer:
   the fallback HTML table is shown (the case in CI/dev when the submodule is
   absent).
 
+## Motion
+
+Opt-in via `@mieweb/ui/motion` — see [../../motion/MAINTAINERS.md](../../motion/MAINTAINERS.md).
+Both layouts (side-by-side and the mobile master/detail switch) get the same
+surfaces, since each exists in both:
+
+| Element               | Preset | Where                                                    |
+| --------------------- | ------ | -------------------------------------------------------- |
+| Jump-to-bottom button | `fade` | [SuperChat.tsx](SuperChat.tsx)                           |
+| Unread badge          | `pop`  | [SuperChatConversations.tsx](SuperChatConversations.tsx) |
+| Message action menus  | `menu` | inherited from `Dropdown`                                |
+
+**Deliberately not animated:**
+
+- **Message rows entering.** Rows change parent when an own-send opens or closes
+  an anchored turn (`superchat-turn`), which remounts them. Under
+  `AnimatedPresence` the old copy would linger through its exit while the new
+  copy entered — briefly doubling the thread height and corrupting the turn
+  reserve measurement. Virtualized rows also mount on every scroll, so they
+  would fade in continuously. Fixing either means restructuring the thread, not
+  adding a preset.
+- **The mobile list ⇄ panel switch in `SuperChatInbox`.** Both panes stay
+  mounted and swap via responsive `hidden sm:flex` classes; animating that needs
+  JS breakpoint tracking for a single transition.
+- **Typing indicator → body.** They share the bubble; fading one out while the
+  other arrives causes a layout jump inside the bubble.
+
 ## Not yet implemented (tracked against the mission)
 
 - `shiki` upgrade path for the code plugin (currently `rehype-highlight`).

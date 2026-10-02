@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react';
 import {
   KEYBOARD_INSET_VAR,
   KEYBOARD_OPEN_ATTRIBUTE,
+  KEYBOARD_SOURCE_ATTRIBUTE,
   VISUAL_VIEWPORT_HEIGHT_VAR,
   VISUAL_VIEWPORT_OFFSET_TOP_VAR,
   useKeyboardInset,
@@ -98,5 +99,63 @@ describe('useKeyboardInset', () => {
   it('does nothing when disabled', () => {
     renderHook(() => useKeyboardInset({ enabled: false }));
     expect(cssVar(KEYBOARD_INSET_VAR)).toBe('');
+  });
+
+  describe("source: 'native'", () => {
+    function fireNative(type: string, keyboardHeight?: number) {
+      const event = Object.assign(new Event(type), { keyboardHeight });
+      act(() => {
+        window.dispatchEvent(event);
+      });
+    }
+
+    it('publishes the height from keyboardWillShow and clears it on keyboardWillHide', () => {
+      const { result } = renderHook(() =>
+        useKeyboardInset({ source: 'native' })
+      );
+      expect(root.getAttribute(KEYBOARD_SOURCE_ATTRIBUTE)).toBe('native');
+
+      fireNative('keyboardWillShow', 336);
+      expect(result.current).toEqual({
+        keyboardInset: 336,
+        isKeyboardOpen: true,
+      });
+      expect(cssVar(KEYBOARD_INSET_VAR)).toBe('336px');
+      expect(root.hasAttribute(KEYBOARD_OPEN_ATTRIBUTE)).toBe(true);
+
+      fireNative('keyboardWillHide');
+      expect(result.current).toEqual({
+        keyboardInset: 0,
+        isKeyboardOpen: false,
+      });
+      expect(cssVar(KEYBOARD_INSET_VAR)).toBe('0px');
+      expect(root.hasAttribute(KEYBOARD_OPEN_ATTRIBUTE)).toBe(false);
+    });
+
+    it('leaves the visual viewport alone', () => {
+      const { result } = renderHook(() =>
+        useKeyboardInset({ source: 'native' })
+      );
+
+      openKeyboard(300);
+
+      expect(result.current.isKeyboardOpen).toBe(false);
+      expect(cssVar(VISUAL_VIEWPORT_HEIGHT_VAR)).toBe('');
+      expect(cssVar(VISUAL_VIEWPORT_OFFSET_TOP_VAR)).toBe('');
+    });
+
+    it('stops listening and clears everything on unmount', () => {
+      const { unmount } = renderHook(() =>
+        useKeyboardInset({ source: 'native' })
+      );
+      fireNative('keyboardWillShow', 300);
+
+      unmount();
+      fireNative('keyboardWillShow', 300);
+
+      expect(cssVar(KEYBOARD_INSET_VAR)).toBe('');
+      expect(root.hasAttribute(KEYBOARD_OPEN_ATTRIBUTE)).toBe(false);
+      expect(root.hasAttribute(KEYBOARD_SOURCE_ATTRIBUTE)).toBe(false);
+    });
   });
 });

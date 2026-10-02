@@ -41,8 +41,12 @@ export const buttonVariants = cva(
           'hover:bg-primary-50 hover:text-primary-900',
           'active:bg-primary-100',
           'dark:border-primary-400 dark:text-primary-400',
-          'dark:hover:bg-primary-950',
-          'dark:active:bg-primary-900',
+          // Lighten the label as the hover/active fill darkens: primary-400
+          // on primary-950 is only ~3.3:1 in the BlueHive palette (WCAG AA
+          // needs 4.5:1); primary-200/950 and primary-100/900 clear it in
+          // every brand palette. See issue #511.
+          'dark:hover:bg-primary-950 dark:hover:text-primary-200',
+          'dark:active:bg-primary-900 dark:active:text-primary-100',
         ],
         danger: [
           'bg-red-600 text-white',

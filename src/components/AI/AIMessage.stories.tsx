@@ -43,7 +43,7 @@ const meta: Meta<typeof AIMessageDisplay> = {
 \`\`\`tsx
 // Host-owned renderer; MarkdownRenderer sanitises, and streaming skips heavy blocks until complete.
 const renderText: AIRenderTextContent = (text, { streaming }) => (
-  <MarkdownRenderer content={text} streaming={streaming} />
+  <MarkdownRenderer text={text} streaming={streaming} />
 );
 
 <div role="log" aria-live="polite" aria-label={t('chat.thread')} className="space-y-4">

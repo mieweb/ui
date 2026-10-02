@@ -9,7 +9,10 @@ import {
 } from './ChatComposer';
 import type { ProviderModelValue } from '../AI/ComposerModelSelector';
 import { RecordButton } from '../RecordButton';
-import { useKeyboardInset } from '../../hooks/useKeyboardInset';
+import {
+  useKeyboardInset,
+  type KeyboardInsetSource,
+} from '../../hooks/useKeyboardInset';
 import { CameraIcon, FileTextIcon, GlobeIcon } from '../Icons';
 
 const sampleAgents: ChatComposerAgentOption[] = [
@@ -114,7 +117,7 @@ const meta = {
 
 Sending: on devices with a mouse or trackpad Enter sends and Shift+Enter inserts a newline; on touch devices Return inserts a newline and only the send button sends (\`submitOnEnter\`: \`'desktop'\` default, \`'always'\`, \`'never'\`). Enter never sends while an IME composition (CJK input) is in progress. \`onSend({ content, attachments })\` receives the trimmed text and staged \`File\`s (the \`NewMessage\` shape from the Messaging module, so hosts can migrate mechanically). \`onSend\` may return a promise — the draft clears optimistically and a rejection is reported through \`onError\` with \`reason: 'send-failed'\` (hosts own retry/restore). \`replyTo\` (\`{ id, content, senderName }\`) renders a dismissible preview row at the top of the card, focuses the input, and stamps \`replyToId\` onto the sent message; the host owns the state — clear it in \`onSend\`, and \`onCancelReply\` fires from the row's close button. Attachments arrive from the \`+\` menu picker, paste, drag-and-drop onto the card, or the imperative \`ChatComposerHandle.addFiles()\` (for page-level drop zones); they are validated against \`acceptedFileTypes\` / \`maxFileSize\` / \`maxAttachments\` with failures reported through \`onError(message, { reason, file })\`. \`mentionOptions\` enables the built-in \`@mention\` autocomplete — the shared Messaging mention module (typing \`@\` opens a filtered listbox; arrows navigate, Enter/Tab insert, Escape dismisses). \`readOnly\` replaces the whole composer with a notice (\`readOnlyMessage\`). The value is controlled (\`value\` + \`onValueChange\`) or uncontrolled. The textarea auto-grows up to \`maxHeight\` (default 160px; any CSS length works — prefer small-viewport units such as \`'30svh'\`, since on iOS \`vh\` ignores the on-screen keyboard).
 
-Mobile keyboard: the input uses a 16px font below \`sm\` (no iOS zoom-on-focus), \`dir="auto"\`, sentence autocapitalization and an \`enterKeyHint\` matching \`submitOnEnter\`. Tapping send or stop keeps focus in the input so the keyboard stays open, tapping empty parts of the card focuses the input, and \`autoFocus\` is ignored on touch devices so navigating to a chat does not pop the keyboard. iOS Safari and WKWebView do not resize the page for the keyboard — mount \`useKeyboardInset()\` once in the app shell and size the shell from \`--mieweb-visual-viewport-height\` so the composer sits on top of the keyboard (see the *Mobile Keyboard Shell* story).
+Mobile keyboard: the input uses a 16px font below \`sm\` (no iOS zoom-on-focus), \`dir="auto"\`, sentence autocapitalization and an \`enterKeyHint\` matching \`submitOnEnter\`. Tapping send or stop keeps focus in the input so the keyboard stays open, tapping empty parts of the card focuses the input, and \`autoFocus\` is ignored on touch devices so navigating to a chat does not pop the keyboard. iOS Safari and WKWebView do not resize the page for the keyboard — mount \`useKeyboardInset()\` once in the app shell and size the shell from \`--mieweb-visual-viewport-height\` so the composer sits on top of the keyboard. In Cordova/Capacitor apps use \`useKeyboardInset({ source: 'native' })\` instead and move only the composer dock (see the *Mobile Keyboard Shell* story).
 
 Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. a custom autocomplete overlay's arrow/Enter navigation — host key handling takes priority over the built-in mention menu and Enter-to-send — or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting into the text). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding.
 
@@ -395,15 +398,21 @@ export const SubmitOnEnter: Story = {
   },
 };
 
-function MobileKeyboardShellDemo() {
-  const { keyboardInset, isKeyboardOpen } = useKeyboardInset();
+function MobileKeyboardShellDemo({ source }: { source: KeyboardInsetSource }) {
+  const { keyboardInset, isKeyboardOpen } = useKeyboardInset({ source });
+  const native = source === 'native';
   return (
     <div
       className="flex flex-col bg-neutral-50 dark:bg-neutral-900"
-      style={{
-        height: 'var(--mieweb-visual-viewport-height, 100dvh)',
-        transform: 'translateY(var(--mieweb-visual-viewport-offset-top, 0px))',
-      }}
+      style={
+        native
+          ? { height: '100dvh' }
+          : {
+              height: 'var(--mieweb-visual-viewport-height, 100dvh)',
+              transform:
+                'translateY(var(--mieweb-visual-viewport-offset-top, 0px))',
+            }
+      }
     >
       <header className="shrink-0 border-b border-neutral-200 px-4 py-3 text-sm font-medium dark:border-neutral-700">
         Keyboard {isKeyboardOpen ? `open (${keyboardInset}px)` : 'closed'}
@@ -425,9 +434,12 @@ function MobileKeyboardShellDemo() {
       <div
         className="shrink-0 px-3 pt-2"
         style={{
-          paddingBottom: isKeyboardOpen
-            ? '0.5rem'
-            : 'max(1rem, env(safe-area-inset-bottom))',
+          paddingBottom: !isKeyboardOpen
+            ? 'max(1rem, env(safe-area-inset-bottom))'
+            : native
+              ? 'calc(var(--mieweb-keyboard-inset, 0px) + 0.5rem)'
+              : '0.5rem',
+          transition: native ? 'padding-bottom 250ms ease' : undefined,
         }}
       >
         <ChatComposer
@@ -440,14 +452,21 @@ function MobileKeyboardShellDemo() {
   );
 }
 
-export const MobileKeyboardShell: Story = {
-  render: () => <MobileKeyboardShellDemo />,
+export const MobileKeyboardShell: StoryObj<typeof MobileKeyboardShellDemo> = {
+  render: (args) => <MobileKeyboardShellDemo {...args} />,
+  args: { source: 'visual-viewport' },
+  argTypes: {
+    source: {
+      control: 'inline-radio',
+      options: ['visual-viewport', 'native'],
+    },
+  },
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         story:
-          'Reference wiring for mobile hosts. `useKeyboardInset()` publishes the visible viewport on `<html>`; the shell sizes itself from `--mieweb-visual-viewport-height` and follows iOS panning via `--mieweb-visual-viewport-offset-top`, so on iOS the composer sits directly on the keyboard, and drops the home-indicator padding while the keyboard is open. Open this story on a phone (or the iOS Simulator) to try it.',
+          "Reference wiring for mobile hosts. With `source: 'visual-viewport'` (browsers), `useKeyboardInset()` publishes the visible viewport on `<html>`; the shell sizes itself from `--mieweb-visual-viewport-height` and follows iOS panning via `--mieweb-visual-viewport-offset-top`, so on iOS the composer sits directly on the keyboard, and drops the home-indicator padding while the keyboard is open. iOS only reports the visual viewport after the keyboard finishes animating, so this path snaps into place. With `source: 'native'` (Cordova/Capacitor with a keyboard plugin and WebView resizing disabled), the shell keeps its full height and only the composer dock pads up by `--mieweb-keyboard-inset`, animating alongside the keyboard; it needs the plugin's `keyboardWillShow` events, so it does nothing in a plain browser. Open this story on a phone (or the iOS Simulator) to try it.",
       },
     },
   },

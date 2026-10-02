@@ -19,6 +19,7 @@ import { createNitroTablePlugin } from './plugins/nitroTable';
 import { SuperChat } from './SuperChat';
 import { SuperChatConversations } from './SuperChatConversations';
 import { SuperChatInbox } from './SuperChatInbox';
+import { MotionProvider } from '../../motion/MotionProvider';
 import type {
   GenUIRegistry,
   GenUIWidgetProps,
@@ -1545,6 +1546,36 @@ describe('SuperChatConversations', () => {
     expect(onConversationOpened).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'c2' })
     );
+  });
+
+  it('only animates unread badges that arrive after the first render', () => {
+    const badgeOf = (title: string) =>
+      screen
+        .getByText(title)
+        .closest('button')!
+        .querySelector<HTMLElement>('[data-slot="superchat-unread-badge"]')!;
+
+    const { rerender } = render(
+      <MotionProvider>
+        <SuperChatConversations conversations={conversations} />
+      </MotionProvider>
+    );
+    // Present on mount: rendered at rest, no enter animation.
+    expect(badgeOf('Intake').style.opacity).not.toBe('0');
+
+    const inserted: SuperChatConversation = {
+      ...conversations[1],
+      id: 'c3',
+      title: 'Referral',
+      unread: 1,
+    };
+    rerender(
+      <MotionProvider>
+        <SuperChatConversations conversations={[...conversations, inserted]} />
+      </MotionProvider>
+    );
+    // A row inserted later starts from the closed variant so its badge pops.
+    expect(badgeOf('Referral').style.opacity).toBe('0');
   });
 
   it('fires onNewConversation from the new-conversation button', async () => {

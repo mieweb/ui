@@ -22,6 +22,8 @@ export {
   VISUAL_VIEWPORT_HEIGHT_VAR,
   VISUAL_VIEWPORT_OFFSET_TOP_VAR,
   KEYBOARD_OPEN_ATTRIBUTE,
+  KEYBOARD_SOURCE_ATTRIBUTE,
+  type KeyboardInsetSource,
   type KeyboardInsetState,
   type UseKeyboardInsetOptions,
 } from './useKeyboardInset';

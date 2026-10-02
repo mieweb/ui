@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChatConversations } from './index';
 import { conversations } from './storyData';
 import { fullHeightChat } from '../../../.storybook/full-height';
+import { MotionProvider } from '../../motion/MotionProvider';
+import { Button } from '../Button';
 
 // ============================================================================
 // Meta
@@ -75,7 +77,11 @@ const active = conversations.find((c) => c.id === activeId);
 - **Uncontrolled selection is one-way.** Changing \`defaultActiveConversationId\` after mount has no effect; use \`activeConversationId\` to drive selection from the host (the inbox does).
 - The **unread count is never cleared** by the component — \`onConversationOpened\` is your hook to update \`unread\` in host state. \`lastActivity\` missing on every conversation means sort order is derived from thread times only.
 - Layout: \`w-64\`, \`shrink-0\`, \`border-r\` (physical; in RTL the divider stays on the right); intended for a flex row with a bounded height. "Conversations" heading and labels are English; the preview shows raw \`text\` (Markdown source, unrendered).
-- Theming: hard-coded \`neutral-*\`, \`primary-600\`, \`text-white\`. Import from \`@mieweb/ui/components/SuperChat\` (not in the main barrel).`,
+- Theming: hard-coded \`neutral-*\`, \`primary-600\`, \`text-white\`. Import from \`@mieweb/ui/components/SuperChat\` (not in the main barrel).
+
+### Motion
+
+An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--docs) gets a small pop when an unread badge appears and a fade when it clears. Badges already present on first render do not pop — they are state, not news. A changing count on an existing badge does not re-pop. Nothing changes at the call site; see the **Motion** story. The mobile list/panel switch in \`SuperChatInbox\` is not animated.`,
       },
     },
     catalog: {
@@ -85,6 +91,11 @@ const active = conversations.find((c) => c.id === activeId);
           type: 'composes with',
           target: 'superchat-superchat-panel',
           why: 'Pair the list with the panel to build a custom inbox layout; SuperChatInbox does exactly this.',
+        },
+        {
+          type: 'composes with',
+          target: 'foundations-motion',
+          why: 'MotionProvider pops unread badges in as they arrive and fades them out when cleared, which the CSS path cannot do because the badge unmounts.',
         },
       ],
     },
@@ -138,4 +149,66 @@ function ControlledList() {
 
 export const Controlled: Story = {
   render: () => <ControlledList />,
+};
+
+// ============================================================================
+// Motion
+// ============================================================================
+
+/**
+ * A/B harness for the motion opt-in. Opening a conversation clears its badge;
+ * "Receive a message" gives the first conversation a fresh one.
+ */
+function MotionDemo() {
+  const [motionEnabled, setMotionEnabled] = React.useState(true);
+  const [items, setItems] = React.useState(conversations);
+
+  const receive = () =>
+    setItems((prev) =>
+      prev.map((c, i) => (i === 0 ? { ...c, unread: (c.unread ?? 0) + 1 } : c))
+    );
+  const markRead = (id: string) =>
+    setItems((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, unread: 0 } : c))
+    );
+
+  return (
+    <MotionProvider disabled={!motionEnabled}>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex flex-wrap items-center gap-3 border-b border-neutral-200 p-3 dark:border-neutral-700">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setMotionEnabled((enabled) => !enabled)}
+            aria-pressed={motionEnabled}
+          >
+            Motion: {motionEnabled ? 'on' : 'off'}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={receive}>
+            Receive a message
+          </Button>
+          <p className="text-muted-foreground text-xs">
+            Open a conversation to clear its badge.
+          </p>
+        </div>
+        <SuperChatConversations
+          conversations={items}
+          onConversationOpened={(c) => markRead(c.id)}
+          className="min-h-0 flex-1"
+        />
+      </div>
+    </MotionProvider>
+  );
+}
+
+export const Motion: Story = {
+  render: () => <MotionDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SuperChatConversations under `@mieweb/ui/motion`. With motion on, a badge that appears pops in (`1 → 1.1 → 1`) and fades out when the conversation is opened; with it off the badge appears and disappears instantly. Under `reducedMotion="user"` the scale is dropped and only the fade remains. The provider is normally mounted once at the app root; it is local here so the comparison can be toggled.',
+      },
+    },
+  },
 };

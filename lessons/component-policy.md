@@ -355,3 +355,30 @@ flowchart TD
 | **2. Build**      | No equivalent exists yet                | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
 | **2.5. Module**   | It renders a collection the caller owns | Props in, callbacks out; no data access, router or framework import             |
 | **3. Contribute** | Local component is stable + generic     | PR to `mieweb/ui`, then replace local with import                               |
+
+## Embedding the Ozwell assistant (page-aware chat)
+
+"Ozwell" names two different things — choose deliberately:
+
+- **`OzwellChat` / `AIChat` (this library)** — the chat *UI shell*. You own the
+  transport and render messages you already have (see the Chat family and
+  `src/components/AI/OZWELL-BACKEND.md`).
+- **The embedded Ozwell assistant (`@ozwell/react`, from ozwellai-api)** — a
+  drop-in, page-aware assistant that can **read and act on the host page**
+  through tool calls. Use it when the user asks to "add Ozwell" or to let Ozwell
+  click / read / fill something on the page. (With an app agent key it acts as
+  that agent; configure no key and it instead gates on end-user sign-in.)
+
+For the page-aware assistant: install `@ozwell/react`, render `OzwellChat`,
+declare page actions in `tools`, and perform each
+one in `onToolCall(name, args, respond)` — always `respond(...)`, returning
+`isError: true` for an unknown tool or missing target. Authenticate with a
+**site-approved agent key** (`agnt_key-…`) via `VITE_OZWELL_AGENT_KEY`; Vite
+inlines `VITE_*` into the browser bundle, so never expose a parent (`ozw_…`),
+admin, or provider key that way. The canonical guide — with a full Vite + MIE UI
+"Click Hello World" example — lives at <https://mieweb.github.io/ozwellai-api/frontend/react/>.
+Conversation content is never relayed to the host; the host receives only the
+tool calls it declares, lifecycle/error events, and data the user explicitly
+shares (opt-in).
+
+This mirrors Rule 16 in [agent/mieweb-ui.instructions.md](../agent/mieweb-ui.instructions.md); keep the two in sync.

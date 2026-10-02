@@ -81,7 +81,11 @@ navigation → Enter-to-send. Don't reorder.
   `replyTo` still focuses on touch — it follows a user tap.
 - **Keyboard inset is the host's job.** The composer doesn't measure the
   keyboard; hosts mount `useKeyboardInset()` and size their shell from its
-  CSS variables (see the *Mobile Keyboard Shell* story).
+  CSS variables (see the _Mobile Keyboard Shell_ story). In native apps,
+  hosts pass `source: 'native'` (keyboard plugin events, which fire before
+  the keyboard animates) and pad only the composer dock by
+  `--mieweb-keyboard-inset`; resizing the whole shell from the visual
+  viewport snaps on iOS because it only updates after the animation.
 
 ## Drag-and-drop delegates validation
 

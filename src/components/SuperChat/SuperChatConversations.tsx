@@ -11,6 +11,7 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { Animated, AnimatedPresence } from '../../motion';
 import { sidebarItem, lastActivityOf, lastMessageByTime } from './parts';
 import type { SuperChatConversation } from './types';
 
@@ -47,6 +48,10 @@ export function SuperChatConversations({
   const [internalActive, setInternalActive] = React.useState(
     defaultActiveConversationId ?? conversations[0]?.id
   );
+  // Badges present on the list's first render are state, not news. Tracked
+  // here rather than per row so a row inserted later still pops its badge.
+  const [hasMounted, setHasMounted] = React.useState(false);
+  React.useEffect(() => setHasMounted(true), []);
   const requestedId = activeConversationId ?? internalActive;
   // Fall back to the first conversation when the requested id no longer exists
   // (e.g. the active conversation was removed) so an item stays highlighted.
@@ -113,12 +118,21 @@ export function SuperChatConversations({
                     </span>
                   )}
                 </span>
-                {!!c.unread && (
-                  <span className="bg-primary-600 ms-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white">
-                    {c.unread}
-                    <span className="sr-only"> unread messages</span>
-                  </span>
-                )}
+                <AnimatedPresence initial={hasMounted}>
+                  {!!c.unread && (
+                    <Animated
+                      key="unread"
+                      as="span"
+                      preset="pop"
+                      mode="presence"
+                      data-slot="superchat-unread-badge"
+                      className="bg-primary-600 ms-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white"
+                    >
+                      {c.unread}
+                      <span className="sr-only"> unread messages</span>
+                    </Animated>
+                  )}
+                </AnimatedPresence>
               </button>
             </div>
           );

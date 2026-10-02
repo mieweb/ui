@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { MarkdownRenderer } from '../Markdown';
 import type { AIMessage, AIRenderTextContent, MCPToolCall } from './types';
+import { useStreamingChatDemo } from './storyData';
 import {
   OzwellChat,
   type OzwellModelOption,
@@ -225,17 +226,6 @@ function InteractivePlaygroundDemo({
     []
   );
 
-  const renderMarkdown: AIRenderTextContent = (text, context) =>
-    context.role === 'assistant' ? (
-      <MarkdownRenderer
-        text={text}
-        cacheKey={context.messageId}
-        streaming={context.streaming}
-      />
-    ) : (
-      text
-    );
-
   const sendDemoMessage = (text: string) => {
     if (isGenerating) {
       setQueuedMessage(text);
@@ -346,7 +336,7 @@ const meta = {
       description: {
         component: `### What it's for
 
-**The Ozwell-branded widget shell around \`AIChat\`: thinking-mode menu, message jump list, warning strip, model picker in the composer, queued follow-up editing and a "Powered by Ozwell" footer — with every piece of state supplied by the host's Ozwell adapter.** \`OzwellChat\` takes \`messages: AIMessage[]\`, \`isGenerating\`, \`onSendMessage(text)\`, \`inputPlaceholder\` (default "Ask a question..."), \`renderTextContent\`, \`footer\` and: \`thinking={{ enabled, mode, onModeChange }}\` (\`OzwellThinkingMode\` \`never\` | \`collapsed\` | \`auto\` | \`expanded\` — applied client-side by filtering or collapsing \`thinking\` blocks before they reach \`AIChat\`); \`models={{ options, value, onChange, providerFilter?, onProviderFilterChange? }}\` (renders \`ComposerModelSelector\` in the composer's selector row when there is more than one option); \`queuedMessage\` / \`onQueuedMessageChange\` / \`onCancelQueuedMessage\` (shows the pending follow-up as a \`status: 'pending'\` user bubble with edit / save / cancel icon buttons via \`renderMessageFooter\`); \`warning\` / \`onDismissWarning\` (an inline \`Toast variant="warning"\`). A **Messages** dropdown appears once there are three or more user messages and scrolls the thread to the chosen one. It renders \`AIChat\` with \`showHeader={false}\`, \`variant="embedded"\`, and — unlike plain \`AIChat\` — keeps the composer **enabled while generating** so the next question can be typed and queued. Types exported: \`OzwellChatProps\`, \`OzwellThinkingMode\`, \`OzwellModelOption\`, \`OzwellModelValue\`.
+**The Ozwell-branded widget shell around \`AIChat\`: thinking-mode menu, message jump list, warning strip, model picker in the composer, queued follow-up editing and a "Powered by Ozwell" footer — with every piece of state supplied by the host's Ozwell adapter.** \`OzwellChat\` takes \`messages: AIMessage[]\`, \`isGenerating\`, \`onSendMessage(text)\`, \`inputPlaceholder\` (default "Ask a question..."), \`renderTextContent\`, \`footer\` and: \`thinking={{ enabled, mode, onModeChange }}\` (\`OzwellThinkingMode\` \`never\` | \`collapsed\` | \`auto\` | \`expanded\` — applied client-side by filtering or collapsing \`thinking\` blocks before they reach \`AIChat\`); \`models={{ options, value, onChange, providerFilter?, onProviderFilterChange? }}\` (renders \`ComposerModelSelector\` in the composer's selector row when there is more than one option); \`queuedMessage\` / \`onQueuedMessageChange\` / \`onCancelQueuedMessage\` (shows the pending follow-up as a \`status: 'pending'\` user bubble with edit / save / cancel icon buttons via \`renderMessageFooter\`); \`warning\` / \`onDismissWarning\` (an inline \`Toast variant="warning"\`). A **Messages** dropdown appears once there are three or more user messages and scrolls the thread to the chosen one. It renders \`AIChat\` with \`showHeader={false}\`, \`variant="embedded"\`, and — unlike plain \`AIChat\` — keeps the composer **enabled while generating** so the next question can be typed and queued. Because the thread is \`AIChat\`'s, the widget inherits its streaming scroll policy — an incoming reply reveals its first line and then the view holds while the rest streams below the fold, position is preserved when scrolled up, and a floating ↓ jump-to-bottom button appears (see the Streaming Response story). Types exported: \`OzwellChatProps\`, \`OzwellThinkingMode\`, \`OzwellModelOption\`, \`OzwellModelValue\`.
 
 ### Use it when
 
@@ -378,7 +368,7 @@ const [queued, setQueued] = useState<string | null>(null);
   models={{ options: adapter.models, value: adapter.model, onChange: adapter.setModel }}
   warning={adapter.fallbackWarning}
   onDismissWarning={adapter.clearWarning}
-  renderTextContent={(text, { streaming }) => <MarkdownRenderer content={text} streaming={streaming} />}
+  renderTextContent={(text, { streaming }) => <MarkdownRenderer text={text} streaming={streaming} />}
 />
 \`\`\`
 
@@ -631,4 +621,70 @@ export const QueuedMessageAndNavigation: Story = {
       within(document.body).getByRole('menuitem', { name: /expanded/i })
     ).toBeVisible();
   },
+};
+
+// ============================================================================
+// Streaming response (scroll anchoring + jump to bottom)
+// ============================================================================
+// OzwellChat renders AIChat, so it inherits AIChat's streaming scroll policy
+// (`useStickToBottom`). This story drives the same shared fake token stream
+// as the AIChat Streaming Response story so the inherited behavior can be
+// exercised inside the widget shell.
+
+const renderMarkdown: AIRenderTextContent = (text, context) =>
+  context.role === 'assistant' ? (
+    <MarkdownRenderer
+      text={text}
+      cacheKey={context.messageId}
+      streaming={context.streaming}
+    />
+  ) : (
+    text
+  );
+
+function StreamingWidgetDemo() {
+  const { messages, isGenerating, sendMessage } = useStreamingChatDemo();
+  return (
+    <div className="h-[600px] w-[min(100vw,560px)] overflow-hidden rounded-lg border border-slate-200 shadow-sm">
+      <OzwellChat
+        messages={messages}
+        isGenerating={isGenerating}
+        onSendMessage={sendMessage}
+        renderTextContent={renderMarkdown}
+      />
+    </div>
+  );
+}
+
+export const StreamingResponse: Story = {
+  name: 'Streaming Response',
+  argTypes: {
+    state: { table: { disable: true } },
+  },
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story: [
+          'A long answer **streams into the widget** — the scroll behavior is',
+          'inherited from `AIChat` (see its Streaming Response story for the',
+          'full policy):',
+          '',
+          '- An incoming reply reveals its first line, then the view **holds** —',
+          '  the rest of the stream fills below the fold under a ↓ arrow rather',
+          '  than chasing every chunk.',
+          '- Scrolling up preserves the position exactly and shows the floating',
+          '  **↓ jump-to-bottom** button (`data-slot="ai-chat-jump-to-bottom"`),',
+          '  which gains a **“New messages”** hint when messages land while',
+          '  scrolled up.',
+          '- Sending a message opens an anchored turn: the user bubble scrolls',
+          '  to the top and the reply streams into reserved space below.',
+          '',
+          'Try it: while the answer streams, scroll up — then click ↓. Sending',
+          'any message triggers another long streamed answer.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: () => <StreamingWidgetDemo />,
 };

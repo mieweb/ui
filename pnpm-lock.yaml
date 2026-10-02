@@ -5,20 +5,23 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  axios@>=1.0.0 <1.16.0: 1.16.0
   datavis-ace: '=4.1.0'
-  dompurify@<3.4.0: 3.4.0
   esbuild@<0.28.1: 0.28.1
-  flatted@<3.4.2: 3.4.2
+  axios@>=1.0.0 <1.16.0: 1.16.0
   minimatch@>=10.0.0 <10.2.3: 10.2.3
   minimatch@>=9.0.0 <9.0.7: 9.0.7
+  flatted@<3.4.2: 3.4.2
   picomatch@>=4.0.0 <4.0.4: 4.0.4
   uuid@<11.1.1: 11.1.1
+  dompurify@<3.4.0: 3.4.0
 
 patchedDependencies:
-  '@kerebron/extension-codecrock@0.8.9':
-    hash: 387d2859f76f160bbf539784ca04c00cf3cc695fb3f517f786dc1994fb28a7e2
-    path: patches/@kerebron__extension-codecrock@0.8.9.patch
+  '@kerebron/extension-codecrock@0.8.12':
+    hash: 992a39133ad7f10f463d904fcce0e313ec5f6635917b6ee05275d88f6fb20351
+    path: patches/@kerebron__extension-codecrock@0.8.12.patch
+  '@kerebron/extension-menu@0.8.12':
+    hash: d808fc6ec0eaf3fd4982ade7ed78c5c14f37eec04dcee965f3ac2152367b5b62
+    path: patches/@kerebron__extension-menu@0.8.12.patch
 
 importers:
 
@@ -93,34 +96,34 @@ importers:
         version: 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/builder':
         specifier: 0.0.5
-        version: 0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(monaco-editor@0.55.1)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+        version: 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(monaco-editor@0.55.1)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
       '@esheet/core':
         specifier: 0.0.5
         version: 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/fields':
         specifier: 0.0.5
-        version: 0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+        version: 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
       '@esheet/renderer':
         specifier: 0.0.5
-        version: 0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+        version: 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
       '@kerebron/editor':
-        specifier: ^0.8.6
-        version: 0.8.9
+        specifier: ^0.8.12
+        version: 0.8.12
       '@kerebron/editor-kits':
-        specifier: ^0.8.6
-        version: 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+        specifier: ^0.8.12
+        version: 0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))
       '@kerebron/extension-basic-editor':
-        specifier: ^0.8.6
-        version: 0.8.9
+        specifier: ^0.8.12
+        version: 0.8.12
       '@kerebron/extension-yjs':
-        specifier: ^0.8.6
-        version: 0.8.9
+        specifier: ^0.8.12
+        version: 0.8.12
       '@kerebron/wasm':
-        specifier: ^0.8.6
-        version: 0.8.9
+        specifier: ^0.8.12
+        version: 0.8.12
       '@mieweb/datavis':
         specifier: link:./packages/datavis
         version: link:packages/datavis
@@ -1047,53 +1050,53 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kerebron/editor-kits@0.8.9':
-    resolution: {integrity: sha512-xCTRYeQkBjfkPSPvQc1fxV6rPwc0JwE/3x8/Q1Eb/wrHWtdcRollt0u0BMi7m0YvMZhP7b01FvZPMQAkZQ0Tcw==}
+  '@kerebron/editor-kits@0.8.12':
+    resolution: {integrity: sha512-1Khn/IInsBiLOH/bHaLOWkKYH76GTBburkGboxozVag2Y3sB/aLEido7QPQ49ipw2tdvDeogLMqQyZBMWS8ijA==}
 
-  '@kerebron/editor@0.8.9':
-    resolution: {integrity: sha512-hQyrKAjyFW8RF7Khfe12LApSvLTfISyg4m0jI11SPSHXJgPe/nNQGD4KoBDkS7d2M+ng72X+FxHLNmVWZtAjEA==}
+  '@kerebron/editor@0.8.12':
+    resolution: {integrity: sha512-MJ7DKNsHRkB4NSZw8DhdhxkUah4RAOGxNAyYoBl3katZhE2h6dUoUB+CRnU3diVNL1xqrzgyatbQc3OI7mgBFg==}
 
-  '@kerebron/extension-basic-editor@0.8.9':
-    resolution: {integrity: sha512-pGBEJkdSWCSibtFARNRd9wKH6sSDanJvcSPDwlgj53yBmzKjCLurnK9YhVhVMD/MzJxC8id0RI8oP3U22Mc2wQ==}
+  '@kerebron/extension-basic-editor@0.8.12':
+    resolution: {integrity: sha512-3TigCyAyhaXc+CeBG4oh7JW9hgCHNlnHdun0Cvwo1YkguJtpX0VWBGW4jVDc5jih9Mr6hhTVsxUe7mzd54Lo4g==}
 
-  '@kerebron/extension-codecrock@0.8.9':
-    resolution: {integrity: sha512-l4AW621JzCCUcBd7S98gOiTSyaIbxEoH4Scv2yEyq2HBxaxO9kspZfnm65isnm1Q1mJEhEtYZ3xer48SHj02qw==}
+  '@kerebron/extension-codecrock@0.8.12':
+    resolution: {integrity: sha512-rIOXPDt0ZJZTGg1AX+pU1/7qv8NSXBqARxIMxl1JiB3O1TXXE9ZfBmKCJ66xpB7wDiA+epKFVlKLV0tPACccRA==}
 
-  '@kerebron/extension-dev-toolkit@0.8.9':
-    resolution: {integrity: sha512-XRpnS7t/3NyYKFXl2jy9OYiWhbGAje7V1xPsnKYm03sLZNw9dvkvcyE1Pv3ZHUsB/zxhiNY3SstPOo4+cr3VOg==}
+  '@kerebron/extension-dev-toolkit@0.8.12':
+    resolution: {integrity: sha512-T65yU9pkyHGV3UFwuY6w8dysYIB6mI1nDwjFfCCmyHaRBy9CXqh7k3UCXsJFaAErRhlRo1nKpj/Kup7gX8v0ew==}
 
-  '@kerebron/extension-markdown@0.8.9':
-    resolution: {integrity: sha512-1/Wx9rXKA4nXTsLW51UaOLywFzUEQa+coNsRJjcqaogF6o0toZwKSl/eE7/2enSz2arojGWJqDcrmjAimxVAvg==}
+  '@kerebron/extension-markdown@0.8.12':
+    resolution: {integrity: sha512-XmzXGHKcr/ASqqY6TLWX/pDlIwtQ/iKjUZg4Z6cX3za8/VRjV/77OKGooFpvInHUiXq42dJ1JNpoW39sAzTnWg==}
 
-  '@kerebron/extension-menu-legacy@0.8.9':
-    resolution: {integrity: sha512-xEt3fjtXmh6zrRJvoukh1XWa8n7aoh1JrKXH2Js3ebWEsZoWo/vHCzNs6EfaIC/K2F6DOcrZVOcx5R7Z0zuCPg==}
+  '@kerebron/extension-menu-legacy@0.8.12':
+    resolution: {integrity: sha512-SILHrLV2dy31VmkzHtfszxOY2fkj7WLx1hnAb8T2sDx1BNO6yzos0PjT1FSIa9D2HgjIGun+KVBvMArjC0B3IA==}
 
-  '@kerebron/extension-menu@0.8.9':
-    resolution: {integrity: sha512-FJNMRbv8dCQPYjJUrkSoPokshNvzO8QwFbZYQnT+ul3fXeupbQYFugBmK1Em8rWjlUNC22aDh3gHcRsApqEm7w==}
+  '@kerebron/extension-menu@0.8.12':
+    resolution: {integrity: sha512-EyNccG/am/P/cqEdJM322HRDK1vfLBMw0JBY8gyMPmgHZYOF8rbNRUTX+YGsDOcK4LsMjcFR5+p1gwVuXOrc1Q==}
 
-  '@kerebron/extension-odt@0.8.9':
-    resolution: {integrity: sha512-sjmHlMzrBwgSQufHUSbe/1NmDIAr6Z0xjQnTBV552ezPidI5sp78rneKKjY70DUzlBjPkYxB31cdSEKl1CsIOw==}
+  '@kerebron/extension-odt@0.8.12':
+    resolution: {integrity: sha512-6+ToOubvjDjj2+/IS2MF06I1/fHbdcwybR0jtHfPJX/DXcHi6J5pHosh9JO9DHst7wBph03ACT56WhJ17SVnVA==}
 
-  '@kerebron/extension-tables@0.8.9':
-    resolution: {integrity: sha512-gU57VFLxADskuDUrZI/TVptvhUzVbBMku6NIBe8dFDn5+IZMHqNXDYZkxuVx1G7ff1Fzi6PqMeL3cJa2Vp0ayA==}
+  '@kerebron/extension-tables@0.8.12':
+    resolution: {integrity: sha512-WX7eo14hGUEx66fA6mi0xDAOE89Cv+VbotB/KwCY7w5JogAn/AEVriRJ8YsZNbgKJS2JjXNHD/Kmfbqx7Kq/YQ==}
 
-  '@kerebron/extension-ui@0.8.9':
-    resolution: {integrity: sha512-6hBIaQUb3OKBT1Ikywf6VjGriiVt5QlcdbCPf0a7SkAqWrPkXGS//v5Xq9XbbCnVAt40RIHVONyQLCjF9DWmIQ==}
+  '@kerebron/extension-ui@0.8.12':
+    resolution: {integrity: sha512-jMS+GOc+3RiWxMIkTZQr4Pun0r3+6jlcKOyc70AY0W/7wNBQRzcT054rugyafTlWUH5/CaaBYgsOCvtqbA0edQ==}
 
-  '@kerebron/extension-yjs@0.8.9':
-    resolution: {integrity: sha512-qnCEbudXaE8IQLXFKxv4R/1oUYupBRU64Vb1rc5Mu8ameOfviYt7dRlHwMh7VA2e2EX2kz11VZxGL6xGltpnQQ==}
+  '@kerebron/extension-yjs@0.8.12':
+    resolution: {integrity: sha512-OPRLejzKbzSk0rSeq0xYfKgRKPqVFdmwJ06yhKVPfjM2OSM0d5Jb9yx1DV4b3ciBOaijWuQ3NmUb/HMnIR/WKg==}
 
-  '@kerebron/odt-wasm@0.8.9':
-    resolution: {integrity: sha512-S5Krh+W4cmENneQ78MlkfRtYRi4RElJzjEuFKBu4ki0r6mWH4JU0KLO7hiPPdauHGTJb4HaEDKNG3NcBwqtZGw==}
+  '@kerebron/odt-wasm@0.8.12':
+    resolution: {integrity: sha512-28di15TdQvO1TWh9ooLNZw6VFtKHjKLylNGdoDJ/h5UpWmRHP+7RBTjadwncpcAgfMgGn0w0t7i5usx1LYVpKQ==}
 
-  '@kerebron/tree-sitter@0.8.9':
-    resolution: {integrity: sha512-ECeKvf+mIn1wq5JYrPovKqRUfppRXlM7uveKF/PXZbyR/lZRhIQP42yallcFIV5z+jIBmydcsZo/sqddaJOsVw==}
+  '@kerebron/tree-sitter@0.8.12':
+    resolution: {integrity: sha512-5z00zgr/mncW7vBh8SA+nmcaHBe7KSM1LBCvhbG21H5bA8mRb26tlxYoA8TK4jyg1EvDkkfRqzffZFTbZ8t9ag==}
 
-  '@kerebron/wasm@0.8.9':
-    resolution: {integrity: sha512-XzcDL9mHeD8oKla6G2+SDbZHv3qK76oF3jNgUe3czFG6J24MqWB5zfv1ty19ZA1MirxTxpfUdjnmTiMH6ToPew==}
+  '@kerebron/wasm@0.8.12':
+    resolution: {integrity: sha512-NzPSwsvjxfMnpJvtnCm4TbIo2Y9fFN31XOq+VapH/UJKU+T9CGmRkRIJh7Dstxf2Nm9znifU7fAtyO9tN0RgeQ==}
 
-  '@kerebron/workspace@0.8.9':
-    resolution: {integrity: sha512-BPa9pmxZcSg0bqPY1oeG2SBxN8OV97rrHqJPhV7+1gMjvlDtdlDFui7ZwocLwVaVQw7KU5YgdQDkRSa2AFeSuQ==}
+  '@kerebron/workspace@0.8.12':
+    resolution: {integrity: sha512-mooXztxVBVz/jUjgY9RWe3lfDrfm/2n05FR4x1gfo0I3gp2jw/aM2EvairxAsiUkNPG+u/YVwlN/TBZRCg+TiQ==}
 
   '@lezer/common@1.5.2':
     resolution: {integrity: sha512-sxQE460fPZyU3sdc8lafxiPwJHBzZRy/udNFynGQky1SePYBdhkBl1kOagA9uT3pxR8K09bOrmTUqA9wb/PjSQ==}
@@ -5172,9 +5175,6 @@ packages:
   prosemirror-dev-toolkit@1.1.8:
     resolution: {integrity: sha512-Qi549XA+DqU5cCkn/xv+M53gy1sQbyOTjiOfiG7Gjq5gm6ZxLilGN04UITWTAYx9kzLBi7Y9RJmvmWB4xiRauA==}
 
-  prosemirror-model@1.25.8:
-    resolution: {integrity: sha512-BswA4BLSFEiORV6Vjj/yZBXDbos1zTEnhyeSSgT8psGFhstQS7UJ8/WOLiDos9Byaee27+tml0/DuMNxYR84zg==}
-
   prosemirror-model@1.25.9:
     resolution: {integrity: sha512-pRTklkDDMMRopyoAcrr9wV/8g/RYgrLHBuJAb5hlEuYZRdm5yqmPjWId83fpBwPpSFqEdja0H7Dfd7z1X/npcA==}
 
@@ -5693,6 +5693,10 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
+  temml@0.13.4:
+    resolution: {integrity: sha512-k1yolMBswx34Jw9hZn5Xh2/GBlwqlW+wiN7QaUYUMhSa1ypfti6rlCfSmCxWyooxH1G32C/Z+qVvgAsBOELZBQ==}
+    engines: {node: '>=18.13.0'}
+
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
     engines: {node: '>=8'}
@@ -6075,8 +6079,8 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
-  web-tree-sitter@0.26.11:
-    resolution: {integrity: sha512-Q5Dm3YTIXSXuH6FxX6RuzX2Qwpc4DPGiYMU87Wg5Z8OIStiQFiUex4zMDc0vBTw78EphaYJacncJghCHzbZptg==}
+  web-tree-sitter@0.26.12:
+    resolution: {integrity: sha512-fvqTNZQBGUgUgfP0mHw+iHf9Yf6bRQrp0A3pSf2v/hSKxkT1beCoIWoLVmlPL7O6dmySfSb/t1aJoJvrgTRStw==}
 
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
@@ -6702,12 +6706,12 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/builder@0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(monaco-editor@0.55.1)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
+  '@esheet/builder@0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(monaco-editor@0.55.1)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
     dependencies:
       '@esheet/adapters': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
-      '@mieweb/ui': 0.7.1-dev.13(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+      '@esheet/fields': 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+      '@mieweb/ui': 0.7.1-dev.13(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
       '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       js-yaml: 4.1.1
       react: 19.2.4
@@ -6752,10 +6756,10 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/fields@0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
+  '@esheet/fields@0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
     dependencies:
       '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@mieweb/ui': 0.7.1-dev.13(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+      '@mieweb/ui': 0.7.1-dev.13(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
       lucide-react: 0.562.0(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
@@ -6787,11 +6791,11 @@ snapshots:
       - y-protocols
       - yjs
 
-  '@esheet/renderer@0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
+  '@esheet/renderer@0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
     dependencies:
       '@esheet/adapters': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.5(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+      '@esheet/fields': 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
       js-yaml: 4.1.1
     optionalDependencies:
       react: 19.2.4
@@ -7134,107 +7138,108 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
+  '@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
     dependencies:
-      '@kerebron/editor': 0.8.9
-      '@kerebron/extension-basic-editor': 0.8.9
-      '@kerebron/extension-codecrock': 0.8.9(patch_hash=387d2859f76f160bbf539784ca04c00cf3cc695fb3f517f786dc1994fb28a7e2)
-      '@kerebron/extension-dev-toolkit': 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      '@kerebron/extension-markdown': 0.8.9
-      '@kerebron/extension-menu': 0.8.9
-      '@kerebron/extension-menu-legacy': 0.8.9
-      '@kerebron/extension-odt': 0.8.9
-      '@kerebron/extension-tables': 0.8.9
-      '@kerebron/extension-ui': 0.8.9
+      '@kerebron/editor': 0.8.12
+      '@kerebron/extension-basic-editor': 0.8.12
+      '@kerebron/extension-codecrock': 0.8.12(patch_hash=992a39133ad7f10f463d904fcce0e313ec5f6635917b6ee05275d88f6fb20351)
+      '@kerebron/extension-dev-toolkit': 0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/extension-markdown': 0.8.12
+      '@kerebron/extension-menu': 0.8.12(patch_hash=d808fc6ec0eaf3fd4982ade7ed78c5c14f37eec04dcee965f3ac2152367b5b62)
+      '@kerebron/extension-menu-legacy': 0.8.12
+      '@kerebron/extension-odt': 0.8.12
+      '@kerebron/extension-tables': 0.8.12
+      '@kerebron/extension-ui': 0.8.12
     transitivePeerDependencies:
       - svelte
 
-  '@kerebron/editor@0.8.9':
+  '@kerebron/editor@0.8.12':
     dependencies:
-      '@kerebron/workspace': 0.8.9
+      '@kerebron/workspace': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-basic-editor@0.8.9':
+  '@kerebron/extension-basic-editor@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
+      '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
       prosemirror-view: 1.40.0
+      temml: 0.13.4
 
-  '@kerebron/extension-codecrock@0.8.9(patch_hash=387d2859f76f160bbf539784ca04c00cf3cc695fb3f517f786dc1994fb28a7e2)':
+  '@kerebron/extension-codecrock@0.8.12(patch_hash=992a39133ad7f10f463d904fcce0e313ec5f6635917b6ee05275d88f6fb20351)':
     dependencies:
-      '@kerebron/editor': 0.8.9
-      '@kerebron/extension-basic-editor': 0.8.9
-      '@kerebron/tree-sitter': 0.8.9
-      '@kerebron/wasm': 0.8.9
-      '@kerebron/workspace': 0.8.9
+      '@kerebron/editor': 0.8.12
+      '@kerebron/extension-basic-editor': 0.8.12
+      '@kerebron/tree-sitter': 0.8.12
+      '@kerebron/wasm': 0.8.12
+      '@kerebron/workspace': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-dev-toolkit@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
+  '@kerebron/extension-dev-toolkit@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
     dependencies:
-      '@kerebron/editor': 0.8.9
+      '@kerebron/editor': 0.8.12
       prosemirror-dev-toolkit: 1.1.8(svelte@5.56.3(@typescript-eslint/types@8.56.1))
       prosemirror-view: 1.40.0
     transitivePeerDependencies:
       - svelte
 
-  '@kerebron/extension-markdown@0.8.9':
+  '@kerebron/extension-markdown@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
-      '@kerebron/extension-basic-editor': 0.8.9
-      '@kerebron/tree-sitter': 0.8.9
-      '@kerebron/wasm': 0.8.9
-      '@kerebron/workspace': 0.8.9
+      '@kerebron/editor': 0.8.12
+      '@kerebron/extension-basic-editor': 0.8.12
+      '@kerebron/tree-sitter': 0.8.12
+      '@kerebron/wasm': 0.8.12
+      '@kerebron/workspace': 0.8.12
       mathml2latex: 1.1.3
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
 
-  '@kerebron/extension-menu-legacy@0.8.9':
+  '@kerebron/extension-menu-legacy@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
+      '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-menu@0.8.9':
+  '@kerebron/extension-menu@0.8.12(patch_hash=d808fc6ec0eaf3fd4982ade7ed78c5c14f37eec04dcee965f3ac2152367b5b62)':
     dependencies:
-      '@kerebron/editor': 0.8.9
+      '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-odt@0.8.9':
+  '@kerebron/extension-odt@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
-      '@kerebron/odt-wasm': 0.8.9
+      '@kerebron/editor': 0.8.12
+      '@kerebron/odt-wasm': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
 
-  '@kerebron/extension-tables@0.8.9':
+  '@kerebron/extension-tables@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
+      '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-ui@0.8.9':
+  '@kerebron/extension-ui@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
+      '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-view: 1.40.0
 
-  '@kerebron/extension-yjs@0.8.9':
+  '@kerebron/extension-yjs@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
-      '@kerebron/extension-basic-editor': 0.8.9
+      '@kerebron/editor': 0.8.12
+      '@kerebron/extension-basic-editor': 0.8.12
       lib0: 0.2.109
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
@@ -7242,17 +7247,17 @@ snapshots:
       y-protocols: 1.0.6(yjs@13.6.30)
       yjs: 13.6.30
 
-  '@kerebron/odt-wasm@0.8.9': {}
+  '@kerebron/odt-wasm@0.8.12': {}
 
-  '@kerebron/tree-sitter@0.8.9':
+  '@kerebron/tree-sitter@0.8.12':
     dependencies:
-      web-tree-sitter: 0.26.11
+      web-tree-sitter: 0.26.12
 
-  '@kerebron/wasm@0.8.9':
+  '@kerebron/wasm@0.8.12':
     dependencies:
-      '@kerebron/editor': 0.8.9
+      '@kerebron/editor': 0.8.12
 
-  '@kerebron/workspace@0.8.9': {}
+  '@kerebron/workspace@0.8.12': {}
 
   '@lezer/common@1.5.2': {}
 
@@ -7352,7 +7357,7 @@ snapshots:
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       wavesurfer.js: 7.12.1
 
-  '@mieweb/ui@0.7.1-dev.13(@kerebron/editor-kits@0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.9)(@kerebron/extension-yjs@0.8.9)(@kerebron/wasm@0.8.9)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
+  '@mieweb/ui@0.7.1-dev.13(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
     dependencies:
       '@swc/helpers': 0.5.19
       '@tanstack/react-virtual': 3.14.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -7369,10 +7374,10 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       tailwind-merge: 2.6.1
     optionalDependencies:
-      '@kerebron/editor': 0.8.9
-      '@kerebron/editor-kits': 0.8.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      '@kerebron/extension-yjs': 0.8.9
-      '@kerebron/wasm': 0.8.9
+      '@kerebron/editor': 0.8.12
+      '@kerebron/editor-kits': 0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/extension-yjs': 0.8.12
+      '@kerebron/wasm': 0.8.12
       '@mieweb/datavis': link:packages/datavis
       ag-grid-community: 35.1.0
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -11935,14 +11940,10 @@ snapshots:
   prosemirror-dev-toolkit@1.1.8(svelte@5.56.3(@typescript-eslint/types@8.56.1)):
     dependencies:
       html: 1.0.0
-      prosemirror-model: 1.25.8
+      prosemirror-model: 1.25.9
       svelte-tree-view: 1.4.2(svelte@5.56.3(@typescript-eslint/types@8.56.1))
     transitivePeerDependencies:
       - svelte
-
-  prosemirror-model@1.25.8:
-    dependencies:
-      orderedmap: 2.1.1
 
   prosemirror-model@1.25.9:
     dependencies:
@@ -12652,6 +12653,8 @@ snapshots:
 
   tapable@2.3.0: {}
 
+  temml@0.13.4: {}
+
   test-exclude@6.0.0:
     dependencies:
       '@istanbuljs/schema': 0.1.3
@@ -13126,7 +13129,7 @@ snapshots:
 
   web-namespaces@2.0.1: {}
 
-  web-tree-sitter@0.26.11: {}
+  web-tree-sitter@0.26.12: {}
 
   webidl-conversions@7.0.0: {}
 
