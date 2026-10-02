@@ -41,7 +41,7 @@ This page documents the layer itself; the subject in every story below is a pane
 Install the optional peer dependency, then wrap the app once:
 
 \`\`\`sh
-npm install motion
+pnpm add motion
 \`\`\`
 
 \`\`\`tsx

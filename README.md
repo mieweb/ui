@@ -56,17 +56,17 @@ The components require React 18+ and React DOM 18+ to render, including when
 embedded in a non-React page. If your project already has those dependencies:
 
 ```bash
-npm install @mieweb/ui
+pnpm add @mieweb/ui
 ```
 
-Use `pnpm add @mieweb/ui` or `yarn add @mieweb/ui` if that is your project's
+Use `npm install @mieweb/ui` or `yarn add @mieweb/ui` if that is your project's
 package manager. You do not need to clone this repository or run Storybook to use
 the library.
 
 For a project without React, install the rendering dependencies:
 
 ```bash
-npm install react react-dom
+pnpm add react react-dom
 ```
 
 Using an AI coding agent? [Set up its instructions](#set-up-your-ai-coding-agent)
