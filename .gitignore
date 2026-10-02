@@ -15,7 +15,7 @@ test-results/*.swp
 *.local.md
 # MedicalCodify shards (.storybook/public/codify) are committed via git-lfs;
 # the extraction TSV + sqlite db live (gitignored) in packages/codify/data/
-# The codify build pipeline lives in a separate (not-yet-published) repo and is
+# The codify build pipeline lives at https://github.com/mieweb/codify and is
 # kept locally here without being tracked in this repo.
 packages/codify/
 
