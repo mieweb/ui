@@ -14,10 +14,50 @@ export interface TranscriptSegment {
   text: string;
 }
 
+/** How confident/complex the speaker attribution is for a segment. */
+export type DiarizedAttribution = 'single' | 'overlap' | 'uncertain';
+
+/** Anonymous speaker activity, before enrolled names are anchored onto it. */
+export interface AnonymousSpeakerActivity {
+  speakerId: string;
+  start: number;
+  end: number;
+  confidence?: number;
+}
+
+/** One segment's anonymous speaker assignment from an experimental/backend diarizer. */
+export interface AnonymousSegmentAttribution {
+  /** Stable anonymous id for the PRIMARY speaker on this segment. */
+  speakerId: string;
+  /** Active speakers for the segment. Include `speakerId` here when provided. */
+  speakerActivities?: AnonymousSpeakerActivity[];
+  attribution?: DiarizedAttribution;
+  confidence?: number;
+  provisional?: boolean;
+}
+
+/** A speaker activity window after anonymous ids are mapped to cluster ids + display labels. */
+export interface DiarizedSpeakerActivity extends AnonymousSpeakerActivity {
+  cluster: number;
+  speaker: string;
+}
+
+/** Stable default speaker ids for cluster-based diarizers. */
+export function speakerIdForCluster(cluster: number): string {
+  return `speaker-${cluster + 1}`;
+}
+
 /** A transcript chunk after diarization: which cluster + a human speaker label. */
 export interface DiarizedSegment extends TranscriptSegment {
   cluster: number;
   speaker: string;
+  /** Stable id for the primary speaker, even if the display name later changes. */
+  speakerId: string;
+  /** All known speaker activity on this segment (1 entry for the current pipeline). */
+  speakerActivities: DiarizedSpeakerActivity[];
+  attribution: DiarizedAttribution;
+  confidence?: number;
+  provisional?: boolean;
 }
 
 export interface ClusterOptions {
@@ -164,10 +204,25 @@ export function attributeSegments(
 ): DiarizedSegment[] {
   return segments.map((seg, i) => {
     const cluster = clusters[i] ?? 0;
+    const speaker = labels[cluster] ?? `Speaker ${cluster + 1}`;
+    const speakerId = speakerIdForCluster(cluster);
     return {
       ...seg,
       cluster,
-      speaker: labels[cluster] ?? `Speaker ${cluster + 1}`,
+      speaker,
+      speakerId,
+      speakerActivities: [
+        {
+          speakerId,
+          cluster,
+          speaker,
+          start: seg.start,
+          end: seg.end,
+          confidence: 1,
+        },
+      ],
+      attribution: 'single',
+      confidence: 1,
     };
   });
 }
@@ -243,10 +298,39 @@ export async function inferSpeakerRoles(
   } catch {
     return segments;
   }
-  return segments.map((s) =>
-    isGeneric(s.speaker) && map[s.speaker]
-      ? { ...s, speaker: map[s.speaker] }
-      : s
+  return segments.map((s) => {
+    const speaker =
+      isGeneric(s.speaker) && map[s.speaker] ? map[s.speaker] : s.speaker;
+    let changedActivities = false;
+    const speakerActivities = s.speakerActivities.map((activity) => {
+      if (isGeneric(activity.speaker) && map[activity.speaker]) {
+        changedActivities = true;
+        return { ...activity, speaker: map[activity.speaker] };
+      }
+      return activity;
+    });
+    return speaker !== s.speaker || changedActivities
+      ? { ...s, speaker, speakerActivities }
+      : s;
+  });
+}
+
+function sameSpeakerActivities(
+  a: DiarizedSpeakerActivity[],
+  b: DiarizedSpeakerActivity[],
+  includeBounds: boolean
+): boolean {
+  return (
+    a.length === b.length &&
+    a.every(
+      (activity, i) =>
+        activity.speakerId === b[i]?.speakerId &&
+        activity.cluster === b[i]?.cluster &&
+        activity.speaker === b[i]?.speaker &&
+        activity.confidence === b[i]?.confidence &&
+        (!includeBounds ||
+          (activity.start === b[i]?.start && activity.end === b[i]?.end))
+    )
   );
 }
 
@@ -255,9 +339,37 @@ export function mergeTurns(segments: DiarizedSegment[]): DiarizedSegment[] {
   const out: DiarizedSegment[] = [];
   for (const seg of segments) {
     const last = out[out.length - 1];
-    if (last && last.cluster === seg.cluster) {
+    if (
+      last &&
+      last.cluster === seg.cluster &&
+      last.speakerId === seg.speakerId &&
+      last.attribution === seg.attribution &&
+      last.provisional === seg.provisional &&
+      sameSpeakerActivities(
+        last.speakerActivities,
+        seg.speakerActivities,
+        last.attribution !== 'single'
+      )
+    ) {
       last.end = seg.end;
       last.text = `${last.text} ${seg.text}`.trim();
+      last.confidence =
+        last.confidence == null
+          ? seg.confidence
+          : seg.confidence == null
+            ? last.confidence
+            : Math.min(last.confidence, seg.confidence);
+      last.speakerActivities = last.speakerActivities.map((activity, i) => ({
+        ...activity,
+        start: Math.min(
+          activity.start,
+          seg.speakerActivities[i]?.start ?? activity.start
+        ),
+        end: Math.max(
+          activity.end,
+          seg.speakerActivities[i]?.end ?? activity.end
+        ),
+      }));
     } else {
       out.push({ ...seg });
     }
