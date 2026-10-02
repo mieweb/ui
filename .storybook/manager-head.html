@@ -280,24 +280,30 @@
     document.head.appendChild(script);
 
     // Temporary launcher icon fix (remove when mieweb/ozwellai-api#296
-    // ships): the loader hardcodes the launcher image to the host page's
-    // /favicon.ico, which this site doesn't serve — so the button renders a
-    // broken image. Swap in the Ozwell mark this Storybook already serves
-    // for HeyOzwell. Polled rather than observed because the loader
-    // re-renders the button's innerHTML on panel toggles, restoring the
-    // broken favicon after any one-shot swap.
+    // ships): the loader renders a generic chat glyph (currently an inline
+    // SVG; previously a broken /favicon.ico <img>) instead of the Ozwell
+    // mark. Replace whatever icon it renders with the mark this Storybook
+    // already serves for HeyOzwell. Polled rather than observed because the
+    // loader re-renders the button's innerHTML on panel toggles, restoring
+    // its own icon after any one-shot swap.
     setInterval(function () {
-      var img = document.querySelector('#ozwell-chat-button img');
-      if (img && img.getAttribute('src') !== './ozwell/icon.svg') {
+      var button = document.getElementById('ozwell-chat-button');
+      if (!button) return;
+      var icon = button.querySelector('.ozwell-chat-icon, img, svg');
+      if (icon && !(icon.tagName === 'IMG' && icon.getAttribute('src') === './ozwell/icon.svg')) {
+        var img = document.createElement('img');
         img.src = './ozwell/icon.svg';
+        img.alt = '';
+        img.className = 'ozwell-chat-icon';
         // Fill the 60px circle: the loader caps .ozwell-chat-icon at 32px
-        // and pads the button. Inline styles win and are re-applied with
-        // the src whenever the loader re-renders the button.
+        // and pads the button. Inline styles win and are re-applied
+        // whenever the loader re-renders the button.
         img.style.width = '100%';
         img.style.height = '100%';
         img.style.objectFit = 'contain';
-        img.parentElement.style.padding = '0';
-        img.parentElement.style.background = '#fff';
+        icon.replaceWith(img);
+        button.style.padding = '0';
+        button.style.background = '#fff';
       }
     }, 500);
   })();
