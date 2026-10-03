@@ -71,13 +71,14 @@
         "Chat",
         "SuperChat",
         "Voice",
-        "Files"
+        "Files",
+        "Presentations"
       ]
     },
     {
       "name": "Templates",
       "scope": "scope:general-purpose",
-      "families": ["Pages", "Conversion", "Content", "Social proof"]
+      "families": ["Pages", "Conversion", "Content", "Social proof", "Reports"]
     },
     {
       "name": "Healthcare",

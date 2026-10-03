@@ -32,6 +32,10 @@ export interface HeroSectionProps extends Omit<SectionBaseProps, 'align'> {
   ctaNote?: string;
   /** Short trust points rendered as a checked list. */
   highlights?: string[];
+  /** Dateline items under the heading, e.g. `['Benchmark report', '2027 edition']`. */
+  meta?: string[];
+  /** Brand mark above the heading. */
+  logo?: TemplateImage;
   image?: TemplateImage;
   /** Trail ending in the current page, which renders unlinked. */
   breadcrumbs?: TemplateLink[];
@@ -52,6 +56,8 @@ export const HeroSection = React.forwardRef<HTMLElement, HeroSectionProps>(
       secondaryCta,
       ctaNote,
       highlights,
+      meta,
+      logo,
       image,
       breadcrumbs,
       headingLevel = 'h1',
@@ -121,6 +127,13 @@ export const HeroSection = React.forwardRef<HTMLElement, HeroSectionProps>(
                 </ol>
               </nav>
             )}
+            {logo && (
+              <TemplateImg
+                {...logo}
+                components={components}
+                className="mb-6 h-12 w-auto"
+              />
+            )}
             <SectionHeading
               as={headingLevel}
               size="hero"
@@ -131,6 +144,23 @@ export const HeroSection = React.forwardRef<HTMLElement, HeroSectionProps>(
               tone={tone}
               titleId={titleId}
             />
+            {meta && meta.length > 0 && (
+              <p
+                data-slot="hero-meta"
+                className={cn(
+                  'mt-6 flex flex-wrap gap-x-2 gap-y-1 text-sm font-medium',
+                  mutedTextClass(tone),
+                  !split && 'justify-center'
+                )}
+              >
+                {meta.map((item, i) => (
+                  <React.Fragment key={item}>
+                    {i > 0 && <span aria-hidden="true">·</span>}
+                    <span>{item}</span>
+                  </React.Fragment>
+                ))}
+              </p>
+            )}
             <CtaLinks
               primary={primaryCta}
               secondary={secondaryCta}

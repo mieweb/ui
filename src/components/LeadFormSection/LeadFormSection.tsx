@@ -1,9 +1,11 @@
 import * as React from 'react';
+import { CircleCheck } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { buttonVariants } from '../Button/button-variants';
 import { RequiredMark, inputVariants } from '../Input';
 import {
   SectionHeading,
+  accentTextClass,
   cardClass,
   containerClass,
   mutedTextClass,
@@ -48,6 +50,8 @@ export interface LeadFormSectionProps extends Omit<
   submitTrackingId?: string;
   /** `split` puts the heading beside the form; `stacked` centres it above. */
   layout?: 'split' | 'stacked';
+  /** What the visitor gets, as a checked list under the heading — e.g. a gated report's contents. */
+  highlights?: string[];
 }
 
 export const defaultLeadFormFields: LeadFormField[] = [
@@ -103,6 +107,7 @@ export const LeadFormSection = React.forwardRef<
       submitLabel = 'Submit',
       note,
       layout = 'split',
+      highlights,
       tone = 'muted',
       submitTrackingId,
       components,
@@ -135,14 +140,38 @@ export const LeadFormSection = React.forwardRef<
             split && 'grid items-start gap-12 lg:grid-cols-2'
           )}
         >
-          <SectionHeading
-            eyebrow={eyebrow}
-            title={title}
-            description={description}
-            align={split ? 'start' : 'center'}
-            tone={tone}
-            titleId={titleId}
-          />
+          <div>
+            <SectionHeading
+              eyebrow={eyebrow}
+              title={title}
+              description={description}
+              align={split ? 'start' : 'center'}
+              tone={tone}
+              titleId={titleId}
+            />
+            {highlights && highlights.length > 0 && (
+              <ul
+                className={cn(
+                  'mt-6 space-y-2',
+                  !split && 'mx-auto w-fit',
+                  mutedTextClass(tone)
+                )}
+              >
+                {highlights.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <CircleCheck
+                      aria-hidden="true"
+                      className={cn(
+                        'mt-0.5 size-4 shrink-0',
+                        accentTextClass(tone)
+                      )}
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <form
             action={resolvedAction}
             method={typeof resolvedAction === 'string' ? method : undefined}

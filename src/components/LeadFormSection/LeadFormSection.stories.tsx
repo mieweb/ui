@@ -127,6 +127,21 @@ export const CustomFields: Story = {
 
 export const OnBrand: Story = { args: { tone: 'brand' } };
 
+/** A report gate: `highlights` lists what the download contains. */
+export const WithHighlights: Story = {
+  args: {
+    title: 'Get the report',
+    description: 'We’ll email you the PDF.',
+    highlights: [
+      'Executive summary',
+      'Key findings',
+      'Methodology',
+      '12-month roadmap',
+    ],
+    submitLabel: 'Email me the report',
+  },
+};
+
 export const Mobile: Story = {
   parameters: { viewport: { defaultViewport: 'mobile1' } },
 };

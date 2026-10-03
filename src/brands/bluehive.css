@@ -48,6 +48,9 @@
   --mieweb-info-foreground: #ffffff;
   --mieweb-secondary-foreground: #ffffff;
 
+  /* Accent Color - BlueHive Gold */
+  --mieweb-accent: #f7b500;
+
   /* Chart / Data Visualization */
   --mieweb-chart-1: #27aae1;
   --mieweb-chart-2: #22c55e;

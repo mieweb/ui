@@ -51,7 +51,7 @@ A band of headline numbers — value with optional prefix, suffix and trend arro
       description:
         'Figures: `{ value, prefix?, suffix?, label, description?, trend? }`.',
     },
-    variant: { control: 'inline-radio', options: ['plain', 'cards'] },
+    variant: { control: 'inline-radio', options: ['plain', 'cards', 'ruled'] },
     locale: {
       control: 'text',
       description: 'BCP 47 locale for number formatting.',
@@ -87,6 +87,21 @@ export const Cards: Story = {
 };
 
 export const OnBrand: Story = { args: { tone: 'brand' } };
+
+/** A report's key-findings band: an accent rule beside each figure, on the brand tone. */
+export const Ruled: Story = {
+  args: {
+    variant: 'ruled',
+    tone: 'brand',
+    align: 'start',
+    eyebrow: 'Key findings at a glance',
+    title: undefined,
+    stats: stats.map((s, i) => ({
+      ...s,
+      description: ['Sample data', 'Median', 'Year one', 'On site'][i],
+    })),
+  },
+};
 
 export const Mobile: Story = {
   parameters: { viewport: { defaultViewport: 'mobile1' } },

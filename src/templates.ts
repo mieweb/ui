@@ -16,6 +16,17 @@ export * from './components/ResourceCardsSection';
 export * from './components/StatsSection';
 export * from './components/LogoCloudSection';
 export * from './components/TestimonialSection';
+// Report sections
+export * from './components/MetricStatusBadge';
+export * from './components/ReportLegend';
+export * from './components/ReportByline';
+export * from './components/ReportMethodology';
+export * from './components/BenchmarkTableSection';
+export * from './components/RankedListSection';
+export * from './components/TileCartogramSection';
+export * from './components/MetricListSection';
+export * from './components/LinkGroupsSection';
+export * from './components/PdfEmbedSection';
 export {
   SectionShell,
   SectionHeading,

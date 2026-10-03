@@ -71,6 +71,25 @@ touching any of these.
    block of `miewebUISafelist` — keep `src/tailwind-preset.ts` and `.cjs` in
    sync.
 
+## Report sections
+
+The Reports family (`MetricStatusBadge`, `ReportLegend`, `BenchmarkTableSection`,
+`RankedListSection`, `TileCartogramSection`, `MetricListSection`, `ReportMethodology`,
+`ReportByline`, `LinkGroupsSection`, `PdfEmbedSection`) follows the same contract, plus:
+
+- **Provenance is a shell prop.** `SectionShell`'s `status` renders the badge under
+  the heading; sections that report figures accept `status` and forward it.
+- **Bars, tiles and dots are decorative.** Every value is also in text (or `sr-only`
+  when a `note` replaces it visually). Keep it that way when adding a chart-like section.
+- **Status colours are dots, never text.** EH's `--mieweb-success` fails AA as text on
+  white; `MetricListSection`'s `positive` uses a success rule instead.
+- **`accent`** (`--color-accent`, `--mieweb-accent` with a primary fallback) is a
+  highlight for fills and rules on dark surfaces. It is gold for EH and BlueHive and
+  fails contrast as text on light grounds.
+
+The slide deck lives outside this entry (`@mieweb/ui/deck`, client) — see
+`src/components/Deck/MAINTAINERS.md`.
+
 ## Gotchas
 
 - The marquee (`mie-marquee` in `src/styles/effects.css`) needs the track to

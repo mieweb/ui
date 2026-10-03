@@ -538,6 +538,8 @@ const preview: Preview = {
             ['Overview', '*'],
             'Files',
             ['Overview', '*'],
+            'Presentations',
+            ['Overview', '*'],
           ],
           'Templates',
           [
@@ -548,6 +550,8 @@ const preview: Preview = {
             'Content',
             ['Overview', '*'],
             'Social proof',
+            ['Overview', '*'],
+            'Reports',
             ['Overview', '*'],
           ],
           'Healthcare',

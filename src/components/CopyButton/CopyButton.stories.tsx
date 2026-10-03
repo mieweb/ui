@@ -46,6 +46,11 @@ An inline icon \`Button\` that writes \`value\` to the clipboard and shows a che
           target: 'actions-button',
           why: 'Renders an icon-size Button and accepts its variant/size props.',
         },
+        {
+          type: 'composes with',
+          target: 'reports-reportmethodology',
+          why: 'Beside the suggested citation, from a client component, for a one-click copy.',
+        },
       ],
     },
   },

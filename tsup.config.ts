@@ -60,6 +60,7 @@ export default defineConfig({
     'ag-grid-react',
     'react-globe.gl',
     'three',
+    'leaflet',
     '@mieweb/ui',
     // @mieweb/datavis is a git submodule (link:), not a published package, so it
     // is bundled into the datavis entry — like its CSS — instead of externalized.

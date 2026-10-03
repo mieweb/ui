@@ -97,6 +97,11 @@ The badge owns nothing: the host maps its domain state to a \`variant\` and supp
       relationships: [
         {
           type: 'alternative to',
+          target: 'reports-metricstatusbadge',
+          why: 'MetricStatusBadge has fixed data-provenance meanings (live, modeled, maturing) for report figures.',
+        },
+        {
+          type: 'alternative to',
           target: 'data-display-countbadge',
           why: 'Badge is a static label span; CountBadge is a button with a count chip that can open a popover table of items.',
         },

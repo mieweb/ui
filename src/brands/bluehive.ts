@@ -32,6 +32,9 @@ export const bluehiveBrand: BrandConfig = {
       950: '#00506e',
     },
 
+    // Gold accent from the logo — mirrors --mieweb-accent in bluehive.css
+    accent: { DEFAULT: '#f7b500' },
+
     // Light mode semantic colors
     light: {
       background: '#ffffff',

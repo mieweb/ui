@@ -41,6 +41,9 @@
   --color-ozwell: var(--mieweb-ozwell, #0ba0e0);
   --color-ozwell-foreground: var(--mieweb-ozwell-foreground, #ffffff);
 
+  /* ── Accent — a brand's highlight colour (EH and BlueHive gold); falls back to primary ── */
+  --color-accent: var(--mieweb-accent, var(--mieweb-primary-400));
+
   /* ── Secondary Color Scale ─────────────────────────────────────────── */
   --color-secondary: var(--mieweb-secondary-500, #6366f1);
   --color-secondary-50: var(--mieweb-secondary-50, #eef2ff);

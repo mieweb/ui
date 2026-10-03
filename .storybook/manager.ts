@@ -1,8 +1,13 @@
 import React from 'react';
-import { addons, types } from 'storybook/manager-api';
+import {
+  addons,
+  types,
+  useStorybookApi,
+  useStorybookState,
+} from 'storybook/manager-api';
 import { create } from 'storybook/theming/create';
 import { IconButton } from 'storybook/internal/components';
-import { ShareAltIcon } from '@storybook/icons';
+import { GithubIcon, ShareAltIcon } from '@storybook/icons';
 
 // Brand theme configurations for the Storybook manager UI
 const brandThemes = {
@@ -534,6 +539,44 @@ addons.register('mieweb-404-redirect', (api) => {
       selectFallbackIfAvailable();
     }
   }, POLL_INTERVAL_MS);
+});
+
+// Keep the source link in the manager so full-height stories and MDX pages
+// can open their exact source file without needing a footer in the preview.
+function GitHubSourceTool() {
+  // Subscribe to navigation and index loading so the link follows the page.
+  useStorybookState();
+  const api = useStorybookApi();
+  const sourcePath = api.getCurrentStoryData()?.importPath
+    ?.replace(/\\/g, '/')
+    .replace(/^\.\//, '');
+
+  if (!sourcePath) return null;
+
+  const githubUrl = `https://github.com/mieweb/ui/blob/main/${sourcePath
+    .split('/')
+    .map(encodeURIComponent)
+    .join('/')}`;
+
+  return React.createElement(
+    IconButton,
+    { asChild: true, ariaLabel: 'View source on GitHub' },
+    React.createElement(
+      'a',
+      { href: githubUrl, target: '_blank', rel: 'noopener noreferrer' },
+      React.createElement(GithubIcon)
+    )
+  );
+}
+
+addons.register('mieweb-github-source', () => {
+  addons.add('mieweb-github-source/tool', {
+    type: types.TOOLEXTRA,
+    title: 'View source on GitHub',
+    match: ({ viewMode, tabId }) =>
+      (viewMode === 'story' || viewMode === 'docs') && !tabId,
+    render: () => React.createElement(GitHubSourceTool),
+  });
 });
 
 // Storybook 10 moved "Open canvas in new tab" into the Share menu; restore a

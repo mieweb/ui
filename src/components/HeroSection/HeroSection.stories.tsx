@@ -124,6 +124,18 @@ export const Brand: Story = {
   },
 };
 
+/** A report hero: brand mark above, dateline `meta` below the heading. */
+export const ReportHero: Story = {
+  args: {
+    tone: 'brand',
+    logo: { src: '/mie-logo.svg', alt: 'MIE', width: 120, height: 48 },
+    eyebrow: 'Benchmark report',
+    meta: ['2026 edition', 'Sample data'],
+    highlights: undefined,
+    image: undefined,
+  },
+};
+
 export const Mobile: Story = {
   args: { variant: 'split', image: dashboardImage },
   parameters: { viewport: { defaultViewport: 'mobile1' } },

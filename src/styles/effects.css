@@ -159,3 +159,103 @@
     display: none;
   }
 }
+
+/* ── Deck (@mieweb/ui/deck) ──────────────────────────────────────────── */
+/* Content fades up the first time its slide is seen. Hidden only once the
+   deck has mounted (`data-ready`), so server HTML and no-JS stay readable. */
+.mie-deck[data-ready] .mie-deck-slide:not([data-seen]) .mie-deck-reveal {
+  opacity: 0;
+  transform: translateY(1.5rem);
+}
+.mie-deck-reveal {
+  transition:
+    opacity 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98),
+    transform 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  transition-delay: calc(var(--mie-reveal-i, 0) * 80ms);
+}
+/* Chart bars grow from the baseline. */
+.mie-deck-grow {
+  transform-origin: bottom;
+  transition: transform 0.8s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  transition-delay: calc(var(--mie-reveal-i, 0) * 60ms + 200ms);
+}
+.mie-deck[data-ready] .mie-deck-slide:not([data-seen]) .mie-deck-grow {
+  transform: scaleY(0);
+}
+@keyframes mie-deck-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.mie-deck-spin {
+  animation: mie-deck-spin 60s linear infinite;
+}
+/* A dot travelling along a diagram edge. */
+@keyframes mie-deck-flow {
+  from {
+    left: var(--mie-from-x);
+    top: var(--mie-from-y);
+  }
+  to {
+    left: var(--mie-to-x);
+    top: var(--mie-to-y);
+  }
+}
+.mie-deck-flow {
+  left: var(--mie-from-x);
+  top: var(--mie-from-y);
+  animation: mie-deck-flow 2.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mie-deck-reveal,
+  .mie-deck-grow {
+    transition: none;
+  }
+  .mie-deck[data-ready] .mie-deck-slide:not([data-seen]) .mie-deck-reveal,
+  .mie-deck[data-ready] .mie-deck-slide:not([data-seen]) .mie-deck-grow {
+    opacity: 1;
+    transform: none;
+  }
+  .mie-deck-spin,
+  .mie-deck-flow {
+    animation: none;
+  }
+}
+/* PointMap (@mieweb/ui/maps): permanent value labels sit on their markers. */
+.leaflet-tooltip.mie-map-value {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-weight: 700;
+  color: var(--mieweb-foreground, #171717);
+}
+.leaflet-tooltip.mie-map-value::before {
+  display: none;
+}
+
+/* Print: one slide per page, every slide's content visible. */
+@media print {
+  .mie-deck {
+    height: auto;
+    overflow: visible;
+  }
+  .mie-deck-scroll {
+    height: auto;
+    overflow: visible;
+  }
+  .mie-deck-slide {
+    min-height: 100vh;
+    break-after: page;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  /* Match the data-ready hide rules' specificity so never-seen slides
+     still print their reveal/grow content (equal specificity, later wins). */
+  .mie-deck .mie-deck-slide .mie-deck-reveal,
+  .mie-deck .mie-deck-slide .mie-deck-grow,
+  .mie-deck[data-ready] .mie-deck-slide:not([data-seen]) .mie-deck-reveal,
+  .mie-deck[data-ready] .mie-deck-slide:not([data-seen]) .mie-deck-grow {
+    opacity: 1;
+    transform: none;
+  }
+}

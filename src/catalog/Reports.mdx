@@ -1,0 +1,35 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Templates/Reports/Overview" />
+
+# Reports
+
+> **Published data a reader can check.** A report is only as credible as its provenance: label
+> every figure live, modeled or maturing, cite its source, and say who wrote it. These sections
+> are `LandingPage` blocks, so a report is a content file — see the `benchmark-report` preset.
+
+## Which one?
+
+| Component                                                                         | Use it when                                                   | Not when                                                                                   |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [MetricStatusBadge](?path=/docs/reports-metricstatusbadge--docs)                  | Tagging a figure or section live / modeled / maturing         | The label is a workflow state — [Badge](?path=/docs/data-display-badge--docs)              |
+| [ReportLegend](?path=/docs/reports-reportlegend--docs)                            | Explaining those tags near the top of the report              | Every figure has one source — say so in the methodology                                    |
+| [BenchmarkTableSection](?path=/docs/reports-benchmarktablesection--docs)          | Several measures across many items                            | Readers must sort or filter — DataVis NITRO                                                |
+| [RankedListSection](?path=/docs/reports-rankedlistsection--docs)                  | A ranking where order matters more than exact values          | Each item has several measures — BenchmarkTableSection                                     |
+| [TileCartogramSection](?path=/docs/reports-tilecartogramsection--docs)            | A figure by state where small states matter                   | Real location matters — [PointMap](?path=/docs/presentations-pointmap--docs)               |
+| [MetricListSection](?path=/docs/reports-metriclistsection--docs)                  | Metrics you define now and measure later                      | All values are known — StatsSection `cards`                                                |
+| [ReportMethodology](?path=/docs/reports-reportmethodology--docs)                  | Sources, how to cite, cadence and data downloads              | Per-sentence citations — the site's footnote system                                        |
+| [ReportByline](?path=/docs/reports-reportbyline--docs)                            | Authors and publish/update dates                              | A blog post with its own byline                                                            |
+| [LinkGroupsSection](?path=/docs/reports-linkgroupssection--docs)                  | Linking out to the pages behind the numbers                   | Each link needs an image — ResourceCardsSection                                            |
+| [PdfEmbedSection](?path=/docs/reports-pdfembedsection--docs)                      | An inline PDF edition with download                           | The PDF is gated — LeadFormSection with `highlights`                                       |
+
+The rest of a report comes from the other families: `HeroSection` with `meta` for the dateline,
+`StatsSection variant="ruled"` on the brand tone for key findings, `FeatureGridSection` for the
+executive summary (numbers as lettermark icons) and outlook, and `LeadFormSection` with
+`highlights` as the gate for a downloadable edition.
+
+## Shared limitations
+
+- Server-safe (`@mieweb/ui/templates`) and static: no sorting, filtering or client JavaScript.
+- Bars, tiles and dots are decorative; every value is also in text.
+- Structured data (`Report`/`Dataset`, `Person`) stays in the page head — the sections render none.
