@@ -1,13 +1,13 @@
 # Prescribe plan
 
-Status: implementation in progress on local branch codex/prescribe-plan. Component plan reviewed October 2, 2026; simulated EHR API and standards references added October 3, 2026. Changes are committed locally for review; nothing is to be pushed without the user's later instruction.
+Status: complete and verified locally on branch codex/prescribe-plan. All six phases are implemented. Component plan reviewed October 2, 2026; simulated EHR API, implementation, and final verification completed October 3, 2026. Changes are committed locally for review; nothing has been pushed, and pushing requires the user's later instruction.
 
 Implementation tracking: complete a checklist item only after implementing and verifying it, then append the implementation commit SHA to that item. Record implementation commits and their validation in the progress log below. Commit code changes first and commit the corresponding plan update separately so the plan can refer to an existing commit. Git history records both code and progress commits.
 
 ## Implementation progress
 
 - Baseline: the complete UI, shared validator, EHR API, simulator, and standards plan is tracked before implementation begins.
-- In progress: phases 1–6 below. Verified work is linked to local implementation commits; remaining checkboxes are still outstanding.
+- Completed: phases 1–6 below. Every checklist item links to the local implementation or verification commit. The working branch is ready for review.
 - `4c21528d` — Shared JSON draft/context/readiness contracts, deterministic validator and explicit demo policy, pure/API public entries, typed HTTP client, 37-route runtime schema registry and generated OpenAPI. Verified 24 tests in Node and 24 tests in jsdom, isolated TypeScript compilation, affected ESLint/Prettier, and targeted ESM/CommonJS builds/imports. Full declaration/build integration and simulator execution remain outstanding.
 - `d4a799fb` — Added trusted resolved-product consistency (identity/code/version/strength/form), explicit unknown ingredient/compound paths, human-readable validation messages, scoped context references, complete typed service methods/provider payloads, and junior EHR adapter guide. Verified 25 pure/API tests in both Node and jsdom, isolated TypeScript compilation, scoped ESLint/Prettier, regenerated all 37 OpenAPI operations and targeted ESM/CommonJS builds. The simulator will supply server-owned product metadata; production clinical/network adapters remain outside scope.
 - `ddf5d3d7` — Lossless optional drafts and canonical adapters; shared readiness/issue UI; verified catalog metadata and explicit prescription editor controls; permissive saving/focus restoration; Assessment linked/unlinked/collapsed alerts; stable grid identity/filter/completion; opt-in medication/reconciliation/eSheet integration and consumer composition docs. Verified 43 focused tests, scoped ESLint, catalog check, and six real-browser completion/accessibility cases. Visual test files will be committed separately after the API simulation browser suite is finalized; full declaration/build integration remains pending.
@@ -17,6 +17,8 @@ Implementation tracking: complete a checklist item only after implementing and v
 - `fe306294` — Preserved optional catalog coding-system versions through injected lookup, editor draft/save, and trusted product previews. Verified all 13 affected medication/order-editor tests plus affected ESLint/Prettier.
 
 - `cea078ed` — Complete deterministic fake EHR service, per-instance store/scheduler/providers, all 37 HTTP routes, all 24 scenarios and variants, eight requested service domains, scoped PDMP/PA, review/signing/transmission/reconciliation/cancellation state machines, real typed-client Storybook host, trace/reset controls, and simulator maintenance guide. Verified all 82 focused simulator tests and the full repository suite: 104 files / 1,354 tests passed. Whole-repository TypeScript/lint/format, final library build, static Storybook and browser checks follow against the frozen source.
+
+- `75c3ae10` — Final verification assets: real-browser completion/editor/read-only/theme/mobile/RTL and typed-client workflow tests, four inspected pixel baselines, corrected test fixture typing, and Node-only ESM/CommonJS declaration consumers. Final checks passed: 104 Vitest files / 1,354 tests; 102 Node tests; seven focused real-client host retests; TypeScript, ESLint, Prettier, catalog and whitespace checks; complete library JS/declaration/CSS build; isolated public runtime/declaration checks; regenerated OpenAPI (37 operations / 52 schemas, clean diff); static Storybook build/catalog manifest; 16 fresh Playwright cases with all four snapshots matching and no Axe WCAG 2A/AA/2.1AA violations. An earlier concurrent build/check run timed out six tests under resource contention; the frozen sequential rerun passed without global timeout changes. All six phases are complete, with no outstanding implementation items. No pushes or remote changes were performed.
 
 Allow clinicians and staff to record an unfinished medication order immediately, show what prevents it from being prescribed or sent to a pharmacy, and provide a direct way to complete it wherever that order appears. A name such as “Lasix” is enough to save an order draft. Completing prescription details, obtaining the prescriber's signature, and transmitting the prescription are separate steps.
 
@@ -292,7 +294,7 @@ Deliverable: a complete, reviewable UI workflow consuming the shared TypeScript 
 - [x] Add opt-in prescribing integration to medication lists/reconciliation and eSheet; keep intake defaults unchanged. (`ddf5d3d7`)
 - [x] Document generic list/sidebar composition and host chart-summary/work-queue adapters. (`ddf5d3d7`)
 - [x] Update EncounterOrders.mdx and medication/editor docs with the shared contracts, correct exports, and client/server import examples. (`ddf5d3d7`)
-- [ ] Verify optional props, legacy data, package declarations, and dependency isolation across supported entry points.
+- [x] Verify optional props, legacy data, package declarations, and dependency isolation across supported entry points. (`5307f961`, `fe306294`, `75c3ae10`)
 
 Deliverable: the same prescription revision has consistent alerts and completion actions across supported UI views, with a documented validator that server applications can reuse.
 
@@ -307,9 +309,9 @@ Deliverable: a fake EHR implementing the same interface the production EHR will 
 
 ### Phase 6 Verify complete UI and API simulations
 
-- [ ] Connect a Storybook host through the typed API client; demonstrate all eight requested services and the fixture scenarios below.
-- [ ] Test late responses, partial/unavailable services, override expiry, revision conflicts, PDMP review, PA decisions, and simulated signing.
-- [ ] Test duplicate-send prevention, response loss, operation polling, cancellation, and reset using controlled time.
+- [x] Connect a Storybook host through the typed API client; demonstrate all eight requested services and the fixture scenarios below. (`cea078ed`, `75c3ae10`)
+- [x] Test late responses, partial/unavailable services, override expiry, revision conflicts, PDMP review, PA decisions, and simulated signing. (`5307f961`, `cea078ed`, `75c3ae10`)
+- [x] Test duplicate-send prevention, response loss, operation polling, cancellation, and reset using controlled time. (`cea078ed`, `75c3ae10`)
 - [x] Publish consumer documentation and the OpenAPI contract; identify production adapter responsibilities and applicable standards. (`d4a799fb`, `5307f961`, `cea078ed`)
 
 Deliverable: an inspectable end-to-end prescribing simulation that a junior developer can extend by implementing the defined methods and fixtures.
@@ -341,7 +343,7 @@ Deliverable: an inspectable end-to-end prescribing simulation that a junior deve
 
 Verification covers the pure validator, component adapters, and fake EHR service/API. Run focused Vitest coverage, typecheck/lint for affected code, browser/Node validator parity, built-entry import/declaration checks, API contract tests, Storybook interaction/accessibility checks, and catalog checks when documentation/exports change. Use synthetic fixtures; a live signing/transmission service remains outside this deliverable.
 
-Implementation is tracked in the local commits and verified checklist above. The pure validator, API contracts, healthcare completion UI, and fake EHR workflow are implemented. Final package/build and static Storybook/browser integration checks are in progress.
+Implementation is tracked in the local commits and verified checklist above. All six phases are implemented and verified locally, including the shared validator, API contracts, healthcare completion UI, deterministic fake EHR, package builds, and static Storybook/browser workflows. The production integrations described below remain consuming-EHR responsibilities.
 
 ## Policy and component decisions
 
