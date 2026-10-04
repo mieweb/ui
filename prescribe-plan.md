@@ -6,6 +6,12 @@ Implementation tracking: complete a checklist item only after implementing and v
 
 ## Implementation progress
 
+### Review follow-up: floating and field-level alerts
+
+- [ ] Keep prescription alerts available in a collapsed floating panel that expands within 20% of the viewport height.
+- [ ] Show scoped, accessible alerts beside medication, pharmacy, and prescription detail inputs as users scroll through the editor.
+- [ ] Verify expansion, collapse, scrolling, issue focus, mobile/RTL layout, and accessibility; update the review demo and PR.
+
 - Baseline: the complete UI, shared validator, EHR API, simulator, and standards plan is tracked before implementation begins.
 - Completed: phases 1–6 below. Every checklist item links to the local implementation or verification commit. The working branch is ready for review.
 - `4c21528d` — Shared JSON draft/context/readiness contracts, deterministic validator and explicit demo policy, pure/API public entries, typed HTTP client, 37-route runtime schema registry and generated OpenAPI. Verified 24 tests in Node and 24 tests in jsdom, isolated TypeScript compilation, affected ESLint/Prettier, and targeted ESM/CommonJS builds/imports. Full declaration/build integration and simulator execution remain outstanding.
