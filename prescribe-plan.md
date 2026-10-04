@@ -8,6 +8,8 @@ Implementation tracking: complete a checklist item only after implementing and v
 
 ### Review follow-up: floating and field-level alerts
 
+- [ ] Remove the floating editor panel when no outstanding issues remain, restore it for new issues, and retain successful workflow status inline in the demo.
+
 - [x] Keep prescription alerts available in a collapsed floating panel that expands within 20% of the viewport height. (`2785ae47`)
 - [x] Show scoped, accessible alerts beside medication, pharmacy, and prescription detail inputs as users scroll through the editor. (`2785ae47`)
 - [x] Verify expansion, collapse, scrolling, issue focus, mobile/RTL layout, and accessibility; update the review demo and PR. (`2785ae47`)
