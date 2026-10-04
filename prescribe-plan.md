@@ -8,9 +8,11 @@ Implementation tracking: complete a checklist item only after implementing and v
 
 ### Review follow-up: floating and field-level alerts
 
-- [ ] Keep prescription alerts available in a collapsed floating panel that expands within 20% of the viewport height.
-- [ ] Show scoped, accessible alerts beside medication, pharmacy, and prescription detail inputs as users scroll through the editor.
-- [ ] Verify expansion, collapse, scrolling, issue focus, mobile/RTL layout, and accessibility; update the review demo and PR.
+- [x] Keep prescription alerts available in a collapsed floating panel that expands within 20% of the viewport height. (`2785ae47`)
+- [x] Show scoped, accessible alerts beside medication, pharmacy, and prescription detail inputs as users scroll through the editor. (`2785ae47`)
+- [x] Verify expansion, collapse, scrolling, issue focus, mobile/RTL layout, and accessibility; update the review demo and PR. (`2785ae47`)
+
+- `2785ae47` — Collapsed floating status/count summary with an independently scrolling issue list capped at `20dvh`; dialog placement outside its scrolling body; scoped inline alerts and input associations for medication lookup, prescription details, substitution/PRN, and pharmacy. The demo hides its page panel while the editor is open and reserves space for its floating panel at the end of the page. Legacy inline summary defaults and translation objects remain compatible. Verified all 1,365 repository tests, full TypeScript/ESLint/Prettier/catalog checks, complete library and static Storybook builds, public ESM/CommonJS/declaration checks, and 18 fresh browser cases with four matching visual baselines and no Axe WCAG 2A/AA/2.1AA violations. Browser cases measure the height cap and persistent summary during scrolling on desktop and mobile RTL/dark views. The updated review demo runs on port 6008 because ports 6006/6007 belong to another checkout. Included in [PR #538](https://github.com/mieweb/ui/pull/538).
 
 - Baseline: the complete UI, shared validator, EHR API, simulator, and standards plan is tracked before implementation begins.
 - Completed: phases 1–6 below. Every checklist item links to the local implementation or verification commit. The working branch is ready for review.
