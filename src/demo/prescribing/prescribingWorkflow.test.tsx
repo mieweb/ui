@@ -10,6 +10,7 @@ import {
 import { StrictMode } from 'react';
 import { FakeEhrStoryHost } from './FakeEhrStoryHost';
 import * as transport from './createFakeFetch';
+import type { FakeEhrService } from './createFakeEhrService';
 
 async function press(name: string) {
   const button = screen.getByRole('button', { name });
@@ -81,14 +82,14 @@ describe('real API client prescribing story host', { timeout: 20000 }, () => {
   it('suppresses review/sign/send controls at injected clock expiry without waiting for a new API response', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
     const actual = transport.createFakeFetch;
-    let captured: Parameters<typeof actual>[0] | undefined;
+    let captured: FakeEhrService | undefined;
     let reads = 0;
     const spy = vi
       .spyOn(transport, 'createFakeFetch')
       .mockImplementation((service, options) => {
         const fetch = actual(service, options);
         if (!options?.onRequest) return fetch;
-        captured = service;
+        if ('controller' in service) captured = service as FakeEhrService;
         return (input, init) => {
           if (init?.method === 'GET') reads += 1;
           return fetch(input, init);

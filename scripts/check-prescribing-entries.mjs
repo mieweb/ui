@@ -71,7 +71,7 @@ for (const path of [
   const declarations = await readFile(resolve(root, 'dist', path), 'utf8');
   assert(declarations.length > 0, `Missing declarations: ${path}`);
 }
-// Compile an actual consumer against the package exports, rather than source types.
+// Compile ESM and CommonJS consumers against package exports, rather than source types.
 const virtualPath = resolve(root, '.prescribing-entries-check.ts');
 const consumer = `
 import { validatePrescription, demoPrescriptionPolicy, type PrescriptionValidationInput } from '@mieweb/ui/prescribing';
@@ -81,6 +81,19 @@ const result = validatePrescription(input, demoPrescriptionPolicy);
 const client: PrescribingApi = createHttpClient({ baseUrl: 'https://example.invalid/api/prescribing/v1' });
 void client.getCapabilities(); void result.issues;
 `;
+const commonPath = resolve(root, '.prescribing-entries-check.cts');
+const commonConsumer = `
+import prescribing = require('@mieweb/ui/prescribing');
+import api = require('@mieweb/ui/prescribing/api');
+const input: prescribing.PrescriptionValidationInput = ${JSON.stringify(completeValidationFixture)};
+const result = prescribing.validatePrescription(input, prescribing.demoPrescriptionPolicy);
+const client: api.PrescribingApi = api.createHttpClient();
+void client.getCapabilities(); void result.issues;
+`;
+const sources = new Map([
+  [virtualPath, consumer],
+  [commonPath, commonConsumer],
+]);
 const options = {
   noEmit: true,
   strict: true,
@@ -94,11 +107,10 @@ const options = {
 const host = ts.createCompilerHost(options);
 const originalRead = host.readFile.bind(host);
 const originalExists = host.fileExists.bind(host);
-host.readFile = (path) =>
-  path === virtualPath ? consumer : originalRead(path);
-host.fileExists = (path) => path === virtualPath || originalExists(path);
+host.readFile = (path) => sources.get(path) ?? originalRead(path);
+host.fileExists = (path) => sources.has(path) || originalExists(path);
 const diagnostics = ts.getPreEmitDiagnostics(
-  ts.createProgram([virtualPath], options, host)
+  ts.createProgram([...sources.keys()], options, host)
 );
 assert.equal(
   diagnostics.length,
