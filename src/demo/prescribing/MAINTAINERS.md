@@ -53,6 +53,13 @@ resource/scope and a current-or-newer projection revision. Generation tokens and
 AbortSignals reject work after reset/unmount. The mounted demo clock advances
 every 500 ms; pending reads stop after 30 seconds with manual refresh available.
 
+Prescription issues use a collapsed floating summary capped at 20% of the dynamic
+viewport height, including its header. Expanded issues scroll within that panel.
+The host hides its panel while the editor is open; the editor keeps a compact panel
+above its scrolling body. Medication, pharmacy, and detail fields also show their
+scoped issues inline with accessible descriptions. Keep both presentations on the
+same current validation/workflow scope and preserve permissive draft saving.
+
 Run `pnpm exec vitest run src/demo/prescribing` for service, all declared HTTP
 routes, scenario/variant, questionnaire and real-client UI coverage. Root visual
 tests exercise the rendered editor, PDMP, PA, failure/recovery and theme/mobile

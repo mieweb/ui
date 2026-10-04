@@ -3,6 +3,36 @@
 Incomplete prescription text is a draft. Save it before requesting review, signing, or sending.
 The shared `PrescriptionDetails` payload is canonical; order display strings are projections.
 
+Use `presentation="floating"` for a summary that stays visible while scrolling. It starts
+collapsed with the readiness status and issue count; its button expands/collapses the reasons.
+The entire panel, including the header, uses at most `20dvh` (20% of the current viewport
+height). Expanded reasons scroll within that space and the scroll region is keyboard focusable.
+The default `floatingPlacement="viewport"` anchors it at the logical inline end near the
+bottom of the viewport, so its position follows RTL direction. Render one floating summary
+for the selected prescription rather than a copy for every row.
+
+In a dialog, use `floatingPlacement="container"` and mount the summary after `ModalHeader`,
+outside `ModalBody`. It remains visible while the body scrolls and leaves the footer available.
+Hide the underlying viewport summary while that dialog is open. The original inline summary
+and `collapsible` disclosure keep their existing behavior.
+
+```tsx
+<PrescriptionIssueSummary
+  {...readinessScope}
+  presentation="floating"
+  readiness={readiness}
+  medicationName={prescription.name}
+  onIssueAction={focusIssueField}
+/>
+```
+
+Fields should also show their own current issues next to the inputs, with their message IDs
+included in each input's `aria-describedby`. `getPrescriptionIssues(readinessScope)` exports
+the summary's identity/revision checks, expired-workflow filtering, and deduplication for this
+mapping. Subscribe with `usePrescriptionClock` when mapping external workflow issues so those
+messages expire with the floating summary. This preserves missing local details after an
+external result expires without showing issues from a different prescription revision.
+
 ```tsx
 import { Assessment, OrderEditor } from '@mieweb/ui';
 import { validatePrescription } from '@mieweb/ui/prescribing';

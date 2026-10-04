@@ -12,6 +12,7 @@ import {
 import type { Medication } from '../../components/MedicationList/MedicationList';
 import {
   PrescriptionIssueSummary,
+  getPrescriptionIssues,
   isPrescriptionReadinessCurrent,
 } from '../../components/PrescriptionReadiness';
 import {
@@ -120,6 +121,7 @@ export function FakeEhrStoryHost({
   const [pollTimedOut, setPollTimedOut] = React.useState(false);
   const [pharmacies, setPharmacies] = React.useState<PharmacyRecord[]>([]);
   const pharmacyRef = React.useRef<HTMLSelectElement | null>(null);
+  const fieldId = React.useId();
   const generation = React.useRef(0);
   const keySequence = React.useRef(0);
   const sendKey = React.useRef<string | null>(null);
@@ -515,6 +517,46 @@ export function FakeEhrStoryHost({
           },
         }
       : undefined;
+  const readinessScope = {
+    readiness,
+    medicationName: draft?.display,
+    expectedOrderId: prescription?.id ?? 'unsaved',
+    expectedOrderRevision: prescription?.contentRevision ?? 'draft',
+    expectedContextRevision: validationConfig?.input.context.revision,
+    expectedPolicyVersion: validationConfig?.policy.version,
+    now,
+  };
+  const fieldIssues = getPrescriptionIssues(readinessScope);
+  const medicationIssues = fieldIssues.filter((issue) =>
+    [
+      'name',
+      'display',
+      'productId',
+      'code',
+      'context.product',
+      'context.controlledSchedule',
+    ].includes(issue.fieldPath?.replace(/^(draft|prescription)\./, '') ?? '')
+  );
+  const pharmacyIssues = fieldIssues.filter(
+    (issue) => issue.remediation === 'pharmacy'
+  );
+  const inlineIssues = (issues: PrescriptionIssue[], id: string) =>
+    issues.length > 0 && (
+      <ul id={id} className="mt-1 space-y-1 text-xs">
+        {issues.map((issue) => (
+          <li
+            key={`${issue.code}:${issue.fieldPath ?? ''}`}
+            className={
+              issue.severity === 'error'
+                ? 'text-danger-600'
+                : 'text-muted-foreground'
+            }
+          >
+            {issue.message}
+          </li>
+        ))}
+      </ul>
+    );
   const evaluationCurrent = Boolean(
     workflow.evaluation?.subject.kind === 'saved' &&
     readiness?.workflow &&
@@ -538,7 +580,7 @@ export function FakeEhrStoryHost({
 
   return (
     <div
-      className="text-foreground mx-auto max-w-5xl space-y-5 p-4"
+      className="text-foreground mx-auto max-w-5xl space-y-5 p-4 pb-[calc(20dvh+2rem)]"
       data-slot="prescribing-simulation"
     >
       <header className="border-border bg-background rounded-lg border p-4">
@@ -624,47 +666,69 @@ export function FakeEhrStoryHost({
         aria-label="Prescription draft"
       >
         <h3 className="font-semibold">Prescription draft</h3>
-        <label className="block text-sm">
-          Medication name
-          <input
-            className={fieldClass}
-            value={draft?.display ?? ''}
-            disabled={busy || readOnly || !!prescription?.signedArtifactId}
-            onChange={(event) => {
-              if (draft)
-                setDraft({
-                  ...draft,
-                  display: event.target.value,
-                  code: undefined,
-                  prescription: { name: event.target.value },
-                });
-            }}
-          />
-        </label>
-        <label className="block text-sm">
-          Pharmacy
-          <select
-            ref={pharmacyRef}
-            className={fieldClass}
-            aria-label="Pharmacy"
-            value={draft?.pharmacyId ?? ''}
-            disabled={busy || readOnly || !!prescription?.signedArtifactId}
-            onChange={(event) => {
-              if (draft)
-                setDraft({
-                  ...draft,
-                  pharmacyId: event.target.value || undefined,
-                });
-            }}
-          >
-            <option value="">Select a synthetic pharmacy</option>
-            {pharmacies.map((pharmacy) => (
-              <option key={pharmacy.id} value={pharmacy.id}>
-                {pharmacy.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div>
+          <label className="block text-sm">
+            Medication name
+            <input
+              className={`${fieldClass} aria-invalid:border-danger-500`}
+              aria-invalid={
+                medicationIssues.some((issue) => issue.severity === 'error') ||
+                undefined
+              }
+              aria-describedby={
+                medicationIssues.length
+                  ? `${fieldId}-medication-issues`
+                  : undefined
+              }
+              value={draft?.display ?? ''}
+              disabled={busy || readOnly || !!prescription?.signedArtifactId}
+              onChange={(event) => {
+                if (draft)
+                  setDraft({
+                    ...draft,
+                    display: event.target.value,
+                    code: undefined,
+                    prescription: { name: event.target.value },
+                  });
+              }}
+            />
+          </label>
+          {inlineIssues(medicationIssues, `${fieldId}-medication-issues`)}
+        </div>
+        <div>
+          <label className="block text-sm">
+            Pharmacy
+            <select
+              ref={pharmacyRef}
+              className={`${fieldClass} aria-invalid:border-danger-500`}
+              aria-label="Pharmacy"
+              aria-invalid={
+                pharmacyIssues.some((issue) => issue.severity === 'error') ||
+                undefined
+              }
+              aria-describedby={
+                pharmacyIssues.length ? `${fieldId}-pharmacy-issues` : undefined
+              }
+              value={draft?.pharmacyId ?? ''}
+              disabled={busy || readOnly || !!prescription?.signedArtifactId}
+              onChange={(event) => {
+                if (draft)
+                  setDraft({
+                    ...draft,
+                    pharmacyId: event.target.value || undefined,
+                  });
+              }}
+            >
+              <option value="">Select a synthetic pharmacy</option>
+              {pharmacies.map((pharmacy) => (
+                <option key={pharmacy.id} value={pharmacy.id}>
+                  {pharmacy.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {inlineIssues(pharmacyIssues, `${fieldId}-pharmacy-issues`)}
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button
             disabled={
@@ -717,13 +781,10 @@ export function FakeEhrStoryHost({
             {prescription.recordVersion} · {prescription.lifecycle}
           </p>
         )}
-        {readiness && (
+        {readiness && !editorOpen && (
           <PrescriptionIssueSummary
-            readiness={readiness}
-            medicationName={draft?.display}
-            expectedOrderId={prescription?.id ?? 'unsaved'}
-            expectedOrderRevision={prescription?.contentRevision ?? 'draft'}
-            now={now}
+            {...readinessScope}
+            presentation="floating"
             onCompletePrescription={complete}
             onIssueAction={(issue) => {
               if (issue.remediation === 'pharmacy')

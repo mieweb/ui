@@ -55,6 +55,8 @@ import { DateInput } from '../DateInput';
 import { Checkbox } from '../Checkbox';
 import {
   PrescriptionIssueSummary,
+  getPrescriptionIssues,
+  usePrescriptionClock,
   usePrescriptionPreview,
   type PrescriptionValidationOptions,
 } from '../PrescriptionReadiness';
@@ -104,6 +106,10 @@ export interface MedicationLookupProps {
   placeholder?: string;
   initialQuery?: string;
   initialSearch?: boolean;
+  /** Associate the injected search input with its inline prescription alerts. */
+  id?: string;
+  'aria-invalid'?: React.AriaAttributes['aria-invalid'];
+  'aria-describedby'?: string;
   onSelect?: (result: MedicationLookupResult) => void;
   onFreeText?: (text: string) => void;
 }
@@ -311,6 +317,31 @@ function newId(): string {
   return `med-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** Product/coding issues belong beside the visible medication search. */
+function editorIssueField(fieldPath?: string): string | undefined {
+  const field = fieldPath?.replace(/^(draft|prescription)\./, '');
+  if (
+    [
+      'productId',
+      'code',
+      'context.product',
+      'context.controlledSchedule',
+      'display',
+    ].some((alias) => field === alias || field?.startsWith(`${alias}.`))
+  )
+    return 'name';
+  if (field === 'context.pharmacy') return 'pharmacyId';
+  return field;
+}
+
+function isEditableFieldError(issue: PrescriptionIssue): boolean {
+  return (
+    issue.severity === 'error' &&
+    issue.remediation === 'edit-prescription' &&
+    !issue.fieldPath?.startsWith('context.')
+  );
+}
+
 // =============================================================================
 // MedicationEditor
 // =============================================================================
@@ -407,21 +438,28 @@ export function MedicationEditor({
     edited ? undefined : readiness,
     prescriptionNow
   );
-  const issues = preview
-    ? [...preview.validation.issues, ...(preview.workflow?.issues ?? [])]
-    : [];
+  const clock = usePrescriptionClock(
+    preview?.workflow?.expiresAt,
+    prescriptionNow
+  );
+  const readinessProps = {
+    readiness: preview,
+    now: clock,
+    medicationName: draft.name || 'Medication',
+    expectedOrderId: draft.id,
+    expectedOrderRevision:
+      prescribing?.input.orderRevision ?? draft.prescriptionRevision,
+    expectedContextRevision: prescribing?.input.context.revision,
+    expectedPolicyVersion: prescribing?.policy.version,
+  };
+  const issues = getPrescriptionIssues(readinessProps);
   const patch = (fields: Partial<Medication>) => {
     setEdited(true);
     setSaveError('');
     setDraft((previous) => ({ ...previous, ...fields }));
   };
   const focusField = React.useCallback((fieldPath?: string) => {
-    const rawField = fieldPath?.replace(/^(draft|prescription)\./, '');
-    const field = ['productId', 'code', 'context.product', 'display'].includes(
-      rawField ?? ''
-    )
-      ? 'name'
-      : rawField;
+    const field = editorIssueField(fieldPath);
     const target = field
       ? Array.from(
           bodyRef.current?.querySelectorAll<HTMLElement>(
@@ -429,8 +467,13 @@ export function MedicationEditor({
           ) ?? []
         ).find((element) => element.dataset.prescriptionField === field)
       : undefined;
+    const input = target?.matches('input, textarea, select')
+      ? target
+      : target?.querySelector<HTMLElement>(
+          'input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
+        );
     (
-      target ??
+      input ??
       bodyRef.current?.querySelector<HTMLElement>(
         'input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
       )
@@ -451,18 +494,29 @@ export function MedicationEditor({
     else onIssueAction?.(issue);
   };
   const fieldMessages = (field: string) =>
-    issues.filter(
-      (issue) =>
-        issue.fieldPath?.replace(/^(draft|prescription)\./, '') === field
-    );
+    issues
+      .filter((issue) => editorIssueField(issue.fieldPath) === field)
+      .filter(
+        (issue, index, all) =>
+          all.findIndex(
+            (other) =>
+              other.code === issue.code && other.message === issue.message
+          ) === index
+      );
+  const hasFieldError = (field: string) =>
+    fieldMessages(field).some(isEditableFieldError);
   const attributes = (field: string) => ({
     id: `${instanceId}-${field}`,
     'data-prescription-field': field,
-    'aria-invalid':
-      fieldMessages(field).some((issue) => issue.severity === 'error') ||
-      undefined,
+    'aria-invalid': hasFieldError(field) || undefined,
     'aria-describedby': fieldMessages(field).length
       ? `${instanceId}-${field}-issues`
+      : undefined,
+    'aria-errormessage': hasFieldError(field)
+      ? `${instanceId}-${field}-issues`
+      : undefined,
+    className: hasFieldError(field)
+      ? 'border-destructive focus:ring-destructive focus-visible:ring-destructive'
       : undefined,
     disabled: readOnly || saving,
   });
@@ -470,10 +524,20 @@ export function MedicationEditor({
     fieldMessages(field).length > 0 && (
       <div
         id={`${instanceId}-${field}-issues`}
-        className="text-danger-600 text-xs"
+        className="space-y-1 text-xs"
+        data-slot="prescription-field-issues"
       >
         {fieldMessages(field).map((issue) => (
-          <p key={issue.code}>{issue.message}</p>
+          <p
+            key={`${issue.code}:${issue.fieldPath ?? ''}`}
+            className={
+              isEditableFieldError(issue)
+                ? 'text-danger-700 dark:text-danger-300'
+                : 'text-warning-900 dark:text-warning-200'
+            }
+          >
+            {issue.message}
+          </p>
         ))}
       </div>
     );
@@ -625,26 +689,37 @@ export function MedicationEditor({
         </ModalTitle>
         <ModalClose />
       </ModalHeader>
+      {(prescribing || readiness) && (
+        <PrescriptionIssueSummary
+          {...readinessProps}
+          presentation="floating"
+          floatingPlacement="container"
+          className="mx-6 mb-3 w-auto shrink-0"
+          onIssueAction={readOnly ? undefined : issueAction}
+          readOnly={readOnly}
+        />
+      )}
       <ModalBody className="space-y-5">
         <div ref={bodyRef} className="space-y-5">
-          {(prescribing || readiness) && (
-            <PrescriptionIssueSummary
-              readiness={preview}
-              now={prescriptionNow}
-              medicationName={draft.name || 'Medication'}
-              expectedOrderId={draft.id}
-              expectedOrderRevision={
-                prescribing?.input.orderRevision ?? draft.prescriptionRevision
-              }
-              onIssueAction={readOnly ? undefined : issueAction}
-              readOnly={readOnly}
-            />
-          )}
           <section className="space-y-3" aria-label="Medication">
             {effectiveCodeLookup && !readOnly ? (
-              <div className="space-y-1.5">
-                <Label>Medication</Label>
+              <div
+                className="space-y-1.5"
+                role="group"
+                aria-labelledby={`${instanceId}-name-label`}
+                aria-describedby={attributes('name')['aria-describedby']}
+                data-prescription-field="name"
+              >
+                <Label
+                  id={`${instanceId}-name-label`}
+                  htmlFor={`${instanceId}-name`}
+                >
+                  Medication
+                </Label>
                 <effectiveCodeLookup.component
+                  id={`${instanceId}-name`}
+                  aria-invalid={attributes('name')['aria-invalid']}
+                  aria-describedby={attributes('name')['aria-describedby']}
                   indexUrl={effectiveCodeLookup.indexUrl}
                   locale={effectiveCodeLookup.locale}
                   domains={['med']}
@@ -661,7 +736,7 @@ export function MedicationEditor({
                     ? `Coded: ${draft.code.system} ${draft.code.code}`
                     : 'Free-text draft; select a product when ready.'}
                 </p>
-                {messages('code')}
+                {messages('name')}
               </div>
             ) : (
               <div className="space-y-1.5">
@@ -728,11 +803,13 @@ export function MedicationEditor({
               {textField('frequency', 'Frequency')}
             </div>
             <Checkbox
+              {...attributes('prn')}
               checked={draft.prn ?? false}
               disabled={readOnly || saving}
               label="As needed (PRN)"
               onChange={(event) => patch({ prn: event.target.checked })}
             />
+            {messages('prn')}
             {draft.prn && (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {textField('prnReason', 'As-needed reason')}
@@ -781,29 +858,35 @@ export function MedicationEditor({
               {textField('daysSupply', 'Days supply', 'numeric')}
               {textField('refills', 'Refills', 'numeric')}
             </div>
-            <RadioGroup
-              name={`${instanceId}-substitution`}
-              label="Substitution"
-              value={draft.substitution ?? '0'}
-              onValueChange={(value) =>
-                !readOnly &&
-                !saving &&
-                patch({ substitution: value as '0' | '1' })
-              }
-              orientation="horizontal"
-              size="sm"
-            >
-              <Radio
-                value="0"
-                label="Substitution permitted"
-                disabled={readOnly || saving}
-              />
-              <Radio
-                value="1"
-                label="Dispense as written (DAW)"
-                disabled={readOnly || saving}
-              />
-            </RadioGroup>
+            <div className="space-y-1.5">
+              <RadioGroup
+                name={`${instanceId}-substitution`}
+                label="Substitution"
+                value={draft.substitution ?? '0'}
+                onValueChange={(value) =>
+                  !readOnly &&
+                  !saving &&
+                  patch({ substitution: value as '0' | '1' })
+                }
+                orientation="horizontal"
+                size="sm"
+              >
+                <Radio
+                  {...attributes('substitution')}
+                  value="0"
+                  label="Substitution permitted"
+                  disabled={readOnly || saving}
+                />
+                <Radio
+                  {...attributes('substitution')}
+                  id={`${instanceId}-substitution-daw`}
+                  value="1"
+                  label="Dispense as written (DAW)"
+                  disabled={readOnly || saving}
+                />
+              </RadioGroup>
+              {messages('substitution')}
+            </div>
           </section>
           <section className="space-y-3" aria-label="Dates and context">
             <h4 className="text-muted-foreground text-xs font-semibold uppercase">
@@ -835,12 +918,15 @@ export function MedicationEditor({
             </div>
             {textField('indication', 'Indication')}
             {prescribing && (
-              <p className="text-muted-foreground text-sm">
-                Pharmacy:{' '}
-                {prescribing.input.context.pharmacy?.state === 'known'
-                  ? 'Selected by the EHR'
-                  : 'Selection needed in the EHR'}
-              </p>
+              <div className="space-y-1.5">
+                <p className="text-muted-foreground text-sm">
+                  Pharmacy:{' '}
+                  {prescribing.input.context.pharmacy?.state === 'known'
+                    ? 'Selected by the EHR'
+                    : 'Selection needed in the EHR'}
+                </p>
+                {messages('pharmacyId')}
+              </div>
             )}
             <div className="space-y-1.5">
               <Label htmlFor={`${instanceId}-pharmacyNotes`}>

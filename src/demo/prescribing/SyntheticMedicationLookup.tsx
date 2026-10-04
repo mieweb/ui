@@ -48,8 +48,11 @@ export function SyntheticMedicationLookup({
       <label className="block text-sm">
         Medication
         <input
-          className="border-border bg-background text-foreground focus-visible:ring-ring w-full rounded border p-2 focus-visible:ring-2"
+          className="border-border bg-background text-foreground focus-visible:ring-ring aria-invalid:border-danger-500 w-full rounded border p-2 focus-visible:ring-2"
+          id={props.id}
           aria-label="Medication"
+          aria-invalid={props['aria-invalid']}
+          aria-describedby={props['aria-describedby']}
           value={query}
           placeholder="Search SimDrug, or retain free text"
           onChange={(event) => {

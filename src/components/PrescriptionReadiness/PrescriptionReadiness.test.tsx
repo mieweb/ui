@@ -1,9 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, renderHook, screen } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  renderHook,
+  screen,
+  within,
+} from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import {
   getPrescriptionReadinessState,
   createPrescriptionPreview,
+  getPrescriptionIssues,
   usePrescriptionClock,
   PrescriptionIssueSummary,
 } from './PrescriptionReadiness';
@@ -108,6 +115,156 @@ describe('prescription readiness presentation', () => {
     );
     expect(screen.getByText('Simulation')).toBeVisible();
   });
+  it('starts floating alerts collapsed and links the toggle to its scrollable issue region', () => {
+    const readiness = uiReadiness({ name: 'Lasix' });
+    const complete = vi.fn();
+    const resolve = vi.fn();
+    renderWithTheme(
+      <PrescriptionIssueSummary
+        {...identity}
+        presentation="floating"
+        medicationName="Lasix"
+        readiness={readiness}
+        onCompletePrescription={complete}
+        onIssueAction={resolve}
+      />
+    );
+    const toggle = screen.getByRole('button', {
+      name: /^Expand prescription issues: Lasix,/,
+    });
+    const issueCount = getPrescriptionIssues({ ...identity, readiness }).length;
+    expect(within(toggle).getByText(`${issueCount} issues`)).toBeVisible();
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('region')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Complete prescription: Lasix' })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(toggle);
+    const region = screen.getByRole('region', {
+      name: 'Prescription issues: Lasix',
+    });
+    expect(toggle).toHaveAttribute('aria-controls', region.id);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(region).toHaveAttribute('tabindex', '0');
+    fireEvent.click(
+      within(region).getAllByRole('button', { name: /^Resolve issue:/ })[0]
+    );
+    expect(resolve).toHaveBeenCalledWith(readiness.validation.issues[0]);
+    fireEvent.click(
+      within(region).getByRole('button', {
+        name: 'Complete prescription: Lasix',
+      })
+    );
+    expect(complete).toHaveBeenCalledWith(
+      expect.objectContaining({ remediation: 'edit-prescription' })
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /^Collapse prescription issues:/ })
+    );
+    expect(region).not.toBeVisible();
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+  it('allows read-only users to expand floating reasons without offering mutations', () => {
+    renderWithTheme(
+      <PrescriptionIssueSummary
+        {...identity}
+        presentation="floating"
+        floatingPlacement="container"
+        medicationName="Lasix"
+        readOnly
+        readiness={uiReadiness({ name: 'Lasix' })}
+        onCompletePrescription={vi.fn()}
+        onIssueAction={vi.fn()}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /^Expand prescription issues:/ })
+    );
+    expect(
+      screen.getByText(
+        'An authorized team member can complete this prescription.'
+      )
+    ).toBeVisible();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+  });
+  it('updates floating count and reasons when the current draft changes', () => {
+    const { rerender } = renderWithTheme(
+      <PrescriptionIssueSummary
+        {...identity}
+        presentation="floating"
+        medicationName="Lasix"
+        readiness={uiReadiness({ name: 'Lasix' })}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /^Expand prescription issues:/ })
+    );
+    expect(screen.getByRole('list')).toBeVisible();
+    rerender(
+      <PrescriptionIssueSummary
+        {...identity}
+        presentation="floating"
+        medicationName="SimDrug A"
+        readiness={uiReadiness(completeUiPrescription)}
+      />
+    );
+    expect(screen.getByText('Details complete')).toBeVisible();
+    expect(screen.getByText('0 issues')).toBeVisible();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('No unresolved prescription issues.')
+    ).toBeVisible();
+  });
+});
+
+it('shares revision-scoped, deduplicated local issues while removing expired workflow issues', () => {
+  const readiness = uiReadiness({ name: 'Lasix' });
+  const [localIssue] = readiness.validation.issues;
+  const workflow = simulatedWorkflow({
+    review: 'fail',
+    sign: 'unknown',
+    transmit: 'unknown',
+  }).workflow!;
+  const externalIssue = {
+    ...localIssue,
+    code: 'SYNTHETIC_EXTERNAL_REVIEW',
+    fieldPath: 'context.medications',
+    message: 'Synthetic review is required.',
+  };
+  readiness.workflow = {
+    ...workflow,
+    expiresAt: '2026-10-03T13:00:00.000Z',
+    issues: [localIssue, externalIssue],
+  };
+  const current = getPrescriptionIssues({
+    ...identity,
+    readiness,
+    now: '2026-10-03T12:00:00.000Z',
+  });
+  expect(
+    current.filter(
+      (issue) =>
+        issue.code === localIssue.code &&
+        issue.fieldPath === localIssue.fieldPath
+    )
+  ).toHaveLength(1);
+  expect(current).toContain(externalIssue);
+  expect(
+    getPrescriptionIssues({
+      ...identity,
+      readiness,
+      now: '2026-10-03T13:00:00.000Z',
+    })
+  ).toEqual(readiness.validation.issues);
+  expect(
+    getPrescriptionIssues({
+      ...identity,
+      expectedOrderRevision: '2',
+      readiness,
+      now: '2026-10-03T12:00:00.000Z',
+    })
+  ).toEqual([]);
 });
 
 describe('prescription expiry and unresolved context', () => {

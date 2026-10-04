@@ -2,7 +2,14 @@
 
 import * as React from 'react';
 import { DateTime } from 'luxon';
-import { AlertCircle, CheckCircle2, Clock, Send } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Send,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { validatePrescription } from '../../prescribing/validate';
 import type {
@@ -43,25 +50,34 @@ export interface PrescriptionReadinessLabels {
   completeAction: string;
   resolveAction: string;
   readOnly: string;
+  expandAction?: string;
+  collapseAction?: string;
+  issue?: string;
+  issues?: string;
 }
-export const prescriptionReadinessLabels: PrescriptionReadinessLabels = {
-  incomplete: 'Needs prescription details',
-  invalid: 'Prescription needs correction',
-  unknown: 'Readiness not checked',
-  blocked: 'Prescribing blocked',
-  complete: 'Details complete',
-  review: 'Ready for prescriber review',
-  send: 'Ready to send',
-  sending: 'Sending',
-  sent: 'Sent',
-  failed: 'Send failed',
-  simulation: 'Simulation',
-  reasons: 'Prescription issues',
-  noIssues: 'No unresolved prescription issues.',
-  completeAction: 'Complete prescription',
-  resolveAction: 'Resolve issue',
-  readOnly: 'An authorized team member can complete this prescription.',
-};
+export const prescriptionReadinessLabels: Required<PrescriptionReadinessLabels> =
+  {
+    incomplete: 'Needs prescription details',
+    invalid: 'Prescription needs correction',
+    unknown: 'Readiness not checked',
+    blocked: 'Prescribing blocked',
+    complete: 'Details complete',
+    review: 'Ready for prescriber review',
+    send: 'Ready to send',
+    sending: 'Sending',
+    sent: 'Sent',
+    failed: 'Send failed',
+    simulation: 'Simulation',
+    reasons: 'Prescription issues',
+    noIssues: 'No unresolved prescription issues.',
+    completeAction: 'Complete prescription',
+    resolveAction: 'Resolve issue',
+    readOnly: 'An authorized team member can complete this prescription.',
+    expandAction: 'Expand prescription issues',
+    collapseAction: 'Collapse prescription issues',
+    issue: 'issue',
+    issues: 'issues',
+  };
 export interface PrescriptionReadinessProps {
   readiness?: PrescriptionReadiness;
   medicationName?: string;
@@ -177,6 +193,29 @@ export function isPrescriptionReadinessCurrent(
     if (!expiry || expiry.toMillis() <= clock.toMillis()) return false;
   }
   return true;
+}
+
+/** Shared scoped issues for summaries and messages beside editable fields. */
+export function getPrescriptionIssues(
+  props: PrescriptionReadinessProps
+): PrescriptionIssue[] {
+  const { readiness } = props;
+  // Known local issues remain useful even when a workflow projection expires.
+  const issues = [
+    ...(isPrescriptionValidationCurrent(props)
+      ? (readiness?.validation.issues ?? [])
+      : []),
+    ...(isPrescriptionReadinessCurrent(props)
+      ? (readiness?.workflow?.issues ?? [])
+      : []),
+  ];
+  return issues.filter(
+    (issue, index, all) =>
+      all.findIndex(
+        (other) =>
+          other.code === issue.code && other.fieldPath === issue.fieldPath
+      ) === index
+  );
 }
 
 export function getPrescriptionReadinessState(
@@ -347,6 +386,10 @@ export interface PrescriptionIssueSummaryProps extends PrescriptionReadinessProp
   readOnly?: boolean;
   /** Expanded editor summary; compact rows use a keyboard-operable disclosure. */
   collapsible?: boolean;
+  /** Floating summaries start collapsed and occupy at most 20% of viewport height. */
+  presentation?: 'inline' | 'floating';
+  /** Mount container placement outside a dialog's scrolling body to keep it visible. */
+  floatingPlacement?: 'viewport' | 'container';
 }
 export const PrescriptionIssueSummary = React.forwardRef<
   HTMLDivElement,
@@ -359,6 +402,8 @@ export const PrescriptionIssueSummary = React.forwardRef<
     onIssueAction,
     readOnly = false,
     collapsible = false,
+    presentation = 'inline',
+    floatingPlacement = 'viewport',
     labels: overrides,
     className,
   } = props;
@@ -366,22 +411,26 @@ export const PrescriptionIssueSummary = React.forwardRef<
   const clock = usePrescriptionClock(readiness?.workflow?.expiresAt, props.now);
   const currentProps = { ...props, now: clock };
   const current = isPrescriptionReadinessCurrent(currentProps);
-  const validationCurrent = isPrescriptionValidationCurrent(currentProps);
-  // Known local issues remain useful even when a workflow projection expires.
-  const issues = [
-    ...(validationCurrent ? (readiness?.validation.issues ?? []) : []),
-    ...(current ? (readiness?.workflow?.issues ?? []) : []),
-  ].filter(
-    (issue, index, all) =>
-      all.findIndex(
-        (other) =>
-          other.code === issue.code && other.fieldPath === issue.fieldPath
-      ) === index
+  const issues = getPrescriptionIssues(currentProps);
+  const [expanded, setExpanded] = React.useState(false);
+  const regionId = React.useId();
+  const issueCount = `${issues.length} ${issues.length === 1 ? labels.issue : labels.issues}`;
+  const badge = (
+    <PrescriptionReadinessBadge
+      readiness={readiness}
+      medicationName={medicationName}
+      expectedOrderId={props.expectedOrderId}
+      expectedOrderRevision={props.expectedOrderRevision}
+      expectedContextRevision={props.expectedContextRevision}
+      expectedPolicyVersion={props.expectedPolicyVersion}
+      labels={overrides}
+      now={clock}
+    />
   );
   const content = (
     <>
       {issues.length ? (
-        <ul className="list-disc space-y-1 pl-5 text-sm">
+        <ul className="list-disc space-y-1 ps-5 text-sm">
           {issues.map((issue) => (
             <li key={`${issue.code}:${issue.fieldPath ?? ''}`}>
               <span>{issue.message}</span>
@@ -430,6 +479,54 @@ export const PrescriptionIssueSummary = React.forwardRef<
       )}
     </>
   );
+  if (presentation === 'floating') {
+    const Chevron = expanded ? ChevronUp : ChevronDown;
+    return (
+      <div
+        ref={ref}
+        data-slot="prescription-issue-summary"
+        data-presentation="floating"
+        data-placement={floatingPlacement}
+        className={cn(
+          'border-border bg-background text-foreground flex max-h-[20dvh] min-h-0 flex-col overflow-hidden rounded-lg border shadow-lg',
+          floatingPlacement === 'viewport'
+            ? 'fixed end-4 bottom-4 z-40 w-[calc(100%_-_2rem)] max-w-md'
+            : 'relative min-w-0 shrink-0',
+          className
+        )}
+      >
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={regionId}
+          aria-label={`${expanded ? labels.collapseAction : labels.expandAction}: ${medicationName}, ${issueCount}`}
+          onClick={() => setExpanded((value) => !value)}
+          className="hover:bg-muted focus-visible:ring-ring flex min-h-10 shrink-0 items-center justify-between gap-2 rounded-lg px-3 py-2 text-start focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+        >
+          <span
+            role="status"
+            aria-live="polite"
+            className="flex min-w-0 flex-wrap items-center gap-2"
+          >
+            {badge}
+            <span className="text-muted-foreground text-xs">{issueCount}</span>
+          </span>
+          <Chevron size={16} aria-hidden="true" className="shrink-0" />
+        </button>
+        <div
+          id={regionId}
+          role="region"
+          aria-label={`${labels.reasons}: ${medicationName}`}
+          hidden={!expanded}
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable reasons need keyboard focus
+          tabIndex={0}
+          className="border-border focus-visible:ring-ring min-h-0 overflow-y-auto overscroll-contain border-t p-3 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+        >
+          <div className="space-y-2">{content}</div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       ref={ref}
@@ -439,16 +536,7 @@ export const PrescriptionIssueSummary = React.forwardRef<
       {collapsible ? (
         <details>
           <summary className="focus-visible:ring-ring cursor-pointer rounded focus-visible:ring-2">
-            <PrescriptionReadinessBadge
-              readiness={readiness}
-              medicationName={medicationName}
-              expectedOrderId={props.expectedOrderId}
-              expectedOrderRevision={props.expectedOrderRevision}
-              expectedContextRevision={props.expectedContextRevision}
-              expectedPolicyVersion={props.expectedPolicyVersion}
-              labels={overrides}
-              now={clock}
-            />{' '}
+            {badge}{' '}
             <span className="sr-only">
               {labels.reasons}: {medicationName}
             </span>
@@ -458,16 +546,7 @@ export const PrescriptionIssueSummary = React.forwardRef<
       ) : (
         <>
           <div role="status" aria-live="polite">
-            <PrescriptionReadinessBadge
-              readiness={readiness}
-              medicationName={medicationName}
-              expectedOrderId={props.expectedOrderId}
-              expectedOrderRevision={props.expectedOrderRevision}
-              expectedContextRevision={props.expectedContextRevision}
-              expectedPolicyVersion={props.expectedPolicyVersion}
-              labels={overrides}
-              now={clock}
-            />
+            {badge}
           </div>
           {content}
         </>

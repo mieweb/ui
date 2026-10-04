@@ -30,6 +30,44 @@ async function prepare() {
 }
 
 describe('real API client prescribing story host', { timeout: 20000 }, () => {
+  it('keeps the floating summary separate from scoped inline medication and pharmacy alerts', async () => {
+    render(<FakeEhrStoryHost automaticClock={false} />);
+    const name = await screen.findByRole('textbox', {
+      name: 'Medication name',
+    });
+    await waitFor(() => expect(name).toHaveAttribute('aria-invalid', 'true'));
+    const medicationDescription = document.getElementById(
+      name.getAttribute('aria-describedby')!
+    )!;
+    expect(medicationDescription).toHaveTextContent('Drug product is required');
+    expect(medicationDescription).toHaveTextContent('Drug code is required');
+    const pharmacy = screen.getByRole('combobox', { name: 'Pharmacy' });
+    expect(
+      document.getElementById(pharmacy.getAttribute('aria-describedby')!)
+    ).toHaveTextContent('pharmacy must be resolved');
+    const toggle = screen.getByRole('button', {
+      name: /^Expand prescription issues:/,
+    });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(toggle);
+    expect(
+      screen.getByRole('button', { name: /^Collapse prescription issues:/ })
+    ).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Complete prescription: Lasix' })
+    );
+    const dialog = await screen.findByRole('dialog');
+    expect(
+      document.querySelectorAll('[data-presentation="floating"]')
+    ).toHaveLength(1);
+    const lookup = within(dialog).getByRole('textbox', {
+      name: 'Medication',
+    });
+    expect(lookup).toHaveAttribute('aria-invalid', 'true');
+    expect(
+      document.getElementById(lookup.getAttribute('aria-describedby')!)
+    ).toHaveTextContent('Drug product is required');
+  });
   it('keeps signed content read-only through summary actions and edits a replacement instead', async () => {
     render(
       <FakeEhrStoryHost

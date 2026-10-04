@@ -31,6 +31,108 @@ async function checkAccessibility(page: Page, context = '#storybook-root') {
 }
 
 test.describe('Prescription completion', () => {
+  for (const viewport of [
+    { width: 1280, height: 800 },
+    { width: 390, height: 844 },
+  ]) {
+    test(`floating alerts stay compact while field alerts follow scrolling at ${viewport.width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport);
+      await openStory(
+        page,
+        'encounter-orders-prescribing-simulation--interactive',
+        viewport.width < 600
+          ? 'direction:rtl;theme:dark;brand:enterprise-health'
+          : ''
+      );
+      const panel = page.locator(
+        '[data-slot="prescription-issue-summary"][data-presentation="floating"]'
+      );
+      const expand = panel.getByRole('button', {
+        name: /^Expand prescription issues:/,
+      });
+      await expect(expand).toHaveAttribute('aria-expanded', 'false');
+      const assertCompact = async () => {
+        await expect
+          .poll(() =>
+            panel.evaluate(
+              (element) =>
+                element.getBoundingClientRect().height <=
+                window.innerHeight * 0.2 + 1
+            )
+          )
+          .toBeTruthy();
+      };
+      await assertCompact();
+      const initial = await panel.boundingBox();
+      expect(initial!.x).toBeGreaterThanOrEqual(0);
+      expect(initial!.x + initial!.width).toBeLessThanOrEqual(viewport.width);
+      await checkAccessibility(page);
+      await page
+        .getByRole('heading', {
+          name: 'Review, simulated signing and transmission',
+        })
+        .scrollIntoViewIfNeeded();
+      const scrolled = await panel.boundingBox();
+      expect(Math.abs(scrolled!.y - initial!.y)).toBeLessThanOrEqual(1);
+      await expand.focus();
+      await page.keyboard.press('Enter');
+      await assertCompact();
+      await expect(
+        panel.getByRole('button', { name: /^Collapse prescription issues:/ })
+      ).toHaveAttribute('aria-expanded', 'true');
+      await panel
+        .getByRole('button', {
+          name: 'Resolve issue: Drug product is required to complete the prescription.',
+          exact: true,
+        })
+        .click();
+      const dialog = page.getByRole('dialog');
+      await expect(dialog).toBeVisible();
+      await expect(panel).toHaveCount(1);
+      await expect(panel).toHaveAttribute('data-placement', 'container');
+      await assertCompact();
+      const lookup = dialog.getByRole('textbox', {
+        name: 'Medication',
+        exact: true,
+      });
+      await expect(lookup).toBeFocused();
+      await expect(lookup).toHaveAttribute('aria-invalid', 'true');
+      const lookupDescription = await lookup.getAttribute('aria-describedby');
+      await expect(page.locator(`[id="${lookupDescription}"]`)).toContainText(
+        'Drug product is required'
+      );
+      const quantity = dialog.getByRole('textbox', {
+        name: 'Quantity',
+        exact: true,
+      });
+      await quantity.fill('-1');
+      await expect(quantity).toHaveAttribute('aria-invalid', 'true');
+      const description = await quantity.getAttribute('aria-describedby');
+      await expect(page.locator(`[id="${description}"]`)).toBeVisible();
+      await expect(page.locator(`[id="${description}"]`)).toContainText(
+        /greater than zero|positive/i
+      );
+      await expect(
+        panel.getByRole('button', { name: /^Expand prescription issues:/ })
+      ).toBeVisible();
+      await expect(
+        dialog.getByRole('button', { name: 'Save draft', exact: true })
+      ).toBeVisible();
+      await checkAccessibility(page, '[role="dialog"]');
+      await panel
+        .getByRole('button', { name: /^Expand prescription issues:/ })
+        .click();
+      await assertCompact();
+      await panel
+        .getByRole('button', { name: /^Collapse prescription issues:/ })
+        .click();
+      await expect(
+        panel.getByRole('button', { name: /^Expand prescription issues:/ })
+      ).toHaveAttribute('aria-expanded', 'false');
+    });
+  }
   test('explicit prescription details survive save and reopen without claiming transmission', async ({
     page,
   }) => {

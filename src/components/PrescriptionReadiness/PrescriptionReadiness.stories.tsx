@@ -54,7 +54,7 @@ Pass readinessByOrderId and onCompletePrescription to Assessment, or compose Pre
 
 ### Limitations
 
-The host owns persistence, identity, revisions, context freshness, clinical providers, review, signing, and transmission. Simulated server results always display Simulation. Details complete alone never means ready to send. Disclosure uses native details/summary, actions are keyboard accessible, and editor summaries announce changes politely. Labels are customizable and semantic theme tokens support dark mode.`,
+The host owns persistence, identity, revisions, context freshness, clinical providers, review, signing, and transmission. Simulated server results always display Simulation. Details complete alone never means ready to send. Inline disclosure uses native details/summary. Floating summaries start collapsed, keep status and issue count visible, and cap their complete panel at 20% of dynamic viewport height with independently scrolling reasons. Container placement keeps the same summary outside a dialog's scrolling body. Toggle buttons expose aria-expanded/controls and status updates announce politely. Labels are customizable and semantic theme tokens support dark mode.`,
       },
     },
   },
@@ -69,6 +69,18 @@ The host owns persistence, identity, revisions, context freshness, clinical prov
     expectedOrderRevision: { description: 'Current content revision.' },
     readOnly: { description: 'Show reasons without mutation controls.' },
     labels: { description: 'Localizable status and action copy.' },
+    presentation: {
+      description:
+        'Inline by default; floating starts collapsed and caps the entire panel at 20dvh.',
+      control: 'select',
+      options: ['inline', 'floating'],
+    },
+    floatingPlacement: {
+      description:
+        'Viewport anchors to logical inline-end/bottom; container mounts outside a dialog scroll body.',
+      control: 'select',
+      options: ['viewport', 'container'],
+    },
     onCompletePrescription: {
       description:
         'Open the full editor for this instance and first editable issue.',
@@ -157,6 +169,47 @@ export const ReadyToSend: Story = {
 export const Mobile: Story = {
   args: { ...BareLasix.args },
   globals: { viewport: { value: 'mobile1', isRotated: false } },
+};
+export const Floating: Story = {
+  args: {
+    readiness: uiReadiness({ name: 'Lasix' }),
+    presentation: 'floating',
+  },
+  render: (args) => (
+    <div className="min-h-[150dvh] space-y-4">
+      <h2 className="text-lg font-semibold">Prescription workspace</h2>
+      <p className="text-muted-foreground max-w-lg text-sm">
+        Scroll this workspace. The compact status stays visible; expand it to
+        review the reasons within a panel capped at 20% of the viewport height.
+      </p>
+      <PrescriptionIssueSummary {...args} />
+    </div>
+  ),
+};
+export const FloatingContained: Story = {
+  args: {
+    ...Floating.args,
+    floatingPlacement: 'container',
+  },
+  render: (args) => (
+    <div className="border-border flex h-[70dvh] max-w-2xl flex-col overflow-hidden rounded-lg border">
+      <h2 className="shrink-0 p-4 text-lg font-semibold">
+        Prescription editor layout
+      </h2>
+      <PrescriptionIssueSummary {...args} />
+      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        <div className="min-h-[100dvh]">
+          <p className="text-muted-foreground text-sm">
+            This scrolling body leaves the summary and footer visible. The
+            prescription editor also displays each issue next to its field.
+          </p>
+        </div>
+      </div>
+      <div className="border-border shrink-0 border-t p-4 text-sm">
+        Editor actions remain available here.
+      </div>
+    </div>
+  ),
 };
 function SimulationDrugLookup({
   initialQuery,
