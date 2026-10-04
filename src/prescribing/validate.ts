@@ -27,7 +27,8 @@ const fullTimestamp = (value: unknown) =>
     value
   );
 const date = (value: unknown) =>
-  typeof value === 'string'
+  typeof value === 'string' &&
+  (fullTimestamp(value) || /^\d{4}-\d{2}-\d{2}$/.test(value))
     ? DateTime.fromISO(value, { zone: 'UTC' })
     : DateTime.invalid('invalid input');
 const fieldLabels: Record<string, string> = {
@@ -461,7 +462,10 @@ export function validatePrescription(
         (c) => !isJsonObject(c) || !nonempty(c.system) || !nonempty(c.code)
       ) ||
       typeof product.strength !== 'string' ||
-      typeof product.doseForm !== 'string'
+      typeof product.doseForm !== 'string' ||
+      !Array.isArray(product.quantityUnits) ||
+      product.quantityUnits.length === 0 ||
+      product.quantityUnits.some((unit) => !nonempty(unit))
     ) {
       add(
         'PRODUCT_METADATA_UNKNOWN',
@@ -503,6 +507,19 @@ export function validatePrescription(
           'PRODUCT_CODE_MISMATCH',
           'prescription.code',
           'Drug code does not match the selected product.'
+        );
+        invalid = true;
+      }
+      if (
+        nonempty(details.quantityUnit) &&
+        !(product.quantityUnits as string[]).includes(
+          String(details.quantityUnit)
+        )
+      ) {
+        add(
+          'PRODUCT_DISPENSING_UNIT_MISMATCH',
+          'prescription.quantityUnit',
+          'Dispensing unit does not match the selected drug product.'
         );
         invalid = true;
       }

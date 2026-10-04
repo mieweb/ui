@@ -8,6 +8,7 @@
  * status, kind, date).
  */
 
+import { DateTime } from 'luxon';
 import {
   evaluateDue,
   normalizeOrders,
@@ -177,7 +178,12 @@ export function buildChartOrderRows(
               readiness,
               expectedOrderId: o.orderId,
               expectedOrderRevision: o.prescriptionRevision,
-              now: options.prescriptionNow,
+              now:
+                options.prescriptionNow ??
+                (options.now
+                  ? (DateTime.fromJSDate(options.now).toISO() ??
+                    'invalid-clock')
+                  : undefined),
             });
             return {
               prescriptionReadiness: state,

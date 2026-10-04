@@ -81,6 +81,7 @@ export interface MedicationLookupResult {
   strength?: string;
   doseForm?: string;
   quantityUnit?: string;
+  quantityUnits?: string[];
   conceptSpecificity?: 'product' | 'ingredient' | 'compound';
   controlledSchedule?: ControlledSchedule;
   observedAt?: string;
@@ -548,6 +549,9 @@ export function MedicationEditor({
           conceptSpecificity: result.conceptSpecificity ?? 'product',
           strength: result.strength,
           doseForm: result.doseForm,
+          quantityUnits:
+            result.quantityUnits ??
+            (result.quantityUnit ? [result.quantityUnit] : []),
         },
         observedAt,
         sourceId,

@@ -8741,7 +8741,7 @@
           },
           "revision": {
             "type": "string",
-            "minLength": 1
+            "pattern": "^\\d+$"
           },
           "subject": {
             "$ref": "#/components/schemas/EvaluationSubject"

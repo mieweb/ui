@@ -237,6 +237,7 @@ export interface GateReason {
 }
 export interface EvaluationRecord {
   id: string;
+  /** Monotonic nonnegative decimal string within this evaluation resource. */
   revision: string;
   subject: EvaluationSubject;
   relatedPrescriptions: RevisionRef[];

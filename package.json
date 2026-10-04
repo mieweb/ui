@@ -304,7 +304,8 @@
     "test:visual:debug": "playwright test --debug",
     "test:storybook": "test-storybook --url http://localhost:6006 --maxWorkers 2 --testTimeout 30000",
     "prepublishOnly": "npm run build",
-    "test:prescribing:node": "vitest run --config vitest.prescribing-node.config.ts"
+    "test:prescribing:node": "vitest run --config vitest.prescribing-node.config.ts",
+    "check:prescribing-entries": "node scripts/check-prescribing-entries.mjs"
   },
   "peerDependencies": {
     "@kerebron/editor": ">=0.8.12",

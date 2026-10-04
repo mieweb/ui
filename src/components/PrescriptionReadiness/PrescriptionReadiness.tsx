@@ -75,21 +75,68 @@ export interface PrescriptionReadinessProps {
   now?: string;
 }
 
-/** Refresh a visible projection at expiry without requiring an API response. */
+/** Timestamp validation never lets Luxon fill an implicit date or timezone. */
+function prescriptionTimestamp(value: string): DateTime | null {
+  if (
+    typeof value !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
+      value
+    )
+  )
+    return null;
+  const parsed = DateTime.fromISO(value, { zone: 'utc' });
+  return parsed.isValid ? parsed : null;
+}
+
+/** The nearest future expiry lets aggregate views rearm after each result expires. */
+export function nextPrescriptionExpiry(
+  results: Iterable<PrescriptionReadiness | undefined>,
+  now?: string
+): string | undefined {
+  const clock = now === undefined ? DateTime.utc() : prescriptionTimestamp(now);
+  if (!clock) return undefined;
+  let earliest: { value: string; milliseconds: number } | undefined;
+  for (const result of results) {
+    const value = result?.workflow?.expiresAt;
+    const expiry = value ? prescriptionTimestamp(value) : null;
+    if (
+      expiry &&
+      expiry.toMillis() > clock.toMillis() &&
+      (!earliest || expiry.toMillis() < earliest.milliseconds)
+    )
+      earliest = { value: value!, milliseconds: expiry.toMillis() };
+  }
+  return earliest?.value;
+}
+
+/** Refresh at expiry without an API response, including deadlines beyond timer limits. */
 export function usePrescriptionClock(
   expiresAt?: string | null,
   now?: string
 ): string {
   const [, refresh] = React.useReducer((value: number) => value + 1, 0);
   React.useEffect(() => {
-    if (now || !expiresAt) return;
-    const expiry = DateTime.fromISO(expiresAt, { zone: 'utc' }).toMillis();
-    if (!Number.isFinite(expiry)) return;
-    const timer = setTimeout(
-      () => refresh(),
-      Math.max(1, Math.min(2147483647, expiry - DateTime.utc().toMillis() + 1))
-    );
-    return () => clearTimeout(timer);
+    if (now !== undefined || !expiresAt) return;
+    const expiry = prescriptionTimestamp(expiresAt);
+    if (!expiry || expiry.toMillis() <= DateTime.utc().toMillis()) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      const remaining = expiry.toMillis() - DateTime.utc().toMillis();
+      timer = setTimeout(
+        () => {
+          if (cancelled) return;
+          if (expiry.toMillis() > DateTime.utc().toMillis()) schedule();
+          else refresh();
+        },
+        Math.max(1, Math.min(2147483647, remaining + 1))
+      );
+    };
+    schedule();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [expiresAt, now]);
   return now ?? DateTime.utc().toISO()!;
 }
@@ -119,20 +166,15 @@ export function isPrescriptionReadinessCurrent(
   props: PrescriptionReadinessProps
 ): boolean {
   if (!isPrescriptionValidationCurrent(props)) return false;
+  const clock =
+    props.now === undefined ? DateTime.utc() : prescriptionTimestamp(props.now);
+  if (!clock) return false;
   const workflow = props.readiness?.workflow;
   if (!workflow) return true;
   if (workflow.validity !== 'current') return false;
-  if (workflow.expiresAt) {
-    const expiry = DateTime.fromISO(workflow.expiresAt, { zone: 'utc' });
-    const clock = props.now
-      ? DateTime.fromISO(props.now, { zone: 'utc' })
-      : DateTime.utc();
-    if (
-      !expiry.isValid ||
-      !clock.isValid ||
-      expiry.toMillis() <= clock.toMillis()
-    )
-      return false;
+  if (workflow.expiresAt !== null) {
+    const expiry = prescriptionTimestamp(workflow.expiresAt);
+    if (!expiry || expiry.toMillis() <= clock.toMillis()) return false;
   }
   return true;
 }
@@ -177,7 +219,7 @@ export function createPrescriptionPreview(
   const { input, policy } = configuration;
   if (
     hostReadiness &&
-    isPrescriptionReadinessCurrent({
+    isPrescriptionValidationCurrent({
       readiness: hostReadiness,
       now,
       expectedOrderId: input.orderId,

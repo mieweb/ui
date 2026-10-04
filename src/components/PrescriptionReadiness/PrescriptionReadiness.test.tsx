@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, renderHook, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import {
   getPrescriptionReadinessState,
   createPrescriptionPreview,
+  usePrescriptionClock,
   PrescriptionIssueSummary,
 } from './PrescriptionReadiness';
 import {
@@ -216,4 +217,65 @@ it('preserves a matching delivery receipt after clinical workflow expiry', () =>
       now: '2026-10-03T13:00:00.000Z',
     })
   ).toBe('unknown');
+});
+
+it('rejects date-less or timezone-less workflow timestamps and injected clocks', () => {
+  const readiness = simulatedWorkflow({
+    review: 'pass',
+    sign: 'pass',
+    transmit: 'pass',
+  });
+  for (const expiresAt of [
+    '13:00:00',
+    '2026-10-03',
+    '2026-10-03T13:00:00',
+    '',
+  ]) {
+    expect(
+      getPrescriptionReadinessState({
+        ...identity,
+        readiness: {
+          ...readiness,
+          workflow: { ...readiness.workflow!, expiresAt },
+        },
+        now: '2026-10-03T12:00:00Z',
+      })
+    ).toBe('unknown');
+  }
+  expect(
+    getPrescriptionReadinessState({ ...identity, readiness, now: '12:00:00' })
+  ).toBe('unknown');
+});
+
+it('reschedules capped expiry timers and disposes the outstanding timer', () => {
+  vi.useFakeTimers();
+  const beginning = Date.UTC(2026, 9, 3, 12);
+  vi.setSystemTime(beginning);
+  try {
+    const expiresAt = new Date(beginning + 2147483647 + 1000).toISOString();
+    const { result, unmount } = renderHook(() =>
+      usePrescriptionClock(expiresAt)
+    );
+    const initial = result.current;
+    expect(vi.getTimerCount()).toBe(1);
+    act(() => {
+      vi.advanceTimersByTime(2147483647);
+    });
+    expect(result.current).toBe(initial);
+    expect(vi.getTimerCount()).toBe(1);
+    act(() => {
+      vi.advanceTimersByTime(1002);
+    });
+    expect(result.current).not.toBe(initial);
+    expect(vi.getTimerCount()).toBe(0);
+    unmount();
+    const pending = renderHook(() =>
+      usePrescriptionClock(new Date(beginning + 2147483647 * 2).toISOString())
+    );
+    expect(vi.getTimerCount()).toBe(1);
+    pending.unmount();
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    vi.useRealTimers();
+  }
 });

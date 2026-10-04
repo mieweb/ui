@@ -226,6 +226,31 @@ describe('API contracts and client', () => {
       )
     ).toBe(true);
   });
+  it('compares revisions only within one selected evaluation resource', () => {
+    expect(
+      shouldAcceptEvaluation(
+        { ...evaluation, id: 'ev-new', revision: '1' },
+        evaluation,
+        'scope'
+      )
+    ).toBe(false);
+    expect(
+      shouldAcceptEvaluation(
+        { ...evaluation, id: 'ev-new', revision: '1' },
+        evaluation,
+        'scope',
+        'ev-new'
+      )
+    ).toBe(true);
+    expect(
+      shouldAcceptEvaluation(
+        evaluation,
+        { ...evaluation, id: 'ev-new' },
+        'scope',
+        'ev-new'
+      )
+    ).toBe(false);
+  });
   it('polls only reads with controlled time then stops at terminal or visible timeout', async () => {
     let now = 0;
     let reads = 0;

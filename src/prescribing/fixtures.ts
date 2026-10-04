@@ -36,6 +36,7 @@ export const completeValidationFixture: PrescriptionValidationInput = {
         conceptSpecificity: 'product',
         strength: '5 mg',
         doseForm: 'tablet',
+        quantityUnits: ['tablet'],
       },
       observedAt: '2026-10-03T12:00:00Z',
       sourceId: 'fixture',

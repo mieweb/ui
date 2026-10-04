@@ -21,6 +21,11 @@
  */
 
 import * as React from 'react';
+import { DateTime } from 'luxon';
+import {
+  nextPrescriptionExpiry,
+  usePrescriptionClock,
+} from '../PrescriptionReadiness';
 import { Button } from '../Button';
 import type { PrescriptionReadiness } from '../../prescribing/types';
 import { cn } from '../../utils/cn';
@@ -75,6 +80,33 @@ interface OrdersGridBaseProps {
   title?: string;
   className?: string;
   'data-testid'?: string;
+}
+
+function useOrdersPrescriptionClock(
+  history: PatientHistory,
+  readinessByOrderId?: Record<string, PrescriptionReadiness | undefined>,
+  prescriptionNow?: string,
+  now?: Date
+) {
+  const injectedClock =
+    prescriptionNow ??
+    (now ? (DateTime.fromJSDate(now).toISO() ?? 'invalid-clock') : undefined);
+  const activeResults = history.orders
+    .filter(
+      (order) =>
+        order.prescribingIntent === 'prescribe' &&
+        order.prescriptionActive !== false &&
+        order.status === 'pending'
+    )
+    .map((order) =>
+      order.orderId
+        ? (readinessByOrderId?.[order.orderId] ?? order.prescriptionReadiness)
+        : order.prescriptionReadiness
+    );
+  return usePrescriptionClock(
+    nextPrescriptionExpiry(activeResults, injectedClock),
+    injectedClock
+  );
 }
 
 function OrdersGridInner({
@@ -287,11 +319,17 @@ export function ChartOrdersGrid({
   title = 'Orders — chart',
   ...rest
 }: ChartOrdersGridProps) {
+  const prescriptionClock = useOrdersPrescriptionClock(
+    history,
+    readinessByOrderId,
+    prescriptionNow,
+    now
+  );
   const rows = React.useMemo(() => {
     const opts: OrderRowsOptions = {
       enrolledKeys,
       readinessByOrderId,
-      prescriptionNow,
+      prescriptionNow: prescriptionClock,
       now,
       programLabels,
       orderLabels,
@@ -303,7 +341,7 @@ export function ChartOrdersGrid({
     programs,
     enrolledKeys,
     readinessByOrderId,
-    prescriptionNow,
+    prescriptionClock,
     now,
     programLabels,
     orderLabels,
@@ -338,11 +376,17 @@ export function EncounterOrdersGrid({
   title = 'Encounter orders',
   ...rest
 }: EncounterOrdersGridProps) {
+  const prescriptionClock = useOrdersPrescriptionClock(
+    history,
+    readinessByOrderId,
+    prescriptionNow,
+    now
+  );
   const rows = React.useMemo(() => {
     const opts: OrderRowsOptions = {
       enrolledKeys,
       readinessByOrderId,
-      prescriptionNow,
+      prescriptionNow: prescriptionClock,
       now,
       programLabels,
       orderLabels,
@@ -354,7 +398,7 @@ export function EncounterOrdersGrid({
     encounterId,
     enrolledKeys,
     readinessByOrderId,
-    prescriptionNow,
+    prescriptionClock,
     now,
     programLabels,
     orderLabels,

@@ -364,12 +364,22 @@ export async function pollOperation<T>(
 export function shouldAcceptEvaluation(
   incoming: EvaluationRecord,
   current: EvaluationRecord | null,
-  expectedInputFingerprint: string
+  expectedInputFingerprint: string,
+  expectedEvaluationId?: string
 ): boolean {
+  if (
+    incoming.inputFingerprint !== expectedInputFingerprint ||
+    (expectedEvaluationId !== undefined && incoming.id !== expectedEvaluationId)
+  )
+    return false;
+  if (!current) return true;
+  if (current.id !== incoming.id) return expectedEvaluationId === incoming.id;
+  if (!/^\d+$/.test(incoming.revision) || !/^\d+$/.test(current.revision))
+    return false;
+  const next = incoming.revision.replace(/^0+(?=\d)/, '');
+  const previous = current.revision.replace(/^0+(?=\d)/, '');
   return (
-    incoming.inputFingerprint === expectedInputFingerprint &&
-    (!current ||
-      current.inputFingerprint !== incoming.inputFingerprint ||
-      Number(incoming.revision) >= Number(current.revision))
+    next.length > previous.length ||
+    (next.length === previous.length && next >= previous)
   );
 }

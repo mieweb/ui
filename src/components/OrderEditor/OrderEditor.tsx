@@ -75,6 +75,7 @@ export interface OrderLookupResult {
   strength?: string;
   doseForm?: string;
   quantityUnit?: string;
+  quantityUnits?: string[];
   conceptSpecificity?: 'product' | 'ingredient' | 'compound';
   controlledSchedule?: import('../../prescribing/types').ControlledSchedule;
   observedAt?: string;

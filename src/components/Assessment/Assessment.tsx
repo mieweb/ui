@@ -44,6 +44,8 @@ import {
 } from '../CodeLookup/context';
 import {
   createPrescriptionPreview,
+  nextPrescriptionExpiry,
+  usePrescriptionClock,
   getPrescriptionReadinessState,
   PrescriptionIssueSummary,
   type PrescriptionValidationOptions,
@@ -1015,6 +1017,22 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         return [order.orderId, { configuration, readiness }];
       })
     );
+    const activePrescriptionResults = orders
+      .filter(
+        (order) =>
+          order.type === 'medication' &&
+          order.prescriptionActive !== false &&
+          order.prescribingIntent !== 'history' &&
+          order.prescribingIntent !== 'administration'
+      )
+      .flatMap((order) => [
+        readinessByOrderId?.[order.orderId],
+        prescriptionRows.get(order.orderId)?.readiness,
+      ]);
+    const prescriptionClock = usePrescriptionClock(
+      nextPrescriptionExpiry(activePrescriptionResults, prescriptionNow),
+      prescriptionNow
+    );
     const incompletePrescriptionCount = orders.filter(
       (order) =>
         order.type === 'medication' &&
@@ -1027,7 +1045,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         !['complete', 'review', 'send', 'sent', 'sending'].includes(
           getPrescriptionReadinessState({
             readiness: prescriptionRows.get(order.orderId)?.readiness,
-            now: prescriptionNow,
+            now: prescriptionClock,
             expectedOrderId: order.orderId,
             expectedOrderRevision:
               prescriptionRows.get(order.orderId)?.configuration?.input
@@ -1472,7 +1490,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                           order={order}
                           drag={orderDrag}
                           controls={orderControls}
-                          prescriptionNow={prescriptionNow}
+                          prescriptionNow={prescriptionClock}
                           prescribing={
                             prescriptionRows.get(order.orderId)?.configuration
                           }
@@ -1682,7 +1700,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     order={order}
                     drag={orderDrag}
                     controls={orderControls}
-                    prescriptionNow={prescriptionNow}
+                    prescriptionNow={prescriptionClock}
                     prescribing={
                       prescriptionRows.get(order.orderId)?.configuration
                     }

@@ -399,7 +399,7 @@ export const prescribingSchemas: Record<string, JsonSchema> = {
   }),
   EvaluationRecord: obj({
     id,
-    revision: id,
+    revision: { type: 'string', pattern: '^\\d+$' },
     subject: ref('EvaluationSubject'),
     relatedPrescriptions: list(ref('RevisionRef')),
     patientContextRevision: id,

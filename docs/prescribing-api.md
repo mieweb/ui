@@ -14,6 +14,7 @@ pnpm exec vitest run src/prescribing src/demo/prescribing
 pnpm typecheck
 pnpm catalog:check
 pnpm build
+pnpm check:prescribing-entries
 node scripts/generate-prescribing-openapi.mjs
 ```
 
@@ -68,7 +69,7 @@ const readiness = evaluationToReadiness(
 
 Inject `fetch`, session headers or `credentials` when the host uses a different session transport. Every named method is typed; `request<T>` also supports the documented methods/paths and checks runtime schemas. Treat `PrescribingApiError.problem` as an operation failure and keep clinical findings in domain panels. Do not display success for a malformed response; the client rejects it.
 
-Resolved product facts include catalog identity/coding/version, concept specificity, strength and dosage form. The demo profile requires that trusted metadata and rejects mismatched entered product/code/strength/form. Unavailable metadata and unsupported ingredient/compound paths remain unknown. The editor can consume authoritative metadata through the injected medication lookup; parsing a display label cannot establish product identity.
+Resolved product facts include catalog identity/coding/version, concept specificity, strength, dosage form and allowed dispensing units. The demo profile requires that trusted metadata and rejects mismatched entered product/code/strength/form/dispensing unit. Unavailable metadata and unsupported ingredient/compound paths remain unknown. The editor can consume authoritative metadata through the injected medication lookup; parsing a display label cannot establish product identity.
 
 On the server, choose the active policy and load current context from trusted records, then call `validatePrescription(input, policy)`. Never accept the client's computed result, policy choice, role or signature flag as evidence. The client and server use the same validator implementation. The pure entry has no React, fetch, browser globals or simulator imports.
 
@@ -76,7 +77,7 @@ On the server, choose the active policy and load current context from trusted re
 
 A nonempty display name is the draft minimum. Optional prescription values, including malformed quantity/refill text, remain savable so another team member can complete them. Validation reports missing/invalid values separately. Canonical `prescription` fields drive the editor and are projected atomically into legacy display/Sig/code fields; never update a visible drug name while retaining an earlier eligible product.
 
-`contentRevision` changes only for prescribing content edits. References in evaluation/review/artifacts use that revision. `recordVersion` changes for any returned representation change and determines the strong ETag (`"rx-0001:1"`). Read the latest ETag before PUT; do not use contentRevision as an If-Match value. Evaluation, PA, PDMP and signing resources have their own revisions.
+`contentRevision` changes only for prescribing content edits. References in evaluation/review/artifacts use that revision. `recordVersion` changes for any returned representation change and determines the strong ETag (`"rx-0001:1"`). Read the latest ETag before PUT; do not use contentRevision as an If-Match value. Evaluation, PA, PDMP and signing resources have their own revisions. Evaluation projection revisions are monotonic decimal strings within that evaluation ID; compare revisions only for the same resource. A newly selected evaluation can start at revision 1 even when the previous evaluation had revision 10.
 
 Require `Idempotency-Key` for every POST/PUT. Scope it by session/tenant, actor, route and canonical body/precondition. Replay an identical committed request before rejecting stale preconditions; recover its original operation. Different content with the same key returns 409. Retain keys for the entire simulation session; a production implementation must define durable retention. Timeout/AbortSignal stops waiting and does not undo a committed mutation.
 
@@ -96,7 +97,7 @@ Review requires current saved content, completed pre-review domains and the perm
 
 Use `PUT /evaluations/{id}/workflow-context` to replace both PDMP and PA links (ID or null), with the current evaluation ETag. Verify scope/freshness server-side. Workflow changes recompute `workflowFingerprint`, projection revision and gates without rerunning an unchanged clinical snapshot. Clinical/context changes require a new evaluation.
 
-Compute the earliest applicable expiry. The host refreshes at expiry/on focus/resume and rejects late/older projections. The readiness component suppresses elapsed passing results. `shouldAcceptEvaluation` checks clinical scope and monotonic projection revision; abort reads on patient/order switch. Poll reads at 500 ms with backoff capped at 5 seconds, stop at terminal/unmount, and after 30 seconds retain visible pending with manual refresh. These are configurable UI settings.
+Compute the earliest applicable expiry. The host refreshes at expiry/on focus/resume and rejects late/older projections. The readiness component suppresses elapsed passing results. `shouldAcceptEvaluation` checks clinical scope, selected evaluation identity and monotonic projection revision. Read the current selected identity/scope when applying a response; a captured value from before a new selection cannot authorize an old response. Abort reads on patient/order switch. Poll reads at 500 ms with backoff capped at 5 seconds, stop at terminal/unmount, and after 30 seconds retain visible pending with manual refresh. These are configurable UI settings.
 
 ## Provider boundaries
 

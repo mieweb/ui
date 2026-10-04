@@ -127,12 +127,20 @@ describe('shared prescription validator', () => {
       validatePrescription(input, demoPrescriptionPolicy).checks.review
     ).toBe('unknown');
   });
+  it('keeps invalid time-only therapy dates deterministic', () => {
+    const input = fixture();
+    input.draft.prescription.startDate = '12:00:00';
+    input.draft.prescription.endDate = '2026-10-03';
+    const result = validatePrescription(input, demoPrescriptionPolicy);
+    expect(result.issues.map((i) => i.code)).toEqual(['DATE_INVALID']);
+  });
   it('checks explicit drug identity, code, strength and form against trusted product metadata', () => {
     for (const changed of [
       { productId: 'sim-b' },
       { code: { system: 'urn:mieweb:simulation-drug', code: 'sim-b' } },
       { strength: '999 mg' },
       { doseForm: 'capsule' },
+      { quantityUnit: 'mL' },
     ]) {
       const input = fixture();
       Object.assign(input.draft.prescription, changed);
@@ -156,6 +164,7 @@ describe('shared prescription validator', () => {
         conceptSpecificity: 'ingredient',
         strength: '5 mg',
         doseForm: 'tablet',
+        quantityUnits: ['tablet'],
       },
       observedAt: input.evaluatedAt,
       sourceId: 'fixture',

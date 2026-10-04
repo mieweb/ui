@@ -1,7 +1,11 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithTheme } from '../../test/test-utils';
-import { prescribingUiConfiguration } from '../PrescriptionReadiness/storyData';
+import {
+  prescribingUiConfiguration,
+  completeUiPrescription,
+  simulatedWorkflow,
+} from '../PrescriptionReadiness/storyData';
 import { Assessment, type AssessmentProps } from './Assessment';
 
 const concerns: AssessmentProps['concerns'] = [
@@ -288,4 +292,60 @@ describe('Assessment prescription drafts', () => {
       screen.queryByText('Needs prescription details')
     ).not.toBeInTheDocument();
   });
+});
+
+it('refreshes collapsed prescription counts at successive workflow expiries without new props', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(Date.UTC(2026, 9, 3, 12));
+  try {
+    const first = simulatedWorkflow({
+      review: 'pass',
+      sign: 'pass',
+      transmit: 'pass',
+    });
+    first.workflow!.expiresAt = '2026-10-03T12:00:01.000Z';
+    const second = {
+      ...first,
+      validation: { ...first.validation },
+      workflow: { ...first.workflow! },
+    };
+    second.validation.orderId = 'rx-ui-2';
+    second.workflow!.expiresAt = '2026-10-03T12:00:02.000Z';
+    const drafts: AssessmentProps['orders'] = ['rx-ui-1', 'rx-ui-2'].map(
+      (orderId) => ({
+        orderId,
+        type: 'medication',
+        display: 'SimDrug A',
+        prescription: completeUiPrescription,
+        prescribingIntent: 'prescribe',
+        prescriptionRevision: '1',
+      })
+    );
+    renderAssessment({
+      orders: drafts,
+      showPlan: false,
+      readinessByOrderId: { 'rx-ui-1': first, 'rx-ui-2': second },
+      prescribing: (order) => ({
+        ...prescribingUiConfiguration,
+        input: { ...prescribingUiConfiguration.input, orderId: order.orderId },
+      }),
+    });
+    expect(
+      screen.queryByRole('button', { name: /prescription.*need attention/ })
+    ).not.toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(1002);
+    });
+    expect(
+      screen.getByRole('button', { name: '1 prescription need attention' })
+    ).toBeVisible();
+    act(() => {
+      vi.advanceTimersByTime(1001);
+    });
+    expect(
+      screen.getByRole('button', { name: '2 prescriptions need attention' })
+    ).toBeVisible();
+  } finally {
+    vi.useRealTimers();
+  }
 });

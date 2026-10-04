@@ -21,6 +21,7 @@ export const prescribingUiConfiguration: PrescribingConfiguration = {
           conceptSpecificity: 'product',
           strength: '5 mg',
           doseForm: 'tablet',
+          quantityUnits: ['tablet'],
         },
         observedAt: '2026-10-03T12:00:00.000Z',
         sourceId: 'simulation',

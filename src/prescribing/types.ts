@@ -76,6 +76,7 @@ export interface PrescriptionValidationContext {
     conceptSpecificity: 'product' | 'ingredient' | 'compound';
     strength: string;
     doseForm: string;
+    quantityUnits: string[];
   }>;
 }
 export interface PrescriptionValidationInput {

@@ -97,7 +97,7 @@ EHR adapters. The simulation demonstrates these contracts with synthetic fixture
 marks simulated host results. It does not establish clinical suitability or EPCS certification.
 
 Injected medication lookups can return verified `productId`, `strength`, `doseForm`,
-`quantityUnit`, `conceptSpecificity`, `controlledSchedule`, `observedAt`, and `sourceId` alongside
+`quantityUnit`, `quantityUnits`, `conceptSpecificity`, `controlledSchedule`, `observedAt`, and `sourceId` alongside
 `label`, `codetype`, and `fullcode`. These are catalog metadata, separate from label parsing.
 Selecting a new product clears dependent code/dose/instructions, then applies verified product
 metadata. A plain coded pick without resolved metadata stays unresolved until the EHR adapter
@@ -110,3 +110,11 @@ shows a visible notice, while explicit structured values and complex Sig text re
 Historical delivery receipts remain visible after clinical eligibility expires. Cancelled or
 replacement records use the host order lifecycle and a new prescription identity; they do not
 become fresh signing/transmission permissions from a previous receipt.
+
+Aggregate views use `nextPrescriptionExpiry` with `usePrescriptionClock` to refresh counts,
+filters, and serialized row projections at the nearest active workflow expiry. The clock rearms
+for later expiries without a server response. `prescriptionNow` provides a fixed simulation clock;
+order grids also honor their existing `now` date when no prescribing clock is supplied. ISO clocks
+and expiries include a complete date, time, and explicit offset; date-only/time-only values cannot
+produce a ready state. The host increments the prescription content revision atomically with
+changed canonical fields so a result from an earlier payload cannot match the edited draft.
