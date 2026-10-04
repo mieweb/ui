@@ -8,6 +8,8 @@ Implementation tracking: complete a checklist item only after implementing and v
 
 ### Review follow-up: floating and field-level alerts
 
+- [ ] Use Codify-backed CodeLookup for medication and indication/concern, preserve coded selections and durable concern links, and verify free-text drafts and save/reopen behavior.
+
 - [x] Remove the floating editor panel when no outstanding issues remain, restore it for new issues, and retain successful workflow status inline in the demo. (`49adcb74`)
 
 - [x] Keep prescription alerts available in a collapsed floating panel that expands within 20% of the viewport height. (`2785ae47`)
