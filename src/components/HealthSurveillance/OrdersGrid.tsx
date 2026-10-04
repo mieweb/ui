@@ -21,6 +21,8 @@
  */
 
 import * as React from 'react';
+import { Button } from '../Button';
+import type { PrescriptionReadiness } from '../../prescribing/types';
 import { cn } from '../../utils/cn';
 import { DataVisNitroGrid, DataVisNitroSource } from '../DataVisNITRO';
 import {
@@ -44,6 +46,12 @@ import type { ProgramsMap } from './evaluate';
 // =============================================================================
 
 interface OrdersGridBaseProps {
+  prescriptionNow?: string;
+  readinessByOrderId?: Record<string, PrescriptionReadiness | undefined>;
+  /** Opens completion for this exact persisted instance. Never receives code-only rows. */
+  onCompletePrescription?: (row: OrderRow) => void;
+  /** Display-only screens retain alerts and filtering. */
+  readOnly?: boolean;
   history: PatientHistory;
   /** Program metadata — programs.json contents (`programs` field) */
   programs: ProgramsMap;
@@ -76,6 +84,8 @@ function OrdersGridInner({
   onOrderRows,
   onRequisition,
   onCancel,
+  onCompletePrescription,
+  readOnly = false,
   className,
   'data-testid': dataTestId,
 }: {
@@ -85,10 +95,28 @@ function OrdersGridInner({
   onOrderRows?: (rows: OrderRow[]) => void;
   onRequisition?: (rows: OrderRow[]) => void;
   onCancel?: (rows: OrderRow[]) => void;
+  onCompletePrescription?: (row: OrderRow) => void;
+  readOnly?: boolean;
   className?: string;
   'data-testid'?: string;
 }) {
-  const url = useOrderRowsUrl(rows);
+  const [readinessFilter, setReadinessFilter] = React.useState('all');
+  const filterId = React.useId();
+  const filteredRows = React.useMemo(
+    () =>
+      rows.filter(
+        (row) =>
+          readinessFilter === 'all' ||
+          (readinessFilter === 'attention'
+            ? row.prescriptionNeedsCompletion === 'true'
+            : row.prescriptionReadiness === readinessFilter)
+      ),
+    [rows, readinessFilter]
+  );
+  const url = useOrderRowsUrl(filteredRows);
+  const attentionCount = rows.filter(
+    (row) => row.prescriptionNeedsCompletion === 'true'
+  ).length;
 
   // Mass operations over the native checkbox selection. The palette hands
   // each callback the selected rows' data (OrderRow-shaped after the
@@ -101,7 +129,7 @@ function OrdersGridInner({
       label: string;
       callback: (ctx: { rows: unknown[] }) => void;
     }[] = [];
-    if (onOrderRows) {
+    if (!readOnly && onOrderRows) {
       ops.push({
         label: 'Order',
         callback: ({ rows: sel }) => {
@@ -112,7 +140,7 @@ function OrdersGridInner({
         },
       });
     }
-    if (onRequisition) {
+    if (!readOnly && onRequisition) {
       ops.push({
         label: 'Create requisition',
         callback: ({ rows: sel }) => {
@@ -123,7 +151,7 @@ function OrdersGridInner({
         },
       });
     }
-    if (onCancel) {
+    if (!readOnly && onCancel) {
       ops.push({
         label: 'Cancel',
         callback: ({ rows: sel }) => {
@@ -134,8 +162,20 @@ function OrdersGridInner({
         },
       });
     }
+    if (!readOnly && onCompletePrescription)
+      ops.push({
+        label: 'Complete prescription',
+        callback: ({ rows: selection }) => {
+          const row = asOrderRows(selection).find(
+            (candidate) =>
+              candidate.orderId &&
+              candidate.prescriptionNeedsCompletion === 'true'
+          );
+          if (row) onCompletePrescription(row);
+        },
+      });
     return ops;
-  }, [onOrderRows, onRequisition, onCancel]);
+  }, [onOrderRows, onRequisition, onCancel, onCompletePrescription, readOnly]);
 
   const columns = React.useMemo(
     () =>
@@ -152,6 +192,52 @@ function OrdersGridInner({
       data-testid={dataTestId}
       className={cn('flex flex-col gap-2', className)}
     >
+      {rows.some((row) => row.prescriptionReadiness) && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span role="status" aria-live="polite">
+            {attentionCount} prescription{attentionCount === 1 ? '' : 's'} need
+            attention
+          </span>
+          <label htmlFor={filterId}>Prescription readiness</label>
+          <select
+            id={filterId}
+            value={readinessFilter}
+            onChange={(event) => setReadinessFilter(event.target.value)}
+            className="border-border bg-background rounded border px-2 py-1"
+          >
+            <option value="all">All orders</option>
+            <option value="attention">Needs attention</option>
+            <option value="incomplete">Needs details</option>
+            <option value="invalid">Needs correction</option>
+            <option value="unknown">Not checked</option>
+            <option value="blocked">Blocked</option>
+            <option value="complete">Details complete</option>
+            <option value="review">Ready for review</option>
+            <option value="send">Ready to send</option>
+            <option value="sending">Sending</option>
+            <option value="sent">Sent</option>
+            <option value="failed">Send failed</option>
+          </select>
+          {!readOnly &&
+            onCompletePrescription &&
+            filteredRows
+              .filter(
+                (row) =>
+                  row.orderId && row.prescriptionNeedsCompletion === 'true'
+              )
+              .map((row) => (
+                <Button
+                  key={row.orderId}
+                  size="sm"
+                  variant="outline"
+                  aria-label={`Complete prescription: ${row.order} (${row.orderId})`}
+                  onClick={() => onCompletePrescription(row)}
+                >
+                  Complete {row.order}
+                </Button>
+              ))}
+        </div>
+      )}
       <DataVisNitroSource type="http" url={url}>
         <OrdersGroupPresets />
         <DataVisNitroGrid
@@ -196,12 +282,16 @@ export function ChartOrdersGrid({
   orderLabels,
   now,
   includeDue,
+  readinessByOrderId,
+  prescriptionNow,
   title = 'Orders — chart',
   ...rest
 }: ChartOrdersGridProps) {
   const rows = React.useMemo(() => {
     const opts: OrderRowsOptions = {
       enrolledKeys,
+      readinessByOrderId,
+      prescriptionNow,
       now,
       programLabels,
       orderLabels,
@@ -212,6 +302,8 @@ export function ChartOrdersGrid({
     history,
     programs,
     enrolledKeys,
+    readinessByOrderId,
+    prescriptionNow,
     now,
     programLabels,
     orderLabels,
@@ -241,12 +333,16 @@ export function EncounterOrdersGrid({
   programLabels,
   orderLabels,
   now,
+  readinessByOrderId,
+  prescriptionNow,
   title = 'Encounter orders',
   ...rest
 }: EncounterOrdersGridProps) {
   const rows = React.useMemo(() => {
     const opts: OrderRowsOptions = {
       enrolledKeys,
+      readinessByOrderId,
+      prescriptionNow,
       now,
       programLabels,
       orderLabels,
@@ -257,6 +353,8 @@ export function EncounterOrdersGrid({
     programs,
     encounterId,
     enrolledKeys,
+    readinessByOrderId,
+    prescriptionNow,
     now,
     programLabels,
     orderLabels,

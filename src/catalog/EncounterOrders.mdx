@@ -14,14 +14,14 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 ## Which one?
 
-| Component                                                                       | Use it when                                                                                                                                                                                                                                       | Not when                                                                                                                                                    |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Assessment](?path=/docs/encounter-orders-assessment--docs)                     | The visit's **A&P**: `items` point at today's assertion of each concern; `orders` nest under problems via `concernId` (the durable IndicationLink); unified coded add row; unlinked bucket; drag to re-link                                       | The chart problem list — `ProblemList`; relevance tagging — `PresentingProblems`; full order edits — `OrderEditor`; a due list — `HealthSurveillance`       |
-| [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs)                   | Editing one `AssessmentOrder` in full. Morphs: `medication` → `MedicationEditor` (NCPDP); `lab` / `imaging` / `procedure` / `referral` → typed editors with coded search, priority, timing, body site / refer-to                                  | The inline display / detail edit Assessment already offers; reconciling presenting meds — `MedicationReconciliation`                                        |
-| [HealthSurveillance](?path=/docs/encounter-orders-healthsurveillance--docs)     | Showing what is **overdue / due / pending / done** for OSHA / DOT programs (`enrolledKeys`) and CMS eCQMs, from `evaluateDue(history, programs)`; each item is a picklist of satisfying orders → `onOrderMany`                                    | You need the plan itself — `Assessment`; an order-history grid — the story-only `ChartOrdersGrid` demo on NITRO; rules beyond periodicity + age / sex gates |
-| [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)               | The page **is the patient**: demographics, status dot, allergy / medication / alert / provider rows, flag ribbon, `CountBadge` actions, ⋮ menu with built-in Contact / Add / Edit Patient modals                                                  | The page is a case — `CaseManagementHeader`; a generic titled page — `PageHeader`; you need the full editable lists — `AllergyList` / `MedicationList`      |
-| [CaseManagementHeader](?path=/docs/encounter-orders-casemanagementheader--docs) | The page **is a case**: `CaseContextBar` (case #, status, type, editing users, `collabStatus` slot) over the patient identity row, Add Case Note / Close Case, collapsible details grid with Days Open, `alert` slot, fully translatable `labels` | The page is the patient's chart — `PatientHeader`; a generic titled page — `PageHeader`                                                                     |
-| [WebChartReportViewer](?path=/docs/encounter-orders-webchartreportviewer--docs) | Browsing **canned system reports** (grid of cards) and viewing one in a modal with a date range; result rendered by shape — HTML string, rows → `Table`, object → key/value                                                                       | Interactive analysis of rows — DataVis NITRO; a single fixed dataset — `Table`; untrusted HTML results (rendered unsanitised)                               |
+| Component                                                                       | Use it when                                                                                                                                                                                                                                       | Not when                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Assessment](?path=/docs/encounter-orders-assessment--docs)                     | The visit's **A&P**: `items` point at today's assertion of each concern; `orders` nest under problems via `concernId` (the durable IndicationLink); unified coded add row; unlinked bucket; drag to re-link                                       | The chart problem list — `ProblemList`; relevance tagging — `PresentingProblems`; full order edits — `OrderEditor`; a due list — `HealthSurveillance`                                      |
+| [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs)                   | Editing one `AssessmentOrder` in full. Morphs: `medication` → `MedicationEditor` (NCPDP); `lab` / `imaging` / `procedure` / `referral` → typed editors with coded search, priority, timing, body site / refer-to                                  | The inline display / detail edit Assessment already offers; reconciling presenting meds — `MedicationReconciliation`                                                                       |
+| [HealthSurveillance](?path=/docs/encounter-orders-healthsurveillance--docs)     | Showing what is **overdue / due / pending / done** for OSHA / DOT programs (`enrolledKeys`) and CMS eCQMs, from `evaluateDue(history, programs)`; each item is a picklist of satisfying orders → `onOrderMany`                                    | You need the plan itself — `Assessment`; an order-history grid — `ChartOrdersGrid` / `EncounterOrdersGrid`, exported from `@mieweb/ui/datavis`; rules beyond periodicity + age / sex gates |
+| [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)               | The page **is the patient**: demographics, status dot, allergy / medication / alert / provider rows, flag ribbon, `CountBadge` actions, ⋮ menu with built-in Contact / Add / Edit Patient modals                                                  | The page is a case — `CaseManagementHeader`; a generic titled page — `PageHeader`; you need the full editable lists — `AllergyList` / `MedicationList`                                     |
+| [CaseManagementHeader](?path=/docs/encounter-orders-casemanagementheader--docs) | The page **is a case**: `CaseContextBar` (case #, status, type, editing users, `collabStatus` slot) over the patient identity row, Add Case Note / Close Case, collapsible details grid with Days Open, `alert` slot, fully translatable `labels` | The page is the patient's chart — `PatientHeader`; a generic titled page — `PageHeader`                                                                                                    |
+| [WebChartReportViewer](?path=/docs/encounter-orders-webchartreportviewer--docs) | Browsing **canned system reports** (grid of cards) and viewing one in a modal with a date range; result rendered by shape — HTML string, rows → `Table`, object → key/value                                                                       | Interactive analysis of rows — DataVis NITRO; a single fixed dataset — `Table`; untrusted HTML results (rendered unsanitised)                                                              |
 
 ## Data contracts
 
@@ -90,3 +90,41 @@ All six ship from the main `@mieweb/ui` entry with no peers. `CodeLookup` (injec
 - **Persistence and fetching are yours.** Every component is controlled; nothing here calls
   WebChart, FHIR or any API, and `HealthSurveillance`'s `programs.json` and `CodeLookup`'s
   shards must be served by the host.
+
+## Prescription drafts and readiness
+
+An unfinished prescription remains a valid order draft. Store canonical optional details in
+`AssessmentOrder.prescription`, and keep `display`, `detail`, and `code` synchronized in the
+same save. `orderToMedication` / `medicationToOrder` preserve structured details and order metadata.
+The editor confirms parser suggestions and provides explicit dose, route, frequency, and units.
+Therapy dates are separate from the signing workflow's written date.
+
+`PrescriptionReadinessBadge` and `PrescriptionIssueSummary` are exported from `@mieweb/ui`.
+`Assessment` accepts `prescribing(order)` for shared local validation, `readinessByOrderId` for
+host evaluations, and `onCompletePrescription(order, issue)` for the full editor. All additions
+are optional. Existing order consumers retain their current behavior. Prescribing intent on
+medication lists and eSheet is opt-in; ordinary intake and reconciliation have no completion alerts.
+
+The pure shared TypeScript entry has no React or DOM dependency:
+
+```ts
+import { validatePrescription } from '@mieweb/ui/prescribing';
+const result = validatePrescription(input, policy); // same function in browser and Node
+```
+
+The EHR chooses the policy, rebuilds trusted patient/prescriber/pharmacy facts, and reruns
+validation. Local “Details complete” cannot authorize signing or transmission. Current
+host-confirmed gates and signing evidence are required for those labels; simulation is visibly
+marked. Every view supplies the current order ID/content revision, context revision, and policy.
+
+For chart/encounter grids, supply stable `HistoryOrder.orderId`, `prescriptionRevision`,
+`prescribingIntent: 'prescribe'`, and the corresponding readiness projection. A code identifies
+an orderable item; it cannot select one of several identical prescriptions. Completion callbacks
+carry the exact row instance. Operational status, surveillance prerequisites, and requisitions
+keep their existing meanings.
+
+Generic `OrderList` hosts compose `PrescriptionIssueSummary` in `renderOrder`; `OrderSidebar`
+can place it in children/actions. Chart summaries and work queues reuse the same result keyed
+by stable order ID. The EHR owns counts, assignees, links, and refetch/subscription after saves.
+See [PrescriptionReadiness](?path=/docs/encounter-orders-prescriptionreadiness--docs) for state
+examples and an interactive permissive-draft workflow.

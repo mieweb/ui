@@ -15,6 +15,12 @@ import {
   type DueItem,
   type ProgramsMap,
 } from './evaluate';
+import {
+  getPrescriptionReadinessState,
+  prescriptionReadinessLabels,
+  type PrescriptionReadinessState,
+} from '../PrescriptionReadiness';
+import type { PrescriptionReadiness } from '../../prescribing/types';
 import type { PatientHistory } from './history';
 
 // =============================================================================
@@ -26,6 +32,13 @@ export type OrderRowStatus = 'completed' | 'pending' | 'available' | 'blocked';
 
 /** One encounter order as a flat grid row. */
 export interface OrderRow {
+  /** Unique persisted order instance; omitted for due-list suggestions. */
+  orderId?: string;
+  prescriptionRevision?: string;
+  /** Independent from operational status and surveillance prerequisites. */
+  prescriptionReadiness?: PrescriptionReadinessState;
+  prescriptionReadinessLabel?: string;
+  prescriptionNeedsCompletion?: 'true' | 'false';
   /** CODETYPE|FULLCODE of the order */
   orderKey: string;
   /** Order display label */
@@ -52,6 +65,8 @@ export interface OrderRow {
 }
 
 export interface OrderRowsOptions {
+  prescriptionNow?: string;
+  readinessByOrderId?: Record<string, PrescriptionReadiness | undefined>;
   /** Occupational enrollments; quality measures apply to everyone in-gate */
   enrolledKeys?: string[];
   /** Evaluation clock (defaults to today; inject for determinism) */
@@ -148,6 +163,36 @@ export function buildChartOrderRows(
   // 1) Every order in the history (all encounters)
   for (const o of history.orders) {
     rows.push({
+      orderId: o.orderId,
+      prescriptionRevision: o.prescriptionRevision,
+      ...(o.prescribingIntent === 'prescribe' &&
+      o.prescriptionActive !== false &&
+      o.status === 'pending'
+        ? (() => {
+            const readiness = o.orderId
+              ? (options.readinessByOrderId?.[o.orderId] ??
+                o.prescriptionReadiness)
+              : o.prescriptionReadiness;
+            const state = getPrescriptionReadinessState({
+              readiness,
+              expectedOrderId: o.orderId,
+              expectedOrderRevision: o.prescriptionRevision,
+              now: options.prescriptionNow,
+            });
+            return {
+              prescriptionReadiness: state,
+              prescriptionReadinessLabel: prescriptionReadinessLabels[state],
+              prescriptionNeedsCompletion: ([
+                'incomplete',
+                'invalid',
+                'unknown',
+                'blocked',
+              ].includes(state)
+                ? 'true'
+                : 'false') as 'true' | 'false',
+            };
+          })()
+        : {}),
       orderKey: o.key,
       order: orderLabel(o.key),
       ...reasonFields(byOrderKey.get(o.key)),

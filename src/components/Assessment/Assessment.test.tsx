@@ -1,6 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithTheme } from '../../test/test-utils';
+import { prescribingUiConfiguration } from '../PrescriptionReadiness/storyData';
 import { Assessment, type AssessmentProps } from './Assessment';
 
 const concerns: AssessmentProps['concerns'] = [
@@ -210,6 +211,81 @@ describe('Assessment actions', () => {
 
     expect(
       screen.queryByLabelText(/actions for essential hypertension/i)
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('Assessment prescription drafts', () => {
+  const draft = {
+    orderId: 'rx-ui-1',
+    type: 'medication' as const,
+    display: 'Lasix',
+    prescribingIntent: 'prescribe' as const,
+    prescriptionRevision: '1',
+  };
+  it('renders linked and unlinked warnings and dispatches exact instance completion', () => {
+    const complete = vi.fn();
+    renderAssessment({
+      orders: [
+        { ...draft, concernId: 'concern-1' },
+        { ...draft, orderId: 'rx-ui-2' },
+      ],
+      prescribing: (order) => ({
+        ...prescribingUiConfiguration,
+        input: { ...prescribingUiConfiguration.input, orderId: order.orderId },
+      }),
+      onCompletePrescription: complete,
+    });
+    expect(screen.getAllByText('Needs prescription details')).toHaveLength(2);
+    fireEvent.click(
+      screen.getAllByRole('button', { name: 'Complete prescription: Lasix' })[1]
+    );
+    expect(complete).toHaveBeenCalledWith(
+      expect.objectContaining({ orderId: 'rx-ui-2' }),
+      expect.objectContaining({ remediation: 'edit-prescription' })
+    );
+  });
+  it('shows a completion count while the plan is collapsed', () => {
+    const reveal = vi.fn();
+    renderAssessment({
+      orders: [draft],
+      prescribing: () => prescribingUiConfiguration,
+      showPlan: false,
+      onShowPlanChange: reveal,
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: '1 prescription need attention' })
+    );
+    expect(reveal).toHaveBeenCalledWith(true);
+  });
+  it('keeps the collapsed count visible when the host hides the title', () => {
+    renderAssessment({
+      title: null,
+      orders: [draft],
+      prescribing: () => prescribingUiConfiguration,
+      showPlan: false,
+    });
+    expect(
+      screen.getByRole('button', { name: '1 prescription need attention' })
+    ).toBeVisible();
+  });
+  it('does not allow canonical prescriptions to silently fall back to inline edits', () => {
+    const inline = vi.fn();
+    renderAssessment({
+      orders: [{ ...draft, prescription: { name: 'Lasix' } }],
+      onEditOrder: inline,
+    });
+    expect(
+      screen.queryByRole('button', { name: 'Edit' })
+    ).not.toBeInTheDocument();
+  });
+  it('keeps history and administration rows outside completion alerts', () => {
+    renderAssessment({
+      orders: [{ ...draft, prescribingIntent: 'history' }],
+      prescribing: () => prescribingUiConfiguration,
+    });
+    expect(
+      screen.queryByText('Needs prescription details')
     ).not.toBeInTheDocument();
   });
 });
