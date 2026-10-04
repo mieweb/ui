@@ -714,6 +714,7 @@ export const prescribingSchemas: Record<string, JsonSchema> = {
     requirePrescriber: bool,
     requirePharmacy: bool,
     requireClassification: bool,
+    requireResolvedProduct: bool,
     maxContextAgeMs: { type: 'number', minimum: 1 },
     allowCompound: bool,
     scheduleRefillLimits: { type: 'object', additionalProperties: integer },
@@ -1009,12 +1010,12 @@ export function validateSchema(
   schema: JsonSchema,
   path = '$'
 ): SchemaIssue[] {
-  if (schema.$ref)
-    return validateSchema(
-      value,
-      prescribingSchemas[schema.$ref.split('/').pop()!] ?? {},
-      path
-    );
+  if (schema.$ref) {
+    const resolved = prescribingSchemas[schema.$ref.split('/').pop()!];
+    return resolved
+      ? validateSchema(value, resolved, path)
+      : [{ fieldPath: path, message: 'Unknown schema reference.' }];
+  }
   if (schema.oneOf || schema.anyOf) {
     const variants = schema.oneOf ?? schema.anyOf!;
     const passing = variants.filter(

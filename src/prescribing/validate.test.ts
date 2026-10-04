@@ -127,6 +127,43 @@ describe('shared prescription validator', () => {
       validatePrescription(input, demoPrescriptionPolicy).checks.review
     ).toBe('unknown');
   });
+  it('checks explicit drug identity, code, strength and form against trusted product metadata', () => {
+    for (const changed of [
+      { productId: 'sim-b' },
+      { code: { system: 'urn:mieweb:simulation-drug', code: 'sim-b' } },
+      { strength: '999 mg' },
+      { doseForm: 'capsule' },
+    ]) {
+      const input = fixture();
+      Object.assign(input.draft.prescription, changed);
+      const checked = validatePrescription(input, demoPrescriptionPolicy);
+      expect(checked.dataState).toBe('invalid');
+      expect(checked.checks.review).toBe('fail');
+      expect(
+        checked.issues.some((issue) => issue.code.includes('MISMATCH'))
+      ).toBe(true);
+    }
+    const input = fixture();
+    input.context.product = { state: 'unknown', reason: 'Catalog unavailable' };
+    expect(
+      validatePrescription(input, demoPrescriptionPolicy).checks.review
+    ).toBe('unknown');
+    input.context.product = {
+      state: 'known',
+      value: {
+        id: 'sim-a',
+        coding: [{ system: 'urn:mieweb:simulation-drug', code: 'sim-a' }],
+        conceptSpecificity: 'ingredient',
+        strength: '5 mg',
+        doseForm: 'tablet',
+      },
+      observedAt: input.evaluatedAt,
+      sourceId: 'fixture',
+    };
+    expect(
+      validatePrescription(input, demoPrescriptionPolicy).checks.review
+    ).toBe('unknown');
+  });
   it('normalizes decimals without floating point changes', () => {
     expect(normalizeDecimal('000.5000')).toBe('0.5');
     expect(normalizeDecimal('9007199254740993.001')).toBe(

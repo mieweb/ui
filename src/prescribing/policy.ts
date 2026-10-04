@@ -18,6 +18,7 @@ export interface PrescriptionPolicy {
   requirePrescriber: boolean;
   requirePharmacy: boolean;
   requireClassification: boolean;
+  requireResolvedProduct: boolean;
   maxContextAgeMs: number;
   allowCompound: boolean;
   scheduleRefillLimits: Partial<Record<'II' | 'III' | 'IV' | 'V', number>>;
@@ -38,6 +39,7 @@ export const demoPrescriptionPolicy: PrescriptionPolicy = {
   version: '1.0.0',
   requiredFields: [
     'productId',
+    'code',
     'strength',
     'doseForm',
     'sig',
@@ -63,6 +65,7 @@ export const demoPrescriptionPolicy: PrescriptionPolicy = {
   requirePrescriber: true,
   requirePharmacy: true,
   requireClassification: true,
+  requireResolvedProduct: true,
   maxContextAgeMs: 86400000,
   allowCompound: false,
   scheduleRefillLimits: { II: 0, III: 5, IV: 5 },

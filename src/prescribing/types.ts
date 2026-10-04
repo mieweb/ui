@@ -70,6 +70,13 @@ export interface PrescriptionValidationContext {
   }>;
   pharmacy?: Fact<{ id: string; newRx: boolean; epcs: boolean }>;
   controlledSchedule?: Fact<ControlledSchedule>;
+  product?: Fact<{
+    id: string;
+    coding: DrugCoding[];
+    conceptSpecificity: 'product' | 'ingredient' | 'compound';
+    strength: string;
+    doseForm: string;
+  }>;
 }
 export interface PrescriptionValidationInput {
   draft: PrescriptionDraft;
@@ -135,6 +142,7 @@ export interface PrescriptionReadiness {
 }
 /** Editor/row host input. Construct fresh trusted context on the server. */
 export interface PrescribingConfiguration {
+  references?: { patientId: string; prescriberId: string; pharmacyId?: string };
   input: Omit<PrescriptionValidationInput, 'draft'>;
   policy: import('./policy').PrescriptionPolicy;
 }

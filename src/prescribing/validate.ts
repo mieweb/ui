@@ -30,6 +30,33 @@ const date = (value: unknown) =>
   typeof value === 'string'
     ? DateTime.fromISO(value, { zone: 'UTC' })
     : DateTime.invalid('invalid input');
+const fieldLabels: Record<string, string> = {
+  name: 'Medication name',
+  sig: 'Directions',
+  productId: 'Drug product',
+  code: 'Drug code',
+  strength: 'Strength',
+  doseForm: 'Dosage form',
+  dose: 'Dose',
+  doseUnit: 'Dose unit',
+  quantity: 'Dispense quantity',
+  quantityUnit: 'Dispensing unit',
+  daysSupply: 'Days supply',
+  route: 'Route',
+  frequency: 'Frequency',
+  prnReason: 'As-needed reason',
+  maxDailyDose: 'Maximum daily dose',
+  refills: 'Refills',
+  substitution: 'Substitution choice',
+  startDate: 'Therapy start date',
+  endDate: 'Therapy end date',
+  writtenDate: 'Written date',
+  indication: 'Indication',
+  pharmacyNotes: 'Pharmacy notes',
+  pharmacyId: 'Pharmacy',
+  prn: 'As-needed choice',
+};
+const fieldLabel = (field: string) => fieldLabels[field] ?? field;
 const nonempty = (value: unknown) =>
   typeof value === 'string' && value.trim().length > 0;
 /** Pure, synchronous and deterministic: all time and context enter through input. */
@@ -94,6 +121,7 @@ export function validatePrescription(
       'requirePrescriber',
       'requirePharmacy',
       'requireClassification',
+      'requireResolvedProduct',
       'allowCompound',
     ].every((k) => typeof policy[k] === 'boolean') &&
     typeof policy.maxContextAgeMs === 'number' &&
@@ -201,7 +229,7 @@ export function validatePrescription(
       add(
         'FIELD_TYPE',
         `prescription.${field}`,
-        `${field} has an invalid value type.`
+        `${fieldLabel(field)} has an invalid value type.`
       );
       invalid = true;
     }
@@ -215,7 +243,7 @@ export function validatePrescription(
       add(
         'REQUIRED',
         `prescription.${field}`,
-        `${field} is required to complete the prescription.`
+        `${fieldLabel(field)} is required to complete the prescription.`
       );
       missing = true;
     }
@@ -239,7 +267,7 @@ export function validatePrescription(
         add(
           'POSITIVE_DECIMAL',
           `prescription.${field}`,
-          `${field} must be a positive decimal.`
+          `${fieldLabel(field)} must be a positive decimal.`
         );
         invalid = true;
       }
@@ -292,7 +320,11 @@ export function validatePrescription(
       nonempty(details[field]) &&
       !supported.includes(String(details[field]))
     ) {
-      add('UNIT_UNSUPPORTED', `prescription.${field}`, `Unsupported ${field}.`);
+      add(
+        'UNIT_UNSUPPORTED',
+        `prescription.${field}`,
+        `Choose a supported ${fieldLabel(field).toLowerCase()}.`
+      );
       invalid = true;
     }
   }
@@ -314,7 +346,7 @@ export function validatePrescription(
       add(
         'DATE_INVALID',
         `prescription.${field}`,
-        `${field} must be a valid ISO calendar date.`
+        `${fieldLabel(field)} must be a valid calendar date.`
       );
       invalid = true;
     }
@@ -411,6 +443,83 @@ export function validatePrescription(
     }
     return (fact as unknown as Fact<T> & { value: T }).value;
   };
+  const product = checkFact<Record<string, unknown>>(
+    'product',
+    p.requireResolvedProduct,
+    'edit-prescription'
+  );
+  if (product) {
+    const productCoding = product.coding;
+    if (
+      !nonempty(product.id) ||
+      !['product', 'ingredient', 'compound'].includes(
+        String(product.conceptSpecificity)
+      ) ||
+      !Array.isArray(productCoding) ||
+      productCoding.length === 0 ||
+      productCoding.some(
+        (c) => !isJsonObject(c) || !nonempty(c.system) || !nonempty(c.code)
+      ) ||
+      typeof product.strength !== 'string' ||
+      typeof product.doseForm !== 'string'
+    ) {
+      add(
+        'PRODUCT_METADATA_UNKNOWN',
+        'context.product',
+        'Resolved drug product metadata must be verified.',
+        'edit-prescription'
+      );
+      unknown = true;
+    } else if (
+      product.conceptSpecificity === 'ingredient' ||
+      (product.conceptSpecificity === 'compound' && !p.allowCompound)
+    ) {
+      add(
+        'PRODUCT_PATH_UNSUPPORTED',
+        'prescription.productId',
+        'Select a supported drug product; this profile does not support the selected ingredient or compound pathway.'
+      );
+      unknown = true;
+    } else {
+      if (nonempty(details.productId) && details.productId !== product.id) {
+        add(
+          'PRODUCT_ID_MISMATCH',
+          'prescription.productId',
+          'Drug product does not match the resolved catalog record.'
+        );
+        invalid = true;
+      }
+      if (
+        isJsonObject(coding) &&
+        !productCoding.some(
+          (c) =>
+            isJsonObject(c) &&
+            c.system === coding.system &&
+            c.code === coding.code &&
+            (coding.version === undefined || c.version === coding.version)
+        )
+      ) {
+        add(
+          'PRODUCT_CODE_MISMATCH',
+          'prescription.code',
+          'Drug code does not match the selected product.'
+        );
+        invalid = true;
+      }
+      for (const field of ['strength', 'doseForm'] as const)
+        if (
+          nonempty(details[field]) &&
+          String(details[field]).trim() !== String(product[field]).trim()
+        ) {
+          add(
+            'PRODUCT_DETAIL_MISMATCH',
+            `prescription.${field}`,
+            `${fieldLabel(field)} does not match the selected product; reselect or confirm the intended product.`
+          );
+          invalid = true;
+        }
+    }
+  }
   const patient = checkFact<Record<string, unknown>>(
     'patient',
     p.requirePatient,

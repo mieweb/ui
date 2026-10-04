@@ -681,6 +681,10 @@ export interface PrescribingApi {
     },
     options: RequestOptions
   ): Promise<ApiResponse<TransmissionRecord>>;
+  getCancellation(
+    id: string,
+    options?: RequestOptions
+  ): Promise<ApiResponse<CancellationRecord>>;
   cancelPrescription(
     id: string,
     request: {
@@ -746,4 +750,127 @@ export interface TransmissionRequest {
   signedArtifactId: string;
   pharmacyId: string;
   transactionType: 'NewRx';
+}
+/** Domain payloads remain separate from check coverage/freshness and workflow eligibility. */
+export interface InteractionResult {
+  evaluatedPairs: string[];
+  historyReviewed: boolean;
+  synthetic?: boolean;
+}
+export interface PregnancyResult {
+  pregnancy: Fact<'pregnant' | 'not-pregnant' | 'unknown'>;
+  lactation: Fact<boolean>;
+  reproductivePotential: Fact<'planning' | 'not-planning' | 'unknown'>;
+  narrative: string;
+  synthetic?: boolean;
+}
+export interface DosingResult {
+  perDoseAmount: { value: string; unit: string } | null;
+  dailyAmount: { value: string; unit: string } | null;
+  weightKg: string | null;
+  demonstrationRange: { maxPerDose: string; unit: string } | null;
+  synthetic?: boolean;
+}
+export interface CoverageRestriction {
+  code: string;
+  message: string;
+  productId?: string;
+  quantity?: string;
+  indication?: string;
+}
+export interface CoverageAlternative {
+  productId: string;
+  display: string;
+  coverage: 'covered' | 'not-covered' | 'conditional' | 'unknown';
+}
+export interface FormularyResult {
+  planId: string;
+  formularyVersion: string;
+  productId: string;
+  coverage: 'covered' | 'not-covered' | 'conditional' | 'unknown';
+  tier: string | null;
+  restrictions: CoverageRestriction[];
+  quantityLimit: { value: string; unit: string } | null;
+  stepTherapy: string | null;
+  priorAuthorization: 'yes' | 'no' | 'unknown';
+  alternatives: CoverageAlternative[];
+  evidence: Evidence[];
+  synthetic?: boolean;
+}
+export interface BenefitResult {
+  inquiryId: string;
+  planId: string;
+  memberId: string;
+  pharmacyId: string | null;
+  productId: string;
+  quantity: string | null;
+  daysSupply: string | null;
+  coverage: 'covered' | 'not-covered' | 'conditional' | 'unknown';
+  patientCostEstimate: { amount: string; currency: string } | null;
+  estimateAsOf: string;
+  estimateDisclaimer: string;
+  restrictions: CoverageRestriction[];
+  priorAuthorization: 'yes' | 'no' | 'unknown';
+  alternatives: CoverageAlternative[];
+  payerResponseId: string;
+  synthetic?: boolean;
+}
+export interface ClinicalProviderSnapshot {
+  draft: PrescriptionDraft;
+  context: PatientContextSnapshot;
+  product: DrugProduct | null;
+  related: Array<{ draft: PrescriptionDraft; product: DrugProduct | null }>;
+  policy: PrescriptionPolicy;
+  knowledgeVersion: string;
+  evaluatedAt: string;
+}
+export interface ClinicalKnowledgeProvider {
+  checkInteractions(
+    snapshot: Readonly<ClinicalProviderSnapshot>,
+    signal?: AbortSignal
+  ): Promise<CheckResult<InteractionResult>>;
+  checkPregnancy(
+    snapshot: Readonly<ClinicalProviderSnapshot>,
+    signal?: AbortSignal
+  ): Promise<CheckResult<PregnancyResult>>;
+  checkDosing(
+    snapshot: Readonly<ClinicalProviderSnapshot>,
+    signal?: AbortSignal
+  ): Promise<CheckResult<DosingResult>>;
+}
+export interface CoverageProvider {
+  checkFormulary(
+    snapshot: Readonly<ClinicalProviderSnapshot>,
+    signal?: AbortSignal
+  ): Promise<CheckResult<FormularyResult>>;
+  checkBenefit(
+    snapshot: Readonly<ClinicalProviderSnapshot>,
+    signal?: AbortSignal
+  ): Promise<CheckResult<BenefitResult>>;
+}
+export interface TransmissionProvider {
+  submitNewRx(
+    snapshot: Readonly<SignedArtifact>,
+    correlationId: string,
+    signal?: AbortSignal
+  ): Promise<{
+    outcome: 'acknowledged' | 'rejected' | 'failed' | 'unknown';
+    receiptId?: string;
+  }>;
+  lookupOutcome(
+    correlationId: string,
+    signal?: AbortSignal
+  ): Promise<{
+    outcome:
+      | 'acknowledged'
+      | 'rejected'
+      | 'known-not-transmitted'
+      | 'still-unknown';
+    checkedAt: string;
+  }>;
+  submitCancelRx(
+    original: { signedArtifactId: string; transmissionId: string | null },
+    correlationId: string,
+    signal?: AbortSignal
+  ): Promise<{ outcome: 'acknowledged' | 'rejected' | 'unknown' }>;
 }

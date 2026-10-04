@@ -176,6 +176,8 @@ export function createHttpClient(
       request('POST', `/transmissions/${segment(id)}/reconciliations`, b, o),
     retryTransmission: (id, b, o) =>
       request('POST', `/transmissions/${segment(id)}/retries`, b, o),
+    getCancellation: (id, o) =>
+      request('GET', `/cancellations/${segment(id)}`, undefined, o),
     cancelPrescription: (id, b, o) =>
       request('POST', `/prescriptions/${segment(id)}/cancellations`, b, o),
     replacePrescription: (id, b, o) =>

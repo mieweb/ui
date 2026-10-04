@@ -28,6 +28,18 @@ export const completeValidationFixture: PrescriptionValidationInput = {
   },
   context: {
     revision: '1',
+    product: {
+      state: 'known',
+      value: {
+        id: 'sim-a',
+        coding: [{ system: 'urn:mieweb:simulation-drug', code: 'sim-a' }],
+        conceptSpecificity: 'product',
+        strength: '5 mg',
+        doseForm: 'tablet',
+      },
+      observedAt: '2026-10-03T12:00:00Z',
+      sourceId: 'fixture',
+    },
     patient: {
       state: 'known',
       value: {

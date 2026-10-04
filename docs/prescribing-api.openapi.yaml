@@ -10292,6 +10292,9 @@
           "requireClassification": {
             "type": "boolean"
           },
+          "requireResolvedProduct": {
+            "type": "boolean"
+          },
           "maxContextAgeMs": {
             "type": "number",
             "minimum": 1
@@ -10393,6 +10396,7 @@
           "requirePrescriber",
           "requirePharmacy",
           "requireClassification",
+          "requireResolvedProduct",
           "maxContextAgeMs",
           "allowCompound",
           "scheduleRefillLimits",
