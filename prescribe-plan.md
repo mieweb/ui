@@ -9,6 +9,7 @@ Implementation tracking: complete a checklist item only after implementing and v
 - Baseline: the complete UI, shared validator, EHR API, simulator, and standards plan is tracked before implementation begins.
 - In progress: phases 1–6 below. Verified work is linked to local implementation commits; remaining checkboxes are still outstanding.
 - `4c21528d` — Shared JSON draft/context/readiness contracts, deterministic validator and explicit demo policy, pure/API public entries, typed HTTP client, 37-route runtime schema registry and generated OpenAPI. Verified 24 tests in Node and 24 tests in jsdom, isolated TypeScript compilation, affected ESLint/Prettier, and targeted ESM/CommonJS builds/imports. Full declaration/build integration and simulator execution remain outstanding.
+- `d4a799fb` — Added trusted resolved-product consistency (identity/code/version/strength/form), explicit unknown ingredient/compound paths, human-readable validation messages, scoped context references, complete typed service methods/provider payloads, and junior EHR adapter guide. Verified 25 pure/API tests in both Node and jsdom, isolated TypeScript compilation, scoped ESLint/Prettier, regenerated all 37 OpenAPI operations and targeted ESM/CommonJS builds. The simulator will supply server-owned product metadata; production clinical/network adapters remain outside scope.
 
 Allow clinicians and staff to record an unfinished medication order immediately, show what prevents it from being prescribed or sent to a pharmacy, and provide a direct way to complete it wherever that order appears. A name such as “Lasix” is enough to save an order draft. Completing prescription details, obtaining the prescriber's signature, and transmitting the prescription are separate steps.
 
@@ -259,10 +260,10 @@ Deliverable: a Lasix draft can be edited, saved, reopened, and handed to another
 
 ### Phase 2 Build the shared TypeScript validator
 
-- [x] Add src/prescribing/types.ts, policy.ts, validate.ts, and index.ts with one deterministic validatePrescription implementation and typed versioned profiles. (`4c21528d`)
-- [x] Define JSON-compatible draft/context/policy inputs and structured issues/results, including unknown context and invalid configuration behavior. (`4c21528d`)
-- [x] Register src/prescribing.ts in tsup.entries.mjs and package.json exports for @mieweb/ui/prescribing; use the existing ESM/CommonJS/declaration build. (`4c21528d`)
-- [x] Test field presence/format, explicit zero refills, profile conditions, fixed-time date boundaries, input immutability, and stable issue ordering. (`4c21528d`)
+- [x] Add src/prescribing/types.ts, policy.ts, validate.ts, and index.ts with one deterministic validatePrescription implementation and typed versioned profiles. (`4c21528d`, `d4a799fb`)
+- [x] Define JSON-compatible draft/context/policy inputs and structured issues/results, including unknown context and invalid configuration behavior. (`4c21528d`, `d4a799fb`)
+- [x] Register src/prescribing.ts in tsup.entries.mjs and package.json exports for @mieweb/ui/prescribing; use the existing ESM/CommonJS/declaration build. (`4c21528d`, `d4a799fb`)
+- [x] Test field presence/format, explicit zero refills, profile conditions, fixed-time date boundaries, input immutability, and stable issue ordering. (`4c21528d`, `d4a799fb`)
 - [ ] Verify identical fixtures in browser and Node, JSON round trips, and built imports without React or DOM dependencies.
 
 Deliverable: UI and TypeScript server consumers can import and run the same rules through one public API.
