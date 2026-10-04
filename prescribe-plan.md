@@ -1,6 +1,6 @@
 # Prescribe plan
 
-Status: complete and verified locally on branch codex/prescribe-plan. All six phases are implemented. Component plan reviewed October 2, 2026; simulated EHR API, implementation, and final verification completed October 3, 2026. Changes are committed locally for review; nothing has been pushed, and pushing requires the user's later instruction.
+Status: complete and verified on branch codex/prescribe-plan. All six phases are implemented. Component plan reviewed October 2, 2026; simulated EHR API, implementation, and final verification completed October 3, 2026. The user authorized publishing this branch and opening a pull request for online review on October 3, 2026.
 
 Implementation tracking: complete a checklist item only after implementing and verifying it, then append the implementation commit SHA to that item. Record implementation commits and their validation in the progress log below. Commit code changes first and commit the corresponding plan update separately so the plan can refer to an existing commit. Git history records both code and progress commits.
 
