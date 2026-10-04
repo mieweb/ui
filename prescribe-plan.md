@@ -16,6 +16,8 @@ Implementation tracking: complete a checklist item only after implementing and v
 
 - `fe306294` — Preserved optional catalog coding-system versions through injected lookup, editor draft/save, and trusted product previews. Verified all 13 affected medication/order-editor tests plus affected ESLint/Prettier.
 
+- `cea078ed` — Complete deterministic fake EHR service, per-instance store/scheduler/providers, all 37 HTTP routes, all 24 scenarios and variants, eight requested service domains, scoped PDMP/PA, review/signing/transmission/reconciliation/cancellation state machines, real typed-client Storybook host, trace/reset controls, and simulator maintenance guide. Verified all 82 focused simulator tests and the full repository suite: 104 files / 1,354 tests passed. Whole-repository TypeScript/lint/format, final library build, static Storybook and browser checks follow against the frozen source.
+
 Allow clinicians and staff to record an unfinished medication order immediately, show what prevents it from being prescribed or sent to a pharmacy, and provide a direct way to complete it wherever that order appears. A name such as “Lasix” is enough to save an order draft. Completing prescription details, obtaining the prescriber's signature, and transmitting the prescription are separate steps.
 
 The starting workflow is [Assessment Interactive](https://ui.mieweb.org/?path=/story/encounter-orders-assessment--interactive). Implementation covers the UI component library, a shared TypeScript validation layer usable in client and server, and a fake EHR service/API for development and Storybook. The same validation functions and rules run in both environments. The fake service simulates transmission, clinical checks, PDMP, coverage, and prior authorization. A production EHR implements the declared API using its real data and providers; real EPCS credentials, clinical knowledge sources, payer/PDMP connections, and Surescripts transport remain outside this repository's implementation.
@@ -296,10 +298,10 @@ Deliverable: the same prescription revision has consistent alerts and completion
 
 ### Phase 5 Implement the fake EHR service and API
 
-- [ ] Implement the API contracts, per-instance store, fixture providers, and HTTP adapter described below; have validation call the shared pure validator.
-- [ ] Add deterministic evaluation, PDMP, formulary/benefit, prior authorization, simulated signing, transmission, and cancellation state machines.
-- [ ] Add runtime request/response schemas, OpenAPI documentation, revision checks, action gates, idempotency, and typed failure responses.
-- [ ] Add per-story reset, scenario selection, injectable clock/IDs, and lifecycle cleanup; isolate fake code from the published validator entry.
+- [x] Implement the API contracts, per-instance store, fixture providers, and HTTP adapter described below; have validation call the shared pure validator. (`4c21528d`, `d4a799fb`, `cea078ed`)
+- [x] Add deterministic evaluation, PDMP, formulary/benefit, prior authorization, simulated signing, transmission, and cancellation state machines. (`cea078ed`)
+- [x] Add runtime request/response schemas, OpenAPI documentation, revision checks, action gates, idempotency, and typed failure responses. (`4c21528d`, `cea078ed`)
+- [x] Add per-story reset, scenario selection, injectable clock/IDs, and lifecycle cleanup; isolate fake code from the published validator entry. (`cea078ed`)
 
 Deliverable: a fake EHR implementing the same interface the production EHR will replace, with no real external transmissions.
 
@@ -308,7 +310,7 @@ Deliverable: a fake EHR implementing the same interface the production EHR will 
 - [ ] Connect a Storybook host through the typed API client; demonstrate all eight requested services and the fixture scenarios below.
 - [ ] Test late responses, partial/unavailable services, override expiry, revision conflicts, PDMP review, PA decisions, and simulated signing.
 - [ ] Test duplicate-send prevention, response loss, operation polling, cancellation, and reset using controlled time.
-- [ ] Publish consumer documentation and the OpenAPI contract; identify production adapter responsibilities and applicable standards.
+- [x] Publish consumer documentation and the OpenAPI contract; identify production adapter responsibilities and applicable standards. (`d4a799fb`, `5307f961`, `cea078ed`)
 
 Deliverable: an inspectable end-to-end prescribing simulation that a junior developer can extend by implementing the defined methods and fixtures.
 
@@ -339,7 +341,7 @@ Deliverable: an inspectable end-to-end prescribing simulation that a junior deve
 
 Verification covers the pure validator, component adapters, and fake EHR service/API. Run focused Vitest coverage, typecheck/lint for affected code, browser/Node validator parity, built-entry import/declaration checks, API contract tests, Storybook interaction/accessibility checks, and catalog checks when documentation/exports change. Use synthetic fixtures; a live signing/transmission service remains outside this deliverable.
 
-Implementation is tracked in the local commits and verified checklist above. The pure validator, API contracts, and healthcare completion UI are implemented; the fake EHR workflow and final package/browser integration checks are in progress.
+Implementation is tracked in the local commits and verified checklist above. The pure validator, API contracts, healthcare completion UI, and fake EHR workflow are implemented. Final package/build and static Storybook/browser integration checks are in progress.
 
 ## Policy and component decisions
 
