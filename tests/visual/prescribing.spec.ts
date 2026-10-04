@@ -9,6 +9,40 @@ async function openStory(page: Page, story: string, globals = '') {
   await expect(page.locator('.sb-errordisplay')).not.toBeVisible();
 }
 
+async function selectMedication(page: Page) {
+  const dialog = page.getByRole('dialog');
+  await dialog
+    .getByRole('combobox', { name: 'Medication', exact: true })
+    .fill('SimDrug');
+  await page.getByRole('option', { name: /^SimDrug A 5 mg tablet / }).click();
+  await expect(
+    dialog.getByLabel('Product strength', { exact: true })
+  ).toHaveValue('5 mg');
+}
+
+async function selectIndication(page: Page) {
+  const dialog = page.getByRole('dialog');
+  await dialog
+    .getByRole('combobox', { name: 'Indication (concern)', exact: true })
+    .fill('Synthetic');
+  const result = page.getByRole('option', { name: /^Synthetic indication / });
+  await expect(result).toBeVisible();
+  await dialog
+    .getByRole('combobox', { name: 'Indication (concern)', exact: true })
+    .press('Escape');
+  await expect(dialog).toBeVisible();
+  await expect(result).not.toBeVisible();
+  await dialog
+    .getByRole('combobox', { name: 'Indication (concern)', exact: true })
+    .fill('Synthetic indication');
+  await result.click();
+  await expect(
+    dialog.getByText('Linked chart concern: Synthetic indication', {
+      exact: true,
+    })
+  ).toBeVisible();
+}
+
 async function checkAccessibility(page: Page, context = '#storybook-root') {
   // Check settled colors after controls transition from disabled to enabled.
   await expect
@@ -93,7 +127,7 @@ test.describe('Prescription completion', () => {
       await expect(panel).toHaveCount(1);
       await expect(panel).toHaveAttribute('data-placement', 'container');
       await assertCompact();
-      const lookup = dialog.getByRole('textbox', {
+      const lookup = dialog.getByRole('combobox', {
         name: 'Medication',
         exact: true,
       });
@@ -133,104 +167,128 @@ test.describe('Prescription completion', () => {
       ).toHaveAttribute('aria-expanded', 'false');
     });
   }
-  test('explicit prescription details survive save and reopen without claiming transmission', async ({
-    page,
-  }) => {
-    await openStory(
+  for (const viewport of [
+    { width: 1280, height: 800 },
+    { width: 320, height: 568 },
+  ]) {
+    test(`coded medication and concern survive save and reopen at ${viewport.width}px`, async ({
       page,
-      'encounter-orders-prescriptionreadiness--interactive'
-    );
-    await page
-      .locator('summary')
-      .filter({ hasText: 'Needs prescription details' })
-      .click();
-    await page
-      .getByRole('button', {
-        name: 'Complete prescription: Lasix',
-        exact: true,
-      })
-      .click();
-    const dialog = page.getByRole('dialog');
-    await dialog
-      .getByRole('button', {
-        name: 'Select SimDrug A 5 mg tablet',
-        exact: true,
-      })
-      .click();
-    const fields = {
-      'Product strength': '5 mg',
-      'Dose form': 'tablet',
-      'Dose per administration': '5',
-      'Dose unit': 'mg',
-      Route: 'oral',
-      Frequency: 'Once daily',
-      'Sig (patient directions)': 'Synthetic demonstration directions.',
-      Quantity: '30',
-      'Dispensing unit': 'tablet',
-      Refills: '0',
-    };
-    for (const [label, value] of Object.entries(fields)) {
+    }) => {
+      await page.setViewportSize(viewport);
+      await openStory(
+        page,
+        'encounter-orders-prescriptionreadiness--interactive'
+      );
+      await page
+        .locator('summary')
+        .filter({ hasText: 'Needs prescription details' })
+        .click();
+      await page
+        .getByRole('button', {
+          name: 'Complete prescription: Lasix',
+          exact: true,
+        })
+        .click();
+      const dialog = page.getByRole('dialog');
+      await selectMedication(page);
+      await selectIndication(page);
+      const fields = {
+        'Product strength': '5 mg',
+        'Dose form': 'tablet',
+        'Dose per administration': '5',
+        'Dose unit': 'mg',
+        Route: 'oral',
+        Frequency: 'Once daily',
+        'Sig (patient directions)': 'Synthetic demonstration directions.',
+        Quantity: '30',
+        'Dispensing unit': 'tablet',
+        Refills: '0',
+      };
+      for (const [label, value] of Object.entries(fields)) {
+        await dialog
+          .getByRole('textbox', { name: label, exact: true })
+          .fill(value);
+      }
+      await expect(
+        dialog.getByRole('combobox', { name: 'Medication', exact: true })
+      ).toHaveValue('SimDrug A 5 mg tablet');
+      const floatingSummary = dialog.locator('[data-presentation="floating"]');
+      await expect(floatingSummary).toHaveCount(0);
+      await expect(dialog.getByLabel('Refills', { exact: true })).toBeFocused();
+      const route = dialog.getByLabel('Route', { exact: true });
+      await route.fill('');
+      await expect(floatingSummary).toBeVisible();
+      await expect(route).toHaveAttribute('aria-invalid', 'true');
+      await route.fill('oral');
+      await expect(floatingSummary).toHaveCount(0);
+      await expect(route).toBeFocused();
       await dialog
-        .getByRole('textbox', { name: label, exact: true })
-        .fill(value);
-    }
-    await expect(
-      dialog.getByRole('textbox', { name: 'Medication', exact: true })
-    ).toHaveValue('SimDrug A');
-    const floatingSummary = dialog.locator('[data-presentation="floating"]');
-    await expect(floatingSummary).toHaveCount(0);
-    await expect(dialog.getByLabel('Refills', { exact: true })).toBeFocused();
-    const route = dialog.getByLabel('Route', { exact: true });
-    await route.fill('');
-    await expect(floatingSummary).toBeVisible();
-    await expect(route).toHaveAttribute('aria-invalid', 'true');
-    await route.fill('oral');
-    await expect(floatingSummary).toHaveCount(0);
-    await expect(route).toBeFocused();
-    await dialog
-      .getByRole('button', { name: 'Save draft', exact: true })
-      .click();
-    await expect(dialog).not.toBeVisible();
-    await expect(
-      page.getByText('Details complete', { exact: true })
-    ).toBeVisible();
-    await expect(page.getByText('Ready to send', { exact: true })).toHaveCount(
-      0
-    );
-    await page
-      .getByRole('button', {
-        name: 'Complete prescription: SimDrug A',
-        exact: true,
-      })
-      .click();
-    for (const [label, value] of Object.entries(fields)) {
+        .getByRole('button', { name: 'Save draft', exact: true })
+        .click();
+      await expect(dialog).not.toBeVisible();
+      await expect(
+        page.getByText('Details complete', { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByText('Ready to send', { exact: true })
+      ).toHaveCount(0);
+      // Linking to the concern moves the order into a newly mounted problem row.
+      await page
+        .locator('summary')
+        .filter({ hasText: 'Details complete' })
+        .click();
+      await page
+        .getByRole('button', {
+          name: 'Complete prescription: SimDrug A 5 mg tablet',
+          exact: true,
+        })
+        .click();
+      for (const [label, value] of Object.entries(fields)) {
+        await expect(
+          page
+            .getByRole('dialog')
+            .getByRole('textbox', { name: label, exact: true })
+        ).toHaveValue(value);
+      }
       await expect(
         page
           .getByRole('dialog')
-          .getByRole('textbox', { name: label, exact: true })
-      ).toHaveValue(value);
-    }
-    await expect(
-      page
+          .getByRole('combobox', { name: 'Medication', exact: true })
+      ).toHaveValue('SimDrug A 5 mg tablet');
+      await expect(
+        dialog.getByRole('combobox', {
+          name: 'Indication (concern)',
+          exact: true,
+        })
+      ).toHaveValue('Synthetic indication');
+      await expect(
+        dialog.getByText(
+          'Coded: urn:mieweb:simulation-condition sim-condition-1',
+          { exact: true }
+        )
+      ).toBeVisible();
+      await expect(
+        dialog.getByText('Linked chart concern: Synthetic indication', {
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(
+        page
+          .getByRole('dialog')
+          .getByRole('radio', { name: 'Substitution permitted', exact: true })
+      ).toBeChecked();
+      await page
         .getByRole('dialog')
-        .getByRole('textbox', { name: 'Medication', exact: true })
-    ).toHaveValue('SimDrug A');
-    await expect(
-      page
-        .getByRole('dialog')
-        .getByRole('radio', { name: 'Substitution permitted', exact: true })
-    ).toBeChecked();
-    await page
-      .getByRole('dialog')
-      .getByRole('button', { name: 'Cancel', exact: true })
-      .click();
-    await expect(
-      page.getByRole('button', {
-        name: 'Complete prescription: SimDrug A',
-        exact: true,
-      })
-    ).toBeFocused();
-  });
+        .getByRole('button', { name: 'Cancel', exact: true })
+        .click();
+      await expect(
+        page.getByRole('button', {
+          name: 'Complete prescription: SimDrug A 5 mg tablet',
+          exact: true,
+        })
+      ).toBeFocused();
+    });
+  }
 
   test('a draft warning remains visible and can be completed with the keyboard', async ({
     page,
@@ -255,11 +313,11 @@ test.describe('Prescription completion', () => {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(
-      dialog.getByRole('textbox', { name: 'Medication', exact: true })
+      dialog.getByRole('combobox', { name: 'Medication', exact: true })
     ).toBeFocused();
     await checkAccessibility(page, '[role="dialog"]');
     await dialog
-      .getByRole('textbox', { name: 'Medication', exact: true })
+      .getByRole('combobox', { name: 'Medication', exact: true })
       .evaluate((input) => {
         input.scrollIntoView({ block: 'center', behavior: 'instant' });
       });
@@ -427,7 +485,7 @@ test.describe('Fake EHR prescribing workflow', () => {
       page.getByRole('button', { name: 'Simulate signing', exact: true })
     ).toBeEnabled();
     await page
-      .getByRole('textbox', { name: 'Medication name', exact: true })
+      .getByRole('combobox', { name: 'Medication name', exact: true })
       .fill('Pending free text draft');
     await expect(
       page.getByRole('button', { name: 'Check readiness', exact: true })
@@ -459,18 +517,8 @@ test.describe('Fake EHR prescribing workflow', () => {
       .getByRole('button', { name: 'Edit prescription', exact: true })
       .click();
     const dialog = page.getByRole('dialog');
-    await dialog
-      .getByRole('textbox', { name: 'Medication', exact: true })
-      .fill('SimDrug');
-    await dialog
-      .getByRole('button', { name: 'Search synthetic catalog', exact: true })
-      .click();
-    await dialog
-      .getByRole('button', {
-        name: 'Select SimDrug A 5 mg tablet',
-        exact: true,
-      })
-      .click();
+    await selectMedication(page);
+    await selectIndication(page);
     for (const [label, value] of Object.entries({
       'Dose per administration': '5',
       'Dose unit': 'mg',
@@ -479,7 +527,6 @@ test.describe('Fake EHR prescribing workflow', () => {
       'Sig (patient directions)': 'Synthetic demonstration directions.',
       Quantity: '30',
       Refills: '0',
-      Indication: 'Invented fixture indication',
     })) {
       await dialog
         .getByRole('textbox', { name: label, exact: true })

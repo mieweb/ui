@@ -113,6 +113,8 @@ export const prescriptionDetailFields: Array<keyof PrescriptionDetails> = [
   'endDate',
   'writtenDate',
   'indication',
+  'indicationCode',
+  'concernId',
   'pharmacyNotes',
   'pharmacyId',
 ];

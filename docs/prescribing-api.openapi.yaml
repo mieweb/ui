@@ -7430,6 +7430,12 @@
           "indication": {
             "type": "string"
           },
+          "indicationCode": {
+            "$ref": "#/components/schemas/DrugCoding"
+          },
+          "concernId": {
+            "type": "string"
+          },
           "pharmacyNotes": {
             "type": "string"
           },
@@ -9310,6 +9316,18 @@
                 "type": "string"
               },
               "quantityUnit": {
+                "type": "string"
+              },
+              "daysSupply": {
+                "type": "string"
+              },
+              "indication": {
+                "type": "string"
+              },
+              "indicationCode": {
+                "$ref": "#/components/schemas/DrugCoding"
+              },
+              "concernId": {
                 "type": "string"
               },
               "coverageRevision": {

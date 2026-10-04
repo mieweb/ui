@@ -21,6 +21,14 @@ describe('prescription adapters', () => {
         prn: true,
         prnReason: 'Demo symptom',
         maxDailyDose: '5',
+        concernId: 'concern1',
+        indication: 'Hypertension',
+        indicationCode: {
+          system: 'ICD-10-CM',
+          code: 'I10',
+          display: 'Essential hypertension',
+          version: '2026',
+        },
       },
       concernId: 'concern1',
       priority: 'urgent',
@@ -74,6 +82,58 @@ describe('prescription adapters', () => {
         order
       ).code
     ).toBeUndefined();
+  });
+  it('uses the current durable assessment link when an order has been moved to another concern', () => {
+    const order: AssessmentOrder = {
+      orderId: 'rx1',
+      type: 'medication',
+      display: 'Drug',
+      concernId: 'current-concern',
+      prescription: { name: 'Drug', concernId: 'previous-concern' },
+    };
+    const medication = orderToMedication(order);
+    expect(medication.concernId).toBe('current-concern');
+    const saved = medicationToOrder(medication, order);
+    expect(saved.concernId).toBe('current-concern');
+    expect(saved.prescription?.concernId).toBe('current-concern');
+  });
+  it('clears explicit concern links while preserving legacy omitted links', () => {
+    const order: AssessmentOrder = {
+      orderId: 'rx1',
+      type: 'medication',
+      display: 'Drug',
+      concernId: 'concern1',
+      prescription: { name: 'Drug', concernId: 'concern1' },
+    };
+    const medication = {
+      id: 'rx1',
+      status: 'unreconciled' as const,
+      name: 'Drug',
+    };
+    const preserved = medicationToOrder(medication, order);
+    expect(preserved.concernId).toBe('concern1');
+    expect(preserved.prescription?.concernId).toBe('concern1');
+    const cleared = medicationToOrder(
+      { ...medication, concernId: undefined },
+      order
+    );
+    expect(cleared.concernId).toBeUndefined();
+    expect(cleared.prescription?.concernId).toBeUndefined();
+    expect(
+      orderToMedication({ ...order, concernId: undefined }).concernId
+    ).toBeUndefined();
+  });
+  it('retains a canonical concern link when the legacy order has no link property', () => {
+    const order: AssessmentOrder = {
+      orderId: 'rx1',
+      type: 'medication',
+      display: 'Drug',
+      prescription: { name: 'Drug', concernId: 'canonical-concern' },
+    };
+    expect(orderToMedication(order).concernId).toBe('canonical-concern');
+    expect(medicationToOrder(orderToMedication(order), order).concernId).toBe(
+      'canonical-concern'
+    );
   });
 });
 

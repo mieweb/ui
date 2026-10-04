@@ -53,6 +53,26 @@ resource/scope and a current-or-newer projection revision. Generation tokens and
 AbortSignals reject work after reset/unmount. The mounted demo clock advances
 every 500 ms; pending reads stop after 30 seconds with manual refresh available.
 
+Medication and indication use the actual Codify-backed `CodeLookup` component
+and module worker. The simulator serves a small invented med/condition index at
+`/prescribing-codify`, isolated from the full clinical catalog at `/codify`.
+Rebuild its checked-in MCDX assets with `node scripts/build-prescribing-codify.mjs`
+after editing `fixtures/codify.json`. Its deterministic manifest hash invalidates
+the worker cache when those fixture rows change. Keep medication codes synchronized
+with `makeProducts`; fixture tests verify that search results resolve to the fake
+EHR catalog. Indexed labels never confer strength, dosage form or controlled
+classification: `PrescribingMedicationLookup` resolves each picked code through
+the typed `getDrug` API and checks the returned coding before adding metadata.
+Typing another medication aborts and discards a pending resolution. Resolution
+failures retain a saveable free-text draft.
+
+The indication search loads the condition domain and can link the existing
+`demo-concern-1` chart concern by its current coded assertion. The host supplies
+durable concern identities; the lookup never makes an ID from a label or code.
+An unmatched code remains an unlinked coded indication for the EHR to resolve.
+These condition codes and concern records are invented simulation fixtures.
+Production hosts should pass their chart concerns and maintained Codify indexes.
+
 Prescription issues use a collapsed floating summary capped at 20% of the dynamic
 viewport height, including its header. Expanded issues scroll within that panel.
 The host hides its panel while the editor is open; the editor keeps a compact panel

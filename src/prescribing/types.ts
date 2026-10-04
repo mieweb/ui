@@ -30,7 +30,12 @@ export interface PrescriptionDetails {
   startDate?: string;
   endDate?: string;
   writtenDate?: string;
+  /** Display text for the condition/concern being treated; free text remains savable. */
   indication?: string;
+  /** Selected condition coding, independent of the medication's drug code. */
+  indicationCode?: DrugCoding;
+  /** Durable chart concern identity; the EHR resolves and authorizes this link. */
+  concernId?: string;
   pharmacyNotes?: string;
   pharmacyId?: string;
 }

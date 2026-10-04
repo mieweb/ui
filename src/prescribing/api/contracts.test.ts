@@ -141,6 +141,54 @@ describe('API contracts and client', () => {
       ).length
     ).toBeGreaterThan(0);
   });
+  it('accepts optional concern coding and leaves uncoded indication drafts savable', () => {
+    const draft = {
+      ...completeValidationFixture.draft,
+      prescription: {
+        indication: 'Hypertension',
+        concernId: 'chart-concern-1',
+        indicationCode: {
+          system: 'ICD-10-CM',
+          code: 'I10',
+          display: 'Essential hypertension',
+          version: '2026',
+        },
+      },
+    };
+    expect(validateRequest('POST', '/prescriptions', draft)).toEqual([]);
+    expect(
+      validateResponse(
+        'GET',
+        '/prescriptions/rx-1',
+        envelope({
+          ...record,
+          prescription: draft.prescription,
+        })
+      )
+    ).toEqual([]);
+    expect(
+      validateRequest('POST', '/prescriptions', {
+        ...draft,
+        prescription: { indication: 'Uncoded concern' },
+      })
+    ).toEqual([]);
+  });
+  it.each([
+    { system: 'ICD-10-CM' },
+    { system: 'ICD-10-CM', code: '' },
+    { system: 'ICD-10-CM', code: 'I10', version: 2026 },
+    { system: 'ICD-10-CM', code: 'I10', display: false },
+  ])(
+    'rejects malformed optional condition coding %j in API drafts',
+    (indicationCode) => {
+      expect(
+        validateRequest('POST', '/prescriptions', {
+          ...completeValidationFixture.draft,
+          prescription: { indicationCode },
+        }).length
+      ).toBeGreaterThan(0);
+    }
+  );
   it('injects recoverable keys/revisions/session transport and validates response', async () => {
     const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
       new Response(JSON.stringify(envelope(record)), {

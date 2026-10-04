@@ -1096,6 +1096,24 @@ export function createFakeEhrService(
       );
     verifyWorkflowScope(draft, pdmpQueryId, priorAuthorizationId);
   }
+  function matchesPriorAuthorizationScope(
+    draft: PrescriptionDraft,
+    pa: PriorAuthorizationCase
+  ) {
+    return (
+      pa.patientId === draft.patientId &&
+      pa.scope.productId === draft.prescription.productId &&
+      pa.scope.quantity === draft.prescription.quantity &&
+      pa.scope.quantityUnit === draft.prescription.quantityUnit &&
+      pa.scope.daysSupply === draft.prescription.daysSupply &&
+      pa.scope.indication === draft.prescription.indication &&
+      pa.scope.concernId === draft.prescription.concernId &&
+      canonical(pa.scope.indicationCode) ===
+        canonical(draft.prescription.indicationCode) &&
+      pa.planId === patient(draft.patientId).coverage.planId &&
+      pa.scope.coverageRevision === patient(draft.patientId).coverage.revision
+    );
+  }
   function verifyWorkflowScope(
     draft: PrescriptionDraft,
     pdmpQueryId: string | null,
@@ -1121,16 +1139,7 @@ export function createFakeEhrService(
     if (priorAuthorizationId) {
       const pa = resource(store.priorAuthorizations, priorAuthorizationId);
       authorize(pa.patientId);
-      if (
-        pa.patientId !== draft.patientId ||
-        pa.scope.productId !== draft.prescription.productId ||
-        pa.scope.quantity !== draft.prescription.quantity ||
-        pa.scope.quantityUnit !== draft.prescription.quantityUnit ||
-        pa.scope.daysSupply !== draft.prescription.daysSupply ||
-        pa.scope.indication !== draft.prescription.indication ||
-        pa.planId !== patient(draft.patientId).coverage.planId ||
-        pa.scope.coverageRevision !== patient(draft.patientId).coverage.revision
-      )
+      if (!matchesPriorAuthorizationScope(draft, pa))
         fail(
           422,
           'PA_SCOPE_MISMATCH',
@@ -1783,6 +1792,12 @@ export function createFakeEhrService(
           ...(draft.prescription.indication
             ? { indication: draft.prescription.indication }
             : {}),
+          ...(draft.prescription.indicationCode
+            ? { indicationCode: clone(draft.prescription.indicationCode) }
+            : {}),
+          ...(draft.prescription.concernId !== undefined
+            ? { concernId: draft.prescription.concernId }
+            : {}),
           coverageRevision: coverage.revision,
         },
         createdAt: clock.now(),
@@ -1880,13 +1895,7 @@ export function createFakeEhrService(
             'Submission kind does not match the questionnaire workflow'
           );
         const currentDraftRecord = rx(record.prescription.id);
-        if (
-          currentDraftRecord.prescription.productId !==
-            record.scope.productId ||
-          currentDraftRecord.prescription.quantity !== record.scope.quantity ||
-          patient(record.patientId).coverage.revision !==
-            record.scope.coverageRevision
-        )
+        if (!matchesPriorAuthorizationScope(currentDraftRecord, record))
           fail(
             422,
             'PA_SCOPE_MISMATCH',

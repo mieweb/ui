@@ -58,7 +58,7 @@ const details = Object.fromEntries(
     key,
     key === 'prn'
       ? bool
-      : key === 'code'
+      : key === 'code' || key === 'indicationCode'
         ? ref('DrugCoding')
         : key === 'substitution'
           ? en('0', '1')
@@ -511,6 +511,10 @@ export const prescribingSchemas: Record<string, JsonSchema> = {
           productId: id,
           quantity: str,
           quantityUnit: str,
+          daysSupply: str,
+          indication: str,
+          indicationCode: ref('DrugCoding'),
+          concernId: str,
           coverageRevision: id,
         },
         ['productId', 'quantity', 'quantityUnit', 'coverageRevision']

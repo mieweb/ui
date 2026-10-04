@@ -80,37 +80,42 @@ import { CodeLookup } from '…/CodeLookup'; // app bundlers only, see below
 ## MedicationEditor (NCPDP prescription editor)
 
 Modal editor capturing the NCPDP SCRIPT NewRx `MedicationPrescribed` field
-set, with CodeLookup-based drug coding. Mount with a `key` per target so a
+set, with Codify-backed CodeLookup for medication and indication/concern coding. Mount with a `key` per target so a
 different medication reseeds the draft.
 
 | Editor field                          | `Medication` prop              | NCPDP element                        |
 | ------------------------------------- | ------------------------------ | ------------------------------------ |
 | Medication (search/name)              | `name`                         | DrugDescription                      |
 | — code (auto from lookup)             | `code {system, code, display}` | DrugCoded / ProductCode / DrugDBCode |
-| Strength (auto from label)            | `strength`                     | Strength + StrengthUnitOfMeasure     |
-| Dose form (auto from label)           | `doseForm`                     | DrugCoded/FormCode                   |
+| Product strength                     | `strength`                     | Strength + StrengthUnitOfMeasure     |
+| Dose form                            | `doseForm`                     | DrugCoded/FormCode                   |
 | Quantity                              | `quantity`                     | Quantity/Value                       |
-| — unit (auto from dose form)          | `quantityUnit`                 | Quantity/QuantityUnitOfMeasure       |
+| — dispensing unit                    | `quantityUnit`                 | Quantity/QuantityUnitOfMeasure       |
 | Days supply                           | `daysSupply`                   | DaysSupply                           |
 | Refills                               | `refills`                      | NumberOfRefills                      |
 | Substitution (radio)                  | `substitution` (`'0'`/`'1'`)   | Substitutions (DAW)                  |
 | Sig                                   | `sig`                          | Sig/SigText                          |
-| — route/frequency/PRN (auto from sig) | `route`, `frequency`, `prn`    | Sig structured elements              |
-| Start / End date                      | `startDate`, `endDate`         | WrittenDate / EffectiveDate          |
-| Indication                            | `indication`                   | Diagnosis/Primary                    |
+| — explicit route/frequency/PRN        | `route`, `frequency`, `prn`    | Sig structured elements              |
+| Therapy Start / End date              | `startDate`, `endDate`         | Effective therapy dates; signing supplies WrittenDate |
+| Indication (concern)                  | `indication`, `indicationCode` | Diagnosis/Primary                    |
+| — chart concern link                 | `concernId`                    | Host chart identity; not a catalog code |
 | Pharmacy notes                        | `pharmacyNotes`                | Note                                 |
 
-Derived fields ("auto"):
+Drug coding and prescription metadata are separate. A CodeLookup pick supplies
+the coding; the injected EHR catalog adapter supplies confirmed product identity,
+strength, form, and allowed dispensing units. Label and sig parsers provide
+suggestions only. Route, frequency, PRN, and dispensing unit have explicit controls.
 
-- Picking a coded result parses the label — "lisinopril 20 mg tablet" fills
-  `strength: "20 mg"`, `doseForm: "tablet"`, and `quantityUnit: "tablet"`
-  (via `parseMedicationLabel`, exported).
-- The quantity unit always follows the dose form (tablet → tablet, solution →
-  milliliter, …) — there is no separate unit control.
-- Route, frequency, and PRN are parsed live from the sig text (via
-  `parseSig`, exported): "1 tablet by mouth daily as needed" derives
-  `route: oral`, `frequency: Once daily`, `prn: true`, shown under the
-  sig field.
+Both lookups default to the ambient `CodeLookupProvider`. An explicit
+`indicationCodeLookup={{ component: CodeLookup, indexUrl: '/codify' }}` configures
+the condition-domain search independently of the medication catalog adapter;
+`indicationCodeLookup={false}` selects a plain input. Supply
+`indicationConcerns={chart.concerns}` to offer existing chart concerns. Selecting
+one preserves its durable `concernId`; a uniquely matching current coded assertion
+also links it. A catalog code alone never creates a chart concern identity.
+The host creates or resolves a new concern before saving its link. Free-text
+indications remain valid drafts. Typing changes immediately clear stale coding and
+the old concern link; coded selections and links survive save/reopen.
 
 All fields are optional on `Medication` — a bare `{ id, name, status }`
 renders fine everywhere.

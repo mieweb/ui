@@ -53,6 +53,9 @@ import { Label } from '../Label';
 import { RadioGroup, Radio } from '../Radio';
 import { DateInput } from '../DateInput';
 import { Checkbox } from '../Checkbox';
+import { Select } from '../Select';
+import { currentAssertion, type ConditionConcern } from '../ProblemList';
+import { normalizeConditionCodingSystem } from '../ConditionEditor';
 import {
   PrescriptionIssueSummary,
   getPrescriptionIssues,
@@ -106,12 +109,18 @@ export interface MedicationLookupProps {
   placeholder?: string;
   initialQuery?: string;
   initialSearch?: boolean;
+  /** Freeze the search input and result actions during an asynchronous save. */
+  disabled?: boolean;
   /** Associate the injected search input with its inline prescription alerts. */
   id?: string;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
   'aria-invalid'?: React.AriaAttributes['aria-invalid'];
   'aria-describedby'?: string;
   onSelect?: (result: MedicationLookupResult) => void;
   onFreeText?: (text: string) => void;
+  /** Persist draft edits immediately, before a result or free-text submission. */
+  onQueryChange?: (text: string) => void;
 }
 
 /** CodeLookup wiring for the editor (component injected by the consumer). */
@@ -121,6 +130,31 @@ export interface CodeLookupConfig {
   /** Base URL of the codify index, e.g. '/codify' */
   indexUrl: string;
   /** Shard locale (default 'en') */
+  locale?: string;
+}
+
+/** A condition code selected as the concern treated by this medication. */
+export interface IndicationLookupResult {
+  label: string;
+  codetype: string;
+  fullcode: string;
+  codeVersion?: string;
+  /** Catalog identity; never used as a chart concern's durable concernId. */
+  fullid?: string;
+}
+
+/** Worker-free injection contract for a condition-domain CodeLookup. */
+export interface IndicationLookupProps extends Omit<
+  MedicationLookupProps,
+  'domains' | 'onSelect'
+> {
+  domains?: 'condition'[];
+  onSelect?: (result: IndicationLookupResult) => void;
+}
+
+export interface IndicationCodeLookupConfig {
+  component: React.ComponentType<IndicationLookupProps>;
+  indexUrl: string;
   locale?: string;
 }
 
@@ -134,6 +168,10 @@ export interface MedicationEditorProps {
    * `CodeLookupProvider`; pass `false` to force a plain name input.
    */
   codeLookup?: CodeLookupConfig | false;
+  /** Condition-domain Codify search, defaulting to the ambient provider. */
+  indicationCodeLookup?: IndicationCodeLookupConfig | false;
+  /** Existing chart concerns available as durable indication links. */
+  indicationConcerns?: ConditionConcern[];
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete medication on save */
@@ -317,6 +355,14 @@ function newId(): string {
   return `med-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** Compare Codify aliases with canonical FHIR coding-system identifiers. */
+function indicationCodingSystemKey(system: string): string {
+  const uri = system.toLowerCase().replace(/\/$/, '');
+  if (uri === 'http://snomed.info/sct') return 'SNOMED';
+  if (uri === 'http://hl7.org/fhir/sid/icd-10-cm') return 'ICD-10-CM';
+  return normalizeConditionCodingSystem(system);
+}
+
 /** Product/coding issues belong beside the visible medication search. */
 function editorIssueField(fieldPath?: string): string | undefined {
   const field = fieldPath?.replace(/^(draft|prescription)\./, '');
@@ -331,6 +377,12 @@ function editorIssueField(fieldPath?: string): string | undefined {
   )
     return 'name';
   if (field === 'context.pharmacy') return 'pharmacyId';
+  if (
+    field === 'concernId' ||
+    field === 'indicationCode' ||
+    field?.startsWith('indicationCode.')
+  )
+    return 'indication';
   return field;
 }
 
@@ -350,6 +402,8 @@ export function MedicationEditor({
   open,
   medication,
   codeLookup,
+  indicationCodeLookup,
+  indicationConcerns = [],
   onClose,
   onSave,
   prescribing,
@@ -364,6 +418,10 @@ export function MedicationEditor({
     codeLookup === false
       ? undefined
       : (codeLookup ?? ambientCodeLookup ?? undefined);
+  const effectiveIndicationLookup: IndicationCodeLookupConfig | undefined =
+    indicationCodeLookup === false
+      ? undefined
+      : (indicationCodeLookup ?? ambientCodeLookup ?? undefined);
   const [draft, setDraft] = React.useState<Medication>(() => ({
     id: prescribing?.input.orderId ?? newId(),
     name: '',
@@ -378,6 +436,9 @@ export function MedicationEditor({
     React.useState<PrescriptionValidationContext['controlledSchedule']>();
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState('');
+  // CodeLookup reads its initial query once; choosing a chart concern reseeds it.
+  const [indicationLookupRevision, setIndicationLookupRevision] =
+    React.useState(0);
   const bodyRef = React.useRef<HTMLDivElement>(null);
   // Capture each closed-to-open transition before the modal's passive focus
   // effect. Delayed cleanup avoids stealing focus during StrictMode replay.
@@ -646,6 +707,71 @@ export function MedicationEditor({
         setSelectedSchedule(prescribing.input.context.controlledSchedule);
     }
   };
+  const availableConcerns = indicationConcerns.flatMap((concern) => {
+    const assertion = currentAssertion(concern);
+    return assertion &&
+      assertion.verificationStatus !== 'refuted' &&
+      assertion.verificationStatus !== 'entered-in-error'
+      ? [{ concern, assertion }]
+      : [];
+  });
+  const changeIndication = (indication: string) => {
+    patch({ indication, indicationCode: undefined, concernId: undefined });
+  };
+  const selectIndication = (result: IndicationLookupResult) => {
+    const system = normalizeConditionCodingSystem(result.codetype);
+    const matches = availableConcerns.filter(({ assertion }) =>
+      assertion.coding?.some(
+        (coding) =>
+          indicationCodingSystemKey(coding.system) ===
+            indicationCodingSystemKey(system) && coding.code === result.fullcode
+      )
+    );
+    // A shared code can describe several concerns. Retain an existing match,
+    // or link a unique match; otherwise the host resolves the chart concern.
+    const match =
+      matches.find(({ concern }) => concern.concernId === draft.concernId) ??
+      (matches.length === 1 ? matches[0] : undefined);
+    patch({
+      indication: result.label,
+      indicationCode: {
+        system,
+        code: result.fullcode,
+        display: result.label,
+        ...(result.codeVersion !== undefined && {
+          version: result.codeVersion,
+        }),
+      },
+      concernId: match?.concern.concernId,
+    });
+  };
+  const selectConcern = (concernId: string) => {
+    const selected = availableConcerns.find(
+      ({ concern }) => concern.concernId === concernId
+    );
+    if (!selected) {
+      patch({ concernId: undefined });
+      return;
+    }
+    const coding =
+      selected.assertion.coding?.find((entry) => entry.primary) ??
+      selected.assertion.coding?.[0];
+    patch({
+      indication: selected.assertion.text,
+      indicationCode: coding
+        ? {
+            system: normalizeConditionCodingSystem(coding.system),
+            code: coding.code,
+            display: coding.display ?? selected.assertion.text,
+          }
+        : undefined,
+      concernId: selected.concern.concernId,
+    });
+    setIndicationLookupRevision((revision) => revision + 1);
+  };
+  const linkedConcern = availableConcerns.find(
+    ({ concern }) => concern.concernId === draft.concernId
+  );
   const directionContradictions = [
     draft.route &&
     sigSuggestion.route &&
@@ -718,6 +844,7 @@ export function MedicationEditor({
                 </Label>
                 <effectiveCodeLookup.component
                   id={`${instanceId}-name`}
+                  aria-label="Medication"
                   aria-invalid={attributes('name')['aria-invalid']}
                   aria-describedby={attributes('name')['aria-describedby']}
                   indexUrl={effectiveCodeLookup.indexUrl}
@@ -726,10 +853,12 @@ export function MedicationEditor({
                   bare
                   clearOnSelect={false}
                   placeholder="Search medications"
-                  initialQuery={medication?.name || undefined}
-                  initialSearch={medication ? !medication.code : undefined}
+                  initialQuery={draft.name || undefined}
+                  initialSearch={!draft.code}
+                  disabled={saving}
                   onSelect={handleProductSelect}
                   onFreeText={(name) => changeDrug(name)}
+                  onQueryChange={(name) => changeDrug(name)}
                 />
                 <p className="text-muted-foreground text-xs">
                   {draft.code
@@ -916,7 +1045,83 @@ export function MedicationEditor({
                 {messages('endDate')}
               </div>
             </div>
-            {textField('indication', 'Indication')}
+            <div className="space-y-1.5">
+              <Label
+                id={`${instanceId}-indication-label`}
+                htmlFor={`${instanceId}-indication`}
+              >
+                Indication
+              </Label>
+              {effectiveIndicationLookup && !readOnly ? (
+                <div
+                  role="group"
+                  aria-labelledby={`${instanceId}-indication-label`}
+                  aria-describedby={
+                    attributes('indication')['aria-describedby']
+                  }
+                  data-prescription-field="indication"
+                >
+                  <effectiveIndicationLookup.component
+                    key={indicationLookupRevision}
+                    id={`${instanceId}-indication`}
+                    aria-label="Indication (concern)"
+                    aria-invalid={attributes('indication')['aria-invalid']}
+                    aria-describedby={
+                      attributes('indication')['aria-describedby']
+                    }
+                    indexUrl={effectiveIndicationLookup.indexUrl}
+                    locale={effectiveIndicationLookup.locale}
+                    domains={['condition']}
+                    bare
+                    clearOnSelect={false}
+                    placeholder="Search the concern treated by this medication"
+                    initialQuery={draft.indication || undefined}
+                    initialSearch={!draft.indicationCode}
+                    disabled={saving}
+                    onSelect={selectIndication}
+                    onFreeText={changeIndication}
+                    onQueryChange={changeIndication}
+                  />
+                </div>
+              ) : (
+                <Input
+                  {...attributes('indication')}
+                  value={draft.indication ?? ''}
+                  onChange={(event) => changeIndication(event.target.value)}
+                />
+              )}
+              {messages('indication')}
+              <p className="text-muted-foreground text-xs">
+                {draft.indicationCode
+                  ? `Coded: ${draft.indicationCode.system} ${draft.indicationCode.code}`
+                  : 'Free-text indication; select a concern or code when ready.'}
+              </p>
+              {draft.concernId && (
+                <p className="text-muted-foreground text-xs">
+                  Linked chart concern:{' '}
+                  {linkedConcern?.assertion.text ??
+                    draft.indication ??
+                    draft.concernId}
+                </p>
+              )}
+              {availableConcerns.length > 0 && !readOnly && (
+                <Select
+                  id={`${instanceId}-concern`}
+                  label="Chart concern"
+                  placeholder="Choose an existing concern"
+                  value={draft.concernId ?? ''}
+                  disabled={saving}
+                  options={[
+                    { value: '', label: 'No linked chart concern' },
+                    ...availableConcerns.map(({ concern, assertion }) => ({
+                      value: concern.concernId,
+                      label: assertion.text,
+                    })),
+                  ]}
+                  onValueChange={selectConcern}
+                />
+              )}
+            </div>
             {prescribing && (
               <div className="space-y-1.5">
                 <p className="text-muted-foreground text-sm">

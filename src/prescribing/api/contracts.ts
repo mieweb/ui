@@ -356,6 +356,8 @@ export interface PriorAuthorizationCase {
     quantityUnit: string;
     daysSupply?: string;
     indication?: string;
+    indicationCode?: DrugCoding;
+    concernId?: string;
     coverageRevision: string;
   };
   createdAt: string;

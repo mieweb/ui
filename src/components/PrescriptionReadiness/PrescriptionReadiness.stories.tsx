@@ -8,9 +8,19 @@ import {
   uiReadiness,
 } from './storyData';
 import { Assessment, type AssessmentOrder } from '../Assessment';
-import { OrderEditor, type OrderLookupProps } from '../OrderEditor';
-import { Input } from '../Input';
-import { Button } from '../Button';
+import { OrderEditor } from '../OrderEditor';
+import { CodeLookup } from '../CodeLookup';
+import { currentAssertion } from '../ProblemList';
+import { createFakeEhrService } from '../../demo/prescribing/createFakeEhrService';
+import { createFakeFetch } from '../../demo/prescribing/createFakeFetch';
+import { makeProducts } from '../../demo/prescribing/fixtures';
+import { createHttpClient } from '../../prescribing/api/createHttpClient';
+import {
+  PrescribingMedicationLookup,
+  prescribingCodifyIndexUrl,
+  prescribingIndicationConcerns,
+} from '../../demo/prescribing/PrescribingMedicationLookup';
+import type { MedicationLookupProps } from '../MedicationList';
 
 const meta: Meta<typeof PrescriptionIssueSummary> = {
   id: 'encounter-orders-prescriptionreadiness',
@@ -31,6 +41,11 @@ const meta: Meta<typeof PrescriptionIssueSummary> = {
           type: 'uses',
           target: 'clinical-lists-medicationlist',
           why: 'Opt-in prescription intent uses shared issue presentation while history retains reconciliation.',
+        },
+        {
+          type: 'uses',
+          target: 'clinical-lists-codelookup',
+          why: 'Medication and indication use Codify-backed med and condition searches; concern selection preserves chart identity.',
         },
       ],
     },
@@ -211,53 +226,21 @@ export const FloatingContained: Story = {
     </div>
   ),
 };
-function SimulationDrugLookup({
-  initialQuery,
-  onFreeText,
-  onSelect,
-}: OrderLookupProps) {
-  const [query, setQuery] = useState(initialQuery ?? '');
-  return (
-    <div className="space-y-2">
-      <Input
-        aria-label="Medication"
-        value={query}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          onFreeText?.(event.target.value);
-        }}
-      />
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          setQuery('SimDrug A');
-          onSelect?.({
-            fullid: 'sim-a',
-            label: 'SimDrug A',
-            codetype: 'urn:mieweb:simulation-drug',
-            fullcode: 'sim-a',
-            productId: 'sim-a',
-            strength: '5 mg',
-            doseForm: 'tablet',
-            quantityUnit: 'tablet',
-            conceptSpecificity: 'product',
-            controlledSchedule: 'non-controlled',
-            observedAt: '2026-10-03T12:00:00.000Z',
-            sourceId: 'synthetic-catalog',
-          });
-        }}
-      >
-        Select SimDrug A 5 mg tablet
-      </Button>
-      <p className="text-muted-foreground text-xs">
-        Synthetic catalog for this demonstration.
-      </p>
-    </div>
-  );
-}
 function DraftCompletion() {
+  const [concerns, setConcerns] = useState(prescribingIndicationConcerns);
+  const [lookup] = useState(() => {
+    const service = createFakeEhrService({ scenarioId: 'lasix-draft' });
+    const client = createHttpClient({ fetch: createFakeFetch(service) });
+    return function Lookup(props: MedicationLookupProps) {
+      return (
+        <PrescribingMedicationLookup
+          {...props}
+          client={client}
+          now={() => service.clock.now()}
+        />
+      );
+    };
+  });
   const [order, setOrder] = useState<AssessmentOrder>({
     orderId: 'rx-ui-1',
     type: 'medication',
@@ -268,18 +251,55 @@ function DraftCompletion() {
   const [editing, setEditing] = useState(false);
   const [field, setField] = useState<string>();
   const [saved, setSaved] = useState('');
+  const linkedConcern = concerns.find(
+    (concern) => concern.concernId === order.concernId
+  );
+  const linkedAssertion = linkedConcern
+    ? currentAssertion(linkedConcern)
+    : undefined;
+  const catalogProduct = makeProducts(
+    prescribingUiConfiguration.input.evaluatedAt
+  ).find((product) => product.id === order.prescription?.productId);
   const configuration = {
     ...prescribingUiConfiguration,
     input: {
       ...prescribingUiConfiguration.input,
       orderRevision: order.prescriptionRevision!,
+      context: {
+        ...prescribingUiConfiguration.input.context,
+        ...(catalogProduct && {
+          product: {
+            state: 'known' as const,
+            value: {
+              id: catalogProduct.id,
+              coding: catalogProduct.coding,
+              conceptSpecificity: catalogProduct.specificity,
+              strength: catalogProduct.strength,
+              doseForm: catalogProduct.form,
+              quantityUnits: catalogProduct.quantityUnits,
+            },
+            observedAt: prescribingUiConfiguration.input.evaluatedAt,
+            sourceId: 'urn:mieweb:simulation:catalog',
+          },
+          controlledSchedule: catalogProduct.controlledSchedule,
+        }),
+      },
     },
   };
   return (
     <div className="space-y-4">
       <Assessment
-        concerns={[]}
-        items={[]}
+        concerns={concerns}
+        items={
+          linkedConcern && linkedAssertion
+            ? [
+                {
+                  concernId: linkedConcern.concernId,
+                  assertionId: linkedAssertion.id,
+                },
+              ]
+            : []
+        }
         orders={[order]}
         renderOrderSearch={false}
         prescribing={() => configuration}
@@ -305,13 +325,45 @@ function DraftCompletion() {
           open
           order={order}
           codeLookup={{
-            component: SimulationDrugLookup,
-            indexUrl: '/simulation-catalog',
+            component: lookup,
+            indexUrl: prescribingCodifyIndexUrl,
           }}
+          indicationCodeLookup={{
+            component: CodeLookup,
+            indexUrl: prescribingCodifyIndexUrl,
+          }}
+          indicationConcerns={concerns}
           prescribing={configuration}
           initialIssueField={field}
           onClose={() => setEditing(false)}
           onSave={(next) => {
+            if (next.prescription?.indication && !next.concernId) {
+              const concernId = `demo-concern-${concerns.length + 1}`;
+              setConcerns((previous) => [
+                ...previous,
+                {
+                  concernId,
+                  clinicalStatus: 'active',
+                  source: 'manuallyAdded',
+                  assertions: [
+                    {
+                      id: `${concernId}-assertion-1`,
+                      date: '2026-10-03',
+                      text: next.prescription!.indication!,
+                      coding: next.prescription!.indicationCode
+                        ? [next.prescription!.indicationCode]
+                        : undefined,
+                      verificationStatus: 'unconfirmed',
+                    },
+                  ],
+                },
+              ]);
+              next = {
+                ...next,
+                concernId,
+                prescription: { ...next.prescription, concernId },
+              };
+            }
             setOrder({
               ...next,
               prescriptionRevision: String(

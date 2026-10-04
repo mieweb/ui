@@ -1,18 +1,99 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import {
   MedicationEditor,
   lookupToMedicationFields,
   type MedicationLookupProps,
+  type IndicationLookupProps,
 } from './MedicationEditor';
+import { CodeLookupProvider } from '../CodeLookup/context';
+import type { CodeLookupProps } from '../CodeLookup/CodeLookup';
+import type { ConditionConcern } from '../ProblemList';
+import type { Medication } from './MedicationList';
 import {
   completeUiPrescription,
   prescribingUiConfiguration,
   uiReadiness,
 } from '../PrescriptionReadiness/storyData';
 import type { PrescriptionIssue } from '../../prescribing/types';
+
+const heartFailureConcern: ConditionConcern = {
+  concernId: 'chart-concern-heart-failure',
+  clinicalStatus: 'active',
+  assertions: [
+    {
+      id: 'assertion-old',
+      date: '2025-01-01',
+      text: 'Edema',
+      verificationStatus: 'provisional',
+      coding: [{ system: 'ICD-10-CM', code: 'R60.9' }],
+    },
+    {
+      id: 'assertion-current',
+      date: '2026-10-01',
+      text: 'Heart failure',
+      verificationStatus: 'confirmed',
+      coding: [{ system: 'ICD-10-CM', code: 'I50.9', primary: true }],
+    },
+  ],
+};
+
+function ConditionLookup(props: IndicationLookupProps) {
+  const [query, setQuery] = React.useState(props.initialQuery ?? '');
+  return (
+    <div>
+      <input
+        id={props.id}
+        aria-label={props['aria-label']}
+        aria-invalid={props['aria-invalid']}
+        aria-describedby={props['aria-describedby']}
+        disabled={props.disabled}
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          props.onQueryChange?.(event.target.value);
+        }}
+      />
+      <button
+        disabled={props.disabled}
+        onClick={() => {
+          setQuery('Heart failure');
+          props.onSelect?.({
+            label: 'Heart failure',
+            codetype: 'ICD10',
+            fullcode: 'I50.9',
+            fullid: 'catalog-row-not-a-concern-id',
+            codeVersion: '2026',
+          });
+        }}
+      >
+        Select coded concern
+      </button>
+      <button
+        disabled={props.disabled}
+        onClick={() => {
+          setQuery('Edema');
+          props.onSelect?.({
+            label: 'Edema',
+            codetype: 'ICD10',
+            fullcode: 'R60.9',
+            fullid: 'another-catalog-row',
+          });
+        }}
+      >
+        Select historical code
+      </button>
+    </div>
+  );
+}
 
 describe('prescription draft editor', () => {
   it('saves an incomplete draft and persists the displayed substitution default', async () => {
@@ -608,6 +689,554 @@ describe('inline prescription alerts', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByLabelText('Route')).not.toHaveAttribute(
       'aria-describedby'
+    );
+  });
+});
+
+describe('coded medication and concern indications', () => {
+  it('disables both injected lookups and their selections until saving finishes', async () => {
+    let finishSave!: () => void;
+    const pendingSave = new Promise<void>((resolve) => {
+      finishSave = resolve;
+    });
+    function MedicationLookup(props: MedicationLookupProps) {
+      return (
+        <div>
+          <input
+            id={props.id}
+            aria-label={props['aria-label']}
+            disabled={props.disabled}
+            defaultValue={props.initialQuery}
+          />
+          <button disabled={props.disabled}>Select medication code</button>
+        </div>
+      );
+    }
+    renderWithTheme(
+      <MedicationEditor
+        open
+        medication={{ id: 'med-1', name: 'Lasix', status: 'unreconciled' }}
+        codeLookup={{ component: MedicationLookup, indexUrl: '/codify' }}
+        indicationCodeLookup={{
+          component: ConditionLookup,
+          indexUrl: '/codify',
+        }}
+        indicationConcerns={[heartFailureConcern]}
+        onSave={() => pendingSave}
+        onClose={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(screen.getByRole('textbox', { name: 'Medication' })).toBeDisabled();
+    expect(
+      screen.getByRole('textbox', { name: 'Indication (concern)' })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Select medication code' })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Select coded concern' })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('combobox', { name: 'Chart concern' })
+    ).toBeDisabled();
+    await act(async () => {
+      finishSave();
+    });
+    expect(screen.getByRole('textbox', { name: 'Medication' })).toBeEnabled();
+    expect(
+      screen.getByRole('textbox', { name: 'Indication (concern)' })
+    ).toBeEnabled();
+  });
+
+  it.each([
+    {
+      chartSystem: 'http://hl7.org/fhir/sid/icd-10-cm',
+      catalogSystem: 'ICD10',
+      code: 'I50.9',
+    },
+    {
+      chartSystem: 'http://snomed.info/sct',
+      catalogSystem: 'SNOMED US',
+      code: '84114007',
+    },
+  ])(
+    'links $catalogSystem selections to chart concerns with canonical FHIR system URIs',
+    async ({ chartSystem, catalogSystem, code }) => {
+      const save = vi.fn();
+      const concern: ConditionConcern = {
+        ...heartFailureConcern,
+        assertions: [
+          {
+            ...heartFailureConcern.assertions[1],
+            coding: [{ system: chartSystem, code }],
+          },
+        ],
+      };
+      function CanonicalConditionLookup(props: IndicationLookupProps) {
+        return (
+          <button
+            onClick={() =>
+              props.onSelect?.({
+                label: 'Heart failure',
+                codetype: catalogSystem,
+                fullcode: code,
+              })
+            }
+          >
+            Select concern alias
+          </button>
+        );
+      }
+      renderWithTheme(
+        <MedicationEditor
+          open
+          medication={{ id: 'med-1', name: 'Lasix', status: 'unreconciled' }}
+          codeLookup={false}
+          indicationCodeLookup={{
+            component: CanonicalConditionLookup,
+            indexUrl: '/codify',
+          }}
+          indicationConcerns={[concern]}
+          onSave={save}
+          onClose={vi.fn()}
+        />
+      );
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Select concern alias' })
+      );
+      expect(
+        screen.getByText('Linked chart concern: Heart failure')
+      ).toBeVisible();
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await waitFor(() =>
+        expect(save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            concernId: concern.concernId,
+            indicationCode: expect.objectContaining({ code }),
+          })
+        )
+      );
+    }
+  );
+
+  it('uses the ambient lookup for both medication and condition domains', () => {
+    const lookup = vi.fn((props: CodeLookupProps) => (
+      <input id={props.id} aria-label={props['aria-label']} />
+    ));
+    renderWithTheme(
+      <CodeLookupProvider component={lookup} indexUrl="/codify">
+        <MedicationEditor
+          open
+          medication={{ id: 'med-1', name: 'Lasix', status: 'unreconciled' }}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+        />
+      </CodeLookupProvider>
+    );
+    expect(lookup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexUrl: '/codify',
+        domains: ['med'],
+        'aria-label': 'Medication',
+        onQueryChange: expect.any(Function),
+      }),
+      undefined
+    );
+    expect(lookup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexUrl: '/codify',
+        domains: ['condition'],
+        'aria-label': 'Indication (concern)',
+        onQueryChange: expect.any(Function),
+      }),
+      undefined
+    );
+  });
+
+  it('saves coded indications with the durable concern link and reopens them', async () => {
+    let saved: Medication | undefined;
+    function Host() {
+      const [medication, setMedication] = React.useState<Medication>({
+        id: 'med-1',
+        name: 'Lasix',
+        status: 'unreconciled',
+      });
+      const [open, setOpen] = React.useState(true);
+      return open ? (
+        <MedicationEditor
+          open
+          medication={medication}
+          codeLookup={false}
+          indicationCodeLookup={{
+            component: ConditionLookup,
+            indexUrl: '/codify',
+          }}
+          indicationConcerns={[heartFailureConcern]}
+          onSave={(next) => {
+            saved = next;
+            setMedication(next);
+          }}
+          onClose={() => setOpen(false)}
+        />
+      ) : (
+        <button onClick={() => setOpen(true)}>Reopen prescription</button>
+      );
+    }
+    renderWithTheme(<Host />);
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Select coded concern' })
+    );
+    expect(
+      screen.getByText('Linked chart concern: Heart failure')
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(saved).toMatchObject({
+        indication: 'Heart failure',
+        concernId: heartFailureConcern.concernId,
+        indicationCode: {
+          system: 'ICD-10-CM',
+          code: 'I50.9',
+          display: 'Heart failure',
+          version: '2026',
+        },
+      })
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Reopen prescription' })
+      ).toBeVisible()
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Reopen prescription' })
+    );
+    expect(
+      screen.getByRole('textbox', { name: 'Indication (concern)' })
+    ).toHaveValue('Heart failure');
+    expect(screen.getByText('Coded: ICD-10-CM I50.9')).toBeVisible();
+    expect(
+      screen.getByText('Linked chart concern: Heart failure')
+    ).toBeVisible();
+  });
+
+  it('does not turn a catalog row or historical assertion into a concern link', async () => {
+    const save = vi.fn();
+    renderWithTheme(
+      <MedicationEditor
+        open
+        medication={{ id: 'med-1', name: 'Lasix', status: 'unreconciled' }}
+        codeLookup={false}
+        indicationCodeLookup={{
+          component: ConditionLookup,
+          indexUrl: '/codify',
+        }}
+        indicationConcerns={[heartFailureConcern]}
+        onSave={save}
+        onClose={vi.fn()}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Select historical code' })
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indication: 'Edema',
+          indicationCode: expect.objectContaining({ code: 'R60.9' }),
+          concernId: undefined,
+        })
+      )
+    );
+  });
+
+  it('allows an uncoded chart concern and clears its link immediately when typed text changes', async () => {
+    const save = vi.fn();
+    const uncodedConcern: ConditionConcern = {
+      concernId: 'durable-uncoded-concern',
+      clinicalStatus: 'active',
+      assertions: [
+        {
+          id: 'uncoded-assertion',
+          date: '2026-10-01',
+          text: 'Leg swelling under evaluation',
+          verificationStatus: 'unconfirmed',
+        },
+      ],
+    };
+    renderWithTheme(
+      <MedicationEditor
+        open
+        medication={{ id: 'med-1', name: 'Lasix', status: 'unreconciled' }}
+        codeLookup={false}
+        indicationCodeLookup={{
+          component: ConditionLookup,
+          indexUrl: '/codify',
+        }}
+        indicationConcerns={[uncodedConcern]}
+        onSave={save}
+        onClose={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('combobox', { name: 'Chart concern' }));
+    fireEvent.click(
+      screen.getByRole('option', { name: uncodedConcern.assertions[0].text })
+    );
+    const indication = screen.getByRole('textbox', {
+      name: 'Indication (concern)',
+    });
+    expect(indication).toHaveValue(uncodedConcern.assertions[0].text);
+    expect(
+      screen.getByText(
+        `Linked chart concern: ${uncodedConcern.assertions[0].text}`
+      )
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(save).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          concernId: uncodedConcern.concernId,
+          indicationCode: undefined,
+        })
+      )
+    );
+    fireEvent.change(indication, {
+      target: { value: 'Another concern for later review' },
+    });
+    expect(
+      screen.queryByText(/^Linked chart concern:/)
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(save).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          indication: 'Another concern for later review',
+          indicationCode: undefined,
+          concernId: undefined,
+        })
+      )
+    );
+    expect(Object.hasOwn(save.mock.lastCall![0], 'concernId')).toBe(true);
+  });
+
+  it('clears stale medication coding on lookup typing without requiring Enter', async () => {
+    const save = vi.fn();
+    function MedicationLookup(props: MedicationLookupProps) {
+      return (
+        <input
+          id={props.id}
+          aria-label={props['aria-label']}
+          defaultValue={props.initialQuery}
+          onChange={(event) => props.onQueryChange?.(event.target.value)}
+        />
+      );
+    }
+    renderWithTheme(
+      <MedicationEditor
+        open
+        medication={{
+          id: 'med-1',
+          name: 'Old medication',
+          status: 'unreconciled',
+          code: { system: 'RxNorm', code: 'old' },
+          productId: 'old-product',
+          strength: '5 mg',
+        }}
+        codeLookup={{ component: MedicationLookup, indexUrl: '/codify' }}
+        onSave={save}
+        onClose={vi.fn()}
+      />
+    );
+    fireEvent.change(screen.getByRole('textbox', { name: 'Medication' }), {
+      target: { value: 'New draft medication' },
+    });
+    expect(
+      screen.getByText('Free-text draft; select a product when ready.')
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'New draft medication',
+          code: undefined,
+          productId: undefined,
+          strength: undefined,
+        })
+      )
+    );
+  });
+
+  it('clears a coded indication and its durable link before free-text submission', async () => {
+    const save = vi.fn();
+    renderWithTheme(
+      <MedicationEditor
+        open
+        medication={{
+          id: 'med-1',
+          name: 'Lasix',
+          status: 'unreconciled',
+          indication: 'Heart failure',
+          concernId: heartFailureConcern.concernId,
+          indicationCode: { system: 'ICD-10-CM', code: 'I50.9' },
+        }}
+        codeLookup={false}
+        indicationCodeLookup={{
+          component: ConditionLookup,
+          indexUrl: '/codify',
+        }}
+        indicationConcerns={[heartFailureConcern]}
+        onSave={save}
+        onClose={vi.fn()}
+      />
+    );
+    fireEvent.change(
+      screen.getByRole('textbox', { name: 'Indication (concern)' }),
+      {
+        target: { value: 'Changed concern awaiting review' },
+      }
+    );
+    expect(
+      screen.queryByText('Coded: ICD-10-CM I50.9')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/^Linked chart concern:/)
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indication: 'Changed concern awaiting review',
+          indicationCode: undefined,
+          concernId: undefined,
+        })
+      )
+    );
+    expect(Object.hasOwn(save.mock.lastCall![0], 'concernId')).toBe(true);
+  });
+
+  it('requires concern selection when more than one current concern has the selected code', async () => {
+    const save = vi.fn();
+    renderWithTheme(
+      <MedicationEditor
+        open
+        medication={{ id: 'med-1', name: 'Lasix', status: 'unreconciled' }}
+        codeLookup={false}
+        indicationCodeLookup={{
+          component: ConditionLookup,
+          indexUrl: '/codify',
+        }}
+        indicationConcerns={[
+          heartFailureConcern,
+          {
+            ...heartFailureConcern,
+            concernId: 'another-heart-failure-concern',
+          },
+        ]}
+        onSave={save}
+        onClose={vi.fn()}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Select coded concern' })
+    );
+    expect(
+      screen.queryByText(/^Linked chart concern:/)
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indicationCode: expect.objectContaining({ code: 'I50.9' }),
+          concernId: undefined,
+        })
+      )
+    );
+  });
+
+  it('shows indication coding and concern feedback in a read-only editor without a picker', () => {
+    renderWithTheme(
+      <MedicationEditor
+        open
+        readOnly
+        medication={{
+          id: 'med-1',
+          name: 'Lasix',
+          status: 'unreconciled',
+          indication: 'Heart failure',
+          concernId: heartFailureConcern.concernId,
+          indicationCode: { system: 'ICD-10-CM', code: 'I50.9' },
+        }}
+        indicationCodeLookup={{
+          component: ConditionLookup,
+          indexUrl: '/codify',
+        }}
+        indicationConcerns={[heartFailureConcern]}
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />
+    );
+    expect(screen.getByLabelText('Indication')).toBeDisabled();
+    expect(screen.getByLabelText('Indication')).toHaveValue('Heart failure');
+    expect(screen.getByText('Coded: ICD-10-CM I50.9')).toBeVisible();
+    expect(
+      screen.getByText('Linked chart concern: Heart failure')
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('button', { name: 'Select coded concern' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('combobox', { name: 'Chart concern' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('places indication-code issues beside the lookup and focuses that field', async () => {
+    const readiness = uiReadiness(completeUiPrescription);
+    readiness.validation.issues = [
+      {
+        code: 'INDICATION_CODE_REVIEW',
+        ruleId: 'test.indication-code',
+        ruleSource: 'product',
+        fieldPath: 'prescription.indicationCode.code',
+        message: 'Complete the concern coding.',
+        severity: 'error',
+        blocks: ['review'],
+        remediation: 'edit-prescription',
+      },
+    ];
+    renderWithTheme(
+      <MedicationEditor
+        open
+        medication={{
+          id: 'rx-ui-1',
+          name: 'SimDrug A',
+          status: 'unreconciled',
+          ...completeUiPrescription,
+        }}
+        codeLookup={false}
+        indicationCodeLookup={{
+          component: ConditionLookup,
+          indexUrl: '/codify',
+        }}
+        prescribing={prescribingUiConfiguration}
+        readiness={readiness}
+        initialIssueField="prescription.indicationCode.code"
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />
+    );
+    const indication = screen.getByRole('textbox', {
+      name: 'Indication (concern)',
+    });
+    await waitFor(() => expect(indication).toHaveFocus());
+    expect(indication).toHaveAttribute('aria-invalid', 'true');
+    const messageId = indication.getAttribute('aria-describedby')!;
+    expect(document.getElementById(messageId)).toHaveTextContent(
+      'Complete the concern coding.'
+    );
+    expect(screen.getByRole('group', { name: 'Indication' })).toHaveAttribute(
+      'aria-describedby',
+      messageId
     );
   });
 });

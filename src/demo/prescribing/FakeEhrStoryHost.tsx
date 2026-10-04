@@ -7,6 +7,7 @@ import { DateTime } from 'luxon';
 import { Button } from '../../components/Button';
 import {
   MedicationEditor,
+  lookupToMedicationFields,
   type MedicationLookupProps,
 } from '../../components/MedicationList/MedicationEditor';
 import type { Medication } from '../../components/MedicationList/MedicationList';
@@ -49,7 +50,12 @@ import type { FakeEhrService } from './createFakeEhrService';
 import { createFakeFetch } from './createFakeFetch';
 import { getScenario, prescribingScenarios } from './scenarios';
 import { clone, canonical } from './scheduler';
-import { SyntheticMedicationLookup } from './SyntheticMedicationLookup';
+import { CodeLookup } from '../../components/CodeLookup/CodeLookup';
+import {
+  PrescribingMedicationLookup,
+  prescribingCodifyIndexUrl,
+  prescribingIndicationConcerns,
+} from './PrescribingMedicationLookup';
 
 export interface FakeEhrStoryHostProps {
   initialScenario?: string;
@@ -104,6 +110,7 @@ export function FakeEhrStoryHost({
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState('');
   const [editorOpen, setEditorOpen] = React.useState(false);
+  const [pageLookupVersion, setPageLookupVersion] = React.useState(0);
   const [focusField, setFocusField] = React.useState<string>();
   const [readySelected, setReadySelected] = React.useState(false);
   const [answers, setAnswers] = React.useState<QuestionnaireAnswer[]>([]);
@@ -482,7 +489,7 @@ export function FakeEhrStoryHost({
     () =>
       function Lookup(props: MedicationLookupProps) {
         return bundle ? (
-          <SyntheticMedicationLookup
+          <PrescribingMedicationLookup
             {...props}
             client={bundle.client}
             now={() => bundle.service.clock.now()}
@@ -674,32 +681,72 @@ export function FakeEhrStoryHost({
       >
         <h3 className="font-semibold">Prescription draft</h3>
         <div>
-          <label className="block text-sm">
+          <label className="block text-sm" htmlFor={`${fieldId}-medication`}>
             Medication name
-            <input
-              className={`${fieldClass} aria-invalid:border-danger-500`}
-              aria-invalid={
-                medicationIssues.some((issue) => issue.severity === 'error') ||
-                undefined
-              }
-              aria-describedby={
-                medicationIssues.length
-                  ? `${fieldId}-medication-issues`
-                  : undefined
-              }
-              value={draft?.display ?? ''}
-              disabled={busy || readOnly || !!prescription?.signedArtifactId}
-              onChange={(event) => {
-                if (draft)
-                  setDraft({
-                    ...draft,
-                    display: event.target.value,
-                    code: undefined,
-                    prescription: { name: event.target.value },
-                  });
-              }}
-            />
           </label>
+          <fieldset
+            disabled={busy || readOnly || !!prescription?.signedArtifactId}
+          >
+            {bundle && draft && (
+              <Lookup
+                key={`${bundle.generation}:${pageLookupVersion}`}
+                id={`${fieldId}-medication`}
+                indexUrl={prescribingCodifyIndexUrl}
+                domains={['med']}
+                bare
+                clearOnSelect={false}
+                initialQuery={draft.display}
+                initialSearch={!draft.code}
+                aria-label="Medication name"
+                aria-invalid={
+                  medicationIssues.some(
+                    (issue) => issue.severity === 'error'
+                  ) || undefined
+                }
+                aria-describedby={
+                  medicationIssues.length
+                    ? `${fieldId}-medication-issues`
+                    : undefined
+                }
+                onQueryChange={(text) => {
+                  setDraft((previous) =>
+                    previous
+                      ? {
+                          ...previous,
+                          display: text,
+                          code: undefined,
+                          prescription: { name: text },
+                        }
+                      : null
+                  );
+                }}
+                onFreeText={(text) =>
+                  setDraft((previous) =>
+                    previous
+                      ? {
+                          ...previous,
+                          display: text,
+                          code: undefined,
+                          prescription: { name: text },
+                        }
+                      : null
+                  )
+                }
+                onSelect={(result) =>
+                  setDraft((previous) => {
+                    if (!previous) return null;
+                    const selected = lookupToMedicationFields(result);
+                    return {
+                      ...previous,
+                      display: result.label,
+                      code: selected.code,
+                      prescription: { ...previous.prescription, ...selected },
+                    };
+                  })
+                }
+              />
+            )}
+          </fieldset>
           {inlineIssues(medicationIssues, `${fieldId}-medication-issues`)}
         </div>
         <div>
@@ -768,6 +815,7 @@ export function FakeEhrStoryHost({
                 scenarioId: 'complete-demo',
               });
               setDraft(completeService.controller.draft());
+              setPageLookupVersion((version) => version + 1);
               completeService.controller.dispose();
             }}
           >
@@ -1703,8 +1751,13 @@ export function FakeEhrStoryHost({
           medication={medication}
           codeLookup={{
             component: Lookup,
-            indexUrl: '/api/prescribing/v1/drugs',
+            indexUrl: prescribingCodifyIndexUrl,
           }}
+          indicationCodeLookup={{
+            component: CodeLookup,
+            indexUrl: prescribingCodifyIndexUrl,
+          }}
+          indicationConcerns={prescribingIndicationConcerns}
           readOnly={draftReadOnly}
           prescribing={validationConfig}
           readiness={readiness}

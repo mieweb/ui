@@ -53,6 +53,8 @@ const fieldLabels: Record<string, string> = {
   endDate: 'Therapy end date',
   writtenDate: 'Written date',
   indication: 'Indication',
+  indicationCode: 'Indication code',
+  concernId: 'Concern link',
   pharmacyNotes: 'Pharmacy notes',
   pharmacyId: 'Pharmacy',
   prn: 'As-needed choice',
@@ -60,6 +62,12 @@ const fieldLabels: Record<string, string> = {
 const fieldLabel = (field: string) => fieldLabels[field] ?? field;
 const nonempty = (value: unknown) =>
   typeof value === 'string' && value.trim().length > 0;
+const validCoding = (value: unknown) =>
+  isJsonObject(value) &&
+  nonempty(value.system) &&
+  nonempty(value.code) &&
+  (value.display === undefined || typeof value.display === 'string') &&
+  (value.version === undefined || typeof value.version === 'string');
 /** Pure, synchronous and deterministic: all time and context enter through input. */
 export function validatePrescription(
   rawInput: PrescriptionValidationInput | unknown,
@@ -221,11 +229,12 @@ export function validatePrescription(
     if (
       value !== undefined &&
       ((field === 'prn' && typeof value !== 'boolean') ||
-        (field === 'code' &&
-          (!isJsonObject(value) ||
-            !nonempty(value.system) ||
-            !nonempty(value.code))) ||
-        (field !== 'prn' && field !== 'code' && typeof value !== 'string'))
+        ((field === 'code' || field === 'indicationCode') &&
+          !validCoding(value)) ||
+        (field !== 'prn' &&
+          field !== 'code' &&
+          field !== 'indicationCode' &&
+          typeof value !== 'string'))
     ) {
       add(
         'FIELD_TYPE',

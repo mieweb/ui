@@ -7,10 +7,75 @@ import {
   waitFor,
   within,
 } from '@testing-library/react';
-import { StrictMode } from 'react';
+import { StrictMode, useState } from 'react';
 import { FakeEhrStoryHost } from './FakeEhrStoryHost';
 import * as transport from './createFakeFetch';
 import type { FakeEhrService } from './createFakeEhrService';
+import type { CodeLookupProps } from '../../components/CodeLookup/CodeLookup';
+import codifyFixtures from './fixtures/codify.json';
+
+// jsdom has no module workers; browser coverage exercises the real Codify worker.
+vi.mock('../../components/CodeLookup/CodeLookup', () => ({
+  CodeLookup: function TestCodeLookup(props: CodeLookupProps) {
+    const [query, setQuery] = useState(props.initialQuery ?? '');
+    const [open, setOpen] = useState(false);
+    const resultsId = `${props.id ?? 'test-lookup'}-results`;
+    const fixtures = props.domains?.includes('condition')
+      ? codifyFixtures.condition
+      : codifyFixtures.med;
+    return (
+      <div>
+        <input
+          role="combobox"
+          id={props.id}
+          aria-label={props['aria-label']}
+          aria-invalid={props['aria-invalid']}
+          aria-describedby={props['aria-describedby']}
+          aria-expanded={open}
+          aria-controls={resultsId}
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setOpen(true);
+            props.onQueryChange?.(event.target.value);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              props.onFreeText?.(query);
+              setOpen(false);
+            }
+          }}
+        />
+        {open && (
+          <div role="listbox" id={resultsId}>
+            {fixtures.map((result) => (
+              <button
+                key={result.fullid}
+                role="option"
+                aria-selected="false"
+                type="button"
+                onClick={() => {
+                  setQuery(result.label);
+                  setOpen(false);
+                  props.onSelect?.({
+                    ...result,
+                    domain: props.domains?.includes('condition')
+                      ? 'condition'
+                      : 'med',
+                    score: 1,
+                    viaAlias: false,
+                  });
+                }}
+              >
+                {result.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  },
+}));
 
 async function press(name: string) {
   const button = screen.getByRole('button', { name });
@@ -32,7 +97,7 @@ async function prepare() {
 describe('real API client prescribing story host', { timeout: 20000 }, () => {
   it('keeps the floating summary separate from scoped inline medication and pharmacy alerts', async () => {
     render(<FakeEhrStoryHost automaticClock={false} />);
-    const name = await screen.findByRole('textbox', {
+    const name = await screen.findByRole('combobox', {
       name: 'Medication name',
     });
     await waitFor(() => expect(name).toHaveAttribute('aria-invalid', 'true'));
@@ -60,7 +125,7 @@ describe('real API client prescribing story host', { timeout: 20000 }, () => {
     expect(
       document.querySelectorAll('[data-presentation="floating"]')
     ).toHaveLength(1);
-    const lookup = within(dialog).getByRole('textbox', {
+    const lookup = within(dialog).getByRole('combobox', {
       name: 'Medication',
     });
     expect(lookup).toHaveAttribute('aria-invalid', 'true');
@@ -228,15 +293,17 @@ describe('real API client prescribing story host', { timeout: 20000 }, () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Edit prescription' }));
     const dialog = await screen.findByRole('dialog');
-    const query = within(dialog).getByRole('textbox', { name: 'Medication' });
+    const query = within(dialog).getByRole('combobox', { name: 'Medication' });
     fireEvent.change(query, { target: { value: 'SimDrug' } });
     fireEvent.click(
-      within(dialog).getByRole('button', { name: 'Search synthetic catalog' })
-    );
-    fireEvent.click(
-      await within(dialog).findByRole('button', {
-        name: 'Select SimDrug A 5 mg tablet',
+      await within(dialog).findByRole('option', {
+        name: 'SimDrug A 5 mg tablet',
       })
+    );
+    await waitFor(() =>
+      expect(within(dialog).getByLabelText('Product strength')).toHaveValue(
+        '5 mg'
+      )
     );
     // Product metadata is selected authoritatively; actual dose and directions remain explicit.
     const labels: Record<string, string> = {
@@ -248,12 +315,18 @@ describe('real API client prescribing story host', { timeout: 20000 }, () => {
       Quantity: '30',
       'Dispensing unit': 'tablet',
       Refills: '0',
-      Indication: 'Synthetic indication',
     };
     for (const [label, value] of Object.entries(labels)) {
       const control = within(dialog).getByLabelText(label, { exact: true });
       fireEvent.change(control, { target: { value } });
     }
+    const indication = within(dialog).getByRole('combobox', {
+      name: 'Indication (concern)',
+    });
+    fireEvent.change(indication, { target: { value: 'Synthetic' } });
+    fireEvent.click(
+      within(dialog).getByRole('option', { name: 'Synthetic indication' })
+    );
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save draft' }));
     await waitFor(() =>
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -261,6 +334,19 @@ describe('real API client prescribing story host', { timeout: 20000 }, () => {
     expect(
       await screen.findByText(/Order rx-0001 · content revision 2/)
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit prescription' }));
+    const savedEditor = await screen.findByRole('dialog');
+    expect(
+      within(savedEditor).getByRole('combobox', { name: 'Chart concern' })
+    ).toHaveTextContent('Synthetic indication');
+    expect(
+      within(savedEditor).getByText(
+        'Linked chart concern: Synthetic indication'
+      )
+    ).toBeInTheDocument();
+    fireEvent.click(
+      within(savedEditor).getByRole('button', { name: 'Cancel' })
+    );
     await press('Check readiness');
     await press('Advance pending jobs');
     await screen.findByText('Ready for prescriber review');
@@ -297,9 +383,12 @@ describe('real API client prescribing story host', { timeout: 20000 }, () => {
     expect(
       screen.getByRole('button', { name: 'Simulate signing' })
     ).not.toBeDisabled();
-    fireEvent.change(screen.getByRole('textbox', { name: 'Medication name' }), {
-      target: { value: 'Unresolved other medication' },
-    });
+    fireEvent.change(
+      screen.getByRole('combobox', { name: 'Medication name' }),
+      {
+        target: { value: 'Unresolved other medication' },
+      }
+    );
     expect(
       screen.getByRole('checkbox', {
         name: 'I reviewed this prescription and select it as ready to sign',

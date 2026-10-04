@@ -71,11 +71,17 @@ Inject `fetch`, session headers or `credentials` when the host uses a different 
 
 Resolved product facts include catalog identity/coding/version, concept specificity, strength, dosage form and allowed dispensing units. The demo profile requires that trusted metadata and rejects mismatched entered product/code/strength/form/dispensing unit. Unavailable metadata and unsupported ingredient/compound paths remain unknown. The editor can consume authoritative metadata through the injected medication lookup; parsing a display label cannot establish product identity.
 
+Medication and indication use separate Codify `CodeLookup` searches. The medication searches the `med` domain and stores its selected coding in `prescription.code`. The indication searches the `condition` domain and stores its display text in `prescription.indication` and its selected condition coding in `prescription.indicationCode` (`system`, `code`, optional `display`/`version`). Condition coding does not use the drug coding-system allowlist. Both searches permit free text and incomplete drafts; typing over a selected indication clears its old coding and concern link immediately.
+
+`prescription.concernId` is the durable chart concern being treated. Selecting an existing concern retains this identity across recoding; a terminology result alone does not invent a chart concern ID. The EHR owns concern creation/resolution, patient/encounter scope and authorization. On save, resolve an unlinked condition selection to an existing concern or create one according to the host's workflow, then return the authorized durable ID. Verify supplied IDs against the patient's chart before persisting; the simulator preserves them as opaque fixture data because it has no chart-concern resource. Indication display, indication coding and concern ID are optional and independently representable so a bare medication or uncoded indication remains savable.
+
 On the server, choose the active policy and load current context from trusted records, then call `validatePrescription(input, policy)`. Never accept the client's computed result, policy choice, role or signature flag as evidence. The client and server use the same validator implementation. The pure entry has no React, fetch, browser globals or simulator imports.
 
 ## Persistence and concurrency
 
 A nonempty display name is the draft minimum. Optional prescription values, including malformed quantity/refill text, remain savable so another team member can complete them. Validation reports missing/invalid values separately. Canonical `prescription` fields drive the editor and are projected atomically into legacy display/Sig/code fields; never update a visible drug name while retaining an earlier eligible product.
+
+For `AssessmentOrder` adapters, the current top-level `concernId` takes precedence over an older canonical link when an order has been moved in the assessment. Saving a medication updates both link representations. An explicit `concernId: undefined` clears the link; legacy medication objects that omit that property preserve the existing base-order link. API PUT replaces the prescription content, so omit `concernId`/`indicationCode` in the submitted replacement to clear them. Present malformed coding objects fail the runtime schema, while missing optional coding and invalid free-text dosing fields remain savable. Any indication text, coding or concern-link edit changes the content revision and invalidates prior clinical evaluations/signing eligibility.
 
 `contentRevision` changes only for prescribing content edits. References in evaluation/review/artifacts use that revision. `recordVersion` changes for any returned representation change and determines the strong ETag (`"rx-0001:1"`). Read the latest ETag before PUT; do not use contentRevision as an If-Match value. Evaluation, PA, PDMP and signing resources have their own revisions. Evaluation projection revisions are monotonic decimal strings within that evaluation ID; compare revisions only for the same resource. A newly selected evaluation can start at revision 1 even when the previous evaluation had revision 10.
 
@@ -120,6 +126,8 @@ PDMP is an explicit action, never a keystroke side effect. Fetching a report is 
 
 PA has its own lifecycle and cancellation; cancelling PA does not cancel a prescription. Save partial answers, but submission requires the current form/version, enabled required answers and permitted actor. `enableWhen` is a simple conjunction of typed comparisons, not executable JavaScript. Additional-information requests issue a new questionnaire version. Reject duplicate/unknown item IDs and stale form submissions. Approval is scoped to product/quantity/plan/effective period; it never becomes a patient-wide boolean.
 
+PA scope also records dispensing unit, days supply, indication text, `indicationCode` and `concernId`. Compare the structured coding canonically, including its version, rather than comparing only the displayed indication. A changed concern link or code rejects reuse or submission of the previous case with `PA_SCOPE_MISMATCH`, even if the display text is unchanged. The same scope check applies when linking an authorization to a fresh evaluation.
+
 A PA requirement, noncovered benefit or unknown estimate is displayed independently of clinical readiness. The configured policy decides whether transmission is held. A permitted proceed decision does not turn a denial into approval or an unknown price into zero.
 
 ## Review, simulated signing and sending
@@ -135,7 +143,7 @@ CancelRx request, local cancellation, pharmacy acknowledgement, rejection and un
 ## Junior developer verification checklist
 
 1. Run every fixture through runtime schemas and the pure validator in Node and browser environments.
-2. Prove bare-name and invalid-text drafts save, reopen and round-trip without loss, including zero refills/substitution/therapy dates.
+2. Prove bare-name and invalid-text drafts save, reopen and round-trip without loss, including zero refills/substitution/therapy dates, indication coding/version and durable concern links. Prove replacing indication text clears obsolete coding/link metadata.
 3. Prove context/product changes invalidate evaluation/decision/signing eligibility and late provider results never overwrite a newer projection.
 4. Exercise required-service omission, unavailable/partial/expired results, blocking findings and permitted/forbidden decisions.
 5. Exercise PDMP explicit query/review, ambiguity/outage/empty/stale results, PA scope/form versions/hold-versus-no-hold.

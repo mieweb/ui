@@ -48,9 +48,11 @@ import { RadioGroup, Radio } from '../Radio';
 import {
   MedicationEditor,
   type CodeLookupConfig,
+  type IndicationCodeLookupConfig,
   type Medication,
 } from '../MedicationList';
 import type { AssessmentOrder, OrderType } from '../Assessment';
+import type { ConditionConcern } from '../ProblemList';
 import type {
   PrescriptionIssue,
   PrescriptionReadiness,
@@ -123,6 +125,10 @@ export interface OrderEditorProps {
    * `CodeLookupProvider`; pass `false` to force a plain name input.
    */
   codeLookup?: OrderCodeLookupConfig | false;
+  /** Condition coding search for the prescription's indication/concern. */
+  indicationCodeLookup?: IndicationCodeLookupConfig | false;
+  /** Existing chart concerns that can be linked by their durable identity. */
+  indicationConcerns?: ConditionConcern[];
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete order on save */
@@ -157,6 +163,9 @@ export function orderToMedication(order: AssessmentOrder): Medication {
           }
         : undefined,
     }),
+    concernId: Object.prototype.hasOwnProperty.call(order, 'concernId')
+      ? order.concernId
+      : order.prescription?.concernId,
     name: order.prescription?.name ?? order.display,
     prescribingIntent: order.prescribingIntent,
     prescriptionRevision: order.prescriptionRevision,
@@ -181,10 +190,16 @@ export function medicationToOrder(
   const prescription = Object.fromEntries(
     Object.entries(med).filter(([key]) => !metadata.has(key))
   );
+  const concernId = Object.prototype.hasOwnProperty.call(med, 'concernId')
+    ? med.concernId
+    : Object.prototype.hasOwnProperty.call(base, 'concernId')
+      ? base.concernId
+      : base.prescription?.concernId;
   return {
     ...base,
+    concernId,
     prescribingIntent: med.prescribingIntent ?? base.prescribingIntent,
-    prescription,
+    prescription: { ...prescription, concernId },
     display: med.name,
     detail: med.sig || undefined,
     indication: med.indication || undefined,
@@ -514,6 +529,8 @@ export function OrderEditor({
   order,
   defaultType = 'procedure',
   codeLookup,
+  indicationCodeLookup,
+  indicationConcerns,
   onClose,
   onSave,
   prescribing,
@@ -554,6 +571,8 @@ export function OrderEditor({
                 locale: codeLookup.locale,
               } as CodeLookupConfig)
         }
+        indicationCodeLookup={indicationCodeLookup}
+        indicationConcerns={indicationConcerns}
         onClose={onClose}
         onSave={(med) => onSave(medicationToOrder(med, base))}
       />

@@ -154,6 +154,8 @@ export interface CodeLookupProps extends Omit<
    * highlighted result, or clicks the "use as free text" footer row.
    */
   onFreeText?: (text: string) => void;
+  /** Called on direct input edits, before a coded or free-text selection is committed. */
+  onQueryChange?: (query: string) => void;
   /** Max results to show */
   limit?: number;
   placeholder?: string;
@@ -162,6 +164,8 @@ export interface CodeLookupProps extends Omit<
    * embedding in forms. Loading/error state shows in the placeholder.
    */
   bare?: boolean;
+  /** Disable the input while a containing editor is saving or read-only. */
+  disabled?: boolean;
   /**
    * Clear the input after a selection so the next entry can be typed
    * immediately (defaults to true in bare mode, false otherwise).
@@ -254,15 +258,22 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       programsUrl,
       onSelect,
       onFreeText,
+      onQueryChange,
       initialQuery,
       initialSearch = true,
       limit = 15,
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
+      disabled = false,
       clearOnSelect,
       memory,
       className,
       'data-testid': dataTestId,
+      id: inputId,
+      'aria-label': inputLabel = 'Search medical codes',
+      'aria-labelledby': inputLabelledBy,
+      'aria-invalid': inputInvalid,
+      'aria-describedby': inputDescription,
       ...props
     },
     ref
@@ -449,7 +460,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
 
     // debounced search-as-you-type
     React.useEffect(() => {
-      if (status.state !== 'ready') return;
+      if (disabled || status.state !== 'ready') return;
       if (skipSearchRef.current) {
         skipSearchRef.current = false;
         return;
@@ -490,6 +501,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       preferCodetypesKey,
       codetypesKey,
       billableOnly,
+      disabled,
     ]);
 
     /** A row that can be drilled into (→) to list its family members */
@@ -557,6 +569,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         : rankedResults;
 
     const pick = (r: CodifyResult) => {
+      searchIdRef.current += 1;
       if (memUserId && memContext) {
         const scope = { userId: memUserId, context: memContext };
         void recordUse(scope, r).then(() => {
@@ -581,6 +594,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const submitFreeText = () => {
       const text = query.trim();
       if (!text || !onFreeText) return;
+      searchIdRef.current += 1;
       onFreeText(text);
       setOpen(false);
       setDrill(null);
@@ -617,9 +631,15 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         submitFreeText();
       } else if (e.key === 'Escape') {
         e.preventDefault();
+        // The first Escape belongs to the open lookup, not its containing modal.
+        if (drill || open) e.stopPropagation();
+        searchIdRef.current += 1;
         if (drill) closeDrill();
         else if (open) setOpen(false);
-        else setQuery('');
+        else {
+          setQuery('');
+          onQueryChange?.('');
+        }
       }
     };
 
@@ -632,6 +652,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
 
     // Single source of truth for dropdown visibility — also drives aria-expanded
     const dropdownOpen =
+      !disabled &&
       open &&
       (Boolean(drill) ||
         list.length > 0 ||
@@ -695,6 +716,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             }}
             type="button"
             role="radio"
+            disabled={disabled}
             aria-checked={i === activeCodetypeIdx}
             tabIndex={i === activeCodetypeIdx ? 0 : -1}
             onClick={() => selectCodetype(i)}
@@ -720,6 +742,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           className="text-muted-foreground absolute start-3 top-5 -translate-y-1/2"
         />
         <input
+          id={inputId}
           type="text"
           role="combobox"
           aria-expanded={dropdownOpen}
@@ -727,24 +750,31 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           aria-activedescendant={
             activeIndex >= 0 ? optionId(activeIndex) : undefined
           }
-          aria-label="Search medical codes"
+          aria-label={inputLabel}
+          aria-labelledby={inputLabelledBy}
+          aria-invalid={inputInvalid}
+          aria-describedby={inputDescription}
           value={query}
           onChange={(e) => {
             // User edits always search — clear any pending suppression
             // (unconsumed initialSearch=false seed, or a pick's write-back).
             skipSearchRef.current = false;
+            searchIdRef.current += 1;
             setQuery(e.target.value);
+            setResults([]);
+            setActiveIndex(-1);
             setDrill(null);
+            onQueryChange?.(e.target.value);
           }}
           onKeyDown={handleKeyDown}
           onFocus={() => list.length > 0 && setOpen(true)}
           onBlur={() => setOpen(false)}
           placeholder={effectivePlaceholder}
-          disabled={status.state === 'error'}
+          disabled={disabled}
           // The shared Input slot: condensed-view.css keys density off it.
           data-slot="input"
           className={cn(
-            'border-border bg-background text-foreground placeholder:text-muted-foreground',
+            'border-border bg-background text-foreground placeholder:text-muted-foreground aria-invalid:border-danger-500',
             'h-10 w-full rounded-md border ps-9 pe-3 text-sm',
             'focus:ring-ring focus:ring-2 focus:outline-none'
           )}

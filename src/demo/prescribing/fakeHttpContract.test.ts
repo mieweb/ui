@@ -12,6 +12,185 @@ import { createHarness, draftFromRecord } from './testSupport';
 import { createSimulationClock } from './scheduler';
 
 describe('fake prescribing HTTP contract', () => {
+  it('saves and reopens coded concerns through HTTP while allowing incomplete free-text drafts', async () => {
+    const h = createHarness({ scenarioId: 'lasix-draft' });
+    const draft = h.service.controller.draft();
+    draft.prescription = { indication: 'Uncoded concern' };
+    const created = await h.client.createPrescription(draft, h.key());
+    expect(
+      (await h.client.getPrescription(created.body.data.id)).body.data
+        .prescription
+    ).toEqual({
+      indication: 'Uncoded concern',
+    });
+    const details = {
+      indication: 'Hypertension',
+      concernId: 'chart-concern-1',
+      indicationCode: {
+        system: 'ICD-10-CM',
+        code: 'I10',
+        display: 'Essential hypertension',
+        version: '2026',
+      },
+    };
+    const coded = await h.client.updatePrescription(
+      created.body.data.id,
+      {
+        ...draftFromRecord(created.body.data),
+        prescription: details,
+      },
+      { ...h.key(), ifMatch: created.headers.etag }
+    );
+    expect(coded.body.data.contentRevision).toBe('2');
+    expect(
+      (await h.client.getPrescription(coded.body.data.id)).body.data
+        .prescription
+    ).toEqual(details);
+    await h.client.updatePrescription(
+      coded.body.data.id,
+      {
+        ...draftFromRecord(coded.body.data),
+        prescription: { indication: 'Different uncoded concern' },
+      },
+      { ...h.key(), ifMatch: coded.headers.etag }
+    );
+    expect(
+      (await h.client.getPrescription(coded.body.data.id)).body.data
+        .prescription
+    ).toEqual({
+      indication: 'Different uncoded concern',
+    });
+  });
+  it.each(['indicationCode', 'concernId'] as const)(
+    'rejects reuse and submission of PA scope after changing %s even when display text is unchanged',
+    async (field) => {
+      const h = createHarness({ scenarioId: 'pa-approved' });
+      const draft = h.service.controller.draft();
+      draft.prescription = {
+        ...draft.prescription,
+        indication: 'Hypertension',
+        concernId: 'chart-concern-1',
+        indicationCode: { system: 'ICD-10-CM', code: 'I10', version: '2026' },
+      };
+      const { prescription, evaluation } = await h.createAndEvaluate(draft);
+      const pa = (
+        await h.client.createPriorAuthorization(
+          {
+            prescription: {
+              id: prescription.id,
+              revision: prescription.contentRevision,
+            },
+            evaluationId: evaluation.id,
+            benefitType: 'pharmacy',
+            reasonCode: 'simulation',
+          },
+          h.key()
+        )
+      ).body.data;
+      expect(pa.scope).toMatchObject({
+        concernId: draft.prescription.concernId,
+        indicationCode: draft.prescription.indicationCode,
+      });
+      const form = (await h.client.getQuestionnaire(pa.id)).body.data;
+      const ready = (
+        await h.client.saveAnswers(
+          pa.id,
+          {
+            questionnaireId: form.id,
+            questionnaireVersion: form.version,
+            answers: [
+              { linkId: 'indication', value: 'Hypertension' },
+              { linkId: 'tried-alternative', value: false },
+            ],
+          },
+          { ...h.key(), ifMatch: `"${pa.id}:${pa.revision}"` }
+        )
+      ).body.data;
+      const before = await h.client.getPrescription(prescription.id);
+      const changedDraft = draftFromRecord(before.body.data);
+      changedDraft.prescription = {
+        ...changedDraft.prescription,
+        ...(field === 'indicationCode'
+          ? {
+              indicationCode: {
+                system: 'ICD-10-CM',
+                code: 'I11.9',
+                version: '2026',
+              },
+            }
+          : { concernId: 'chart-concern-2' }),
+      };
+      const changed = await h.client.updatePrescription(
+        prescription.id,
+        changedDraft,
+        {
+          ...h.key(),
+          ifMatch: before.headers.etag,
+        }
+      );
+      expect((await h.currentEvaluation(evaluation.id)).validity).toBe('stale');
+      const fresh = await h.client.createEvaluation(
+        {
+          subject: {
+            kind: 'saved',
+            prescription: {
+              id: prescription.id,
+              revision: changed.body.data.contentRevision,
+            },
+          },
+          services: ['validation'],
+        },
+        h.key()
+      );
+      await expect(
+        h.client.updateWorkflowContext(
+          fresh.body.data.id,
+          {
+            pdmpQueryId: null,
+            priorAuthorizationId: pa.id,
+          },
+          { ...h.key(), ifMatch: fresh.headers.etag }
+        )
+      ).rejects.toMatchObject({
+        problem: { status: 422, code: 'PA_SCOPE_MISMATCH' },
+      });
+      await expect(
+        h.client.submitPriorAuthorization(
+          pa.id,
+          {
+            caseRevision: ready.revision,
+            questionnaireVersion: form.version,
+            submissionKind: 'initial',
+          },
+          h.key()
+        )
+      ).rejects.toMatchObject({
+        problem: { status: 422, code: 'PA_SCOPE_MISMATCH' },
+      });
+    }
+  );
+  it('rejects malformed condition coding at the actual HTTP boundary before persistence', async () => {
+    const service = createFakeEhrService({ scenarioId: 'lasix-draft' });
+    const response = await createFakeFetch(service)(
+      '/api/prescribing/v1/prescriptions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Idempotency-Key': 'bad-condition-code',
+        },
+        body: JSON.stringify({
+          ...service.controller.draft(),
+          prescription: {
+            indication: 'Hypertension',
+            indicationCode: { system: 'ICD-10-CM' },
+          },
+        }),
+      }
+    );
+    expect(response.status).toBe(400);
+    expect(service.controller.snapshot().records.prescriptions).toEqual([]);
+  });
   it('logs a preserved mutation request exactly once after routing consumes the body', async () => {
     const service = createFakeEhrService({ scenarioId: 'lasix-draft' });
     const observed: Array<Promise<unknown>> = [];

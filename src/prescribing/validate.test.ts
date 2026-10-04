@@ -35,6 +35,50 @@ describe('shared prescription validator', () => {
     expect(result.issues[0].fieldPath).toBe('prescription.productId');
     expect(result.issues.some((i) => i.code === 'CONTEXT_UNKNOWN')).toBe(true);
   });
+  it('accepts optional indication text and condition coding independently of drug coding', () => {
+    const input = fixture();
+    input.draft.prescription.indication = 'Hypertension';
+    expect(validatePrescription(input, demoPrescriptionPolicy).dataState).toBe(
+      'complete'
+    );
+    input.draft.prescription.concernId = 'chart-concern-1';
+    input.draft.prescription.indicationCode = {
+      system: 'ICD-10-CM',
+      code: 'I10',
+      display: 'Essential hypertension',
+      version: '2026',
+    };
+    expect(validatePrescription(input, demoPrescriptionPolicy).issues).toEqual(
+      []
+    );
+  });
+  it.each([
+    null,
+    'I10',
+    { system: 'ICD-10-CM' },
+    { system: '', code: 'I10' },
+    { system: 'ICD-10-CM', code: 'I10', display: 42 },
+    { system: 'ICD-10-CM', code: 'I10', version: false },
+  ])('reports malformed optional indication coding %j', (indicationCode) => {
+    const input = fixture();
+    const result = validatePrescription(
+      {
+        ...input,
+        draft: {
+          ...input.draft,
+          prescription: { ...input.draft.prescription, indicationCode },
+        },
+      },
+      demoPrescriptionPolicy
+    );
+    expect(result.dataState).toBe('invalid');
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        code: 'FIELD_TYPE',
+        fieldPath: 'prescription.indicationCode',
+      })
+    );
+  });
   it.each(['-1', 'ten', '1.5'])(
     'rejects invalid refill %s but keeps input representable',
     (value) => {
