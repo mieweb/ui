@@ -10,6 +10,7 @@ Implementation tracking: complete a checklist item only after implementing and v
 - In progress: phases 1–6 below. Verified work is linked to local implementation commits; remaining checkboxes are still outstanding.
 - `4c21528d` — Shared JSON draft/context/readiness contracts, deterministic validator and explicit demo policy, pure/API public entries, typed HTTP client, 37-route runtime schema registry and generated OpenAPI. Verified 24 tests in Node and 24 tests in jsdom, isolated TypeScript compilation, affected ESLint/Prettier, and targeted ESM/CommonJS builds/imports. Full declaration/build integration and simulator execution remain outstanding.
 - `d4a799fb` — Added trusted resolved-product consistency (identity/code/version/strength/form), explicit unknown ingredient/compound paths, human-readable validation messages, scoped context references, complete typed service methods/provider payloads, and junior EHR adapter guide. Verified 25 pure/API tests in both Node and jsdom, isolated TypeScript compilation, scoped ESLint/Prettier, regenerated all 37 OpenAPI operations and targeted ESM/CommonJS builds. The simulator will supply server-owned product metadata; production clinical/network adapters remain outside scope.
+- `ddf5d3d7` — Lossless optional drafts and canonical adapters; shared readiness/issue UI; verified catalog metadata and explicit prescription editor controls; permissive saving/focus restoration; Assessment linked/unlinked/collapsed alerts; stable grid identity/filter/completion; opt-in medication/reconciliation/eSheet integration and consumer composition docs. Verified 43 focused tests, scoped ESLint, catalog check, and six real-browser completion/accessibility cases. Visual test files will be committed separately after the API simulation browser suite is finalized; full declaration/build integration remains pending.
 
 Allow clinicians and staff to record an unfinished medication order immediately, show what prevents it from being prescribed or sent to a pharmacy, and provide a direct way to complete it wherever that order appears. A name such as “Lasix” is enough to save an order draft. Completing prescription details, obtaining the prescriber's signature, and transmitting the prescription are separate steps.
 
@@ -250,11 +251,11 @@ After DEA-required data changes following designation as ready to sign, require 
 
 ### Phase 1 Preserve prescription drafts
 
-- [ ] Define shared optional PrescriptionDetails and prescribing-intent contracts, and add AssessmentOrder.prescription.
-- [ ] Make orderToMedication and medicationToOrder preserve all structured details and existing order metadata. Keep legacy parsing subordinate to explicit values.
-- [ ] Define canonical prescription fields and atomic legacy projections; route or synchronize inline edits so displayed and evaluated data agree.
-- [ ] Resolve drug-change invalidation, stored substitution defaults, and therapy/written date separation.
-- [ ] Add meaningful round-trip and legacy compatibility tests; update the OrderEditor data-loss documentation when fixed.
+- [x] Define shared optional PrescriptionDetails and prescribing-intent contracts, and add AssessmentOrder.prescription. (`ddf5d3d7`)
+- [x] Make orderToMedication and medicationToOrder preserve all structured details and existing order metadata. Keep legacy parsing subordinate to explicit values. (`ddf5d3d7`)
+- [x] Define canonical prescription fields and atomic legacy projections; route or synchronize inline edits so displayed and evaluated data agree. (`ddf5d3d7`)
+- [x] Resolve drug-change invalidation, stored substitution defaults, and therapy/written date separation. (`ddf5d3d7`)
+- [x] Add meaningful round-trip and legacy compatibility tests; update the OrderEditor data-loss documentation when fixed. (`ddf5d3d7`)
 
 Deliverable: a Lasix draft can be edited, saved, reopened, and handed to another user without losing prescription details.
 
@@ -270,21 +271,21 @@ Deliverable: UI and TypeScript server consumers can import and run the same rule
 
 ### Phase 3 Show readiness in Assessment and the editor
 
-- [ ] Have editor and row previews consume the shared validator directly; add an adapter for host-confirmed results and optional workflow status.
-- [ ] Add shared badge/summary components and labels; export UI components through the main entry without introducing new peers.
-- [ ] Wire linked/unlinked Assessment rows, collapsed-plan counts, and the existing full-editor handoff.
-- [ ] Add explicit field controls and issue-to-field focus. Preserve Save draft independently of sign/send validation.
-- [ ] Add Storybook examples for bare Lasix, partially completed, invalid, unknown, blocked, details complete, and read-only orders; simulate optional host workflow states.
+- [x] Have editor and row previews consume the shared validator directly; add an adapter for host-confirmed results and optional workflow status. (`ddf5d3d7`)
+- [x] Add shared badge/summary components and labels; export UI components through the main entry without introducing new peers. (`ddf5d3d7`)
+- [x] Wire linked/unlinked Assessment rows, collapsed-plan counts, and the existing full-editor handoff. (`ddf5d3d7`)
+- [x] Add explicit field controls and issue-to-field focus. Preserve Save draft independently of sign/send validation. (`ddf5d3d7`)
+- [x] Add Storybook examples for bare Lasix, partially completed, invalid, unknown, blocked, details complete, and read-only orders; simulate optional host workflow states. (`ddf5d3d7`)
 
 Deliverable: a complete, reviewable UI workflow consuming the shared TypeScript validation layer.
 
 ### Phase 4 Propagate readiness and document consumer contracts
 
-- [ ] Add stable instance identity and readiness projections to history/grid adapters without changing surveillance due/prerequisite rules.
-- [ ] Extend orderRows.ts, ordersGridShared.tsx, and OrdersGrid.tsx for readiness filtering and completion callbacks; retain the datavis entry boundary.
-- [ ] Add opt-in prescribing integration to medication lists/reconciliation and eSheet; keep intake defaults unchanged.
-- [ ] Document generic list/sidebar composition and host chart-summary/work-queue adapters.
-- [ ] Update EncounterOrders.mdx and medication/editor docs with the shared contracts, correct exports, and client/server import examples.
+- [x] Add stable instance identity and readiness projections to history/grid adapters without changing surveillance due/prerequisite rules. (`ddf5d3d7`)
+- [x] Extend orderRows.ts, ordersGridShared.tsx, and OrdersGrid.tsx for readiness filtering and completion callbacks; retain the datavis entry boundary. (`ddf5d3d7`)
+- [x] Add opt-in prescribing integration to medication lists/reconciliation and eSheet; keep intake defaults unchanged. (`ddf5d3d7`)
+- [x] Document generic list/sidebar composition and host chart-summary/work-queue adapters. (`ddf5d3d7`)
+- [x] Update EncounterOrders.mdx and medication/editor docs with the shared contracts, correct exports, and client/server import examples. (`ddf5d3d7`)
 - [ ] Verify optional props, legacy data, package declarations, and dependency isolation across supported entry points.
 
 Deliverable: the same prescription revision has consistent alerts and completion actions across supported UI views, with a documented validator that server applications can reuse.
@@ -334,7 +335,7 @@ Deliverable: an inspectable end-to-end prescribing simulation that a junior deve
 
 Verification covers the pure validator, component adapters, and fake EHR service/API. Run focused Vitest coverage, typecheck/lint for affected code, browser/Node validator parity, built-entry import/declaration checks, API contract tests, Storybook interaction/accessibility checks, and catalog checks when documentation/exports change. Use synthetic fixtures; a live signing/transmission service remains outside this deliverable.
 
-This change is currently a plan document; no component behavior or prescribing integration has been changed.
+Implementation is tracked in the local commits and verified checklist above. The pure validator, API contracts, and healthcare completion UI are implemented; the fake EHR workflow and final package/browser integration checks are in progress.
 
 ## Policy and component decisions
 
