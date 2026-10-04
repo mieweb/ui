@@ -204,6 +204,12 @@ describe('real API client prescribing story host', { timeout: 20000 }, () => {
     expect(
       screen.getByText('Simulated destination acknowledgement; not dispensing')
     ).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-presentation="floating"]')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Sent').closest('[role="status"]')
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Reset simulation' }));
     await waitFor(() =>
       expect(screen.queryByText(/Order rx-0001/)).not.toBeInTheDocument()

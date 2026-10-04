@@ -7,6 +7,13 @@ Use `presentation="floating"` for a summary that stays visible while scrolling. 
 collapsed with the readiness status and issue count; its button expands/collapses the reasons.
 The entire panel, including the header, uses at most `20dvh` (20% of the current viewport
 height). Expanded reasons scroll within that space and the scroll region is keyboard focusable.
+The floating panel disappears when there are no scoped issues and the readiness state is
+`complete`, `review`, `send`, or `sent`. It reappears collapsed if a new issue arrives. Unknown,
+stale, unavailable, blocked, sending, or failed readiness remains visible even with zero issues,
+so absent check results cannot look like success. Inline summaries keep their existing success
+feedback; a host can also show `PrescriptionReadinessBadge` inline after a floating panel clears.
+If the disappearing panel still has focus, it restores the control focus entered from when that
+control remains available. An input being edited elsewhere keeps its focus.
 The default `floatingPlacement="viewport"` anchors it at the logical inline end near the
 bottom of the viewport, so its position follows RTL direction. Render one floating summary
 for the selected prescription rather than a copy for every row.

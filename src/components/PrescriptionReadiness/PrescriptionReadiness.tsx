@@ -386,7 +386,7 @@ export interface PrescriptionIssueSummaryProps extends PrescriptionReadinessProp
   readOnly?: boolean;
   /** Expanded editor summary; compact rows use a keyboard-operable disclosure. */
   collapsible?: boolean;
-  /** Floating summaries start collapsed and occupy at most 20% of viewport height. */
+  /** Floating summaries start collapsed, use at most 20dvh, and hide on issue-free success. */
   presentation?: 'inline' | 'floating';
   /** Mount container placement outside a dialog's scrolling body to keep it visible. */
   floatingPlacement?: 'viewport' | 'container';
@@ -412,7 +412,30 @@ export const PrescriptionIssueSummary = React.forwardRef<
   const currentProps = { ...props, now: clock };
   const current = isPrescriptionReadinessCurrent(currentProps);
   const issues = getPrescriptionIssues(currentProps);
+  const state = getPrescriptionReadinessState(currentProps);
+  const hideFloating =
+    presentation === 'floating' &&
+    issues.length === 0 &&
+    ['complete', 'review', 'send', 'sent'].includes(state);
   const [expanded, setExpanded] = React.useState(false);
+  const previousOutsideFocus = React.useRef<HTMLElement | null>(null);
+  const focusInside = React.useRef(false);
+  React.useLayoutEffect(() => {
+    if (!hideFloating) return;
+    const previous = previousOutsideFocus.current;
+    // A removed focused toggle leaves focus on the document body. Restore its
+    // entry point only in that case; input focus elsewhere must remain intact.
+    if (
+      focusInside.current &&
+      previous?.isConnected &&
+      previous.ownerDocument.activeElement === previous.ownerDocument.body &&
+      !previous.closest('[inert], [hidden]') &&
+      !previous.matches(':disabled')
+    )
+      previous.focus({ preventScroll: true });
+    focusInside.current = false;
+    setExpanded(false);
+  }, [hideFloating]);
   const regionId = React.useId();
   const issueCount = `${issues.length} ${issues.length === 1 ? labels.issue : labels.issues}`;
   const badge = (
@@ -455,9 +478,7 @@ export const PrescriptionIssueSummary = React.forwardRef<
       )}
       {!readOnly &&
         onCompletePrescription &&
-        !['sent', 'sending'].includes(
-          getPrescriptionReadinessState(currentProps)
-        ) && (
+        !['sent', 'sending'].includes(state) && (
           <Button
             type="button"
             variant="outline"
@@ -480,6 +501,7 @@ export const PrescriptionIssueSummary = React.forwardRef<
     </>
   );
   if (presentation === 'floating') {
+    if (hideFloating) return null;
     const Chevron = expanded ? ChevronUp : ChevronDown;
     return (
       <div
@@ -487,6 +509,17 @@ export const PrescriptionIssueSummary = React.forwardRef<
         data-slot="prescription-issue-summary"
         data-presentation="floating"
         data-placement={floatingPlacement}
+        onFocusCapture={(event) => {
+          const previous = event.relatedTarget;
+          if (!event.currentTarget.contains(previous))
+            previousOutsideFocus.current =
+              previous instanceof HTMLElement ? previous : null;
+          focusInside.current = true;
+        }}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget))
+            focusInside.current = false;
+        }}
         className={cn(
           'border-border bg-background text-foreground flex max-h-[20dvh] min-h-0 flex-col overflow-hidden rounded-lg border shadow-lg',
           floatingPlacement === 'viewport'

@@ -188,7 +188,7 @@ describe('prescription readiness presentation', () => {
     ).toBeVisible();
     expect(screen.getAllByRole('button')).toHaveLength(1);
   });
-  it('updates floating count and reasons when the current draft changes', () => {
+  it('removes resolved floating alerts and reappears collapsed when a new issue arrives', () => {
     const { rerender } = renderWithTheme(
       <PrescriptionIssueSummary
         {...identity}
@@ -209,12 +209,184 @@ describe('prescription readiness presentation', () => {
         readiness={uiReadiness(completeUiPrescription)}
       />
     );
-    expect(screen.getByText('Details complete')).toBeVisible();
-    expect(screen.getByText('0 issues')).toBeVisible();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByText('Details complete')).not.toBeInTheDocument();
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
+    rerender(
+      <PrescriptionIssueSummary
+        {...identity}
+        presentation="floating"
+        medicationName="SimDrug A"
+        readiness={uiReadiness({ ...completeUiPrescription, quantity: '-1' })}
+      />
+    );
+    expect(screen.getByText('Prescription needs correction')).toBeVisible();
     expect(
-      screen.getByText('No unresolved prescription issues.')
-    ).toBeVisible();
+      screen.getByRole('button', { name: /^Expand prescription issues:/ })
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+  });
+  it.each([
+    ['complete', uiReadiness(completeUiPrescription)],
+    [
+      'review',
+      simulatedWorkflow({ review: 'pass', sign: 'pass', transmit: 'unknown' }),
+    ],
+    [
+      'send',
+      simulatedWorkflow({ review: 'pass', sign: 'pass', transmit: 'pass' }),
+    ],
+    [
+      'sent',
+      {
+        ...simulatedWorkflow({
+          review: 'pass',
+          sign: 'pass',
+          transmit: 'pass',
+        }),
+        delivery: 'sent' as const,
+      },
+    ],
+  ])(
+    'hides issue-free %s floating readiness while retaining inline success',
+    (_, readiness) => {
+      const { rerender } = renderWithTheme(
+        <PrescriptionIssueSummary
+          {...identity}
+          presentation="floating"
+          readiness={readiness}
+        />
+      );
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      rerender(
+        <PrescriptionIssueSummary {...identity} readiness={readiness} />
+      );
+      expect(screen.getByRole('status')).toBeVisible();
+      expect(
+        screen.getByText('No unresolved prescription issues.')
+      ).toBeVisible();
+    }
+  );
+  it.each([
+    ['unavailable', undefined],
+    [
+      'stale',
+      {
+        ...uiReadiness(completeUiPrescription),
+        validation: {
+          ...uiReadiness(completeUiPrescription).validation,
+          orderRevision: 'old-revision',
+        },
+      },
+    ],
+    [
+      'unknown',
+      simulatedWorkflow({
+        review: 'unknown',
+        sign: 'unknown',
+        transmit: 'unknown',
+      }),
+    ],
+    [
+      'blocked',
+      simulatedWorkflow({
+        review: 'fail',
+        sign: 'unknown',
+        transmit: 'unknown',
+      }),
+    ],
+    [
+      'sending',
+      {
+        ...simulatedWorkflow({
+          review: 'pass',
+          sign: 'pass',
+          transmit: 'pass',
+        }),
+        delivery: 'sending' as const,
+      },
+    ],
+    [
+      'failed',
+      {
+        ...simulatedWorkflow({
+          review: 'pass',
+          sign: 'pass',
+          transmit: 'pass',
+        }),
+        delivery: 'failed' as const,
+      },
+    ],
+  ])(
+    'retains issue-free %s floating readiness instead of implying success',
+    (_, readiness) => {
+      renderWithTheme(
+        <PrescriptionIssueSummary
+          {...identity}
+          presentation="floating"
+          readiness={readiness}
+        />
+      );
+      expect(
+        screen.getByRole('button', { name: /^Expand prescription issues:/ })
+      ).toBeVisible();
+      expect(screen.getByRole('status')).toBeVisible();
+    }
+  );
+  it('returns focus from a disappearing toggle to its available entry control', () => {
+    const content = (complete: boolean) => (
+      <>
+        <button type="button">Check prescription</button>
+        <PrescriptionIssueSummary
+          {...identity}
+          presentation="floating"
+          readiness={uiReadiness(
+            complete ? completeUiPrescription : { name: 'Lasix' }
+          )}
+        />
+      </>
+    );
+    const { rerender } = renderWithTheme(content(false));
+    const entry = screen.getByRole('button', { name: 'Check prescription' });
+    act(() => entry.focus());
+    act(() =>
+      screen
+        .getByRole('button', { name: /^Expand prescription issues:/ })
+        .focus()
+    );
+    rerender(content(true));
+    expect(entry).toHaveFocus();
+  });
+  it('keeps focus on an input being edited when resolved floating alerts disappear', () => {
+    const content = (complete: boolean) => (
+      <>
+        <button type="button">Check prescription</button>
+        <input aria-label="Quantity" defaultValue="30" />
+        <PrescriptionIssueSummary
+          {...identity}
+          presentation="floating"
+          readiness={uiReadiness(
+            complete ? completeUiPrescription : { name: 'Lasix' }
+          )}
+        />
+      </>
+    );
+    const { rerender } = renderWithTheme(content(false));
+    act(() =>
+      screen.getByRole('button', { name: 'Check prescription' }).focus()
+    );
+    act(() =>
+      screen
+        .getByRole('button', { name: /^Expand prescription issues:/ })
+        .focus()
+    );
+    const input = screen.getByRole('textbox', { name: 'Quantity' });
+    act(() => input.focus());
+    rerender(content(true));
+    expect(input).toHaveFocus();
+    expect(
+      screen.queryByRole('button', { name: /^Expand prescription issues:/ })
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -268,6 +440,37 @@ it('shares revision-scoped, deduplicated local issues while removing expired wor
 });
 
 describe('prescription expiry and unresolved context', () => {
+  it('reappears when an issue-free passing workflow expires without a server response', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(Date.UTC(2026, 9, 3, 12));
+    try {
+      const readiness = simulatedWorkflow({
+        review: 'pass',
+        sign: 'pass',
+        transmit: 'pass',
+      });
+      readiness.workflow!.expiresAt = '2026-10-03T12:00:01.000Z';
+      renderWithTheme(
+        <PrescriptionIssueSummary
+          {...identity}
+          presentation="floating"
+          readiness={readiness}
+        />
+      );
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      act(() => {
+        vi.advanceTimersByTime(1002);
+      });
+      expect(
+        within(screen.getByRole('status')).getByText('Readiness not checked')
+      ).toBeVisible();
+      expect(
+        screen.getByRole('button', { name: /^Expand prescription issues:/ })
+      ).toHaveAttribute('aria-expanded', 'false');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it('expires a passing host projection without an API response', () => {
     vi.useFakeTimers();
     vi.setSystemTime(Date.UTC(2026, 9, 3, 12));

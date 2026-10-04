@@ -59,6 +59,9 @@ The host hides its panel while the editor is open; the editor keeps a compact pa
 above its scrolling body. Medication, pharmacy, and detail fields also show their
 scoped issues inline with accessible descriptions. Keep both presentations on the
 same current validation/workflow scope and preserve permissive draft saving.
+Issue-free successful readiness hides the floating panel in the editor and uses
+an inline status badge in the host. New issues or uncertain/expired readiness bring
+the panel back. Reserve page-end space only while a floating alert is needed.
 
 Run `pnpm exec vitest run src/demo/prescribing` for service, all declared HTTP
 routes, scenario/variant, questionnaire and real-client UI coverage. Root visual

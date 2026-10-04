@@ -177,6 +177,16 @@ test.describe('Prescription completion', () => {
     await expect(
       dialog.getByRole('textbox', { name: 'Medication', exact: true })
     ).toHaveValue('SimDrug A');
+    const floatingSummary = dialog.locator('[data-presentation="floating"]');
+    await expect(floatingSummary).toHaveCount(0);
+    await expect(dialog.getByLabel('Refills', { exact: true })).toBeFocused();
+    const route = dialog.getByLabel('Route', { exact: true });
+    await route.fill('');
+    await expect(floatingSummary).toBeVisible();
+    await expect(route).toHaveAttribute('aria-invalid', 'true');
+    await route.fill('oral');
+    await expect(floatingSummary).toHaveCount(0);
+    await expect(route).toBeFocused();
     await dialog
       .getByRole('button', { name: 'Save draft', exact: true })
       .click();

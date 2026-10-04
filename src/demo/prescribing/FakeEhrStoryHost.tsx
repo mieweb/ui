@@ -12,7 +12,9 @@ import {
 import type { Medication } from '../../components/MedicationList/MedicationList';
 import {
   PrescriptionIssueSummary,
+  PrescriptionReadinessBadge,
   getPrescriptionIssues,
+  getPrescriptionReadinessState,
   isPrescriptionReadinessCurrent,
 } from '../../components/PrescriptionReadiness';
 import {
@@ -527,6 +529,11 @@ export function FakeEhrStoryHost({
     now,
   };
   const fieldIssues = getPrescriptionIssues(readinessScope);
+  const noOutstandingIssues =
+    fieldIssues.length === 0 &&
+    ['complete', 'review', 'send', 'sent'].includes(
+      getPrescriptionReadinessState(readinessScope)
+    );
   const medicationIssues = fieldIssues.filter((issue) =>
     [
       'name',
@@ -580,7 +587,7 @@ export function FakeEhrStoryHost({
 
   return (
     <div
-      className="text-foreground mx-auto max-w-5xl space-y-5 p-4 pb-[calc(20dvh+2rem)]"
+      className={`text-foreground mx-auto max-w-5xl space-y-5 p-4${noOutstandingIssues ? '' : 'pb-[calc(20dvh+2rem)]'}`}
       data-slot="prescribing-simulation"
     >
       <header className="border-border bg-background rounded-lg border p-4">
@@ -782,18 +789,25 @@ export function FakeEhrStoryHost({
           </p>
         )}
         {readiness && !editorOpen && (
-          <PrescriptionIssueSummary
-            {...readinessScope}
-            presentation="floating"
-            onCompletePrescription={complete}
-            onIssueAction={(issue) => {
-              if (issue.remediation === 'pharmacy')
-                pharmacyRef.current?.focus();
-              else if (issue.remediation === 'edit-prescription')
-                complete(issue);
-            }}
-            readOnly={draftReadOnly}
-          />
+          <>
+            {noOutstandingIssues && (
+              <div role="status" aria-live="polite">
+                <PrescriptionReadinessBadge {...readinessScope} />
+              </div>
+            )}
+            <PrescriptionIssueSummary
+              {...readinessScope}
+              presentation="floating"
+              onCompletePrescription={complete}
+              onIssueAction={(issue) => {
+                if (issue.remediation === 'pharmacy')
+                  pharmacyRef.current?.focus();
+                else if (issue.remediation === 'edit-prescription')
+                  complete(issue);
+              }}
+              readOnly={draftReadOnly}
+            />
+          </>
         )}
       </section>
       <section
