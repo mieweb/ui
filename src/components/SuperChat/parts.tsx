@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { DateTime } from 'luxon';
 import { cva } from 'class-variance-authority';
 import {
   Check as CheckIcon,
@@ -21,6 +22,7 @@ import { Dropdown, DropdownItem, DropdownSubmenu } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
 import { SparklesIcon } from '../AI/icons';
+import { defaultSuperChatLabels, type SuperChatLabels } from './labels';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -37,21 +39,66 @@ import type {
 // Helpers
 // ============================================================================
 
-export function formatTime(time: Date | string): string {
-  return new Date(time).toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+/** Parse known timestamps without giving missing values a synthetic date. */
+function messageDateTime(time?: Date | string): DateTime | undefined {
+  const date =
+    time instanceof Date
+      ? DateTime.fromJSDate(time)
+      : typeof time === 'string'
+        ? DateTime.fromISO(time)
+        : undefined;
+  return date?.isValid ? date : undefined;
+}
+
+export function formatTime(time?: Date | string, locale?: string): string {
+  const date = messageDateTime(time);
+  if (!date) return '';
+  return date.toLocaleString(
+    {
+      hour: 'numeric',
+      minute: '2-digit',
+    },
+    { locale }
+  );
 }
 
 export function byTime(a: SuperChatMessage, b: SuperChatMessage): number {
-  return new Date(a.time).getTime() - new Date(b.time).getTime();
+  const first = messageDateTime(a.time);
+  const second = messageDateTime(b.time);
+  return first && second ? first.toMillis() - second.toMillis() : 0;
+}
+
+/**
+ * Sort a fully timestamped thread. An incomplete timeline preserves its
+ * supplied order as a whole, since unknown times cannot be placed reliably.
+ */
+export function sortThread(
+  thread: SuperChatMessage[],
+  sortMessagesBy: 'time' | 'provided' = 'time'
+): SuperChatMessage[] {
+  if (sortMessagesBy === 'provided') return [...thread];
+  // Parse once per message instead of repeating date parsing in the sort
+  // comparator for every comparison in a large, virtualized history.
+  const dated: { message: SuperChatMessage; time: number }[] = [];
+  for (const message of thread) {
+    const time = messageDateTime(message.time)?.toMillis();
+    if (time === undefined) return [...thread];
+    dated.push({ message, time });
+  }
+  return dated.sort((a, b) => a.time - b.time).map(({ message }) => message);
 }
 
 export function lastActivityOf(c: SuperChatConversation): number {
-  if (c.lastActivity) return new Date(c.lastActivity).getTime();
-  const last = lastMessageByTime(c.thread);
-  return last ? new Date(last.time).getTime() : 0;
+  const explicit = messageDateTime(c.lastActivity);
+  if (explicit) return explicit.toMillis();
+  let latest: number | undefined;
+  for (const message of c.thread) {
+    const time = messageDateTime(message.time)?.toMillis();
+    if (time !== undefined && (latest === undefined || time > latest)) {
+      latest = time;
+    }
+  }
+  return latest ?? 0;
 }
 
 /** Compute mentioned participant ids from `@Name` tokens in the draft. */
@@ -85,7 +132,11 @@ export function lastMessageByTime(
   let latest: SuperChatMessage | undefined;
   let latestTime = -Infinity;
   for (const message of thread) {
-    const t = new Date(message.time).getTime();
+    const date = messageDateTime(message.time);
+    // As with sortThread, the supplied sequence is authoritative whenever
+    // any timestamp is unknown. In particular, don't skip an undated reply.
+    if (!date) return thread.at(-1);
+    const t = date.toMillis();
     if (t >= latestTime) {
       latest = message;
       latestTime = t;
@@ -273,8 +324,11 @@ export function acceptTokensFor(
  * base64 `data:` URL {@link ComposerAttachment}s SuperChat hosts expect.
  */
 export function filesToComposerAttachments(
-  files: File[]
+  files: File[],
+  labels?: Partial<SuperChatLabels>
 ): Promise<ComposerAttachment[]> {
+  const attachmentName =
+    labels?.attachmentName ?? defaultSuperChatLabels.attachmentName;
   return Promise.all(
     files.map(
       (file, i) =>
@@ -285,7 +339,7 @@ export function filesToComposerAttachments(
               typeof reader.result === 'string' ? reader.result : '';
             resolve({
               id: `att-${Date.now()}-${i}`,
-              name: file.name || `attachment-${i}`,
+              name: file.name || attachmentName(i + 1),
               type: file.type || 'application/octet-stream',
               dataUrl,
             });
@@ -543,9 +597,10 @@ const MessageActionsBar = React.forwardRef<
 });
 
 interface MessageOverflowMenuProps {
-  /** Aligns the popover to the outer margin (right for self, left otherwise). */
+  /** Aligns the popover to the outer margin (end for self, start otherwise). */
   isSelf: boolean;
   actions: MessageAction[];
+  label: string;
   /**
    * Whether the footer action bar is currently in view. While it is, the
    * overflow trigger hides (the footer already offers the actions); it
@@ -562,6 +617,7 @@ interface MessageOverflowMenuProps {
 function MessageOverflowMenu({
   isSelf,
   actions,
+  label,
   footerVisible,
 }: MessageOverflowMenuProps) {
   const [open, setOpen] = React.useState(false);
@@ -597,7 +653,7 @@ function MessageOverflowMenu({
           <button
             type="button"
             data-slot="superchat-overflow-button"
-            aria-label="Message actions"
+            aria-label={label}
             className={cn(actionButtonClass, actionRevealClass)}
           >
             <EllipsisIcon size={14} aria-hidden="true" />
@@ -641,6 +697,8 @@ interface MessageRowProps {
   /** Format for the default copy action — Ctrl/Cmd-click on the footer copy
    * button (defaults to `'rich'`). */
   defaultCopyFormat?: SuperChatCopyFormat;
+  labels?: Partial<SuperChatLabels>;
+  locale?: string;
 }
 
 /**
@@ -662,7 +720,10 @@ export const MessageRow = React.memo(function MessageRow({
   editable,
   onMessageEdited,
   defaultCopyFormat = 'rich',
+  labels,
+  locale,
 }: MessageRowProps) {
+  const text = { ...defaultSuperChatLabels, ...labels };
   const streaming = message.status === 'streaming';
   const hasBody = !!message.text || (message.content?.length ?? 0) > 0;
   const [isEditing, setIsEditing] = React.useState(false);
@@ -798,7 +859,9 @@ export const MessageRow = React.memo(function MessageRow({
 
   const accent = participant?.color;
   const accentTextColor = accessibleAccentTextColor(accent);
-  const authorName = participant?.name ?? 'Unknown';
+  const authorName = participant?.name ?? text.unknownAuthor;
+  const messageTime = formatTime(message.time, locale);
+  const editedTime = formatTime(message.editedAt, locale);
 
   const startEdit = () => {
     const el = bubbleRef.current;
@@ -840,7 +903,7 @@ export const MessageRow = React.memo(function MessageRow({
             reader.onload = () => {
               const dataUrl =
                 typeof reader.result === 'string' ? reader.result : '';
-              const name = file.name || `pasted-image-${i + 1}.png`;
+              const name = file.name || text.pastedImageName(i + 1);
               resolve(dataUrl ? `![${name}](${dataUrl})` : '');
             };
             reader.readAsDataURL(file);
@@ -874,8 +937,8 @@ export const MessageRow = React.memo(function MessageRow({
       ? [
           {
             id: 'copy',
-            label: 'Copy message',
-            title: 'Copy message (\u2318/Ctrl-click: default format)',
+            label: text.copyMessage,
+            title: text.copyMessageHint,
             icon: copy.copied ? (
               <CheckIcon size={14} aria-hidden="true" />
             ) : (
@@ -883,22 +946,22 @@ export const MessageRow = React.memo(function MessageRow({
             ),
             onSelect: copy.copyDefault,
             submenu: {
-              label: 'Copy as',
+              label: text.copyAs,
               items: [
                 {
                   id: 'copy-rich',
-                  label: 'Copy as rich text',
-                  description: 'Rich text + Markdown',
+                  label: text.copyAsRichText,
+                  description: text.richTextAndMarkdown,
                   onSelect: copy.copyRich,
                 },
                 {
                   id: 'copy-markdown',
-                  label: 'Copy as Markdown',
+                  label: text.copyAsMarkdown,
                   onSelect: copy.copyMarkdown,
                 },
                 {
                   id: 'copy-plain',
-                  label: 'Copy as plain text',
+                  label: text.copyAsPlainText,
                   onSelect: copy.copyPlain,
                 },
               ],
@@ -910,7 +973,7 @@ export const MessageRow = React.memo(function MessageRow({
       ? [
           {
             id: 'edit',
-            label: 'Edit message',
+            label: text.editMessage,
             icon: <PencilIcon size={14} aria-hidden="true" />,
             onSelect: startEdit,
           } satisfies MessageAction,
@@ -922,7 +985,7 @@ export const MessageRow = React.memo(function MessageRow({
     <div
       data-slot="superchat-message"
       role="article"
-      aria-label={`${authorName}, ${formatTime(message.time)}`}
+      aria-label={text.messageLabel(authorName, messageTime || undefined)}
       className={cn(
         'group flex gap-2',
         isSelf ? 'flex-row-reverse' : 'flex-row'
@@ -941,6 +1004,7 @@ export const MessageRow = React.memo(function MessageRow({
             <MessageOverflowMenu
               isSelf={isSelf}
               actions={actions}
+              label={text.messageActions}
               footerVisible={collapseToMenu ? false : footerVisible}
             />
             {!collapseToMenu && (
@@ -977,16 +1041,21 @@ export const MessageRow = React.memo(function MessageRow({
               {participant.role}
             </span>
           )}
-          <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
-            {formatTime(message.time)}
-          </span>
+          {messageTime && (
+            <span
+              data-slot="superchat-message-time"
+              className="text-[10px] text-neutral-500 dark:text-neutral-400"
+            >
+              {messageTime}
+            </span>
+          )}
           {message.editedAt && (
             <span
               data-slot="superchat-edited-indicator"
               className="text-[10px] text-neutral-500 dark:text-neutral-400"
-              title={`Edited ${formatTime(message.editedAt)}`}
+              title={editedTime ? text.editedAt(editedTime) : undefined}
             >
-              (edited)
+              {text.edited}
             </span>
           )}
         </div>
@@ -1031,7 +1100,7 @@ export const MessageRow = React.memo(function MessageRow({
                       cancelEdit();
                     }
                   }}
-                  aria-label="Edit message"
+                  aria-label={text.editMessage}
                   className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
                 />
                 <div className="flex justify-end gap-2">
@@ -1040,7 +1109,7 @@ export const MessageRow = React.memo(function MessageRow({
                     onClick={cancelEdit}
                     className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
                   >
-                    Cancel
+                    {text.cancelEdit}
                   </button>
                   <button
                     type="button"
@@ -1048,7 +1117,7 @@ export const MessageRow = React.memo(function MessageRow({
                     disabled={!draft.trim() || draft.trim() === message.text}
                     className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
                   >
-                    Save
+                    {text.saveEdit}
                   </button>
                 </div>
               </div>

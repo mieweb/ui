@@ -25,8 +25,43 @@ const meta: Meta<typeof SuperChatConversations> = {
       table: { category: 'Selection' },
     },
     // Complex/object + callback props are wired in code, not via controls.
-    conversations: { control: false, table: { category: 'Data' } },
-    activeConversationId: { control: false, table: { category: 'Selection' } },
+    conversations: {
+      control: false,
+      description: 'Host-owned catalog; summaries may arrive before histories.',
+      table: { category: 'Data' },
+    },
+    activeConversationId: {
+      control: false,
+      description: 'Controlled stable id; null explicitly selects nothing.',
+      table: { category: 'Data' },
+    },
+    selectionFallback: {
+      control: 'select',
+      options: ['first', 'none'],
+      description:
+        'Choose the legacy first-row fallback or preserve no matching selection.',
+      table: { category: 'Data' },
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Catalog request is pending; existing rows remain visible.',
+      table: { category: 'Data' },
+    },
+    error: {
+      control: false,
+      description: 'Host-rendered catalog failure and recovery controls.',
+      table: { category: 'Data' },
+    },
+    renderEmpty: {
+      control: false,
+      description: 'Successful empty catalog content.',
+      table: { category: 'Slots' },
+    },
+    labels: {
+      control: false,
+      description: 'Localized labels and accessible names.',
+      table: { category: 'Data' },
+    },
     className: { control: false },
     onConversationOpened: { control: false, table: { category: 'Callbacks' } },
     onNewConversation: { control: false, table: { category: 'Callbacks' } },
@@ -38,7 +73,7 @@ const meta: Meta<typeof SuperChatConversations> = {
       description: {
         component: `### What it's for
 
-**The SuperChat conversation switcher: a sidebar listing host-owned conversations, newest activity first, with unread badges, last-message preview and an optional "+" action.** \`SuperChatConversations\` takes \`conversations: SuperChatConversation[]\` and sorts them by \`lastActivity\` (falling back to the latest message \`time\`). Selection is controlled with \`activeConversationId\` or uncontrolled with \`defaultActiveConversationId\` (default: the first conversation); when the requested id disappears the first conversation is highlighted instead. \`onConversationOpened(conversation)\` fires on click; \`onNewConversation\` adds the "New conversation" button. It renders an \`<aside aria-label="Conversations">\` (\`data-slot="superchat-conversations"\`) with a \`role="list"\` of \`role="listitem"\` buttons, the active one marked \`aria-current="true"\`; the unread count carries an \`sr-only\` "unread messages" suffix. Fixed \`w-64\` with a trailing border; override with \`className\`.
+**The SuperChat conversation switcher: a sidebar listing host-owned conversations, newest activity first, with unread badges, last-message preview and an optional "+" action.** \`SuperChatConversations\` takes \`conversations: SuperChatConversation[]\` and sorts them by \`lastActivity\` (falling back to the latest message \`time\`). Selection is controlled with \`activeConversationId\` or uncontrolled with \`defaultActiveConversationId\` (default: the first conversation); the default fallback highlights the first conversation when a requested id disappears. Set \`selectionFallback="none"\` to preserve an unavailable controlled selection, or pass \`null\` for explicit no selection. \`onConversationOpened(conversation)\` fires on click; \`onNewConversation\` adds the "New conversation" button. It renders an \`<aside aria-label="Conversations">\` (\`data-slot="superchat-conversations"\`) with a \`role="list"\` of \`role="listitem"\` buttons, the active one marked \`aria-current="true"\`; the unread badge has a localized accessible count label. Catalog \`loading\` and host-rendered \`error\` preserve any existing rows; \`renderEmpty\` replaces successful empty content. Fixed \`w-64\` with a logical trailing border; override with \`className\`.
 
 ### Use it when
 
@@ -73,11 +108,11 @@ const active = conversations.find((c) => c.id === activeId);
 
 ### Limitations
 
-- **Accessibility as implemented:** landmark is \`aside\` (complementary) named "Conversations"; items are plain \`<button>\`s inside \`role="listitem"\` — no arrow-key navigation (Tab moves between items) and no \`aria-selected\`; \`aria-current\` marks the active item. Unread badges are announced via \`sr-only\` text; the preview line is truncated visually only. The "+" button is \`aria-label="New conversation"\` with a literal \`+\` glyph.
+- **Accessibility as implemented:** landmark is \`aside\` (complementary) named "Conversations"; items are plain \`<button>\`s inside \`role="listitem"\` — no arrow-key navigation (Tab moves between items) and no \`aria-selected\`; \`aria-current\` marks the active item. Unread badges are announced through localized accessible labels; the preview line is truncated visually only. The "+" button is \`aria-label="New conversation"\` with a literal \`+\` glyph.
 - **Uncontrolled selection is one-way.** Changing \`defaultActiveConversationId\` after mount has no effect; use \`activeConversationId\` to drive selection from the host (the inbox does).
-- The **unread count is never cleared** by the component — \`onConversationOpened\` is your hook to update \`unread\` in host state. \`lastActivity\` missing on every conversation means sort order is derived from thread times only.
-- Layout: \`w-64\`, \`shrink-0\`, \`border-r\` (physical; in RTL the divider stays on the right); intended for a flex row with a bounded height. "Conversations" heading and labels are English; the preview shows raw \`text\` (Markdown source, unrendered).
-- Theming: hard-coded \`neutral-*\`, \`primary-600\`, \`text-white\`. Import from \`@mieweb/ui/components/SuperChat\` (not in the main barrel).
+- The **unread count is never cleared** by the component — \`onConversationOpened\` is your hook to update \`unread\` in host state. \`lastActivity\` missing on every conversation means sort order is derived from valid thread times, or remains stable when no timestamp is available. Lazy summary previews do not require messages in \`thread\`.
+- Layout: \`w-64\`, \`shrink-0\`, \`border-e\` (follows the host text direction); intended for a flex row with a bounded height. English labels can be replaced through \`labels\`; the preview shows raw \`text\` (Markdown source, unrendered).
+- Theming: brand palette utilities support light and dark mode. Import from \`@mieweb/ui/components/SuperChat\` (not in the main barrel).
 
 ### Motion
 
@@ -85,6 +120,7 @@ An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--do
       },
     },
     catalog: {
+      collection: true,
       entry: '@mieweb/ui/components/SuperChat',
       relationships: [
         {
@@ -211,4 +247,18 @@ export const Motion: Story = {
       },
     },
   },
+};
+
+export const Empty: Story = { args: { conversations: [] } };
+export const Loading: Story = { args: { conversations: [], loading: true } };
+export const Error: Story = {
+  args: {
+    conversations: [],
+    error:
+      'The conversation catalog is unavailable. Retry in the host application.',
+  },
+};
+export const Mobile: Story = {
+  ...Default,
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
 };

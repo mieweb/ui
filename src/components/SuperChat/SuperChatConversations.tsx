@@ -13,19 +13,31 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Animated, AnimatedPresence } from '../../motion';
 import { sidebarItem, lastActivityOf, lastMessageByTime } from './parts';
+import { defaultSuperChatLabels, type SuperChatLabels } from './labels';
+import { resolveActiveConversation } from './selection';
 import type { SuperChatConversation } from './types';
 
 // ============================================================================
 // SuperChatConversations (conversation list)
 // ============================================================================
 
-export interface SuperChatConversationsProps {
+export interface SuperChatConversationsProps extends React.HTMLAttributes<HTMLElement> {
   /** All conversations (host-owned state). */
   conversations: SuperChatConversation[];
-  /** Controlled active conversation id. */
-  activeConversationId?: string;
+  /** Controlled active conversation id. `null` explicitly selects nothing. */
+  activeConversationId?: string | null;
   /** Uncontrolled initial active conversation id. */
-  defaultActiveConversationId?: string;
+  defaultActiveConversationId?: string | null;
+  /** Missing-id behavior. Defaults to the legacy first-row selection. */
+  selectionFallback?: 'first' | 'none';
+  /** Catalog is loading; existing rows remain visible. */
+  loading?: boolean;
+  /** Host-rendered catalog error; existing rows remain visible. */
+  error?: React.ReactNode;
+  /** Replace the empty catalog message. */
+  renderEmpty?: () => React.ReactNode;
+  /** Override user-facing strings. */
+  labels?: Partial<SuperChatLabels>;
   /** Additional class name. */
   className?: string;
 
@@ -37,27 +49,46 @@ export interface SuperChatConversationsProps {
 /**
  * Conversation list. See the module `MAINTAINERS.md` for the data model.
  */
-export function SuperChatConversations({
-  conversations,
-  activeConversationId,
-  defaultActiveConversationId,
-  className,
-  onConversationOpened,
-  onNewConversation,
-}: SuperChatConversationsProps) {
+export const SuperChatConversations = React.forwardRef<
+  HTMLElement,
+  SuperChatConversationsProps
+>(function SuperChatConversations(
+  {
+    conversations,
+    activeConversationId,
+    defaultActiveConversationId,
+    selectionFallback = 'first',
+    loading = false,
+    error,
+    renderEmpty,
+    labels,
+    className,
+    onConversationOpened,
+    onNewConversation,
+    ...rest
+  },
+  ref
+) {
+  const text = { ...defaultSuperChatLabels, ...labels };
+  const hasError = error != null && error !== false;
   const [internalActive, setInternalActive] = React.useState(
-    defaultActiveConversationId ?? conversations[0]?.id
+    defaultActiveConversationId !== undefined
+      ? defaultActiveConversationId
+      : selectionFallback === 'first'
+        ? conversations[0]?.id
+        : undefined
   );
   // Badges present on the list's first render are state, not news. Tracked
   // here rather than per row so a row inserted later still pops its badge.
   const [hasMounted, setHasMounted] = React.useState(false);
   React.useEffect(() => setHasMounted(true), []);
-  const requestedId = activeConversationId ?? internalActive;
-  // Fall back to the first conversation when the requested id no longer exists
-  // (e.g. the active conversation was removed) so an item stays highlighted.
-  const activeId = conversations.some((c) => c.id === requestedId)
-    ? requestedId
-    : conversations[0]?.id;
+  const requestedId =
+    activeConversationId !== undefined ? activeConversationId : internalActive;
+  const activeId = resolveActiveConversation(
+    conversations,
+    requestedId,
+    selectionFallback
+  )?.id;
 
   const sortedConversations = React.useMemo(
     () =>
@@ -72,8 +103,11 @@ export function SuperChatConversations({
 
   return (
     <aside
+      {...rest}
+      ref={ref}
       data-slot="superchat-conversations"
-      aria-label="Conversations"
+      aria-label={rest['aria-label'] ?? text.conversations}
+      aria-busy={loading || undefined}
       className={cn(
         'flex w-64 shrink-0 flex-col border-e border-neutral-200 dark:border-neutral-700',
         className
@@ -81,19 +115,40 @@ export function SuperChatConversations({
     >
       <div className="flex items-center justify-between p-3">
         <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">
-          Conversations
+          {text.conversations}
         </span>
         {onNewConversation && (
           <button
             type="button"
             onClick={onNewConversation}
-            aria-label="New conversation"
-            className="rounded-md px-2 py-1 text-lg leading-none text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            aria-label={text.newConversation}
+            className="focus-visible:ring-primary-500 min-h-11 min-w-11 rounded-md px-2 py-1 text-lg leading-none text-neutral-500 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-neutral-800"
           >
             +
           </button>
         )}
       </div>
+      {loading && (
+        <div
+          role="status"
+          className="px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300"
+        >
+          {text.loadingConversations}
+        </div>
+      )}
+      {hasError && (
+        <div
+          role="alert"
+          className="px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300"
+        >
+          {error}
+        </div>
+      )}
+      {!loading && !hasError && conversations.length === 0 && (
+        <div className="p-3 text-sm text-neutral-600 dark:text-neutral-300">
+          {renderEmpty ? renderEmpty() : text.emptyConversations}
+        </div>
+      )}
       <div
         data-slot="superchat-conversation-list"
         role="list"
@@ -101,20 +156,26 @@ export function SuperChatConversations({
       >
         {sortedConversations.map((c) => {
           const last = lastMessageByTime(c.thread);
+          const preview = c.preview ?? last?.text;
           const isActive = c.id === activeId;
           return (
             <div key={c.id} role="listitem">
               <button
                 type="button"
+                data-slot="superchat-conversation-button"
+                data-conversation-id={c.id}
                 aria-current={isActive ? 'true' : undefined}
                 onClick={() => selectConversation(c)}
-                className={sidebarItem({ active: isActive })}
+                className={cn(
+                  sidebarItem({ active: isActive }),
+                  'focus-visible:ring-primary-500 min-h-11 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset'
+                )}
               >
                 <span className="flex-1 truncate">
                   <span className="block truncate font-medium">{c.title}</span>
-                  {last?.text && (
+                  {preview && (
                     <span className="block truncate text-xs text-neutral-600 dark:text-neutral-400">
-                      {last.text}
+                      {preview}
                     </span>
                   )}
                 </span>
@@ -128,8 +189,10 @@ export function SuperChatConversations({
                       data-slot="superchat-unread-badge"
                       className="bg-primary-600 ms-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white"
                     >
-                      {c.unread}
-                      <span className="sr-only"> unread messages</span>
+                      <span aria-hidden="true">{c.unread}</span>
+                      <span className="sr-only">
+                        {text.unreadMessages(c.unread)}
+                      </span>
                     </Animated>
                   )}
                 </AnimatedPresence>
@@ -140,4 +203,4 @@ export function SuperChatConversations({
       </div>
     </aside>
   );
-}
+});

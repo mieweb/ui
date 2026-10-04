@@ -111,8 +111,11 @@ export interface SuperChatMessage {
    * code), reused from the AI module for tool-call visualization etc.
    */
   content?: AIMessageContent[];
-  /** Timestamp; the thread is append-only and ordered by `time`. */
-  time: Date | string;
+  /**
+   * Timestamp, when known. Omit it instead of inventing a date. Threads with
+   * missing or invalid timestamps retain their supplied order.
+   */
+  time?: Date | string;
   /**
    * Timestamp of the most recent edit, if the message has been edited. When
    * set, surfaces an "(edited)" indicator next to the message time.
@@ -177,6 +180,11 @@ export interface SuperChatConversation {
   unread?: number;
   /** Timestamp of the last activity (used for sidebar ordering). */
   lastActivity?: Date | string;
+  /**
+   * Sidebar preview independent of the loaded thread. Useful for catalogs
+   * that fetch messages only after selection. An empty string hides the preview.
+   */
+  preview?: string;
   /** Everyone taking part in this conversation. */
   participants: Participant[];
   /** Ordered thread items. */

@@ -25,6 +25,7 @@ together, so anything the inbox does you can rebuild from the two parts.
 - [Quick start](#quick-start)
 - [Visual layout & anatomy](#visual-layout--anatomy)
 - [Vocabulary](#vocabulary)
+- [Host-controlled integration](#host-controlled-catalogs-histories-and-drafts)
 - [Props](#props)
 - [Rich Markdown plugins](#rich-markdown-plugins)
 - [Accessibility](#accessibility)
@@ -205,6 +206,132 @@ export function MyInbox({ conversations, currentParticipantId }) {
 
 ---
 
+## Host-controlled catalogs, histories and drafts
+
+Use `SuperChatInbox` when a catalog and its message histories arrive separately.
+A catalog record still has a stable `id`, `title`, `participants` and `thread`,
+but its `thread` may be empty until the application loads that history. Supply
+`preview` for the list's summary text; it never becomes a thread message.
+`preview: ''` intentionally hides the preview, whereas omitting it falls back to
+the last loaded message text. Keep IDs stable across refreshes and reconnections.
+
+```tsx
+const catalog: SuperChatConversation[] = [
+  {
+    id: 'release-planning',
+    title: 'Release planning',
+    preview: 'Confirm the accessibility review before the release.',
+    participants: [{ id: 'me', kind: 'human', name: 'You' }],
+    thread: [], // history has not been loaded
+  },
+];
+```
+
+Keep selection, request status and per-conversation drafts in the host. This
+composition sketch uses the host's `DraftComposer` and `DeliveryStatus`;
+SuperChat does not import a router, fetch data or provide a delivery guarantee.
+
+```tsx
+<SuperChatInbox
+  conversations={catalogWithLoadedThreads}
+  activeConversationId={selectedId} // string | null
+  selectionFallback="none"
+  mobileView={mobileView}
+  onMobileViewChange={setMobileView}
+  onConversationOpened={(conversation) => selectAndLoad(conversation.id)}
+  loading={catalogRequest.pending}
+  error={catalogRequest.error && <CatalogRetry error={catalogRequest.error} />}
+  conversationLoading={historyRequest.pending}
+  conversationError={
+    historyRequest.error && <HistoryRetry error={historyRequest.error} />
+  }
+  currentParticipantId={me.id}
+  sortMessagesBy="provided"
+  renderEmpty={() => <p>No conversations have been created.</p>}
+  renderNoSelection={() => <p>Choose a conversation.</p>}
+  renderConversationEmpty={() => <p>No messages in this conversation.</p>}
+  renderComposer={({ conversation, currentParticipantId, readOnly }) => (
+    <DraftComposer
+      value={drafts[conversation.id] ?? ''}
+      authorId={currentParticipantId}
+      disabled={readOnly}
+      onChange={(value) => updateDraft(conversation.id, value)}
+      onSend={() => sendDraft(conversation.id)}
+    />
+  )}
+  renderStatus={({ conversation }) => (
+    <DeliveryStatus conversationId={conversation.id} />
+  )}
+/>
+```
+
+`renderComposer` replaces the default composer, including its send behavior.
+The host must handle validation, pending state, rejection, draft retention and
+any attachment persistence. Do not show a successful message until the host's
+own protocol supplies the appropriate result. Both slots receive
+`{ conversation, currentParticipantId, readOnly }`; selected-history loading or
+error hides the composer. Prevent late history responses for an old selection
+from overwriting the current one, for example with request cancellation or an
+ID-keyed result cache.
+
+The default composer's `onMessageSent` callback accepts `void | Promise<void>`;
+it awaits an asynchronous send and restores its draft if that promise rejects.
+An adapter that previously returned a mutation payload directly may need to
+await the mutation and return no value, or use a custom composer:
+
+```tsx
+onMessageSent={async (text, { conversation }) => {
+  await api.send(conversation.id, text);
+  // Apply the authoritative result in host state; return void to the composer.
+}}
+```
+
+### Selection and mobile navigation
+
+| Input                                                      | Behavior                                                                                    |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `activeConversationId={null}`                              | Explicitly selects no conversation, including with the default fallback.                    |
+| Missing or unavailable ID with `selectionFallback="first"` | Preserves the existing first-conversation fallback. This is the default.                    |
+| Missing or unavailable ID with `selectionFallback="none"`  | Renders no selection; it does not silently open a different conversation.                   |
+| `defaultActiveConversationId`                              | Initializes uncontrolled selection once; accepts `null`.                                    |
+| `mobileView="list"` or `"chat"`                            | Host-controlled narrow-screen pane. Does not clear selection or drafts.                     |
+| `defaultMobileView`                                        | Initializes uncontrolled navigation; defaults to `list`.                                    |
+| `onMobileViewChange`                                       | Receives row-open and Back navigation requests. Update controlled `mobileView` in the host. |
+
+On desktop both panes remain visible. On mobile, Back returns to the catalog
+and preserves the selected ID; storing drafts by ID keeps one conversation's
+text out of another. Both catalog and panel state remain explicit: `loading`
+and `error` describe the catalog, while `conversationLoading` and
+`conversationError` describe the selected history. Loading/error keeps existing
+catalog rows available; neither is represented as a successful empty catalog.
+
+### Timestamps and translated interfaces
+
+Message `time` is optional. Omit it when the source did not provide a timestamp;
+the renderer does not invent a date or append an empty time to its accessible
+name. This widens the accepted data type: consumer code that directly dereferences
+`message.time` must now guard against `undefined` before parsing or formatting it.
+Existing records with timestamps continue to render normally. Use `sortMessagesBy="provided"` for server sequence order, or keep the
+default `"time"` ordering for timestamped history. `order="desc"` reverses the
+chosen ordering. The application remains responsible for stable message IDs.
+
+Pass `labels` to translate SuperChat's visible text and accessible names,
+including function labels such as `chatTitle(title)` and
+`unreadMessages(count)`. `composerLabels` configures the default ChatComposer;
+a custom composer supplies its own translated strings. `locale` formats
+supplied timestamps. Set the host's `dir="rtl"` for RTL layout; locale alone
+does not change the document direction. Brand and light/dark styling follow
+the existing theme provider.
+
+See the [Host Controlled story](https://ui.mieweb.org/?path=/story/superchat-inbox--host-controlled)
+for an executable example with lazy history, separate drafts, a status slot and
+an explicit history failure; the [RTL story](https://ui.mieweb.org/?path=/story/superchat-inbox--rtl)
+uses expanded Arabic labels. Choose `SuperChatConversations` plus `SuperChat`
+when the host needs a different layout, and the lower-level Messaging kit when
+its delivery-state primitives better match your application.
+
+---
+
 ## Visual layout & anatomy
 
 Every structural region carries a stable `data-slot` attribute (for styling /
@@ -309,7 +436,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | Term              | Type                                | Meaning                                                                                                                      |
 | ----------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **Participant**   | [`Participant`](types.ts)           | An actor: `kind` is `human` \| `agent` \| `system`; carries `name`, optional `color`, `avatar`, `role`, `status`.            |
-| **Conversation**  | [`SuperChatConversation`](types.ts) | `participants` + an ordered `thread`, plus `title`, `unread`, `lastActivity`.                                                |
+| **Conversation**  | [`SuperChatConversation`](types.ts) | `participants` + an ordered `thread`, plus `title`, `preview`, `unread`, `lastActivity`.                                     |
 | **Thread**        | `SuperChatMessage[]`                | Append-only list, **ordered by `time`**; concurrent agent replies interleave.                                                |
 | **Message**       | [`SuperChatMessage`](types.ts)      | A thread item: `participantId`, `text` and/or rich `content` blocks, `time`, `status`, optional `editedAt`/`ref`/`mentions`. |
 | **Reference**     | [`SuperChatRef`](types.ts)          | A linked entity (`doc`/`rx`/`appt`) rendered as a chip.                                                                      |
@@ -321,66 +448,71 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 
 ## Props
 
+The shared integration props for selection, mobile navigation, request states,
+composer/status slots and localization are described in
+[Host-controlled catalogs, histories and drafts](#host-controlled-catalogs-histories-and-drafts).
+The tables below list the original surface and commonly used rendering callbacks.
+
 ### `SuperChatInbox`
 
 The combined surface. Owns active-conversation selection (controlled or
 uncontrolled).
 
-| Prop                          | Type                                          | Default            | Description                                                                                         |
-| ----------------------------- | --------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
-| `conversations`               | `SuperChatConversation[]`                     | —                  | **Required.** All conversations (host-owned).                                                       |
-| `activeConversationId`        | `string`                                      | —                  | Controlled active conversation id.                                                                  |
-| `defaultActiveConversationId` | `string`                                      | first conversation | Uncontrolled initial active id.                                                                     |
-| `currentParticipantId`        | `string`                                      | —                  | The local user's id (drives alignment + compose identity).                                          |
-| `renderPlugins`               | `SuperChatRenderPlugin[]`                     | —                  | Opt-in rich Markdown plugins.                                                                       |
-| `renderTextContent`           | `AIRenderTextContent`                         | Markdown core      | Replace the entire text renderer (advanced).                                                        |
-| `trustedContent`              | `boolean`                                     | `false`            | Skip sanitization — **only** for host-authored content.                                             |
-| `readOnly`                    | `boolean`                                     | `false`            | Disable the composer.                                                                               |
-| `order`                       | `'asc' \| 'desc'`                             | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).      |
-| `virtualized`                 | `boolean`                                     | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.           |
-| `showSidebar`                 | `boolean`                                     | `true`             | Show the conversation list.                                                                         |
-| `linkBuilder`                 | `SuperChatLinkBuilder`                        | —                  | Build hrefs for `ref` thread items.                                                                 |
-| `className`                   | `string`                                      | —                  | Extra classes on the root.                                                                          |
-| `onMessageSent`               | `(text, { conversation, mentions }) => void`  | —                  | Fired on send; `mentions` are the addressed participant ids.                                        |
-| `onMessageEdited`             | `(messageId, text, { conversation }) => void` | —                  | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved. |
-| `onConversationOpened`        | `(conversation) => void`                      | —                  | Fired when a conversation is selected.                                                              |
-| `onConversationClosed`        | `(conversation) => void`                      | —                  | Shows a close button when provided.                                                                 |
-| `onNewConversation`           | `() => void`                                  | —                  | Shows a "+" button in the list when provided.                                                       |
-| `onReferenceClick`            | `(ref) => void`                               | —                  | Fired when a reference chip is activated.                                                           |
+| Prop                          | Type                                                          | Default            | Description                                                                                         |
+| ----------------------------- | ------------------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
+| `conversations`               | `SuperChatConversation[]`                                     | —                  | **Required.** All conversations (host-owned).                                                       |
+| `activeConversationId`        | `string \| null`                                              | —                  | Controlled stable id; `null` means no selection.                                                    |
+| `defaultActiveConversationId` | `string \| null`                                              | first conversation | Uncontrolled initial active id.                                                                     |
+| `currentParticipantId`        | `string`                                                      | —                  | The local user's id (drives alignment + compose identity).                                          |
+| `renderPlugins`               | `SuperChatRenderPlugin[]`                                     | —                  | Opt-in rich Markdown plugins.                                                                       |
+| `renderTextContent`           | `AIRenderTextContent`                                         | Markdown core      | Replace the entire text renderer (advanced).                                                        |
+| `trustedContent`              | `boolean`                                                     | `false`            | Skip sanitization — **only** for host-authored content.                                             |
+| `readOnly`                    | `boolean`                                                     | `false`            | Disable the composer.                                                                               |
+| `order`                       | `'asc' \| 'desc'`                                             | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).      |
+| `virtualized`                 | `boolean`                                                     | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.           |
+| `showSidebar`                 | `boolean`                                                     | `true`             | Show the conversation list.                                                                         |
+| `linkBuilder`                 | `SuperChatLinkBuilder`                                        | —                  | Build hrefs for `ref` thread items.                                                                 |
+| `className`                   | `string`                                                      | —                  | Extra classes on the root.                                                                          |
+| `onMessageSent`               | `(text, { conversation, mentions }) => void \| Promise<void>` | —                  | Fired on send; `mentions` are the addressed participant ids.                                        |
+| `onMessageEdited`             | `(messageId, text, { conversation }) => void`                 | —                  | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved. |
+| `onConversationOpened`        | `(conversation) => void`                                      | —                  | Fired when a conversation is selected.                                                              |
+| `onConversationClosed`        | `(conversation) => void`                                      | —                  | Shows a close button when provided.                                                                 |
+| `onNewConversation`           | `() => void`                                                  | —                  | Shows a "+" button in the list when provided.                                                       |
+| `onReferenceClick`            | `(ref) => void`                                               | —                  | Fired when a reference chip is activated.                                                           |
 
 ### `SuperChat` (panel)
 
 Renders exactly one conversation.
 
-| Prop                   | Type                                          | Default       | Description                                                                                         |
-| ---------------------- | --------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------- |
-| `conversation`         | `SuperChatConversation`                       | —             | **Required.** The conversation to display.                                                          |
-| `currentParticipantId` | `string`                                      | —             | The local user's id (drives alignment + compose identity).                                          |
-| `renderPlugins`        | `SuperChatRenderPlugin[]`                     | —             | Opt-in rich Markdown plugins.                                                                       |
-| `renderTextContent`    | `AIRenderTextContent`                         | Markdown core | Replace the entire text renderer (advanced).                                                        |
-| `trustedContent`       | `boolean`                                     | `false`       | Skip sanitization — **only** for host-authored content.                                             |
-| `readOnly`             | `boolean`                                     | `false`       | Disable the composer.                                                                               |
-| `order`                | `'asc' \| 'desc'`                             | `'asc'`       | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).      |
-| `virtualized`          | `boolean`                                     | `false`       | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.           |
-| `linkBuilder`          | `SuperChatLinkBuilder`                        | —             | Build hrefs for `ref` thread items.                                                                 |
-| `className`            | `string`                                      | —             | Extra classes on the root.                                                                          |
-| `onMessageSent`        | `(text, { conversation, mentions }) => void`  | —             | Fired on send; `mentions` are the addressed participant ids.                                        |
-| `onMessageEdited`      | `(messageId, text, { conversation }) => void` | —             | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved. |
-| `onConversationClosed` | `(conversation) => void`                      | —             | Shows a close button when provided.                                                                 |
-| `onReferenceClick`     | `(ref) => void`                               | —             | Fired when a reference chip is activated.                                                           |
+| Prop                   | Type                                                          | Default       | Description                                                                                         |
+| ---------------------- | ------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------- |
+| `conversation`         | `SuperChatConversation`                                       | —             | **Required.** The conversation to display.                                                          |
+| `currentParticipantId` | `string`                                                      | —             | The local user's id (drives alignment + compose identity).                                          |
+| `renderPlugins`        | `SuperChatRenderPlugin[]`                                     | —             | Opt-in rich Markdown plugins.                                                                       |
+| `renderTextContent`    | `AIRenderTextContent`                                         | Markdown core | Replace the entire text renderer (advanced).                                                        |
+| `trustedContent`       | `boolean`                                                     | `false`       | Skip sanitization — **only** for host-authored content.                                             |
+| `readOnly`             | `boolean`                                                     | `false`       | Disable the composer.                                                                               |
+| `order`                | `'asc' \| 'desc'`                                             | `'asc'`       | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).      |
+| `virtualized`          | `boolean`                                                     | `false`       | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.           |
+| `linkBuilder`          | `SuperChatLinkBuilder`                                        | —             | Build hrefs for `ref` thread items.                                                                 |
+| `className`            | `string`                                                      | —             | Extra classes on the root.                                                                          |
+| `onMessageSent`        | `(text, { conversation, mentions }) => void \| Promise<void>` | —             | Fired on send; `mentions` are the addressed participant ids.                                        |
+| `onMessageEdited`      | `(messageId, text, { conversation }) => void`                 | —             | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved. |
+| `onConversationClosed` | `(conversation) => void`                                      | —             | Shows a close button when provided.                                                                 |
+| `onReferenceClick`     | `(ref) => void`                                               | —             | Fired when a reference chip is activated.                                                           |
 
 ### `SuperChatConversations` (list)
 
 The conversation switcher. Supports controlled or uncontrolled selection.
 
-| Prop                          | Type                      | Default            | Description                                   |
-| ----------------------------- | ------------------------- | ------------------ | --------------------------------------------- |
-| `conversations`               | `SuperChatConversation[]` | —                  | **Required.** All conversations (host-owned). |
-| `activeConversationId`        | `string`                  | —                  | Controlled active conversation id.            |
-| `defaultActiveConversationId` | `string`                  | first conversation | Uncontrolled initial active id.               |
-| `className`                   | `string`                  | —                  | Extra classes on the root.                    |
-| `onConversationOpened`        | `(conversation) => void`  | —                  | Fired when a conversation is selected.        |
-| `onNewConversation`           | `() => void`              | —                  | Shows a "+" button when provided.             |
+| Prop                          | Type                      | Default            | Description                                      |
+| ----------------------------- | ------------------------- | ------------------ | ------------------------------------------------ |
+| `conversations`               | `SuperChatConversation[]` | —                  | **Required.** All conversations (host-owned).    |
+| `activeConversationId`        | `string \| null`          | —                  | Controlled stable id; `null` means no selection. |
+| `defaultActiveConversationId` | `string \| null`          | first conversation | Uncontrolled initial active id.                  |
+| `className`                   | `string`                  | —                  | Extra classes on the root.                       |
+| `onConversationOpened`        | `(conversation) => void`  | —                  | Fired when a conversation is selected.           |
+| `onNewConversation`           | `() => void`              | —                  | Shows a "+" button when provided.                |
 
 ---
 
@@ -631,11 +763,11 @@ SuperChat ships with assistive-tech support built in:
   title, and the participant face-pile is a labelled `group`.
 - **Live message log** — the thread is `role="log"` with `aria-live="polite"`, so
   screen readers announce new messages. It is keyboard-focusable for scrolling.
-- **Per-message context** — each message is an `article` named `"{author}, {time}"`.
+- **Per-message context** — each message is an `article` named `"{author}, {time}"` when a valid timestamp is supplied, or by author alone otherwise.
 - **Mention combobox** — the composer is an `aria-autocomplete="list"` combobox
   wired to a `listbox` via `aria-controls` / `aria-activedescendant`. Keyboard:
   `↑`/`↓` move, `Enter`/`Tab` accept, `Esc` dismisses; `Enter` (no `Shift`) sends.
-- **Active conversation** — marked with `aria-current` in the list.
+- **Active conversation** — marked with `aria-current` in the list. Conversation buttons use Tab/Enter/Space; they do not implement listbox arrow-key navigation. Mobile row-open moves focus into the panel and Back returns focus to the selected row. Hidden panes are absent from the tab order.
 - **Jump to bottom** — the floating ↓ button is labelled `Scroll to bottom`
   (or `New messages — scroll to bottom` when unseen messages arrived below) and
   shows a visible focus ring; because the log is `aria-live`, arriving messages

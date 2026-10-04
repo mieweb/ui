@@ -15,6 +15,7 @@
 import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { MessageRow } from './parts';
+import type { SuperChatLabels } from './labels';
 import type {
   AIRenderTextContent,
   Participant,
@@ -43,6 +44,8 @@ export interface VirtualThreadProps {
   onMessageEdited?: (messageId: string, text: string) => void;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
   defaultCopyFormat?: SuperChatCopyFormat;
+  labels?: Partial<SuperChatLabels>;
+  locale?: string;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -66,6 +69,8 @@ export function VirtualThread({
   editable,
   onMessageEdited,
   defaultCopyFormat,
+  labels,
+  locale,
   scrollRef,
   contentRef,
   containerProps,
@@ -102,7 +107,7 @@ export function VirtualThread({
               style={{
                 position: 'absolute',
                 top: 0,
-                left: 0,
+                insetInlineStart: 0,
                 width: '100%',
                 transform: `translateY(${virtualRow.start}px)`,
               }}
@@ -123,6 +128,8 @@ export function VirtualThread({
                   editable={editable}
                   onMessageEdited={onMessageEdited}
                   defaultCopyFormat={defaultCopyFormat}
+                  labels={labels}
+                  locale={locale}
                 />
               </div>
             </div>

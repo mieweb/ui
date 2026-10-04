@@ -16,6 +16,7 @@ import {
 import type { SuperChatConversation } from './index';
 import { richConversation, secondConversation, registry } from './storyData';
 import 'katex/dist/katex.min.css';
+import { Button } from '../Button';
 
 // ============================================================================
 // Meta
@@ -55,8 +56,113 @@ const meta: Meta<typeof SuperChatInbox> = {
       table: { category: 'Selection' },
     },
     // Complex/object + callback props are wired in code, not via controls.
-    conversations: { control: false, table: { category: 'Data' } },
-    activeConversationId: { control: false, table: { category: 'Selection' } },
+    conversations: {
+      control: false,
+      description:
+        'Host-owned catalog records. preview does not require loaded thread messages.',
+      table: { category: 'Data' },
+    },
+    activeConversationId: {
+      control: false,
+      description: 'Controlled stable id; null explicitly selects nothing.',
+      table: { category: 'Data' },
+    },
+    selectionFallback: {
+      control: 'select',
+      options: ['first', 'none'],
+      description:
+        'Default first preserves existing behavior. Use none when a missing host selection must not open another conversation.',
+      table: { category: 'Data' },
+    },
+    mobileView: {
+      control: 'select',
+      options: ['list', 'chat'],
+      description:
+        'Controlled narrow-screen pane; desktop continues to show both panes.',
+      table: { category: 'Data' },
+    },
+    defaultMobileView: {
+      control: 'select',
+      options: ['list', 'chat'],
+      description: 'Initial narrow-screen pane for uncontrolled navigation.',
+      table: { category: 'Data' },
+    },
+    onMobileViewChange: {
+      control: false,
+      description:
+        'Reports list/chat navigation so the host can update its route or state.',
+      table: { category: 'Callbacks' },
+    },
+    loading: {
+      control: 'boolean',
+      description: 'The catalog request is pending.',
+      table: { category: 'Data' },
+    },
+    error: {
+      control: false,
+      description:
+        'Host-rendered catalog error. It is not an empty successful result.',
+      table: { category: 'Data' },
+    },
+    conversationLoading: {
+      control: 'boolean',
+      description: 'The selected conversation history is pending.',
+      table: { category: 'Data' },
+    },
+    conversationError: {
+      control: false,
+      description: 'Host-rendered selected-history error.',
+      table: { category: 'Data' },
+    },
+    renderEmpty: {
+      control: false,
+      description: 'Successful empty catalog content.',
+      table: { category: 'Slots' },
+    },
+    renderNoSelection: {
+      control: false,
+      description: 'Content when no available conversation is selected.',
+      table: { category: 'Slots' },
+    },
+    renderConversationEmpty: {
+      control: false,
+      description: 'Successful empty selected history content.',
+      table: { category: 'Slots' },
+    },
+    renderComposer: {
+      control: false,
+      description:
+        'Replace the composer with host-controlled drafts; receives conversation, currentParticipantId and readOnly.',
+      table: { category: 'Slots' },
+    },
+    renderStatus: {
+      control: false,
+      description:
+        'Render host status beside the thread/composer using the same conversation context.',
+      table: { category: 'Slots' },
+    },
+    labels: {
+      control: false,
+      description: 'Override accessible names and visible SuperChat text.',
+      table: { category: 'Rendering' },
+    },
+    locale: {
+      control: 'text',
+      description: 'Locale for supplied message timestamps.',
+      table: { category: 'Rendering' },
+    },
+    composerLabels: {
+      control: false,
+      description: 'Translated labels forwarded to the default ChatComposer.',
+      table: { category: 'Rendering' },
+    },
+    sortMessagesBy: {
+      control: 'select',
+      options: ['time', 'provided'],
+      description:
+        'Sort timestamped records, or preserve host-provided message order without inventing dates.',
+      table: { category: 'Data' },
+    },
     renderPlugins: { control: false, table: { category: 'Rendering' } },
     renderTextContent: { control: false, table: { category: 'Rendering' } },
     linkBuilder: { control: false, table: { category: 'Rendering' } },
@@ -73,58 +179,62 @@ const meta: Meta<typeof SuperChatInbox> = {
       description: {
         component: `### What it's for
 
-**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
+**A host-owned conversation catalog beside the selected SuperChat panel.** \`SuperChatInbox\` composes \`SuperChatConversations\` and \`SuperChat\`, including narrow-screen list/detail navigation. The application supplies stable conversation and participant IDs, summaries, messages and request state; the library performs no fetching, authentication, routing or persistence.
 
 ### Use it when
 
-- You want a **finished inbox** for conversations that mix humans and AI agents — care-team threads with a triage agent, an admin console watching several agents — and are happy with list-left / panel-right.
-- You are migrating from \`mieweb/chat-component\` and want the closest API.
-- Messages are Markdown and may need code / math / Mermaid / GenUI / NITRO-table plugins; you install only the peers for the plugins you pass.
+- A catalog arrives before its histories, and opening one row loads only that conversation's messages.
+- A route or external store owns selection, mobile navigation and a separate draft for each conversation.
+- Multiple humans or agents share Markdown conversations and you want the existing SuperChat rendering and accessibility surfaces.
 
 ### Don't use it when
 
-- You need a different arrangement (list in a drawer, panel in a modal, two panels) — compose \`SuperChatConversations\` + \`SuperChat\` yourself.
-- There is only ever one conversation on screen — \`SuperChat\` alone, or \`AIChat\` if it is one user and one assistant with plain text.
-- Human-to-human messaging with delivery states, read receipts and typing indicators — Messaging's \`MessagingSplitView\` + \`MessageThread\`; SuperChat has none of those.
+- Only one conversation is ever shown: use \`SuperChat\`, or \`AIChat\` for a single user/assistant exchange.
+- Your layout needs a drawer, three columns or multiple panels: compose \`SuperChatConversations\` with \`SuperChat\` directly.
+- You need delivery receipts or typing indicators from a messaging service: compose the Messaging primitives and supply that service's state.
 
 ### Example
 
+The **Host Controlled** story keeps catalog summaries separate from histories, loads explicit example records after selection, and keys drafts by stable conversation ID. Its \`renderComposer\` and \`renderStatus\` slots own draft and submission state; no preview is turned into an invented message.
+
 \`\`\`tsx
-import { SuperChatInbox } from '@mieweb/ui/components/SuperChat';
-import { createCodePlugin, createNitroTablePlugin } from '@mieweb/ui/components/SuperChat/plugins';
-
-const plugins = useMemo(() => [createCodePlugin(), createNitroTablePlugin()], []);
-const [conversations, setConversations] = useState<SuperChatConversation[]>([]);
-useEffect(() => { api.listConversations().then(setConversations); }, []); // host transport + auth
-
-<div style={{ height: 'calc(100vh - 120px)' }}>
-  <SuperChatInbox
-    conversations={conversations}
-    currentParticipantId={me.id}
-    renderPlugins={plugins}
-    linkBuilder={(ref) => routes.record(ref)}
-    onConversationOpened={(c) => setConversations((all) => all.map((x) => x.id === c.id ? { ...x, unread: 0 } : x))}
-    onMessageSent={(text, { conversation, mentions, attachments }) => {
-      const msg = { id: crypto.randomUUID(), participantId: me.id, text, time: new Date().toISOString() };
-      setConversations((all) => all.map((x) => x.id === conversation.id
-        ? { ...x, thread: [...x.thread, msg], lastActivity: msg.time } : x));
-      void api.send(conversation.id, msg, attachments, mentions); // agents reply via your stream → append to thread
-    }}
-    onNewConversation={() => setConversations((all) => [newDraft(me), ...all])}
-  />
-</div>
+<SuperChatInbox
+  conversations={catalogWithLoadedThreads}
+  activeConversationId={selectedId} // null explicitly selects nothing
+  selectionFallback="none"
+  mobileView={mobileView}
+  onMobileViewChange={setMobileView}
+  onConversationOpened={(conversation) => selectAndLoad(conversation.id)}
+  loading={catalogLoading}
+  error={catalogError}
+  conversationLoading={historyLoading}
+  conversationError={historyError}
+  currentParticipantId={me.id}
+  sortMessagesBy="provided"
+  renderComposer={({ conversation, readOnly }) => (
+    <HostComposer
+      value={drafts[conversation.id] ?? ''}
+      disabled={readOnly}
+      onChange={(value) => updateDraft(conversation.id, value)}
+      onSend={() => sendDraft(conversation.id)}
+    />
+  )}
+  renderStatus={({ conversation }) => <HostStatus id={conversation.id} />}
+/>
 \`\`\`
 
 ### Limitations
 
-- **Accessibility as implemented:** the root \`role="group"\` is named after the active conversation; inner semantics come from the two children (\`aside\` "Conversations", \`section\` panel, \`role="log"\` thread, \`article\` messages). On small screens hidden panes are removed with \`hidden sm:flex\`, so they are not in the tab order; switching pane does **not** move focus to the newly shown pane. With no conversations it shows an unlabelled "No conversation selected" section.
-- **Host owns everything mutable:** unread counts, appending sent messages, agent replies, edits (\`editedAt\`), and attachment upload (delivered as base64 \`dataUrl\`s). Nothing here talks to a network.
-- **Selection fallback:** if the active id is missing from \`conversations\` the first conversation is shown; the list highlight always follows the panel.
-- Needs a bounded height (\`h-full\` root) and a flex-capable parent. The sidebar is \`w-64\` on \`sm\`+ and full-width below. RTL: list border and message accents are physical (\`border-r\`, \`borderLeft\`).
-- i18n: "Conversations", "New conversation", "No conversation selected", "Chat: …" and the panel's strings are English. Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core) plus per-plugin optional peers; import from \`@mieweb/ui/components/SuperChat\`.`,
+- Selection remains backward compatible: an absent or missing ID falls back to the first conversation by default. Set \`selectionFallback="none"\` to avoid opening an unrelated row while a controlled ID is unavailable; \`null\` always means no selection. Default props only initialize uncontrolled state.
+- Catalog loading/error preserves existing rows; selected-history loading/error suppresses the composer. \`renderEmpty\`, \`renderNoSelection\` and \`renderConversationEmpty\` distinguish three successful empty states. Errors are host-provided React nodes, so the host supplies appropriate recovery actions.
+- Custom composers replace default sending behavior: the host owns draft isolation, validation, pending/error handling and persistence. \`renderComposer\` and \`renderStatus\` receive \`{ conversation, currentParticipantId, readOnly }\`.
+- Supply a bounded height. Below \`sm\`, row selection opens the panel and Back returns to the list without clearing selection or host drafts. Both panes are visible at desktop widths. Hidden panes leave the tab order; mobile navigation moves focus to the panel or selected row. Conversation buttons use Tab/Enter/Space, not an arrow-key listbox model.
+- \`labels\` localizes SuperChat text and accessible names, \`composerLabels\` configures the default composer, and \`locale\` formats real timestamps. Missing timestamps remain absent; \`sortMessagesBy="provided"\` keeps source order. Set \`dir\` on the host for RTL. Theme colors follow the active brand and dark mode.
+- Rich plugins remain opt-in. The host owns sanitization for custom renderers and any application-specific attachment transport.`,
       },
     },
     catalog: {
+      collection: true,
       entry: '@mieweb/ui/components/SuperChat',
       peers: ['react-markdown', 'remark-gfm', 'rehype-sanitize'],
       relationships: [
@@ -443,4 +553,317 @@ export const SourcesAndGuards: Story = {
     },
   },
   render: () => <SourcesAndGuardsDemo />,
+};
+
+// This fixture belongs to the host example, not to the library's data layer.
+// Catalog previews never masquerade as messages in an unloaded thread.
+const hostCatalog: SuperChatConversation[] = [
+  {
+    id: 'release-planning',
+    title: 'Release planning',
+    preview: 'Confirm the accessibility review before the release.',
+    lastActivity: '2026-06-08T14:00:00Z',
+    participants: [
+      { id: 'me', kind: 'human', name: 'You' },
+      { id: 'alex', kind: 'human', name: 'Alex' },
+    ],
+    thread: [],
+  },
+  {
+    id: 'design-review',
+    title: 'Design review',
+    preview: 'The narrow-screen layout is ready for review.',
+    lastActivity: '2026-06-08T13:00:00Z',
+    participants: [
+      { id: 'me', kind: 'human', name: 'You' },
+      { id: 'sam', kind: 'human', name: 'Sam' },
+    ],
+    thread: [],
+  },
+];
+const hostHistory: Record<string, SuperChatConversation['thread']> = {
+  'release-planning': [
+    {
+      id: 'planning-note',
+      participantId: 'alex',
+      text: 'The accessibility review is the last release check.',
+      // The source did not provide a timestamp. Do not invent one.
+    },
+    {
+      id: 'planning-reply',
+      participantId: 'me',
+      text: 'I will check keyboard navigation and the mobile layout.',
+      time: '2026-06-08T14:00:00Z',
+    },
+  ],
+  'design-review': [
+    {
+      id: 'design-note',
+      participantId: 'sam',
+      text: 'Please review the compact conversation list.',
+    },
+  ],
+};
+
+function HostControlledInbox({ rtl = false }: { rtl?: boolean }) {
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [mobileView, setMobileView] = React.useState<'list' | 'chat'>('list');
+  const [drafts, setDrafts] = React.useState<Record<string, string>>({});
+  const [history, setHistory] = React.useState<typeof hostHistory>({});
+  const [loadingId, setLoadingId] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const [failHistory, setFailHistory] = React.useState(false);
+  const [request, setRequest] = React.useState(0);
+  const [submitted, setSubmitted] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    if (!activeId) return;
+    setLoadingId(activeId);
+    setError(null);
+    // A deterministic story fixture stands in for a host-owned request.
+    // Cleanup prevents a slow previous selection from replacing the current one.
+    const timer = window.setTimeout(() => {
+      if (failHistory) {
+        setError(
+          rtl
+            ? 'تعذر تحميل السجل. أعد المحاولة.'
+            : 'History is unavailable. Retry the request.'
+        );
+      } else {
+        setHistory((previous) => ({
+          ...previous,
+          [activeId]: hostHistory[activeId] ?? [],
+        }));
+      }
+      setLoadingId(null);
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [activeId, failHistory, request, rtl]);
+  const conversations = hostCatalog.map((conversation, index) => ({
+    ...conversation,
+    title: rtl
+      ? ['تخطيط الإصدار', 'مراجعة التصميم'][index]
+      : conversation.title,
+    preview: rtl
+      ? [
+          'أكد مراجعة إمكانية الوصول قبل الإصدار.',
+          'التخطيط للشاشات الصغيرة جاهز للمراجعة.',
+        ][index]
+      : conversation.preview,
+    thread: history[conversation.id] ?? [],
+  }));
+  return (
+    <div
+      dir={rtl ? 'rtl' : 'ltr'}
+      className="flex min-h-0 w-full flex-1 flex-col"
+    >
+      <div className="border-border bg-background flex flex-wrap items-center gap-3 border-b p-3 text-sm">
+        <p className="text-muted-foreground">
+          {rtl
+            ? 'مثال: يتحكم التطبيق في الاختيار والمسودات وتحميل السجل.'
+            : 'Example: the host owns selection, drafts and history requests.'}
+        </p>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={failHistory}
+            onChange={(event) => setFailHistory(event.target.checked)}
+          />
+          {rtl ? 'محاكاة تعذر تحميل السجل' : 'Simulate history failure'}
+        </label>
+        {activeId && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setRequest((value) => value + 1)}
+          >
+            {rtl ? 'إعادة تحميل السجل' : 'Reload history'}
+          </Button>
+        )}
+      </div>
+      <SuperChatInbox
+        className="min-h-0 flex-1"
+        conversations={conversations}
+        activeConversationId={activeId}
+        selectionFallback="none"
+        mobileView={mobileView}
+        onMobileViewChange={setMobileView}
+        onConversationOpened={(conversation) => {
+          setActiveId(conversation.id);
+          setSubmitted(null);
+        }}
+        currentParticipantId="me"
+        sortMessagesBy="provided"
+        locale={rtl ? 'ar' : 'en'}
+        labels={
+          rtl
+            ? {
+                chat: 'الدردشة',
+                chatTitle: (title) => `محادثة: ${title}`,
+                conversations: 'المحادثات',
+                noConversationSelected: 'اختر محادثة لعرض سجلها.',
+                backToConversations: 'العودة إلى المحادثات',
+                participants: 'المشاركون',
+                messages: 'الرسائل',
+                loadingMessages: 'جارٍ تحميل الرسائل…',
+                messageActions: 'إجراءات الرسالة',
+                copyMessage: 'نسخ الرسالة',
+              }
+            : undefined
+        }
+        conversationLoading={loadingId === activeId && activeId !== null}
+        conversationError={error}
+        renderNoSelection={() => (
+          <p className="text-muted-foreground p-6">
+            {rtl
+              ? 'اختر محادثة لعرض سجلها.'
+              : 'Choose a conversation to load its history.'}
+          </p>
+        )}
+        renderConversationEmpty={() => (
+          <p className="text-muted-foreground p-6">
+            {rtl
+              ? 'لا توجد رسائل محفوظة.'
+              : 'No saved messages in this conversation.'}
+          </p>
+        )}
+        renderStatus={({ conversation }) => (
+          <p role="status" className="text-muted-foreground px-4 py-2 text-sm">
+            {submitted === conversation.id
+              ? rtl
+                ? 'تم تسليم مسودة المثال إلى التطبيق؛ لم يتم إنشاء رسالة خادم.'
+                : 'Example draft handed to the host; no server message was fabricated.'
+              : rtl
+                ? 'مسودة محلية خاصة بهذه المحادثة.'
+                : 'Local draft belongs to this conversation.'}
+          </p>
+        )}
+        renderComposer={({ conversation, readOnly }) => (
+          <form
+            className="border-border bg-background grid gap-2 border-t p-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setSubmitted(conversation.id);
+            }}
+          >
+            <label
+              htmlFor={`host-draft-${conversation.id}`}
+              className="text-sm font-medium"
+            >
+              {rtl
+                ? `مسودة: ${conversation.title}`
+                : `Draft for ${conversation.title}`}
+            </label>
+            <textarea
+              id={`host-draft-${conversation.id}`}
+              className="border-border bg-background text-foreground focus-visible:ring-ring min-h-20 w-full rounded-md border p-2 focus-visible:ring-2"
+              value={drafts[conversation.id] ?? ''}
+              disabled={readOnly || loadingId !== null || error !== null}
+              onChange={(event) =>
+                setDrafts((previous) => ({
+                  ...previous,
+                  [conversation.id]: event.target.value,
+                }))
+              }
+            />
+            <Button
+              type="submit"
+              className="justify-self-start"
+              disabled={
+                readOnly ||
+                loadingId !== null ||
+                error !== null ||
+                !drafts[conversation.id]?.trim()
+              }
+            >
+              {rtl ? 'إرسال مسودة المثال' : 'Submit example draft'}
+            </Button>
+          </form>
+        )}
+      />
+    </div>
+  );
+}
+
+export const HostControlled: Story = {
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story:
+          'A generic host-controlled inbox: catalog summaries have empty threads until the host resolves a history request; missing message timestamps remain absent. Stable conversation IDs key selection and drafts. The composer and status slots contain host state. The simulated history failure is explicit and never replaces a missing history with preview text or an invented server message.',
+      },
+    },
+  },
+  render: () => <HostControlledInbox />,
+};
+
+export const Mobile: Story = {
+  ...HostControlled,
+  parameters: {
+    ...HostControlled.parameters,
+    viewport: { defaultViewport: 'mobile1' },
+  },
+};
+
+export const RTL: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
+  globals: { direction: 'rtl', locale: 'ar' },
+  render: () => <HostControlledInbox rtl />,
+};
+
+export const Empty: Story = {
+  decorators: [fullHeightChat],
+  args: {
+    conversations: [],
+    renderEmpty: () => (
+      <p className="p-6">No conversations have been created.</p>
+    ),
+  },
+};
+export const Loading: Story = {
+  decorators: [fullHeightChat],
+  args: { conversations: [], loading: true },
+};
+export const Error: Story = {
+  decorators: [fullHeightChat],
+  args: {
+    conversations: [],
+    error: <p>The conversation catalog is unavailable. Reconnect and retry.</p>,
+  },
+};
+export const NoSelection: Story = {
+  decorators: [fullHeightChat],
+  args: {
+    conversations: hostCatalog,
+    activeConversationId: null,
+    renderNoSelection: () => (
+      <p className="p-6">Choose a conversation to load its history.</p>
+    ),
+  },
+};
+export const MissingSelection: Story = {
+  decorators: [fullHeightChat],
+  args: {
+    ...NoSelection.args,
+    activeConversationId: 'unavailable-conversation',
+    selectionFallback: 'none',
+  },
+};
+export const ConversationLoading: Story = {
+  decorators: [fullHeightChat],
+  args: {
+    conversations: hostCatalog,
+    activeConversationId: 'release-planning',
+    conversationLoading: true,
+  },
+};
+export const ConversationError: Story = {
+  decorators: [fullHeightChat],
+  args: {
+    conversations: hostCatalog,
+    activeConversationId: 'release-planning',
+    conversationError: <p>History is unavailable. Retry the request.</p>,
+  },
 };

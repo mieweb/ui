@@ -35,7 +35,7 @@
    `channel`, `ref`, `linkBuilder`, callbacks). No bundled React / `tw-` prefix.
 2. **Participant model** (`Participant { id, kind, name, color?, … }`) unifies the
    AI module's `user`/`assistant` and chat-component's `external`/`internal`/`system`.
-   The thread is append-only and **ordered by `time`**; concurrent agent replies
+   The thread is append-only; default ordering uses valid `time` values, while `sortMessagesBy="provided"` preserves source sequence; concurrent agent replies
    interleave and are disambiguated by per-participant `color`/avatar/name.
 3. **Pluggable Markdown pipeline** wired through the AI module's
    `renderTextContent` seam. **The host owns sanitization** — untrusted output is
@@ -53,6 +53,58 @@
   `components/SuperChat/index` and `components/SuperChat/plugins/index`.
 - SuperChat is intentionally **not** re-exported from the top-level `src/index.ts`
   (same pattern as `datavis` / `ag-grid`) so the main bundle stays light.
+
+## Host integration invariants
+
+- `preview` is catalog metadata, never a fabricated message. Omitted preview may
+  use a real loaded thread item; an explicit empty string suppresses it. Missing
+  message `time` stays missing in visible text and accessible names. Optional
+  `time` widens the public input type; consumer code dereferencing it may require
+  an undefined guard, so do not describe this as universally source-compatible.
+- Inbox and standalone list share selection resolution. `null` is explicit no
+  selection; `undefined` leaves selection uncontrolled. Preserve the historical
+  first-row fallback by default, and honor `selectionFallback="none"` for missing
+  controlled IDs without rendering or highlighting another conversation.
+- Mobile navigation is independent of selection. Controlled `mobileView` changes
+  only after the host responds to `onMobileViewChange`. Back preserves selection;
+  narrow-screen transitions restore focus to the panel or selected row. Desktop
+  retains both panes. Keep the `sm` breakpoint and focus logic consistent.
+- Catalog loading/error keeps existing rows available. Detail loading/error must
+  not expose a send-capable composer for unconfirmed history. Distinguish empty
+  catalog, no selected conversation and empty selected history.
+- `renderComposer`/`renderStatus` receive only the selected conversation,
+  `currentParticipantId` and `readOnly` context. The application owns draft state,
+  asynchronous mutations, transport, authentication and persistence; do not add
+  app stores, connection state or route hooks to these components. The default
+  composer send callback accepts `void | Promise<void>`; adapters that returned
+  mutation payloads directly may need to await the operation and return void.
+- `labels`, `composerLabels` and `locale` flow from Inbox to its children. Keep
+  accessible and visible labels aligned; use logical CSS edges for RTL.
+
+### Integration stories and browser coverage
+
+`SuperChatInbox.stories.tsx` retains the `superchat-inbox` catalog ID and its
+existing relationships. Its Host Controlled example uses stable IDs, catalog
+previews, explicitly delayed fixture histories, a missing message timestamp,
+ID-keyed drafts and composer/status slots. Empty/Loading/Error document catalog
+states; No Selection/Missing Selection and Conversation Loading/Error separate
+panel states. Mobile and RTL use the same composition rather than a second demo.
+
+`tests/visual/superchat-integration.spec.ts` checks desktop switching and draft
+isolation, explicit/missing no-selection safety, asynchronous history failure,
+mobile Back and focus, translated RTL layout and scoped axe checks for the host
+composition in light/dark themes. Its intentional screenshot
+baselines cover desktop/mobile, light/dark and bluehive/enterprise-health themes.
+After the static Storybook build, run the focused file:
+
+```sh
+pnpm exec playwright test tests/visual/superchat-integration.spec.ts
+```
+
+For a deliberate visual change, update only this file's snapshots with
+`--update-snapshots`, inspect the images, then rerun without the update flag.
+This browser suite complements component unit tests; it does not test a host's
+network protocol or claim screen-reader testing from DOM assertions.
 
 ## Render plugin contract (read before adding a plugin)
 
