@@ -76,6 +76,8 @@ export interface MedicationLookupResult {
   label: string;
   codetype: string;
   fullcode: string;
+  /** Coding-system release supplied by the authoritative catalog adapter. */
+  codeVersion?: string;
   /** Verified product metadata supplied by the host's catalog adapter, never parsed from label. */
   productId?: string;
   strength?: string;
@@ -296,6 +298,7 @@ export function lookupToMedicationFields(
       system: result.codetype,
       code: result.fullcode,
       display: result.label,
+      ...(result.codeVersion !== undefined && { version: result.codeVersion }),
     },
     productId: result.productId,
     strength: result.strength,
@@ -530,6 +533,7 @@ export function MedicationEditor({
       system: result.codetype,
       code: result.fullcode,
       display: result.label,
+      ...(result.codeVersion !== undefined && { version: result.codeVersion }),
     });
     patch({
       productId: result.productId,
@@ -545,7 +549,15 @@ export function MedicationEditor({
         state: 'known',
         value: {
           id: result.productId,
-          coding: [{ system: result.codetype, code: result.fullcode }],
+          coding: [
+            {
+              system: result.codetype,
+              code: result.fullcode,
+              ...(result.codeVersion !== undefined && {
+                version: result.codeVersion,
+              }),
+            },
+          ],
           conceptSpecificity: result.conceptSpecificity ?? 'product',
           strength: result.strength,
           doseForm: result.doseForm,

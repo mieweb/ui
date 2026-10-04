@@ -98,7 +98,7 @@ marks simulated host results. It does not establish clinical suitability or EPCS
 
 Injected medication lookups can return verified `productId`, `strength`, `doseForm`,
 `quantityUnit`, `quantityUnits`, `conceptSpecificity`, `controlledSchedule`, `observedAt`, and `sourceId` alongside
-`label`, `codetype`, and `fullcode`. These are catalog metadata, separate from label parsing.
+`label`, `codetype`, `fullcode`, and optional `codeVersion`. These are catalog metadata, separate from label parsing.
 Selecting a new product clears dependent code/dose/instructions, then applies verified product
 metadata. A plain coded pick without resolved metadata stays unresolved until the EHR adapter
 resolves it. Product IDs stay in the payload; the clinical form presents search and selected-product

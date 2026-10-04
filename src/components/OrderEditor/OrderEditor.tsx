@@ -71,6 +71,7 @@ export interface OrderLookupResult {
   label: string;
   codetype: string;
   fullcode: string;
+  codeVersion?: string;
   productId?: string;
   strength?: string;
   doseForm?: string;

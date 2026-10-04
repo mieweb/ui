@@ -4,6 +4,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import {
   MedicationEditor,
+  lookupToMedicationFields,
   type MedicationLookupProps,
 } from './MedicationEditor';
 import {
@@ -227,6 +228,61 @@ it('accepts verified product metadata from an injected lookup and clears depende
         productId: 'sim-a',
         code: expect.objectContaining({ code: 'sim-a' }),
         quantityUnit: 'tablet',
+      })
+    )
+  );
+});
+
+it('retains versioned catalog coding in the draft and its trusted product preview', async () => {
+  const save = vi.fn();
+  const selection = {
+    label: 'SimDrug A',
+    codetype: 'urn:mieweb:simulation-drug',
+    fullcode: 'sim-a',
+    codeVersion: '2026-10',
+    productId: 'sim-a',
+    strength: '5 mg',
+    doseForm: 'tablet',
+    quantityUnit: 'tablet',
+    controlledSchedule: 'non-controlled' as const,
+  };
+  expect(lookupToMedicationFields(selection).code).toEqual({
+    system: selection.codetype,
+    code: selection.fullcode,
+    display: selection.label,
+    version: selection.codeVersion,
+  });
+  function Catalog({ onSelect }: MedicationLookupProps) {
+    return (
+      <button onClick={() => onSelect?.(selection)}>
+        Select versioned catalog product
+      </button>
+    );
+  }
+  renderWithTheme(
+    <MedicationEditor
+      open
+      medication={{ id: 'rx-ui-1', name: 'Lasix', status: 'unreconciled' }}
+      prescribing={prescribingUiConfiguration}
+      codeLookup={{ component: Catalog, indexUrl: '/catalog' }}
+      onSave={save}
+      onClose={vi.fn()}
+    />
+  );
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Select versioned catalog product' })
+  );
+  expect(
+    screen.queryByText('Drug code does not match the selected product.')
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+  await waitFor(() =>
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: expect.objectContaining({
+          code: selection.fullcode,
+          version: selection.codeVersion,
+        }),
       })
     )
   );
