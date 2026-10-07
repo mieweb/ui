@@ -71,6 +71,13 @@ The caller owns \`value\`. \`onChange\` may return a promise: the field shows a 
     },
     catalog: {
       entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'data-display-badge',
+          why: 'Each tag chip is a removable Badge (onRemove + removeLabel); TagEditor adds the input, suggestions and async save around them.',
+        },
+      ],
     },
   },
   argTypes: {

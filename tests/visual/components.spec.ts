@@ -641,6 +641,18 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('badge-default.png');
   });
 
+  test('Badge - Removable', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable');
+    await expect(page).toHaveScreenshot('badge-removable.png');
+  });
+
+  test('Badge - Removable (dark)', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable', {
+      globals: 'theme:dark',
+    });
+    await expect(page).toHaveScreenshot('badge-removable-dark.png');
+  });
+
   test('Card - Default', async ({ page }) => {
     await gotoStory(page, 'layout-card--default');
     await expect(page).toHaveScreenshot('card-default.png');
@@ -693,6 +705,28 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('progress-default.png', {
       animations: 'disabled',
     });
+  });
+
+  // CompletenessMeter's bar composes Progress (#549)
+  test('CompletenessMeter - Default', async ({ page }) => {
+    await gotoStory(page, 'record-details-completenessmeter--default');
+    await expect(page).toHaveScreenshot('completenessmeter-default.png', {
+      animations: 'disabled',
+    });
+  });
+
+  // TagEditor chips render removable Badges (#549)
+  test('TagEditor - Default', async ({ page }) => {
+    await gotoStory(page, 'text-inputs-tageditor--default');
+    await expect(page).toHaveScreenshot('tageditor-default.png');
+  });
+
+  // ProviderSearchFilters active-filter chips render removable Badges (#549)
+  test('ProviderSearchFilters - Active filters', async ({ page }) => {
+    await gotoStory(page, 'providers-providersearchfilters--active-filters-demo');
+    await expect(page).toHaveScreenshot(
+      'providersearchfilters-active-filters.png'
+    );
   });
 
   test('Text - All variants', async ({ page }) => {

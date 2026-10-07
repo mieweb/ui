@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { Progress } from '../Progress';
 
 export interface CompletenessField {
   /** Stable key, passed back to `onFieldClick`. */
@@ -100,27 +101,13 @@ export const CompletenessMeter = React.forwardRef<
 
   const bar = (
     <div className="flex items-center gap-2">
-      <div
-        role="progressbar"
-        aria-valuenow={percent}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuetext={labels.percent(percent)}
-        aria-label={labels.progress}
-        data-slot="completeness-meter-bar"
-        className={cn(
-          'bg-muted h-2 overflow-hidden rounded-full',
-          compact ? 'w-24' : 'flex-1'
-        )}
-      >
-        <div
-          className={cn(
-            'h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300',
-            tone(percent)
-          )}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+      <Progress
+        value={percent}
+        srLabel={labels.progress}
+        valueText={labels.percent(percent)}
+        fillClassName={tone(percent)}
+        className={compact ? 'w-24' : 'flex-1'}
+      />
       <span className="text-muted-foreground text-xs font-medium tabular-nums">
         {labels.percent(percent)}
       </span>

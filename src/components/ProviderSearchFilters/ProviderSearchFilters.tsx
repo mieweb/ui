@@ -6,6 +6,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { Badge } from '../Badge';
 
 // ============================================================================
 // Types
@@ -958,24 +959,14 @@ export function ActiveFilters({
     >
       <span className="text-muted-foreground text-sm">Active filters:</span>
       {activeFilters.map((filter) => (
-        <span
+        <Badge
           key={filter.key}
-          className={cn(
-            'inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm',
-            'bg-neutral-100 text-neutral-700',
-            'dark:bg-neutral-700 dark:text-neutral-300'
-          )}
+          variant="secondary"
+          onRemove={filter.onClear}
+          removeLabel={`Remove filter: ${filter.label}`}
         >
           {filter.label}
-          <button
-            type="button"
-            onClick={filter.onClear}
-            className="ms-1 rounded-full p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-600"
-            aria-label={`Remove filter: ${filter.label}`}
-          >
-            <XMarkIcon className="h-3 w-3" />
-          </button>
-        </span>
+        </Badge>
       ))}
       <button
         type="button"
