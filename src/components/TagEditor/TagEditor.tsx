@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { Badge } from '../Badge';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { useClickOutside } from '../../hooks/useClickOutside';
 
@@ -239,26 +240,23 @@ export const TagEditor = React.forwardRef<HTMLDivElement, TagEditorProps>(
               className="flex max-w-full flex-wrap items-center gap-1.5"
             >
               {value.map((tag, index) => (
-                <li
-                  key={tag}
-                  data-slot="tag-editor-tag"
-                  className="bg-primary-100 text-primary-900 dark:bg-primary-900 dark:text-primary-100 inline-flex max-w-full items-center gap-1 rounded-full py-0.5 ps-2.5 pe-1 text-sm"
-                >
-                  <span className="truncate">{tag}</span>
-                  {!readOnly && (
-                    <button
-                      type="button"
-                      aria-label={labels.remove(tag)}
-                      disabled={!interactive}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        remove(index);
-                      }}
-                      className="hover:bg-primary-200 dark:hover:bg-primary-800 focus-visible:ring-ring rounded-full p-0.5 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
-                    >
-                      <X aria-hidden="true" className="h-3 w-3" />
-                    </button>
-                  )}
+                <li key={tag} className="inline-flex max-w-full">
+                  <Badge
+                    data-slot="tag-editor-tag"
+                    className="max-w-full"
+                    onRemove={
+                      readOnly
+                        ? undefined
+                        : (e) => {
+                            e.stopPropagation();
+                            remove(index);
+                          }
+                    }
+                    removeLabel={labels.remove(tag)}
+                    removeDisabled={!interactive}
+                  >
+                    <span className="truncate">{tag}</span>
+                  </Badge>
                 </li>
               ))}
             </ul>

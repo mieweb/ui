@@ -818,6 +818,7 @@ module.exports = {
     'dark:bg-primary-800',
     'dark:bg-primary-900/60',
     'dark:hover:bg-white/10',
+    'hover:bg-black/10',
     'group-open:rotate-180',
     'rtl:-scale-x-100',
     'after:absolute',
