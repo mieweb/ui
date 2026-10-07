@@ -11,6 +11,7 @@ coverage/
 # Playwright test results
 playwright-report/
 playwright-results/
+tests/mobile/artifacts/
 test-results/*.swp
 *.local.md
 # MedicalCodify shards (.storybook/public/codify) are committed via git-lfs;

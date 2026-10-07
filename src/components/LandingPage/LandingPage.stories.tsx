@@ -265,25 +265,45 @@ export default function Page() {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const VerticalHub: Story = { args: { blocks: verticalHubBlocks } };
+export const VerticalHub: Story = {
+  args: { blocks: verticalHubBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
+};
 
-export const ServiceDetail: Story = { args: { blocks: serviceDetailBlocks } };
+export const ServiceDetail: Story = {
+  args: { blocks: serviceDetailBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
+};
 
-export const Campaign: Story = { args: { blocks: campaignBlocks } };
+export const Campaign: Story = {
+  args: { blocks: campaignBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
+};
 
-export const Comparison: Story = { args: { blocks: comparisonBlocks } };
+export const Comparison: Story = {
+  args: { blocks: comparisonBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
+};
 
-export const Resource: Story = { args: { blocks: resourceBlocks } };
+export const Resource: Story = {
+  args: { blocks: resourceBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
+};
 
-export const Pricing: Story = { args: { blocks: pricingBlocks } };
+export const Pricing: Story = {
+  args: { blocks: pricingBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
+};
 
 /** A sample benchmark report built from the Reports sections — illustrative data. */
 export const BenchmarkReport: Story = {
   args: { blocks: benchmarkReportBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
 };
 
 /** A gated report: `LeadFormSection` with `highlights` listing what the download contains. */
 export const GatedReport: Story = {
+  parameters: { mobilePreview: { mode: 'standalone' } },
   args: {
     blocks: [
       {
@@ -317,6 +337,7 @@ export const GatedReport: Story = {
 
 /** A `custom` block renders a site-owned section from the `custom` map. */
 export const WithCustomBlock: Story = {
+  parameters: { mobilePreview: { mode: 'standalone' } },
   args: {
     blocks: [
       serviceDetailBlocks[0],
@@ -352,12 +373,16 @@ export const Validation: Story = {
 
 export const Mobile: Story = {
   args: { blocks: campaignBlocks },
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  parameters: {
+    viewport: { defaultViewport: 'mobile1' },
+    mobilePreview: { mode: 'standalone' },
+  },
 };
 
 export const RTL: Story = {
   name: 'RTL',
   args: { blocks: verticalHubBlocks },
+  parameters: { mobilePreview: { mode: 'standalone' } },
   render: (args) => (
     <div dir="rtl">
       <LandingPage {...args} />

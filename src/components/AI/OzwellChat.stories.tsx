@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { MarkdownRenderer } from '../Markdown';
 import type { AIMessage, AIRenderTextContent, MCPToolCall } from './types';
 import { useStreamingChatDemo } from './storyData';
@@ -519,21 +519,23 @@ export const Playground: Story = {
 
     // ChatComposer's submit path is async — wait for the demo's optimistic
     // thinking block rather than asserting synchronously.
-    await expect(
-      canvas.findByText('Reviewing your message…')
-    ).resolves.toBeVisible();
+    await waitFor(() =>
+      expect(canvas.getByText('Reviewing your message…')).toBeVisible()
+    );
     await userEvent.type(
       canvas.getByRole('textbox', { name: 'Message' }),
       'Follow-up'
     );
     await userEvent.keyboard('{Enter}');
     await expect(canvas.findAllByText('Follow-up')).resolves.toHaveLength(1);
-    await expect(
-      canvas.findByRole('heading', { name: 'Hello' })
-    ).resolves.toBeVisible();
-    await expect(
-      canvas.findByText('This reply is rendered as Markdown.')
-    ).resolves.toBeVisible();
+    await waitFor(() =>
+      expect(canvas.getByRole('heading', { name: 'Hello' })).toBeVisible()
+    );
+    await waitFor(() =>
+      expect(
+        canvas.getByText('This reply is rendered as Markdown.')
+      ).toBeVisible()
+    );
     await expect(
       canvas.getByRole('button', { name: /Thought/ })
     ).toHaveAttribute('aria-expanded', 'false');

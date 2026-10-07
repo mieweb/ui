@@ -10,6 +10,7 @@
  */
 
 import type * as React from 'react';
+import type { MediaFeedMedia, MediaFeedProps } from '../MediaFeed';
 import type {
   AIMessageContent,
   AIMessageStatus,
@@ -91,6 +92,42 @@ export interface SuperChatRef {
 /** Kind of thread item. */
 export type SuperChatItemType = 'message' | 'ref' | 'system';
 
+/** Persisted media belonging to a message; ids are unique within that message. */
+export interface SuperChatMediaAttachment extends MediaFeedMedia {
+  /** Stable attachment id assigned by the host when the media is persisted. */
+  id: string;
+  /** Optional display title, independent of the source filename. */
+  title?: string;
+  /** Optional plain-text caption; defaults to the source message text. */
+  caption?: string;
+}
+
+/** A conversation media item retains the original message and author identity. */
+export interface SuperChatMediaItem {
+  /** Collision-safe identity derived from conversation, message and attachment ids. */
+  id: string;
+  conversationId: string;
+  message: SuperChatMessage;
+  attachment: SuperChatMediaAttachment;
+  participant?: Participant;
+}
+
+export type SuperChatView = 'thread' | 'media';
+
+/** Feed behavior and extension slots; conversation data/accessors are fixed. */
+export type SuperChatMediaFeedProps = Omit<
+  MediaFeedProps<SuperChatMediaItem>,
+  'items' | 'getId' | 'getMedia' | 'getTitle' | 'getCaption' | 'getAuthor'
+>;
+
+/** Labels introduced by the conversation's media view. */
+export interface SuperChatMediaLabels {
+  backToConversation: string;
+  openMedia: string;
+  playMedia: string;
+  unknownAuthor: string;
+}
+
 /**
  * A single thread item. Preserves the `chat-component` thread-item shape
  * (`senderId`/`sender_name`/`channel`/`time`/`text`) while adding a
@@ -111,6 +148,8 @@ export interface SuperChatMessage {
    * code), reused from the AI module for tool-call visualization etc.
    */
   content?: AIMessageContent[];
+  /** Explicit persisted image/video/audio/YouTube attachments for thread and feed views. */
+  media?: SuperChatMediaAttachment[];
   /** Timestamp; the thread is append-only and ordered by `time`. */
   time: Date | string;
   /**

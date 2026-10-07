@@ -19,6 +19,9 @@ patchedDependencies:
   '@kerebron/extension-codecrock@0.8.12':
     hash: 992a39133ad7f10f463d904fcce0e313ec5f6635917b6ee05275d88f6fb20351
     path: patches/@kerebron__extension-codecrock@0.8.12.patch
+  '@kerebron/extension-markdown@0.8.12':
+    hash: 6b433a5e766e4858e67aa21b9ad90af692c1e98c2aedc8c84dcce38071c432de
+    path: patches/@kerebron__extension-markdown@0.8.12.patch
   '@kerebron/extension-menu@0.8.12':
     hash: d808fc6ec0eaf3fd4982ade7ed78c5c14f37eec04dcee965f3ac2152367b5b62
     path: patches/@kerebron__extension-menu@0.8.12.patch
@@ -145,6 +148,9 @@ importers:
       '@storybook/addon-links':
         specifier: ^10.2.11
         version: 10.2.11(react@19.2.4)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
+      '@storybook/icons':
+        specifier: 2.0.1
+        version: 2.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@storybook/react':
         specifier: ^10.2.11
         version: 10.2.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
@@ -205,6 +211,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^3.2.6
         version: 3.2.6(vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0))
+      '@xyflow/react':
+        specifier: ^12.12.0
+        version: 12.12.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ag-grid-community:
         specifier: ^35.1.0
         version: 35.1.0
@@ -250,6 +259,9 @@ importers:
       d3-zoom:
         specifier: ^3.0.0
         version: 3.0.0
+      elkjs:
+        specifier: ^0.11.1
+        version: 0.11.1
       eslint:
         specifier: ^9.39.3
         version: 9.39.3(jiti@2.6.1)
@@ -2341,6 +2353,22 @@ packages:
   '@vitest/utils@3.2.6':
     resolution: {integrity: sha512-lI23nIs4bnT3T8NIoh+vFaz5s2/DdP0Jgt2jxwgWljvwn82cLJtyi/If+fjFyoLMGIOz0U/fKvWE0d4jsNQEfg==}
 
+  '@xyflow/react@12.12.0':
+    resolution: {integrity: sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ==}
+    peerDependencies:
+      '@types/react': '>=17'
+      '@types/react-dom': '>=17'
+      react: '>=17'
+      react-dom: '>=17'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
+  '@xyflow/system@0.0.83':
+    resolution: {integrity: sha512-a//eDjez3WZF47aaPTfVUDD0OINOq+WVwBZCRTqG+m0a5euX8EwlJ4jMY1Wxz0Ocj4xOeekJ70V22Pq0ll8RJw==}
+
   accessor-fn@1.5.3:
     resolution: {integrity: sha512-rkAofCwe/FvYFUlMB0v0gWmhqtfAtV1IUkdPbfhTUyYniu5LrC0A0UJkTH0Jv3S8SvwkmfuAlY+mQIJATdocMA==}
     engines: {node: '>=12'}
@@ -2704,6 +2732,9 @@ packages:
 
   class-variance-authority@0.7.1:
     resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
+
+  classcat@5.0.5:
+    resolution: {integrity: sha512-JhZUT7JFcQy/EzW605k/ktHtncoo9vnyW/2GspNYwFlN1C/WmjuV/xtS04e9SOkL2sTdw0VAZ2UGCcQ9lR6p6w==}
 
   clean-stack@2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}
@@ -3178,6 +3209,9 @@ packages:
 
   electron-to-chromium@1.5.302:
     resolution: {integrity: sha512-sM6HAN2LyK82IyPBpznDRqlTQAtuSaO+ShzFiWTvoMJLHyZ+Y39r8VMfHzwbU8MVBzQ4Wdn85+wlZl2TLGIlwg==}
+
+  elkjs@0.11.1:
+    resolution: {integrity: sha512-zxxR9k+rx5ktMwT/FwyLdPCrq7xN6e4VGGHH8hA01vVYKjTFik7nHOxBnAYtrgYUB1RpAiLvA1/U2YraWxyKKg==}
 
   emittery@0.13.1:
     resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
@@ -6260,6 +6294,21 @@ packages:
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
+  zustand@4.5.7:
+    resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      '@types/react': '>=16.8'
+      immer: '>=9.0.6'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+
   zustand@5.0.14:
     resolution: {integrity: sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g==}
     engines: {node: '>=12.20.0'}
@@ -7156,7 +7205,7 @@ snapshots:
       '@kerebron/extension-basic-editor': 0.8.12
       '@kerebron/extension-codecrock': 0.8.12(patch_hash=992a39133ad7f10f463d904fcce0e313ec5f6635917b6ee05275d88f6fb20351)
       '@kerebron/extension-dev-toolkit': 0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      '@kerebron/extension-markdown': 0.8.12
+      '@kerebron/extension-markdown': 0.8.12(patch_hash=6b433a5e766e4858e67aa21b9ad90af692c1e98c2aedc8c84dcce38071c432de)
       '@kerebron/extension-menu': 0.8.12(patch_hash=d808fc6ec0eaf3fd4982ade7ed78c5c14f37eec04dcee965f3ac2152367b5b62)
       '@kerebron/extension-menu-legacy': 0.8.12
       '@kerebron/extension-odt': 0.8.12
@@ -7201,7 +7250,7 @@ snapshots:
     transitivePeerDependencies:
       - svelte
 
-  '@kerebron/extension-markdown@0.8.12':
+  '@kerebron/extension-markdown@0.8.12(patch_hash=6b433a5e766e4858e67aa21b9ad90af692c1e98c2aedc8c84dcce38071c432de)':
     dependencies:
       '@kerebron/editor': 0.8.12
       '@kerebron/extension-basic-editor': 0.8.12
@@ -8487,6 +8536,31 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
+  '@xyflow/react@12.12.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@xyflow/system': 0.0.83
+      classcat: 5.0.5
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      zustand: 4.5.7(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)
+    optionalDependencies:
+      '@types/react': 19.2.14
+      '@types/react-dom': 19.2.3(@types/react@19.2.14)
+    transitivePeerDependencies:
+      - immer
+
+  '@xyflow/system@0.0.83':
+    dependencies:
+      '@types/d3-drag': 3.0.7
+      '@types/d3-interpolate': 3.0.4
+      '@types/d3-selection': 3.0.11
+      '@types/d3-transition': 3.0.9
+      '@types/d3-zoom': 3.0.8
+      d3-drag: 3.0.0
+      d3-interpolate: 3.0.1
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
+
   accessor-fn@1.5.3: {}
 
   acorn-jsx@5.3.2(acorn@8.16.0):
@@ -8891,6 +8965,8 @@ snapshots:
   class-variance-authority@0.7.1:
     dependencies:
       clsx: 2.1.1
+
+  classcat@5.0.5: {}
 
   clean-stack@2.2.0: {}
 
@@ -9384,6 +9460,8 @@ snapshots:
   eastasianwidth@0.2.0: {}
 
   electron-to-chromium@1.5.302: {}
+
+  elkjs@0.11.1: {}
 
   emittery@0.13.1: {}
 
@@ -13329,6 +13407,14 @@ snapshots:
   zimmerframe@1.1.4: {}
 
   zod@4.4.3: {}
+
+  zustand@4.5.7(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4):
+    dependencies:
+      use-sync-external-store: 1.6.0(react@19.2.4)
+    optionalDependencies:
+      '@types/react': 19.2.14
+      immer: 11.1.8
+      react: 19.2.4
 
   zustand@5.0.14(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
     optionalDependencies:

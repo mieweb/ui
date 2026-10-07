@@ -79,6 +79,11 @@ The header owns nothing but the (optionally uncontrolled) expanded flag; case da
       relationships: [
         {
           type: 'alternative to',
+          target: 'record-details-recordheader',
+          why: "When there's no case workflow state to show, use the generic RecordHeader.",
+        },
+        {
+          type: 'alternative to',
           target: 'encounter-orders-patientheader',
           why: 'CaseManagementHeader leads with the case (number, status, days open) and keeps the patient as context; PatientHeader leads with the patient (demographics, allergies, medications, actions).',
         },

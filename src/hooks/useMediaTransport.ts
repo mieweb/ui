@@ -124,6 +124,7 @@ export function useMediaTransport(
 
   const [element, setElementState] = useState<HTMLMediaElement | null>(null);
   const [state, setStateRaw] = useState<MediaTransportState>('idle');
+  const stateRef = useRef<MediaTransportState>('idle');
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [durationMs, setDurationMs] = useState(0);
   const [playbackRate, setPlaybackRateState] = useState(initialRate);
@@ -152,11 +153,12 @@ export function useMediaTransport(
   };
 
   const setState = useCallback((next: MediaTransportState) => {
-    setStateRaw((prev) => {
-      if (prev === next) return prev;
-      handlers.current.onStateChange?.(next);
-      return next;
-    });
+    if (stateRef.current === next) return;
+    stateRef.current = next;
+    setStateRaw(next);
+    // Consumers often update parent state here. Keep that notification outside
+    // React's state updater, which may run during render or twice in StrictMode.
+    handlers.current.onStateChange?.(next);
   }, []);
 
   const setMediaElement = useCallback((el: HTMLMediaElement | null) => {

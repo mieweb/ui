@@ -43,6 +43,16 @@ export interface VirtualThreadProps {
   onMessageEdited?: (messageId: string, text: string) => void;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
   defaultCopyFormat?: SuperChatCopyFormat;
+  onOpenMedia?: (
+    messageId: string,
+    attachmentId: string,
+    play?: boolean
+  ) => void;
+  openMediaLabel?: string;
+  playMediaLabel?: string;
+  /** Localized preview load-error/retry text, forwarded to each row. */
+  mediaErrorLabel?: string;
+  mediaRetryLabel?: string;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -66,6 +76,11 @@ export function VirtualThread({
   editable,
   onMessageEdited,
   defaultCopyFormat,
+  onOpenMedia,
+  openMediaLabel,
+  playMediaLabel,
+  mediaErrorLabel,
+  mediaRetryLabel,
   scrollRef,
   contentRef,
   containerProps,
@@ -123,6 +138,11 @@ export function VirtualThread({
                   editable={editable}
                   onMessageEdited={onMessageEdited}
                   defaultCopyFormat={defaultCopyFormat}
+                  onOpenMedia={onOpenMedia}
+                  openMediaLabel={openMediaLabel}
+                  playMediaLabel={playMediaLabel}
+                  mediaErrorLabel={mediaErrorLabel}
+                  mediaRetryLabel={mediaRetryLabel}
                 />
               </div>
             </div>

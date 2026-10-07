@@ -54,6 +54,42 @@
 - SuperChat is intentionally **not** re-exported from the top-level `src/index.ts`
   (same pattern as `datavis` / `ag-grid`) so the main bundle stays light.
 
+## Conversation media
+
+`SuperChatMessage.media` contains explicit persisted `SuperChatMediaAttachment`
+records. Each attachment shares the `MediaFeedMedia` source shape and has an id
+unique within its message. The host uploads composer files and writes these
+records; Markdown links and arbitrary metadata are never inferred as media.
+
+`getConversationMediaItems` sorts messages chronologically and flattens their
+attachments while retaining the original message, attachment and participant
+objects. A JSON-encoded tuple of conversation, message and attachment ids is
+the feed id. Keep this identity when adding actions: reactions and replies
+target the original conversation message, rather than a second media store.
+
+`SuperChat` and `SuperChatInbox` keep the ordinary thread as the default view.
+`view`/`onViewChange` support host-controlled navigation; `defaultView` starts an
+uncontrolled panel in either `thread` or `media`. The media view composes
+`MediaFeed`; `mediaFeedProps` exposes its behavior, labels and render slots while
+reserving the conversation's items and accessors. `mediaLabels` localizes the
+return control and inline attachment actions. The header and composer remain
+mounted in both views, and the composer keeps its existing send/restore contract.
+
+Playing an inline attachment opens the same attachment in the feed. The thread
+has no header view toggle; a control above the feed provides Back to conversation.
+Returning restores focus to the attachment that opened the feed when it is
+still mounted. Switching conversation remounts the feed so
+uncontrolled selection and fullscreen state cannot leak to another conversation.
+The virtualized thread forwards the same attachment action as ordinary rows.
+Custom feed players must obey `renderMedia`'s `active` playback boundary.
+
+Leaving the thread captures its reading position before unmounting its players.
+Returning restores a scrolled-up reader and keeps the unseen-message hint;
+incoming messages follow a previously pinned reader. An own send received while
+viewing media waits to anchor its turn until the ordinary thread remounts, or
+pins the newest message in a virtualized thread. Conversation/order changes
+discard this snapshot and use their normal bottom/top anchor.
+
 ## Render plugin contract (read before adding a plugin)
 
 A `SuperChatRenderPlugin` contributes `remarkPlugins`, `rehypePlugins`,

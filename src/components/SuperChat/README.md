@@ -352,22 +352,44 @@ uncontrolled).
 
 Renders exactly one conversation.
 
-| Prop                   | Type                                          | Default       | Description                                                                                         |
-| ---------------------- | --------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------- |
-| `conversation`         | `SuperChatConversation`                       | —             | **Required.** The conversation to display.                                                          |
-| `currentParticipantId` | `string`                                      | —             | The local user's id (drives alignment + compose identity).                                          |
-| `renderPlugins`        | `SuperChatRenderPlugin[]`                     | —             | Opt-in rich Markdown plugins.                                                                       |
-| `renderTextContent`    | `AIRenderTextContent`                         | Markdown core | Replace the entire text renderer (advanced).                                                        |
-| `trustedContent`       | `boolean`                                     | `false`       | Skip sanitization — **only** for host-authored content.                                             |
-| `readOnly`             | `boolean`                                     | `false`       | Disable the composer.                                                                               |
-| `order`                | `'asc' \| 'desc'`                             | `'asc'`       | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).      |
-| `virtualized`          | `boolean`                                     | `false`       | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.           |
-| `linkBuilder`          | `SuperChatLinkBuilder`                        | —             | Build hrefs for `ref` thread items.                                                                 |
-| `className`            | `string`                                      | —             | Extra classes on the root.                                                                          |
-| `onMessageSent`        | `(text, { conversation, mentions }) => void`  | —             | Fired on send; `mentions` are the addressed participant ids.                                        |
-| `onMessageEdited`      | `(messageId, text, { conversation }) => void` | —             | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved. |
-| `onConversationClosed` | `(conversation) => void`                      | —             | Shows a close button when provided.                                                                 |
-| `onReferenceClick`     | `(ref) => void`                               | —             | Fired when a reference chip is activated.                                                           |
+| Prop                   | Type                                          | Default             | Description                                                                                                                            |
+| ---------------------- | --------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `conversation`         | `SuperChatConversation`                       | —                   | **Required.** The conversation to display.                                                                                             |
+| `currentParticipantId` | `string`                                      | —                   | The local user's id (drives alignment + compose identity).                                                                             |
+| `renderPlugins`        | `SuperChatRenderPlugin[]`                     | —                   | Opt-in rich Markdown plugins.                                                                                                          |
+| `renderTextContent`    | `AIRenderTextContent`                         | Markdown core       | Replace the entire text renderer (advanced).                                                                                           |
+| `trustedContent`       | `boolean`                                     | `false`             | Skip sanitization — **only** for host-authored content.                                                                                |
+| `readOnly`             | `boolean`                                     | `false`             | Disable the composer.                                                                                                                  |
+| `order`                | `'asc' \| 'desc'`                             | `'asc'`             | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                         |
+| `virtualized`          | `boolean`                                     | `false`             | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                              |
+| `linkBuilder`          | `SuperChatLinkBuilder`                        | —                   | Build hrefs for `ref` thread items.                                                                                                    |
+| `className`            | `string`                                      | —                   | Extra classes on the root.                                                                                                             |
+| `showHeader`           | `boolean`                                     | `true`              | Show the title/participants header. When `false`, the title stays as a visually hidden heading so the panel keeps its accessible name. |
+| `placeholder`          | `string`                                      | —                   | Composer placeholder (ignored when `readOnly`).                                                                                        |
+| `allowAttachments`     | `boolean`                                     | `true`              | Enable composer attachments without making the panel read-only.                                                                        |
+| `agents`               | `ChatComposerAgentOption[]`                   | —                   | Agents for the composer agent selector; the selector renders when non-empty.                                                           |
+| `selectedAgent`        | `string \| null`                              | —                   | Controlled selected agent id. The host owns agent state.                                                                               |
+| `onAgentChange`        | `(agentId) => void`                           | —                   | Fired when the user picks an agent.                                                                                                    |
+| `modelSelectorProps`   | `ComposerModelSelectorProps`                  | —                   | Renders the composer model selector (controlled `models`/`value`/`onChange`). Omit to hide it, e.g. when only one model is allowed.    |
+| `isStreaming`          | `boolean`                                     | `false`             | While true the send button becomes a stop button (requires `onStop`).                                                                  |
+| `agentSelectorLabel`   | `string`                                      | `'Select agent'`    | Localized accessible label / empty-state text for the agent selector.                                                                  |
+| `stopLabel`            | `string`                                      | `'Stop generating'` | Localized accessible label for the icon-only stop button.                                                                              |
+| `onStop`               | `() => void`                                  | —                   | Called when the user stops a streaming reply.                                                                                          |
+| `onMessageSent`        | `(text, { conversation, mentions }) => void`  | —                   | Fired on send; `mentions` are the addressed participant ids.                                                                           |
+| `onMessageEdited`      | `(messageId, text, { conversation }) => void` | —                   | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                    |
+| `onConversationClosed` | `(conversation) => void`                      | —                   | Shows a close button when provided.                                                                                                    |
+| `onReferenceClick`     | `(ref) => void`                               | —                   | Fired when a reference chip is activated.                                                                                              |
+
+#### Composer agent & model selectors
+
+`SuperChat` can surface the shared `ChatComposer` agent and model selectors for AI-backed panels. Both are **controlled**: the host owns which agents exist, the selected agent, the models allowed for that agent, and the selected model, and is responsible for routing each send accordingly. SuperChat only renders the controls.
+
+- Pass `agents` + `selectedAgent` + `onAgentChange` to show the agent selector.
+- Pass `modelSelectorProps` to show the model selector; omit it when the choice is fixed (one allowed model).
+- Pair `isStreaming` with `onStop` to let users cancel a reply.
+- Use `showHeader={false}` when an outer shell already shows the title (e.g. an embedded widget).
+
+Not a fit for human-only conversations — use `@`-mentions to address participants there. See the **Composer Selectors** story for a stateful example.
 
 ### `SuperChatConversations` (list)
 

@@ -52,10 +52,9 @@ async function gotoStory(
 // Warm up the server before running tests
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
-  // Visit the index to ensure server is fully ready. goto() already waits
-  // for 'load'; waiting for 'networkidle' here is brittle because the
-  // Storybook manager keeps the network busy and can exceed the hook timeout.
-  await page.goto('/');
+  // Warm up the manager without waiting for optional external widgets/fonts.
+  // Each test waits for its own story to render before making assertions.
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.close();
 });
 
@@ -400,6 +399,55 @@ test.describe('Visual Regression Tests - Core Components', () => {
     expect(await composer.boundingBox()).toEqual(closedComposerBox);
   });
 
+  test('Modal - Full-screen mobile clears the safe areas', async ({ page }) => {
+    // Issue #548: below `sm` the full-screen Modal must pad itself clear of
+    // the status bar and home indicator. Chromium cannot emulate
+    // env(safe-area-inset-*), so simulate a notch through the override vars.
+    const safeTop = 59;
+    const safeBottom = 34;
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'overlays-modal--default');
+    await page.addStyleTag({
+      content: `:root { --mieweb-safe-area-top: ${safeTop}px; --mieweb-safe-area-bottom: ${safeBottom}px; }`,
+    });
+    await page.getByRole('button', { name: 'Open Modal' }).click();
+
+    const dialog = page.locator("[data-slot='modal']");
+    await expect(dialog).toBeVisible();
+    await dialog.evaluate((element) =>
+      Promise.all(
+        element.getAnimations({ subtree: true }).map((a) => a.finished)
+      )
+    );
+
+    const layout = await dialog.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const box = element.getBoundingClientRect();
+      const header = element
+        .querySelector("[data-slot='modal-header']")!
+        .getBoundingClientRect();
+      const footer = element
+        .querySelector("[data-slot='modal-footer']")!
+        .getBoundingClientRect();
+      return {
+        paddingTop: style.paddingTop,
+        paddingBottom: style.paddingBottom,
+        headerOffset: header.top - box.top,
+        footerOffset: box.bottom - footer.bottom,
+      };
+    });
+    expect(layout.paddingTop).toBe(`${safeTop}px`);
+    expect(layout.paddingBottom).toBe(`${safeBottom}px`);
+    // Border is 1px, so the slots start just inside the inset.
+    expect(layout.headerOffset).toBeGreaterThanOrEqual(safeTop);
+    expect(layout.footerOffset).toBeGreaterThanOrEqual(safeBottom);
+
+    // Above `sm` the dialog is centred and rounded: no inset padding.
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await expect(dialog).toHaveCSS('padding-top', '0px');
+    await expect(dialog).toHaveCSS('padding-bottom', '0px');
+  });
+
   test('MessageThread - Full thread with shared composer', async ({ page }) => {
     // MessageThread now embeds the shared ChatComposer in its border-t frame
     // (composer unification #465). Message footers show wall-clock times, so
@@ -455,6 +503,14 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .locator("[data-slot='chat-composer-input']")
       .waitFor({ state: 'visible' });
     await expect(page).toHaveScreenshot('superchat-playground.png');
+  });
+
+  test('SuperChat - Composer selectors', async ({ page }) => {
+    // Agent + model selector row in the SuperChat composer.
+    await gotoStory(page, 'superchat-superchat-panel--composer-selectors');
+    const composer = page.locator("[data-slot='chat-composer']");
+    await composer.waitFor({ state: 'visible' });
+    await expect(composer).toHaveScreenshot('superchat-composer-selectors.png');
   });
 
   test('SuperChat - Read only', async ({ page }) => {
@@ -585,6 +641,18 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('badge-default.png');
   });
 
+  test('Badge - Removable', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable');
+    await expect(page).toHaveScreenshot('badge-removable.png');
+  });
+
+  test('Badge - Removable (dark)', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable', {
+      globals: 'theme:dark',
+    });
+    await expect(page).toHaveScreenshot('badge-removable-dark.png');
+  });
+
   test('Card - Default', async ({ page }) => {
     await gotoStory(page, 'layout-card--default');
     await expect(page).toHaveScreenshot('card-default.png');
@@ -637,6 +705,28 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('progress-default.png', {
       animations: 'disabled',
     });
+  });
+
+  // CompletenessMeter's bar composes Progress (#549)
+  test('CompletenessMeter - Default', async ({ page }) => {
+    await gotoStory(page, 'record-details-completenessmeter--default');
+    await expect(page).toHaveScreenshot('completenessmeter-default.png', {
+      animations: 'disabled',
+    });
+  });
+
+  // TagEditor chips render removable Badges (#549)
+  test('TagEditor - Default', async ({ page }) => {
+    await gotoStory(page, 'text-inputs-tageditor--default');
+    await expect(page).toHaveScreenshot('tageditor-default.png');
+  });
+
+  // ProviderSearchFilters active-filter chips render removable Badges (#549)
+  test('ProviderSearchFilters - Active filters', async ({ page }) => {
+    await gotoStory(page, 'providers-providersearchfilters--active-filters-demo');
+    await expect(page).toHaveScreenshot(
+      'providersearchfilters-active-filters.png'
+    );
   });
 
   test('Text - All variants', async ({ page }) => {
@@ -914,6 +1004,56 @@ test.describe('Visual Regression Tests - Templates', () => {
     await expect(page).toHaveScreenshot('template-campaign-mobile.png', {
       animations: 'disabled',
       fullPage: true,
+    });
+  });
+});
+
+test.describe('Visual Regression Tests - Record pages', () => {
+  // Fixtures pin `now`, so day headers and relative times stay stable.
+  const shots: [string, string, string?][] = [
+    ['records-recordlayout--contact', 'recordlayout-contact.png'],
+    [
+      'records-recordlayout--contact',
+      'recordlayout-contact-dark.png',
+      'theme:dark',
+    ],
+    ['record-details-recordheader--contact', 'recordheader-contact.png'],
+    ['record-details-propertylist--groups', 'propertylist-groups.png'],
+    ['record-details-avatargroup--presence', 'avatargroup-presence.png'],
+    [
+      'record-details-reviewcard--absolute-date',
+      'reviewcard-absolute-date.png',
+    ],
+    ['records-activityfeed--default', 'activityfeed-default.png'],
+    ['records-fieldhistory--default', 'fieldhistory-default.png'],
+    ['records-actionplan--default', 'actionplan-default.png'],
+  ];
+  for (const [id, file, globals] of shots) {
+    test(`${id}${globals ? ` (${globals})` : ''}`, async ({ page }) => {
+      await gotoStory(page, id, { globals });
+      await expect(page).toHaveScreenshot(file, {
+        animations: 'disabled',
+        fullPage: true,
+      });
+    });
+  }
+
+  test('RecordLayout - Contact (mobile)', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'records-recordlayout--contact');
+    await expect(page).toHaveScreenshot('recordlayout-contact-mobile.png', {
+      animations: 'disabled',
+      fullPage: true,
+    });
+  });
+
+  test('OrgChart - Default', async ({ page }) => {
+    await gotoStory(page, 'records-orgchart--default');
+    // The elk layout resolves after the first render.
+    await page.locator('.react-flow__node').first().waitFor();
+    await page.waitForTimeout(500);
+    await expect(page).toHaveScreenshot('orgchart-default.png', {
+      animations: 'disabled',
     });
   });
 });

@@ -63,8 +63,8 @@ The host owns the position as plain state; the player and the transcript never t
 
 ### Limitations
 
-- Accessibility: with native \`controls\` the browser supplies labelled, keyboard-operable controls; the component adds nothing but the \`aria-label\` you pass (no default). \`controls={false}\` leaves **no visible or keyboard control** — you must drive the ref yourself. The error panel is \`role="alert"\`, so it is announced, but its text ("Unable to load media. The server may be unavailable.") and the "Retry" label are hard-coded English.
-- No caption slot: the component accepts no \`children\` and renders no \`<track>\`, so subtitles cannot be attached (the \`jsx-a11y/media-has-caption\` rule is suppressed inside).
+- Accessibility: with native \`controls\` the browser supplies labelled, keyboard-operable controls; the component adds the \`aria-label\` you pass (no default). \`controls={false}\` leaves **no visible or keyboard control** — supply controls through the ref, as \`MediaFeed\` does. The error panel is \`role="alert"\`; override its English defaults with \`labels={{ error, retry }}\`.
+- Caption tracks belong to the host’s media resource. Supply \`<track>\` elements through \`children\`; the component does not generate subtitles.
 - \`kind\` inference is by extension only — signed URLs without an extension fall back to audio; pass \`kind="video"\` explicitly. The transport reports \`durationMs\` as \`0\` until metadata is known or when it is non-finite (live streams).
 - Layout: \`<video>\` is \`object-contain\` inside a full-height flex box; \`<audio>\` is \`w-[90%] max-w-lg\` with \`my-4\`. The container is symmetric, so RTL is unaffected; the browser's control bar follows the platform.
 - Theming: \`card\` uses \`border-border bg-card\`; the error surface uses \`destructive\` tokens. Depends on \`Button\`, \`useMediaTransport\`, \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
@@ -73,6 +73,11 @@ The host owns the position as plain state; the player and the transcript never t
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'media-mediafeed',
+          why: 'MediaFeed coordinates one active native player across a scrollable collection and immersive viewer; MediaPlayer remains the surface for a single clip.',
+        },
         {
           type: 'alternative to',
           target: 'media-audioplayer',

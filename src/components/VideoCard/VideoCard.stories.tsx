@@ -83,6 +83,11 @@ A video thumbnail card: poster image, the branded \`PlayButton\` (white disc, br
       entry: '@mieweb/ui',
       relationships: [
         {
+          type: 'alternative to',
+          target: 'media-mediafeed',
+          why: 'MediaFeed coordinates active playback and an immersive viewer across a collection; VideoCard is the linked thumbnail or hover preview for a single video.',
+        },
+        {
           type: 'composes with',
           target: 'showcase-radialexplorer',
           why: '`VideoCard variant="plate"` is the intended media block for RadialExplorer\'s detail panel.',

@@ -8,6 +8,8 @@ import {
 import { create } from 'storybook/theming/create';
 import { IconButton } from 'storybook/internal/components';
 import { GithubIcon, ShareAltIcon } from '@storybook/icons';
+import { buildArgsParam } from 'storybook/internal/router';
+import { serializeProjectGlobals } from './mobile-preview';
 
 // Brand theme configurations for the Storybook manager UI
 const brandThemes = {
@@ -218,6 +220,7 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
 // Set initial theme (BlueHive as default)
 addons.setConfig({
   theme: createBrandTheme('bluehive'),
+  initialActive: 'canvas',
   sidebar: {
     showRoots: true,
     collapsedRoots: ['bluehive', 'deprecated'],
@@ -230,6 +233,39 @@ addons.setConfig({
     copy: { hidden: false },
     fullscreen: { hidden: false },
   },
+});
+
+// Keep the catalog in Storybook; open the exact current story at the top level
+// for real viewport/keyboard testing. Same-tab navigation makes browser Back
+// work for complete examples and the chrome-free full-screen mode, too.
+addons.register('mieweb-mobile-preview', (api) => {
+  addons.add('mieweb-mobile-preview/tool', {
+    type: types.TOOLEXTRA,
+    title: 'Open mobile sandbox',
+    match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
+    render: () => React.createElement(IconButton, {
+      title: 'Open mobile sandbox',
+      'aria-label': 'Open mobile sandbox',
+      className: 'mieweb-mobile-sandbox',
+      style: { minWidth: 44, minHeight: 40 },
+      onClick: () => {
+        const story = api.getCurrentStoryData();
+        if (story?.type !== 'story' || story.refId) return;
+        const { managerHref, previewHref } = api.getStoryHrefs(story.id, {
+          inheritArgs: false,
+          inheritGlobals: false,
+          queryParams: {
+            args: buildArgsParam(story.initialArgs, story.args ?? {}),
+            globals: serializeProjectGlobals(api.getUserGlobals()),
+          },
+        });
+        const url = new URL(previewHref, window.location.href);
+        url.searchParams.set('mobilePreview', 'sandbox');
+        url.searchParams.set('returnTo', managerHref);
+        window.location.assign(url.href);
+      },
+    }, React.createElement('span', null, 'Sandbox')),
+  });
 });
 
 // Inject CSS custom properties for dynamic theming
@@ -274,6 +310,30 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       --mieweb-manager-content-bg: ${contentBg};
       --mieweb-manager-text: ${textColor};
       --mieweb-manager-text-muted: ${textMuted};
+    }
+
+    /* Keep the device-testing action visible beside the scrolling mobile
+       toolbar. Reserve its width so every other tool can still scroll into
+       view. The same button remains in the normal toolbar on desktop. */
+    @media (max-width: 599px) {
+      .sb-bar:has(.mieweb-mobile-sandbox) {
+        max-width: calc(100% - 84px);
+      }
+
+      [role="toolbar"] .mieweb-mobile-sandbox {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 2;
+        box-sizing: border-box;
+        width: 84px;
+        min-width: 84px !important;
+        height: 40px;
+        border-radius: 0;
+        border-left: 1px solid var(--mieweb-manager-border);
+        background: var(--mieweb-manager-content-bg) !important;
+        color: var(--mieweb-manager-text) !important;
+      }
     }
     
     /* Selected story item highlight */
@@ -600,27 +660,7 @@ addons.register('mieweb-open-in-new-tab', (api) => {
             const url = new URL('iframe.html', window.location.href);
             url.searchParams.set('id', storyId);
             url.searchParams.set('viewMode', 'story');
-            // Only forward this project's toolbar globals (see preview.tsx
-            // globalTypes); tool globals (measure/outline) and object-valued
-            // globals (viewport, backgrounds, a11y) must not follow the story
-            // into the popped-out tab.
-            const FORWARDED_GLOBALS = new Set([
-              'brand',
-              'theme',
-              'density',
-              'locale',
-            ]);
-            const globalsParam = Object.entries(api.getGlobals() ?? {})
-              .filter(([key, value]) => {
-                if (!FORWARDED_GLOBALS.has(key)) return false;
-                return (
-                  typeof value === 'string' ||
-                  typeof value === 'number' ||
-                  typeof value === 'boolean'
-                );
-              })
-              .map(([key, value]) => `${key}:${String(value)}`)
-              .join(';');
+            const globalsParam = serializeProjectGlobals(api.getGlobals() ?? {});
             if (globalsParam) url.searchParams.set('globals', globalsParam);
             window.open(url.toString(), '_blank', 'noopener,noreferrer');
           },

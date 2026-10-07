@@ -195,15 +195,17 @@ export function Sidebar({
         data-slot="sidebar"
         data-testid={testId}
         className={cn(
-          'flex h-screen flex-col',
+          'flex flex-col',
           'border-e border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
           // Mobile positioning (start-pinned; off-canvas direction flips in RTL)
-          isMobileViewport && 'fixed start-0 top-0 z-50',
+          // 100vh includes space behind mobile browser toolbars. Follow their
+          // current height so the footer stays inside the visible viewport.
+          isMobileViewport && 'fixed start-0 top-0 z-50 h-[100dvh]',
           // Desktop positioning. Collapsing animates `width`, which motion does
           // not drive, so this transition belongs on both paths — but scoped to
           // desktop, where width is the only thing that changes.
           !isMobileViewport &&
-            'relative transition-[width,min-width] duration-300 ease-in-out',
+            'relative h-screen transition-[width,min-width] duration-300 ease-in-out',
           className
         )}
         // CSS path only, and only on mobile. `transition-transform` rather than

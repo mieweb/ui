@@ -21,6 +21,12 @@ patchedDependencies:
   # fixed upstream. (The 0.8.9 "Illegal invocation" getSelection patch was
   # fixed upstream in 0.8.12.)
   "@kerebron/extension-codecrock@0.8.12": patches/@kerebron__extension-codecrock@0.8.12.patch
+  # The serializer's mark table has no entries for highlight, superscript or
+  # subscript, so those marks are silently dropped when a document is saved
+  # back to Markdown (mieweb/ui#536). Emit them as <mark>/<sup>/<sub> inline
+  # HTML — the tree-sitter parse side already maps those tags back onto the
+  # marks. Drop once fixed upstream.
+  "@kerebron/extension-markdown@0.8.12": patches/@kerebron__extension-markdown@0.8.12.patch
   # Ported from packages/esheet (same patch, field-tested there):
   # 1. Toolbar dropdown items re-dispatch their command via a synthetic
   #    MouseEvent built with `view: dntShim.dntGlobalThis` — dnt's merge-proxy

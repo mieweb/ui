@@ -1,0 +1,96 @@
+/* Deliberately scoped to explicitly opened, top-level testing pages. */
+html[data-mobile-preview] body {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100dvh;
+}
+
+html[data-mobile-preview] #storybook-root {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.mobile-preview-navigation {
+  padding: max(8px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right)) 12px
+    max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--mieweb-border);
+  background: var(--mieweb-card);
+  color: var(--mieweb-foreground);
+  font: 14px/1.4 var(--mieweb-font-sans, system-ui, sans-serif);
+}
+
+.mobile-preview-navigation nav,
+.mobile-preview-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-preview-navigation a,
+.mobile-preview-navigation button,
+.mobile-preview-navigation select {
+  min-height: 44px;
+  color: inherit;
+  font: inherit;
+}
+
+.mobile-preview-navigation a,
+.mobile-preview-navigation button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.mobile-preview-navigation button {
+  cursor: pointer;
+}
+.mobile-preview-back-icon:dir(rtl) {
+  transform: scaleX(-1);
+}
+.mobile-preview-navigation :is(a, button):hover {
+  background: var(--mieweb-muted);
+}
+.mobile-preview-navigation :is(a, button, select):focus-visible {
+  outline: 2px solid var(--mieweb-ring);
+  outline-offset: 2px;
+}
+.mobile-preview-selection strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mobile-preview-navigation select {
+  min-width: 0;
+  max-width: 65%;
+  padding: 8px;
+  border: 1px solid var(--mieweb-border);
+  border-radius: 6px;
+  background: var(--mieweb-background);
+  font-size: 16px; /* Prevent iOS focus zoom without disabling pinch zoom. */
+}
+.mobile-preview-navigation p {
+  margin-top: 8px;
+}
+.mobile-preview-content {
+  min-width: 0;
+  padding: 16px;
+}
+.mobile-preview-content[data-layout='centered'] {
+  display: flex;
+  justify-content: center;
+}
+.mobile-preview-content[data-layout='centered'] > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.mobile-preview-content[data-layout='fullscreen'] {
+  padding: 0;
+}
