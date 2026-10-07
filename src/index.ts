@@ -74,6 +74,7 @@ export {
   type ReferralData,
 } from './components/CreateReferralModal';
 export * from './components/EditUserRoleModal';
+export * from './components/EmailEditor';
 export * from './components/EmployeeForm';
 export * from './components/EmployeeProfile';
 export * from './components/EmployerContactCard';
