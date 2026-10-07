@@ -31,8 +31,10 @@ const badgeVariants = cva(
       },
       // Padding lives in compound variants so the remove button can sit
       // closer to the end edge without fighting the symmetric `px-*`.
+      // No root gap: the remove button carries its own `ms-1` so icon and
+      // multi-node children keep their normal spacing.
       removable: {
-        true: 'gap-1',
+        true: '',
         false: '',
       },
     },
@@ -117,7 +119,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
             aria-label={removeLabel}
             disabled={removeDisabled}
             onClick={onRemove}
-            className="focus-visible:ring-ring shrink-0 rounded-full p-0.5 hover:bg-black/10 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:hover:bg-white/10"
+            className="focus-visible:ring-ring ms-1 shrink-0 rounded-full p-0.5 hover:bg-black/10 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:hover:bg-white/10"
           >
             <X aria-hidden="true" className="h-3 w-3" />
           </button>
