@@ -1299,6 +1299,11 @@ export const miewebUISafelist = [
   'hover:text-gray-700',
   'hover:text-gray-900',
   'max-h-[calc(100dvh-10rem)]',
+  // Modal full-screen mobile safe-area insets (reset at sm)
+  'pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))]',
+  'pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
+  'sm:pt-0',
+  'sm:pb-0',
   'md:flex',
   'sm:block',
   'dark:border-b',

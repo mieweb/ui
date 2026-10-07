@@ -399,6 +399,55 @@ test.describe('Visual Regression Tests - Core Components', () => {
     expect(await composer.boundingBox()).toEqual(closedComposerBox);
   });
 
+  test('Modal - Full-screen mobile clears the safe areas', async ({ page }) => {
+    // Issue #548: below `sm` the full-screen Modal must pad itself clear of
+    // the status bar and home indicator. Chromium cannot emulate
+    // env(safe-area-inset-*), so simulate a notch through the override vars.
+    const safeTop = 59;
+    const safeBottom = 34;
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'overlays-modal--default');
+    await page.addStyleTag({
+      content: `:root { --mieweb-safe-area-top: ${safeTop}px; --mieweb-safe-area-bottom: ${safeBottom}px; }`,
+    });
+    await page.getByRole('button', { name: 'Open Modal' }).click();
+
+    const dialog = page.locator("[data-slot='modal']");
+    await expect(dialog).toBeVisible();
+    await dialog.evaluate((element) =>
+      Promise.all(
+        element.getAnimations({ subtree: true }).map((a) => a.finished)
+      )
+    );
+
+    const layout = await dialog.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const box = element.getBoundingClientRect();
+      const header = element
+        .querySelector("[data-slot='modal-header']")!
+        .getBoundingClientRect();
+      const footer = element
+        .querySelector("[data-slot='modal-footer']")!
+        .getBoundingClientRect();
+      return {
+        paddingTop: style.paddingTop,
+        paddingBottom: style.paddingBottom,
+        headerOffset: header.top - box.top,
+        footerOffset: box.bottom - footer.bottom,
+      };
+    });
+    expect(layout.paddingTop).toBe(`${safeTop}px`);
+    expect(layout.paddingBottom).toBe(`${safeBottom}px`);
+    // Border is 1px, so the slots start just inside the inset.
+    expect(layout.headerOffset).toBeGreaterThanOrEqual(safeTop);
+    expect(layout.footerOffset).toBeGreaterThanOrEqual(safeBottom);
+
+    // Above `sm` the dialog is centred and rounded: no inset padding.
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await expect(dialog).toHaveCSS('padding-top', '0px');
+    await expect(dialog).toHaveCSS('padding-bottom', '0px');
+  });
+
   test('MessageThread - Full thread with shared composer', async ({ page }) => {
     // MessageThread now embeds the shared ChatComposer in its border-t frame
     // (composer unification #465). Message footers show wall-clock times, so
