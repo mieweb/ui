@@ -58,6 +58,7 @@ Controlled here so the chevron can read the same state; \`defaultOpen\` alone wo
 - Accessibility: trigger is \`<button type="button" aria-expanded aria-controls={contentId}>\` (ids from \`useId()\`); content is \`role="region" aria-labelledby={triggerId}\`. With the default unmount, \`aria-controls\` points at an element that does not exist while closed — use \`forceMount\` if that matters to your AT testing. Keyboard is native button behaviour only.
 - **No animation by default** — content appears and disappears instantly unless the app opts into motion (see below). No icon, no styling, no \`asChild\`: the trigger is always a real \`<button>\`, so it cannot wrap a link or another button.
 - \`disabled\` disables the trigger and ignores toggles, but does not close an already-open panel.
+- \`storageKey\` remembers the open state in \`localStorage\` across reloads (uncontrolled only; ignored when \`open\` is set). It is read after mount, so server and hydration renders use \`defaultOpen\` and a restored panel opens on the next frame. Storage errors (blocked or full) are ignored. Keys are global to the origin — namespace them (\`"orders.advanced"\`).
 - RTL / responsive / theming: nothing built in — all classes are yours. No strings. No third-party dependencies.
 
 ### Motion
@@ -87,6 +88,16 @@ Two caveats worth knowing before you rely on it:
     },
   },
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  argTypes: {
+    open: { description: 'Controlled open state.', control: false },
+    defaultOpen: { description: 'Initial open state (uncontrolled).' },
+    disabled: { description: 'Blocks toggling.' },
+    storageKey: {
+      description:
+        'localStorage key that remembers the open state across reloads (uncontrolled only).',
+      control: 'text',
+    },
+  },
 };
 
 export default meta;
@@ -120,6 +131,27 @@ export const DefaultOpen: Story = {
 
 export const Controlled: Story = {
   render: () => <ControlledCollapsible />,
+};
+
+export const Persisted: Story = {
+  render: () => (
+    <Collapsible storageKey="mieweb-ui-story.collapsible" className="w-72">
+      <CollapsibleTrigger className="bg-muted hover:bg-muted/80 flex w-full items-center justify-between rounded-md px-4 py-2 text-sm font-medium">
+        Remembered section
+      </CollapsibleTrigger>
+      <CollapsibleContent className="border-border mt-2 rounded-md border p-4 text-sm">
+        Open this, then reload the page — it stays open.
+      </CollapsibleContent>
+    </Collapsible>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`storageKey` keeps the uncontrolled open state in `localStorage`, so a reload restores it.',
+      },
+    },
+  },
 };
 
 function ControlledCollapsible() {

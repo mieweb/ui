@@ -126,7 +126,7 @@ function CatalogBanner({
             <>
               {' '}
               Use{' '}
-              <AnchorMdx href={docsHref(successor.target)}>
+              <AnchorMdx href={docsHref(successor.target)} target="_self">
                 {titles[successor.target] ?? successor.target}
               </AnchorMdx>{' '}
               instead — {successor.why}
@@ -175,7 +175,7 @@ function RelatedList({ relationships, titles }: { relationships: CatalogRelation
         {sorted.map((r) => (
           <li key={`${r.type}:${r.target}`}>
             <em>{capitalize(r.type)}</em>{' '}
-            <AnchorMdx href={docsHref(r.target)}>{titles[r.target] ?? r.target}</AnchorMdx> — {r.why}
+            <AnchorMdx href={docsHref(r.target)} target="_self">{titles[r.target] ?? r.target}</AnchorMdx> — {r.why}
           </li>
         ))}
       </ul>

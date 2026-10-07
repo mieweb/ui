@@ -2153,6 +2153,7 @@ function AppShell() {
 export const Dashboard: StoryObj = {
   render: () => <AppShell />,
   parameters: {
+    mobilePreview: { mode: 'standalone' },
     // Dashboard uses third-party DataVis NITRO grid/charting library which
     // renders invalid ARIA attributes, nested interactives, and duplicate
     // landmarks that we cannot fix without upstream changes.

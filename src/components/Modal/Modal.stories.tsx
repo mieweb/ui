@@ -124,10 +124,19 @@ The one consequence the demo can't show: motion writes a \`transform\` on the di
     },
   },
   decorators: [
-    (Story) => (
+    (Story, context) => (
       <div
-        className="flex min-h-[600px] items-center justify-center p-8"
-        style={{ transform: 'translateZ(0)' }}
+        className={
+          context.viewMode === 'docs'
+            ? 'flex min-h-[600px] items-center justify-center p-8'
+            : 'flex min-h-[200px] items-center justify-center p-4 sm:min-h-[600px] sm:p-8'
+        }
+        // Only inline docs examples need to contain the fixed dialog.
+        style={
+          context.viewMode === 'docs'
+            ? { transform: 'translateZ(0)' }
+            : undefined
+        }
       >
         <Story />
       </div>

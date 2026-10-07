@@ -72,6 +72,11 @@ const [toolbarEl, setToolbarEl] = useState<HTMLElement | null>(null);
       entry: '@mieweb/ui',
       relationships: [
         {
+          type: 'alternative to',
+          target: 'records-recordlayout',
+          why: 'For a fixed fields/activity/related frame around one record, use RecordLayout.',
+        },
+        {
           type: 'composes with',
           target: 'views-viewset',
           why: "A dashboard of widgets is the usual filling for ViewSet's overview slot.",

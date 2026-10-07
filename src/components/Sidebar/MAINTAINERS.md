@@ -3,6 +3,15 @@
 Short notes on the invariants that are easy to break. User-facing docs live in
 [Sidebar.stories.tsx](./Sidebar.stories.tsx).
 
+## Mobile drawer height follows browser chrome
+
+The fixed mobile drawer uses `100dvh`; the desktop rail retains `100vh`.
+On iPhone Safari, `100vh` extends behind expanded browser toolbars and clips
+the bottom-aligned footer. Keep the dynamic-height utility in the Tailwind 3
+safelist. The native Dashboard smoke test checks the entire footer against
+`visualViewport` and taps Settings without scrolling it into view; checking
+only the close button misses this regression.
+
 ## `SidebarNavGroup` unmounts its items — on purpose
 
 The items panel is rendered through `AnimatedPresence` and is **absent from the

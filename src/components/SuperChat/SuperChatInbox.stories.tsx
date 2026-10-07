@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { DateTime } from 'luxon';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChatInbox, createMarkdownRenderer } from './index';
 import { fullHeightChat } from '../../../.storybook/full-height';
@@ -15,6 +16,11 @@ import {
 } from './plugins';
 import type { SuperChatConversation } from './index';
 import { richConversation, secondConversation, registry } from './storyData';
+import { Button } from '../Button';
+import { ButtonGroup } from '../ButtonGroup';
+import { getSampleVideo } from '../AudioPlayer/sampleVideo';
+import { createMediaConversations } from './mediaStoryData';
+import type { SuperChatMediaAttachment, SuperChatView } from './types';
 import 'katex/dist/katex.min.css';
 
 // ============================================================================
@@ -27,6 +33,36 @@ const meta: Meta<typeof SuperChatInbox> = {
   component: SuperChatInbox,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   argTypes: {
+    view: {
+      control: 'inline-radio',
+      options: ['thread', 'media'],
+      description:
+        'Controlled conversation view. Omit to let attachment playback open the media feed and Back return to the thread.',
+      table: { category: 'Behavior' },
+    },
+    onViewChange: {
+      control: false,
+      description: 'Reports a requested thread/media view switch.',
+      table: { category: 'Callbacks' },
+    },
+    defaultView: {
+      control: 'select',
+      options: ['thread', 'media'],
+      description: 'Initial view when selection is uncontrolled.',
+      table: { category: 'Behavior' },
+    },
+    mediaLabels: {
+      control: false,
+      description:
+        'Localized return control, attachment actions and unknown author labels.',
+      table: { category: 'Rendering' },
+    },
+    mediaFeedProps: {
+      control: false,
+      description:
+        'Optional media feed labels, actions and playback configuration for the active conversation.',
+      table: { category: 'Slots' },
+    },
     readOnly: {
       control: 'boolean',
       description: 'Disable the composer.',
@@ -75,11 +111,14 @@ const meta: Meta<typeof SuperChatInbox> = {
 
 **The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
 
+Messages can also carry explicit \`media: SuperChatMediaAttachment[]\` records (stable attachment ID, kind and source, with optional title/caption/poster). The thread opens by default. Press **Play** on an attachment to open that clip in the media feed; **Back to conversation** returns to the same reading position and draft. There is no header view toggle. \`view\` / \`onViewChange\` let the host control this navigation, and \`defaultView\` supplies the initial choice. The media view composes [MediaFeed](?path=/docs/media-mediafeed--docs), derives items through \`getConversationMediaItems\`, and retains the conversation header and composer. Both views address the same messages and participants. \`mediaFeedProps\` supplies feed playback configuration, labels, custom media and action slots; \`mediaLabels\` localizes the return control and attachment actions. Attachment upload and persistence still belong to the host. Open the **Media Conversation** story for a local video/image example.
+
 ### Use it when
 
 - You want a **finished inbox** for conversations that mix humans and AI agents — care-team threads with a triage agent, an admin console watching several agents — and are happy with list-left / panel-right.
 - You are migrating from \`mieweb/chat-component\` and want the closest API.
 - Messages are Markdown and may need code / math / Mermaid / GenUI / NITRO-table plugins; you install only the peers for the plugins you pass.
+- A conversation includes explicit media attachments and people want to browse them one at a time while keeping the same conversation and composer.
 
 ### Don't use it when
 
@@ -128,6 +167,11 @@ useEffect(() => { api.listConversations().then(setConversations); }, []); // hos
       entry: '@mieweb/ui/components/SuperChat',
       peers: ['react-markdown', 'remark-gfm', 'rehype-sanitize'],
       relationships: [
+        {
+          type: 'composes with',
+          target: 'media-mediafeed',
+          why: 'The media view maps the active conversation’s explicit message attachments into MediaFeed, retaining participant identity, header and composer.',
+        },
         {
           type: 'contains',
           target: 'superchat-superchat-panel',
@@ -248,7 +292,10 @@ export const Playground: Story = {
   // Page-level inbox: fill the canvas height (#504). SourcesAndGuards below is
   // a scrolling reference page, so the decorator is per-story, not meta-level.
   decorators: [fullHeightChat],
-  parameters: { githubSourceFooter: false },
+  parameters: {
+    githubSourceFooter: false,
+    mobilePreview: { mode: 'standalone' },
+  },
   render: (args) => (
     <InteractiveInbox
       {...args}
@@ -443,4 +490,150 @@ export const SourcesAndGuards: Story = {
     },
   },
   render: () => <SourcesAndGuardsDemo />,
+};
+
+function MediaConversationDemo() {
+  const [conversations, setConversations] = React.useState(() =>
+    createMediaConversations('')
+  );
+  const [view, setView] = React.useState<SuperChatView>('thread');
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string>();
+  const [likedMessages, setLikedMessages] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    let mounted = true;
+    void getSampleVideo().then(
+      (url) => {
+        if (!mounted) return;
+        setConversations((all) =>
+          all.map((conversation) => ({
+            ...conversation,
+            thread: conversation.thread.map((message) => ({
+              ...message,
+              media: message.media?.map((attachment) =>
+                attachment.kind === 'video' && !attachment.src
+                  ? { ...attachment, src: url }
+                  : attachment
+              ),
+            })),
+          }))
+        );
+        setLoading(false);
+      },
+      () => {
+        if (!mounted) return;
+        setError('The browser could not generate the local sample video.');
+        setLoading(false);
+      }
+    );
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return (
+    <SuperChatInbox
+      conversations={conversations}
+      currentParticipantId="me"
+      view={view}
+      onViewChange={setView}
+      onConversationOpened={() => setView('thread')}
+      acceptedFileTypes={['image', 'video', 'audio']}
+      onMessageSent={(text, { conversation, attachments }) => {
+        // In an app, upload files here and persist the resulting source URLs.
+        // This local demo persists data URLs directly in host-owned state.
+        const media = attachments.flatMap<SuperChatMediaAttachment>(
+          (attachment) => {
+            const kind = attachment.type.startsWith('image/')
+              ? 'image'
+              : attachment.type.startsWith('video/')
+                ? 'video'
+                : attachment.type.startsWith('audio/')
+                  ? 'audio'
+                  : undefined;
+            return kind
+              ? [
+                  {
+                    id: attachment.id,
+                    kind,
+                    src: attachment.dataUrl,
+                    title: attachment.name,
+                    alt: attachment.name,
+                  },
+                ]
+              : [];
+          }
+        );
+        const message = {
+          id: window.crypto.randomUUID(),
+          participantId: 'me',
+          time: DateTime.utc().toJSDate(),
+          text,
+          media,
+        };
+        setConversations((all) =>
+          all.map((item) =>
+            item.id === conversation.id
+              ? {
+                  ...item,
+                  thread: [...item.thread, message],
+                  lastActivity: message.time,
+                }
+              : item
+          )
+        );
+      }}
+      mediaFeedProps={{
+        loading,
+        error,
+        renderActions: (item) => {
+          const messageKey = JSON.stringify([
+            item.conversationId,
+            item.message.id,
+          ]);
+          const liked = likedMessages.includes(messageKey);
+          return (
+            <ButtonGroup>
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-pressed={liked}
+                onClick={() =>
+                  setLikedMessages((all) =>
+                    liked
+                      ? all.filter((id) => id !== messageKey)
+                      : [...all, messageKey]
+                  )
+                }
+              >
+                {liked ? 'Liked' : 'Like'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setView('thread')}
+              >
+                Reply
+              </Button>
+            </ButtonGroup>
+          );
+        },
+      }}
+    />
+  );
+}
+
+export const MediaConversation: Story = {
+  name: 'Media conversation',
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Start in the conversation and press Play on a video to open that clip in an Instagram-style MediaFeed. Back to conversation restores the thread, its reading position and the draft. Both views use the same explicit message.media attachments, participants and source message ids. Reactions apply to the original message, and the shared composer still sends through host-owned conversation state. Videos are generated locally; select Planning to see a conversation without media.',
+      },
+    },
+  },
+  render: () => <MediaConversationDemo />,
 };

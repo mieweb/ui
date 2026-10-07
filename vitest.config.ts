@@ -17,7 +17,7 @@ export default defineConfig({
       '**/*.spec.ts',
     ],
     coverage: {
-      reporter: ['text', 'json-summary', 'html'],
+      reporter: ['text', 'json', 'json-summary', 'html'],
       exclude: [
         'node_modules/',
         'dist/',

@@ -52,10 +52,9 @@ async function gotoStory(
 // Warm up the server before running tests
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
-  // Visit the index to ensure server is fully ready. goto() already waits
-  // for 'load'; waiting for 'networkidle' here is brittle because the
-  // Storybook manager keeps the network busy and can exceed the hook timeout.
-  await page.goto('/');
+  // Warm up the manager without waiting for optional external widgets/fonts.
+  // Each test waits for its own story to render before making assertions.
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.close();
 });
 
@@ -504,6 +503,14 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .locator("[data-slot='chat-composer-input']")
       .waitFor({ state: 'visible' });
     await expect(page).toHaveScreenshot('superchat-playground.png');
+  });
+
+  test('SuperChat - Composer selectors', async ({ page }) => {
+    // Agent + model selector row in the SuperChat composer.
+    await gotoStory(page, 'superchat-superchat-panel--composer-selectors');
+    const composer = page.locator("[data-slot='chat-composer']");
+    await composer.waitFor({ state: 'visible' });
+    await expect(composer).toHaveScreenshot('superchat-composer-selectors.png');
   });
 
   test('SuperChat - Read only', async ({ page }) => {
@@ -963,6 +970,56 @@ test.describe('Visual Regression Tests - Templates', () => {
     await expect(page).toHaveScreenshot('template-campaign-mobile.png', {
       animations: 'disabled',
       fullPage: true,
+    });
+  });
+});
+
+test.describe('Visual Regression Tests - Record pages', () => {
+  // Fixtures pin `now`, so day headers and relative times stay stable.
+  const shots: [string, string, string?][] = [
+    ['records-recordlayout--contact', 'recordlayout-contact.png'],
+    [
+      'records-recordlayout--contact',
+      'recordlayout-contact-dark.png',
+      'theme:dark',
+    ],
+    ['record-details-recordheader--contact', 'recordheader-contact.png'],
+    ['record-details-propertylist--groups', 'propertylist-groups.png'],
+    ['record-details-avatargroup--presence', 'avatargroup-presence.png'],
+    [
+      'record-details-reviewcard--absolute-date',
+      'reviewcard-absolute-date.png',
+    ],
+    ['records-activityfeed--default', 'activityfeed-default.png'],
+    ['records-fieldhistory--default', 'fieldhistory-default.png'],
+    ['records-actionplan--default', 'actionplan-default.png'],
+  ];
+  for (const [id, file, globals] of shots) {
+    test(`${id}${globals ? ` (${globals})` : ''}`, async ({ page }) => {
+      await gotoStory(page, id, { globals });
+      await expect(page).toHaveScreenshot(file, {
+        animations: 'disabled',
+        fullPage: true,
+      });
+    });
+  }
+
+  test('RecordLayout - Contact (mobile)', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'records-recordlayout--contact');
+    await expect(page).toHaveScreenshot('recordlayout-contact-mobile.png', {
+      animations: 'disabled',
+      fullPage: true,
+    });
+  });
+
+  test('OrgChart - Default', async ({ page }) => {
+    await gotoStory(page, 'records-orgchart--default');
+    // The elk layout resolves after the first render.
+    await page.locator('.react-flow__node').first().waitFor();
+    await page.waitForTimeout(500);
+    await expect(page).toHaveScreenshot('orgchart-default.png', {
+      animations: 'disabled',
     });
   });
 });

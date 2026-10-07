@@ -75,6 +75,11 @@ The header keeps only modal open/close and form-draft state; patient data, count
       relationships: [
         {
           type: 'alternative to',
+          target: 'record-details-recordheader',
+          why: 'For a non-patient record (contact, company, deal), use the generic RecordHeader.',
+        },
+        {
+          type: 'alternative to',
           target: 'encounter-orders-casemanagementheader',
           why: 'PatientHeader leads with the patient (demographics, allergies, medications, actions); CaseManagementHeader leads with the case (number, status, days open) and keeps the patient as context.',
         },

@@ -41,8 +41,10 @@ This page documents the layer itself; the subject in every story below is a pane
 Install the optional peer dependency, then wrap the app once:
 
 \`\`\`sh
-npm install motion
+pnpm add motion
 \`\`\`
+
+(Use \`npm install motion\` or \`yarn add motion\` if that is your project's package manager.)
 
 \`\`\`tsx
 import { MotionProvider } from '@mieweb/ui/motion';

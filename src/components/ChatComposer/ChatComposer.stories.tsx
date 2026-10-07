@@ -415,7 +415,9 @@ function MobileKeyboardShellDemo({ source }: { source: KeyboardInsetSource }) {
       }
     >
       <header className="shrink-0 border-b border-neutral-200 px-4 py-3 text-sm font-medium dark:border-neutral-700">
-        Keyboard {isKeyboardOpen ? `open (${keyboardInset}px)` : 'closed'}
+        {native
+          ? `Keyboard ${isKeyboardOpen ? `open (${keyboardInset}px)` : 'closed'}`
+          : `Viewport inset: ${keyboardInset}px`}
       </header>
       <div
         className="min-h-0 flex-1 overflow-y-auto p-4 text-sm text-neutral-600 dark:text-neutral-300"
@@ -463,10 +465,12 @@ export const MobileKeyboardShell: StoryObj<typeof MobileKeyboardShellDemo> = {
   },
   parameters: {
     layout: 'fullscreen',
+    mobilePreview: { mode: 'standalone' },
+    githubSourceFooter: false,
     docs: {
       description: {
         story:
-          "Reference wiring for mobile hosts. With `source: 'visual-viewport'` (browsers), `useKeyboardInset()` publishes the visible viewport on `<html>`; the shell sizes itself from `--mieweb-visual-viewport-height` and follows iOS panning via `--mieweb-visual-viewport-offset-top`, so on iOS the composer sits directly on the keyboard, and drops the home-indicator padding while the keyboard is open. iOS only reports the visual viewport after the keyboard finishes animating, so this path snaps into place. With `source: 'native'` (Cordova/Capacitor with a keyboard plugin and WebView resizing disabled), the shell keeps its full height and only the composer dock pads up by `--mieweb-keyboard-inset`, animating alongside the keyboard; it needs the plugin's `keyboardWillShow` events, so it does nothing in a plain browser. Open this story on a phone (or the iOS Simulator) to try it.",
+          "Reference wiring for mobile hosts. With `source: 'visual-viewport'` (browsers), `useKeyboardInset()` publishes the visible viewport on `<html>`; the shell sizes itself from `--mieweb-visual-viewport-height` and follows iOS panning via `--mieweb-visual-viewport-offset-top`, so on iOS the composer sits directly on the keyboard, and drops the home-indicator padding when a keyboard inset is detected. If the browser already shrinks its layout viewport, the remaining inset can be 0px with the keyboard open; the shell still tracks the visible height. iOS only reports the visual viewport after the keyboard finishes animating, so this path snaps into place. With `source: 'native'` (Cordova/Capacitor with a keyboard plugin and WebView resizing disabled), the shell keeps its full height and only the composer dock pads up by `--mieweb-keyboard-inset`, animating alongside the keyboard; it needs the plugin's `keyboardWillShow` events, so it does nothing in a plain browser. Open this story on a phone (or the iOS Simulator) to try it.",
       },
     },
   },

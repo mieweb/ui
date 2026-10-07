@@ -113,7 +113,7 @@ Controlled or uncontrolled exactly like a native input; validation and the \`err
   },
   decorators: [
     (Story) => (
-      <div style={{ width: '300px' }}>
+      <div style={{ width: '300px', maxWidth: '100%' }}>
         <Story />
       </div>
     ),

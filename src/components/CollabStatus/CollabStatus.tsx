@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { WrapText, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { AvatarGroup, type AvatarPresence } from '../AvatarGroup/AvatarGroup';
 
 // =============================================================================
 // Types
@@ -13,6 +14,13 @@ export interface CollabPeer {
   name: string;
   /** Optional presence color (cursor/avatar tint). */
   color?: string;
+  /**
+   * What the peer is doing. Peers without a mode count as editing; `viewing`
+   * peers are left out of the "… are editing" summary.
+   */
+  mode?: AvatarPresence;
+  /** Avatar image URL. */
+  avatarUrl?: string;
 }
 
 /** Static identity of the open collaboration room, shown in the debug panel. */
@@ -58,6 +66,8 @@ export interface CollabStatusLabels {
   peersTitle: (count: number) => string;
   /** Shown in the occupants section when nobody else is in the room. */
   alone: React.ReactNode;
+  /** Accessible name of an occupant with a `mode`, e.g. `Ann is viewing`. */
+  presence?: (name: string, mode: AvatarPresence) => string;
   /** Heading of the debug panel. */
   logTitle: (count: number) => string;
   /** Accessible name of the panel close button. */
@@ -127,23 +137,29 @@ export interface CollabStatusProps {
 // Helpers
 // =============================================================================
 
-/** One row of the occupants list: a display label and its presence color. */
-interface PeerLabel {
+/** One occupant: a person, however many windows they have open. */
+interface Occupant extends CollabPeer {
   label: string;
-  color?: string;
 }
 
-/** Collapse multiple windows of the same person into `Name (N)`. */
-function peerLabels(peers: CollabPeer[]): PeerLabel[] {
-  const seen = new Map<string, { count: number; color?: string }>();
+/**
+ * Collapse multiple windows of the same person into `Name (N)`; they count as
+ * viewing only if every window is explicitly viewing.
+ */
+function peerLabels(peers: CollabPeer[]): Occupant[] {
+  const seen = new Map<string, CollabPeer & { count: number }>();
   for (const p of peers) {
     const entry = seen.get(p.name);
-    if (entry) entry.count += 1;
-    else seen.set(p.name, { count: 1, color: p.color });
+    if (!entry) seen.set(p.name, { ...p, count: 1 });
+    else {
+      entry.count += 1;
+      if (entry.mode === 'viewing' && p.mode !== 'viewing') entry.mode = p.mode;
+      entry.avatarUrl ??= p.avatarUrl;
+    }
   }
-  return [...seen].map(([name, { count, color }]) => ({
-    label: count > 1 ? `${name} (${count})` : name,
-    color,
+  return [...seen.values()].map(({ count, ...p }) => ({
+    ...p,
+    label: count > 1 ? `${p.name} (${count})` : p.name,
   }));
 }
 
@@ -280,7 +296,9 @@ export function CollabStatus({
   }, [open]);
 
   const occupants = peerLabels(peers);
-  const names = occupants.map((p) => p.label);
+  const names = occupants
+    .filter((p) => p.mode !== 'viewing')
+    .map((p) => p.label);
   // Long values are clipped to one line; the panel's wrap toggle unclips them.
   const clip = wrapped ? 'break-all whitespace-pre-wrap' : 'truncate';
   const statusText = connected ? labels.live : labels.connecting;
@@ -446,28 +464,25 @@ export function CollabStatus({
               {peers.length === 0 ? (
                 <p className="text-muted-foreground">{labels.alone}</p>
               ) : (
-                <ul
-                  className="flex flex-wrap gap-x-3 gap-y-1"
-                  data-slot="collab-status-peers"
-                >
-                  {occupants.map((peer) => (
-                    <li key={peer.label} className="flex items-center gap-1.5">
-                      <span
-                        aria-hidden="true"
-                        className="h-2 w-2 shrink-0 rounded-full"
-                        style={{
-                          backgroundColor: peer.color ?? 'currentColor',
-                        }}
-                      />
-                      <span
-                        className={cn('text-foreground', clip)}
-                        title={peer.label}
-                      >
-                        {peer.label}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <div data-slot="collab-status-peers">
+                  <AvatarGroup
+                    size="sm"
+                    max={8}
+                    className="flex-wrap ps-0.5"
+                    labels={{
+                      list: labels.peersTitle(peers.length),
+                      ...(labels.presence && { presence: labels.presence }),
+                    }}
+                    items={occupants.map((peer) => ({
+                      id: peer.name,
+                      name: peer.name,
+                      label: peer.label,
+                      src: peer.avatarUrl,
+                      presence: peer.mode,
+                      color: peer.color,
+                    }))}
+                  />
+                </div>
               )}
             </section>
 
