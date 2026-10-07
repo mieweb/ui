@@ -90,7 +90,7 @@ The badge owns nothing: the host maps its domain state to a \`variant\` and supp
 - The badge itself is not interactive: no \`onClick\` styling, focus ring or keyboard handling. Only the remove button (when \`onRemove\` is set) is focusable; \`removeLabel\` defaults to English "Remove", so always pass a translated string.
 - RTL: the icon gap uses logical \`me-1\` and the removable paddings logical \`ps\`/\`pe\`; the layout is otherwise symmetric.
 - Theming: \`default\` and \`outline\` use \`primary-*\` / \`border-current\`; \`secondary\`, \`success\`, \`warning\` and \`danger\` are hard-coded \`neutral|green|yellow|red-100/900\` with \`dark:\` variants, so a brand theme cannot recolour them.
-- No built-in strings. Depends on \`class-variance-authority\`.`,
+- The only built-in string is the remove button's English "Remove" fallback — override it with a translated \`removeLabel\`. Depends on \`class-variance-authority\`.`,
       },
     },
     catalog: {
@@ -104,7 +104,7 @@ The badge owns nothing: the host maps its domain state to a \`variant\` and supp
         {
           type: 'alternative to',
           target: 'data-display-countbadge',
-          why: 'Badge is a static label span; CountBadge is a button with a count chip that can open a popover table of items.',
+          why: 'Badge is a label span (optionally removable); CountBadge is a button with a count chip that can open a popover table of items.',
         },
         {
           type: 'alternative to',

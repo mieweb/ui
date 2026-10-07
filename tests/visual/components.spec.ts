@@ -592,6 +592,18 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('badge-default.png');
   });
 
+  test('Badge - Removable', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable');
+    await expect(page).toHaveScreenshot('badge-removable.png');
+  });
+
+  test('Badge - Removable (dark)', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable', {
+      globals: 'theme:dark',
+    });
+    await expect(page).toHaveScreenshot('badge-removable-dark.png');
+  });
+
   test('Card - Default', async ({ page }) => {
     await gotoStory(page, 'layout-card--default');
     await expect(page).toHaveScreenshot('card-default.png');
