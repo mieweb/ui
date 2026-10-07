@@ -1,5 +1,4 @@
 import * as React from 'react';
-import DOMPurify from 'dompurify';
 import {
   Facebook,
   Github,
@@ -11,7 +10,7 @@ import {
   Youtube,
 } from 'lucide-react';
 
-import { safeColor, safeGradient } from './renderEmailMjml';
+import { safeColor, safeGradient, sanitizeEmailHtml } from './renderEmailMjml';
 import type {
   EmailBlock,
   EmailContentBlock,
@@ -38,7 +37,9 @@ function SafeHtml({
   html: string;
   style?: React.CSSProperties;
 }) {
-  const clean = React.useMemo(() => DOMPurify.sanitize(html), [html]);
+  // Sanitise after mount: there is no DOM during server rendering.
+  const [clean, setClean] = React.useState('');
+  React.useEffect(() => setClean(sanitizeEmailHtml(html) ?? ''), [html]);
   // Undo the CSS reset so paragraphs and lists space out as they will in a mail client.
   return (
     <div

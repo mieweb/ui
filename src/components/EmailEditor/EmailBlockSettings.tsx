@@ -8,6 +8,7 @@ import { Select } from '../Select';
 import { Switch } from '../Switch';
 import { Textarea } from '../Textarea';
 import type { EmailEditorLabels } from './labels';
+import { sanitizeEmailHtml } from './renderEmailMjml';
 import {
   createEmailBlock,
   generateEmailBlockId,
@@ -233,7 +234,7 @@ export function EmailBlockSettings({
         <>
           <RichTextEditor
             aria-label={f.content}
-            value={block.content}
+            value={sanitizeEmailHtml(block.content) ?? ''}
             onChange={(content) => set({ content })}
             variableGroups={variableGroups}
             enableDictation={false}

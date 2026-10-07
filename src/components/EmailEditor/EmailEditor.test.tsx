@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 
 import { renderWithTheme } from '../../test/test-utils';
 import { EmailEditor } from './EmailEditor';
@@ -16,11 +16,15 @@ const initial: EmailContentTree = { version: '1.0', blocks: [heading, text] };
 
 function Harness({
   onDesign,
+  initialDesign = {},
 }: {
   onDesign?: (d: EmailDesignSettings) => void;
+  initialDesign?: EmailDesignSettings;
 }) {
   const [value, setValue] = useState(initial);
-  const [design, setDesign] = useState<EmailDesignSettings>({});
+  const [design, setDesign] = useState<EmailDesignSettings | undefined>(
+    initialDesign
+  );
   return (
     <>
       <EmailEditor
@@ -103,6 +107,71 @@ describe('EmailEditor', () => {
     unmount();
     renderWithTheme(<Harness onDesign={vi.fn()} />);
     expect(screen.getByRole('tab', { name: 'Design' })).toBeInTheDocument();
+  });
+
+  it('undoes the first design edit when design was omitted', () => {
+    const onDesign = vi.fn();
+    renderWithTheme(<Harness onDesign={onDesign} initialDesign={undefined} />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Design' }));
+    fireEvent.change(screen.getByLabelText('Content width (px)'), {
+      target: { value: '700' },
+    });
+    expect(onDesign).toHaveBeenLastCalledWith({ contentWidth: 700 });
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(onDesign).toHaveBeenLastCalledWith({});
+    expect(screen.getByLabelText('Content width (px)')).toHaveValue(600);
+  });
+
+  it('applies a finished upload to the latest document', async () => {
+    const image = { ...createEmailBlock('image'), alt: '' };
+    let finish: (url: string) => void = () => {};
+    const onUploadImage = () =>
+      new Promise<string>((resolve) => {
+        finish = resolve;
+      });
+    let latest: EmailContentTree = { version: '1.0', blocks: [image] };
+    function UploadHarness() {
+      const [value, setValue] = useState(latest);
+      latest = value;
+      return (
+        <EmailEditor
+          value={value}
+          onChange={setValue}
+          onUploadImage={onUploadImage}
+        />
+      );
+    }
+    const { container } = renderWithTheme(<UploadHarness />);
+    fireEvent.click(screen.getByRole('button', { name: 'Select Image' }));
+    const file = new File(['x'], 'a.png', { type: 'image/png' });
+    fireEvent.change(container.querySelector('input[type=file]')!, {
+      target: { files: [file] },
+    });
+    fireEvent.change(screen.getByLabelText('Alt text'), {
+      target: { value: 'Logo' },
+    });
+    await act(async () => finish('https://cdn/a.png'));
+    expect(latest.blocks[0]).toMatchObject({
+      alt: 'Logo',
+      src: 'https://cdn/a.png',
+    });
+  });
+
+  it('sanitises stored HTML before it reaches the text editor', () => {
+    const unsafe = {
+      ...createEmailBlock('text'),
+      content: '<img src="x" onerror="alert(1)"><style>*{}</style><p>ok</p>',
+    };
+    renderWithTheme(
+      <EmailEditor
+        value={{ version: '1.0', blocks: [unsafe] }}
+        onChange={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
+    const editor = screen.getByRole('textbox', { name: 'Content' });
+    expect(editor.innerHTML).toContain('<p>ok</p>');
+    expect(editor.innerHTML).not.toMatch(/onerror|<style/);
   });
 
   it('accepts label overrides', () => {

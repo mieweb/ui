@@ -381,21 +381,36 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
       return [...groups.values()];
     }, [mergeTags]);
 
+    // Async edits (image uploads) must land on the document as it is when they finish.
+    const latest = React.useRef({ value, designProp, onChange });
+    React.useEffect(() => {
+      latest.current = { value, designProp, onChange };
+    });
+
     const present: Snapshot = { tree: value, design: designProp };
     const commit = (
       tree: EmailContentTree,
       nextDesign?: EmailDesignSettings
     ) => {
-      setPast((p) => [...p.slice(-49), present]);
+      const current = latest.current;
+      setPast((p) => [
+        ...p.slice(-49),
+        { tree: current.value, design: current.designProp },
+      ]);
       setFuture([]);
-      if (tree !== value) onChange(tree);
+      if (tree !== current.value) current.onChange(tree);
       if (nextDesign) onDesignChange?.(nextDesign);
     };
     const setBlocks = (blocks: EmailBlock[]) => commit({ ...value, blocks });
+    const patchBlock = (id: string, patch: Partial<EmailBlock>) => {
+      const doc = latest.current.value;
+      if (!findEmailBlock(doc.blocks, id)) return;
+      commit({ ...doc, blocks: updateEmailBlock(doc.blocks, id, patch) });
+    };
     const restore = (snapshot: Snapshot) => {
       onChange(snapshot.tree);
-      if (snapshot.design !== designProp && snapshot.design)
-        onDesignChange?.(snapshot.design);
+      if (snapshot.design !== designProp)
+        onDesignChange?.(snapshot.design ?? {});
     };
     const undo = () => {
       const previous = past[past.length - 1];
@@ -505,12 +520,13 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
         return;
       }
       const from = value.blocks.findIndex((b) => b.id === activeId);
-      if (from === -1 || overIndex === -1 || from === overIndex) return;
-      setBlocks(arrayMove(value.blocks, from, overIndex));
+      const to = overId === CANVAS_END ? value.blocks.length - 1 : overIndex;
+      if (from === -1 || to === -1 || from === to) return;
+      setBlocks(arrayMove(value.blocks, from, to));
       announce(
         fill(labels.announceMoved, {
           item: nameOf(value.blocks[from].type),
-          position: overIndex + 1,
+          position: to + 1,
         })
       );
     };
@@ -712,11 +728,7 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
                   labels={labels}
                   variableGroups={variableGroups}
                   onUploadImage={onUploadImage}
-                  onChange={(patch) =>
-                    setBlocks(
-                      updateEmailBlock(value.blocks, selected.id, patch)
-                    )
-                  }
+                  onChange={(patch) => patchBlock(selected.id, patch)}
                   onAddToColumn={(columnIndex, block: EmailContentBlock) => {
                     setBlocks(
                       addBlockToColumn(

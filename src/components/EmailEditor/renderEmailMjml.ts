@@ -82,13 +82,25 @@ function px(value: unknown, fallback: number, max = 2000): number {
     : fallback;
 }
 
+const SANITIZE_CONFIG = {
+  FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button'],
+};
+
+/** DOMPurify with the email policy, or `null` where there is no DOM. */
+export function sanitizeEmailHtml(html: string): string | null {
+  return DOMPurify.isSupported
+    ? DOMPurify.sanitize(html, SANITIZE_CONFIG)
+    : null;
+}
+
 function defaultSanitize(html: string): string {
-  if (!DOMPurify.isSupported) {
+  const clean = sanitizeEmailHtml(html);
+  if (clean === null) {
     throw new Error(
       'renderEmailMjml: no DOM is available to sanitise HTML. Pass options.sanitizeHtml.'
     );
   }
-  return DOMPurify.sanitize(html, { FORBID_TAGS: ['style', 'form', 'input'] });
+  return clean;
 }
 
 const HEADING_SIZES = { 1: 32, 2: 26, 3: 22, 4: 18 } as const;
@@ -105,11 +117,12 @@ const SOCIAL_NAMES: Record<EmailSocialPlatform, string> = {
 
 const ICON_SIZES = { sm: 20, md: 25, lg: 35 } as const;
 
-/** Renders one block as column content (no `mj-section` wrapper). */
+/** Renders one block as column content; `available` is the usable width in px. */
 function renderContent(
   block: EmailContentBlock,
   ctx: Ctx,
-  pad: string
+  pad: string,
+  available: number
 ): string {
   const { design } = ctx;
   switch (block.type) {
@@ -137,12 +150,10 @@ function renderContent(
     }
     case 'image': {
       if (!block.src) return '';
-      // mj-image only accepts px; a percentage becomes px of the content width.
+      // mj-image only accepts px; a percentage becomes px of the usable width.
       const percent = /^(\d+)%$/.exec(String(block.width ?? ''));
       const widthPx = percent
-        ? Math.round(
-            (design.contentWidth * Math.min(Number(percent[1]), 100)) / 100
-          )
+        ? Math.round((available * Math.min(Number(percent[1]), 100)) / 100)
         : parseInt(String(block.width ?? ''), 10);
       const width =
         Number.isFinite(widthPx) &&
@@ -281,15 +292,23 @@ function renderBlock(block: EmailBlock, ctx: Ctx): string {
         const colBg = column.backgroundColor
           ? ` background-color="${safeColor(column.backgroundColor, 'transparent')}"`
           : '';
+        const share = px(column.width ?? 100 / block.columns.length, 50, 100);
+        const available =
+          Math.round((ctx.design.contentWidth * share) / 100) - 24;
         const inner = column.blocks
-          .map((b) => renderContent(b, ctx, '8px 12px'))
+          .map((b) => renderContent(b, ctx, '8px 12px', available))
           .join('');
         return `<mj-column${width}${colBg}>${inner || '<mj-text> </mj-text>'}</mj-column>`;
       })
       .join('');
     return `<mj-section${bg}>${columns}</mj-section>`;
   }
-  const content = renderContent(block, ctx, '10px 25px');
+  const content = renderContent(
+    block,
+    ctx,
+    '10px 25px',
+    ctx.design.contentWidth - 50
+  );
   return content
     ? `<mj-section><mj-column>${content}</mj-column></mj-section>`
     : '';

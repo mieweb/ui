@@ -123,10 +123,21 @@ describe('renderEmailMjml', () => {
       src: 'https://x/a.png',
       width,
     });
-    expect(renderEmailMjml(tree(image('50%')))).toContain('width="300px"');
+    expect(renderEmailMjml(tree(image('50%')))).toContain('width="275px"');
     expect(renderEmailMjml(tree(image('100%')))).not.toMatch(
       /<mj-image[^>]*width=/
     );
+  });
+
+  it('resolves image percentages against the containing column', () => {
+    const columns = createEmailBlock('columns');
+    columns.columns[0].blocks.push({
+      ...createEmailBlock('image'),
+      src: 'https://x/a.png',
+      width: '50%',
+    });
+    // 600px email, 50% column, 12px padding each side: 276px usable.
+    expect(renderEmailMjml(tree(columns))).toContain('width="138px"');
   });
 
   it('points the footer unsubscribe link at the configured URL', () => {
