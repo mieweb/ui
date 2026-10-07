@@ -240,9 +240,12 @@ export const TagEditor = React.forwardRef<HTMLDivElement, TagEditorProps>(
               className="flex max-w-full flex-wrap items-center gap-1.5"
             >
               {value.map((tag, index) => (
-                <li key={tag} className="inline-flex max-w-full">
+                <li
+                  key={tag}
+                  data-slot="tag-editor-tag"
+                  className="inline-flex max-w-full"
+                >
                   <Badge
-                    data-slot="tag-editor-tag"
                     className="max-w-full"
                     onRemove={
                       readOnly
