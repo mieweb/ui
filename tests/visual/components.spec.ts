@@ -744,6 +744,38 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('tabs-underline.png');
   });
 
+  test('Tabs - Dark keyboard focus ring blends with theme', async ({
+    page,
+  }) => {
+    // Issue #512: Tailwind's ring-offset color defaults to #fff, so the
+    // focus-visible ring on a dark background rendered as a white box
+    // swallowing the tab label, and the unlayered global :focus-visible
+    // outline stacked a second indicator on top of the ring.
+    await gotoStory(page, 'navigation-tabs--disabled-tab', {
+      globals: 'theme:dark',
+    });
+    await page.getByRole('tab', { name: 'Enabled', exact: true }).click();
+    await page.keyboard.press('ArrowRight'); // :focus-visible on "Also Enabled"
+    await page.waitForTimeout(300); // let the 200ms transition-all settle
+    const focused = page.getByRole('tab', { name: 'Also Enabled' });
+
+    const ring = await focused.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return {
+        boxShadow: style.boxShadow,
+        outlineStyle: style.outlineStyle,
+        pageBackground: getComputedStyle(document.body).backgroundColor,
+      };
+    });
+    // Ring offset must match the themed background, not default white.
+    expect(ring.boxShadow).toContain(ring.pageBackground);
+    expect(ring.boxShadow).not.toContain('rgb(255, 255, 255)');
+    // focus-visible:outline-none must win over the global outline rule.
+    expect(ring.outlineStyle).toBe('none');
+
+    await expect(page).toHaveScreenshot('tabs-focus-dark.png');
+  });
+
   // Components with branding fixes
   test('Toast - Success', async ({ page }) => {
     await gotoStory(page, 'feedback-toast--success');
