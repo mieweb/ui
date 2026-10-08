@@ -85,6 +85,8 @@ function px(value: unknown, fallback: number, max = 2000): number {
 
 const SANITIZE_CONFIG = {
   FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button'],
+  // Host CSS classes (e.g. `fixed inset-0`) and ids would escape the style allowlist.
+  FORBID_ATTR: ['class', 'id'],
 };
 
 // Formatting only: anything that can position, layer or load (url()) is dropped.
@@ -168,7 +170,9 @@ function renderContent(
     case 'heading': {
       const level = HEADING_SIZES[block.level] ? block.level : 2;
       const color = safeColor(block.color, design.headingColor);
-      return `<mj-text align="${align(block.alignment, 'left')}" font-size="${HEADING_SIZES[level]}px" font-weight="bold" color="${color}" padding="${pad}"><h${level}>${escapeHtml(block.text)}</h${level}></mj-text>`;
+      const size = HEADING_SIZES[level];
+      // Inline size: clients scale h1-h4 relative to the mj-text font size.
+      return `<mj-text align="${align(block.alignment, 'left')}" font-size="${size}px" font-weight="bold" color="${color}" padding="${pad}"><h${level} style="font-size: ${size}px; line-height: 1.25;">${escapeHtml(block.text)}</h${level}></mj-text>`;
     }
     case 'text': {
       const color = block.color
@@ -190,14 +194,13 @@ function renderContent(
     case 'image': {
       if (!block.src) return '';
       // mj-image only accepts px; a percentage becomes px of the usable width.
-      const percent = /^(\d+)%$/.exec(String(block.width ?? ''));
+      const percent = /^(\d*\.?\d+)%$/.exec(String(block.width ?? '').trim());
+      const share = percent ? Math.min(Number(percent[1]), 100) : 0;
       const widthPx = percent
-        ? Math.round((available * Math.min(Number(percent[1]), 100)) / 100)
+        ? Math.round((available * share) / 100)
         : parseInt(String(block.width ?? ''), 10);
       const width =
-        Number.isFinite(widthPx) &&
-        widthPx > 0 &&
-        !(percent && percent[1] === '100')
+        Number.isFinite(widthPx) && widthPx > 0 && share !== 100
           ? ` width="${px(widthPx, 600)}px"`
           : '';
       const href = block.href ? ` href="${safeUrl(block.href)}"` : '';
@@ -299,7 +302,7 @@ function renderHero(block: EmailHeroBlock): string {
     );
   }
   parts.push(
-    `<mj-text align="${a}" color="${fg}" font-size="32px" font-weight="bold" line-height="1.2" padding="0 0 8px 0"><h1 style="color: ${fg}; margin: 0;">${escapeHtml(block.headline)}</h1></mj-text>`
+    `<mj-text align="${a}" color="${fg}" font-size="32px" font-weight="bold" line-height="1.2" padding="0 0 8px 0"><h1 style="color: ${fg}; margin: 0; font-size: 32px; line-height: 1.2;">${escapeHtml(block.headline)}</h1></mj-text>`
   );
   if (block.subtitle) {
     parts.push(
@@ -357,36 +360,36 @@ function renderBlock(block: EmailBlock, ctx: Ctx): string {
  * Serialises an email document to MJML. Compile the result with `mjml` (server)
  * or `mjml-browser` to get client-safe HTML.
  */
-export function renderEmailMjml(
-  tree: EmailContentTree,
-  options: RenderEmailMjmlOptions = {}
-): string {
+/** Defaults plus `design`, with every colour, width and font validated. */
+export function normalizeDesignSettings(
+  design: EmailDesignSettings | undefined
+): Required<EmailDesignSettings> {
   const defaults = createDefaultDesignSettings();
-  const d = resolveDesignSettings(options.design);
-  const design: Required<EmailDesignSettings> = {
-    ...d,
-    bodyBackgroundColor: safeColor(
-      d.bodyBackgroundColor,
-      defaults.bodyBackgroundColor
-    ),
-    contentBackgroundColor: safeColor(
-      d.contentBackgroundColor,
-      defaults.contentBackgroundColor
-    ),
-    textColor: safeColor(d.textColor, defaults.textColor),
-    headingColor: safeColor(d.headingColor, defaults.headingColor),
-    linkColor: safeColor(d.linkColor, defaults.linkColor),
-    buttonBackgroundColor: safeColor(
-      d.buttonBackgroundColor,
-      defaults.buttonBackgroundColor
-    ),
-    buttonTextColor: safeColor(d.buttonTextColor, defaults.buttonTextColor),
+  const d = resolveDesignSettings(design);
+  const color = (key: keyof EmailDesignSettings) =>
+    safeColor(d[key] as string, defaults[key] as string);
+  return {
+    bodyBackgroundColor: color('bodyBackgroundColor'),
+    contentBackgroundColor: color('contentBackgroundColor'),
+    textColor: color('textColor'),
+    headingColor: color('headingColor'),
+    linkColor: color('linkColor'),
+    buttonBackgroundColor: color('buttonBackgroundColor'),
+    buttonTextColor: color('buttonTextColor'),
+    buttonBorderRadius: px(d.buttonBorderRadius, 6, 100),
     contentWidth: px(d.contentWidth, 600, 1200),
     fontFamily:
       typeof d.fontFamily === 'string' && /^[\w\s,'-]+$/.test(d.fontFamily)
         ? d.fontFamily
         : defaults.fontFamily,
   };
+}
+
+export function renderEmailMjml(
+  tree: EmailContentTree,
+  options: RenderEmailMjmlOptions = {}
+): string {
+  const design = normalizeDesignSettings(options.design);
   const ctx: Ctx = {
     design,
     sanitize: options.sanitizeHtml ?? defaultSanitize,

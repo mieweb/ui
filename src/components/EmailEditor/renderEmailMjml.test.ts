@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { renderEmailMjml } from './renderEmailMjml';
+import { normalizeDesignSettings, renderEmailMjml } from './renderEmailMjml';
 import {
   addBlockToColumn,
   duplicateEmailBlock,
@@ -137,9 +137,42 @@ describe('renderEmailMjml', () => {
       width,
     });
     expect(renderEmailMjml(tree(image('50%')))).toContain('width="275px"');
+    expect(renderEmailMjml(tree(image('50.5%')))).toContain('width="278px"');
+    expect(renderEmailMjml(tree(image('.5%')))).toContain('width="3px"');
     expect(renderEmailMjml(tree(image('100%')))).not.toMatch(
       /<mj-image[^>]*width=/
     );
+  });
+
+  it('sizes headings inline so clients do not scale them again', () => {
+    const mjml = renderEmailMjml(
+      tree(createEmailBlock('heading'), createEmailBlock('hero'))
+    );
+    expect(mjml).toContain('<h2 style="font-size: 26px; line-height: 1.25;">');
+    expect(mjml).toMatch(/<h1 style="[^"]*font-size: 32px;/);
+  });
+
+  it('strips class and id so host CSS cannot style stored HTML', () => {
+    const html = {
+      ...createEmailBlock('html'),
+      html: '<div class="fixed inset-0 z-50" id="root">x</div>',
+    };
+    const mjml = renderEmailMjml(tree(html));
+    expect(mjml).toContain('<div>x</div>');
+    expect(mjml).not.toMatch(/fixed|id="root"/);
+  });
+
+  it('validates design colours, falling back to defaults', () => {
+    const design = normalizeDesignSettings({
+      bodyBackgroundColor: 'url(https://x/y.png)',
+      buttonBackgroundColor: 'red;position:fixed',
+      linkColor: '#123456',
+    });
+    expect(design).toMatchObject({
+      bodyBackgroundColor: '#f4f4f5',
+      buttonBackgroundColor: '#2563eb',
+      linkColor: '#123456',
+    });
   });
 
   it('resolves image percentages against the containing column', () => {
@@ -151,6 +184,12 @@ describe('renderEmailMjml', () => {
     });
     // 600px email, 50% column, 12px padding each side: 276px usable.
     expect(renderEmailMjml(tree(columns))).toContain('width="138px"');
+    columns.columns[1].blocks.push({
+      ...createEmailBlock('image'),
+      src: 'https://x/b.png',
+      width: '50.5%',
+    });
+    expect(renderEmailMjml(tree(columns))).toContain('width="139px"');
   });
 
   it('lets undefined design fields inherit their defaults', () => {

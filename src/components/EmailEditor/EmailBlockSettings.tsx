@@ -206,6 +206,10 @@ export function EmailBlockSettings({
   );
   const uploadRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
+  const [uploadFailed, setUploadFailed] = React.useState(false);
+  // HTML the editor just emitted is already live in its DOM; sanitising it again
+  // would normalise it and make RichTextEditor rewrite innerHTML (losing the caret).
+  const emitted = React.useRef<string | null>(null);
 
   switch (block.type) {
     case 'heading':
@@ -239,8 +243,15 @@ export function EmailBlockSettings({
         <>
           <RichTextEditor
             aria-label={f.content}
-            value={sanitizeEmailHtml(block.content) ?? ''}
-            onChange={(content) => set({ content })}
+            value={
+              block.content === emitted.current
+                ? block.content
+                : (sanitizeEmailHtml(block.content) ?? '')
+            }
+            onChange={(content) => {
+              emitted.current = content;
+              set({ content });
+            }}
             variableGroups={variableGroups}
             enableDictation={false}
           />
@@ -314,8 +325,11 @@ export function EmailBlockSettings({
                   e.target.value = '';
                   if (!file) return;
                   setUploading(true);
+                  setUploadFailed(false);
                   try {
                     set({ src: await onUploadImage(file) });
+                  } catch {
+                    setUploadFailed(true);
                   } finally {
                     setUploading(false);
                   }
@@ -330,6 +344,11 @@ export function EmailBlockSettings({
               >
                 {f.uploadImage}
               </Button>
+              {uploadFailed && (
+                <p role="alert" className="text-destructive text-sm">
+                  {f.uploadFailed}
+                </p>
+              )}
             </>
           )}
           <TextField

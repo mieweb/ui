@@ -60,6 +60,7 @@ import {
   type EmailEditorLabelOverrides,
   type EmailEditorLabels,
 } from './labels';
+import { normalizeDesignSettings } from './renderEmailMjml';
 import {
   addBlockToColumn,
   duplicateEmailBlock,
@@ -70,7 +71,6 @@ import {
 } from './tree';
 import {
   createEmailBlock,
-  resolveDesignSettings,
   type EmailBlock,
   type EmailBlockType,
   type EmailContentBlock,
@@ -356,7 +356,7 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
       [labelOverrides]
     );
     const design = React.useMemo(
-      () => resolveDesignSettings(designProp),
+      () => normalizeDesignSettings(designProp),
       [designProp]
     );
     const [selectedId, setSelectedId] = React.useState<string | null>(null);

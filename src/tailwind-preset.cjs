@@ -62,6 +62,7 @@ module.exports = {
     'focus-within:outline-1',
     'focus-within:outline-dashed',
     'focus-within:outline-primary-300',
+    'focus-within:opacity-100',
     '-top-3.5',
     'min-h-[640px]',
     '[&_a]:pointer-events-none',

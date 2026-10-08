@@ -55,6 +55,7 @@ export const defaultEmailEditorLabels = {
     fullWidth: 'Full width',
     imageUrl: 'Image URL',
     uploadImage: 'Upload image',
+    uploadFailed: 'The image could not be uploaded. Try again.',
     altText: 'Alt text',
     width: 'Width (px or %)',
     style: 'Style',

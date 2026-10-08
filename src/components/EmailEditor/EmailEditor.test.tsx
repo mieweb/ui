@@ -16,7 +16,7 @@ const initial: EmailContentTree = { version: '1.0', blocks: [heading, text] };
 
 function Harness({
   onDesign,
-  initialDesign = {},
+  initialDesign,
 }: {
   onDesign?: (d: EmailDesignSettings) => void;
   initialDesign?: EmailDesignSettings;
@@ -157,13 +157,35 @@ describe('EmailEditor', () => {
     });
   });
 
+  it('reports a failed upload and keeps the existing image', async () => {
+    const image = { ...createEmailBlock('image'), src: 'https://cdn/old.png' };
+    const onChange = vi.fn();
+    const { container } = renderWithTheme(
+      <EmailEditor
+        value={{ version: '1.0', blocks: [image] }}
+        onChange={onChange}
+        onUploadImage={() => Promise.reject(new Error('offline'))}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Select Image' }));
+    await act(async () => {
+      fireEvent.change(container.querySelector('input[type=file]')!, {
+        target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] },
+      });
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The image could not be uploaded'
+    );
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('sanitises stored HTML before it reaches the text editor', () => {
     const unsafe = {
       ...createEmailBlock('text'),
       content:
-        '<img src="x" onerror="alert(1)"><style>*{}</style><div style="position:fixed;inset:0">x</div><p>ok</p>',
+        '<img src="x" onerror="alert(1)"><style>*{}</style><div style="position:fixed;inset:0">x</div><div class="fixed inset-0 z-50" id="app">y</div><p>ok</p>',
     };
-    renderWithTheme(
+    const { container } = renderWithTheme(
       <EmailEditor
         value={{ version: '1.0', blocks: [unsafe] }}
         onChange={vi.fn()}
@@ -172,7 +194,39 @@ describe('EmailEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
     const editor = screen.getByRole('textbox', { name: 'Content' });
     expect(editor.innerHTML).toContain('<p>ok</p>');
-    expect(editor.innerHTML).not.toMatch(/onerror|<style|position/);
+    expect(editor.innerHTML).not.toMatch(/onerror|<style|position|class=|id=/);
+    // Canvas preview and editing surface alike.
+    expect(container.querySelector('.fixed, #app')).toBeNull();
+  });
+
+  it('does not rewrite the editing surface for its own normalised output', () => {
+    const aligned = {
+      ...createEmailBlock('text'),
+      content: '<p style="text-align: center;">x</p>',
+    };
+    renderWithTheme(
+      <EmailEditor
+        value={{ version: '1.0', blocks: [aligned] }}
+        onChange={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
+    const editor = screen.getByRole('textbox', { name: 'Content' });
+    editor.innerHTML = '<p style="text-align: center;">xy</p>';
+    const paragraph = editor.firstChild;
+    fireEvent.input(editor);
+    expect(editor.firstChild).toBe(paragraph);
+  });
+
+  it('validates design colours before painting the canvas', () => {
+    const { container } = renderWithTheme(
+      <EmailEditor
+        value={initial}
+        onChange={vi.fn()}
+        design={{ bodyBackgroundColor: 'url(https://x/y.png)' }}
+      />
+    );
+    expect(container.querySelector('[style*="url("]')).toBeNull();
   });
 
   it('never submits a surrounding form', () => {
