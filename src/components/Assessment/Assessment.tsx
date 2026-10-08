@@ -236,6 +236,7 @@ export interface AssessmentProps extends Omit<
   onShowPlanChange?: (show: boolean) => void;
   /** Called when a row action is clicked */
   onAction?: (item: AssessmentItem, action: AssessmentAction) => void;
+  rowActions?: readonly AssessmentAction[];
   /** Remove a problem from this visit's assessment, not its longitudinal record. */
   onRemoveAssessment?: (item: AssessmentItem) => void;
   /**
@@ -835,6 +836,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       showPlan = true,
       onShowPlanChange,
       onAction,
+      rowActions = Object.keys(ACTION_META) as AssessmentAction[],
       onRemoveAssessment,
       onAddOrder,
       onAddAssessment,
@@ -1221,7 +1223,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                             'pointer-fine:group-has-[[data-order-id]:focus-within]:opacity-0'
                           )}
                         >
-                          {(Object.keys(ACTION_META) as AssessmentAction[]).map(
+                          {rowActions.map(
                             (action) => {
                               const meta = ACTION_META[action];
                               if (action !== 'add-order' && !onAction)
