@@ -192,15 +192,31 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
   return React.createElement(
     'span',
     { style: { display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0, maxWidth: '100%' } },
-    // Let the component name shrink and wrap as usual; badges stay one line.
-    React.createElement('span', { style: { minWidth: 0 } }, item.name),
+    // Badged rows stay a single line: the name ellipsizes rather than
+    // word-wrapping into an oversized row; its full text sits in the tooltip.
+    React.createElement(
+      'span',
+      {
+        title: item.name,
+        style: {
+          minWidth: 0,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        },
+      },
+      item.name
+    ),
     ...badges.map((tag) =>
       React.createElement(
         'span',
         {
           key: tag,
+          className: 'mieweb-sidebar-badge',
           'aria-label': TAG_BADGES[tag].label,
-          // Tooltip reveals the full text when the badge is truncated.
+          // Tooltip reveals the full text when the badge is truncated. For
+          // keyboard users the injected manager CSS un-truncates the badge
+          // while its row has :focus-visible (or :hover).
           title: TAG_BADGES[tag].label,
           style: {
             fontSize: 9,
@@ -213,11 +229,14 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
             color: '#fff',
             background: TAG_BADGES[tag].color,
             // Never wrap; truncate with an ellipsis when space runs out (#533).
+            // The huge shrink factor makes the badge give up its space before
+            // the component name does.
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             minWidth: 0,
             maxWidth: '100%',
+            flexShrink: 9999,
           },
         },
         TAG_BADGES[tag].label
@@ -394,6 +413,16 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     /* Sidebar item hover - row level so hovering 3-dot also highlights the row */
     [data-nodetype]:not([data-selected="true"]):hover {
       background-color: ${isDark ? `${brand.primary}20` : `${brand.primary}10`} !important;
+    }
+
+    /* Catalog badges (renderSidebarLabel) truncate first to keep the name
+       readable; hovering the row or keyboard-focusing its button reveals the
+       full badge text inline (#533 asks for the tooltip to be focus-reachable
+       too). !important outranks the badge's inline flex-shrink/max-width. */
+    [data-nodetype]:hover .mieweb-sidebar-badge,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-badge {
+      flex-shrink: 0 !important;
+      max-width: none !important;
     }
     
     /* Toolbar selected button */

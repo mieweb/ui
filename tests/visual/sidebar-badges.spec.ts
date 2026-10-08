@@ -19,6 +19,9 @@ const SHORT_BADGE = 'Beta';
 
 // renderSidebarLabel sets lineHeight: '14px'; a wrapped badge doubles that.
 const BADGE_LINE_HEIGHT = 14;
+// A single-line sidebar row is 28px; a wrapping name or badge exceeds this,
+// which is exactly the "oversized row" regression #533 complains about.
+const SINGLE_LINE_ROW_MAX_HEIGHT = 32;
 
 async function gotoSidebar(page: Page, docsPath: string, navSize?: number) {
   // The manager's hosted assistant is unrelated to the sidebar.
@@ -77,10 +80,14 @@ async function expectBadgeContract(
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();
     const nav = document.querySelector('#storybook-explorer-tree');
+    const rowRect = element
+      .closest('[data-nodetype]')
+      ?.getBoundingClientRect();
     return {
       whiteSpace: style.whiteSpace,
       textOverflow: style.textOverflow,
       height: rect.height,
+      rowHeight: rowRect?.height ?? Number.POSITIVE_INFINITY,
       truncated: element.scrollWidth > element.clientWidth,
       overflowsNav: nav
         ? rect.right > nav.getBoundingClientRect().right + 1
@@ -97,6 +104,12 @@ async function expectBadgeContract(
     metrics.height,
     `${badge} badge must be one line tall`
   ).toBeLessThanOrEqual(BADGE_LINE_HEIGHT + 2);
+  // The badge (and the single-line component name next to it) must not
+  // increase the row height: the whole badged row stays one line tall.
+  expect(
+    metrics.rowHeight,
+    `${name} row must stay single-line`
+  ).toBeLessThanOrEqual(SINGLE_LINE_ROW_MAX_HEIGHT);
   // Contained in the sidebar, not overlapping or spilling out of the nav.
   expect(metrics.overflowsNav, `${badge} badge must stay inside the nav`).toBe(
     false
@@ -144,5 +157,43 @@ test.describe('Sidebar badges - single line with ellipsis (#533)', () => {
     await expect(
       componentRow(page, LONG_NAME, LONG_BADGE)
     ).toHaveScreenshot('sidebar-badge-row-narrow.png');
+  });
+
+  test('keyboard focus reveals the full badge text inline', async ({
+    page,
+  }) => {
+    await gotoSidebar(page, LONG_DOCS_PATH);
+    const row = componentRow(page, LONG_NAME, LONG_BADGE);
+    const badgeEl = row.locator(`span[aria-label="${LONG_BADGE}"]`);
+
+    // The badge truncates at rest at this width...
+    await expect(row).toBeVisible();
+    expect(
+      await badgeEl.evaluate((el) => el.scrollWidth > el.clientWidth)
+    ).toBe(true);
+
+    // ...so the title tooltip's content must also be reachable by keyboard:
+    // arrow-key onto the row (real keyboard interaction sets :focus-visible,
+    // which the manager CSS uses to un-truncate the badge).
+    await row.click();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await expect(row).toBeFocused();
+
+    const focused = await badgeEl.evaluate((el) => {
+      const nav = document.querySelector('#storybook-explorer-tree');
+      const rect = el.getBoundingClientRect();
+      const row = el.closest('[data-nodetype]');
+      return {
+        revealed: el.scrollWidth <= el.clientWidth,
+        insideNav: rect.right <= nav.getBoundingClientRect().right + 1,
+        rowHeight: row.getBoundingClientRect().height,
+      };
+    });
+    expect(focused.revealed, 'focused badge shows its full text').toBe(true);
+    expect(focused.insideNav, 'revealed badge stays inside the nav').toBe(
+      true
+    );
+    expect(focused.rowHeight).toBeLessThanOrEqual(SINGLE_LINE_ROW_MAX_HEIGHT);
   });
 });
