@@ -174,6 +174,33 @@ describe('EmailEditor', () => {
     expect(editor.innerHTML).not.toMatch(/onerror|<style/);
   });
 
+  it('never submits a surrounding form', () => {
+    const onSubmit = vi.fn((e: React.FormEvent) => e.preventDefault());
+    renderWithTheme(
+      <form onSubmit={onSubmit}>
+        <Harness onDesign={vi.fn()} />
+      </form>
+    );
+    fireEvent.click(screen.getAllByRole('button', { name: 'Move down' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Duplicate' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mobile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Table' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add row' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0]);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('treats undefined design fields as defaults', () => {
+    renderWithTheme(
+      <Harness onDesign={vi.fn()} initialDesign={{ fontFamily: undefined }} />
+    );
+    fireEvent.click(screen.getByRole('tab', { name: 'Design' }));
+    expect(screen.getByRole('combobox', { name: 'Font' })).toHaveTextContent(
+      'Arial'
+    );
+  });
+
   it('accepts label overrides', () => {
     renderWithTheme(
       <EmailEditor

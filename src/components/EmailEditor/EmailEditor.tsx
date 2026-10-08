@@ -47,11 +47,14 @@ import {
 
 import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
 import { cn } from '../../utils/cn';
-import { Button } from '../Button';
 import type { RichTextVariableGroup } from '../RichTextEditor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../Tabs';
 import { EmailBlockPreview } from './EmailBlockPreview';
-import { EmailBlockSettings, EmailDesignPanel } from './EmailBlockSettings';
+import {
+  Button,
+  EmailBlockSettings,
+  EmailDesignPanel,
+} from './EmailBlockSettings';
 import {
   mergeEmailEditorLabels,
   type EmailEditorLabelOverrides,
@@ -66,8 +69,8 @@ import {
   updateEmailBlock,
 } from './tree';
 import {
-  createDefaultDesignSettings,
   createEmailBlock,
+  resolveDesignSettings,
   type EmailBlock,
   type EmailBlockType,
   type EmailContentBlock,
@@ -353,7 +356,7 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
       [labelOverrides]
     );
     const design = React.useMemo(
-      () => ({ ...createDefaultDesignSettings(), ...designProp }),
+      () => resolveDesignSettings(designProp),
       [designProp]
     );
     const [selectedId, setSelectedId] = React.useState<string | null>(null);

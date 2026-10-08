@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify';
 
 import {
   createDefaultDesignSettings,
+  resolveDesignSettings,
   type EmailAlignment,
   type EmailBlock,
   type EmailContentBlock,
@@ -323,7 +324,7 @@ export function renderEmailMjml(
   options: RenderEmailMjmlOptions = {}
 ): string {
   const defaults = createDefaultDesignSettings();
-  const d = { ...defaults, ...options.design };
+  const d = resolveDesignSettings(options.design);
   const design: Required<EmailDesignSettings> = {
     ...d,
     bodyBackgroundColor: safeColor(
@@ -343,9 +344,10 @@ export function renderEmailMjml(
     ),
     buttonTextColor: safeColor(d.buttonTextColor, defaults.buttonTextColor),
     contentWidth: px(d.contentWidth, 600, 1200),
-    fontFamily: /^[\w\s,'-]+$/.test(d.fontFamily)
-      ? d.fontFamily
-      : defaults.fontFamily,
+    fontFamily:
+      typeof d.fontFamily === 'string' && /^[\w\s,'-]+$/.test(d.fontFamily)
+        ? d.fontFamily
+        : defaults.fontFamily,
   };
   const ctx: Ctx = {
     design,

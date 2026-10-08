@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Plus, Trash2, Upload } from 'lucide-react';
 
-import { Button } from '../Button';
+import { Button as BaseButton, type ButtonProps } from '../Button';
 import { Input } from '../Input';
 import { RichTextEditor, type RichTextVariableGroup } from '../RichTextEditor';
 import { Select } from '../Select';
@@ -21,6 +21,11 @@ import {
 } from './types';
 
 type Patch<B> = (patch: Partial<B>) => void;
+
+/** Editor actions must never submit a host form. */
+export function Button(props: ButtonProps) {
+  return <BaseButton type="button" {...props} />;
+}
 
 interface FieldProps<T> {
   label: string;

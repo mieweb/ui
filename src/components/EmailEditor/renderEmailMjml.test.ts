@@ -140,6 +140,14 @@ describe('renderEmailMjml', () => {
     expect(renderEmailMjml(tree(columns))).toContain('width="138px"');
   });
 
+  it('lets undefined design fields inherit their defaults', () => {
+    const mjml = renderEmailMjml(tree(createEmailBlock('heading')), {
+      design: { fontFamily: undefined, contentWidth: undefined },
+    });
+    expect(mjml).toContain('font-family="Arial, Helvetica, sans-serif"');
+    expect(mjml).toContain('width="600px"');
+  });
+
   it('points the footer unsubscribe link at the configured URL', () => {
     const mjml = renderEmailMjml(tree(createEmailBlock('footer')), {
       unsubscribeUrl: 'https://example.com/u',

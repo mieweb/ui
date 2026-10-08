@@ -226,6 +226,16 @@ export function createDefaultDesignSettings(): Required<EmailDesignSettings> {
   };
 }
 
+/** Defaults overlaid with the fields `design` actually sets; `undefined` inherits. */
+export function resolveDesignSettings(
+  design: EmailDesignSettings | undefined
+): Required<EmailDesignSettings> {
+  const defined = Object.entries(design ?? {}).filter(
+    ([, v]) => v !== undefined
+  );
+  return { ...createDefaultDesignSettings(), ...Object.fromEntries(defined) };
+}
+
 export function createEmailBlock<T extends EmailBlockType>(
   type: T
 ): Extract<EmailBlock, { type: T }> {
