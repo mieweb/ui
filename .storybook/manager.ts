@@ -6,8 +6,8 @@ import {
   useStorybookState,
 } from 'storybook/manager-api';
 import { create } from 'storybook/theming/create';
-import { IconButton } from 'storybook/internal/components';
-import { GithubIcon, ShareAltIcon } from '@storybook/icons';
+import { Button } from 'storybook/internal/components';
+import { GithubIcon, MobileIcon, ShareAltIcon } from '@storybook/icons';
 import { buildArgsParam } from 'storybook/internal/router';
 import { serializeProjectGlobals } from './mobile-preview';
 
@@ -240,14 +240,15 @@ addons.setConfig({
 // work for complete examples and the chrome-free full-screen mode, too.
 addons.register('mieweb-mobile-preview', (api) => {
   addons.add('mieweb-mobile-preview/tool', {
-    type: types.TOOLEXTRA,
+    type: types.TOOL,
     title: 'Open mobile sandbox',
     match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
-    render: () => React.createElement(IconButton, {
-      title: 'Open mobile sandbox',
-      'aria-label': 'Open mobile sandbox',
+    render: () => React.createElement(Button, {
+      variant: 'ghost',
+      size: 'small',
+      padding: 'small',
+      ariaLabel: 'Open mobile sandbox',
       className: 'mieweb-mobile-sandbox',
-      style: { minWidth: 44, minHeight: 40 },
       onClick: () => {
         const story = api.getCurrentStoryData();
         if (story?.type !== 'story' || story.refId) return;
@@ -264,7 +265,7 @@ addons.register('mieweb-mobile-preview', (api) => {
         url.searchParams.set('returnTo', managerHref);
         window.location.assign(url.href);
       },
-    }, React.createElement('span', null, 'Sandbox')),
+    }, React.createElement(MobileIcon)),
   });
 });
 
@@ -317,7 +318,7 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
        view. The same button remains in the normal toolbar on desktop. */
     @media (max-width: 599px) {
       .sb-bar:has(.mieweb-mobile-sandbox) {
-        max-width: calc(100% - 84px);
+        max-width: calc(100% - 48px);
       }
 
       [role="toolbar"] .mieweb-mobile-sandbox {
@@ -326,8 +327,8 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
         right: 0;
         z-index: 2;
         box-sizing: border-box;
-        width: 84px;
-        min-width: 84px !important;
+        width: 48px;
+        min-width: 48px !important;
         height: 40px;
         border-radius: 0;
         border-left: 1px solid var(--mieweb-manager-border);
@@ -619,8 +620,14 @@ function GitHubSourceTool() {
     .join('/')}`;
 
   return React.createElement(
-    IconButton,
-    { asChild: true, ariaLabel: 'View source on GitHub' },
+    Button,
+    {
+      asChild: true,
+      variant: 'ghost',
+      size: 'small',
+      padding: 'small',
+      ariaLabel: 'View source on GitHub',
+    },
     React.createElement(
       'a',
       { href: githubUrl, target: '_blank', rel: 'noopener noreferrer' },
@@ -631,7 +638,7 @@ function GitHubSourceTool() {
 
 addons.register('mieweb-github-source', () => {
   addons.add('mieweb-github-source/tool', {
-    type: types.TOOLEXTRA,
+    type: types.TOOL,
     title: 'View source on GitHub',
     match: ({ viewMode, tabId }) =>
       (viewMode === 'story' || viewMode === 'docs') && !tabId,
@@ -644,16 +651,18 @@ addons.register('mieweb-github-source', () => {
 // preserved) in a new tab.
 addons.register('mieweb-open-in-new-tab', (api) => {
   addons.add('mieweb-open-in-new-tab/tool', {
-    type: types.TOOLEXTRA,
+    type: types.TOOL,
     title: 'Open canvas in new tab',
     match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
     render: () =>
       React.createElement(
-        IconButton,
+        Button,
         {
           key: 'mieweb-open-in-new-tab',
-          title: 'Open canvas in new tab',
-          'aria-label': 'Open canvas in new tab',
+          variant: 'ghost',
+          size: 'small',
+          padding: 'small',
+          ariaLabel: 'Open canvas in new tab',
           onClick: () => {
             const { storyId } = api.getUrlState();
             if (!storyId) return;
