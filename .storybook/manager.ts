@@ -191,14 +191,17 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
   }
   return React.createElement(
     'span',
-    { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } },
-    item.name,
+    { style: { display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0, maxWidth: '100%' } },
+    // Let the component name shrink and wrap as usual; badges stay one line.
+    React.createElement('span', { style: { minWidth: 0 } }, item.name),
     ...badges.map((tag) =>
       React.createElement(
         'span',
         {
           key: tag,
           'aria-label': TAG_BADGES[tag].label,
+          // Tooltip reveals the full text when the badge is truncated.
+          title: TAG_BADGES[tag].label,
           style: {
             fontSize: 9,
             lineHeight: '14px',
@@ -209,6 +212,12 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
             borderRadius: 999,
             color: '#fff',
             background: TAG_BADGES[tag].color,
+            // Never wrap; truncate with an ellipsis when space runs out (#533).
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            minWidth: 0,
+            maxWidth: '100%',
           },
         },
         TAG_BADGES[tag].label
