@@ -438,8 +438,8 @@ Notes:
 - Only self-authored, non-streaming **text** messages are editable;
   messages with rich `content` blocks, references, and system notices are not.
 - Editing is disabled when `readOnly` is set or `onMessageEdited` is omitted.
-- In the editor, **Enter** saves and **Escape** cancels (Shift+Enter adds a
-  newline).
+- In the editor, **Enter** adds a newline, **Ctrl/Cmd+Enter** or the **Save**
+  button saves, and **Escape** cancels.
 
 ---
 
