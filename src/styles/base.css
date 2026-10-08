@@ -428,10 +428,24 @@ kbd {
   font-family: var(--mieweb-font-mono);
 }
 
-/* Focus visible styles for accessibility */
-:focus-visible {
-  outline: 2px solid var(--mieweb-ring);
-  outline-offset: 2px;
+/* Focus visible styles for accessibility.
+   Layered so component utilities (e.g. focus-visible:outline-none on
+   elements that render their own focus ring) can override it —
+   unlayered rules would beat Tailwind's utilities layer. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--mieweb-ring);
+    outline-offset: 2px;
+  }
+
+  /* Theme the focus ring offset. Tailwind's --tw-ring-offset-color is
+     registered with inherits:false and defaults to #fff, which renders
+     as a glaring white box around focused elements in dark mode
+     (mieweb/ui#512). Set it per-element to the background token so
+     ring-offset-* utilities blend with the current theme. */
+  * {
+    --tw-ring-offset-color: var(--mieweb-background, #ffffff);
+  }
 }
 
 /* Reduce motion for users who prefer it */
