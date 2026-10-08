@@ -160,7 +160,8 @@ describe('EmailEditor', () => {
   it('sanitises stored HTML before it reaches the text editor', () => {
     const unsafe = {
       ...createEmailBlock('text'),
-      content: '<img src="x" onerror="alert(1)"><style>*{}</style><p>ok</p>',
+      content:
+        '<img src="x" onerror="alert(1)"><style>*{}</style><div style="position:fixed;inset:0">x</div><p>ok</p>',
     };
     renderWithTheme(
       <EmailEditor
@@ -171,7 +172,7 @@ describe('EmailEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
     const editor = screen.getByRole('textbox', { name: 'Content' });
     expect(editor.innerHTML).toContain('<p>ok</p>');
-    expect(editor.innerHTML).not.toMatch(/onerror|<style/);
+    expect(editor.innerHTML).not.toMatch(/onerror|<style|position/);
   });
 
   it('never submits a surrounding form', () => {

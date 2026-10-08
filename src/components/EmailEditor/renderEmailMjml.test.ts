@@ -88,6 +88,19 @@ describe('renderEmailMjml', () => {
     expect(mjml).not.toContain('onerror');
   });
 
+  it('keeps formatting styles but drops ones that can cover the page', () => {
+    const html = {
+      ...createEmailBlock('html'),
+      html: '<div style="position:fixed;inset:0;z-index:2147483647;background:white;color:#111;margin:-40px;padding:8px;background-color:url(x)">hi</div><p style="position:absolute">p</p>',
+    };
+    const mjml = renderEmailMjml(tree(html));
+    expect(mjml).toContain('style="color: #111; padding: 8px"');
+    expect(mjml).toContain('<p>p</p>');
+    expect(mjml).not.toMatch(
+      /position|inset|z-index|-40px|url\(x\)|background: white/
+    );
+  });
+
   it('uses a caller-supplied sanitiser', () => {
     const sanitizeHtml = vi.fn(() => '<p>clean</p>');
     const mjml = renderEmailMjml(tree(createEmailBlock('text')), {

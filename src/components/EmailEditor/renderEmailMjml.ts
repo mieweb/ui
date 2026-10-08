@@ -87,11 +87,49 @@ const SANITIZE_CONFIG = {
   FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button'],
 };
 
+// Formatting only: anything that can position, layer or load (url()) is dropped.
+const SAFE_STYLE_PROPERTY =
+  /^(color|background-color|font(-[a-z]+)?|text-(align|decoration|transform|indent)|line-height|letter-spacing|word-spacing|white-space|vertical-align|(margin|padding)(-(top|right|bottom|left))?|border(-(top|right|bottom|left))?(-(width|style|color))?|border-(collapse|spacing|radius)|(max-|min-)?(width|height)|display|list-style(-type)?)$/;
+
+export function sanitizeInlineStyle(style: string): string {
+  return style
+    .split(';')
+    .map((declaration) => {
+      const colon = declaration.indexOf(':');
+      if (colon === -1) return '';
+      const property = declaration.slice(0, colon).trim().toLowerCase();
+      const value = declaration.slice(colon + 1).trim();
+      return SAFE_STYLE_PROPERTY.test(property) &&
+        value &&
+        !/url\s*\(|expression\s*\(|@import|[<>\\]/i.test(value) &&
+        // Negative margins could pull content over the surrounding page.
+        !(property.startsWith('margin') && value.includes('-'))
+        ? `${property}: ${value}`
+        : '';
+    })
+    .filter(Boolean)
+    .join('; ');
+}
+
+let purifier: ReturnType<typeof DOMPurify> | null | undefined;
+
+// A private instance, so the style hook never leaks into other DOMPurify users.
+function getPurifier() {
+  if (purifier !== undefined) return purifier;
+  if (typeof window === 'undefined') return null;
+  const instance = DOMPurify(window);
+  if (!instance.isSupported) return (purifier = null);
+  instance.addHook('uponSanitizeAttribute', (_node, data) => {
+    if (data.attrName !== 'style') return;
+    data.attrValue = sanitizeInlineStyle(data.attrValue);
+    if (!data.attrValue) data.keepAttr = false;
+  });
+  return (purifier = instance);
+}
+
 /** DOMPurify with the email policy, or `null` where there is no DOM. */
 export function sanitizeEmailHtml(html: string): string | null {
-  return DOMPurify.isSupported
-    ? DOMPurify.sanitize(html, SANITIZE_CONFIG)
-    : null;
+  return getPurifier()?.sanitize(html, SANITIZE_CONFIG) ?? null;
 }
 
 function defaultSanitize(html: string): string {
