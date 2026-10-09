@@ -57,13 +57,22 @@ const [tab, setTab] = useState<'summary' | 'history' | 'files'>('summary');
 
 Controlled here so the tab can be synced to a URL query param; \`defaultValue\` alone is fine for purely local state.
 
+For the common "keep the tab in the URL" case, an uncontrolled \`Tabs\` can do it itself:
+
+\`\`\`tsx
+<Tabs defaultValue="summary" urlParam="tab">…</Tabs>
+\`\`\`
+
+\`urlParam\` mirrors the selection into \`?tab=\` with \`history.replaceState\` (no router, no new history entry), drops it when it equals \`defaultValue\`, and follows back/forward. \`Tabs\` cannot see its triggers' values, so it accepts any non-empty param; to reject unknown values, use the \`useUrlTab(param, default, allowed)\` hook and control \`Tabs\` with it.
+
 ### Limitations
 
 - Accessibility: \`TabsList\` is \`role="tablist"\`; triggers are \`<button role="tab" aria-selected aria-controls="tabpanel-{value}" id="tab-{value}">\` with roving \`tabIndex\` (selected 0, others −1); panels are \`role="tabpanel" aria-labelledby tabIndex={0}\`. Arrow Left/Right and Up/Down move focus (wrapping), Home/End jump — but **focus does not select**: the user must press Enter/Space (manual activation). \`TabsList\` itself also has \`tabIndex={0}\`, so Tab stops once on the list before the active tab. Pass \`aria-label\` to \`TabsList\` yourself; none is set. Ids are derived from \`value\`, so two \`Tabs\` on one page with the same values produce duplicate ids.
 - No \`orientation\` prop: the list is always horizontal, though arrow keys accept both axes. No overflow handling — many tabs wrap or overflow the container; \`whitespace-nowrap\` on triggers.
 - The \`variant\` is read from context, so all triggers share one style; \`TabsContent\` adds \`mt-4\`.
 - RTL: symmetric flex; ArrowRight always moves to the *next* DOM tab, which is visually leftward in RTL.
-- Theming: semantic tokens (\`border-border\`, \`bg-muted\`, \`bg-background\`, \`text-muted-foreground\`) plus \`primary-700/800\` for the active underline. No built-in strings. Depends on \`class-variance-authority\`.`,
+- Theming: semantic tokens (\`border-border\`, \`bg-muted\`, \`bg-background\`, \`text-muted-foreground\`) plus \`primary-700/800\` for the active underline. No built-in strings. Depends on \`class-variance-authority\`.
+- \`urlParam\` is ignored when \`value\` is set. An unrecognised value in the URL (e.g. a stale link) selects no tab. Server and hydration renders use \`defaultValue\`; the URL value applies right after hydration.`,
       },
     },
     catalog: {
@@ -102,6 +111,11 @@ Controlled here so the tab can be synced to a URL query param; \`defaultValue\` 
     variant: {
       control: 'select',
       options: ['underline', 'pills', 'enclosed'],
+    },
+    urlParam: {
+      description:
+        'Query parameter that mirrors the selected tab when uncontrolled (replaceState, dropped at defaultValue).',
+      control: 'text',
     },
     children: {
       control: false,
@@ -530,4 +544,41 @@ function ControlledTabsDemo() {
 
 export const Controlled: Story = {
   render: () => <ControlledTabsDemo />,
+};
+
+function UrlSyncedTabsDemo() {
+  const [search, setSearch] = React.useState(() => window.location.search);
+  return (
+    <div className="flex w-[400px] flex-col gap-3">
+      <Tabs
+        defaultValue="summary"
+        urlParam="demoTab"
+        onValueChange={() => setSearch(window.location.search)}
+      >
+        <TabsList aria-label="Record sections">
+          <TabsTrigger value="summary">Summary</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="files">Files</TabsTrigger>
+        </TabsList>
+        <TabsContent value="summary">Summary panel</TabsContent>
+        <TabsContent value="history">History panel</TabsContent>
+        <TabsContent value="files">Files panel</TabsContent>
+      </Tabs>
+      <p className="text-muted-foreground text-xs">
+        Query string: <code className="font-mono">{search || '(empty)'}</code>
+      </p>
+    </div>
+  );
+}
+
+export const UrlSynced: Story = {
+  render: () => <UrlSyncedTabsDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Uncontrolled `Tabs` with `urlParam="demoTab"`. Switching tabs rewrites `?demoTab=` in place (the default tab removes it), so a reload or shared link reopens the same tab.',
+      },
+    },
+  },
 };

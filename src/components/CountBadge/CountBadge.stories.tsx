@@ -70,7 +70,7 @@ The host owns the items and the mutations; the component owns popover open state
         {
           type: 'alternative to',
           target: 'data-display-badge',
-          why: 'CountBadge is a button with a count chip that can open a popover table of items; Badge is a static label span.',
+          why: 'CountBadge is a button with a count chip that can open a popover table of items; Badge is a label span (optionally removable), not a count.',
         },
         {
           type: 'composes with',

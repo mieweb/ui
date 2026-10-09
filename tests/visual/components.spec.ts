@@ -399,6 +399,55 @@ test.describe('Visual Regression Tests - Core Components', () => {
     expect(await composer.boundingBox()).toEqual(closedComposerBox);
   });
 
+  test('Modal - Full-screen mobile clears the safe areas', async ({ page }) => {
+    // Issue #548: below `sm` the full-screen Modal must pad itself clear of
+    // the status bar and home indicator. Chromium cannot emulate
+    // env(safe-area-inset-*), so simulate a notch through the override vars.
+    const safeTop = 59;
+    const safeBottom = 34;
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'overlays-modal--default');
+    await page.addStyleTag({
+      content: `:root { --mieweb-safe-area-top: ${safeTop}px; --mieweb-safe-area-bottom: ${safeBottom}px; }`,
+    });
+    await page.getByRole('button', { name: 'Open Modal' }).click();
+
+    const dialog = page.locator("[data-slot='modal']");
+    await expect(dialog).toBeVisible();
+    await dialog.evaluate((element) =>
+      Promise.all(
+        element.getAnimations({ subtree: true }).map((a) => a.finished)
+      )
+    );
+
+    const layout = await dialog.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const box = element.getBoundingClientRect();
+      const header = element
+        .querySelector("[data-slot='modal-header']")!
+        .getBoundingClientRect();
+      const footer = element
+        .querySelector("[data-slot='modal-footer']")!
+        .getBoundingClientRect();
+      return {
+        paddingTop: style.paddingTop,
+        paddingBottom: style.paddingBottom,
+        headerOffset: header.top - box.top,
+        footerOffset: box.bottom - footer.bottom,
+      };
+    });
+    expect(layout.paddingTop).toBe(`${safeTop}px`);
+    expect(layout.paddingBottom).toBe(`${safeBottom}px`);
+    // Border is 1px, so the slots start just inside the inset.
+    expect(layout.headerOffset).toBeGreaterThanOrEqual(safeTop);
+    expect(layout.footerOffset).toBeGreaterThanOrEqual(safeBottom);
+
+    // Above `sm` the dialog is centred and rounded: no inset padding.
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await expect(dialog).toHaveCSS('padding-top', '0px');
+    await expect(dialog).toHaveCSS('padding-bottom', '0px');
+  });
+
   test('MessageThread - Full thread with shared composer', async ({ page }) => {
     // MessageThread now embeds the shared ChatComposer in its border-t frame
     // (composer unification #465). Message footers show wall-clock times, so
@@ -454,6 +503,14 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .locator("[data-slot='chat-composer-input']")
       .waitFor({ state: 'visible' });
     await expect(page).toHaveScreenshot('superchat-playground.png');
+  });
+
+  test('SuperChat - Composer selectors', async ({ page }) => {
+    // Agent + model selector row in the SuperChat composer.
+    await gotoStory(page, 'superchat-superchat-panel--composer-selectors');
+    const composer = page.locator("[data-slot='chat-composer']");
+    await composer.waitFor({ state: 'visible' });
+    await expect(composer).toHaveScreenshot('superchat-composer-selectors.png');
   });
 
   test('SuperChat - Read only', async ({ page }) => {
@@ -584,6 +641,18 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('badge-default.png');
   });
 
+  test('Badge - Removable', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable');
+    await expect(page).toHaveScreenshot('badge-removable.png');
+  });
+
+  test('Badge - Removable (dark)', async ({ page }) => {
+    await gotoStory(page, 'data-display-badge--removable', {
+      globals: 'theme:dark',
+    });
+    await expect(page).toHaveScreenshot('badge-removable-dark.png');
+  });
+
   test('Card - Default', async ({ page }) => {
     await gotoStory(page, 'layout-card--default');
     await expect(page).toHaveScreenshot('card-default.png');
@@ -638,6 +707,31 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  // CompletenessMeter's bar composes Progress (#549)
+  test('CompletenessMeter - Default', async ({ page }) => {
+    await gotoStory(page, 'record-details-completenessmeter--default');
+    await expect(page).toHaveScreenshot('completenessmeter-default.png', {
+      animations: 'disabled',
+    });
+  });
+
+  // TagEditor chips render removable Badges (#549)
+  test('TagEditor - Default', async ({ page }) => {
+    await gotoStory(page, 'text-inputs-tageditor--default');
+    await expect(page).toHaveScreenshot('tageditor-default.png');
+  });
+
+  // ProviderSearchFilters active-filter chips render removable Badges (#549)
+  test('ProviderSearchFilters - Active filters', async ({ page }) => {
+    await gotoStory(
+      page,
+      'providers-providersearchfilters--active-filters-demo'
+    );
+    await expect(page).toHaveScreenshot(
+      'providersearchfilters-active-filters.png'
+    );
+  });
+
   test('Text - All variants', async ({ page }) => {
     await gotoStory(page, 'foundations-text--all-variants');
     await expect(page).toHaveScreenshot('text-all-variants.png');
@@ -651,6 +745,38 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('Tabs - Underline', async ({ page }) => {
     await gotoStory(page, 'navigation-tabs--underline');
     await expect(page).toHaveScreenshot('tabs-underline.png');
+  });
+
+  test('Tabs - Dark keyboard focus ring blends with theme', async ({
+    page,
+  }) => {
+    // Issue #512: Tailwind's ring-offset color defaults to #fff, so the
+    // focus-visible ring on a dark background rendered as a white box
+    // swallowing the tab label, and the unlayered global :focus-visible
+    // outline stacked a second indicator on top of the ring.
+    await gotoStory(page, 'navigation-tabs--disabled-tab', {
+      globals: 'theme:dark',
+    });
+    await page.getByRole('tab', { name: 'Enabled', exact: true }).click();
+    await page.keyboard.press('ArrowRight'); // :focus-visible on "Also Enabled"
+    await page.waitForTimeout(300); // let the 200ms transition-all settle
+    const focused = page.getByRole('tab', { name: 'Also Enabled' });
+
+    const ring = await focused.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return {
+        boxShadow: style.boxShadow,
+        outlineStyle: style.outlineStyle,
+        pageBackground: getComputedStyle(document.body).backgroundColor,
+      };
+    });
+    // Ring offset must match the themed background, not default white.
+    expect(ring.boxShadow).toContain(ring.pageBackground);
+    expect(ring.boxShadow).not.toContain('rgb(255, 255, 255)');
+    // focus-visible:outline-none must win over the global outline rule.
+    expect(ring.outlineStyle).toBe('none');
+
+    await expect(page).toHaveScreenshot('tabs-focus-dark.png');
   });
 
   // Components with branding fixes
@@ -917,6 +1043,56 @@ test.describe('Visual Regression Tests - Templates', () => {
   });
 });
 
+test.describe('Visual Regression Tests - Record pages', () => {
+  // Fixtures pin `now`, so day headers and relative times stay stable.
+  const shots: [string, string, string?][] = [
+    ['records-recordlayout--contact', 'recordlayout-contact.png'],
+    [
+      'records-recordlayout--contact',
+      'recordlayout-contact-dark.png',
+      'theme:dark',
+    ],
+    ['record-details-recordheader--contact', 'recordheader-contact.png'],
+    ['record-details-propertylist--groups', 'propertylist-groups.png'],
+    ['record-details-avatargroup--presence', 'avatargroup-presence.png'],
+    [
+      'record-details-reviewcard--absolute-date',
+      'reviewcard-absolute-date.png',
+    ],
+    ['records-activityfeed--default', 'activityfeed-default.png'],
+    ['records-fieldhistory--default', 'fieldhistory-default.png'],
+    ['records-actionplan--default', 'actionplan-default.png'],
+  ];
+  for (const [id, file, globals] of shots) {
+    test(`${id}${globals ? ` (${globals})` : ''}`, async ({ page }) => {
+      await gotoStory(page, id, { globals });
+      await expect(page).toHaveScreenshot(file, {
+        animations: 'disabled',
+        fullPage: true,
+      });
+    });
+  }
+
+  test('RecordLayout - Contact (mobile)', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'records-recordlayout--contact');
+    await expect(page).toHaveScreenshot('recordlayout-contact-mobile.png', {
+      animations: 'disabled',
+      fullPage: true,
+    });
+  });
+
+  test('OrgChart - Default', async ({ page }) => {
+    await gotoStory(page, 'records-orgchart--default');
+    // The elk layout resolves after the first render.
+    await page.locator('.react-flow__node').first().waitFor();
+    await page.waitForTimeout(500);
+    await expect(page).toHaveScreenshot('orgchart-default.png', {
+      animations: 'disabled',
+    });
+  });
+});
+
 test.describe('Visual Regression Tests - Deck', () => {
   // Reduced motion shows every reveal and skips the count-up, so frames are stable.
   test.beforeEach(async ({ page }) => {
@@ -1075,5 +1251,43 @@ test.describe('Visual Regression Tests - RichEditor (kerebron.css)', () => {
     await expect(page.locator('.kb-editor ul')).toHaveCount(2);
     await expect(page.locator('.kb-editor ul ul')).toHaveCount(0);
     await expect(page.locator('.kb-editor ol')).toHaveCount(1);
+  });
+});
+
+test.describe('Visual Regression Tests - EmailEditor', () => {
+  const story = 'editors-emaileditor--default';
+
+  async function gotoEditor(page: Page, globals?: string) {
+    await gotoStory(page, story, { globals });
+    // Text blocks are sanitised after mount, so wait for their content.
+    await page.getByText('Here is what shipped').waitFor({ state: 'visible' });
+  }
+
+  test('EmailEditor - Desktop (light)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await expect(page).toHaveScreenshot('emaileditor-desktop-light.png');
+  });
+
+  test('EmailEditor - Desktop (dark)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page, 'theme:dark');
+    await expect(page).toHaveScreenshot('emaileditor-desktop-dark.png');
+  });
+
+  test('EmailEditor - Selected block settings', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByRole('heading', { name: 'Faster scheduling' }).click();
+    await expect(
+      page.getByRole('complementary', { name: 'Block settings' })
+    ).toContainText('Heading');
+    await expect(page).toHaveScreenshot('emaileditor-selected-block.png');
+  });
+
+  test('EmailEditor - Mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoEditor(page);
+    await expect(page).toHaveScreenshot('emaileditor-mobile.png');
   });
 });

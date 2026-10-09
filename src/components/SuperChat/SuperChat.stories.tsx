@@ -772,3 +772,117 @@ export const StreamingResponse: Story = {
   },
   render: (args) => <StreamingPanel {...args} />,
 };
+
+// Composer agent + model selectors. Host-owned state: the agent list, the
+// models each agent allows, and the selection. Switching agents resets the
+// model to that agent's default; a simulated reply streams with a stop button.
+const selectorAgents = [
+  { id: 'triage', label: 'Triage Agent', description: 'Intake and routing' },
+  { id: 'scribe', label: 'Scribe', description: 'Visit notes' },
+];
+
+const selectorModels: Record<
+  string,
+  { provider: string; model: string; label: string }[]
+> = {
+  triage: [
+    { provider: 'anthropic', model: 'claude-opus-5', label: 'claude-opus-5' },
+    {
+      provider: 'anthropic',
+      model: 'claude-sonnet-5-5',
+      label: 'claude-sonnet-5-5',
+    },
+  ],
+  scribe: [{ provider: 'openai', model: 'gpt-5.2', label: 'gpt-5.2' }],
+};
+
+function ComposerSelectorsPanel() {
+  const [convo, setConvo] = React.useState<SuperChatConversation>({
+    id: 'selectors',
+    title: 'Ask an agent',
+    participants: [
+      { id: 'u1', kind: 'human', name: 'Dr. Alice Reyes' },
+      { id: 'triage', kind: 'agent', name: 'Triage Agent', color: '#2563eb' },
+      { id: 'scribe', kind: 'agent', name: 'Scribe', color: '#0e7490' },
+    ],
+    thread: [
+      {
+        id: 'w1',
+        participantId: 'triage',
+        text: 'Pick an agent and model below, then ask a question.',
+        time: '2026-06-07T09:00:00Z',
+      },
+    ],
+  });
+  const [agent, setAgent] = React.useState('triage');
+  const [model, setModel] = React.useState(selectorModels.triage[0]);
+  const [streaming, setStreaming] = React.useState(false);
+  const timer = React.useRef<number | undefined>(undefined);
+  const models = selectorModels[agent];
+
+  const stop = () => {
+    window.clearTimeout(timer.current);
+    setStreaming(false);
+    setConvo((prev) => ({
+      ...prev,
+      thread: prev.thread.map((m) =>
+        m.status === 'streaming' ? { ...m, status: 'complete' } : m
+      ),
+    }));
+  };
+
+  return (
+    <SuperChat
+      conversation={convo}
+      currentParticipantId="u1"
+      placeholder="Ask the selected agent…"
+      allowAttachments={false}
+      agents={selectorAgents}
+      selectedAgent={agent}
+      onAgentChange={(id) => {
+        setAgent(id);
+        setModel(selectorModels[id][0]);
+      }}
+      modelSelectorProps={
+        models.length > 1
+          ? {
+              models,
+              value: model,
+              onChange: (v) => setModel({ ...model, ...v }),
+            }
+          : undefined
+      }
+      isStreaming={streaming}
+      onStop={stop}
+      onMessageSent={(text) => {
+        const now = Date.now();
+        const replyId = `r-${now}`;
+        setConvo((prev) => ({
+          ...prev,
+          thread: [
+            ...prev.thread,
+            {
+              id: `u-${now}`,
+              participantId: 'u1',
+              text,
+              time: new Date(now).toISOString(),
+            },
+            {
+              id: replyId,
+              participantId: agent,
+              text: `Answering with **${model.model}**…`,
+              status: 'streaming',
+              time: new Date(now + 1).toISOString(),
+            },
+          ],
+        }));
+        setStreaming(true);
+        timer.current = window.setTimeout(stop, 2500);
+      }}
+    />
+  );
+}
+
+export const ComposerSelectors: Story = {
+  render: () => <ComposerSelectorsPanel />,
+};

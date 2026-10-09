@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Components/Record details/Overview" />
+
+# Record details
+
+> **The pieces that describe one record** — a contact, company, clinic, patient or deal.
+> `RecordHeader` names it, `PropertyList` lists its fields, and the rest add the details a
+> record page keeps needing: who's here, what's hidden, how complete it is, how it's rated.
+
+## Which one?
+
+| Component                                                               | Use it when                                                                  | Not when                                                                                     |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [RecordHeader](?path=/docs/record-details-recordheader--docs)           | The top of a record page: avatar or logo, name, status badges, meta, actions | A page that isn't about one record — `PageHeader`; a patient — `PatientHeader`               |
+| [PropertyList](?path=/docs/record-details-propertylist--docs)           | Label/value fields, optionally editable in place, copyable or grouped        | Rows the user sorts or filters — DataVis NITRO; a form submitted at once — form inputs       |
+| [AvatarGroup](?path=/docs/record-details-avatargroup--docs)             | Several people at once — owners, participants, who is viewing or editing     | One person — `Avatar`                                                                        |
+| [PhiMask](?path=/docs/record-details-phimask--docs)                     | A sensitive value (SSN, DOB, member ID) that stays hidden until revealed     | Access control — masking is display only; the server must not send what the user may not see |
+| [CompletenessMeter](?path=/docs/record-details-completenessmeter--docs) | Showing how much of a record is filled in and what's missing                 | Task progress over time — `Progress` / `ActionPlan`                                          |
+| [Rating](?path=/docs/record-details-rating--docs)                       | A star score, read-only or as an input                                       | A numeric metric — `Badge` or a stat                                                         |
+| [ReviewCard](?path=/docs/record-details-reviewcard--docs)               | One review with author, date, rating, body and an optional reply             | A feed of mixed events — `ActivityFeed`                                                      |
+
+## How they fit together
+
+- `RecordHeader` takes `AvatarGroup` in its `presence` slot to show who else has the record open.
+- `PropertyList` uses `InlineEdit` for editable fields and `CopyButton` for copyable ones; put a
+  `PhiMask` in an item's `render` to hide a sensitive value.
+- On a full page, these sit inside [RecordLayout](?path=/docs/records-recordlayout--docs):
+  `RecordHeader` in `header`, `PropertyList` in `sidebar`.
+
+## Shared limitations
+
+- Default strings are English; every component takes a `labels` prop, and none reads a
+  translation context.
+- Editing in `PropertyList` is per field: each save calls `onSave(key, value)`, and a rejected
+  promise restores the previous value.
+- `PhiMask` keeps the hidden value out of the DOM, but the value is still in your JavaScript.

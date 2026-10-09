@@ -75,6 +75,11 @@ The host owns the HTML string and is responsible for sanitising it before storag
           why: 'RichTextEditor when the note needs bold/lists/alignment, merge variables or dictation; Textarea for plain multi-line text.',
         },
         {
+          type: 'alternative to',
+          target: 'editors-emaileditor',
+          why: 'RichTextEditor for a single formatted HTML body; EmailEditor when the message needs layout blocks and is sent as an email.',
+        },
+        {
           type: 'uses',
           target: 'choice-inputs-dropdown',
           why: 'The searchable Variables menu is a Dropdown with DropdownLabel groups and DropdownItem entries.',

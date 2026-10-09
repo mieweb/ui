@@ -5,6 +5,7 @@ import {
   renderHook,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CollabStatus } from './CollabStatus';
@@ -25,6 +26,22 @@ describe('CollabStatus', () => {
     expect(screen.getByRole('button')).toHaveTextContent(
       'Ann, Bo (2) are editing'
     );
+  });
+
+  it('counts a person as editing unless every window is viewing', () => {
+    render(
+      <CollabStatus
+        connected
+        peers={[
+          { name: 'Ann' },
+          { name: 'Ann', mode: 'viewing' },
+          { name: 'Bo', mode: 'viewing' },
+          { name: 'Bo', mode: 'viewing' },
+        ]}
+      />
+    );
+    expect(screen.getByRole('button')).toHaveTextContent('Ann (2) is editing');
+    expect(screen.getByRole('button')).not.toHaveTextContent('Bo');
   });
 
   it('shows "Connecting…" before the initial sync', () => {
@@ -50,8 +67,36 @@ describe('CollabStatus', () => {
 
     const panel = await screen.findByRole('dialog');
     expect(panel).toHaveTextContent('In the room (2)');
-    expect(panel).toHaveTextContent('Ann');
-    expect(panel).toHaveTextContent('Bo');
+    const list = within(panel).getByRole('list', { name: 'In the room (2)' });
+    expect(within(list).getByRole('img', { name: 'Ann' })).toBeTruthy();
+    expect(within(list).getByRole('img', { name: 'Bo' })).toBeTruthy();
+  });
+
+  it('shows peer modes as avatar presence and only counts editors as editing', async () => {
+    const user = userEvent.setup();
+    render(
+      <CollabStatus
+        connected
+        peers={[
+          { name: 'Ann', mode: 'viewing' },
+          { name: 'Bo', mode: 'viewing' },
+          { name: 'Bo', mode: 'editing' },
+        ]}
+      />
+    );
+
+    const trigger = screen.getByRole('button');
+    expect(trigger).toHaveTextContent('Bo (2) is editing');
+    expect(trigger).not.toHaveTextContent('Ann');
+
+    await user.click(trigger);
+    const panel = await screen.findByRole('dialog');
+    expect(
+      within(panel).getByRole('img', { name: 'Bo (2) is editing' })
+    ).toBeTruthy();
+    expect(
+      within(panel).getByRole('img', { name: 'Ann is viewing' })
+    ).toBeTruthy();
   });
 
   it('says so when nobody else is in the room', async () => {
