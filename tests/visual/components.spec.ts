@@ -723,7 +723,10 @@ test.describe('Visual Regression Tests - Core Components', () => {
 
   // ProviderSearchFilters active-filter chips render removable Badges (#549)
   test('ProviderSearchFilters - Active filters', async ({ page }) => {
-    await gotoStory(page, 'providers-providersearchfilters--active-filters-demo');
+    await gotoStory(
+      page,
+      'providers-providersearchfilters--active-filters-demo'
+    );
     await expect(page).toHaveScreenshot(
       'providersearchfilters-active-filters.png'
     );
@@ -1248,5 +1251,43 @@ test.describe('Visual Regression Tests - RichEditor (kerebron.css)', () => {
     await expect(page.locator('.kb-editor ul')).toHaveCount(2);
     await expect(page.locator('.kb-editor ul ul')).toHaveCount(0);
     await expect(page.locator('.kb-editor ol')).toHaveCount(1);
+  });
+});
+
+test.describe('Visual Regression Tests - EmailEditor', () => {
+  const story = 'editors-emaileditor--default';
+
+  async function gotoEditor(page: Page, globals?: string) {
+    await gotoStory(page, story, { globals });
+    // Text blocks are sanitised after mount, so wait for their content.
+    await page.getByText('Here is what shipped').waitFor({ state: 'visible' });
+  }
+
+  test('EmailEditor - Desktop (light)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await expect(page).toHaveScreenshot('emaileditor-desktop-light.png');
+  });
+
+  test('EmailEditor - Desktop (dark)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page, 'theme:dark');
+    await expect(page).toHaveScreenshot('emaileditor-desktop-dark.png');
+  });
+
+  test('EmailEditor - Selected block settings', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByRole('heading', { name: 'Faster scheduling' }).click();
+    await expect(
+      page.getByRole('complementary', { name: 'Block settings' })
+    ).toContainText('Heading');
+    await expect(page).toHaveScreenshot('emaileditor-selected-block.png');
+  });
+
+  test('EmailEditor - Mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoEditor(page);
+    await expect(page).toHaveScreenshot('emaileditor-mobile.png');
   });
 });

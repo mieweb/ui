@@ -50,6 +50,7 @@ export const entries = {
     'src/components/CustomizableDashboard/index.ts',
   'components/DateInput/index': 'src/components/DateInput/index.ts',
   'components/Dropdown/index': 'src/components/Dropdown/index.ts',
+  'components/EmailEditor/index': 'src/components/EmailEditor/index.ts',
   'components/FilterSummaryBar/index':
     'src/components/FilterSummaryBar/index.ts',
   'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
