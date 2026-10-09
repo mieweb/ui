@@ -23,7 +23,11 @@ export interface EmailHeadingBlock extends EmailBlockBase {
 
 export interface EmailTextBlock extends EmailBlockBase {
   type: 'text';
-  /** HTML. Sanitised by `renderEmailMjml`, never by the editor. */
+  /**
+   * HTML. Existing values are stored as-is and sanitised on every output
+   * (editing surface, canvas preview, `renderEmailMjml`); only HTML pasted or
+   * dropped into the editor is sanitised before it is stored.
+   */
   content: string;
   alignment?: EmailAlignment;
   color?: string;

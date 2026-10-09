@@ -44,15 +44,20 @@ export function escapeHtml(value: string): string {
  * rejected: its safety depends on the expansion, so hosts composing URLs from
  * tokens must revalidate after merge expansion.
  */
-export function safeUrl(value: string | undefined): string {
-  const url = (value ?? '').trim();
+export function isSafeUrl(value: string | undefined): boolean {
   // After the leading slash, a second slash, backslash or whitespace would let
   // URL parsers (which strip tabs/newlines and treat `\` as `/`) read the path
   // as a network-path URL on an attacker's origin. The merge-token branch is
   // anchored to the end so `{{empty}}javascript:...` cannot smuggle a scheme.
-  return /^(https?:|mailto:|tel:|#|\/(?![/\\\s])|\{\{[^{}]*\}\}$)/i.test(url)
-    ? escapeHtml(url)
-    : '#';
+  return /^(https?:|mailto:|tel:|#|\/(?![/\\\s])|\{\{[^{}]*\}\}$)/i.test(
+    (value ?? '').trim()
+  );
+}
+
+/** `value` when `isSafeUrl` accepts it (HTML-escaped for interpolation), else `#`. */
+export function safeUrl(value: string | undefined): string {
+  const url = (value ?? '').trim();
+  return isSafeUrl(url) ? escapeHtml(url) : '#';
 }
 
 // Hex colours only come in 3, 4, 6 or 8 digits; 5 or 7 would be invalid CSS.
@@ -101,9 +106,14 @@ function px(value: unknown, fallback: number, max = 2000): number {
 
 const SANITIZE_CONFIG = {
   FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button'],
-  // Host CSS classes (e.g. `fixed inset-0`) and ids would escape the style allowlist.
-  FORBID_ATTR: ['class', 'id'],
+  // Host CSS classes (e.g. `fixed inset-0`) and ids would escape the style
+  // allowlist; srcset/xlink:href would escape the URL policy below.
+  FORBID_ATTR: ['class', 'id', 'srcset', 'xlink:href'],
 };
+
+// DOMPurify's default URI policy is looser than this component's (it permits
+// protocol-relative URLs, ftp:, cid:, ...), so URL attributes get `isSafeUrl`.
+const URL_ATTRIBUTES = new Set(['href', 'src', 'background', 'poster']);
 
 // Formatting only: anything that can position, layer or load (url()) is dropped.
 const SAFE_STYLE_PROPERTY =
@@ -138,6 +148,11 @@ function getPurifier() {
   const instance = DOMPurify(window);
   if (!instance.isSupported) return (purifier = null);
   instance.addHook('uponSanitizeAttribute', (_node, data) => {
+    if (URL_ATTRIBUTES.has(data.attrName)) {
+      // Validate only; DOMPurify escapes attribute values when serialising.
+      if (!isSafeUrl(data.attrValue)) data.keepAttr = false;
+      return;
+    }
     if (data.attrName !== 'style') return;
     data.attrValue = sanitizeInlineStyle(data.attrValue);
     if (!data.attrValue) data.keepAttr = false;

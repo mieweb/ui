@@ -14,8 +14,11 @@
   `validationLevel: 'strict'` after touching the renderer — MJML rejects attributes the
   browser preview would happily accept (e.g. `%` widths on `mj-image`, `css-inline` on
   `mj-table`).
-- **Sanitising is the renderer's job, not the editor's.** The editor stores raw HTML for
-  `text`/`html` blocks; the canvas and `renderEmailMjml` both sanitise on output. Every
-  interpolated colour, URL and gradient goes through `safeColor` / `safeUrl` / `safeGradient`.
+- **Sanitising happens on output, through one policy.** Stored `text`/`html` content is
+  not normalised in place; the editing surface, canvas preview and `renderEmailMjml` each
+  sanitise it with `sanitizeEmailHtml` on the way out, and HTML pasted or dropped into
+  `RichTextEditor` passes the same policy before it is stored. Every interpolated colour,
+  URL and gradient goes through `safeColor` / `safeUrl` / `safeGradient`, and the policy
+  applies `isSafeUrl` to URL attributes inside the markup.
 - **Drag is pointer-only by design**, matching `BoardView`: keyboard reordering is the
   Move up/down buttons, announced through `useLiveAnnouncement`.

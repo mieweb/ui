@@ -155,6 +155,25 @@ describe('renderEmailMjml', () => {
     expect(mjml).not.toContain('onerror');
   });
 
+  it('applies the URL policy inside text and html markup', () => {
+    // DOMPurify's default URI policy would keep all of these.
+    const hostile =
+      '<a href="//evil.example/a">a</a>' +
+      '<a href="ftp://evil.example/b">b</a>' +
+      '<img src="cid:evil" alt="c">' +
+      '<a href="https://good.example/d">d</a>' +
+      '<a href="/newsletter/view">e</a>';
+    for (const block of [
+      { ...createEmailBlock('html'), html: hostile },
+      { ...createEmailBlock('text'), content: hostile },
+    ]) {
+      const mjml = renderEmailMjml(tree(block));
+      expect(mjml).not.toContain('evil');
+      expect(mjml).toContain('https://good.example/d');
+      expect(mjml).toContain('/newsletter/view');
+    }
+  });
+
   it('keeps formatting styles but drops ones that can cover the page', () => {
     const html = {
       ...createEmailBlock('html'),
