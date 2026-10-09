@@ -124,6 +124,16 @@ describe('Assessment actions', () => {
     ).toHaveAttribute('draggable', 'false');
   });
 
+  it('does not render an empty concern toolbar', () => {
+    renderAssessment({ rowActions: ['move'], onAction: vi.fn() });
+
+    expect(
+      screen.queryByRole('toolbar', {
+        name: 'Actions for Essential hypertension',
+      })
+    ).not.toBeInTheDocument();
+  });
+
   it('limits existing order controls to configured order actions', () => {
     const { container } = renderAssessment({
       orders,
@@ -137,14 +147,15 @@ describe('Assessment actions', () => {
     expect(
       screen.queryByRole('toolbar', { name: 'Actions for Lisinopril 10 mg' })
     ).not.toBeInTheDocument();
-    expect(container.querySelector('[data-order-id="order-1"]')).not.toHaveAttribute(
-      'draggable'
-    );
+    expect(
+      container.querySelector('[data-order-id="order-1"]')
+    ).not.toHaveAttribute('draggable');
   });
 
   it('limits the global add row to configured modes', () => {
-    const renderOrderSearch: NonNullable<AssessmentProps['renderOrderSearch']> =
-      () => <input aria-label="Assessment search" />;
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = () => <input aria-label="Assessment search" />;
     renderAssessment({
       addModes: ['problem'],
       defaultAddMode: 'problem',
@@ -162,6 +173,54 @@ describe('Assessment actions', () => {
     expect(
       screen.queryByRole('option', { name: 'Add (auto)' })
     ).not.toBeInTheDocument();
+  });
+
+  it('requires each configured add mode to have executable callbacks', () => {
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = () => <input aria-label="Assessment search" />;
+    renderAssessment({
+      addModes: ['auto', 'problem'],
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    });
+
+    expect(
+      screen.queryByRole('form', { name: 'Add concern or order' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('uses an available add mode when addModes changes', () => {
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = () => <input aria-label="Assessment search" />;
+    const callbacks = {
+      onAddAssessment: vi.fn(),
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    };
+    const { rerender } = renderAssessment({
+      ...callbacks,
+      addModes: ['order', 'problem'],
+      defaultAddMode: 'order',
+    });
+
+    expect(screen.getByRole('combobox', { name: 'What to add' })).toHaveValue(
+      'order'
+    );
+
+    rerender(
+      <Assessment
+        concerns={concerns}
+        items={items}
+        addModes={['problem']}
+        {...callbacks}
+      />
+    );
+
+    expect(screen.getByRole('combobox', { name: 'What to add' })).toHaveValue(
+      'problem'
+    );
   });
 
   it('gives a nested order toolbar precedence over concern actions', () => {
