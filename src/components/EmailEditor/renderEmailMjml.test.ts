@@ -74,6 +74,24 @@ describe('renderEmailMjml', () => {
     expect(mjml).not.toContain('javascript:');
   });
 
+  it('only accepts a complete merge token, not a token prefix', () => {
+    const button = (url: string) => ({ ...createEmailBlock('button'), url });
+    // If {{empty}} expands to '' at send time, the rest would become the URL.
+    for (const sneaky of [
+      '{{empty}}javascript:alert(1)',
+      '{{empty}}//evil.example/path',
+      '{{base_url}}/path',
+    ]) {
+      const mjml = renderEmailMjml(tree(button(sneaky)));
+      expect(mjml).toContain('href="#"');
+      expect(mjml).not.toContain('evil.example');
+      expect(mjml).not.toContain('javascript:');
+    }
+    expect(renderEmailMjml(tree(button('{{unsubscribe_url}}')))).toContain(
+      'href="{{unsubscribe_url}}"'
+    );
+  });
+
   it('keeps root-relative URLs but rejects network-path lookalikes', () => {
     const button = (url: string) => ({ ...createEmailBlock('button'), url });
     expect(renderEmailMjml(tree(button('/newsletter/view')))).toContain(

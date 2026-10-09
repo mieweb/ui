@@ -38,13 +38,19 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-/** Allows http(s), mailto, tel, anchors, root-relative paths and `{{merge}}` tokens. */
+/**
+ * Allows http(s), mailto, tel, anchors, root-relative paths and a single
+ * complete `{{merge}}` token. A token with a suffix (`{{base}}/path`) is
+ * rejected: its safety depends on the expansion, so hosts composing URLs from
+ * tokens must revalidate after merge expansion.
+ */
 export function safeUrl(value: string | undefined): string {
   const url = (value ?? '').trim();
   // After the leading slash, a second slash, backslash or whitespace would let
   // URL parsers (which strip tabs/newlines and treat `\` as `/`) read the path
-  // as a network-path URL on an attacker's origin.
-  return /^(https?:|mailto:|tel:|#|\/(?![/\\\s])|\{\{)/i.test(url)
+  // as a network-path URL on an attacker's origin. The merge-token branch is
+  // anchored to the end so `{{empty}}javascript:...` cannot smuggle a scheme.
+  return /^(https?:|mailto:|tel:|#|\/(?![/\\\s])|\{\{[^{}]*\}\}$)/i.test(url)
     ? escapeHtml(url)
     : '#';
 }
