@@ -845,6 +845,18 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     await gotoStory(page, 'navigation-megamenu--grouped', {
       globals: 'direction:rtl',
     });
+    // The 5% page-diff tolerance can swallow icon-sized regressions, so
+    // assert the mirror directly. Tailwind 4 renders -scale-x-100 via the
+    // CSS `scale` property, not `transform`.
+    const icons = page.locator(
+      'svg.lucide-chevron-right, svg.lucide-arrow-right'
+    );
+    await expect(icons).toHaveCount(3);
+    for (const icon of await icons.all()) {
+      expect(await icon.evaluate((el) => getComputedStyle(el).scale)).toBe(
+        '-1 1'
+      );
+    }
     await expect(page).toHaveScreenshot('megamenu-grouped-rtl.png', {
       animations: 'disabled',
     });
@@ -894,6 +906,21 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     await gotoStory(page, 'data-display-yeartimeline--pinned-to-september', {
       globals: 'direction:rtl',
     });
+    // The 5% page-diff tolerance can swallow marker-only regressions, so
+    // assert the geometry directly: dropping either rtl:translate-x
+    // compensation would skew one marker off the shared September line.
+    const centerX = (slot: string) =>
+      page
+        .locator(`[data-slot='${slot}']`)
+        .evaluate((el) =>
+          ((r) => r.left + r.width / 2)(el.getBoundingClientRect())
+        );
+    expect(
+      Math.abs(
+        (await centerX('year-timeline-today')) -
+          (await centerX('year-timeline-playhead'))
+      )
+    ).toBeLessThanOrEqual(1.5);
     await expect(page).toHaveScreenshot(
       'yeartimeline-pinned-september-rtl.png',
       {
@@ -935,6 +962,13 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     await gotoStory(page, 'showcase-radialexplorer--static', {
       globals: 'direction:rtl',
     });
+    // Direct mirror assertion — the icon is far smaller than the 5%
+    // page-diff tolerance (Tailwind 4 maps -scale-x-100 to CSS `scale`).
+    const ctaArrow = page.locator('svg.lucide-arrow-right');
+    await expect(ctaArrow).toHaveCount(1);
+    expect(await ctaArrow.evaluate((el) => getComputedStyle(el).scale)).toBe(
+      '-1 1'
+    );
     await expect(page).toHaveScreenshot('radialexplorer-static-rtl.png', {
       animations: 'disabled',
     });
