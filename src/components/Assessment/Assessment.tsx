@@ -215,8 +215,11 @@ export interface AssessmentItem {
   note?: string;
 }
 
-/** Row actions on an assessed problem. */
+/** Actions available on an assessed problem. */
 export type AssessmentAction = 'refine' | 'revise' | 'add-order';
+export type AssessmentRowAction = AssessmentAction | 'remove' | 'move';
+export type AssessmentOrderAction = 'edit' | 'remove' | 'move';
+export type AssessmentAddMode = 'auto' | 'problem' | 'order';
 
 export interface AssessmentProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -236,6 +239,12 @@ export interface AssessmentProps extends Omit<
   onShowPlanChange?: (show: boolean) => void;
   /** Called when a row action is clicked */
   onAction?: (item: AssessmentItem, action: AssessmentAction) => void;
+  /** Actions available on assessment rows. */
+  rowActions?: readonly AssessmentRowAction[];
+  /** Actions available on existing order rows. */
+  orderActions?: readonly AssessmentOrderAction[];
+  /** Modes available in the global add row. */
+  addModes?: readonly AssessmentAddMode[];
   /** Remove a problem from this visit's assessment, not its longitudinal record. */
   onRemoveAssessment?: (item: AssessmentItem) => void;
   /**
@@ -301,7 +310,7 @@ export interface AssessmentProps extends Omit<
    * Initial mode of the unified add row's "What to add" selector.
    * Default 'auto' (the pick's coding system decides concern vs order).
    */
-  defaultAddMode?: 'auto' | 'problem' | 'order';
+  defaultAddMode?: AssessmentAddMode;
   /**
    * Restrict concern searches to billable (leaf) ICD-10 codes — category
    * roots (E11) and SNOMED synonyms are dropped. Forwarded to
@@ -329,8 +338,10 @@ export const ORDER_TYPE_META: Record<
   referral: { label: 'Referral', icon: SendIcon },
 };
 
+type AssessmentToolbarAction = 'refine' | 'revise' | 'add-order';
+
 const ACTION_META: Record<
-  AssessmentAction,
+  AssessmentToolbarAction,
   { label: string; icon: React.ComponentType<{ size?: number | string }> }
 > = {
   refine: { label: 'Refine (more specific)', icon: PencilIcon },
@@ -835,6 +846,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       showPlan = true,
       onShowPlanChange,
       onAction,
+      rowActions = [
+        ...Object.keys(ACTION_META),
+        'remove',
+        'move',
+      ] as AssessmentRowAction[],
+      orderActions = ['edit', 'remove', 'move'],
+      addModes,
       onRemoveAssessment,
       onAddOrder,
       onAddAssessment,
@@ -856,13 +874,31 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
   ) => {
     const instanceId = React.useId();
     const [addingFor, setAddingFor] = React.useState<string | null>(null);
-    const [addMode, setAddMode] = React.useState<'auto' | 'problem' | 'order'>(
-      defaultAddMode
-    );
+    const requestedAddModes: readonly AssessmentAddMode[] = addModes ?? [
+      'auto',
+      'problem',
+      'order',
+    ];
+    const availableAddModes = requestedAddModes.filter((mode) => {
+      if (mode === 'problem') return Boolean(onAddAssessment);
+      if (mode === 'order') return Boolean(onAddOrder);
+      return Boolean(onAddAssessment && onAddOrder);
+    });
+    const initialAddMode = availableAddModes.includes(defaultAddMode)
+      ? defaultAddMode
+      : (availableAddModes[0] ?? defaultAddMode);
+    const [selectedAddMode, setSelectedAddMode] =
+      React.useState<AssessmentAddMode>(initialAddMode);
+    const addMode = availableAddModes.includes(selectedAddMode)
+      ? selectedAddMode
+      : (availableAddModes[0] ?? defaultAddMode);
     /** Free text typed in auto mode — we must ask what it is before adding */
     const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(
       null
     );
+    React.useEffect(() => {
+      if (addMode !== 'auto') setPendingFreeText(null);
+    }, [addMode]);
     // clears-then-sets so repeated identical messages re-announce
     const [announcement, setAnnouncement] = useLiveAnnouncement();
 
@@ -892,10 +928,21 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       (o) => !o.concernId || !items.some((i) => i.concernId === o.concernId)
     );
 
+    const toolbarActions = rowActions.filter(
+      (action): action is AssessmentToolbarAction =>
+        action in ACTION_META &&
+        (action === 'add-order'
+          ? Boolean(onAddOrder || onAction)
+          : Boolean(onAction))
+    );
+    const showConcernToolbar =
+      toolbarActions.length > 0 ||
+      (rowActions.includes('remove') && Boolean(onRemoveAssessment));
+
     const drag = useDragReorder({
       ids: items.map((i) => i.concernId),
       onReorder:
-        readOnly || !onReorderItems
+        readOnly || !rowActions.includes('move') || !onReorderItems
           ? undefined
           : (ids) => {
               setAnnouncement('Assessment concerns reordered');
@@ -919,48 +966,54 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     const orderControls: OrderControls | undefined = readOnly
       ? undefined
       : {
-          moveWithin: onReorderOrders
-            ? (order, dir) => {
-                const planIds = orders
-                  .filter((o) => o.concernId === order.concernId)
-                  .map((o) => o.orderId);
-                const i = planIds.indexOf(order.orderId);
-                const target = planIds[i + dir];
-                if (!target) return;
-                onReorderOrders(
-                  reorderIds(
-                    orders.map((o) => o.orderId),
-                    order.orderId,
-                    target,
-                    dir === 1
-                  )
-                );
-                setAnnouncement(
-                  `${order.display} moved ${dir === -1 ? 'up' : 'down'}`
-                );
-              }
+          moveWithin:
+            orderActions.includes('move') && onReorderOrders
+              ? (order, dir) => {
+                  const planIds = orders
+                    .filter((o) => o.concernId === order.concernId)
+                    .map((o) => o.orderId);
+                  const i = planIds.indexOf(order.orderId);
+                  const target = planIds[i + dir];
+                  if (!target) return;
+                  onReorderOrders(
+                    reorderIds(
+                      orders.map((o) => o.orderId),
+                      order.orderId,
+                      target,
+                      dir === 1
+                    )
+                  );
+                  setAnnouncement(
+                    `${order.display} moved ${dir === -1 ? 'up' : 'down'}`
+                  );
+                }
+              : undefined,
+          moveToProblem:
+            orderActions.includes('move') && onLinkOrder
+              ? (order, concernId) => {
+                  onLinkOrder(order, concernId);
+                  setAnnouncement(
+                    `${order.display} moved to ${problemLabel(concernId)}`
+                  );
+                }
+              : undefined,
+          edit:
+            orderActions.includes('edit') && onEditOrder
+              ? (order, changes) => {
+                  onEditOrder(order, changes);
+                  setAnnouncement(`${changes.display} updated`);
+                }
+              : undefined,
+          editStart: orderActions.includes('edit')
+            ? onEditOrderStart
             : undefined,
-          moveToProblem: onLinkOrder
-            ? (order, concernId) => {
-                onLinkOrder(order, concernId);
-                setAnnouncement(
-                  `${order.display} moved to ${problemLabel(concernId)}`
-                );
-              }
-            : undefined,
-          edit: onEditOrder
-            ? (order, changes) => {
-                onEditOrder(order, changes);
-                setAnnouncement(`${changes.display} updated`);
-              }
-            : undefined,
-          editStart: onEditOrderStart,
-          remove: onRemoveOrder
-            ? (order) => {
-                onRemoveOrder(order);
-                setAnnouncement(`${order.display} removed`);
-              }
-            : undefined,
+          remove:
+            orderActions.includes('remove') && onRemoveOrder
+              ? (order) => {
+                  onRemoveOrder(order);
+                  setAnnouncement(`${order.display} removed`);
+                }
+              : undefined,
           adjacentProblem: (order, dir) => {
             const i = items.findIndex((it) => it.concernId === order.concernId);
             const adj = items[i + dir];
@@ -977,7 +1030,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     // ---- Order-level drag & drop: reorder within a plan, or move to another
     // problem by dropping on its block (re-link) or between its orders. ----
     const orderDragEnabled =
-      !readOnly && Boolean(onReorderOrders || onLinkOrder);
+      !readOnly &&
+      orderActions.includes('move') &&
+      Boolean(onReorderOrders || onLinkOrder);
     const [draggingOrderId, setDraggingOrderId] = React.useState<string | null>(
       null
     );
@@ -1209,61 +1264,51 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     )}
                     <CodingChips coding={assertion.coding} />
 
-                    {!readOnly &&
-                      (onAction || onAddOrder || onRemoveAssessment) && (
-                        <RowActionToolbar
-                          label={`Actions for ${assertion.text}`}
-                          align="top"
-                          className={cn(
-                            'pointer-fine:group-has-[[data-order-id]:hover]:pointer-events-none',
-                            'pointer-fine:group-has-[[data-order-id]:hover]:opacity-0',
-                            'pointer-fine:group-has-[[data-order-id]:focus-within]:pointer-events-none',
-                            'pointer-fine:group-has-[[data-order-id]:focus-within]:opacity-0'
-                          )}
-                        >
-                          {(Object.keys(ACTION_META) as AssessmentAction[]).map(
-                            (action) => {
-                              const meta = ACTION_META[action];
-                              if (action !== 'add-order' && !onAction)
-                                return null;
-                              if (
-                                action === 'add-order' &&
-                                !onAddOrder &&
-                                !onAction
-                              )
-                                return null;
-                              return (
-                                <RowIconButton
-                                  key={action}
-                                  label={meta.label}
-                                  icon={meta.icon}
-                                  size="sm"
-                                  expanded={
-                                    action === 'add-order' && onAddOrder
-                                      ? addingFor === item.concernId
-                                      : undefined
-                                  }
-                                  controls={
-                                    action === 'add-order' && onAddOrder
-                                      ? addOrderFormId
-                                      : undefined
-                                  }
-                                  onClick={() => {
-                                    if (action === 'add-order' && onAddOrder) {
-                                      setAddingFor((prev) =>
-                                        prev === item.concernId
-                                          ? null
-                                          : item.concernId
-                                      );
-                                    } else {
-                                      onAction?.(item, action);
-                                    }
-                                  }}
-                                />
-                              );
-                            }
-                          )}
-                          {onRemoveAssessment && (
+                    {!readOnly && showConcernToolbar && (
+                      <RowActionToolbar
+                        label={`Actions for ${assertion.text}`}
+                        align="top"
+                        className={cn(
+                          'pointer-fine:group-has-[[data-order-id]:hover]:pointer-events-none',
+                          'pointer-fine:group-has-[[data-order-id]:hover]:opacity-0',
+                          'pointer-fine:group-has-[[data-order-id]:focus-within]:pointer-events-none',
+                          'pointer-fine:group-has-[[data-order-id]:focus-within]:opacity-0'
+                        )}
+                      >
+                        {toolbarActions.map((action) => {
+                          const meta = ACTION_META[action];
+                          return (
+                            <RowIconButton
+                              key={action}
+                              label={meta.label}
+                              icon={meta.icon}
+                              size="sm"
+                              expanded={
+                                action === 'add-order' && onAddOrder
+                                  ? addingFor === item.concernId
+                                  : undefined
+                              }
+                              controls={
+                                action === 'add-order' && onAddOrder
+                                  ? addOrderFormId
+                                  : undefined
+                              }
+                              onClick={() => {
+                                if (action === 'add-order' && onAddOrder) {
+                                  setAddingFor((prev) =>
+                                    prev === item.concernId
+                                      ? null
+                                      : item.concernId
+                                  );
+                                } else {
+                                  onAction?.(item, action);
+                                }
+                              }}
+                            />
+                          );
+                        })}
+                        {rowActions.includes('remove') &&
+                          onRemoveAssessment && (
                             <RowIconButton
                               label={`Remove ${assertion.text} from assessment`}
                               icon={TrashIcon}
@@ -1276,8 +1321,8 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                               }}
                             />
                           )}
-                        </RowActionToolbar>
-                      )}
+                      </RowActionToolbar>
+                    )}
                   </div>
 
                   {item.note && (
@@ -1326,6 +1371,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               adds an (unlinked) order — auto-detected from the coding system,
               or forced via the mode dropdown. Free text asks (in auto mode). */}
           {!readOnly &&
+            availableAddModes.length > 0 &&
             effectiveRenderOrderSearch &&
             (onAddAssessment || onAddOrder) && (
               <div
@@ -1338,7 +1384,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   data-slot="select-trigger"
                   value={addMode}
                   onChange={(e) => {
-                    setAddMode(e.target.value as typeof addMode);
+                    setSelectedAddMode(e.target.value as typeof addMode);
                     setPendingFreeText(null);
                   }}
                   className={cn(
@@ -1346,11 +1392,15 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     'focus:ring-ring focus:ring-2 focus:outline-none'
                   )}
                 >
-                  <option value="auto">Add (auto)</option>
-                  {onAddAssessment && (
+                  {availableAddModes.includes('auto') && (
+                    <option value="auto">Add (auto)</option>
+                  )}
+                  {availableAddModes.includes('problem') && onAddAssessment && (
                     <option value="problem">Add concern</option>
                   )}
-                  {onAddOrder && <option value="order">Add order</option>}
+                  {availableAddModes.includes('order') && onAddOrder && (
+                    <option value="order">Add order</option>
+                  )}
                 </select>
                 <div className="min-w-64 flex-1">
                   {effectiveRenderOrderSearch({
@@ -1423,7 +1473,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 </div>
 
                 {/* Free text in auto mode: ask what it is */}
-                {pendingFreeText !== null && (
+                {addMode === 'auto' && pendingFreeText !== null && (
                   <div
                     role="group"
                     aria-label={`Add "${pendingFreeText}" as`}

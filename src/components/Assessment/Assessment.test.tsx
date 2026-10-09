@@ -103,6 +103,171 @@ describe('Assessment actions', () => {
     ).toBeInTheDocument();
   });
 
+  it('limits concern controls to configured row actions', () => {
+    const { container } = renderAssessment({
+      rowActions: ['remove'],
+      onAction: vi.fn(),
+      onRemoveAssessment: vi.fn(),
+      onReorderItems: vi.fn(),
+    });
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Remove Essential hypertension from assessment',
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /refine|revise|add order/i })
+    ).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-slot="assessment-problem"]')
+    ).toHaveAttribute('draggable', 'false');
+  });
+
+  it('does not render an empty concern toolbar', () => {
+    renderAssessment({ rowActions: ['move'], onAction: vi.fn() });
+
+    expect(
+      screen.queryByRole('toolbar', {
+        name: 'Actions for Essential hypertension',
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it('limits existing order controls to configured order actions', () => {
+    const { container } = renderAssessment({
+      orders,
+      orderActions: [],
+      onEditOrder: vi.fn(),
+      onRemoveOrder: vi.fn(),
+      onReorderOrders: vi.fn(),
+      onLinkOrder: vi.fn(),
+    });
+
+    expect(
+      screen.queryByRole('toolbar', { name: 'Actions for Lisinopril 10 mg' })
+    ).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-order-id="order-1"]')
+    ).not.toHaveAttribute('draggable');
+  });
+
+  it('limits the global add row to configured modes', () => {
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = () => <input aria-label="Assessment search" />;
+    renderAssessment({
+      addModes: ['problem'],
+      defaultAddMode: 'problem',
+      onAddAssessment: vi.fn(),
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    });
+
+    expect(
+      screen.getByRole('option', { name: 'Add concern' })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'Add order' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'Add (auto)' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('requires each configured add mode to have executable callbacks', () => {
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = () => <input aria-label="Assessment search" />;
+    renderAssessment({
+      addModes: ['auto', 'problem'],
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    });
+
+    expect(
+      screen.queryByRole('form', { name: 'Add concern or order' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('uses an available add mode when addModes changes', () => {
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = () => <input aria-label="Assessment search" />;
+    const callbacks = {
+      onAddAssessment: vi.fn(),
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    };
+    const { rerender } = renderAssessment({
+      ...callbacks,
+      addModes: ['order', 'problem'],
+      defaultAddMode: 'order',
+    });
+
+    expect(screen.getByRole('combobox', { name: 'What to add' })).toHaveValue(
+      'order'
+    );
+
+    rerender(
+      <Assessment
+        concerns={concerns}
+        items={items}
+        addModes={['problem']}
+        {...callbacks}
+      />
+    );
+
+    expect(screen.getByRole('combobox', { name: 'What to add' })).toHaveValue(
+      'problem'
+    );
+  });
+
+  it('clears pending free text when addModes disables auto mode', () => {
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = ({ onFreeText }) => (
+      <button type="button" onClick={() => onFreeText?.('uncoded entry')}>
+        Enter free text
+      </button>
+    );
+    const callbacks = {
+      onAddAssessment: vi.fn(),
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    };
+    const { rerender } = renderAssessment({
+      ...callbacks,
+      addModes: ['auto', 'problem'],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Enter free text' }));
+    expect(
+      screen.getByRole('group', { name: 'Add "uncoded entry" as' })
+    ).toBeInTheDocument();
+
+    rerender(
+      <Assessment
+        concerns={concerns}
+        items={items}
+        addModes={['problem']}
+        {...callbacks}
+      />
+    );
+    rerender(
+      <Assessment
+        concerns={concerns}
+        items={items}
+        addModes={['auto', 'problem']}
+        {...callbacks}
+      />
+    );
+
+    expect(
+      screen.queryByRole('group', { name: 'Add "uncoded entry" as' })
+    ).not.toBeInTheDocument();
+  });
+
   it('gives a nested order toolbar precedence over concern actions', () => {
     renderAssessment({
       orders,
