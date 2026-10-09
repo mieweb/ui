@@ -4,6 +4,7 @@ export {
   type EmailEditorProps,
 } from './EmailEditor';
 export {
+  createEmailHtmlSanitizer,
   renderEmailMjml,
   type RenderEmailMjmlOptions,
 } from './renderEmailMjml';

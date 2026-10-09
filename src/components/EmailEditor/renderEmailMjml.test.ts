@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  createEmailHtmlSanitizer,
   hasHeroCta,
   normalizeDesignSettings,
   renderEmailMjml,
@@ -172,6 +173,23 @@ describe('renderEmailMjml', () => {
       expect(mjml).toContain('https://good.example/d');
       expect(mjml).toContain('/newsletter/view');
     }
+  });
+
+  it('enforces the same policy from a caller-supplied window', () => {
+    // The test environment's global window is jsdom, exactly what a server host
+    // would hand to the factory.
+    const sanitize = createEmailHtmlSanitizer(window);
+    const hostile =
+      '<div class="fixed" id="app" style="position:fixed;inset:0;color:red">' +
+      '<a href="//evil.example/a">a</a>' +
+      '<a href="https://good.example/b">b</a></div>';
+    const clean = sanitize(hostile);
+    expect(clean).not.toMatch(/class=|id=|position|evil/);
+    expect(clean).toContain('color: red');
+    expect(clean).toContain('https://good.example/b');
+    const block = { ...createEmailBlock('html'), html: hostile };
+    const mjml = renderEmailMjml(tree(block), { sanitizeHtml: sanitize });
+    expect(mjml).not.toContain('evil');
   });
 
   it('keeps formatting styles but drops ones that can cover the page', () => {

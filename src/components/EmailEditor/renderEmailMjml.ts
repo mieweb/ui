@@ -15,8 +15,10 @@ import {
 export interface RenderEmailMjmlOptions {
   design?: EmailDesignSettings;
   /**
-   * Sanitises the HTML of `text` and `html` blocks. Defaults to DOMPurify, which
-   * needs a DOM — on a server pass your own (e.g. DOMPurify over jsdom).
+   * Sanitises the HTML of `text` and `html` blocks. Defaults to DOMPurify with
+   * the email policy, which needs a DOM — on a server pass
+   * `createEmailHtmlSanitizer(new JSDOM('').window)` so the same policy applies
+   * (vanilla DOMPurify over jsdom would enforce far less).
    */
   sanitizeHtml?: (html: string) => string;
   /** `href` of the footer's unsubscribe link. Defaults to `{{unsubscribe_url}}`. */
@@ -141,12 +143,7 @@ export function sanitizeInlineStyle(style: string): string {
 
 let purifier: ReturnType<typeof DOMPurify> | null | undefined;
 
-// A private instance, so the style hook never leaks into other DOMPurify users.
-function getPurifier() {
-  if (purifier !== undefined) return purifier;
-  if (typeof window === 'undefined') return null;
-  const instance = DOMPurify(window);
-  if (!instance.isSupported) return (purifier = null);
+function installEmailPolicy(instance: ReturnType<typeof DOMPurify>) {
   instance.addHook('uponSanitizeAttribute', (_node, data) => {
     if (URL_ATTRIBUTES.has(data.attrName)) {
       // Validate only; DOMPurify escapes attribute values when serialising.
@@ -157,7 +154,35 @@ function getPurifier() {
     data.attrValue = sanitizeInlineStyle(data.attrValue);
     if (!data.attrValue) data.keepAttr = false;
   });
-  return (purifier = instance);
+  return instance;
+}
+
+/**
+ * The email sanitation policy on a caller-supplied window, for environments
+ * without a global DOM: `createEmailHtmlSanitizer(new JSDOM('').window)`.
+ * Vanilla DOMPurify is NOT equivalent — it would keep class/id attributes,
+ * positioning styles and URL schemes this policy rejects.
+ */
+export function createEmailHtmlSanitizer(
+  win: Parameters<typeof DOMPurify>[0]
+): (html: string) => string {
+  const instance = DOMPurify(win);
+  if (!instance.isSupported) {
+    throw new Error(
+      'createEmailHtmlSanitizer: the supplied window cannot run DOMPurify.'
+    );
+  }
+  installEmailPolicy(instance);
+  return (html) => instance.sanitize(html, SANITIZE_CONFIG);
+}
+
+// A private instance, so the policy hook never leaks into other DOMPurify users.
+function getPurifier() {
+  if (purifier !== undefined) return purifier;
+  if (typeof window === 'undefined') return null;
+  const instance = DOMPurify(window);
+  if (!instance.isSupported) return (purifier = null);
+  return (purifier = installEmailPolicy(instance));
 }
 
 /** DOMPurify with the email policy, or `null` where there is no DOM. */
