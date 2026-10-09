@@ -274,6 +274,25 @@ describe('EmailEditor', () => {
     expect(container.querySelector('.fixed, #app')).toBeNull();
   });
 
+  it('sanitises pasted HTML with the same policy as stored content', () => {
+    const exec = vi.fn().mockReturnValue(true);
+    document.execCommand = exec; // jsdom has no execCommand
+    renderWithTheme(<Harness />);
+    fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
+    fireEvent.paste(screen.getByRole('textbox', { name: 'Content' }), {
+      clipboardData: {
+        getData: (type: string) =>
+          type === 'text/html'
+            ? '<div class="x" style="position:fixed;inset:0"><p>hi</p></div>'
+            : '',
+      },
+    });
+    const inserted = exec.mock.calls[0];
+    expect(inserted[0]).toBe('insertHTML');
+    expect(inserted[2]).toContain('<p>hi</p>');
+    expect(inserted[2]).not.toMatch(/position|class=/);
+  });
+
   it('does not rewrite the editing surface for its own normalised output', () => {
     const aligned = {
       ...createEmailBlock('text'),

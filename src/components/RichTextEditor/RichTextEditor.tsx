@@ -64,6 +64,11 @@ export interface RichTextEditorProps {
   onDictationError?: (message: string) => void;
   /** Disable editing and toolbar actions. */
   disabled?: boolean;
+  /**
+   * Sanitises HTML introduced by paste or drop before it reaches the editable
+   * DOM. Without it, pasted markup is inserted as the browser provides it.
+   */
+  sanitizeHtml?: (html: string) => string;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
 }
@@ -127,6 +132,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       enableDictation = true,
       onDictationError,
       disabled = false,
+      sanitizeHtml,
       'aria-label': ariaLabel,
     },
     ref
@@ -165,6 +171,42 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const updateContent = () => {
       if (editorRef.current) onChange(editorRef.current.innerHTML);
+    };
+
+    // Pasted/dropped HTML otherwise lands in the live DOM unfiltered, where
+    // hostile markup (position:fixed overlays, host CSS classes) is active.
+    const insertSanitized = (html: string) => {
+      if (!sanitizeHtml) return false;
+      document.execCommand('insertHTML', false, sanitizeHtml(html));
+      updateContent();
+      return true;
+    };
+    const handlePaste = (e: React.ClipboardEvent) => {
+      const html = e.clipboardData.getData('text/html');
+      if (html && sanitizeHtml) {
+        e.preventDefault();
+        insertSanitized(html);
+      }
+    };
+    const handleDrop = (e: React.DragEvent) => {
+      const html = e.dataTransfer.getData('text/html');
+      if (!html || !sanitizeHtml) return;
+      e.preventDefault();
+      const caret = (
+        document as Document & {
+          caretRangeFromPoint?: (
+            x: number,
+            y: number
+          ) => ReturnType<Document['createRange']> | null;
+        }
+      ).caretRangeFromPoint?.(e.clientX, e.clientY);
+      if (caret) {
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(caret);
+      }
+      editorRef.current?.focus();
+      insertSanitized(html);
     };
 
     const execCommand = (command: string) => {
@@ -546,7 +588,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             aria-multiline="true"
             aria-label={ariaLabel ?? placeholder}
             contentEditable={!disabled}
+            tabIndex={disabled ? -1 : 0}
             onInput={updateContent}
+            onPaste={handlePaste}
+            onDrop={handleDrop}
             className={cn(
               'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
               'prose prose-sm max-w-none',

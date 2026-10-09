@@ -253,6 +253,9 @@ export function EmailBlockSettings({
               emitted.current = content;
               set({ content });
             }}
+            // Pasted markup must pass the same policy as stored content; the
+            // `emitted` bypass above is only safe because of this.
+            sanitizeHtml={(html) => sanitizeEmailHtml(html) ?? ''}
             variableGroups={variableGroups}
             enableDictation={false}
           />
