@@ -46,6 +46,10 @@ export interface UseDiarizationOptions {
   /** Load the ~50 MB speaker runtime + warm Whisper. Set false to keep it dormant until it's needed
    *  (e.g. a host feature that's off). Default true. */
   enabled?: boolean;
+  /** Anchor clusters against THIS namespace's enrolled voices — pass the same value used at enrollment
+   *  (`useVoiceSetup` / `VoiceManager`), or scoped users get "Speaker N" (or another user's labels)
+   *  from the legacy shared store. Omit for the original unscoped store. */
+  voiceprintNamespace?: string;
 }
 
 export interface UseDiarizationResult {
@@ -82,10 +86,16 @@ export function useDiarization(
     inferRoles = false,
     enabled = true,
     minSegmentSeconds = 1.0,
+    voiceprintNamespace,
   } = options;
-  const sv = useSpeakerVerify({ enabled }); // loads the TitaNet runtime (only when enabled)
+  // loads the TitaNet runtime (only when enabled); scoped so identify() anchors to the right store
+  const sv = useSpeakerVerify({ enabled, voiceprintNamespace });
   const svRef = React.useRef(sv);
   svRef.current = sv;
+  // The CURRENT namespace, readable mid-pass: a diarize() started under namespace A must not identify
+  // against A's store or publish A's labels after the host switches to B (transcription awaits are long).
+  const nsRef = React.useRef(voiceprintNamespace);
+  nsRef.current = voiceprintNamespace;
 
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -103,11 +113,17 @@ export function useDiarization(
       setError(null);
       try {
         const svh = svRef.current;
+        const passNamespace = nsRef.current;
+        const assertNamespace = () => {
+          if (nsRef.current !== passNamespace)
+            throw new Error('voiceprint namespace changed during diarization');
+        };
         // 1. transcript segments (Whisper timestamps) + the raw 16k samples to embed windows from
         const [segments, samples] = await Promise.all([
           transcribeSegments(blob),
           decodeTo16kMono(blob),
         ]);
+        assertNamespace(); // svh + its identify() belong to passNamespace — don't cross-label after a switch
         if (!segments.length) {
           setResult([]);
           return [];
@@ -182,6 +198,7 @@ export function useDiarization(
           }
         }
         if (merge) out = mergeTurns(out);
+        assertNamespace(); // final gate before publishing (inferRoles awaits the LLM)
         setResult(out);
         return out;
       } catch (e) {

@@ -65,6 +65,12 @@ export interface AccordionProps
   collapsible?: boolean;
   /** Heading level wrapping each trigger for document outline (default h3). */
   headingLevel?: 'h2' | 'h3' | 'h4';
+  /**
+   * Persists the open ids in `localStorage` under this key (uncontrolled
+   * only). Restored after mount, so server and hydration renders use
+   * `defaultOpenIds`.
+   */
+  storageKey?: string;
 }
 
 // =============================================================================
@@ -98,6 +104,7 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
       onOpenChange,
       collapsible = true,
       headingLevel: Heading = 'h3',
+      storageKey,
       variant,
       className,
       ...props
@@ -108,13 +115,33 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
     const [internalOpen, setInternalOpen] = React.useState<string[]>(
       () => defaultOpenIds ?? []
     );
+    const persists = Boolean(storageKey) && controlledOpen === undefined;
+
+    React.useEffect(() => {
+      if (!persists || !storageKey) return;
+      try {
+        const stored: unknown = JSON.parse(
+          window.localStorage.getItem(storageKey) ?? 'null'
+        );
+        if (Array.isArray(stored)) {
+          setInternalOpen(
+            stored.filter((id): id is string => typeof id === 'string')
+          );
+        }
+      } catch {
+        // Storage blocked or value corrupt: keep defaultOpenIds.
+      }
+    }, [persists, storageKey]);
     const rawOpen = controlledOpen ?? internalOpen;
     // Single mode keeps at most one panel open, even if defaultOpenIds or a
-    // controlled openIds array hands us several.
-    const open = React.useMemo(
-      () => (type === 'single' ? rawOpen.slice(0, 1) : rawOpen),
-      [type, rawOpen]
-    );
+    // controlled openIds array hands us several. Stored ids for removed items
+    // are dropped first so they can't crowd out a valid one.
+    const open = React.useMemo(() => {
+      const known = persists
+        ? rawOpen.filter((id) => items.some((item) => item.id === id))
+        : rawOpen;
+      return type === 'single' ? known.slice(0, 1) : known;
+    }, [type, rawOpen, persists, items]);
     const openSet = React.useMemo(() => new Set(open), [open]);
 
     const toggle = (id: string) => {
@@ -126,6 +153,13 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
         next = type === 'single' ? [id] : [...open, id];
       }
       if (controlledOpen === undefined) setInternalOpen(next);
+      if (persists && storageKey) {
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(next));
+        } catch {
+          // Storage blocked or full; state still updates in memory.
+        }
+      }
       onOpenChange?.(next);
     };
 

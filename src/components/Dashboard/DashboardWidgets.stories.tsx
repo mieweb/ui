@@ -45,6 +45,7 @@ const meta: Meta = {
   tags: ['autodocs', 'scope:application-local', 'maturity:experimental'],
   parameters: {
     layout: 'fullscreen',
+    mobilePreview: { mode: 'standalone' },
     docs: {
       description: {
         component: `### What it's for

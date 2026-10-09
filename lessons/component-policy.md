@@ -25,6 +25,7 @@ Before writing any UI code, check [ui.mieweb.org](https://ui.mieweb.org) (Storyb
 | **Layout**       | `Card` (+ CardHeader/Content), `Accordion`, `AppHeader`, `SiteHeader`, `SiteFooter`, `PageHeader`, `ThemeProvider`, `VisuallyHidden`                                                   |
 | **Overlays**     | `Modal` (+ ModalHeader/Body/Footer), `Sheet`, `Tooltip`, `DockablePanel`, `Sidebar`                                                                                                    |
 | **Modules**      | Media (`AudioPlayer`, `AudioRecorder`, `DocumentScanner`), Editors (`RichEditor`, `Markdown`), Chat (`MessageBubble`, `AIChat`, `SuperChat`), Files (`DropzoneOverlay`, `FileManager`) |
+| **Templates**    | Public marketing pages from data: `LandingPage` + presets, and sections (`HeroSection`, `FeatureGridSection`, `FaqSection`, `PricingSection`, …) from `@mieweb/ui/templates`, which is Server-Component safe |
 | **Healthcare**   | `ProblemList`, `MedicationList`, `AllergyList`, `CodeLookup`, `OrderEditor`, `Assessment`, `PatientHeader`                                                                             |
 | **Charts**       | `DataVisNitroGraph`; chart colors via `--mieweb-chart-1` through `--mieweb-chart-5` CSS variables                                                                                      |
 
@@ -191,6 +192,39 @@ export { MyWidget, myWidgetVariants, type MyWidgetProps };
 
 ---
 
+## Tier 2.5: Headless Modules
+
+**A component that renders a collection the caller owns is a _module_, and modules follow a stricter contract than an ordinary Tier 2 component.**
+
+A module knows what a conversation, an order or a work item looks like. It does not know where one comes from. That single distinction is why `SuperChatInbox` can ship in a library while an app's inbox page cannot: the page holds subscriptions, mutations and routing; the module holds layout, interaction and state rendering.
+
+Get this wrong and the component is unportable — it pins every consumer to one data layer, one router and one framework. Get it right and the app shrinks to an adapter.
+
+### The contract
+
+| Rule                                                                                                                                             | Why                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| **No data access.** No fetching, subscriptions, stores, routers, or framework imports. Data arrives as `items` / `loading` / `error` props.      | Enforced by `no-restricted-imports` in the library's ESLint config.          |
+| **Mutations leave as callbacks** typed `(…args) => void \| Promise<void>`. The module renders pending and failure state and restores on reject.  | The app owns the write; the module owns what the user sees while it happens. |
+| **Navigation is a prop** — `onOpen(id)` and/or `getHref(id)`. Never a router hook.                                                               | `getHref` also makes rows middle-clickable and crawlable.                    |
+| **Generic over the item** — `<T>` plus accessor props (`getId`, `getStatus`, …) or a `columns` / `stages` config. No library-owned domain types. | An app's `Order` type never has to match the library's.                      |
+| **Domain rendering is a slot** — `renderItem`, `renderDetail`, `toolbar`. Colour comes from a token _name_ (`accent`), never a class string.     | Keeps brand and dark-mode correctness inside the library.                    |
+| **Every user-facing string is overridable** through a `labels` prop.                                                                             | An English default is a regression for any host shipping other locales.      |
+| **Styled elements carry `data-slot`**, with matching rules in `src/styles/condensed-view.css`, and `classNames` keyed by the same names.         | Density is CSS-only; `pnpm condensed:scan` reports uncovered slots.          |
+| **Logical direction only** (`ms-`, `ps-`, `start-`); read direction from the element, not `document.documentElement`.                            | `pnpm rtl:scan` fails on physical utilities.                                 |
+
+### Declare it, and prove the states
+
+Set `parameters.catalog.collection: true` on the Meta. `pnpm catalog:check` then requires an **Empty**, **Loading** and **Error** story, because "no data", "not loaded yet" and "the call failed" are part of a module's API and a consumer cannot tell whether they are handled from the props table alone. Also give the story `Data` / `Callbacks` / `Slots` argType categories and a `Mobile` story.
+
+### Reference implementations
+
+`SuperChatInbox` for the data/callback split, `ChatComposer` for extension points (`labels`, `classNames`, `inputProps`, render slots), and the `Modules/Views` family for the accessor pattern.
+
+Consuming one: [wiring-headless-modules.md](wiring-headless-modules.md) is the adapter recipe for Meteor and for TanStack Query.
+
+---
+
 ## Tier 3: Contribute Upstream to @mieweb/ui
 
 **When a local component is stable, well-tested, and useful beyond your project, contribute it to `@mieweb/ui`.**
@@ -202,6 +236,7 @@ A component is ready for upstream contribution when:
 - [ ] **Used in production** — it's been running in at least one real project
 - [ ] **API is stable** — the props interface hasn't changed significantly in 2+ weeks
 - [ ] **Follows Tier 2 standards** — CVA variants, forwardRef, CN utility, theme variables
+- [ ] **Follows the Tier 2.5 contract** if it renders a caller-owned collection — no data access, router or framework import; `parameters.catalog.collection` with Empty / Loading / Error stories
 - [ ] **Has accessibility** — ARIA labels, keyboard nav, focus indicators
 - [ ] **Has dark mode support** — tested with light and dark themes
 - [ ] **Has brand support** — tested with at least 2 brands
@@ -293,7 +328,10 @@ flowchart TD
     Check -->|No| Similar{Similar component<br/>in @mieweb/ui?}
     Similar -->|Yes| Compose[Compose from existing<br/>@mieweb/ui primitives]
     Similar -->|No| Build[Tier 2: Build locally<br/>in @mieweb/ui style]
-    Build --> Stable{Stable + generic<br/>enough?}
+    Build --> Collection{Renders a collection<br/>the caller owns?}
+    Collection -->|Yes| Module[Tier 2.5: Headless module<br/>props in, callbacks out]
+    Collection -->|No| Stable
+    Module --> Stable{Stable + generic<br/>enough?}
     Stable -->|Yes| Contribute[Tier 3: Contribute<br/>to @mieweb/ui]
     Stable -->|No| Keep[Keep as local<br/>component]
     Contribute --> Remove[Remove local copy,<br/>import from @mieweb/ui]
@@ -303,7 +341,7 @@ flowchart TD
     classDef tier3 fill:#e0e7ff,stroke:#4f46e5
 
     class Use,Compose tier1
-    class Build,Keep tier2
+    class Build,Keep,Module tier2
     class Contribute,Remove tier3
 ```
 
@@ -311,8 +349,36 @@ flowchart TD
 
 ## Summary
 
-| Tier              | When                                | What                                                                            |
-| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
-| **1. Use**        | Component exists in `@mieweb/ui`    | `import { X } from '@mieweb/ui'`                                                |
-| **2. Build**      | No equivalent exists yet            | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
-| **3. Contribute** | Local component is stable + generic | PR to `mieweb/ui`, then replace local with import                               |
+| Tier              | When                                    | What                                                                            |
+| ----------------- | --------------------------------------- | ------------------------------------------------------------------------------- |
+| **1. Use**        | Component exists in `@mieweb/ui`        | `import { X } from '@mieweb/ui'`                                                |
+| **2. Build**      | No equivalent exists yet                | Build locally following @mieweb/ui patterns (CVA, forwardRef, theme vars, a11y) |
+| **2.5. Module**   | It renders a collection the caller owns | Props in, callbacks out; no data access, router or framework import             |
+| **3. Contribute** | Local component is stable + generic     | PR to `mieweb/ui`, then replace local with import                               |
+
+## Embedding the Ozwell assistant (page-aware chat)
+
+"Ozwell" names two different things — choose deliberately:
+
+- **`OzwellChat` / `AIChat` (this library)** — the chat *UI shell*. You own the
+  transport and render messages you already have (see the Chat family and
+  `src/components/AI/OZWELL-BACKEND.md`).
+- **The embedded Ozwell assistant (`@ozwell/react`, from ozwellai-api)** — a
+  drop-in, page-aware assistant that can **read and act on the host page**
+  through tool calls. Use it when the user asks to "add Ozwell" or to let Ozwell
+  click / read / fill something on the page. (With an app agent key it acts as
+  that agent; configure no key and it instead gates on end-user sign-in.)
+
+For the page-aware assistant: install `@ozwell/react`, render `OzwellChat`,
+declare page actions in `tools`, and perform each
+one in `onToolCall(name, args, respond)` — always `respond(...)`, returning
+`isError: true` for an unknown tool or missing target. Authenticate with a
+**site-approved agent key** (`agnt_key-…`) via `VITE_OZWELL_AGENT_KEY`; Vite
+inlines `VITE_*` into the browser bundle, so never expose a parent (`ozw_…`),
+admin, or provider key that way. The canonical guide — with a full Vite + MIE UI
+"Click Hello World" example — lives at <https://mieweb.github.io/ozwellai-api/frontend/react/>.
+Conversation content is never relayed to the host; the host receives only the
+tool calls it declares, lifecycle/error events, and data the user explicitly
+shares (opt-in).
+
+This mirrors Rule 16 in [agent/mieweb-ui.instructions.md](../agent/mieweb-ui.instructions.md); keep the two in sync.

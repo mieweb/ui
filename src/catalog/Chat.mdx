@@ -24,7 +24,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 | [OzwellChat](?path=/docs/chat-ozwellchat--docs)                       | You are the Ozwell application: thinking-mode menu, message jump list, warning strip, model picker, queued follow-up editing, "Powered by Ozwell" footer                                | A generic assistant in your own product — `AIChat`; multi-participant — `SuperChat`                                                                         |
 | [ComposerModelSelector](?path=/docs/chat-composermodelselector--docs) | Picking an LLM per message from a short provider-grouped list inside a composer; menu opens upward within `boundaryRef`; optional effort drill-down                                     | A normal form field — `Select` / `Dropdown`; options are not provider/model pairs; hundreds of options — `Autocomplete`                                     |
 | [ReconciliationPanel](?path=/docs/chat-reconciliationpanel--docs)     | A person must confirm AI-extracted values (OCR, parsed intake, agent output) before they overwrite data on file; confidence-aware defaults; `onApply(accepted)`                         | No existing record to compare (use a form); a single yes/no — `AlertDialog`; long-text diffs                                                                |
-| [Messaging](?path=/docs/chat-messaging--docs)                         | Human-to-human messaging primitives — `MessageBubble`, `MessageList` (live `role="log"`), `MessageComposer` (mentions, attachments), `MessageThread`, `MessagingSplitView`              | The other party is an AI with tool calls — `AIChat`; a finished multi-participant inbox — `SuperChatInbox`; real-time transport (bring your own)            |
+| [Messaging](?path=/docs/chat-messaging--docs)                         | Human-to-human messaging primitives — `MessageBubble`, `MessageList` (live `role="log"`), `MessageThread` (mounts `ChatComposer`), `MessagingSplitView`; the legacy `MessageComposer` was retired in 0.10.0 (superseded by `ChatComposer`, see `MIGRATION.md#chat-composer`) | The other party is an AI with tool calls — `AIChat`; a finished multi-participant inbox — `SuperChatInbox`; real-time transport (bring your own)            |
 
 ## How they fit together
 
@@ -33,13 +33,13 @@ import { Meta } from '@storybook/addon-docs/blocks';
   [SuperChat](?path=/docs/modules-superchat-overview--docs) generalises that into a
   **participant** model (`human` / `agent` / `system`, many of each) with a conversation list and
   a Markdown plugin pipeline — and it _composes_ this family: its rows reuse `ChatBubble`,
-  `AITypingIndicator` and `MCPToolCallDisplay`, and its compose box is Messaging's
-  `MessageComposer`. `Messaging` is the human-to-human kit (`Message` / `Conversation` types with
+  `AITypingIndicator` and `MCPToolCallDisplay`, and its compose box is `ChatComposer` (as is
+  `AIChat`'s and `MessageThread`'s). `Messaging` is the human-to-human kit (`Message` / `Conversation` types with
   delivery `status`, read receipts, typing state) that both of the others borrow pieces from.
   Pick by participants first, then by whether you want a finished surface or primitives.
 - **`OzwellChat` and `HeyOzwell` are shells around `AIChat`, not new chats.** `OzwellChat` renders
   `AIChat` headerless and adds widget chrome (thinking modes applied client-side, queued message,
-  `ComposerModelSelector` in the composer's trailing slot). The
+  `ComposerModelSelector` in `ChatComposer`'s selector row). The
   [Voice](?path=/docs/modules-voice-overview--docs) family's `HeyOzwell` opens a `FloatingAIChat`
   and `HandsFreeChat` renders an inline `AIChat`; both feed it `messages` from `useHeyOzwell`.
 - **Text rendering is a seam, and the host owns sanitisation.** Every text block is plain
@@ -53,6 +53,13 @@ import { Meta } from '@storybook/addon-docs/blocks';
   invoked). The `askOzwell*` / `isOzwellConfigured` helpers exist for demos and read a
   browser-held config (`localStorage.ozwellConfig` / `window.__ozwell`) — never commit a key, and
   proxy it server-side for anything public (see `src/components/AI/OZWELL-BACKEND.md`).
+- **Want the hosted, page-aware Ozwell (not a UI shell you wire yourself)?** Use the embedded
+  assistant from **ozwellai-api** (`@ozwell/react`) — a drop-in that can
+  read and act on your page via tool calls (`tools` + `onToolCall`). It authenticates with a
+  **site-approved agent key** (`agnt_key-…`, passed as `VITE_OZWELL_AGENT_KEY`; never a parent or
+  provider key). That is a different package from this library's `OzwellChat`; follow the guide
+  (with a full Vite + MIE UI "Click Hello World" example) at
+  [the Ozwell React guide](https://mieweb.github.io/ozwellai-api/frontend/react/).
 - **Reconciliation closes the loop with extraction.** [DocumentScanner](?path=/docs/files-documentscanner--docs)
   (Files) produces fields; `AIReconciliationPanel` is where a human accepts them.
 
@@ -66,10 +73,11 @@ import { Meta } from '@storybook/addon-docs/blocks';
   "Close chat", "Stop", "Thinking", "Failed to send", the MCP friendly-name map and tense
   rewriting, "Powered by Ozwell", "Today" / "Yesterday", "Apply n updates" — externalise before
   localising. Timestamps use `toLocaleTimeString` / `toLocaleDateString`.
-- **Physical layout.** User messages use `flex-row-reverse`; composer trailing slots sit at
-  `right-1`; modal/trigger positions are `right-4` / `left-4`; `ChatBubble accent` is a physical
-  `borderLeft`; Messaging's reply preview is `border-l-4`. Thinking blocks use logical
-  `border-s` / `ps-3`.
+- **Physical layout.** User messages use `flex-row-reverse`; the legacy Messaging composer's
+  trailing slot sits at `right-1` (`AIChat`, `OzwellChat` and `MessageThread` now use `ChatComposer`, which is
+  logical-property/RTL-safe); modal/trigger positions are `right-4` / `left-4`; `ChatBubble
+  accent` is a physical `borderLeft`; Messaging's reply preview is `border-l-4`. Thinking blocks
+  use logical `border-s` / `ps-3`.
 - **Theming.** Most surfaces use hard-coded `neutral-*` / `white` / `primary-800` utilities rather
   than semantic tokens; `OzwellChat`, `ComposerModelSelector` and `AIReconciliationPanel` use
   `bg-card` / `border-border` / `text-muted-foreground`. `prose` classes on message text need

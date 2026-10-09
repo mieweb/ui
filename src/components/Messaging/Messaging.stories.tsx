@@ -3,7 +3,6 @@ import * as React from 'react';
 import {
   MessageBubble,
   MessageList,
-  MessageComposer,
   MessageThread,
   ConversationHeader,
   ConversationListItem,
@@ -248,12 +247,12 @@ const bubbleMeta: Meta<typeof MessageBubble> = {
       description: {
         component: `### What it's for
 
-**The human-to-human messaging primitives: bubble, list, composer, thread, conversation header/list item and split view — a kit, not one component.** This page's \`component\` is \`MessageBubble\` (\`message: Message\`, \`isOutgoing\`, \`showAvatar\`, \`showSenderName\`, \`showTimestamp\`, \`showStatus\`, \`onRetry\`, \`onAttachmentClick\`, \`formatTimestamp\`), which renders text, attachment previews, delivery status icons and read receipts. Around it the module exports \`MessageList\` (\`messages\`, \`currentUser\`, \`groupByDate\`, \`typingState\`, \`hasMore\` / \`onLoadMore\`, \`autoScroll\` \`always\` | \`onNewMessage\` | \`manual\`; a \`role="log" aria-live="polite"\` scroller with date separators, skeletons and a scroll-to-bottom button), \`MessageComposer\` (\`onSend(NewMessage)\`, controlled \`value\` / \`onValueChange\`, \`maxLength\` 1600, \`showAttachmentPicker\`, \`showCameraButton\`, \`replyTo\`, \`mentionOptions\` for an @-mention listbox, \`inputTrailing\` slot, \`variant\` \`default\` | \`minimal\`; drag-drop and paste-to-attach built in), \`MessageThread\` (header + list + composer over one \`conversation\`, driven by \`eventHandlers: MessagingEventHandlers\`), \`ConversationHeader\`, \`ConversationListItem\`, \`ConversationListSkeleton\`, \`MessagingSplitView\` (responsive list/thread layout with \`hasSelectedConversation\`), \`LightboxModal\`, \`TypingIndicator\`, \`DateSeparator\`, \`EmptyState\`, \`SkeletonMessage\`, \`AttachmentPicker\` / \`DragDropZone\` / \`CameraButton\`, and the hooks \`useMessages\`, \`useTypingIndicator\`, \`useMessageScroll\`, \`useReadReceipts\`. Data model: \`Message\` (\`type\` \`text\` | \`media\` | \`system\` | \`typing\`, \`sender: MessageParticipant\`, \`status\` sending → sent → delivered → read | failed, \`attachments\`, \`readReceipts\`, \`reactions\`) and \`Conversation\` (\`type\` \`direct\` | \`group\` | \`channel\` | \`broadcast\`).
+**The human-to-human messaging primitives: bubble, list, thread, conversation header/list item and split view — a kit, not one component.** This page's \`component\` is \`MessageBubble\` (\`message: Message\`, \`isOutgoing\`, \`showAvatar\`, \`showSenderName\`, \`showTimestamp\`, \`showStatus\`, \`onRetry\`, \`onAttachmentClick\`, \`formatTimestamp\`), which renders text, attachment previews, delivery status icons and read receipts. Around it the module exports \`MessageList\` (\`messages\`, \`currentUser\`, \`groupByDate\`, \`typingState\`, \`hasMore\` / \`onLoadMore\`, \`autoScroll\` \`always\` | \`onNewMessage\` | \`manual\`; a \`role="log" aria-live="polite"\` scroller with date separators, skeletons and a scroll-to-bottom button), \`MessageThread\` (header + list + composer over one \`conversation\`, driven by \`eventHandlers: MessagingEventHandlers\`; its composer is the shared \`ChatComposer\` — \`+\` menu attach, drag-and-drop onto the message list, \`data-slot="chat-composer-*"\` internals — while \`showAttachmentPicker\`, \`showCameraButton\`, \`maxMessageLength\` and the typing callbacks keep working unchanged), \`ConversationHeader\`, \`ConversationListItem\`, \`ConversationListSkeleton\`, \`MessagingSplitView\` (responsive list/thread layout with \`hasSelectedConversation\`), \`LightboxModal\`, \`TypingIndicator\`, \`DateSeparator\`, \`EmptyState\`, \`SkeletonMessage\`, \`AttachmentPicker\` / \`DragDropZone\` / \`CameraButton\`, and the hooks \`useMessages\`, \`useTypingIndicator\`, \`useMessageScroll\`, \`useReadReceipts\`. Data model: \`Message\` (\`type\` \`text\` | \`media\` | \`system\` | \`typing\`, \`sender: MessageParticipant\`, \`status\` sending → sent → delivered → read | failed, \`attachments\`, \`readReceipts\`, \`reactions\`) and \`Conversation\` (\`type\` \`direct\` | \`group\` | \`channel\` | \`broadcast\`).
 
 ### Use it when
 
 - Staff ↔ patient or staff ↔ staff **messaging**: delivery states, read receipts, typing indicators, file/image attachments with a lightbox, reply-to, and a conversation switcher — and you want to own the layout and transport.
-- You need only one piece — e.g. \`MessageComposer\` under something that is not a chat (\`AIChat\` and \`SuperChat\` both mount it), or \`MessageBubble\` inside a notification feed.
+- You need only one piece — e.g. \`MessageBubble\` inside a notification feed, or \`MessageList\` under your own input. (For a standalone compose box use \`ChatComposer\` — the legacy \`MessageComposer\` was retired in 0.10.0, see \`MIGRATION.md#chat-composer\`.)
 
 ### Don't use it when
 
@@ -302,11 +301,11 @@ const { messages, sendMessage, retryMessage, loadMore } = useMessages({
 
 ### Limitations
 
-- **Accessibility as implemented:** \`MessageList\` is a \`role="log"\` live region ("Message history"), so incoming messages are announced; each bubble is \`role="article" aria-label="Message from <name>"\`, status icons are \`role="img"\` ("Message read"…), the typing indicator is \`role="status"\`. The composer textarea is \`aria-label="Message"\` with \`aria-autocomplete="list"\` + \`aria-activedescendant\` when \`mentionOptions\` is set; the send button is "Send message" / "Sending message". Enter sends, Shift+Enter newlines; after a failed \`onSend\` the text is restored but **attachments are lost**. Attachment previews and the lightbox (\`role="dialog"\`) come from \`MessageThread\`; \`MessageList\`'s scroll-to-bottom button is \`position: fixed\` (\`right-4 bottom-24\`), which escapes embedded layouts.
+- **Accessibility as implemented:** \`MessageList\` is a \`role="log"\` live region ("Message history"), so incoming messages are announced; each bubble is \`role="article" aria-label="Message from <name>"\`, status icons are \`role="img"\` ("Message read"…), the typing indicator is \`role="status"\`. The composer (\`MessageThread\`'s shared \`ChatComposer\`) textarea gains \`aria-autocomplete="list"\` + \`aria-activedescendant\` when \`mentionOptions\` is set; the send button is "Send message" / "Sending message…". Enter sends, Shift+Enter newlines; after a failed \`onSend\` the text is restored but **attachments are lost**. Attachment previews and the lightbox (\`role="dialog"\`) come from \`MessageThread\`; \`MessageList\`'s scroll-to-bottom button is \`position: fixed\` (\`right-4 bottom-24\`), which escapes embedded layouts.
 - **Content is text-only.** Message \`content\` renders as text — no Markdown, links are not auto-linked, and there is no \`renderTextContent\` seam (use SuperChat or AI for rich rendering). \`readReceipts\` labels join participant names in English ("Read by A, B").
 - **Dates are locale-formatted but labels are English** ("Today", "Yesterday", "Replying to …", "Type a message...", "Load more messages", "Select a conversation"). \`groupByDate\` compares local calendar days.
 - **Attachments** are kept as \`File\`s with object URLs (revoked on remove/unmount); \`validateFile\` enforces \`acceptedFileTypes\` / \`maxFileSize\`; the camera button uses \`<input capture>\`, and paste-to-attach only works when \`showAttachmentPicker\` is on. Upload itself is the host's job (\`NewMessage.attachments: File[]\`).
-- RTL: outgoing bubbles use \`flex-row-reverse\`/\`justify-end\`, the reply preview has a physical \`border-l-4\`, and the composer's trailing slot is \`right-1\`. Theming is hard-coded \`neutral-*\`/\`white\`/\`primary-*\` utilities. Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
+- RTL: outgoing bubbles use \`flex-row-reverse\`/\`justify-end\`, and the reply preview has a physical \`border-l-4\` (\`MessageThread\`'s \`ChatComposer\` uses logical properties). Theming is hard-coded \`neutral-*\`/\`white\`/\`primary-*\` utilities. Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
       },
     },
     catalog: {
@@ -315,7 +314,7 @@ const { messages, sendMessage, retryMessage, loadMore } = useMessages({
         {
           type: 'composes with',
           target: 'chat-aichat',
-          why: 'AIChat reuses MessageComposer and EmptyState from the Messaging module for its input and empty thread.',
+          why: 'AIChat reuses EmptyState from the Messaging module for its empty thread (its input is ChatComposer).',
         },
         {
           type: 'alternative to',
@@ -325,7 +324,7 @@ const { messages, sendMessage, retryMessage, loadMore } = useMessages({
         {
           type: 'alternative to',
           target: 'chat-chatcomposer',
-          why: 'Both composers share the same @mention autocomplete module and reply-to contract (replyTo / onCancelReply); MessageComposer remains the composer wired into MessageThread today, while ChatComposer is the standardized input (+ menu, mic, stop, agent/model selectors) preferred for new work.',
+          why: 'ChatComposer is the standardized input (+ menu, mic, stop, agent/model selectors) that MessageThread mounts; the legacy MessageComposer was retired in 0.10.0 (see MIGRATION.md#chat-composer). Both share the @mention autocomplete module and reply-to contract.',
         },
       ],
     },
@@ -515,76 +514,6 @@ export const MessageListWithTyping: StoryObj<typeof MessageList> = {
       </div>
     );
   },
-};
-
-// ============================================================================
-// MessageComposer Stories
-// ============================================================================
-
-export const ComposerStory: StoryObj<typeof MessageComposer> = {
-  name: 'MessageComposer',
-  render: () => (
-    <div className="w-[400px] border-t">
-      <MessageComposer
-        onSend={() => {
-          // Message sent
-        }}
-        placeholder="Type a message..."
-        showAttachmentPicker
-      />
-    </div>
-  ),
-};
-
-export const ComposerWithCharCount: StoryObj<typeof MessageComposer> = {
-  name: 'MessageComposer (With Character Count)',
-  render: () => (
-    <div className="w-[400px] border-t">
-      <MessageComposer
-        onSend={() => {
-          // Message sent
-        }}
-        placeholder="Type a message..."
-        maxLength={160}
-        showCharacterCount
-      />
-    </div>
-  ),
-};
-
-export const ComposerWithReply: StoryObj<typeof MessageComposer> = {
-  name: 'MessageComposer (With Reply)',
-  render: () => (
-    <div className="w-[400px] border-t">
-      <MessageComposer
-        onSend={() => {
-          // Message sent
-        }}
-        replyTo={{
-          id: '1',
-          content: mockMessages[0].content,
-          senderName: otherUser.name,
-        }}
-        onCancelReply={() => {
-          // Cancel reply
-        }}
-      />
-    </div>
-  ),
-};
-
-export const ComposerSending: StoryObj<typeof MessageComposer> = {
-  name: 'MessageComposer (Sending)',
-  render: () => (
-    <div className="w-[400px] border-t">
-      <MessageComposer
-        onSend={() => {
-          // Message sent
-        }}
-        isSending
-      />
-    </div>
-  ),
 };
 
 // ============================================================================

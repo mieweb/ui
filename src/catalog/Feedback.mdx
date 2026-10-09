@@ -34,4 +34,6 @@ Loading states are their own family: [Loading](?path=/docs/components-loading-ov
   `ConnectionStatus` is assertive. Avoid mounting several announcing components at once.
 - Default button labels and messages are English; every component here exposes props to replace
   them, but none reads a translation context.
-- Focus is not returned to the trigger when `AlertDialog` closes — handle it in `onOpenChange`.
+- `AlertDialog` uses `role="alertdialog"`, focuses Cancel first for destructive and warning
+  variants, and returns focus to the opener on close. For `await confirm()`, wrap the app in
+  `ConfirmDialogProvider` and call `useConfirm()`.

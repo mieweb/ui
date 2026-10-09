@@ -33,16 +33,9 @@ export {
   type LoadMoreButtonProps,
 } from './MessageList';
 
-export {
-  MessageComposer,
-  CharacterCounter,
-  SendButton,
-  sendButtonVariants,
-  type MessageComposerProps,
-  type CharacterCounterProps,
-  type SendButtonProps,
-  type MentionOption,
-} from './MessageComposer';
+// `MessageComposer` retired in 0.10.0 — superseded by ChatComposer
+// (see MIGRATION.md#chat-composer). The shared mention module stays.
+export { type MentionOption } from './useMentionAutocomplete';
 
 export {
   AttachmentPicker,
@@ -86,6 +79,7 @@ export {
   useTypingIndicator,
   useMessageScroll,
   useReadReceipts,
+  useTypingEmulation,
   type UseMessagesOptions,
   type UseMessagesReturn,
   type UseTypingIndicatorOptions,
@@ -93,4 +87,6 @@ export {
   type UseMessageScrollOptions,
   type UseMessageScrollReturn,
   type UseReadReceiptsOptions,
+  type UseTypingEmulationOptions,
+  type UseTypingEmulationReturn,
 } from './hooks';

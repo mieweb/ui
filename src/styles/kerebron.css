@@ -120,6 +120,34 @@
 }
 
 /*
+ * Kerebron leaves headings, lists, links and code to browser defaults, which
+ * Tailwind's preflight strips (headings `inherit`, lists `list-style: none`,
+ * links `color: inherit`) — so "# " and "- " produced real h1/ul nodes that
+ * rendered as plain text while editing. `revert` hands these back to the
+ * browser. (Adapted from mieweb/timehuddle#620.)
+ *
+ * Deliberately NOT in `@layer base`: @mieweb/q ships an *unlayered* preflight
+ * copy, and unlayered author rules beat any layered rule. Unlayered here with
+ * `:where()` keeps specificity at 0,1,0 — above preflight's bare element
+ * selectors (0,0,1) but below Kerebron's own `.kb-editor pre` / `.kb-editor
+ * ul` rules (0,1,1), so its pre-wrap and list padding stay in charge.
+ */
+.kb-editor :where(h1, h2, h3, h4, h5, h6, ol, ul, a, code, pre) {
+  all: revert;
+}
+/* The browser's default link blue is unreadable on the dark editor surface,
+   and the brand blue fails 4.5:1 on white, so each theme gets its own shade.
+   Dark uses primary-400: primary-500 (#64748b) is only ~3.9:1 on the default
+   brand's #0f172a background, while primary-400 (#94a3b8) is ~7:1. */
+.kb-editor :where(a) {
+  color: var(--mieweb-primary-800, #0f749c);
+}
+[data-theme='dark'] .kb-editor :where(a),
+.dark .kb-editor :where(a) {
+  color: var(--mieweb-primary-400, #94a3b8);
+}
+
+/*
  * Kerebron's base.css paints inline shortcode pills green without setting a
  * text color, so the inherited foreground fails WCAG AA contrast. Pin an
  * explicit white-on-green pairing (≈5.1:1) that holds in both themes.
@@ -127,6 +155,93 @@
 .kb-shortcode-inline {
   background-color: #008000;
   color: #ffffff;
+}
+
+/*
+ * codecrock's light syntax palette fails WCAG AA on white: keyword #d73 is
+ * 3.1:1, number #099 3.5:1, string #690 3.4:1, comment #998 2.9:1, etc.
+ * (axe color-contrast, caught by the Storybook a11y CI job). Darken each
+ * failing token to a hue-preserving shade ≥4.5:1; tokens already passing
+ * (property, function, type, variable, tag) are left to upstream.
+ */
+.kb-editor .ts-keyword,
+.kb-editor .ts-keyword_operator,
+.kb-editor .ts-function_builtin {
+  color: #b03a00; /* was #d73 (3.1:1) → 6.1:1 */
+}
+.kb-editor .ts-number {
+  color: #007272; /* was #099 (3.5:1) → 5.8:1 */
+}
+.kb-editor .ts-string {
+  color: #557700; /* was #690 (3.4:1) → 5.2:1 */
+}
+.kb-editor .ts-string_special {
+  color: #c22f2f; /* was #d44 (4.2:1) → 5.6:1 */
+}
+.kb-editor .ts-comment {
+  color: #716d5e; /* was #998 (2.9:1) → 5.2:1 */
+}
+.kb-editor .ts-operator {
+  color: #637226; /* upstream #9a6 (2.5:1, misspelt .ts-perator) → 5.3:1 */
+}
+.kb-editor .ts-punctuation,
+.kb-editor .ts-punctuation_bracket {
+  color: #707070; /* was #999 (2.9:1) → 5.0:1 */
+}
+.kb-editor .ts-attribute {
+  color: #8a5c00; /* was #e90 (2.3:1) → 5.8:1 */
+}
+.kb-editor .ts-constant,
+.kb-editor .ts-constant_builtin {
+  color: #006a8e; /* was #0086b3 (4.2:1) → 6.1:1 */
+}
+/*
+ * Dark: codecrock only switches its palette via prefers-color-scheme, which
+ * a class-based dark toggle never matches — so dark surfaces were showing
+ * the light tokens. Re-assert codecrock's own dark (VS Code) palette for
+ * the tokens overridden above under the app's dark selectors.
+ */
+[data-theme='dark'] .kb-editor .ts-keyword,
+[data-theme='dark'] .kb-editor .ts-keyword_operator,
+.dark .kb-editor .ts-keyword,
+.dark .kb-editor .ts-keyword_operator {
+  color: #c586c0;
+}
+[data-theme='dark'] .kb-editor .ts-function_builtin,
+.dark .kb-editor .ts-function_builtin {
+  color: #dcdcaa;
+}
+[data-theme='dark'] .kb-editor .ts-number,
+.dark .kb-editor .ts-number {
+  color: #b5cea8;
+}
+[data-theme='dark'] .kb-editor .ts-string,
+[data-theme='dark'] .kb-editor .ts-string_special,
+.dark .kb-editor .ts-string,
+.dark .kb-editor .ts-string_special {
+  color: #ce9178;
+}
+[data-theme='dark'] .kb-editor .ts-comment,
+.dark .kb-editor .ts-comment {
+  color: #6a9955;
+}
+[data-theme='dark'] .kb-editor .ts-operator,
+[data-theme='dark'] .kb-editor .ts-punctuation,
+[data-theme='dark'] .kb-editor .ts-punctuation_bracket,
+.dark .kb-editor .ts-operator,
+.dark .kb-editor .ts-punctuation,
+.dark .kb-editor .ts-punctuation_bracket {
+  color: #d4d4d4;
+}
+[data-theme='dark'] .kb-editor .ts-attribute,
+.dark .kb-editor .ts-attribute {
+  color: #9cdcfe;
+}
+[data-theme='dark'] .kb-editor .ts-constant,
+[data-theme='dark'] .kb-editor .ts-constant_builtin,
+.dark .kb-editor .ts-constant,
+.dark .kb-editor .ts-constant_builtin {
+  color: #4fc1ff;
 }
 
 /* Overflow-menu icons declare min sizes that burst their compact buttons. */

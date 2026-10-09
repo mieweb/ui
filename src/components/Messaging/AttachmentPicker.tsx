@@ -72,6 +72,21 @@ function generateAttachmentId(): string {
   return `attachment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+/**
+ * MessageComposer's historical attachment validation defaults. Shared so
+ * hosts that mount `ChatComposer` (which leaves file types and size
+ * unrestricted) can apply the same limits — `MessageThread` does, and
+ * `AIChat` does for legacy `composerProps` consumers.
+ */
+const DEFAULT_ACCEPTED_FILE_TYPES = [
+  'image/*',
+  'video/*',
+  '.pdf',
+  '.doc',
+  '.docx',
+];
+const DEFAULT_MAX_FILE_SIZE = 25 * 1024 * 1024;
+
 // ============================================================================
 // Attachment Preview Item Component
 // ============================================================================
@@ -326,8 +341,8 @@ const AttachmentPicker = React.forwardRef<
   (
     {
       onFilesSelected,
-      acceptedTypes = ['image/*', 'video/*', '.pdf', '.doc', '.docx'],
-      maxFileSize = 25 * 1024 * 1024, // 25MB
+      acceptedTypes = DEFAULT_ACCEPTED_FILE_TYPES,
+      maxFileSize = DEFAULT_MAX_FILE_SIZE,
       maxFiles = 10,
       multiple = true,
       disabled = false,
@@ -672,6 +687,8 @@ export {
   AttachmentPreviewItem,
   DragDropZone,
   CameraButton,
+  DEFAULT_ACCEPTED_FILE_TYPES,
+  DEFAULT_MAX_FILE_SIZE,
   getFileType,
   formatFileSize,
   validateFile,

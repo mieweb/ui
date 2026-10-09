@@ -30,6 +30,12 @@ const dangerOutline =
   'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive';
 
 export interface VoiceManagerProps {
+  /** Isolates persisted enrollment (WHO + WHAT prints) from other users of the same browser profile —
+   *  e.g. pass the signed-in user's id. Must be the SAME value the verifying surface (`useHeyOzwell` /
+   *  `HandsFreeChat`) uses, or this page manages a different store than the one gating wakes (it would
+   *  look empty and enroll into the wrong store). A scoped store starts empty — no legacy unscoped
+   *  records are inherited. Omit to manage the original shared store. */
+  voiceprintNamespace?: string;
   /** Octopus logo source, forwarded to the enrollment screen. */
   logoSrc?: string;
 }
@@ -41,8 +47,11 @@ interface SetupTarget {
 }
 
 /** The central voice-enrollment management page. */
-export function VoiceManager({ logoSrc }: VoiceManagerProps) {
-  const sv = useSpeakerVerify();
+export function VoiceManager({
+  logoSrc,
+  voiceprintNamespace,
+}: VoiceManagerProps) {
+  const sv = useSpeakerVerify({ voiceprintNamespace });
   const [inSetup, setInSetup] = React.useState<SetupTarget | null>(null);
   const [, setTick] = React.useState(0); // bump to force a re-read of the voice list after enroll/remove/clear
   const [addName, setAddName] = React.useState('');
@@ -60,6 +69,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
   if (inSetup) {
     return (
       <VoiceSetup
+        voiceprintNamespace={voiceprintNamespace}
         mode={inSetup.mode}
         voiceId={inSetup.voiceId}
         label={inSetup.label}
@@ -93,7 +103,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
   };
   const clearAll = () => {
     sv.clear();
-    void clearWhatPrints();
+    void clearWhatPrints(voiceprintNamespace);
     setTick((t) => t + 1);
   };
 

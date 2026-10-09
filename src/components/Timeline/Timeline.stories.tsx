@@ -127,6 +127,11 @@ All three are stateless; the host maps its domain model to steps/events and owns
       relationships: [
         {
           type: 'alternative to',
+          target: 'views-ganttview',
+          why: 'Timeline walks one record through named steps or events; GanttView places many records on a shared time axis.',
+        },
+        {
+          type: 'alternative to',
           target: 'navigation-stepindicator',
           why: 'TimelineProgress shows the status of a process the user watches; StepIndicator has clickable steps for a flow the user drives.',
         },
@@ -134,6 +139,11 @@ All three are stateless; the host maps its domain model to steps/events and owns
           type: 'alternative to',
           target: 'overlays-modal',
           why: 'OrderConfirmation is a fixed one-button success overlay without focus management; Modal is the general dialog with slots, focus trap and scroll lock.',
+        },
+        {
+          type: 'alternative to',
+          target: 'data-display-yeartimeline',
+          why: 'Timeline tracks a single process\u2019s milestones and events; YearTimeline lays a whole year of scheduled/continuous items on one Gantt grid.',
         },
       ],
     },

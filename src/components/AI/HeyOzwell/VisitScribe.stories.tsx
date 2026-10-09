@@ -18,7 +18,7 @@ const meta: Meta<typeof VisitScribe> = {
       description: {
         component: `### What it's for
 
-**An ambient scribe for multi-person encounters: record the room, stop, and get an on-device speaker-labelled transcript you can correct.** \`VisitScribe\` (props \`title\`, \`subtitle\`, \`inferRoles\`, \`liveTranscript\`, \`diarizationOptions\` — \`threshold\`, \`maxSpeakers\`, \`minSegmentSeconds\`, \`identifyThreshold\`, \`merge\` — and \`className\`) is the UI over \`useVisitScribe\`, which owns a \`MediaRecorder\` and an elapsed timer and, on **Stop**, runs \`useDiarization\`: Whisper word timestamps → TitaNet speaker embeddings → agglomerative clustering (\`threshold\`, default 0.65; \`maxSpeakers\` or Auto) → anchoring to voices enrolled in \`VoiceManager\` (\`identifyThreshold\`) → optional LLM role inference for unknown speakers ("Label unknown speakers with AI", only when a chat backend is configured). Unknown speakers are "Speaker N". With **Live transcript** on, \`transcribeSamples\` runs on ~7 s chunks of new audio for a rough running caption (no labels) that the clean diarized transcript replaces on stop. Afterwards: **Edit speakers** to rename (renaming two to the same name merges them) or reassign a single line; **Re-analyze** re-runs diarization on the stored clip with new Advanced settings without re-recording; **New visit** starts over. Also exported: \`useVisitScribe\`, \`useDiarization\`, and the pure helpers \`clusterEmbeddings\`, \`labelClusters\`, \`attributeSegments\`, \`mergeTurns\`, \`inferSpeakerRoles\`.
+**An ambient scribe for multi-person encounters: record the room, stop, and get an on-device speaker-labelled transcript you can correct.** \`VisitScribe\` (props \`title\`, \`subtitle\`, \`inferRoles\`, \`liveTranscript\`, \`diarizationOptions\` — \`threshold\`, \`maxSpeakers\`, \`minSegmentSeconds\`, \`identifyThreshold\`, \`merge\`, \`voiceprintNamespace\` (anchor to THAT user's enrolled voices — pass the same value used in \`VoiceManager\`; scoped stores don't inherit legacy unscoped enrollment) — and \`className\`) is the UI over \`useVisitScribe\`, which owns a \`MediaRecorder\` and an elapsed timer and, on **Stop**, runs \`useDiarization\`: Whisper word timestamps → TitaNet speaker embeddings → agglomerative clustering (\`threshold\`, default 0.65; \`maxSpeakers\` or Auto) → anchoring to voices enrolled in \`VoiceManager\` (\`identifyThreshold\`) → optional LLM role inference for unknown speakers ("Label unknown speakers with AI", only when a chat backend is configured). Unknown speakers are "Speaker N". With **Live transcript** on, \`transcribeSamples\` runs on ~7 s chunks of new audio for a rough running caption (no labels) that the clean diarized transcript replaces on stop. Afterwards: **Edit speakers** to rename (renaming two to the same name merges them) or reassign a single line; **Re-analyze** re-runs diarization on the stored clip with new Advanced settings without re-recording; **New visit** starts over. Also exported: \`useVisitScribe\`, \`useDiarization\`, and the pure helpers \`clusterEmbeddings\`, \`labelClusters\`, \`attributeSegments\`, \`mergeTurns\`, \`inferSpeakerRoles\`.
 
 ### Use it when
 
@@ -43,7 +43,11 @@ import { VisitScribe } from '@mieweb/ui';
   title={t('scribe.title')}
   subtitle={t('scribe.subtitle')}
   inferRoles={settings.scribe.aiRoles}          // only effective when an OpenAI-compatible backend is configured
-  diarizationOptions={{ threshold: 0.65, identifyThreshold: settings.scribe.identifyThreshold }}
+  diarizationOptions={{
+    threshold: 0.65,
+    identifyThreshold: settings.scribe.identifyThreshold,
+    voiceprintNamespace: user.id, // same value used to enroll in <VoiceManager> — else turns come back "Speaker N"
+  }}
 />
 \`\`\`
 

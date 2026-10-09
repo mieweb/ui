@@ -3,6 +3,9 @@
 Short notes on the invariants that are easy to break. User-facing docs live in
 [ChatComposer.stories.tsx](./ChatComposer.stories.tsx).
 
+In-repo hosts: `SuperChat`, `AIChat` and Messaging's `MessageThread` all mount
+this composer — run their suites too when changing send/attachment behavior.
+
 ## Object-URL lifecycle
 
 Staged image/video attachments get a `URL.createObjectURL` preview. Every URL
@@ -24,6 +27,17 @@ add/remove/send so same-batch calls see accurate room and the unmount cleanup
 never re-revokes. The updaters themselves are pure merges/filters. Keep it
 that way.
 
+## Imperative `addFiles` bypasses `allowAttachments`
+
+`allowAttachments` gates only the composer's own attach affordances — the `+`
+button, the paste handler, and the internal `DragDropZone`. The imperative
+`ref.addFiles()` path deliberately has **no** gate: hosts that call it (e.g.
+MessageThread's camera capture with `showAttachmentPicker={false}`) have
+already opted in, and legacy MessageComposer parity requires camera-only
+staging to work. Validation and structured `onError` reporting still apply.
+Don't re-add an `allowAttachments` check inside `addFiles`; gate new
+user-facing entry points at the entry point instead.
+
 ## Menus are controlled
 
 The `+` menu and agent menu use controlled `open`/`onOpenChange` because
@@ -41,12 +55,37 @@ change reason strings without a major-version note.
 ## Shared mention module
 
 `mentionOptions` delegates to `useMentionAutocomplete` / `MentionMenu` in
-`../Messaging/useMentionAutocomplete.tsx` — the **same** module MessageComposer
-uses; its invariants live in
+`../Messaging/useMentionAutocomplete.tsx` — the module extracted from the
+retired MessageComposer; its invariants live in
 [Messaging/MAINTAINERS.md](../Messaging/MAINTAINERS.md). ChatComposer-specific
 contract: keyboard priority in the textarea `onKeyDown` is host
 `textareaProps.onKeyDown` (preventDefault claims the event) → mention menu
 navigation → Enter-to-send. Don't reorder.
+
+## Mobile keyboard behavior
+
+- **Enter.** `submitOnEnter="desktop"` (default) keys off
+  `(hover: none) and (pointer: coarse)`: touch devices get a newline on
+  Return. The `isComposing` guard sits before the send check so Enter that
+  confirms an IME candidate never sends — keep it there.
+- **Send/stop keep focus via `onMouseDown` preventDefault**, not
+  `onPointerDown`: cancelling pointerdown does not stop the focus change in
+  every browser. Removing it brings back the keyboard close/reopen bounce on
+  iOS, because `handleSend` refocuses after the blur has started.
+- **Card tap-to-focus** skips anything matching the interactive selector
+  (buttons, links, inputs, menus). New interactive children must match it or
+  a tap on them will be swallowed.
+- **`autoFocus` is ignored on touch** (it would pop the keyboard on every
+  navigation). It is applied by a mount effect after a client-side pointer
+  check, never as an `autofocus` attribute, so SSR markup can't trigger it.
+  `replyTo` still focuses on touch — it follows a user tap.
+- **Keyboard inset is the host's job.** The composer doesn't measure the
+  keyboard; hosts mount `useKeyboardInset()` and size their shell from its
+  CSS variables (see the _Mobile Keyboard Shell_ story). In native apps,
+  hosts pass `source: 'native'` (keyboard plugin events, which fire before
+  the keyboard animates) and pad only the composer dock by
+  `--mieweb-keyboard-inset`; resizing the whole shell from the visual
+  viewport snaps on iOS because it only updates after the animation.
 
 ## Drag-and-drop delegates validation
 
@@ -71,6 +110,11 @@ auto-clear-on-send; hosts own the state.
   taller content overflow-centers instead of inflating the control row.
   `disabled` does **not** propagate into custom slot content — that's the
   documented contract, not an oversight.
+- `leadingSlot` — custom control at the leading edge (e.g. a voice-activation
+  toggle). It shares the `+` menu's grid cell rather than adding a column, so
+  it inherits the cell's responsive row placement; the cell renders even when
+  the `+` menu is hidden. Same `h-8` wrapper and `disabled` contract as
+  `micSlot` (`data-slot="chat-composer-leading-slot"`).
 - `addMenuItems` — host actions in the `+` menu; `checked` items render as
   `menuitemcheckbox` via `DropdownItem`'s native `checked` prop.
 - `modelSelectorProps` — passed through to `ComposerModelSelector`

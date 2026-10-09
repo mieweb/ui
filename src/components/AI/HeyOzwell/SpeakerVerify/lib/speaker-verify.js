@@ -1,3 +1,10 @@
+import {
+  clearVoiceprints,
+  getVoiceprints,
+  setVoiceprints,
+  voiceprintStorageKey,
+} from '../../../voiceprintStore';
+
 /**
  * On-device speaker-verification gate (the "only the enrolled doctor can wake it" layer).
  *
@@ -37,7 +44,7 @@
     return "https://huggingface.co/jlocala/ozwell-voice-assets/resolve/main/sv-runtime";
   })();
   const MODEL = "./nemo_en_titanet_small.onnx"; // preloaded into the WASM filesystem
-  const LS_KEY = "ozwellDoctorVoiceprint";       // { centroid: number[], n: number }
+  const BASE_STORAGE_KEY = "ozwellDoctorVoiceprint"; // { centroid: number[], n: number }
   // Threshold from the spike's enroll-centroid distributions (genuine ~0.75 / impostor ~0.22).
   // 0.45 (2026-06-22): with mic DSP on + matched enrollment the genuine doctor scores ~0.75-0.93 clean,
   // so 0.45 passes with wide margin and rejects impostors harder. Heavy background can still drag the doctor
@@ -88,57 +95,40 @@
   // audio). Per-phrase because on a ~1s clip a speaker embedding still carries a little of
   // WHAT was said, so the doctor's "hey ozwell" centroid scores their "ozwell i'm done"
   // too low. We enroll + gate each phrase against its own centroid. ---
-  // --- WHO-centroid persistence on IndexedDB (replaces localStorage; same db/store as voiceprintStore.ts).
-  // verify()/enroll() read these synchronously, so we keep an in-memory `_store` hydrated from IndexedDB on
-  // init (before ready() resolves) and write through on save. ---
-  const IDB_DB = "ozwell-voice", IDB_STORE = "voiceprints";
-  function idbOpen() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(IDB_DB, 1);
-      req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE); };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-  function idbReq(mode, run) {
-    return idbOpen().then((db) => new Promise((resolve, reject) => {
-      const tx = db.transaction(IDB_STORE, mode);
-      const r = run(tx.objectStore(IDB_STORE));
-      tx.oncomplete = () => { resolve(r && r.result); db.close(); };
-      tx.onerror = () => { reject(tx.error); db.close(); };
-      tx.onabort = () => { reject(tx.error); db.close(); }; // else an aborted tx leaves the promise pending
-    }));
-  }
-  const idbGet = (key) => idbReq("readonly", (s) => s.get(key));
-  const idbPut = (key, v) => idbReq("readwrite", (s) => s.put(v, key));
-  const idbDel = (key) => idbReq("readwrite", (s) => s.delete(key));
-
-  let _store = null; // in-memory WHO map; hydrated from IndexedDB before ready() resolves
+  const stores = new Map(); // in-memory WHO maps, hydrated per namespace before use
+  const hydrations = new Map(); // one IndexedDB read per namespace, shared by concurrent hooks
   // Ignore the old single-centroid format ({centroid, n}) from earlier builds.
   const normalizeWho = (o) => (o && Array.isArray(o.centroid)) ? {} : (o || {});
 
-  async function hydrateStore() {
+  async function hydrateStore(namespace) {
+    const storageKey = voiceprintStorageKey(BASE_STORAGE_KEY, namespace);
+    if (stores.has(storageKey)) return;
+    const pending = hydrations.get(storageKey);
+    if (pending) return pending;
+    const hydration = getVoiceprints(
+      storageKey,
+      namespace === undefined ? (raw) => normalizeWho(JSON.parse(raw || "{}")) : undefined
+    ).then((value) => {
+      stores.set(storageKey, value || {});
+    });
+    hydrations.set(storageKey, hydration);
     try {
-      let v = await idbGet(LS_KEY);
-      if (v === undefined) { // nothing in IndexedDB — migrate a legacy localStorage value once, then drop it
-        let raw = null; try { raw = localStorage.getItem(LS_KEY); } catch (e) { /* ignore */ }
-        if (raw != null) {
-          v = normalizeWho(JSON.parse(raw || "{}"));
-          await idbPut(LS_KEY, v);
-          try { localStorage.removeItem(LS_KEY); } catch (e) { /* ignore */ }
-        }
-      }
-      _store = v || {};
-    } catch (e) { _store = _store || {}; }
+      await hydration;
+    } finally {
+      hydrations.delete(storageKey);
+    }
   }
-  function loadAll() {
-    if (_store) return _store;
+  function loadAll(namespace) {
+    const storageKey = voiceprintStorageKey(BASE_STORAGE_KEY, namespace);
+    if (stores.has(storageKey)) return stores.get(storageKey);
     // Pre-hydration fallback (verify/enroll only run after ready(), which awaits hydrateStore).
-    try { return normalizeWho(JSON.parse(localStorage.getItem(LS_KEY) || "{}")); } catch (e) { return {}; }
+    if (namespace !== undefined) return {};
+    try { return normalizeWho(JSON.parse(localStorage.getItem(BASE_STORAGE_KEY) || "{}")); } catch (e) { return {}; }
   }
-  function saveAll(obj) {
-    _store = obj;
-    idbPut(LS_KEY, obj).catch((e) => console.warn("SV save failed", e));
+  function saveAll(obj, namespace) {
+    const storageKey = voiceprintStorageKey(BASE_STORAGE_KEY, namespace);
+    stores.set(storageKey, obj);
+    void setVoiceprints(storageKey, obj);
   }
   // Multi-VOICE, multi-condition: each phrase stores a map of voices, each with a LIST of condition
   // centroids. Verify passes if ANY voice's ANY condition matches (so the doctor AND an enrolled
@@ -155,8 +145,8 @@
     return { voices: {} };
   }
   // Flat list of EVERY enrolled voice's centroids for a phrase (verify passes if any matches).
-  function allCentroids(phrase) {
-    const voices = normPhrase(loadAll()[phrase]).voices;
+  function allCentroids(phrase, namespace) {
+    const voices = normPhrase(loadAll(namespace)[phrase]).voices;
     const out = [];
     for (const id in voices) for (const c of (voices[id].centroids || [])) out.push(Float32Array.from(c));
     return out;
@@ -164,6 +154,7 @@
 
   const SpeakerVerify = {
     ready: () => readyPromise,
+    loadNamespace: (namespace) => hydrateStore(namespace),
     isLoaded: () => handle !== 0,
     threshold: DEFAULT_THRESHOLD,
     // AS-norm (score normalization): normalize the raw cosine against a crowd of other voices, so the
@@ -179,7 +170,7 @@
     /** Enroll a VOICE for a phrase from N utterances → one condition-centroid under opts.voiceId
      *  (default "you"). opts.append ADDS it as another condition for that voice; otherwise it replaces
      *  that voice's conditions. opts.label names the voice. Capped to the most recent SV_CENTROID_CAP. */
-    enroll(phrase, utterances /* [{samples, sampleRate}] */, opts) {
+    enroll(phrase, utterances /* [{samples, sampleRate}] */, opts, namespace) {
       if (!handle) throw new Error("SpeakerVerify not ready");
       const voiceId = (opts && opts.voiceId) || DEFAULT_VOICE_ID;
       const embs = utterances.map(u => computeEmbedding(u.samples, u.sampleRate));
@@ -187,7 +178,7 @@
       for (const e of embs) for (let i = 0; i < dim; i++) c[i] += e[i];
       for (let i = 0; i < dim; i++) c[i] /= embs.length;
       l2normalize(c);
-      const all = loadAll();
+      const all = loadAll(namespace);
       const entry = normPhrase(all[phrase]);
       const prevVoice = entry.voices[voiceId];
       const prev = (opts && opts.append && prevVoice && Array.isArray(prevVoice.centroids))
@@ -199,13 +190,13 @@
         createdAt: (prevVoice && prevVoice.createdAt) || Date.now(),
         centroids,
       };
-      all[phrase] = entry; saveAll(all);
+      all[phrase] = entry; saveAll(all, namespace);
       return { n: embs.length, conditions: centroids.length, voiceId };
     },
 
     /** Verify a live utterance against the BEST condition-centroid across ALL enrolled voices. */
-    verify(phrase, samples, sampleRate) {
-      const cents = allCentroids(phrase);
+    verify(phrase, samples, sampleRate, namespace) {
+      const cents = allCentroids(phrase, namespace);
       if (!cents.length) return { score: 0, znorm: null, pass: false, enrolled: false };
       const live = computeEmbedding(samples, sampleRate);
       let score = -1;
@@ -226,7 +217,7 @@
     },
 
     /** How many conditions are enrolled for a phrase, across ALL voices (0 = none). */
-    conditionCount: (phrase) => allCentroids(phrase).length,
+    conditionCount: (phrase, namespace) => allCentroids(phrase, namespace).length,
 
     /** TitaNet speaker embedding for a raw utterance (Float32 + true sample rate). For diarization /
      *  clustering. Returns the L2-normalized embedding, or null if the runtime isn't ready. */
@@ -237,10 +228,10 @@
     /** Best-matching ENROLLED voice for a live utterance, across all voices + phrases (text-independent,
      *  so conversational audio works). Returns { voiceId, label, score } (max cosine) or null if nothing
      *  enrolled / not ready. The caller applies a threshold to decide whether to trust the name. */
-    identify(samples, sampleRate) {
+    identify(samples, sampleRate, namespace) {
       if (!handle) return null;
       const live = computeEmbedding(samples, sampleRate);
-      const all = loadAll();
+      const all = loadAll(namespace);
       const best = {}; // voiceId -> { label, score }
       for (const phrase in all) {
         const voices = normPhrase(all[phrase]).voices;
@@ -259,8 +250,8 @@
     },
 
     /** List enrolled voices aggregated across phrases: [{ id, label, createdAt, conditions }]. */
-    listVoices() {
-      const all = loadAll();
+    listVoices(namespace) {
+      const all = loadAll(namespace);
       const acc = {};
       for (const phrase in all) {
         const voices = normPhrase(all[phrase]).voices;
@@ -280,31 +271,35 @@
 
     /** Remove a voice across all phrases — revokes that person's WHO match (the WHAT phrase-prints,
      *  which are shared/speaker-independent, are left in voiceprintStore). */
-    removeVoice(voiceId) {
-      const all = loadAll();
+    removeVoice(voiceId, namespace) {
+      const all = loadAll(namespace);
       let changed = false;
       for (const phrase in all) {
         const entry = normPhrase(all[phrase]);
         if (entry.voices[voiceId]) { delete entry.voices[voiceId]; all[phrase] = entry; changed = true; }
       }
-      if (changed) saveAll(all);
+      if (changed) saveAll(all, namespace);
     },
 
     /** Rename a voice across all phrases. */
-    renameVoice(voiceId, label) {
-      const all = loadAll();
+    renameVoice(voiceId, label, namespace) {
+      const all = loadAll(namespace);
       let changed = false;
       for (const phrase in all) {
         const entry = normPhrase(all[phrase]);
         if (entry.voices[voiceId]) { entry.voices[voiceId].label = label; all[phrase] = entry; changed = true; }
       }
-      if (changed) saveAll(all);
+      if (changed) saveAll(all, namespace);
     },
 
     // hasEnrollment(phrase) -> is that phrase enrolled; hasEnrollment() -> is anything enrolled.
-    hasEnrollment: (phrase) => phrase ? allCentroids(phrase).length > 0 : Object.keys(loadAll()).some((p) => allCentroids(p).length > 0),
-    enrolledPhrases: () => Object.keys(loadAll()),
-    clearEnrollment: () => { _store = {}; idbDel(LS_KEY).catch(() => {}); try { localStorage.removeItem(LS_KEY); } catch (e) { /* ignore */ } },
+    hasEnrollment: (phrase, namespace) => phrase ? allCentroids(phrase, namespace).length > 0 : Object.keys(loadAll(namespace)).some((p) => allCentroids(p, namespace).length > 0),
+    enrolledPhrases: (namespace) => Object.keys(loadAll(namespace)),
+    clearEnrollment: (namespace) => {
+      const storageKey = voiceprintStorageKey(BASE_STORAGE_KEY, namespace);
+      stores.set(storageKey, {});
+      void clearVoiceprints(storageKey);
+    },
   };
 
   async function init() {
@@ -334,7 +329,7 @@
         const r = await fetch(SV_DIR + "/sv-cohort.json");
         if (r.ok) { cohort = (await r.json()).map((v) => Float32Array.from(v)); console.log("[SpeakerVerify] AS-norm cohort:", cohort.length); }
       } catch (e) { console.warn("[SpeakerVerify] cohort load failed (AS-norm off):", e); }
-      await hydrateStore(); // load enrolled WHO centroids from IndexedDB before reporting ready
+      await hydrateStore(); // preserve the existing unscoped API by default
       readyResolve(SpeakerVerify);
     } catch (e) {
       window.Module = prevModule; // restore the global even on failure

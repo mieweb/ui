@@ -208,7 +208,7 @@ const meta = {
 
 ### Use it when
 
-- The user picks an **LLM per message** from a short, grouped list (OpenAI / Anthropic / Ollama…) inside a composer where vertical space is scarce and the menu must open upward and stay inside the widget — \`OzwellChat\` mounts it in \`AIChat\`'s composer trailing slot.
+- The user picks an **LLM per message** from a short, grouped list (OpenAI / Anthropic / Ollama…) inside a composer where vertical space is scarce and the menu must open upward and stay inside the widget — \`OzwellChat\` mounts it in \`ChatComposer\`'s selector row via \`modelSelectorProps\`.
 - You also need a per-model **effort/reasoning** level without a second control.
 
 ### Don't use it when
@@ -227,24 +227,23 @@ const [effort, setEffort] = useState<string | null>(null);
 const composerRef = useRef<HTMLDivElement>(null);
 
 <div ref={composerRef} className="relative">
-  <MessageComposer
+  <ChatComposer
     onSend={send}
-    inputTrailing={
-      <ComposerModelSelector
-        models={models}
-        value={model}
-        onChange={(next) => { setModel(next); setEffort(null); }}
-        effortOptions={effortsFor(model)} // [] hides the effort row
-        effort={effort}
-        defaultEffort="medium"
-        onEffortChange={setEffort}
-        boundaryRef={composerRef}
-        ariaLabel={t('chat.model')}
-        placeholder={t('chat.model')}
-        anyLabel={t('common.any')}
-        emptyLabel={t('chat.noModels')}
-      />
-    }
+    showModelSelector
+    modelSelectorProps={{
+      models,
+      value: model,
+      onChange: (next) => { setModel(next); setEffort(null); },
+      effortOptions: effortsFor(model), // [] hides the effort row
+      effort,
+      defaultEffort: 'medium',
+      onEffortChange: setEffort,
+      boundaryRef: composerRef,
+      ariaLabel: t('chat.model'),
+      placeholder: t('chat.model'),
+      anyLabel: t('common.any'),
+      emptyLabel: t('chat.noModels'),
+    }}
   />
 </div>
 \`\`\`

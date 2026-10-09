@@ -1,8 +1,15 @@
 import React from 'react';
-import { addons, types } from 'storybook/manager-api';
+import {
+  addons,
+  types,
+  useStorybookApi,
+  useStorybookState,
+} from 'storybook/manager-api';
 import { create } from 'storybook/theming/create';
-import { IconButton } from 'storybook/internal/components';
-import { ShareAltIcon } from '@storybook/icons';
+import { Button } from 'storybook/internal/components';
+import { GithubIcon, MobileIcon, ShareAltIcon } from '@storybook/icons';
+import { buildArgsParam } from 'storybook/internal/router';
+import { serializeProjectGlobals } from './mobile-preview';
 
 // Brand theme configurations for the Storybook manager UI
 const brandThemes = {
@@ -184,14 +191,42 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
   }
   return React.createElement(
     'span',
-    { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } },
-    item.name,
+    {
+      style: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        minWidth: 0,
+        maxWidth: '100%',
+      },
+    },
+    // Badged rows stay a single line: the name ellipsizes rather than
+    // word-wrapping into an oversized row; its full text sits in the tooltip.
+    React.createElement(
+      'span',
+      {
+        className: 'mieweb-sidebar-name',
+        title: item.name,
+        style: {
+          minWidth: 0,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        },
+      },
+      item.name
+    ),
     ...badges.map((tag) =>
       React.createElement(
         'span',
         {
           key: tag,
+          className: 'mieweb-sidebar-badge',
           'aria-label': TAG_BADGES[tag].label,
+          // Tooltip reveals the full text when the badge is truncated. For
+          // keyboard users the injected manager CSS un-truncates the badge
+          // while its row has :focus-visible (or :hover).
+          title: TAG_BADGES[tag].label,
           style: {
             fontSize: 9,
             lineHeight: '14px',
@@ -202,6 +237,15 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
             borderRadius: 999,
             color: '#fff',
             background: TAG_BADGES[tag].color,
+            // Never wrap; truncate with an ellipsis when space runs out (#533).
+            // The huge shrink factor makes the badge give up its space before
+            // the component name does.
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            minWidth: 0,
+            maxWidth: '100%',
+            flexShrink: 9999,
           },
         },
         TAG_BADGES[tag].label
@@ -213,6 +257,7 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
 // Set initial theme (BlueHive as default)
 addons.setConfig({
   theme: createBrandTheme('bluehive'),
+  initialActive: 'canvas',
   sidebar: {
     showRoots: true,
     collapsedRoots: ['bluehive', 'deprecated'],
@@ -225,6 +270,40 @@ addons.setConfig({
     copy: { hidden: false },
     fullscreen: { hidden: false },
   },
+});
+
+// Keep the catalog in Storybook; open the exact current story at the top level
+// for real viewport/keyboard testing. Same-tab navigation makes browser Back
+// work for complete examples and the chrome-free full-screen mode, too.
+addons.register('mieweb-mobile-preview', (api) => {
+  addons.add('mieweb-mobile-preview/tool', {
+    type: types.TOOL,
+    title: 'Open mobile sandbox',
+    match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
+    render: () => React.createElement(Button, {
+      variant: 'ghost',
+      size: 'small',
+      padding: 'small',
+      ariaLabel: 'Open mobile sandbox',
+      className: 'mieweb-mobile-sandbox',
+      onClick: () => {
+        const story = api.getCurrentStoryData();
+        if (story?.type !== 'story' || story.refId) return;
+        const { managerHref, previewHref } = api.getStoryHrefs(story.id, {
+          inheritArgs: false,
+          inheritGlobals: false,
+          queryParams: {
+            args: buildArgsParam(story.initialArgs, story.args ?? {}),
+            globals: serializeProjectGlobals(api.getUserGlobals()),
+          },
+        });
+        const url = new URL(previewHref, window.location.href);
+        url.searchParams.set('mobilePreview', 'sandbox');
+        url.searchParams.set('returnTo', managerHref);
+        window.location.assign(url.href);
+      },
+    }, React.createElement(MobileIcon)),
+  });
 });
 
 // Inject CSS custom properties for dynamic theming
@@ -269,6 +348,30 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       --mieweb-manager-content-bg: ${contentBg};
       --mieweb-manager-text: ${textColor};
       --mieweb-manager-text-muted: ${textMuted};
+    }
+
+    /* Keep the device-testing action visible beside the scrolling mobile
+       toolbar. Reserve its width so every other tool can still scroll into
+       view. The same button remains in the normal toolbar on desktop. */
+    @media (max-width: 599px) {
+      .sb-bar:has(.mieweb-mobile-sandbox) {
+        max-width: calc(100% - 48px);
+      }
+
+      [role="toolbar"] .mieweb-mobile-sandbox {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 2;
+        box-sizing: border-box;
+        width: 48px;
+        min-width: 48px !important;
+        height: 40px;
+        border-radius: 0;
+        border-left: 1px solid var(--mieweb-manager-border);
+        background: var(--mieweb-manager-content-bg) !important;
+        color: var(--mieweb-manager-text) !important;
+      }
     }
     
     /* Selected story item highlight */
@@ -319,6 +422,22 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     /* Sidebar item hover - row level so hovering 3-dot also highlights the row */
     [data-nodetype]:not([data-selected="true"]):hover {
       background-color: ${isDark ? `${brand.primary}20` : `${brand.primary}10`} !important;
+    }
+
+    /* Catalog badges (renderSidebarLabel) truncate first to keep the name
+       readable; hovering the row or keyboard-focusing its button flips the
+       shrink priority so badges reveal their text and the name ellipsizes
+       instead (#533 asks for the tooltip to be focus-reachable too). Badges
+       stay shrinkable (never flex-shrink: 0 / unbounded width), so even
+       multi-badge rows can't overflow the nav — they just share the space.
+       !important outranks the badge's inline flex-shrink. */
+    [data-nodetype]:hover .mieweb-sidebar-name,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-name {
+      flex-shrink: 9999;
+    }
+    [data-nodetype]:hover .mieweb-sidebar-badge,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-badge {
+      flex-shrink: 1 !important;
     }
     
     /* Toolbar selected button */
@@ -536,48 +655,74 @@ addons.register('mieweb-404-redirect', (api) => {
   }, POLL_INTERVAL_MS);
 });
 
+// Keep the source link in the manager so full-height stories and MDX pages
+// can open their exact source file without needing a footer in the preview.
+function GitHubSourceTool() {
+  // Subscribe to navigation and index loading so the link follows the page.
+  useStorybookState();
+  const api = useStorybookApi();
+  const sourcePath = api.getCurrentStoryData()?.importPath
+    ?.replace(/\\/g, '/')
+    .replace(/^\.\//, '');
+
+  if (!sourcePath) return null;
+
+  const githubUrl = `https://github.com/mieweb/ui/blob/main/${sourcePath
+    .split('/')
+    .map(encodeURIComponent)
+    .join('/')}`;
+
+  return React.createElement(
+    Button,
+    {
+      asChild: true,
+      variant: 'ghost',
+      size: 'small',
+      padding: 'small',
+      ariaLabel: 'View source on GitHub',
+    },
+    React.createElement(
+      'a',
+      { href: githubUrl, target: '_blank', rel: 'noopener noreferrer' },
+      React.createElement(GithubIcon)
+    )
+  );
+}
+
+addons.register('mieweb-github-source', () => {
+  addons.add('mieweb-github-source/tool', {
+    type: types.TOOL,
+    title: 'View source on GitHub',
+    match: ({ viewMode, tabId }) =>
+      (viewMode === 'story' || viewMode === 'docs') && !tabId,
+    render: () => React.createElement(GitHubSourceTool),
+  });
+});
+
 // Storybook 10 moved "Open canvas in new tab" into the Share menu; restore a
 // one-click toolbar button that opens the bare story iframe (current globals
 // preserved) in a new tab.
 addons.register('mieweb-open-in-new-tab', (api) => {
   addons.add('mieweb-open-in-new-tab/tool', {
-    type: types.TOOLEXTRA,
+    type: types.TOOL,
     title: 'Open canvas in new tab',
     match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
     render: () =>
       React.createElement(
-        IconButton,
+        Button,
         {
           key: 'mieweb-open-in-new-tab',
-          title: 'Open canvas in new tab',
-          'aria-label': 'Open canvas in new tab',
+          variant: 'ghost',
+          size: 'small',
+          padding: 'small',
+          ariaLabel: 'Open canvas in new tab',
           onClick: () => {
             const { storyId } = api.getUrlState();
             if (!storyId) return;
             const url = new URL('iframe.html', window.location.href);
             url.searchParams.set('id', storyId);
             url.searchParams.set('viewMode', 'story');
-            // Only forward this project's toolbar globals (see preview.tsx
-            // globalTypes); tool globals (measure/outline) and object-valued
-            // globals (viewport, backgrounds, a11y) must not follow the story
-            // into the popped-out tab.
-            const FORWARDED_GLOBALS = new Set([
-              'brand',
-              'theme',
-              'density',
-              'locale',
-            ]);
-            const globalsParam = Object.entries(api.getGlobals() ?? {})
-              .filter(([key, value]) => {
-                if (!FORWARDED_GLOBALS.has(key)) return false;
-                return (
-                  typeof value === 'string' ||
-                  typeof value === 'number' ||
-                  typeof value === 'boolean'
-                );
-              })
-              .map(([key, value]) => `${key}:${String(value)}`)
-              .join(';');
+            const globalsParam = serializeProjectGlobals(api.getGlobals() ?? {});
             if (globalsParam) url.searchParams.set('globals', globalsParam);
             window.open(url.toString(), '_blank', 'noopener,noreferrer');
           },

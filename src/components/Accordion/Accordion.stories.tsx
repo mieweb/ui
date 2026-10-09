@@ -55,6 +55,7 @@ Controlled so sections with validation errors can be forced open; \`defaultOpenI
 - Accessibility: each trigger is a native \`<button type="button">\` inside the chosen heading, with \`aria-expanded\` and \`aria-controls\` pointing at the panel; each panel is \`role="region"\` with \`aria-labelledby\` the trigger, and when closed it gets \`aria-hidden\` **and** \`inert\` so hidden content is unreachable. Ids come from \`useId()\` + \`item.id\`, so repeated Accordions do not collide. Keyboard is native only: Tab / Enter / Space — **no Arrow Up/Down, Home/End** between headers (not required by the APG pattern, but absent). \`disabled\` items keep their heading but the button is disabled.
 - Closed panels stay **mounted** (content renders even when hidden); there is no lazy-mount or \`forceMount\` switch.
 - In \`single\` mode extra ids in \`defaultOpenIds\` / \`openIds\` are truncated to the first one.
+- \`storageKey\` remembers which panels are open in \`localStorage\` (a JSON array of ids) across reloads — uncontrolled only, ignored when \`openIds\` is set. It is read after mount, so server and hydration renders use \`defaultOpenIds\` and restored panels animate open on the next frame. Storage errors and corrupt values fall back to \`defaultOpenIds\`; ids no longer in \`items\` are harmless. Keys are global to the origin — namespace them.
 - RTL: \`text-start\` on the trigger; the chevron is symmetric. Responsive: full-width block, no breakpoints.
 - Theming: semantic tokens only (\`bg-card\`, \`border-border\`, \`divide-border\`, \`bg-muted/60\`, \`text-muted-foreground\`, \`ring-ring\`). No strings. Depends on \`lucide-react\` (\`ChevronDown\`) and \`class-variance-authority\`.`,
       },
@@ -66,6 +67,11 @@ Controlled so sections with validation errors can be forced open; \`defaultOpenI
           type: 'alternative to',
           target: 'layout-collapsible',
           why: 'Accordion renders a styled stack of panels from an items array and owns the single/multiple rule; Collapsible is one headless trigger + content you style.',
+        },
+        {
+          type: 'alternative to',
+          target: 'content-faqsection',
+          why: 'Accordion is a styled, stateful panel stack for app content; FaqSection is a server-rendered <details> list of plain-text Q&A for marketing pages.',
         },
       ],
     },
@@ -87,6 +93,11 @@ Controlled so sections with validation errors can be forced open; \`defaultOpenI
     collapsible: {
       description: 'In single mode, allow closing the open panel.',
       control: 'boolean',
+    },
+    storageKey: {
+      description:
+        'localStorage key that remembers the open ids across reloads (uncontrolled only).',
+      control: 'text',
     },
   },
 };
@@ -164,6 +175,22 @@ export const Multiple: Story = {
 export const Controlled: Story = {
   render: (args) => <ControlledExample {...args} />,
   args: { items: FAQ_ITEMS.slice(0, 3), type: 'single' },
+};
+
+export const Persisted: Story = {
+  args: {
+    items: FAQ_ITEMS.slice(0, 3),
+    type: 'multiple',
+    storageKey: 'mieweb-ui-story.accordion',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `storageKey`, the open panels are saved to `localStorage` — open a few and reload the page.',
+      },
+    },
+  },
 };
 
 function ControlledExample(args: React.ComponentProps<typeof Accordion>) {

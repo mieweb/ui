@@ -206,7 +206,10 @@ function isCurrentlyOpen(schedule?: DayHours[]): boolean {
     if (!start) return false;
 
     const startMinutes = start.getHours() * 60 + start.getMinutes();
-    const endMinutes = end ? end.getHours() * 60 + end.getMinutes() : 24 * 60; // Assume end of day if no end time
+    const rawEnd = end ? end.getHours() * 60 + end.getMinutes() : 24 * 60; // Assume end of day if no end time
+    // A 00:00 or 23:59 close means end of day, not "closed" (see normalizeClosingTime)
+    const endMinutes =
+      rawEnd === 0 || rawEnd === 23 * 60 + 59 ? 24 * 60 : rawEnd;
 
     return currentTime >= startMinutes && currentTime < endMinutes;
   });

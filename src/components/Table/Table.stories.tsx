@@ -89,6 +89,11 @@ The **Playground** story below deliberately hand-rolls sorting, filtering, pinne
       relationships: [
         {
           type: 'alternative to',
+          target: 'reports-benchmarktablesection',
+          why: 'On a public report page, BenchmarkTableSection is the whole section: heading, provenance, formatting and bars.',
+        },
+        {
+          type: 'alternative to',
           target: 'grids-datavis-nitro',
           why: 'NITRO is the default grid; Table only for a few static rows nobody sorts, filters or exports.',
         },

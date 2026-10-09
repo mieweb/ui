@@ -124,6 +124,16 @@ Tab state stays in the page; the header is a pure layout wrapper.
       entry: '@mieweb/ui',
       relationships: [
         {
+          type: 'alternative to',
+          target: 'record-details-recordheader',
+          why: 'When the page is about one record, RecordHeader adds avatar, badges, meta and overflow actions.',
+        },
+        {
+          type: 'alternative to',
+          target: 'conversion-herosection',
+          why: 'PageHeader titles a screen inside an app with actions and tabs; HeroSection opens a public marketing page with an h1 and CTAs.',
+        },
+        {
           type: 'composes with',
           target: 'navigation-tabs',
           why: 'A TabsList in PageHeader children sits under the title as the section switcher for the page.',
@@ -259,20 +269,8 @@ export const ProviderExample: Story = {
     title: 'Redimed Downtown',
     subtitle: '123 Main St, Indianapolis, IN 46202',
     icon: (
-      <div className="justify-content-center flex h-10 w-10 items-center rounded-full bg-blue-100 dark:bg-blue-900">
-        <svg
-          className="h-6 w-6 text-blue-600 dark:text-blue-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-          />
-        </svg>
+      <div className="bg-primary-100 dark:bg-primary-900 flex h-10 w-10 items-center justify-center rounded-full">
+        <BuildingIcon className="text-primary-600 dark:text-primary-400 h-6 w-6" />
       </div>
     ),
     actions: (

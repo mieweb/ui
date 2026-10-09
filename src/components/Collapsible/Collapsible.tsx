@@ -32,6 +32,12 @@ export interface CollapsibleProps extends React.HTMLAttributes<HTMLDivElement> {
   onOpenChange?: (open: boolean) => void;
   /** Disables toggling */
   disabled?: boolean;
+  /**
+   * Persists the open state in `localStorage` under this key (uncontrolled
+   * only). Restored after mount, so server and hydration renders use
+   * `defaultOpen`.
+   */
+  storageKey?: string;
 }
 
 /**
@@ -53,6 +59,7 @@ const Collapsible = React.forwardRef<HTMLDivElement, CollapsibleProps>(
       defaultOpen = false,
       onOpenChange,
       disabled,
+      storageKey,
       children,
       ...props
     },
@@ -63,13 +70,33 @@ const Collapsible = React.forwardRef<HTMLDivElement, CollapsibleProps>(
 
     const isControlled = controlledOpen !== undefined;
     const open = isControlled ? controlledOpen : uncontrolledOpen;
+    const persists = Boolean(storageKey) && !isControlled;
+
+    React.useEffect(() => {
+      if (!persists || !storageKey) return;
+      try {
+        const stored = window.localStorage.getItem(storageKey);
+        if (stored === 'true' || stored === 'false') {
+          setUncontrolledOpen(stored === 'true');
+        }
+      } catch {
+        // Storage can be blocked (privacy mode, sandboxed iframe).
+      }
+    }, [persists, storageKey]);
 
     const toggle = React.useCallback(() => {
       if (disabled) return;
       const next = !open;
       if (!isControlled) setUncontrolledOpen(next);
+      if (persists && storageKey) {
+        try {
+          window.localStorage.setItem(storageKey, String(next));
+        } catch {
+          // Storage can be blocked or full; state still updates in memory.
+        }
+      }
       onOpenChange?.(next);
-    }, [disabled, open, isControlled, onOpenChange]);
+    }, [disabled, open, isControlled, persists, storageKey, onOpenChange]);
 
     const value = React.useMemo<CollapsibleContextValue>(
       () => ({

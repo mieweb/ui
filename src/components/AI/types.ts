@@ -289,8 +289,15 @@ export interface MCPToolInfo {
 // ============================================================================
 
 export interface AIChatCallbacks {
-  /** Called when user sends a message */
-  onSendMessage?: (message: string) => void | Promise<void>;
+  /**
+   * Called when user sends a message. When attachments are enabled via
+   * `composerProps`, the staged files arrive as the second argument
+   * (attachment-only sends invoke this with an empty string).
+   */
+  onSendMessage?: (
+    message: string,
+    attachments?: File[]
+  ) => void | Promise<void>;
   /** Called when a tool call is initiated */
   onToolCall?: (toolCall: MCPToolCall) => void | Promise<void>;
   /** Called when a tool call completes */

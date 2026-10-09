@@ -6,6 +6,7 @@ export {
   type ChatComposerMenuItem,
   type ChatComposerAgentOption,
 } from './ChatComposer';
-// Mention candidates are shared with MessageComposer; re-exported here so
-// ChatComposer hosts don't need to know where the type lives.
+// Mention candidates live in the shared Messaging mention module;
+// re-exported here so ChatComposer hosts don't need to know where the type
+// lives.
 export type { MentionOption } from '../Messaging/useMentionAutocomplete';

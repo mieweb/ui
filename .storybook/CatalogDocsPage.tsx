@@ -10,6 +10,7 @@ import {
   useOf,
 } from '@storybook/addon-docs/blocks';
 import taxonomy from './taxonomy.json';
+import { ComponentMetaBlock } from './blocks/ComponentMetaBlock';
 
 /**
  * Autodocs template that renders the catalog metadata declared on each Meta
@@ -125,7 +126,7 @@ function CatalogBanner({
             <>
               {' '}
               Use{' '}
-              <AnchorMdx href={docsHref(successor.target)}>
+              <AnchorMdx href={docsHref(successor.target)} target="_self">
                 {titles[successor.target] ?? successor.target}
               </AnchorMdx>{' '}
               instead — {successor.why}
@@ -174,7 +175,7 @@ function RelatedList({ relationships, titles }: { relationships: CatalogRelation
         {sorted.map((r) => (
           <li key={`${r.type}:${r.target}`}>
             <em>{capitalize(r.type)}</em>{' '}
-            <AnchorMdx href={docsHref(r.target)}>{titles[r.target] ?? r.target}</AnchorMdx> — {r.why}
+            <AnchorMdx href={docsHref(r.target)} target="_self">{titles[r.target] ?? r.target}</AnchorMdx> — {r.why}
           </li>
         ))}
       </ul>
@@ -218,6 +219,8 @@ export function CatalogDocsPage() {
       <CatalogBanner tags={tags} relationships={relationships} titles={titles} />
       <Subtitle />
       <Description />
+      {/* "In production" strip driven by `parameters.meta` (src/docs/component-meta.ts). */}
+      <ComponentMetaBlock />
       <RelatedList relationships={relationships} titles={titles} />
       <InstallBlock entry={catalog.entry} peers={catalog.peers} component={componentName} />
       <Primary />

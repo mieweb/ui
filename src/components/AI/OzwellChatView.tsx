@@ -6,7 +6,7 @@ import { CheckIcon, CloseIcon, PencilIcon } from '../Icons';
 import { Toast } from '../Toast';
 import { Tooltip } from '../Tooltip';
 import {
-  ComposerModelSelector,
+  type ComposerModelSelectorProps,
   type ProviderModelOption,
   type ProviderModelValue,
 } from './ComposerModelSelector';
@@ -226,22 +226,24 @@ export function OzwellChat({
     setMessagesMenuOpen(false);
   };
 
-  const modelSelector =
-    showModelSelector && models ? (
-      <ComposerModelSelector
-        models={models.options}
-        value={models.value}
-        onChange={models.onChange}
-        {...(models.providerFilter !== undefined
-          ? {
-              providerFilter: models.providerFilter,
-              onProviderFilterChange: models.onProviderFilterChange,
-            }
-          : { onProviderFilterChange: models.onProviderFilterChange })}
-        boundaryRef={shellRef}
-        className="border-border bg-card text-foreground max-w-[min(142px,38vw)] shadow-sm"
-      />
-    ) : undefined;
+  // Rendered by ChatComposer in its selector row below the input card
+  // (previously a floating overlay inside the MessageComposer input).
+  const modelSelectorProps: ComposerModelSelectorProps | undefined =
+    showModelSelector && models
+      ? {
+          models: models.options,
+          value: models.value,
+          onChange: models.onChange,
+          ...(models.providerFilter !== undefined
+            ? {
+                providerFilter: models.providerFilter,
+                onProviderFilterChange: models.onProviderFilterChange,
+              }
+            : { onProviderFilterChange: models.onProviderFilterChange }),
+          boundaryRef: shellRef,
+          className: 'max-w-[min(160px,44vw)]',
+        }
+      : undefined;
 
   const startQueuedMessageEdit = () => {
     setQueuedMessageDraft(queuedMessage ?? '');
@@ -482,11 +484,6 @@ export function OzwellChat({
       <AIChat
         messages={chatMessages}
         isGenerating={isGenerating}
-        className={
-          showModelSelector
-            ? '[&_[data-slot="composer-input"]]:pe-[min(160px,44vw)]'
-            : undefined
-        }
         showHeader={false}
         height="100%"
         variant="embedded"
@@ -496,9 +493,11 @@ export function OzwellChat({
         renderTextContent={renderMessageTextContent}
         renderMessageFooter={renderQueuedMessageFooter}
         composerProps={{
-          inputTrailing: modelSelector,
           disabled: false,
           isSending: false,
+          ...(modelSelectorProps
+            ? { showModelSelector: true, modelSelectorProps }
+            : {}),
         }}
       />
 

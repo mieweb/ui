@@ -260,6 +260,15 @@ export const motionPresets: Record<MotionPreset, MotionPresetDefinition> = {
     // `times` front-loads the overshoot so it reads as a pop rather than an
     // even swell. Keyframe arrays need a duration-based tween; a spring has no
     // way to run through intermediate values.
-    transition: { duration: 0.28, ease: 'easeOut', times: [0, 0.45, 1] },
+    //
+    // `times` is scoped to `scale` on purpose. At the top level it also
+    // applies to `opacity`, whose two-value tween then gets three time stops:
+    // it overshoots to 1 early, falls back toward 0, and snaps to 1 at the end,
+    // so the badge flickers instead of fading in.
+    transition: {
+      duration: 0.15,
+      ease: 'easeOut',
+      scale: { duration: 0.28, ease: 'easeOut', times: [0, 0.45, 1] },
+    },
   },
 };

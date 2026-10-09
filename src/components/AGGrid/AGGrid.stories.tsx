@@ -295,8 +295,10 @@ This keeps the base package lightweight for consumers who don't need data grids.
 **1. Install AG Grid alongside \`@mieweb/ui\`:**
 
 \`\`\`bash
-npm install @mieweb/ui ag-grid-community ag-grid-react
+pnpm add @mieweb/ui ag-grid-community ag-grid-react
 \`\`\`
+
+(Use \`npm install\` or \`yarn add\` with the same packages if that is your project's package manager.)
 
 **2. Import from the \`@mieweb/ui/ag-grid\` sub-path** (not the main entry):
 

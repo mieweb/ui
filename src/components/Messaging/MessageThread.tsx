@@ -10,9 +10,19 @@ import type {
   MessagingEventHandlers,
 } from './types';
 import { MessageList } from './MessageList';
-import { MessageComposer } from './MessageComposer';
+import {
+  ChatComposer,
+  type ChatComposerHandle,
+} from '../ChatComposer/ChatComposer';
+import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { ConversationHeader } from './ConversationHeader';
-import { DragDropZone } from './AttachmentPicker';
+import {
+  CameraButton,
+  DragDropZone,
+  DEFAULT_ACCEPTED_FILE_TYPES,
+  DEFAULT_MAX_FILE_SIZE,
+} from './AttachmentPicker';
+import { useTypingEmulation } from './hooks';
 
 // ============================================================================
 // Lightbox Modal Component
@@ -169,9 +179,14 @@ export interface MessageThreadProps {
   maxMessageLength?: number;
   /** Show character count */
   showCharacterCount?: boolean;
-  /** Show attachment picker */
+  /** Enable file attachments in the composer (`+` menu, paste, drag-and-drop) */
   showAttachmentPicker?: boolean;
-  /** Show camera button */
+  /**
+   * Show a camera capture button in the composer's action row (mobile).
+   * Captured photos are staged via the composer's imperative `addFiles`,
+   * which works independently of `showAttachmentPicker` — that prop only
+   * gates the `+` menu, paste, and drag-and-drop affordances.
+   */
   showCameraButton?: boolean;
   /** Accepted file types */
   acceptedFileTypes?: string[];
@@ -258,6 +273,34 @@ const MessageThread = React.forwardRef<HTMLDivElement, MessageThreadProps>(
       senderName: string;
     } | null>(null);
 
+    // Composer handle so files dropped on the message list (and camera
+    // captures) are staged in the composer.
+    const composerRef = React.useRef<ChatComposerHandle>(null);
+
+    React.useEffect(() => {
+      notifyComposerMigrationOnce('MessageThread');
+    }, []);
+
+    // Controlled composer draft so a failed send can restore the typed text
+    // (ChatComposer clears optimistically and delegates restore to the host;
+    // MessageComposer restored it internally).
+    const [draft, setDraft] = React.useState('');
+    // Bumped on every user edit (including the optimistic clear that precedes
+    // a send), so a stale failed send never overwrites newer typed input.
+    const draftEpochRef = React.useRef(0);
+    const handleDraftChange = React.useCallback((value: string) => {
+      draftEpochRef.current += 1;
+      setDraft(value);
+    }, []);
+
+    // MessageComposer parity: emulate its typing callbacks for
+    // eventHandlers.onTypingStart / onTypingStop.
+    const { stopTyping } = useTypingEmulation({
+      value: draft,
+      onTypingStart: eventHandlers.onTypingStart,
+      onTypingStop: eventHandlers.onTypingStop,
+    });
+
     // Get participant for direct messages
     const participant =
       conversation?.type === 'direct'
@@ -277,12 +320,29 @@ const MessageThread = React.forwardRef<HTMLDivElement, MessageThreadProps>(
 
     // Handle send message
     const handleSendMessage = async (newMessage: NewMessage) => {
+      // MessageComposer parity: typing stops immediately on send.
+      stopTyping();
       const messageWithReply: NewMessage = {
         ...newMessage,
         replyToId: replyTo?.id || newMessage.replyToId,
       };
       setReplyTo(null);
-      await eventHandlers.onSendMessage?.(messageWithReply);
+      const epoch = draftEpochRef.current;
+      try {
+        // A returned promise is awaited so an async rejection follows the
+        // same draft-restore path as a synchronous throw.
+        await Promise.resolve(eventHandlers.onSendMessage?.(messageWithReply));
+      } catch (error) {
+        // MessageComposer parity: restore the text when the host callback
+        // fails (attachments are not restaged) — unless the user has typed a
+        // newer draft while this send was pending.
+        if (draftEpochRef.current === epoch) {
+          setDraft(newMessage.content);
+        }
+        // Rethrow so ChatComposer reports the failure through `onError`
+        // ('Failed to send message' — the same copy MessageComposer used).
+        throw error;
+      }
     };
 
     return (
@@ -308,10 +368,15 @@ const MessageThread = React.forwardRef<HTMLDivElement, MessageThreadProps>(
 
         {/* Message list */}
         <DragDropZone
-          onFilesDropped={() => {
-            // Could trigger composer with attachments
-            onError?.('Drop files on the composer to attach them');
+          onFilesDropped={(files) => {
+            // Stage list-area drops in the composer (validation and error
+            // reporting happen once, in the composer's addFiles).
+            composerRef.current?.addFiles(files);
           }}
+          // Without these, the zone's default maxFiles={10} would silently
+          // truncate drops before addFiles could enforce/report the limit.
+          maxFiles={maxAttachments}
+          onError={onError}
           disabled={!showAttachmentPicker}
           className="flex-1 overflow-hidden"
         >
@@ -334,24 +399,42 @@ const MessageThread = React.forwardRef<HTMLDivElement, MessageThreadProps>(
           />
         </DragDropZone>
 
-        {/* Composer */}
-        <MessageComposer
-          onSend={handleSendMessage}
-          onTypingStart={eventHandlers.onTypingStart}
-          onTypingStop={eventHandlers.onTypingStop}
-          placeholder={placeholder}
-          maxLength={maxMessageLength}
-          showCharacterCount={showCharacterCount}
-          isSending={isSending}
-          showAttachmentPicker={showAttachmentPicker}
-          showCameraButton={showCameraButton}
-          acceptedFileTypes={acceptedFileTypes}
-          maxFileSize={maxFileSize}
-          maxAttachments={maxAttachments}
-          onError={onError}
-          replyTo={replyTo}
-          onCancelReply={() => setReplyTo(null)}
-        />
+        {/* Composer — the shared ChatComposer pill, framed with the same
+            border-t + p-3 breathing room MessageComposer's input area used. */}
+        <div
+          data-slot="message-thread-composer"
+          className="shrink-0 border-t border-neutral-200 p-3 dark:border-neutral-700"
+        >
+          <ChatComposer
+            ref={composerRef}
+            value={draft}
+            onValueChange={handleDraftChange}
+            onSend={handleSendMessage}
+            placeholder={placeholder}
+            maxLength={maxMessageLength}
+            showCharacterCount={showCharacterCount}
+            isSending={isSending}
+            allowAttachments={showAttachmentPicker}
+            // MessageComposer applied these validation defaults; ChatComposer
+            // leaves file types and size unrestricted, so apply them here.
+            acceptedFileTypes={acceptedFileTypes ?? DEFAULT_ACCEPTED_FILE_TYPES}
+            maxFileSize={maxFileSize ?? DEFAULT_MAX_FILE_SIZE}
+            maxAttachments={maxAttachments}
+            onError={onError}
+            replyTo={replyTo}
+            onCancelReply={() => setReplyTo(null)}
+            // Same accessible name MessageComposer's textarea had.
+            inputLabel="Message"
+            micSlot={
+              showCameraButton ? (
+                <CameraButton
+                  onCapture={(file) => composerRef.current?.addFiles([file])}
+                  disabled={isSending}
+                />
+              ) : undefined
+            }
+          />
+        </div>
 
         {/* Lightbox */}
         <LightboxModal

@@ -22,7 +22,7 @@ Opting an application into real animations. Components ship with CSS transitions
 
 The opt-in is resolved in the module graph, not by a prop. \`motion\` is an optional peer dependency imported only by the \`@mieweb/ui/motion\` entry, so an app that never imports that entry never pays for it and its bundle is unchanged.
 
-This page documents the layer itself; the subject in every story below is a panel built from \`Animated\` rather than a library component. To see what motion does to a component, use the **Motion** story on that component's own page — [Modal](?path=/story/overlays-modal--motion) and [Sidebar](?path=/story/overlays-sidebar--motion) are the two wired up so far.
+This page documents the layer itself; the subject in every story below is a panel built from \`Animated\` rather than a library component. To see what motion does to a component, use the **Motion** story on that component's own page — [Modal](?path=/story/overlays-modal--motion) and [Sidebar](?path=/story/overlays-sidebar--motion), for example. The full list of supported components is under **Limitations** below.
 
 ### Use it when
 
@@ -41,8 +41,10 @@ This page documents the layer itself; the subject in every story below is a pane
 Install the optional peer dependency, then wrap the app once:
 
 \`\`\`sh
-npm install motion
+pnpm add motion
 \`\`\`
+
+(Use \`npm install motion\` or \`yarn add motion\` if that is your project's package manager.)
 
 \`\`\`tsx
 import { MotionProvider } from '@mieweb/ui/motion';
@@ -72,7 +74,7 @@ Note that import is from \`@mieweb/ui\`, not \`@mieweb/ui/motion\`: \`Animated\`
 
 ### Limitations
 
-- \`Modal\`, \`Sidebar\`, \`Toast\`, \`Dropdown\`, and \`Collapsible\` are wired up. Every other component ignores the provider and keeps its CSS transitions.
+- \`Modal\`, \`Sidebar\`, \`Toast\`, \`Dropdown\`, \`Collapsible\`, and SuperChat (\`SuperChat\`, \`SuperChatConversations\`, \`SuperChatInbox\`) are wired up. Every other component ignores the provider and keeps its CSS transitions.
 - \`reducedMotion\` defaults to \`'user'\`, which drops transforms and keeps opacity when the OS asks for reduced motion. Verify both paths — they are different code.
 - Motion holds an element at rest with a \`transform\`, and a transformed ancestor becomes the containing block for \`position: fixed\` descendants. Components that are only sometimes animated should pass \`enabled={false}\` the rest of the time, as \`Sidebar\` does on desktop.
 - \`disabled\` forces every component back onto the CSS path. It exists for test runs, where springs make assertions timing-dependent. Flipping it remounts \`Animated\` elements (they swap between motion components and plain tags), so set it once per suite rather than toggling it mid-interaction.`,
@@ -105,6 +107,16 @@ Note that import is from \`@mieweb/ui\`, not \`@mieweb/ui/motion\`: \`Animated\`
           type: 'composes with',
           target: 'choice-inputs-dropdown',
           why: 'MotionProvider scales the menu out of its trigger and gives it a real exit animation, which the CSS path cannot do because the menu unmounts on close.',
+        },
+        {
+          type: 'composes with',
+          target: 'superchat-superchat-panel',
+          why: 'MotionProvider fades the jump-to-bottom button in and out, which the CSS path cannot do because the button unmounts once the thread is back at the bottom.',
+        },
+        {
+          type: 'composes with',
+          target: 'superchat-conversations-list',
+          why: 'MotionProvider pops unread badges in as they arrive and fades them out when cleared, which the CSS path cannot do because the badge unmounts.',
         },
       ],
     },

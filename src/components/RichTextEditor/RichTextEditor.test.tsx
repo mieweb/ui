@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { screen } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
 import {
@@ -116,5 +116,57 @@ describe('RichTextEditor', () => {
     expect(
       screen.getByRole('textbox', { name: /note body/i })
     ).toBeInTheDocument();
+  });
+
+  describe('paste sanitisation', () => {
+    // jsdom has no execCommand; the component inserts pasted HTML through it.
+    const exec = vi.fn().mockReturnValue(true);
+    document.execCommand = exec;
+    afterEach(() => exec.mockClear());
+
+    const paste = (html: string) =>
+      fireEvent.paste(screen.getByRole('textbox', { name: 'Body' }), {
+        clipboardData: {
+          getData: (type: string) => (type === 'text/html' ? html : ''),
+        },
+      });
+
+    it('runs pasted HTML through sanitizeHtml before it reaches the DOM', () => {
+      const onChange = vi.fn();
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={onChange}
+          aria-label="Body"
+          sanitizeHtml={(html) =>
+            html.replaceAll('<script>alert(1)</script>', '')
+          }
+        />
+      );
+      paste('<b>hi</b><script>alert(1)</script>');
+      expect(exec).toHaveBeenCalledWith('insertHTML', false, '<b>hi</b>');
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    it('leaves plain-text pastes to the browser', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          aria-label="Body"
+          sanitizeHtml={(html) => html}
+        />
+      );
+      paste('');
+      expect(exec).not.toHaveBeenCalled();
+    });
+
+    it('keeps default paste behaviour without sanitizeHtml', () => {
+      renderWithTheme(
+        <RichTextEditor value="" onChange={() => {}} aria-label="Body" />
+      );
+      paste('<b>hi</b>');
+      expect(exec).not.toHaveBeenCalled();
+    });
   });
 });

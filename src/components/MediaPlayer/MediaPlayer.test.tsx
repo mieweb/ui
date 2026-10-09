@@ -47,6 +47,40 @@ describe('MediaPlayer', () => {
     expect(container.querySelector('video')).not.toBeNull();
   });
 
+  it('supports feed playback attributes and caller-owned caption tracks', () => {
+    const { container } = render(
+      <MediaPlayer
+        src="movie.mp4"
+        muted
+        loop
+        poster="cover.jpg"
+        preload="metadata"
+      >
+        <track kind="captions" src="captions.vtt" srcLang="en" />
+      </MediaPlayer>
+    );
+    const video = container.querySelector('video') as HTMLVideoElement;
+    expect(video.muted).toBe(true);
+    expect(video.loop).toBe(true);
+    expect(video).toHaveAttribute('poster', 'cover.jpg');
+    expect(video).toHaveAttribute('preload', 'metadata');
+    expect(video.querySelector('track')).toHaveAttribute('src', 'captions.vtt');
+  });
+
+  it('localizes its error and retry surface', () => {
+    const { container } = render(
+      <MediaPlayer
+        src="song.mp3"
+        labels={{ error: 'Media unavailable', retry: 'Try again' }}
+      />
+    );
+    fireEvent.error(container.querySelector('audio') as HTMLAudioElement);
+    expect(screen.getByRole('alert')).toHaveTextContent('Media unavailable');
+    expect(
+      screen.getByRole('button', { name: 'Try again' })
+    ).toBeInTheDocument();
+  });
+
   it('mirrors the element into mediaElementRef', () => {
     const mediaElementRef = createRef<HTMLVideoElement | HTMLAudioElement>();
     const { container } = render(
@@ -96,8 +130,9 @@ describe('MediaPlayer', () => {
 
   it('shows a retry surface on error and recovers', () => {
     const onError = vi.fn();
+    const onRetry = vi.fn();
     const { container } = render(
-      <MediaPlayer src="song.mp3" onError={onError} />
+      <MediaPlayer src="song.mp3" onError={onError} onRetry={onRetry} />
     );
     const el = container.querySelector('audio') as HTMLAudioElement;
     fireEvent(el, new Event('error'));
@@ -106,6 +141,7 @@ describe('MediaPlayer', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /retry/i }));
+    expect(onRetry).toHaveBeenCalledOnce();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(container.querySelector('audio')).not.toBeNull();
   });

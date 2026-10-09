@@ -54,6 +54,8 @@ export {
   AIChat,
   SuggestedActions,
   type AIChatProps,
+  type AIChatComposerProps,
+  type AIChatLegacyComposerProps,
   type SuggestedActionsProps,
 } from './AIChat';
 

@@ -4,13 +4,11 @@ import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 
 // ============================================================================
-// @mention autocomplete — shared between MessageComposer and ChatComposer.
-//
-// Extracted verbatim from MessageComposer so both composers expose identical
-// mention behavior (query detection, keyboard navigation, insertion, ARIA
-// combobox wiring, listbox rendering). Do not change semantics here without
-// running both composers' test suites — SuperChat pins this behavior through
-// MessageComposer today.
+// @mention autocomplete — consumed by ChatComposer (and, before its
+// retirement in 0.10.0, MessageComposer — it was extracted verbatim from it:
+// query detection, keyboard navigation, insertion, ARIA combobox wiring,
+// listbox rendering). Do not change semantics here without running
+// ChatComposer's test suite plus the SuperChat/AIChat consumer suites.
 // ============================================================================
 
 /**

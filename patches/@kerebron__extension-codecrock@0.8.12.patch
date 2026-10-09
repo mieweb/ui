@@ -1,0 +1,13 @@
+diff --git a/esm/ui.js b/esm/ui.js
+index 279ba0013b41baa109e555f1e5fe9b55d5d18f7d..e4696ec90831fa811897728133c0be757ee48b64 100644
+--- a/esm/ui.js
++++ b/esm/ui.js
+@@ -5,6 +5,8 @@ export function addLanguageDropDown(nodeView) {
+     const select = document.createElement('select');
+     nodeView.dom.appendChild(select);
+     select.classList.add('codecrock-select');
++    // Accessible name for the language picker (axe: select-name).
++    select.setAttribute('aria-label', 'Code language');
+     for (const lang of [''].concat(nodeView.config.languageWhitelist || [])) {
+         const option = document.createElement('option');
+         option.value = lang;

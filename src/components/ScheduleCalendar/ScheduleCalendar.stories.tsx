@@ -58,6 +58,11 @@ const { data: appointments = [], isLoading } = useAppointments(date, 'week');
       entry: '@mieweb/ui',
       relationships: [
         {
+          type: 'alternative to',
+          target: 'views-calendarview',
+          why: 'This books timed appointments into an hour axis; CalendarView places dated records, including ones spanning days, on a month grid.',
+        },
+        {
           type: 'composes with',
           target: 'date-time-schedulepicker',
           why: 'In a booking flow ScheduleCalendar shows what is already booked while SchedulePicker offers the remaining open slots.',

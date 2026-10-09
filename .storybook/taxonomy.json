@@ -56,7 +56,9 @@
         "Loading",
         "Overlays",
         "Navigation",
-        "Layout"
+        "Layout",
+        "Record details",
+        "Showcase"
       ]
     },
     {
@@ -64,13 +66,21 @@
       "scope": "scope:general-purpose",
       "families": [
         "Dashboards",
+        "Views",
         "Media",
         "Editors",
         "Chat",
         "SuperChat",
         "Voice",
-        "Files"
+        "Files",
+        "Presentations",
+        "Records"
       ]
+    },
+    {
+      "name": "Templates",
+      "scope": "scope:general-purpose",
+      "families": ["Pages", "Conversion", "Content", "Social proof", "Reports"]
     },
     {
       "name": "Healthcare",

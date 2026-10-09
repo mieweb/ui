@@ -1,0 +1,144 @@
+diff --git a/esm/pmToMdConverter.js b/esm/pmToMdConverter.js
+index 0bd4e5e36caf3e94a9148ac20b757c68e0940894..8d3eaa9099343f2994ab8f11635fb31685d8d076 100644
+--- a/esm/pmToMdConverter.js
++++ b/esm/pmToMdConverter.js
+@@ -372,6 +372,34 @@ export async function extPmToMdConverter(origDocument, config, schema, eventTarg
+             mixable: true,
+             expelEnclosingWhitespace: true,
+         },
++        // mieweb/ui patch (mieweb/ui#536): serialize highlight, superscript
++        // and subscript as inline HTML so they survive the markdown
++        // round-trip; the tree-sitter parse side already maps these tags back
++        // onto the marks.
++        superscript: {
++            open: 'superscript_open',
++            close: 'superscript_close',
++            mixable: true,
++            expelEnclosingWhitespace: true,
++        },
++        subscript: {
++            open: 'subscript_open',
++            close: 'subscript_close',
++            mixable: true,
++            expelEnclosingWhitespace: true,
++        },
++        highlight: {
++            open: async (mark) => {
++                const token = new Token('highlight_open', 'mark', 1);
++                if (mark.attrs.color) {
++                    token.attrSet('color', mark.attrs.color);
++                }
++                return token;
++            },
++            close: 'highlight_close',
++            mixable: true,
++            expelEnclosingWhitespace: true,
++        },
+         math: {
+             open: 'math_inline_open',
+             close: 'math_inline_close',
+diff --git a/esm/token_handlers/inline_token_handlers.js b/esm/token_handlers/inline_token_handlers.js
+index b9f690609ab8f219284d671d03f46c79899dd34d..6a910124c79eb49cbaf185405d821cd1b43abdea 100644
+--- a/esm/token_handlers/inline_token_handlers.js
++++ b/esm/token_handlers/inline_token_handlers.js
+@@ -1,5 +1,15 @@
+ import MathMl2LaTeX from 'mathml2latex';
+ import { fixCharacters } from '../utils.js';
++// mieweb/ui patch (mieweb/ui#536): escape values interpolated into
++// double-quoted HTML attributes so quote-bearing input cannot corrupt the
++// markup or inject attributes; entities decode back on re-parse.
++function escapeHtmlAttr(value) {
++    return String(value)
++        .replace(/&/g, '&amp;')
++        .replace(/"/g, '&quot;')
++        .replace(/</g, '&lt;')
++        .replace(/>/g, '&gt;');
++}
+ export function escapeMarkdown(token, current) {
+     const markdownChars = [
+         { char: '\\', escape: '\\\\' },
+@@ -194,6 +204,43 @@ export function getInlineTokensHandlers() {
+                 ctx.current.log(token.markup || '~', token);
+             },
+         ],
++        // mieweb/ui patch (mieweb/ui#536): emit highlight/superscript/
++        // subscript as inline HTML — CommonMark has no syntax for them and
++        // the tree-sitter grammar cannot be extended, but its `html` branch
++        // maps these tags back onto the marks on parse.
++        'superscript_open': [
++            (token, ctx) => {
++                ctx.current.log('<sup>', token);
++            },
++        ],
++        'superscript_close': [
++            (token, ctx) => {
++                ctx.current.log('</sup>', token);
++            },
++        ],
++        'subscript_open': [
++            (token, ctx) => {
++                ctx.current.log('<sub>', token);
++            },
++        ],
++        'subscript_close': [
++            (token, ctx) => {
++                ctx.current.log('</sub>', token);
++            },
++        ],
++        'highlight_open': [
++            (token, ctx) => {
++                const color = token.attrGet('color');
++                ctx.current.log(color && color !== 'yellow'
++                    ? `<mark style="background-color: ${escapeHtmlAttr(color)}">`
++                    : '<mark>', token);
++            },
++        ],
++        'highlight_close': [
++            (token, ctx) => {
++                ctx.current.log('</mark>', token);
++            },
++        ],
+         'link_open': [
+             (token, ctx) => {
+                 ctx.stash('getInlineTokensHandlers.link_open');
+@@ -350,6 +397,40 @@ export function getHtmlInlineFormatTokensHandlers() {
+                 ctx.current.log(`</${tag}>`, token);
+             },
+         ],
++        // mieweb/ui patch (mieweb/ui#536): same marks inside HTML contexts.
++        'superscript_open': [
++            (token, ctx) => {
++                ctx.current.log('<sup>', token);
++            },
++        ],
++        'superscript_close': [
++            (token, ctx) => {
++                ctx.current.log('</sup>', token);
++            },
++        ],
++        'subscript_open': [
++            (token, ctx) => {
++                ctx.current.log('<sub>', token);
++            },
++        ],
++        'subscript_close': [
++            (token, ctx) => {
++                ctx.current.log('</sub>', token);
++            },
++        ],
++        'highlight_open': [
++            (token, ctx) => {
++                const color = token.attrGet('color');
++                ctx.current.log(color && color !== 'yellow'
++                    ? `<mark style="background-color: ${escapeHtmlAttr(color)}">`
++                    : '<mark>', token);
++            },
++        ],
++        'highlight_close': [
++            (token, ctx) => {
++                ctx.current.log('</mark>', token);
++            },
++        ],
+     };
+ }
+ export function getHtmlInlineTokensHandlers() {

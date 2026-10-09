@@ -15,6 +15,9 @@ import {
 import type { SuperChatConversation } from './index';
 import { conversation, richConversation, registry } from './storyData';
 import { markdownShowcaseConversation } from './storyData';
+import { fullHeightChat } from '../../../.storybook/full-height';
+import { MotionProvider } from '../../motion/MotionProvider';
+import { Button } from '../Button';
 import 'katex/dist/katex.min.css';
 
 // ============================================================================
@@ -26,6 +29,8 @@ const meta: Meta<typeof SuperChat> = {
   title: 'Modules/SuperChat/SuperChat (Panel)',
   component: SuperChat,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  // Every story is a page-level panel: fill the canvas height (#504).
+  decorators: [fullHeightChat],
   argTypes: {
     readOnly: {
       control: 'boolean',
@@ -69,6 +74,7 @@ const meta: Meta<typeof SuperChat> = {
   },
   parameters: {
     layout: 'fullscreen',
+    githubSourceFooter: false,
     docs: {
       description: {
         component: `### What it's for
@@ -124,7 +130,11 @@ const append = (m: SuperChatMessage) =>
 - Copy uses \`navigator.clipboard.write\` (secure context; plain-text fallback). Attachments are delivered to the host as base64 \`dataUrl\`s — upload and swap URLs yourself; \`attachmentCache\` (IndexedDB) is opt-in.
 - **Layout.** Fills its flex parent (\`h-full\`); you must give it a bounded height. Non-virtualised threads render every row (rows are \`React.memo\`; keep message objects referentially stable). \`order="desc"\` anchors to the top.
 - i18n: "Messages", "Participants", "Send message", "Copy message", "Edit message", "(edited)" and time via \`toLocaleTimeString\` are English/locale-default. RTL: alignment is flex-based, but the speaker accent is a physical \`borderLeft\` and the Copy control floats left/right by author.
-- Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core); \`rehype-highlight\`, \`remark-math\` + \`rehype-katex\` + \`katex\`, \`mermaid\`, \`@mieweb/datavis\` per plugin — all optional in \`package.json\`. Not in the main barrel: import from \`@mieweb/ui/components/SuperChat\`.`,
+- Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core); \`rehype-highlight\`, \`remark-math\` + \`rehype-katex\` + \`katex\`, \`mermaid\`, \`@mieweb/datavis\` per plugin — all optional in \`package.json\`. Not in the main barrel: import from \`@mieweb/ui/components/SuperChat\`.
+
+### Motion
+
+An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--docs) gets a fade on the jump-to-bottom button as it appears and disappears, and the message action menus inherit Dropdown's menu animation. Nothing changes at the call site; see the **Motion** story. Message rows deliberately do **not** animate in — see the module MAINTAINERS for why.`,
       },
     },
     catalog: {
@@ -150,6 +160,11 @@ const append = (m: SuperChatMessage) =>
           type: 'uses',
           target: 'chat-chatcomposer',
           why: 'The compose box is the shared ChatComposer (attachments behind its `+` menu, `chat-composer-*` data-slots) with mentionOptions built from the participants.',
+        },
+        {
+          type: 'composes with',
+          target: 'foundations-motion',
+          why: 'MotionProvider fades the jump-to-bottom button in and out, which the CSS path cannot do because the button unmounts once the thread is back at the bottom.',
         },
       ],
     },
@@ -324,23 +339,21 @@ export const Playground: Story = {
     trustedContent: false,
   },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        {...args}
-        initial={richConversation}
-        renderPlugins={[
-          createCodePlugin(),
-          createMathPlugin(),
-          createGenUIPlugin(registry),
-          createMermaidPlugin(),
-          createImagePlugin(),
-          createNitroTablePlugin(),
-          createAttachmentPlugin(),
-        ]}
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      {...args}
+      initial={richConversation}
+      renderPlugins={[
+        createCodePlugin(),
+        createMathPlugin(),
+        createGenUIPlugin(registry),
+        createMermaidPlugin(),
+        createImagePlugin(),
+        createNitroTablePlugin(),
+        createAttachmentPlugin(),
+      ]}
+      onReferenceClick={(ref) => console.log('ref', ref)}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 
@@ -367,23 +380,21 @@ export const Reverse: Story = {
     },
   },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        {...args}
-        initial={richConversation}
-        renderPlugins={[
-          createCodePlugin(),
-          createMathPlugin(),
-          createGenUIPlugin(registry),
-          createMermaidPlugin(),
-          createImagePlugin(),
-          createNitroTablePlugin(),
-          createAttachmentPlugin(),
-        ]}
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      {...args}
+      initial={richConversation}
+      renderPlugins={[
+        createCodePlugin(),
+        createMathPlugin(),
+        createGenUIPlugin(registry),
+        createMermaidPlugin(),
+        createImagePlugin(),
+        createNitroTablePlugin(),
+        createAttachmentPlugin(),
+      ]}
+      onReferenceClick={(ref) => console.log('ref', ref)}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 
@@ -411,11 +422,7 @@ export const Long: Story = {
       },
     },
   },
-  render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel {...args} initial={longConversation} />
-    </div>
-  ),
+  render: (args) => <InteractivePanel {...args} initial={longConversation} />,
 };
 
 // The same 300-message thread, newest-first (social-feed style, top-anchored).
@@ -437,11 +444,56 @@ export const LongReverse: Story = {
       },
     },
   },
-  render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel {...args} initial={longConversation} />
-    </div>
-  ),
+  render: (args) => <InteractivePanel {...args} initial={longConversation} />,
+};
+
+// ============================================================================
+// Motion
+// ============================================================================
+
+/**
+ * A/B harness for the motion opt-in. Uses the long thread so there is room to
+ * scroll away from the bottom and summon the jump-to-bottom button.
+ */
+function MotionDemo() {
+  const [motionEnabled, setMotionEnabled] = React.useState(true);
+
+  return (
+    <MotionProvider disabled={!motionEnabled}>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex items-center gap-3 border-b border-neutral-200 p-3 dark:border-neutral-700">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setMotionEnabled((enabled) => !enabled)}
+            aria-pressed={motionEnabled}
+          >
+            Motion: {motionEnabled ? 'on' : 'off'}
+          </Button>
+          <p className="text-muted-foreground text-xs">
+            Scroll up, then jump back down, with the switch set each way.
+          </p>
+        </div>
+        <InteractivePanel
+          currentParticipantId="u1"
+          initial={longConversation}
+          className="min-h-0"
+        />
+      </div>
+    </MotionProvider>
+  );
+}
+
+export const Motion: Story = {
+  render: () => <MotionDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SuperChat under `@mieweb/ui/motion`. With motion on, the jump-to-bottom button fades in when you scroll away from the newest message and fades out when you return; with it off the button appears and disappears instantly, because it unmounts. Hover a message and open its ⋯ menu to see the Dropdown menu animation it inherits. Opacity survives `reducedMotion="user"`, so the fade still runs with the OS setting on. The provider is normally mounted once at the app root; it is local here so the comparison can be toggled.',
+      },
+    },
+  },
 };
 
 // The only plugin-less example. Math (`$$ … $$`, `$x$`) and the ```genui``` block
@@ -464,14 +516,12 @@ export const CoreNoPlugins: Story = {
     },
   },
   render: () => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        initial={conversation}
-        currentParticipantId="u1"
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      initial={conversation}
+      currentParticipantId="u1"
+      onReferenceClick={(ref) => console.log('ref', ref)}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
 };
 
@@ -498,13 +548,341 @@ export const MarkdownShowcase: Story = {
     },
   },
   render: (args) => (
-    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
-      <InteractivePanel
-        {...args}
-        initial={markdownShowcaseConversation}
-        renderPlugins={[createCodePlugin()]}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
+    <InteractivePanel
+      {...args}
+      initial={markdownShowcaseConversation}
+      renderPlugins={[createCodePlugin()]}
+      linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
   ),
+};
+
+// ============================================================================
+// Streaming response (scroll anchoring + jump to bottom)
+// ============================================================================
+// A long AI answer streams in chunk by chunk. While the user is at the bottom
+// the thread follows the stream; the moment they scroll up to read, their
+// position is preserved and the floating ↓ button appears. A follow-up
+// message lands after the stream completes, so scrolling up also demos the
+// "New messages" hint on the button.
+
+const streamParticipants = [
+  {
+    id: 'u1',
+    kind: 'human' as const,
+    name: 'Dr. Alice Reyes',
+    color: '#0e7490',
+  },
+  { id: 'a1', kind: 'agent' as const, name: 'Summary Agent', color: '#2563eb' },
+];
+
+const streamedAnswer = `Here is the **full visit summary** — no detail spared.
+
+## Presenting concerns
+
+The patient presented with a two-week history of intermittent palpitations, most noticeable in the evening and after caffeine. No syncope, no chest pain, no dyspnea on exertion. Symptoms are non-positional and resolve spontaneously within minutes.
+
+## History
+
+- Hypertension, well controlled on lisinopril 10 mg daily
+- No prior arrhythmia, no structural heart disease on last echo (2024)
+- Family history: father with atrial fibrillation at age 62
+- Social: two espressos daily, no tobacco, alcohol 2–3 drinks/week
+
+## Examination
+
+Vitals today: BP **128/82**, HR 76 regular, afebrile. Cardiac exam unremarkable — no murmurs, rubs, or gallops. Lungs clear bilaterally. No peripheral edema.
+
+## Data review
+
+| Study | Date | Result |
+| --- | --- | --- |
+| 12-lead ECG | today | Normal sinus rhythm, no ectopy |
+| CBC | last week | Within normal limits |
+| TSH | last week | 2.1 mIU/L (normal) |
+| Potassium | today | 4.6 mmol/L |
+
+## Assessment
+
+Palpitations, most consistent with benign premature beats provoked by caffeine. Low suspicion for sustained arrhythmia given the normal ECG, normal thyroid function, and absence of red-flag features. Family history of AF warrants a documented rhythm before fully closing the loop.
+
+## Plan
+
+1. 14-day ambulatory rhythm monitor to capture a symptomatic episode
+2. Trial of caffeine reduction (one espresso daily) with a symptom diary
+3. Continue lisinopril unchanged; recheck BP at follow-up
+4. Return precautions reviewed — syncope, chest pain, or sustained rapid palpitations prompt urgent evaluation
+5. Follow-up visit in three weeks to review the monitor data
+
+The rhythm monitor referral has been queued and the symptom diary template added to the patient portal. All of today's findings are documented in the encounter note.`;
+
+/** Sentence-ish chunks so the stream reads naturally. */
+const streamChunks = streamedAnswer.match(/[^ ]+( |$)/g) ?? [streamedAnswer];
+
+const streamingInitial: SuperChatConversation = {
+  id: 'streaming-demo',
+  title: 'Visit summary',
+  reference_id: 'patient/4821',
+  participants: streamParticipants,
+  thread: [
+    {
+      id: 'sm-1',
+      participantId: 'a1',
+      text: 'The encounter note is ready for review. Want the highlights or the full summary?',
+      time: '2026-06-01T09:00:00Z',
+    },
+    {
+      id: 'sm-2',
+      participantId: 'u1',
+      text: '@Summary give me the **full** summary — don’t spare any detail.',
+      time: '2026-06-01T09:00:30Z',
+    },
+  ],
+};
+
+function StreamingPanel(
+  props: Partial<React.ComponentProps<typeof SuperChat>>
+) {
+  const [convo, setConvo] = React.useState(streamingInitial);
+  const intervalRef = React.useRef<number | undefined>(undefined);
+  const timeoutsRef = React.useRef<number[]>([]);
+
+  const streamResponse = React.useCallback(() => {
+    const messageId = `stream-${Date.now()}`;
+    setConvo((prev) => ({
+      ...prev,
+      thread: [
+        ...prev.thread,
+        {
+          id: messageId,
+          participantId: 'a1',
+          text: '',
+          status: 'streaming' as const,
+          time: new Date().toISOString(),
+        },
+      ],
+    }));
+    let cursor = 0;
+    window.clearInterval(intervalRef.current);
+    intervalRef.current = window.setInterval(() => {
+      // A few words per tick ≈ token streaming.
+      cursor = Math.min(cursor + 4, streamChunks.length);
+      const done = cursor >= streamChunks.length;
+      const text = streamChunks.slice(0, cursor).join('');
+      setConvo((prev) => ({
+        ...prev,
+        thread: prev.thread.map((m) =>
+          m.id === messageId
+            ? { ...m, text, status: done ? undefined : ('streaming' as const) }
+            : m
+        ),
+      }));
+      if (done) {
+        window.clearInterval(intervalRef.current);
+        // A trailing message a beat later — scrolled-up users get the
+        // "New messages" hint on the jump-to-bottom button.
+        timeoutsRef.current.push(
+          window.setTimeout(() => {
+            setConvo((prev) => ({
+              ...prev,
+              thread: [
+                ...prev.thread,
+                {
+                  id: `after-${Date.now()}`,
+                  participantId: 'a1',
+                  text: 'Anything else you’d like me to pull from the chart?',
+                  time: new Date().toISOString(),
+                },
+              ],
+            }));
+          }, 1200)
+        );
+      }
+    }, 120);
+  }, []);
+
+  // Kick off the demo stream shortly after mount; clean up on unmount.
+  React.useEffect(() => {
+    const kickoff = window.setTimeout(streamResponse, 800);
+    const timeouts = timeoutsRef.current;
+    return () => {
+      window.clearTimeout(kickoff);
+      window.clearInterval(intervalRef.current);
+      timeouts.forEach((t) => window.clearTimeout(t));
+    };
+  }, [streamResponse]);
+
+  return (
+    <SuperChat
+      {...props}
+      conversation={convo}
+      currentParticipantId="u1"
+      onMessageSent={(text) => {
+        setConvo((prev) => ({
+          ...prev,
+          thread: [
+            ...prev.thread,
+            {
+              id: `m-${Date.now()}`,
+              participantId: 'u1',
+              text,
+              time: new Date().toISOString(),
+            },
+          ],
+        }));
+        // Every send triggers another long streamed answer.
+        timeoutsRef.current.push(window.setTimeout(streamResponse, 600));
+      }}
+    />
+  );
+}
+
+export const StreamingResponse: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'A long AI answer **streams in** while the user reads. Scroll behavior:',
+          '',
+          '- **Incoming streams never push the view** — when a reply starts',
+          '  streaming, its first line is revealed and the scroll then holds; the',
+          '  response fills below the fold under a ↓ arrow that upgrades to',
+          '  **“New messages”** when it finishes. A short reply that fits resumes',
+          '  normal pinning.',
+          '- **Scrolled up** — the position is preserved exactly; nothing yanks the',
+          '  reader down. A floating **↓ jump-to-bottom** button appears over the',
+          '  thread (`data-slot="superchat-jump-to-bottom"`).',
+          '- When messages arrive while scrolled up, the button grows a',
+          '  **“New messages”** hint. Clicking it returns to the newest message and',
+          '  resumes pinning.',
+          '- **Sending your own message opens an anchored turn** (the',
+          '  ChatGPT/Claude UX): your bubble scrolls to the **top** of the',
+          '  viewport and the reply streams into reserved space below',
+          '  (`data-slot="superchat-turn"`). The view stays put while you read — even',
+          '  past the fold; jump-to-bottom or scrolling down yourself resumes',
+          '  pinning.',
+          '',
+          'Try it: send a message and watch it anchor to the top. While the answer',
+          'streams, scroll up — then click ↓. Sending any',
+          'message triggers another long streamed answer. The same behavior is',
+          'reusable via the exported `useStickToBottom` hook.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => <StreamingPanel {...args} />,
+};
+
+// Composer agent + model selectors. Host-owned state: the agent list, the
+// models each agent allows, and the selection. Switching agents resets the
+// model to that agent's default; a simulated reply streams with a stop button.
+const selectorAgents = [
+  { id: 'triage', label: 'Triage Agent', description: 'Intake and routing' },
+  { id: 'scribe', label: 'Scribe', description: 'Visit notes' },
+];
+
+const selectorModels: Record<
+  string,
+  { provider: string; model: string; label: string }[]
+> = {
+  triage: [
+    { provider: 'anthropic', model: 'claude-opus-5', label: 'claude-opus-5' },
+    {
+      provider: 'anthropic',
+      model: 'claude-sonnet-5-5',
+      label: 'claude-sonnet-5-5',
+    },
+  ],
+  scribe: [{ provider: 'openai', model: 'gpt-5.2', label: 'gpt-5.2' }],
+};
+
+function ComposerSelectorsPanel() {
+  const [convo, setConvo] = React.useState<SuperChatConversation>({
+    id: 'selectors',
+    title: 'Ask an agent',
+    participants: [
+      { id: 'u1', kind: 'human', name: 'Dr. Alice Reyes' },
+      { id: 'triage', kind: 'agent', name: 'Triage Agent', color: '#2563eb' },
+      { id: 'scribe', kind: 'agent', name: 'Scribe', color: '#0e7490' },
+    ],
+    thread: [
+      {
+        id: 'w1',
+        participantId: 'triage',
+        text: 'Pick an agent and model below, then ask a question.',
+        time: '2026-06-07T09:00:00Z',
+      },
+    ],
+  });
+  const [agent, setAgent] = React.useState('triage');
+  const [model, setModel] = React.useState(selectorModels.triage[0]);
+  const [streaming, setStreaming] = React.useState(false);
+  const timer = React.useRef<number | undefined>(undefined);
+  const models = selectorModels[agent];
+
+  const stop = () => {
+    window.clearTimeout(timer.current);
+    setStreaming(false);
+    setConvo((prev) => ({
+      ...prev,
+      thread: prev.thread.map((m) =>
+        m.status === 'streaming' ? { ...m, status: 'complete' } : m
+      ),
+    }));
+  };
+
+  return (
+    <SuperChat
+      conversation={convo}
+      currentParticipantId="u1"
+      placeholder="Ask the selected agent…"
+      allowAttachments={false}
+      agents={selectorAgents}
+      selectedAgent={agent}
+      onAgentChange={(id) => {
+        setAgent(id);
+        setModel(selectorModels[id][0]);
+      }}
+      modelSelectorProps={
+        models.length > 1
+          ? {
+              models,
+              value: model,
+              onChange: (v) => setModel({ ...model, ...v }),
+            }
+          : undefined
+      }
+      isStreaming={streaming}
+      onStop={stop}
+      onMessageSent={(text) => {
+        const now = Date.now();
+        const replyId = `r-${now}`;
+        setConvo((prev) => ({
+          ...prev,
+          thread: [
+            ...prev.thread,
+            {
+              id: `u-${now}`,
+              participantId: 'u1',
+              text,
+              time: new Date(now).toISOString(),
+            },
+            {
+              id: replyId,
+              participantId: agent,
+              text: `Answering with **${model.model}**…`,
+              status: 'streaming',
+              time: new Date(now + 1).toISOString(),
+            },
+          ],
+        }));
+        setStreaming(true);
+        timer.current = window.setTimeout(stop, 2500);
+      }}
+    />
+  );
+}
+
+export const ComposerSelectors: Story = {
+  render: () => <ComposerSelectorsPanel />,
 };

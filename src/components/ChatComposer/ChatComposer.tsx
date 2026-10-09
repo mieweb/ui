@@ -79,7 +79,13 @@ export interface ChatComposerAgentOption {
 
 /** Imperative handle exposed via `ref` for host-level integrations. */
 export interface ChatComposerHandle {
-  /** Stage files programmatically (e.g. from a page-level drop zone). */
+  /**
+   * Stage files programmatically (e.g. from a page-level drop zone or a
+   * camera capture in `micSlot`). Deliberately NOT gated by
+   * `allowAttachments` — that prop only hides the composer's own attach
+   * affordances (the + button, paste, internal drop zone). Imperative calls
+   * are explicit host actions; validation and `onError` still apply.
+   */
   addFiles: (files: File[]) => void;
   /** Focus the text input. */
   focus: () => void;
@@ -128,8 +134,17 @@ export interface ChatComposerProps {
    */
   canSendWhenEmpty?: boolean;
   /**
+   * When the Enter key sends. `'desktop'` sends on Enter only on devices
+   * with a fine pointer; on touch devices Return inserts a newline and the
+   * send button sends (claude.ai / chatgpt.com parity). Shift+Enter always
+   * inserts a newline, and Enter never sends mid IME composition.
+   * @default 'desktop'
+   */
+  submitOnEnter?: 'desktop' | 'always' | 'never';
+  /**
    * Maximum height of the auto-growing input: a pixel number or any CSS
-   * length (e.g. `'40vh'`).
+   * length. Prefer small-viewport units (e.g. `'30svh'`) over `vh`: on iOS
+   * `vh` is the full screen and ignores the on-screen keyboard.
    * @default 160
    */
   maxHeight?: number | string;
@@ -145,6 +160,14 @@ export interface ChatComposerProps {
     'value' | 'defaultValue'
   >;
 
+  /**
+   * Custom node rendered at the leading edge, before the `+` menu (e.g. a
+   * voice-activation toggle). Wrapped in a 32px-tall (`h-8`) flex row so it
+   * aligns with the other controls; taller content overflows and stays
+   * vertically centered. Interaction state is not managed: pass your own
+   * disabled state when the composer is `disabled`.
+   */
+  leadingSlot?: React.ReactNode;
   /** Extra entries for the `+` menu, rendered after the built-in items. */
   addMenuItems?: ChatComposerMenuItem[];
   /** Enable file attachments (built-in "Attach files" menu item, paste-to-attach, drag-and-drop, chips). @default true */
@@ -280,6 +303,39 @@ const selectorTriggerClasses = cn(
 
 const MAX_INPUT_HEIGHT = 160;
 
+/** Touch-first devices (phones, tablets without a trackpad). */
+const TOUCH_DEVICE_QUERY = '(hover: none) and (pointer: coarse)';
+
+// Touch detection as an external store: during hydration React renders the
+// server snapshot (fine pointer) and then re-renders with the client value,
+// so SSR-emitted attributes like `enterkeyhint` never go stale.
+const subscribeTouchDevice = (onChange: () => void) => {
+  const query = window.matchMedia?.(TOUCH_DEVICE_QUERY);
+  query?.addEventListener('change', onChange);
+  return () => query?.removeEventListener('change', onChange);
+};
+const getTouchDeviceSnapshot = () =>
+  window.matchMedia?.(TOUCH_DEVICE_QUERY).matches ?? false;
+const getServerTouchDeviceSnapshot = () => false;
+
+/**
+ * Card descendants that keep their own pointer behavior (and text that
+ * stays selectable) instead of forwarding a tap to the textarea.
+ */
+const CARD_INTERACTIVE_SELECTOR = [
+  'button',
+  'a',
+  'input',
+  'textarea',
+  'select',
+  'label',
+  'video',
+  '[role="listbox"]',
+  '[role="menu"]',
+  '[data-slot="chat-composer-reply-preview"]',
+  '[data-slot="chat-composer-attachments"]',
+].join(',');
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -305,8 +361,10 @@ export const ChatComposer = React.forwardRef<
     maxLength,
     showCharacterCount = false,
     canSendWhenEmpty = false,
+    submitOnEnter = 'desktop',
     maxHeight = MAX_INPUT_HEIGHT,
     textareaProps,
+    leadingSlot,
     addMenuItems,
     allowAttachments = true,
     acceptedFileTypes,
@@ -362,6 +420,15 @@ export const ChatComposer = React.forwardRef<
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const [agentMenuOpen, setAgentMenuOpen] = React.useState(false);
 
+  const isTouchDevice = React.useSyncExternalStore(
+    subscribeTouchDevice,
+    getTouchDeviceSnapshot,
+    getServerTouchDeviceSnapshot
+  );
+  const sendsOnEnter =
+    submitOnEnter === 'always' ||
+    (submitOnEnter === 'desktop' && !isTouchDevice);
+
   // Focus the input when a reply target is set (MessageComposer parity).
   // Keyed on the id, not the object: hosts often build `replyTo` inline, so
   // an object dependency would re-steal focus (and reset the caret) on every
@@ -372,6 +439,18 @@ export const ChatComposer = React.forwardRef<
       textareaRef.current?.focus();
     }
   }, [replyToId]);
+
+  // Host-opt-in autofocus, applied on the client only after confirming a
+  // fine pointer. A rendered `autofocus` attribute would ship in SSR markup
+  // (where the touch check can't run) and pop the on-screen keyboard over
+  // the page the user just navigated to.
+  React.useEffect(() => {
+    if (!autoFocus) return;
+    if (window.matchMedia?.(TOUCH_DEVICE_QUERY).matches) return;
+    textareaRef.current?.focus();
+    // Mount-only, matching native `autofocus` semantics.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasText = value.trim().length > 0;
   const hasContent = hasText || attachments.length > 0;
@@ -450,7 +529,11 @@ export const ChatComposer = React.forwardRef<
 
   const addFiles = React.useCallback(
     (files: File[]) => {
-      if (!allowAttachments || files.length === 0) return;
+      // No `allowAttachments` gate here: every user-facing entry point
+      // (paste handler, + button, internal drop zone) is gated separately,
+      // so this only opens the imperative `ref.addFiles()` path for hosts
+      // (e.g. MessageThread's camera capture with the picker disabled).
+      if (files.length === 0) return;
       // Staging happens outside the state updater so object-URL creation,
       // id generation and onError stay out of a function React may re-invoke.
       const limitMessage =
@@ -499,7 +582,6 @@ export const ChatComposer = React.forwardRef<
       }
     },
     [
-      allowAttachments,
       maxAttachments,
       acceptedFileTypes,
       maxFileSize,
@@ -593,10 +675,31 @@ export const ChatComposer = React.forwardRef<
     textareaRef.current?.focus();
   };
 
+  // Pressing a button moves focus off the textarea, which on mobile starts
+  // dismissing the keyboard before `handleSend` refocuses it (a visible
+  // close/reopen bounce). Cancelling mousedown keeps focus where it is; the
+  // click still fires, and keyboard users can still tab to the button.
+  const keepInputFocus = (event: React.MouseEvent) => {
+    event.preventDefault();
+  };
+
+  // Tapping the card's padding or empty toolbar space focuses the input
+  // (claude.ai / chatgpt.com parity) instead of doing nothing — or, with the
+  // keyboard open, blurring the input and dismissing it.
+  const focusInputFromCard = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    const target = event.target as HTMLElement;
+    if (target.closest(CARD_INTERACTIVE_SELECTOR)) return;
+    event.preventDefault();
+    textareaRef.current?.focus();
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // @mention menu navigation takes priority over send.
     if (mention.handleKeyDown(event)) return;
-    if (event.key === 'Enter' && !event.shiftKey) {
+    // Enter confirms an IME candidate (CJK input) rather than sending.
+    if (event.nativeEvent.isComposing) return;
+    if (event.key === 'Enter' && !event.shiftKey && sendsOnEnter) {
       event.preventDefault();
       handleSend();
     }
@@ -714,6 +817,14 @@ export const ChatComposer = React.forwardRef<
             dataSlot="chat-composer-mention-list"
           />
           <textarea
+            // Mobile keyboard hints; overridable via `textareaProps`.
+            enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
+            inputMode="text"
+            autoCapitalize="sentences"
+            autoCorrect="on"
+            spellCheck
+            // Follows the typed script, so RTL text aligns correctly.
+            dir="auto"
             {...textareaProps}
             ref={textareaRef}
             data-slot="chat-composer-input"
@@ -747,9 +858,6 @@ export const ChatComposer = React.forwardRef<
             }}
             placeholder={placeholder}
             disabled={disabled}
-            // Host-opt-in only; off by default.
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus={autoFocus}
             rows={1}
             aria-label={inputLabel}
             {...mention.inputProps}
@@ -760,7 +868,9 @@ export const ChatComposer = React.forwardRef<
             }}
             className={cn(
               'block w-full resize-none bg-transparent',
-              'rounded-lg text-sm',
+              // 16px below `sm`: iOS zooms the page when focusing an input
+              // with a smaller font.
+              'rounded-lg text-base sm:text-sm',
               cells.textarea,
               'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
               // Ring the input itself on focus rather than the whole shell.
@@ -771,56 +881,72 @@ export const ChatComposer = React.forwardRef<
           />
         </div>
 
-        {showAddMenu && (
-          <div className={cells.add}>
-            <Dropdown
-              placement="top-start"
-              open={addMenuOpen}
-              onOpenChange={setAddMenuOpen}
-              trigger={
-                <button
-                  type="button"
-                  data-slot="chat-composer-add-button"
-                  aria-label={addMenuLabel}
-                  disabled={disabled}
-                  className={iconButtonClasses}
-                >
-                  <PlusIcon className="h-4 w-4" aria-hidden="true" />
-                </button>
-              }
-            >
-              {allowAttachments && (
-                <DropdownItem
-                  icon={
-                    <PaperclipIcon className="h-4 w-4" aria-hidden="true" />
-                  }
-                  onClick={() => {
-                    setAddMenuOpen(false);
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  {attachFilesLabel}
-                </DropdownItem>
-              )}
-              {allowAttachments && addMenuItems && addMenuItems.length > 0 && (
-                <DropdownSeparator />
-              )}
-              {addMenuItems?.map((item) => (
-                <DropdownItem
-                  key={item.id}
-                  icon={item.icon}
-                  disabled={item.disabled}
-                  variant={item.variant}
-                  checked={item.checked}
-                  onClick={() => {
-                    setAddMenuOpen(false);
-                    item.onSelect?.();
-                  }}
-                >
-                  <span className="min-w-0 truncate">{item.label}</span>
-                </DropdownItem>
-              ))}
-            </Dropdown>
+        {(showAddMenu || leadingSlot != null) && (
+          <div
+            className={cn(
+              cells.add,
+              leadingSlot != null && 'flex items-center gap-0.5'
+            )}
+          >
+            {leadingSlot != null && (
+              <div
+                data-slot="chat-composer-leading-slot"
+                className="flex h-8 shrink-0 items-center"
+              >
+                {leadingSlot}
+              </div>
+            )}
+
+            {showAddMenu && (
+              <Dropdown
+                placement="top-start"
+                open={addMenuOpen}
+                onOpenChange={setAddMenuOpen}
+                trigger={
+                  <button
+                    type="button"
+                    data-slot="chat-composer-add-button"
+                    aria-label={addMenuLabel}
+                    disabled={disabled}
+                    className={iconButtonClasses}
+                  >
+                    <PlusIcon className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                }
+              >
+                {allowAttachments && (
+                  <DropdownItem
+                    icon={
+                      <PaperclipIcon className="h-4 w-4" aria-hidden="true" />
+                    }
+                    onClick={() => {
+                      setAddMenuOpen(false);
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    {attachFilesLabel}
+                  </DropdownItem>
+                )}
+                {allowAttachments &&
+                  addMenuItems &&
+                  addMenuItems.length > 0 && <DropdownSeparator />}
+                {addMenuItems?.map((item) => (
+                  <DropdownItem
+                    key={item.id}
+                    icon={item.icon}
+                    disabled={item.disabled}
+                    variant={item.variant}
+                    checked={item.checked}
+                    onClick={() => {
+                      setAddMenuOpen(false);
+                      item.onSelect?.();
+                    }}
+                  >
+                    <span className="min-w-0 truncate">{item.label}</span>
+                  </DropdownItem>
+                ))}
+              </Dropdown>
+            )}
           </div>
         )}
 
@@ -884,6 +1010,7 @@ export const ChatComposer = React.forwardRef<
               data-slot="chat-composer-stop-button"
               aria-label={stopLabel}
               disabled={disabled}
+              onMouseDown={keepInputFocus}
               onClick={onStop}
               className={cn(
                 iconButtonClasses,
@@ -902,6 +1029,7 @@ export const ChatComposer = React.forwardRef<
               aria-label={isSending ? sendingLabel : sendLabel}
               aria-busy={isSending || undefined}
               disabled={!canSend}
+              onMouseDown={keepInputFocus}
               onClick={handleSend}
               className={cn(
                 iconButtonClasses,
@@ -1006,10 +1134,13 @@ export const ChatComposer = React.forwardRef<
   // validation and structured `onError` reporting stay in one place (the
   // zone itself does not validate).
   const card = (
+    // Pointer-only convenience: the textarea stays the keyboard/AT target.
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       data-slot="chat-composer-card"
+      onMouseDown={focusInputFromCard}
       className={cn(
-        'rounded-2xl border border-neutral-200 bg-white shadow-sm',
+        'cursor-text rounded-2xl border border-neutral-200 bg-white shadow-sm',
         'dark:border-[#2e2e30] dark:bg-[#1c1c1e]'
       )}
     >

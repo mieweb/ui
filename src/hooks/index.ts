@@ -17,6 +17,17 @@ export {
 export { useEscapeKey } from './useEscapeKey';
 export { useFocusTrap } from './useFocusTrap';
 export {
+  useKeyboardInset,
+  KEYBOARD_INSET_VAR,
+  VISUAL_VIEWPORT_HEIGHT_VAR,
+  VISUAL_VIEWPORT_OFFSET_TOP_VAR,
+  KEYBOARD_OPEN_ATTRIBUTE,
+  KEYBOARD_SOURCE_ATTRIBUTE,
+  type KeyboardInsetSource,
+  type KeyboardInsetState,
+  type UseKeyboardInsetOptions,
+} from './useKeyboardInset';
+export {
   useKeyboardShortcut,
   useCommandK,
   type KeyboardShortcutOptions,
@@ -38,12 +49,36 @@ export {
 export {
   useDragReorder,
   reorderIds,
+  moveIdBy,
   dragIndicatorClasses,
+  DEFAULT_DRAG_REORDER_LABELS,
+  type DragReorderLabels,
   type UseDragReorderOptions,
   type UseDragReorderReturn,
   type DragOverState,
 } from './useDragReorder';
+export {
+  useOrderPersistence,
+  localStorageOrderAdapter,
+  mergeOrder,
+  type OrderPersistenceAdapter,
+  type UseOrderPersistenceOptions,
+  type UseOrderPersistenceReturn,
+} from './useOrderPersistence';
+export { useUrlTab } from './useUrlTab';
 export { useLiveAnnouncement } from './useLiveAnnouncement';
+export {
+  useStickToBottom,
+  useStreamEndedBelowFold,
+  type UseStickToBottomOptions,
+  type UseStickToBottomReturn,
+} from './useStickToBottom';
+export {
+  useYouTubeHoverPreview,
+  type HoverPreviewState,
+  type UseYouTubeHoverPreviewOptions,
+  type UseYouTubeHoverPreviewReturn,
+} from './useYouTubeHoverPreview';
 export {
   useMediaTransport,
   type MediaTransportState,

@@ -23,9 +23,14 @@ import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
 import { CodeLookup } from '../src/components/CodeLookup';
-import { CodeLookupProvider } from '../src/components/CodeLookup/context';
+import {
+  CodeLookupProvider,
+  type CodeLookupComponent,
+} from '../src/components/CodeLookup/context';
 import { isRtlLocale } from '../src/hooks/useDirection';
 import { CatalogDocsPage } from './CatalogDocsPage';
+import { withMobilePreview } from './MobilePreview';
+import { mobilePreviewMode } from './mobile-preview';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -144,8 +149,17 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   // Create a style tag with high specificity to override base.css
   const styleTag = document.createElement('style');
   styleTag.id = 'mieweb-brand-styles';
+  const accent = colors.accent
+    ? `
+      --mieweb-accent: ${colors.accent.DEFAULT} !important;
+      --mieweb-accent-light: ${colors.accent.light ?? colors.accent.DEFAULT} !important;
+      --mieweb-accent-dark: ${colors.accent.dark ?? colors.accent.DEFAULT} !important;`
+    : `
+      --mieweb-accent: initial !important;
+      --mieweb-accent-light: initial !important;
+      --mieweb-accent-dark: initial !important;`;
   styleTag.textContent = `
-    :root, [data-theme="light"], [data-theme="dark"] {
+    :root, [data-theme="light"], [data-theme="dark"] {${accent}
       --mieweb-primary-50: ${colors.primary[50]} !important;
       --mieweb-primary-100: ${colors.primary[100]} !important;
       --mieweb-primary-200: ${colors.primary[200]} !important;
@@ -209,10 +223,18 @@ const withGitHubSource: Decorator = (Story, context) => {
     return `https://github.com/mieweb/ui/blob/main/${stripped}`;
   })();
 
+  // Full-height stories (parameters.githubSourceFooter === false) fill the
+  // canvas exactly; a trailing footer would only add a page scrollbar. The
+  // link still renders in docs view, where examples are bounded.
+  const showFooter = !(
+    context.viewMode === 'story' &&
+    (context.parameters?.githubSourceFooter === false || mobilePreviewMode())
+  );
+
   return (
     <>
       <Story />
-      {githubUrl && (
+      {githubUrl && showFooter && (
         <div
           style={{
             marginTop: '12px',
@@ -262,6 +284,7 @@ const withBrand: Decorator = (Story, context) => {
 
   // Check if the story has fullscreen layout
   const isFullscreen = context.parameters?.layout === 'fullscreen';
+  const isMobilePreview = context.viewMode === 'story' && mobilePreviewMode();
   
   // Build font family string
   const fontFamily = brand.typography.fontFamily.sans
@@ -272,7 +295,7 @@ const withBrand: Decorator = (Story, context) => {
     <>
       {fontLink && <link rel="stylesheet" href={fontLink} />}
       <div
-        className={`min-h-[200px] transition-colors duration-200 ${isDark ? 'dark' : ''} ${isFullscreen ? '' : 'p-4'}`}
+        className={`${isMobilePreview ? '' : 'min-h-[200px]'} transition-colors duration-200 ${isDark ? 'dark' : ''} ${isFullscreen || isMobilePreview ? '' : 'p-4'}`}
         style={{
           backgroundColor: semanticColors.background,
           color: semanticColors.foreground,
@@ -284,6 +307,9 @@ const withBrand: Decorator = (Story, context) => {
     </>
   );
 };
+
+// Adapt the forward-ref component to the provider's element-returning contract.
+const PreviewCodeLookup: CodeLookupComponent = (props) => <CodeLookup {...props} />;
 
 // Provides an ambient CodeLookup so the healthcare components' default (no
 // explicit `codeLookup` / `renderCodeSearch` prop) demonstrates offline coded
@@ -302,7 +328,7 @@ const withCodeLookup: Decorator = (Story, context) => {
   const lookupLocale = ['en', 'es'].includes(locale) ? locale : 'en';
   return (
     <CodeLookupProvider
-      component={CodeLookup}
+      component={PreviewCodeLookup}
       indexUrl="/codify"
       locale={lookupLocale}
       memory={{ userId, storage: trusted ? 'local' : 'session' }}
@@ -500,10 +526,16 @@ const preview: Preview = {
             ['Overview', '*'],
             'Layout',
             ['Overview', '*'],
+            'Record details',
+            ['Overview', '*'],
+            'Showcase',
+            ['Overview', '*'],
           ],
           'Modules',
           [
             'Dashboards',
+            ['Overview', '*'],
+            'Views',
             ['Overview', '*'],
             'Media',
             ['Overview', '*'],
@@ -516,6 +548,23 @@ const preview: Preview = {
             'Voice',
             ['Overview', '*'],
             'Files',
+            ['Overview', '*'],
+            'Presentations',
+            ['Overview', '*'],
+            'Records',
+            ['Overview', '*'],
+          ],
+          'Templates',
+          [
+            'Pages',
+            ['Overview', '*'],
+            'Conversion',
+            ['Overview', '*'],
+            'Content',
+            ['Overview', '*'],
+            'Social proof',
+            ['Overview', '*'],
+            'Reports',
             ['Overview', '*'],
           ],
           'Healthcare',
@@ -547,7 +596,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withGitHubSource, withBrand, withCodeLookup],
+  decorators: [withGitHubSource, withBrand, withCodeLookup, withMobilePreview],
 };
 
 export default preview;

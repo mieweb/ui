@@ -21,6 +21,7 @@ import { Dropdown, DropdownItem, DropdownSubmenu } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
 import { SparklesIcon } from '../AI/icons';
+import { MessageMedia } from './MessageMedia';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -257,7 +258,7 @@ const DEFAULT_ACCEPTED_FILE_TYPES: AttachmentKind[] = [
 
 /**
  * Map SuperChat's high-level {@link AttachmentKind} categories to the
- * `<input accept>` tokens consumed by the shared `MessageComposer`.
+ * `<input accept>` tokens consumed by the shared `ChatComposer`.
  */
 export function acceptTokensFor(
   kinds: AttachmentKind[] = DEFAULT_ACCEPTED_FILE_TYPES
@@ -269,7 +270,7 @@ export function acceptTokensFor(
 }
 
 /**
- * Read the `File` objects emitted by the shared `MessageComposer` into the
+ * Read the `File` objects emitted by the shared `ChatComposer` into the
  * base64 `data:` URL {@link ComposerAttachment}s SuperChat hosts expect.
  */
 export function filesToComposerAttachments(
@@ -520,9 +521,10 @@ function FooterActionButton({
 }
 
 /**
- * The hover-revealed row of action icon buttons under a message bubble. Each
- * button runs its action's default behavior; explicit variants live in the
- * sticky overflow menu ({@link MessageOverflowMenu}).
+ * The hover-revealed action icon button in the avatar gutter, at the end of a
+ * message. Rendered only when a message has a single action — multiple actions
+ * collapse into the sticky overflow menu ({@link MessageOverflowMenu}), which
+ * also hosts each action's explicit variants.
  */
 const MessageActionsBar = React.forwardRef<
   HTMLDivElement,
@@ -532,11 +534,7 @@ const MessageActionsBar = React.forwardRef<
     <div
       ref={ref}
       data-slot="superchat-message-actions"
-      className={cn(
-        'flex items-center gap-0.5',
-        isSelf && 'justify-end',
-        actionRevealClass
-      )}
+      className={cn('flex flex-col items-center gap-0.5', actionRevealClass)}
     >
       {actions.map((action) => (
         <FooterActionButton key={action.id} action={action} isSelf={isSelf} />
@@ -558,9 +556,9 @@ interface MessageOverflowMenuProps {
 }
 
 /**
- * The sticky overflow (⋯) control beside the bubble. On long messages it
+ * The sticky overflow (⋯) control in the avatar gutter. On long messages it
  * follows the scroll (sticky within the thread) so actions stay reachable, and
- * hands off to the footer bar once the message end scrolls into view.
+ * hands off to the actions bar once the message end scrolls into view.
  */
 function MessageOverflowMenu({
   isSelf,
@@ -576,13 +574,13 @@ function MessageOverflowMenu({
 
   return (
     <div
-      // Self-align to the bottom of the (possibly tall) message row and stick
-      // to the viewport bottom: on long messages the control follows the
-      // scroll and settles at the message's end once it is fully in view.
-      // Raise the whole (sticky) stacking context above the sibling bubble
-      // while open so the menu sits over rich content like tables.
+      // Push to the bottom of the (possibly tall) avatar gutter and stick to
+      // the viewport bottom: on long messages the control follows the scroll
+      // and settles at the message's end once it is fully in view. Raise the
+      // whole (sticky) stacking context above the sibling bubble while open so
+      // the menu sits over rich content like tables.
       className={cn(
-        'sticky bottom-2 shrink-0 self-end transition-opacity',
+        'sticky bottom-2 mt-auto shrink-0 transition-opacity',
         // Rich content (e.g. NITRO tables) layers internals up to z-50, so the
         // open menu's stacking context must clear that.
         open ? 'z-[60]' : 'z-10',
@@ -644,6 +642,18 @@ interface MessageRowProps {
   /** Format for the default copy action — Ctrl/Cmd-click on the footer copy
    * button (defaults to `'rich'`). */
   defaultCopyFormat?: SuperChatCopyFormat;
+  /** Open an explicit attachment in the conversation media view. */
+  onOpenMedia?: (
+    messageId: string,
+    attachmentId: string,
+    play?: boolean
+  ) => void;
+  openMediaLabel?: string;
+  playMediaLabel?: string;
+  /** Localized preview load-error text (falls back to the player default). */
+  mediaErrorLabel?: string;
+  /** Localized preview retry text (falls back to the player default). */
+  mediaRetryLabel?: string;
 }
 
 /**
@@ -665,11 +675,23 @@ export const MessageRow = React.memo(function MessageRow({
   editable,
   onMessageEdited,
   defaultCopyFormat = 'rich',
+  onOpenMedia,
+  openMediaLabel = 'Open in media feed',
+  playMediaLabel = 'Play',
+  mediaErrorLabel,
+  mediaRetryLabel,
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
-  const hasBody = !!message.text || (message.content?.length ?? 0) > 0;
+  const hasBody =
+    !!message.text ||
+    (message.content?.length ?? 0) > 0 ||
+    (message.media?.length ?? 0) > 0;
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
+  // Keeps the bubble from shrinking when it flips into edit mode: the rendered
+  // content width, captured on edit start, becomes the editor's min-width
+  // (w-80 stays the floor for short messages, max-w-full the cap).
+  const [editMinWidth, setEditMinWidth] = React.useState<number>();
   const editRef = React.useRef<HTMLTextAreaElement>(null);
   // The rendered bubble content, read at copy time for the rich-text payload.
   const bubbleRef = React.useRef<HTMLDivElement>(null);
@@ -732,7 +754,13 @@ export const MessageRow = React.memo(function MessageRow({
     (!!message.content?.length ||
       (typeof message.text === 'string' && message.text.length > 0));
 
-  const hasActions = canCopy || (canEdit && !isEditing);
+  const showEditAction = canEdit && !isEditing;
+  const actionCount = (canCopy ? 1 : 0) + (showEditAction ? 1 : 0);
+  const hasActions = actionCount > 0;
+  // A lone action shows its icon directly (with the sticky ⋯ hand-off on long
+  // messages); multiple actions collapse into the ⋯ menu alone so the gutter
+  // never stacks a pile of icons.
+  const collapseToMenu = actionCount > 1;
 
   const copy = useMessageCopy({
     markdown: markdownSource,
@@ -757,7 +785,10 @@ export const MessageRow = React.memo(function MessageRow({
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasActions]);
+    // Re-attach whenever the bar's presence changes: it renders only for a
+    // lone action (`hasActions && !collapseToMenu`), and a bar mounted after
+    // e.g. a readOnly/editable toggle would otherwise never be observed.
+  }, [hasActions, collapseToMenu]);
 
   if (message.type === 'system') {
     return (
@@ -791,6 +822,15 @@ export const MessageRow = React.memo(function MessageRow({
   const authorName = participant?.name ?? 'Unknown';
 
   const startEdit = () => {
+    const el = bubbleRef.current;
+    if (el) {
+      const cs = getComputedStyle(el);
+      const contentWidth =
+        el.clientWidth -
+        parseFloat(cs.paddingLeft) -
+        parseFloat(cs.paddingRight);
+      setEditMinWidth(contentWidth > 0 ? contentWidth : undefined);
+    }
     setDraft(message.text ?? '');
     setIsEditing(true);
   };
@@ -887,7 +927,7 @@ export const MessageRow = React.memo(function MessageRow({
           } satisfies MessageAction,
         ]
       : []),
-    ...(canEdit && !isEditing
+    ...(showEditAction
       ? [
           {
             id: 'edit',
@@ -909,8 +949,40 @@ export const MessageRow = React.memo(function MessageRow({
         isSelf ? 'flex-row-reverse' : 'flex-row'
       )}
     >
-      <ParticipantAvatar participant={participant} />
-      <div className={cn('flex min-w-0 flex-col gap-1', isSelf && 'items-end')}>
+      {/* Avatar gutter: the sticky overflow (⋯) and the end-of-message action
+          bar live under the avatar so the bubble aligns with the author name
+          instead of being indented by an action slot. */}
+      <div
+        data-slot="superchat-message-gutter"
+        className="flex shrink-0 flex-col items-center gap-1"
+      >
+        <ParticipantAvatar participant={participant} />
+        {hasActions && (
+          <>
+            <MessageOverflowMenu
+              isSelf={isSelf}
+              actions={actions}
+              footerVisible={collapseToMenu ? false : footerVisible}
+            />
+            {!collapseToMenu && (
+              <MessageActionsBar
+                ref={actionsBarRef}
+                actions={actions}
+                isSelf={isSelf}
+              />
+            )}
+          </>
+        )}
+      </div>
+      {/* flex-1 makes the column span the remaining row width so the bubble's
+          max-w-[85%] resolves against the thread, not a shrink-wrapped column
+          (which would clamp complex content toward its min-content width). */}
+      <div
+        className={cn(
+          'flex min-w-0 flex-1 flex-col gap-1',
+          isSelf && 'items-end'
+        )}
+      >
         <div
           data-slot="superchat-message-meta"
           className="flex items-baseline gap-2"
@@ -940,19 +1012,15 @@ export const MessageRow = React.memo(function MessageRow({
           )}
         </div>
 
+        {/* w-full keeps this row at thread width even under the column's
+            items-end (self messages), preserving the 85% cap's meaning; the
+            row direction places the bubble on the correct side. */}
         <div
           className={cn(
-            'flex items-center gap-1',
+            'flex w-full items-center gap-1',
             isSelf ? 'flex-row-reverse' : 'flex-row'
           )}
         >
-          {hasActions && (
-            <MessageOverflowMenu
-              isSelf={isSelf}
-              actions={actions}
-              footerVisible={footerVisible}
-            />
-          )}
           <ChatBubble
             ref={bubbleRef}
             data-slot="superchat-bubble"
@@ -964,6 +1032,7 @@ export const MessageRow = React.memo(function MessageRow({
               <div
                 data-slot="superchat-message-editor"
                 className="flex w-80 max-w-full flex-col gap-2"
+                style={editMinWidth ? { minWidth: editMinWidth } : undefined}
               >
                 <textarea
                   value={draft}
@@ -1066,6 +1135,23 @@ export const MessageRow = React.memo(function MessageRow({
                   </div>
                 )}
 
+                {message.media?.map((attachment) => (
+                  <MessageMedia
+                    key={attachment.id}
+                    attachment={attachment}
+                    openLabel={openMediaLabel}
+                    playLabel={playMediaLabel}
+                    errorLabel={mediaErrorLabel}
+                    retryLabel={mediaRetryLabel}
+                    launchId={JSON.stringify([message.id, attachment.id])}
+                    onOpen={
+                      onOpenMedia
+                        ? (play) => onOpenMedia(message.id, attachment.id, play)
+                        : undefined
+                    }
+                  />
+                ))}
+
                 {/* Animated typing indicator while a reply streams in with no
                     body yet — matches the AI chat's streaming affordance. */}
                 {streaming && !hasBody && (
@@ -1077,13 +1163,6 @@ export const MessageRow = React.memo(function MessageRow({
             )}
           </ChatBubble>
         </div>
-        {hasActions && (
-          <MessageActionsBar
-            ref={actionsBarRef}
-            actions={actions}
-            isSelf={isSelf}
-          />
-        )}
       </div>
     </div>
   );

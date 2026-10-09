@@ -7,7 +7,12 @@ import {
   AIChatTrigger,
   type AIMessage,
 } from './index';
-import { sampleMessages, suggestedActions } from './storyData';
+import {
+  sampleMessages,
+  suggestedActions,
+  useStreamingChatDemo,
+} from './storyData';
+import { fullHeightChat } from '../../../.storybook/full-height';
 
 // ============================================================================
 // AI Chat Stories
@@ -24,7 +29,7 @@ const meta: Meta<typeof AIChat> = {
       description: {
         component: `### What it's for
 
-**A controlled, single-assistant chat surface: thread + composer + suggestion chips, with the host owning every message.** \`AIChat\` takes \`messages: AIMessage[]\` (or a \`session\`), renders one \`AIMessageDisplay\` per message inside a scrolling \`data-slot="ai-chat-messages"\` region that auto-scrolls to the newest message, and reuses the Messaging module's \`MessageComposer\` (\`variant="minimal"\`, attachments/camera/character-count off) as its input. Anatomy: a **header** (\`title\`, default "AI Assistant"; a red **Stop** button while \`isGenerating && onCancel\`; icon buttons for \`onClear\` and \`onClose\`; hide it with \`showHeader={false}\`), the **thread** (empty state "How can I help you today?" with \`suggestions\` chips; \`showTimestamps\`), a **suggestions row** above the composer once the thread is non-empty and not generating, and the **composer** (\`inputPlaceholder\`, \`composerProps\` passthrough, \`talkToText\` adds a \`RecordButton\` in the input's trailing slot wired to \`onRecordingStart\` / \`onRecordingComplete(blob, duration)\`). Suggestions are \`{ id, label, prompt, icon }\`; \`icon\` maps to a built-in glyph set (\`patient\`, \`search\`, \`appointment\`, \`document\`, \`help\`, \`default\`); selecting one calls \`onSuggestedAction\` or, if absent, \`onSendMessage(prompt)\`. \`renderTextContent(text, { messageId, streaming, role })\` and \`renderMessageFooter(message)\` are threaded to every message. Also exported: \`SuggestedActions\`, and the wrappers \`AIChatModal\` (\`open\`, \`onOpenChange\`, \`position\` \`bottom-right\` | \`bottom-left\` | \`center\`, \`width\`, \`height\`), \`AIChatTrigger\` and \`FloatingAIChat\` (trigger + modal, controlled or \`defaultOpen\`), which forward every \`AIChat\` prop. Variants: \`variant\` \`default\` | \`embedded\` | \`floating\`; \`size\` \`sm\`…\`full\`; \`height\`.
+**A controlled, single-assistant chat surface: thread + composer + suggestion chips, with the host owning every message.** \`AIChat\` takes \`messages: AIMessage[]\` (or a \`session\`), renders one \`AIMessageDisplay\` per message inside a scrolling \`data-slot="ai-chat-messages"\` region that pins to the newest message while the reader is at the bottom (scrolling up preserves the position and shows a floating \u2193 jump-to-bottom button \u2014 see the Streaming Response story), and renders the standardized \`ChatComposer\` (attachments off, 1600-char cap, \`aria-label="Message"\`) as its input. Anatomy: a **header** (\`title\`, default "AI Assistant"; a red **Stop** button while \`isGenerating && onCancel\`; icon buttons for \`onClear\` and \`onClose\`; hide it with \`showHeader={false}\`), the **thread** (empty state "How can I help you today?" with \`suggestions\` chips; \`showTimestamps\`), a **suggestions row** above the composer once the thread is non-empty and not generating, and the **composer** (\`inputPlaceholder\`; \`composerProps\` passes \`ChatComposerProps\` through — legacy \`MessageComposerProps\` keys such as \`showAttachmentPicker\` and \`inputTrailing\` are still accepted and mapped; \`talkToText\` adds a \`RecordButton\` in the composer's mic slot wired to \`onRecordingStart\` / \`onRecordingComplete(blob, duration)\`). Suggestions are \`{ id, label, prompt, icon }\`; \`icon\` maps to a built-in glyph set (\`patient\`, \`search\`, \`appointment\`, \`document\`, \`help\`, \`default\`); selecting one calls \`onSuggestedAction\` or, if absent, \`onSendMessage(prompt)\`. \`renderTextContent(text, { messageId, streaming, role })\` and \`renderMessageFooter(message)\` are threaded to every message. Also exported: \`SuggestedActions\`, and the wrappers \`AIChatModal\` (\`open\`, \`onOpenChange\`, \`position\` \`bottom-right\` | \`bottom-left\` | \`center\`, \`width\`, \`height\`), \`AIChatTrigger\` and \`FloatingAIChat\` (trigger + modal, controlled or \`defaultOpen\`), which forward every \`AIChat\` prop. Variants: \`variant\` \`default\` | \`embedded\` | \`floating\`; \`size\` \`sm\`…\`full\`; \`height\`.
 
 ### Use it when
 
@@ -76,7 +81,7 @@ async function send(text: string) {
   onCancel={() => abortRef.current?.abort()}
   onClear={() => setMessages([])}
   suggestions={[{ id: 'sched', label: t('chat.schedule'), prompt: 'Schedule a follow-up', icon: 'appointment' }]}
-  renderTextContent={(text, { streaming }) => <MarkdownRenderer content={text} streaming={streaming} />}
+  renderTextContent={(text, { streaming }) => <MarkdownRenderer text={text} streaming={streaming} />}
   userName={currentUser.displayName}
   height={560}
 />
@@ -84,11 +89,11 @@ async function send(text: string) {
 
 ### Limitations
 
-- **No live region.** The thread is a plain scrolling \`div\`; new or streamed assistant messages, the typing indicator and the header's "Generating..." text are not announced. \`onSendMessage\` receives trimmed text only — the composer clears itself (Enter sends, Shift+Enter newlines, so focus stays in the textarea) and nothing moves focus to the reply.
+- **No live region.** The thread is a plain scrolling \`div\`; new or streamed assistant messages, the typing indicator and the header's "Generating..." text are not announced. \`onSendMessage\` receives trimmed text, plus the staged \`File[]\` as a second argument when attachments are enabled via \`composerProps\` (attachment-only sends deliver \`''\`) — the composer clears optimistically (Enter sends, Shift+Enter newlines, so focus stays in the textarea); if \`onSendMessage\` throws or rejects, the text draft is restored (attachments are not) and the failure is reported through \`composerProps.onError\` ("Failed to send message").
 - Header icon buttons carry English \`aria-label\`s ("Clear chat", "Close chat"); **Stop** is visible text. Suggestion chips are plain \`<button>\`s. \`AIChatModal\` renders \`role="dialog" aria-modal aria-label="AI Assistant Chat"\`, traps focus and closes on Escape; its \`center\` backdrop is a focusable \`role="button"\`.
 - **Sanitisation is the host's.** Default text rendering is \`whitespace-pre-wrap\` plain text; anything you return from \`renderTextContent\` is inserted as-is. Image/file/audio/video block URLs are only guarded against \`javascript:\`.
 - \`session.isGenerating\` and \`session.messages\` win over the flat props; \`onToolCall\` / \`onToolComplete\` exist on \`AIChatCallbacks\` but are **never invoked** by this component (tool calls are display-only). \`talkToText\` requires a secure context and microphone permission; the \`duration\` passed to \`onRecordingComplete\` comes from \`RecordButton\` (see Media › RecordButton for its caveats).
-- **i18n / RTL.** Every default string is English ("AI Assistant", "Ask anything...", "How can I help you today?", "Try asking:", "Generating...", "Stop"). User messages align with \`flex-row-reverse\`, the composer's trailing slot uses \`right-1\` / \`pr-10\`, and the modal/trigger positions are physical (\`right-4\`, \`left-4\`).
+- **i18n / RTL.** Every default string is English ("AI Assistant", "Ask anything...", "How can I help you today?", "Try asking:", "Generating...", "Stop"). User messages align with \`flex-row-reverse\`, and the modal/trigger positions are physical (\`right-4\`, \`left-4\`); the composer itself uses logical properties.
 - **Theming.** Container and header use hard-coded \`neutral-*\`, \`white\`, \`primary-800\` and \`red-*\` utilities rather than semantic tokens. Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
       },
     },
@@ -103,7 +108,12 @@ async function send(text: string) {
         {
           type: 'composes with',
           target: 'chat-messaging',
-          why: 'AIChat reuses MessageComposer and EmptyState from the Messaging module for its input and empty thread.',
+          why: 'AIChat reuses EmptyState from the Messaging module for its empty thread.',
+        },
+        {
+          type: 'contains',
+          target: 'chat-chatcomposer',
+          why: 'AIChat’s input is the standardized ChatComposer (attachments off by default); legacy MessageComposer keys passed through composerProps are mapped for compatibility.',
         },
         {
           type: 'contains',
@@ -217,46 +227,46 @@ type Story = StoryObj<typeof AIChat>;
 
 /** Interactive playground — adjust props from the Controls panel. */
 export const Playground: Story = {
-  render: (args) => (
-    <div className="h-[600px]">
-      <AIChat {...args} height="100%" />
-    </div>
-  ),
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
+  render: (args) => <AIChat {...args} height="100%" />,
 };
 
 /** Empty state: suggestions surface as a getting-started prompt grid. */
 export const EmptyChat: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: () => (
-    <div className="h-[600px]">
-      <AIChat
-        messages={[]}
-        suggestions={suggestedActions}
-        height="100%"
-        onSendMessage={(msg) => console.log('Send:', msg)}
-      />
-    </div>
+    <AIChat
+      messages={[]}
+      suggestions={suggestedActions}
+      height="100%"
+      onSendMessage={(msg) => console.log('Send:', msg)}
+    />
   ),
 };
 
 /** A populated conversation, including an inline tool call. */
 export const ChatWithMessages: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: () => (
-    <div className="h-[600px]">
-      <AIChat
-        messages={sampleMessages}
-        suggestions={suggestedActions}
-        height="100%"
-        userName="Dr. Jane"
-        onSendMessage={(msg) => console.log('Send:', msg)}
-        onResourceClick={(link) => console.log('Link clicked:', link)}
-        onClear={() => console.log('Clear chat')}
-      />
-    </div>
+    <AIChat
+      messages={sampleMessages}
+      suggestions={suggestedActions}
+      height="100%"
+      userName="Dr. Jane"
+      onSendMessage={(msg) => console.log('Send:', msg)}
+      onResourceClick={(link) => console.log('Link clicked:', link)}
+      onClear={() => console.log('Clear chat')}
+    />
   ),
 };
 
 /** The assistant is streaming a response — note the typing indicator. */
 export const GeneratingResponse: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
   render: () => {
     const messages: AIMessage[] = [
       ...sampleMessages.slice(0, 3),
@@ -269,37 +279,95 @@ export const GeneratingResponse: Story = {
       },
     ];
     return (
-      <div className="h-[600px]">
-        <AIChat
-          messages={messages}
-          isGenerating={true}
-          height="100%"
-          onSendMessage={(msg) => console.log('Send:', msg)}
-          onCancel={() => console.log('Cancel generation')}
-        />
-      </div>
+      <AIChat
+        messages={messages}
+        isGenerating={true}
+        height="100%"
+        onSendMessage={(msg) => console.log('Send:', msg)}
+        onCancel={() => console.log('Cancel generation')}
+      />
     );
   },
 };
 
-/** Talk-to-text: the composer exposes a microphone for voice input. */
-export const TalkToText: Story = {
-  render: () => (
-    <div className="h-[600px]">
-      <AIChat
-        messages={[]}
-        suggestions={suggestedActions}
-        height="100%"
-        talkToText
-        onSendMessage={(msg) => console.log('Send:', msg)}
-        onRecordingComplete={(blob, duration) =>
-          console.log('Recording complete:', { size: blob.size, duration })
-        }
-      />
-    </div>
-  ),
+// ============================================================================
+// Streaming response (scroll anchoring + jump to bottom)
+// ============================================================================
+// A long AI answer streams in chunk by chunk. While the user is at the bottom
+// the thread follows the stream; the moment they scroll up to read, their
+// position is preserved and the floating ↓ button appears. A follow-up
+// message lands after the stream completes, so scrolling up also demos the
+// "New messages" hint on the button. The stream driver lives in storyData.ts
+// and is shared with the OzwellChat Streaming Response story.
+
+function StreamingChat() {
+  const { messages, isGenerating, sendMessage } = useStreamingChatDemo();
+  return (
+    <AIChat
+      messages={messages}
+      isGenerating={isGenerating}
+      height="100%"
+      userName="Dr. Jane"
+      onSendMessage={sendMessage}
+    />
+  );
+}
+
+export const StreamingResponse: Story = {
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story: [
+          'A long AI answer **streams in** while the user reads. Scroll behavior:',
+          '',
+          '- **Incoming streams never push the view** — when a reply starts',
+          '  streaming, its first line is revealed and the scroll then holds; the',
+          '  response fills below the fold under a ↓ arrow that upgrades to',
+          '  **“New messages”** when it finishes. A short reply that fits resumes',
+          '  normal pinning.',
+          '- **Scrolled up** — the position is preserved exactly; nothing yanks the',
+          '  reader down. A floating **↓ jump-to-bottom** button appears over the',
+          '  thread (`data-slot="ai-chat-jump-to-bottom"`).',
+          '- When messages arrive while scrolled up, the button grows a',
+          '  **“New messages”** hint. Clicking it returns to the newest message and',
+          '  resumes pinning.',
+          '- **Sending your own message opens an anchored turn** (the',
+          '  ChatGPT/Claude UX): your bubble scrolls to the **top** of the',
+          '  viewport and the reply streams into reserved space below',
+          '  (`data-slot="ai-chat-turn"`). The view stays put while you read — even',
+          '  past the fold; jump-to-bottom or scrolling down yourself resumes',
+          '  pinning.',
+          '',
+          'Try it: send a message and watch it anchor to the top. While the answer',
+          'streams, scroll up — then click ↓. Sending any',
+          'message triggers another long streamed answer. Same policy as SuperChat;',
+          'the behavior is reusable via the exported `useStickToBottom` hook.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: () => <StreamingChat />,
 };
 
+/** Talk-to-text: the composer exposes a microphone for voice input. */
+export const TalkToText: Story = {
+  decorators: [fullHeightChat],
+  parameters: { githubSourceFooter: false },
+  render: () => (
+    <AIChat
+      messages={[]}
+      suggestions={suggestedActions}
+      height="100%"
+      talkToText
+      onSendMessage={(msg) => console.log('Send:', msg)}
+      onRecordingComplete={(blob, duration) =>
+        console.log('Recording complete:', { size: blob.size, duration })
+      }
+    />
+  ),
+};
 /**
  * The **Suggested Actions** bar in isolation. These are the quick-prompt pill
  * buttons rendered by `AIChat` via its `suggestions` prop; each `icon` key maps

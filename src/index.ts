@@ -1,6 +1,8 @@
 // Components
 export * from './components/AddContactModal';
 export * from './components/Accordion';
+export * from './components/ActionPlan';
+export * from './components/ActivityFeed';
 export * from './components/AdditionalFields';
 export * from './components/Address';
 // AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
@@ -15,12 +17,15 @@ export * from './components/AlertDialog';
 export * from './components/AllergyList';
 export * from './components/AppHeader';
 export * from './components/Assessment';
+export * from './components/AssociationList';
 export * from './components/AudioPlayer';
 export * from './components/AudioRecorder';
 export * from './components/AuthDialog';
 export * from './components/Autocomplete';
 export * from './components/Avatar';
+export * from './components/AvatarGroup';
 export * from './components/Badge';
+export * from './components/BoardView';
 export * from './components/BookingDialog';
 export * from './components/Breadcrumb';
 export * from './components/BusinessHours';
@@ -28,6 +33,8 @@ export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/ButtonGroup';
 export * from './components/Card';
+export * from './components/CalendarHeatmap';
+export * from './components/CalendarView';
 export * from './components/CaseManagementHeader';
 export * from './components/ChatComposer';
 export * from './components/Checkbox';
@@ -41,6 +48,7 @@ export * from './components/ClampedText';
 export * from './components/CollabStatus';
 export * from './components/Collapsible';
 export * from './components/CommandPalette';
+export * from './components/CompletenessMeter';
 export * from './components/ConnectionStatus';
 export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
@@ -66,6 +74,7 @@ export {
   type ReferralData,
 } from './components/CreateReferralModal';
 export * from './components/EditUserRoleModal';
+export * from './components/EmailEditor';
 export * from './components/EmployeeForm';
 export * from './components/EmployeeProfile';
 export * from './components/EmployerContactCard';
@@ -74,14 +83,17 @@ export * from './components/EmployerPricingCard';
 export * from './components/EmployerView';
 export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
+export * from './components/FieldHistory';
 export * from './components/FileManager';
 export * from './components/FilterSummaryBar';
 export * from './components/FloatingWindow';
 export * from './components/FreshnessBadge';
+export * from './components/GanttView';
 export * from './components/GlossaryTooltip';
 export * from './components/HealthSurveillance';
 export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
+export * from './components/InlineEdit';
 export * from './components/Input';
 export * from './components/InventoryManager';
 export * from './components/Label';
@@ -92,13 +104,19 @@ export * from './components/InvoicePaymentPage';
 // InvoiceView exports InvoiceLineItem which conflicts with InvoicePaymentPage
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
+export * from './components/ListView';
 export * from './components/LoadingPage';
+export * from './components/LogoUploader';
 export * from './components/Markdown';
 export * from './components/MedicationList';
 export * from './components/MediaEditor';
 export * from './components/MediaPlayer';
+export * from './components/MediaFeed';
+export * from './components/MegaMenu';
 export * from './components/Messaging';
 export * from './components/Modal';
+export * from './components/OrbitRing';
+export * from './components/RadialExplorer';
 export * from './components/NotificationCenter';
 export * from './components/OnboardingWizard';
 export * from './components/OrderCard';
@@ -120,11 +138,13 @@ export * from './components/PaymentHistoryTable';
 export * from './components/PaymentMethod';
 export * from './components/PendingClaimsTable';
 export * from './components/PermissionsEditor';
+export * from './components/PhiMask';
 export * from './components/PhoneInput';
 export * from './components/PresentingProblems';
 export * from './components/ProblemList';
 export * from './components/ProductVersion';
 export * from './components/Progress';
+export * from './components/PropertyList';
 export * from './components/ProviderCard';
 export * from './components/ProviderDetailHeader';
 // ProviderOverview exports QuickAction type which conflicts with QuickAction component
@@ -142,8 +162,11 @@ export * from './components/ProviderUsersTable';
 export * from './components/QuickAction';
 export * from './components/QuickLinksCard';
 export * from './components/Radio';
+export * from './components/Rating';
 export * from './components/ReadingProgressBar';
 export * from './components/RecordButton';
+export * from './components/RecordHeader';
+export * from './components/RecordLayout';
 export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
@@ -166,6 +189,7 @@ export * from './components/ServiceShippingSettings';
 export * from './components/Separator';
 export * from './components/Sheet';
 export * from './components/SectionSpyNav';
+export * from './components/SliderCalculator';
 export * from './components/SourceTip';
 export * from './components/Sparkline';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
@@ -187,6 +211,7 @@ export * from './components/Switch';
 export * from './components/Table';
 export * from './components/TableOfContents';
 export * from './components/Tabs';
+export * from './components/TagEditor';
 export * from './components/Text';
 export * from './components/Textarea';
 export * from './components/ThemeProvider';
@@ -194,7 +219,17 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
+export * from './components/UserPicker';
+export * from './components/ViewSwitcher';
+export * from './components/ViewSet';
+// The contract every Modules/Views component reads through.
+export * from './views/types';
 export * from './components/TranscriptView';
+export * from './components/VideoCard';
+export * from './components/YearTimeline';
+// Landing-page sections + LandingPage. Server Components import the same API
+// from @mieweb/ui/templates, whose graph avoids client-only React APIs.
+export * from './templates';
 // `TranscriptSegment` is exported by both AI (Whisper output, seconds) and
 // TranscriptView (media display schema, milliseconds). Keep the pre-existing AI
 // type at the root barrel; import the media-schema type from the subpath

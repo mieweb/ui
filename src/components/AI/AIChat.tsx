@@ -4,8 +4,8 @@
  * A complete chat interface for AI interactions with support for
  * MCP tool calls, suggested actions, and streaming responses.
  *
- * This component reuses the core Messaging components (MessageComposer,
- * EmptyState) to maintain DRY principles.
+ * This component reuses the shared ChatComposer for its input and the
+ * Messaging module's EmptyState to maintain DRY principles.
  */
 
 import * as React from 'react';
@@ -22,13 +22,26 @@ import type {
 } from './types';
 import { AIMessageDisplay } from './AIMessage';
 import {
-  MessageComposer,
-  type MessageComposerProps,
-} from '../Messaging/MessageComposer';
+  ChatComposer,
+  type ChatComposerProps,
+} from '../ChatComposer/ChatComposer';
+import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
+import type { NewMessage } from '../Messaging/types';
+import {
+  DEFAULT_ACCEPTED_FILE_TYPES,
+  DEFAULT_MAX_FILE_SIZE,
+} from '../Messaging/AttachmentPicker';
+import { useTypingEmulation } from '../Messaging/hooks';
 import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
+import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import {
+  useStickToBottom,
+  useStreamEndedBelowFold,
+} from '../../hooks/useStickToBottom';
 import { RecordButton } from '../RecordButton';
 import { SparklesIcon, CloseIcon, RefreshIcon } from './icons';
 
@@ -247,6 +260,39 @@ const chatVariants = cva('flex flex-col', {
   },
 });
 
+/**
+ * Legacy `MessageComposerProps`-era keys still accepted through
+ * `composerProps` so hosts written against the old composer keep compiling
+ * and working without changes. Each key is mapped onto its ChatComposer
+ * equivalent (or emulated) — see the individual deprecation notes. New code
+ * should pass `ChatComposerProps` keys directly.
+ */
+export interface AIChatLegacyComposerProps {
+  /** @deprecated Use `allowAttachments` instead. */
+  showAttachmentPicker?: boolean;
+  /** @deprecated ChatComposer has no camera button; this prop is ignored. */
+  showCameraButton?: boolean;
+  /** @deprecated ChatComposer has a single presentation; this prop is ignored. */
+  variant?: 'default' | 'minimal';
+  /** @deprecated Use `micSlot` instead (rendered in the composer's action row). */
+  inputTrailing?: React.ReactNode;
+  /** @deprecated Emulated by AIChat: fires when the draft becomes non-empty (MessageComposer parity). */
+  onTypingStart?: () => void;
+  /** @deprecated Emulated by AIChat: fires after 2s idle or on send (MessageComposer parity). */
+  onTypingStop?: () => void;
+}
+
+/** Props accepted by `AIChatProps.composerProps`. */
+export type AIChatComposerProps = Partial<ChatComposerProps> &
+  AIChatLegacyComposerProps;
+
+// MessageComposer rendered its trailing slot behind `{inputTrailing && …}`,
+// so any falsy value (e.g. `false` from `cond && <Mic />`, null, '')
+// suppressed it. ChatComposer only skips `undefined` — anything else mounts
+// the slot wrapper — so normalize falsy legacy slot values to undefined.
+const normalizeLegacySlot = (node: React.ReactNode): React.ReactNode =>
+  node || undefined;
+
 export interface AIChatProps
   extends VariantProps<typeof chatVariants>, AIChatCallbacks {
   /** Chat session data */
@@ -269,8 +315,12 @@ export interface AIChatProps
   inputPlaceholder?: string;
   /** Height constraint */
   height?: string | number;
-  /** Props to pass to the MessageComposer */
-  composerProps?: Partial<MessageComposerProps>;
+  /**
+   * Props to pass to the internal ChatComposer. Legacy MessageComposer-era
+   * keys (`showAttachmentPicker`, `inputTrailing`, `onTypingStart`, …) are
+   * still accepted and mapped — see {@link AIChatLegacyComposerProps}.
+   */
+  composerProps?: AIChatComposerProps;
   /** Enable talk-to-text microphone button inside the input */
   talkToText?: boolean;
   /** Callback when recording starts */
@@ -292,7 +342,7 @@ export interface AIChatProps
 
 /**
  * A complete AI chat interface with message history, input, and tool call support.
- * Reuses MessageComposer from the Messaging components for consistent UX.
+ * Reuses the shared ChatComposer for a consistent input UX.
  */
 export function AIChat({
   session,
@@ -322,7 +372,9 @@ export function AIChat({
   renderTextContent,
   renderMessageFooter,
 }: AIChatProps) {
-  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    notifyComposerMigrationOnce('AIChat');
+  }, []);
 
   const messages = React.useMemo(
     () => session?.messages || messagesProp || [],
@@ -330,16 +382,261 @@ export function AIChat({
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
 
-  // Auto-scroll to bottom on new messages
-  React.useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (container) container.scrollTop = container.scrollHeight;
-  }, [messages]);
+  // The thread pins to the newest message only while the user is at the
+  // bottom. Once they scroll up to read, streaming growth (handled by
+  // useStickToBottom's ResizeObserver) and appended messages leave their
+  // position alone; a floating "jump to bottom" button offers the way back
+  // (and flags unseen messages). Same policy as SuperChat.
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const {
+    containerRef: messagesContainerRef,
+    contentRef: messagesContentRef,
+    isAtBottom,
+    scrollToBottom,
+    anchorToTurnStart,
+    followIfPinned,
+    stopFollowing,
+  } = useStickToBottom();
+  const [hasNewBelow, setHasNewBelow] = React.useState(false);
+  // Own-send turn anchoring (ChatGPT/Claude-style): the freshly sent user
+  // message opens a "turn" that reserves a viewport of space, anchored so the
+  // bubble sits at the top and the reply streams into the space below.
+  const [turnStartId, setTurnStartId] = React.useState<string | null>(null);
+  const [turnMinHeight, setTurnMinHeight] = React.useState<number>();
+  const anchoredTurnRef = React.useRef<string | null>(null);
 
-  const handleSend = async (message: { content: string }) => {
-    if (message.content.trim() && onSendMessage) {
-      onSendMessage(message.content.trim());
+  // Anchor to the newest message on mount and when the session changes.
+  React.useEffect(() => {
+    setTurnStartId(null);
+    anchoredTurnRef.current = null;
+    scrollToBottom('auto');
+    setHasNewBelow(false);
+  }, [session?.id, scrollToBottom]);
+
+  // New-message policy: follow while pinned, always follow the user's own
+  // sends, otherwise flag that unseen content arrived below.
+  const messageCount = messages.length;
+  const prevMessageCountRef = React.useRef(messageCount);
+  const policySessionRef = React.useRef(session?.id);
+  const policyBaselinedRef = React.useRef(false);
+  React.useEffect(() => {
+    // A session switch replaces the thread wholesale: the reset effect above
+    // owns the scroll, so rebase the append baseline instead of mistaking the
+    // replacement's user messages for a fresh send. The first run baselines
+    // the mount the same way.
+    if (
+      !policyBaselinedRef.current ||
+      policySessionRef.current !== session?.id
+    ) {
+      policyBaselinedRef.current = true;
+      policySessionRef.current = session?.id;
+      prevMessageCountRef.current = messageCount;
+      // A thread that arrives mid-stream (restored session, in-progress host
+      // stream) must hold like an appended stream: the reset effect revealed
+      // the bottom, so hold there and let useStreamEndedBelowFold release
+      // the hold on completion.
+      if (messages.at(-1)?.status === 'streaming') stopFollowing();
+      return;
     }
+    const prevCount = prevMessageCountRef.current;
+    if (messageCount === prevCount) return;
+    const grew = messageCount > prevCount;
+    prevMessageCountRef.current = messageCount;
+    // A batch update can append the user's message together with an assistant
+    // placeholder — an own send anywhere in the appended slice counts.
+    const ownMessage = grew
+      ? messages
+          .slice(prevCount)
+          .filter((m) => m.role === 'user')
+          .at(-1)
+      : undefined;
+    if (ownMessage) {
+      // Own send: open a new anchored turn (the layout effect below scrolls
+      // it to the top of the viewport once the reserve is in place).
+      setTurnStartId(ownMessage.id);
+    } else if (grew && messages.at(-1)?.status === 'streaming') {
+      // An incoming stream fills below the fold instead of pushing the view:
+      // reveal its first line if we were following, then hold position. On
+      // completion useStreamEndedBelowFold raises the hint (below the fold)
+      // or resumes following (the reply never outgrew the viewport).
+      followIfPinned('auto');
+      stopFollowing();
+    } else if (!followIfPinned('auto') && grew) {
+      setHasNewBelow(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messageCount, isAtBottom, session?.id]);
+
+  // Apply the turn reserve, then anchor the turn's start to the viewport top.
+  // Two passes: the first render after a send measures the viewport and sets
+  // the min-height; once it's in place there is room to scroll the bubble to
+  // the top, so the re-run performs the actual anchor.
+  React.useLayoutEffect(() => {
+    if (!turnStartId || anchoredTurnRef.current === turnStartId) return;
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    // Just under a full viewport (minus the py-4 padding) so the anchored
+    // bubble's top lands at the top edge of the scroll area.
+    const reserve = Math.max(0, container.clientHeight - 32);
+    if (turnMinHeight !== reserve) {
+      setTurnMinHeight(reserve);
+      return;
+    }
+    const target = container.querySelector<HTMLElement>(
+      '[data-slot="ai-chat-turn"]'
+    );
+    if (target) {
+      anchorToTurnStart(target, prefersReducedMotion ? 'auto' : 'smooth');
+      anchoredTurnRef.current = turnStartId;
+    }
+  }, [
+    turnStartId,
+    turnMinHeight,
+    anchorToTurnStart,
+    prefersReducedMotion,
+    messagesContainerRef,
+  ]);
+
+  const turnIndex = React.useMemo(
+    () => (turnStartId ? messages.findIndex((m) => m.id === turnStartId) : -1),
+    [messages, turnStartId]
+  );
+
+  // The hint clears once the user reaches the bottom again.
+  React.useEffect(() => {
+    if (isAtBottom) setHasNewBelow(false);
+  }, [isAtBottom]);
+
+  // A reply that finishes streaming below the fold upgrades the jump button
+  // to the "New messages" hint — the reader hasn't seen the end of it.
+  const raiseNewBelow = React.useCallback(() => setHasNewBelow(true), []);
+  const resumeFollowing = React.useCallback(
+    () => scrollToBottom('auto'),
+    [scrollToBottom]
+  );
+  useStreamEndedBelowFold(
+    messages.at(-1),
+    isAtBottom,
+    raiseNewBelow,
+    resumeFollowing
+  );
+
+  const handleJumpToBottom = React.useCallback(() => {
+    scrollToBottom(prefersReducedMotion ? 'auto' : 'smooth');
+  }, [scrollToBottom, prefersReducedMotion]);
+
+  const renderMessageItem = (message: AIMessage) => (
+    <AIMessageDisplay
+      key={message.id}
+      message={message}
+      userName={userName}
+      showTimestamp={showTimestamps}
+      onLinkClick={handleLinkClick}
+      renderTextContent={renderTextContent}
+      renderMessageFooter={renderMessageFooter}
+    />
+  );
+
+  // Split legacy MessageComposer-era keys (mapped below) and the keys AIChat
+  // must own (value/onValueChange for draft restore) from the passthrough.
+  const {
+    showAttachmentPicker,
+    inputTrailing,
+    onTypingStart,
+    onTypingStop,
+    value: hostValue,
+    onValueChange: hostOnValueChange,
+    onSend: hostOnSend,
+    micSlot: hostMicSlot,
+    ...composerRest
+  } = composerProps ?? {};
+  // `showCameraButton` and `variant` have no ChatComposer equivalent (see
+  // the deprecation notes); strip them so they never reach the composer.
+  delete composerRest.showCameraButton;
+  delete composerRest.variant;
+
+  const hasInputTrailing = !!composerProps && 'inputTrailing' in composerProps;
+
+  // `showAttachmentPicker` needs a presence check: MessageComposer defaulted
+  // it to true, so the old `{...composerProps}` spread turned a
+  // present-but-undefined key into "enabled" (it erased AIChat's own
+  // explicit `false`), while an absent key left attachments off.
+  const legacyAttachments =
+    !!composerProps && 'showAttachmentPicker' in composerProps
+      ? (showAttachmentPicker ?? true)
+      : false;
+
+  // Controlled composer draft so a failed send can restore the typed text
+  // (ChatComposer clears optimistically and delegates restore to the host;
+  // MessageComposer restored it internally). When the host controls the
+  // value via composerProps, restore flows through its onValueChange.
+  const [draft, setDraft] = React.useState('');
+  // Bumped on every user edit, so a stale failed send never overwrites
+  // newer typed input.
+  const draftEpochRef = React.useRef(0);
+  const composerValue = hostValue ?? draft;
+  // MessageComposer only invoked onValueChange when controlled
+  // (value !== undefined); preserve that contract for legacy hosts that
+  // pass onValueChange alone. This is a deliberate AIChat-owned exception
+  // to the ChatComposer API: `composerProps.onValueChange` without `value`
+  // receives no callbacks here (raw ChatComposer would fire it on every
+  // edit). Pass `value` too if you need change notifications.
+  const isHostControlled = hostValue !== undefined;
+  const handleComposerValueChange = React.useCallback(
+    (value: string) => {
+      draftEpochRef.current += 1;
+      setDraft(value);
+      if (isHostControlled) hostOnValueChange?.(value);
+    },
+    [isHostControlled, hostOnValueChange]
+  );
+
+  // Emulate MessageComposer's typing callbacks for legacy composerProps
+  // consumers (shared with MessageThread — see useTypingEmulation).
+  const { stopTyping } = useTypingEmulation({
+    value: composerValue,
+    onTypingStart,
+    onTypingStop,
+  });
+
+  // Shared send path: stop typing, await the handler, and restore the draft
+  // on failure (epoch-guarded so a stale failure never clobbers newer input).
+  // MessageComposer applied this to host-supplied `onSend` too.
+  const sendWithRestore = async (
+    message: NewMessage,
+    send: (message: NewMessage) => void | Promise<void>
+  ) => {
+    stopTyping();
+    const epoch = draftEpochRef.current;
+    try {
+      // A returned promise is awaited so an async rejection follows the
+      // same draft-restore path as a synchronous throw.
+      await Promise.resolve(send(message));
+    } catch (error) {
+      if (draftEpochRef.current === epoch) {
+        setDraft(message.content);
+        if (isHostControlled) hostOnValueChange?.(message.content);
+      }
+      // Rethrow so ChatComposer reports the failure through `onError`
+      // ('Failed to send message' — the same copy MessageComposer used).
+      throw error;
+    }
+  };
+
+  const handleSend = async (message: NewMessage) => {
+    if (!onSendMessage) return;
+    const content = message.content.trim();
+    const attachments = message.attachments?.length
+      ? message.attachments
+      : undefined;
+    // ChatComposer has already cleared its staged files by the time `onSend`
+    // runs, so attachment-only messages must still reach the host — dropping
+    // them here would silently destroy the user's files.
+    if (!content && !attachments) return;
+    await sendWithRestore(message, () =>
+      // Keep the exact legacy call shape for text-only sends.
+      attachments ? onSendMessage(content, attachments) : onSendMessage(content)
+    );
   };
 
   const handleSuggestionSelect = (action: AISuggestedAction) => {
@@ -425,35 +722,54 @@ export function AIChat({
         </div>
       )}
 
-      {/* Messages */}
+      {/* Messages — the viewport wrapper hosts the floating jump-to-bottom
+          button (absolute, never fixed, so it stays inside embedded layouts) */}
       <div
-        ref={messagesContainerRef}
-        data-slot="ai-chat-messages"
-        className="flex-1 overflow-y-auto px-4 py-4"
+        data-slot="ai-chat-messages-viewport"
+        className="relative flex min-h-0 flex-1 flex-col"
       >
-        {messages.length === 0 ? (
-          <AIEmptyState
-            suggestions={suggestions}
-            onSuggestionSelect={handleSuggestionSelect}
-          />
-        ) : (
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <AIMessageDisplay
-                key={message.id}
-                message={message}
-                userName={userName}
-                showTimestamp={showTimestamps}
-                onLinkClick={handleLinkClick}
-                renderTextContent={renderTextContent}
-                renderMessageFooter={renderMessageFooter}
+        <div
+          ref={messagesContainerRef}
+          data-slot="ai-chat-messages"
+          className="flex-1 overflow-y-auto px-4 py-4"
+        >
+          {/* Always-mounted content wrapper so useStickToBottom's
+              ResizeObserver is attached before the first message arrives. */}
+          <div ref={messagesContentRef}>
+            {messages.length === 0 ? (
+              <AIEmptyState
+                suggestions={suggestions}
+                onSuggestionSelect={handleSuggestionSelect}
               />
-            ))}
+            ) : (
+              <div className="space-y-4">
+                {(turnIndex === -1
+                  ? messages
+                  : messages.slice(0, turnIndex)
+                ).map(renderMessageItem)}
+                {turnIndex !== -1 && (
+                  <div
+                    data-slot="ai-chat-turn"
+                    className="space-y-4"
+                    style={{ minHeight: turnMinHeight }}
+                  >
+                    {messages.slice(turnIndex).map(renderMessageItem)}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+        </div>
+        {!isAtBottom && (
+          <JumpToBottomButton
+            dataSlot="ai-chat-jump-to-bottom"
+            hasNewMessages={hasNewBelow}
+            onClick={handleJumpToBottom}
+          />
         )}
       </div>
 
-      {/* Input - Using MessageComposer from Messaging */}
+      {/* Input - Using the shared ChatComposer */}
       <div
         data-slot="ai-chat-input"
         className="shrink-0 border-t border-neutral-200 dark:border-neutral-700"
@@ -469,30 +785,63 @@ export function AIChat({
               />
             </div>
           )}
-        <MessageComposer
-          onSend={handleSend}
-          placeholder={inputPlaceholder}
-          disabled={isGenerating}
-          isSending={isGenerating}
-          showAttachmentPicker={false}
-          showCameraButton={false}
-          showCharacterCount={false}
-          variant="minimal"
-          inputTrailing={
-            talkToText ? (
-              <RecordButton
-                variant="ghost"
-                size="sm"
-                showPulse={false}
-                showWaveform
-                disabled={isGenerating}
-                onRecordingStart={onRecordingStart}
-                onRecordingComplete={onRecordingComplete}
-              />
-            ) : undefined
-          }
-          {...composerProps}
-        />
+        {/* Same p-3 breathing room MessageComposer's input area used. */}
+        <div data-slot="ai-chat-composer" className="p-3">
+          <ChatComposer
+            onSend={
+              hostOnSend
+                ? (message: NewMessage) => sendWithRestore(message, hostOnSend)
+                : handleSend
+            }
+            placeholder={inputPlaceholder}
+            disabled={isGenerating}
+            isSending={isGenerating}
+            // composerProps wins over the built-in talkToText slot (same
+            // override order as the old {...composerProps} spread). micSlot
+            // is a ChatComposer passthrough prop, so non-undefined values —
+            // including null — forward raw and keep ChatComposer's own
+            // semantics (null mounts its default mic button); only the
+            // legacy inputTrailing path normalizes falsy values, preserving
+            // MessageComposer's `{inputTrailing && …}` suppression.
+            micSlot={
+              hostMicSlot !== undefined ? (
+                hostMicSlot
+              ) : hasInputTrailing ? (
+                normalizeLegacySlot(inputTrailing)
+              ) : talkToText ? (
+                <RecordButton
+                  variant="ghost"
+                  size="sm"
+                  showPulse={false}
+                  showWaveform
+                  disabled={isGenerating}
+                  onRecordingStart={onRecordingStart}
+                  onRecordingComplete={onRecordingComplete}
+                />
+              ) : undefined
+            }
+            {...composerRest}
+            // MessageComposer-parity defaults, applied after the spread so
+            // explicit `undefined` in composerProps can't erase them
+            // (MessageComposer's destructuring defaults treated undefined
+            // as absent); explicit values still win.
+            allowAttachments={
+              composerRest.allowAttachments ?? legacyAttachments
+            }
+            maxLength={composerRest.maxLength ?? 1600}
+            inputLabel={composerRest.inputLabel ?? 'Message'}
+            acceptedFileTypes={
+              composerRest.acceptedFileTypes ??
+              (legacyAttachments ? DEFAULT_ACCEPTED_FILE_TYPES : undefined)
+            }
+            maxFileSize={
+              composerRest.maxFileSize ??
+              (legacyAttachments ? DEFAULT_MAX_FILE_SIZE : undefined)
+            }
+            value={composerValue}
+            onValueChange={handleComposerValueChange}
+          />
+        </div>
       </div>
     </div>
   );

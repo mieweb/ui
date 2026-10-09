@@ -25,6 +25,16 @@ const meta: Meta<typeof OrderList> = {
         sourceState: 'shown',
       },
     },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'orders-order-inbox-demo',
+          why: 'This is the shipped order list with its own tab model; the demo shows the generic view system configured for orders.',
+        },
+      ],
+    },
   },
   args: {
     showSearch: true,

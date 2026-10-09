@@ -7,6 +7,7 @@ const meta: Meta<typeof InvoicePaymentPage> = {
   component: InvoicePaymentPage,
   parameters: {
     layout: 'fullscreen',
+    mobilePreview: { mode: 'standalone' },
   },
   tags: ['autodocs', 'scope:product-specific', 'maturity:stable'],
 };

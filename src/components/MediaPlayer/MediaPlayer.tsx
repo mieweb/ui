@@ -50,12 +50,27 @@ export interface MediaPlayerProps extends VariantProps<
   kind?: MediaKind;
   /** Whether to show native controls (default `true`). */
   controls?: boolean;
+  /** Begin muted; native controls can still change the volume. */
+  muted?: boolean;
+  /** Repeat playback when the media ends. */
+  loop?: boolean;
+  /** Video thumbnail displayed before playback. */
+  poster?: string;
+  /** Browser preload hint (default browser behavior when omitted). */
+  preload?: 'none' | 'metadata' | 'auto';
+  /** Caption/subtitle `<track>` elements. The `src` attribute is always set
+   * on the media element, so alternative `<source>` children are ignored. */
+  children?: React.ReactNode;
+  /** Localized load-error and retry text. */
+  labels?: { error?: string; retry?: string };
   /** Callback when playback state changes. */
   onStateChange?: (state: MediaPlayerState) => void;
   /** Callback when playback ends. */
   onEnded?: () => void;
   /** Callback when an error occurs. */
   onError?: (error: Error) => void;
+  /** Callback after the user requests a fresh media load on the error surface. */
+  onRetry?: () => void;
   /** Callback on time updates (milliseconds). */
   onTimeUpdate?: (currentTimeMs: number, durationMs: number) => void;
   /** Additional class name. */
@@ -122,10 +137,17 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
       src,
       kind,
       controls = true,
+      muted,
+      loop,
+      poster,
+      preload,
+      children,
+      labels,
       variant,
       onStateChange,
       onEnded,
       onError,
+      onRetry,
       onTimeUpdate,
       className,
       'aria-label': ariaLabel,
@@ -148,7 +170,10 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
       onStateChange,
       onEnded,
       onError: (err) => {
-        setError('Unable to load media. The server may be unavailable.');
+        setError(
+          labels?.error ??
+            'Unable to load media. The server may be unavailable.'
+        );
         onError?.(err);
       },
       endedState: 'paused',
@@ -187,11 +212,15 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
     const handleRetry = React.useCallback(() => {
       setError(null);
       mediaElement?.load();
-    }, [mediaElement]);
+      onRetry?.();
+    }, [mediaElement, onRetry]);
 
     const sharedMediaProps = {
       src,
       controls,
+      muted,
+      loop,
+      preload,
       'aria-label': ariaLabel,
     };
 
@@ -215,7 +244,7 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
               className="bg-background"
               onClick={handleRetry}
             >
-              Retry
+              {labels?.retry ?? 'Retry'}
             </Button>
           </div>
         </div>
@@ -225,22 +254,27 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
     return (
       <div className={mediaPlayerVariants({ variant, className })}>
         {resolvedKind === 'video' ? (
-          // Generic media surface: caption tracks belong to the consumer's media
-          // resource and are supplied via children, not this transport component.
+          // Tracks belong to the caller's media resource and can be supplied as
+          // children. The feed also supports a custom renderer for captions.
           // eslint-disable-next-line jsx-a11y/media-has-caption
           <video
             ref={setElement as React.Ref<HTMLVideoElement>}
             playsInline
+            poster={poster}
             className="h-auto max-h-full w-auto max-w-full object-contain"
             {...sharedMediaProps}
-          />
+          >
+            {children}
+          </video>
         ) : (
           // eslint-disable-next-line jsx-a11y/media-has-caption
           <audio
             ref={setElement as React.Ref<HTMLAudioElement>}
             className="my-4 w-[90%] max-w-lg"
             {...sharedMediaProps}
-          />
+          >
+            {children}
+          </audio>
         )}
       </div>
     );

@@ -22,7 +22,8 @@ When asked to create a table, data grid, or any tabular data view:
 
 ```tsx
 import { DataVisNitroSource, DataVisNitroGrid } from '@mieweb/ui/datavis';
-// Peer deps: npm install @mieweb/datavis datavis-ace
+// Self-contained entry: @mieweb/datavis is bundled in and datavis-ace ships as
+// a dependency of @mieweb/ui — no extra installs needed to use these.
 ```
 
 ## Rule 2: Buttons belong in a ButtonGroup
@@ -167,7 +168,19 @@ Tailwind: on Tailwind 4, add an `@source` for `@mieweb/ui` so library classes ar
 
 If JSDoc, the console, or the docs mark something deprecated (`AGGrid` today), do not use it in new code and do not suppress the warning. Use the documented replacement.
 
-## Rule 14: When existing components do not meet the need
+## Rule 14: A component that renders a collection takes it through props
+
+Anything that displays a list, board, calendar, timeline or inbox of records the caller owns is a **headless module**. It receives `items` / `loading` / `error` as props, hands changes back through `on*` callbacks typed `void | Promise<void>`, and navigates through `onOpen(id)` / `getHref(id)`.
+
+Never fetch, subscribe, read a store, or import a router or app framework inside such a component — `meteor/*`, `next/*`, `react-router*`, `@tanstack/react-query` and `@fortawesome/*` are blocked by ESLint. Make it generic over the item type with accessor props (`getId`, `getStatus`, `getStart`, …), put domain rendering in `render*` slots, return a token _name_ for colour (never a class string), and make every user-facing string overridable through `labels`.
+
+Declare it with `parameters.catalog.collection: true`; `pnpm catalog:check` then requires an **Empty**, **Loading** and **Error** story. Full contract:
+[component-policy → Tier 2.5](https://github.com/mieweb/ui/blob/main/lessons/component-policy.md#tier-25-headless-modules).
+
+Wiring one to an app's data layer — accessors, awaited mutations, `onOpen` plus `getHref`, where filter state lives:
+[wiring-headless-modules.md](https://github.com/mieweb/ui/blob/main/lessons/wiring-headless-modules.md).
+
+## Rule 15: When existing components do not meet the need
 
 Before creating or materially extending a reusable component, read the
 [upstream contribution guide](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md)
@@ -185,3 +198,80 @@ abstraction solely to make it contributable.
 Follow the repository's permissions and approval requirements for commits,
 pushes, and PR creation. Do not treat these instructions as authorization to
 publish changes.
+
+## Rule 16: Embedding the Ozwell assistant that acts on the page
+
+Two different things share the "Ozwell" name — pick deliberately:
+
+- **`OzwellChat` / `AIChat` (this library)** — the *chat UI shell*. You own the
+  transport and render messages you already have. Use it when the assistant is
+  part of your own product and you wire the answers yourself (see the
+  [Chat family](https://ui.mieweb.org/?path=/docs/modules-chat-overview--docs)
+  and the [Ozwell backend guide](https://github.com/mieweb/ui/blob/main/src/components/AI/OZWELL-BACKEND.md)).
+- **The embedded Ozwell assistant (`@ozwell/react`, from ozwellai-api)** — a
+  drop-in, page-aware assistant that can **read and act on your page** through
+  tool calls. Use this when the user says things like "add Ozwell" or "let
+  Ozwell click / read / fill something on the page."
+
+To add the page-aware assistant to a `@mieweb/ui` app:
+
+- Install `@ozwell/react` alongside `@mieweb/ui`.
+- Render `OzwellChat` from `@ozwell/react` and declare one tool in `tools` for
+  each page action the user wants Ozwell to perform (click, read, fill, …).
+- Authenticate with a **site-approved agent key** (`agnt_key-…`) via
+  `VITE_OZWELL_AGENT_KEY`. Vite inlines every `VITE_*` value into the browser
+  bundle — this is **not** secret storage, so never expose a parent (`ozw_…`),
+  admin, or model-provider key this way; use a server-side integration when a
+  credential must stay private.
+- Handle each call in `onToolCall(name, args, respond)`: perform the DOM action
+  and **always** `respond(...)`. Return `isError: true` for an unknown tool name
+  or a missing target, so the assistant never claims an action that did not happen.
+- Follow the canonical guide — a full **Vite + MIE UI "Click Hello World"**
+  example — at <https://mieweb.github.io/ozwellai-api/frontend/react/>.
+
+Example — let Ozwell fill a field on the page (adapt the tool to your app's own actions):
+
+```tsx
+import { useState } from 'react';
+import { Input } from '@mieweb/ui';
+import { OzwellChat, type OzwellTool } from '@ozwell/react';
+
+const tools: OzwellTool[] = [{
+  type: 'function',
+  function: {
+    name: 'set_note',
+    description: 'Write text into the Note field when the user asks.',
+    parameters: {
+      type: 'object',
+      properties: { text: { type: 'string', description: 'Text to put in the Note field' } },
+      required: ['text'],
+    },
+  },
+}];
+
+export default function App() {
+  const [note, setNote] = useState('');
+  return (
+    <>
+      <Input label="Note" value={note} onChange={(e) => setNote(e.target.value)} />
+      <output aria-live="polite">Note: {note}</output>
+      <OzwellChat
+        apiKey={import.meta.env.VITE_OZWELL_AGENT_KEY}
+        tools={tools}
+        onToolCall={(name, args, respond) => {
+          if (name !== 'set_note' || typeof args.text !== 'string') {
+            respond({ isError: true, content: [{ type: 'text', text: 'Tool unavailable' }] });
+            return;
+          }
+          setNote(args.text);
+          respond({ content: [{ type: 'text', text: `Note set to "${args.text}"` }] });
+        }}
+      />
+    </>
+  );
+}
+```
+
+Privacy: conversation content stays between the user and Ozwell and is never
+relayed to the host page. The host receives only the tool calls it declares,
+lifecycle/error events, and any data the user explicitly shares (opt-in).

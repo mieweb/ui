@@ -30,7 +30,7 @@ const meta: Meta = {
       description: {
         component: `### What it's for
 
-**The drop-in voice entry point: an octopus toggle for the app header that runs the on-device wake-word detector, opens a \`FloatingAIChat\`, dictates on "hey ozwell", transcribes on "ozwell I'm done" and sends.** \`HeyOzwell\` is a thin wrapper over the headless \`useHeyOzwell\` hook that composes \`HeyOzwellToggle\` (\`aria-pressed\` button with a load ring and volume pulse), \`OzwellSettingsMenu\` (right-click / long-press: "Your voice" via \`onManageVoices\`, plus a read-only "Models & versions" list from \`MODEL_MANIFEST\`) and, while active, \`FloatingAIChat {...oz.chatProps} {...chatProps}\`. Options (all \`UseHeyOzwellOptions\`): \`autoDictateOnWake\`, \`closeChatOnDone\`, \`transcription\` \`browser\` | \`server\`, \`requireDoctor\` (invisible speaker-verify gate against enrolled voiceprints), \`autoStart\`, \`liveTranscript\`, \`conversationMode\` (diarize the clip and send "Dr. Jane: … / Patient: …"), \`reviewBeforeSend\`, \`onSend(text)\`, \`assetBase\`, \`diarizationOptions\`; plus \`size\`, \`logoSrc\`, \`longPressMs\`, \`className\`, \`chatProps\` (e.g. \`suggestions\`, \`userName\`). For a custom layout use \`useHeyOzwell\` directly: it returns \`toggleProps\`, \`chatProps\`, \`phase\` \`listening\` | \`dictating\` | \`transcribing\`, \`send\`, \`startDictation\` / \`stopDictation\`, \`settingsOpen\`, \`modelStatus\`. One shared microphone: the detector opens \`getUserMedia\` once and every other consumer reads \`getStream()\`.
+**The drop-in voice entry point: an octopus toggle for the app header that runs the on-device wake-word detector, opens a \`FloatingAIChat\`, dictates on "hey ozwell", transcribes on "ozwell I'm done" and sends.** \`HeyOzwell\` is a thin wrapper over the headless \`useHeyOzwell\` hook that composes \`HeyOzwellToggle\` (\`aria-pressed\` button with a load ring and volume pulse), \`OzwellSettingsMenu\` (right-click / long-press: "Your voice" via \`onManageVoices\`, plus a read-only "Models & versions" list from \`MODEL_MANIFEST\`) and, while active, \`FloatingAIChat {...oz.chatProps} {...chatProps}\`. Options (all \`UseHeyOzwellOptions\`): \`autoDictateOnWake\`, \`closeChatOnDone\`, \`transcription\` \`browser\` | \`server\`, \`requireDoctor\` (invisible speaker-verify gate against enrolled voiceprints), \`voiceprintNamespace\` (isolate persisted enrollment per user of a shared browser — pass the SAME value to \`VoiceManager\` / \`VoiceSetup\`; scoped stores don't inherit legacy unscoped records), \`autoStart\`, \`liveTranscript\`, \`conversationMode\` (diarize the clip and send "Dr. Jane: … / Patient: …"), \`reviewBeforeSend\`, \`onSend(text)\`, \`assetBase\`, \`diarizationOptions\`; plus \`size\`, \`logoSrc\`, \`longPressMs\`, \`className\`, \`chatProps\` (e.g. \`suggestions\`, \`userName\`). For a custom layout use \`useHeyOzwell\` directly: it returns \`toggleProps\`, \`chatProps\`, \`phase\` \`listening\` | \`dictating\` | \`transcribing\`, \`send\`, \`startDictation\` / \`stopDictation\`, \`settingsOpen\`, \`modelStatus\`. One shared microphone: the detector opens \`getUserMedia\` once and every other consumer reads \`getStream()\`.
 
 ### Use it when
 
@@ -59,10 +59,11 @@ window.__ozwellWhisperHost = config.whisperHost;      // Whisper weights (must s
   <span className="flex-1" />
   <HeyOzwell
     requireDoctor
+    voiceprintNamespace={user.id}                      // scope enrollment to this user (shared workstation)
     autoDictateOnWake
     reviewBeforeSend
     onSend={(text) => assistant.send(text)}          // your backend; reply rendering stays yours
-    onManageVoices={() => navigate('/settings/voice')} // route to a page rendering <VoiceManager />
+    onManageVoices={() => navigate('/settings/voice')} // that page must render <VoiceManager voiceprintNamespace={user.id} />
     chatProps={{ userName: user.displayName, suggestions }}
   />
 </header>

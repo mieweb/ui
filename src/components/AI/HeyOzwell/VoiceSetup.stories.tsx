@@ -16,7 +16,7 @@ const meta: Meta<typeof VoiceSetup> = {
       description: {
         component: `### What it's for
 
-**The guided, Apple-style enrollment screen: tap the octopus, say "hey ozwell" and "ozwell I'm done" three times each, and both the speaker (WHO) and phrase (WHAT) voiceprints are saved on-device.** \`VoiceSetup\` is presentation over \`useVoiceSetup\`, which runs \`useSpeakerVerify\` + \`useWakeWord\` together: the wake detector supplies the shared mic stream and phrase embeddings, a rolling recorder captures each utterance, and on completion the TitaNet centroid is stored per phrase (\`enroll\`) and the phrase-prints are saved (\`saveWhatPrints\`). Props: \`mode\` \`enroll\` (replace the default voice \`you\`) | \`add\` (append another voice or condition under \`voiceId\` / \`label\`), \`logoSrc\`, \`onDone\`, \`onCancel\`. Phases (\`VoiceSetupPhase\`): \`intro\` → \`getready\` → \`speak\` → \`gotit\` | \`deny\` (retry: "Let's try that again") → \`done\`, with progress dots for the 6 reps, a volume-reactive octopus and "Add another spot" to append a further room/distance condition. Also exported: \`useVoiceSetup\` (\`ready\`, \`phase\`, \`phrase\`, \`step\`, \`total\`, \`level\`, \`start\`, \`addAnotherSpot\`, \`cancel\`).
+**The guided, Apple-style enrollment screen: tap the octopus, say "hey ozwell" and "ozwell I'm done" three times each, and both the speaker (WHO) and phrase (WHAT) voiceprints are saved on-device.** \`VoiceSetup\` is presentation over \`useVoiceSetup\`, which runs \`useSpeakerVerify\` + \`useWakeWord\` together: the wake detector supplies the shared mic stream and phrase embeddings, a rolling recorder captures each utterance, and on completion the TitaNet centroid is stored per phrase (\`enroll\`) and the phrase-prints are saved (\`saveWhatPrints\`). Props: \`mode\` \`enroll\` (replace the default voice \`you\`) | \`add\` (append another voice or condition under \`voiceId\` / \`label\`), \`logoSrc\`, \`voiceprintNamespace\` (scope the persisted enrollment per user of a shared browser profile), \`onDone\`, \`onCancel\`. Phases (\`VoiceSetupPhase\`): \`intro\` → \`getready\` → \`speak\` → \`gotit\` | \`deny\` (retry: "Let's try that again") → \`done\`, with progress dots for the 6 reps, a volume-reactive octopus and "Add another spot" to append a further room/distance condition. Also exported: \`useVoiceSetup\` (\`ready\`, \`phase\`, \`phrase\`, \`step\`, \`total\`, \`level\`, \`start\`, \`addAnotherSpot\`, \`cancel\`).
 
 ### Use it when
 
@@ -35,10 +35,13 @@ const meta: Meta<typeof VoiceSetup> = {
 import { VoiceSetup } from '@mieweb/ui';
 
 // Onboarding step: enroll the signed-in clinician, then continue.
+// voiceprintNamespace must MATCH the verifying surface (HeyOzwell / HandsFreeChat) and VoiceManager —
+// scoped stores start empty (no legacy unscoped records), so a mismatched enroll is invisible to them.
 <VoiceSetup
   mode="enroll"
   voiceId={user.id}
   label={user.displayName}
+  voiceprintNamespace={user.id}
   logoSrc={branding.ozwellIcon}
   onDone={() => { analytics.track('voice_enrolled'); next(); }}
   onCancel={skip}

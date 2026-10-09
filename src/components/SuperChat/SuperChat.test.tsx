@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import { createCodePlugin } from './plugins/code';
 import { createGenUIPlugin } from './plugins/genui';
@@ -19,6 +25,7 @@ import { createNitroTablePlugin } from './plugins/nitroTable';
 import { SuperChat } from './SuperChat';
 import { SuperChatConversations } from './SuperChatConversations';
 import { SuperChatInbox } from './SuperChatInbox';
+import { MotionProvider } from '../../motion/MotionProvider';
 import type {
   GenUIRegistry,
   GenUIWidgetProps,
@@ -852,7 +859,9 @@ describe('SuperChat', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('only offers editing on the local user’s own messages', () => {
+  it('only offers editing on the local user’s own messages', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
     render(
       <div style={{ height: 400 }}>
         <SuperChat
@@ -862,10 +871,42 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    // u1 authored m1; a1 authored m2 — only one edit button should exist.
-    const editButtons = screen.getAllByRole('button', { name: 'Edit message' });
-    expect(editButtons).toHaveLength(1);
+    // Editable messages collapse copy + edit into the ⋯ menu, so there is no
+    // direct edit button; only u1's own message (m1, first) offers the entry.
+    expect(
+      screen.queryByRole('button', { name: 'Edit message' })
+    ).not.toBeInTheDocument();
+    const overflows = screen.getAllByRole('button', {
+      name: 'Message actions',
+    });
+    await user.click(overflows[0]);
+    expect(
+      await screen.findByRole('menuitem', { name: 'Edit message' })
+    ).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    await user.click(overflows[1]);
+    await screen.findByRole('menuitem', { name: 'Copy as' });
+    expect(
+      screen.queryByRole('menuitem', { name: 'Edit message' })
+    ).not.toBeInTheDocument();
   });
+
+  /**
+   * Starts editing the local user's own message (m1, the first overflow
+   * trigger): with copy + edit collapsed into the ⋯ menu, editing begins from
+   * its menu item rather than a direct icon button.
+   */
+  async function startEditViaMenu(user: {
+    click: (element: Element) => Promise<void>;
+  }) {
+    const [selfOverflow] = screen.getAllByRole('button', {
+      name: 'Message actions',
+    });
+    await user.click(selfOverflow);
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Edit message' })
+    );
+  }
 
   it('edits a message and fires onMessageEdited with the new text', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -880,7 +921,7 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    await startEditViaMenu(user);
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     await user.clear(editor);
     await user.type(editor, 'edited body');
@@ -906,7 +947,7 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    await startEditViaMenu(user);
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     const file = new File(['fake-bytes'], 'edited.png', { type: 'image/png' });
     fireEvent.paste(editor, {
@@ -938,7 +979,7 @@ describe('SuperChat', () => {
         />
       </div>
     );
-    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    await startEditViaMenu(user);
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     await user.type(editor, ' extra');
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -1094,6 +1135,368 @@ describe('SuperChat', () => {
     );
     expect(container.querySelector('code')).toHaveTextContent('const x = 1;');
   });
+
+  describe('scroll anchoring', () => {
+    // jsdom has no layout, so scroll metrics are mocked directly on the
+    // thread element and position changes are driven with scroll events.
+    function getThread(container: HTMLElement): HTMLDivElement {
+      const el = container.querySelector<HTMLDivElement>(
+        '[data-slot="superchat-thread"]'
+      );
+      if (!el) throw new Error('thread not found');
+      return el;
+    }
+
+    function mockMetrics(
+      el: HTMLElement,
+      { scrollHeight = 1000, clientHeight = 400 } = {}
+    ) {
+      Object.defineProperty(el, 'scrollHeight', {
+        configurable: true,
+        value: scrollHeight,
+      });
+      Object.defineProperty(el, 'clientHeight', {
+        configurable: true,
+        value: clientHeight,
+      });
+    }
+
+    function appended(
+      from: string,
+      base: SuperChatConversation = conversation
+    ): SuperChatConversation {
+      return {
+        ...base,
+        thread: [
+          ...base.thread,
+          {
+            id: `new-${from}`,
+            participantId: from,
+            text: 'more content below',
+            time: '2026-06-07T09:05:00Z',
+          },
+        ],
+      };
+    }
+
+    it('shows the jump-to-bottom button only while scrolled up', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+
+      // At the bottom (1000 - 600 - 400 = 0): no button.
+      thread.scrollTop = 600;
+      fireEvent.scroll(thread);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+      // Scrolled up: the button appears.
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+      expect(screen.getByLabelText('Scroll to bottom')).toBeInTheDocument();
+    });
+
+    it('preserves the reading position when a message arrives while scrolled up, and flags it', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      // Position untouched; the button now carries the new-messages hint.
+      expect(thread.scrollTop).toBe(100);
+      expect(screen.getByText('New messages')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('New messages — scroll to bottom')
+      ).toBeInTheDocument();
+    });
+
+    it('follows an incoming message while at the bottom', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+    });
+
+    it('opens an anchored turn for the local user’s own message instead of pinning to the bottom', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat conversation={appended('u1')} currentParticipantId="u1" />
+      );
+
+      // The new turn reserves a viewport of space (clientHeight 400 − p-4
+      // padding) so its start can anchor to the top edge…
+      const turn = container.querySelector<HTMLElement>(
+        '[data-slot="superchat-turn"]'
+      );
+      expect(turn).not.toBeNull();
+      expect(turn!.style.minHeight).toBe('368px');
+      expect(turn!.textContent).toContain('more content below');
+      // …and the thread is NOT yanked to the bottom (reading mode).
+      expect(thread.scrollTop).not.toBe(thread.scrollHeight);
+    });
+
+    it('does not anchor a turn for own messages arriving with a conversation switch', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up in the old conversation
+      fireEvent.scroll(thread);
+
+      // The replacement conversation is longer and includes the local user's
+      // messages — that's history, not a fresh send: reset to the bottom.
+      rerender(
+        <SuperChat
+          conversation={{ ...appended('u1'), id: 'c2' }}
+          currentParticipantId="u1"
+        />
+      );
+
+      expect(
+        container.querySelector('[data-slot="superchat-turn"]')
+      ).toBeNull();
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+    });
+
+    it('holds instead of following when mounted with a streaming reply', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const streamingConversation: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'live',
+            participantId: 'a1',
+            text: 'tokens…',
+            time: '2026-06-07T09:04:00Z',
+            status: 'streaming',
+          },
+        ],
+      };
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={streamingConversation}
+          currentParticipantId="u1"
+        />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      // The mount established a stream hold, so the next growth must not
+      // push the view to the bottom (a pinned follow would set scrollTop to
+      // scrollHeight).
+      rerender(
+        <SuperChat
+          conversation={appended('a1', streamingConversation)}
+          currentParticipantId="u1"
+        />
+      );
+
+      expect(thread.scrollTop).toBe(600);
+    });
+
+    it('anchors the turn at the own message when a batch append ends with another sender', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // scrolled up
+      fireEvent.scroll(thread);
+
+      // Optimistic send: the local user's message and the peer's reply land
+      // in a single update, so the newest message is not the local user's.
+      rerender(
+        <SuperChat
+          conversation={appended('a1', appended('u1'))}
+          currentParticipantId="u1"
+        />
+      );
+
+      // The turn starts at the own message and carries the peer's reply.
+      const turn = container.querySelector<HTMLElement>(
+        '[data-slot="superchat-turn"]'
+      );
+      expect(turn).not.toBeNull();
+      expect(
+        turn!.querySelectorAll('[data-slot="superchat-message"]')
+      ).toHaveLength(2);
+      expect(thread.scrollTop).not.toBe(thread.scrollHeight);
+    });
+
+    it('upgrades the jump button to “New messages” when a stream finishes below the fold', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const streaming: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'stream-1',
+            participantId: 'a1',
+            text: 'partial answer…',
+            time: '2026-06-07T09:06:00Z',
+            status: 'streaming',
+          },
+        ],
+      };
+      const { container, rerender } = render(
+        <SuperChat conversation={streaming} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100; // the end of the reply is below the fold
+      fireEvent.scroll(thread);
+      expect(screen.queryByText('New messages')).toBeNull(); // still streaming
+
+      const finished: SuperChatConversation = {
+        ...streaming,
+        thread: [
+          ...conversation.thread,
+          { ...streaming.thread.at(-1)!, status: 'complete' },
+        ],
+      };
+      rerender(<SuperChat conversation={finished} currentParticipantId="u1" />);
+
+      expect(screen.getByText('New messages')).toBeInTheDocument();
+    });
+
+    it('resumes following after a short stream that ended at the bottom', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread);
+
+      // A streaming reply appends: its first line is revealed, then the view
+      // holds (no following) while it streams.
+      const streaming: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'stream-1',
+            participantId: 'a1',
+            text: 'short answer',
+            time: '2026-06-07T09:06:00Z',
+            status: 'streaming',
+          },
+        ],
+      };
+      rerender(
+        <SuperChat conversation={streaming} currentParticipantId="u1" />
+      );
+      expect(thread.scrollTop).toBe(thread.scrollHeight); // revealed
+
+      // It finishes above the fold → following resumes: the next append is
+      // followed instead of raising the hint.
+      const finished: SuperChatConversation = {
+        ...streaming,
+        thread: [
+          ...conversation.thread,
+          { ...streaming.thread.at(-1)!, status: 'complete' },
+        ],
+      };
+      rerender(<SuperChat conversation={finished} currentParticipantId="u1" />);
+      rerender(
+        <SuperChat
+          conversation={appended('a1', finished)}
+          currentParticipantId="u1"
+        />
+      );
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+    });
+
+    it('jump-to-bottom scrolls down, clears the hint, and hides', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const { container, rerender } = render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+      rerender(
+        <SuperChat conversation={appended('a1')} currentParticipantId="u1" />
+      );
+
+      await user.click(
+        screen.getByLabelText('New messages — scroll to bottom')
+      );
+
+      expect(thread.scrollTop).toBe(thread.scrollHeight);
+      expect(screen.queryByText('New messages')).toBeNull();
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+    });
+
+    it('keeps the top anchor and offers no jump button when order="desc"', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 300;
+      fireEvent.scroll(thread);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+
+      rerender(
+        <SuperChat
+          conversation={appended('a1')}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      );
+
+      // New message re-anchors to the top (feed style), still no button.
+      expect(thread.scrollTop).toBe(0);
+      expect(screen.queryByLabelText('Scroll to bottom')).toBeNull();
+    });
+  });
 });
 
 describe('SuperChatConversations', () => {
@@ -1149,6 +1552,36 @@ describe('SuperChatConversations', () => {
     expect(onConversationOpened).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'c2' })
     );
+  });
+
+  it('only animates unread badges that arrive after the first render', () => {
+    const badgeOf = (title: string) =>
+      screen
+        .getByText(title)
+        .closest('button')!
+        .querySelector<HTMLElement>('[data-slot="superchat-unread-badge"]')!;
+
+    const { rerender } = render(
+      <MotionProvider>
+        <SuperChatConversations conversations={conversations} />
+      </MotionProvider>
+    );
+    // Present on mount: rendered at rest, no enter animation.
+    expect(badgeOf('Intake').style.opacity).not.toBe('0');
+
+    const inserted: SuperChatConversation = {
+      ...conversations[1],
+      id: 'c3',
+      title: 'Referral',
+      unread: 1,
+    };
+    rerender(
+      <MotionProvider>
+        <SuperChatConversations conversations={[...conversations, inserted]} />
+      </MotionProvider>
+    );
+    // A row inserted later starts from the closed variant so its badge pops.
+    expect(badgeOf('Referral').style.opacity).toBe('0');
   });
 
   it('fires onNewConversation from the new-conversation button', async () => {
@@ -1235,5 +1668,85 @@ describe('SuperChatInbox', () => {
     expect(panel().getByText('first conversation')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /Follow-up/ }));
     expect(panel().getByText('second conversation')).toBeInTheDocument();
+  });
+});
+
+describe('SuperChat composer options', () => {
+  const convo: SuperChatConversation = {
+    id: 'opts',
+    title: 'Agent chat',
+    participants: [
+      { id: 'u1', kind: 'human', name: 'Me' },
+      { id: 'a1', kind: 'agent', name: 'Agent' },
+    ],
+    thread: [],
+  };
+  const agents = [
+    { id: 'a1', label: 'Triage Agent' },
+    { id: 'a2', label: 'Scribe' },
+  ];
+  const models = [
+    { provider: 'openai', model: 'gpt-5.2', label: 'gpt-5.2' },
+    { provider: 'anthropic', model: 'claude-opus-5', label: 'claude-opus-5' },
+  ];
+
+  it('renders controlled agent and model selectors and reports changes', async () => {
+    const onAgentChange = vi.fn();
+    render(
+      <SuperChat
+        conversation={convo}
+        currentParticipantId="u1"
+        agents={agents}
+        selectedAgent="a1"
+        onAgentChange={onAgentChange}
+        modelSelectorProps={{
+          models,
+          value: { provider: 'openai', model: 'gpt-5.2' },
+          onChange: vi.fn(),
+        }}
+      />
+    );
+    const agentTrigger = screen.getByRole('button', {
+      name: 'Select agent: Triage Agent',
+    });
+    expect(screen.getByRole('button', { name: /gpt-5\.2/ })).toBeTruthy();
+    fireEvent.click(agentTrigger);
+    const scribe = await screen.findByRole('menuitemradio', { name: /Scribe/ });
+    fireEvent.click(scribe);
+    expect(onAgentChange).toHaveBeenCalledWith('a2');
+  });
+
+  it('forwards localized agent and stop labels', () => {
+    render(
+      <SuperChat
+        conversation={convo}
+        currentParticipantId="u1"
+        agents={agents}
+        selectedAgent={null}
+        agentSelectorLabel="Elegir agente"
+        isStreaming
+        onStop={vi.fn()}
+        stopLabel="Detener"
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Elegir agente' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Detener' })).toBeTruthy();
+  });
+
+  it('omits selectors when not configured', () => {
+    render(<SuperChat conversation={convo} currentParticipantId="u1" />);
+    expect(screen.queryByRole('button', { name: /Select agent/ })).toBeNull();
+  });
+
+  it('keeps an accessible name when the header is hidden', () => {
+    render(
+      <SuperChat
+        conversation={convo}
+        currentParticipantId="u1"
+        showHeader={false}
+      />
+    );
+    expect(screen.getByRole('group', { name: 'Agent chat' })).toBeTruthy();
+    expect(document.querySelector('[data-slot="superchat-header"]')).toBeNull();
   });
 });

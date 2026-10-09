@@ -1,4 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useMediaTransport } from './useMediaTransport';
@@ -72,6 +73,25 @@ describe('useMediaTransport', () => {
     expect(onStateChange).toHaveBeenCalledWith('loading');
     expect(onStateChange).toHaveBeenCalledWith('playing');
     expect(onStateChange).toHaveBeenCalledWith('paused');
+  });
+
+  it('notifies each state transition once under StrictMode and repeated native events', () => {
+    const onStateChange = vi.fn();
+    const { result } = renderHook(() => useMediaTransport({ onStateChange }), {
+      wrapper: StrictMode,
+    });
+    act(() => result.current.setMediaElement(el));
+    act(() => {
+      el.dispatchEvent(new Event('play'));
+      el.dispatchEvent(new Event('playing'));
+      el.dispatchEvent(new Event('playing'));
+    });
+    expect(onStateChange).toHaveBeenCalledExactlyOnceWith('playing');
+    act(() => {
+      el.dispatchEvent(new Event('pause'));
+      el.dispatchEvent(new Event('pause'));
+    });
+    expect(onStateChange.mock.calls).toEqual([['playing'], ['paused']]);
   });
 
   it('reports duration and time in milliseconds', () => {

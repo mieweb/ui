@@ -24,6 +24,7 @@ import {
   toOzwellMessages,
 } from './ozwellChat';
 import { transcribeBlob, warmWhisper } from './whisperTranscribe';
+import { fullHeightChat } from '../../../.storybook/full-height';
 
 const meta: Meta<typeof AIChat> = {
   id: 'chat-aichat-voice',
@@ -32,6 +33,7 @@ const meta: Meta<typeof AIChat> = {
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
   parameters: {
     layout: 'fullscreen',
+    githubSourceFooter: false,
     docs: {
       description: {
         component: `### What it's for
@@ -189,34 +191,33 @@ function VoiceAIChat() {
   }, []);
 
   return (
-    <div style={{ height: '100vh' }}>
-      <AIChat
-        messages={messages}
-        height="100%"
-        talkToText
-        isGenerating={generating}
-        title="Ozwell Assistant"
-        inputPlaceholder={
-          transcribing ? 'Transcribing on-device…' : 'Speak or type…'
+    <AIChat
+      messages={messages}
+      height="100%"
+      talkToText
+      isGenerating={generating}
+      title="Ozwell Assistant"
+      inputPlaceholder={
+        transcribing ? 'Transcribing on-device…' : 'Speak or type…'
+      }
+      onSendMessage={send}
+      onRecordingComplete={async (blob) => {
+        setTranscribing(true);
+        try {
+          const text = await transcribeBlob(blob);
+          if (text) send(text); // auto-send; change to set the composer value if you prefer review-first
+        } catch (e) {
+          console.error('[voice] on-device transcription failed', e);
+        } finally {
+          setTranscribing(false);
         }
-        onSendMessage={send}
-        onRecordingComplete={async (blob) => {
-          setTranscribing(true);
-          try {
-            const text = await transcribeBlob(blob);
-            if (text) send(text); // auto-send; change to set the composer value if you prefer review-first
-          } catch (e) {
-            console.error('[voice] on-device transcription failed', e);
-          } finally {
-            setTranscribing(false);
-          }
-        }}
-      />
-    </div>
+      }}
+    />
   );
 }
 
 /** The real AIChat with the mic wired to a browser-resident Whisper. Tap mic → speak → it transcribes on-device → sends. */
 export const OnDeviceVoice: Story = {
+  decorators: [fullHeightChat],
   render: () => <VoiceAIChat />,
 };

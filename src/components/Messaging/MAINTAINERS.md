@@ -3,16 +3,48 @@
 Short notes on the invariants that are easy to break. User-facing docs live in
 [Messaging.stories.tsx](./Messaging.stories.tsx).
 
+## MessageThread mounts ChatComposer
+
+[MessageThread.tsx](./MessageThread.tsx) mounts the shared `ChatComposer`
+(`../ChatComposer/ChatComposer.tsx`) — the legacy `MessageComposer` was
+retired in 0.10.0 (now in `.attic/MessageComposer/`; consumer guide in
+`MIGRATION.md#chat-composer`) — while keeping
+MessageThread's public props unchanged:
+
+- **Failed-send restore is host-side.** ChatComposer clears the draft
+  optimistically; MessageThread controls `value`/`onValueChange` and restores
+  the text when `eventHandlers.onSendMessage` rejects, epoch-guarded so a
+  stale failure never clobbers newer typed input (same pattern as SuperChat
+  and AIChat). The send handler **rethrows** so ChatComposer reports
+  `'Failed to send message'` through `onError` — don't swallow the error.
+- **Typing callbacks are emulated** via `useTypingEmulation` in
+  [hooks.ts](./hooks.ts) — the state machine extracted from the retired
+  MessageComposer
+  (start on non-empty draft, stop after 2s idle, keepalive loop, stop on
+  send). `AIChat` uses the same hook; run both suites when touching it.
+- **Attachment validation defaults** (`DEFAULT_ACCEPTED_FILE_TYPES`,
+  `DEFAULT_MAX_FILE_SIZE` in [AttachmentPicker.tsx](./AttachmentPicker.tsx))
+  are applied by MessageThread because ChatComposer leaves types/size
+  unrestricted.
+- `showCameraButton` renders `CameraButton` in ChatComposer's `micSlot`;
+  captures route through the composer's imperative `addFiles`, which
+  deliberately bypasses `allowAttachments` — camera staging works even with
+  `showAttachmentPicker={false}`. Files dropped on the message list also
+  route through `addFiles`, but the list-level `DragDropZone` is gated on
+  `showAttachmentPicker`. Validation and error reporting happen once, in
+  `addFiles`.
+- Suite: [MessageThread.test.tsx](./MessageThread.test.tsx).
+
 ## Shared @mention module
 
 [useMentionAutocomplete.tsx](./useMentionAutocomplete.tsx) is the single
-implementation of `@mention` autocomplete, consumed by **two** composers:
-`MessageComposer` (here) and `ChatComposer`. It was extracted **verbatim**
-from MessageComposer so both stay behavior-identical.
+implementation of `@mention` autocomplete, consumed by `ChatComposer`. It was
+extracted **verbatim** from the retired `MessageComposer` (now in
+`.attic/MessageComposer/`).
 
-- **Run both suites** when touching it: `MessageComposer` is exercised by
-  `SuperChat.test.tsx` (SuperChat pins mention behavior through it) and
-  `ChatComposer.test.tsx` has its own `@mentions` describe block.
+- **Run all affected suites** when touching it: `ChatComposer` has its own
+  `@mentions` describe block in `ChatComposer.test.tsx` plus consumer coverage
+  in `SuperChat.test.tsx` and `AIChat.test.tsx`.
 - `useMentionAutocomplete().handleKeyDown(event)` returns `true` when it
   consumed the key — callers **must** check it before their own Enter-to-send
   handling. Each composer also runs host key handlers first (preventDefault

@@ -469,3 +469,71 @@ export function useReadReceipts(options: UseReadReceiptsOptions) {
 
   return { observeMessage };
 }
+
+// ============================================================================
+// useTypingEmulation Hook
+// ============================================================================
+
+export interface UseTypingEmulationOptions {
+  /** The current composer draft (controlled value). */
+  value: string;
+  /** Called when the user starts typing. */
+  onTypingStart?: () => void;
+  /** Called when the user stops typing. */
+  onTypingStop?: () => void;
+}
+
+export interface UseTypingEmulationReturn {
+  /**
+   * Stop typing immediately (fires `onTypingStop` unconditionally).
+   * Call from the send path — MessageComposer's submit did.
+   */
+  stopTyping: () => void;
+}
+
+/**
+ * Emulates MessageComposer's typing callbacks for hosts that mount
+ * `ChatComposer` (which has no typing props), replicating its exact state
+ * machine: start when the draft becomes non-empty, stop after 2s idle — then
+ * start again while the draft stays non-empty (a keepalive loop hosts'
+ * typing indicators rely on). Used by `MessageThread` and `AIChat`.
+ */
+export function useTypingEmulation({
+  value,
+  onTypingStart,
+  onTypingStop,
+}: UseTypingEmulationOptions): UseTypingEmulationReturn {
+  const [isTyping, setIsTyping] = React.useState(false);
+  const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  React.useEffect(() => {
+    if (!onTypingStart && !onTypingStop) return;
+    if (value.length > 0 && !isTyping) {
+      setIsTyping(true);
+      onTypingStart?.();
+    }
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      if (isTyping) {
+        setIsTyping(false);
+        onTypingStop?.();
+      }
+    }, 2000);
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [value, isTyping, onTypingStart, onTypingStop]);
+
+  const stopTyping = React.useCallback(() => {
+    setIsTyping(false);
+    onTypingStop?.();
+  }, [onTypingStop]);
+
+  return { stopTyping };
+}

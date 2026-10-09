@@ -15,7 +15,7 @@ const meta: Meta<typeof RichEditor> = {
 
 **A Markdown document editor built on Kerebron's \`CoreEditor\` (ProseMirror), with optional live collaboration.** \`RichEditor\` loads \`value\` as Markdown (\`text/x-markdown\`), renders the Kerebron **AdvancedEditorKit** toolbar and surface, and reports Markdown back through \`onChange\` on every transaction. \`RichEditorHandle\` gives \`getContent()\` (awaits the initial load — read this on submit, \`onChange\` can lag a keystroke) and \`focus()\`. \`collab={{ room, wsUrl?, params?, user?, WebSocketPolyfill? }}\` switches to a Yjs CRDT document shared by every peer in the room (the Yjs kit is lazy-loaded; \`history\` is swapped for CRDT undo). \`disabled\` makes the surface read-only and dims it; \`id\`, \`aria-label\`, \`aria-labelledby\`, \`className\` land on the host; \`showPreview\` prints the Markdown under the editor; \`assetLoad\` redirects the tree-sitter WASM grammars. The same entry exports \`CodeEditor\` (\`value\`, \`onChange\`, \`lang\` default \`typescript\`) over Kerebron's **CodeEditorKit**, plus the \`CollabConfig\` type.
 
-Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: install the peers \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (plus \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\` for \`collab\`), import \`@mieweb/ui/kerebron.css\` beside \`@mieweb/ui/styles.css\`, and serve \`@kerebron/wasm\`'s \`assets/\` directory at \`/kerebron-wasm\`.
+Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: install the peers \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (plus \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\` for \`collab\`), import \`@mieweb/ui/kerebron.css\` beside \`@mieweb/ui/styles.css\`, and serve \`@kerebron/wasm\`'s \`assets/\` directory at \`/kerebron-wasm\`. Until the fixes land upstream, also apply the [\`patches/@kerebron__*\` fixes](https://github.com/mieweb/ui/tree/main/patches) in the host app — they target \`@kerebron/*@0.8.12\` exactly (matching the \`>=0.8.12\` peer floor) and are pnpm-format, so pnpm hosts list them under \`patchedDependencies\` as-is, while npm/yarn hosts must convert them to their patch tool's native format (e.g. \`patch-package\` expects its own filenames and \`node_modules/…\` paths). Without the \`extension-menu\` patch the toolbar's Heading/List dropdowns do not fire in browsers; without the \`extension-markdown\` patch the highlight/superscript/subscript marks are silently dropped when the document is saved back to Markdown (they round-trip as \`<mark>\`/\`<sup>\`/\`<sub>\` inline HTML).
 
 ### Use it when
 
@@ -56,7 +56,23 @@ async function save() {
 <Button onClick={save} disabled={saving}>Save</Button>
 \`\`\`
 
-\`value\` and \`collab\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
+### Pasted and dropped files
+
+Images and videos can be pasted or dropped straight onto the surface. **Set \`mediaUpload.uploadHandler\` if the document is persisted anywhere** — without it the file is embedded in the document itself, an image as a base64 \`data:\` URL and a video as an object URL. A 4 MB screenshot becomes roughly 5.8 MB of Markdown, which most APIs will refuse, and an object URL is dead as soon as the page reloads.
+
+\`\`\`tsx
+<RichEditor
+  value={note.markdown}
+  mediaUpload={{
+    // Return the URL the document should reference the file by.
+    uploadHandler: async (file) => (await api.uploadMedia(file)).url,
+  }}
+/>
+\`\`\`
+
+The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters.
+
+\`value\`, \`collab\` and \`mediaUpload\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
 
 ### Limitations
 
@@ -64,7 +80,7 @@ async function save() {
 - Runtime: tree-sitter WASM grammars load from \`/kerebron-wasm\` (or \`assetLoad\`); the first load per editor is serialised, so many editors on one page start one after another. \`autocomplete\` and \`hover\` extensions are removed from the kit for teardown safety. The editor mounts into a disposable child \`div\` because \`CoreEditor.destroy()\` clones its host.
 - Collaboration: \`wsUrl\` defaults to \`<ws|wss>://<host>/yjs\` and the room is appended by the provider; the host must run a Yjs websocket relay. Joining an empty room seeds it from \`value\`; the component re-seeds if the sync lands as a blank overwrite (observed with extension-yjs 0.8.x). There is no offline queue, permissions or comment model.
 - \`showPreview\` renders an unstyled \`<h5>Markdown Output</h5><pre>\` for debugging, not for end users. No \`placeholder\`, character count or validation props.
-- i18n/RTL/theming: toolbar labels and menus are Kerebron's (English); direction and colours follow Kerebron's CSS with \`kb-component--dark\` toggled by \`useIsDarkMode\`. Peers: \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (\`>=0.8.6\`), optional \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\`. Entry \`@mieweb/ui/kerebron\` + \`@mieweb/ui/kerebron.css\`.`,
+- i18n/RTL/theming: toolbar labels and menus are Kerebron's (English); direction and colours follow Kerebron's CSS with \`kb-component--dark\` toggled by \`useIsDarkMode\`. Peers: \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (\`>=0.8.12\`), optional \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\`. Entry \`@mieweb/ui/kerebron\` + \`@mieweb/ui/kerebron.css\`.`,
       },
     },
     catalog: {
@@ -116,6 +132,43 @@ function BasicExample() {
 
 export const Basic: Story = {
   render: () => <BasicExample />,
+};
+
+/**
+ * Preset Markdown covering the block/inline styles that `kerebron.css` must
+ * keep visible inside `.kb-editor` (headings, lists, links, inline/block
+ * code) even when the host's Tailwind preflight resets them. Exercised by
+ * the visual regression suite in light and dark themes.
+ */
+function FormattedExample() {
+  const [value, setValue] = useState(
+    [
+      '# Heading one',
+      '',
+      '## Heading two',
+      '',
+      '- Bullet one',
+      '- Bullet two',
+      '',
+      '1. Numbered item',
+      '',
+      'A [link](https://mieweb.com) and `inline code`.',
+      '',
+      '```javascript',
+      'const answer = 42;',
+      '```',
+      '',
+    ].join('\n')
+  );
+  return (
+    <div className="max-w-2xl">
+      <RichEditor value={value} onChange={setValue} />
+    </div>
+  );
+}
+
+export const FormattedContent: Story = {
+  render: () => <FormattedExample />,
 };
 
 /**

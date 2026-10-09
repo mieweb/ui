@@ -1,0 +1,21 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Modules/Presentations/Overview" />
+
+# Presentations
+
+> **One idea per screen, read in order, shared as a link.** Board updates, growth reviews and
+> talks published as pages. Both live on optional entries so their weight stays out of apps
+> that don't present.
+
+## Which one?
+
+| Component                                              | Use it when                                                     | Not when                                                                                  |
+| ------------------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| [Deck](?path=/docs/presentations-deck--docs)           | A full-screen slide deck from JSON slides (`@mieweb/ui/deck`)   | A report people scan and search — the [Reports](?path=/docs/templates-reports-overview--docs) sections |
+| [PointMap](?path=/docs/presentations-pointmap--docs)   | Points or regional bubbles on a real map (`@mieweb/ui/maps`)    | Comparing every state equally — TileCartogramSection                                      |
+
+## Shared limitations
+
+- Client-only. `PointMap` needs the optional `leaflet` peer and its CSS.
+- Decks fill the viewport; hide the site chrome on deck routes and pass `home`.

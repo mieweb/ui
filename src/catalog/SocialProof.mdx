@@ -1,0 +1,23 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Templates/Social proof/Overview" />
+
+# Social proof
+
+> **Evidence that other people chose this.** Numbers, names and quotes — each a claim the page has
+> to stand behind, so cite figures and only publish quotes and logos you have permission to use.
+
+## Which one?
+
+| Component                                                                 | Use it when                                          | Not when                                                                                |
+| ------------------------------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [StatsSection](?path=/docs/social-proof-statssection--docs)                 | Two to four headline figures back the pitch          | Figures must count up on scroll — render `AnimatedNumber` from a client component       |
+| [LogoCloudSection](?path=/docs/social-proof-logocloudsection--docs)         | A quick "trusted by" or "connects to" strip          | Logos orbiting your mark as a hero visual — [OrbitRing](?path=/docs/showcase-orbitring--docs) |
+| [TestimonialSection](?path=/docs/social-proof-testimonialsection--docs)     | Quotes from customers in the buyer's position        | A rotating carousel — keep that client-side in the app                                  |
+
+## Shared limitations
+
+- Nothing here animates with JavaScript. The logo marquee is CSS only and holds still under
+  `prefers-reduced-motion`.
+- Decorative marks — trend arrows, stars, headshots, the marquee's second copy — are hidden from
+  assistive tech; the text around them carries the meaning.

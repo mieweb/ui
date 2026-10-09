@@ -17,7 +17,7 @@ const meta: Meta<typeof VoiceManager> = {
       description: {
         component: `### What it's for
 
-**The "Your voice" page: list, rename, remove, add and clear the voices Ozwell is allowed to respond to, and launch \`VoiceSetup\` for enrollment.** \`VoiceManager\` (single prop \`logoSrc\`) reads enrolled voices from \`useSpeakerVerify().listVoices()\` — each \`{ id, label, createdAt, conditions }\` — and renders one card per voice with **Rename** (inline input, Enter saves / Escape cancels) and **Remove** (with a confirmation step), an "Add a voice" input + button that opens \`VoiceSetup mode="add"\` under a fresh \`voiceId\`, and **Clear all voices** (confirmation, also clears the phrase-prints). With nothing enrolled it shows "Set up your voice", which opens \`VoiceSetup mode="enroll"\` for the default voice \`you\`. \`onDone\` / \`onCancel\` from the setup screen return here and refresh the list. Voiceprints live in IndexedDB (\`ozwell-voice\`); the footer states "Voiceprints stay on your device — they're never uploaded." Also exported: \`useSpeakerVerify\` (\`enroll\`, \`verify\`, \`identify\`, \`listVoices\`, \`removeVoice\`, \`renameVoice\`, \`clear\`, \`setGates\`) and the store helpers \`getVoiceprints\` / \`setVoiceprints\` / \`clearVoiceprints\` / \`loadWhatPrints\` / \`saveWhatPrints\` / \`clearWhatPrints\`.
+**The "Your voice" page: list, rename, remove, add and clear the voices Ozwell is allowed to respond to, and launch \`VoiceSetup\` for enrollment.** \`VoiceManager\` (props \`logoSrc\`, \`voiceprintNamespace\` — scope the persisted enrollment per user of a shared browser profile) reads enrolled voices from \`useSpeakerVerify().listVoices()\` — each \`{ id, label, createdAt, conditions }\` — and renders one card per voice with **Rename** (inline input, Enter saves / Escape cancels) and **Remove** (with a confirmation step), an "Add a voice" input + button that opens \`VoiceSetup mode="add"\` under a fresh \`voiceId\`, and **Clear all voices** (confirmation, also clears the phrase-prints). With nothing enrolled it shows "Set up your voice", which opens \`VoiceSetup mode="enroll"\` for the default voice \`you\`. \`onDone\` / \`onCancel\` from the setup screen return here and refresh the list. Voiceprints live in IndexedDB (\`ozwell-voice\`); the footer states "Voiceprints stay on your device — they're never uploaded." Also exported: \`useSpeakerVerify\` (\`enroll\`, \`verify\`, \`identify\`, \`listVoices\`, \`removeVoice\`, \`renameVoice\`, \`clear\`, \`setGates\`) and the store helpers \`getVoiceprints\` / \`setVoiceprints\` / \`clearVoiceprints\` / \`loadWhatPrints\` / \`saveWhatPrints\` / \`clearWhatPrints\`.
 
 ### Use it when
 
@@ -36,11 +36,13 @@ const meta: Meta<typeof VoiceManager> = {
 import { VoiceManager } from '@mieweb/ui';
 
 // Settings route; the same page HeyOzwell's "Your voice" menu item should navigate to.
+// voiceprintNamespace must be the SAME value the verifying surface uses (omit both for the shared store) —
+// otherwise this page manages a different store than the one gating wakes.
 export function VoiceSettingsPage() {
   return (
     <section aria-labelledby="voice-heading" className="h-full">
       <VisuallyHidden><h1 id="voice-heading">{t('settings.voice')}</h1></VisuallyHidden>
-      <VoiceManager logoSrc={branding.ozwellIcon} />
+      <VoiceManager logoSrc={branding.ozwellIcon} voiceprintNamespace={user.id} />
     </section>
   );
 }
