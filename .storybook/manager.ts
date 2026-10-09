@@ -191,7 +191,15 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
   }
   return React.createElement(
     'span',
-    { style: { display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0, maxWidth: '100%' } },
+    {
+      style: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        minWidth: 0,
+        maxWidth: '100%',
+      },
+    },
     // Badged rows stay a single line: the name ellipsizes rather than
     // word-wrapping into an oversized row; its full text sits in the tooltip.
     React.createElement(
