@@ -85,6 +85,28 @@ describe('EmailEditor', () => {
     expect(types()).toBe('columns,divider,text');
   });
 
+  it('shows a placeholder for host-owned block types and keeps them deletable', () => {
+    const signature = {
+      id: 'sig1',
+      type: 'signature',
+      name: 'Dr. Example',
+    } as unknown as EmailContentTree['blocks'][number];
+    const doc: EmailContentTree = {
+      version: '1.0',
+      blocks: [signature, createEmailBlock('text')],
+    };
+    renderWithTheme(<Harness doc={doc} />);
+    expect(
+      screen.getByText(
+        'Unsupported block (signature). It will not be included in the sent email.'
+      )
+    ).toBeInTheDocument();
+    expect(types()).toBe('signature,text'); // preserved in the document
+    fireEvent.click(screen.getByRole('button', { name: 'Select signature' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0]);
+    expect(types()).toBe('text');
+  });
+
   it('edits the selected block from the settings panel', () => {
     renderWithTheme(<Harness />);
     fireEvent.click(screen.getByRole('button', { name: 'Select Heading' }));

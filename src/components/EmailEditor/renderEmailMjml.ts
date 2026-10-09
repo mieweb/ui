@@ -301,6 +301,10 @@ function renderContent(
         .join('');
       return `<mj-table padding="${pad}" width="100%" cellpadding="0" cellspacing="0" css-class="email-table">${rows}</mj-table>`;
     }
+    // Unsupported block types (host-owned blocks in a loaded document) are
+    // omitted from the email; the canvas shows a placeholder for them.
+    default:
+      return '';
   }
 }
 

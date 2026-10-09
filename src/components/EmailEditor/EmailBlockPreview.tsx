@@ -62,6 +62,8 @@ export interface EmailBlockPreviewProps {
   renderChild: (block: EmailContentBlock) => React.ReactNode;
   /** Shown in an empty column. */
   emptyColumnLabel: string;
+  /** Shown for a block type this editor does not support; `{type}` is replaced. */
+  unsupportedBlockLabel: string;
   /** Accessible names for the social block's icons, usually `labels.platforms`. */
   platformLabels: Record<EmailSocialPlatform, string>;
 }
@@ -72,6 +74,7 @@ export function EmailBlockPreview({
   design,
   renderChild,
   emptyColumnLabel,
+  unsupportedBlockLabel,
   platformLabels,
 }: EmailBlockPreviewProps) {
   const pad = '10px 25px';
@@ -388,6 +391,20 @@ export function EmailBlockPreview({
               )}
             </div>
           ))}
+        </div>
+      );
+    // Host-owned block types (e.g. Waggleline-only blocks) are kept in the
+    // document but rendered as a visible placeholder; `renderEmailMjml` omits them.
+    default:
+      return (
+        <div
+          role="note"
+          className="border-border text-muted-foreground m-2 rounded-md border border-dashed p-4 text-center text-xs"
+        >
+          {unsupportedBlockLabel.replace(
+            '{type}',
+            (block as { type: string }).type
+          )}
         </div>
       );
   }

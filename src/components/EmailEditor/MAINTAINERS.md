@@ -2,9 +2,13 @@
 
 - **Origin.** Ported from Waggleline's email builder (`app/imports/ui/emails/EmailEditorPage.tsx`,
   `app/imports/api/emails/{types,renderer}.ts`). Block field names are kept identical so
-  Waggleline documents load here unchanged; Waggleline-only blocks (`signature`, `feedback`,
-  `survey-link`, `app-download`, `section`, `cta-bar`, `video-thumbnail`) were left behind.
-  Add one here only when it has no product dependency.
+  documents built from the shared block set load here unchanged; Waggleline-only blocks
+  (`signature`, `feedback`, `survey-link`, `app-download`, `section`, `cta-bar`,
+  `video-thumbnail`) were left behind. The compatibility contract for those is conversion:
+  the host maps them to shared types (most flatten to `text`/`html`/`button`) before
+  loading. Unconverted blocks are not lost — they stay in the document and the canvas
+  shows an "unsupported block" placeholder — but `renderEmailMjml` omits them from the
+  sent email. Add a block type here only when it has no product dependency.
 - **Two renderers, one model.** `EmailBlockPreview` (React, canvas) and `renderEmailMjml`
   (string, send) must change together. Run the MJML through `mjml` with
   `validationLevel: 'strict'` after touching the renderer — MJML rejects attributes the

@@ -1,6 +1,10 @@
 /**
- * Email document model. Field names match Waggleline's email builder so stored
- * documents move between the two without migration.
+ * Email document model. Field names match Waggleline's email builder, so
+ * documents built from this shared block set move between the two without
+ * migration. The union is closed: hosts with product-specific blocks must
+ * convert them to these types (or drop them) before loading a document.
+ * Unrecognised blocks are preserved in the document but render as an
+ * "unsupported block" placeholder in the canvas and are omitted from the MJML.
  */
 
 export type EmailAlignment = 'left' | 'center' | 'right';

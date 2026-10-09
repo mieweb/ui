@@ -18,6 +18,8 @@ export const defaultEmailEditorLabels = {
   addBlock: 'Add block',
   emptyCanvas: 'Drag a block here, or click one in the palette.',
   emptyColumn: 'Empty column',
+  unsupportedBlock:
+    'Unsupported block ({type}). It will not be included in the sent email.',
   noSelection: 'Select a block in the canvas to edit it.',
   column: 'Column',
   selectBlock: 'Select {item}',

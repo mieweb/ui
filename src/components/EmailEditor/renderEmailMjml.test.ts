@@ -93,6 +93,22 @@ describe('renderEmailMjml', () => {
     }
   });
 
+  it('omits host-owned block types it does not support', () => {
+    const signature = {
+      id: 'sig1',
+      type: 'signature',
+      name: 'Dr. Example',
+    } as unknown as EmailBlock;
+    const columns = createEmailBlock('columns');
+    columns.columns[0].blocks.push(signature as never);
+    const mjml = renderEmailMjml(
+      tree(signature, createEmailBlock('heading'), columns)
+    );
+    expect(mjml).not.toContain('Dr. Example');
+    expect(mjml).not.toContain('undefined');
+    expect(mjml).toContain('<h2'); // neighbouring blocks still render
+  });
+
   it('rejects colours that would inject CSS', () => {
     const divider = {
       ...createEmailBlock('divider'),

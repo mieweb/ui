@@ -163,7 +163,8 @@ function BlockFrame({
   dragHandle,
   children,
 }: BlockFrameProps) {
-  const name = labels.blockTypes[block.type];
+  // `?? type` names unsupported block types from host documents at runtime.
+  const name = labels.blockTypes[block.type] ?? block.type;
   const tool = 'text-muted-foreground hover:text-foreground h-7 w-7';
   // Frames nest inside columns, so a child's click must not also select its parent.
   const own = (action: () => void) => (e: React.MouseEvent) => {
@@ -436,7 +437,8 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
       restore(next);
     };
 
-    const nameOf = (type: EmailBlockType) => labels.blockTypes[type];
+    // `?? type` covers unsupported block types from host documents at runtime.
+    const nameOf = (type: EmailBlockType) => labels.blockTypes[type] ?? type;
 
     const insertBlock = (type: EmailBlockType, index?: number) => {
       const block = createEmailBlock(type);
@@ -493,6 +495,7 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
         block={block}
         design={design}
         emptyColumnLabel={labels.emptyColumn}
+        unsupportedBlockLabel={labels.unsupportedBlock}
         platformLabels={labels.platforms}
         renderChild={(child) => {
           const column =
