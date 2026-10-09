@@ -427,9 +427,9 @@ The button owns the microphone; the host owns the transcription phase and the te
 
 - Browser APIs: needs a secure context and the microphone permission; a refusal or missing \`MediaRecorder\` reaches \`onRecordingError\` and shows the \`error\` state for 2 s with **no message** — tell the user yourself. Output container/codec is whatever the browser supports; when \`mimeType\` is unsupported the Blob is still labelled with the requested type.
 - \`onRecordingComplete\`'s \`duration\` comes from a closure captured at record start, so as implemented it does not report the take's real length; derive it from the blob if you need it.
-- Accessibility: a single \`<button>\` whose \`aria-label\` follows the state ("Start recording", "Stop recording", "Processing recording", "Recording unavailable", "Recording failed", "Recording complete"), with \`aria-pressed\` while recording and \`aria-busy\` while processing. The duration and "Listening…"/"Transcribing…" captions are plain \`<span>\`s — no \`aria-live\`, so state changes are not announced. The button is \`disabled\` during \`processing\`, which drops focus in some browsers.
+- Accessibility: a single \`<button>\` whose \`aria-label\` follows the state ("Start recording", "Stop recording", "Processing recording", "Recording unavailable", "Recording failed", "Recording complete"), with \`aria-pressed\` while recording and \`aria-busy\` while processing. Pass \`aria-label\` to replace the generated label (for example to localize it); in controlled mode, update it whenever \`state\` changes. The duration and "Listening…"/"Transcribing…" captions are plain \`<span>\`s — no \`aria-live\`, so state changes are not announced. The button is \`disabled\` during \`processing\`, which drops focus in some browsers.
 - Controlled mode disables capture entirely: with \`state\` set, \`onRecordingComplete\`/\`maxDuration\`/\`mimeType\` are inert and only \`onClick\` fires.
-- i18n: all labels and \`m:ss\` are hard-coded English. \`showWaveform\` needs the \`animate-waveform\` keyframes from \`@mieweb/ui/styles.css\`.
+- i18n: the generated labels and \`m:ss\` are hard-coded English; override the label with \`aria-label\`. \`showWaveform\` needs the \`animate-waveform\` keyframes from \`@mieweb/ui/styles.css\`.
 - Theming: \`primary\`, \`destructive\`, \`success\`, \`muted\` tokens but a hard-coded \`red-500\`/\`red-400\` for the recording state. RTL: the caption sits after the button in a symmetric \`inline-flex\` (\`gap-2\`). Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
       },
     },
@@ -440,6 +440,11 @@ The button owns the microphone; the host owns the transcription phase and the te
           type: 'alternative to',
           target: 'media-audiorecorder',
           why: 'AudioRecorder is a full record/pause/review panel with waveform playback; RecordButton is one toolbar button that hands off a Blob.',
+        },
+        {
+          type: 'alternative to',
+          target: 'media-dictationbutton',
+          why: 'DictationButton keeps the audio and hands back editable text (transcribed on-device by default); RecordButton hands the host the Blob.',
         },
         {
           type: 'composes with',

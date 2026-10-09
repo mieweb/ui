@@ -23,6 +23,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 | [MediaEditor Live Demo](?path=/docs/media-mediaeditor-live-demo--docs) | Trying `MediaEditor` on your own file: on-device Whisper transcription, then the editor with the Script panel                                                                             | Anything you ship — use `MediaEditor` with your own transcription source                                                                                                     |
 | [AudioRecorder](?path=/docs/media-audiorecorder--docs)                 | A deliberate take with pause/resume, `maxDuration`, waveform playback and delete before the host receives the `Blob` (`onRecordingComplete`)                                              | A single mic icon in a composer — `RecordButton`; you cannot ship `wavesurfer.js`; a speaker-labelled visit transcript — [VisitScribe](?path=/docs/voice-visit-scribe--docs) |
 | [RecordButton](?path=/docs/media-recordbutton--docs)                   | One round button for talk-to-text / voice messages: six visual states, `transcriptionState` overlay, controlled `state` when you own the recorder                                         | The user should review the take first — `AudioRecorder`; you want a real waveform (its bars are a CSS animation)                                                             |
+| [DictationButton](?path=/docs/media-dictationbutton--docs)             | Voice typing: records one speaker, transcribes (on-device Whisper by default, or a host `transcribe`) and returns **editable text** via `onText` — never sends                            | The host needs the audio `Blob` — `RecordButton`; several speakers — [VisitScribe](?path=/docs/voice-visit-scribe--docs)                                                     |
 
 ## How they fit together
 
@@ -49,6 +50,8 @@ import { Meta } from '@storybook/addon-docs/blocks';
   Choose by what happens after Stop: `AudioRecorder` loads the take into a waveform for review
   and delete; `RecordButton` flashes `processing` / `success` and hands the `Blob` to
   `onRecordingComplete` — play it back with an `AudioPlayer` if the user needs to hear it.
+  `DictationButton` renders a controlled `RecordButton` but runs its own recorder (`useDictation`) and
+  returns text instead of a `Blob`.
 - **Whisper is a demo, not a peer.** The Live Demo transcribes with the repo-internal
   `whisperTranscribe` worker; only `decodeTo16kMono` is public. Hosts bring their own
   word-level timestamps.

@@ -186,6 +186,11 @@ const composerRef = useRef<ChatComposerHandle>(null);
           target: 'choice-inputs-dropdown',
           why: 'The + menu and agent selector are Dropdown menus opening above the composer.',
         },
+        {
+          type: 'composes with',
+          target: 'media-dictationbutton',
+          why: 'Put DictationButton in leadingSlot for voice typing next to a micSlot RecordButton; its onText appends to the controlled value and the user still presses Send.',
+        },
       ],
     },
   },

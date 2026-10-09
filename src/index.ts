@@ -165,6 +165,7 @@ export * from './components/Radio';
 export * from './components/Rating';
 export * from './components/ReadingProgressBar';
 export * from './components/RecordButton';
+export * from './components/DictationButton';
 export * from './components/RecordHeader';
 export * from './components/RecordLayout';
 export * from './components/RecurringServiceCard';
