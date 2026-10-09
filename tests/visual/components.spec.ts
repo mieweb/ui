@@ -837,6 +837,31 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     });
   });
 
+  test('MegaMenu - Grouped panel (RTL)', async ({ page }) => {
+    // Grouped renders all three mirrored icon sites: the group-link
+    // ChevronRight, the "Explore the platform" allLabel ArrowRight, and
+    // the featured "Take the tour" CTA ArrowRight — each must flip via
+    // rtl:-scale-x-100 under dir="rtl".
+    await gotoStory(page, 'navigation-megamenu--grouped', {
+      globals: 'direction:rtl',
+    });
+    // The 5% page-diff tolerance can swallow icon-sized regressions, so
+    // assert the mirror directly. Tailwind 4 renders -scale-x-100 via the
+    // CSS `scale` property, not `transform`.
+    const icons = page.locator(
+      'svg.lucide-chevron-right, svg.lucide-arrow-right'
+    );
+    await expect(icons).toHaveCount(3);
+    for (const icon of await icons.all()) {
+      expect(await icon.evaluate((el) => getComputedStyle(el).scale)).toBe(
+        '-1 1'
+      );
+    }
+    await expect(page).toHaveScreenshot('megamenu-grouped-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('VideoCard - Default', async ({ page }) => {
     // Mask the YouTube thumbnail (external i.ytimg.com fetch is not
     // deterministic); the play button, duration pill, and copy stack are.
@@ -873,6 +898,55 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     });
   });
 
+  test('YearTimeline - Pinned to September (RTL)', async ({ page }) => {
+    // Deterministic pinned `now`. Locks the mirrored month grid plus the
+    // insetInlineStart positioning and rtl:translate-x mirroring of the
+    // today pill and playhead — they must stay aligned in September,
+    // measured from the right edge under dir="rtl".
+    await gotoStory(page, 'data-display-yeartimeline--pinned-to-september', {
+      globals: 'direction:rtl',
+    });
+    // The 5% page-diff tolerance can swallow marker-only regressions, so
+    // assert the geometry directly: dropping either rtl:translate-x
+    // compensation would skew one marker off the shared September line.
+    const centerX = (slot: string) =>
+      page
+        .locator(`[data-slot='${slot}']`)
+        .evaluate((el) =>
+          ((r) => r.left + r.width / 2)(el.getBoundingClientRect())
+        );
+    expect(
+      Math.abs(
+        (await centerX('year-timeline-today')) -
+          (await centerX('year-timeline-playhead'))
+      )
+    ).toBeLessThanOrEqual(1.5);
+    // The gridlines overlay must span exactly the month-scale column
+    // (inset by the label rail on the inline-start side) — reverting its
+    // insetInlineStart to physical `left` would misplace it in RTL while
+    // staying under the screenshot threshold.
+    const bounds = (locator: ReturnType<typeof page.locator>) =>
+      locator.evaluate((el) =>
+        ((r) => ({ left: r.left, right: r.right }))(el.getBoundingClientRect())
+      );
+    const gridlines = await bounds(
+      page.locator("[data-slot='year-timeline-gridlines']")
+    );
+    const monthScale = await bounds(
+      page.locator("[data-slot='year-timeline-today']").locator('..')
+    );
+    expect(Math.abs(gridlines.left - monthScale.left)).toBeLessThanOrEqual(1.5);
+    expect(Math.abs(gridlines.right - monthScale.right)).toBeLessThanOrEqual(
+      1.5
+    );
+    await expect(page).toHaveScreenshot(
+      'yeartimeline-pinned-september-rtl.png',
+      {
+        animations: 'disabled',
+      }
+    );
+  });
+
   test('SliderCalculator - ROI panel', async ({ page }) => {
     // Brand-sensitive: primary-800→950 radial panel, accent-gradient slider
     // fill, tabular-nums results.
@@ -896,6 +970,24 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     // the detail card is deterministic.
     await gotoStory(page, 'showcase-radialexplorer--static');
     await expect(page).toHaveScreenshot('radialexplorer-static.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('RadialExplorer - Static spoke (RTL)', async ({ page }) => {
+    // The footer CTA ArrowRight must flip via rtl:-scale-x-100; the radial
+    // wheel itself stays rotationally symmetric (rtl-ignore trig).
+    await gotoStory(page, 'showcase-radialexplorer--static', {
+      globals: 'direction:rtl',
+    });
+    // Direct mirror assertion — the icon is far smaller than the 5%
+    // page-diff tolerance (Tailwind 4 maps -scale-x-100 to CSS `scale`).
+    const ctaArrow = page.locator('svg.lucide-arrow-right');
+    await expect(ctaArrow).toHaveCount(1);
+    expect(await ctaArrow.evaluate((el) => getComputedStyle(el).scale)).toBe(
+      '-1 1'
+    );
+    await expect(page).toHaveScreenshot('radialexplorer-static-rtl.png', {
       animations: 'disabled',
     });
   });
