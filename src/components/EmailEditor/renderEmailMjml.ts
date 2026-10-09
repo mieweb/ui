@@ -46,7 +46,9 @@ export function safeUrl(value: string | undefined): string {
     : '#';
 }
 
-const COLOR = /^(#[0-9a-f]{3,8}|(rgb|rgba|hsl|hsla)\([\d\s.,%]+\)|[a-z]+)$/i;
+// Hex colours only come in 3, 4, 6 or 8 digits; 5 or 7 would be invalid CSS.
+const COLOR =
+  /^(#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|(rgb|rgba|hsl|hsla)\([\d\s.,%]+\)|[a-z]+)$/i;
 
 export function safeColor(value: string | undefined, fallback: string): string {
   return value && COLOR.test(value.trim()) ? value.trim() : fallback;
@@ -65,6 +67,11 @@ function heroGradient(block: EmailHeroBlock): string | null {
   return /^[\w-]+$/.test(block.id)
     ? safeGradient(block.backgroundGradient)
     : null;
+}
+
+/** The canvas preview and `renderHero` must agree on when the CTA exists. */
+export function hasHeroCta(block: EmailHeroBlock): boolean {
+  return Boolean(block.ctaText && block.ctaUrl);
 }
 
 function align(
@@ -194,7 +201,10 @@ function renderContent(
     case 'image': {
       if (!block.src) return '';
       // mj-image only accepts px; a percentage becomes px of the usable width.
-      const percent = /^(\d*\.?\d+)%$/.exec(String(block.width ?? '').trim());
+      // Unambiguous alternation: `\d*\.?\d+` backtracks polynomially (CodeQL).
+      const percent = /^(\d+(?:\.\d+)?|\.\d+)%$/.exec(
+        String(block.width ?? '').trim()
+      );
       const share = percent ? Math.min(Number(percent[1]), 100) : 0;
       const widthPx = percent
         ? Math.round((available * share) / 100)
@@ -309,9 +319,9 @@ function renderHero(block: EmailHeroBlock): string {
       `<mj-text align="${a}" color="${fg}" font-size="16px" line-height="1.5" padding="0 0 16px 0">${escapeHtml(block.subtitle)}</mj-text>`
     );
   }
-  if (block.ctaText && block.ctaUrl) {
+  if (hasHeroCta(block)) {
     parts.push(
-      `<mj-button align="${a}" background-color="${safeColor(block.ctaColor, '#ffffff')}" color="${bg}" font-size="16px" font-weight="600" border-radius="6px" padding="8px 0" href="${safeUrl(block.ctaUrl)}">${escapeHtml(block.ctaText)}</mj-button>`
+      `<mj-button align="${a}" background-color="${safeColor(block.ctaColor, '#ffffff')}" color="${bg}" font-size="16px" font-weight="600" border-radius="6px" padding="8px 0" href="${safeUrl(block.ctaUrl)}">${escapeHtml(block.ctaText ?? '')}</mj-button>`
     );
   }
   const gradient = heroGradient(block)
@@ -377,7 +387,8 @@ export function normalizeDesignSettings(
     buttonBackgroundColor: color('buttonBackgroundColor'),
     buttonTextColor: color('buttonTextColor'),
     buttonBorderRadius: px(d.buttonBorderRadius, 6, 100),
-    contentWidth: px(d.contentWidth, 600, 1200),
+    // The design UI's 320px floor also applies to documents set programmatically.
+    contentWidth: Math.max(320, px(d.contentWidth, 600, 1200)),
     fontFamily:
       typeof d.fontFamily === 'string' && /^[\w\s,'-]+$/.test(d.fontFamily)
         ? d.fontFamily

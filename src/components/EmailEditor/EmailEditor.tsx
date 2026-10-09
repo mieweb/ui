@@ -71,6 +71,7 @@ import {
 } from './tree';
 import {
   createEmailBlock,
+  resolveDesignSettings,
   type EmailBlock,
   type EmailBlockType,
   type EmailContentBlock,
@@ -241,7 +242,12 @@ function BlockFrame({
       {/* Mouse shortcut for the Select button in the toolbar above. */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
-        onClick={own(onSelect)}
+        onClick={(e) => {
+          e.stopPropagation();
+          // A preview link reached by keyboard must select, not navigate away.
+          if ((e.target as HTMLElement).closest('a')) e.preventDefault();
+          onSelect();
+        }}
         className="cursor-pointer [&_a]:pointer-events-none"
       >
         {children}
@@ -435,7 +441,10 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
     const insertBlock = (type: EmailBlockType, index?: number) => {
       const block = createEmailBlock(type);
       const blocks = [...value.blocks];
-      const selectedIndex = blocks.findIndex((b) => b.id === selectedId);
+      // The selection may sit inside columns; insert after its top-level container.
+      const selectedIndex = blocks.findIndex((b) =>
+        Boolean(findEmailBlock([b], selectedId))
+      );
       const at =
         index ?? (selectedIndex === -1 ? blocks.length : selectedIndex + 1);
       blocks.splice(at, 0, block);
@@ -603,8 +612,10 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
               </TabsContent>
               {onDesignChange && (
                 <TabsContent value="design" className={panelBody}>
+                  {/* Raw values, so an in-progress colour (`#12…`) is not snapped
+                      back to a fallback; only the canvas and MJML normalise. */}
                   <EmailDesignPanel
-                    design={design}
+                    design={resolveDesignSettings(designProp)}
                     labels={labels}
                     onChange={(patch) =>
                       commit(value, { ...designProp, ...patch })

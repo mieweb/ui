@@ -148,14 +148,15 @@ export const CONTENT_BLOCK_TYPES = [
   'footer',
 ] as const satisfies readonly EmailContentBlock['type'][];
 
-function resizeColumns(
+export function resizeColumns(
   columns: EmailColumn[],
   count: 1 | 2 | 3
 ): EmailColumn[] {
-  const width = Math.round(100 / count);
+  const width = Math.floor(100 / count);
   const next = Array.from({ length: count }, (_, i) => ({
     ...(columns[i] ?? { id: generateEmailBlockId(), blocks: [] }),
-    width,
+    // The last column absorbs the rounding remainder so widths sum to 100.
+    width: i === count - 1 ? 100 - width * (count - 1) : width,
   }));
   // Keep content from dropped columns by moving it into the last remaining one.
   const dropped = columns.slice(count).flatMap((c) => c.blocks);
@@ -437,12 +438,15 @@ export function EmailBlockSettings({
                 key={i}
                 className="border-border space-y-2 rounded-md border p-3"
               >
+                <legend className="sr-only">
+                  {f.socialLink.replace('{number}', String(i + 1))}
+                </legend>
                 <SelectField
                   label={f.platform}
                   value={link.platform}
                   options={SOCIAL_PLATFORMS.map((p) => ({
                     value: p,
-                    label: p[0].toUpperCase() + p.slice(1),
+                    label: labels.platforms[p],
                   }))}
                   onChange={(platform) => update({ platform })}
                 />

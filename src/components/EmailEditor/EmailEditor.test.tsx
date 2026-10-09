@@ -17,11 +17,13 @@ const initial: EmailContentTree = { version: '1.0', blocks: [heading, text] };
 function Harness({
   onDesign,
   initialDesign,
+  doc = initial,
 }: {
   onDesign?: (d: EmailDesignSettings) => void;
   initialDesign?: EmailDesignSettings;
+  doc?: EmailContentTree;
 }) {
-  const [value, setValue] = useState(initial);
+  const [value, setValue] = useState(doc);
   const [design, setDesign] = useState<EmailDesignSettings | undefined>(
     initialDesign
   );
@@ -65,6 +67,22 @@ describe('EmailEditor', () => {
     expect(
       screen.getByRole('button', { name: 'Select Divider' })
     ).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('inserts after the containing columns when the selection is nested', () => {
+    const columns = createEmailBlock('columns');
+    columns.columns[0].blocks.push({
+      ...createEmailBlock('heading'),
+      text: 'Nested',
+    });
+    const doc: EmailContentTree = {
+      version: '1.0',
+      blocks: [columns, createEmailBlock('text')],
+    };
+    renderWithTheme(<Harness doc={doc} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Select Heading' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Divider' }));
+    expect(types()).toBe('columns,divider,text');
   });
 
   it('edits the selected block from the settings panel', () => {
@@ -254,6 +272,68 @@ describe('EmailEditor', () => {
     expect(screen.getByRole('combobox', { name: 'Font' })).toHaveTextContent(
       'Arial'
     );
+  });
+
+  it('keeps an in-progress design colour while it is typed', () => {
+    renderWithTheme(<Harness onDesign={vi.fn()} />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Design' }));
+    const [input] = screen.getAllByLabelText('Page background');
+    let next = '';
+    for (const char of '#123456') {
+      next += char;
+      fireEvent.change(input, { target: { value: next } });
+      expect(input).toHaveValue(next);
+    }
+  });
+
+  it('hides the hero CTA when its URL is missing, matching the renderer', () => {
+    const hero = { ...createEmailBlock('hero'), ctaText: 'Go', ctaUrl: '' };
+    renderWithTheme(
+      <EmailEditor
+        value={{ version: '1.0', blocks: [hero] }}
+        onChange={vi.fn()}
+      />
+    );
+    expect(screen.queryByText('Go')).not.toBeInTheDocument();
+  });
+
+  it('selects instead of navigating when a preview link is activated', async () => {
+    const linked = {
+      ...createEmailBlock('text'),
+      content: '<p><a href="https://example.com">Visit</a></p>',
+    };
+    renderWithTheme(
+      <EmailEditor
+        value={{ version: '1.0', blocks: [linked] }}
+        onChange={vi.fn()}
+      />
+    );
+    const anchor = await screen.findByText('Visit');
+    // fireEvent.click returns false when the default action was cancelled.
+    expect(fireEvent.click(anchor)).toBe(false);
+    expect(screen.getByRole('button', { name: 'Select Text' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('names each social link group and localises platform options', () => {
+    const social = createEmailBlock('social');
+    renderWithTheme(
+      <EmailEditor
+        value={{ version: '1.0', blocks: [social] }}
+        onChange={vi.fn()}
+        labels={{ platforms: { linkedin: 'LinkedIn (es)' } }}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Select Social links' })
+    );
+    expect(screen.getByRole('group', { name: 'Link 1' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Link 2' })).toBeInTheDocument();
+    expect(
+      screen.getAllByRole('combobox', { name: 'Platform' })[0]
+    ).toHaveTextContent('LinkedIn (es)');
   });
 
   it('accepts label overrides', () => {

@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { normalizeDesignSettings, renderEmailMjml } from './renderEmailMjml';
+import {
+  hasHeroCta,
+  normalizeDesignSettings,
+  renderEmailMjml,
+  safeColor,
+} from './renderEmailMjml';
 import {
   addBlockToColumn,
   duplicateEmailBlock,
@@ -10,6 +15,7 @@ import {
   updateEmailBlock,
 } from './tree';
 import { EMAIL_BLOCK_TYPES } from './EmailEditor';
+import { resizeColumns } from './EmailBlockSettings';
 import {
   createEmailBlock,
   createEmptyEmailContentTree,
@@ -78,6 +84,14 @@ describe('renderEmailMjml', () => {
     expect(mjml).not.toContain('url(x)');
   });
 
+  it('only accepts hex colours with a valid digit count', () => {
+    expect(safeColor('#12345', '#000000')).toBe('#000000');
+    expect(safeColor('#1234567', '#000000')).toBe('#000000');
+    for (const valid of ['#123', '#1234', '#123456', '#12345678']) {
+      expect(safeColor(valid, '#000000')).toBe(valid);
+    }
+  });
+
   it('sanitises HTML with DOMPurify by default', () => {
     const html = {
       ...createEmailBlock('html'),
@@ -142,6 +156,13 @@ describe('renderEmailMjml', () => {
     expect(renderEmailMjml(tree(image('100%')))).not.toMatch(
       /<mj-image[^>]*width=/
     );
+    // Zero widths are treated as unset, matching the canvas preview.
+    expect(renderEmailMjml(tree(image('0%')))).not.toMatch(
+      /<mj-image[^>]*width=/
+    );
+    expect(renderEmailMjml(tree(image('0')))).not.toMatch(
+      /<mj-image[^>]*width=/
+    );
   });
 
   it('sizes headings inline so clients do not scale them again', () => {
@@ -173,6 +194,22 @@ describe('renderEmailMjml', () => {
       buttonBackgroundColor: '#2563eb',
       linkColor: '#123456',
     });
+  });
+
+  it('enforces the design UI\u2019s 320px minimum content width', () => {
+    expect(normalizeDesignSettings({ contentWidth: 1 }).contentWidth).toBe(320);
+    expect(normalizeDesignSettings({ contentWidth: 480 }).contentWidth).toBe(
+      480
+    );
+  });
+
+  it('omits the hero CTA unless both text and URL exist', () => {
+    const hero = createEmailBlock('hero');
+    expect(hasHeroCta(hero)).toBe(true);
+    expect(hasHeroCta({ ...hero, ctaUrl: '' })).toBe(false);
+    expect(renderEmailMjml(tree({ ...hero, ctaUrl: '' }))).not.toContain(
+      'mj-button'
+    );
   });
 
   it('resolves image percentages against the containing column', () => {
@@ -252,5 +289,11 @@ describe('tree helpers', () => {
       'text',
       'footer',
     ]);
+  });
+
+  it('keeps resized column widths summing to 100', () => {
+    expect(resizeColumns([], 3).map((c) => c.width)).toEqual([33, 33, 34]);
+    expect(resizeColumns([], 2).map((c) => c.width)).toEqual([50, 50]);
+    expect(resizeColumns([], 1).map((c) => c.width)).toEqual([100]);
   });
 });

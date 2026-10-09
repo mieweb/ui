@@ -1,4 +1,4 @@
-import type { EmailBlockType } from './types';
+import type { EmailBlockType, EmailSocialPlatform } from './types';
 
 export const defaultEmailEditorLabels = {
   blocks: 'Blocks',
@@ -40,6 +40,15 @@ export const defaultEmailEditorLabels = {
     quote: 'Quote',
     table: 'Table',
   } satisfies Record<EmailBlockType, string>,
+  platforms: {
+    facebook: 'Facebook',
+    twitter: 'Twitter',
+    linkedin: 'LinkedIn',
+    instagram: 'Instagram',
+    youtube: 'YouTube',
+    github: 'GitHub',
+    website: 'Website',
+  } satisfies Record<EmailSocialPlatform, string>,
   fields: {
     text: 'Text',
     content: 'Content',
@@ -62,6 +71,7 @@ export const defaultEmailEditorLabels = {
     height: 'Height (px)',
     iconSize: 'Icon size',
     platform: 'Platform',
+    socialLink: 'Link {number}',
     addLink: 'Add link',
     removeLink: 'Remove link',
     html: 'HTML',
@@ -131,6 +141,7 @@ export function mergeEmailEditorLabels(
     ...d,
     ...overrides,
     blockTypes: { ...d.blockTypes, ...overrides.blockTypes },
+    platforms: { ...d.platforms, ...overrides.platforms },
     fields: { ...d.fields, ...overrides.fields },
     options: { ...d.options, ...overrides.options },
   } as EmailEditorLabels;

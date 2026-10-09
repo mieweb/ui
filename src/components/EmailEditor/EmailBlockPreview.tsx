@@ -10,7 +10,12 @@ import {
   Youtube,
 } from 'lucide-react';
 
-import { safeColor, safeGradient, sanitizeEmailHtml } from './renderEmailMjml';
+import {
+  hasHeroCta,
+  safeColor,
+  safeGradient,
+  sanitizeEmailHtml,
+} from './renderEmailMjml';
 import type {
   EmailBlock,
   EmailContentBlock,
@@ -127,10 +132,12 @@ export function EmailBlockPreview({
               style={{
                 display: 'inline-block',
                 maxWidth: '100%',
+                // Zero/invalid widths fall back to full width, matching the
+                // omitted width in renderEmailMjml.
                 width:
-                  typeof block.width === 'number'
+                  parseFloat(String(block.width ?? '')) > 0
                     ? block.width
-                    : (block.width ?? '100%'),
+                    : '100%',
                 borderRadius: block.borderRadius,
               }}
             />
@@ -324,7 +331,7 @@ export function EmailBlockPreview({
           {block.subtitle && (
             <p style={{ margin: '0 0 16px' }}>{block.subtitle}</p>
           )}
-          {block.ctaText && (
+          {hasHeroCta(block) && (
             <span
               style={{
                 display: 'inline-block',
