@@ -29,6 +29,11 @@ const meta: Meta<typeof CollabStatus> = {
           target: 'encounter-orders-casemanagementheader',
           why: 'Drops into CaseManagementHeader\'s collabStatus slot beside the "… are editing" line on the case context bar.',
         },
+        {
+          type: 'uses',
+          target: 'record-details-avatargroup',
+          why: 'The panel shows room occupants, with their viewing/editing presence, as an AvatarGroup.',
+        },
       ],
     },
     docs: {
@@ -58,6 +63,7 @@ hand it.
 - The panel is portalled to \`document.body\` and positioned under the chip; Escape closes it and returns focus to the chip, a pointer outside dismisses it, and it does not trap focus.
 - All strings are overridable through \`labels\`; defaults are English.
 - Peer colours come from the awareness payload, not brand tokens — check contrast against your header background.
+- The panel lists occupants as an \`AvatarGroup\` (names in each avatar's accessible name and tooltip). A peer's optional \`mode\` (\`viewing\` / \`editing\`) adds a presence ring; peers without a mode count as editing, as before.
 
 ### Binding it to a Yjs server (the short version)
 
@@ -113,7 +119,10 @@ story in a second tab to watch presence and the log light up.
       description: 'True once the room completed its initial server sync.',
       control: 'boolean',
     },
-    peers: { description: 'Other people in the room right now.' },
+    peers: {
+      description:
+        'Other people in the room right now: `{ name, color?, mode?, avatarUrl? }`. `mode: "viewing"` peers are left out of the editing summary.',
+    },
     log: { description: 'Recent collaboration events, newest first.' },
     room: { description: 'Room identity shown at the top of the panel.' },
     showLog: {
@@ -163,6 +172,20 @@ export const WithPeers: Story = {
 
 export const StatusOnly: Story = {
   args: { connected: true, showLog: false, peers: [{ name: 'Ann Nurse' }] },
+};
+
+/** Peers with a `mode`: viewers get a primary ring and stay out of "… is editing". */
+export const ViewersAndEditors: Story = {
+  args: {
+    connected: true,
+    room,
+    log: sampleLog,
+    peers: [
+      { name: 'Ann Nurse', mode: 'editing' },
+      { name: 'Bo Tech', mode: 'viewing' },
+      { name: 'Cy Scheduler', mode: 'viewing' },
+    ],
+  },
 };
 
 /** For headers with no room for a chip: the dot alone still opens the panel. */

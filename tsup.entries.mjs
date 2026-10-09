@@ -7,6 +7,8 @@ export const entries = {
   index: 'src/index.ts',
   'ag-grid': 'src/ag-grid.ts',
   globe: 'src/globe.ts',
+  // Optional @xyflow/react + elkjs peers. See: src/components/OrgChart/MAINTAINERS.md
+  'org-chart': 'src/org-chart.ts',
   datavis: 'src/datavis.ts',
   esheet: 'src/esheet.ts',
   kerebron: 'src/kerebron.ts',
@@ -48,6 +50,7 @@ export const entries = {
     'src/components/CustomizableDashboard/index.ts',
   'components/DateInput/index': 'src/components/DateInput/index.ts',
   'components/Dropdown/index': 'src/components/Dropdown/index.ts',
+  'components/EmailEditor/index': 'src/components/EmailEditor/index.ts',
   'components/FilterSummaryBar/index':
     'src/components/FilterSummaryBar/index.ts',
   'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
@@ -108,6 +111,24 @@ export const entries = {
   'components/VideoCard/index': 'src/components/VideoCard/index.ts',
   'components/VisuallyHidden/index': 'src/components/VisuallyHidden/index.ts',
   'components/YearTimeline/index': 'src/components/YearTimeline/index.ts',
+  // Ported from Waggleline's record pages
+  'components/ActionPlan/index': 'src/components/ActionPlan/index.ts',
+  'components/ActivityFeed/index': 'src/components/ActivityFeed/index.ts',
+  'components/AssociationList/index': 'src/components/AssociationList/index.ts',
+  'components/AvatarGroup/index': 'src/components/AvatarGroup/index.ts',
+  'components/CalendarHeatmap/index': 'src/components/CalendarHeatmap/index.ts',
+  'components/CompletenessMeter/index':
+    'src/components/CompletenessMeter/index.ts',
+  'components/FieldHistory/index': 'src/components/FieldHistory/index.ts',
+  'components/InlineEdit/index': 'src/components/InlineEdit/index.ts',
+  'components/LogoUploader/index': 'src/components/LogoUploader/index.ts',
+  'components/PhiMask/index': 'src/components/PhiMask/index.ts',
+  'components/PropertyList/index': 'src/components/PropertyList/index.ts',
+  'components/Rating/index': 'src/components/Rating/index.ts',
+  'components/RecordHeader/index': 'src/components/RecordHeader/index.ts',
+  'components/RecordLayout/index': 'src/components/RecordLayout/index.ts',
+  'components/TagEditor/index': 'src/components/TagEditor/index.ts',
+  'components/UserPicker/index': 'src/components/UserPicker/index.ts',
   // Brand system entries for tree-shaking
   'brands/index': 'src/brands/index.ts',
   'brands/types': 'src/brands/types.ts',

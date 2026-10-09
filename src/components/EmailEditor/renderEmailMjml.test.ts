@@ -1,0 +1,389 @@
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  createEmailHtmlSanitizer,
+  hasHeroCta,
+  normalizeDesignSettings,
+  renderEmailMjml,
+  safeColor,
+} from './renderEmailMjml';
+import {
+  addBlockToColumn,
+  duplicateEmailBlock,
+  findEmailBlock,
+  moveEmailBlock,
+  removeEmailBlock,
+  updateEmailBlock,
+} from './tree';
+import { EMAIL_BLOCK_TYPES } from './EmailEditor';
+import { resizeColumns } from './EmailBlockSettings';
+import {
+  createEmailBlock,
+  createEmptyEmailContentTree,
+  type EmailBlock,
+  type EmailContentTree,
+} from './types';
+
+const tree = (...blocks: EmailBlock[]): EmailContentTree => ({
+  version: '1.0',
+  blocks,
+});
+
+describe('renderEmailMjml', () => {
+  it('renders every block type inside an mjml document', () => {
+    const mjml = renderEmailMjml(
+      tree(...EMAIL_BLOCK_TYPES.map((t) => createEmailBlock(t))),
+      {
+        design: { contentWidth: 640, bodyBackgroundColor: '#eeeeee' },
+      }
+    );
+    expect(mjml).toMatch(/^<mjml>/);
+    expect(mjml).toContain(
+      '<mj-body background-color="#eeeeee" width="640px">'
+    );
+    for (const tag of [
+      'mj-button',
+      'mj-divider',
+      'mj-spacer',
+      'mj-social',
+      'mj-raw',
+      'mj-table',
+    ]) {
+      expect(mjml).toContain(`<${tag}`);
+    }
+  });
+
+  it('escapes plain-text fields', () => {
+    const heading = {
+      ...createEmailBlock('heading'),
+      text: '<script>alert(1)</script>',
+    };
+    const mjml = renderEmailMjml(tree(heading));
+    expect(mjml).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(mjml).not.toContain('<script>');
+  });
+
+  it('neutralises unsafe URLs but keeps merge tokens', () => {
+    const bad = { ...createEmailBlock('button'), url: 'javascript:alert(1)' };
+    const merge = {
+      ...createEmailBlock('button'),
+      url: '{{provider_page_url}}',
+    };
+    const mjml = renderEmailMjml(tree(bad, merge));
+    expect(mjml).toContain('href="#"');
+    expect(mjml).toContain('href="{{provider_page_url}}"');
+    expect(mjml).not.toContain('javascript:');
+  });
+
+  it('only accepts a complete merge token, not a token prefix', () => {
+    const button = (url: string) => ({ ...createEmailBlock('button'), url });
+    // If {{empty}} expands to '' at send time, the rest would become the URL.
+    for (const sneaky of [
+      '{{empty}}javascript:alert(1)',
+      '{{empty}}//evil.example/path',
+      '{{base_url}}/path',
+    ]) {
+      const mjml = renderEmailMjml(tree(button(sneaky)));
+      expect(mjml).toContain('href="#"');
+      expect(mjml).not.toContain('evil.example');
+      expect(mjml).not.toContain('javascript:');
+    }
+    expect(renderEmailMjml(tree(button('{{unsubscribe_url}}')))).toContain(
+      'href="{{unsubscribe_url}}"'
+    );
+  });
+
+  it('keeps root-relative URLs but rejects network-path lookalikes', () => {
+    const button = (url: string) => ({ ...createEmailBlock('button'), url });
+    expect(renderEmailMjml(tree(button('/newsletter/view')))).toContain(
+      'href="/newsletter/view"'
+    );
+    // URL parsers treat `\` as `/` and strip embedded tabs/newlines, so these
+    // would resolve as https://evil.example/path on a trusted origin.
+    for (const sneaky of [
+      '/\\evil.example/path',
+      '/\t/evil.example/path',
+      '/\n/evil.example/path',
+      '//evil.example/path',
+    ]) {
+      expect(renderEmailMjml(tree(button(sneaky)))).not.toContain(
+        'evil.example'
+      );
+    }
+  });
+
+  it('omits host-owned block types it does not support', () => {
+    const signature = {
+      id: 'sig1',
+      type: 'signature',
+      name: 'Dr. Example',
+    } as unknown as EmailBlock;
+    const columns = createEmailBlock('columns');
+    columns.columns[0].blocks.push(signature as never);
+    const mjml = renderEmailMjml(
+      tree(signature, createEmailBlock('heading'), columns)
+    );
+    expect(mjml).not.toContain('Dr. Example');
+    expect(mjml).not.toContain('undefined');
+    expect(mjml).toContain('<h2'); // neighbouring blocks still render
+  });
+
+  it('rejects colours that would inject CSS', () => {
+    const divider = {
+      ...createEmailBlock('divider'),
+      color: 'red;background:url(x)',
+    };
+    const mjml = renderEmailMjml(tree(divider));
+    expect(mjml).toContain('border-color="#e5e7eb"');
+    expect(mjml).not.toContain('url(x)');
+  });
+
+  it('only accepts hex colours with a valid digit count', () => {
+    expect(safeColor('#12345', '#000000')).toBe('#000000');
+    expect(safeColor('#1234567', '#000000')).toBe('#000000');
+    for (const valid of ['#123', '#1234', '#123456', '#12345678']) {
+      expect(safeColor(valid, '#000000')).toBe(valid);
+    }
+  });
+
+  it('sanitises HTML with DOMPurify by default', () => {
+    const html = {
+      ...createEmailBlock('html'),
+      html: '<img src="x" onerror="alert(1)"><p>ok</p>',
+    };
+    const mjml = renderEmailMjml(tree(html));
+    expect(mjml).toContain('<p>ok</p>');
+    expect(mjml).not.toContain('onerror');
+  });
+
+  it('applies the URL policy inside text and html markup', () => {
+    // DOMPurify's default URI policy would keep all of these.
+    const hostile =
+      '<a href="//evil.example/a">a</a>' +
+      '<a href="ftp://evil.example/b">b</a>' +
+      '<img src="cid:evil" alt="c">' +
+      '<a href="https://good.example/d">d</a>' +
+      '<a href="/newsletter/view">e</a>';
+    for (const block of [
+      { ...createEmailBlock('html'), html: hostile },
+      { ...createEmailBlock('text'), content: hostile },
+    ]) {
+      const mjml = renderEmailMjml(tree(block));
+      expect(mjml).not.toContain('evil');
+      expect(mjml).toContain('https://good.example/d');
+      expect(mjml).toContain('/newsletter/view');
+    }
+  });
+
+  it('enforces the same policy from a caller-supplied window', () => {
+    // The test environment's global window is jsdom, exactly what a server host
+    // would hand to the factory.
+    const sanitize = createEmailHtmlSanitizer(window);
+    const hostile =
+      '<div class="fixed" id="app" style="position:fixed;inset:0;color:red">' +
+      '<a href="//evil.example/a">a</a>' +
+      '<a href="https://good.example/b">b</a></div>';
+    const clean = sanitize(hostile);
+    expect(clean).not.toMatch(/class=|id=|position|evil/);
+    expect(clean).toContain('color: red');
+    expect(clean).toContain('https://good.example/b');
+    const block = { ...createEmailBlock('html'), html: hostile };
+    const mjml = renderEmailMjml(tree(block), { sanitizeHtml: sanitize });
+    expect(mjml).not.toContain('evil');
+  });
+
+  it('keeps formatting styles but drops ones that can cover the page', () => {
+    const html = {
+      ...createEmailBlock('html'),
+      html: '<div style="position:fixed;inset:0;z-index:2147483647;background:white;color:#111;margin:-40px;padding:8px;background-color:url(x)">hi</div><p style="position:absolute">p</p>',
+    };
+    const mjml = renderEmailMjml(tree(html));
+    expect(mjml).toContain('style="color: #111; padding: 8px"');
+    expect(mjml).toContain('<p>p</p>');
+    expect(mjml).not.toMatch(
+      /position|inset|z-index|-40px|url\(x\)|background: white/
+    );
+  });
+
+  it('uses a caller-supplied sanitiser', () => {
+    const sanitizeHtml = vi.fn(() => '<p>clean</p>');
+    const mjml = renderEmailMjml(tree(createEmailBlock('text')), {
+      sanitizeHtml,
+    });
+    expect(sanitizeHtml).toHaveBeenCalledWith(
+      '<p>Write your message here.</p>'
+    );
+    expect(mjml).toContain('<p>clean</p>');
+  });
+
+  it('emits hero gradients only when they are plain CSS gradients', () => {
+    const good = {
+      ...createEmailBlock('hero'),
+      id: 'h1',
+      backgroundGradient: 'linear-gradient(135deg, rgb(1,2,3), #fff)',
+    };
+    const bad = {
+      ...createEmailBlock('hero'),
+      id: 'h2',
+      backgroundGradient: 'linear-gradient(url(http://x))',
+    };
+    const mjml = renderEmailMjml(tree(good, bad));
+    expect(mjml).toContain(
+      '.hero-gradient-h1 { background: linear-gradient(135deg, rgb(1,2,3), #fff)'
+    );
+    expect(mjml).not.toContain('hero-gradient-h2');
+  });
+
+  it('converts image percentages to px because mj-image only accepts px', () => {
+    const image = (width: string) => ({
+      ...createEmailBlock('image'),
+      src: 'https://x/a.png',
+      width,
+    });
+    expect(renderEmailMjml(tree(image('50%')))).toContain('width="275px"');
+    expect(renderEmailMjml(tree(image('50.5%')))).toContain('width="278px"');
+    expect(renderEmailMjml(tree(image('.5%')))).toContain('width="3px"');
+    expect(renderEmailMjml(tree(image('100%')))).not.toMatch(
+      /<mj-image[^>]*width=/
+    );
+    // Zero widths are treated as unset, matching the canvas preview.
+    expect(renderEmailMjml(tree(image('0%')))).not.toMatch(
+      /<mj-image[^>]*width=/
+    );
+    expect(renderEmailMjml(tree(image('0')))).not.toMatch(
+      /<mj-image[^>]*width=/
+    );
+  });
+
+  it('sizes headings inline so clients do not scale them again', () => {
+    const mjml = renderEmailMjml(
+      tree(createEmailBlock('heading'), createEmailBlock('hero'))
+    );
+    expect(mjml).toContain('<h2 style="font-size: 26px; line-height: 1.25;">');
+    expect(mjml).toMatch(/<h1 style="[^"]*font-size: 32px;/);
+  });
+
+  it('strips class and id so host CSS cannot style stored HTML', () => {
+    const html = {
+      ...createEmailBlock('html'),
+      html: '<div class="fixed inset-0 z-50" id="root">x</div>',
+    };
+    const mjml = renderEmailMjml(tree(html));
+    expect(mjml).toContain('<div>x</div>');
+    expect(mjml).not.toMatch(/fixed|id="root"/);
+  });
+
+  it('validates design colours, falling back to defaults', () => {
+    const design = normalizeDesignSettings({
+      bodyBackgroundColor: 'url(https://x/y.png)',
+      buttonBackgroundColor: 'red;position:fixed',
+      linkColor: '#123456',
+    });
+    expect(design).toMatchObject({
+      bodyBackgroundColor: '#f4f4f5',
+      buttonBackgroundColor: '#2563eb',
+      linkColor: '#123456',
+    });
+  });
+
+  it('enforces the design UI\u2019s 320px minimum content width', () => {
+    expect(normalizeDesignSettings({ contentWidth: 1 }).contentWidth).toBe(320);
+    expect(normalizeDesignSettings({ contentWidth: 480 }).contentWidth).toBe(
+      480
+    );
+  });
+
+  it('omits the hero CTA unless both text and URL exist', () => {
+    const hero = createEmailBlock('hero');
+    expect(hasHeroCta(hero)).toBe(true);
+    expect(hasHeroCta({ ...hero, ctaUrl: '' })).toBe(false);
+    expect(renderEmailMjml(tree({ ...hero, ctaUrl: '' }))).not.toContain(
+      'mj-button'
+    );
+  });
+
+  it('resolves image percentages against the containing column', () => {
+    const columns = createEmailBlock('columns');
+    columns.columns[0].blocks.push({
+      ...createEmailBlock('image'),
+      src: 'https://x/a.png',
+      width: '50%',
+    });
+    // 600px email, 50% column, 12px padding each side: 276px usable.
+    expect(renderEmailMjml(tree(columns))).toContain('width="138px"');
+    columns.columns[1].blocks.push({
+      ...createEmailBlock('image'),
+      src: 'https://x/b.png',
+      width: '50.5%',
+    });
+    expect(renderEmailMjml(tree(columns))).toContain('width="139px"');
+  });
+
+  it('lets undefined design fields inherit their defaults', () => {
+    const mjml = renderEmailMjml(tree(createEmailBlock('heading')), {
+      design: { fontFamily: undefined, contentWidth: undefined },
+    });
+    expect(mjml).toContain('font-family="Arial, Helvetica, sans-serif"');
+    expect(mjml).toContain('width="600px"');
+  });
+
+  it('points the footer unsubscribe link at the configured URL', () => {
+    const mjml = renderEmailMjml(tree(createEmailBlock('footer')), {
+      unsubscribeUrl: 'https://example.com/u',
+    });
+    expect(mjml).toContain('href="https://example.com/u"');
+  });
+});
+
+describe('tree helpers', () => {
+  const columns = createEmailBlock('columns');
+  const child = createEmailBlock('heading');
+  const blocks = addBlockToColumn(
+    [createEmailBlock('text'), columns],
+    columns.id,
+    1,
+    child
+  );
+
+  it('finds and updates blocks nested in columns', () => {
+    expect(findEmailBlock(blocks, child.id)).toBe(child);
+    const next = updateEmailBlock(blocks, child.id, { text: 'Nested' });
+    expect(findEmailBlock(next, child.id)).toMatchObject({ text: 'Nested' });
+    expect(next[0]).toBe(blocks[0]);
+  });
+
+  it('moves within the containing list and ignores out-of-range moves', () => {
+    const moved = moveEmailBlock(blocks, columns.id, -1);
+    expect(moved.map((b) => b.id)).toEqual([columns.id, blocks[0].id]);
+    expect(moveEmailBlock(blocks, blocks[0].id, -1)).toEqual(blocks);
+  });
+
+  it('duplicates with fresh ids all the way down', () => {
+    const { blocks: next, newId } = duplicateEmailBlock(blocks, columns.id);
+    const copy = next[2];
+    expect(copy.id).toBe(newId);
+    expect(copy.type).toBe('columns');
+    if (copy.type !== 'columns') return;
+    expect(copy.columns[1].blocks[0].id).not.toBe(child.id);
+  });
+
+  it('removes nested blocks', () => {
+    expect(
+      findEmailBlock(removeEmailBlock(blocks, child.id), child.id)
+    ).toBeUndefined();
+  });
+
+  it('starts new documents with a title, body and footer', () => {
+    expect(createEmptyEmailContentTree().blocks.map((b) => b.type)).toEqual([
+      'heading',
+      'text',
+      'footer',
+    ]);
+  });
+
+  it('keeps resized column widths summing to 100', () => {
+    expect(resizeColumns([], 3).map((c) => c.width)).toEqual([33, 33, 34]);
+    expect(resizeColumns([], 2).map((c) => c.width)).toEqual([50, 50]);
+    expect(resizeColumns([], 1).map((c) => c.width)).toEqual([100]);
+  });
+});

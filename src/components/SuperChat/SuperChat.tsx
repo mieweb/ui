@@ -21,6 +21,8 @@ import {
 } from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
 import { ChatComposer } from '../ChatComposer/ChatComposer';
+import type { ChatComposerAgentOption } from '../ChatComposer/ChatComposer';
+import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
 import { Button } from '../Button';
@@ -115,6 +117,26 @@ export interface SuperChatProps {
   defaultCopyFormat?: SuperChatCopyFormat;
   /** Additional class name. */
   className?: string;
+  /** Show the conversation header (title + participants). Defaults to `true`. */
+  showHeader?: boolean;
+  /** Composer placeholder override. */
+  placeholder?: string;
+  /** Allow file attachments in the composer. Defaults to `true` unless read-only. */
+  allowAttachments?: boolean;
+  /** Agents offered by the composer's agent selector (shown when non-empty). */
+  agents?: ChatComposerAgentOption[];
+  /** Selected agent id for the composer's agent selector. */
+  selectedAgent?: string | null;
+  onAgentChange?: (agentId: string) => void;
+  /** Localized accessible label / empty-state text for the agent selector. */
+  agentSelectorLabel?: string;
+  /** Props for the composer's model selector (shown when provided). */
+  modelSelectorProps?: ComposerModelSelectorProps;
+  /** While true, the send button becomes a stop button (requires `onStop`). */
+  isStreaming?: boolean;
+  onStop?: () => void;
+  /** Localized accessible label for the icon-only stop button. */
+  stopLabel?: string;
 
   // --- callbacks (chat-component-compatible) ---
   /**
@@ -173,6 +195,17 @@ export function SuperChat({
   linkBuilder,
   defaultCopyFormat,
   className,
+  showHeader = true,
+  placeholder,
+  allowAttachments,
+  agents,
+  selectedAgent,
+  onAgentChange,
+  agentSelectorLabel,
+  modelSelectorProps,
+  isStreaming,
+  onStop,
+  stopLabel,
   onMessageSent,
   onMessageEdited,
   onConversationClosed,
@@ -746,65 +779,72 @@ export function SuperChat({
         className
       )}
     >
-      <header
-        data-slot="superchat-header"
-        className="flex items-center justify-between gap-2 border-b border-neutral-200 p-3 dark:border-neutral-700"
-      >
-        <div className="flex min-w-0 items-center gap-2">
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              aria-label="Back to conversations"
-              className="-ms-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+      {showHeader ? (
+        <header
+          data-slot="superchat-header"
+          className="flex items-center justify-between gap-2 border-b border-neutral-200 p-3 dark:border-neutral-700"
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label="Back to conversations"
+                className="-ms-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
               >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
-          )}
-          <div className="min-w-0">
-            <h2
-              id={headingId}
-              className="truncate text-sm font-semibold text-neutral-800 dark:text-neutral-100"
-            >
-              {conversation.title}
-            </h2>
-            <div
-              data-slot="superchat-participants"
-              role="group"
-              aria-label="Participants"
-              className="mt-0.5 flex items-center gap-1"
-            >
-              {conversation.participants.slice(0, 6).map((p) => (
-                <span key={p.id} role="img" aria-label={p.name}>
-                  <ParticipantAvatar participant={p} />
-                </span>
-              ))}
+                <svg
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+            )}
+            <div className="min-w-0">
+              <h2
+                id={headingId}
+                className="truncate text-sm font-semibold text-neutral-800 dark:text-neutral-100"
+              >
+                {conversation.title}
+              </h2>
+              <div
+                data-slot="superchat-participants"
+                role="group"
+                aria-label="Participants"
+                className="mt-0.5 flex items-center gap-1"
+              >
+                {conversation.participants.slice(0, 6).map((p) => (
+                  <span key={p.id} role="img" aria-label={p.name}>
+                    <ParticipantAvatar participant={p} />
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-        {onConversationClosed && (
-          <button
-            type="button"
-            onClick={() => onConversationClosed(conversation)}
-            aria-label="Close conversation"
-            className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-          >
-            <CloseIcon />
-          </button>
-        )}
-      </header>
+          {onConversationClosed && (
+            <button
+              type="button"
+              onClick={() => onConversationClosed(conversation)}
+              aria-label="Close conversation"
+              className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            >
+              <CloseIcon />
+            </button>
+          )}
+        </header>
+      ) : (
+        // Keeps the panel's aria-labelledby reference valid without a visible header.
+        <h2 id={headingId} className="sr-only">
+          {conversation.title}
+        </h2>
+      )}
 
       {activeView === 'media' ? (
         <div
@@ -954,15 +994,25 @@ export function SuperChat({
         placeholder={
           readOnly
             ? 'Read-only conversation'
-            : 'Type a message… use @ to address an agent'
+            : (placeholder ?? 'Type a message… use @ to address an agent')
         }
         mentionOptions={mentionOptions}
-        allowAttachments={!readOnly}
+        allowAttachments={!readOnly && (allowAttachments ?? true)}
         acceptedFileTypes={composerAccept}
         // Same cap MessageComposer applied by default.
         maxFileSize={25 * 1024 * 1024}
         maxLength={100000}
         inputLabel="Message"
+        showAgentSelector={!!agents?.length}
+        agents={agents}
+        selectedAgent={selectedAgent}
+        onAgentChange={onAgentChange}
+        agentSelectorLabel={agentSelectorLabel}
+        showModelSelector={!!modelSelectorProps}
+        modelSelectorProps={modelSelectorProps}
+        isStreaming={isStreaming}
+        onStop={onStop}
+        stopLabel={stopLabel}
       />
     </section>
   );

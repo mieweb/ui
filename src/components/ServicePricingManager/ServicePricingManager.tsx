@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { ChevronRight, ExternalLink } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
@@ -24,7 +25,36 @@ export interface ServicePrice {
   employerPrice?: number;
   isActive: boolean;
   lastUpdated?: Date | string;
+  /** Free-text note shown under the service name */
+  note?: string;
+  /** Entered by hand rather than picked from the services catalog */
+  isCustom?: boolean;
 }
+
+export interface ServicePricingManagerLabels {
+  custom: string;
+  customDescription: string;
+  addNote: string;
+  notePlaceholder: string;
+  noteLabel: (serviceName: string) => string;
+  noteSaveError: string;
+  viewInCatalog: (serviceName: string) => string;
+  showDetails: (serviceName: string) => string;
+  hideDetails: (serviceName: string) => string;
+}
+
+export const DEFAULT_SERVICE_PRICING_MANAGER_LABELS: ServicePricingManagerLabels =
+  {
+    custom: 'Custom',
+    customDescription: 'Not in the services catalog',
+    addNote: 'Add note',
+    notePlaceholder: 'Add note…',
+    noteLabel: (name) => `Note for ${name}`,
+    noteSaveError: "Couldn't save the note. Try again.",
+    viewInCatalog: (name) => `View ${name} in the catalog`,
+    showDetails: (name) => `Show details for ${name}`,
+    hideDetails: (name) => `Hide details for ${name}`,
+  };
 
 export interface ServicePricingManagerProps {
   /** List of service prices */
@@ -51,8 +81,122 @@ export interface ServicePricingManagerProps {
   isLoading?: boolean;
   /** Filter by category */
   categories?: string[];
+  /** Enables inline note editing; a rejected promise restores the previous note */
+  onNoteChange?: (serviceId: string, note: string) => void | Promise<void>;
+  /** Link to the service's catalog entry; return undefined to omit it */
+  getServiceHref?: (service: ServicePrice) => string | undefined;
+  /** Adds an expand toggle per row revealing this content */
+  renderServiceDetails?: (service: ServicePrice) => React.ReactNode;
+  /** Override user-facing strings for notes, custom badge, catalog link and details */
+  labels?: Partial<ServicePricingManagerLabels>;
   /** Additional CSS classes */
   className?: string;
+}
+
+interface ServiceNoteProps {
+  service: ServicePrice;
+  onNoteChange?: ServicePricingManagerProps['onNoteChange'];
+  labels: ServicePricingManagerLabels;
+}
+
+/** Note display with optional inline edit; optimistic while `onNoteChange` is pending. */
+function ServiceNote({ service, onNoteChange, labels }: ServiceNoteProps) {
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState('');
+  const [pending, setPending] = React.useState<string | null>(null);
+  const [failed, setFailed] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const cancelRef = React.useRef(false);
+  const refocusRef = React.useRef(false);
+  const note = pending ?? service.note ?? '';
+
+  React.useEffect(() => {
+    if (editing) inputRef.current?.focus();
+    else if (refocusRef.current) {
+      refocusRef.current = false;
+      buttonRef.current?.focus();
+    }
+  }, [editing]);
+
+  if (!onNoteChange) {
+    return note ? (
+      <p className="text-muted-foreground text-sm">{note}</p>
+    ) : null;
+  }
+
+  const commit = async () => {
+    setEditing(false);
+    const next = draft.trim();
+    if (cancelRef.current || next === (service.note ?? '')) {
+      cancelRef.current = false;
+      return;
+    }
+    setPending(next);
+    setFailed(false);
+    try {
+      await onNoteChange(service.id, next);
+    } catch {
+      setFailed(true);
+    } finally {
+      setPending(null);
+    }
+  };
+
+  return (
+    <div data-slot="service-pricing-note" className="mt-1">
+      {editing ? (
+        <Input
+          ref={inputRef}
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={() => void commit()}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter' && e.key !== 'Escape') return;
+            e.preventDefault();
+            cancelRef.current = e.key === 'Escape';
+            refocusRef.current = true;
+            e.currentTarget.blur();
+          }}
+          placeholder={labels.notePlaceholder}
+          aria-label={labels.noteLabel(service.serviceName)}
+          size="sm"
+        />
+      ) : (
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={() => {
+            if (pending !== null) return;
+            setDraft(note);
+            setEditing(true);
+          }}
+          // aria-disabled (not disabled) keeps focus on the button while saving
+          aria-disabled={pending !== null}
+          aria-busy={pending !== null}
+          aria-label={`${labels.noteLabel(service.serviceName)}: ${note || labels.addNote}`}
+          className={cn(
+            'w-full truncate rounded text-start text-sm',
+            'hover:text-primary-600 dark:hover:text-primary-400',
+            'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+            'aria-disabled:opacity-60',
+            note ? 'text-muted-foreground' : 'text-muted-foreground text-xs'
+          )}
+        >
+          {note || labels.addNote}
+        </button>
+      )}
+      {failed && (
+        <p
+          role="alert"
+          className="text-destructive-700 dark:text-destructive-400 text-xs"
+        >
+          {labels.noteSaveError}
+        </p>
+      )}
+    </div>
+  );
 }
 
 /**
@@ -66,8 +210,23 @@ export function ServicePricingManager({
   isSaving = false,
   isLoading = false,
   categories: _categories = [],
+  onNoteChange,
+  getServiceHref,
+  renderServiceDetails,
+  labels: labelsProp,
   className = '',
 }: ServicePricingManagerProps) {
+  const labels = { ...DEFAULT_SERVICE_PRICING_MANAGER_LABELS, ...labelsProp };
+  const detailsIdPrefix = React.useId();
+  const [expandedIds, setExpandedIds] = React.useState<ReadonlySet<string>>(
+    () => new Set()
+  );
+  const toggleExpanded = (id: string) =>
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
     null
@@ -265,87 +424,161 @@ export function ServicePricingManager({
                   <div className="text-end">Actions</div>
                 </div>
 
-                {filteredServices.map((service) => (
-                  <div
-                    key={service.id}
-                    data-slot="service-pricing-row"
-                    className="items-center gap-4 py-4 md:grid md:grid-cols-6"
-                  >
-                    {/* Service info */}
-                    <div className="col-span-2 mb-2 md:mb-0">
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {service.serviceName}
-                      </p>
-                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                        {service.serviceCode && (
-                          <span>{service.serviceCode}</span>
+                {filteredServices.map((service, index) => {
+                  const href = getServiceHref?.(service);
+                  const expanded = expandedIds.has(service.id);
+                  // Row position, not `service.id`: an ID with whitespace would
+                  // turn the `aria-controls` IDREF into a multi-ID list.
+                  const detailsId = `${detailsIdPrefix}-details-${index}`;
+                  return (
+                    <div
+                      key={service.id}
+                      data-slot="service-pricing-row"
+                      className="items-center gap-4 py-4 md:grid md:grid-cols-6"
+                    >
+                      {/* Service info */}
+                      <div className="col-span-2 mb-2 min-w-0 md:mb-0">
+                        <div className="flex items-center gap-2">
+                          {renderServiceDetails && (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpanded(service.id)}
+                              aria-expanded={expanded}
+                              aria-controls={detailsId}
+                              aria-label={(expanded
+                                ? labels.hideDetails
+                                : labels.showDetails)(service.serviceName)}
+                              className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring flex h-6 w-6 shrink-0 items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none"
+                            >
+                              <ChevronRight
+                                aria-hidden
+                                className={cn(
+                                  'h-4 w-4 transition-transform motion-reduce:transition-none rtl:-scale-x-100',
+                                  expanded && 'rotate-90 rtl:-rotate-90'
+                                )}
+                              />
+                            </button>
+                          )}
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {service.serviceName}
+                          </p>
+                          {service.isCustom && (
+                            <Badge
+                              variant="warning"
+                              size="sm"
+                              title={labels.customDescription}
+                            >
+                              {labels.custom}
+                              <span className="sr-only">
+                                {`: ${labels.customDescription}`}
+                              </span>
+                            </Badge>
+                          )}
+                          {href && (
+                            <a
+                              href={href}
+                              aria-label={labels.viewInCatalog(
+                                service.serviceName
+                              )}
+                              title={labels.viewInCatalog(service.serviceName)}
+                              className="text-muted-foreground hover:text-primary-600 dark:hover:text-primary-400 focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none"
+                            >
+                              <ExternalLink
+                                aria-hidden
+                                className="h-3.5 w-3.5"
+                              />
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                          {service.serviceCode && (
+                            <span>{service.serviceCode}</span>
+                          )}
+                          {service.category && (
+                            <Badge variant="secondary">
+                              {service.category}
+                            </Badge>
+                          )}
+                        </div>
+                        <ServiceNote
+                          service={service}
+                          onNoteChange={onNoteChange}
+                          labels={labels}
+                        />
+                      </div>
+
+                      {/* Base price */}
+                      <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
+                        <span className="text-muted-foreground text-sm md:hidden">
+                          Base:
+                        </span>
+                        <p className="text-end font-semibold text-gray-900 dark:text-white">
+                          {formatCurrency(service.basePrice)}
+                        </p>
+                      </div>
+
+                      {/* Employer price */}
+                      <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
+                        <span className="text-muted-foreground text-sm md:hidden">
+                          Employer:
+                        </span>
+                        <p className="text-muted-foreground text-end">
+                          {service.employerPrice
+                            ? formatCurrency(service.employerPrice)
+                            : '—'}
+                        </p>
+                      </div>
+
+                      {/* Status */}
+                      <div className="mb-2 flex items-center md:mb-0 md:justify-center">
+                        <span className="text-muted-foreground me-2 text-sm md:hidden">
+                          Status:
+                        </span>
+                        <Badge
+                          variant={service.isActive ? 'success' : 'secondary'}
+                        >
+                          {service.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex justify-end gap-2">
+                        {onToggleStatus && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              onToggleStatus(service.id, !service.isActive)
+                            }
+                          >
+                            {service.isActive ? 'Deactivate' : 'Activate'}
+                          </Button>
                         )}
-                        {service.category && (
-                          <Badge variant="secondary">{service.category}</Badge>
+                        {onUpdatePrice && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            leftIcon={<PencilIcon className="h-3.5 w-3.5" />}
+                            onClick={() => handleEditClick(service)}
+                          >
+                            Edit
+                          </Button>
                         )}
                       </div>
-                    </div>
 
-                    {/* Base price */}
-                    <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
-                      <span className="text-muted-foreground text-sm md:hidden">
-                        Base:
-                      </span>
-                      <p className="text-end font-semibold text-gray-900 dark:text-white">
-                        {formatCurrency(service.basePrice)}
-                      </p>
-                    </div>
-
-                    {/* Employer price */}
-                    <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
-                      <span className="text-muted-foreground text-sm md:hidden">
-                        Employer:
-                      </span>
-                      <p className="text-muted-foreground text-end">
-                        {service.employerPrice
-                          ? formatCurrency(service.employerPrice)
-                          : '—'}
-                      </p>
-                    </div>
-
-                    {/* Status */}
-                    <div className="mb-2 flex items-center md:mb-0 md:justify-center">
-                      <span className="text-muted-foreground me-2 text-sm md:hidden">
-                        Status:
-                      </span>
-                      <Badge
-                        variant={service.isActive ? 'success' : 'secondary'}
-                      >
-                        {service.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex justify-end gap-2">
-                      {onToggleStatus && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            onToggleStatus(service.id, !service.isActive)
-                          }
+                      {renderServiceDetails && (
+                        <div
+                          id={detailsId}
+                          data-slot="service-pricing-details"
+                          hidden={!expanded}
+                          className="bg-muted/40 mt-3 rounded-md p-3 text-sm md:col-span-6 md:mt-0"
                         >
-                          {service.isActive ? 'Deactivate' : 'Activate'}
-                        </Button>
-                      )}
-                      {onUpdatePrice && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          leftIcon={<PencilIcon className="h-3.5 w-3.5" />}
-                          onClick={() => handleEditClick(service)}
-                        >
-                          Edit
-                        </Button>
+                          {expanded && renderServiceDetails(service)}
+                        </div>
                       )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

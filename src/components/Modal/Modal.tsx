@@ -58,6 +58,10 @@ const modalContentVariants = cva(
     // Full viewport height on mobile, constrained on larger screens
     'max-h-dvh sm:max-h-[calc(100dvh-2rem)]',
     'min-h-dvh sm:min-h-0',
+    // Full-screen on mobile covers the status bar and home indicator, so
+    // clear the safe areas there. Overridable for tests and native shells.
+    'pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))] sm:pt-0',
+    'pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))] sm:pb-0',
     // If a <form> is used as a direct child (wrapping ModalBody + ModalFooter),
     // make it participate in the flex column layout so overflow constraints work.
     '[&>form]:flex [&>form]:flex-col [&>form]:flex-1 [&>form]:min-h-0',

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import {
@@ -70,5 +70,59 @@ describe('Collapsible', () => {
     const region = screen.getByText('Always mounted');
     expect(region).toBeInTheDocument();
     expect(region).toHaveAttribute('hidden');
+  });
+
+  describe('storageKey', () => {
+    beforeEach(() => window.localStorage.clear());
+
+    it('restores and persists the open state', () => {
+      window.localStorage.setItem('advanced', 'true');
+      const { unmount } = renderCollapsible({ storageKey: 'advanced' });
+      expect(screen.getByText('Hidden content')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button'));
+      expect(window.localStorage.getItem('advanced')).toBe('false');
+      unmount();
+      renderCollapsible({ storageKey: 'advanced', defaultOpen: true });
+      expect(screen.queryByText('Hidden content')).not.toBeInTheDocument();
+    });
+
+    it('ignores storage when controlled', () => {
+      window.localStorage.setItem('advanced', 'true');
+      renderCollapsible({
+        storageKey: 'advanced',
+        open: false,
+        onOpenChange: vi.fn(),
+      });
+      expect(screen.queryByText('Hidden content')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button'));
+      expect(window.localStorage.getItem('advanced')).toBe('true');
+    });
+
+    it('swallows storage errors', () => {
+      // Only block this key: other effects (e.g. useTheme) read storage too.
+      const proto = globalThis.Storage.prototype;
+      const realGet = proto.getItem;
+      const realSet = proto.setItem;
+      const spy = vi.spyOn(proto, 'getItem').mockImplementation(function (
+        this: typeof proto,
+        key: string
+      ) {
+        if (key === 'advanced') throw new Error('blocked');
+        return realGet.call(this, key);
+      });
+      const setSpy = vi.spyOn(proto, 'setItem').mockImplementation(function (
+        this: typeof proto,
+        key,
+        value
+      ) {
+        if (key === 'advanced') throw new Error('blocked');
+        realSet.call(this, key, value);
+      });
+      renderCollapsible({ storageKey: 'advanced' });
+      fireEvent.click(screen.getByRole('button'));
+      expect(screen.getByText('Hidden content')).toBeInTheDocument();
+      spy.mockRestore();
+      setSpy.mockRestore();
+    });
   });
 });

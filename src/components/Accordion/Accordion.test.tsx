@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { Accordion, type AccordionItem } from './Accordion';
@@ -126,5 +126,65 @@ describe('Accordion', () => {
       'aria-expanded',
       'false'
     );
+  });
+
+  describe('storageKey', () => {
+    beforeEach(() => window.localStorage.clear());
+
+    const expanded = (name: string) =>
+      screen.getByRole('button', { name }).getAttribute('aria-expanded');
+
+    it('skips stored ids for removed items in single mode', () => {
+      window.localStorage.setItem('faq', JSON.stringify(['removed', 'b']));
+      renderWithTheme(<Accordion items={ITEMS} storageKey="faq" />);
+      expect(expanded('Question B')).toBe('true');
+    });
+
+    it('restores and persists the open ids', () => {
+      window.localStorage.setItem('faq', JSON.stringify(['b']));
+      const { unmount } = renderWithTheme(
+        <Accordion
+          items={ITEMS}
+          type="multiple"
+          storageKey="faq"
+          defaultOpenIds={['a']}
+        />
+      );
+      expect(expanded('Question A')).toBe('false');
+      expect(expanded('Question B')).toBe('true');
+      fireEvent.click(screen.getByRole('button', { name: 'Question A' }));
+      expect(JSON.parse(window.localStorage.getItem('faq')!)).toEqual([
+        'b',
+        'a',
+      ]);
+      unmount();
+      renderWithTheme(
+        <Accordion items={ITEMS} type="multiple" storageKey="faq" />
+      );
+      expect(expanded('Question A')).toBe('true');
+    });
+
+    it('falls back to defaultOpenIds on a corrupt value', () => {
+      window.localStorage.setItem('faq', '{not json');
+      renderWithTheme(
+        <Accordion items={ITEMS} storageKey="faq" defaultOpenIds={['a']} />
+      );
+      expect(expanded('Question A')).toBe('true');
+    });
+
+    it('ignores storage when controlled', () => {
+      window.localStorage.setItem('faq', JSON.stringify(['b']));
+      renderWithTheme(
+        <Accordion
+          items={ITEMS}
+          storageKey="faq"
+          openIds={['a']}
+          onOpenChange={vi.fn()}
+        />
+      );
+      expect(expanded('Question B')).toBe('false');
+      fireEvent.click(screen.getByRole('button', { name: 'Question B' }));
+      expect(window.localStorage.getItem('faq')).toBe(JSON.stringify(['b']));
+    });
   });
 });

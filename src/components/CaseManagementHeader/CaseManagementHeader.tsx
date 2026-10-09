@@ -242,7 +242,7 @@ export const CaseContextBar = React.forwardRef<
         )}
         <div className="ms-auto flex items-center gap-4">
           {editingUsers && editingUsers.length > 0 && (
-            <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <span className="text-primary-900 dark:text-primary-100 flex items-center gap-1.5 text-xs">
               <UsersIcon size={14} aria-hidden="true" className="shrink-0" />
               {l.editing(editingUsers)}
             </span>

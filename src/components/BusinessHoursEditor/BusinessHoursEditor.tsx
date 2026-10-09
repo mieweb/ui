@@ -14,6 +14,11 @@ import {
   type DaySchedule,
   type HoursRule,
 } from './scheduleRules';
+import {
+  formatTimeInput,
+  normalizeClosingTime,
+  parseTimeInput,
+} from './timeInput';
 
 // ============================================================================
 // Types
@@ -21,6 +26,31 @@ import {
 
 export type { DaySchedule, TimeSlot } from './scheduleRules';
 export { rulesToSchedule, scheduleToRules } from './scheduleRules';
+export {
+  BUSINESS_HOURS_END_OF_DAY,
+  normalizeClosingTime,
+  parseTimeInput,
+} from './timeInput';
+
+export interface BusinessHoursEditorLabels {
+  copy: string;
+  copyToAllDays: string;
+  copyToWeekdays: string;
+  closed: string;
+  /** Shown under a typed time that can't be parsed (`timeEntry="text"`) */
+  invalidTime: string;
+  /** Placeholder for typed time fields (`timeEntry="text"`) */
+  timePlaceholder: string;
+}
+
+export const DEFAULT_BUSINESS_HOURS_EDITOR_LABELS: BusinessHoursEditorLabels = {
+  copy: 'Copy',
+  copyToAllDays: 'Copy to all days',
+  copyToWeekdays: 'Copy to weekdays',
+  closed: 'Closed',
+  invalidTime: 'Enter a time like 9am, 5:30 pm or 17:30',
+  timePlaceholder: 'e.g. 9am',
+};
 
 export interface BusinessHoursEditorProps {
   /** Current schedule data */
@@ -46,6 +76,14 @@ export interface BusinessHoursEditorProps {
   className?: string;
   /** Label for add hours button */
   addHoursLabel?: string;
+  /**
+   * How times are entered:
+   * - 'picker' (default): native time input ('days') or DateInput picker ('rules')
+   * - 'text': a text field that accepts "5pm", "1159pm", "9a", "17:30" and normalises to HH:MM on blur/Enter
+   */
+  timeEntry?: 'picker' | 'text';
+  /** Override user-facing strings */
+  labels?: Partial<BusinessHoursEditorLabels>;
 }
 
 // ============================================================================
@@ -84,6 +122,68 @@ function ensureAllDays(schedule: DaySchedule[]): DaySchedule[] {
   return result;
 }
 
+interface TimeTextInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  use24Hour: boolean;
+  disabled?: boolean;
+  label: string;
+  labels: BusinessHoursEditorLabels;
+}
+
+/** Free-typed time field: keeps the draft while typing, commits a parsed HH:MM on blur/Enter. */
+function TimeTextInput({
+  value,
+  onChange,
+  use24Hour,
+  disabled,
+  label,
+  labels,
+}: TimeTextInputProps) {
+  const [draft, setDraft] = React.useState<string | null>(null);
+  const [invalid, setInvalid] = React.useState(false);
+
+  const reset = () => {
+    setDraft(null);
+    setInvalid(false);
+  };
+
+  const commit = () => {
+    if (draft === null) return;
+    if (!draft.trim()) return reset();
+    const parsed = parseTimeInput(draft);
+    if (!parsed) return setInvalid(true);
+    reset();
+    if (parsed !== value) onChange(parsed);
+  };
+
+  return (
+    <Input
+      type="text"
+      autoComplete="off"
+      value={draft ?? formatTimeInput(value, use24Hour)}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        setInvalid(false);
+      }}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          commit();
+        } else if (e.key === 'Escape' && draft !== null) {
+          reset();
+        }
+      }}
+      placeholder={labels.timePlaceholder}
+      error={invalid ? labels.invalidTime : undefined}
+      disabled={disabled}
+      className="text-sm"
+      aria-label={label}
+    />
+  );
+}
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -113,11 +213,14 @@ function BusinessHoursDaysEditor({
   onChange,
   disabled = false,
   showDescription = true,
-  use24Hour: _use24Hour = false,
+  use24Hour = false,
   weekStartsOn = 0,
   className,
   addHoursLabel = 'Add Hours',
+  timeEntry = 'picker',
+  labels: labelsProp,
 }: BusinessHoursVariantProps) {
+  const labels = { ...DEFAULT_BUSINESS_HOURS_EDITOR_LABELS, ...labelsProp };
   // Ensure all 7 days are present
   const schedule = ensureAllDays(value);
   const orderedDays = getOrderedDays(weekStartsOn);
@@ -158,16 +261,20 @@ function BusinessHoursDaysEditor({
       field: 'start' | 'end' | 'description',
       value: string
     ) => {
-      const newSchedule = [...schedule];
-      const daySchedule = newSchedule.find((d) => d.day === dayIndex);
-
-      if (daySchedule && daySchedule.hours[slotIndex]) {
-        daySchedule.hours[slotIndex] = {
-          ...daySchedule.hours[slotIndex],
-          [field]: value,
-        };
-        onChange(newSchedule);
-      }
+      const slot = schedule.find((d) => d.day === dayIndex)?.hours[slotIndex];
+      if (!slot) return;
+      const next = { ...slot, [field]: value };
+      next.end = normalizeClosingTime(next.start, next.end);
+      onChange(
+        schedule.map((day) =>
+          day.day === dayIndex
+            ? {
+                ...day,
+                hours: day.hours.map((s, i) => (i === slotIndex ? next : s)),
+              }
+            : day
+        )
+      );
     },
     [schedule, onChange]
   );
@@ -256,7 +363,7 @@ function BusinessHoursDaysEditor({
                         className="text-xs"
                       >
                         <CopyIcon className="me-1 h-3 w-3" />
-                        Copy
+                        {labels.copy}
                       </Button>
                     }
                   >
@@ -264,13 +371,13 @@ function BusinessHoursDaysEditor({
                       onClick={() => handleCopyToAll(dayIndex)}
                       disabled={disabled}
                     >
-                      Copy to all days
+                      {labels.copyToAllDays}
                     </DropdownItem>
                     <DropdownItem
                       onClick={() => handleCopyToWeekdays(dayIndex)}
                       disabled={disabled}
                     >
-                      Copy to weekdays
+                      {labels.copyToWeekdays}
                     </DropdownItem>
                   </Dropdown>
                 )}
@@ -294,7 +401,7 @@ function BusinessHoursDaysEditor({
                 data-slot="business-hours-closed"
                 className="text-muted-foreground text-sm italic"
               >
-                Closed
+                {labels.closed}
               </p>
             ) : (
               <div data-slot="business-hours-slots" className="space-y-2">
@@ -305,22 +412,39 @@ function BusinessHoursDaysEditor({
                     className="flex flex-wrap items-center gap-2 sm:flex-nowrap"
                   >
                     {/* Start Time */}
-                    <div className="w-24 sm:w-28">
-                      <Input
-                        type="time"
-                        value={slot.start}
-                        onChange={(e) =>
-                          handleTimeChange(
-                            dayIndex,
-                            slotIndex,
-                            'start',
-                            e.target.value
-                          )
-                        }
-                        disabled={disabled}
-                        className="text-sm"
-                        aria-label={`${DAY_NAMES_SHORT[dayIndex]} start time`}
-                      />
+                    <div
+                      className={
+                        timeEntry === 'text' ? 'w-28 sm:w-32' : 'w-24 sm:w-28'
+                      }
+                    >
+                      {timeEntry === 'text' ? (
+                        <TimeTextInput
+                          value={slot.start}
+                          onChange={(time) =>
+                            handleTimeChange(dayIndex, slotIndex, 'start', time)
+                          }
+                          use24Hour={use24Hour}
+                          disabled={disabled}
+                          label={`${DAY_NAMES_SHORT[dayIndex]} start time`}
+                          labels={labels}
+                        />
+                      ) : (
+                        <Input
+                          type="time"
+                          value={slot.start}
+                          onChange={(e) =>
+                            handleTimeChange(
+                              dayIndex,
+                              slotIndex,
+                              'start',
+                              e.target.value
+                            )
+                          }
+                          disabled={disabled}
+                          className="text-sm"
+                          aria-label={`${DAY_NAMES_SHORT[dayIndex]} start time`}
+                        />
+                      )}
                     </div>
 
                     <span
@@ -331,22 +455,39 @@ function BusinessHoursDaysEditor({
                     </span>
 
                     {/* End Time */}
-                    <div className="w-24 sm:w-28">
-                      <Input
-                        type="time"
-                        value={slot.end}
-                        onChange={(e) =>
-                          handleTimeChange(
-                            dayIndex,
-                            slotIndex,
-                            'end',
-                            e.target.value
-                          )
-                        }
-                        disabled={disabled}
-                        className="text-sm"
-                        aria-label={`${DAY_NAMES_SHORT[dayIndex]} end time`}
-                      />
+                    <div
+                      className={
+                        timeEntry === 'text' ? 'w-28 sm:w-32' : 'w-24 sm:w-28'
+                      }
+                    >
+                      {timeEntry === 'text' ? (
+                        <TimeTextInput
+                          value={slot.end}
+                          onChange={(time) =>
+                            handleTimeChange(dayIndex, slotIndex, 'end', time)
+                          }
+                          use24Hour={use24Hour}
+                          disabled={disabled}
+                          label={`${DAY_NAMES_SHORT[dayIndex]} end time`}
+                          labels={labels}
+                        />
+                      ) : (
+                        <Input
+                          type="time"
+                          value={slot.end}
+                          onChange={(e) =>
+                            handleTimeChange(
+                              dayIndex,
+                              slotIndex,
+                              'end',
+                              e.target.value
+                            )
+                          }
+                          disabled={disabled}
+                          className="text-sm"
+                          aria-label={`${DAY_NAMES_SHORT[dayIndex]} end time`}
+                        />
+                      )}
                     </div>
 
                     {/* Description */}
@@ -421,7 +562,10 @@ function BusinessHoursRulesEditor({
   weekStartsOn = 0,
   className,
   addHoursLabel = 'Add Hours',
+  timeEntry = 'picker',
+  labels: labelsProp,
 }: BusinessHoursVariantProps) {
+  const labels = { ...DEFAULT_BUSINESS_HOURS_EDITOR_LABELS, ...labelsProp };
   // Rules are internal state so draft rows (no days selected yet) survive, and
   // rows keep their identity while editing. External value changes re-derive.
   const [rules, setRules] = React.useState<HoursRule[]>(() =>
@@ -486,9 +630,11 @@ function BusinessHoursRulesEditor({
   const handleRuleChange = useCallback(
     (ruleId: string, field: 'start' | 'end' | 'description', value: string) => {
       emit(
-        rules.map((rule) =>
-          rule.id === ruleId ? { ...rule, [field]: value } : rule
-        )
+        rules.map((rule) => {
+          if (rule.id !== ruleId) return rule;
+          const next = { ...rule, [field]: value };
+          return { ...next, end: normalizeClosingTime(next.start, next.end) };
+        })
       );
     },
     [emit, rules]
@@ -541,18 +687,29 @@ function BusinessHoursRulesEditor({
 
           {/* Start Time */}
           <div className="w-32 sm:w-36">
-            <DateInput
-              inputType="time"
-              timeFormat={timeFormat}
-              minuteStep={15}
-              value={rule.start}
-              onChange={(time) => handleRuleChange(rule.id, 'start', time)}
-              disabled={disabled}
-              size="sm"
-              className="text-sm"
-              label="Start time"
-              hideLabel
-            />
+            {timeEntry === 'text' ? (
+              <TimeTextInput
+                value={rule.start}
+                onChange={(time) => handleRuleChange(rule.id, 'start', time)}
+                use24Hour={use24Hour}
+                disabled={disabled}
+                label="Start time"
+                labels={labels}
+              />
+            ) : (
+              <DateInput
+                inputType="time"
+                timeFormat={timeFormat}
+                minuteStep={15}
+                value={rule.start}
+                onChange={(time) => handleRuleChange(rule.id, 'start', time)}
+                disabled={disabled}
+                size="sm"
+                className="text-sm"
+                label="Start time"
+                hideLabel
+              />
+            )}
           </div>
 
           <span data-slot="business-hours-separator" className="text-gray-400">
@@ -561,18 +718,29 @@ function BusinessHoursRulesEditor({
 
           {/* End Time */}
           <div className="w-32 sm:w-36">
-            <DateInput
-              inputType="time"
-              timeFormat={timeFormat}
-              minuteStep={15}
-              value={rule.end}
-              onChange={(time) => handleRuleChange(rule.id, 'end', time)}
-              disabled={disabled}
-              size="sm"
-              className="text-sm"
-              label="End time"
-              hideLabel
-            />
+            {timeEntry === 'text' ? (
+              <TimeTextInput
+                value={rule.end}
+                onChange={(time) => handleRuleChange(rule.id, 'end', time)}
+                use24Hour={use24Hour}
+                disabled={disabled}
+                label="End time"
+                labels={labels}
+              />
+            ) : (
+              <DateInput
+                inputType="time"
+                timeFormat={timeFormat}
+                minuteStep={15}
+                value={rule.end}
+                onChange={(time) => handleRuleChange(rule.id, 'end', time)}
+                disabled={disabled}
+                size="sm"
+                className="text-sm"
+                label="End time"
+                hideLabel
+              />
+            )}
           </div>
 
           {/* Description */}

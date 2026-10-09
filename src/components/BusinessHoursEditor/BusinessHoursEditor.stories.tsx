@@ -20,12 +20,13 @@ const meta: Meta<typeof BusinessHoursEditor> = {
       description: {
         component: `### What it's for
 
-The **editor for weekly opening hours**. Controlled: \`value: DaySchedule[]\` (\`{ day: 0–6, hours: TimeSlot[] }\`, \`TimeSlot = { id?, start: 'HH:MM', end: 'HH:MM', description? }\`) and \`onChange(schedule)\`. Two layouts via \`variant\`: \`'days'\` (default) lists all seven days, each with "Add Hours", per-slot start/end native time inputs, an optional description and a Copy menu ("Copy to all days" / "Copy to weekdays"); \`'rules'\` shows compact rows of day toggles + one time range (Mon/Wed/Fri 8:00–11:00) using \`DateInput inputType="time"\` with 15-minute steps, and emits the same \`DaySchedule[]\`. \`weekStartsOn\` (\`0\` | \`1\`) reorders days, \`showDescription\` hides the note field, \`use24Hour\` affects the rules variant's pickers, \`disabled\` freezes everything, \`addHoursLabel\` renames the add button. Helpers: \`createDefaultSchedule()\` (Mon–Fri 09:00–17:00), \`createWeekdaySchedule(start, end)\`, \`create24HourSchedule()\`. Types \`DaySchedule\`, \`TimeSlot\`.
+The **editor for weekly opening hours**. Controlled: \`value: DaySchedule[]\` (\`{ day: 0–6, hours: TimeSlot[] }\`, \`TimeSlot = { id?, start: 'HH:MM', end: 'HH:MM', description? }\`) and \`onChange(schedule)\`. Two layouts via \`variant\`: \`'days'\` (default) lists all seven days, each with "Add Hours", per-slot start/end native time inputs, an optional description and a Copy menu ("Copy to all days" / "Copy to weekdays"); \`'rules'\` shows compact rows of day toggles + one time range (Mon/Wed/Fri 8:00–11:00) using \`DateInput inputType="time"\` with 15-minute steps, and emits the same \`DaySchedule[]\`. \`weekStartsOn\` (\`0\` | \`1\`) reorders days, \`showDescription\` hides the note field, \`use24Hour\` affects the rules variant's pickers and typed-time display, \`disabled\` freezes everything, \`addHoursLabel\` renames the add button. \`timeEntry="text"\` swaps the time controls in either variant for text fields that accept "5pm", "5 pm", "1159pm", "9a", "12am", "17:30" or "1730" and normalise to \`HH:MM\` on blur/Enter (the parser is exported as \`parseTimeInput\`). In both entry modes a closing time of \`00:00\` after a real opening time is stored as end of day (\`23:59\`, \`BUSINESS_HOURS_END_OF_DAY\`) rather than read as closed — see \`normalizeClosingTime\`. Helpers: \`createDefaultSchedule()\` (Mon–Fri 09:00–17:00), \`createWeekdaySchedule(start, end)\`, \`create24HourSchedule()\`. Types \`DaySchedule\`, \`TimeSlot\`, \`BusinessHoursEditorLabels\`.
 
 ### Use it when
 
 - Admin or provider settings let someone **define recurring hours** — clinic hours, employer contact hours, on-call windows — including split shifts.
 - Several days share the same hours and you want the fast grouped entry (\`variant="rules"\`).
+- Staff enter hours from a printed sheet or phone call and type faster than they pick (\`timeEntry="text"\`).
 
 ### Don't use it when
 
@@ -53,11 +54,11 @@ const [hours, setHours] = useState<DaySchedule[]>(() => provider.hours ?? create
 
 ### Limitations
 
-- Accessibility: days variant — time and description \`Input\`s carry \`aria-label\`s ("Mon start time", "Mon end time", "Mon description"), remove buttons \`aria-label="Remove Mon time slot"\`; day names are \`<h4>\`s. Rules variant — each row is a \`<fieldset>\` with an sr-only legend "Availability rule"; day toggles are \`<button aria-pressed aria-label="Monday">\`; time pickers are \`DateInput\` with a hidden label ("Start time" / "End time"). No live-region announcement when rows are added/removed; no keyboard shortcuts beyond native controls.
-- **No validation**: end may precede start, ranges may overlap, a rule with no days selected is silently dropped from the emitted schedule (kept only as a draft row). Days-variant \`Input type="time"\` renders the browser's native time control (locale/format decided by the browser, \`use24Hour\` ignored there).
-- State: the days variant **mutates the day objects inside \`value\` in place** before calling \`onChange\` (\`daySchedule.hours = …\`) — hosts relying on reference equality of nested objects or frozen state should clone before passing. The rules variant keeps its own row state and re-derives when the normalized \`value\` changes.
+- Accessibility: days variant — time and description \`Input\`s carry \`aria-label\`s ("Mon start time", "Mon end time", "Mon description"), remove buttons \`aria-label="Remove Mon time slot"\`; day names are \`<h4>\`s. Rules variant — each row is a \`<fieldset>\` with an sr-only legend "Availability rule"; day toggles are \`<button aria-pressed aria-label="Monday">\`; time pickers are \`DateInput\` with a hidden label ("Start time" / "End time"). With \`timeEntry="text"\` each time is a text \`Input\` with the same \`aria-label\`; an unparseable entry keeps the draft, sets \`aria-invalid\` and shows \`labels.invalidTime\` in a \`role="alert"\` message; Escape reverts the draft. No live-region announcement when rows are added/removed; no keyboard shortcuts beyond native controls.
+- **No validation** beyond typed-time parsing: end may precede start, ranges may overlap, a rule with no days selected is silently dropped from the emitted schedule (kept only as a draft row). Days-variant picker mode renders the browser's native time control (locale/format decided by the browser, \`use24Hour\` ignored there).
+- State: "Add Hours" and remove in the days variant **mutate the day objects inside \`value\` in place** before calling \`onChange\` (\`daySchedule.hours = …\`; time edits are immutable) — hosts relying on reference equality of nested objects or frozen state should clone before passing. The rules variant keeps its own row state and re-derives when the normalized \`value\` changes.
 - Time zones: times are naive \`HH:MM\` wall-clock strings; no zone is stored or offered.
-- i18n: hard-coded English — day names, "Closed", "Copy", "Copy to all days", "Copy to weekdays", "Description (optional)", "Availability rule", aria-labels; only \`addHoursLabel\` is a prop. Default new slot is 09:00–17:00.
+- i18n: \`labels\` (defaults in \`DEFAULT_BUSINESS_HOURS_EDITOR_LABELS\`) covers "Copy", "Copy to all days", "Copy to weekdays", "Closed", the typed-time placeholder and error; \`addHoursLabel\` renames the add button. Still hard-coded English: day names, "Description (optional)", "Availability rule", aria-labels. Typed entry understands English am/pm only. Default new slot is 09:00–17:00.
 - RTL: days variant icons use \`mr-1\` (physical); rules variant uses \`me-1\`. Theming: \`gray-*\` borders/headings and \`text-red-500\` remove buttons are hard-coded; rules toggles use \`bg-primary-800\` / \`border-border\` / \`hover:bg-muted\`. Depends on \`Button\`, \`Input\`, \`DateInput\`, \`Dropdown\`.`,
       },
     },
@@ -117,6 +118,17 @@ const [hours, setHours] = useState<DaySchedule[]>(() => provider.hours ?? create
     addHoursLabel: {
       control: 'text',
       description: 'Label for add hours button',
+    },
+    timeEntry: {
+      control: 'radio',
+      options: ['picker', 'text'],
+      description:
+        '\'picker\' (native / DateInput) or \'text\' (type "5pm", "1159pm", "17:30"; normalised on blur/Enter)',
+    },
+    labels: {
+      control: 'object',
+      description:
+        'Overrides for Copy menu, Closed, typed-time placeholder and error (DEFAULT_BUSINESS_HOURS_EDITOR_LABELS)',
     },
   },
   args: {
@@ -473,6 +485,35 @@ export const RulesVariantEmpty: Story = {
     showDescription: false,
     addHoursLabel: 'Add availability',
     use24Hour: true,
+    // @ts-expect-error story-only control for the preview display
+    groupPreview: true,
+  },
+};
+
+export const TypedTimeEntry: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: createDefaultSchedule(),
+    timeEntry: 'text',
+    showDescription: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Type times instead of picking them: "5pm", "5 pm", "1159pm", "9a", "12am", "17:30" all normalise to HH:MM on blur or Enter; Escape reverts. Try "12am" as a closing time — it is stored as 23:59 (end of day), not as closed. An unparseable entry such as "25:00" stays in the field with an error.',
+      },
+    },
+  },
+};
+
+export const TypedTimeEntryRules: Story = {
+  render: (args) => <RulesVariantWrapper {...args} />,
+  argTypes: rulesStoryArgTypes,
+  args: {
+    value: patientAvailability,
+    timeEntry: 'text',
+    showDescription: false,
     // @ts-expect-error story-only control for the preview display
     groupPreview: true,
   },

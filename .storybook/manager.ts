@@ -6,8 +6,8 @@ import {
   useStorybookState,
 } from 'storybook/manager-api';
 import { create } from 'storybook/theming/create';
-import { IconButton } from 'storybook/internal/components';
-import { GithubIcon, ShareAltIcon } from '@storybook/icons';
+import { Button } from 'storybook/internal/components';
+import { GithubIcon, MobileIcon, ShareAltIcon } from '@storybook/icons';
 import { buildArgsParam } from 'storybook/internal/router';
 import { serializeProjectGlobals } from './mobile-preview';
 
@@ -191,14 +191,42 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
   }
   return React.createElement(
     'span',
-    { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } },
-    item.name,
+    {
+      style: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        minWidth: 0,
+        maxWidth: '100%',
+      },
+    },
+    // Badged rows stay a single line: the name ellipsizes rather than
+    // word-wrapping into an oversized row; its full text sits in the tooltip.
+    React.createElement(
+      'span',
+      {
+        className: 'mieweb-sidebar-name',
+        title: item.name,
+        style: {
+          minWidth: 0,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        },
+      },
+      item.name
+    ),
     ...badges.map((tag) =>
       React.createElement(
         'span',
         {
           key: tag,
+          className: 'mieweb-sidebar-badge',
           'aria-label': TAG_BADGES[tag].label,
+          // Tooltip reveals the full text when the badge is truncated. For
+          // keyboard users the injected manager CSS un-truncates the badge
+          // while its row has :focus-visible (or :hover).
+          title: TAG_BADGES[tag].label,
           style: {
             fontSize: 9,
             lineHeight: '14px',
@@ -209,6 +237,15 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
             borderRadius: 999,
             color: '#fff',
             background: TAG_BADGES[tag].color,
+            // Never wrap; truncate with an ellipsis when space runs out (#533).
+            // The huge shrink factor makes the badge give up its space before
+            // the component name does.
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            minWidth: 0,
+            maxWidth: '100%',
+            flexShrink: 9999,
           },
         },
         TAG_BADGES[tag].label
@@ -240,14 +277,15 @@ addons.setConfig({
 // work for complete examples and the chrome-free full-screen mode, too.
 addons.register('mieweb-mobile-preview', (api) => {
   addons.add('mieweb-mobile-preview/tool', {
-    type: types.TOOLEXTRA,
+    type: types.TOOL,
     title: 'Open mobile sandbox',
     match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
-    render: () => React.createElement(IconButton, {
-      title: 'Open mobile sandbox',
-      'aria-label': 'Open mobile sandbox',
+    render: () => React.createElement(Button, {
+      variant: 'ghost',
+      size: 'small',
+      padding: 'small',
+      ariaLabel: 'Open mobile sandbox',
       className: 'mieweb-mobile-sandbox',
-      style: { minWidth: 44, minHeight: 40 },
       onClick: () => {
         const story = api.getCurrentStoryData();
         if (story?.type !== 'story' || story.refId) return;
@@ -264,7 +302,7 @@ addons.register('mieweb-mobile-preview', (api) => {
         url.searchParams.set('returnTo', managerHref);
         window.location.assign(url.href);
       },
-    }, React.createElement('span', null, 'Sandbox')),
+    }, React.createElement(MobileIcon)),
   });
 });
 
@@ -317,7 +355,7 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
        view. The same button remains in the normal toolbar on desktop. */
     @media (max-width: 599px) {
       .sb-bar:has(.mieweb-mobile-sandbox) {
-        max-width: calc(100% - 84px);
+        max-width: calc(100% - 48px);
       }
 
       [role="toolbar"] .mieweb-mobile-sandbox {
@@ -326,8 +364,8 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
         right: 0;
         z-index: 2;
         box-sizing: border-box;
-        width: 84px;
-        min-width: 84px !important;
+        width: 48px;
+        min-width: 48px !important;
         height: 40px;
         border-radius: 0;
         border-left: 1px solid var(--mieweb-manager-border);
@@ -384,6 +422,22 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     /* Sidebar item hover - row level so hovering 3-dot also highlights the row */
     [data-nodetype]:not([data-selected="true"]):hover {
       background-color: ${isDark ? `${brand.primary}20` : `${brand.primary}10`} !important;
+    }
+
+    /* Catalog badges (renderSidebarLabel) truncate first to keep the name
+       readable; hovering the row or keyboard-focusing its button flips the
+       shrink priority so badges reveal their text and the name ellipsizes
+       instead (#533 asks for the tooltip to be focus-reachable too). Badges
+       stay shrinkable (never flex-shrink: 0 / unbounded width), so even
+       multi-badge rows can't overflow the nav — they just share the space.
+       !important outranks the badge's inline flex-shrink. */
+    [data-nodetype]:hover .mieweb-sidebar-name,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-name {
+      flex-shrink: 9999;
+    }
+    [data-nodetype]:hover .mieweb-sidebar-badge,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-badge {
+      flex-shrink: 1 !important;
     }
     
     /* Toolbar selected button */
@@ -619,8 +673,14 @@ function GitHubSourceTool() {
     .join('/')}`;
 
   return React.createElement(
-    IconButton,
-    { asChild: true, ariaLabel: 'View source on GitHub' },
+    Button,
+    {
+      asChild: true,
+      variant: 'ghost',
+      size: 'small',
+      padding: 'small',
+      ariaLabel: 'View source on GitHub',
+    },
     React.createElement(
       'a',
       { href: githubUrl, target: '_blank', rel: 'noopener noreferrer' },
@@ -631,7 +691,7 @@ function GitHubSourceTool() {
 
 addons.register('mieweb-github-source', () => {
   addons.add('mieweb-github-source/tool', {
-    type: types.TOOLEXTRA,
+    type: types.TOOL,
     title: 'View source on GitHub',
     match: ({ viewMode, tabId }) =>
       (viewMode === 'story' || viewMode === 'docs') && !tabId,
@@ -644,16 +704,18 @@ addons.register('mieweb-github-source', () => {
 // preserved) in a new tab.
 addons.register('mieweb-open-in-new-tab', (api) => {
   addons.add('mieweb-open-in-new-tab/tool', {
-    type: types.TOOLEXTRA,
+    type: types.TOOL,
     title: 'Open canvas in new tab',
     match: ({ viewMode, tabId }) => viewMode === 'story' && !tabId,
     render: () =>
       React.createElement(
-        IconButton,
+        Button,
         {
           key: 'mieweb-open-in-new-tab',
-          title: 'Open canvas in new tab',
-          'aria-label': 'Open canvas in new tab',
+          variant: 'ghost',
+          size: 'small',
+          padding: 'small',
+          ariaLabel: 'Open canvas in new tab',
           onClick: () => {
             const { storyId } = api.getUrlState();
             if (!storyId) return;
