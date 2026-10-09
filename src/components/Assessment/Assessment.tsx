@@ -896,6 +896,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(
       null
     );
+    React.useEffect(() => {
+      if (addMode !== 'auto') setPendingFreeText(null);
+    }, [addMode]);
     // clears-then-sets so repeated identical messages re-announce
     const [announcement, setAnnouncement] = useLiveAnnouncement();
 

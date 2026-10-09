@@ -223,6 +223,51 @@ describe('Assessment actions', () => {
     );
   });
 
+  it('clears pending free text when addModes disables auto mode', () => {
+    const renderOrderSearch: NonNullable<
+      AssessmentProps['renderOrderSearch']
+    > = ({ onFreeText }) => (
+      <button type="button" onClick={() => onFreeText?.('uncoded entry')}>
+        Enter free text
+      </button>
+    );
+    const callbacks = {
+      onAddAssessment: vi.fn(),
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    };
+    const { rerender } = renderAssessment({
+      ...callbacks,
+      addModes: ['auto', 'problem'],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Enter free text' }));
+    expect(
+      screen.getByRole('group', { name: 'Add "uncoded entry" as' })
+    ).toBeInTheDocument();
+
+    rerender(
+      <Assessment
+        concerns={concerns}
+        items={items}
+        addModes={['problem']}
+        {...callbacks}
+      />
+    );
+    rerender(
+      <Assessment
+        concerns={concerns}
+        items={items}
+        addModes={['auto', 'problem']}
+        {...callbacks}
+      />
+    );
+
+    expect(
+      screen.queryByRole('group', { name: 'Add "uncoded entry" as' })
+    ).not.toBeInTheDocument();
+  });
+
   it('gives a nested order toolbar precedence over concern actions', () => {
     renderAssessment({
       orders,
