@@ -62,6 +62,8 @@ export interface EmailBlockPreviewProps {
   renderChild: (block: EmailContentBlock) => React.ReactNode;
   /** Shown in an empty column. */
   emptyColumnLabel: string;
+  /** Accessible names for the social block's icons, usually `labels.platforms`. */
+  platformLabels: Record<EmailSocialPlatform, string>;
 }
 
 /** WYSIWYG approximation of a block; the sent email comes from `renderEmailMjml`. */
@@ -70,6 +72,7 @@ export function EmailBlockPreview({
   design,
   renderChild,
   emptyColumnLabel,
+  platformLabels,
 }: EmailBlockPreviewProps) {
   const pad = '10px 25px';
   switch (block.type) {
@@ -186,7 +189,8 @@ export function EmailBlockPreview({
                 key={i}
                 width={size}
                 height={size}
-                aria-label={link.platform}
+                role="img"
+                aria-label={platformLabels[link.platform] ?? link.platform}
               />
             );
           })}

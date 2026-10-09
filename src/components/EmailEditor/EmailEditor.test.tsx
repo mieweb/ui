@@ -334,6 +334,9 @@ describe('EmailEditor', () => {
     expect(
       screen.getAllByRole('combobox', { name: 'Platform' })[0]
     ).toHaveTextContent('LinkedIn (es)');
+    // The canvas icons carry the same localised names.
+    expect(screen.getByRole('img', { name: 'LinkedIn (es)' })).toBeVisible();
+    expect(screen.getByRole('img', { name: 'Website' })).toBeVisible();
   });
 
   it('accepts label overrides', () => {

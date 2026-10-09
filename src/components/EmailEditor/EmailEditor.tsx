@@ -493,6 +493,7 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
         block={block}
         design={design}
         emptyColumnLabel={labels.emptyColumn}
+        platformLabels={labels.platforms}
         renderChild={(child) => {
           const column =
             block.type === 'columns'
