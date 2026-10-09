@@ -191,14 +191,42 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
   }
   return React.createElement(
     'span',
-    { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } },
-    item.name,
+    {
+      style: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        minWidth: 0,
+        maxWidth: '100%',
+      },
+    },
+    // Badged rows stay a single line: the name ellipsizes rather than
+    // word-wrapping into an oversized row; its full text sits in the tooltip.
+    React.createElement(
+      'span',
+      {
+        className: 'mieweb-sidebar-name',
+        title: item.name,
+        style: {
+          minWidth: 0,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        },
+      },
+      item.name
+    ),
     ...badges.map((tag) =>
       React.createElement(
         'span',
         {
           key: tag,
+          className: 'mieweb-sidebar-badge',
           'aria-label': TAG_BADGES[tag].label,
+          // Tooltip reveals the full text when the badge is truncated. For
+          // keyboard users the injected manager CSS un-truncates the badge
+          // while its row has :focus-visible (or :hover).
+          title: TAG_BADGES[tag].label,
           style: {
             fontSize: 9,
             lineHeight: '14px',
@@ -209,6 +237,15 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
             borderRadius: 999,
             color: '#fff',
             background: TAG_BADGES[tag].color,
+            // Never wrap; truncate with an ellipsis when space runs out (#533).
+            // The huge shrink factor makes the badge give up its space before
+            // the component name does.
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            minWidth: 0,
+            maxWidth: '100%',
+            flexShrink: 9999,
           },
         },
         TAG_BADGES[tag].label
@@ -385,6 +422,22 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     /* Sidebar item hover - row level so hovering 3-dot also highlights the row */
     [data-nodetype]:not([data-selected="true"]):hover {
       background-color: ${isDark ? `${brand.primary}20` : `${brand.primary}10`} !important;
+    }
+
+    /* Catalog badges (renderSidebarLabel) truncate first to keep the name
+       readable; hovering the row or keyboard-focusing its button flips the
+       shrink priority so badges reveal their text and the name ellipsizes
+       instead (#533 asks for the tooltip to be focus-reachable too). Badges
+       stay shrinkable (never flex-shrink: 0 / unbounded width), so even
+       multi-badge rows can't overflow the nav — they just share the space.
+       !important outranks the badge's inline flex-shrink. */
+    [data-nodetype]:hover .mieweb-sidebar-name,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-name {
+      flex-shrink: 9999;
+    }
+    [data-nodetype]:hover .mieweb-sidebar-badge,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-badge {
+      flex-shrink: 1 !important;
     }
     
     /* Toolbar selected button */
