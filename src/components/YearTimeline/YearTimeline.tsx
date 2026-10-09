@@ -299,6 +299,7 @@ export function YearTimeline({
         {/* month gridlines */}
         <div
           aria-hidden
+          data-slot="year-timeline-gridlines"
           className="pointer-events-none absolute inset-y-0 end-0 z-0 hidden md:block"
           style={{
             insetInlineStart: 'var(--yt-label)',

@@ -921,6 +921,24 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
           (await centerX('year-timeline-playhead'))
       )
     ).toBeLessThanOrEqual(1.5);
+    // The gridlines overlay must span exactly the month-scale column
+    // (inset by the label rail on the inline-start side) — reverting its
+    // insetInlineStart to physical `left` would misplace it in RTL while
+    // staying under the screenshot threshold.
+    const bounds = (locator: ReturnType<typeof page.locator>) =>
+      locator.evaluate((el) =>
+        ((r) => ({ left: r.left, right: r.right }))(el.getBoundingClientRect())
+      );
+    const gridlines = await bounds(
+      page.locator("[data-slot='year-timeline-gridlines']")
+    );
+    const monthScale = await bounds(
+      page.locator("[data-slot='year-timeline-today']").locator('..')
+    );
+    expect(Math.abs(gridlines.left - monthScale.left)).toBeLessThanOrEqual(1.5);
+    expect(Math.abs(gridlines.right - monthScale.right)).toBeLessThanOrEqual(
+      1.5
+    );
     await expect(page).toHaveScreenshot(
       'yeartimeline-pinned-september-rtl.png',
       {
