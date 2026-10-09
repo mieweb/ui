@@ -409,7 +409,7 @@ function Detail({
           {cta && (
             <a href={cta.href} className={buttonVariants({ effect: 'sheen' })}>
               {cta.label}
-              <ArrowRight size={16} aria-hidden />
+              <ArrowRight size={16} aria-hidden className="rtl:-scale-x-100" />
             </a>
           )}
           {href && (
