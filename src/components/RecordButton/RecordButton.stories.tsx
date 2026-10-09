@@ -442,6 +442,11 @@ The button owns the microphone; the host owns the transcription phase and the te
           why: 'AudioRecorder is a full record/pause/review panel with waveform playback; RecordButton is one toolbar button that hands off a Blob.',
         },
         {
+          type: 'alternative to',
+          target: 'media-dictationbutton',
+          why: 'DictationButton keeps the audio and hands back editable text (transcribed on-device by default); RecordButton hands the host the Blob.',
+        },
+        {
           type: 'composes with',
           target: 'media-audioplayer',
           why: 'RecordButton hands the host a Blob; an AudioPlayer on its object URL plays the take back.',

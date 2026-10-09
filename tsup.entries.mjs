@@ -76,6 +76,7 @@ export const entries = {
   'components/ReadingProgressBar/index':
     'src/components/ReadingProgressBar/index.ts',
   'components/RecordButton/index': 'src/components/RecordButton/index.ts',
+  'components/DictationButton/index': 'src/components/DictationButton/index.ts',
   'components/RichTextEditor/index': 'src/components/RichTextEditor/index.ts',
   'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
   'components/ScrollArea/index': 'src/components/ScrollArea/index.ts',

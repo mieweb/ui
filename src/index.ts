@@ -152,6 +152,7 @@ export * from './components/QuickLinksCard';
 export * from './components/Radio';
 export * from './components/ReadingProgressBar';
 export * from './components/RecordButton';
+export * from './components/DictationButton';
 export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
