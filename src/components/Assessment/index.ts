@@ -8,6 +8,8 @@ export {
   type AssessmentItem,
   type AssessmentOrder,
   type AssessmentAction,
+  type AssessmentOrderAction,
+  type AssessmentAddMode,
   type OrderType,
   type OrderCodePick,
   type AssessmentAddPick,

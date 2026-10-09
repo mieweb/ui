@@ -103,6 +103,67 @@ describe('Assessment actions', () => {
     ).toBeInTheDocument();
   });
 
+  it('limits concern controls to configured row actions', () => {
+    const { container } = renderAssessment({
+      rowActions: ['remove'],
+      onAction: vi.fn(),
+      onRemoveAssessment: vi.fn(),
+      onReorderItems: vi.fn(),
+    });
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Remove Essential hypertension from assessment',
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /refine|revise|add order/i })
+    ).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-slot="assessment-problem"]')
+    ).toHaveAttribute('draggable', 'false');
+  });
+
+  it('limits existing order controls to configured order actions', () => {
+    const { container } = renderAssessment({
+      orders,
+      orderActions: [],
+      onEditOrder: vi.fn(),
+      onRemoveOrder: vi.fn(),
+      onReorderOrders: vi.fn(),
+      onLinkOrder: vi.fn(),
+    });
+
+    expect(
+      screen.queryByRole('toolbar', { name: 'Actions for Lisinopril 10 mg' })
+    ).not.toBeInTheDocument();
+    expect(container.querySelector('[data-order-id="order-1"]')).not.toHaveAttribute(
+      'draggable'
+    );
+  });
+
+  it('limits the global add row to configured modes', () => {
+    const renderOrderSearch: NonNullable<AssessmentProps['renderOrderSearch']> =
+      () => <input aria-label="Assessment search" />;
+    renderAssessment({
+      addModes: ['problem'],
+      defaultAddMode: 'problem',
+      onAddAssessment: vi.fn(),
+      onAddOrder: vi.fn(),
+      renderOrderSearch,
+    });
+
+    expect(
+      screen.getByRole('option', { name: 'Add concern' })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'Add order' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'Add (auto)' })
+    ).not.toBeInTheDocument();
+  });
+
   it('gives a nested order toolbar precedence over concern actions', () => {
     renderAssessment({
       orders,
