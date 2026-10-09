@@ -203,7 +203,7 @@ export function EmailBlockPreview({
     case 'html':
       return <SafeHtml html={block.html} style={{ padding: pad }} />;
     case 'footer': {
-      const color = safeColor(block.color, '#9ca3af');
+      const color = safeColor(block.color, '#6b7280');
       return (
         <div
           style={{

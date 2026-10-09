@@ -293,7 +293,7 @@ function renderContent(
     case 'html':
       return `<mj-raw>${ctx.sanitize(block.html)}</mj-raw>`;
     case 'footer': {
-      const color = safeColor(block.color, '#9ca3af');
+      const color = safeColor(block.color, '#6b7280');
       const lines = [block.companyName, block.address, block.phone]
         .filter((line): line is string => Boolean(line))
         .map(escapeHtml);

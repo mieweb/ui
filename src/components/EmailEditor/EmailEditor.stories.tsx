@@ -253,7 +253,11 @@ export const MjmlOutput: Story = {
           <EmailEditor value={tree} onChange={setTree} />
           <pre
             className="border-border bg-muted max-h-96 overflow-auto rounded-md border p-3 text-xs"
+            role="region"
             aria-label="MJML"
+            // tabIndex makes this scrollable region keyboard-accessible (axe: scrollable-region-focusable)
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={0}
           >
             {mjml}
           </pre>

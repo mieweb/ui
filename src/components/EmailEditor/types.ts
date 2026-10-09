@@ -291,7 +291,7 @@ function newBlock(type: EmailBlockType): EmailBlock {
         showUnsubscribe: true,
         unsubscribeText: 'Unsubscribe from these emails',
         alignment: 'center',
-        color: '#9ca3af',
+        color: '#6b7280',
       };
     case 'quote':
       return {
