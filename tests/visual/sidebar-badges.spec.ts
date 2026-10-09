@@ -17,6 +17,12 @@ const SHORT_DOCS_PATH = '/?path=/docs/chat-chatcomposer--docs';
 const SHORT_NAME = 'ChatComposer';
 const SHORT_BADGE = 'Beta';
 
+// Two badges on one row (Experimental + Demo): revealing them must not
+// overflow the nav — they share the available space instead.
+const MULTI_DOCS_PATH = '/?path=/docs/dashboards-dashboard-demo--docs';
+const MULTI_NAME = 'Dashboard (Demo)';
+const MULTI_BADGES = ['Experimental', 'Demo'];
+
 // renderSidebarLabel sets lineHeight: '14px'; a wrapped badge doubles that.
 const BADGE_LINE_HEIGHT = 14;
 // A single-line sidebar row is 28px; a wrapping name or badge exceeds this,
@@ -195,5 +201,44 @@ test.describe('Sidebar badges - single line with ellipsis (#533)', () => {
       true
     );
     expect(focused.rowHeight).toBeLessThanOrEqual(SINGLE_LINE_ROW_MAX_HEIGHT);
+  });
+
+  test('narrow sidebar: multi-badge row stays contained when revealed', async ({
+    page,
+  }) => {
+    await gotoSidebar(page, MULTI_DOCS_PATH, 140);
+    const row = componentRow(page, MULTI_NAME, MULTI_BADGES[0]);
+    await expect(row).toBeVisible();
+    for (const badge of MULTI_BADGES) {
+      await expect(row.locator(`span[aria-label="${badge}"]`)).toBeVisible();
+    }
+
+    const measure = () =>
+      row.evaluate((el) => {
+        const navRight = document
+          .querySelector('#storybook-explorer-tree')
+          .getBoundingClientRect().right;
+        return {
+          overflows: [...el.querySelectorAll('.mieweb-sidebar-badge')].some(
+            (badge) => badge.getBoundingClientRect().right > navRight + 1
+          ),
+          rowHeight: el
+            .closest('[data-nodetype]')
+            .getBoundingClientRect().height,
+        };
+      });
+
+    // Contained at rest, and still contained while the reveal styles apply:
+    // badges share the row instead of expanding past the nav edge.
+    const resting = await measure();
+    expect(resting.overflows, 'badges inside the nav at rest').toBe(false);
+    expect(resting.rowHeight).toBeLessThanOrEqual(SINGLE_LINE_ROW_MAX_HEIGHT);
+
+    await row.hover();
+    const revealed = await measure();
+    expect(revealed.overflows, 'revealed badges stay inside the nav').toBe(
+      false
+    );
+    expect(revealed.rowHeight).toBeLessThanOrEqual(SINGLE_LINE_ROW_MAX_HEIGHT);
   });
 });

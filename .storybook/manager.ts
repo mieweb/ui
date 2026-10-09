@@ -197,6 +197,7 @@ function renderSidebarLabel(item: { name: string; tags?: string[]; type: string 
     React.createElement(
       'span',
       {
+        className: 'mieweb-sidebar-name',
         title: item.name,
         style: {
           minWidth: 0,
@@ -416,13 +417,19 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     }
 
     /* Catalog badges (renderSidebarLabel) truncate first to keep the name
-       readable; hovering the row or keyboard-focusing its button reveals the
-       full badge text inline (#533 asks for the tooltip to be focus-reachable
-       too). !important outranks the badge's inline flex-shrink/max-width. */
+       readable; hovering the row or keyboard-focusing its button flips the
+       shrink priority so badges reveal their text and the name ellipsizes
+       instead (#533 asks for the tooltip to be focus-reachable too). Badges
+       stay shrinkable (never flex-shrink: 0 / unbounded width), so even
+       multi-badge rows can't overflow the nav — they just share the space.
+       !important outranks the badge's inline flex-shrink. */
+    [data-nodetype]:hover .mieweb-sidebar-name,
+    [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-name {
+      flex-shrink: 9999;
+    }
     [data-nodetype]:hover .mieweb-sidebar-badge,
     [data-nodetype] :is(button, a):focus-visible .mieweb-sidebar-badge {
-      flex-shrink: 0 !important;
-      max-width: none !important;
+      flex-shrink: 1 !important;
     }
     
     /* Toolbar selected button */
