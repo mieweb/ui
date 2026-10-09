@@ -31,11 +31,13 @@ let nextChunk: Blob = new Blob(['audio'], { type: 'audio/webm' });
 class FakeRecorder {
   static instances: FakeRecorder[] = [];
   static throwOnConstruct = false;
+  static deferStop = false;
   state: MediaRecorder['state'] = 'inactive';
   mimeType = 'audio/webm';
   ondataavailable: ((e: { data: Blob }) => void) | null = null;
   onstop: (() => void) | null = null;
   onerror: ((e: Event) => void) | null = null;
+  flushStop: () => void = () => {};
   constructor() {
     if (FakeRecorder.throwOnConstruct) throw new Error('unsupported');
     FakeRecorder.instances.push(this);
@@ -46,8 +48,12 @@ class FakeRecorder {
   stop() {
     if (this.state === 'inactive') return;
     this.state = 'inactive';
-    this.ondataavailable?.({ data: nextChunk });
-    this.onstop?.();
+    this.flushStop = () => {
+      this.ondataavailable?.({ data: nextChunk });
+      this.onstop?.();
+    };
+    // Browsers queue dataavailable/stop as tasks after state flips to inactive.
+    if (!FakeRecorder.deferStop) this.flushStop();
   }
 }
 
@@ -63,6 +69,7 @@ function setup(options: Partial<UseDictationOptions> = {}) {
 beforeEach(() => {
   FakeRecorder.instances = [];
   FakeRecorder.throwOnConstruct = false;
+  FakeRecorder.deferStop = false;
   nextChunk = new Blob(['audio'], { type: 'audio/webm' });
   getUserMedia.mockReset();
   vi.stubGlobal('MediaRecorder', FakeRecorder);
@@ -104,6 +111,19 @@ describe('useDictation', () => {
     await act(() => result.current.start());
     act(() => result.current.stop());
     await waitFor(() => expect(onText).toHaveBeenCalledWith('on device text'));
+  });
+
+  it('keeps the take when Stop is pressed again before onstop fires', async () => {
+    FakeRecorder.deferStop = true;
+    getUserMedia.mockResolvedValue(fakeStream().stream);
+    const transcribe = vi.fn(async () => 'kept');
+    const { result, onText } = setup({ transcribe });
+
+    await act(() => result.current.start());
+    act(() => result.current.stop());
+    act(() => result.current.stop());
+    act(() => FakeRecorder.instances[0].flushStop());
+    await waitFor(() => expect(onText).toHaveBeenCalledWith('kept'));
   });
 
   it('opens only one mic stream on a fast double start', async () => {

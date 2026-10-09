@@ -31,7 +31,13 @@ export const defaultDictationLabels: DictationButtonLabels = {
   micBlocked: 'Microphone access is blocked.',
 };
 
-export interface DictationButtonProps extends UseDictationOptions {
+export interface DictationButtonProps
+  extends
+    UseDictationOptions,
+    Omit<
+      React.ButtonHTMLAttributes<HTMLButtonElement>,
+      'children' | 'onClick' | 'onError' | 'disabled' | 'className'
+    > {
   disabled?: boolean;
   size?: RecordButtonSize;
   variant?: RecordButtonVariant;
@@ -72,6 +78,8 @@ export const DictationButton = React.forwardRef<
       showStatus = false,
       labels: labelOverrides,
       className,
+      onKeyDown,
+      ...rest
     },
     ref
   ) => {
@@ -83,10 +91,10 @@ export const DictationButton = React.forwardRef<
       maxDurationSeconds,
     });
 
-    // A host disabling the composer mid-take must not leave the mic open behind a dead button.
+    // Covers a pending permission prompt (status still idle) and transcribing, not just recording.
     React.useEffect(() => {
-      if (disabled && status === 'recording') cancel();
-    }, [disabled, status, cancel]);
+      if (disabled) cancel();
+    }, [disabled, cancel]);
 
     const errorText =
       error?.name === 'NotAllowedError' ? labels.micBlocked : labels.error;
@@ -113,8 +121,9 @@ export const DictationButton = React.forwardRef<
         className={cn('inline-flex items-center gap-2', className)}
       >
         <RecordButton
+          {...rest}
           ref={ref}
-          state={buttonState[status]}
+          state={disabled ? 'disabled' : buttonState[status]}
           disabled={disabled}
           size={size}
           variant={variant}
@@ -124,6 +133,8 @@ export const DictationButton = React.forwardRef<
             else void start();
           }}
           onKeyDown={(e) => {
+            onKeyDown?.(e);
+            if (e.defaultPrevented) return;
             if (e.key === 'Escape' && status === 'recording') {
               e.preventDefault();
               cancel();

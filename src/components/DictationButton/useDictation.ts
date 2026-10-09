@@ -31,9 +31,11 @@ export interface UseDictationResult {
   cancel: () => void;
 }
 
-const onDeviceTranscribe: DictationTranscribe = async (audio) => {
+const onDeviceTranscribe: DictationTranscribe = async (audio, signal) => {
   // Loaded lazily so hosts using a server provider never pull in Whisper.
   const { transcribeBlob } = await import('../AI/whisperTranscribe');
+  // The shared worker cannot stop a running decode, so cancel only discards its result.
+  if (signal.aborted) throw new Error('Dictation cancelled');
   return transcribeBlob(audio);
 };
 
@@ -151,8 +153,9 @@ export function useDictation({
 
   const stop = React.useCallback(() => {
     const recorder = recorderRef.current;
-    if (recorder && recorder.state !== 'inactive') {
-      recorder.stop();
+    if (recorder) {
+      // Already inactive means onstop is queued; cancelling here would drop the take.
+      if (recorder.state !== 'inactive') recorder.stop();
     } else if (busyRef.current && !abortRef.current) {
       // Still waiting on the permission prompt: nothing recorded yet.
       cancel();

@@ -94,10 +94,46 @@ describe('DictationButton', () => {
   });
 
   it('is disabled when disabled, and cancels a take in progress', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     setStatus('recording');
     render(<DictationButton onText={vi.fn()} disabled />);
     expect(screen.getByRole('button')).toBeDisabled();
     expect(hook.cancel).toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it.each([
+    ['the permission prompt is pending', 'idle'],
+    ['transcribing', 'transcribing'],
+  ] as const)('cancels when disabled while %s', (_, status) => {
+    setStatus(status);
+    const { rerender } = render(<DictationButton onText={vi.fn()} />);
+    expect(hook.cancel).not.toHaveBeenCalled();
+    rerender(<DictationButton onText={vi.fn()} disabled />);
+    expect(hook.cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards button attributes and runs the caller onKeyDown first', () => {
+    setStatus('recording');
+    const onKeyDown = vi.fn((e: { preventDefault: () => void }) =>
+      e.preventDefault()
+    );
+    render(
+      <DictationButton
+        onText={vi.fn()}
+        id="dictate"
+        aria-describedby="hint"
+        data-testid="dictation"
+        onKeyDown={onKeyDown}
+      />
+    );
+    const button = screen.getByTestId('dictation');
+    expect(button).toHaveAttribute('id', 'dictate');
+    expect(button).toHaveAttribute('aria-describedby', 'hint');
+    fireEvent.keyDown(button, { key: 'Escape' });
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(hook.cancel).not.toHaveBeenCalled();
   });
 
   it('shows the elapsed time while recording when showDuration is set', () => {

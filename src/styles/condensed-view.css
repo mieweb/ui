@@ -4822,6 +4822,16 @@ body.condensed [data-slot='record-button-transcription'] {
   font-size: 0.625rem !important;
 }
 
+/* DictationButton — wraps record-button-trigger, so only its own row and captions need rules */
+body.condensed [data-slot='dictation-button'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='dictation-button-duration'],
+body.condensed [data-slot='dictation-button-status'] {
+  font-size: 0.625rem !important;
+}
+
 /* ============================================================
    BookingDialog — condensed overrides
    Covers: DialogOverlay, BookingDialog, FloatingInput,

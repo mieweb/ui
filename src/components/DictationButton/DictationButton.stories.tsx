@@ -153,10 +153,12 @@ The host owns the composer value and the send; the button owns the microphone an
 
 - **Batch, not streaming.** Text arrives after Stop; there is no live interim text yet.
 - **First on-device take is slow.** The default provider lazy-loads the shared Whisper worker (turbo, ~1.3 GB, cached after the first download). Hosts can force the small English model with \`localStorage.ozwellConfig = '{"whisper":"base.en"}'\` (or \`window.__ozwell = { whisper: 'base.en' }\`) — this setting is shared with the other Voice components.
-- **Limits.** Auto-stops after \`maxDurationSeconds\` (default 300; \`0\` disables). Empty or blank takes call nothing. \`Escape\` while recording, \`disabled\` turning on, or unmount discards the take and aborts \`transcribe\` via its \`AbortSignal\`.
+- **English only on device.** The shared Whisper worker pins \`language: 'english'\`, so the default provider transcribes English. For other languages pass a \`transcribe\` provider.
+- **Limits.** Auto-stops after \`maxDurationSeconds\` (default 300; \`0\` disables). Empty or blank takes call nothing. \`Escape\` while recording, \`disabled\` turning on (including during the permission prompt or transcription), or unmount discards the take and aborts \`transcribe\` via its \`AbortSignal\`. The on-device worker cannot stop a decode already running; its result is dropped.
 - **Browsers.** Needs a secure context and microphone permission. A denied prompt shows the \`micBlocked\` label; other failures show the generic \`error\` label and pass the real \`Error\` to \`onError\`. Recording format is the browser default (\`audio/webm\`, Safari \`audio/mp4\`). Embedded browsers without real microphone access (e.g. VS Code's integrated browser) produce undecodable takes — test in Chrome, Safari or Firefox.
 - **Accessibility.** One \`<button>\` whose \`aria-label\` follows the state (\`start\` / \`stop\` / \`transcribing\` / error text) with \`aria-pressed\` while recording. A single \`role="status"\` region announces listening / transcribing / error; it is visually hidden unless \`showStatus\`.
-- **i18n.** Every string comes from \`labels\` (English defaults in \`defaultDictationLabels\`); \`m:ss\` uses \`formatDuration\`. RTL: symmetric \`inline-flex\` with \`gap-2\`.
+- **i18n.** Every string comes from \`labels\` (English defaults in \`defaultDictationLabels\`); \`m:ss\` uses \`formatDuration\`. RTL: symmetric \`inline-flex\` with \`gap-2\`. Speech language: see *English only on device*.
+- **DOM.** Standard button attributes (\`id\`, \`aria-describedby\`, \`data-*\`, handlers) go to the \`<button>\`; \`className\` goes to the wrapper. \`onKeyDown\` runs first and can \`preventDefault()\` to skip the Escape cancel.
 - **Theming.** Inherits \`RecordButton\` tokens and variants. Entry \`@mieweb/ui\`.`,
       },
     },
