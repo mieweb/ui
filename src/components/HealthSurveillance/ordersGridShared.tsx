@@ -36,6 +36,11 @@ export const ORDER_COLUMNS: {
 }[] = [
   { field: 'status', header: 'Status', type: 'string' },
   { field: 'order', header: 'Order', type: 'string' },
+  {
+    field: 'prescriptionReadinessLabel',
+    header: 'Prescription readiness',
+    type: 'string',
+  },
   { field: 'reason', header: 'Reason', type: 'string' },
   { field: 'kind', header: 'Kind', type: 'string' },
   { field: 'date', header: 'Date', type: 'date' },
@@ -59,7 +64,16 @@ export const ORDER_CONTROL_FIELDS = ORDER_COLUMNS.filter(
 export function useOrderRowsUrl(rows: OrderRow[]): string {
   const url = React.useMemo(() => {
     const payload = {
-      typeInfo: ORDER_COLUMNS.map(({ field, type }) => ({ field, type })),
+      typeInfo: [
+        ...ORDER_COLUMNS.map(({ field, type }) => ({ field, type })),
+        ...[
+          'orderId',
+          'orderKey',
+          'prescriptionRevision',
+          'prescriptionReadiness',
+          'prescriptionNeedsCompletion',
+        ].map((field) => ({ field, type: 'string' })),
+      ],
       data: rows,
     };
     const blob = new Blob([JSON.stringify(payload)], {
@@ -98,6 +112,28 @@ export function formatOrderCell(
   _row: unknown,
   column: { field: string }
 ): React.ReactNode {
+  if (
+    column.field === 'prescriptionReadinessLabel' &&
+    typeof value === 'string' &&
+    value
+  ) {
+    return (
+      <Badge
+        variant={
+          [
+            'Details complete',
+            'Ready for prescriber review',
+            'Ready to send',
+            'Sent',
+          ].includes(value)
+            ? 'success'
+            : 'warning'
+        }
+      >
+        {value}
+      </Badge>
+    );
+  }
   if (column.field === 'status' && typeof value === 'string') {
     return <OrderStatusBadge status={value as OrderRowStatus} />;
   }

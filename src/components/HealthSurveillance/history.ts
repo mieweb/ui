@@ -10,10 +10,21 @@
  * equality.
  */
 
+import type {
+  PrescriptionReadiness,
+  PrescribingIntent,
+} from '../../prescribing/types';
+
 /** ISO date string (YYYY-MM-DD or full ISO timestamp). */
 export type IsoDate = string;
 
 export interface HistoryOrder {
+  /** Unique persisted order instance; coding key is not identity. */
+  orderId?: string;
+  prescriptionRevision?: string;
+  prescribingIntent?: PrescribingIntent;
+  prescriptionActive?: boolean;
+  prescriptionReadiness?: PrescriptionReadiness;
   /** CODETYPE|FULLCODE, e.g. "Quest Order|3058" or "HCPCS|92551" */
   key: string;
   /** Display label (optional; the due list falls back to the key) */

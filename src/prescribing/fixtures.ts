@@ -1,0 +1,81 @@
+import type { PrescriptionValidationInput } from './types';
+/** Same JSON fixtures imported in Node and the jsdom component test project. */
+export const completeValidationFixture: PrescriptionValidationInput = {
+  orderId: 'fixture-order',
+  orderRevision: '1',
+  evaluatedAt: '2026-10-03T12:00:00Z',
+  draft: {
+    patientId: 'sim-patient-1',
+    prescriberId: 'sim-prescriber-1',
+    pharmacyId: 'sim-pharmacy-1',
+    intent: 'prescribe',
+    display: 'SimDrug A',
+    prescription: {
+      productId: 'sim-a',
+      code: { system: 'urn:mieweb:simulation-drug', code: 'sim-a' },
+      strength: '5 mg',
+      doseForm: 'tablet',
+      sig: 'Take 5 mg orally daily.',
+      dose: '5',
+      doseUnit: 'mg',
+      route: 'oral',
+      frequency: 'daily',
+      quantity: '30',
+      quantityUnit: 'tablet',
+      refills: '0',
+      substitution: '0',
+    },
+  },
+  context: {
+    revision: '1',
+    product: {
+      state: 'known',
+      value: {
+        id: 'sim-a',
+        coding: [{ system: 'urn:mieweb:simulation-drug', code: 'sim-a' }],
+        conceptSpecificity: 'product',
+        strength: '5 mg',
+        doseForm: 'tablet',
+        quantityUnits: ['tablet'],
+      },
+      observedAt: '2026-10-03T12:00:00Z',
+      sourceId: 'fixture',
+    },
+    patient: {
+      state: 'known',
+      value: {
+        id: 'sim-patient-1',
+        name: 'Demo Patient',
+        address: 'Simulation Avenue',
+      },
+      observedAt: '2026-10-03T12:00:00Z',
+      sourceId: 'fixture',
+    },
+    prescriber: {
+      state: 'known',
+      value: {
+        id: 'sim-prescriber-1',
+        name: 'Demo Prescriber',
+        address: 'Simulation Clinic',
+        authorized: true,
+        networkEnrolled: true,
+        deaRegistration: 'SIM-NOT-DEA',
+        epcsAuthorized: true,
+      },
+      observedAt: '2026-10-03T12:00:00Z',
+      sourceId: 'fixture',
+    },
+    pharmacy: {
+      state: 'known',
+      value: { id: 'sim-pharmacy-1', newRx: true, epcs: true },
+      observedAt: '2026-10-03T12:00:00Z',
+      sourceId: 'fixture',
+    },
+    controlledSchedule: {
+      state: 'known',
+      value: 'non-controlled',
+      observedAt: '2026-10-03T12:00:00Z',
+      sourceId: 'fixture',
+    },
+  },
+};

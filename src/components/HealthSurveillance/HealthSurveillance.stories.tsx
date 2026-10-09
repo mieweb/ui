@@ -33,7 +33,7 @@ The patient's **health-surveillance due list**. It runs the pure \`evaluateDue(h
 ### Don't use it when
 
 - You need the **plan** itself — where the picked orders live under their problems — [Assessment](?path=/docs/encounter-orders-assessment--docs); this card proposes, Assessment records.
-- You need a **full order history grid** with grouping, requisitions and mass cancel — the \`ChartOrdersGrid\` / \`EncounterOrdersGrid\` demos in the *ChartOrders* / *EncounterOrders* stories are built on \`buildChartOrderRows\` / \`buildEncounterOrderRows\` + \`DataVisNitroGrid\`, but the grid components themselves are **not exported** from the package.
+- You need a **full order history grid** with grouping, requisitions and mass cancel — the \`ChartOrdersGrid\` / \`EncounterOrdersGrid\` demos in the *ChartOrders* / *EncounterOrders* stories are built on \`buildChartOrderRows\` / \`buildEncounterOrderRows\` + \`DataVisNitroGrid\`, the grid components are exported from \`@mieweb/ui/datavis\`. Their optional prescription readiness column/filter uses persisted \`orderId\` and \`prescriptionRevision\`; code-only rows cannot invoke completion.
 - You want a patient-level count chip ("Due List 4") in a header — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs) with a \`CountBadge\`; feed it \`evaluateDue(...).length\`.
 - Your programs are not expressible as *periodicity + age / sex gate + satisfying order keys* (e.g. lab-value-driven follow-up, risk-stratified intervals) — the engine has no rule language beyond \`ProgramMeta\`.
 

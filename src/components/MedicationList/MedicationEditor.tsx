@@ -32,7 +32,7 @@
  * | Directions     | Sig/SigText                            |
  * | Refills        | NumberOfRefills                        |
  * | Substitution   | Substitutions (0 permitted / 1 DAW)    |
- * | Start date     | WrittenDate / EffectiveDate            |
+ * | Therapy start  | EffectiveDate (written date is host-owned)            |
  * | Indication     | Diagnosis/Primary                      |
  * | Pharmacy notes | Note                                   |
  */
@@ -52,6 +52,23 @@ import { Textarea } from '../Textarea';
 import { Label } from '../Label';
 import { RadioGroup, Radio } from '../Radio';
 import { DateInput } from '../DateInput';
+import { Checkbox } from '../Checkbox';
+import { Select } from '../Select';
+import { currentAssertion, type ConditionConcern } from '../ProblemList';
+import { normalizeConditionCodingSystem } from '../ConditionEditor';
+import {
+  PrescriptionIssueSummary,
+  getPrescriptionIssues,
+  usePrescriptionClock,
+  usePrescriptionPreview,
+  type PrescriptionValidationOptions,
+} from '../PrescriptionReadiness';
+import type {
+  PrescriptionIssue,
+  PrescriptionReadiness,
+  PrescriptionValidationContext,
+  ControlledSchedule,
+} from '../../prescribing/types';
 import type { Medication } from './MedicationList';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 
@@ -64,6 +81,18 @@ export interface MedicationLookupResult {
   label: string;
   codetype: string;
   fullcode: string;
+  /** Coding-system release supplied by the authoritative catalog adapter. */
+  codeVersion?: string;
+  /** Verified product metadata supplied by the host's catalog adapter, never parsed from label. */
+  productId?: string;
+  strength?: string;
+  doseForm?: string;
+  quantityUnit?: string;
+  quantityUnits?: string[];
+  conceptSpecificity?: 'product' | 'ingredient' | 'compound';
+  controlledSchedule?: ControlledSchedule;
+  observedAt?: string;
+  sourceId?: string;
 }
 
 /**
@@ -80,8 +109,18 @@ export interface MedicationLookupProps {
   placeholder?: string;
   initialQuery?: string;
   initialSearch?: boolean;
+  /** Freeze the search input and result actions during an asynchronous save. */
+  disabled?: boolean;
+  /** Associate the injected search input with its inline prescription alerts. */
+  id?: string;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+  'aria-invalid'?: React.AriaAttributes['aria-invalid'];
+  'aria-describedby'?: string;
   onSelect?: (result: MedicationLookupResult) => void;
   onFreeText?: (text: string) => void;
+  /** Persist draft edits immediately, before a result or free-text submission. */
+  onQueryChange?: (text: string) => void;
 }
 
 /** CodeLookup wiring for the editor (component injected by the consumer). */
@@ -91,6 +130,31 @@ export interface CodeLookupConfig {
   /** Base URL of the codify index, e.g. '/codify' */
   indexUrl: string;
   /** Shard locale (default 'en') */
+  locale?: string;
+}
+
+/** A condition code selected as the concern treated by this medication. */
+export interface IndicationLookupResult {
+  label: string;
+  codetype: string;
+  fullcode: string;
+  codeVersion?: string;
+  /** Catalog identity; never used as a chart concern's durable concernId. */
+  fullid?: string;
+}
+
+/** Worker-free injection contract for a condition-domain CodeLookup. */
+export interface IndicationLookupProps extends Omit<
+  MedicationLookupProps,
+  'domains' | 'onSelect'
+> {
+  domains?: 'condition'[];
+  onSelect?: (result: IndicationLookupResult) => void;
+}
+
+export interface IndicationCodeLookupConfig {
+  component: React.ComponentType<IndicationLookupProps>;
+  indexUrl: string;
   locale?: string;
 }
 
@@ -104,10 +168,25 @@ export interface MedicationEditorProps {
    * `CodeLookupProvider`; pass `false` to force a plain name input.
    */
   codeLookup?: CodeLookupConfig | false;
+  /** Condition-domain Codify search, defaulting to the ambient provider. */
+  indicationCodeLookup?: IndicationCodeLookupConfig | false;
+  /** Existing chart concerns available as durable indication links. */
+  indicationConcerns?: ConditionConcern[];
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete medication on save */
-  onSave: (medication: Medication) => void;
+  onSave: (medication: Medication) => void | Promise<void>;
+  /** Shared validator inputs. No checks run or alerts appear when omitted. */
+  prescribing?: PrescriptionValidationOptions;
+  /** Latest host evaluation. Edited values always fall back to a new local preview. */
+  readiness?: PrescriptionReadiness;
+  prescriptionNow?: string;
+  /** Field path to focus when completing an order. */
+  initialIssueField?: string;
+  /** Host navigation for patient, prescriber, pharmacy, clinical, or system issues. */
+  onIssueAction?: (issue: PrescriptionIssue) => void;
+  /** Editor is display-only; unresolved issues remain visible. */
+  readOnly?: boolean;
 }
 
 // =============================================================================
@@ -250,8 +329,9 @@ export function labelToMedicationFields(label: string): Partial<Medication> {
 
 /**
  * Derive Medication fields from a CodeLookup pick: name, code reference,
- * and — parsed from the label — strength, dose form, and quantity unit.
- * Used by the editor and by inline add-search flows.
+ * and optional authoritative catalog metadata. Label parsing remains an
+ * explicit suggestion helper and never supplies a confirmed product.
+ * Used by inline add-search flows.
  */
 export function lookupToMedicationFields(
   result: MedicationLookupResult
@@ -262,13 +342,56 @@ export function lookupToMedicationFields(
       system: result.codetype,
       code: result.fullcode,
       display: result.label,
+      ...(result.codeVersion !== undefined && { version: result.codeVersion }),
     },
-    ...labelToMedicationFields(result.label),
+    productId: result.productId,
+    strength: result.strength,
+    doseForm: result.doseForm,
+    quantityUnit: result.quantityUnit,
   };
 }
 
 function newId(): string {
   return `med-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** Compare Codify aliases with canonical FHIR coding-system identifiers. */
+function indicationCodingSystemKey(system: string): string {
+  const uri = system.toLowerCase().replace(/\/$/, '');
+  if (uri === 'http://snomed.info/sct') return 'SNOMED';
+  if (uri === 'http://hl7.org/fhir/sid/icd-10-cm') return 'ICD-10-CM';
+  return normalizeConditionCodingSystem(system);
+}
+
+/** Product/coding issues belong beside the visible medication search. */
+function editorIssueField(fieldPath?: string): string | undefined {
+  const field = fieldPath?.replace(/^(draft|prescription)\./, '');
+  if (
+    [
+      'productId',
+      'code',
+      'context.product',
+      'context.controlledSchedule',
+      'display',
+    ].some((alias) => field === alias || field?.startsWith(`${alias}.`))
+  )
+    return 'name';
+  if (field === 'context.pharmacy') return 'pharmacyId';
+  if (
+    field === 'concernId' ||
+    field === 'indicationCode' ||
+    field?.startsWith('indicationCode.')
+  )
+    return 'indication';
+  return field;
+}
+
+function isEditableFieldError(issue: PrescriptionIssue): boolean {
+  return (
+    issue.severity === 'error' &&
+    issue.remediation === 'edit-prescription' &&
+    !issue.fieldPath?.startsWith('context.')
+  );
 }
 
 // =============================================================================
@@ -279,270 +402,776 @@ export function MedicationEditor({
   open,
   medication,
   codeLookup,
+  indicationCodeLookup,
+  indicationConcerns = [],
   onClose,
   onSave,
+  prescribing,
+  readiness,
+  prescriptionNow,
+  initialIssueField,
+  onIssueAction,
+  readOnly = false,
 }: MedicationEditorProps): React.JSX.Element | null {
-  // Default the lookup to the ambient provider; `false` forces plain text.
   const ambientCodeLookup = useCodeLookupConfig();
   const effectiveCodeLookup: CodeLookupConfig | undefined =
     codeLookup === false
       ? undefined
       : (codeLookup ?? ambientCodeLookup ?? undefined);
-
-  const [draft, setDraft] = React.useState<Medication>(
-    () =>
-      medication ?? {
-        id: newId(),
-        name: '',
-        status: 'unreconciled',
-      }
-  );
-
-  // NOTE: draft state is seeded once per mount — give the editor a `key`
-  // (e.g. the medication id) so a different target remounts it.
-
-  // Focus the medication search / name input when the dialog opens.
+  const effectiveIndicationLookup: IndicationCodeLookupConfig | undefined =
+    indicationCodeLookup === false
+      ? undefined
+      : (indicationCodeLookup ?? ambientCodeLookup ?? undefined);
+  const [draft, setDraft] = React.useState<Medication>(() => ({
+    id: prescribing?.input.orderId ?? newId(),
+    name: '',
+    status: 'unreconciled',
+    ...medication,
+    substitution: medication?.substitution ?? '0',
+  }));
+  const [edited, setEdited] = React.useState(false);
+  const [selectedProduct, setSelectedProduct] =
+    React.useState<PrescriptionValidationContext['product']>();
+  const [selectedSchedule, setSelectedSchedule] =
+    React.useState<PrescriptionValidationContext['controlledSchedule']>();
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState('');
+  // CodeLookup reads its initial query once; choosing a chart concern reseeds it.
+  const [indicationLookupRevision, setIndicationLookupRevision] =
+    React.useState(0);
   const bodyRef = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    const input = bodyRef.current?.querySelector('input');
-    input?.focus();
+  // Capture each closed-to-open transition before the modal's passive focus
+  // effect. Delayed cleanup avoids stealing focus during StrictMode replay.
+  const originRef = React.useRef<HTMLElement | null>(null);
+  const previousOpen = React.useRef(false);
+  const mountedRef = React.useRef(false);
+  const focusGeneration = React.useRef(0);
+  const restoreOrigin = React.useCallback(() => {
+    const origin = originRef.current;
+    const generation = focusGeneration.current;
+    queueMicrotask(() => {
+      if (generation === focusGeneration.current && origin?.isConnected)
+        origin.focus();
+    });
   }, []);
-
-  const patch = (p: Partial<Medication>) =>
-    setDraft((prev) => ({ ...prev, ...p }));
-
-  const handleCodeSelect = (result: MedicationLookupResult) => {
-    // Populate strength / dose form / quantity unit from the coded label.
-    patch(lookupToMedicationFields(result));
+  React.useLayoutEffect(() => {
+    if (open && !previousOpen.current) {
+      originRef.current = document.activeElement as HTMLElement;
+      focusGeneration.current += 1;
+    } else if (!open && previousOpen.current) restoreOrigin();
+    previousOpen.current = open;
+  }, [open, restoreOrigin]);
+  React.useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      queueMicrotask(() => {
+        if (!mountedRef.current) restoreOrigin();
+      });
+    };
+  }, [restoreOrigin]);
+  const close = () => {
+    onClose();
+    restoreOrigin();
   };
-
-  const handleSigChange = (sig: string) => {
-    // Route / frequency / PRN are derived from the sig text.
-    const { route, frequency, prn } = parseSig(sig);
-    patch({ sig, route, frequency, prn: prn || undefined });
+  const instanceId = React.useId();
+  const previewConfiguration =
+    prescribing && selectedProduct
+      ? {
+          ...prescribing,
+          input: {
+            ...prescribing.input,
+            context: {
+              ...prescribing.input.context,
+              product: selectedProduct,
+              controlledSchedule: selectedSchedule ?? {
+                state: 'unknown' as const,
+                reason:
+                  'Drug classification must be refreshed for this product.',
+              },
+            },
+          },
+        }
+      : prescribing;
+  const preview = usePrescriptionPreview(
+    draft,
+    previewConfiguration,
+    edited ? undefined : readiness,
+    prescriptionNow
+  );
+  const clock = usePrescriptionClock(
+    preview?.workflow?.expiresAt,
+    prescriptionNow
+  );
+  const readinessProps = {
+    readiness: preview,
+    now: clock,
+    medicationName: draft.name || 'Medication',
+    expectedOrderId: draft.id,
+    expectedOrderRevision:
+      prescribing?.input.orderRevision ?? draft.prescriptionRevision,
+    expectedContextRevision: prescribing?.input.context.revision,
+    expectedPolicyVersion: prescribing?.policy.version,
   };
-
-  const canSave = draft.name.trim().length > 0;
-
+  const issues = getPrescriptionIssues(readinessProps);
+  const patch = (fields: Partial<Medication>) => {
+    setEdited(true);
+    setSaveError('');
+    setDraft((previous) => ({ ...previous, ...fields }));
+  };
+  const focusField = React.useCallback((fieldPath?: string) => {
+    const field = editorIssueField(fieldPath);
+    const target = field
+      ? Array.from(
+          bodyRef.current?.querySelectorAll<HTMLElement>(
+            '[data-prescription-field]'
+          ) ?? []
+        ).find((element) => element.dataset.prescriptionField === field)
+      : undefined;
+    const input = target?.matches('input, textarea, select')
+      ? target
+      : target?.querySelector<HTMLElement>(
+          'input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
+        );
+    (
+      input ??
+      bodyRef.current?.querySelector<HTMLElement>(
+        'input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
+      )
+    )?.focus();
+  }, []);
+  React.useEffect(() => {
+    if (!open) return;
+    let active = true;
+    queueMicrotask(() => {
+      if (active) focusField(initialIssueField);
+    });
+    return () => {
+      active = false;
+    };
+  }, [open, initialIssueField, focusField]);
+  const issueAction = (issue: PrescriptionIssue) => {
+    if (issue.remediation === 'edit-prescription') focusField(issue.fieldPath);
+    else onIssueAction?.(issue);
+  };
+  const fieldMessages = (field: string) =>
+    issues
+      .filter((issue) => editorIssueField(issue.fieldPath) === field)
+      .filter(
+        (issue, index, all) =>
+          all.findIndex(
+            (other) =>
+              other.code === issue.code && other.message === issue.message
+          ) === index
+      );
+  const hasFieldError = (field: string) =>
+    fieldMessages(field).some(isEditableFieldError);
+  const attributes = (field: string) => ({
+    id: `${instanceId}-${field}`,
+    'data-prescription-field': field,
+    'aria-invalid': hasFieldError(field) || undefined,
+    'aria-describedby': fieldMessages(field).length
+      ? `${instanceId}-${field}-issues`
+      : undefined,
+    'aria-errormessage': hasFieldError(field)
+      ? `${instanceId}-${field}-issues`
+      : undefined,
+    className: hasFieldError(field)
+      ? 'border-destructive focus:ring-destructive focus-visible:ring-destructive'
+      : undefined,
+    disabled: readOnly || saving,
+  });
+  const messages = (field: string) =>
+    fieldMessages(field).length > 0 && (
+      <div
+        id={`${instanceId}-${field}-issues`}
+        className="space-y-1 text-xs"
+        data-slot="prescription-field-issues"
+      >
+        {fieldMessages(field).map((issue) => (
+          <p
+            key={`${issue.code}:${issue.fieldPath ?? ''}`}
+            className={
+              isEditableFieldError(issue)
+                ? 'text-danger-700 dark:text-danger-300'
+                : 'text-warning-900 dark:text-warning-200'
+            }
+          >
+            {issue.message}
+          </p>
+        ))}
+      </div>
+    );
+  const textField = (
+    field: keyof Medication & string,
+    label: string,
+    inputMode?: 'numeric' | 'decimal'
+  ) => (
+    <div className="space-y-1.5" key={field}>
+      <Label htmlFor={`${instanceId}-${field}`}>{label}</Label>
+      <Input
+        {...attributes(field)}
+        inputMode={inputMode}
+        value={String(draft[field] ?? '')}
+        onChange={(event) => patch({ [field]: event.target.value })}
+      />
+      {messages(field)}
+    </div>
+  );
+  // Parsers only suggest values. A user must explicitly confirm them, and an
+  // unparseable complex Sig remains valid draft text.
+  const labelSuggestion = parseMedicationLabel(draft.name);
+  const sigSuggestion = parseSig(draft.sig ?? '');
+  const hasSuggestions =
+    (!draft.strength && labelSuggestion.strength) ||
+    (!draft.doseForm && labelSuggestion.doseForm) ||
+    (!draft.route && sigSuggestion.route) ||
+    (!draft.frequency && sigSuggestion.frequency);
+  const changeDrug = (name: string, code?: Medication['code']) => {
+    if (
+      name === draft.name &&
+      code?.system === draft.code?.system &&
+      code?.code === draft.code?.code
+    )
+      return;
+    setSelectedProduct(undefined);
+    setSelectedSchedule(undefined);
+    patch({
+      name,
+      code,
+      productId: undefined,
+      strength: undefined,
+      doseForm: undefined,
+      dose: undefined,
+      doseUnit: undefined,
+      quantityUnit: undefined,
+      route: undefined,
+      frequency: undefined,
+      sig: undefined,
+      prn: undefined,
+      prnReason: undefined,
+      maxDailyDose: undefined,
+    });
+  };
+  const handleProductSelect = (result: MedicationLookupResult) => {
+    changeDrug(result.label, {
+      system: result.codetype,
+      code: result.fullcode,
+      display: result.label,
+      ...(result.codeVersion !== undefined && { version: result.codeVersion }),
+    });
+    patch({
+      productId: result.productId,
+      strength: result.strength,
+      doseForm: result.doseForm,
+      quantityUnit: result.quantityUnit,
+    });
+    if (result.productId && result.strength && result.doseForm) {
+      const observedAt =
+        result.observedAt ?? prescribing?.input.evaluatedAt ?? '';
+      const sourceId = result.sourceId ?? 'injected-catalog';
+      setSelectedProduct({
+        state: 'known',
+        value: {
+          id: result.productId,
+          coding: [
+            {
+              system: result.codetype,
+              code: result.fullcode,
+              ...(result.codeVersion !== undefined && {
+                version: result.codeVersion,
+              }),
+            },
+          ],
+          conceptSpecificity: result.conceptSpecificity ?? 'product',
+          strength: result.strength,
+          doseForm: result.doseForm,
+          quantityUnits:
+            result.quantityUnits ??
+            (result.quantityUnit ? [result.quantityUnit] : []),
+        },
+        observedAt,
+        sourceId,
+      });
+      if (result.controlledSchedule)
+        setSelectedSchedule({
+          state: 'known',
+          value: result.controlledSchedule,
+          observedAt,
+          sourceId,
+        });
+      else if (
+        prescribing?.input.context.product?.state === 'known' &&
+        prescribing.input.context.product.value.id === result.productId
+      )
+        setSelectedSchedule(prescribing.input.context.controlledSchedule);
+    }
+  };
+  const availableConcerns = indicationConcerns.flatMap((concern) => {
+    const assertion = currentAssertion(concern);
+    return assertion &&
+      assertion.verificationStatus !== 'refuted' &&
+      assertion.verificationStatus !== 'entered-in-error'
+      ? [{ concern, assertion }]
+      : [];
+  });
+  const changeIndication = (indication: string) => {
+    patch({ indication, indicationCode: undefined, concernId: undefined });
+  };
+  const selectIndication = (result: IndicationLookupResult) => {
+    const system = normalizeConditionCodingSystem(result.codetype);
+    const matches = availableConcerns.filter(({ assertion }) =>
+      assertion.coding?.some(
+        (coding) =>
+          indicationCodingSystemKey(coding.system) ===
+            indicationCodingSystemKey(system) && coding.code === result.fullcode
+      )
+    );
+    // A shared code can describe several concerns. Retain an existing match,
+    // or link a unique match; otherwise the host resolves the chart concern.
+    const match =
+      matches.find(({ concern }) => concern.concernId === draft.concernId) ??
+      (matches.length === 1 ? matches[0] : undefined);
+    patch({
+      indication: result.label,
+      indicationCode: {
+        system,
+        code: result.fullcode,
+        display: result.label,
+        ...(result.codeVersion !== undefined && {
+          version: result.codeVersion,
+        }),
+      },
+      concernId: match?.concern.concernId,
+    });
+  };
+  const selectConcern = (concernId: string) => {
+    const selected = availableConcerns.find(
+      ({ concern }) => concern.concernId === concernId
+    );
+    if (!selected) {
+      patch({ concernId: undefined });
+      return;
+    }
+    const coding =
+      selected.assertion.coding?.find((entry) => entry.primary) ??
+      selected.assertion.coding?.[0];
+    patch({
+      indication: selected.assertion.text,
+      indicationCode: coding
+        ? {
+            system: normalizeConditionCodingSystem(coding.system),
+            code: coding.code,
+            display: coding.display ?? selected.assertion.text,
+          }
+        : undefined,
+      concernId: selected.concern.concernId,
+    });
+    setIndicationLookupRevision((revision) => revision + 1);
+  };
+  const linkedConcern = availableConcerns.find(
+    ({ concern }) => concern.concernId === draft.concernId
+  );
+  const directionContradictions = [
+    draft.route &&
+    sigSuggestion.route &&
+    draft.route.toLowerCase() !== sigSuggestion.route.toLowerCase()
+      ? `Directions suggest route ${sigSuggestion.route}; the structured route is ${draft.route}.`
+      : '',
+    draft.frequency &&
+    sigSuggestion.frequency &&
+    draft.frequency.toLowerCase() !== sigSuggestion.frequency.toLowerCase()
+      ? `Directions suggest ${sigSuggestion.frequency.toLowerCase()}; the structured frequency is ${draft.frequency.toLowerCase()}.`
+      : '',
+  ].filter(Boolean);
+  const canSave = draft.name.trim().length > 0 && !saving && !readOnly;
+  const save = async () => {
+    if (!canSave) return;
+    setSaving(true);
+    setSaveError('');
+    try {
+      await onSave({ ...draft, name: draft.name.trim() });
+      close();
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save the draft. Try again.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
   if (!open) return null;
-
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} size="lg">
+    <Modal open onOpenChange={(next) => !next && !saving && close()} size="lg">
       <ModalHeader>
         <ModalTitle>
-          {medication ? 'Correct Medication' : 'Add Medication'}
+          {prescribing
+            ? 'Complete prescription'
+            : medication
+              ? 'Correct Medication'
+              : 'Add Medication'}
         </ModalTitle>
         <ModalClose />
       </ModalHeader>
+      {(prescribing || readiness) && (
+        <PrescriptionIssueSummary
+          {...readinessProps}
+          presentation="floating"
+          floatingPlacement="container"
+          className="mx-6 mb-3 w-auto shrink-0"
+          onIssueAction={readOnly ? undefined : issueAction}
+          readOnly={readOnly}
+        />
+      )}
       <ModalBody className="space-y-5">
-        <div ref={bodyRef} className="contents">
-          {/* ——— Medication + coding ——— */}
+        <div ref={bodyRef} className="space-y-5">
           <section className="space-y-3" aria-label="Medication">
-            {effectiveCodeLookup ? (
-              <div className="space-y-1.5">
-                <Label htmlFor="med-search">Medication</Label>
+            {effectiveCodeLookup && !readOnly ? (
+              <div
+                className="space-y-1.5"
+                role="group"
+                aria-labelledby={`${instanceId}-name-label`}
+                aria-describedby={attributes('name')['aria-describedby']}
+                data-prescription-field="name"
+              >
+                <Label
+                  id={`${instanceId}-name-label`}
+                  htmlFor={`${instanceId}-name`}
+                >
+                  Medication
+                </Label>
                 <effectiveCodeLookup.component
+                  id={`${instanceId}-name`}
+                  aria-label="Medication"
+                  aria-invalid={attributes('name')['aria-invalid']}
+                  aria-describedby={attributes('name')['aria-describedby']}
                   indexUrl={effectiveCodeLookup.indexUrl}
                   locale={effectiveCodeLookup.locale}
                   domains={['med']}
                   bare
                   clearOnSelect={false}
-                  placeholder="Search RxNorm / FDB — e.g. lisinopril"
-                  // Seed the search box with the medication name. Editing an
-                  // uncoded medication also runs the search immediately so the
-                  // closest coded matches are offered (a pick fills coding,
-                  // strength, and dose form); coded ones just show their name.
-                  initialQuery={medication?.name || undefined}
-                  initialSearch={medication ? !medication.code : undefined}
-                  onSelect={handleCodeSelect}
-                  onFreeText={(text) => patch({ name: text, code: undefined })}
+                  placeholder="Search medications"
+                  initialQuery={draft.name || undefined}
+                  initialSearch={!draft.code}
+                  disabled={saving}
+                  onSelect={handleProductSelect}
+                  onFreeText={(name) => changeDrug(name)}
+                  onQueryChange={(name) => changeDrug(name)}
                 />
                 <p className="text-muted-foreground text-xs">
                   {draft.code
                     ? `Coded: ${draft.code.system} ${draft.code.code}`
-                    : draft.name
-                      ? `Uncoded free text: "${draft.name}" — pick a result to code it`
-                      : 'Pick a result to code the medication, or press Enter for free text'}
+                    : 'Free-text draft; select a product when ready.'}
                 </p>
+                {messages('name')}
               </div>
             ) : (
               <div className="space-y-1.5">
-                <Label htmlFor="med-name">Medication</Label>
+                <Label htmlFor={`${instanceId}-name`}>Medication</Label>
                 <Input
-                  id="med-name"
+                  {...attributes('name')}
                   value={draft.name}
-                  onChange={(e) => patch({ name: e.target.value })}
+                  onChange={(event) => changeDrug(event.target.value)}
                 />
+                {messages('name')}
               </div>
             )}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="med-strength">Strength</Label>
-                <Input
-                  id="med-strength"
-                  value={draft.strength ?? ''}
-                  onChange={(e) => patch({ strength: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="med-form">Dose form</Label>
-                <Input
-                  id="med-form"
-                  value={draft.doseForm ?? ''}
-                  onChange={(e) => {
-                    const doseForm = e.target.value;
-                    const normalized = doseForm.toLowerCase().trim();
-                    // Quantity unit follows the dose form (tablet → tablet,
-                    // solution → milliliter, …)
+            <p className="text-muted-foreground text-sm">
+              Drug product:{' '}
+              {draft.code
+                ? (draft.code.display ?? draft.name)
+                : 'Not selected. Use medication search to select a product.'}
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {textField('strength', 'Product strength')}
+              {textField('doseForm', 'Dose form')}
+            </div>
+            {hasSuggestions && !readOnly && (
+              <div className="border-border rounded border p-2 text-xs">
+                <p>
+                  Suggested from the label or directions:{' '}
+                  {[
+                    !draft.strength && labelSuggestion.strength,
+                    !draft.doseForm && labelSuggestion.doseForm,
+                    !draft.route && sigSuggestion.route,
+                    !draft.frequency && sigSuggestion.frequency,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={saving}
+                  onClick={() =>
                     patch({
-                      doseForm,
-                      quantityUnit:
-                        (FORM_TO_UNIT[normalized] ?? normalized) || undefined,
-                    });
-                  }}
-                />
+                      strength: draft.strength || labelSuggestion.strength,
+                      doseForm: draft.doseForm || labelSuggestion.doseForm,
+                      route: draft.route || sigSuggestion.route,
+                      frequency: draft.frequency || sigSuggestion.frequency,
+                      prn: draft.prn ?? sigSuggestion.prn,
+                    })
+                  }
+                >
+                  Confirm suggested details
+                </Button>
               </div>
-            </div>
+            )}
           </section>
-
-          {/* ——— Dispensing ——— */}
-          <section className="space-y-3" aria-label="Dispensing">
-            <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-              Dispensing
-            </h4>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="med-qty">
-                  Quantity
-                  {draft.quantityUnit ? ` (${draft.quantityUnit}s)` : ''}
-                </Label>
-                <Input
-                  id="med-qty"
-                  inputMode="decimal"
-                  value={draft.quantity ?? ''}
-                  onChange={(e) => patch({ quantity: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="med-days">Days supply</Label>
-                <Input
-                  id="med-days"
-                  inputMode="numeric"
-                  value={draft.daysSupply ?? ''}
-                  onChange={(e) => patch({ daysSupply: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="med-refills">Refills</Label>
-                <Input
-                  id="med-refills"
-                  inputMode="numeric"
-                  value={draft.refills ?? ''}
-                  onChange={(e) => patch({ refills: e.target.value })}
-                />
-              </div>
-            </div>
-            <RadioGroup
-              name="med-substitution"
-              label="Substitution"
-              value={draft.substitution ?? '0'}
-              onValueChange={(v) => patch({ substitution: v as '0' | '1' })}
-              orientation="horizontal"
-              size="sm"
-            >
-              <Radio value="0" label="Substitution permitted" />
-              <Radio value="1" label="Dispense as written (DAW)" />
-            </RadioGroup>
-          </section>
-
-          {/* ——— Directions ——— */}
           <section className="space-y-3" aria-label="Directions">
-            <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+            <h4 className="text-muted-foreground text-xs font-semibold uppercase">
               Directions
             </h4>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {textField('dose', 'Dose per administration', 'decimal')}
+              {textField('doseUnit', 'Dose unit')}
+              {textField('route', 'Route')}
+              {textField('frequency', 'Frequency')}
+            </div>
+            <Checkbox
+              {...attributes('prn')}
+              checked={draft.prn ?? false}
+              disabled={readOnly || saving}
+              label="As needed (PRN)"
+              onChange={(event) => patch({ prn: event.target.checked })}
+            />
+            {messages('prn')}
+            {draft.prn && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {textField('prnReason', 'As-needed reason')}
+                {textField('maxDailyDose', 'Maximum daily dose', 'decimal')}
+              </div>
+            )}
             <div className="space-y-1.5">
-              <Label htmlFor="med-sig">Sig (patient directions)</Label>
+              <Label htmlFor={`${instanceId}-sig`}>
+                Sig (patient directions)
+              </Label>
               <Textarea
-                id="med-sig"
+                {...attributes('sig')}
                 value={draft.sig ?? ''}
-                onChange={(e) => handleSigChange(e.target.value)}
-                rows={2}
+                onChange={(event) => patch({ sig: event.target.value })}
+                rows={3}
               />
-              <p className="text-muted-foreground text-xs" aria-live="polite">
-                {draft.route || draft.frequency || draft.prn ? (
-                  <>
-                    Derived:{' '}
-                    {[
-                      draft.route && `route ${draft.route}`,
-                      draft.frequency && draft.frequency.toLowerCase(),
-                      draft.prn && 'PRN (as needed)',
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </>
-                ) : (
-                  'Route, frequency, and PRN are derived from the directions'
-                )}
+              {messages('sig')}
+              {directionContradictions.length > 0 && (
+                <div
+                  className="border-warning-500 rounded border p-2 text-sm"
+                  role="status"
+                >
+                  {directionContradictions.map((message) => (
+                    <p key={message}>{message}</p>
+                  ))}
+                  <p>
+                    Confirm the intended directions and structured values.
+                    Suggestions do not invalidate complex directions
+                    automatically.
+                  </p>
+                </div>
+              )}
+              <p className="text-muted-foreground text-xs">
+                Keep complex directions intact. Confirm structured route and
+                frequency separately.
               </p>
             </div>
           </section>
-
-          {/* ——— Dates & context ——— */}
-          <section className="space-y-3" aria-label="Dates and context">
-            <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-              Dates &amp; context
+          <section className="space-y-3" aria-label="Dispensing">
+            <h4 className="text-muted-foreground text-xs font-semibold uppercase">
+              Dispensing
             </h4>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="med-start">Start date</Label>
-                <DateInput
-                  id="med-start"
-                  value={draft.startDate ?? ''}
-                  onChange={(v) => patch({ startDate: v })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="med-end">End date</Label>
-                <DateInput
-                  id="med-end"
-                  value={draft.endDate ?? ''}
-                  onChange={(v) => patch({ endDate: v })}
-                />
-              </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {textField('quantity', 'Quantity', 'decimal')}
+              {textField('quantityUnit', 'Dispensing unit')}
+              {textField('daysSupply', 'Days supply', 'numeric')}
+              {textField('refills', 'Refills', 'numeric')}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="med-indication">Indication</Label>
-              <Input
-                id="med-indication"
-                value={draft.indication ?? ''}
-                onChange={(e) => patch({ indication: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="med-pharmacy-notes">Pharmacy notes</Label>
-              <Textarea
-                id="med-pharmacy-notes"
-                value={draft.pharmacyNotes ?? ''}
-                onChange={(e) => patch({ pharmacyNotes: e.target.value })}
-                rows={2}
-              />
+              <RadioGroup
+                name={`${instanceId}-substitution`}
+                label="Substitution"
+                value={draft.substitution ?? '0'}
+                onValueChange={(value) =>
+                  !readOnly &&
+                  !saving &&
+                  patch({ substitution: value as '0' | '1' })
+                }
+                orientation="horizontal"
+                size="sm"
+              >
+                <Radio
+                  {...attributes('substitution')}
+                  value="0"
+                  label="Substitution permitted"
+                  disabled={readOnly || saving}
+                />
+                <Radio
+                  {...attributes('substitution')}
+                  id={`${instanceId}-substitution-daw`}
+                  value="1"
+                  label="Dispense as written (DAW)"
+                  disabled={readOnly || saving}
+                />
+              </RadioGroup>
+              {messages('substitution')}
             </div>
           </section>
+          <section className="space-y-3" aria-label="Dates and context">
+            <h4 className="text-muted-foreground text-xs font-semibold uppercase">
+              Dates and context
+            </h4>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor={`${instanceId}-startDate`}>
+                  Therapy start date
+                </Label>
+                <DateInput
+                  {...attributes('startDate')}
+                  value={draft.startDate ?? ''}
+                  onChange={(value) => patch({ startDate: value })}
+                />
+                {messages('startDate')}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor={`${instanceId}-endDate`}>
+                  Therapy end date
+                </Label>
+                <DateInput
+                  {...attributes('endDate')}
+                  value={draft.endDate ?? ''}
+                  onChange={(value) => patch({ endDate: value })}
+                />
+                {messages('endDate')}
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                id={`${instanceId}-indication-label`}
+                htmlFor={`${instanceId}-indication`}
+              >
+                Indication
+              </Label>
+              {effectiveIndicationLookup && !readOnly ? (
+                <div
+                  role="group"
+                  aria-labelledby={`${instanceId}-indication-label`}
+                  aria-describedby={
+                    attributes('indication')['aria-describedby']
+                  }
+                  data-prescription-field="indication"
+                >
+                  <effectiveIndicationLookup.component
+                    key={indicationLookupRevision}
+                    id={`${instanceId}-indication`}
+                    aria-label="Indication (concern)"
+                    aria-invalid={attributes('indication')['aria-invalid']}
+                    aria-describedby={
+                      attributes('indication')['aria-describedby']
+                    }
+                    indexUrl={effectiveIndicationLookup.indexUrl}
+                    locale={effectiveIndicationLookup.locale}
+                    domains={['condition']}
+                    bare
+                    clearOnSelect={false}
+                    placeholder="Search the concern treated by this medication"
+                    initialQuery={draft.indication || undefined}
+                    initialSearch={!draft.indicationCode}
+                    disabled={saving}
+                    onSelect={selectIndication}
+                    onFreeText={changeIndication}
+                    onQueryChange={changeIndication}
+                  />
+                </div>
+              ) : (
+                <Input
+                  {...attributes('indication')}
+                  value={draft.indication ?? ''}
+                  onChange={(event) => changeIndication(event.target.value)}
+                />
+              )}
+              {messages('indication')}
+              <p className="text-muted-foreground text-xs">
+                {draft.indicationCode
+                  ? `Coded: ${draft.indicationCode.system} ${draft.indicationCode.code}`
+                  : 'Free-text indication; select a concern or code when ready.'}
+              </p>
+              {draft.concernId && (
+                <p className="text-muted-foreground text-xs">
+                  Linked chart concern:{' '}
+                  {linkedConcern?.assertion.text ??
+                    draft.indication ??
+                    draft.concernId}
+                </p>
+              )}
+              {availableConcerns.length > 0 && !readOnly && (
+                <Select
+                  id={`${instanceId}-concern`}
+                  label="Chart concern"
+                  placeholder="Choose an existing concern"
+                  value={draft.concernId ?? ''}
+                  disabled={saving}
+                  options={[
+                    { value: '', label: 'No linked chart concern' },
+                    ...availableConcerns.map(({ concern, assertion }) => ({
+                      value: concern.concernId,
+                      label: assertion.text,
+                    })),
+                  ]}
+                  onValueChange={selectConcern}
+                />
+              )}
+            </div>
+            {prescribing && (
+              <div className="space-y-1.5">
+                <p className="text-muted-foreground text-sm">
+                  Pharmacy:{' '}
+                  {prescribing.input.context.pharmacy?.state === 'known'
+                    ? 'Selected by the EHR'
+                    : 'Selection needed in the EHR'}
+                </p>
+                {messages('pharmacyId')}
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label htmlFor={`${instanceId}-pharmacyNotes`}>
+                Pharmacy notes
+              </Label>
+              <Textarea
+                {...attributes('pharmacyNotes')}
+                value={draft.pharmacyNotes ?? ''}
+                onChange={(event) =>
+                  patch({ pharmacyNotes: event.target.value })
+                }
+                rows={2}
+              />
+              {messages('pharmacyNotes')}
+            </div>
+            <p className="text-muted-foreground text-xs">
+              The prescriber signing workflow supplies the written and signed
+              date.
+            </p>
+          </section>
+          {saveError && (
+            <p role="alert" className="text-danger-600 text-sm">
+              {saveError}
+            </p>
+          )}
         </div>
       </ModalBody>
       <ModalFooter>
-        <Button variant="secondary" onClick={onClose}>
-          Cancel
+        <Button variant="secondary" onClick={close} disabled={saving}>
+          {readOnly ? 'Close' : 'Cancel'}
         </Button>
-        <Button
-          onClick={() => {
-            onSave({ ...draft, name: draft.name.trim() });
-            onClose();
-          }}
-          disabled={!canSave}
-        >
-          Save
-        </Button>
+        {!readOnly && (
+          <Button onClick={() => void save()} disabled={!canSave}>
+            {saving
+              ? 'Saving…'
+              : prescribing || readiness
+                ? 'Save draft'
+                : 'Save'}
+          </Button>
+        )}
       </ModalFooter>
     </Modal>
   );

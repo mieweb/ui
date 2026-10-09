@@ -23,7 +23,7 @@ The **order editor modal** for an \`AssessmentOrder\` (the order type from [Asse
 
 | \`order.type\` | Editor | Fields |
 |---|---|---|
-| \`medication\` | \`MedicationEditor\` from [MedicationList](?path=/docs/clinical-lists-medicationlist--docs) | full NCPDP SCRIPT prescription — mapped through \`orderToMedication\` / \`medicationToOrder\` |
+| \`medication\` | \`MedicationEditor\` from [MedicationList](?path=/docs/clinical-lists-medicationlist--docs) | structured prescription draft — mapped through \`orderToMedication\` / \`medicationToOrder\` |
 | \`lab\` | \`LabOrderEditor\` | coded search (\`lab\` shard), priority, "When to collect" |
 | \`imaging\` | \`ImagingOrderEditor\` | coded search (\`procedure\` shard), body site, priority, "When to perform" |
 | \`procedure\` | \`ProcedureOrderEditor\` | coded search (\`procedure\`), body site, priority |
@@ -71,13 +71,14 @@ The host owns the orders array; the editor returns the complete \`AssessmentOrde
 
 ### Limitations
 
-- **Accessibility as implemented.** Built on \`Modal\` (\`size="lg"\`, focus trap, Esc, \`ModalClose\`); sections are \`<section aria-label>\` ("Order", "Scheduling", "Details"); fields use \`Label htmlFor\`, the priority radio is a labelled \`RadioGroup\`. The first \`<input>\` in the body is focused on open. Coding status ("Coded: FDB 244899" / "Uncoded free text") is a plain \`<p>\`, not a live region; a save closes silently. The Order label's \`htmlFor="ord-search"\` does not target the injected lookup's input (CodeLookup labels itself "Search medical codes").
-- **Clinical safety.** No validation beyond a non-empty name: no duplicate-order, indication-required, specimen or authorisation checks, no interaction / allergy / dose checking on medication orders, and \`priority\` / \`timing\` are advisory strings. Coded search is only as complete as the codify shards.
+- **Accessibility as implemented.** Built on \`Modal\` (\`size="lg"\`, focus trap, Esc, \`ModalClose\`); sections are \`<section aria-label>\` ("Order", "Scheduling", "Details"); fields use \`Label htmlFor\`, the priority radio is a labelled \`RadioGroup\`. The first \`<input>\` in the body is focused on open. Coding status ("Coded: FDB 244899" / "Uncoded free text") is a plain \`<p>\`, not a live region; the prescribing host can announce a successful draft save; medication dialogs restore focus to their opener. The Order label's \`htmlFor="ord-search"\` does not target the injected lookup's input (CodeLookup labels itself "Search medical codes").
+- **Clinical safety.** Draft save requires a nonempty name. Optional \`prescribing\` runs the shared TypeScript validator and \`readiness\` renders host clinical/workflow findings. The EHR owns clinical knowledge, permissions, signing, and transmission. Non-medication specimen/indication checks remain host concerns; \`priority\` / \`timing\` are advisory strings.
 - **Type is fixed per editor** — you cannot change an order from \`lab\` to \`imaging\` inside the dialog; close and reopen with a different \`defaultType\`.
-- **Medication path** loses fields \`AssessmentOrder\` has no home for (\`priority\`, \`timing\`, \`bodySite\`, \`referTo\` are preserved from \`base\`, but the NCPDP-only fields — strength, quantity, refills, DAW — exist only inside the editor session and are folded to \`display\` / \`detail\` / \`indication\` / \`notes\` on save).
-- **Responsive / RTL.** Single-column stack inside the modal; no breakpoint variants, no RTL handling beyond the inputs.
+- **Medication path** preserves canonical details in \`AssessmentOrder.prescription\` and updates display/detail/code projections atomically. The base order keeps its identity, concern, priority, timing, body site and referral metadata. Label and Sig parsing supplies suggestions for explicit confirmation.
+
+- **Responsive / RTL.** Medication fields stack on narrow screens and use a two-column layout on larger screens. Logical spacing supports the readiness summary; inherited non-medication layouts remain unchanged.
 - **Theming / i18n.** Semantic tokens; all nouns, section headings, placeholders ("Search labs — e.g. a1c"), radio labels and status copy are English constants with no \`labels\` prop.
-- **Dependencies / entry.** \`Modal\`, \`Input\`, \`Textarea\`, \`Label\`, \`RadioGroup\`, \`Button\`, \`MedicationList\` (\`MedicationEditor\`, \`parseSig\`, \`labelToMedicationFields\`), \`Assessment\` types; main \`@mieweb/ui\` entry, no peers. \`CodeLookup\` is not in the package build.`,
+- **Dependencies / entry.** \`Modal\`, \`Input\`, \`Textarea\`, \`Label\`, \`RadioGroup\`, \`Button\`, \`MedicationList\` (\`MedicationEditor\`), \`Assessment\` types; main \`@mieweb/ui\` entry, no peers. \`CodeLookup\` is not in the package build.`,
       },
     },
     catalog: {
