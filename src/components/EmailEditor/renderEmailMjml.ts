@@ -41,7 +41,10 @@ export function escapeHtml(value: string): string {
 /** Allows http(s), mailto, tel, anchors, root-relative paths and `{{merge}}` tokens. */
 export function safeUrl(value: string | undefined): string {
   const url = (value ?? '').trim();
-  return /^(https?:|mailto:|tel:|#|\/(?!\/)|\{\{)/i.test(url)
+  // After the leading slash, a second slash, backslash or whitespace would let
+  // URL parsers (which strip tabs/newlines and treat `\` as `/`) read the path
+  // as a network-path URL on an attacker's origin.
+  return /^(https?:|mailto:|tel:|#|\/(?![/\\\s])|\{\{)/i.test(url)
     ? escapeHtml(url)
     : '#';
 }

@@ -74,6 +74,25 @@ describe('renderEmailMjml', () => {
     expect(mjml).not.toContain('javascript:');
   });
 
+  it('keeps root-relative URLs but rejects network-path lookalikes', () => {
+    const button = (url: string) => ({ ...createEmailBlock('button'), url });
+    expect(renderEmailMjml(tree(button('/newsletter/view')))).toContain(
+      'href="/newsletter/view"'
+    );
+    // URL parsers treat `\` as `/` and strip embedded tabs/newlines, so these
+    // would resolve as https://evil.example/path on a trusted origin.
+    for (const sneaky of [
+      '/\\evil.example/path',
+      '/\t/evil.example/path',
+      '/\n/evil.example/path',
+      '//evil.example/path',
+    ]) {
+      expect(renderEmailMjml(tree(button(sneaky)))).not.toContain(
+        'evil.example'
+      );
+    }
+  });
+
   it('rejects colours that would inject CSS', () => {
     const divider = {
       ...createEmailBlock('divider'),
