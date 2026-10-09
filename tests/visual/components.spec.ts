@@ -837,6 +837,19 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     });
   });
 
+  test('MegaMenu - Grouped panel (RTL)', async ({ page }) => {
+    // Grouped renders all three mirrored icon sites: the group-link
+    // ChevronRight, the "Explore the platform" allLabel ArrowRight, and
+    // the featured "Take the tour" CTA ArrowRight — each must flip via
+    // rtl:-scale-x-100 under dir="rtl".
+    await gotoStory(page, 'navigation-megamenu--grouped', {
+      globals: 'direction:rtl',
+    });
+    await expect(page).toHaveScreenshot('megamenu-grouped-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('VideoCard - Default', async ({ page }) => {
     // Mask the YouTube thumbnail (external i.ytimg.com fetch is not
     // deterministic); the play button, duration pill, and copy stack are.
@@ -873,6 +886,22 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     });
   });
 
+  test('YearTimeline - Pinned to September (RTL)', async ({ page }) => {
+    // Deterministic pinned `now`. Locks the mirrored month grid plus the
+    // insetInlineStart positioning and rtl:translate-x mirroring of the
+    // today pill and playhead — they must stay aligned in September,
+    // measured from the right edge under dir="rtl".
+    await gotoStory(page, 'data-display-yeartimeline--pinned-to-september', {
+      globals: 'direction:rtl',
+    });
+    await expect(page).toHaveScreenshot(
+      'yeartimeline-pinned-september-rtl.png',
+      {
+        animations: 'disabled',
+      }
+    );
+  });
+
   test('SliderCalculator - ROI panel', async ({ page }) => {
     // Brand-sensitive: primary-800→950 radial panel, accent-gradient slider
     // fill, tabular-nums results.
@@ -896,6 +925,17 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     // the detail card is deterministic.
     await gotoStory(page, 'showcase-radialexplorer--static');
     await expect(page).toHaveScreenshot('radialexplorer-static.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('RadialExplorer - Static spoke (RTL)', async ({ page }) => {
+    // The footer CTA ArrowRight must flip via rtl:-scale-x-100; the radial
+    // wheel itself stays rotationally symmetric (rtl-ignore trig).
+    await gotoStory(page, 'showcase-radialexplorer--static', {
+      globals: 'direction:rtl',
+    });
+    await expect(page).toHaveScreenshot('radialexplorer-static-rtl.png', {
       animations: 'disabled',
     });
   });
