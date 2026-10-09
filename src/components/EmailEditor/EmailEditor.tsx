@@ -114,6 +114,8 @@ function fill(
 interface Snapshot {
   tree: EmailContentTree;
   design: EmailDesignSettings | undefined;
+  /** Which controlled channels the commit that created this entry changed. */
+  changed: { tree: boolean; design: boolean };
 }
 
 export interface EmailEditorProps {
@@ -397,18 +399,27 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
       latest.current = { value, designProp, onChange };
     });
 
-    const present: Snapshot = { tree: value, design: designProp };
+    const present = (changed: Snapshot['changed']): Snapshot => ({
+      tree: value,
+      design: designProp,
+      changed,
+    });
     const commit = (
       tree: EmailContentTree,
       nextDesign?: EmailDesignSettings
     ) => {
       const current = latest.current;
+      const changed = {
+        tree: tree !== current.value,
+        design: Boolean(nextDesign),
+      };
+      if (!changed.tree && !changed.design) return;
       setPast((p) => [
         ...p.slice(-49),
-        { tree: current.value, design: current.designProp },
+        { tree: current.value, design: current.designProp, changed },
       ]);
       setFuture([]);
-      if (tree !== current.value) current.onChange(tree);
+      if (changed.tree) current.onChange(tree);
       if (nextDesign) onDesignChange?.(nextDesign);
     };
     const setBlocks = (blocks: EmailBlock[]) => commit({ ...value, blocks });
@@ -417,23 +428,25 @@ export const EmailEditor = React.forwardRef<HTMLDivElement, EmailEditorProps>(
       if (!findEmailBlock(doc.blocks, id)) return;
       commit({ ...doc, blocks: updateEmailBlock(doc.blocks, id, patch) });
     };
+    // Only replay the channels the entry's commit changed: a design-only undo
+    // must not overwrite a document the host may have updated since (and vice
+    // versa), nor fire a spurious onChange.
     const restore = (snapshot: Snapshot) => {
-      onChange(snapshot.tree);
-      if (snapshot.design !== designProp)
-        onDesignChange?.(snapshot.design ?? {});
+      if (snapshot.changed.tree) onChange(snapshot.tree);
+      if (snapshot.changed.design) onDesignChange?.(snapshot.design ?? {});
     };
     const undo = () => {
       const previous = past[past.length - 1];
       if (!previous) return;
       setPast((p) => p.slice(0, -1));
-      setFuture((f) => [present, ...f]);
+      setFuture((f) => [present(previous.changed), ...f]);
       restore(previous);
     };
     const redo = () => {
       const next = future[0];
       if (!next) return;
       setFuture((f) => f.slice(1));
-      setPast((p) => [...p, present]);
+      setPast((p) => [...p, present(next.changed)]);
       restore(next);
     };
 

@@ -162,6 +162,41 @@ describe('EmailEditor', () => {
     expect(screen.getByLabelText('Content width (px)')).toHaveValue(600);
   });
 
+  it('does not replay the document when undoing a design-only edit', () => {
+    const onChange = vi.fn();
+    function DesignHarness() {
+      const [design, setDesign] = useState<EmailDesignSettings>({});
+      return (
+        <EmailEditor
+          value={initial}
+          onChange={onChange}
+          design={design}
+          onDesignChange={setDesign}
+        />
+      );
+    }
+    renderWithTheme(<DesignHarness />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Design' }));
+    const width = () => screen.getByLabelText('Content width (px)');
+    fireEvent.change(width(), { target: { value: '700' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(width()).toHaveValue(600);
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }));
+    expect(width()).toHaveValue(700);
+    // Replaying the document snapshot would fire a spurious onChange and could
+    // overwrite document updates the host made after the design edit.
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('does not replay the design when undoing a document edit', () => {
+    const onDesign = vi.fn();
+    renderWithTheme(<Harness onDesign={onDesign} />);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Move down' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(types()).toBe('heading,text');
+    expect(onDesign).not.toHaveBeenCalled();
+  });
+
   it('applies a finished upload to the latest document', async () => {
     const image = { ...createEmailBlock('image'), alt: '' };
     let finish: (url: string) => void = () => {};
