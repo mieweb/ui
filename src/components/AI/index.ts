@@ -162,6 +162,8 @@ export {
 // Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
 export {
   useDiarization,
+  type ExperimentalDiarizationInput,
+  type ExperimentalDiarizer,
   type UseDiarizationOptions,
   type UseDiarizationResult,
 } from './HeyOzwell/useDiarization';
@@ -173,8 +175,13 @@ export {
   inferSpeakerRoles,
   cosine,
   centroid,
+  speakerIdForCluster,
   type TranscriptSegment,
+  type AnonymousSpeakerActivity,
+  type AnonymousSegmentAttribution,
   type DiarizedSegment,
+  type DiarizedSpeakerActivity,
+  type DiarizedAttribution,
   type ClusterOptions,
   type RoleInferenceOptions,
 } from './diarize';

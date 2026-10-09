@@ -100,6 +100,24 @@ describe('labelClusters / attributeSegments / mergeTurns', () => {
       'Doctor',
       'Speaker 2',
     ]);
+    expect(attributed.map((s) => s.speakerId)).toEqual([
+      'speaker-1',
+      'speaker-1',
+      'speaker-2',
+    ]);
+    expect(attributed[0]).toMatchObject({
+      attribution: 'single',
+      speakerActivities: [
+        {
+          speakerId: 'speaker-1',
+          cluster: 0,
+          speaker: 'Doctor',
+          start: 0,
+          end: 1,
+          confidence: 1,
+        },
+      ],
+    });
 
     const turns = mergeTurns(attributed);
     expect(turns).toHaveLength(2);
@@ -108,11 +126,70 @@ describe('labelClusters / attributeSegments / mergeTurns', () => {
       text: 'hello how are you',
       start: 0,
       end: 2,
+      speakerId: 'speaker-1',
+      attribution: 'single',
     });
     expect(turns[1]).toMatchObject({
       speaker: 'Speaker 2',
       text: 'fine thanks',
     });
+  });
+
+  it('keeps overlap metadata from collapsing into neighboring single-speaker turns', () => {
+    const turns = mergeTurns([
+      {
+        start: 0,
+        end: 1,
+        text: 'doctor only',
+        cluster: 0,
+        speaker: 'Doctor',
+        speakerId: 'speaker-1',
+        attribution: 'single',
+        confidence: 1,
+        speakerActivities: [
+          {
+            speakerId: 'speaker-1',
+            cluster: 0,
+            speaker: 'Doctor',
+            start: 0,
+            end: 1,
+            confidence: 1,
+          },
+        ],
+      },
+      {
+        start: 1,
+        end: 2,
+        text: 'doctor and patient',
+        cluster: 0,
+        speaker: 'Doctor',
+        speakerId: 'speaker-1',
+        attribution: 'overlap',
+        confidence: 0.7,
+        speakerActivities: [
+          {
+            speakerId: 'speaker-1',
+            cluster: 0,
+            speaker: 'Doctor',
+            start: 1,
+            end: 2,
+            confidence: 0.7,
+          },
+          {
+            speakerId: 'speaker-2',
+            cluster: 1,
+            speaker: 'Speaker 2',
+            start: 1,
+            end: 2,
+            confidence: 0.6,
+          },
+        ],
+      },
+    ]);
+
+    expect(turns).toHaveLength(2);
+    expect(turns[1].attribution).toBe('overlap');
+    expect(turns[1].speakerActivities).toHaveLength(2);
   });
 });
 
@@ -124,6 +201,19 @@ describe('inferSpeakerRoles', () => {
       text: 'what brings you in?',
       cluster: 0,
       speaker: 'Dr. Smith',
+      speakerId: 'speaker-1',
+      speakerActivities: [
+        {
+          speakerId: 'speaker-1',
+          cluster: 0,
+          speaker: 'Dr. Smith',
+          start: 0,
+          end: 1,
+          confidence: 1,
+        },
+      ],
+      attribution: 'single',
+      confidence: 1,
     },
     {
       start: 1,
@@ -131,6 +221,19 @@ describe('inferSpeakerRoles', () => {
       text: 'my knee has been hurting',
       cluster: 1,
       speaker: 'Speaker 2',
+      speakerId: 'speaker-2',
+      speakerActivities: [
+        {
+          speakerId: 'speaker-2',
+          cluster: 1,
+          speaker: 'Speaker 2',
+          start: 1,
+          end: 2,
+          confidence: 1,
+        },
+      ],
+      attribution: 'single',
+      confidence: 1,
     },
   ];
 
@@ -143,6 +246,7 @@ describe('inferSpeakerRoles', () => {
     const out = await inferSpeakerRoles(segs, ask);
     expect(called).toBe(1);
     expect(out.map((s) => s.speaker)).toEqual(['Dr. Smith', 'Patient']);
+    expect(out[1].speakerActivities[0].speaker).toBe('Patient');
   });
 
   it('parses JSON wrapped in prose / code fences', async () => {

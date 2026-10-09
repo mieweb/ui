@@ -53,6 +53,17 @@ import { VisitScribe } from '@mieweb/ui';
 
 The component keeps the transcript in its own state; there is no \`onResult\` callback yet — to persist a note, read the DOM or drive \`useVisitScribe\` directly and render your own view.
 
+### How to test in Storybook
+
+1. Start Storybook (\`corepack pnpm storybook\`) and open **Modules → Voice → Visit Scribe**.
+2. Wait for the story to reach **Ready**; the first load may take time while the speaker runtime and Whisper models download.
+3. Click **Start visit**, allow microphone access, and record a short two-speaker sample (or speak in clearly different voices).
+4. Click **Stop** and wait for diarization to finish; confirm the status changes from **Writing…** to a turn/speaker count and the transcript renders below.
+5. Toggle **Live transcript** before recording and confirm a rough caption appears while recording, then is replaced by the final diarized transcript after Stop.
+6. Open **Advanced**, change **Speakers** or **Merge**, click **Re-analyze**, and confirm the same clip is reprocessed without re-recording.
+7. Click **Edit speakers** and verify you can rename a speaker, merge two speakers by giving them the same name, and reassign a single line from its dropdown.
+8. If you have a chat backend configured, toggle **Label unknown speakers with AI** and confirm generic \`Speaker N\` labels can be replaced with inferred roles.
+
 ### Limitations
 
 - **No host callbacks.** \`VisitScribe\` exposes neither the diarized \`result\` nor the edited labels to the host; use \`useVisitScribe\` (\`start\`, \`stop\`, \`reanalyze\`, \`reset\`, \`result\`, \`liveText\`, \`elapsedMs\`) for anything beyond display.
