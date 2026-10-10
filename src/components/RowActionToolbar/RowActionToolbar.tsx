@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { isRtl } from '../../hooks/useDirection';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Tooltip } from '../Tooltip';
@@ -8,7 +9,8 @@ import { Tooltip } from '../Tooltip';
 /**
  * Toolbar / group arrow-key navigation (WAI-ARIA toolbar pattern).
  * Attach to a container's onKeyDown: ←/→ move focus between enabled
- * buttons, Home/End jump to first/last.
+ * buttons, Home/End jump to first/last. Horizontal arrows follow the
+ * visual direction, so they invert under RTL.
  */
 export function toolbarKeyNav(e: React.KeyboardEvent<HTMLElement>) {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
@@ -22,12 +24,17 @@ export function toolbarKeyNav(e: React.KeyboardEvent<HTMLElement>) {
   if (i === -1 || buttons.length === 0) return;
   e.preventDefault();
   e.stopPropagation();
+  let key = e.key;
+  if (isRtl(e.currentTarget)) {
+    if (key === 'ArrowRight') key = 'ArrowLeft';
+    else if (key === 'ArrowLeft') key = 'ArrowRight';
+  }
   const next =
-    e.key === 'ArrowLeft'
+    key === 'ArrowLeft'
       ? (i - 1 + buttons.length) % buttons.length
-      : e.key === 'ArrowRight'
+      : key === 'ArrowRight'
         ? (i + 1) % buttons.length
-        : e.key === 'Home'
+        : key === 'Home'
           ? 0
           : buttons.length - 1;
   buttons[next]?.focus();

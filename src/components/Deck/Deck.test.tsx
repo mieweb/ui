@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import * as React from 'react';
 import { Deck } from './Deck';
 import { SlideFrame } from './SlideFrame';
 import { slideRenderers } from './registry';
@@ -132,6 +133,36 @@ describe('Deck', () => {
       'true'
     );
     expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('inverts tab arrow keys under RTL', () => {
+    const tabs = sampleDeck.find((s) => s.type === 'tabs')!;
+    render(<Deck slides={[tabs]} meta={sampleDeckMeta} syncHash={false} />);
+    const [first] = screen.getAllByRole('tab');
+    // jsdom does not cascade dir → direction; set both on the handler element.
+    first.setAttribute('dir', 'rtl');
+    first.style.direction = 'rtl';
+    fireEvent.keyDown(first, { key: 'ArrowLeft' });
+    expect(screen.getAllByRole('tab')[1]).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
+  it('advances on ArrowLeft when the deck renders RTL', () => {
+    const ref = React.createRef<HTMLDivElement>();
+    render(
+      <Deck
+        ref={ref}
+        slides={sampleDeck.slice(0, 3)}
+        meta={sampleDeckMeta}
+        syncHash={false}
+      />
+    );
+    ref.current!.setAttribute('dir', 'rtl');
+    ref.current!.style.direction = 'rtl';
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
   });
 
   it('gives charts a screen-reader table of their values', () => {

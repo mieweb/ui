@@ -275,6 +275,30 @@ describe('ComposerModelSelector', () => {
       ).toBeInTheDocument();
     });
 
+    it('returns to the model list on ArrowRight under RTL', () => {
+      renderWithEfforts();
+
+      const trigger = screen.getByRole('button', { name: /gpt-5 mini/i });
+      // The listbox is portaled to <body>, so the handler reads direction
+      // from the in-place trigger. jsdom does not cascade dir → direction;
+      // set both on that element.
+      trigger.setAttribute('dir', 'rtl');
+      trigger.style.direction = 'rtl';
+
+      fireEvent.click(trigger);
+      fireEvent.click(screen.getByRole('button', { name: /effort medium/i }));
+      const list = screen.getByRole('listbox', { name: /effort/i });
+
+      // ArrowLeft is the RTL "forward" direction and must no longer go back.
+      fireEvent.keyDown(list, { key: 'ArrowLeft' });
+      expect(screen.getByRole('listbox', { name: /effort/i })).toBe(list);
+
+      fireEvent.keyDown(list, { key: 'ArrowRight' });
+      expect(
+        screen.getByRole('listbox', { name: /^model$/i })
+      ).toBeInTheDocument();
+    });
+
     it('stays in the effort list when the caller passes a new options array', () => {
       // A composer parent re-renders on every keystroke, and callers derive
       // the levels from the selected model, so `effortOptions` arrives as a

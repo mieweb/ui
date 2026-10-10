@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { isRtl } from '../../hooks/useDirection';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import {
   useAnchoredPosition,
@@ -951,9 +952,10 @@ const submenuCloseDelay = 150;
 /**
  * A dropdown item that opens a nested flyout menu.
  *
- * Opens on hover or click, and via ArrowRight/Enter/Space from the keyboard;
- * ArrowLeft or Escape closes just the submenu (Escape is stopped so the root
- * menu stays open) and returns focus to the trigger.
+ * Opens on hover or click, and from the keyboard via Enter/Space or the
+ * arrow toward the inline-end (ArrowRight in LTR, ArrowLeft in RTL); the
+ * opposite arrow or Escape closes just the submenu (Escape is stopped so the
+ * root menu stays open) and returns focus to the trigger.
  *
  * @example
  * ```tsx
@@ -974,6 +976,9 @@ function DropdownSubmenu({
   children,
 }: DropdownSubmenuProps) {
   const [open, setOpen] = React.useState(false);
+  // The flyout opens toward the inline-end — physical left under RTL — so
+  // the panel side matches the open key and the flipped chevron.
+  const [rtl, setRtl] = React.useState(false);
   const menuId = React.useId();
   const dropdownContext = React.useContext(DropdownContext);
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -983,7 +988,13 @@ function DropdownSubmenu({
   const { anchorRef, floatingRef, style, actualSide } = useAnchoredPosition<
     HTMLButtonElement,
     HTMLDivElement
-  >({ open, placement: 'right-start', offset: 4 });
+  >({ open, placement: rtl ? 'left-start' : 'right-start', offset: 4 });
+
+  // Sample direction when opening; layout effect so the reposition with the
+  // corrected placement happens before paint (no wrong-side flash).
+  React.useLayoutEffect(() => {
+    if (open) setRtl(isRtl(anchorRef.current));
+  }, [open, anchorRef]);
 
   // Let the root dropdown treat clicks inside the portaled flyout as "inside"
   // so they don't dismiss the whole menu. Layout effect so the registration
@@ -1059,13 +1070,18 @@ function DropdownSubmenu({
           if (event.detail === 0) focusFirstItem();
         }}
         onKeyDown={(event) => {
-          if (event.key === 'ArrowRight') {
+          // The submenu opens toward the inline-end and its chevron flips
+          // under RTL, so the open/close arrows are visual and invert too.
+          const rtl = isRtl(event.currentTarget);
+          const openKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+          const closeKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+          if (event.key === openKey) {
             event.preventDefault();
             openNow();
             focusFirstItem();
           } else if (
             open &&
-            (event.key === 'ArrowLeft' || event.key === 'Escape')
+            (event.key === closeKey || event.key === 'Escape')
           ) {
             event.preventDefault();
             // Keep the root menu open: stop Escape before it reaches the
@@ -1124,7 +1140,10 @@ function DropdownSubmenu({
                   if (event.pointerType === 'mouse') scheduleClose();
                 }}
                 onKeyDown={(event) => {
-                  if (event.key === 'ArrowLeft' || event.key === 'Escape') {
+                  const closeKey = isRtl(event.currentTarget)
+                    ? 'ArrowRight'
+                    : 'ArrowLeft';
+                  if (event.key === closeKey || event.key === 'Escape') {
                     event.preventDefault();
                     event.stopPropagation();
                     closeAndRefocus();

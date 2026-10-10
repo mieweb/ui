@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { isRtl } from '../../hooks/useDirection';
 import { cn } from '../../utils/cn';
 import { TemplateAnchor, TemplateImg } from '../../templates/Section';
 import type { TemplateIconRegistry } from '../../templates/icons';
@@ -209,10 +210,14 @@ export const Deck = React.forwardRef<HTMLDivElement, DeckProps>(
         if (typingTarget(e.target)) return;
         const key = e.key;
         if (key === ' ' && spaceActivates(e.target)) return;
-        if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(key)) {
+        // ←/→ follow the reading direction: in RTL, ArrowLeft advances.
+        const rtl = isRtl(rootRef.current);
+        const nextKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+        const prevKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+        if (['ArrowDown', nextKey, 'PageDown', ' '].includes(key)) {
           e.preventDefault();
           goTo(active + 1);
-        } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(key)) {
+        } else if (['ArrowUp', prevKey, 'PageUp'].includes(key)) {
           e.preventDefault();
           goTo(active - 1);
         } else if (key === 'Home') {
