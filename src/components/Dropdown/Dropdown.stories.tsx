@@ -235,7 +235,7 @@ export const WithSubmenu: Story = {
     docs: {
       description: {
         story:
-          'A `DropdownSubmenu` opens a nested flyout on hover, click, or ArrowRight; ArrowLeft/Escape closes just the flyout.',
+          'A `DropdownSubmenu` opens a nested flyout on hover, click, or the arrow toward the inline-end (ArrowRight in LTR, ArrowLeft in RTL — the flyout and chevron flip sides too); the opposite arrow or Escape closes just the flyout.',
       },
     },
   },
