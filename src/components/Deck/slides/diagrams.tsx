@@ -341,7 +341,9 @@ export function AdoptionCurveRenderer({
             />
           </svg>
         </div>
-        <div aria-hidden="true" className="mt-2 flex w-full">
+        {/* dir="ltr": the label strip must track the LTR adoption-curve bands
+            above it; letting it reverse in RTL misaligns labels and colors. */}
+        <div aria-hidden="true" dir="ltr" className="mt-2 flex w-full">
           {bands.map((b) => (
             <div
               key={b.label}

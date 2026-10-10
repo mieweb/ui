@@ -1228,6 +1228,32 @@ test.describe('Visual Regression Tests - Deck', () => {
       animations: 'disabled',
     });
   });
+
+  test('Deck - Adoption curve labels stay LTR in RTL', async ({ page }) => {
+    // The adoption-curve SVG stays physical (LTR) by design; the label strip
+    // beneath it carries dir="ltr" so labels keep tracking their bands.
+    await gotoStory(page, 'presentations-deck--all-slide-types', {
+      globals: 'direction:rtl',
+    });
+    const slide = page.locator('[data-slot="deck-slide"][data-index="17"]');
+    await slide.scrollIntoViewIfNeeded();
+    await expect(slide).toHaveAttribute('data-seen', '');
+    const strip = slide.locator('div[dir="ltr"]');
+    await expect(strip).toHaveCount(1);
+    await expect(strip).toHaveCSS('direction', 'ltr');
+    // Flex order must not reverse: first band label (innovators) remains at
+    // the strip's left edge, last (laggards) at the right.
+    const cells = strip.locator('> div');
+    const first = await cells.first().boundingBox();
+    const last = await cells.last().boundingBox();
+    const stripBox = await strip.boundingBox();
+    if (!first || !last || !stripBox) throw new Error('strip not rendered');
+    expect(Math.abs(first.x - stripBox.x)).toBeLessThanOrEqual(1.5);
+    expect(first.x + first.width).toBeLessThanOrEqual(last.x);
+    await expect(page).toHaveScreenshot('deck-adoption-curve-rtl.png', {
+      animations: 'disabled',
+    });
+  });
 });
 
 test.describe('Visual Regression Tests - RichEditor (kerebron.css)', () => {
