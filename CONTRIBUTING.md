@@ -160,6 +160,9 @@ Coding conventions (the full standard lives in
   hardcode hex colors.** Support dark mode and brand switching.
 - **Accessibility** — semantic roles, `aria-*`, keyboard operability, visible
   focus. Modal/overlay components trap focus and close on `Escape`.
+- **RTL-safe styling** — logical properties, flipped directional icons,
+  direction-aware arrow keys. See
+  [RTL & direction-agnostic styling](#rtl--direction-agnostic-styling).
 - **Icons** from `lucide-react`; dates via `luxon`.
 
 For new date parsing, formatting, and comparisons, use Luxon's `DateTime`. Keep
@@ -198,6 +201,58 @@ what lets `SuperChatInbox` ship in a library while an app's inbox page cannot.
 The full rationale lives in
 [lessons/component-policy.md → Tier 2.5](lessons/component-policy.md#tier-25-headless-modules);
 the agent rules restate it as Rule 14. Keep the three in agreement.
+
+## RTL & direction-agnostic styling
+
+Components must render correctly in right-to-left locales
+(`<html dir="rtl">`). Write direction-agnostic code by default; reach for
+`rtl:` overrides only where a logical property cannot express the behavior.
+
+- **Logical Tailwind utilities, never physical ones** — `ms-`/`me-`,
+  `ps-`/`pe-`, `start-`/`end-`, `text-start`/`text-end`,
+  `rounded-s`/`rounded-e`, `border-s`/`border-e`. A `space-x-*` or
+  `divide-x-*` utility needs its paired `rtl:space-x-reverse` /
+  `rtl:divide-x-reverse` on the same element.
+- **Logical inline styles** — in `style={{ … }}` use `insetInlineStart`,
+  `marginInlineStart`, `paddingInlineEnd`, `textAlign: 'start'`, … — never
+  `left`, `marginLeft`, `textAlign: 'left'`.
+- **Directional icons flip with `rtl:-scale-x-100`** — arrows and chevrons
+  that point along the reading direction (navigation, "more", breadcrumb,
+  back/forward) get `className="rtl:-scale-x-100"`. Use this idiom
+  consistently — not `rtl:rotate-180`. Icons with fixed physical meaning
+  (media play/seek triangles, trig or chart geometry) do **not** flip.
+- **Keyboard arrows invert** — `ArrowLeft`/`ArrowRight` handling must follow
+  the reading direction. Use the `useDirection()` hook from
+  [src/hooks/useDirection.ts](src/hooks/useDirection.ts), or
+  `getComputedStyle(element).direction` inside an event handler (see
+  [BoardView](src/components/BoardView/BoardView.tsx) for the pattern).
+- **Safelist new class strings** — any new `rtl:*` or logical utility a
+  component emits must be added to **both**
+  [src/tailwind-preset.ts](src/tailwind-preset.ts) and
+  [src/tailwind-preset.cjs](src/tailwind-preset.cjs).
+- **Genuinely physical code is exempt, with a reason** — pointer-coordinate
+  math, overlays anchored to an SVG coordinate space, LTR-by-convention
+  charts. Annotate the line (or the line above) with
+  `// rtl-ignore -- <reason>`.
+
+### The RTL guard
+
+CI runs `pnpm rtl:scan`, which flags physical-direction Tailwind classes and
+inline-style properties in `src/components`. It is a ratchet against
+[scripts/rtl-baseline.json](scripts/rtl-baseline.json): pre-existing debt is
+allowed, new offenses fail. `node scripts/rtl-scan.mjs --list` prints every
+match; after migrating a file, tighten the ratchet with
+`pnpm rtl:scan:update`.
+
+### Testing in RTL
+
+Use the **direction** toolbar global in Storybook to preview any story in
+RTL. In Playwright visual tests, load the story with
+`gotoStory(page, storyId, { globals: 'direction:rtl' })` — and pair the
+screenshot with computed-style or geometry assertions (e.g.
+`getComputedStyle(el).scale === '-1 1'` for a flipped icon, or
+`getBoundingClientRect()` alignment checks), because the screenshot
+comparison's 5% pixel tolerance can swallow icon-sized regressions.
 
 ## Stories & documentation (autodocs convention)
 
@@ -579,7 +634,9 @@ when a consuming application is involved; the audit and PR requirements still ap
 
 1. `src/components/<Name>/` with `index.ts`, `<Name>.tsx`, `<Name>.stories.tsx`.
 2. Follow the [anatomy](#anatomy-of-a-component) conventions (CVA, `cn`,
-   `forwardRef`, theme tokens, a11y).
+   `forwardRef`, theme tokens, a11y) and
+   [RTL conventions](#rtl--direction-agnostic-styling) (`pnpm rtl:scan` must
+   pass).
 3. Autodocs story that satisfies the
    [metadata contract](#stories--documentation-autodocs-convention): stable `id`,
    taxonomy `title`, `scope:`/`maturity:` tags, the five-heading description,

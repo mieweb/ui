@@ -2,8 +2,10 @@
 /**
  * RTL guard: scans src/components for physical-direction Tailwind classes
  * (ml-/mr-/pl-/pr-/left-/right-/text-left/rounded-l/border-r/space-x-/…)
- * that break right-to-left layouts. Use CSS logical properties instead
- * (ms-/me-/ps-/pe-/start-/end-/text-start/rounded-s/border-e/gap-…).
+ * and physical inline-style properties (marginLeft, left:, textAlign: 'left',
+ * …) that break right-to-left layouts. Use CSS logical properties instead
+ * (ms-/me-/ps-/pe-/start-/end-/text-start/rounded-s, marginInlineStart,
+ * insetInlineStart, textAlign: 'start', …).
  *
  * Works as a ratchet: existing offenders are recorded in rtl-baseline.json.
  * The scan fails only when a file's count INCREASES or a new file offends,
@@ -60,6 +62,56 @@ function isHandledReverse(token, lineText) {
   );
 }
 
+// Physical inline-style properties (React style objects / CSS-in-JS). The
+// camelCase names only occur as style keys in .tsx files, so they are flagged
+// anywhere; `textAlign`/`float`/`clear` are flagged only with a left/right
+// value. Logical equivalents in comments.
+const PHYSICAL_STYLE_PROPS = new RegExp(
+  '(^|[\\s{,(])(' +
+    [
+      '(?:margin|padding)(?:Left|Right)(?=\\s*:)', // → marginInlineStart/End, paddingInlineStart/End
+      'border(?:Top|Bottom)(?:Left|Right)Radius(?=\\s*:)', // → borderStartStartRadius/…
+      'border(?:Left|Right)(?:Width|Style|Color)?(?=\\s*:)', // → borderInlineStart*/End*
+      "textAlign\\s*:\\s*['\"](?:left|right)['\"]", // → 'start'/'end'
+      "(?:float|clear)\\s*:\\s*['\"](?:left|right)['\"]", // → 'inline-start'/'inline-end'
+    ].join('|') +
+    ')',
+  'g'
+);
+
+// Bare `left:`/`right:` keys are real CSS only inside a style object, so they
+// are flagged only on lines inside `style={{ … }}` (tracked per file below).
+const STYLE_INSET_KEYS = /(^|[\s{,(])(left|right)(?=\s*:)/g; // → insetInlineStart/End
+
+// Marks the lines of a file that fall inside a JSX `style={{ … }}` expression,
+// by tracking brace depth from each `style={{` until it closes.
+function styleObjectLines(lines) {
+  const marks = new Array(lines.length).fill(false);
+  let depth = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const text = lines[i];
+    let from = 0;
+    if (depth === 0) {
+      const start = text.search(/style\s*=\s*\{\{/);
+      if (start === -1) continue;
+      from = start;
+    }
+    marks[i] = true;
+    for (let j = from; j < text.length; j++) {
+      if (text[j] === '{') depth++;
+      else if (text[j] === '}') {
+        depth--;
+        if (depth === 0) {
+          const next = text.slice(j + 1).search(/style\s*=\s*\{\{/);
+          if (next === -1) break;
+          j += next; // another style={{ on the same line
+        }
+      }
+    }
+  }
+  return marks;
+}
+
 // `left-1/2` (or `right-1/2`) paired with `translate-x-1/2` on the same line
 // is the physical centering idiom — a centered element renders identically in
 // LTR and RTL, so it is direction-neutral and exempt from the guard.
@@ -84,6 +136,24 @@ function isExplicitlyIgnored(lines, index) {
 // Best-effort logical equivalent for an offending token, shown in failure
 // output so the fix is copy-pasteable.
 function logicalEquivalent(token) {
+  // Inline-style properties
+  if (token === 'left') return 'insetInlineStart';
+  if (token === 'right') return 'insetInlineEnd';
+  if (/^textAlign/.test(token))
+    return token.replace('left', 'start').replace('right', 'end');
+  if (/^(?:float|clear)/.test(token))
+    return token
+      .replace('left', 'inline-start')
+      .replace('right', 'inline-end');
+  if (/^border(?:Top|Bottom)(?:Left|Right)Radius$/.test(token))
+    return token
+      .replace('TopLeft', 'StartStart')
+      .replace('TopRight', 'StartEnd')
+      .replace('BottomLeft', 'EndStart')
+      .replace('BottomRight', 'EndEnd');
+  if (/^(?:margin|padding|border)(?:Left|Right)/.test(token))
+    return token.replace('Left', 'InlineStart').replace('Right', 'InlineEnd');
+  // Tailwind utilities
   if (/^space-x-/.test(token))
     return `${token.replace(/^space-x-/, 'gap-x-')} (or keep it and add rtl:space-x-reverse)`;
   if (/^divide-x/.test(token)) return `${token} rtl:divide-x-reverse`;
@@ -122,9 +192,15 @@ function scan() {
   for (const file of walk(COMPONENTS_DIR)) {
     const rel = relative(root, file);
     const lines = readFileSync(file, 'utf8').split('\n');
+    const inStyle = styleObjectLines(lines);
     lines.forEach((text, i) => {
       if (isExplicitlyIgnored(lines, i)) return;
-      for (const match of text.matchAll(PHYSICAL_UTILITIES)) {
+      const matches = [
+        ...text.matchAll(PHYSICAL_UTILITIES),
+        ...text.matchAll(PHYSICAL_STYLE_PROPS),
+        ...(inStyle[i] ? text.matchAll(STYLE_INSET_KEYS) : []),
+      ];
+      for (const match of matches) {
         if (isCenteringIdiom(match[2], text)) continue;
         if (isHandledReverse(match[2], text)) continue;
         if (!results.has(rel)) results.set(rel, []);
@@ -186,7 +262,7 @@ if (failures.length > 0) {
     String(s).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
   const escProp = (s) => esc(s).replace(/:/g, '%3A').replace(/,/g, '%2C');
   console.error(
-    'RTL guard: new physical-direction Tailwind classes detected.\n'
+    'RTL guard: new physical-direction Tailwind classes or inline styles detected.\n'
   );
   for (const { file, count, allowed } of failures) {
     console.error(`  ${file}: ${count} matches (baseline allows ${allowed})`);
@@ -208,8 +284,8 @@ if (failures.length > 0) {
   }
   console.error(`
 How to fix:
-  1. Replace each class with its logical equivalent shown above
-     (physical left/right → direction-aware start/end).
+  1. Replace each class or style property with its logical equivalent shown
+     above (physical left/right → direction-aware start/end).
   2. If the class string is NEW (not already in the Tailwind safelist), add it
      to BOTH src/tailwind-preset.ts and src/tailwind-preset.cjs.
   3. Only if the usage is genuinely physical (e.g. drag/resize clientX math),
