@@ -11,6 +11,10 @@ module.exports = {
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
     // EncounterVisit: report layout, expanding narratives, and coordinated vitals.
+    'z-40',
+    'sm:inset-8',
+    'sm:rounded-lg',
+    'top-11',
     '[&>[data-slot=card-content]>section]:bg-transparent',
     '[&>[data-slot=card-content]>section]:border-0',
     '[&>[data-slot=card-content]>section]:px-0',

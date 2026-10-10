@@ -25,7 +25,9 @@ const meta: Meta<typeof EncounterVisit> = {
 
 A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medication reconciliation, allergies, or assessment and orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, plan, and follow-up / appointment details are included in the default template. Patient identity is not captured.
 
-The visit reads as a continuous report: full-width sections, small outer insets, and no nested section cards. Narrative inputs grow and shrink with their content. Bold, italic, underline, and list controls appear while editing. Formatting is retained in native response attributes; observation and MCP text stays plain. A compact sticky section selector is available on desktop and phone.
+The three-way toggle uses one draft: **eSheet** offers memory aids and coded capture, **RichEdit** uses Kerebron for headings and free Markdown prose with protected data links, and **View** renders the flattened MDY through mieweb/templit for a final report check. Select a linked value in RichEdit to open its eSheet section with related inputs. Changes update every projection of that field. Free prose stays in the document body; it is not automatically promoted to a coded observation.
+
+The visit reads as a continuous report with small outer insets and no nested section cards. Narrative inputs and the document editor grow with their content. A compact sticky section selector is available in eSheet on desktop and phone.
 
 ### Use it when
 
@@ -39,7 +41,7 @@ The visit reads as a continuous report: full-width sections, small outer insets,
 
 ### Example
 
-Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer; the shared entry re-exports the builder). eSheet supplies its shared CSS automatically.
+Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer; the shared entry re-exports the builder). eSheet supplies its shared CSS automatically. RichEdit additionally uses the optional Kerebron peers documented at \`@mieweb/ui/kerebron\`: load \`@mieweb/ui/kerebron.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\`.
 
 \`\`\`tsx
 import { EncounterVisit, DEFAULT_ENCOUNTER_VISIT_DEFINITION } from '@mieweb/ui/esheet';
@@ -48,7 +50,7 @@ import { EncounterVisit, DEFAULT_ENCOUNTER_VISIT_DEFINITION } from '@mieweb/ui/e
   definition={DEFAULT_ENCOUNTER_VISIT_DEFINITION}
   patientContext="45 yo male with pre-diabetes, back pain and hypertension"
   initialResponses={savedNativeEsheetResponses}
-  onChange={(visit) => updateDraft(visit.responses)}
+  onChange={(visit) => updateDraft(visit.mdy)}
   onSubmit={async (visit) => saveVisit(visit)}
   onToolsReady={(tools) => connectAgent(tools)}
 />
@@ -56,11 +58,13 @@ import { EncounterVisit, DEFAULT_ENCOUNTER_VISIT_DEFINITION } from '@mieweb/ui/e
 
 Each section has a stable \`id\` and \`kind\`. An \`observations\` section accepts \`narrative: true\` and \`observations: [{ id, label, type?, unit?, code?, options?, required? }]\`. For an exam stored as one observation, choose \`kind: 'narrative'\`. Generated IDs are available through \`getEncounterFieldId\`. Change \`definition.id\` to open another visit; \`initialResponses\` is loaded once per visit. Rebuilding the same definition inline preserves edits. Configuration changes preserve answers; removed fields stay in native responses but are omitted from the current observation export.
 
-\`onChange\`, \`ref.getSnapshot()\`, and the MCP tools expose native responses, observations, a note made from entered data, and validation errors. BP is one observation with systolic/diastolic components and a stable reading group. Repeat readings also retain timestamp, position and site. Units are explicit: mmHg, beats/min, breaths/min, °C, %, cm and kg. There is no automatic normal finding, unit conversion, diagnosis, or recommendation.
+\`onChange\`, \`ref.getSnapshot()\`, and the MCP tools expose native responses, observations, a plain data note, portable \`mdy\`, and validation errors. Save persists the full MDY; reopen it with \`initialMdy\`, which takes precedence over \`initialResponses\`. \`defaultMode\` accepts \`esheet\`, \`rich\`, or \`view\`. YAML contains the native \`form\` / \`response\`, encounter section configuration, and stable MDY field projections; the Markdown body contains headings, prose, and linked values. Existing YAML comments and host metadata survive edits. Free prose remains separate from coded data, and manual changes to linked display text cannot overwrite clinical answers. BP is one observation with systolic/diastolic components and a stable reading group; repeat readings retain timestamp, position and site.
+
+The integration follows [Kerebron #115](https://github.com/mieweb/kerebron/issues/115), [eSheet PR #122](https://github.com/mieweb/eSheet/pull/122), and the [Templit MDY specification](https://github.com/mieweb/templit/blob/main/doc/mdy-specification.md). The first two remain open: this component supplies a local protected-link/resolver bridge over the installed editor. Templit 0.2.0 supplies the actual rendering pipeline. Native eSheet IDs retain their identity; MDY-safe aliases map links to those fields. \`mdy:\` targets avoid Kerebron 0.8.12's rewriting of fragment links.
 
 ### MCP integration
 
-Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. Route tools/call through \`executeEncounterVisitToolCall(name, args, tools)\`, using the \`tools\` received by \`onToolsReady\`. The executor returns MCP text content, structuredContent and isError. Available tools read the visit, list sections, set narrative / observations, upsert or remove a vital reading, update clinical lists, validate, get the note and navigate to a section. \`ENCOUNTER_VISIT_SYSTEM_PROMPT\` describes anonymous, evidence-only documentation. This is an in-process bridge; your host owns transport, authentication and persistence. Mutations reject invalid payloads and read-only visits before writing to the same renderer the user sees.
+Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. Route tools/call through \`executeEncounterVisitToolCall(name, args, tools)\`, using the \`tools\` received by \`onToolsReady\`. The executor returns MCP text content, structuredContent and isError. Tools read/write native clinical fields, retrieve the full MDY (\`encounter_visit_get_mdy\`), replace free document prose (\`encounter_visit_set_document_body\`), validate, get the plain data note, and navigate to a section. Replacing prose retains every coded answer and imported YAML metadata. \`ENCOUNTER_VISIT_SYSTEM_PROMPT\` describes anonymous, evidence-only documentation. The host owns transport, authentication and persistence.
 
 ### Limitations
 
@@ -108,6 +112,10 @@ type Story = StoryObj<typeof EncounterVisit>;
 
 export const AnonymousVisit: Story = {};
 
+export const RichEdit: Story = { args: { defaultMode: 'rich' } };
+
+export const FinalView: Story = { args: { defaultMode: 'view' } };
+
 export const Mobile: Story = {
   render: (args) => (
     <div className="mx-auto max-w-[390px]">
@@ -135,6 +143,9 @@ export const ReadOnly: Story = { args: { readOnly: true } };
 function McpDemo(args: EncounterVisitProps) {
   const [tools, setTools] = React.useState<EncounterVisitTools | null>(null);
   const [result, setResult] = React.useState('');
+  const [body, setBody] = React.useState(
+    '# Encounter visit\n\n## Discussion\n\nFree report prose.'
+  );
   return (
     <div className="space-y-4">
       <div className="border-border bg-muted/30 text-foreground rounded-xl border p-4">
@@ -188,6 +199,36 @@ function McpDemo(args: EncounterVisitProps) {
             Record demo BP via MCP
           </Button>
         </ButtonGroup>
+        <label className="mt-3 block text-sm">
+          Document Markdown body
+          <textarea
+            className="bg-background mt-1 block min-h-11 w-full rounded px-2 py-1 text-base"
+            rows={3}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+          />
+        </label>
+        <Button
+          className="mt-2 min-h-11"
+          variant="secondary"
+          disabled={!tools || args.readOnly}
+          onClick={() =>
+            tools &&
+            setResult(
+              JSON.stringify(
+                executeEncounterVisitToolCall(
+                  'encounter_visit_set_document_body',
+                  { body },
+                  tools
+                ),
+                null,
+                2
+              )
+            )
+          }
+        >
+          Replace document body via MCP
+        </Button>
         {result && (
           <pre
             aria-label="MCP result"

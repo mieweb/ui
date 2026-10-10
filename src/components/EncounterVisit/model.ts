@@ -7,6 +7,7 @@ import {
   getEncounterSectionFieldIds,
   validateEncounterDefinition,
 } from './definition';
+import { createEncounterMdy } from './mdy';
 import type {
   EncounterAssessmentValue,
   EncounterCode,
@@ -1070,11 +1071,15 @@ export function createEncounterSnapshot(
     }),
   ].join('\n\n');
   // Keep host snapshot transformations detached from the live eSheet store.
-  return globalThis.structuredClone({
+  const snapshot = {
     definition,
     responses,
     observations,
     note,
     errors,
+  };
+  return globalThis.structuredClone({
+    ...snapshot,
+    mdy: createEncounterMdy(snapshot),
   });
 }

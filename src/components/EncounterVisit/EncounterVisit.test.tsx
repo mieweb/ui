@@ -85,10 +85,12 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     );
     expect(snapshot.observations).toHaveLength(1);
     expect(onChange.mock.lastCall?.[0].responses).toEqual(snapshot.responses);
-    fireEvent.click(screen.getByRole('button', { name: 'Review note' }));
-    expect(
-      screen.getByRole('region', { name: 'Visit note preview' })
-    ).toHaveTextContent('hypertension');
+    fireEvent.click(screen.getByRole('tab', { name: 'View' }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole('region', { name: 'Visit note preview' })
+      ).toHaveTextContent('hypertension')
+    );
     expect(
       screen.queryByRole('textbox', { name: /patient name/i })
     ).not.toBeInTheDocument();

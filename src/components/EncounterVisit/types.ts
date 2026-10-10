@@ -134,5 +134,9 @@ export interface EncounterVisitSnapshot {
   responses: EncounterResponses;
   observations: EncounterObservation[];
   note: string;
+  /** Portable MDY: native eSheet data in YAML, authored Markdown in the body. */
+  mdy: string;
   errors: EncounterValidationIssue[];
 }
+
+export type EncounterVisitMode = 'esheet' | 'rich' | 'view';

@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getEncounterFieldId } from './definition';
 import {
+  ENCOUNTER_DOCUMENT_FIELD_ID,
+  encounterDocumentResponse,
+  getEncounterDocumentBody,
+} from './mdy';
+import {
   createEncounterVisitTools,
   ENCOUNTER_VISIT_TOOL_DEFINITIONS,
   executeEncounterVisitToolCall,
@@ -112,6 +117,77 @@ describe('EncounterVisit in-process tools', () => {
       'Supplied history'
     );
   });
+
+  it('reads portable MDY from the current canonical responses and document body', () => {
+    const ctx = fixture();
+    ctx.tools.setNarrative('hpi', 'History from the supplied encounter.');
+    ctx.tools.setDocumentBody('# Visit\n\nEditable document prose.');
+    const document = ctx.tools.getMdy();
+    const visit = ctx.tools.getVisit();
+    if (!document.success || !visit.success)
+      throw new Error('Expected visit and MDY');
+    expect(document.data.mdy).toBe(visit.data.mdy);
+    expect(document.data.mdy).toContain('response:');
+    expect(document.data.mdy).toContain('History from the supplied encounter.');
+    expect(document.data.mdy).toContain('# Visit\n\nEditable document prose.');
+    ctx.tools.setNarrative('hpi', 'Updated canonical history.');
+    const updated = ctx.tools.getMdy();
+    if (!updated.success) throw new Error('Expected updated MDY');
+    expect(updated.data.mdy).toContain('Updated canonical history.');
+    expect(updated.data.mdy).not.toContain(
+      'History from the supplied encounter.'
+    );
+  });
+
+  it('writes only the document body while preserving clinical responses and imported metadata', () => {
+    const source = '---\nowner: { value: host } # retained\n---\nOld prose.';
+    const original: EncounterResponses = {
+      [getEncounterFieldId('hpi')]: { answer: 'Recorded history.', _ai: false },
+      [getEncounterFieldId('exam', 'motion')]: { answer: '30' },
+      unrelated: { answer: 'Keep this answer.' },
+      [ENCOUNTER_DOCUMENT_FIELD_ID]: {
+        ...encounterDocumentResponse(source),
+        _ai: false,
+        attributes: {
+          ...encounterDocumentResponse(source).attributes,
+          hostRevision: 'revision-3',
+        },
+      },
+    };
+    const ctx = fixture(original);
+    const before = ctx.tools.getVisit();
+    const body = '# Document\n\nPatient reports pulse 120 and a new medicine.';
+    const result = ctx.tools.setDocumentBody(body);
+    if (!before.success || !result.success)
+      throw new Error('Expected document update');
+    expect(ctx.setResponses).toHaveBeenCalledTimes(1);
+    expect(getEncounterDocumentBody(ctx.responses())).toBe(body);
+    expect(ctx.responses()[ENCOUNTER_DOCUMENT_FIELD_ID]).toEqual({
+      ...original[ENCOUNTER_DOCUMENT_FIELD_ID],
+      answer: body,
+      _ai: true,
+    });
+    for (const fieldId of Object.keys(original).filter(
+      (id) => id !== ENCOUNTER_DOCUMENT_FIELD_ID
+    )) {
+      expect(ctx.responses()[fieldId]).toEqual(original[fieldId]);
+    }
+    expect(result.data.observations).toEqual(before.data.observations);
+    expect(getEncounterDocumentBody(original)).toBe('Old prose.');
+    expect(ctx.tools.setDocumentBody('').success).toBe(true);
+    expect(getEncounterDocumentBody(ctx.responses())).toBe('');
+  });
+
+  it.each([null, undefined, 45, {}, []])(
+    'rejects a document body that is not a string: %j',
+    (body) => {
+      const ctx = fixture();
+      expect(
+        errorCode(ctx.tools.setDocumentBody(body as unknown as string))
+      ).toBe('INVALID_ARGUMENT');
+      expect(ctx.setResponses).not.toHaveBeenCalled();
+    }
+  );
 
   it('records observation fields in the native answer and selected formats', () => {
     const ctx = fixture();
@@ -435,11 +511,13 @@ describe('EncounterVisit in-process tools', () => {
       ctx.tools.upsertVitals('vitals', { id: 'first', pulse: 78 }),
       ctx.tools.removeVitals('vitals', 'first'),
       ctx.tools.updateSection('medications', { medications: [] }),
+      ctx.tools.setDocumentBody('Document prose'),
     ];
-    expect(results.map(errorCode)).toEqual(Array(5).fill('READ_ONLY'));
+    expect(results.map(errorCode)).toEqual(Array(6).fill('READ_ONLY'));
     expect(ctx.setResponses).not.toHaveBeenCalled();
     expect(ctx.tools.getVisit().success).toBe(true);
     expect(ctx.tools.getNote().success).toBe(true);
+    expect(ctx.tools.getMdy().success).toBe(true);
     expect(ctx.tools.navigateToSection('exam')).toEqual({
       success: true,
       data: { sectionId: 'exam' },
@@ -498,6 +576,10 @@ describe('EncounterVisit MCP tools/call adapter', () => {
     ],
     ['encounter_visit_upsert_vitals', { sectionId: 'vitals', reading: null }],
     ['encounter_visit_remove_vitals', { sectionId: 'vitals', readingId: '' }],
+    ['encounter_visit_get_mdy', { extra: true }],
+    ['encounter_visit_set_document_body', {}],
+    ['encounter_visit_set_document_body', { body: 45 }],
+    ['encounter_visit_set_document_body', { body: null }],
   ])(
     'rejects malformed tool arguments for %s before mutating',
     (name, args) => {
@@ -512,6 +594,40 @@ describe('EncounterVisit MCP tools/call adapter', () => {
       expect(ctx.setResponses).not.toHaveBeenCalled();
     }
   );
+
+  it('dispatches document body edits and MDY reads through MCP', () => {
+    const ctx = fixture({
+      [getEncounterFieldId('hpi')]: { answer: 'Recorded history.' },
+    });
+    const body = '# Visit\n\nAdditional document prose.';
+    const edited = executeEncounterVisitToolCall(
+      'encounter_visit_set_document_body',
+      { body },
+      ctx.tools
+    );
+    expect(edited.isError).toBeUndefined();
+    expect(edited.structuredContent.success).toBe(true);
+    expect(getEncounterDocumentBody(ctx.responses())).toBe(body);
+    expect(ctx.responses()[getEncounterFieldId('hpi')]).toEqual({
+      answer: 'Recorded history.',
+    });
+    const read = executeEncounterVisitToolCall(
+      'encounter_visit_get_mdy',
+      {},
+      ctx.tools
+    );
+    expect(read.isError).toBeUndefined();
+    expect(read.structuredContent).toMatchObject({
+      success: true,
+      data: { mdy: expect.stringContaining(body) },
+    });
+    expect(JSON.parse(read.content[0].text)).toEqual(read.structuredContent);
+    expect(
+      ENCOUNTER_VISIT_TOOL_DEFINITIONS.find(
+        (tool) => tool.name === 'encounter_visit_get_mdy'
+      )?.annotations.readOnlyHint
+    ).toBe(true);
+  });
 
   it('returns an MCP error when a host callback fails', () => {
     const tools = createEncounterVisitTools({
