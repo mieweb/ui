@@ -74,9 +74,9 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       />
     );
     const input = await screen.findByRole('textbox', { name: 'HPI' });
-    fireEvent.change(input, {
+    fireEvent.input(input, {
       target: {
-        value: '45 yo male with pre-diabetes, back pain and hypertension.',
+        innerHTML: '45 yo male with pre-diabetes, back pain and hypertension.',
       },
     });
     const snapshot = ref.current!.getSnapshot();
@@ -112,11 +112,11 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     }
     render(<Host />);
     const input = await screen.findByRole('textbox', { name: 'HPI' });
-    fireEvent.change(input, { target: { value: 'Draft retained' } });
-    fireEvent.change(input, {
-      target: { value: 'Draft retained after another edit' },
+    fireEvent.input(input, { target: { innerHTML: 'Draft retained' } });
+    fireEvent.input(input, {
+      target: { innerHTML: 'Draft retained after another edit' },
     });
-    expect(input).toHaveValue('Draft retained after another edit');
+    expect(input).toHaveTextContent('Draft retained after another edit');
   });
 
   it('MCP writes update visible fields and user edits return through the same tools', async () => {
@@ -149,6 +149,32 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     expect(screen.getByLabelText('Systolic')).toHaveAttribute('readonly');
   });
 
+  it('retains formatting in the native draft and replaces it when MCP changes the text', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    render(<EncounterVisit ref={ref} definition={definition} />);
+    const narrative = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(narrative, {
+      target: {
+        innerHTML: '<b>Back pain</b><div>History supplied by patient</div>',
+      },
+    });
+    const snapshot = ref.current!.getSnapshot();
+    expect(snapshot.responses[getEncounterFieldId('hpi')]).toMatchObject({
+      answer: 'Back pain\nHistory supplied by patient',
+      attributes: {
+        encounterNarrativeHtml:
+          '<b>Back pain</b><div>History supplied by patient</div>',
+      },
+    });
+    expect(snapshot.note).not.toContain('<b>');
+    expect(narrative.querySelector('b')).toHaveTextContent('Back pain');
+    act(() => {
+      ref.current!.getTools().setNarrative('hpi', 'Revised by MCP');
+    });
+    expect(narrative).toHaveTextContent('Revised by MCP');
+    expect(narrative.querySelector('b')).toBeNull();
+  });
+
   it('blocks save for partial BP and keeps a rejected save draft', async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error('Storage is offline'));
     render(<EncounterVisit definition={definition} onSubmit={onSubmit} />);
@@ -177,8 +203,8 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     const { rerender } = render(
       <EncounterVisit ref={ref} definition={definition} onChange={onChange} />
     );
-    fireEvent.change(await screen.findByRole('textbox', { name: 'HPI' }), {
-      target: { value: 'Preserved narrative' },
+    fireEvent.input(await screen.findByRole('textbox', { name: 'HPI' }), {
+      target: { innerHTML: 'Preserved narrative' },
     });
     onChange.mockClear();
     const next = {
@@ -192,7 +218,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       <EncounterVisit ref={ref} definition={next} onChange={onChange} />
     );
     await screen.findByRole('textbox', { name: 'Plan' });
-    expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveValue(
+    expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveTextContent(
       'Preserved narrative'
     );
     expect(onChange.mock.calls.length).toBeGreaterThan(0);
@@ -204,7 +230,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       <EncounterVisit ref={ref} definition={{ ...next, id: 'new-visit' }} />
     );
     await waitFor(() =>
-      expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveValue('')
+      expect(screen.getByRole('textbox', { name: 'HPI' })).toBeEmptyDOMElement()
     );
   });
 

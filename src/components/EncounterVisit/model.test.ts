@@ -100,7 +100,7 @@ describe('encounter definition', () => {
       fields: [
         {
           id: getEncounterFieldId('hpi'),
-          fieldType: 'longtext',
+          fieldType: 'encounterNarrative',
           width: 'full',
           required: true,
         },

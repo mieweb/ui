@@ -167,14 +167,14 @@ export function EncounterVitalsField({
       (entry) => entry.readingId === reading.id && entry.path?.endsWith(key)
     );
     return (
-      <div key={key} className="min-w-0 space-y-1.5">
+      <div key={key} className="relative min-w-0">
         <Input
           id={inputId}
           label={label}
           aria-describedby={`${inputId}-unit`}
           type="text"
           inputMode="decimal"
-          className="min-h-11"
+          className="min-h-11 pe-12"
           value={
             persistedDraft?.text ??
             formatting ??
@@ -202,7 +202,10 @@ export function EncounterVitalsField({
             }
           }}
         />
-        <p id={`${inputId}-unit`} className="text-muted-foreground text-sm">
+        <p
+          id={`${inputId}-unit`}
+          className="text-muted-foreground pointer-events-none absolute end-3 top-[2.125rem] text-sm"
+        >
           {unit}
         </p>
       </div>
@@ -210,12 +213,9 @@ export function EncounterVitalsField({
   };
 
   return (
-    <section aria-label={definition.question ?? 'Vitals'} className="space-y-4">
-      <h3 className="text-lg font-semibold">
-        {definition.question ?? 'Vitals'}
-      </h3>
+    <section aria-label={definition.question ?? 'Vitals'} className="space-y-3">
       <p className="text-muted-foreground text-sm">
-        Add each measurement set separately. Leave unmeasured values blank.
+        Leave unmeasured values blank.
       </p>
       {parsed.error && (
         <div
@@ -241,51 +241,98 @@ export function EncounterVitalsField({
           (issue) => issue.code === 'incomplete-blood-pressure'
         );
         return (
-          <fieldset
-            key={reading.id}
-            className="border-border min-w-0 space-y-4 rounded-xl border p-3 sm:p-4"
-          >
-            <legend className="px-1 text-base font-semibold">
-              Measurement set {index + 1}
-            </legend>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Input
-                label="Recorded at"
-                type={
-                  !reading.recordedAt ||
-                  (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(
-                    reading.recordedAt
-                  ) &&
-                    !readingIssues.some((issue) =>
+          <fieldset key={reading.id} className="min-w-0 space-y-3">
+            <legend className="sr-only">Measurement set {index + 1}</legend>
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="font-semibold">Measurement set {index + 1}</h4>
+              {!readOnly && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="min-h-11 shrink-0"
+                  aria-label={`Remove measurement set ${index + 1}`}
+                  onClick={() =>
+                    commit({
+                      ...parsed.value,
+                      readings: parsed.value.readings.filter(
+                        (candidate) => candidate.id !== reading.id
+                      ),
+                      inputDrafts: parsed.value.inputDrafts?.filter(
+                        (draft) => draft.readingId !== reading.id
+                      ),
+                    })
+                  }
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
+              <fieldset
+                className="col-span-2 min-w-0"
+                aria-describedby={
+                  bpIssue ? `${instanceId}-${reading.id}-bp-error` : undefined
+                }
+              >
+                <legend className="sr-only">Blood pressure (mmHg)</legend>
+                <div className="grid grid-cols-2 gap-3">
+                  {numberInput(reading, 'systolic', 'Systolic', 'mmHg')}
+                  {numberInput(reading, 'diastolic', 'Diastolic', 'mmHg')}
+                </div>
+                {bpIssue && (
+                  <p
+                    id={`${instanceId}-${reading.id}-bp-error`}
+                    role="alert"
+                    className="text-destructive mt-1 text-sm"
+                  >
+                    {bpIssue.message}
+                  </p>
+                )}
+              </fieldset>
+              {measurements.map(({ key, label, unit }) =>
+                numberInput(reading, key, label, unit)
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="col-span-2 min-w-0 sm:col-span-1">
+                <Input
+                  label="Recorded at"
+                  type={
+                    !reading.recordedAt ||
+                    (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(
+                      reading.recordedAt
+                    ) &&
+                      !readingIssues.some((issue) =>
+                        issue.path?.endsWith('.recordedAt')
+                      ))
+                      ? 'datetime-local'
+                      : 'text'
+                  }
+                  className="min-h-11"
+                  value={reading.recordedAt ?? ''}
+                  readOnly={readOnly}
+                  disabled={!isEnabled}
+                  title="Optional; use the visit's local date and time."
+                  error={
+                    readingIssues.find((issue) =>
                       issue.path?.endsWith('.recordedAt')
-                    ))
-                    ? 'datetime-local'
-                    : 'text'
-                }
-                className="min-h-11"
-                value={reading.recordedAt ?? ''}
-                readOnly={readOnly}
-                disabled={!isEnabled}
-                helperText="Optional; use the visit's local date and time."
-                error={
-                  readingIssues.find((issue) =>
-                    issue.path?.endsWith('.recordedAt')
-                  )?.message
-                }
-                onChange={(event) => {
-                  if (!readOnly)
-                    updateReading(reading.id, {
-                      recordedAt: event.target.value || undefined,
-                    });
-                }}
-              />
+                    )?.message
+                  }
+                  onChange={(event) => {
+                    if (!readOnly)
+                      updateReading(reading.id, {
+                        recordedAt: event.target.value || undefined,
+                      });
+                  }}
+                />
+              </div>
               <Input
                 label="Position"
                 className="min-h-11"
                 value={reading.position ?? ''}
                 readOnly={readOnly}
                 disabled={!isEnabled}
-                helperText="Optional, e.g. seated or standing."
+                placeholder="e.g. seated"
                 onChange={(event) => {
                   if (!readOnly)
                     updateReading(reading.id, {
@@ -293,27 +340,13 @@ export function EncounterVitalsField({
                     });
                 }}
               />
-            </div>
-            <fieldset
-              className="border-border min-w-0 space-y-2 rounded-lg border p-3"
-              aria-describedby={
-                bpIssue ? `${instanceId}-${reading.id}-bp-error` : undefined
-              }
-            >
-              <legend className="px-1 font-medium">
-                Blood pressure (mmHg)
-              </legend>
-              <div className="grid grid-cols-2 gap-3">
-                {numberInput(reading, 'systolic', 'Systolic', 'mmHg')}
-                {numberInput(reading, 'diastolic', 'Diastolic', 'mmHg')}
-              </div>
               <Input
                 label="Measurement site"
                 className="min-h-11"
                 value={reading.site ?? ''}
                 readOnly={readOnly}
                 disabled={!isEnabled}
-                helperText="Optional, e.g. left arm."
+                placeholder="e.g. left arm"
                 onChange={(event) => {
                   if (!readOnly)
                     updateReading(reading.id, {
@@ -321,20 +354,6 @@ export function EncounterVitalsField({
                     });
                 }}
               />
-              {bpIssue && (
-                <p
-                  id={`${instanceId}-${reading.id}-bp-error`}
-                  role="alert"
-                  className="text-destructive text-sm"
-                >
-                  {bpIssue.message}
-                </p>
-              )}
-            </fieldset>
-            <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 lg:grid-cols-3">
-              {measurements.map(({ key, label, unit }) =>
-                numberInput(reading, key, label, unit)
-              )}
             </div>
             {readingIssues
               .filter(
@@ -356,35 +375,14 @@ export function EncounterVitalsField({
                   {issue.message}
                 </p>
               ))}
-            {!readOnly && (
-              <Button
-                type="button"
-                variant="outline"
-                className="min-h-11 w-full sm:w-auto"
-                aria-label={`Remove measurement set ${index + 1}`}
-                onClick={() =>
-                  commit({
-                    ...parsed.value,
-                    readings: parsed.value.readings.filter(
-                      (candidate) => candidate.id !== reading.id
-                    ),
-                    inputDrafts: parsed.value.inputDrafts?.filter(
-                      (draft) => draft.readingId !== reading.id
-                    ),
-                  })
-                }
-              >
-                Remove measurement set
-              </Button>
-            )}
           </fieldset>
         );
       })}
       {!readOnly && (
         <Button
           type="button"
-          variant="outline"
-          className="min-h-11 w-full sm:w-auto"
+          variant="ghost"
+          className="min-h-11"
           onClick={() =>
             commit({
               ...parsed.value,

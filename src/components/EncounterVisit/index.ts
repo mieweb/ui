@@ -9,4 +9,5 @@ export * from './model';
 export * from './mcp';
 export { EncounterVitalsField } from './EncounterVitalsField';
 export { EncounterAssessmentField } from './EncounterAssessmentField';
+export { EncounterNarrativeField } from './EncounterNarrativeField';
 export { registerEncounterFieldTypes } from './fields';

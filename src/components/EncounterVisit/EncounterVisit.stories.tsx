@@ -18,12 +18,14 @@ const meta: Meta<typeof EncounterVisit> = {
   component: EncounterVisit,
   tags: ['autodocs', 'scope:domain-specific', 'maturity:experimental'],
   parameters: {
-    layout: 'padded',
+    layout: 'fullscreen',
     docs: {
       description: {
         component: `### What it's for
 
 A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medication reconciliation, allergies, or assessment and orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, plan, and follow-up / appointment details are included in the default template. Patient identity is not captured.
+
+The visit reads as a continuous report: full-width sections, small outer insets, and no nested section cards. Narrative inputs grow and shrink with their content. Bold, italic, underline, and list controls appear while editing. Formatting is retained in native response attributes; observation and MCP text stays plain. A compact sticky section selector is available on desktop and phone.
 
 ### Use it when
 
@@ -163,6 +165,7 @@ function McpDemo(args: EncounterVisitProps) {
             Read visit
           </Button>
           <Button
+            variant="secondary"
             disabled={!tools || args.readOnly}
             onClick={() =>
               tools &&

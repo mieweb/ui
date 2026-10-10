@@ -1,0 +1,103 @@
+/* Visit sections use document headings rather than eSheet's questionnaire cards.
+   Keep these overrides local to the encounter composition. */
+.encounter-visit .section-field-preview {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.encounter-visit .section-field-preview > h3 {
+  overflow: visible;
+  background: transparent;
+  color: inherit;
+}
+
+.encounter-visit .section-field-preview > h3 > button {
+  min-height: 44px;
+  padding: 0;
+  text-align: start;
+  font-size: 1rem;
+}
+
+.encounter-visit .section-field-preview > div[id] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.encounter-visit .renderer-body {
+  display: grid;
+  row-gap: 1.25rem;
+}
+
+.encounter-visit .section-children {
+  display: grid;
+  row-gap: 0.375rem;
+}
+
+.encounter-visit .field-wrapper {
+  min-width: 0;
+  margin-block: 0;
+  padding-block: 0;
+}
+
+.encounter-visit .renderer-readonly-banner {
+  padding-inline: 0;
+  border: 0;
+  background: transparent;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ul,
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ol {
+  padding-inline-start: 1.5rem;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ul {
+  list-style-type: disc;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ol {
+  list-style-type: decimal;
+}
+
+/* Clinical lists retain their controls, but share the report's section heading
+   and content inset instead of adding another card inside the document. */
+.encounter-visit [data-field-type='medicationList'] > [data-slot='card'],
+.encounter-visit [data-field-type='allergyList'] > [data-slot='card'] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.encounter-visit [data-field-type='medicationList'] [data-slot='card-header'],
+.encounter-visit [data-field-type='allergyList'] [data-slot='card-header'] {
+  display: none;
+}
+
+.encounter-visit [data-field-type='medicationList'] [data-slot='card-content'],
+.encounter-visit [data-field-type='allergyList'] [data-slot='card-content'] {
+  padding: 0;
+}
+
+.encounter-visit
+  [data-field-type='medicationList']
+  [data-slot='clinical-list-heading'],
+.encounter-visit
+  [data-field-type='medicationList']
+  [data-slot='clinical-list-row'],
+.encounter-visit
+  [data-field-type='allergyList']
+  [data-slot='clinical-list-heading'],
+.encounter-visit
+  [data-field-type='allergyList']
+  [data-slot='clinical-list-row'] {
+  padding-inline: 0;
+  border: 0;
+}

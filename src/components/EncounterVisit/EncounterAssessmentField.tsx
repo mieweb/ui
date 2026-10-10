@@ -25,6 +25,7 @@ function FreeTextSearch({
       <div className="min-w-0 flex-1">
         <Input
           label="Concern or order description"
+          hideLabel
           placeholder={placeholder}
           className="min-h-11"
           value={text}
@@ -112,9 +113,6 @@ export function EncounterAssessmentField({
         aria-label={definition.question ?? 'Assessment and plan'}
         className="space-y-3"
       >
-        <h3 className="text-lg font-semibold">
-          {definition.question ?? 'Assessment and plan'}
-        </h3>
         <div
           role="alert"
           className="border-destructive text-destructive rounded-lg border p-3"
@@ -132,8 +130,9 @@ export function EncounterAssessmentField({
       concerns={value.concerns}
       items={value.items}
       orders={value.orders}
-      title={definition.question ?? 'Assessment and plan'}
-      className="[&_.min-w-64]:min-w-0 [&_input]:min-h-11 [&_select]:min-h-11"
+      title={null}
+      aria-label={definition.question ?? 'Assessment and plan'}
+      className="rounded-none border-0 bg-transparent shadow-none [&_.border-dashed]:rounded-none [&_.border-dashed]:border-0 [&_.border-dashed]:bg-transparent [&_.border-dashed]:p-0 [&_.min-w-64]:min-w-0 [&_[data-slot=assessment-problem]]:rounded-none [&_[data-slot=assessment-problem]]:border-0 [&_[data-slot=assessment-problem]]:px-0 [&_[data-slot=assessment-problem]>ul]:ms-0 [&_[data-slot=assessment-problem]>ul]:border-0 [&_[data-slot=assessment-problem]>ul]:ps-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11 [&_select]:min-h-11 [&>[data-slot=card-content]]:p-0 [&>[data-slot=card-content]>section]:border-0 [&>[data-slot=card-content]>section]:bg-transparent [&>[data-slot=card-content]>section]:px-0"
       readOnly={readOnly}
       defaultAddMode="problem"
       renderOrderSearch={codeLookup ? undefined : freeTextSearch}

@@ -1,9 +1,23 @@
 import { getFieldComponent, registerCustomFieldTypes } from '@esheet/fields';
 import { EncounterVitalsField } from './EncounterVitalsField';
 import { EncounterAssessmentField } from './EncounterAssessmentField';
+import { EncounterNarrativeField } from './EncounterNarrativeField';
 
 /** Register encounter fields when missing, retaining any host-supplied editors. */
 export function registerEncounterFieldTypes(): void {
+  if (!getFieldComponent('encounterNarrative')) {
+    registerCustomFieldTypes({
+      encounterNarrative: {
+        label: 'Encounter narrative',
+        category: 'rich',
+        answerType: 'text',
+        hasOptions: false,
+        hasMatrix: false,
+        defaultProps: { question: 'Narrative' },
+        component: EncounterNarrativeField,
+      },
+    });
+  }
   if (!getFieldComponent('encounterVitals')) {
     registerCustomFieldTypes({
       encounterVitals: {

@@ -5,6 +5,20 @@ of the default UI bundle. `definition.ts` generates a native eSheet document;
 the renderer's FormStore owns answers. Custom fields serialize structured data
 into `FieldResponse.answer`. Do not introduce a second clinical state store.
 
+Narrative fields reuse `RichTextEditor` with natural content height and a
+formatting toolbar shown during editing. `answer` stays plain text for notes
+and MCP tools. Sanitized markup is retained in native response `attributes`
+(`encounterNarrativeHtml` / `encounterNarrativeText`) and restored only when
+both the recorded baseline and the markup's text match the current answer.
+An MCP text replacement therefore cannot restore stale formatting.
+
+The layout is a continuous report, with a compact sticky section selector
+instead of a sidebar. `src/styles/encounter-visit.css` removes questionnaire
+card borders and nested padding only inside this composition. Keep the
+document inset at 8 px on phones / 12 px on larger screens and preserve
+44 px editing targets. Narrative inputs must grow and shrink with loaded
+or entered content rather than introduce an internal scrollbar.
+
 `model.ts` validates and exports entered observations and a plain-text note.
 Narratives are observations, and a BP observation carries both components.
 Keep reading IDs, units and measurement context stable. Empty fields must remain

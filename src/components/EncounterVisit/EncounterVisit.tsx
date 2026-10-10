@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ClipboardList, FileText, Save, Stethoscope } from 'lucide-react';
+import { FileText, Save } from 'lucide-react';
 import { EsheetRenderer, type EsheetRendererHandle } from '@esheet/renderer';
 import { getFieldComponent } from '@esheet/fields';
 import { cn } from '../../utils/cn';
@@ -298,50 +298,46 @@ const EncounterVisitSession = React.forwardRef<
       ref={root}
       data-slot="encounter-visit"
       className={cn(
-        'encounter-visit border-border bg-background text-foreground min-w-0 rounded-xl border',
+        'encounter-visit bg-background text-foreground min-w-0',
         className
       )}
     >
-      <header className="border-border flex flex-wrap items-start justify-between gap-4 border-b p-4 sm:p-6">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className="bg-primary-50 text-primary-600 dark:bg-primary-950 dark:text-primary-300 flex size-11 shrink-0 items-center justify-center rounded-xl">
-            <Stethoscope size={22} aria-hidden="true" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-              Anonymous patient · visit document
+      <header className="flex flex-wrap items-start justify-between gap-2 px-2 pt-3 pb-2 sm:px-3">
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs">Anonymous patient</p>
+          <h2 className="text-lg font-semibold">{stableDefinition.title}</h2>
+          {patientContext && (
+            <p
+              dir="auto"
+              className="text-muted-foreground mt-1 text-sm break-words"
+            >
+              {patientContext}
             </p>
-            <h2 className="mt-1 text-xl font-semibold">
-              {stableDefinition.title}
-            </h2>
-            {patientContext && (
-              <p className="text-muted-foreground mt-1 max-w-2xl text-sm break-words">
-                {patientContext}
-              </p>
-            )}
-          </div>
+          )}
         </div>
-        <p className="text-muted-foreground text-sm">
-          {documentedSections.length} of {stableDefinition.sections.length}{' '}
-          sections documented
+        <p className="text-muted-foreground text-xs">
+          <bdi>
+            {documentedSections.length} of {stableDefinition.sections.length}{' '}
+            sections documented
+          </bdi>
         </p>
       </header>
 
-      <div className="min-w-0 lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <div className="min-w-0">
         <nav
           aria-label="Visit sections"
-          className="border-border bg-background lg:bg-muted/30 sticky top-0 z-20 border-b p-3 lg:static lg:border-e lg:border-b-0 lg:p-4"
+          className="bg-background sticky top-0 z-20 px-2 py-1 sm:px-3"
         >
-          <div className="lg:sticky lg:top-4">
+          <div className="flex items-center gap-2">
             <label
               htmlFor={selectId}
-              className="text-muted-foreground mb-1 block text-xs font-semibold lg:hidden"
+              className="text-muted-foreground shrink-0 text-sm"
             >
               Go to section
             </label>
             <select
               id={selectId}
-              className="border-border bg-background focus-visible:ring-primary-500 min-h-11 w-full rounded-lg border px-3 text-base focus-visible:ring-2 focus-visible:outline-none lg:hidden"
+              className="bg-background focus-visible:ring-primary-500 min-h-11 min-w-0 flex-1 rounded px-1 text-base focus-visible:ring-2 focus-visible:outline-none"
               value={activeSection}
               onChange={(event) => focusSection(event.target.value)}
             >
@@ -351,51 +347,12 @@ const EncounterVisitSession = React.forwardRef<
                 </option>
               ))}
             </select>
-            <p className="text-muted-foreground mb-3 hidden items-center gap-2 text-xs font-semibold tracking-wider uppercase lg:flex">
-              <ClipboardList size={14} aria-hidden="true" /> Visit sections
-            </p>
-            <ol className="hidden space-y-1 lg:block">
-              {stableDefinition.sections.map((section, index) => {
-                const documented = documentedSections.some(
-                  (item) => item.id === section.id
-                );
-                return (
-                  <li key={section.id}>
-                    <button
-                      type="button"
-                      aria-current={
-                        activeSection === section.id ? 'location' : undefined
-                      }
-                      onClick={() => focusSection(section.id)}
-                      className={cn(
-                        'focus-visible:ring-primary-500 flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-start text-sm focus-visible:ring-2 focus-visible:outline-none',
-                        activeSection === section.id
-                          ? 'bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-200 font-semibold'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'flex size-6 shrink-0 items-center justify-center rounded-full border text-xs',
-                          documented
-                            ? 'border-primary-500 bg-primary-500 text-primary-foreground'
-                            : 'border-border'
-                        )}
-                      >
-                        {index + 1}
-                      </span>
-                      <span>{section.title}</span>
-                      <span className="sr-only">
-                        {documented ? ', documented' : ', not documented'}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
           </div>
         </nav>
-        <div className="min-w-0 p-3 sm:p-6">
+        <div
+          data-slot="encounter-visit-document"
+          className="min-w-0 px-2 pt-2 pb-4 sm:px-3"
+        >
           {showErrors && snapshot.errors.length > 0 && (
             <div
               role="alert"
@@ -434,7 +391,7 @@ const EncounterVisitSession = React.forwardRef<
             <section
               id={reviewId}
               aria-label="Visit note preview"
-              className="border-border bg-muted/30 mt-6 rounded-xl border p-4"
+              className="mt-6"
             >
               <h3 className="flex items-center gap-2 font-semibold">
                 <FileText size={18} aria-hidden="true" /> Visit note preview
@@ -442,14 +399,17 @@ const EncounterVisitSession = React.forwardRef<
               <p className="text-muted-foreground mt-1 text-xs">
                 Includes documented entries. Unanswered findings remain blank.
               </p>
-              <pre className="mt-4 font-sans text-sm leading-relaxed break-words whitespace-pre-wrap">
+              <pre
+                dir="auto"
+                className="mt-2 font-sans text-base leading-relaxed break-words whitespace-pre-wrap"
+              >
                 {snapshot.note || 'No observations documented yet.'}
               </pre>
             </section>
           )}
         </div>
       </div>
-      <footer className="border-border bg-background sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-b-xl border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6">
+      <footer className="bg-background sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-2 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-3">
         <p
           role="status"
           aria-live="polite"

@@ -203,7 +203,11 @@ function observationField(
       ],
     };
   }
-  return { ...base, fieldType: 'longtext', unit: observation.unit };
+  return {
+    ...base,
+    fieldType: 'encounterNarrative',
+    unit: observation.unit,
+  } as unknown as FieldDefinition;
 }
 
 const CUSTOM_FIELD_TYPES = {
@@ -241,7 +245,7 @@ export function createEncounterFormDefinition(
           ) {
             fields.push({
               id: getEncounterFieldId(section.id),
-              fieldType: 'longtext',
+              fieldType: 'encounterNarrative',
               question:
                 section.kind === 'narrative'
                   ? section.title
@@ -249,7 +253,8 @@ export function createEncounterFormDefinition(
               required:
                 section.kind === 'narrative' ? section.required : undefined,
               width: 'full',
-            });
+              _sourceData: { encounterHideLabel: true },
+            } as unknown as FieldDefinition);
           }
           if (section.kind === 'observations') {
             fields.push(
