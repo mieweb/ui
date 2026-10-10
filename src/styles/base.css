@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './condensed-view.css';
+@import './encounter-visit.css';
 @import '@mieweb/datavis/styles.css';
 @import './effects.css';
 @source "../../node_modules/@mieweb/datavis/dist";

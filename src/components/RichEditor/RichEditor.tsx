@@ -8,10 +8,11 @@ import {
   useState,
 } from 'react';
 
-import { CoreEditor, type AssetLoad } from '@kerebron/editor';
+import { CoreEditor, type AssetLoad, type EditorKit } from '@kerebron/editor';
 import { createAssetLoad } from '@kerebron/wasm/web';
 
 import { useIsDarkMode } from '../../hooks/useIsDarkMode';
+import { MDY_PROJECTION_META } from './mdyTransaction';
 import {
   createEditorKits,
   type CollabConfig,
@@ -40,6 +41,10 @@ export interface RichEditorProps {
   value?: string;
   /** Called with the editor's markdown content whenever it changes. */
   onChange?: (value: string) => void;
+  /** Called when editor setup or a Markdown load fails. getContent also rejects. */
+  onError?: (error: unknown) => void;
+  /** Called after the initial Markdown load completes. */
+  onReady?: (editor: CoreEditor) => void;
   /** Whether to render the live markdown output preview. Defaults to `false`. */
   showPreview?: boolean;
   /**
@@ -92,6 +97,8 @@ export interface RichEditorProps {
    * to change it.
    */
   mediaUpload?: MediaUploadOptions;
+  /** Additional editor kits, installed once when the editor mounts. */
+  editorKits?: EditorKit[];
 }
 
 export interface RichEditorHandle {
@@ -117,6 +124,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     {
       value = '',
       onChange,
+      onError,
+      onReady,
       showPreview = false,
       collab,
       disabled = false,
@@ -126,6 +135,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       'aria-labelledby': ariaLabelledBy,
       assetLoad,
       mediaUpload,
+      editorKits: additionalEditorKits,
     },
     ref
   ) {
@@ -134,11 +144,19 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     const editorInstance = useRef<CoreEditor | null>(null);
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
+    const onErrorRef = useRef(onError);
+    onErrorRef.current = onError;
+    const onReadyRef = useRef(onReady);
+    onReadyRef.current = onReady;
     // Mirrors what the editor last held, so an echo of our own `onChange`
     // doesn't reload the document out from under the caret.
     const valueRef = useRef(value);
     const readyRef = useRef<Promise<void> | null>(null);
     const loadingRef = useRef(false);
+    const loadVersionRef = useRef(0);
+    // Return the exact source until a writer changes the loaded document.
+    // Running the Markdown converter alone can normalize whitespace or links.
+    const loadedDocRef = useRef<unknown>(null);
     const disabledRef = useRef(disabled);
 
     const [md, setMd] = useState<string>('');
@@ -166,12 +184,34 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       if (!editor) return;
 
       loadingRef.current = true;
-      void editor
-        .loadDocumentText(MARKDOWN_TYPE, value)
+      const loadVersion = ++loadVersionRef.current;
+      const previousReady = readyRef.current;
+      // Serialize reloads behind setup and one another. Saving while a reload
+      // is pending awaits that same promise rather than reading stale prose.
+      const pending = (previousReady ?? Promise.resolve())
         .catch(() => undefined)
+        .then(async () => {
+          if (editorInstance.current !== editor) return;
+          await editor.loadDocumentText(MARKDOWN_TYPE, value);
+          if (editorInstance.current !== editor) return;
+          loadedDocRef.current = editor.view.state.doc;
+          lastSerializedDoc.current = editor.view.state.doc;
+          if (showPreviewRef.current) setMd(value);
+        })
         .finally(() => {
-          if (editorInstance.current === editor) loadingRef.current = false;
+          if (
+            editorInstance.current === editor &&
+            loadVersion === loadVersionRef.current
+          ) {
+            loadingRef.current = false;
+          }
         });
+      readyRef.current = pending;
+      void pending.catch((error) => {
+        if (editorInstance.current !== editor) return;
+        console.error('Failed to load markdown:', error);
+        onErrorRef.current?.(error);
+      });
       // `collab` is fixed for the lifetime of the instance.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
@@ -189,7 +229,34 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       host.appendChild(mount);
 
       // Listen to transactions and update markdown preview
-      const onTransaction = async () => {
+      const onTransaction = async (event?: Event) => {
+        const transaction = (
+          event as
+            | globalThis.CustomEvent<{
+                transaction?: {
+                  getMeta: (key: string) => unknown;
+                  before: unknown;
+                };
+              }>
+            | undefined
+        )?.detail?.transaction;
+        if (transaction?.getMeta(MDY_PROJECTION_META) === true) {
+          const doc = editorInstance.current?.view.state.doc;
+          if (transaction.before === loadedDocRef.current) {
+            loadedDocRef.current = doc;
+            lastSerializedDoc.current = doc;
+          } else {
+            lastSerializedDoc.current = null;
+            // A host projection can overtake a pending user-edit save. That
+            // older result is discarded below, so publish the newest composed
+            // document even if the writer does not make another transaction.
+            // A microtask coalesces a burst of clinical updates into one save.
+            void Promise.resolve().then(() => {
+              if (!disposed) return onTransaction();
+            });
+          }
+          return;
+        }
         // Programmatic loads are not edits — reporting them would echo the
         // caller's own `value` back through `onChange`.
         if (loadingRef.current || !editorInstance.current) return;
@@ -201,17 +268,28 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         const { doc } = editorInstance.current.view.state;
         if (doc === lastSerializedDoc.current) return;
         lastSerializedDoc.current = doc;
+        const loadVersion = loadVersionRef.current;
 
         try {
           const buffer =
             await editorInstance.current.saveDocument(MARKDOWN_TYPE);
           const markdown = new globalThis.TextDecoder().decode(buffer);
-          if (disposed) return;
+          if (
+            disposed ||
+            loadingRef.current ||
+            loadVersion !== loadVersionRef.current ||
+            doc !== editorInstance.current?.view.state.doc
+          ) {
+            return;
+          }
           valueRef.current = markdown;
           // `md` only feeds the preview pane; setting it with the preview off
           // re-renders the editor on every keystroke for nothing.
           if (showPreviewRef.current) setMd(markdown);
           onChangeRef.current?.(markdown);
+          // This source is now published. Future clinical-only projections
+          // preserve it without starting another authored-prose write.
+          loadedDocRef.current = doc;
         } catch (err) {
           // The document was marked as serialized before the attempt, to keep
           // selection-only transactions arriving mid-save from re-entering.
@@ -225,6 +303,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       // collaborative mode additionally swaps `history` for the Yjs CRDT sync
       // and lazy-loads the Yjs kit (see `editorKits.ts` for why).
       const setup = async () => {
+        loadingRef.current = true;
+        const loadVersion = ++loadVersionRef.current;
         // `collaborative` is false when a room was asked for but the Yjs kit
         // could not be loaded — the editor is still created, just a local one,
         // so there is no room to join below.
@@ -238,7 +318,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           element: mount,
           uri: 'file:///untitled.md',
           assetLoad: assetLoad ?? createAssetLoad('/kerebron-wasm'),
-          editorKits,
+          editorKits: [...editorKits, ...(additionalEditorKits ?? [])],
           readOnly: disabledRef.current,
         });
 
@@ -317,17 +397,26 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           await queueInitialLoad(() =>
             editor!.loadDocumentText(MARKDOWN_TYPE, valueRef.current)
           );
-          await onTransaction();
-          joinRoom();
-        } else {
-          void onTransaction();
-          joinRoom();
         }
+        if (disposed) return;
+        loadedDocRef.current = editor.view.state.doc;
+        lastSerializedDoc.current = editor.view.state.doc;
+        if (showPreviewRef.current) setMd(valueRef.current);
+        if (loadVersion === loadVersionRef.current) loadingRef.current = false;
+        onReadyRef.current?.(editor);
+        joinRoom();
       };
 
-      readyRef.current = setup().catch((err) =>
-        console.error('Failed to set up editor:', err)
-      );
+      const pending = setup();
+      readyRef.current = pending;
+      // Observe the rejection without replacing the readiness promise: callers
+      // must be able to detect a failed load instead of saving stale content.
+      void pending.catch((error) => {
+        if (disposed) return;
+        loadingRef.current = false;
+        console.error('Failed to set up editor:', error);
+        onErrorRef.current?.(error);
+      });
 
       // Cleanup on unmount
       return () => {
@@ -347,13 +436,24 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       ref,
       () => ({
         getContent: async (): Promise<string> => {
-          await readyRef.current;
-          const editor = editorInstance.current;
-          if (!editor) return valueRef.current;
-          const buffer = await editor.saveDocument(MARKDOWN_TYPE);
-          const markdown = new globalThis.TextDecoder().decode(buffer);
-          valueRef.current = markdown;
-          return markdown;
+          while (true) {
+            await readyRef.current;
+            const editor = editorInstance.current;
+            if (!editor) return valueRef.current;
+            const doc = editor.view.state.doc;
+            const loadVersion = loadVersionRef.current;
+            if (doc === loadedDocRef.current) return valueRef.current;
+            const buffer = await editor.saveDocument(MARKDOWN_TYPE);
+            if (
+              editorInstance.current !== editor ||
+              loadVersion !== loadVersionRef.current ||
+              doc !== editor.view.state.doc
+            )
+              continue;
+            const markdown = new globalThis.TextDecoder().decode(buffer);
+            valueRef.current = markdown;
+            return markdown;
+          }
         },
         focus: (): void => {
           const apply = (): void => {
@@ -370,7 +470,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           };
           // Callers focus on mount; the editor may still be loading its kits.
           if (editorInstance.current) apply();
-          else void readyRef.current?.then(apply);
+          else void readyRef.current?.then(apply, () => undefined);
         },
       }),
       []

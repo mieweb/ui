@@ -39,6 +39,9 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.4)
+      '@mieweb/templit':
+        specifier: 0.2.0
+        version: 0.2.0(marked@17.0.6)(mustache@4.2.0)
       '@swc/helpers':
         specifier: ^0.5.19
         version: 0.5.19
@@ -75,9 +78,21 @@ importers:
       onnxruntime-web:
         specifier: 1.19.0
         version: 1.19.0
+      prosemirror-model:
+        specifier: 1.25.9
+        version: 1.25.9
+      prosemirror-state:
+        specifier: 1.4.3
+        version: 1.4.3
+      prosemirror-view:
+        specifier: 1.40.0
+        version: 1.40.0
       tailwind-merge:
         specifier: ^2.6.1
         version: 2.6.1
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
     devDependencies:
       '@codemirror/lang-yaml':
         specifier: ^6.1.3
@@ -95,20 +110,20 @@ importers:
         specifier: ^6.41.0
         version: 6.43.0
       '@esheet/adapters':
-        specifier: 0.0.5
-        version: 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+        specifier: link:./packages/esheet/packages/adapters
+        version: link:packages/esheet/packages/adapters
       '@esheet/builder':
-        specifier: 0.0.5
-        version: 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(monaco-editor@0.55.1)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+        specifier: link:./packages/esheet/packages/builder
+        version: link:packages/esheet/packages/builder
       '@esheet/core':
-        specifier: 0.0.5
-        version: 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+        specifier: link:./packages/esheet/packages/core
+        version: link:packages/esheet/packages/core
       '@esheet/fields':
-        specifier: 0.0.5
-        version: 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+        specifier: link:./packages/esheet/packages/fields
+        version: link:packages/esheet/packages/fields
       '@esheet/renderer':
-        specifier: 0.0.5
-        version: 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
+        specifier: link:./packages/esheet/packages/renderer
+        version: link:packages/esheet/packages/renderer
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
@@ -144,7 +159,7 @@ importers:
         version: 10.2.11(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
       '@storybook/addon-docs':
         specifier: ^10.2.11
-        version: 10.2.11(@types/react@19.2.14)(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))
+        version: 10.2.11(@types/react@19.2.14)(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       '@storybook/addon-links':
         specifier: ^10.2.11
         version: 10.2.11(react@19.2.4)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
@@ -156,7 +171,7 @@ importers:
         version: 10.2.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
       '@storybook/react-vite':
         specifier: ^10.2.11
-        version: 10.2.11(esbuild@0.28.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))
+        version: 10.2.11(esbuild@0.28.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       '@storybook/test-runner':
         specifier: 0.24.3
         version: 0.24.3(@swc/helpers@0.5.19)(@types/node@22.19.11)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
@@ -210,7 +225,7 @@ importers:
         version: 8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
       '@vitest/coverage-v8':
         specifier: ^3.2.6
-        version: 3.2.6(vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0))
+        version: 3.2.6(vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       '@xyflow/react':
         specifier: ^12.12.0
         version: 12.12.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -357,16 +372,16 @@ importers:
         version: 0.185.1
       tsup:
         specifier: ^8.5.1
-        version: 8.5.1(@swc/core@1.15.30(@swc/helpers@0.5.19))(jiti@2.6.1)(postcss@8.5.15)(typescript@5.9.3)
+        version: 8.5.1(@swc/core@1.15.30(@swc/helpers@0.5.19))(jiti@2.6.1)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.1)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
       vite:
         specifier: ^7.3.2
-        version: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+        version: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
       vitest:
         specifier: ^3.2.6
-        version: 3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0)
+        version: 3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
       wait-on:
         specifier: ^9.1.0
         version: 9.1.0
@@ -839,26 +854,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@esheet/adapters@0.0.5':
-    resolution: {integrity: sha512-T8/ikpS251JPXpfXVpZgEx0HuXw1X2X1x1tF+9JGSDlY+1JA9/kfRBFRPchG6eosTyWS0XAHCYmYrnW44lSrfA==}
-
-  '@esheet/builder@0.0.5':
-    resolution: {integrity: sha512-Q6s2Xpou+ebPf5atAM2Ysv9yGaV/uQQmSzcSCVcsYWrL3QKgMr3qp5Ws5s4VQV5daoKdyupUDAJUQjLGl2Loow==}
-
-  '@esheet/core@0.0.5':
-    resolution: {integrity: sha512-/7KV1d/79Wt71tcDAHDF9hMUlBVYIMxloc1kJtsQGFAkyM/IcwomhYVB4n8aic8MteR5bGnQOlK+xc4xEsCUiA==}
-
-  '@esheet/fields@0.0.5':
-    resolution: {integrity: sha512-TaSiTAj0MwpMrvMAPWCUYFfnogtu3nbb0+Cvyszq7iuKF4nUeIpssV1lb8tPZqPWE4P97zcOOb+QRy50yXrOKw==}
-
-  '@esheet/renderer@0.0.5':
-    resolution: {integrity: sha512-rQHMkQy/N7DyuEs9Lm30rg2ptoBjKpZh1c/QSbKRwUQIShtOqneuV9dVcejMYjd8ciUS3Dcg80cdyFWFHlN83w==}
-    peerDependencies:
-      react: '>=19.0.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
-
   '@eslint-community/eslint-utils@4.9.1':
     resolution: {integrity: sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -1169,6 +1164,23 @@ packages:
   '@mieweb/q@1.0.0':
     resolution: {integrity: sha512-dZes79roq4LhagWTz3hN+eViSLyFJWxaL+4vEdVk9hPI4JPJ7CTsYuHnQd2b4RyZkCTaVClof1mCplzlxLB5pQ==}
 
+  '@mieweb/templit@0.2.0':
+    resolution: {integrity: sha512-pIBFXuMiGUxhN2Dde74NL43Rttj8DEUrTutE7InI3LwmhrIof4mGimT1P2qVWwiXBF6smBFv7p5LRu7cDMsSuA==}
+    peerDependencies:
+      handlebars: ^4.7.8
+      liquidjs: ^10.21.1
+      marked: ^16.3.0
+      mustache: ^4.2.0
+    peerDependenciesMeta:
+      handlebars:
+        optional: true
+      liquidjs:
+        optional: true
+      marked:
+        optional: true
+      mustache:
+        optional: true
+
   '@mieweb/ui@0.2.4':
     resolution: {integrity: sha512-1OBv6wCgxCGY+s2Di5LVGyqFoYWmX14/zLX1+kUc/qRjI+2NGywvLht73pOvcqomvHhzEtVp3hRuHm5bCsHx3g==}
     engines: {node: '>=18.0.0'}
@@ -1184,77 +1196,6 @@ packages:
       ag-grid-react:
         optional: true
       wavesurfer.js:
-        optional: true
-
-  '@mieweb/ui@0.7.1-dev.13':
-    resolution: {integrity: sha512-pDpFGnZ/4ifijV2Gp4Ho0rk0fI2q5D25LFWSLJvpyloJ/5C2NLAHXS8kSsLZduUJnJEvPPvme/wKjkkPWulZTA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    peerDependencies:
-      '@kerebron/editor': '>=0.8.6'
-      '@kerebron/editor-kits': '>=0.8.6'
-      '@kerebron/extension-yjs': '>=0.8.6'
-      '@kerebron/wasm': '>=0.8.6'
-      '@mieweb/datavis': '=1.6.0'
-      ag-grid-community: '>=32.0.0'
-      ag-grid-react: '>=32.0.0'
-      datavis-ace: '=4.1.0'
-      js-yaml: '>=4.0.0'
-      katex: '>=0.16.0'
-      mermaid: '>=11.0.0'
-      papaparse: '>=5.0.0'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-      react-markdown: '>=9.0.0'
-      rehype-highlight: '>=7.0.0'
-      rehype-katex: '>=7.0.0'
-      rehype-sanitize: '>=6.0.0'
-      remark-gfm: '>=4.0.0'
-      remark-math: '>=6.0.0'
-      wavesurfer.js: '>=7.0.0'
-      y-protocols: '>=1.0.6'
-      yjs: '>=13.6.0'
-    peerDependenciesMeta:
-      '@kerebron/editor':
-        optional: true
-      '@kerebron/editor-kits':
-        optional: true
-      '@kerebron/extension-yjs':
-        optional: true
-      '@kerebron/wasm':
-        optional: true
-      '@mieweb/datavis':
-        optional: true
-      ag-grid-community:
-        optional: true
-      ag-grid-react:
-        optional: true
-      datavis-ace:
-        optional: true
-      js-yaml:
-        optional: true
-      katex:
-        optional: true
-      mermaid:
-        optional: true
-      papaparse:
-        optional: true
-      react-markdown:
-        optional: true
-      rehype-highlight:
-        optional: true
-      rehype-katex:
-        optional: true
-      rehype-sanitize:
-        optional: true
-      remark-gfm:
-        optional: true
-      remark-math:
-        optional: true
-      wavesurfer.js:
-        optional: true
-      y-protocols:
-        optional: true
-      yjs:
         optional: true
 
   '@mieweb/ychart@file:packages/ychart':
@@ -4292,6 +4233,10 @@ packages:
     resolution: {integrity: sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==}
     hasBin: true
 
+  js-yaml@4.1.0:
+    resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
+    hasBin: true
+
   js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
@@ -6264,6 +6209,11 @@ packages:
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
     engines: {node: '>=6'}
@@ -6757,134 +6707,6 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@esheet/adapters@0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
-    dependencies:
-      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - '@types/react'
-      - immer
-      - react
-      - use-sync-external-store
-
-  '@esheet/builder@0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(monaco-editor@0.55.1)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
-    dependencies:
-      '@esheet/adapters': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
-      '@mieweb/ui': 0.7.1-dev.13(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
-      '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      js-yaml: 4.1.1
-      react: 19.2.4
-      sortablejs: 1.15.7
-      tslib: 2.8.1
-      zustand: 5.0.14(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-    transitivePeerDependencies:
-      - '@kerebron/editor'
-      - '@kerebron/editor-kits'
-      - '@kerebron/extension-yjs'
-      - '@kerebron/wasm'
-      - '@mieweb/datavis'
-      - '@types/react'
-      - ag-grid-community
-      - ag-grid-react
-      - datavis-ace
-      - immer
-      - katex
-      - mermaid
-      - monaco-editor
-      - papaparse
-      - react-dom
-      - react-markdown
-      - rehype-highlight
-      - rehype-katex
-      - rehype-sanitize
-      - remark-gfm
-      - remark-math
-      - use-sync-external-store
-      - wavesurfer.js
-      - y-protocols
-      - yjs
-
-  '@esheet/core@0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
-    dependencies:
-      tslib: 2.8.1
-      zod: 4.4.3
-      zustand: 5.0.14(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-    transitivePeerDependencies:
-      - '@types/react'
-      - immer
-      - react
-      - use-sync-external-store
-
-  '@esheet/fields@0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
-    dependencies:
-      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@mieweb/ui': 0.7.1-dev.13(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
-      lucide-react: 0.562.0(react@19.2.4)
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      sortablejs: 1.15.7
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - '@kerebron/editor'
-      - '@kerebron/editor-kits'
-      - '@kerebron/extension-yjs'
-      - '@kerebron/wasm'
-      - '@mieweb/datavis'
-      - '@types/react'
-      - ag-grid-community
-      - ag-grid-react
-      - datavis-ace
-      - immer
-      - js-yaml
-      - katex
-      - mermaid
-      - papaparse
-      - react-markdown
-      - rehype-highlight
-      - rehype-katex
-      - rehype-sanitize
-      - remark-gfm
-      - remark-math
-      - use-sync-external-store
-      - wavesurfer.js
-      - y-protocols
-      - yjs
-
-  '@esheet/renderer@0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
-    dependencies:
-      '@esheet/adapters': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/core': 0.0.5(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.5(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)
-      js-yaml: 4.1.1
-    optionalDependencies:
-      react: 19.2.4
-    transitivePeerDependencies:
-      - '@kerebron/editor'
-      - '@kerebron/editor-kits'
-      - '@kerebron/extension-yjs'
-      - '@kerebron/wasm'
-      - '@mieweb/datavis'
-      - '@types/react'
-      - ag-grid-community
-      - ag-grid-react
-      - datavis-ace
-      - immer
-      - katex
-      - mermaid
-      - papaparse
-      - react-markdown
-      - rehype-highlight
-      - rehype-katex
-      - rehype-sanitize
-      - remark-gfm
-      - remark-math
-      - use-sync-external-store
-      - wavesurfer.js
-      - y-protocols
-      - yjs
-
   '@eslint-community/eslint-utils@4.9.1(eslint@9.39.3(jiti@2.6.1))':
     dependencies:
       eslint: 9.39.3(jiti@2.6.1)
@@ -7172,11 +6994,11 @@ snapshots:
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
-  '@joshwooding/vite-plugin-react-docgen-typescript@0.6.4(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))':
+  '@joshwooding/vite-plugin-react-docgen-typescript@0.6.4(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))':
     dependencies:
       glob: 13.0.6
       react-docgen-typescript: 2.4.0(typescript@5.9.3)
-      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
     optionalDependencies:
       typescript: 5.9.3
 
@@ -7403,6 +7225,13 @@ snapshots:
       - use-sync-external-store
       - wavesurfer.js
 
+  '@mieweb/templit@0.2.0(marked@17.0.6)(mustache@4.2.0)':
+    dependencies:
+      js-yaml: 4.1.0
+    optionalDependencies:
+      marked: 17.0.6
+      mustache: 4.2.0
+
   '@mieweb/ui@0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
     dependencies:
       '@swc/helpers': 0.5.19
@@ -7417,45 +7246,6 @@ snapshots:
       ag-grid-community: 35.1.0
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       wavesurfer.js: 7.12.1
-
-  '@mieweb/ui@0.7.1-dev.13(@kerebron/editor-kits@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.8.12)(@kerebron/extension-yjs@0.8.12)(@kerebron/wasm@0.8.12)(@mieweb/datavis@packages+datavis)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(katex@0.17.0)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react-markdown@10.1.0(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(rehype-highlight@7.0.2)(rehype-katex@7.0.1)(rehype-sanitize@6.0.0)(remark-gfm@4.0.1)(remark-math@6.0.0)(wavesurfer.js@7.12.1)(y-protocols@1.0.6(yjs@13.6.30))(yjs@13.6.30)':
-    dependencies:
-      '@swc/helpers': 0.5.19
-      '@tanstack/react-virtual': 3.14.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      class-variance-authority: 0.7.1
-      clsx: 2.1.1
-      dompurify: 3.4.8
-      google-libphonenumber: 3.2.44
-      highlight.js: 11.11.1
-      lucide-react: 0.562.0(react@19.2.4)
-      luxon: 3.7.2
-      marked: 17.0.6
-      onnxruntime-web: 1.19.0
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      tailwind-merge: 2.6.1
-    optionalDependencies:
-      '@kerebron/editor': 0.8.12
-      '@kerebron/editor-kits': 0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      '@kerebron/extension-yjs': 0.8.12
-      '@kerebron/wasm': 0.8.12
-      '@mieweb/datavis': link:packages/datavis
-      ag-grid-community: 35.1.0
-      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      datavis-ace: 4.1.0
-      js-yaml: 4.1.1
-      katex: 0.17.0
-      mermaid: 11.15.0
-      papaparse: 5.5.3
-      react-markdown: 10.1.0(@types/react@19.2.14)(react@19.2.4)
-      rehype-highlight: 7.0.2
-      rehype-katex: 7.0.1
-      rehype-sanitize: 6.0.0
-      remark-gfm: 4.0.1
-      remark-math: 6.0.0
-      wavesurfer.js: 7.12.1
-      y-protocols: 1.0.6(yjs@13.6.30)
-      yjs: 13.6.30
 
   '@mieweb/ychart@file:packages/ychart(@popperjs/core@2.11.8)':
     dependencies:
@@ -7697,10 +7487,10 @@ snapshots:
       axe-core: 4.11.1
       storybook: 10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
 
-  '@storybook/addon-docs@10.2.11(@types/react@19.2.14)(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))':
+  '@storybook/addon-docs@10.2.11(@types/react@19.2.14)(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))':
     dependencies:
       '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@19.2.4)
-      '@storybook/csf-plugin': 10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))
+      '@storybook/csf-plugin': 10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       '@storybook/icons': 2.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@storybook/react-dom-shim': 10.2.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
       react: 19.2.4
@@ -7721,25 +7511,25 @@ snapshots:
     optionalDependencies:
       react: 19.2.4
 
-  '@storybook/builder-vite@10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))':
+  '@storybook/builder-vite@10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))':
     dependencies:
-      '@storybook/csf-plugin': 10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))
+      '@storybook/csf-plugin': 10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       storybook: 10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ts-dedent: 2.2.0
-      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - esbuild
       - rollup
       - webpack
 
-  '@storybook/csf-plugin@10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))':
+  '@storybook/csf-plugin@10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))':
     dependencies:
       storybook: 10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       unplugin: 2.3.11
     optionalDependencies:
       esbuild: 0.28.1
       rollup: 4.59.0
-      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
 
   '@storybook/global@5.0.0': {}
 
@@ -7754,11 +7544,11 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       storybook: 10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
 
-  '@storybook/react-vite@10.2.11(esbuild@0.28.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))':
+  '@storybook/react-vite@10.2.11(esbuild@0.28.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))':
     dependencies:
-      '@joshwooding/vite-plugin-react-docgen-typescript': 0.6.4(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))
+      '@joshwooding/vite-plugin-react-docgen-typescript': 0.6.4(typescript@5.9.3)(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       '@rollup/pluginutils': 5.3.0(rollup@4.59.0)
-      '@storybook/builder-vite': 10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))
+      '@storybook/builder-vite': 10.2.11(esbuild@0.28.1)(rollup@4.59.0)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       '@storybook/react': 10.2.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
       empathic: 2.0.0
       magic-string: 0.30.21
@@ -7768,7 +7558,7 @@ snapshots:
       resolve: 1.22.11
       storybook: 10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       tsconfig-paths: 4.2.0
-      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - esbuild
       - rollup
@@ -8453,7 +8243,7 @@ snapshots:
       d3-selection: 3.0.0
       d3-transition: 3.0.1(d3-selection@3.0.0)
 
-  '@vitest/coverage-v8@3.2.6(vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0))':
+  '@vitest/coverage-v8@3.2.6(vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -8468,7 +8258,7 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.2
       tinyrainbow: 2.0.0
-      vitest: 3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0)
+      vitest: 3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -8488,13 +8278,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.6(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))':
+  '@vitest/mocker@3.2.6(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))':
     dependencies:
       '@vitest/spy': 3.2.6
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -10969,6 +10759,10 @@ snapshots:
       argparse: 1.0.10
       esprima: 4.0.1
 
+  js-yaml@4.1.0:
+    dependencies:
+      argparse: 2.0.1
+
   js-yaml@4.1.1:
     dependencies:
       argparse: 2.0.1
@@ -11977,12 +11771,13 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
-  postcss-load-config@6.0.1(jiti@2.6.1)(postcss@8.5.15):
+  postcss-load-config@6.0.1(jiti@2.6.1)(postcss@8.5.15)(yaml@2.9.1):
     dependencies:
       lilconfig: 3.1.3
     optionalDependencies:
       jiti: 2.6.1
       postcss: 8.5.15
+      yaml: 2.9.1
 
   postcss-value-parser@4.2.0: {}
 
@@ -12889,7 +12684,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.5.1(@swc/core@1.15.30(@swc/helpers@0.5.19))(jiti@2.6.1)(postcss@8.5.15)(typescript@5.9.3):
+  tsup@8.5.1(@swc/core@1.15.30(@swc/helpers@0.5.19))(jiti@2.6.1)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.1):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.28.1)
       cac: 6.7.14
@@ -12900,7 +12695,7 @@ snapshots:
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
       picocolors: 1.1.1
-      postcss-load-config: 6.0.1(jiti@2.6.1)(postcss@8.5.15)
+      postcss-load-config: 6.0.1(jiti@2.6.1)(postcss@8.5.15)(yaml@2.9.1)
       resolve-from: 5.0.0
       rollup: 4.59.0
       source-map: 0.7.6
@@ -13103,13 +12898,13 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite-node@3.2.4(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0):
+  vite-node@3.2.4(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -13124,7 +12919,7 @@ snapshots:
       - tsx
       - yaml
 
-  vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0):
+  vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1):
     dependencies:
       esbuild: 0.28.1
       fdir: 6.5.0(picomatch@4.0.4)
@@ -13138,12 +12933,13 @@ snapshots:
       jiti: 2.6.1
       lightningcss: 1.31.1
       sass: 1.100.0
+      yaml: 2.9.1
 
-  vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0):
+  vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.6
-      '@vitest/mocker': 3.2.6(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0))
+      '@vitest/mocker': 3.2.6(vite@7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1))
       '@vitest/pretty-format': 3.2.6
       '@vitest/runner': 3.2.6
       '@vitest/snapshot': 3.2.6
@@ -13161,8 +12957,8 @@ snapshots:
       tinyglobby: 0.2.15
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
-      vite-node: 3.2.4(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)
+      vite: 7.3.5(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
+      vite-node: 3.2.4(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(sass@1.100.0)(yaml@2.9.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/debug': 4.1.13
@@ -13366,6 +13162,8 @@ snapshots:
   y18n@5.0.8: {}
 
   yallist@3.1.1: {}
+
+  yaml@2.9.1: {}
 
   yargs-parser@18.1.3:
     dependencies:
