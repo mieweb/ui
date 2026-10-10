@@ -952,9 +952,10 @@ const submenuCloseDelay = 150;
 /**
  * A dropdown item that opens a nested flyout menu.
  *
- * Opens on hover or click, and via ArrowRight/Enter/Space from the keyboard;
- * ArrowLeft or Escape closes just the submenu (Escape is stopped so the root
- * menu stays open) and returns focus to the trigger.
+ * Opens on hover or click, and from the keyboard via Enter/Space or the
+ * arrow toward the inline-end (ArrowRight in LTR, ArrowLeft in RTL); the
+ * opposite arrow or Escape closes just the submenu (Escape is stopped so the
+ * root menu stays open) and returns focus to the trigger.
  *
  * @example
  * ```tsx
@@ -975,6 +976,9 @@ function DropdownSubmenu({
   children,
 }: DropdownSubmenuProps) {
   const [open, setOpen] = React.useState(false);
+  // The flyout opens toward the inline-end — physical left under RTL — so
+  // the panel side matches the open key and the flipped chevron.
+  const [rtl, setRtl] = React.useState(false);
   const menuId = React.useId();
   const dropdownContext = React.useContext(DropdownContext);
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -984,7 +988,13 @@ function DropdownSubmenu({
   const { anchorRef, floatingRef, style, actualSide } = useAnchoredPosition<
     HTMLButtonElement,
     HTMLDivElement
-  >({ open, placement: 'right-start', offset: 4 });
+  >({ open, placement: rtl ? 'left-start' : 'right-start', offset: 4 });
+
+  // Sample direction when opening; layout effect so the reposition with the
+  // corrected placement happens before paint (no wrong-side flash).
+  React.useLayoutEffect(() => {
+    if (open) setRtl(isRtl(anchorRef.current));
+  }, [open, anchorRef]);
 
   // Let the root dropdown treat clicks inside the portaled flyout as "inside"
   // so they don't dismiss the whole menu. Layout effect so the registration

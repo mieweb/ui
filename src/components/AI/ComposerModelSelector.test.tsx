@@ -278,12 +278,16 @@ describe('ComposerModelSelector', () => {
     it('returns to the model list on ArrowRight under RTL', () => {
       renderWithEfforts();
 
-      fireEvent.click(screen.getByRole('button', { name: /gpt-5 mini/i }));
+      const trigger = screen.getByRole('button', { name: /gpt-5 mini/i });
+      // The listbox is portaled to <body>, so the handler reads direction
+      // from the in-place trigger. jsdom does not cascade dir → direction;
+      // set both on that element.
+      trigger.setAttribute('dir', 'rtl');
+      trigger.style.direction = 'rtl';
+
+      fireEvent.click(trigger);
       fireEvent.click(screen.getByRole('button', { name: /effort medium/i }));
       const list = screen.getByRole('listbox', { name: /effort/i });
-      // jsdom does not cascade dir → direction; set both on the handler element.
-      list.setAttribute('dir', 'rtl');
-      (list as HTMLElement).style.direction = 'rtl';
 
       // ArrowLeft is the RTL "forward" direction and must no longer go back.
       fireEvent.keyDown(list, { key: 'ArrowLeft' });

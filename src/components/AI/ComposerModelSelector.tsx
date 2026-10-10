@@ -305,8 +305,10 @@ export function ComposerModelSelector({
     }
     // Left/Backspace mirrors the drill-down affordance so keyboard users can
     // get back to the model list without reaching for the mouse. The drill
-    // chevron flips under RTL, so the back arrow does too.
-    const backKey = isRtl(event.currentTarget) ? 'ArrowRight' : 'ArrowLeft';
+    // chevron flips under RTL, so the back arrow does too. The listbox is
+    // portaled to <body>, so read direction from the in-place trigger — it
+    // sees local dir overrides around the composer that the portal misses.
+    const backKey = isRtl(triggerRef.current) ? 'ArrowRight' : 'ArrowLeft';
     if (event.key === backKey || event.key === 'Backspace') {
       event.preventDefault();
       setView('models');
