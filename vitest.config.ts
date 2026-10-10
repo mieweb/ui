@@ -41,6 +41,20 @@ export default defineConfig({
   },
   resolve: {
     alias: [
+      ...['core', 'fields', 'adapters', 'renderer', 'builder'].map((pkg) => ({
+        find: new RegExp(`^@esheet/${pkg}$`),
+        replacement: resolve(
+          __dirname,
+          `packages/esheet/packages/${pkg}/src/index.ts`
+        ),
+      })),
+      {
+        find: /^@esheet\/styles$/,
+        replacement: resolve(
+          __dirname,
+          'packages/esheet/packages/styles/src/index.ts'
+        ),
+      },
       {
         find: /^@mieweb\/ui\/components\/(.+)$/,
         replacement: `${resolve(__dirname, 'src/components')}/$1`,

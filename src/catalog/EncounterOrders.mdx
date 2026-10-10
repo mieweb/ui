@@ -4,7 +4,9 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Encounter & orders
 
-> **What does the page lead with, and what data does it get?** Today's conclusions and the
+> **What does the page lead with, and what data does it get?** A whole visit document with
+> narrative, observations, coordinated vitals and MCP tools → `EncounterVisit` (eSheet-backed).
+> Today's conclusions and the
 > orders placed for each problem → `Assessment` (plain props: concerns, items, orders). One
 > order in full → `OrderEditor` (morphs by type). What is _due_ from surveillance programs
 > and quality measures → `HealthSurveillance` (`PatientHistory` + `programs.json`). The banner
@@ -16,6 +18,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 | Component                                                                       | Use it when                                                                                                                                                                                                                                       | Not when                                                                                                                                                    |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) | A mobile-friendly anonymous visit document with configurable narrative / observation sections, repeated BP and other vitals, clinical lists, assessment and MCP tools sharing native eSheet responses | A single list or order panel; backend scheduling, signed records or clinical decision support |
 | [Assessment](?path=/docs/encounter-orders-assessment--docs)                     | The visit's **A&P**: `items` point at today's assertion of each concern; `orders` nest under problems via `concernId` (the durable IndicationLink); unified coded add row; unlinked bucket; drag to re-link                                       | The chart problem list — `ProblemList`; relevance tagging — `PresentingProblems`; full order edits — `OrderEditor`; a due list — `HealthSurveillance`       |
 | [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs)                   | Editing one `AssessmentOrder` in full. Morphs: `medication` → `MedicationEditor` (NCPDP); `lab` / `imaging` / `procedure` / `referral` → typed editors with coded search, priority, timing, body site / refer-to                                  | The inline display / detail edit Assessment already offers; reconciling presenting meds — `MedicationReconciliation`                                        |
 | [HealthSurveillance](?path=/docs/encounter-orders-healthsurveillance--docs)     | Showing what is **overdue / due / pending / done** for OSHA / DOT programs (`enrolledKeys`) and CMS eCQMs, from `evaluateDue(history, programs)`; each item is a picklist of satisfying orders → `onOrderMany`                                    | You need the plan itself — `Assessment`; an order-history grid — the story-only `ChartOrdersGrid` demo on NITRO; rules beyond periodicity + age / sex gates |

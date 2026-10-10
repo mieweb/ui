@@ -84,11 +84,12 @@ If you cloned without `--recurse-submodules`, run
 
 Use Node.js 24 (the version used by CI) and the pnpm version declared in
 `package.json`. The `prestorybook` hook builds eSheet when its required artifacts
-are missing; it does not detect every stale build after a submodule update. To
-rebuild updated eSheet sources explicitly:
+are missing or its submodule revision changes. Local `@esheet/*` development
+dependencies link to that checkout, and Storybook uses its shared stylesheet.
+To rebuild updated eSheet sources explicitly:
 
 ```bash
-pnpm --dir packages/esheet --filter '@esheet/builder...' --filter '@esheet/renderer...' build
+pnpm build:esheet
 ```
 
 Storybook uses HMR for source and documentation edits. Do not restart it after
