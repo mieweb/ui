@@ -64,14 +64,15 @@ function isHandledReverse(token, lineText) {
 
 // Physical inline-style properties (React style objects / CSS-in-JS). The
 // camelCase names only occur as style keys in .tsx files, so they are flagged
-// anywhere; `textAlign`/`float`/`clear` are flagged only with a left/right
-// value. Logical equivalents in comments.
+// anywhere — including ES shorthand (`style={{ marginLeft }}`), hence the
+// `[:,}]` terminator; `textAlign`/`float`/`clear` are flagged only with a
+// left/right value. Logical equivalents in comments.
 const PHYSICAL_STYLE_PROPS = new RegExp(
   '(^|[\\s{,(])(' +
     [
-      '(?:margin|padding)(?:Left|Right)(?=\\s*:)', // → marginInlineStart/End, paddingInlineStart/End
-      'border(?:Top|Bottom)(?:Left|Right)Radius(?=\\s*:)', // → borderStartStartRadius/…
-      'border(?:Left|Right)(?:Width|Style|Color)?(?=\\s*:)', // → borderInlineStart*/End*
+      '(?:margin|padding)(?:Left|Right)(?=\\s*[:,}])', // → marginInlineStart/End, paddingInlineStart/End
+      'border(?:Top|Bottom)(?:Left|Right)Radius(?=\\s*[:,}])', // → borderStartStartRadius/…
+      'border(?:Left|Right)(?:Width|Style|Color)?(?=\\s*[:,}])', // → borderInlineStart*/End*
       "textAlign\\s*:\\s*['\"](?:left|right)['\"]", // → 'start'/'end'
       "(?:float|clear)\\s*:\\s*['\"](?:left|right)['\"]", // → 'inline-start'/'inline-end'
     ].join('|') +
