@@ -12,6 +12,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { isRtl } from '../../hooks/useDirection';
 import { Card, CardContent } from '../Card/Card';
 import {
   SearchIcon,
@@ -590,6 +591,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Drill-in/out arrows are visual (the drill chevron flips under RTL).
+      const rtl = isRtl(e.currentTarget);
+      const drillInKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+      const drillOutKey = rtl ? 'ArrowRight' : 'ArrowLeft';
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setOpen(true);
@@ -598,7 +603,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         e.preventDefault();
         setActiveIndex((i) => Math.max(-1, i - 1));
       } else if (
-        e.key === 'ArrowRight' &&
+        e.key === drillInKey &&
         !drill &&
         activeIndex >= 0 &&
         list[activeIndex] &&
@@ -606,7 +611,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       ) {
         e.preventDefault();
         openDrill(list[activeIndex]);
-      } else if (e.key === 'ArrowLeft' && drill) {
+      } else if (e.key === drillOutKey && drill) {
         e.preventDefault();
         closeDrill();
       } else if (e.key === 'Enter' && activeIndex >= 0 && list[activeIndex]) {
@@ -657,8 +662,14 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       i: number
     ) => {
       const n = codetypeOptions!.length;
+      // Roving focus follows the visual order: invert ←/→ under RTL.
+      let key = e.key;
+      if (isRtl(e.currentTarget)) {
+        if (key === 'ArrowRight') key = 'ArrowLeft';
+        else if (key === 'ArrowLeft') key = 'ArrowRight';
+      }
       let next: number;
-      switch (e.key) {
+      switch (key) {
         case 'ArrowRight':
         case 'ArrowDown':
           next = (i + 1) % n;

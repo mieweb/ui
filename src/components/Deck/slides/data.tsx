@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ArrowDown, ArrowUp } from 'lucide-react';
+import { isRtl } from '../../../hooks/useDirection';
 import { cn } from '../../../utils/cn';
 import { useDeck, useTone } from '../DeckContext';
 import { Graphic } from '../graphics';
@@ -659,14 +660,20 @@ export function TabsRenderer({ slide, index }: SlideRendererProps<TabsSlide>) {
   const current = slide.tabs[active]?.slide;
   const onKey = (e: React.KeyboardEvent) => {
     const n = slide.tabs.length;
+    // Horizontal arrows follow the visual direction (invert under RTL).
+    let key = e.key;
+    if (isRtl(e.currentTarget)) {
+      if (key === 'ArrowRight') key = 'ArrowLeft';
+      else if (key === 'ArrowLeft') key = 'ArrowRight';
+    }
     const next =
-      e.key === 'ArrowRight'
+      key === 'ArrowRight'
         ? (active + 1) % n
-        : e.key === 'ArrowLeft'
+        : key === 'ArrowLeft'
           ? (active - 1 + n) % n
-          : e.key === 'Home'
+          : key === 'Home'
             ? 0
-            : e.key === 'End'
+            : key === 'End'
               ? n - 1
               : -1;
     if (next < 0) return;

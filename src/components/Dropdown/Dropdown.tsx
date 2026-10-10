@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { isRtl } from '../../hooks/useDirection';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import {
   useAnchoredPosition,
@@ -1059,13 +1060,18 @@ function DropdownSubmenu({
           if (event.detail === 0) focusFirstItem();
         }}
         onKeyDown={(event) => {
-          if (event.key === 'ArrowRight') {
+          // The submenu opens toward the inline-end and its chevron flips
+          // under RTL, so the open/close arrows are visual and invert too.
+          const rtl = isRtl(event.currentTarget);
+          const openKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+          const closeKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+          if (event.key === openKey) {
             event.preventDefault();
             openNow();
             focusFirstItem();
           } else if (
             open &&
-            (event.key === 'ArrowLeft' || event.key === 'Escape')
+            (event.key === closeKey || event.key === 'Escape')
           ) {
             event.preventDefault();
             // Keep the root menu open: stop Escape before it reaches the
@@ -1124,7 +1130,10 @@ function DropdownSubmenu({
                   if (event.pointerType === 'mouse') scheduleClose();
                 }}
                 onKeyDown={(event) => {
-                  if (event.key === 'ArrowLeft' || event.key === 'Escape') {
+                  const closeKey = isRtl(event.currentTarget)
+                    ? 'ArrowRight'
+                    : 'ArrowLeft';
+                  if (event.key === closeKey || event.key === 'Escape') {
                     event.preventDefault();
                     event.stopPropagation();
                     closeAndRefocus();

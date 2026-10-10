@@ -377,4 +377,68 @@ describe('Assessment actions', () => {
       screen.queryByLabelText(/actions for essential hypertension/i)
     ).not.toBeInTheDocument();
   });
+
+  describe('order row keyboard re-linking (Alt+←/→)', () => {
+    const twoConcerns: AssessmentProps['concerns'] = [
+      ...concerns,
+      {
+        concernId: 'concern-2',
+        clinicalStatus: 'active',
+        assertions: [
+          {
+            id: 'assertion-2',
+            date: '2026-09-16',
+            text: 'Type 2 diabetes',
+            verificationStatus: 'confirmed',
+          },
+        ],
+      },
+    ];
+    const twoItems: AssessmentProps['items'] = [
+      ...items,
+      { concernId: 'concern-2', assertionId: 'assertion-2' },
+    ];
+
+    function renderWithOrder(onLinkOrder = vi.fn()) {
+      renderWithTheme(
+        <Assessment
+          concerns={twoConcerns}
+          items={twoItems}
+          orders={orders}
+          renderOrderSearch={false}
+          onLinkOrder={onLinkOrder}
+        />
+      );
+      const row = document.querySelector<HTMLElement>(
+        'li[data-order-id="order-1"]'
+      )!;
+      row.focus();
+      return { row, onLinkOrder };
+    }
+
+    it('moves the order to the next problem on Alt+ArrowRight', () => {
+      const { row, onLinkOrder } = renderWithOrder();
+      fireEvent.keyDown(row, { key: 'ArrowRight', altKey: true });
+      expect(onLinkOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ orderId: 'order-1' }),
+        'concern-2'
+      );
+    });
+
+    it('inverts Alt+ArrowLeft/ArrowRight under RTL', () => {
+      const { row, onLinkOrder } = renderWithOrder();
+      // jsdom does not cascade dir → direction; set both on the handler element.
+      row.setAttribute('dir', 'rtl');
+      row.style.direction = 'rtl';
+      // ArrowRight now looks toward the previous problem — none exists.
+      fireEvent.keyDown(row, { key: 'ArrowRight', altKey: true });
+      expect(onLinkOrder).not.toHaveBeenCalled();
+      // ArrowLeft is the visual "next" and re-links to concern-2.
+      fireEvent.keyDown(row, { key: 'ArrowLeft', altKey: true });
+      expect(onLinkOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ orderId: 'order-1' }),
+        'concern-2'
+      );
+    });
+  });
 });

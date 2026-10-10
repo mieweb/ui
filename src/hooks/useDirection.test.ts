@@ -2,7 +2,7 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createRef } from 'react';
 
-import { isRtlLocale, useDirection } from './useDirection';
+import { isRtl, isRtlLocale, useDirection } from './useDirection';
 
 /**
  * jsdom does not implement the UA `[dir="rtl"] { direction: rtl }` cascade,
@@ -46,6 +46,24 @@ describe('isRtlLocale', () => {
     for (const locale of ['en', 'en-US', 'es', 'fr', 'zh-CN']) {
       expect(isRtlLocale(locale)).toBe(false);
     }
+  });
+});
+
+describe('isRtl', () => {
+  it('reads the element itself', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    expect(isRtl(el)).toBe(false);
+    setDir(el, 'rtl');
+    expect(isRtl(el)).toBe(true);
+    el.remove();
+  });
+
+  it('falls back to the document element when no element is given', () => {
+    expect(isRtl()).toBe(false);
+    setDir(document.documentElement, 'rtl');
+    expect(isRtl()).toBe(true);
+    expect(isRtl(null)).toBe(true);
   });
 });
 

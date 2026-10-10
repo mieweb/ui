@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { isRtl } from '../../hooks/useDirection';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
@@ -471,10 +472,10 @@ function OrderRow({
       controls.moveWithin?.(order, e.key === 'ArrowUp' ? -1 : 1);
     } else if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
       e.preventDefault();
-      const adj = controls.adjacentProblem(
-        order,
-        e.key === 'ArrowLeft' ? -1 : 1
-      );
+      // Problem columns are laid out by the document flow, so ←/→ are
+      // visual: invert under RTL.
+      const back = isRtl(e.currentTarget) ? 'ArrowRight' : 'ArrowLeft';
+      const adj = controls.adjacentProblem(order, e.key === back ? -1 : 1);
       if (adj) controls.moveToProblem?.(order, adj.concernId);
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       // Roving focus between order rows in the same plan

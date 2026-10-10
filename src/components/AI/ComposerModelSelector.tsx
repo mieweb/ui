@@ -4,6 +4,7 @@ import { Check, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { isRtl } from '../../hooks/useDirection';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 export type ProviderModelValue = {
@@ -303,8 +304,10 @@ export function ComposerModelSelector({
       setEffortHighlight(efforts.length - 1);
     }
     // Left/Backspace mirrors the drill-down affordance so keyboard users can
-    // get back to the model list without reaching for the mouse.
-    if (event.key === 'ArrowLeft' || event.key === 'Backspace') {
+    // get back to the model list without reaching for the mouse. The drill
+    // chevron flips under RTL, so the back arrow does too.
+    const backKey = isRtl(event.currentTarget) ? 'ArrowRight' : 'ArrowLeft';
+    if (event.key === backKey || event.key === 'Backspace') {
       event.preventDefault();
       setView('models');
     }
