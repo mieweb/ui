@@ -3,10 +3,12 @@
 import * as React from 'react';
 import { Save } from 'lucide-react';
 import { EsheetRenderer, type EsheetRendererHandle } from '@esheet/renderer';
-import { getFieldComponent } from '@esheet/fields';
 import { cn } from '../../utils/cn';
-import { registerMedicationListFieldType } from '../../esheet-fields/MedicationListField';
-import { registerAllergyListFieldType } from '../../esheet-fields/AllergyListField';
+import {
+  CodeLookupContext,
+  useCodeLookupConfig,
+  type CodeLookupProviderConfig,
+} from '../CodeLookup/context';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
@@ -46,6 +48,8 @@ export interface EncounterVisitProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   'onChange' | 'onSubmit' | 'title'
 > {
+  /** Supply the host's terminology catalog, or inherit the ambient provider. */
+  codeLookup?: CodeLookupProviderConfig;
   /** Sections and their narrative / observation granularity. */
   definition?: EncounterVisitDefinition;
   /** Loaded once per definition.id. Change the id to open another visit. */
@@ -74,16 +78,17 @@ export interface EncounterVisitHandle {
 
 function ensureFields(): void {
   registerEncounterFieldTypes();
-  // Respect a host's earlier registration, including its CodeLookup wiring.
-  if (!getFieldComponent('medicationList')) registerMedicationListFieldType();
-  if (!getFieldComponent('allergyList')) registerAllergyListFieldType();
 }
 
 /** A configurable visit document, backed by a single native eSheet renderer. */
 export const EncounterVisit = React.forwardRef<
   EncounterVisitHandle,
   EncounterVisitProps
->(function EncounterVisit({ definition, initialMdy, ...props }, ref) {
+>(function EncounterVisit(
+  { definition, initialMdy, codeLookup, ...props },
+  ref
+) {
+  const inheritedCodeLookup = useCodeLookupConfig();
   const parsed = React.useMemo(
     () => (initialMdy === undefined ? null : parseEncounterMdy(initialMdy)),
     [initialMdy]
@@ -133,7 +138,7 @@ export const EncounterVisit = React.forwardRef<
       );
     }
   }
-  return (
+  const session = (
     <EncounterVisitSession
       key={visitDefinition.id}
       {...props}
@@ -141,6 +146,11 @@ export const EncounterVisit = React.forwardRef<
       definition={visitDefinition}
       ref={ref}
     />
+  );
+  return (
+    <CodeLookupContext.Provider value={codeLookup ?? inheritedCodeLookup}>
+      {session}
+    </CodeLookupContext.Provider>
   );
 });
 

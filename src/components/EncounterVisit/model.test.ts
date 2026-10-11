@@ -417,7 +417,7 @@ describe('encounter observations and note', () => {
     expect(
       createEncounterFormDefinition(DEFAULT_ENCOUNTER_VISIT_DEFINITION).pages[0]
         .fields
-    ).toHaveLength(10);
+    ).toHaveLength(11);
   });
 });
 

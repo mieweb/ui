@@ -245,6 +245,8 @@ export interface AssessmentProps extends Omit<
   orderActions?: readonly AssessmentOrderAction[];
   /** Modes available in the global add row. */
   addModes?: readonly AssessmentAddMode[];
+  /** Accessible label for the global capture form; distinguish multiple editors on one page. */
+  addFormLabel?: string;
   /** Remove a problem from this visit's assessment, not its longitudinal record. */
   onRemoveAssessment?: (item: AssessmentItem) => void;
   /**
@@ -853,6 +855,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       ] as AssessmentRowAction[],
       orderActions = ['edit', 'remove', 'move'],
       addModes,
+      addFormLabel = 'Add concern or order',
       onRemoveAssessment,
       onAddOrder,
       onAddAssessment,
@@ -1376,7 +1379,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             (onAddAssessment || onAddOrder) && (
               <div
                 role="form"
-                aria-label="Add concern or order"
+                aria-label={addFormLabel}
                 className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
               >
                 <select

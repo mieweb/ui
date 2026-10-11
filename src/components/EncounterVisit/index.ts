@@ -12,3 +12,8 @@ export { EncounterVitalsField } from './EncounterVitalsField';
 export { EncounterAssessmentField } from './EncounterAssessmentField';
 export { EncounterNarrativeField } from './EncounterNarrativeField';
 export { registerEncounterFieldTypes } from './fields';
+
+export { EncounterMedicationField } from './EncounterMedicationField';
+export { EncounterAllergyField } from './EncounterAllergyField';
+export { EncounterConditionsField } from './EncounterConditionsField';
+export { EncounterPlanField } from './EncounterPlanField';

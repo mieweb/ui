@@ -28,6 +28,16 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 ## Data contracts
 
+`EncounterVisit` uses one native eSheet response map across eSheet, RichEdit
+and the Templit report view. Its medication and allergy sections use
+`MedicationReconciliation` and `AllergyManager`; Conditions uses `ProblemList`,
+and Assessment/Plan use `Assessment` with coded orders. Supply the host's
+terminology catalog through `codeLookup` or an ambient `CodeLookupProvider`.
+Plan orders link to the recorded Conditions by `concernId`; narrative Plan
+prose remains available alongside them. Common findings are configurable quick
+selections that append to narratives only when selected. Empty report prompts
+and headings disappear from View.
+
 | Component              | Input                                                                                                                                                                           | Output                                                                                                                               |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `Assessment`           | `concerns: ConditionConcern[]` (chart), `items: AssessmentItem[]` + `orders: AssessmentOrder[]` (encounter) — plain props, no FHIR                                              | `onAddOrder`, `onAddAssessment`, `onLinkOrder`, `onEditOrder(Start)`, `onRemoveOrder`, `onReorder*` — host persists                  |

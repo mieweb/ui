@@ -12,6 +12,9 @@ import { getFieldComponent, registerFieldComponents } from '@esheet/fields';
 import { renderWithTheme } from '../../test/test-utils';
 import { EncounterVitalsField } from './EncounterVitalsField';
 import { EncounterAssessmentField } from './EncounterAssessmentField';
+import { EncounterConditionsField } from './EncounterConditionsField';
+import { EncounterPlanField } from './EncounterPlanField';
+import { conditionPick, renderClinicalField } from './clinicalFieldTestUtils';
 import { registerEncounterFieldTypes } from './fields';
 import type { EncounterAssessmentValue, EncounterVitalsValue } from './types';
 
@@ -406,22 +409,29 @@ describe('EncounterAssessmentField', () => {
     ],
   };
 
-  it('reuses Assessment to add an explicitly entered concern with linked assertion ids', () => {
-    const { latest } = renderControlledField(
+  it('reuses Assessment to add a coded concern with linked assertion ids', () => {
+    const { latest, lookupProps } = renderClinicalField(
       EncounterAssessmentField,
       'encounterAssessment',
-      initial
+      initial,
+      {
+        pick: {
+          ...conditionPick,
+          fullid: 'ICD10|M54.9',
+          fullcode: 'M54.9',
+          label: 'Back pain',
+        },
+      }
     );
     expect(screen.getByText('Hypertension')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Concern or order description'), {
-      target: { value: 'Back pain' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    expect(lookupProps().onFreeText).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     const value = latest<EncounterAssessmentValue>();
     expect(value.orders).toEqual(initial.orders);
     expect(value.concerns[1].assertions[0]).toMatchObject({
       text: 'Back pain',
       verificationStatus: 'unconfirmed',
+      coding: [{ system: 'ICD10', code: 'M54.9', display: 'Back pain' }],
     });
     expect(value.items[1]).toEqual({
       concernId: value.concerns[1].concernId,
@@ -481,9 +491,13 @@ describe('EncounterAssessmentField', () => {
 });
 
 describe('registerEncounterFieldTypes', () => {
-  it('registers both encounter editors idempotently and retains host overrides', () => {
+  it('registers encounter editors idempotently and retains host overrides', () => {
     registerEncounterFieldTypes();
     expect(getFieldComponent('encounterVitals')).toBe(EncounterVitalsField);
+    expect(getFieldComponent('encounterConditions')).toBe(
+      EncounterConditionsField
+    );
+    expect(getFieldComponent('encounterPlan')).toBe(EncounterPlanField);
     expect(getFieldComponent('encounterAssessment')).toBe(
       EncounterAssessmentField
     );

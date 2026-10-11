@@ -1,3 +1,4 @@
+import { currentAssertion, type ConditionConcern } from '../ProblemList';
 import type { FieldResponse } from '@esheet/core';
 import { DateTime } from 'luxon';
 import type { Medication } from '../MedicationList';
@@ -10,6 +11,8 @@ import {
 import { createEncounterMdy } from './mdy';
 import type {
   EncounterAssessmentValue,
+  EncounterConditionsValue,
+  EncounterPlanValue,
   EncounterCode,
   EncounterObservation,
   EncounterResponses,
@@ -389,7 +392,8 @@ function duplicateIds(values: Record<string, unknown>[], key: string): boolean {
 export function validateEncounterAssessment(
   value: unknown,
   fieldId = '',
-  sectionId = ''
+  sectionId = '',
+  externalConcerns: readonly ConditionConcern[] = []
 ): EncounterValidationIssue[] {
   const issues: EncounterValidationIssue[] = [];
   const add = (message: string, path?: string) =>
@@ -409,7 +413,13 @@ export function validateEncounterAssessment(
     add('Assessment must contain concerns, items and orders arrays.');
     return issues;
   }
-  const concerns = new Map<string, Set<string>>();
+  const concerns = new Map(
+    externalConcerns.map((concern) => [
+      concern.concernId,
+      new Set(concern.assertions.map((assertion) => assertion.id)),
+    ])
+  );
+  const localConcernIds = new Set<string>();
   value.concerns.forEach((concern: unknown, index: number) => {
     const path = `concerns.${index}`;
     if (
@@ -431,8 +441,9 @@ export function validateEncounterAssessment(
       );
       return;
     }
-    if (concerns.has(concern.concernId))
+    if (localConcernIds.has(concern.concernId))
       add('Concern ids must be unique.', `${path}.concernId`);
+    localConcernIds.add(concern.concernId);
     const assertionIds = new Set<string>();
     concerns.set(concern.concernId, assertionIds);
     concern.assertions.forEach((assertion: unknown, assertionIndex: number) => {
@@ -563,42 +574,25 @@ export function parseEncounterAssessment(
     : { concerns: [], items: [], orders: [] };
 }
 
-function validateCustom(
-  section: EncounterSectionDefinition,
-  answer: string,
-  fieldId: string
+function validateClinicalList(
+  parsed: unknown,
+  key: 'medications' | 'allergies',
+  validItem: (item: unknown) => boolean,
+  title: string,
+  fieldId: string,
+  sectionId: string
 ): EncounterValidationIssue[] {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(answer) as unknown;
-  } catch {
-    return [
-      {
-        sectionId: section.id,
-        fieldId,
-        code: 'invalid-json',
-        message: `${section.title} contains malformed JSON.`,
-      },
-    ];
-  }
-  if (section.kind === 'vitals')
-    return validateEncounterVitals(parsed, fieldId, section.id);
-  if (section.kind === 'assessment')
-    return validateEncounterAssessment(parsed, fieldId, section.id);
-  const key = section.kind === 'medications' ? 'medications' : 'allergies';
-  const validItem =
-    section.kind === 'medications' ? validMedication : validAllergy;
   const issues: EncounterValidationIssue[] = [];
   const add = (message: string, path?: string) =>
     issues.push({
-      sectionId: section.id,
+      sectionId,
       fieldId,
       code: 'invalid-value' as const,
       message,
       path,
     });
   if (!record(parsed) || !Array.isArray(parsed[key])) {
-    add(`${section.title} must contain a ${key} array.`, key);
+    add(`${title} must contain a ${key} array.`, key);
     return issues;
   }
   const values = parsed[key] as unknown[];
@@ -610,8 +604,8 @@ function validateCustom(
       );
   });
   if (values.every(record) && duplicateIds(values, 'id'))
-    add(`${section.title} ids must be unique.`, key);
-  if (section.kind === 'allergies') {
+    add(`${title} ids must be unique.`, key);
+  if (key === 'allergies') {
     if (
       parsed.noKnownAllergies !== undefined &&
       typeof parsed.noKnownAllergies !== 'boolean'
@@ -629,6 +623,218 @@ function validateCustom(
     }
   }
   return issues;
+}
+
+export function validateEncounterMedicationValue(
+  value: unknown,
+  fieldId = '',
+  sectionId = ''
+): EncounterValidationIssue[] {
+  return validateClinicalList(
+    value,
+    'medications',
+    validMedication,
+    'Medications',
+    fieldId,
+    sectionId
+  );
+}
+
+export function validateEncounterAllergyValue(
+  value: unknown,
+  fieldId = '',
+  sectionId = ''
+): EncounterValidationIssue[] {
+  return validateClinicalList(
+    value,
+    'allergies',
+    validAllergy,
+    'Allergies',
+    fieldId,
+    sectionId
+  );
+}
+
+export function validateEncounterConditions(
+  value: unknown,
+  fieldId = '',
+  sectionId = ''
+): EncounterValidationIssue[] {
+  return validateEncounterAssessment(
+    {
+      concerns: record(value) ? value.concerns : undefined,
+      items: [],
+      orders: [],
+    },
+    fieldId,
+    sectionId
+  );
+}
+
+/** Order shape/codes are local; concern references are checked against the full visit. */
+export function validateEncounterPlan(
+  value: unknown,
+  fieldId = '',
+  sectionId = ''
+): EncounterValidationIssue[] {
+  if (!record(value) || !Array.isArray(value.orders))
+    return [
+      {
+        sectionId,
+        fieldId,
+        code: 'invalid-value',
+        message: 'Plan must contain an orders array.',
+        path: 'orders',
+      },
+    ];
+  const ids = new Set(
+    value.orders.flatMap((order) =>
+      record(order) && nonempty(order.concernId) ? [order.concernId] : []
+    )
+  );
+  return validateEncounterAssessment(
+    {
+      concerns: Array.from(ids, (concernId) => ({
+        concernId,
+        clinicalStatus: 'active',
+        assertions: [],
+      })),
+      items: [],
+      orders: value.orders,
+    },
+    fieldId,
+    sectionId
+  );
+}
+
+export function parseEncounterConditions(
+  answer?: string
+): EncounterConditionsValue {
+  const parsed = parseJson(answer);
+  return validateEncounterConditions(parsed).length === 0
+    ? (parsed as EncounterConditionsValue)
+    : { concerns: [] };
+}
+
+export function parseEncounterPlan(answer?: string): EncounterPlanValue {
+  const parsed = parseJson(answer);
+  return validateEncounterPlan(parsed).length === 0
+    ? (parsed as EncounterPlanValue)
+    : { orders: [] };
+}
+
+function validateCoding(
+  section: EncounterSectionDefinition,
+  parsed: Record<string, unknown>,
+  fieldId: string,
+  externalConcerns: readonly ConditionConcern[] = []
+): EncounterValidationIssue[] {
+  if (!section.requireCoding) return [];
+  const issues: EncounterValidationIssue[] = [];
+  const add = (path: string) =>
+    issues.push({
+      sectionId: section.id,
+      fieldId,
+      code: 'invalid-value' as const,
+      path,
+      message: `${section.title} entries require a selected clinical code.`,
+    });
+  const coded = (code: unknown) => record(code) && validCode(code);
+  if (section.kind === 'medications' || section.kind === 'allergies') {
+    const key = section.kind;
+    if (Array.isArray(parsed[key]))
+      parsed[key].forEach((entry, index) => {
+        if (record(entry) && !coded(entry.code)) add(`${key}.${index}.code`);
+      });
+  } else if (section.kind === 'conditions' || section.kind === 'assessment') {
+    if (Array.isArray(parsed.concerns))
+      parsed.concerns.forEach((entry, index) => {
+        if (!record(entry) || !Array.isArray(entry.assertions)) return;
+        const assertion = currentAssertion(
+          entry as unknown as ConditionConcern
+        );
+        if (!assertion?.coding?.some(coded)) add(`concerns.${index}.coding`);
+      });
+  }
+  if (section.kind === 'assessment' && Array.isArray(parsed.items)) {
+    const concerns = [
+      ...(Array.isArray(parsed.concerns) ? parsed.concerns : []),
+      ...externalConcerns,
+    ];
+    parsed.items.forEach((item, index) => {
+      if (!record(item)) return;
+      const concern = concerns.find(
+        (entry) => record(entry) && entry.concernId === item.concernId
+      );
+      const assertion =
+        concern && Array.isArray(concern.assertions)
+          ? concern.assertions.find(
+              (entry: unknown) => record(entry) && entry.id === item.assertionId
+            )
+          : undefined;
+      if (
+        !record(assertion) ||
+        !Array.isArray(assertion.coding) ||
+        !assertion.coding.some(coded)
+      )
+        add(`items.${index}.coding`);
+    });
+  }
+  if (section.kind === 'plan' || section.kind === 'assessment') {
+    if (Array.isArray(parsed.orders))
+      parsed.orders.forEach((order, index) => {
+        if (
+          record(order) &&
+          (!record(order.code) ||
+            !nonempty(order.code.fullid) ||
+            !nonempty(order.code.codetype) ||
+            !nonempty(order.code.fullcode))
+        )
+          add(`orders.${index}.code`);
+      });
+  }
+  return issues;
+}
+
+function validateCustom(
+  section: EncounterSectionDefinition,
+  answer: string,
+  fieldId: string,
+  externalConcerns: readonly ConditionConcern[] = []
+): EncounterValidationIssue[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(answer) as unknown;
+  } catch {
+    return [
+      {
+        sectionId: section.id,
+        fieldId,
+        code: 'invalid-json',
+        message: `${section.title} contains malformed JSON.`,
+      },
+    ];
+  }
+  const shape =
+    section.kind === 'vitals'
+      ? validateEncounterVitals(parsed, fieldId, section.id)
+      : section.kind === 'assessment'
+        ? validateEncounterAssessment(
+            parsed,
+            fieldId,
+            section.id,
+            externalConcerns
+          )
+        : section.kind === 'conditions'
+          ? validateEncounterConditions(parsed, fieldId, section.id)
+          : section.kind === 'plan'
+            ? validateEncounterPlan(parsed, fieldId, section.id)
+            : section.kind === 'medications'
+              ? validateEncounterMedicationValue(parsed, fieldId, section.id)
+              : validateEncounterAllergyValue(parsed, fieldId, section.id);
+  return shape.length || !record(parsed)
+    ? shape
+    : validateCoding(section, parsed, fieldId, externalConcerns);
 }
 
 function selectedValue(response?: FieldResponse): string | undefined {
@@ -659,10 +865,38 @@ function customHasContent(
       (Array.isArray(parsed.allergies) && parsed.allergies.length > 0) ||
       parsed.noKnownAllergies === true
     );
+  if (section.kind === 'conditions')
+    return Array.isArray(parsed.concerns) && parsed.concerns.length > 0;
   return (
     (Array.isArray(parsed.items) && parsed.items.length > 0) ||
     (Array.isArray(parsed.orders) && parsed.orders.length > 0)
   );
+}
+
+export function getEncounterConcerns(
+  definition: EncounterVisitDefinition,
+  responses: EncounterResponses
+): ConditionConcern[] {
+  const concerns = new Map<string, ConditionConcern>();
+  const sections = [...definition.sections].sort(
+    (a, b) => Number(b.kind === 'conditions') - Number(a.kind === 'conditions')
+  );
+  for (const section of sections) {
+    if (section.kind !== 'conditions' && section.kind !== 'assessment')
+      continue;
+    const value = parseJson(
+      responses[getEncounterFieldId(section.id, 'value')]?.answer
+    );
+    if (
+      !record(value) ||
+      validateEncounterConditions({ concerns: value.concerns }).length
+    )
+      continue;
+    for (const concern of value.concerns as ConditionConcern[])
+      if (!concerns.has(concern.concernId))
+        concerns.set(concern.concernId, concern);
+  }
+  return [...concerns.values()];
 }
 
 /** Report required omissions and malformed values without changing recorded data. */
@@ -671,6 +905,7 @@ export function validateEncounterResponses(
   responses: EncounterResponses
 ): EncounterValidationIssue[] {
   validateEncounterDefinition(definition);
+  const externalConcerns = getEncounterConcerns(definition, responses);
   const issues: EncounterValidationIssue[] = [];
   const add = (
     sectionId: string,
@@ -696,10 +931,7 @@ export function validateEncounterResponses(
         );
       }
     }
-    if (
-      section.kind === 'narrative' ||
-      (section.kind === 'observations' && section.narrative)
-    ) {
+    if (section.kind === 'narrative' || section.narrative) {
       const fieldId = getEncounterFieldId(section.id);
       const response = responses[fieldId];
       if (response?.selected !== undefined)
@@ -779,13 +1011,17 @@ export function validateEncounterResponses(
           'Structured sections store serialized JSON in answer.'
         );
       if (nonempty(response?.answer))
-        issues.push(...validateCustom(section, response.answer, fieldId));
+        issues.push(
+          ...validateCustom(section, response.answer, fieldId, externalConcerns)
+        );
     }
     if (section.required) {
       const hasContent =
         section.kind === 'narrative' || section.kind === 'observations'
           ? ids.some((id) => responseHasContent(responses[id]))
-          : customHasContent(
+          : (section.narrative &&
+              responseHasContent(responses[getEncounterFieldId(section.id)])) ||
+            customHasContent(
               section,
               responses[getEncounterFieldId(section.id, 'value')]?.answer
             );
@@ -797,6 +1033,30 @@ export function validateEncounterResponses(
           `${section.title} requires at least one recorded answer.`
         );
     }
+  }
+  const concernIds = new Set(
+    externalConcerns.map((concern) => concern.concernId)
+  );
+  for (const section of definition.sections) {
+    if (section.kind !== 'plan') continue;
+    const fieldId = getEncounterFieldId(section.id, 'value');
+    const parsed = parseJson(responses[fieldId]?.answer);
+    if (!record(parsed) || !Array.isArray(parsed.orders)) continue;
+    parsed.orders.forEach((order, index) => {
+      if (
+        record(order) &&
+        nonempty(order.concernId) &&
+        !concernIds.has(order.concernId)
+      )
+        issues.push({
+          sectionId: section.id,
+          fieldId,
+          code: 'invalid-value',
+          path: `orders.${index}.concernId`,
+          message:
+            'A plan order must link to a condition recorded in this visit.',
+        });
+    });
   }
   return issues;
 }
@@ -868,13 +1128,18 @@ function exportVitals(
 
 function exportCustom(
   section: EncounterSectionDefinition,
-  answer?: string
+  answer?: string,
+  externalConcerns: readonly ConditionConcern[] = []
 ): EncounterObservation[] {
   if (section.kind === 'vitals') return exportVitals(section, answer);
   if (
     !nonempty(answer) ||
-    validateCustom(section, answer, getEncounterFieldId(section.id, 'value'))
-      .length > 0
+    validateCustom(
+      { ...section, requireCoding: false },
+      answer,
+      getEncounterFieldId(section.id, 'value'),
+      externalConcerns
+    ).length > 0
   )
     return [];
   const parsed = parseJson(answer) as Record<string, unknown>;
@@ -891,6 +1156,9 @@ function exportCustom(
         medication.sig,
         `Status: ${medication.status}`,
         medication.note,
+        section.requireCoding && !medication.code
+          ? 'Coding required'
+          : undefined,
       ]
         .filter(Boolean)
         .join('; '),
@@ -905,6 +1173,12 @@ function exportCustom(
           ...base,
           label: 'Allergies',
           value: 'No known allergies (explicitly recorded)',
+          // HL7 IPA NKA example: AllergyIntolerance/716186003 (explicit absence).
+          code: {
+            system: 'http://snomed.info/sct',
+            code: '716186003',
+            display: 'No known allergy',
+          },
         },
       ];
     return (parsed.allergies as Allergy[]).map((allergy) => ({
@@ -916,6 +1190,7 @@ function exportCustom(
         allergy.severity,
         allergy.inactive ? 'inactive' : undefined,
         allergy.note,
+        section.requireCoding && !allergy.code ? 'Coding required' : undefined,
       ]
         .filter(Boolean)
         .join('; '),
@@ -923,10 +1198,44 @@ function exportCustom(
       groupId: allergy.id,
     }));
   }
-  const assessment = parsed as unknown as EncounterAssessmentValue;
+  if (section.kind === 'conditions') {
+    return (parsed.concerns as ConditionConcern[]).flatMap((concern) => {
+      const assertion = currentAssertion(concern);
+      if (!assertion) return [];
+      return [
+        {
+          ...base,
+          label: 'Condition',
+          value: [
+            assertion.text,
+            `Status: ${concern.clinicalStatus}`,
+            `Verification: ${assertion.verificationStatus}`,
+            assertion.note,
+            section.requireCoding && !assertion.coding?.length
+              ? 'Coding required'
+              : undefined,
+          ]
+            .filter(Boolean)
+            .join('; '),
+          groupId: concern.concernId,
+          code:
+            assertion.coding?.find((coding) => coding.primary) ??
+            assertion.coding?.[0],
+        },
+      ];
+    });
+  }
+  const assessment: EncounterAssessmentValue =
+    section.kind === 'plan'
+      ? {
+          concerns: [],
+          items: [],
+          orders: parsed.orders as EncounterPlanValue['orders'],
+        }
+      : (parsed as unknown as EncounterAssessmentValue);
   const observations: EncounterObservation[] = [];
   for (const item of assessment.items) {
-    const assertion = assessment.concerns
+    const assertion = [...assessment.concerns, ...externalConcerns]
       .find((concern) => concern.concernId === item.concernId)
       ?.assertions.find((assertion) => assertion.id === item.assertionId);
     if (assertion)
@@ -938,6 +1247,9 @@ function exportCustom(
           `Verification: ${assertion.verificationStatus}`,
           assertion.note,
           item.note,
+          section.requireCoding && !assertion.coding?.length
+            ? 'Coding required'
+            : undefined,
         ]
           .filter(Boolean)
           .join('; '),
@@ -960,6 +1272,7 @@ function exportCustom(
         order.bodySite,
         order.referTo,
         order.notes,
+        section.requireCoding && !order.code ? 'Coding required' : undefined,
       ]
         .filter(Boolean)
         .join('; '),
@@ -982,12 +1295,10 @@ export function createEncounterSnapshot(
   responses: EncounterResponses
 ): EncounterVisitSnapshot {
   const errors = validateEncounterResponses(definition, responses);
+  const externalConcerns = getEncounterConcerns(definition, responses);
   const observations: EncounterObservation[] = [];
   for (const section of definition.sections) {
-    if (
-      section.kind === 'narrative' ||
-      (section.kind === 'observations' && section.narrative)
-    ) {
+    if (section.kind === 'narrative' || section.narrative) {
       const fieldId = getEncounterFieldId(section.id);
       const answer = responses[fieldId]?.answer;
       if (nonempty(answer))
@@ -1034,7 +1345,8 @@ export function createEncounterSnapshot(
       observations.push(
         ...exportCustom(
           section,
-          responses[getEncounterFieldId(section.id, 'value')]?.answer
+          responses[getEncounterFieldId(section.id, 'value')]?.answer,
+          externalConcerns
         )
       );
     }
@@ -1050,8 +1362,9 @@ export function createEncounterSnapshot(
         `${section.title}\n${values
           .map((observation) => {
             const metadata = [
-              observation.groupId &&
-                `${section.kind === 'vitals' ? 'Reading' : 'Record'} ${observation.groupId}`,
+              section.kind === 'vitals' &&
+                observation.groupId &&
+                `Reading ${observation.groupId}`,
               observation.recordedAt,
               observation.position,
               observation.site,

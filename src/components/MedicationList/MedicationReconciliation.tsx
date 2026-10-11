@@ -77,6 +77,8 @@ export interface MedicationReconciliationProps {
    * ```
    */
   codeLookup?: CodeLookupConfig | false;
+  /** Require a catalog selection for new medications; existing uncoded records remain editable. */
+  requireCode?: boolean;
   /**
    * Render an inline CodeLookup search bar in the add-medication section
    * (requires `codeLookup`). Picks add immediately as Unreconciled — the
@@ -210,6 +212,7 @@ export function MedicationReconciliation({
   actions = MANAGED_ACTIONS,
   onAction,
   codeLookup,
+  requireCode = false,
   inlineAddSearch = false,
   readOnly = false,
   reconciledMessage,
@@ -323,7 +326,12 @@ export function MedicationReconciliation({
         bare
         clearOnSelect
         placeholder="Search medications to add"
-        onSelect={(result) =>
+        onSelect={(result) => {
+          if (
+            requireCode &&
+            (!result.codetype.trim() || !result.fullcode.trim())
+          )
+            return;
           commit([
             ...medications,
             {
@@ -332,9 +340,9 @@ export function MedicationReconciliation({
               status: 'unreconciled',
               ...lookupToMedicationFields(result),
             },
-          ])
-        }
-        onFreeText={(text) => addMedication(text)}
+          ]);
+        }}
+        onFreeText={requireCode ? undefined : (text) => addMedication(text)}
       />
     ) : undefined;
 
@@ -354,9 +362,13 @@ export function MedicationReconciliation({
             )
           )
         }
-        quickAddOptions={quickAddOptions}
+        quickAddOptions={requireCode ? undefined : quickAddOptions}
         onQuickAdd={(name) => addMedication(name)}
-        onAddOther={() => setDialog({ kind: 'add' })}
+        onAddOther={
+          requireCode && !effectiveCodeLookup
+            ? undefined
+            : () => setDialog({ kind: 'add' })
+        }
         addSearch={addSearch}
         reconciledMessage={reconciledMessage}
         emptyMessage={emptyMessage}
@@ -377,6 +389,7 @@ export function MedicationReconciliation({
           open
           medication={editorTarget}
           codeLookup={codeLookup === false ? false : effectiveCodeLookup}
+          requireCode={requireCode}
           onClose={() => setDialog(null)}
           onSave={handleEditorSave}
         />

@@ -85,9 +85,10 @@ export interface CodeLookupProviderConfig {
   memory?: false | CodeLookupMemoryDefaults;
 }
 
-const CodeLookupContext = React.createContext<CodeLookupProviderConfig | null>(
-  null
-);
+// Internal compositions use the context directly to retain their mounted draft
+// when a host adds or removes lookup wiring. It is not in the public entry.
+export const CodeLookupContext =
+  React.createContext<CodeLookupProviderConfig | null>(null);
 
 export interface CodeLookupProviderProps {
   /** The CodeLookup component to distribute (import it in your app). */

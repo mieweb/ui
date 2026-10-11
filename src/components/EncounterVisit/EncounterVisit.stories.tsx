@@ -8,9 +8,136 @@ import {
 import { executeEncounterVisitToolCall, type EncounterVisitTools } from './mcp';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
+import type { CodeLookupProps } from '../CodeLookup/CodeLookup';
+import type { CodifyResult } from '../CodeLookup/engine';
 
 const PATIENT_CONTEXT =
   '45 yo male with pre-diabetes, back pain and hypertension';
+
+// Story-only selections reuse clinical component examples. The peanut substance
+// is also documented in SNOMED's Allergy Implementation Guide:
+// https://docs.snomed.org/implementation-guides/allergy-implementation-guide/4-information-model-and-terminology-binding/4.3-examples
+// Production hosts inject their actual terminology catalog.
+const SAMPLE_CATALOG: CodifyResult[] = [
+  {
+    fullid: 'FDB244899',
+    label: 'lisinopril 10 mg tablet',
+    codetype: 'FDB',
+    fullcode: '244899',
+    domain: 'med',
+    score: 1,
+    viaAlias: false,
+  },
+  {
+    fullid: 'ICD10|I10',
+    label: 'Essential hypertension',
+    codetype: 'ICD10',
+    fullcode: 'I10',
+    domain: 'condition',
+    score: 1,
+    viaAlias: false,
+  },
+  {
+    fullid: 'LOINC|4548-4',
+    label: 'Hemoglobin A1c',
+    codetype: 'LOINC',
+    fullcode: '4548-4',
+    domain: 'lab',
+    score: 1,
+    viaAlias: false,
+  },
+  {
+    fullid: 'HCPCS|92551',
+    label: 'Pure tone hearing test, air',
+    codetype: 'HCPCS',
+    fullcode: '92551',
+    domain: 'procedure',
+    score: 1,
+    viaAlias: false,
+  },
+  {
+    fullid: 'SNOMED US|762952008',
+    label: 'Peanut substance',
+    codetype: 'SNOMED US',
+    fullcode: '762952008',
+    domain: 'condition',
+    score: 1,
+    viaAlias: false,
+  },
+];
+
+/** Small deterministic Storybook catalog, never imported by the component. */
+function SampleCatalog({
+  domains,
+  searchDomains,
+  searchCodetypes,
+  placeholder,
+  initialQuery,
+  clearOnSelect,
+  onSelect,
+  onFreeText,
+  'aria-label': ariaLabel,
+}: CodeLookupProps): React.JSX.Element {
+  const [query, setQuery] = React.useState(initialQuery ?? '');
+  const allowedDomains = searchDomains ?? domains;
+  const matches = query.trim()
+    ? SAMPLE_CATALOG.filter(
+        (result) =>
+          (!allowedDomains ||
+            allowedDomains.some((domain) => domain === result.domain)) &&
+          (!searchCodetypes || searchCodetypes.includes(result.codetype)) &&
+          `${result.label} ${result.fullcode}`
+            .toLowerCase()
+            .includes(query.trim().toLowerCase())
+      )
+    : [];
+  const select = (result: CodifyResult) => {
+    onSelect?.(result);
+    setQuery(clearOnSelect === false ? result.label : '');
+  };
+  return (
+    <div className="min-w-0 space-y-1" data-slot="sample-clinical-catalog">
+      <input
+        type="search"
+        aria-label={
+          ariaLabel ?? placeholder ?? 'Search sample clinical catalog'
+        }
+        placeholder={placeholder}
+        value={query}
+        className="border-input bg-background min-h-11 w-full min-w-0 rounded border px-2 text-base"
+        onChange={(event) => setQuery(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && matches[0]) {
+            event.preventDefault();
+            select(matches[0]);
+          }
+        }}
+      />
+      {matches.map((result) => (
+        <Button
+          key={result.fullid}
+          type="button"
+          variant="secondary"
+          className="min-h-11 w-full justify-start text-start whitespace-normal"
+          aria-label={`Select ${result.label} (${result.codetype} ${result.fullcode})`}
+          onClick={() => select(result)}
+        >
+          {result.label} · {result.codetype} {result.fullcode}
+        </Button>
+      ))}
+      {query.trim() && !matches.length && (
+        <p className="text-muted-foreground text-xs" role="status">
+          No match in this small Storybook sample catalog.
+        </p>
+      )}
+      {onFreeText && query.trim() && (
+        <Button type="button" onClick={() => onFreeText(query.trim())}>
+          Use uncoded free text
+        </Button>
+      )}
+    </div>
+  );
+}
 
 const meta: Meta<typeof EncounterVisit> = {
   id: 'encounter-orders-encountervisit',
@@ -23,7 +150,9 @@ const meta: Meta<typeof EncounterVisit> = {
       description: {
         component: `### What it's for
 
-A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medication reconciliation, allergies, or assessment and orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, plan, and follow-up / appointment details are included in the default template. Patient identity is not captured.
+A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medication reconciliation, allergies, coded conditions, assessment and coded plan orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, a plan narrative and follow-up / appointment details are included in the default eleven-section template. Patient identity is not captured.
+
+MedicationReconciliation, AllergyManager, ProblemList and Assessment supply the healthcare capture controls. New medications, allergens, conditions and plan orders require a selected terminology code. Common findings are explicit quick selections that append to narrative text without replacing authored content or auto-recording normal findings. The examples use a small, **Storybook-only sample catalog** with representative code selections. Production applications supply their real CodeLookup component and catalog URL through \`codeLookup\` or an enclosing \`CodeLookupProvider\`. Non-drug allergens require SNOMED substance concepts in the host catalog; these are never inferred from names.
 
 The three-way toggle uses one draft: **eSheet** offers memory aids and coded capture, **RichEdit** uses Kerebron for headings and free Markdown prose with protected data links, and **View** renders the flattened MDY through mieweb/templit for a final report check. View omits uncaptured field prompts and empty section headings, while retaining authored prose and entered values such as zero or a negative choice. Select a linked value in RichEdit to open its eSheet section with related inputs. Changes update every projection of that field. Free prose stays in the document body; it is not automatically promoted to a coded observation.
 
@@ -45,11 +174,13 @@ Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install ma
 
 \`\`\`tsx
 import { EncounterVisit, DEFAULT_ENCOUNTER_VISIT_DEFINITION } from '@mieweb/ui/esheet';
+import { CodeLookup } from '…/CodeLookup'; // from the host's worker-capable app bundle
 
 <EncounterVisit
   definition={DEFAULT_ENCOUNTER_VISIT_DEFINITION}
   patientContext="45 yo male with pre-diabetes, back pain and hypertension"
   initialResponses={savedNativeEsheetResponses}
+  codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
   onChange={(visit) => updateDraft(visit.mdy)}
   onSubmit={async (visit) => saveVisit(visit)}
   onToolsReady={(tools) => connectAgent(tools)}
@@ -71,7 +202,8 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
 - Save is a host callback, and appointment details are documentation rather than booking. No FHIR Observation or signed-document export is claimed.
 - Validation checks configured required entries, value types, supported ranges, JSON shapes and complete BP pairs. It does not interpret measurements medically.
 - The anonymous example seeds only the facts supplied: age, sex, pre-diabetes, back pain and hypertension. Measurements, exam findings, medications and treatment remain unanswered.
-- Medication and allergy fields use the existing clinical components and their CodeLookupProvider when provided. Assessment and orders reuse Assessment's concern / assertion model. Labels and the default template are English; customize section and observation labels for your application.`,
+- The small sample catalog demonstrates interaction. The host supplies its real terminology service; new coded entries cannot be added without it. Imported uncoded legacy entries remain visible and can be corrected.
+- Medication, allergy, condition and plan fields retain the codes actually selected through the existing clinical components. Assessment and orders reuse Assessment's concern / assertion model. Labels, common findings and the default template are English; customize them for your application.`,
       },
     },
     catalog: {
@@ -104,6 +236,10 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
   args: {
     patientContext: PATIENT_CONTEXT,
     initialResponses: EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
+    codeLookup: {
+      component: SampleCatalog,
+      indexUrl: '/storybook-sample-catalog',
+    },
     onSubmit: async () => {},
   },
 };
@@ -146,6 +282,27 @@ function McpDemo(args: EncounterVisitProps) {
   const [body, setBody] = React.useState(
     '# Encounter visit\n\n## Discussion\n\nFree report prose.'
   );
+  const [sectionId, setSectionId] = React.useState('plan');
+  const [sectionJson, setSectionJson] = React.useState(
+    JSON.stringify(
+      {
+        orders: [
+          {
+            orderId: 'demo-a1c',
+            type: 'lab',
+            display: 'Hemoglobin A1c',
+            code: {
+              fullid: 'LOINC|4548-4',
+              codetype: 'LOINC',
+              fullcode: '4548-4',
+            },
+          },
+        ],
+      },
+      null,
+      2
+    )
+  );
   return (
     <div className="space-y-4">
       <div className="border-border bg-muted/30 text-foreground rounded-xl border p-4">
@@ -177,6 +334,26 @@ function McpDemo(args: EncounterVisitProps) {
           </Button>
           <Button
             variant="secondary"
+            disabled={!tools}
+            onClick={() =>
+              tools &&
+              setResult(
+                JSON.stringify(
+                  executeEncounterVisitToolCall(
+                    'encounter_visit_get_mdy',
+                    {},
+                    tools
+                  ),
+                  null,
+                  2
+                )
+              )
+            }
+          >
+            Read MDY
+          </Button>
+          <Button
+            variant="secondary"
             disabled={!tools || args.readOnly}
             onClick={() =>
               tools &&
@@ -199,6 +376,65 @@ function McpDemo(args: EncounterVisitProps) {
             Record demo BP via MCP
           </Button>
         </ButtonGroup>
+        <label className="mt-3 block text-sm">
+          Coded section
+          <select
+            className="bg-background mt-1 block min-h-11 w-full rounded px-2 py-1 text-base"
+            value={sectionId}
+            onChange={(event) => setSectionId(event.target.value)}
+          >
+            {(args.definition ?? DEFAULT_ENCOUNTER_VISIT_DEFINITION).sections
+              .filter((section) =>
+                [
+                  'medications',
+                  'allergies',
+                  'conditions',
+                  'assessment',
+                  'plan',
+                ].includes(section.kind)
+              )
+              .map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.title}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label className="mt-2 block text-sm">
+          Coded section JSON
+          <textarea
+            className="bg-background mt-1 block min-h-11 w-full rounded px-2 py-1 text-base"
+            rows={3}
+            value={sectionJson}
+            onChange={(event) => setSectionJson(event.target.value)}
+          />
+        </label>
+        <Button
+          className="mt-2 min-h-11"
+          variant="secondary"
+          disabled={!tools || args.readOnly}
+          onClick={() => {
+            if (!tools) return;
+            try {
+              const value: unknown = JSON.parse(sectionJson);
+              setResult(
+                JSON.stringify(
+                  executeEncounterVisitToolCall(
+                    'encounter_visit_update_section',
+                    { sectionId, value },
+                    tools
+                  ),
+                  null,
+                  2
+                )
+              );
+            } catch {
+              setResult('Enter valid JSON before updating the coded section.');
+            }
+          }}
+        >
+          Update coded section via MCP
+        </Button>
         <label className="mt-3 block text-sm">
           Document Markdown body
           <textarea

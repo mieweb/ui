@@ -60,6 +60,8 @@ export interface AllergyManagerProps {
    * `CodeLookupProvider`; pass `false` to force plain text.
    */
   codeLookup?: CodeLookupConfig | false;
+  /** Require coded new allergens; non-drug searches use SNOMED substance concepts. */
+  requireCode?: boolean;
   /** Render an inline allergen search bar in the add section (requires codeLookup) */
   inlineAddSearch?: boolean;
   /** Hide all action affordances (display only) */
@@ -88,11 +90,13 @@ const TYPE_OPTIONS = [
 function AllergyEditor({
   allergy,
   codeLookup,
+  requireCode = false,
   onClose,
   onSave,
 }: {
   allergy?: Allergy;
   codeLookup?: CodeLookupConfig;
+  requireCode?: boolean;
   onClose: () => void;
   onSave: (allergy: Allergy) => void;
 }) {
@@ -109,11 +113,17 @@ function AllergyEditor({
     bodyRef.current?.querySelector('input')?.focus();
   }, []);
 
-  const canSave = draft.allergen.trim().length > 0;
+  const hasCode = Boolean(draft.code?.system.trim() && draft.code.code.trim());
+  const unchangedLegacyAllergen =
+    allergy &&
+    draft.allergen === allergy.allergen &&
+    (draft.type ?? 'drug') === (allergy.type ?? 'drug');
+  const canSave =
+    draft.allergen.trim().length > 0 &&
+    (!requireCode || hasCode || Boolean(unchangedLegacyAllergen));
 
-  // CodeLookup's shards cover drugs (RxNorm/FDB — the 'med' domain); food
-  // and environmental allergens have no shard, so the search only renders
-  // for drug-type allergies and other types use a plain text input.
+  // Required coding uses the host's SNOMED substance concepts for non-drug
+  // allergens. The host must include those concepts in its condition shards.
   const isDrug = (draft.type ?? 'drug') === 'drug';
 
   return (
@@ -146,22 +156,34 @@ function AllergyEditor({
               // A drug code is wrong on a non-drug allergen.
               patch({
                 type,
-                ...(type !== 'drug' && { code: undefined }),
+                ...(type !== (draft.type ?? 'drug') && { code: undefined }),
               });
             }}
           />
 
-          {isDrug && codeLookup ? (
+          {codeLookup && (isDrug || requireCode) ? (
             <div className="space-y-1.5">
               <Label htmlFor="alg-search">Allergen</Label>
               <codeLookup.component
                 indexUrl={codeLookup.indexUrl}
                 locale={codeLookup.locale}
-                domains={['med']}
+                domains={isDrug ? ['med'] : ['condition']}
+                searchCodetypes={isDrug ? undefined : ['SNOMED US']}
                 bare
                 clearOnSelect={false}
-                placeholder="Search drug allergens — e.g. penicillin"
-                onSelect={(result) =>
+                placeholder={
+                  isDrug
+                    ? 'Search drug allergens — e.g. penicillin'
+                    : 'Search SNOMED allergen substances'
+                }
+                initialQuery={allergy?.allergen || undefined}
+                initialSearch={allergy ? !allergy.code : undefined}
+                onSelect={(result) => {
+                  if (
+                    requireCode &&
+                    (!result.codetype.trim() || !result.fullcode.trim())
+                  )
+                    return;
                   patch({
                     allergen: result.label,
                     code: {
@@ -169,10 +191,12 @@ function AllergyEditor({
                       code: result.fullcode,
                       display: result.label,
                     },
-                  })
-                }
-                onFreeText={(text) =>
-                  patch({ allergen: text, code: undefined })
+                  });
+                }}
+                onFreeText={
+                  requireCode
+                    ? undefined
+                    : (text) => patch({ allergen: text, code: undefined })
                 }
               />
               <p className="text-muted-foreground text-xs">
@@ -180,7 +204,9 @@ function AllergyEditor({
                   ? `Coded: ${draft.code.system} ${draft.code.code}`
                   : draft.allergen
                     ? `Uncoded free text: "${draft.allergen}"`
-                    : 'Pick a result to code the allergen, or press Enter for free text'}
+                    : requireCode
+                      ? 'Pick a catalog result to code the allergen'
+                      : 'Pick a result to code the allergen, or press Enter for free text'}
               </p>
             </div>
           ) : (
@@ -189,7 +215,10 @@ function AllergyEditor({
               <Input
                 id="alg-name"
                 value={draft.allergen}
-                onChange={(e) => patch({ allergen: e.target.value })}
+                readOnly={requireCode}
+                onChange={(e) =>
+                  patch({ allergen: e.target.value, code: undefined })
+                }
               />
             </div>
           )}
@@ -287,6 +316,7 @@ export function AllergyManager({
   onNoKnownAllergiesChange,
   title = 'Allergies',
   codeLookup,
+  requireCode = false,
   inlineAddSearch = false,
   readOnly = false,
   className,
@@ -310,11 +340,11 @@ export function AllergyManager({
 
   const commit = (next: Allergy[]) => {
     if (!isControlled) setInternal(next);
-    onChange?.(next);
     // Any recorded allergy clears the NKA flag.
     if (next.length > 0 && noKnownAllergies) {
       onNoKnownAllergiesChange?.(false);
     }
+    onChange?.(next);
   };
 
   const handleAction = (allergy: Allergy, action: AllergyAction) => {
@@ -341,7 +371,12 @@ export function AllergyManager({
         bare
         clearOnSelect
         placeholder="Search drug allergens to add — use Add allergy… for food/environmental"
-        onSelect={(result) =>
+        onSelect={(result) => {
+          if (
+            requireCode &&
+            (!result.codetype.trim() || !result.fullcode.trim())
+          )
+            return;
           commit([
             ...allergies,
             {
@@ -354,12 +389,18 @@ export function AllergyManager({
                 display: result.label,
               },
             },
-          ])
-        }
-        onFreeText={(text) =>
-          // this search bar is explicitly for drug allergens — free-text
-          // entries carry type 'drug' like the coded path
-          commit([...allergies, { id: newId(), allergen: text, type: 'drug' }])
+          ]);
+        }}
+        onFreeText={
+          requireCode
+            ? undefined
+            : (text) =>
+                // this search bar is explicitly for drug allergens — free-text
+                // entries carry type 'drug' like the coded path
+                commit([
+                  ...allergies,
+                  { id: newId(), allergen: text, type: 'drug' },
+                ])
         }
       />
     ) : undefined;
@@ -378,7 +419,11 @@ export function AllergyManager({
           )
         }
         addSearch={addSearch}
-        onAdd={() => setDialog({ kind: 'add' })}
+        onAdd={
+          requireCode && !effectiveCodeLookup
+            ? undefined
+            : () => setDialog({ kind: 'add' })
+        }
         readOnly={readOnly}
         className={className}
         data-testid={dataTestId}
@@ -389,6 +434,7 @@ export function AllergyManager({
           key={dialog.kind === 'correct' ? dialog.allergy.id : 'add'}
           allergy={dialog.kind === 'correct' ? dialog.allergy : undefined}
           codeLookup={effectiveCodeLookup}
+          requireCode={requireCode}
           onClose={() => setDialog(null)}
           onSave={(saved) => {
             if (dialog.kind === 'correct') {

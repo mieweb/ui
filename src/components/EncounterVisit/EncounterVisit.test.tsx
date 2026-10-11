@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
 import type { EncounterVisitDefinition, EncounterVisitSnapshot } from './types';
+import { CodeLookupProvider } from '../CodeLookup/context';
 
 const definition: EncounterVisitDefinition = {
   id: 'test-visit',
@@ -28,6 +29,40 @@ const definition: EncounterVisitDefinition = {
 };
 
 describe('EncounterVisit with the real eSheet renderer', () => {
+  it('retains the native draft when terminology wiring appears, changes or is removed', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const Lookup = () => <div data-testid="terminology-lookup" />;
+    const { rerender } = render(
+      <CodeLookupProvider component={Lookup} indexUrl="/ambient">
+        <EncounterVisit ref={ref} definition={definition} />
+      </CodeLookupProvider>
+    );
+    const input = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(input, { target: { innerHTML: '<b>Draft retained</b>' } });
+    const tools = ref.current!.getTools();
+    for (const codeLookup of [
+      { component: Lookup, indexUrl: '/explicit' },
+      { component: Lookup, indexUrl: '/changed' },
+      undefined,
+    ]) {
+      rerender(
+        <CodeLookupProvider component={Lookup} indexUrl="/ambient">
+          <EncounterVisit
+            ref={ref}
+            definition={definition}
+            codeLookup={codeLookup}
+          />
+        </CodeLookupProvider>
+      );
+      expect(screen.getByRole('textbox', { name: 'HPI' })).toBe(input);
+      expect(input.querySelector('b')).toHaveTextContent('Draft retained');
+      expect(ref.current!.getTools()).toBe(tools);
+      expect(
+        ref.current!.getSnapshot().responses[getEncounterFieldId('hpi')].answer
+      ).toBe('Draft retained');
+    }
+  });
+
   it('keeps unfinished numeric drafts visible to Save and MCP validation', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const onSubmit = vi.fn();

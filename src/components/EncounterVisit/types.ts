@@ -11,12 +11,22 @@ export type EncounterSectionKind =
   | 'vitals'
   | 'medications'
   | 'allergies'
+  | 'conditions'
+  | 'plan'
   | 'assessment';
 
 export interface EncounterCode {
   system: string;
   code: string;
   display?: string;
+}
+
+/** Explicit quick selections; free prose never becomes a coded finding automatically. */
+export interface EncounterNarrativeFinding {
+  id: string;
+  label: string;
+  text: string;
+  code?: EncounterCode;
 }
 
 export interface EncounterObservationDefinition {
@@ -26,6 +36,7 @@ export interface EncounterObservationDefinition {
   unit?: string;
   code?: EncounterCode;
   options?: string[];
+  findings?: EncounterNarrativeFinding[];
   required?: boolean;
 }
 
@@ -35,7 +46,11 @@ export interface EncounterSectionDefinition {
   description?: string;
   kind: EncounterSectionKind;
   observations?: EncounterObservationDefinition[];
-  /** Add a free narrative alongside an observations section's individual fields. */
+  /** Explicit common findings available to this section's narrative. */
+  findings?: EncounterNarrativeFinding[];
+  /** Require coding for the structured clinical entries in this section. */
+  requireCoding?: boolean;
+  /** Add a free narrative alongside a structured section's fields. */
   narrative?: boolean;
   /** Require at least one answer in this section. */
   required?: boolean;
@@ -86,6 +101,16 @@ export interface EncounterVitalsValue {
 export interface EncounterAssessmentValue {
   concerns: ConditionConcern[];
   items: AssessmentItem[];
+  orders: AssessmentOrder[];
+}
+
+/** Native ProblemList concerns, including assertion history and clinical codes. */
+export interface EncounterConditionsValue {
+  concerns: ConditionConcern[];
+}
+
+/** Native Assessment orders; linked concerns remain in their source sections. */
+export interface EncounterPlanValue {
   orders: AssessmentOrder[];
 }
 

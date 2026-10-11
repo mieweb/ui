@@ -74,7 +74,8 @@ export interface MedicationLookupResult {
 export interface MedicationLookupProps {
   indexUrl: string;
   locale?: string;
-  domains?: 'med'[];
+  domains?: ('med' | 'condition')[];
+  searchCodetypes?: string[];
   bare?: boolean;
   clearOnSelect?: boolean;
   placeholder?: string;
@@ -104,6 +105,8 @@ export interface MedicationEditorProps {
    * `CodeLookupProvider`; pass `false` to force a plain name input.
    */
   codeLookup?: CodeLookupConfig | false;
+  /** Require a catalog selection for new or renamed medications; retain legacy entries. */
+  requireCode?: boolean;
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete medication on save */
@@ -279,6 +282,7 @@ export function MedicationEditor({
   open,
   medication,
   codeLookup,
+  requireCode = false,
   onClose,
   onSave,
 }: MedicationEditorProps): React.JSX.Element | null {
@@ -312,6 +316,8 @@ export function MedicationEditor({
     setDraft((prev) => ({ ...prev, ...p }));
 
   const handleCodeSelect = (result: MedicationLookupResult) => {
+    if (requireCode && (!result.codetype.trim() || !result.fullcode.trim()))
+      return;
     // Populate strength / dose form / quantity unit from the coded label.
     patch(lookupToMedicationFields(result));
   };
@@ -322,7 +328,11 @@ export function MedicationEditor({
     patch({ sig, route, frequency, prn: prn || undefined });
   };
 
-  const canSave = draft.name.trim().length > 0;
+  const hasCode = Boolean(draft.code?.system.trim() && draft.code.code.trim());
+  const unchangedLegacyName = medication && draft.name === medication.name;
+  const canSave =
+    draft.name.trim().length > 0 &&
+    (!requireCode || hasCode || Boolean(unchangedLegacyName));
 
   if (!open) return null;
 
@@ -355,14 +365,20 @@ export function MedicationEditor({
                   initialQuery={medication?.name || undefined}
                   initialSearch={medication ? !medication.code : undefined}
                   onSelect={handleCodeSelect}
-                  onFreeText={(text) => patch({ name: text, code: undefined })}
+                  onFreeText={
+                    requireCode
+                      ? undefined
+                      : (text) => patch({ name: text, code: undefined })
+                  }
                 />
                 <p className="text-muted-foreground text-xs">
                   {draft.code
                     ? `Coded: ${draft.code.system} ${draft.code.code}`
                     : draft.name
                       ? `Uncoded free text: "${draft.name}" — pick a result to code it`
-                      : 'Pick a result to code the medication, or press Enter for free text'}
+                      : requireCode
+                        ? 'Pick a catalog result to code the medication'
+                        : 'Pick a result to code the medication, or press Enter for free text'}
                 </p>
               </div>
             ) : (
@@ -371,7 +387,10 @@ export function MedicationEditor({
                 <Input
                   id="med-name"
                   value={draft.name}
-                  onChange={(e) => patch({ name: e.target.value })}
+                  readOnly={requireCode}
+                  onChange={(e) =>
+                    patch({ name: e.target.value, code: undefined })
+                  }
                 />
               </div>
             )}

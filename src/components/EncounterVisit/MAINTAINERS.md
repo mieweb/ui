@@ -34,6 +34,37 @@ and MCP tools. Sanitized markup is retained in native response `attributes`
 both the recorded baseline and the markup's text match the current answer.
 An MCP text replacement therefore cannot restore stale formatting.
 
+Common findings are configured on narrative sections and text observations.
+The collapsed chooser appends a finding only after an explicit selection; it
+never fills normal findings by default. `narrativeFindings.ts` records selected
+finding metadata as JSON in `attributes.encounterNarrativeFindings`, with an
+`encounterNarrativeFindingsText` baseline. Preserve host attributes and rich
+formatting when appending. Invalidate stale selection metadata after an external
+text replacement; do not infer a selection from prose that happens to match.
+
+Clinical sections compose the existing healthcare components:
+`MedicationReconciliation`, `AllergyManager`, `ProblemList` for Conditions, and
+`Assessment` for Assessment and Plan. The Plan variant captures coded medication,
+lab, procedure and referral orders, with optional supplementary narrative.
+Keep the stable Plan narrative field ID when adding its structured value field.
+Plan orders refer to recorded condition IDs rather than copying conditions into
+the Plan response. Assessment items retain the explicitly selected assertion ID;
+refining a condition must not silently revise a recorded assessment.
+
+The host supplies its terminology catalog through `EncounterVisit.codeLookup`
+or an enclosing `CodeLookupProvider`. Keep the context scope mounted when lookup
+wiring appears, changes or disappears so a late catalog load cannot reset the
+visit draft. New clinical entries require a selected
+code. An absent provider disables coded capture; it must not introduce a
+free-text fallback or fabricated code. Medication lookup uses the medication
+domain; conditions use condition codes, and non-drug allergies require substance
+concepts in the host's condition-domain SNOMED catalog. Default definitions set
+`requireCoding: true`; legacy imported uncoded records remain visible with
+"Coding required" and fail validation until coded. Standalone medication/allergy
+components retain their existing behavior unless `requireCode` is enabled.
+Only an explicit no-known-allergies flag exports
+[SNOMED CT 716186003](https://www.hl7.org/fhir/uv/ipa/STU1/AllergyIntolerance-NKAExample.html).
+
 The layout is a continuous report, with a compact sticky section selector
 instead of a sidebar. `src/styles/encounter-visit.css` removes questionnaire
 card borders and nested padding only inside this composition. Keep the
@@ -57,6 +88,12 @@ one serialized vital-set response atomically. Keep unrelated answers intact.
 `encounter_visit_set_document_body` writes only the reserved body response,
 preserves imported metadata and marks that response as an AI edit. It must
 reject read-only writes without altering recorded section answers.
+The 13 tools also include `encounter_visit_select_narrative_finding`, which
+selects a configured finding by section ID, finding ID and optional text
+observation ID. Structured updates accept Conditions `{ concerns }` and Plan
+`{ orders }` alongside the existing clinical shapes. Apply the same coding
+policy to MCP writes, and reject writes that introduce dangling assessment or
+plan references. Terminology membership remains the host catalog's responsibility.
 
 The upstream support status was verified on 2026-10-10:
 

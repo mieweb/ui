@@ -1,10 +1,21 @@
 import * as React from 'react';
 import DOMPurify from 'dompurify';
+import { ChevronDown, Check } from 'lucide-react';
 import type { FieldComponentProps, FieldResponse } from '@esheet/core';
+import { Button } from '../Button';
 import { RichTextEditor } from '../RichTextEditor';
+import type { EncounterNarrativeFinding } from './types';
+import {
+  applyEncounterNarrativeFinding,
+  getEncounterNarrativeFindings,
+  hasEncounterNarrativeFindingText,
+  validEncounterNarrativeFindings,
+} from './narrativeFindings';
 
 const HTML_ATTRIBUTE = 'encounterNarrativeHtml';
 const TEXT_ATTRIBUTE = 'encounterNarrativeText';
+const FINDINGS_ATTRIBUTE = 'encounterNarrativeFindings';
+const FINDINGS_TEXT_ATTRIBUTE = 'encounterNarrativeFindingsText';
 
 /** Keep visit formatting small: no links, media, styles, or imported document chrome. */
 export function sanitizeEncounterNarrativeHtml(html: string): string {
@@ -98,15 +109,63 @@ export function EncounterNarrativeField({
   onResponse,
 }: FieldComponentProps): React.JSX.Element {
   const editorRef = React.useRef<HTMLDivElement>(null);
+  const responseRef = React.useRef(response);
+  responseRef.current = response;
   const labelId = React.useId();
+  const findingsId = React.useId();
   const definition = field.definition as {
     question?: string;
     unit?: string;
-    _sourceData?: { encounterHideLabel?: boolean };
+    _sourceData?: {
+      encounterHideLabel?: boolean;
+      encounterFindings?: EncounterNarrativeFinding[];
+    };
   };
   const question = definition.question || 'Narrative';
   const readOnly = !isPreview || !isEnabled || isReadOnly;
   const html = React.useMemo(() => responseHtml(response), [response]);
+  const findings = validEncounterNarrativeFindings(
+    definition._sourceData?.encounterFindings
+  );
+  const selectedFindings = getEncounterNarrativeFindings(response);
+
+  const publish = (
+    value: string,
+    previous: FieldResponse | undefined,
+    selected: EncounterNarrativeFinding[]
+  ) => {
+    const sanitized = sanitizeEncounterNarrativeHtml(value);
+    const answer = encounterNarrativeText(sanitized);
+    const attributes = {
+      ...previous?.attributes,
+      [HTML_ATTRIBUTE]: sanitized,
+      [TEXT_ATTRIBUTE]: answer,
+      ...(selected.length ||
+      previous?.attributes?.[FINDINGS_ATTRIBUTE] !== undefined
+        ? {
+            [FINDINGS_ATTRIBUTE]: JSON.stringify(selected),
+            [FINDINGS_TEXT_ATTRIBUTE]: answer,
+          }
+        : {}),
+    };
+    const next = { ...previous, answer, _ai: false, attributes };
+    responseRef.current = next;
+    onResponse(next);
+  };
+
+  const addFinding = (finding: EncounterNarrativeFinding) => {
+    if (readOnly) return;
+    const previous = responseRef.current;
+    const next = applyEncounterNarrativeFinding(previous, finding);
+    if (next === previous) return;
+    const answer = previous?.answer ?? '';
+    // An explicit pick may code an already entered matching line, but never
+    // inserts the same line twice or treats unpicked prose as coded capture.
+    const nextHtml = hasEncounterNarrativeFindingText(answer, finding.text)
+      ? responseHtml(previous)
+      : `${answer.trim() ? responseHtml(previous) : ''}<p>${textToHtml(finding.text)}</p>`;
+    publish(nextHtml, previous, getEncounterNarrativeFindings(next));
+  };
 
   React.useEffect(() => {
     editorRef.current?.setAttribute('dir', 'auto');
@@ -141,16 +200,14 @@ export function EncounterNarrativeField({
           if (readOnly) return;
           const sanitized = sanitizeEncounterNarrativeHtml(value);
           const answer = encounterNarrativeText(sanitized);
-          onResponse({
-            ...response,
-            answer,
-            _ai: false,
-            attributes: {
-              ...response?.attributes,
-              [HTML_ATTRIBUTE]: sanitized,
-              [TEXT_ATTRIBUTE]: answer,
-            },
-          });
+          const previous = responseRef.current;
+          publish(
+            sanitized,
+            previous,
+            getEncounterNarrativeFindings(previous).filter((finding) =>
+              hasEncounterNarrativeFindingText(answer, finding.text)
+            )
+          );
         }}
         aria-label={question}
         placeholder={readOnly ? 'Not documented' : 'Enter narrative…'}
@@ -159,6 +216,57 @@ export function EncounterNarrativeField({
         sanitizeHtml={sanitizeEncounterNarrativeHtml}
         className="[&_[role=textbox]]:text-foreground overflow-visible rounded-none border-0 bg-transparent [&_.pointer-events-none]:px-0 [&_.pointer-events-none]:py-1.5 [&_[data-slot=rich-text-editor-toolbar]]:static [&_[data-slot=rich-text-editor-toolbar]]:hidden [&_[data-slot=rich-text-editor-toolbar]]:border-0 [&_[data-slot=rich-text-editor-toolbar]]:bg-transparent [&_[data-slot=rich-text-editor-toolbar]]:p-0 focus-within:[&_[data-slot=rich-text-editor-toolbar]]:flex [&_[data-slot=rich-text-editor-toolbar]>*:nth-child(n+7)]:hidden [&_[data-slot=rich-text-editor-toolbar]>button]:h-11 [&_[data-slot=rich-text-editor-toolbar]>button]:w-11 [&_[role=textbox]]:min-h-11 [&_[role=textbox]]:cursor-text [&_[role=textbox]]:overflow-visible [&_[role=textbox]]:bg-transparent [&_[role=textbox]]:px-0 [&_[role=textbox]]:py-1.5 [&_[role=textbox]]:text-base [&_[role=textbox]]:leading-7 [&_[role=textbox]]:break-words [&_[role=textbox]]:whitespace-pre-wrap [&_[role=textbox]_li]:my-0 [&_[role=textbox]_ol]:my-1 [&_[role=textbox]_p]:my-0 [&_[role=textbox]_ul]:my-1"
       />
+      {!readOnly && findings.length > 0 && (
+        <details
+          className="group"
+          data-slot="encounter-common-findings"
+          onMouseDownCapture={(event) => {
+            // Keep the focus-only toolbar in place until click completes.
+            // Native summary toggling and keyboard focus remain unchanged.
+            if (editorRef.current?.contains(document.activeElement))
+              event.preventDefault();
+          }}
+        >
+          <summary
+            aria-controls={findingsId}
+            className="text-muted-foreground focus-visible:ring-ring flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden"
+          >
+            <ChevronDown
+              aria-hidden="true"
+              className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none"
+            />
+            Common findings
+          </summary>
+          <div
+            id={findingsId}
+            role="group"
+            aria-label={`${question} common findings`}
+            className="flex flex-wrap gap-1 pb-1"
+          >
+            {findings.map((finding) => {
+              const selected = selectedFindings.some(
+                (item) => item.id === finding.id
+              );
+              return (
+                <Button
+                  key={finding.id}
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto min-h-11 max-w-full px-2 text-start font-normal whitespace-normal [&>span]:text-wrap [&>span]:whitespace-normal"
+                  title={finding.text}
+                  aria-label={`${selected ? 'Added' : 'Add'} ${finding.label}`}
+                  disabled={selected}
+                  leftIcon={selected ? <Check aria-hidden="true" /> : undefined}
+                  onClick={() => addFinding(finding)}
+                >
+                  {finding.label}
+                </Button>
+              );
+            })}
+          </div>
+        </details>
+      )}
     </div>
   );
 }

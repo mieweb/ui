@@ -113,7 +113,10 @@ function observationDisplay(observation: EncounterObservation): string {
   return `${observation.value}${unit ? ` ${unit}` : ''}`;
 }
 
-function groupedDisplay(observations: EncounterObservation[]): string {
+function groupedDisplay(
+  observations: EncounterObservation[],
+  showReadingId: boolean
+): string {
   const groups = new Map<string, EncounterObservation[]>();
   for (const observation of observations) {
     const key = observation.groupId ?? '';
@@ -124,7 +127,7 @@ function groupedDisplay(observations: EncounterObservation[]): string {
   return Array.from(groups, ([groupId, values]) => {
     const first = values[0];
     const metadata = [
-      groupId,
+      showReadingId ? groupId : undefined,
       first.recordedAt,
       first.position,
       first.site,
@@ -158,7 +161,7 @@ export function getEncounterMdyFields(
       const structured = !narrative && section.kind !== 'observations';
       let display: string;
       if (structured) {
-        display = groupedDisplay(observations);
+        display = groupedDisplay(observations, section.kind === 'vitals');
       } else if (observations.length) {
         display = observations.map(observationDisplay).join('; ');
       } else {
