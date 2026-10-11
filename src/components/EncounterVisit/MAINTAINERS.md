@@ -35,8 +35,9 @@ both the recorded baseline and the markup's text match the current answer.
 An MCP text replacement therefore cannot restore stale formatting.
 
 Common findings are configured on narrative sections and text observations.
-The collapsed chooser appends a finding only after an explicit selection; it
-never fills normal findings by default. `narrativeFindings.ts` records selected
+The chooser starts open for one-click selection and can be collapsed. It appends
+a finding only after an explicit selection; it never fills normal findings by
+default. `narrativeFindings.ts` records selected
 finding metadata as JSON in `attributes.encounterNarrativeFindings`, with an
 `encounterNarrativeFindingsText` baseline. Preserve host attributes and rich
 formatting when appending. Invalidate stale selection metadata after an external

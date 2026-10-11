@@ -380,7 +380,10 @@ test('a selected common finding appends once and preserves authored narrative ac
   const field = page
     .locator('[data-slot=encounter-narrative]')
     .filter({ has: narrative });
-  await field.locator('summary').click();
+  await expect(field.locator('details')).toHaveAttribute('open', '');
+  await expect(
+    field.getByRole('button', { name: 'Add No fever', exact: true })
+  ).toBeVisible();
   await page.screenshot({
     path: test.info().outputPath('common-findings-phone.png'),
   });

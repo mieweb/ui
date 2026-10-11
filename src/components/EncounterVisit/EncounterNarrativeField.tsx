@@ -221,6 +221,7 @@ export function EncounterNarrativeField({
       />
       {!readOnly && findings.length > 0 && (
         <details
+          open
           className="group"
           data-slot="encounter-common-findings"
           onMouseDownCapture={(event) => {
