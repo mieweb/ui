@@ -71,13 +71,15 @@ function Catalog(props: CodeLookupProps): React.JSX.Element {
 
 function fieldProps(
   fieldType: string,
-  overrides: Partial<FieldComponentProps> = {}
+  overrides: Partial<FieldComponentProps> = {},
+  requireCoding = true
 ): FieldComponentProps {
   return {
     field: {
       definition: {
         id: 'clinical-field',
         fieldType,
+        _sourceData: { encounterRequireCoding: requireCoding },
         question:
           fieldType === 'encounterMedications' ? 'Medications' : 'Allergies',
       } as unknown as FieldDefinition,
@@ -107,6 +109,7 @@ function renderField(
   value?: unknown,
   options: {
     catalog?: boolean;
+    requireCoding?: boolean;
     response?: FieldResponse;
     fieldProps?: Partial<FieldComponentProps>;
   } = {}
@@ -119,7 +122,7 @@ function renderField(
     );
     const field = (
       <Component
-        {...fieldProps(fieldType, options.fieldProps)}
+        {...fieldProps(fieldType, options.fieldProps, options.requireCoding)}
         response={response}
         onResponse={(next) => {
           onResponse(next);
@@ -151,6 +154,7 @@ describe('Encounter coded clinical fields', () => {
         response: {
           answer: '{"medications":[],"hostExtension":"retained"}',
           attributes: { host: 'retained' },
+          selected: { id: 'stale', value: 'Stale selection' },
           _ai: true,
         },
       }
@@ -183,6 +187,7 @@ describe('Encounter coded clinical fields', () => {
       attributes: { host: 'retained' },
       _ai: false,
     });
+    expect(onResponse.mock.calls.at(-1)![0]).not.toHaveProperty('selected');
   });
 
   it('requires a selected medication code before saving the proper prescription editor', () => {
@@ -336,6 +341,14 @@ describe('Encounter coded clinical fields', () => {
         '{"bad":"saved data"}'
       );
       expect(screen.queryByRole('button')).toBeNull();
+      const original = screen.getByLabelText(
+        fieldType === 'encounterMedications'
+          ? 'Original medication answer'
+          : 'Original allergy answer'
+      );
+      expect(original).toHaveAttribute('tabindex', '0');
+      original.focus();
+      expect(original).toHaveFocus();
       expect(onResponse).not.toHaveBeenCalled();
     }
   );
@@ -415,4 +428,55 @@ describe('Encounter coded clinical fields', () => {
     ]);
     expect(allergyChange.mock.calls[0][0][0]).not.toHaveProperty('code');
   });
+});
+
+describe('optional coding in encounter medication and allergy adapters', () => {
+  it.each([
+    {
+      component: EncounterMedicationField,
+      fieldType: 'encounterMedications',
+      key: 'medications',
+      value: 'name',
+    },
+    {
+      component: EncounterAllergyField,
+      fieldType: 'encounterAllergies',
+      key: 'allergies',
+      value: 'allergen',
+    },
+  ])(
+    'permits explicit uncoded $fieldType capture only with requireCoding false',
+    ({ component, fieldType, key, value }) => {
+      const { latest } = renderField(component, fieldType, undefined, {
+        requireCoding: false,
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Use free text' }));
+      const entries = latest<Record<string, Record<string, unknown>[]>>()[key];
+      expect(entries[0][value]).toBe('Unknown drug');
+      expect(entries[0]).not.toHaveProperty('code');
+    }
+  );
+  it.each([
+    {
+      component: EncounterMedicationField,
+      fieldType: 'encounterMedications',
+      button: 'Other…',
+    },
+    {
+      component: EncounterAllergyField,
+      fieldType: 'encounterAllergies',
+      button: 'Add allergy…',
+    },
+  ])(
+    'offers the proper uncoded editor without a catalog only when configured for $fieldType',
+    ({ component, fieldType, button }) => {
+      renderField(component, fieldType, undefined, {
+        requireCoding: false,
+        catalog: false,
+      });
+      expect(screen.getByRole('button', { name: button })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: button }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    }
+  );
 });

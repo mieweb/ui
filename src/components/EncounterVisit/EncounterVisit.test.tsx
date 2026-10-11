@@ -29,6 +29,41 @@ const definition: EncounterVisitDefinition = {
 };
 
 describe('EncounterVisit with the real eSheet renderer', () => {
+  it('translates shell labels and counters without resetting the native visit', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const messages = {
+      labels: {
+        'Anonymous patient': 'Patient anonyme',
+        'Visit mode': 'Mode de visite',
+        View: 'Aperçu',
+        '{count} of {total} sections documented':
+          '{count} sur {total} sections documentées',
+        '{count} observations documented': '{count} observations documentées',
+      },
+    };
+    const { rerender } = render(
+      <EncounterVisit ref={ref} definition={definition} messages={messages} />
+    );
+    const hpi = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(hpi, { target: { innerHTML: 'Draft retained' } });
+    expect(
+      screen.getByRole('tablist', { name: 'Mode de visite' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('Patient anonyme')).toBeInTheDocument();
+    expect(
+      screen.getByText('1 sur 3 sections documentées')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '1 observations documentées'
+    );
+    rerender(<EncounterVisit ref={ref} definition={definition} />);
+    expect(screen.getByRole('textbox', { name: 'HPI' })).toBe(hpi);
+    expect(hpi).toHaveTextContent('Draft retained');
+    expect(
+      ref.current!.getSnapshot().responses[getEncounterFieldId('hpi')].answer
+    ).toBe('Draft retained');
+  });
+
   it('retains the native draft when terminology wiring appears, changes or is removed', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const Lookup = () => <div data-testid="terminology-lookup" />;

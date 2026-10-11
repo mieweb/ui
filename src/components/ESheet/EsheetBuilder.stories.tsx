@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-// eSheet compiled CSS is loaded globally in .storybook/preview.tsx so the
-// builder + renderer stylesheets always apply in a deterministic order.
+// Shared @esheet/styles CSS is loaded globally in .storybook/preview.tsx
+// and imported automatically by both upstream entry points.
 import {
   EsheetBuilder,
   registerMieEsheetFields,
@@ -120,7 +120,7 @@ The **eSheet form designer**: a full-screen authoring surface where a non-develo
 
 \`\`\`tsx
 import { EsheetBuilder, registerMieEsheetFields, type FormDefinition } from '@mieweb/ui/esheet';
-// plus the eSheet stylesheets — see Limitations
+import '@mieweb/ui/styles.css'; // @esheet/styles is imported by the builder
 
 registerMieEsheetFields({ codeLookup: { component: CodeLookup, indexUrl: '/codify' } }); // once, module scope
 
@@ -140,7 +140,7 @@ function TemplateEditor({ template }: { template: FormTemplate }) {
 
 ### Limitations
 
-- Separate install: \`@esheet/builder\` (and \`@esheet/core\` for the type) are optional peers, imported from \`@mieweb/ui/esheet\`, not the main barrel. Styling is **not** bundled: each package's compiled \`index.output.css\` lives in its \`src/\` and is not listed in the package \`exports\`, so the host must copy/alias those two files itself (Storybook imports them from the submodule source) — load the renderer's first, then the builder's, as both define the same utility classes.
+- Separate install: install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer) for the shared \`@mieweb/ui/esheet\` entry. Builder and Renderer import \`@esheet/styles\` automatically; load \`@mieweb/ui/styles.css\` for the composed UI controls. Remove old renderer/builder \`src/index.output.css\` copies and their ordering rules; the shared stylesheet replaces both. The stylesheet is also exported as \`@esheet/styles/styles.css\` when the host needs an explicit CSS entry.
 - Persistence is entirely yours: nothing is saved, autosaved, fetched or validated against a server; \`onChange\` fires on every keystroke, so debounce before persisting.
 - Accessibility (as shipped in the pinned submodule): several axe rules are disabled in this story because the upstream markup fails them — active mode tab contrast (\`color-contrast\`), duplicate unlabeled \`<aside>\` tool panels (\`landmark-unique\`), and drag handles that are \`<div aria-label>\` without a role (\`aria-prohibited-attr\`). Drag-and-drop has no documented keyboard alternative beyond disabling it.
 - Layout: expects to fill its container (the stories use \`height: 100vh\`); it is a desktop authoring tool, not designed for small screens. Dark mode is opt-in via a \`dark\` class on \`className\`, independent of the @mieweb/ui theme provider.
@@ -150,7 +150,12 @@ function TemplateEditor({ template }: { template: FormTemplate }) {
     },
     catalog: {
       entry: '@mieweb/ui/esheet',
-      peers: ['@esheet/builder', '@esheet/core'],
+      peers: [
+        '@esheet/core',
+        '@esheet/fields',
+        '@esheet/renderer',
+        '@esheet/builder',
+      ],
       relationships: [
         {
           type: 'composes with',

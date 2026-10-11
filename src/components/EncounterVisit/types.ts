@@ -60,6 +60,8 @@ export interface EncounterSectionDefinition {
 export interface EncounterVisitDefinition {
   id: string;
   title: string;
+  /** Explicit encounter date (YYYY-MM-DD) used for newly recorded condition assertions. */
+  encounterDate?: string;
   sections: EncounterSectionDefinition[];
 }
 

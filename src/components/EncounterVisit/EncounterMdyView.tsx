@@ -3,9 +3,11 @@
 import * as React from 'react';
 import { renderEncounterMdy } from './mdy';
 import { createEncounterReportHtml } from './report';
+import { useEncounterMessages } from './messages';
 
 /** Flattened MDY is rendered through Templit, then sanitized for the report. */
 export function EncounterMdyView({ source }: { source: string }) {
+  const m = useEncounterMessages();
   const [rendered, setRendered] = React.useState<{
     source: string;
     html: string;
@@ -44,23 +46,23 @@ export function EncounterMdyView({ source }: { source: string }) {
 
   return (
     <section
-      aria-label="Visit note preview"
+      aria-label={m('Visit note preview')}
       dir="auto"
       aria-busy={rendered?.source !== source && failure?.source !== source}
     >
       {failure?.source === source ? (
-        <p role="alert">{failure.message}</p>
+        <p role="alert">{m(failure.message)}</p>
       ) : rendered?.source !== source ? (
-        <p role="status">Rendering visit…</p>
+        <p role="status">{m('Rendering visit…')}</p>
       ) : (
         <>
           {rendered.diagnostics.length > 0 && (
             <ul
-              aria-label="Document diagnostics"
+              aria-label={m('Document diagnostics')}
               className="text-muted-foreground mb-3 text-sm"
             >
               {rendered.diagnostics.map((diagnostic, index) => (
-                <li key={index}>{diagnostic.message}</li>
+                <li key={index}>{m(diagnostic.message)}</li>
               ))}
             </ul>
           )}

@@ -49,9 +49,24 @@ const definition: EncounterVisitDefinition = {
       ],
     },
     { id: 'vitals', title: 'Vitals', kind: 'vitals' },
-    { id: 'medications', title: 'Medications', kind: 'medications' },
-    { id: 'allergies', title: 'Allergies', kind: 'allergies' },
-    { id: 'assessment', title: 'Assessment', kind: 'assessment' },
+    {
+      id: 'medications',
+      title: 'Medications',
+      kind: 'medications',
+      requireCoding: false,
+    },
+    {
+      id: 'allergies',
+      title: 'Allergies',
+      kind: 'allergies',
+      requireCoding: false,
+    },
+    {
+      id: 'assessment',
+      title: 'Assessment',
+      kind: 'assessment',
+      requireCoding: false,
+    },
   ],
 };
 
@@ -642,4 +657,33 @@ describe('encounter validation', () => {
       assessment
     );
   });
+});
+
+describe('calendar-valid explicit clinical dates', () => {
+  it.each([
+    '',
+    '2026-02-30',
+    '2025-02-29',
+    '1900-02-29',
+    '2026-13-01',
+    '2026-01-00',
+    '2026-1-01',
+    '2026-10-10T12:00:00Z',
+  ])('rejects assertion date %j', (date) => {
+    const value = globalThis.structuredClone(assessment);
+    value.concerns[0].assertions[0].date = date;
+    expect(validateEncounterAssessment(value)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: 'concerns.0.assertions.0' }),
+      ])
+    );
+  });
+  it.each(['2024-02-29', '2000-02-29', '2026-10-10'])(
+    'accepts explicit calendar date %s',
+    (date) => {
+      const value = globalThis.structuredClone(assessment);
+      value.concerns[0].assertions[0].date = date;
+      expect(validateEncounterAssessment(value)).toEqual([]);
+    }
+  );
 });

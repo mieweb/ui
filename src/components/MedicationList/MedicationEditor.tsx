@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 /**
  * MedicationEditor — prescription editor modal for a `Medication`.
  *
@@ -286,6 +288,7 @@ export function MedicationEditor({
   onClose,
   onSave,
 }: MedicationEditorProps): React.JSX.Element | null {
+  const m = useMessages();
   // Default the lookup to the ambient provider; `false` forces plain text.
   const ambientCodeLookup = useCodeLookupConfig();
   const effectiveCodeLookup: CodeLookupConfig | undefined =
@@ -340,24 +343,24 @@ export function MedicationEditor({
     <Modal open onOpenChange={(o) => !o && onClose()} size="lg">
       <ModalHeader>
         <ModalTitle>
-          {medication ? 'Correct Medication' : 'Add Medication'}
+          {medication ? m('Correct Medication') : m('Add Medication')}
         </ModalTitle>
         <ModalClose />
       </ModalHeader>
       <ModalBody className="space-y-5">
         <div ref={bodyRef} className="contents">
           {/* ——— Medication + coding ——— */}
-          <section className="space-y-3" aria-label="Medication">
+          <section className="space-y-3" aria-label={m('Medication')}>
             {effectiveCodeLookup ? (
               <div className="space-y-1.5">
-                <Label htmlFor="med-search">Medication</Label>
+                <Label htmlFor="med-search">{m('Medication')}</Label>
                 <effectiveCodeLookup.component
                   indexUrl={effectiveCodeLookup.indexUrl}
                   locale={effectiveCodeLookup.locale}
                   domains={['med']}
                   bare
                   clearOnSelect={false}
-                  placeholder="Search RxNorm / FDB — e.g. lisinopril"
+                  placeholder={m('Search RxNorm / FDB — e.g. lisinopril')}
                   // Seed the search box with the medication name. Editing an
                   // uncoded medication also runs the search immediately so the
                   // closest coded matches are offered (a pick fills coding,
@@ -373,17 +376,25 @@ export function MedicationEditor({
                 />
                 <p className="text-muted-foreground text-xs">
                   {draft.code
-                    ? `Coded: ${draft.code.system} ${draft.code.code}`
+                    ? m('Coded: {system} {code}', {
+                        system: draft.code.system,
+                        code: draft.code.code,
+                      })
                     : draft.name
-                      ? `Uncoded free text: "${draft.name}" — pick a result to code it`
+                      ? m(
+                          'Uncoded free text: "{name}" — pick a result to code it',
+                          { name: draft.name }
+                        )
                       : requireCode
-                        ? 'Pick a catalog result to code the medication'
-                        : 'Pick a result to code the medication, or press Enter for free text'}
+                        ? m('Pick a catalog result to code the medication')
+                        : m(
+                            'Pick a result to code the medication, or press Enter for free text'
+                          )}
                 </p>
               </div>
             ) : (
               <div className="space-y-1.5">
-                <Label htmlFor="med-name">Medication</Label>
+                <Label htmlFor="med-name">{m('Medication')}</Label>
                 <Input
                   id="med-name"
                   value={draft.name}
@@ -396,7 +407,7 @@ export function MedicationEditor({
             )}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="med-strength">Strength</Label>
+                <Label htmlFor="med-strength">{m('Strength')}</Label>
                 <Input
                   id="med-strength"
                   value={draft.strength ?? ''}
@@ -404,7 +415,7 @@ export function MedicationEditor({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="med-form">Dose form</Label>
+                <Label htmlFor="med-form">{m('Dose form')}</Label>
                 <Input
                   id="med-form"
                   value={draft.doseForm ?? ''}
@@ -425,14 +436,14 @@ export function MedicationEditor({
           </section>
 
           {/* ——— Dispensing ——— */}
-          <section className="space-y-3" aria-label="Dispensing">
+          <section className="space-y-3" aria-label={m('Dispensing')}>
             <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-              Dispensing
+              {m('Dispensing')}
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="med-qty">
-                  Quantity
+                  {m('Quantity')}
                   {draft.quantityUnit ? ` (${draft.quantityUnit}s)` : ''}
                 </Label>
                 <Input
@@ -443,7 +454,7 @@ export function MedicationEditor({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="med-days">Days supply</Label>
+                <Label htmlFor="med-days">{m('Days supply')}</Label>
                 <Input
                   id="med-days"
                   inputMode="numeric"
@@ -452,7 +463,7 @@ export function MedicationEditor({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="med-refills">Refills</Label>
+                <Label htmlFor="med-refills">{m('Refills')}</Label>
                 <Input
                   id="med-refills"
                   inputMode="numeric"
@@ -463,24 +474,24 @@ export function MedicationEditor({
             </div>
             <RadioGroup
               name="med-substitution"
-              label="Substitution"
+              label={m('Substitution')}
               value={draft.substitution ?? '0'}
               onValueChange={(v) => patch({ substitution: v as '0' | '1' })}
               orientation="horizontal"
               size="sm"
             >
-              <Radio value="0" label="Substitution permitted" />
-              <Radio value="1" label="Dispense as written (DAW)" />
+              <Radio value="0" label={m('Substitution permitted')} />
+              <Radio value="1" label={m('Dispense as written (DAW)')} />
             </RadioGroup>
           </section>
 
           {/* ——— Directions ——— */}
-          <section className="space-y-3" aria-label="Directions">
+          <section className="space-y-3" aria-label={m('Directions')}>
             <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-              Directions
+              {m('Directions')}
             </h4>
             <div className="space-y-1.5">
-              <Label htmlFor="med-sig">Sig (patient directions)</Label>
+              <Label htmlFor="med-sig">{m('Sig (patient directions)')}</Label>
               <Textarea
                 id="med-sig"
                 value={draft.sig ?? ''}
@@ -490,30 +501,30 @@ export function MedicationEditor({
               <p className="text-muted-foreground text-xs" aria-live="polite">
                 {draft.route || draft.frequency || draft.prn ? (
                   <>
-                    Derived:{' '}
+                    {m('Derived:')}{' '}
                     {[
-                      draft.route && `route ${draft.route}`,
-                      draft.frequency && draft.frequency.toLowerCase(),
-                      draft.prn && 'PRN (as needed)',
+                      draft.route && m('route {route}', { route: draft.route }),
+                      draft.frequency && m(draft.frequency.toLowerCase()),
+                      draft.prn && m('PRN (as needed)'),
                     ]
                       .filter(Boolean)
                       .join(' · ')}
                   </>
                 ) : (
-                  'Route, frequency, and PRN are derived from the directions'
+                  m('Route, frequency, and PRN are derived from the directions')
                 )}
               </p>
             </div>
           </section>
 
           {/* ——— Dates & context ——— */}
-          <section className="space-y-3" aria-label="Dates and context">
+          <section className="space-y-3" aria-label={m('Dates and context')}>
             <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-              Dates &amp; context
+              {m('Dates & context')}
             </h4>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="med-start">Start date</Label>
+                <Label htmlFor="med-start">{m('Start date')}</Label>
                 <DateInput
                   id="med-start"
                   value={draft.startDate ?? ''}
@@ -521,7 +532,7 @@ export function MedicationEditor({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="med-end">End date</Label>
+                <Label htmlFor="med-end">{m('End date')}</Label>
                 <DateInput
                   id="med-end"
                   value={draft.endDate ?? ''}
@@ -530,7 +541,7 @@ export function MedicationEditor({
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="med-indication">Indication</Label>
+              <Label htmlFor="med-indication">{m('Indication')}</Label>
               <Input
                 id="med-indication"
                 value={draft.indication ?? ''}
@@ -538,7 +549,7 @@ export function MedicationEditor({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="med-pharmacy-notes">Pharmacy notes</Label>
+              <Label htmlFor="med-pharmacy-notes">{m('Pharmacy notes')}</Label>
               <Textarea
                 id="med-pharmacy-notes"
                 value={draft.pharmacyNotes ?? ''}
@@ -551,7 +562,7 @@ export function MedicationEditor({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {m('Cancel')}
         </Button>
         <Button
           onClick={() => {
@@ -560,7 +571,7 @@ export function MedicationEditor({
           }}
           disabled={!canSave}
         >
-          Save
+          {m('Save')}
         </Button>
       </ModalFooter>
     </Modal>

@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 /**
  * AllergyManager — batteries-included allergy list.
  *
@@ -100,6 +102,7 @@ function AllergyEditor({
   onClose: () => void;
   onSave: (allergy: Allergy) => void;
 }) {
+  const m = useMessages();
   const [draft, setDraft] = React.useState<Allergy>(
     () => allergy ?? { id: newId(), allergen: '', type: 'drug' }
   );
@@ -129,27 +132,34 @@ function AllergyEditor({
   return (
     <Modal open onOpenChange={(o) => !o && onClose()} size="md">
       <ModalHeader>
-        <ModalTitle>{allergy ? 'Correct Allergy' : 'Add Allergy'}</ModalTitle>
-        <ModalClose />
+        <ModalTitle>
+          {allergy ? m('Correct Allergy') : m('Add Allergy')}
+        </ModalTitle>
+        <ModalClose aria-label={m('Close')} />
       </ModalHeader>
       <ModalBody className="space-y-4">
         <div ref={bodyRef} className="contents">
           <RadioGroup
             name="alg-kind"
-            label="Mechanism"
-            description="A true immune-mediated allergy, or a non-immune intolerance (e.g. GI upset)"
+            label={m('Mechanism')}
+            description={m(
+              'A true immune-mediated allergy, or a non-immune intolerance (e.g. GI upset)'
+            )}
             value={draft.kind ?? 'allergy'}
             onValueChange={(v) => patch({ kind: v as AllergyKind })}
             orientation="horizontal"
             size="sm"
           >
-            <Radio value="allergy" label="Allergy" />
-            <Radio value="intolerance" label="Intolerance" />
+            <Radio value="allergy" label={m('Allergy')} />
+            <Radio value="intolerance" label={m('Intolerance')} />
           </RadioGroup>
 
           <Select
-            label="Type"
-            options={TYPE_OPTIONS}
+            label={m('Type')}
+            options={TYPE_OPTIONS.map((option) => ({
+              ...option,
+              label: m(option.label),
+            }))}
             value={draft.type ?? 'drug'}
             onValueChange={(v) => {
               const type = v as AllergyType;
@@ -163,7 +173,7 @@ function AllergyEditor({
 
           {codeLookup && (isDrug || requireCode) ? (
             <div className="space-y-1.5">
-              <Label htmlFor="alg-search">Allergen</Label>
+              <Label htmlFor="alg-search">{m('Allergen')}</Label>
               <codeLookup.component
                 indexUrl={codeLookup.indexUrl}
                 locale={codeLookup.locale}
@@ -173,8 +183,8 @@ function AllergyEditor({
                 clearOnSelect={false}
                 placeholder={
                   isDrug
-                    ? 'Search drug allergens — e.g. penicillin'
-                    : 'Search SNOMED allergen substances'
+                    ? m('Search drug allergens — e.g. penicillin')
+                    : m('Search SNOMED allergen substances')
                 }
                 initialQuery={allergy?.allergen || undefined}
                 initialSearch={allergy ? !allergy.code : undefined}
@@ -201,17 +211,24 @@ function AllergyEditor({
               />
               <p className="text-muted-foreground text-xs">
                 {draft.code
-                  ? `Coded: ${draft.code.system} ${draft.code.code}`
+                  ? m('Coded: {system} {code}', {
+                      system: draft.code.system,
+                      code: draft.code.code,
+                    })
                   : draft.allergen
-                    ? `Uncoded free text: "${draft.allergen}"`
+                    ? m('Uncoded free text: "{name}"', {
+                        name: draft.allergen,
+                      })
                     : requireCode
-                      ? 'Pick a catalog result to code the allergen'
-                      : 'Pick a result to code the allergen, or press Enter for free text'}
+                      ? m('Pick a catalog result to code the allergen')
+                      : m(
+                          'Pick a result to code the allergen, or press Enter for free text'
+                        )}
               </p>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <Label htmlFor="alg-name">Allergen</Label>
+              <Label htmlFor="alg-name">{m('Allergen')}</Label>
               <Input
                 id="alg-name"
                 value={draft.allergen}
@@ -224,7 +241,7 @@ function AllergyEditor({
           )}
 
           <div className="space-y-1.5">
-            <Label htmlFor="alg-reaction">Reaction</Label>
+            <Label htmlFor="alg-reaction">{m('Reaction')}</Label>
             <Input
               id="alg-reaction"
               value={draft.reaction ?? ''}
@@ -234,7 +251,7 @@ function AllergyEditor({
 
           <RadioGroup
             name="alg-severity"
-            label="Severity"
+            label={m('Severity')}
             value={draft.severity ?? ''}
             onValueChange={(v) =>
               patch({ severity: (v || undefined) as AllergySeverity })
@@ -242,13 +259,13 @@ function AllergyEditor({
             orientation="horizontal"
             size="sm"
           >
-            <Radio value="mild" label="Mild" />
-            <Radio value="moderate" label="Moderate" />
-            <Radio value="severe" label="Severe" />
+            <Radio value="mild" label={m('Mild')} />
+            <Radio value="moderate" label={m('Moderate')} />
+            <Radio value="severe" label={m('Severe')} />
           </RadioGroup>
 
           <div className="space-y-1.5">
-            <Label htmlFor="alg-onset">Onset date</Label>
+            <Label htmlFor="alg-onset">{m('Onset date')}</Label>
             <DateInput
               id="alg-onset"
               value={draft.onsetDate ?? ''}
@@ -257,7 +274,7 @@ function AllergyEditor({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="alg-note">Note</Label>
+            <Label htmlFor="alg-note">{m('Note')}</Label>
             <Textarea
               id="alg-note"
               value={draft.note ?? ''}
@@ -269,7 +286,7 @@ function AllergyEditor({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {m('Cancel')}
         </Button>
         <Button
           onClick={() => {
@@ -278,7 +295,7 @@ function AllergyEditor({
           }}
           disabled={!canSave}
         >
-          Save
+          {m('Save')}
         </Button>
       </ModalFooter>
     </Modal>
@@ -322,6 +339,7 @@ export function AllergyManager({
   className,
   'data-testid': dataTestId,
 }: AllergyManagerProps): React.JSX.Element {
+  const m = useMessages();
   const isControlled = controlled !== undefined;
   const [internal, setInternal] = React.useState<Allergy[]>(
     defaultAllergies ?? []
@@ -370,7 +388,9 @@ export function AllergyManager({
         domains={['med']}
         bare
         clearOnSelect
-        placeholder="Search drug allergens to add — use Add allergy… for food/environmental"
+        placeholder={m(
+          'Search drug allergens to add — use Add allergy… for food/environmental'
+        )}
         onSelect={(result) => {
           if (
             requireCode &&
@@ -449,15 +469,15 @@ export function AllergyManager({
       {dialog?.kind === 'note' && (
         <Modal open onOpenChange={(o) => !o && setDialog(null)} size="md">
           <ModalHeader>
-            <ModalTitle>Allergy Notes</ModalTitle>
-            <ModalClose />
+            <ModalTitle>{m('Allergy Notes')}</ModalTitle>
+            <ModalClose aria-label={m('Close')} />
           </ModalHeader>
           <ModalBody className="space-y-4">
             <p className="text-muted-foreground text-sm">
               {dialog.allergy.allergen}
             </p>
             <div className="space-y-1.5">
-              <Label htmlFor="alg-note-dlg">Note</Label>
+              <Label htmlFor="alg-note-dlg">{m('Note')}</Label>
               <Textarea
                 id="alg-note-dlg"
                 value={noteDraft}
@@ -468,7 +488,7 @@ export function AllergyManager({
           </ModalBody>
           <ModalFooter>
             <Button variant="secondary" onClick={() => setDialog(null)}>
-              Cancel
+              {m('Cancel')}
             </Button>
             <Button
               onClick={() => {
@@ -482,7 +502,7 @@ export function AllergyManager({
                 setDialog(null);
               }}
             >
-              Save
+              {m('Save')}
             </Button>
           </ModalFooter>
         </Modal>

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { useMessages } from '../../utils/messages';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
@@ -227,11 +228,12 @@ function FieldFlag({
   onChange: (f: FieldUncertainty | undefined) => void;
   hasValue: boolean;
 }) {
+  const m = useMessages();
   const unknown = value?.known === false;
   return (
     <span
       role="group"
-      aria-label={`Certainty for ${label}`}
+      aria-label={m('Certainty for {label}', { label })}
       className="flex items-center gap-1"
     >
       <button
@@ -249,7 +251,7 @@ function FieldFlag({
             : 'border-border text-muted-foreground hover:text-foreground'
         )}
       >
-        Unknown
+        {m('Unknown')}
       </button>
       {hasValue &&
         !unknown &&
@@ -260,7 +262,10 @@ function FieldFlag({
               key={c}
               type="button"
               aria-pressed={active}
-              aria-label={`${label} confidence ${c}`}
+              aria-label={m('{label} confidence {confidence}', {
+                label,
+                confidence: m(c),
+              })}
               onClick={() =>
                 onChange(active ? undefined : { known: true, confidence: c })
               }
@@ -271,7 +276,7 @@ function FieldFlag({
                   : 'border-border text-muted-foreground hover:text-foreground'
               )}
             >
-              {c}
+              {m(c)}
             </button>
           );
         })}
@@ -284,12 +289,13 @@ function FieldFlag({
 // =============================================================================
 
 function ObservationHistory({ concern }: { concern?: ConditionConcern }) {
+  const m = useMessages();
   const observations = concern?.observations;
   if (!observations?.length) return null;
   return (
-    <section aria-label="Past observations" className="space-y-1">
+    <section aria-label={m('Past observations')} className="space-y-1">
       <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-        Observations
+        {m('Observations')}
       </h4>
       <ol className="border-border max-h-40 space-y-1.5 overflow-y-auto rounded-md border p-2">
         {[...observations].reverse().map((o) => (
@@ -343,6 +349,7 @@ export function ConditionEditor({
   className,
   'data-testid': dataTestId,
 }: ConditionEditorProps) {
+  const m = useMessages();
   const prior = concern ? currentAssertion(concern) : undefined;
 
   // Default the code search to the ambient provider; `false` forces manual
@@ -516,7 +523,7 @@ export function ConditionEditor({
     >
       <ModalHeader>
         <ModalTitle>
-          {MODE_META[mode].title}
+          {m(MODE_META[mode].title)}
           {prior ? ` — ${prior.text}` : ''}
         </ModalTitle>
       </ModalHeader>
@@ -529,10 +536,9 @@ export function ConditionEditor({
             >
               <AlertTriangleIcon size={16} />
               <span>
-                Revising marks the prior assertion <strong>refuted</strong> (it
-                was never true) — history is preserved on the timeline. Use{' '}
-                <em>Refine</em> instead if the prior was correct but less
-                specific.
+                {m(
+                  'Revising marks the prior assertion refuted (it was never true) — history is preserved on the timeline. Use Refine instead if the prior was correct but less specific.'
+                )}
               </span>
             </div>
           )}
@@ -540,16 +546,19 @@ export function ConditionEditor({
           {mode === 'relate' ? (
             <>
               <Select
-                label="Relationship"
-                options={RELATIONSHIP_OPTIONS}
+                label={m('Relationship')}
+                options={RELATIONSHIP_OPTIONS.map((option) => ({
+                  ...option,
+                  label: m(option.label),
+                }))}
                 value={relType}
                 onValueChange={(v) =>
                   setRelType(v as ConcernRelationship['type'])
                 }
               />
               <Select
-                label="Related problem"
-                placeholder="Select a problem…"
+                label={m('Related problem')}
+                placeholder={m('Select a problem…')}
                 options={relatableConcerns
                   .filter((c) => c.concernId !== concern?.concernId)
                   .map((c) => ({
@@ -564,10 +573,12 @@ export function ConditionEditor({
             <>
               <ObservationHistory concern={concern} />
               <Textarea
-                label="New observation"
+                label={m('New observation')}
                 value={observation}
                 onChange={(e) => setObservation(e.target.value)}
-                placeholder="e.g. BP improving on current regimen; patient reports better sleep"
+                placeholder={m(
+                  'e.g. BP improving on current regimen; patient reports better sleep'
+                )}
                 rows={3}
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
@@ -586,29 +597,33 @@ export function ConditionEditor({
               {mode === 'add' && effectiveRenderCodeSearch && !text.trim() ? (
                 <div className="space-y-1">
                   <span className="text-foreground block text-sm font-medium">
-                    Problem name
+                    {m('Problem name')}
                     <span className="text-destructive ms-1" aria-hidden="true">
                       *
                     </span>
                   </span>
                   {effectiveRenderCodeSearch({
-                    placeholder:
-                      'Search conditions — or type a name and press Enter…',
+                    placeholder: m(
+                      'Search conditions — or type a name and press Enter…'
+                    ),
                     onPick: handleCodePick,
                     onFreeText: (t) => setText(t.trim()),
                   })}
                   <p className="text-muted-foreground text-xs">
-                    Picking a code fills the name and coding together; free text
-                    is fine — codes can be added any time.
+                    {m(
+                      'Picking a code fills the name and coding together; free text is fine — codes can be added any time.'
+                    )}
                   </p>
                 </div>
               ) : (
                 <Input
-                  label="Problem name"
+                  label={m('Problem name')}
                   required
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="e.g. Type 1 diabetes mellitus with neuropathy"
+                  placeholder={m(
+                    'e.g. Type 1 diabetes mellitus with neuropathy'
+                  )}
                 />
               )}
 
@@ -617,18 +632,20 @@ export function ConditionEditor({
                   size="sm"
                   checked={progression}
                   onChange={(e) => setProgression(e.target.checked)}
-                  label="Disease progressed (e.g. new complication) rather than a more specific diagnosis"
+                  label={m(
+                    'Disease progressed (e.g. new complication) rather than a more specific diagnosis'
+                  )}
                 />
               )}
 
               {/* Coding — progressive enrichment, never required */}
               <fieldset className="space-y-3">
-                <legend className="sr-only">Coding</legend>
+                <legend className="sr-only">{m('Coding')}</legend>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                    Coding
+                    {m('Coding')}
                     <FieldFlag
-                      label="Coding"
+                      label={m('Coding')}
                       value={fields.coding}
                       onChange={setField('coding')}
                       hasValue={coding.length > 0}
@@ -651,14 +668,14 @@ export function ConditionEditor({
                     leftIcon={<PlusIcon size={12} />}
                     className="h-8 shrink-0 text-xs"
                   >
-                    Add code
+                    {m('Add code')}
                   </Button>
                 </div>
                 {effectiveRenderCodeSearch &&
                   !(mode === 'add' && !text.trim()) && (
                     <div>
                       {effectiveRenderCodeSearch({
-                        placeholder: 'Search codes — ICD-10-CM / SNOMED…',
+                        placeholder: m('Search codes — ICD-10-CM / SNOMED…'),
                         onPick: handleCodePick,
                         onFreeText: (t) => setText((prev) => prev || t),
                       })}
@@ -666,8 +683,9 @@ export function ConditionEditor({
                   )}
                 {coding.length === 0 && (
                   <p className="text-muted-foreground text-xs">
-                    Optional — a name-only problem is valid. Codes can be added
-                    any time.
+                    {m(
+                      'Optional — a name-only problem is valid. Codes can be added any time.'
+                    )}
                   </p>
                 )}
                 {coding.length > 0 && (
@@ -676,17 +694,17 @@ export function ConditionEditor({
                     data-slot="condition-coding-header"
                     className="text-muted-foreground hidden grid-cols-[minmax(8rem,1.1fr)_minmax(7rem,0.9fr)_minmax(10rem,1.5fr)_5.5rem_2.5rem] items-center gap-2 px-1 text-xs font-medium sm:!grid"
                   >
-                    <span>System</span>
-                    <span>Code</span>
-                    <span>Display</span>
-                    <span className="text-center">Primary code</span>
-                    <span className="sr-only">Actions</span>
+                    <span>{m('System')}</span>
+                    <span>{m('Code')}</span>
+                    <span>{m('Display')}</span>
+                    <span className="text-center">{m('Primary code')}</span>
+                    <span className="sr-only">{m('Actions')}</span>
                   </div>
                 )}
                 {coding.length > 0 && (
                   <RadioGroup
                     name="primary-coding"
-                    label="Primary display code"
+                    label={m('Primary display code')}
                     value={String(
                       Math.max(
                         0,
@@ -713,10 +731,12 @@ export function ConditionEditor({
                       >
                         <div className="space-y-1">
                           <span className="text-muted-foreground text-xs sm:hidden">
-                            System
+                            {m('System')}
                           </span>
                           <Select
-                            aria-label={`Coding system ${i + 1}`}
+                            aria-label={m('Coding system {index}', {
+                              index: i + 1,
+                            })}
                             options={CODING_SYSTEMS.map((s) => ({
                               value: s,
                               label: s,
@@ -730,45 +750,53 @@ export function ConditionEditor({
                         </div>
                         <div className="space-y-1">
                           <span className="text-muted-foreground text-xs sm:hidden">
-                            Code
+                            {m('Code')}
                           </span>
                           <Input
-                            aria-label={`Code ${i + 1}`}
+                            aria-label={m('Code {index}', { index: i + 1 })}
                             value={c.code}
                             onChange={(e) =>
                               updateCoding(i, { code: e.target.value })
                             }
-                            placeholder="Code"
+                            placeholder={m('Code')}
                             disabled={codingUnknown}
                             className="font-mono"
                           />
                         </div>
                         <div className="space-y-1">
                           <span className="text-muted-foreground text-xs sm:hidden">
-                            Display
+                            {m('Display')}
                           </span>
                           <Input
-                            aria-label={`Display ${i + 1}`}
+                            aria-label={m('Display {index}', { index: i + 1 })}
                             value={c.display ?? ''}
                             onChange={(e) =>
                               updateCoding(i, { display: e.target.value })
                             }
-                            placeholder="Display"
+                            placeholder={m('Display')}
                             disabled={codingUnknown}
                           />
                         </div>
                         <div className="flex min-h-10 items-center gap-1.5 text-xs sm:justify-center">
                           <Radio
                             value={String(i)}
-                            aria-label={`Primary code: ${c.system} ${c.code || `row ${i + 1}`}`}
+                            aria-label={m('Primary code: {system} {code}', {
+                              system: c.system,
+                              code:
+                                c.code || m('row {index}', { index: i + 1 }),
+                            })}
                             disabled={codingUnknown}
                           />
-                          <span className="sm:sr-only">Primary code</span>
+                          <span className="sm:sr-only">
+                            {m('Primary code')}
+                          </span>
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={`Remove code ${i + 1}`}
+                          aria-label={m('Remove code {index}', {
+                            index: i + 1,
+                          })}
                           disabled={codingUnknown}
                           onClick={() =>
                             setCoding((prev) =>
@@ -788,8 +816,11 @@ export function ConditionEditor({
               </fieldset>
 
               <Select
-                label="Verification status"
-                options={VERIFICATION_OPTIONS}
+                label={m('Verification status')}
+                options={VERIFICATION_OPTIONS.map((option) => ({
+                  ...option,
+                  label: m(option.label),
+                }))}
                 value={verification}
                 onValueChange={(v) => setVerification(v as VerificationStatus)}
               />
@@ -797,10 +828,12 @@ export function ConditionEditor({
               {/* Severity value and its three-state certainty affordance */}
               <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
                 <div className="space-y-1">
-                  <span className="block text-sm font-medium">Severity</span>
+                  <span className="block text-sm font-medium">
+                    {m('Severity')}
+                  </span>
                   <div
                     role="group"
-                    aria-label="Severity"
+                    aria-label={m('Severity')}
                     className="border-border inline-flex items-center overflow-hidden rounded-md border"
                   >
                     {SEVERITIES.map((s) => {
@@ -820,16 +853,18 @@ export function ConditionEditor({
                               : 'bg-background text-muted-foreground hover:text-foreground'
                           )}
                         >
-                          {s}
+                          {m(s)}
                         </button>
                       );
                     })}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="block text-sm font-medium">Certainty</span>
+                  <span className="block text-sm font-medium">
+                    {m('Certainty')}
+                  </span>
                   <FieldFlag
-                    label="Severity"
+                    label={m('Severity')}
                     value={fields.severity}
                     onChange={setField('severity')}
                     hasValue={Boolean(severity)}
@@ -840,9 +875,9 @@ export function ConditionEditor({
               {/* Fuzzy onset — exact date OR human string */}
               <div className="space-y-1">
                 <span className="flex items-center gap-2 text-sm font-medium">
-                  Onset
+                  {m('Onset')}
                   <FieldFlag
-                    label="Onset"
+                    label={m('Onset')}
                     value={fields.onset}
                     onChange={setField('onset')}
                     hasValue={Boolean(onsetDate || onsetFuzzy)}
@@ -850,7 +885,7 @@ export function ConditionEditor({
                 </span>
                 <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[minmax(10rem,0.8fr)_auto_minmax(14rem,1.2fr)]">
                   <DateInput
-                    aria-label="Onset date (exact)"
+                    aria-label={m('Onset date (exact)')}
                     value={onsetDate}
                     onChange={(value) => {
                       setOnsetDate(value);
@@ -858,31 +893,38 @@ export function ConditionEditor({
                     }}
                     disabled={fields.onset?.known === false}
                     validateOnBlur
+                    error={
+                      hasInvalidOnsetDate
+                        ? m('Please enter a valid date (MM/DD/YYYY)')
+                        : undefined
+                    }
                     width="full"
                   />
                   <span className="text-muted-foreground pb-3 text-center text-xs">
-                    or
+                    {m('or')}
                   </span>
                   <Input
-                    aria-label="Onset (fuzzy)"
+                    aria-label={m('Onset (fuzzy)')}
                     value={onsetFuzzy}
                     onChange={(e) => {
                       setOnsetFuzzy(e.target.value);
                       if (e.target.value) setOnsetDate('');
                     }}
                     disabled={fields.onset?.known === false}
-                    placeholder={
+                    placeholder={m(
                       'Fuzzy — "since her twenties", "~3 months ago"'
-                    }
+                    )}
                   />
                 </div>
               </div>
 
               <Textarea
-                label="Note"
+                label={m('Note')}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="e.g. patient thinks it started after the fall, not sure"
+                placeholder={m(
+                  'e.g. patient thinks it started after the fall, not sure'
+                )}
                 rows={2}
               />
 
@@ -890,12 +932,15 @@ export function ConditionEditor({
                 <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
                   <HelpCircleIcon size={12} />
                   <span>
-                    Uncertainty recorded:{' '}
+                    {m('Uncertainty recorded:')}{' '}
                     {Object.entries(fields)
                       .map(([k, f]) =>
                         f?.known === false
-                          ? `${k} unknown`
-                          : `${f?.confidence ?? 'unspecified'} confidence in ${k}`
+                          ? m('{field} unknown', { field: m(k) })
+                          : m('{confidence} confidence in {field}', {
+                              confidence: m(f?.confidence ?? 'unspecified'),
+                              field: m(k),
+                            })
                       )
                       .join(', ')}
                   </span>
@@ -907,18 +952,20 @@ export function ConditionEditor({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={() => onOpenChange(false)}>
-          Cancel
+          {m('Cancel')}
         </Button>
         <Button onClick={handleSave} disabled={saveDisabled}>
-          {mode === 'relate'
-            ? 'Relate'
-            : mode === 'observe'
-              ? 'Add observation'
-              : 'Save'}
+          {m(
+            mode === 'relate'
+              ? 'Relate'
+              : mode === 'observe'
+                ? 'Add observation'
+                : 'Save'
+          )}
         </Button>
         {mode !== 'relate' && mode !== 'observe' && !text.trim() && (
           <Badge variant="outline" size="sm" className="text-muted-foreground">
-            name required
+            {m('name required')}
           </Badge>
         )}
       </ModalFooter>

@@ -249,6 +249,35 @@ describe('RichEditor', () => {
     expect(editorMock.saveDocument).toHaveBeenCalledTimes(1);
   });
 
+  it('accepts a content read as the source for later reads and clinical projections', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    renderWithTheme(
+      <RichEditor ref={ref} value="# original" onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    docMock.current = { id: 'edited' };
+    await expect(ref.current?.getContent()).resolves.toBe('# hello');
+    await expect(ref.current?.getContent()).resolves.toBe('# hello');
+    const before = docMock.current;
+    docMock.current = { id: 'clinical-projection' };
+    await transactionHandler()(
+      new globalThis.CustomEvent('transaction', {
+        detail: {
+          transaction: {
+            before,
+            getMeta: (key: string) => key === MDY_PROJECTION_META,
+          },
+        },
+      })
+    );
+    await expect(ref.current?.getContent()).resolves.toBe('# hello');
+    await transactionHandler()();
+    expect(editorMock.saveDocument).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('reports a failed initial load and rejects content reads', async () => {
     const failure = new Error('WASM grammar failed to load');
     editorMock.loadDocumentText.mockRejectedValueOnce(failure);

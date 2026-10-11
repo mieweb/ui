@@ -230,6 +230,32 @@ interface LinkSpan {
 /** Find inline field links while leaving code, images, and escaped text inert. */
 function fieldLinkSpans(body: string): LinkSpan[] {
   const links: LinkSpan[] = [];
+  // Pair brackets once. Looking for a closing bracket separately for each
+  // opening bracket makes malformed documents with many `[` quadratic.
+  const closingBrackets = new Map<number, number>();
+  const openingBrackets: number[] = [];
+  for (let cursor = 0; cursor < body.length; cursor += 1) {
+    if (body[cursor] === '\\') cursor += 1;
+    else if (body[cursor] === '[') openingBrackets.push(cursor);
+    else if (body[cursor] === ']') {
+      const opening = openingBrackets.pop();
+      if (opening !== undefined) closingBrackets.set(opening, cursor);
+    }
+  }
+  // Inline code closes only on an entire run of the same length. Index those
+  // runs once rather than searching every suffix when run lengths differ.
+  const ticksByLength = new Map<number, number[]>();
+  for (let cursor = 0; cursor < body.length; cursor += 1) {
+    if (body[cursor] !== '`') continue;
+    const start = cursor;
+    while (body[cursor + 1] === '`') cursor += 1;
+    const length = cursor - start + 1;
+    const runs = ticksByLength.get(length) ?? [];
+    runs.push(start);
+    ticksByLength.set(length, runs);
+  }
+  const tickCursors = new Map<number, number>();
+  let noMoreTagEnds = false;
   let index = 0;
   while (index < body.length) {
     const lineStart = index === 0 || body[index - 1] === '\n';
@@ -258,51 +284,53 @@ function fieldLinkSpans(body: string): LinkSpan[] {
       index = end < 0 ? body.length : end + 3;
       continue;
     }
-    const htmlBlock = /^<(pre|code|script|style)\b[^>]*>/i.exec(
-      body.slice(index)
-    );
-    if (htmlBlock) {
-      const end = new RegExp(`</${htmlBlock[1]}\\s*>`, 'i').exec(
-        body.slice(index + htmlBlock[0].length)
-      );
-      index += end
-        ? htmlBlock[0].length + end.index + end[0].length
-        : body.length - index;
-      continue;
+    const htmlPrefix =
+      !noMoreTagEnds && body[index] === '<'
+        ? /^<(pre|code|script|style)\b/i.exec(body.slice(index, index + 8))
+        : null;
+    if (htmlPrefix) {
+      const tagEnd = body.indexOf('>', index + htmlPrefix[0].length);
+      if (tagEnd < 0) noMoreTagEnds = true;
+      else {
+        const contentStart = tagEnd + 1;
+        const end = new RegExp(`</${htmlPrefix[1]}\\s*>`, 'i').exec(
+          body.slice(contentStart)
+        );
+        index = end ? contentStart + end.index + end[0].length : body.length;
+        continue;
+      }
     }
     if (body[index] === '\\') {
       index += 2;
       continue;
     }
     if (body[index] === '`') {
-      const ticks = /^`+/.exec(body.slice(index))![0];
-      let end = body.indexOf(ticks, index + ticks.length);
-      while (
-        end >= 0 &&
-        (body[end - 1] === '`' || body[end + ticks.length] === '`')
-      ) {
-        end = body.indexOf(ticks, end + ticks.length);
-      }
-      index = end >= 0 ? end + ticks.length : index + ticks.length;
+      let ticksEnd = index + 1;
+      while (body[ticksEnd] === '`') ticksEnd += 1;
+      const length = ticksEnd - index;
+      const runs = ticksByLength.get(length) ?? [];
+      let cursor = tickCursors.get(length) ?? 0;
+      while (cursor < runs.length && runs[cursor] < ticksEnd) cursor += 1;
+      tickCursors.set(length, cursor);
+      const closing = runs[cursor];
+      index = closing === undefined ? ticksEnd : closing + length;
       continue;
     }
     if (body[index] !== '[' || body[index - 1] === '!') {
       index += 1;
       continue;
     }
-    let depth = 1;
-    let closing = index + 1;
-    for (; closing < body.length && depth; closing += 1) {
-      if (body[closing] === '\\') closing += 1;
-      else if (body[closing] === '[') depth += 1;
-      else if (body[closing] === ']') depth -= 1;
+    const labelEnd = closingBrackets.get(index);
+    if (labelEnd === undefined) {
+      index += 1;
+      continue;
     }
-    const labelEnd = closing - 1;
+    const closing = labelEnd + 1;
     const destination =
       /^\([ \t]*(?:<(?:mdy:|#)([a-z0-9_-]+)>|(?:mdy:|#)([a-z0-9_-]+))(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'))?[ \t]*\)/.exec(
         body.slice(closing)
       );
-    if (depth === 0 && destination) {
+    if (destination) {
       const end = closing + destination[0].length;
       links.push({
         id: destination[1] ?? destination[2],
@@ -597,6 +625,10 @@ const SOURCE_PROPERTIES = new Set([
   'options',
   'required',
   'encounterHideLabel',
+  'findings',
+  'encounterFindings',
+  'encounterRequireCoding',
+  'encounterDate',
 ]);
 
 function mergeMetadata(

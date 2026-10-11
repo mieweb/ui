@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 /**
  * MedicationReconciliation — batteries-included medication reconciliation.
  *
@@ -123,6 +125,7 @@ function MedicationDialog({
   onClose: () => void;
   onSave: (fields: Record<string, string>) => void;
 }) {
+  const m = useMessages();
   const [form, setForm] = React.useState<Record<string, string>>(() =>
     dialog.kind === 'note'
       ? ({ note: dialog.medication.note ?? '' } as Record<string, string>)
@@ -143,7 +146,7 @@ function MedicationDialog({
     <Modal open onOpenChange={(open) => !open && onClose()} size="md">
       <ModalHeader>
         <ModalTitle>
-          {dialog.kind === 'note' ? 'Medication Notes' : 'Add Task'}
+          {dialog.kind === 'note' ? m('Medication Notes') : m('Add Task')}
         </ModalTitle>
         <ModalClose />
       </ModalHeader>
@@ -153,7 +156,7 @@ function MedicationDialog({
         </p>
         {dialog.kind === 'note' ? (
           <div className="space-y-1.5">
-            <Label htmlFor="med-note">Note</Label>
+            <Label htmlFor="med-note">{m('Note')}</Label>
             <Textarea
               id="med-note"
               value={form.note}
@@ -163,22 +166,22 @@ function MedicationDialog({
           </div>
         ) : (
           <div className="space-y-1.5">
-            <Label htmlFor="med-task">Task</Label>
+            <Label htmlFor="med-task">{m('Task')}</Label>
             <Textarea
               id="med-task"
               value={form.task}
               onChange={set('task')}
               rows={3}
-              placeholder="Follow-up task for this medication"
+              placeholder={m('Follow-up task for this medication')}
             />
           </div>
         )}
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {m('Cancel')}
         </Button>
-        <Button onClick={handleSave}>Save</Button>
+        <Button onClick={handleSave}>{m('Save')}</Button>
       </ModalFooter>
     </Modal>
   );
@@ -220,6 +223,7 @@ export function MedicationReconciliation({
   className,
   'data-testid': dataTestId,
 }: MedicationReconciliationProps): React.JSX.Element {
+  const m = useMessages();
   const isControlled = controlledMedications !== undefined;
   const [internal, setInternal] = React.useState<Medication[]>(
     defaultMedications ?? []
@@ -325,7 +329,7 @@ export function MedicationReconciliation({
         domains={['med']}
         bare
         clearOnSelect
-        placeholder="Search medications to add"
+        placeholder={m('Search medications to add')}
         onSelect={(result) => {
           if (
             requireCode &&

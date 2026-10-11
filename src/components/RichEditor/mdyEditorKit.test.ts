@@ -310,13 +310,16 @@ describe('MDY field-link protection', () => {
         TextSelection.create(view.state.doc, span().from + 1)
       )
     );
-    expect(
-      plugin.props.handleKeyDown?.call(
-        plugin,
-        view,
-        new KeyboardEvent('keydown', { key: 'Enter' })
-      )
-    ).toBe(false);
+    const key = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      cancelable: true,
+    });
+    expect(plugin.props.handleKeyDown?.call(plugin, view, key)).toBe(true);
+    expect(key.defaultPrevented).toBe(true);
+    const chip = view.dom.querySelector<HTMLElement>('[data-mdy-field]')!;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    chip.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
     expect(onFieldActivate).not.toHaveBeenCalled();
   });
 });

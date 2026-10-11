@@ -170,14 +170,14 @@ The visit reads as a continuous report with small outer insets and no nested sec
 
 ### Example
 
-Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer; the shared entry re-exports the builder). eSheet supplies its shared CSS automatically. RichEdit additionally uses the optional Kerebron peers documented at \`@mieweb/ui/kerebron\`: load \`@mieweb/ui/kerebron.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\`.
+Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer; the shared entry re-exports the builder). eSheet supplies its shared CSS automatically. RichEdit additionally uses the optional Kerebron peers documented at \`@mieweb/ui/kerebron\`: load \`@mieweb/ui/kerebron.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\`. With Kerebron 0.8.12, the host must override every \`prosemirror-view\` resolution to 1.42.3; [package-manager setup](https://github.com/mieweb/ui/blob/main/MIGRATION.md#esheet-and-encountervisit) is included in the published package. This repository’s pnpm override does not propagate to consumer applications.
 
 \`\`\`tsx
 import { EncounterVisit, DEFAULT_ENCOUNTER_VISIT_DEFINITION } from '@mieweb/ui/esheet';
 import { CodeLookup } from '…/CodeLookup'; // from the host's worker-capable app bundle
 
 <EncounterVisit
-  definition={DEFAULT_ENCOUNTER_VISIT_DEFINITION}
+  definition={{ ...DEFAULT_ENCOUNTER_VISIT_DEFINITION, encounterDate: visit.date }}
   patientContext="45 yo male with pre-diabetes, back pain and hypertension"
   initialResponses={savedNativeEsheetResponses}
   codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
@@ -186,6 +186,8 @@ import { CodeLookup } from '…/CodeLookup'; // from the host's worker-capable a
   onToolsReady={(tools) => connectAgent(tools)}
 />
 \`\`\`
+
+The host supplies the visit’s explicit \`definition.encounterDate\` (YYYY-MM-DD) or the user enters an assertion date when capturing a condition. Clinical dates never default to the current clock. Provide \`messages={{ labels: { "Save visit": "Guardar visita", "Allergies": "Alergias" } }}\` or \`messages.translate(message, values)\` for built-in interface text, including accessible labels, section controls, clinical dialogs and announcements. English source strings are lookup keys; placeholders such as \`{name}\` retain the actual entered name. Author section titles, prompts and common findings in the application’s language. Catalog display names, codes and entered clinical prose are preserved.
 
 Each section has a stable \`id\` and \`kind\`. An \`observations\` section accepts \`narrative: true\` and \`observations: [{ id, label, type?, unit?, code?, options?, required? }]\`. For an exam stored as one observation, choose \`kind: 'narrative'\`. Generated IDs are available through \`getEncounterFieldId\`. Change \`definition.id\` to open another visit; \`initialResponses\` is loaded once per visit. Rebuilding the same definition inline preserves edits. Configuration changes preserve answers; removed fields stay in native responses but are omitted from the current observation export.
 
@@ -203,7 +205,7 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
 - Validation checks configured required entries, value types, supported ranges, JSON shapes and complete BP pairs. It does not interpret measurements medically.
 - The anonymous example seeds only the facts supplied: age, sex, pre-diabetes, back pain and hypertension. Measurements, exam findings, medications and treatment remain unanswered.
 - The small sample catalog demonstrates interaction. The host supplies its real terminology service; new coded entries cannot be added without it. Imported uncoded legacy entries remain visible and can be corrected.
-- Medication, allergy, condition and plan fields retain the codes actually selected through the existing clinical components. Assessment and orders reuse Assessment's concern / assertion model. Labels, common findings and the default template are English; customize them for your application.`,
+- Medication, allergy, condition and plan fields retain the codes actually selected through the existing clinical components. Assessment and orders reuse Assessment's concern / assertion model. The default template and interface are English. Use \`messages\` for interface translations and configure section labels, prompts and common findings in the application’s language. Kerebron toolbar translation remains an upstream limitation.`,
       },
     },
     catalog: {
@@ -230,10 +232,19 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
           target: 'clinical-lists-medicationlist',
           why: 'Medication reconciliation is recorded in the visit response.',
         },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-allergylist',
+          why: 'The visit allergy field uses AllergyManager over AllergyList for coded capture and explicit no-known-allergies status; use AllergyManager directly for a standalone chart list.',
+        },
       ],
     },
   },
   args: {
+    definition: {
+      ...DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+      encounterDate: '2026-10-10', // Explicit date for this fictional visit.
+    },
     patientContext: PATIENT_CONTEXT,
     initialResponses: EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
     codeLookup: {
@@ -252,6 +263,26 @@ export const RichEdit: Story = { args: { defaultMode: 'rich' } };
 
 export const FinalView: Story = { args: { defaultMode: 'view' } };
 
+/** Deliberately expanded control text also exercises the inherited clinical translations. */
+export const Localized: Story = {
+  args: {
+    messages: {
+      labels: {
+        'Anonymous patient': 'Paciente anónimo',
+        eSheet: 'Formulario clínico con captura estructurada y codificada',
+        RichEdit: 'Editor de narrativa clínica enriquecida',
+        View: 'Revisión final del documento clínico',
+        'Go to section': 'Ir a la sección del documento clínico',
+        Systolic: 'Sistólica',
+        Diastolic: 'Diastólica',
+        'Add measurement set': 'Agregar un conjunto de mediciones',
+        'Visit note preview': 'Vista previa del documento clínico',
+        'Save visit': 'Guardar la visita',
+      },
+    },
+  },
+};
+
 export const Mobile: Story = {
   render: (args) => (
     <div className="mx-auto max-w-[390px]">
@@ -265,6 +296,7 @@ export const NarrativeExam: Story = {
     definition: {
       ...DEFAULT_ENCOUNTER_VISIT_DEFINITION,
       id: 'narrative-exam-visit',
+      encounterDate: '2026-10-10',
       sections: DEFAULT_ENCOUNTER_VISIT_DEFINITION.sections.map((section) =>
         section.id === 'exam'
           ? { id: 'exam', title: 'Physical examination', kind: 'narrative' }

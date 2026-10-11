@@ -452,6 +452,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
               continue;
             const markdown = new globalThis.TextDecoder().decode(buffer);
             valueRef.current = markdown;
+            loadedDocRef.current = doc;
+            lastSerializedDoc.current = doc;
             return markdown;
           }
         },

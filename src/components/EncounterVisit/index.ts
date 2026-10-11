@@ -8,6 +8,11 @@ export * from './definition';
 export * from './model';
 export * from './mcp';
 export * from './mdy';
+export type {
+  EncounterVisitMessages,
+  EncounterMessageTranslator,
+  EncounterMessageValues,
+} from './messages';
 export { EncounterVitalsField } from './EncounterVitalsField';
 export { EncounterAssessmentField } from './EncounterAssessmentField';
 export { EncounterNarrativeField } from './EncounterNarrativeField';

@@ -3,6 +3,65 @@
 Breaking-change recipes for `@mieweb/ui` consumers. Each section is anchored
 so release notes and dev-console notices can deep-link to it.
 
+## eSheet and EncounterVisit
+
+The `@mieweb/ui/esheet` entry now includes EncounterVisit. Install matching
+`@esheet/core`, `@esheet/fields`, `@esheet/renderer` and `@esheet/builder` versions
+(0.0.6-17 or newer). They are optional peers because the default UI entry does
+not use eSheet. The shared entry exports the builder even when your application
+only renders visits, so all four peers must be present.
+
+Builder and Renderer import their `@esheet/styles` dependency automatically.
+Remove copied or aliased `renderer/src/index.output.css` and
+`builder/src/index.output.css` files; one shared stylesheet replaces both.
+An explicit CSS entry is available at `@esheet/styles/styles.css`. Continue
+loading `@mieweb/ui/styles.css` for composed UI components.
+
+EncounterVisit's RichEdit mode additionally requires the Kerebron peers
+`@kerebron/editor`, `@kerebron/editor-kits`, `@kerebron/extension-basic-editor`
+and `@kerebron/wasm` (tested together at 0.8.12). Import `@mieweb/ui/kerebron.css`
+and serve `@kerebron/wasm/assets` at `/kerebron-wasm`. Apply the Kerebron patches
+described by the RichEditor documentation for its toolbar and Markdown marks.
+
+**Required for Kerebron 0.8.12:** configure the consuming application's package
+manager to resolve every `prosemirror-view` dependency to **1.42.3**. Kerebron
+pins 1.40.0, while the protected MDY link bridge uses 1.42.3. Two view instances
+can make decorations incompatible and leave the older view's behavior active.
+The overrides in this library's checkout do not propagate to installed apps.
+
+For pnpm 10, add to the host's `pnpm-workspace.yaml`:
+
+```yaml
+overrides:
+  prosemirror-view: "1.42.3"
+```
+
+For npm, add to the host's `package.json`:
+
+```json
+{
+  "overrides": {
+    "prosemirror-view": "1.42.3"
+  }
+}
+```
+
+For Yarn, add to the host's `package.json`:
+
+```json
+{
+  "resolutions": {
+    "prosemirror-view": "1.42.3"
+  }
+}
+```
+
+If the host also declares `prosemirror-view` directly, pin that dependency to
+1.42.3. Reinstall and inspect `pnpm why prosemirror-view`,
+`npm ls prosemirror-view` or `yarn why prosemirror-view`: every resolved instance
+must be 1.42.3. Keep this requirement until a tested Kerebron release shares the
+same view version without an override.
+
 ## Chat composer
 
 **`MessageComposer` was retired in 0.10.0.** The shared **`ChatComposer`** is

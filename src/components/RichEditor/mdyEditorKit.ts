@@ -213,9 +213,8 @@ const mdyPluginKey = new PluginKey('mdy-field-links');
 
 export function createMdyFieldPlugin(options: MdyEditorOptions): Plugin {
   const activate = (id: string, event: Event) => {
-    if (options.isDisabled?.()) return false;
     event.preventDefault();
-    options.onFieldActivate(id);
+    if (!options.isDisabled?.()) options.onFieldActivate(id);
     return true;
   };
   const targetId = (event: Event) => {

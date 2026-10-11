@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { EncounterConditionsField } from './EncounterConditionsField';
 import type { ConditionConcern } from '../ProblemList';
@@ -176,7 +176,53 @@ describe('EncounterConditionsField', () => {
       initialAnswer: '{"concerns":[{"coding":"wrong"}]}',
     });
     expect(screen.getByRole('alert')).toHaveTextContent('"coding":"wrong"');
+    expect(screen.getByLabelText('Original Conditions answer')).toHaveAttribute(
+      'tabindex',
+      '0'
+    );
     expect(Lookup).not.toHaveBeenCalled();
     expect(onResponse).not.toHaveBeenCalled();
+  });
+});
+
+describe('explicit assertion date and uncoded condition configuration', () => {
+  it('requires explicit date entry and records a historical encounter date without clock inference', () => {
+    const { latest, Lookup } = renderConditions(undefined, {
+      encounterDate: null,
+    });
+    expect(screen.getByLabelText('Assertion date')).toHaveValue('');
+    expect(Lookup).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('Assertion date'), {
+      target: { value: '2020-02-29' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
+    expect(latest<ConditionsValue>().concerns[0].assertions[0].date).toBe(
+      '2020-02-29'
+    );
+  });
+  it('rejects a delayed coded selection after the explicit date is cleared', () => {
+    const { lookupProps, onResponse } = renderConditions();
+    const delayed = lookupProps().onSelect;
+    fireEvent.change(screen.getByLabelText('Assertion date'), {
+      target: { value: '' },
+    });
+    act(() => delayed?.(conditionPick));
+    expect(onResponse).not.toHaveBeenCalled();
+  });
+  it('allows an explicit uncoded condition through the proper condition editor when coding is optional', () => {
+    const { latest } = renderConditions(undefined, {
+      provider: false,
+      requireCoding: false,
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.change(dialog.getByLabelText(/Problem name/), {
+      target: { value: 'Explicit uncoded symptom' },
+    });
+    fireEvent.click(dialog.getByRole('button', { name: /save/i }));
+    const assertion = latest<ConditionsValue>().concerns[0].assertions[0];
+    expect(assertion.text).toBe('Explicit uncoded symptom');
+    expect(assertion.coding).toEqual([]);
+    expect(assertion.date).toBe('2026-10-10');
   });
 });

@@ -321,6 +321,10 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@esheet/builder": ">=0.0.6-17",
+    "@esheet/core": ">=0.0.6-17",
+    "@esheet/fields": ">=0.0.6-17",
+    "@esheet/renderer": ">=0.0.6-17",
     "@kerebron/editor": ">=0.8.12",
     "@kerebron/editor-kits": ">=0.8.12",
     "@kerebron/extension-basic-editor": ">=0.8.12",
@@ -352,6 +356,18 @@
     "yjs": ">=13.6.0"
   },
   "peerDependenciesMeta": {
+    "@esheet/builder": {
+      "optional": true
+    },
+    "@esheet/core": {
+      "optional": true
+    },
+    "@esheet/fields": {
+      "optional": true
+    },
+    "@esheet/renderer": {
+      "optional": true
+    },
     "@xyflow/react": {
       "optional": true
     },

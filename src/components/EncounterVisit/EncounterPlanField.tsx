@@ -9,8 +9,11 @@ import { currentAssertion, type ConditionConcern } from '../ProblemList';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 import { validateEncounterConditions, validateEncounterPlan } from './model';
 import type { EncounterPlanValue } from './types';
+import { useEncounterMessages } from './messages';
 import {
   clinicalAssessmentClasses,
+  clinicalAnswerResponse,
+  clinicalRequiresCoding,
   codedOrderSearch,
   InvalidClinicalAnswer,
   reorderClinicalEntries,
@@ -111,6 +114,8 @@ export function EncounterPlanField({
     () => readPlan(response?.answer),
     [response?.answer]
   );
+  const m = useEncounterMessages();
+  const requireCoding = clinicalRequiresCoding(field);
   const state = useClinicalFormState(form);
   const codeLookup = useCodeLookupConfig();
   const readOnly =
@@ -130,7 +135,7 @@ export function EncounterPlanField({
     [state]
   );
   const definition = field.definition as { question?: string };
-  const label = definition.question ?? 'Plan';
+  const label = definition.question ?? m('Plan');
   const commit = (update: (next: EncounterPlanValue) => EncounterPlanValue) => {
     if (
       !canEdit.current ||
@@ -139,16 +144,20 @@ export function EncounterPlanField({
       !currentValue.current
     )
       return;
-    onResponse({
-      ...(form.getState().responses[field.definition.id] ??
-        currentResponse.current),
-      answer: JSON.stringify(update(currentValue.current)),
-      _ai: false,
-    });
+    onResponse(
+      clinicalAnswerResponse(
+        form.getState().responses[field.definition.id] ??
+          currentResponse.current,
+        JSON.stringify(update(currentValue.current))
+      )
+    );
   };
   const renderSearch = React.useMemo(
-    () => (codeLookup ? codedOrderSearch(codeLookup) : undefined),
-    [codeLookup]
+    () =>
+      codeLookup || !requireCoding
+        ? codedOrderSearch(codeLookup, requireCoding, m)
+        : undefined,
+    [codeLookup, requireCoding, m]
   );
 
   if (!value)
@@ -163,15 +172,15 @@ export function EncounterPlanField({
         title={null}
         className={clinicalAssessmentClasses}
         readOnly={readOnly}
-        rowActions={codeLookup ? ['add-order'] : []}
+        rowActions={codeLookup || !requireCoding ? ['add-order'] : []}
         addModes={['order']}
         addFormLabel="Add plan order"
         defaultAddMode="order"
         renderOrderSearch={renderSearch}
         onAddOrder={
-          codeLookup
+          codeLookup || !requireCoding
             ? (item, order) => {
-                if (!order.code) return;
+                if (requireCoding && !order.code) return;
                 commit((next) => ({
                   ...next,
                   orders: [
@@ -225,9 +234,9 @@ export function EncounterPlanField({
           }))
         }
       />
-      {!readOnly && !codeLookup && (
+      {!readOnly && requireCoding && !codeLookup && (
         <p className="text-muted-foreground text-sm">
-          Coded order search is unavailable.
+          {m('Coded order search is unavailable.')}
         </p>
       )}
     </section>

@@ -138,7 +138,7 @@ function assertJsonValue(value: unknown, seen = new Set<object>()): void {
   if (value === null || typeof value === 'string' || typeof value === 'boolean')
     return;
   if (typeof value === 'number' && Number.isFinite(value)) return;
-  if (typeof value !== 'object' || value === null) {
+  if (typeof value !== 'object') {
     throw new ToolError(
       'INVALID_ARGUMENT',
       'The value must contain only valid JSON values.'
@@ -222,7 +222,19 @@ export function createEncounterVisitTools(
   ): EncounterVisitSnapshot {
     const currentDefinition = definition();
     const previous = options.getResponses();
-    const next = { ...previous, [fieldId]: { ...response, _ai: true } };
+    const replacement = { ...response, _ai: true };
+    // Narrative and structured writes replace answer storage, including invalid imports.
+    // Choices alone keep selection storage, and setObservation supplies their new identity.
+    const target = currentDefinition.sections.find(
+      ({ id }) => id === sectionId
+    );
+    const isChoice = target?.observations?.some(
+      (observation) =>
+        getEncounterFieldId(sectionId, observation.id) === fieldId &&
+        observation.type === 'choice'
+    );
+    if (!isChoice) delete replacement.selected;
+    const next = { ...previous, [fieldId]: replacement };
     const issueKey = (issue: EncounterValidationIssue) =>
       JSON.stringify([
         issue.sectionId,
@@ -612,6 +624,17 @@ const readingSchema = {
     site: { type: 'string' },
   },
   required: ['id'],
+  anyOf: [
+    'systolic',
+    'diastolic',
+    'pulse',
+    'respiratoryRate',
+    'temperature',
+    'oxygenSaturation',
+    'height',
+    'weight',
+    'pain',
+  ].map((key) => ({ required: [key] })),
   dependentRequired: { systolic: ['diastolic'], diastolic: ['systolic'] },
   additionalProperties: false,
 };
@@ -694,7 +717,7 @@ export const ENCOUNTER_VISIT_TOOL_DEFINITIONS: EncounterVisitMcpToolDefinition[]
     ),
     tool(
       'encounter_visit_update_section',
-      'Replace one clinical section using a JSON object or serialized JSON string. Clinical codes are required when the section declares requireCoding. Shapes: conditions {concerns:[ConditionConcern]}; plan {orders:[AssessmentOrder]} (concernId links to conditions/assessment); medications {medications:[{id,name,status,code:{system,code},...}]}; allergies {allergies:[{id,allergen,...}],noKnownAllergies?:boolean}; assessment {concerns:[ConditionConcern],items:[AssessmentItem],orders:[AssessmentOrder]}. Medication status is unreconciled, taking, taking-noncompliant, not-taking or unknown. Inspect existing content before replacing it.',
+      'Replace one clinical section using a JSON object or serialized JSON string. Clinical codes are required unless the section explicitly sets requireCoding to false. Shapes: conditions {concerns:[ConditionConcern]}; plan {orders:[AssessmentOrder]} (concernId links to conditions/assessment); medications {medications:[{id,name,status,code:{system,code},...}]}; allergies {allergies:[{id,allergen,...}],noKnownAllergies?:boolean}; assessment {concerns:[ConditionConcern],items:[AssessmentItem],orders:[AssessmentOrder]}. Medication status is unreconciled, taking, taking-noncompliant, not-taking or unknown. Inspect existing content before replacing it.',
       { sectionId: idSchema, value: { type: ['object', 'string'] } },
       ['sectionId', 'value']
     ),

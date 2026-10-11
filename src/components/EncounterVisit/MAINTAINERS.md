@@ -54,16 +54,31 @@ refining a condition must not silently revise a recorded assessment.
 The host supplies its terminology catalog through `EncounterVisit.codeLookup`
 or an enclosing `CodeLookupProvider`. Keep the context scope mounted when lookup
 wiring appears, changes or disappears so a late catalog load cannot reset the
-visit draft. New clinical entries require a selected
-code. An absent provider disables coded capture; it must not introduce a
+visit draft. Clinical entries require a selected
+code by default (`section.requireCoding ?? true`). An absent provider disables coded capture; it must not introduce a
 free-text fallback or fabricated code. Medication lookup uses the medication
 domain; conditions use condition codes, and non-drug allergies require substance
 concepts in the host's condition-domain SNOMED catalog. Default definitions set
 `requireCoding: true`; legacy imported uncoded records remain visible with
-"Coding required" and fail validation until coded. Standalone medication/allergy
+"Coding required" and fail validation until coded. Explicit `requireCoding: false`
+enables the existing clinical components' uncoded entry paths in both UI and MCP.
+Standalone medication/allergy
 components retain their existing behavior unless `requireCode` is enabled.
 Only an explicit no-known-allergies flag exports
 [SNOMED CT 716186003](https://www.hl7.org/fhir/uv/ipa/STU1/AllergyIntolerance-NKAExample.html).
+
+Assertion dates are real ISO calendar dates (`YYYY-MM-DD`). The host may provide
+`definition.encounterDate`; otherwise the Conditions/Assessment fields require
+an explicit date entry before creating an assertion. Never infer the clinical
+date from the device clock. Dates and codes already on imported records remain
+unchanged until the user explicitly edits them.
+
+`EncounterVisit.messages` accepts an English-keyed `labels` dictionary and/or a
+typed `translate(message, values)` callback. Built-in shell, field, validation
+and composed healthcare editor controls inherit this stable context. `{name}`
+placeholders support reordering interpolated values. Translations change UI
+messages, never coded values, authored prose or stored assertions. The host
+localizes its section definitions and common-finding labels/text explicitly.
 
 The layout is a continuous report, with a compact sticky section selector
 instead of a sidebar. `src/styles/encounter-visit.css` removes questionnaire
@@ -104,6 +119,11 @@ The upstream support status was verified on 2026-10-10:
   span opens its native eSheet section, including coordinated inputs. Use
   `mdy:<alias>` links because the current Markdown converter rewrites ordinary
   fragment identifiers from their display text.
+  Hosts using Kerebron 0.8.12 must enforce one `prosemirror-view` 1.42.3 instance
+  with the package-manager overrides documented in
+  [MIGRATION.md](../../../MIGRATION.md#esheet-and-encountervisit). Repository
+  overrides do not propagate to consumers. Missing optional RichEdit peers are
+  caught by the local editor boundary; eSheet and View retain the draft.
 - [Templit's MDY specification](https://github.com/mieweb/templit/blob/main/doc/mdy-specification.md)
   and [eSheet template sample](https://github.com/mieweb/templit/blob/main/samples/esheet.mdyt)
   are available in published `@mieweb/templit` 0.2.0. No MDY issue was open in

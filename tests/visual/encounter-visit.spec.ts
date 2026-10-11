@@ -795,3 +795,58 @@ for (const variant of [
     });
   });
 }
+
+test('expanded translated controls fit a phone and keep section navigation below the mode tabs', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(
+    '/iframe.html?id=encounter-orders-encountervisit--localized&viewMode=story'
+  );
+  await expect(page.getByText('Paciente anónimo')).toBeVisible();
+  const navigation = page.getByRole('combobox', {
+    name: 'Ir a la sección del documento clínico',
+  });
+  await navigation.selectOption('vitals');
+  await expect(navigation).toBeInViewport();
+  const tabs = await page.getByRole('tablist').boundingBox();
+  const nav = await page
+    .getByRole('navigation', { name: 'Visit sections' })
+    .boundingBox();
+  expect(nav!.y).toBeGreaterThanOrEqual(tabs!.y + tabs!.height - 1);
+  const modeBar = await page.locator('.encounter-mode-bar').boundingBox();
+  const target = await page
+    .locator('[data-field-id="encounter:vitals:section"]')
+    .boundingBox();
+  expect(target!.y).toBeGreaterThanOrEqual(modeBar!.y + modeBar!.height);
+  await page.screenshot({
+    path: test.info().outputPath('translated-phone.png'),
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+  await page
+    .getByRole('button', { name: 'Agregar un conjunto de mediciones' })
+    .click();
+  await page.getByLabel('Sistólica', { exact: true }).fill('142');
+  await page.getByLabel('Diastólica', { exact: true }).fill('88');
+  await page
+    .getByRole('tab', {
+      name: 'Revisión final del documento clínico',
+      exact: true,
+    })
+    .click();
+  const preview = page.getByRole('region', {
+    name: 'Vista previa del documento clínico',
+  });
+  await expect(preview).toHaveAttribute('aria-busy', 'false');
+  await expect(preview).toContainText('142/88');
+  await expect(preview).toContainText('back pain');
+  await injectAxe(page);
+  await checkA11y(page, '[data-slot="encounter-visit"]', {
+    detailedReport: true,
+    detailedReportOptions: { html: true },
+  });
+});

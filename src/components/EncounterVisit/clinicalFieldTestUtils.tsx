@@ -13,6 +13,7 @@ import type { CodeLookupProps } from '../CodeLookup/CodeLookup';
 import type { CodifyResult } from '../CodeLookup/engine';
 import type { ConditionConcern } from '../ProblemList';
 import { renderWithTheme } from '../../test/test-utils';
+import { MessagesProvider, type ComponentMessages } from '../../utils/messages';
 
 export const hypertensionConcern: ConditionConcern = {
   concernId: 'hypertension',
@@ -62,6 +63,9 @@ export function renderClinicalField(
     seedConcerns?: ConditionConcern[];
     initialAnswer?: string;
     initialResponse?: FieldResponse;
+    encounterDate?: string | null;
+    requireCoding?: boolean;
+    messages?: ComponentMessages;
   } = {}
 ): RenderResult & {
   onResponse: ReturnType<typeof vi.fn>;
@@ -93,6 +97,13 @@ export function renderClinicalField(
       definition: {
         id: 'test-field',
         fieldType,
+        _sourceData: {
+          encounterDate:
+            options.encounterDate === null
+              ? undefined
+              : (options.encounterDate ?? '2026-10-10'),
+          encounterRequireCoding: options.requireCoding ?? true,
+        },
         question:
           fieldType === 'encounterConditions'
             ? 'Conditions'
@@ -148,12 +159,16 @@ export function renderClinicalField(
         }}
       />
     );
-    return options.provider === false ? (
-      child
-    ) : (
-      <CodeLookupProvider component={Lookup} indexUrl="/clinical-codify">
-        {child}
-      </CodeLookupProvider>
+    return (
+      <MessagesProvider messages={options.messages}>
+        {options.provider === false ? (
+          child
+        ) : (
+          <CodeLookupProvider component={Lookup} indexUrl="/clinical-codify">
+            {child}
+          </CodeLookupProvider>
+        )}
+      </MessagesProvider>
     );
   }
   const rendered = renderWithTheme(<Harness />);

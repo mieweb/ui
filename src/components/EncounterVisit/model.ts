@@ -1,6 +1,7 @@
 import { currentAssertion, type ConditionConcern } from '../ProblemList';
 import type { FieldResponse } from '@esheet/core';
 import { DateTime } from 'luxon';
+import { isEncounterDate } from './date';
 import type { Medication } from '../MedicationList';
 import type { Allergy } from '../AllergyList';
 import {
@@ -452,7 +453,7 @@ export function validateEncounterAssessment(
         !record(assertion) ||
         !nonempty(assertion.id) ||
         !nonempty(assertion.text) ||
-        typeof assertion.date !== 'string' ||
+        !isEncounterDate(assertion.date) ||
         ![
           'unconfirmed',
           'provisional',
@@ -464,7 +465,7 @@ export function validateEncounterAssessment(
         !optionalStrings(assertion, ['note'])
       ) {
         add(
-          'Each assertion requires an id, text, date and verification status.',
+          'Each assertion requires an id, text, a valid YYYY-MM-DD date and verification status.',
           assertionPath
         );
         return;
@@ -729,7 +730,7 @@ function validateCoding(
   fieldId: string,
   externalConcerns: readonly ConditionConcern[] = []
 ): EncounterValidationIssue[] {
-  if (!section.requireCoding) return [];
+  if (!(section.requireCoding ?? true)) return [];
   const issues: EncounterValidationIssue[] = [];
   const add = (path: string) =>
     issues.push({
@@ -1156,7 +1157,7 @@ function exportCustom(
         medication.sig,
         `Status: ${medication.status}`,
         medication.note,
-        section.requireCoding && !medication.code
+        (section.requireCoding ?? true) && !medication.code
           ? 'Coding required'
           : undefined,
       ]
@@ -1190,7 +1191,9 @@ function exportCustom(
         allergy.severity,
         allergy.inactive ? 'inactive' : undefined,
         allergy.note,
-        section.requireCoding && !allergy.code ? 'Coding required' : undefined,
+        (section.requireCoding ?? true) && !allergy.code
+          ? 'Coding required'
+          : undefined,
       ]
         .filter(Boolean)
         .join('; '),
@@ -1211,7 +1214,7 @@ function exportCustom(
             `Status: ${concern.clinicalStatus}`,
             `Verification: ${assertion.verificationStatus}`,
             assertion.note,
-            section.requireCoding && !assertion.coding?.length
+            (section.requireCoding ?? true) && !assertion.coding?.length
               ? 'Coding required'
               : undefined,
           ]
@@ -1247,7 +1250,7 @@ function exportCustom(
           `Verification: ${assertion.verificationStatus}`,
           assertion.note,
           item.note,
-          section.requireCoding && !assertion.coding?.length
+          (section.requireCoding ?? true) && !assertion.coding?.length
             ? 'Coding required'
             : undefined,
         ]
@@ -1272,7 +1275,9 @@ function exportCustom(
         order.bodySite,
         order.referTo,
         order.notes,
-        section.requireCoding && !order.code ? 'Coding required' : undefined,
+        (section.requireCoding ?? true) && !order.code
+          ? 'Coding required'
+          : undefined,
       ]
         .filter(Boolean)
         .join('; '),

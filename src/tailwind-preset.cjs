@@ -15,6 +15,7 @@ module.exports = {
     'sm:inset-8',
     'sm:rounded-lg',
     'top-11',
+    'max-w-[50%]',
     '[&_[data-slot=clinical-list-heading]]:border-0',
     '[&_[data-slot=clinical-list-row]]:px-0',
     '[&>span]:text-wrap',

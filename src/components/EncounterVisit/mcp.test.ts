@@ -40,9 +40,24 @@ const definition: EncounterVisitDefinition = {
       ],
     },
     { id: 'vitals', title: 'Vitals', kind: 'vitals' },
-    { id: 'medications', title: 'Medications', kind: 'medications' },
-    { id: 'allergies', title: 'Allergies', kind: 'allergies' },
-    { id: 'assessment', title: 'Assessment', kind: 'assessment' },
+    {
+      id: 'medications',
+      title: 'Medications',
+      kind: 'medications',
+      requireCoding: false,
+    },
+    {
+      id: 'allergies',
+      title: 'Allergies',
+      kind: 'allergies',
+      requireCoding: false,
+    },
+    {
+      id: 'assessment',
+      title: 'Assessment',
+      kind: 'assessment',
+      requireCoding: false,
+    },
   ],
 };
 
@@ -650,4 +665,92 @@ describe('EncounterVisit MCP tools/call adapter', () => {
       },
     });
   });
+});
+
+describe('MCP response replacement repairs imported selections', () => {
+  it.each([
+    {
+      sectionId: 'hpi',
+      fieldId: getEncounterFieldId('hpi'),
+      write: (tools: ReturnType<typeof createEncounterVisitTools>) =>
+        tools.setNarrative('hpi', 'Explicit narrative replacement'),
+    },
+    {
+      sectionId: 'medications',
+      fieldId: getEncounterFieldId('medications', 'value'),
+      write: (tools: ReturnType<typeof createEncounterVisitTools>) =>
+        tools.updateSection('medications', { medications: [] }),
+    },
+  ])(
+    'clears stale selected storage for $sectionId without discarding host metadata',
+    ({ fieldId, write }) => {
+      const original = {
+        answer: 'Previous content',
+        selected: { id: 'old', value: 'Old selection' },
+        attributes: { host: 'retained' },
+      };
+      const ctx = fixture({ [fieldId]: original });
+      expect(write(ctx.tools).success).toBe(true);
+      expect(ctx.responses()[fieldId]).not.toHaveProperty('selected');
+      expect(ctx.responses()[fieldId]).toMatchObject({
+        attributes: { host: 'retained' },
+        _ai: true,
+      });
+      expect(original.selected.value).toBe('Old selection');
+    }
+  );
+  it('publishes measurement presence constraints so id-only readings fail schema validation', () => {
+    const tool = ENCOUNTER_VISIT_TOOL_DEFINITIONS.find(
+      ({ name }) => name === 'encounter_visit_upsert_vitals'
+    )!;
+    const schema = (
+      tool.inputSchema.properties as Record<
+        string,
+        { anyOf: { required: string[] }[] }
+      >
+    ).reading;
+    const matches = (reading: Record<string, unknown>) =>
+      schema.anyOf.some(({ required }) =>
+        required.every((key) => Object.hasOwn(reading, key))
+      );
+    expect(matches({ id: 'first' })).toBe(false);
+    expect(matches({ id: 'first', recordedAt: '2026-10-10T10:00:00Z' })).toBe(
+      false
+    );
+    expect(matches({ id: 'first', pulse: 0 })).toBe(true);
+    expect(matches({ id: 'first', systolic: 120, diastolic: 80 })).toBe(true);
+    expect(
+      fixture().tools.upsertVitals('vitals', { id: 'first' }).success
+    ).toBe(false);
+  });
+});
+
+describe('MCP clinical assertion dates', () => {
+  it.each(['', '2026-02-30', '2025-02-29'])(
+    'rejects invalid assertion date %j without committing clinical changes',
+    (date) => {
+      const ctx = fixture();
+      const result = ctx.tools.updateSection('assessment', {
+        concerns: [
+          {
+            concernId: 'condition',
+            clinicalStatus: 'active',
+            assertions: [
+              {
+                id: 'assertion',
+                text: 'Explicit condition',
+                date,
+                verificationStatus: 'unconfirmed',
+              },
+            ],
+          },
+        ],
+        items: [],
+        orders: [],
+      });
+      expect(result.success).toBe(false);
+      expect(ctx.setResponses).not.toHaveBeenCalled();
+      expect(errorCode(result)).toBe('INVALID_RESPONSE');
+    }
+  );
 });

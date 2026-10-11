@@ -8,6 +8,7 @@ import type {
   EncounterVitalsValue,
 } from './types';
 import { validateEncounterVitals } from './model';
+import { useEncounterMessages } from './messages';
 
 type NumericVital = EncounterVitalNumericKey;
 
@@ -91,6 +92,14 @@ function newReadingId(): string {
   return globalThis.crypto.randomUUID();
 }
 
+/** Every UTF-16 code unit becomes a whitespace-free, collision-free ID segment. */
+function readingIdSegment(id: string): string {
+  return id
+    .split('')
+    .map((part) => part.charCodeAt(0).toString(16).padStart(4, '0'))
+    .join('');
+}
+
 /** Repeatable measurements stored together as one native eSheet JSON answer. */
 export function EncounterVitalsField({
   field,
@@ -100,6 +109,7 @@ export function EncounterVitalsField({
   isReadOnly,
   onResponse,
 }: FieldComponentProps): React.JSX.Element {
+  const m = useEncounterMessages();
   const instanceId = React.useId();
   const parsed = React.useMemo(
     () => readVitals(response?.answer),
@@ -114,7 +124,11 @@ export function EncounterVitalsField({
   const issues = validateEncounterVitals(parsed.value, definition.id);
 
   const commit = (value: EncounterVitalsValue) => {
-    if (!readOnly) onResponse({ answer: JSON.stringify(value) });
+    if (!readOnly) {
+      const next = { ...response, answer: JSON.stringify(value), _ai: false };
+      delete next.selected;
+      onResponse(next);
+    }
   };
   const updateReading = (id: string, patch: Partial<EncounterVitalReading>) => {
     commit({
@@ -151,7 +165,7 @@ export function EncounterVitalsField({
     unit: string
   ) => {
     const draftKey = `${reading.id}:${key}`;
-    const inputId = `${instanceId}-${reading.id}-${key}`;
+    const inputId = `${instanceId}-${readingIdSegment(reading.id)}-${key}`;
     const savedDraft = drafts[draftKey];
     const formatting =
       savedDraft && Object.is(savedDraft.baseline, reading[key])
@@ -170,7 +184,7 @@ export function EncounterVitalsField({
       <div key={key} className="relative min-w-0">
         <Input
           id={inputId}
-          label={label}
+          label={m(label)}
           aria-describedby={`${inputId}-unit`}
           type="text"
           inputMode="decimal"
@@ -182,7 +196,13 @@ export function EncounterVitalsField({
           }
           readOnly={readOnly}
           disabled={!isEnabled}
-          error={persistedDraft ? 'Enter a finite number.' : issue?.message}
+          error={
+            persistedDraft
+              ? m('Enter a finite number.')
+              : issue
+                ? m(issue.message)
+                : undefined
+          }
           onChange={(event) => {
             if (readOnly) return;
             const text = event.target.value;
@@ -213,24 +233,34 @@ export function EncounterVitalsField({
   };
 
   return (
-    <section aria-label={definition.question ?? 'Vitals'} className="space-y-3">
+    <section
+      aria-label={definition.question ?? m('Vitals')}
+      className="space-y-3"
+    >
       <p className="text-muted-foreground text-sm">
-        Leave unmeasured values blank.
+        {m('Leave unmeasured values blank.')}
       </p>
       {parsed.error && (
         <div
           role="alert"
           className="border-destructive text-destructive rounded-lg border p-3"
         >
-          <p>{parsed.error}</p>
-          <pre className="mt-2 max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap">
+          <p>{m(parsed.error)}</p>
+          {/* Keyboard users must be able to scroll this retained raw answer. */}
+          {/* eslint-disable jsx-a11y/no-noninteractive-tabindex */}
+          <pre
+            tabIndex={0}
+            aria-label={m('Saved vitals answer')}
+            className="mt-2 max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap"
+          >
             {response?.answer}
           </pre>
+          {/* eslint-enable jsx-a11y/no-noninteractive-tabindex */}
         </div>
       )}
       {!parsed.error && parsed.value.readings.length === 0 && (
         <p className="text-muted-foreground text-sm">
-          No measurements recorded.
+          {m('No measurements recorded.')}
         </p>
       )}
       {parsed.value.readings.map((reading, index) => {
@@ -240,17 +270,26 @@ export function EncounterVitalsField({
         const bpIssue = readingIssues.find(
           (issue) => issue.code === 'incomplete-blood-pressure'
         );
+        const recordedAtIssue = readingIssues.find((issue) =>
+          issue.path?.endsWith('.recordedAt')
+        );
         return (
           <fieldset key={reading.id} className="min-w-0 space-y-3">
-            <legend className="sr-only">Measurement set {index + 1}</legend>
+            <legend className="sr-only">
+              {m('Measurement set {number}', { number: index + 1 })}
+            </legend>
             <div className="flex items-center justify-between gap-2">
-              <h4 className="font-semibold">Measurement set {index + 1}</h4>
+              <h4 className="font-semibold">
+                {m('Measurement set {number}', { number: index + 1 })}
+              </h4>
               {!readOnly && (
                 <Button
                   type="button"
                   variant="ghost"
                   className="min-h-11 shrink-0"
-                  aria-label={`Remove measurement set ${index + 1}`}
+                  aria-label={m('Remove measurement set {number}', {
+                    number: index + 1,
+                  })}
                   onClick={() =>
                     commit({
                       ...parsed.value,
@@ -263,7 +302,7 @@ export function EncounterVitalsField({
                     })
                   }
                 >
-                  Remove
+                  {m('Remove')}
                 </Button>
               )}
             </div>
@@ -271,21 +310,25 @@ export function EncounterVitalsField({
               <fieldset
                 className="col-span-2 min-w-0"
                 aria-describedby={
-                  bpIssue ? `${instanceId}-${reading.id}-bp-error` : undefined
+                  bpIssue
+                    ? `${instanceId}-${readingIdSegment(reading.id)}-bp-error`
+                    : undefined
                 }
               >
-                <legend className="sr-only">Blood pressure (mmHg)</legend>
+                <legend className="sr-only">
+                  {m('Blood pressure (mmHg)')}
+                </legend>
                 <div className="grid grid-cols-2 gap-3">
                   {numberInput(reading, 'systolic', 'Systolic', 'mmHg')}
                   {numberInput(reading, 'diastolic', 'Diastolic', 'mmHg')}
                 </div>
                 {bpIssue && (
                   <p
-                    id={`${instanceId}-${reading.id}-bp-error`}
+                    id={`${instanceId}-${readingIdSegment(reading.id)}-bp-error`}
                     role="alert"
                     className="text-destructive mt-1 text-sm"
                   >
-                    {bpIssue.message}
+                    {m(bpIssue.message)}
                   </p>
                 )}
               </fieldset>
@@ -296,7 +339,7 @@ export function EncounterVitalsField({
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="col-span-2 min-w-0 sm:col-span-1">
                 <Input
-                  label="Recorded at"
+                  label={m('Recorded at')}
                   type={
                     !reading.recordedAt ||
                     (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(
@@ -312,11 +355,9 @@ export function EncounterVitalsField({
                   value={reading.recordedAt ?? ''}
                   readOnly={readOnly}
                   disabled={!isEnabled}
-                  title="Optional; use the visit's local date and time."
+                  title={m("Optional; use the visit's local date and time.")}
                   error={
-                    readingIssues.find((issue) =>
-                      issue.path?.endsWith('.recordedAt')
-                    )?.message
+                    recordedAtIssue ? m(recordedAtIssue.message) : undefined
                   }
                   onChange={(event) => {
                     if (!readOnly)
@@ -327,12 +368,12 @@ export function EncounterVitalsField({
                 />
               </div>
               <Input
-                label="Position"
+                label={m('Position')}
                 className="min-h-11"
                 value={reading.position ?? ''}
                 readOnly={readOnly}
                 disabled={!isEnabled}
-                placeholder="e.g. seated"
+                placeholder={m('e.g. seated')}
                 onChange={(event) => {
                   if (!readOnly)
                     updateReading(reading.id, {
@@ -341,12 +382,12 @@ export function EncounterVitalsField({
                 }}
               />
               <Input
-                label="Measurement site"
+                label={m('Measurement site')}
                 className="min-h-11"
                 value={reading.site ?? ''}
                 readOnly={readOnly}
                 disabled={!isEnabled}
-                placeholder="e.g. left arm"
+                placeholder={m('e.g. left arm')}
                 onChange={(event) => {
                   if (!readOnly)
                     updateReading(reading.id, {
@@ -372,7 +413,7 @@ export function EncounterVitalsField({
                   role="alert"
                   className="text-destructive text-sm"
                 >
-                  {issue.message}
+                  {m(issue.message)}
                 </p>
               ))}
           </fieldset>
@@ -390,7 +431,7 @@ export function EncounterVitalsField({
             })
           }
         >
-          Add measurement set
+          {m('Add measurement set')}
         </Button>
       )}
     </section>

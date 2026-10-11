@@ -6,10 +6,48 @@ import type { CodeLookupProviderConfig } from '../CodeLookup/context';
 import { normalizeConditionCodingSystem } from '../ConditionEditor';
 import { currentAssertion } from '../ProblemList';
 import { validateEncounterConditions } from './model';
+import { isEncounterDate } from './date';
+import { useEncounterMessages } from './messages';
+import { Input } from '../Input';
+import { Button } from '../Button';
+
+function FreeClinicalEntry({
+  placeholder,
+  translate,
+  onFreeText,
+}: {
+  placeholder: string;
+  translate: (message: string) => string;
+  onFreeText?: (text: string) => void;
+}) {
+  const [text, setText] = React.useState('');
+  return (
+    <div className="flex min-w-0 flex-wrap gap-2">
+      <Input
+        aria-label={translate('Clinical entry')}
+        placeholder={placeholder}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+      />
+      <Button
+        type="button"
+        disabled={!text.trim()}
+        onClick={() => {
+          onFreeText?.(text.trim());
+          setText('');
+        }}
+      >
+        {translate('Add')}
+      </Button>
+    </div>
+  );
+}
 
 /** Coded capture shares the host's lookup without importing its worker. */
 export function codedOrderSearch(
-  config: CodeLookupProviderConfig
+  config: CodeLookupProviderConfig | null,
+  requireCoding = true,
+  translate: (message: string) => string = (message) => message
 ): Exclude<AssessmentProps['renderOrderSearch'], false | undefined> {
   const CodedOrderSearch: Exclude<
     AssessmentProps['renderOrderSearch'],
@@ -21,7 +59,16 @@ export function codedOrderSearch(
     billableOnly,
     placeholder,
     onPick,
+    onFreeText,
   }) => {
+    if (!config)
+      return (
+        <FreeClinicalEntry
+          placeholder={placeholder}
+          translate={translate}
+          onFreeText={onFreeText}
+        />
+      );
     const Lookup = config.component;
     const allowedDomains = (domains ?? [
       'med',
@@ -40,6 +87,7 @@ export function codedOrderSearch(
         bare
         clearOnSelect
         placeholder={placeholder}
+        onFreeText={requireCoding ? undefined : onFreeText}
         onSelect={(result) => {
           if (
             !result.fullid?.trim() ||
@@ -72,6 +120,7 @@ export function InvalidClinicalAnswer({
   label: string;
   answer?: string;
 }): React.JSX.Element {
+  const m = useEncounterMessages();
   return (
     <section aria-label={label}>
       <div
@@ -79,11 +128,17 @@ export function InvalidClinicalAnswer({
         className="border-destructive text-destructive rounded-lg border p-3"
       >
         <p>
-          The saved {label.toLowerCase()} answer could not be read. The original
-          answer is retained below; correct it through the visit data before
-          editing.
+          {m(
+            'The saved {label} answer could not be read. The original answer is retained below; correct it through the visit data before editing.',
+            { label }
+          )}
         </p>
-        <pre className="mt-2 max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap">
+        <pre
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable original data needs keyboard focus
+          tabIndex={0}
+          aria-label={m('Original {label} answer', { label })}
+          className="mt-2 max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap"
+        >
           {answer}
         </pre>
       </div>
@@ -156,5 +211,67 @@ export function matchingConditionCode(
         coding.code.trim().toUpperCase() ===
           picked.fullcode.trim().toUpperCase()
     )
+  );
+}
+
+/** The generated native definition carries the same default coding policy as validation. */
+export function clinicalRequiresCoding(
+  field: FieldComponentProps['field']
+): boolean {
+  return (
+    (field.definition as { _sourceData?: { encounterRequireCoding?: boolean } })
+      ._sourceData?.encounterRequireCoding ?? true
+  );
+}
+
+/** Replacing serialized clinical content must repair incompatible imported selection storage. */
+export function clinicalAnswerResponse(
+  response: FieldComponentProps['response'],
+  answer: string
+) {
+  const next = { ...response, answer, _ai: false };
+  delete next.selected;
+  return next;
+}
+
+/** New assertions use a host date or an explicit entry, never the device clock. */
+export function useEncounterAssertionDate(field: FieldComponentProps['field']) {
+  const hostDate = (
+    field.definition as { _sourceData?: { encounterDate?: string } }
+  )._sourceData?.encounterDate;
+  const [date, setDate] = React.useState(hostDate ?? '');
+  React.useEffect(() => {
+    setDate(hostDate ?? '');
+  }, [hostDate]);
+  return { date, setDate, valid: isEncounterDate(date) };
+}
+
+export function EncounterAssertionDateInput({
+  date,
+  setDate,
+}: {
+  date: string;
+  setDate: (date: string) => void;
+}) {
+  const m = useEncounterMessages();
+  const id = React.useId();
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-2">
+      <label htmlFor={id} className="text-sm">
+        {m('Assertion date')}
+      </label>
+      <Input
+        id={id}
+        type="date"
+        value={date}
+        onChange={(event) => setDate(event.target.value)}
+        className="min-h-11 w-auto"
+      />
+      {!isEncounterDate(date) && (
+        <span className="text-muted-foreground text-sm">
+          {m('Enter the encounter date before adding or changing a diagnosis.')}
+        </span>
+      )}
+    </div>
   );
 }

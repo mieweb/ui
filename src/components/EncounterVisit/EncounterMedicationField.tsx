@@ -3,7 +3,12 @@ import type { FieldComponentProps } from '@esheet/core';
 import { MedicationReconciliation, type Medication } from '../MedicationList';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 import { validateEncounterMedicationValue } from './model';
-import { useClinicalFormState } from './clinicalFieldAdapters';
+import {
+  clinicalAnswerResponse,
+  clinicalRequiresCoding,
+  useClinicalFormState,
+} from './clinicalFieldAdapters';
+import { useEncounterMessages } from './messages';
 
 interface MedicationValue {
   medications: Medication[];
@@ -41,6 +46,8 @@ export function EncounterMedicationField({
     () => readValue(response?.answer),
     [response?.answer]
   );
+  const m = useEncounterMessages();
+  const requireCoding = clinicalRequiresCoding(field);
   const codeLookup = useCodeLookupConfig();
   const state = useClinicalFormState(form);
   const readOnly =
@@ -54,34 +61,43 @@ export function EncounterMedicationField({
   const definition = field.definition as { question?: string };
   return (
     <section
-      aria-label={definition.question ?? 'Presenting medications'}
+      aria-label={definition.question ?? m('Presenting medications')}
       className="min-w-0 space-y-2"
     >
       {error ? (
         <div role="alert" className="text-destructive space-y-2 text-sm">
-          <p>{error}</p>
-          <pre className="max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap">
+          <p>{m(error)}</p>
+          <pre
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable original data needs keyboard focus
+            tabIndex={0}
+            aria-label={m('Original medication answer')}
+            className="max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap"
+          >
             {response?.answer}
           </pre>
         </div>
       ) : (
         <>
-          {!readOnly && !codeLookup && (
+          {!readOnly && requireCoding && !codeLookup && (
             <p className="text-muted-foreground text-sm">
-              Connect a medication terminology catalog to add coded medications.
+              {m(
+                'Connect a medication terminology catalog to add coded medications.'
+              )}
             </p>
           )}
-          {value.medications.some((medication) => !medication.code) && (
-            <p className="text-muted-foreground text-sm">
-              Imported medications without a code are retained. Use Correct to
-              select their catalog entries.
-            </p>
-          )}
+          {requireCoding &&
+            value.medications.some((medication) => !medication.code) && (
+              <p className="text-muted-foreground text-sm">
+                {m(
+                  'Imported medications without a code are retained. Use Correct to select their catalog entries.'
+                )}
+              </p>
+            )}
           <MedicationReconciliation
             medications={value.medications}
             title={null}
             codeLookup={codeLookup ?? false}
-            requireCode
+            requireCode={requireCoding}
             inlineAddSearch={Boolean(codeLookup)}
             readOnly={readOnly}
             className="rounded-none border-0 bg-transparent shadow-none [&_[data-slot=clinical-list-heading]]:border-0 [&_[data-slot=clinical-list-row]]:px-0 [&_button]:min-h-11 [&_input]:min-h-11 [&>[data-slot=card-content]]:p-0"
@@ -92,11 +108,12 @@ export function EncounterMedicationField({
                 form.getState().disposed
               )
                 return;
-              onResponse({
-                ...response,
-                answer: JSON.stringify({ ...value, medications }),
-                _ai: false,
-              });
+              onResponse(
+                clinicalAnswerResponse(
+                  form.getState().responses[field.definition.id] ?? response,
+                  JSON.stringify({ ...value, medications })
+                )
+              );
             }}
           />
         </>

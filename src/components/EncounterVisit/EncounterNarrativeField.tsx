@@ -5,6 +5,7 @@ import type { FieldComponentProps, FieldResponse } from '@esheet/core';
 import { Button } from '../Button';
 import { RichTextEditor } from '../RichTextEditor';
 import type { EncounterNarrativeFinding } from './types';
+import { useEncounterMessages } from './messages';
 import {
   applyEncounterNarrativeFinding,
   getEncounterNarrativeFindings,
@@ -108,6 +109,7 @@ export function EncounterNarrativeField({
   isSoftRequired,
   onResponse,
 }: FieldComponentProps): React.JSX.Element {
+  const m = useEncounterMessages();
   const editorRef = React.useRef<HTMLDivElement>(null);
   const responseRef = React.useRef(response);
   responseRef.current = response;
@@ -121,7 +123,7 @@ export function EncounterNarrativeField({
       encounterFindings?: EncounterNarrativeFinding[];
     };
   };
-  const question = definition.question || 'Narrative';
+  const question = definition.question || m('Narrative');
   const readOnly = !isPreview || !isEnabled || isReadOnly;
   const html = React.useMemo(() => responseHtml(response), [response]);
   const findings = validEncounterNarrativeFindings(
@@ -149,6 +151,7 @@ export function EncounterNarrativeField({
         : {}),
     };
     const next = { ...previous, answer, _ai: false, attributes };
+    delete next.selected;
     responseRef.current = next;
     onResponse(next);
   };
@@ -210,7 +213,7 @@ export function EncounterNarrativeField({
           );
         }}
         aria-label={question}
-        placeholder={readOnly ? 'Not documented' : 'Enter narrative…'}
+        placeholder={readOnly ? m('Not documented') : m('Enter narrative…')}
         disabled={readOnly}
         enableDictation={false}
         sanitizeHtml={sanitizeEncounterNarrativeHtml}
@@ -235,12 +238,12 @@ export function EncounterNarrativeField({
               aria-hidden="true"
               className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none"
             />
-            Common findings
+            {m('Common findings')}
           </summary>
           <div
             id={findingsId}
             role="group"
-            aria-label={`${question} common findings`}
+            aria-label={m('{question} common findings', { question })}
             className="flex flex-wrap gap-1 pb-1"
           >
             {findings.map((finding) => {
@@ -255,7 +258,10 @@ export function EncounterNarrativeField({
                   size="sm"
                   className="h-auto min-h-11 max-w-full px-2 text-start font-normal whitespace-normal [&>span]:text-wrap [&>span]:whitespace-normal"
                   title={finding.text}
-                  aria-label={`${selected ? 'Added' : 'Add'} ${finding.label}`}
+                  aria-label={m(
+                    selected ? 'Added {finding}' : 'Add {finding}',
+                    { finding: finding.label }
+                  )}
                   disabled={selected}
                   leftIcon={selected ? <Check aria-hidden="true" /> : undefined}
                   onClick={() => addFinding(finding)}

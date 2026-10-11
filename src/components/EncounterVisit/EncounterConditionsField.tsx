@@ -1,12 +1,21 @@
 import * as React from 'react';
 import type { FieldComponentProps } from '@esheet/core';
 import { ProblemList, currentAssertion } from '../ProblemList';
+import {
+  ConditionEditor,
+  type ConditionAssertionDraft,
+} from '../ConditionEditor';
+import { useEncounterMessages } from './messages';
 import { Button } from '../Button';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 import { validateEncounterConditions } from './model';
 import type { EncounterConditionsValue } from './types';
 import {
   InvalidClinicalAnswer,
+  clinicalAnswerResponse,
+  clinicalRequiresCoding,
+  EncounterAssertionDateInput,
+  useEncounterAssertionDate,
   matchingConditionCode,
   reorderClinicalEntries,
   useClinicalFormState,
@@ -44,6 +53,12 @@ export function EncounterConditionsField({
     () => readConditions(response?.answer),
     [response?.answer]
   );
+  const m = useEncounterMessages();
+  const requireCoding = clinicalRequiresCoding(field);
+  const assertionDate = useEncounterAssertionDate(field);
+  const currentDate = React.useRef(assertionDate);
+  currentDate.current = assertionDate;
+  const [manualEditing, setManualEditing] = React.useState(false);
   const state = useClinicalFormState(form);
   const codeLookup = useCodeLookupConfig();
   const readOnly =
@@ -63,7 +78,7 @@ export function EncounterConditionsField({
     mode: 'refinement' | 'revision';
   } | null>(null);
   const definition = field.definition as { question?: string };
-  const label = definition.question ?? 'Conditions';
+  const label = definition.question ?? m('Conditions');
   const commit = (
     update: (next: EncounterConditionsValue) => EncounterConditionsValue
   ) => {
@@ -74,12 +89,68 @@ export function EncounterConditionsField({
       !currentValue.current
     )
       return;
-    onResponse({
-      ...(form.getState().responses[field.definition.id] ??
-        currentResponse.current),
-      answer: JSON.stringify(update(currentValue.current)),
-      _ai: false,
+    onResponse(
+      clinicalAnswerResponse(
+        form.getState().responses[field.definition.id] ??
+          currentResponse.current,
+        JSON.stringify(update(currentValue.current))
+      )
+    );
+  };
+
+  const recordAssertion = (
+    draft: ConditionAssertionDraft,
+    pick?: { codetype: string; fullcode: string }
+  ) => {
+    if (!currentDate.current.valid || (requireCoding && !draft.coding?.length))
+      return;
+    commit((next) => {
+      const assertion = {
+        ...draft,
+        id: globalThis.crypto.randomUUID(),
+        date: currentDate.current.date,
+      };
+      if (editing)
+        return {
+          ...next,
+          concerns: next.concerns.map((concern) =>
+            concern.concernId === editing.concernId
+              ? {
+                  ...concern,
+                  assertions: [
+                    ...concern.assertions,
+                    {
+                      ...assertion,
+                      changeType: editing.mode,
+                      supersedes: currentAssertion(concern)?.id,
+                    },
+                  ],
+                }
+              : concern
+          ),
+        };
+      if (
+        pick &&
+        next.concerns.some((concern) => matchingConditionCode(concern, pick))
+      )
+        return next;
+      return {
+        ...next,
+        concerns: [
+          ...next.concerns,
+          {
+            concernId: globalThis.crypto.randomUUID(),
+            clinicalStatus: 'active',
+            source: 'manuallyAdded',
+            assertions: [assertion],
+          },
+        ],
+      };
     });
+    if (canEdit.current) {
+      setEditing(null);
+      setManualEditing(false);
+    }
   };
 
   if (!value)
@@ -96,7 +167,9 @@ export function EncounterConditionsField({
         title={null}
         readOnly={readOnly}
         actions={[
-          ...(codeLookup ? (['refine', 'revise'] as const) : []),
+          ...(assertionDate.valid && (codeLookup || !requireCoding)
+            ? (['refine', 'revise'] as const)
+            : []),
           'resolve',
           'move-up',
           'move-down',
@@ -118,6 +191,7 @@ export function EncounterConditionsField({
               concernId: concern.concernId,
               mode: action === 'refine' ? 'refinement' : 'revision',
             });
+            if (!codeLookup) setManualEditing(true);
           }
         }}
         onReorder={(ids) =>
@@ -131,12 +205,13 @@ export function EncounterConditionsField({
           }))
         }
       />
-      {!readOnly && Lookup && codeLookup && (
+      {!readOnly && <EncounterAssertionDateInput {...assertionDate} />}
+      {!readOnly && assertionDate.valid && Lookup && codeLookup && (
         <div className="min-w-0 space-y-2">
           {editingConcern && (
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span>
-                {editing?.mode === 'refinement' ? 'Refine' : 'Revise'}{' '}
+                {editing?.mode === 'refinement' ? m('Refine') : m('Revise')}{' '}
                 {currentAssertion(editingConcern)?.text}
               </span>
               <Button
@@ -145,7 +220,7 @@ export function EncounterConditionsField({
                 className="min-h-11"
                 onClick={() => setEditing(null)}
               >
-                Cancel
+                {m('Cancel')}
               </Button>
             </div>
           )}
@@ -160,11 +235,13 @@ export function EncounterConditionsField({
             initialQuery={
               editingConcern ? currentAssertion(editingConcern)?.text : ''
             }
-            aria-label={editingConcern ? 'Recode condition' : 'Add condition'}
+            aria-label={
+              editingConcern ? m('Recode condition') : m('Add condition')
+            }
             placeholder={
               editingConcern
-                ? 'Search replacement diagnosis…'
-                : 'Search conditions…'
+                ? m('Search replacement diagnosis…')
+                : m('Search conditions…')
             }
             onSelect={(pick) => {
               if (
@@ -175,12 +252,10 @@ export function EncounterConditionsField({
                 pick.domain !== 'condition'
               )
                 return;
-              commit((next) => {
-                const assertion = {
-                  id: globalThis.crypto.randomUUID(),
-                  date: new Date().toISOString().slice(0, 10),
+              recordAssertion(
+                {
                   text: pick.label,
-                  verificationStatus: 'unconfirmed' as const,
+                  verificationStatus: 'unconfirmed',
                   coding: [
                     {
                       system: pick.codetype,
@@ -189,54 +264,43 @@ export function EncounterConditionsField({
                       primary: true,
                     },
                   ],
-                };
-                if (editing) {
-                  return {
-                    ...next,
-                    concerns: next.concerns.map((concern) =>
-                      concern.concernId === editing.concernId
-                        ? {
-                            ...concern,
-                            assertions: [
-                              ...concern.assertions,
-                              {
-                                ...assertion,
-                                changeType: editing.mode,
-                                supersedes: currentAssertion(concern)?.id,
-                              },
-                            ],
-                          }
-                        : concern
-                    ),
-                  };
-                }
-                if (
-                  next.concerns.some((concern) =>
-                    matchingConditionCode(concern, pick)
-                  )
-                )
-                  return next;
-                return {
-                  ...next,
-                  concerns: [
-                    ...next.concerns,
-                    {
-                      concernId: globalThis.crypto.randomUUID(),
-                      clinicalStatus: 'active',
-                      source: 'manuallyAdded',
-                      assertions: [assertion],
-                    },
-                  ],
-                };
-              });
-              if (canEdit.current) setEditing(null);
+                },
+                pick
+              );
             }}
           />
         </div>
       )}
-      {!readOnly && !codeLookup && (
+      {!readOnly && assertionDate.valid && !requireCoding && (
+        <>
+          <Button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setManualEditing(true);
+            }}
+          >
+            {m('Other…')}
+          </Button>
+          <ConditionEditor
+            mode={
+              editing?.mode === 'refinement'
+                ? 'refine'
+                : editing
+                  ? 'revise'
+                  : 'add'
+            }
+            open={manualEditing}
+            onOpenChange={setManualEditing}
+            concern={editingConcern}
+            renderCodeSearch={false}
+            onSave={(draft) => recordAssertion(draft)}
+          />
+        </>
+      )}
+      {!readOnly && requireCoding && !codeLookup && (
         <p className="text-muted-foreground text-sm">
-          Coded condition search is unavailable.
+          {m('Coded condition search is unavailable.')}
         </p>
       )}
     </section>

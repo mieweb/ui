@@ -109,6 +109,111 @@ describe('EncounterVisit mode synchronization', () => {
     ).toThrow('The MDY form id does not match');
   });
 
+  it('rejects imported field schemas and choice options that reuse the same native IDs', () => {
+    const original = parseEncounterMdy(
+      createEncounterSnapshot(definition, {}).mdy
+    );
+    const yaml = new Document(original.frontMatter);
+    yaml.delete('encounterDefinition');
+    const source = `---\n${yaml.toString()}---\n${original.body}`;
+    expect(() =>
+      render(
+        <EncounterVisit
+          initialMdy={source}
+          definition={{
+            ...definition,
+            sections: [
+              definition.sections[0],
+              { ...definition.sections[1], kind: 'medications' },
+            ],
+          }}
+        />
+      )
+    ).toThrow('The MDY fields do not match');
+    const choices: EncounterVisitDefinition = {
+      id: definition.id,
+      title: definition.title,
+      sections: [
+        {
+          id: 'exam',
+          title: 'Exam',
+          kind: 'observations',
+          observations: [
+            {
+              id: 'finding',
+              label: 'Finding',
+              type: 'choice',
+              options: ['Yes', 'No'],
+            },
+          ],
+        },
+      ],
+    };
+    const choiceMdy = parseEncounterMdy(
+      createEncounterSnapshot(choices, {}).mdy
+    );
+    const choiceYaml = new Document(choiceMdy.frontMatter);
+    choiceYaml.delete('encounterDefinition');
+    const imported = `---\n${choiceYaml.toString()}---\n${choiceMdy.body}`;
+    expect(() =>
+      render(
+        <EncounterVisit
+          initialMdy={imported}
+          definition={{
+            ...choices,
+            sections: [
+              {
+                ...choices.sections[0],
+                observations: [
+                  {
+                    ...choices.sections[0].observations![0],
+                    options: ['Positive', 'Negative'],
+                  },
+                ],
+              },
+            ],
+          }}
+        />
+      )
+    ).toThrow('The MDY fields do not match');
+    expect(() =>
+      render(<EncounterVisit initialMdy={imported} definition={choices} />)
+    ).not.toThrow();
+  });
+
+  it('flushes rich prose and focuses the requested section after the eSheet is visible', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const { container } = render(
+      <EncounterVisit ref={ref} definition={definition} defaultMode="rich" />
+    );
+    const editor = await screen.findByRole('textbox', {
+      name: 'Encounter narrative',
+    });
+    const body = `${(editor as HTMLTextAreaElement).value}\n\nFinal unreported keystroke.`;
+    fireEvent.change(editor, { target: { value: body } });
+    const section = container.querySelector<HTMLElement>(
+      '[data-field-id="encounter:vitals:section"]'
+    )!;
+    const focus = vi.spyOn(section, 'focus');
+    focus.mockImplementation(() => {
+      expect(section.closest('[hidden]')).toBeNull();
+    });
+    const scroll = vi.fn();
+    section.scrollIntoView = scroll;
+    act(() => {
+      ref.current!.getTools().navigateToSection('vitals');
+    });
+    await waitFor(() => expect(focus).toHaveBeenCalledOnce());
+    expect(scroll).toHaveBeenCalledWith({ block: 'start', behavior: 'auto' });
+    expect(screen.getByRole('tab', { name: 'eSheet' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(ref.current!.getSnapshot().mdy).toContain(
+      'Final unreported keystroke.'
+    );
+  });
+
   it('flushes the last rich edit before switching and saving, with coded responses retained', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const onSubmit = vi.fn();

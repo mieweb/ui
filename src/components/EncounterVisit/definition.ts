@@ -1,4 +1,5 @@
 import type { FieldDefinition, FormDefinition } from '@esheet/core';
+import { isEncounterDate } from './date';
 import type {
   EncounterObservationDefinition,
   EncounterNarrativeFinding,
@@ -105,6 +106,11 @@ export function validateEncounterDefinition(
   if (!nonempty(definition.id) || !nonempty(definition.title)) {
     invalid('id and title must be nonempty strings');
   }
+  if (
+    definition.encounterDate !== undefined &&
+    !isEncounterDate(definition.encounterDate)
+  )
+    invalid('encounterDate must be a valid YYYY-MM-DD date');
   if (!Array.isArray(definition.sections) || definition.sections.length === 0) {
     invalid('at least one section is required');
   }
@@ -332,6 +338,7 @@ export function createEncounterFormDefinition(
               required: section.required,
               _sourceData: {
                 encounterRequireCoding: section.requireCoding ?? true,
+                encounterDate: definition.encounterDate,
               },
               width: 'full',
             } as unknown as FieldDefinition);

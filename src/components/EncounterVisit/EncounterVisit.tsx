@@ -31,6 +31,11 @@ import {
 import { registerEncounterFieldTypes } from './fields';
 import { createEncounterSnapshot } from './model';
 import { createEncounterVisitTools, type EncounterVisitTools } from './mcp';
+import {
+  EncounterMessagesProvider,
+  useEncounterMessages,
+  type EncounterVisitMessages,
+} from './messages';
 import type {
   EncounterResponses,
   EncounterVisitDefinition,
@@ -44,12 +49,29 @@ const EncounterMdyEditor = React.lazy(() =>
   }))
 );
 
+class EncounterEditorBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
 export interface EncounterVisitProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   'onChange' | 'onSubmit' | 'title'
 > {
   /** Supply the host's terminology catalog, or inherit the ambient provider. */
   codeLookup?: CodeLookupProviderConfig;
+  /** Translate built-in labels and messages while retaining native coded data. */
+  messages?: EncounterVisitMessages;
   /** Sections and their narrative / observation granularity. */
   definition?: EncounterVisitDefinition;
   /** Loaded once per definition.id. Change the id to open another visit. */
@@ -85,7 +107,7 @@ export const EncounterVisit = React.forwardRef<
   EncounterVisitHandle,
   EncounterVisitProps
 >(function EncounterVisit(
-  { definition, initialMdy, codeLookup, ...props },
+  { definition, initialMdy, codeLookup, messages, ...props },
   ref
 ) {
   const inheritedCodeLookup = useCodeLookupConfig();
@@ -117,21 +139,45 @@ export const EncounterVisit = React.forwardRef<
     throw new Error('The MDY form id does not match the encounter definition.');
   }
   if (parsed?.form && !parsed.definition) {
-    const fieldIds = (
+    const fieldShapes = (
       form: ReturnType<typeof createEncounterFormDefinition>
     ) => {
-      const ids: string[] = [];
+      const shapes: { id: string; shape: unknown }[] = [];
       const visitFields = (fields: (typeof form.pages)[number]['fields']) =>
         fields?.forEach((field) => {
-          ids.push(field.id);
+          const native = field as unknown as Record<string, unknown>;
+          const source = native._sourceData as
+            | Record<string, unknown>
+            | undefined;
+          const code = source?.code as
+            | { system?: unknown; code?: unknown }
+            | undefined;
+          const options = Array.isArray(native.options)
+            ? native.options
+                .map((option: { id?: unknown; value?: unknown } | null) => ({
+                  id: option?.id,
+                  value: option?.value,
+                }))
+                .sort((a, b) => String(a.id).localeCompare(String(b.id)))
+            : undefined;
+          shapes.push({
+            id: field.id,
+            shape: {
+              fieldType: field.fieldType,
+              inputType: native.inputType,
+              unit: native.unit,
+              code: code && { system: code.system, code: code.code },
+              options,
+            },
+          });
           if ('fields' in field) visitFields(field.fields);
         });
       form.pages.forEach((page) => visitFields(page.fields));
-      return ids.sort().join('\n');
+      return JSON.stringify(shapes.sort((a, b) => a.id.localeCompare(b.id)));
     };
     if (
-      fieldIds(parsed.form) !==
-      fieldIds(createEncounterFormDefinition(visitDefinition))
+      fieldShapes(parsed.form) !==
+      fieldShapes(createEncounterFormDefinition(visitDefinition))
     ) {
       throw new Error(
         'The MDY fields do not match the supplied encounter definition.'
@@ -149,7 +195,9 @@ export const EncounterVisit = React.forwardRef<
   );
   return (
     <CodeLookupContext.Provider value={codeLookup ?? inheritedCodeLookup}>
-      {session}
+      <EncounterMessagesProvider messages={messages}>
+        {session}
+      </EncounterMessagesProvider>
     </CodeLookupContext.Provider>
   );
 });
@@ -174,6 +222,7 @@ const EncounterVisitSession = React.forwardRef<
   ref
 ) {
   ensureFields();
+  const m = useEncounterMessages();
   // Content identity prevents a host's inline config object from resetting answers.
   const definitionJson = JSON.stringify(definition);
   const stableDefinition = React.useMemo(
@@ -204,6 +253,9 @@ const EncounterVisitSession = React.forwardRef<
   const [mode, setModeState] = React.useState<EncounterVisitMode>(defaultMode);
   const [richMounted, setRichMounted] = React.useState(defaultMode === 'rich');
   const [modePending, setModePending] = React.useState(false);
+  const [pendingSection, setPendingSection] = React.useState<string | null>(
+    null
+  );
   const [resolverField, setResolverField] = React.useState<string | null>(null);
   const resolverTrap = React.useRef<HTMLDivElement>(null);
   const richEditor = React.useRef<RichEditorHandle>(null);
@@ -220,6 +272,7 @@ const EncounterVisitSession = React.forwardRef<
     onSubmit,
     readOnly,
     saving,
+    m,
   });
   latest.current = {
     definition: stableDefinition,
@@ -227,6 +280,7 @@ const EncounterVisitSession = React.forwardRef<
     onSubmit,
     readOnly,
     saving,
+    m,
   };
   const responses = React.useRef(initialSeed);
   // Preserve answers when section configuration changes within this visit.
@@ -269,19 +323,25 @@ const EncounterVisitSession = React.forwardRef<
   }, [writeBody]);
 
   const setMode = React.useCallback(
-    async (next: EncounterVisitMode) => {
+    async (next: EncounterVisitMode, sectionId?: string) => {
       if (!['esheet', 'rich', 'view'].includes(next)) return;
       setModePending(true);
       try {
-        await flushEditor();
+        if (richEditor.current) await flushEditor();
         setResolverField(null);
         if (next === 'rich') setRichMounted(true);
+        if (sectionId !== undefined) {
+          setActiveSection(sectionId);
+          setPendingSection(sectionId);
+        }
         setModeState(next);
       } catch (error) {
         setSaveMessage(
           error instanceof Error
             ? error.message
-            : 'Unable to read the editor. Your draft is still here.'
+            : latest.current.m(
+                'Unable to read the editor. Your draft is still here.'
+              )
         );
       } finally {
         setModePending(false);
@@ -290,31 +350,41 @@ const EncounterVisitSession = React.forwardRef<
     [flushEditor]
   );
 
-  const focusSection = React.useCallback((sectionId: string) => {
-    if (
-      !latest.current.definition.sections.some(
-        (section) => section.id === sectionId
+  const focusSection = React.useCallback(
+    (sectionId: string) => {
+      if (
+        !latest.current.definition.sections.some(
+          (section) => section.id === sectionId
+        )
       )
-    )
-      return;
-    setActiveSection(sectionId);
-    setResolverField(null);
-    setModeState('esheet');
+        return;
+      void setMode('esheet', sectionId);
+    },
+    [setMode]
+  );
+
+  React.useLayoutEffect(() => {
+    if (mode !== 'esheet' || pendingSection === null) return;
     // Compare attributes directly: ids can contain punctuation, so no CSS escaping is needed.
-    const fieldId = getEncounterSectionFieldId(sectionId);
+    const fieldId = getEncounterSectionFieldId(pendingSection);
     const section = Array.from(
       root.current?.querySelectorAll<HTMLElement>('[data-field-id]') ?? []
     ).find((element) => element.dataset.fieldId === fieldId);
+    setPendingSection(null);
     if (!section) return;
     const toggle = section.querySelector<HTMLButtonElement>(
       'button[aria-expanded="false"]'
     );
     toggle?.click();
     section.tabIndex = -1;
-    section.style.scrollMarginTop = '6rem';
+    const modeBarHeight =
+      root.current
+        ?.querySelector<HTMLElement>('.encounter-mode-bar')
+        ?.getBoundingClientRect().height ?? 0;
+    section.style.scrollMarginTop = `${modeBarHeight + 8}px`;
     section.focus({ preventScroll: true });
     section.scrollIntoView?.({ block: 'start', behavior: 'auto' });
-  }, []);
+  }, [mode, pendingSection]);
 
   const [tools] = React.useState(() =>
     createEncounterVisitTools({
@@ -372,7 +442,9 @@ const EncounterVisitSession = React.forwardRef<
         setResolverField(id);
       } catch (error) {
         setSaveMessage(
-          error instanceof Error ? error.message : 'Unable to read the editor.'
+          error instanceof Error
+            ? error.message
+            : latest.current.m('Unable to read the editor.')
         );
       } finally {
         setModePending(false);
@@ -522,7 +594,9 @@ const EncounterVisitSession = React.forwardRef<
         if (richEditor.current) await flushEditor();
       } catch (error) {
         setSaveMessage(
-          error instanceof Error ? error.message : 'Unable to read the editor.'
+          error instanceof Error
+            ? error.message
+            : latest.current.m('Unable to read the editor.')
         );
         return;
       }
@@ -539,7 +613,7 @@ const EncounterVisitSession = React.forwardRef<
       setShowErrors(true);
       if (next.errors.length > 0) {
         setSnapshot(next);
-        setSaveMessage('Resolve the highlighted entries before saving.');
+        setSaveMessage(m('Resolve the highlighted entries before saving.'));
         focusSection(next.errors[0].sectionId);
         return;
       }
@@ -549,12 +623,14 @@ const EncounterVisitSession = React.forwardRef<
       setSaveMessage('');
       try {
         await latest.current.onSubmit(next);
-        setSaveMessage('Visit saved.');
+        setSaveMessage(latest.current.m('Visit saved.'));
       } catch (error) {
         setSaveMessage(
           error instanceof Error
             ? error.message
-            : 'Unable to save this visit. Your draft is still here.'
+            : latest.current.m(
+                'Unable to save this visit. Your draft is still here.'
+              )
         );
       } finally {
         latest.current.saving = false;
@@ -596,8 +672,10 @@ const EncounterVisitSession = React.forwardRef<
         className="flex flex-wrap items-start justify-between gap-2 px-2 pt-3 pb-2 sm:px-3"
       >
         <div className="min-w-0">
-          <p className="text-muted-foreground text-xs">Anonymous patient</p>
-          <h2 className="text-lg font-semibold">{stableDefinition.title}</h2>
+          <p className="text-muted-foreground text-xs">
+            {m('Anonymous patient')}
+          </p>
+          <h2 className="text-lg font-semibold">{m(stableDefinition.title)}</h2>
           {patientContext && (
             <p
               dir="auto"
@@ -609,8 +687,10 @@ const EncounterVisitSession = React.forwardRef<
         </div>
         <p className="text-muted-foreground text-xs">
           <bdi>
-            {documentedSections.length} of {stableDefinition.sections.length}{' '}
-            sections documented
+            {m('{count} of {total} sections documented', {
+              count: documentedSections.length,
+              total: stableDefinition.sections.length,
+            })}
           </bdi>
         </p>
       </header>
@@ -623,7 +703,7 @@ const EncounterVisitSession = React.forwardRef<
           <div
             role="tablist"
             tabIndex={-1}
-            aria-label="Visit mode"
+            aria-label={m('Visit mode')}
             className="grid grid-cols-3 gap-1"
             onKeyDown={(event) => {
               const modes: EncounterVisitMode[] = ['esheet', 'rich', 'view'];
@@ -670,49 +750,51 @@ const EncounterVisitSession = React.forwardRef<
                 tabIndex={mode === value ? 0 : -1}
                 disabled={modePending || saving}
                 className={cn(
-                  'focus-visible:ring-primary-500 min-h-11 rounded px-2 text-base focus-visible:ring-2 focus-visible:outline-none',
+                  'focus-visible:ring-primary-500 min-h-11 min-w-0 rounded px-2 text-base break-words whitespace-normal focus-visible:ring-2 focus-visible:outline-none',
                   mode === value
                     ? 'bg-muted font-semibold'
                     : 'text-muted-foreground'
                 )}
                 onClick={() => void setMode(value)}
               >
-                {value === 'esheet'
-                  ? 'eSheet'
-                  : value === 'rich'
-                    ? 'RichEdit'
-                    : 'View'}
+                {m(
+                  value === 'esheet'
+                    ? 'eSheet'
+                    : value === 'rich'
+                      ? 'RichEdit'
+                      : 'View'
+                )}
               </button>
             ))}
           </div>
+          <nav
+            hidden={mode !== 'esheet'}
+            inert={resolverField !== null}
+            aria-label={m('Visit sections')}
+            className="bg-background sticky top-11 z-20 py-1"
+          >
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor={selectId}
+                className="text-muted-foreground max-w-[50%] shrink-0 text-sm break-words"
+              >
+                {m('Go to section')}
+              </label>
+              <select
+                id={selectId}
+                className="bg-background focus-visible:ring-primary-500 min-h-11 min-w-0 flex-1 rounded px-1 text-base focus-visible:ring-2 focus-visible:outline-none"
+                value={activeSection}
+                onChange={(event) => focusSection(event.target.value)}
+              >
+                {stableDefinition.sections.map((section) => (
+                  <option key={section.id} value={section.id}>
+                    {m(section.title)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </nav>
         </div>
-        <nav
-          hidden={mode !== 'esheet'}
-          inert={resolverField !== null}
-          aria-label="Visit sections"
-          className="bg-background sticky top-11 z-20 px-2 py-1 sm:px-3"
-        >
-          <div className="flex items-center gap-2">
-            <label
-              htmlFor={selectId}
-              className="text-muted-foreground shrink-0 text-sm"
-            >
-              Go to section
-            </label>
-            <select
-              id={selectId}
-              className="bg-background focus-visible:ring-primary-500 min-h-11 min-w-0 flex-1 rounded px-1 text-base focus-visible:ring-2 focus-visible:outline-none"
-              value={activeSection}
-              onChange={(event) => focusSection(event.target.value)}
-            >
-              {stableDefinition.sections.map((section) => (
-                <option key={section.id} value={section.id}>
-                  {section.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        </nav>
         <div
           id={panelId}
           role="tabpanel"
@@ -725,7 +807,7 @@ const EncounterVisitSession = React.forwardRef<
               role="alert"
               className="border-destructive/40 bg-destructive/5 mb-4 rounded-lg border p-3 text-sm"
             >
-              <p className="font-semibold">Entries need attention</p>
+              <p className="font-semibold">{m('Entries need attention')}</p>
               <ul className="mt-2 space-y-1">
                 {snapshot.errors.map((issue, index) => (
                   <li key={`${issue.fieldId}-${index}`}>
@@ -734,7 +816,7 @@ const EncounterVisitSession = React.forwardRef<
                       className="text-destructive min-h-11 text-start underline underline-offset-2"
                       onClick={() => focusSection(issue.sectionId)}
                     >
-                      {issue.message}
+                      {m(issue.message)}
                     </button>
                   </li>
                 ))}
@@ -762,7 +844,7 @@ const EncounterVisitSession = React.forwardRef<
             {resolverField && (
               <div className="bg-background sticky top-0 z-20 flex items-center justify-between gap-2 py-2">
                 <h3 id={resolverTitleId} className="font-semibold">
-                  {resolvedField?.label ?? 'Linked visit field'}
+                  {m(resolvedField?.label ?? 'Linked visit field')}
                 </h3>
                 <Button
                   type="button"
@@ -770,7 +852,7 @@ const EncounterVisitSession = React.forwardRef<
                   className="min-h-11"
                   onClick={closeResolver}
                 >
-                  Done
+                  {m('Done')}
                 </Button>
               </div>
             )}
@@ -791,33 +873,45 @@ const EncounterVisitSession = React.forwardRef<
           {richMounted && (
             <div hidden={mode !== 'rich'} inert={resolverField !== null}>
               <p className="text-muted-foreground mb-2 text-sm">
-                Write headings and free text. Select a linked value to edit its
-                eSheet data.
+                {m(
+                  'Write headings and free text. Select a linked value to edit its eSheet data.'
+                )}
               </p>
-              <React.Suspense
-                fallback={<p role="status">Loading rich editor…</p>}
+              <EncounterEditorBoundary
+                fallback={
+                  <p role="alert">
+                    {m(
+                      'Rich editor is unavailable. Continue editing in eSheet or review this visit in View.'
+                    )}
+                  </p>
+                }
               >
-                <EncounterMdyEditor
-                  ref={richEditor}
-                  body={
-                    getEncounterDocumentBody(snapshot.responses) ?? richBodySeed
-                  }
-                  fieldIds={mdyFields.map((field) => field.id)}
-                  fields={mdyFields.map((field) => ({
-                    id: field.id,
-                    display: field.display,
-                    label: field.label,
-                  }))}
-                  onChange={writeBody}
-                  onFieldActivate={(id) => void activateResolver(id)}
-                  disabled={
-                    readOnly ||
-                    saving ||
-                    mode !== 'rich' ||
-                    resolverField !== null
-                  }
-                />
-              </React.Suspense>
+                <React.Suspense
+                  fallback={<p role="status">{m('Loading rich editor…')}</p>}
+                >
+                  <EncounterMdyEditor
+                    ref={richEditor}
+                    body={
+                      getEncounterDocumentBody(snapshot.responses) ??
+                      richBodySeed
+                    }
+                    fieldIds={mdyFields.map((field) => field.id)}
+                    fields={mdyFields.map((field) => ({
+                      id: field.id,
+                      display: field.display,
+                      label: field.label,
+                    }))}
+                    onChange={writeBody}
+                    onFieldActivate={(id) => void activateResolver(id)}
+                    disabled={
+                      readOnly ||
+                      saving ||
+                      mode !== 'rich' ||
+                      resolverField !== null
+                    }
+                  />
+                </React.Suspense>
+              </EncounterEditorBoundary>
             </div>
           )}
           {mode === 'view' && <EncounterMdyView source={snapshot.mdy} />}
@@ -834,8 +928,10 @@ const EncounterVisitSession = React.forwardRef<
         >
           {saveMessage ||
             (readOnly
-              ? 'Read-only visit'
-              : `${snapshot.observations.length} observations documented`)}
+              ? m('Read-only visit')
+              : m('{count} observations documented', {
+                  count: snapshot.observations.length,
+                }))}
         </p>
         <ButtonGroup className="w-full sm:w-auto">
           {onSubmit && (
@@ -846,7 +942,7 @@ const EncounterVisitSession = React.forwardRef<
               leftIcon={<Save size={16} aria-hidden="true" />}
               onClick={() => void submit()}
             >
-              {saving ? 'Saving…' : 'Save visit'}
+              {m(saving ? 'Saving…' : 'Save visit')}
             </Button>
           )}
         </ButtonGroup>

@@ -336,6 +336,50 @@ describe('Encounter MDY data and linked narrative', () => {
     );
   });
 
+  it('handles large unmatched bracket runs while still refreshing nested and escaped labels', () => {
+    const fields = getEncounterMdyFields(
+      snapshot({ [hpiId]: { answer: 'Updated finding' } })
+    );
+    const hpi = fields.find(({ fieldId }) => fieldId === hpiId)!;
+    const unmatched = '['.repeat(100_000);
+    expect(refreshEncounterMdyLinks(unmatched, fields)).toBe(unmatched);
+    expect(
+      refreshEncounterMdyLinks(
+        `${unmatched}[Old [nested] \\] label](mdy:${hpi.id})`,
+        fields
+      )
+    ).toBe(`${unmatched}[Updated finding](mdy:${hpi.id})`);
+  }, 1_000);
+
+  it('handles incomplete HTML tags and unmatched backtick runs without repeated suffix scans', () => {
+    const fields = getEncounterMdyFields(
+      snapshot({ [hpiId]: { answer: 'Updated finding' } })
+    );
+    const hpi = fields.find(({ fieldId }) => fieldId === hpiId)!;
+    const link = `[Original](mdy:${hpi.id})`;
+    const incompleteTags = '<pre '.repeat(20_000);
+    const unmatchedTicks = Array.from(
+      { length: 1_000 },
+      (_, index) => '`'.repeat(index + 1) + 'x'
+    ).join('');
+    for (const prefix of [incompleteTags, unmatchedTicks])
+      expect(refreshEncounterMdyLinks(prefix + link, fields)).toBe(
+        prefix + `[Updated finding](mdy:${hpi.id})`
+      );
+    for (const tag of ['pre', 'code', 'script', 'style'])
+      expect(
+        refreshEncounterMdyLinks(
+          `<${tag} class="x">${link}</${tag}> ${link}`,
+          fields
+        )
+      ).toBe(
+        `<${tag} class="x">${link}</${tag}> [Updated finding](mdy:${hpi.id})`
+      );
+    expect(refreshEncounterMdyLinks(`\`\`${link}\`\` ${link}`, fields)).toBe(
+      `\`\`${link}\`\` [Updated finding](mdy:${hpi.id})`
+    );
+  }, 1_000);
+
   it('preserves imported YAML bytes on no-op and comments/provenance on data writes', () => {
     const originalSnapshot = snapshot({ [hpiId]: { answer: 'Original' } });
     const source = createEncounterMdy(originalSnapshot).replace(
@@ -365,6 +409,50 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(updatedParsed.response?.[hpiId].answer).toBe('Changed');
     expect(updatedParsed.body).toContain('[Changed]');
     expect(updatedParsed.body).not.toContain('[Original]');
+  });
+
+  it('retires generated clinical and finding metadata while preserving host extensions', () => {
+    const original = snapshot();
+    const parsed = parseEncounterMdy(original.mdy);
+    const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
+    const sourcePath = [
+      'form',
+      'pages',
+      0,
+      'fields',
+      0,
+      'fields',
+      0,
+      '_sourceData',
+    ];
+    document.setIn(
+      [...sourcePath, 'findings'],
+      [{ id: 'old', label: 'Old', text: 'Old finding.' }]
+    );
+    document.setIn(
+      [...sourcePath, 'encounterFindings'],
+      [{ id: 'old', label: 'Old', text: 'Old finding.' }]
+    );
+    document.setIn([...sourcePath, 'encounterRequireCoding'], true);
+    document.setIn([...sourcePath, 'encounterDate'], '2020-01-01');
+    document.setIn([...sourcePath, 'hostExtension'], { source: 'kept' });
+    const source = `---\n${document.toString()}---\n${parsed.body}`;
+    const next = parseEncounterMdy(
+      createEncounterMdy(original, undefined, source)
+    );
+    const field = next.form!.pages[0].fields![0];
+    const narrative = 'fields' in field ? field.fields![0] : undefined;
+    const metadata = (
+      narrative as unknown as { _sourceData: Record<string, unknown> }
+    )._sourceData;
+    expect(metadata).toMatchObject({ hostExtension: { source: 'kept' } });
+    for (const property of [
+      'findings',
+      'encounterFindings',
+      'encounterRequireCoding',
+      'encounterDate',
+    ])
+      expect(metadata).not.toHaveProperty(property);
   });
 
   it('carries imported front matter in the reserved answer without recursively embedding it', () => {

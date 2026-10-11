@@ -508,3 +508,71 @@ describe('coded clinical sections and explicit narrative findings', () => {
     expect(f.getResponses()).toEqual(recorded());
   });
 });
+
+describe('default and explicit clinical coding policy', () => {
+  it.each([
+    {
+      kind: 'medications' as const,
+      value: {
+        medications: [
+          { id: 'med', name: 'Explicit medication', status: 'unknown' },
+        ],
+      },
+    },
+    {
+      kind: 'allergies' as const,
+      value: { allergies: [{ id: 'allergy', allergen: 'Explicit allergen' }] },
+    },
+    {
+      kind: 'conditions' as const,
+      value: {
+        concerns: [
+          {
+            ...condition,
+            assertions: [{ ...condition.assertions[0], coding: undefined }],
+          },
+        ],
+      },
+    },
+    {
+      kind: 'assessment' as const,
+      value: {
+        concerns: [
+          {
+            ...condition,
+            assertions: [{ ...condition.assertions[0], coding: undefined }],
+          },
+        ],
+        items: [],
+        orders: [],
+      },
+    },
+    {
+      kind: 'plan' as const,
+      value: { orders: [{ ...order, concernId: undefined, code: undefined }] },
+    },
+  ])(
+    'uses the same omitted/true/false coding policy for $kind validation and MCP writes',
+    ({ kind, value }) => {
+      for (const requireCoding of [undefined, true, false]) {
+        const custom: EncounterVisitDefinition = {
+          id: 'policy',
+          title: 'Policy',
+          sections: [{ id: kind, title: kind, kind, requireCoding }],
+        };
+        const responses = { [id(kind)]: response(value) };
+        expect(validateEncounterResponses(custom, responses).length > 0).toBe(
+          requireCoding !== false
+        );
+        const tools = createEncounterVisitTools({
+          getDefinition: () => custom,
+          getResponses: () => ({}),
+          setResponses: () => {},
+        });
+        expect(tools.updateSection(kind, JSON.stringify(value)).success).toBe(
+          requireCoding === false
+        );
+      }
+    }
+  );
+});

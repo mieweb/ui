@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { AssessmentOrder } from '../Assessment';
 import type { FieldResponse } from '@esheet/core';
 import { EncounterConditionsField } from './EncounterConditionsField';
@@ -472,6 +472,7 @@ describe('clinical native response metadata', () => {
         answer: JSON.stringify(empty),
         attributes: { hostExtension: 'original', provenance: 'retained' },
         signatureData: 'opaque-host-payload',
+        selected: { id: 'stale', value: 'Unrelated option' },
         _ai: true,
       };
       const { form, onResponse } = renderClinicalField(
@@ -490,6 +491,7 @@ describe('clinical native response metadata', () => {
         _ai: false,
       });
       expect(first.answer).not.toBe(original.answer);
+      expect(first).not.toHaveProperty('selected');
       act(() =>
         form.getState().setResponse('test-field', {
           ...first,
@@ -516,6 +518,99 @@ describe('clinical native response metadata', () => {
         hostExtension: 'original',
         provenance: 'retained',
       });
+    }
+  );
+});
+
+describe('explicit uncoded clinical configuration', () => {
+  it.each([
+    {
+      component: EncounterPlanField,
+      fieldType: 'encounterPlan',
+      expectedKey: 'orders',
+    },
+    {
+      component: EncounterAssessmentField,
+      fieldType: 'encounterAssessment',
+      expectedKey: 'concerns',
+    },
+  ])(
+    'allows uncoded $fieldType capture without a catalog only when configured',
+    ({ component, fieldType, expectedKey }) => {
+      const { latest } = renderClinicalField(component, fieldType, undefined, {
+        provider: false,
+        requireCoding: false,
+      });
+      fireEvent.change(
+        screen.getByRole('textbox', { name: 'Clinical entry' }),
+        { target: { value: 'Explicitly entered clinical text' } }
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+      const value = latest<Record<string, unknown[]>>();
+      expect(value[expectedKey]).toHaveLength(1);
+      expect(JSON.stringify(value)).toContain(
+        'Explicitly entered clinical text'
+      );
+      expect(JSON.stringify(value)).not.toContain('coding');
+    }
+  );
+});
+
+describe('clinical translation ownership', () => {
+  it.each([
+    {
+      component: EncounterPlanField,
+      fieldType: 'encounterPlan',
+      label: 'Add plan order',
+      provider: true,
+    },
+    {
+      component: EncounterAssessmentField,
+      fieldType: 'encounterAssessment',
+      label: 'Add assessment or order',
+      provider: true,
+    },
+    {
+      component: EncounterPlanField,
+      fieldType: 'encounterPlan',
+      label: 'Add plan order',
+      provider: false,
+    },
+    {
+      component: EncounterAssessmentField,
+      fieldType: 'encounterAssessment',
+      label: 'Add assessment or order',
+      provider: false,
+    },
+  ])(
+    'translates $fieldType labels and provider=$provider search prompts exactly once',
+    ({ component, fieldType, label, provider }) => {
+      const translate = vi.fn((message: string) => `localized ${message}`);
+      const { lookupProps } = renderClinicalField(
+        component,
+        fieldType,
+        undefined,
+        { provider, requireCoding: false, messages: { translate } }
+      );
+      expect(
+        screen.getByRole('form', { name: `localized ${label}` })
+      ).toBeInTheDocument();
+      const placeholder = provider
+        ? lookupProps().placeholder
+        : screen
+            .getByRole('textbox', { name: 'localized Clinical entry' })
+            .getAttribute('placeholder');
+      expect(placeholder).toMatch(/^localized /);
+      expect(placeholder).not.toMatch(/^localized localized /);
+      expect(
+        translate.mock.calls.some(([message]) =>
+          message.startsWith('localized ')
+        )
+      ).toBe(false);
+      if (!provider)
+        expect(
+          screen.getByRole('button', { name: 'localized Add' })
+        ).toBeInTheDocument();
     }
   );
 });
