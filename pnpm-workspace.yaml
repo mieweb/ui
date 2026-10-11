@@ -14,6 +14,10 @@ overrides:
   "picomatch@>=4.0.0 <4.0.4": "4.0.4"
   "uuid@<11.1.1": "11.1.1"
   "dompurify@<3.4.0": "3.4.0"
+  # Templit pins an older parser; retain its API while including merge-limit fixes.
+  "@mieweb/templit@0.2.0>js-yaml": "4.3.2"
+  # Kerebron pins this view version. Keep it aligned with the visit's protected links.
+  "prosemirror-view@1.40.0": "1.42.3"
 
 patchedDependencies:
   # kerebron regression hit by the storybook a11y CI job: the code-block

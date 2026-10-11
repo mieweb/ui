@@ -31,6 +31,8 @@ export interface EncounterMdyField {
   sectionId: string;
   label: string;
   display: string;
+  /** Derived capture state for report pruning; never stored in the MDY envelope. */
+  empty?: boolean;
 }
 
 export interface EncounterMdyDiagnostic {
@@ -60,6 +62,33 @@ export interface ParsedEncounterMdy {
 
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function hasValue(value: unknown): boolean {
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (typeof value === 'number' || typeof value === 'boolean') return true;
+  if (Array.isArray(value)) return value.some(hasValue);
+  if (record(value)) return Object.values(value).some(hasValue);
+  return false;
+}
+
+/** Selection identities and labels alone are not an explicitly selected value. */
+function hasSelectedValue(selected: unknown): boolean {
+  if (Array.isArray(selected)) return selected.some(hasSelectedValue);
+  if (!record(selected)) return false;
+  if ('value' in selected) return hasValue(selected.value);
+  return Object.values(selected).some(hasSelectedValue);
+}
+
+function hasNativeValue(
+  response?: FieldResponse,
+  parseAnswer = false
+): boolean {
+  return (
+    (response?.answer !== undefined &&
+      hasValue(parseAnswer ? canonicalValue(response) : response.answer)) ||
+    hasSelectedValue(response?.selected)
+  );
 }
 
 /** Encode native ids without assuming their punctuation is valid in MDY. */
@@ -126,8 +155,9 @@ export function getEncounterMdyFields(
           ? section.title
           : `${section.title} narrative`
         : (observationDefinition?.label ?? section.title);
+      const structured = !narrative && section.kind !== 'observations';
       let display: string;
-      if (!narrative && section.kind !== 'observations') {
+      if (structured) {
         display = groupedDisplay(observations);
       } else if (observations.length) {
         display = observations.map(observationDisplay).join('; ');
@@ -141,6 +171,9 @@ export function getEncounterMdyFields(
         sectionId: section.id,
         label,
         display: display.trim() ? display : '—',
+        empty: structured
+          ? observations.length === 0 || !display.trim()
+          : !hasNativeValue(snapshot.responses[fieldId]),
       };
     })
   );
@@ -391,6 +424,20 @@ function validNativeResponses(value: unknown): value is EncounterResponses {
   );
 }
 
+function hasTemplateSyntax(body: string): boolean {
+  for (const [opener, closer] of [
+    ['{{', '}}'],
+    ['{%', '%}'],
+  ]) {
+    // Any closing token after the first opener is enough. Searching once per
+    // token avoids rescanning the suffix for every unmatched opening token.
+    const start = body.indexOf(opener);
+    if (start >= 0 && body.indexOf(closer, start + opener.length) >= 0)
+      return true;
+  }
+  return false;
+}
+
 /** Parse safe YAML and native objects without dropping unknown metadata or provenance. */
 export function parseEncounterMdy(source: string): ParsedEncounterMdy {
   const split = splitSource(source);
@@ -469,7 +516,7 @@ export function parseEncounterMdy(source: string): ParsedEncounterMdy {
         fieldId: field.fieldId,
       });
   }
-  if (/\{\{[\s\S]*?\}\}|\{%[\s\S]*?%\}/.test(result.body))
+  if (hasTemplateSyntax(result.body))
     result.diagnostics.push({
       severity: 'warning',
       code: 'template-syntax',
@@ -808,6 +855,9 @@ export async function renderEncounterMdy(source: string): Promise<{
     fields = fieldsFromFrontMatter(parsed.frontMatter ?? {}).map((field) => ({
       ...field,
       display: canonical.get(field.fieldId)?.display ?? field.display,
+      empty:
+        canonical.get(field.fieldId)?.empty ??
+        !hasNativeValue(parsed.response?.[field.fieldId], true),
     }));
   } else if (parsed.response) {
     const units = new Map<string, string>();
@@ -825,12 +875,13 @@ export async function renderEncounterMdy(source: string): Promise<{
     fields = fields.map((field) => {
       const cached = parsed.frontMatter?.[field.id];
       const native = response[field.fieldId];
+      const empty = !hasNativeValue(native, true);
       if (
         !native ||
         !record(cached) ||
         JSON.stringify(cached.value) === JSON.stringify(canonicalValue(native))
       )
-        return field;
+        return { ...field, empty };
       const display = fieldDisplay({
         ...native,
         unit: units.get(field.fieldId),
@@ -841,7 +892,7 @@ export async function renderEncounterMdy(source: string): Promise<{
         fieldId: field.fieldId,
         message: `${field.label}'s cached projection differed from its canonical response and was refreshed.`,
       });
-      return { ...field, display: display.trim() ? display : '—' };
+      return { ...field, display: display.trim() ? display : '—', empty };
     });
   }
   const body = refreshEncounterMdyLinks(parsed.body, fields);

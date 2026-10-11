@@ -121,6 +121,201 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(parsed.response).toEqual(responses);
   });
 
+  it('derives empty flags from native input rather than placeholder-looking display', () => {
+    expect(getEncounterMdyFields(snapshot()).every(({ empty }) => empty)).toBe(
+      true
+    );
+    const entered = snapshot({
+      [hpiId]: { answer: '—' },
+      [pulseId]: { answer: '0' },
+      [choiceId]: { selected: { id: 'No', value: 'No' } },
+    });
+    const enteredFields = getEncounterMdyFields(entered);
+    for (const fieldId of [hpiId, pulseId, choiceId])
+      expect(
+        enteredFields.find((field) => field.fieldId === fieldId)?.empty
+      ).toBe(false);
+    const invalid = snapshot({ [pulseId]: { answer: 'unfinished number' } });
+    expect(invalid.observations).toEqual([]);
+    expect(
+      getEncounterMdyFields(invalid).find(({ fieldId }) => fieldId === pulseId)
+        ?.empty
+    ).toBe(false);
+    const blank = snapshot({
+      [hpiId]: { answer: ' \n\t' },
+      [choiceId]: { selected: [] },
+    });
+    expect(getEncounterMdyFields(blank).every(({ empty }) => empty)).toBe(true);
+    for (const field of enteredFields)
+      expect(
+        parseEncounterMdy(entered.mdy).frontMatter?.[field.id]
+      ).not.toHaveProperty('empty');
+    expect(createEncounterMdy(entered, undefined, entered.mdy)).toBe(
+      entered.mdy
+    );
+  });
+
+  it('treats structured empty containers and vital metadata as uncaptured findings', () => {
+    const structuredDefinition: EncounterVisitDefinition = {
+      id: 'structured',
+      title: 'Structured note',
+      sections: [
+        { id: 'vitals', title: 'Vitals', kind: 'vitals' },
+        { id: 'medications', title: 'Medications', kind: 'medications' },
+        { id: 'allergies', title: 'Allergies', kind: 'allergies' },
+        { id: 'assessment', title: 'Assessment', kind: 'assessment' },
+      ],
+    };
+    const medicationsId = getEncounterFieldId('medications', 'value');
+    const allergiesId = getEncounterFieldId('allergies', 'value');
+    const assessmentId = getEncounterFieldId('assessment', 'value');
+    const blankResponses = {
+      [vitalsId]: { answer: JSON.stringify({ readings: [] }) },
+      [medicationsId]: { answer: JSON.stringify({ medications: [] }) },
+      [allergiesId]: {
+        answer: JSON.stringify({ allergies: [], noKnownAllergies: false }),
+      },
+      [assessmentId]: {
+        answer: JSON.stringify({ concerns: [], items: [], orders: [] }),
+      },
+    };
+    const blank = createEncounterSnapshot(structuredDefinition, blankResponses);
+    expect(getEncounterMdyFields(blank).every(({ empty }) => empty)).toBe(true);
+    const metadata = createEncounterSnapshot(structuredDefinition, {
+      ...blankResponses,
+      [vitalsId]: {
+        answer: JSON.stringify({
+          readings: [
+            {
+              id: 'first',
+              recordedAt: '2026-10-10T10:00:00Z',
+              position: 'sitting',
+              site: 'left arm',
+            },
+          ],
+        }),
+      },
+    });
+    expect(metadata.observations).toEqual([]);
+    expect(getEncounterMdyFields(metadata).every(({ empty }) => empty)).toBe(
+      true
+    );
+    const entered = createEncounterSnapshot(structuredDefinition, {
+      ...blankResponses,
+      [vitalsId]: {
+        answer: JSON.stringify({
+          readings: [{ id: 'first', systolic: 140, pulse: 0 }],
+        }),
+      },
+      [medicationsId]: {
+        answer: JSON.stringify({
+          medications: [{ id: 'one', name: 'Aspirin', status: 'taking' }],
+        }),
+      },
+      [allergiesId]: {
+        answer: JSON.stringify({ allergies: [], noKnownAllergies: true }),
+      },
+    });
+    const enteredFields = getEncounterMdyFields(entered);
+    for (const fieldId of [vitalsId, medicationsId, allergiesId])
+      expect(
+        enteredFields.find((field) => field.fieldId === fieldId)?.empty
+      ).toBe(false);
+    expect(
+      enteredFields.find(({ fieldId }) => fieldId === vitalsId)?.display
+    ).toContain('140/? mmHg');
+    expect(
+      enteredFields.find(({ fieldId }) => fieldId === vitalsId)?.display
+    ).toContain('Pulse: 0 /min');
+    expect(
+      enteredFields.find(({ fieldId }) => fieldId === allergiesId)?.display
+    ).toContain('No known allergies');
+  });
+
+  it('propagates refreshed canonical empty flags without pruning source prose', async () => {
+    const original = snapshot({
+      [hpiId]: { answer: 'Old narrative' },
+      [vitalsId]: {
+        answer: JSON.stringify({ readings: [{ id: 'first', pulse: 80 }] }),
+      },
+    });
+    const parsed = parseEncounterMdy(original.mdy);
+    const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
+    document.setIn(['response', hpiId, 'answer'], '   ');
+    document.setIn(
+      ['response', vitalsId, 'answer'],
+      JSON.stringify({ readings: [{ id: 'first', position: 'sitting' }] })
+    );
+    const source = `---\n${document.toString()}---\n${parsed.body}\n\nAuthored discussion stays.`;
+    const rendered = await renderEncounterMdy(source);
+    for (const fieldId of [hpiId, vitalsId])
+      expect(
+        rendered.fields.find((field) => field.fieldId === fieldId)?.empty
+      ).toBe(true);
+    expect(rendered.raw).toContain('[—](mdy:');
+    expect(rendered.raw).toContain('## History');
+    expect(rendered.raw).toContain('Authored discussion stays.');
+    expect(parseEncounterMdy(source).body).toContain('Old narrative');
+  });
+
+  it.each([
+    { value: [], empty: true },
+    { value: {}, empty: true },
+    { value: null, empty: true },
+    { value: ' \n\t', empty: true },
+    { value: [null, '', {}], empty: true },
+    { value: { nested: [] }, empty: true },
+    { value: 0, empty: false },
+    { value: false, empty: false },
+    { value: '—', empty: false },
+    { value: 'unfinished number', empty: false },
+    { value: { value: false }, empty: false },
+  ])(
+    'derives generic native capture from canonical $value',
+    async ({ value, empty }) => {
+      const original = snapshot();
+      const parsed = parseEncounterMdy(original.mdy);
+      const field = getEncounterMdyFields(original).find(
+        ({ fieldId }) => fieldId === hpiId
+      )!;
+      const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
+      document.delete('encounterDefinition');
+      document.setIn(['response', hpiId], { answer: JSON.stringify(value) });
+      document.setIn([field.id, 'display'], 'Cached placeholder');
+      const rendered = await renderEncounterMdy(
+        `---\n${document.toString()}---\n${parsed.body}`
+      );
+      expect(
+        rendered.fields.find(({ fieldId }) => fieldId === hpiId)?.empty
+      ).toBe(empty);
+    }
+  );
+
+  it.each([
+    { selected: [], empty: true },
+    { selected: {}, empty: true },
+    { selected: { id: 'empty', value: ' ' }, empty: true },
+    { selected: { row: { id: 'empty', value: '' } }, empty: true },
+    { selected: { id: 'negative', value: false }, empty: false },
+    { selected: { id: 'zero', value: 0 }, empty: false },
+    { selected: { row: { id: 'no', value: 'No' } }, empty: false },
+  ])(
+    'derives generic selection capture from explicit values $selected',
+    async ({ selected, empty }) => {
+      const original = snapshot();
+      const parsed = parseEncounterMdy(original.mdy);
+      const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
+      document.delete('encounterDefinition');
+      document.setIn(['response', choiceId], { selected });
+      const rendered = await renderEncounterMdy(
+        `---\n${document.toString()}---\n${parsed.body}`
+      );
+      expect(
+        rendered.fields.find(({ fieldId }) => fieldId === choiceId)?.empty
+      ).toBe(empty);
+    }
+  );
+
   it('preserves authored headings, unlinked prose, deleted projections and code', () => {
     const fields = getEncounterMdyFields(
       snapshot({ [hpiId]: { answer: 'Updated [finding]' } })
@@ -272,6 +467,47 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(
       rendered.diagnostics.some(({ code }) => code === 'template-syntax')
     ).toBe(true);
+  });
+
+  it.each([
+    ['{{}}', true],
+    ['{%%}', true],
+    ['{{ \n\t}}', true],
+    ['{% \ncontent\n %}', true],
+    ['}} before {{', false],
+    ['%} before {%', false],
+    ['{{ mismatched %}', false],
+    ['{% mismatched }}', false],
+    ['{{', false],
+    ['{%', false],
+    ['}} before {{matched}}', true],
+    ['%} before {%matched%}', true],
+    ['{{ unmatched then {%matched%}', true],
+    ['{% unmatched then {{matched}}', true],
+  ])('checks template delimiter order in %j', (body, warning) => {
+    const source = createEncounterMdy(snapshot(), body as string);
+    const parsed = parseEncounterMdy(source);
+    expect(parsed.body).toBe(body);
+    expect(
+      parsed.diagnostics.some(({ code }) => code === 'template-syntax')
+    ).toBe(warning);
+  });
+
+  it('handles long unmatched template prefixes without repeatedly scanning suffixes', () => {
+    const body = '{{{%'.repeat(50_000);
+    const envelope = parseEncounterMdy(snapshot().mdy).frontMatterSource;
+    const unmatched = parseEncounterMdy(`${envelope}${body}`);
+    expect(unmatched.body).toBe(body);
+    expect(
+      unmatched.diagnostics.some(({ code }) => code === 'template-syntax')
+    ).toBe(false);
+    for (const closer of ['}}', '%}']) {
+      const matched = parseEncounterMdy(`${envelope}${body}${closer}`);
+      expect(matched.body).toBe(`${body}${closer}`);
+      expect(
+        matched.diagnostics.some(({ code }) => code === 'template-syntax')
+      ).toBe(true);
+    }
   });
 
   it('renders multiline narrative as one safe linked projection with readable breaks', async () => {

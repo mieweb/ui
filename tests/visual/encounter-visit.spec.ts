@@ -5,9 +5,11 @@ const story =
   '/iframe.html?id=encounter-orders-encountervisit--anonymous-visit&viewMode=story';
 
 async function showView(page: Page) {
-  await page.getByRole('tab', { name: 'View', exact: true }).click();
+  const tab = page.getByRole('tab', { name: 'View', exact: true });
+  await tab.click();
+  await expect(tab).toHaveAttribute('aria-selected', 'true');
   const preview = page.getByRole('region', { name: 'Visit note preview' });
-  await expect(preview).toBeVisible();
+  await expect(preview).toBeAttached();
   await expect(preview).toHaveAttribute('aria-busy', 'false');
   return preview;
 }
@@ -138,6 +140,12 @@ test('phone RichEdit preserves authored headings and free prose across modes', a
   await page.keyboard.type(prose);
   await expect(editor).toContainText(prose);
   await expect(title).toBeVisible();
+  for (const name of ['Patient history', 'Review of systems', 'Vitals']) {
+    await expect(
+      editor.getByRole('heading', { name, exact: true })
+    ).toBeVisible();
+  }
+  await expect(editor).toContainText('—');
   await page
     .getByRole('tab', { name: 'RichEdit', exact: true })
     .scrollIntoViewIfNeeded();
@@ -152,6 +160,13 @@ test('phone RichEdit preserves authored headings and free prose across modes', a
     })
   ).toBeVisible();
   await expect(preview).toContainText(prose);
+  await expect(preview.getByRole('heading')).toHaveText([
+    'Encounter visit',
+    'Additional discussion',
+    'History of present illness',
+  ]);
+  await expect(preview).not.toContainText('—');
+  await expect(preview).not.toContainText('Medical history:');
   await expect(page).toHaveScreenshot('encounter-mobile-view.png');
   await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
   await expect(
@@ -163,12 +178,64 @@ test('phone RichEdit preserves authored headings and free prose across modes', a
   await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
   await expect(heading).toBeVisible();
   await expect(editor).toContainText(prose);
+  await expect(
+    editor.getByRole('heading', { name: 'Patient history', exact: true })
+  ).toBeVisible();
+  await expect(editor).toContainText('—');
   await expect(await showView(page)).toContainText(prose);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth
     )
   ).toBe(true);
+});
+
+test('View omits uncaptured prompts and keeps a captured zero measurement', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(story);
+  let preview = await showView(page);
+  await expect(preview.getByRole('heading')).toHaveText([
+    'Encounter visit',
+    'History of present illness',
+  ]);
+  await expect(preview).toContainText('back pain');
+  await expect(preview).not.toContainText('—');
+  await expect(preview.getByRole('listitem')).toHaveCount(0);
+
+  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  const narrative = page.getByRole('textbox', {
+    name: 'History of present illness',
+  });
+  await narrative.fill('');
+  await expect(narrative).toHaveText('');
+  preview = await showView(page);
+  await expect(preview.getByRole('heading')).toHaveCount(0);
+  await expect(preview.getByRole('listitem')).toHaveCount(0);
+  await expect(preview).not.toContainText('back pain');
+  await expect(preview).not.toContainText('—');
+
+  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await page
+    .getByRole('combobox', { name: 'Go to section' })
+    .selectOption('vitals');
+  await page.getByRole('button', { name: 'Add measurement set' }).click();
+  preview = await showView(page);
+  await expect(preview.getByRole('heading')).toHaveCount(0);
+  await expect(preview.getByRole('listitem')).toHaveCount(0);
+  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await page.getByLabel('Pain', { exact: true }).fill('0');
+  preview = await showView(page);
+  await expect(preview.getByRole('heading')).toHaveText([
+    'Encounter visit',
+    'Vitals',
+  ]);
+  await expect(preview).toContainText('Pain score: 0');
+  await expect(preview).not.toContainText('—');
+  await expect(preview).not.toContainText('History of present illness');
+  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await expect(page.getByLabel('Pain', { exact: true })).toHaveValue('0');
 });
 
 test('a linked field resolves to the same eSheet BP data on a phone', async ({

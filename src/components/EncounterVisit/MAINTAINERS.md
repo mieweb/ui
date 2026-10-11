@@ -20,6 +20,13 @@ and validation as the form. MDY field links need an explicit resolver mapping to
 the generated native IDs, which contain colons and may contain percent escapes.
 Do not replace stable response IDs with editor-friendly aliases in persistence.
 
+View omits uncaptured field links, their label-only prompt rows, and headings
+with no recorded values or authored content beneath them. Determine emptiness
+from native responses/exported findings, never from the displayed em dash:
+entered zero, negative choices and literal em dashes are captured values.
+Keep authored prose, media, code and table column alignment intact. This is
+render-only cleanup; eSheet/RichEdit and the saved MDY retain their memory aids.
+
 Narrative fields reuse `RichTextEditor` with natural content height and a
 formatting toolbar shown during editing. `answer` stays plain text for notes
 and MCP tools. Sanitized markup is retained in native response `attributes`

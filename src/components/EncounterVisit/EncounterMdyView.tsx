@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import DOMPurify from 'dompurify';
 import { renderEncounterMdy } from './mdy';
+import { createEncounterReportHtml } from './report';
 
 /** Flattened MDY is rendered through Templit, then sanitized for the report. */
 export function EncounterMdyView({ source }: { source: string }) {
@@ -20,35 +20,10 @@ export function EncounterMdyView({ source }: { source: string }) {
     void renderEncounterMdy(source)
       .then((result) => {
         if (cancelled) return;
-        const report = new globalThis.DOMParser().parseFromString(
+        const html = createEncounterReportHtml(
           result.html ?? '',
-          'text/html'
+          result.fields
         );
-        // Data-backed spans read as ordinary report text in the final view.
-        report.querySelectorAll<HTMLAnchorElement>('a').forEach((link) => {
-          const href = link.getAttribute('href') ?? '';
-          if (href.startsWith('mdy:') || href.startsWith('#visit_')) {
-            link.replaceWith(...link.childNodes);
-          } else {
-            link.setAttribute('target', '_blank');
-            link.setAttribute('rel', 'noopener noreferrer');
-          }
-        });
-        const html = DOMPurify.sanitize(report.body.innerHTML, {
-          USE_PROFILES: { html: true },
-          FORBID_TAGS: [
-            'form',
-            'input',
-            'textarea',
-            'select',
-            'button',
-            'iframe',
-            'object',
-            'embed',
-            'style',
-          ],
-          ADD_ATTR: ['target', 'rel'],
-        });
         setRendered({ source, html, diagnostics: result.diagnostics });
         setFailure(null);
       })

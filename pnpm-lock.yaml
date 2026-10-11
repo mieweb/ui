@@ -14,6 +14,8 @@ overrides:
   picomatch@>=4.0.0 <4.0.4: 4.0.4
   uuid@<11.1.1: 11.1.1
   dompurify@<3.4.0: 3.4.0
+  '@mieweb/templit@0.2.0>js-yaml': 4.3.2
+  prosemirror-view@1.40.0: 1.42.3
 
 patchedDependencies:
   '@kerebron/extension-codecrock@0.8.12':
@@ -85,8 +87,8 @@ importers:
         specifier: 1.4.3
         version: 1.4.3
       prosemirror-view:
-        specifier: 1.40.0
-        version: 1.40.0
+        specifier: 1.42.3
+        version: 1.42.3
       tailwind-merge:
         specifier: ^2.6.1
         version: 2.6.1
@@ -4233,12 +4235,12 @@ packages:
     resolution: {integrity: sha512-PMSmkqxr106Xa156c2M265Z+FTrPl+oxd/rgOQy2tijQeK5TxQ43psO1ZCwhVOSdnn+RzkzlRz/eY4BgJBYVpg==}
     hasBin: true
 
-  js-yaml@4.1.0:
-    resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
-    hasBin: true
-
   js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
+    hasBin: true
+
+  js-yaml@4.3.2:
+    resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
     hasBin: true
 
   jsdom@26.1.0:
@@ -5175,8 +5177,8 @@ packages:
   prosemirror-transform@1.10.4:
     resolution: {integrity: sha512-pwDy22nAnGqNR1feOQKHxoFkkUtepoFAd3r2hbEDsnf4wp57kKA36hXsB3njA9FtONBEwSDnDeCiJe+ItD+ykw==}
 
-  prosemirror-view@1.40.0:
-    resolution: {integrity: sha512-2G3svX0Cr1sJjkD/DYWSe3cfV5VPVTBOxI9XQEGWJDFEpsZb/gh4MV29ctv+OJx2RFX4BLt09i+6zaGM/ldkCw==}
+  prosemirror-view@1.42.3:
+    resolution: {integrity: sha512-oTN7EtH+CpwxU9NrwEYWd0UZ4JUx7l048l5A2Xppm4p/60isZYLnth9QVQmC3VRIvdrIWCxwZSd+Uz791G31/w==}
 
   protobufjs@7.6.4:
     resolution: {integrity: sha512-RJJPTTpvFfHcWLkIa2JFWK4XvtSzS0yEWDmunqHXli1h3JlkbcQZXDZdcWxv+JK3Xsl5/UFDPZ0iGm7DAengYw==}
@@ -7042,7 +7044,7 @@ snapshots:
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
 
   '@kerebron/extension-basic-editor@0.8.12':
     dependencies:
@@ -7050,7 +7052,7 @@ snapshots:
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
       temml: 0.13.4
 
   '@kerebron/extension-codecrock@0.8.12(patch_hash=992a39133ad7f10f463d904fcce0e313ec5f6635917b6ee05275d88f6fb20351)':
@@ -7062,13 +7064,13 @@ snapshots:
       '@kerebron/workspace': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
 
   '@kerebron/extension-dev-toolkit@0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))':
     dependencies:
       '@kerebron/editor': 0.8.12
       prosemirror-dev-toolkit: 1.1.8(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
     transitivePeerDependencies:
       - svelte
 
@@ -7088,14 +7090,14 @@ snapshots:
       '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
 
   '@kerebron/extension-menu@0.8.12(patch_hash=d808fc6ec0eaf3fd4982ade7ed78c5c14f37eec04dcee965f3ac2152367b5b62)':
     dependencies:
       '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
 
   '@kerebron/extension-odt@0.8.12':
     dependencies:
@@ -7110,14 +7112,14 @@ snapshots:
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.4
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
 
   '@kerebron/extension-ui@0.8.12':
     dependencies:
       '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
 
   '@kerebron/extension-yjs@0.8.12':
     dependencies:
@@ -7126,7 +7128,7 @@ snapshots:
       lib0: 0.2.109
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
       y-protocols: 1.0.6(yjs@13.6.30)
       yjs: 13.6.30
 
@@ -7227,7 +7229,7 @@ snapshots:
 
   '@mieweb/templit@0.2.0(marked@17.0.6)(mustache@4.2.0)':
     dependencies:
-      js-yaml: 4.1.0
+      js-yaml: 4.3.2
     optionalDependencies:
       marked: 17.0.6
       mustache: 4.2.0
@@ -10759,11 +10761,11 @@ snapshots:
       argparse: 1.0.10
       esprima: 4.0.1
 
-  js-yaml@4.1.0:
+  js-yaml@4.1.1:
     dependencies:
       argparse: 2.0.1
 
-  js-yaml@4.1.1:
+  js-yaml@4.3.2:
     dependencies:
       argparse: 2.0.1
 
@@ -11844,13 +11846,13 @@ snapshots:
     dependencies:
       prosemirror-model: 1.25.9
       prosemirror-transform: 1.10.4
-      prosemirror-view: 1.40.0
+      prosemirror-view: 1.42.3
 
   prosemirror-transform@1.10.4:
     dependencies:
       prosemirror-model: 1.25.9
 
-  prosemirror-view@1.40.0:
+  prosemirror-view@1.42.3:
     dependencies:
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.3
