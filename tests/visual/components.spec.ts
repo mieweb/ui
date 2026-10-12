@@ -169,6 +169,19 @@ test.describe('Visual Regression Tests - Core Components', () => {
       await gotoStory(page, 'chat-chatcomposer--with-selectors-end-slot', {
         ...options,
       });
+      // The end slot follows the model selector in reading order, so it
+      // sits physically left of it under RTL and right of it otherwise.
+      const [model, slot] = await Promise.all([
+        page
+          .locator("[data-slot='composer-model-selector-trigger']")
+          .boundingBox(),
+        page.locator("[data-slot='composer-selector-trigger']").boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(slot!.x).toBeLessThan(model!.x);
+      } else {
+        expect(slot!.x).toBeGreaterThan(model!.x);
+      }
       await expect(page).toHaveScreenshot(
         `chat-composer-selectors-end-slot${name}.png`
       );

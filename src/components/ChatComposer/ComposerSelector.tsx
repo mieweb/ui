@@ -58,13 +58,16 @@ export function ComposerSelector({
 }: ComposerSelectorProps) {
   // Controlled: DropdownItem does not close its parent Dropdown on click.
   const [open, setOpen] = React.useState(false);
+  // Disabling mid-open must also close the menu, or its items stay clickable.
+  if (disabled && open) setOpen(false);
   const selected = options.find((option) => option.id === value) ?? null;
 
   return (
     <Dropdown
       placement="top-start"
-      open={open}
+      open={open && !disabled}
       onOpenChange={setOpen}
+      disabled={disabled}
       trigger={
         <button
           type="button"

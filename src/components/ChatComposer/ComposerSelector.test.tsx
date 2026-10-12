@@ -75,4 +75,42 @@ describe('ComposerSelector', () => {
       screen.getByRole('button', { name: 'Voice: Activate' })
     ).toBeDisabled();
   });
+
+  it('closes an open menu when it becomes disabled and keeps it closed after', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <ComposerSelector
+        options={options}
+        value="on"
+        onChange={onChange}
+        label="Voice"
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Voice: Activate' }));
+    expect(
+      screen.getByRole('menuitemradio', { name: /disable/i })
+    ).toBeVisible();
+
+    rerender(
+      <ComposerSelector
+        options={options}
+        value="on"
+        onChange={onChange}
+        label="Voice"
+        disabled
+      />
+    );
+    expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
+
+    rerender(
+      <ComposerSelector
+        options={options}
+        value="on"
+        onChange={onChange}
+        label="Voice"
+      />
+    );
+    expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
