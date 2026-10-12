@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { isRtl } from '../../hooks/useDirection';
 import { cn } from '../../utils/cn';
 import {
   CalendarIcon,
@@ -160,8 +161,7 @@ export const ViewSwitcher = React.forwardRef<HTMLDivElement, ViewSwitcherProps>(
       const enabled = options.filter((o) => !o.disabled);
       // Logical, not physical: ArrowRight moves to the visually next option,
       // which is the previous one under RTL.
-      const forward =
-        getComputedStyle(event.currentTarget).direction === 'rtl' ? -1 : 1;
+      const forward = isRtl(event.currentTarget) ? -1 : 1;
       switch (event.key) {
         case 'ArrowRight':
           event.preventDefault();

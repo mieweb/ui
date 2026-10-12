@@ -688,6 +688,35 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('countrycodedropdown-default.png');
   });
 
+  test('Dropdown - Submenu flyout opens inline-end (RTL)', async ({ page }) => {
+    // Under dir="rtl" DropdownSubmenu swaps its anchored placement to
+    // 'left-start' so the flyout, chevron, and open/close arrow keys all
+    // agree on the inline-end side.
+    await gotoStory(page, 'choice-inputs-dropdown--with-submenu', {
+      globals: 'direction:rtl',
+    });
+    await page.getByRole('button', { name: 'Export' }).click();
+    const trigger = page.locator("[data-slot='dropdown-submenu-trigger']");
+    await trigger.click();
+    const submenu = page.locator("[data-slot='dropdown-submenu']");
+    await submenu.waitFor({ state: 'visible' });
+    // The 5% page-diff tolerance can swallow a side-flip on a small panel,
+    // so assert the geometry directly: the flyout's right edge must sit at
+    // or before the trigger's left edge. Poll so the open animation (scale
+    // from the landing side) settles first.
+    const triggerBox = await trigger.evaluate((el) =>
+      ((r) => ({ left: r.left }))(el.getBoundingClientRect())
+    );
+    await expect
+      .poll(() =>
+        submenu.evaluate((el) => el.getBoundingClientRect().right)
+      )
+      .toBeLessThanOrEqual(triggerBox.left);
+    await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('Table - Default', async ({ page }) => {
     await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');

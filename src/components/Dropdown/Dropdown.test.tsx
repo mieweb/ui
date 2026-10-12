@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Button } from '../Button';
@@ -355,6 +355,39 @@ describe('Dropdown', () => {
       'beta',
       'gamma',
     ]);
+  });
+
+  it('inverts submenu open/close arrows under RTL', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Dropdown trigger={<Button>Open menu</Button>}>
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+        <DropdownSubmenu label="More">
+          <DropdownItem value="beta">Beta</DropdownItem>
+        </DropdownSubmenu>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    const trigger = screen.getByRole('menuitem', { name: /More/ });
+    // jsdom does not cascade dir → direction; set both on the handler element.
+    trigger.setAttribute('dir', 'rtl');
+    trigger.style.direction = 'rtl';
+
+    // ArrowRight (the LTR open key) must do nothing under RTL…
+    fireEvent.keyDown(trigger, { key: 'ArrowRight' });
+    expect(screen.queryByRole('menuitem', { name: 'Beta' })).toBeNull();
+
+    // …while ArrowLeft opens toward the inline-end.
+    fireEvent.keyDown(trigger, { key: 'ArrowLeft' });
+    const submenuItem = await screen.findByRole('menuitem', { name: 'Beta' });
+
+    // The flyout is portaled to document.body, outside the dir override, so
+    // its close key must come from the direction sampled at the trigger:
+    // ArrowRight closes it again, dispatched on the focused submenu item.
+    fireEvent.keyDown(submenuItem, { key: 'ArrowRight' });
+    expect(screen.queryByRole('menuitem', { name: 'Beta' })).toBeNull();
   });
 
   it('shows an indeterminate select-all state when some visible items are selected', async () => {

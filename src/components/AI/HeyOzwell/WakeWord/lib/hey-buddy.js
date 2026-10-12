@@ -164,12 +164,30 @@ export class HeyBuddy {
         this.detectedCallbacks = [];
 
         // Initialize batcher and add callback
+        this._processing = false;
         this.batcher = new AudioBatcher(
             batchSeconds,
             batchIntervalSeconds,
             targetSampleRate
         );
-        this.batcher.onBatch((batch) => this.process(batch));
+        this.batcher.onBatch((batch) => this.processBatch(batch));
+    }
+
+    /**
+     * Process a batch, dropping (never queueing) batches that arrive while one is still in flight —
+     * the batcher doesn't await callbacks, so unguarded runs pile up and block the main thread.
+     * @param {Float32Array} batch - The batcher's live rolling buffer (mutated after this call).
+     */
+    async processBatch(batch) {
+        if (this._processing) return;
+        this._processing = true;
+        try {
+            await this.process(batch.slice()); // snapshot: the batcher keeps shifting its buffer
+        } catch (e) {
+            console.warn("[HeyBuddy] process failed", e);
+        } finally {
+            this._processing = false;
+        }
     }
 
     /**
@@ -506,14 +524,9 @@ export class HeyBuddy {
         if(justStartedSpeaking) this.speechStart();
         if(justStoppedSpeaking) this.speechEnd();
 
-        if (isSpeaking && this.embeddingBuffer.dims[0] === this.wakeWordEmbeddingFrames && !this._wakeBusy) {
-            // If we're listening, run wake word detection. Guard against OVERLAPPING runs — if a wake
-            // inference takes longer than the frame interval, the next frame would call run() on a
-            // still-busy session → "Session already started". The guard skips those frames safely.
-            this._wakeBusy = true;
-            let wakeWordsCalled;
-            try { wakeWordsCalled = await this.checkWakeWords(); }
-            finally { this._wakeBusy = false; }
+        if (isSpeaking && this.embeddingBuffer.dims[0] === this.wakeWordEmbeddingFrames) {
+            // If we're listening, run wake word detection (overlap is prevented by processBatch).
+            const wakeWordsCalled = await this.checkWakeWords();
             // Trigger callbacks with processed data
             this.processed({
                 listening: true,

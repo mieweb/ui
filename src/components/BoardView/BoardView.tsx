@@ -14,6 +14,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { isRtl } from '../../hooks/useDirection';
 import { cn } from '../../utils/cn';
 import { Spinner } from '../Spinner';
 import {
@@ -441,7 +442,7 @@ export function BoardView<T>({
     columnIndex: number
   ) => {
     if (!onMove || !(event.ctrlKey || event.metaKey)) return;
-    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const rtl = isRtl(event.currentTarget);
     let delta = 0;
     if (event.key === 'ArrowRight') delta = rtl ? -1 : 1;
     else if (event.key === 'ArrowLeft') delta = rtl ? 1 : -1;
