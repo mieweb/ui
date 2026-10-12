@@ -157,6 +157,24 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-condensed', { globals: 'density:condensed' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ChatComposer - Selectors end slot${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-chatcomposer--with-selectors-end-slot', {
+        ...options,
+      });
+      await expect(page).toHaveScreenshot(
+        `chat-composer-selectors-end-slot${name}.png`
+      );
+    });
+  }
+
   test('ChatComposer - With record button', async ({ page }) => {
     // The 40px RecordButton in micSlot must overflow-center in the h-8
     // control row without inflating the pill height.
@@ -708,9 +726,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       ((r) => ({ left: r.left }))(el.getBoundingClientRect())
     );
     await expect
-      .poll(() =>
-        submenu.evaluate((el) => el.getBoundingClientRect().right)
-      )
+      .poll(() => submenu.evaluate((el) => el.getBoundingClientRect().right))
       .toBeLessThanOrEqual(triggerBox.left);
     await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
       animations: 'disabled',
