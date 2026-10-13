@@ -4992,6 +4992,22 @@ body.condensed
   transform: none !important;
 }
 
+/* RTL: mirror the physical translate so the thumb travels toward
+   inline-end (left) instead of exiting the compact track */
+[dir='rtl']
+  body.condensed
+  [data-slot='consent-switch-toggle'][aria-checked='true']
+  [data-slot='consent-switch-thumb'] {
+  translate: -0.875rem !important;
+}
+
+[dir='rtl']
+  body.condensed
+  [data-slot='consent-switch-toggle'][aria-checked='false']
+  [data-slot='consent-switch-thumb'] {
+  translate: -0.125rem !important;
+}
+
 body.condensed [data-slot='consent-switch-label'] {
   font-size: 0.6875rem !important;
 }

@@ -833,19 +833,35 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect
       .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
       .toBe('loading-bar');
+    await expect(page).toHaveScreenshot('loading-bar-colors.png', {
+      animations: 'disabled',
+    });
     await gotoStory(page, 'loading-loadingpage--progress-bar-colors', {
       globals: 'direction:rtl',
     });
     await expect
       .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
       .toBe('loading-bar-rtl');
-    await gotoStory(page, 'loading-loadingpage--skeletons', {
-      globals: 'direction:rtl',
+    await expect(page).toHaveScreenshot('loading-bar-colors-rtl.png', {
+      animations: 'disabled',
     });
+    await gotoStory(page, 'loading-loadingpage--skeletons');
     const wave = page.locator('.animate-shimmer').first();
     await expect
       .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer');
+    await expect(page).toHaveScreenshot('loading-skeletons.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--skeletons', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
       .toBe('shimmer-rtl');
+    await expect(page).toHaveScreenshot('loading-skeletons-rtl.png', {
+      animations: 'disabled',
+    });
   });
 
   test('Deck - bar chart marker label stays centered in RTL', async ({
@@ -870,6 +886,11 @@ test.describe('Visual Regression Tests - Core Components', () => {
         })
       )
       .toBeLessThanOrEqual(1);
+    const chart = page.locator('[data-slot="deck-bar-chart"]').first();
+    await chart.scrollIntoViewIfNeeded();
+    await expect(chart).toHaveScreenshot('deck-bar-chart-rtl.png', {
+      animations: 'disabled',
+    });
   });
 
   test('Table - Default', async ({ page }) => {
