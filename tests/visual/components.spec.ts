@@ -893,6 +893,32 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  test('BookingDialog - Condensed consent switch thumb mirrors (RTL)', async ({
+    page,
+  }) => {
+    // condensed-view.css repositions the thumb with physical `translate`
+    // + `transform: none !important`, which tramples the component's
+    // rtl:-translate-x-* utilities — dedicated :dir(rtl) condensed rules
+    // mirror it. Assert the thumb travels toward inline-end (negative
+    // translate) in both states.
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl;density:condensed',
+    });
+    const toggle = page.locator("[data-slot='consent-switch-toggle']").first();
+    const thumb = toggle.locator("[data-slot='consent-switch-thumb']");
+    const translateX = () =>
+      thumb.evaluate((el) => parseFloat(getComputedStyle(el).translate));
+    await expect.poll(translateX).toBe(-2); // unchecked: -0.125rem
+    await toggle.click();
+    await expect.poll(translateX).toBe(-14); // checked: -0.875rem
+    const consent = page.locator("[data-slot='booking-dialog-consent']");
+    await consent.scrollIntoViewIfNeeded();
+    await expect(consent).toHaveScreenshot(
+      'booking-consent-condensed-rtl.png',
+      { animations: 'disabled' }
+    );
+  });
+
   test('Table - Default', async ({ page }) => {
     await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');
