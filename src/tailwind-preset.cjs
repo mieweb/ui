@@ -267,6 +267,13 @@ module.exports = {
     // RTL Phase 2: Toast slide-in animation + RTL mirror
     'animate-slide-in-right',
     'rtl:animate-slide-in-left',
+    // RTL Phase 2 transforms batch: LoadingPage bar/shimmer + RTL mirrors,
+    // BookingDialog consent-switch thumb mirror
+    'animate-loading-bar',
+    'rtl:animate-loading-bar-rtl',
+    'animate-shimmer',
+    'rtl:animate-shimmer-rtl',
+    'rtl:-translate-x-5',
     // RTL Phase 2: directional icon mirroring (chevrons/arrows)
     'rtl:-scale-x-100',
     // RTL Phase 5: YearTimeline now-marker centering mirrors
@@ -1094,6 +1101,30 @@ module.exports = {
           '0%': { transform: 'translateY(0.5rem)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'loading-bar': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(300%)' },
+        },
+        'loading-bar-rtl': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-300%)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
+        'shimmer-rtl': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
         'scale-in': {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
@@ -1118,6 +1149,12 @@ module.exports = {
         'fade-out': 'fade-out 150ms ease-in',
         'slide-in-from-top': 'slide-in-from-top 150ms ease-out',
         'slide-in-from-bottom': 'slide-in-from-bottom 150ms ease-out',
+        'slide-in-right': 'slide-in-right 300ms ease-out',
+        'slide-in-left': 'slide-in-left 300ms ease-out',
+        'loading-bar': 'loading-bar 1.5s ease infinite',
+        'loading-bar-rtl': 'loading-bar-rtl 1.5s ease infinite',
+        shimmer: 'shimmer 2s linear infinite',
+        'shimmer-rtl': 'shimmer-rtl 2s linear infinite',
         'scale-in': 'scale-in 150ms ease-out',
         'ozwell-message-flare': 'ozwell-message-flare 1.8s ease-out',
       },

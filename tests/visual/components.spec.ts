@@ -822,6 +822,112 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  test('LoadingPage - bar and shimmer animations mirror under RTL', async ({
+    page,
+  }) => {
+    // `animate-loading-bar` / `animate-shimmer` emitted no CSS at all before
+    // this batch (their keyframes were never defined), so assert they resolve
+    // to real animations and swap to the `-rtl` mirrors under dir="rtl".
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors');
+    const bar = page.locator('.animate-loading-bar');
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar');
+    await expect(page).toHaveScreenshot('loading-bar-colors.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar-rtl');
+    await expect(page).toHaveScreenshot('loading-bar-colors-rtl.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--skeletons');
+    const wave = page.locator('.animate-shimmer').first();
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer');
+    await expect(page).toHaveScreenshot('loading-skeletons.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--skeletons', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer-rtl');
+    await expect(page).toHaveScreenshot('loading-skeletons-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Deck - bar chart marker label stays centered in RTL', async ({
+    page,
+  }) => {
+    // The label anchors at `start-1/2` (right: 50% in RTL), so the physical
+    // centering translate must mirror: `-translate-x-1/2 rtl:translate-x-1/2`.
+    // Without the mirror the label lands a full label-width off the divider.
+    await gotoStory(page, 'presentations-deck--rtl');
+    const label = page
+      .locator('[data-slot="deck-bar-chart"] span.start-1\\/2')
+      .first();
+    // Center-to-center offset within a 1px subpixel-rounding budget — an
+    // unmirrored label sits a half label-width (tens of px) off the divider.
+    await expect
+      .poll(() =>
+        label.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const center = r.left + r.width / 2;
+          const p = el.parentElement!.getBoundingClientRect();
+          return Math.abs(center - (p.left + p.width / 2));
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    const chart = page.locator('[data-slot="deck-bar-chart"]').first();
+    await chart.scrollIntoViewIfNeeded();
+    await expect(chart).toHaveScreenshot('deck-bar-chart-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('BookingDialog - Consent switch thumb mirrors (RTL)', async ({
+    page,
+  }) => {
+    const translateX = () =>
+      page
+        .locator("[data-slot='consent-switch-thumb']")
+        .first()
+        .evaluate((el) => parseFloat(getComputedStyle(el).translate));
+    // Normal density: the component's own rtl:-translate-x-* utilities
+    // drive the travel (-0.125rem resting, -1.25rem checked).
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl',
+    });
+    const toggle = page.locator("[data-slot='consent-switch-toggle']").first();
+    await expect.poll(translateX).toBe(-2);
+    await toggle.click();
+    await expect.poll(translateX).toBe(-20);
+    // Condensed density: condensed-view.css repositions the thumb with
+    // physical `translate` + `transform: none !important`, trampling the
+    // utilities above — dedicated :dir(rtl) condensed rules mirror it
+    // (-0.125rem resting, -0.875rem checked).
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl;density:condensed',
+    });
+    await expect.poll(translateX).toBe(-2);
+    await toggle.click();
+    await expect.poll(translateX).toBe(-14);
+    const consent = page.locator("[data-slot='booking-dialog-consent']");
+    await consent.scrollIntoViewIfNeeded();
+    await expect(consent).toHaveScreenshot(
+      'booking-consent-condensed-rtl.png',
+      { animations: 'disabled' }
+    );
+  });
+
   test('Table - Default', async ({ page }) => {
     await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');
