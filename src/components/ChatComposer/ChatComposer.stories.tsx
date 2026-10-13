@@ -8,6 +8,7 @@ import {
   type ChatComposerMenuItem,
 } from './ChatComposer';
 import type { ProviderModelValue } from '../AI/ComposerModelSelector';
+import { ComposerSelector } from './ComposerSelector';
 import { RecordButton } from '../RecordButton';
 import {
   useKeyboardInset,
@@ -113,7 +114,7 @@ const meta = {
       description: {
         component: `### What it's for
 
-**The standardized chat input.** At \`md+\` \`ChatComposer\` renders as a single-row pill — a \`+\` menu (built-in "Attach files" plus host-supplied \`addMenuItems\`), an auto-growing textarea, an optional mic, and a send button that swaps to **stop** while \`isStreaming\`, side by side with the icon actions pinned to the bottom as the input grows. Below the \`md\` breakpoint the input stacks above the icon row. An optional row below the card holds an **agent selector** (\`showAgentSelector\` + \`agents\`) and a **model selector** (\`showModelSelector\` + \`modelSelectorProps\`, an embedded \`ComposerModelSelector\` rendered with \`variant="ghost"\` so it matches the agent selector — override via \`modelSelectorProps.variant\`), rendered as quiet text on the page background. No large filled buttons: every control is a small ghost icon; the send button fills with the primary color only when there is content to send (or always, with \`canSendWhenEmpty\` — see below).
+**The standardized chat input.** At \`md+\` \`ChatComposer\` renders as a single-row pill — a \`+\` menu (built-in "Attach files" plus host-supplied \`addMenuItems\`), an auto-growing textarea, an optional mic, and a send button that swaps to **stop** while \`isStreaming\`, side by side with the icon actions pinned to the bottom as the input grows. Below the \`md\` breakpoint the input stacks above the icon row. An optional row below the card holds an **agent selector** (\`showAgentSelector\` + \`agents\`) and a **model selector** (\`showModelSelector\` + \`modelSelectorProps\`, an embedded \`ComposerModelSelector\` rendered with \`variant="ghost"\` so it matches the agent selector — override via \`modelSelectorProps.variant\`), and host content at its end (\`selectorsEndSlot\`, e.g. a voice-activation selector), rendered as quiet text on the page background. No large filled buttons: every control is a small ghost icon; the send button fills with the primary color only when there is content to send (or always, with \`canSendWhenEmpty\` — see below).
 
 Sending: on devices with a mouse or trackpad Enter sends and Shift+Enter inserts a newline; on touch devices Return inserts a newline and only the send button sends (\`submitOnEnter\`: \`'desktop'\` default, \`'always'\`, \`'never'\`). Enter never sends while an IME composition (CJK input) is in progress. \`onSend({ content, attachments })\` receives the trimmed text and staged \`File\`s (the \`NewMessage\` shape from the Messaging module, so hosts can migrate mechanically). \`onSend\` may return a promise — the draft clears optimistically and a rejection is reported through \`onError\` with \`reason: 'send-failed'\` (hosts own retry/restore). \`replyTo\` (\`{ id, content, senderName }\`) renders a dismissible preview row at the top of the card, focuses the input, and stamps \`replyToId\` onto the sent message; the host owns the state — clear it in \`onSend\`, and \`onCancelReply\` fires from the row's close button. Attachments arrive from the \`+\` menu picker, paste, drag-and-drop onto the card, or the imperative \`ChatComposerHandle.addFiles()\` (for page-level drop zones); they are validated against \`acceptedFileTypes\` / \`maxFileSize\` / \`maxAttachments\` with failures reported through \`onError(message, { reason, file })\`. \`mentionOptions\` enables the built-in \`@mention\` autocomplete — the shared Messaging mention module (typing \`@\` opens a filtered listbox; arrows navigate, Enter/Tab insert, Escape dismisses). \`readOnly\` replaces the whole composer with a notice (\`readOnlyMessage\`). The value is controlled (\`value\` + \`onValueChange\`) or uncontrolled. The textarea auto-grows up to \`maxHeight\` (default 160px; any CSS length works — prefer small-viewport units such as \`'30svh'\`, since on iOS \`vh\` ignores the on-screen keyboard).
 
@@ -125,6 +126,7 @@ Host integration escape hatches: \`textareaProps\` spreads extra props onto the 
 
 - Building **any new chat surface** — AI assistants, patient messaging, support chat. This is the canonical composer (the legacy \`MessageComposer\` was retired in 0.10.0 — see \`MIGRATION.md#chat-composer\`).
 - The surface needs per-message **agent or model choice** (AI chat), a \`+\` action menu, or voice input (\`onMicClick\` for a simple hook, \`micSlot\` to embed \`RecordButton\` for real recording, or \`leadingSlot\` for a host-owned control before the \`+\` menu).
+- A host control belongs **next to the model selector** below the card (e.g. a wake-word on/off selector) — pass it as \`selectorsEndSlot\` (see *With Selectors End Slot*).
 
 ### Don't use it when
 
@@ -161,7 +163,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
 
 ### Limitations
 
-- The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. Use \`leadingSlot\` for a host control before the \`+\` menu. Both slots are constrained to a 32px-tall row so they line up with the other controls; taller content (like \`RecordButton\`) overflows and stays vertically centered without inflating the composer. Interaction state is yours — disable your own control when the composer is \`disabled\`.
+- The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. Use \`leadingSlot\` for a host control before the \`+\` menu. Both slots are constrained to a 32px-tall row so they line up with the other controls; taller content (like \`RecordButton\`) overflows and stays vertically centered without inflating the composer. \`selectorsEndSlot\` renders after the model selector in the row below the card and shows that row on its own. Interaction state is yours — disable your own control when the composer is \`disabled\`.
 - Attachment upload state is the host's job: files are staged locally and handed over on send as \`File[]\`; there is no built-in upload progress.
 - i18n: all strings are props with English defaults (\`placeholder\`, \`inputLabel\`, \`addMenuLabel\`, \`attachFilesLabel\`, \`micLabel\`, \`sendLabel\`, \`sendingLabel\`, \`stopLabel\`, \`agentSelectorLabel\`, \`readOnlyMessage\`, \`attachmentLimitLabel\`, \`sendFailedLabel\`, \`mentionListLabel\`, \`dropFilesLabel\`, \`replyingToLabel\`, \`cancelReplyLabel\`); file-validation messages from \`onError\` carry a machine-readable \`context.reason\` so hosts can substitute localized copy. RTL: uses logical properties (\`ms-auto\`, \`pe-*\`, the reply preview's \`border-s-4\` accent) throughout.
 - Accessibility: every icon button has an \`aria-label\`; the \`+\` and agent menus are \`Dropdown\`s (Tab-based item access, Escape/outside-click to close — no arrow-key navigation or typeahead yet) that close on selection; \`addMenuItems\` with \`checked\` render as \`menuitemcheckbox\`, agent options as \`menuitemradio\`; the send button exposes \`aria-busy\` while \`isSending\`; the character counter is \`aria-live="polite"\`. The textarea is labelled via \`inputLabel\`; with \`mentionOptions\` it gains \`aria-autocomplete="list"\` plus \`aria-controls\` / \`aria-activedescendant\` into the mention \`listbox\` (labelled via \`mentionListLabel\`).
@@ -198,6 +200,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
     onSend: { table: { disable: true } },
     leadingSlot: { table: { disable: true } },
     micSlot: { table: { disable: true } },
+    selectorsEndSlot: { table: { disable: true } },
     modelSelectorProps: { table: { disable: true } },
   },
 } satisfies Meta<typeof ChatComposer>;
@@ -347,6 +350,41 @@ export const WithLeadingSlot: Story = {
       description: {
         story:
           'Use `leadingSlot` for a host-owned control before the `+` menu. The host owns interaction state, including disabling the control when the composer is disabled.',
+      },
+    },
+  },
+};
+
+function WakeWordSelectorDemo() {
+  const [wake, setWake] = React.useState<string | null>('on');
+  return (
+    <ComposerSelector
+      options={[
+        { id: 'on', label: 'Activate', description: 'Listen for "Hey Ozwell"' },
+        { id: 'off', label: 'Disable', description: 'Wake word off' },
+      ]}
+      value={wake}
+      onChange={setWake}
+      label="Hey Ozwell"
+      triggerLabel="Hey Ozwell"
+      icon={<AudioWaveform className="h-3.5 w-3.5" aria-hidden="true" />}
+    />
+  );
+}
+
+export const WithSelectorsEndSlot: Story = {
+  render: () => (
+    <ChatComposerDemo
+      onSend={() => {}}
+      showModelSelector
+      selectorsEndSlot={<WakeWordSelectorDemo />}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`selectorsEndSlot` places a host control after the model selector in the row below the card — here a wake-word on/off selector. The host owns its state and disabled handling. The selector shown is the library-internal `ComposerSelector` (not exported); the slot accepts any node.',
       },
     },
   },
