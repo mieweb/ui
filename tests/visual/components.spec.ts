@@ -188,6 +188,39 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   }
 
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-condensed', { globals: 'density:condensed' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`HeyOzwellSelector - Error menu${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'voice-hey-ozwell-selector--error-state', {
+        ...options,
+      });
+      const trigger = page.locator("[data-slot='composer-selector-trigger']");
+      // The phase icon leads the label: right of it under RTL, left otherwise.
+      const [icon, text] = await Promise.all([
+        trigger.locator('svg').first().boundingBox(),
+        trigger.locator('span').first().boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(icon!.x).toBeGreaterThan(text!.x);
+      } else {
+        expect(icon!.x).toBeLessThan(text!.x);
+      }
+      await trigger.click();
+      await expect(
+        page.getByText('Microphone permission denied')
+      ).toBeVisible();
+      await expect(page).toHaveScreenshot(
+        `hey-ozwell-selector-error-menu${name}.png`
+      );
+    });
+  }
+
   test('ChatComposer - With record button', async ({ page }) => {
     // The 40px RecordButton in micSlot must overflow-center in the h-8
     // control row without inflating the pill height.
@@ -750,7 +783,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     // `start`/`end` resolve against the trigger's text direction: in LTR
     // start = left of the trigger, end = right.
     await gotoStory(page, 'overlays-tooltip--logical-placements');
-    const startTip = page.getByRole('tooltip').filter({ hasText: 'Inline start' });
+    const startTip = page
+      .getByRole('tooltip')
+      .filter({ hasText: 'Inline start' });
     const endTip = page.getByRole('tooltip').filter({ hasText: 'Inline end' });
     const startBtn = page.getByRole('button', { name: 'Start' });
     const endBtn = page.getByRole('button', { name: 'End' });
@@ -775,7 +810,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'overlays-tooltip--logical-placements', {
       globals: 'direction:rtl',
     });
-    const startTip = page.getByRole('tooltip').filter({ hasText: 'Inline start' });
+    const startTip = page
+      .getByRole('tooltip')
+      .filter({ hasText: 'Inline start' });
     const endTip = page.getByRole('tooltip').filter({ hasText: 'Inline end' });
     const startBtn = page.getByRole('button', { name: 'Start' });
     const endBtn = page.getByRole('button', { name: 'End' });
