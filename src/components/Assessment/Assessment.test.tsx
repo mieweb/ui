@@ -442,3 +442,22 @@ describe('Assessment actions', () => {
     });
   });
 });
+
+describe('Assessment capture landmark', () => {
+  it.each([
+    [undefined, 'Add concern or order'],
+    ['Add clinical assessment', 'Add clinical assessment'],
+  ])(
+    'uses an explicit form label while preserving the default',
+    (addFormLabel, expected) => {
+      renderAssessment({
+        concerns: [],
+        items: [],
+        addFormLabel,
+        onAddAssessment: vi.fn(),
+        renderOrderSearch: () => <span>Coded search</span>,
+      });
+      expect(screen.getByRole('form', { name: expected })).toBeInTheDocument();
+    }
+  );
+});

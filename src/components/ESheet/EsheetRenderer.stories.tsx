@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-// eSheet compiled CSS is loaded globally in .storybook/preview.tsx so the
-// builder + renderer stylesheets always apply in a deterministic order.
+// The shared eSheet stylesheet is loaded globally in .storybook/preview.tsx.
 import {
   EsheetRenderer,
   registerMieEsheetFields,
@@ -79,6 +78,7 @@ The **fill-out side of eSheet**: renders a form definition as live fields and co
 ### Don't use it when
 
 - You need to **edit the form definition** — \`ESheet Builder\`.
+- You need a complete clinical visit document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) composes this renderer with narrative and observation sections, repeatable vitals, clinical lists, note review and MCP tools.
 - The form is fixed and developer-authored — compose \`Input\`, \`Select\`, \`DateInput\` etc. directly.
 - Users add free key/value extras to an otherwise fixed form — \`AdditionalFields\`.
 - You need a submit button, autosave or server persistence out of the box — the renderer has none; the host calls \`getValidResponse()\` and posts.
@@ -110,7 +110,7 @@ function IntakeForm({ definition, draft }: { definition: FormDefinition; draft?:
 
 ### Limitations
 
-- Separate install: \`@esheet/renderer\` (and \`@esheet/core\` for types) are optional peers behind \`@mieweb/ui/esheet\`. The compiled stylesheet (\`index.output.css\`) lives in the package's \`src/\` and is not in its \`exports\`, so the host must copy/alias it (Storybook imports it from the submodule source); load it before the builder's when both are present.
+- Separate install: install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer) for the shared \`@mieweb/ui/esheet\` entry. The renderer and builder import the shared \`@esheet/styles\` stylesheet automatically; load \`@mieweb/ui/styles.css\` for the composed UI components.
 - Imperative API: there is no \`onChange\` / \`onSubmit\` and no submit button — read answers via the ref. Validation runs only when you call \`getValidResponse()\`; \`getRawResponse()\` returns unvalidated state.
 - Accessibility depends on \`@esheet/fields\`' field markup; the renderer shell itself sets one \`aria-*\` attribute and no landmark roles. A known upstream contrast failure on the selected option card (mieweb/eSheet#170) is excluded from axe in the *PreFilled* story.
 - i18n / RTL: no locale, direction or translation hooks were found in the renderer source; built-in strings are English and layout is LTR. Dark mode is a \`dark\` class on \`className\`, not the @mieweb/ui theme provider.
@@ -121,6 +121,11 @@ function IntakeForm({ definition, draft }: { definition: FormDefinition; draft?:
       entry: '@mieweb/ui/esheet',
       peers: ['@esheet/renderer', '@esheet/core'],
       relationships: [
+        {
+          type: 'composes with',
+          target: 'encounter-orders-encountervisit',
+          why: 'EncounterVisit adds clinical section configuration, coordinated vitals, note review and MCP tools around one native renderer; use Renderer directly for other form workflows.',
+        },
         {
           type: 'composes with',
           target: 'composite-forms-esheet-builder',

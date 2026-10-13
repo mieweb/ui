@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
@@ -170,6 +172,7 @@ function AllergyRow({
   onMove?: (allergy: Allergy, dir: -1 | 1) => void;
   onAction?: (allergy: Allergy, action: AllergyAction) => void;
 }) {
+  const m = useMessages();
   const handleRowKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.target !== e.currentTarget) return;
     if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
@@ -202,7 +205,9 @@ function AllergyRow({
       onKeyDown={drag.enabled ? handleRowKeyDown : undefined}
       aria-label={
         drag.enabled
-          ? `${allergy.allergen}. Alt plus arrow keys to reorder.`
+          ? m('{name}. Alt plus arrow keys to reorder.', {
+              name: allergy.allergen,
+            })
           : undefined
       }
       {...drag.rowProps(allergy.id)}
@@ -241,12 +246,12 @@ function AllergyRow({
       )}
       {allergy.severity && (
         <Badge variant={SEVERITY_BADGE[allergy.severity]} size="sm">
-          {allergy.severity}
+          {m(allergy.severity)}
         </Badge>
       )}
       {allergy.kind === 'intolerance' && (
         <Badge variant="secondary" size="sm">
-          intolerance
+          {m('intolerance')}
         </Badge>
       )}
       {allergy.reaction && (
@@ -256,12 +261,12 @@ function AllergyRow({
       )}
       {allergy.onsetDate && (
         <span className="text-muted-foreground text-xs">
-          since {allergy.onsetDate}
+          {m('since {date}', { date: allergy.onsetDate })}
         </span>
       )}
       {allergy.inactive && (
         <Badge variant="secondary" size="sm">
-          inactive
+          {m('inactive')}
         </Badge>
       )}
       {allergy.note && (
@@ -272,11 +277,13 @@ function AllergyRow({
       )}
 
       {!readOnly && actions.length > 0 && (
-        <RowActionToolbar label={`Actions for ${allergy.allergen}`}>
+        <RowActionToolbar
+          label={m('Actions for {name}', { name: allergy.allergen })}
+        >
           {actions.map((action) => (
             <RowIconButton
               key={action}
-              label={ACTION_META[action].label}
+              label={m(ACTION_META[action].label)}
               icon={ACTION_META[action].icon}
               onClick={() => onAction?.(allergy, action)}
             />
@@ -325,6 +332,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
     },
     ref
   ) => {
+    const m = useMessages();
     const [announcement, setAnnouncement] = useLiveAnnouncement();
 
     const groups = TYPE_ORDER.map((type) => ({
@@ -346,7 +354,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
         readOnly || !onReorder
           ? undefined
           : (ids) => {
-              setAnnouncement('Allergy list reordered');
+              setAnnouncement(m('Allergy list reordered'));
               onReorder(ids);
             },
       canDropOn: (dragged, target) => typeOf(dragged) === typeOf(target),
@@ -369,11 +377,13 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
         if (to < 0 || to >= allergies.length) return;
         [ids[from], ids[to]] = [ids[to], ids[from]];
         setAnnouncement(
-          `${allergy.allergen} moved ${dir === -1 ? 'up' : 'down'}`
+          m(dir === -1 ? '{name} moved up' : '{name} moved down', {
+            name: allergy.allergen,
+          })
         );
         onReorder(ids);
       },
-      [allergies, onReorder, readOnly, setAnnouncement]
+      [allergies, m, onReorder, readOnly, setAnnouncement]
     );
 
     return (
@@ -391,7 +401,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
                 size={16}
                 className="text-red-600 dark:text-red-400"
               />
-              {title}
+              {m(title)}
             </h3>
           </CardHeader>
         )}
@@ -404,11 +414,11 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
                   <Badge variant="success" size="sm">
                     ✓
                   </Badge>
-                  No known allergies (NKA)
+                  {m('No known allergies (NKA)')}
                 </p>
               ) : (
                 <p className="text-muted-foreground text-sm">
-                  Allergy status not recorded.
+                  {m('Allergy status not recorded.')}
                 </p>
               )}
               {!readOnly && onNoKnownAllergiesChange && (
@@ -418,19 +428,19 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
                   onClick={() => onNoKnownAllergiesChange(!noKnownAllergies)}
                 >
                   {noKnownAllergies
-                    ? 'Clear no-known-allergies'
-                    : 'Confirm: no known allergies'}
+                    ? m('Clear no-known-allergies')
+                    : m('Confirm: no known allergies')}
                 </Button>
               )}
             </div>
           ) : (
             groups.map(({ type, label, items }) => (
-              <section key={type} aria-label={label}>
+              <section key={type} aria-label={m(label)}>
                 <h4
                   data-slot="clinical-list-heading"
                   className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
                 >
-                  {label}
+                  {m(label)}
                 </h4>
                 <ul className="mt-1">
                   {items.map((allergy) => (
@@ -452,7 +462,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
           {!readOnly && (addSearch || onAdd) && (
             <div className="space-y-2">
               <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                Add allergy
+                {m('Add allergy')}
               </span>
               {addSearch}
               {onAdd && (
@@ -463,7 +473,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
                   leftIcon={<PlusIcon size={12} />}
                   className="h-auto rounded-full px-2.5 py-1 text-xs"
                 >
-                  Add allergy…
+                  {m('Add allergy…')}
                 </Button>
               )}
             </div>

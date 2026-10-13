@@ -84,11 +84,12 @@ If you cloned without `--recurse-submodules`, run
 
 Use Node.js 24 (the version used by CI) and the pnpm version declared in
 `package.json`. The `prestorybook` hook builds eSheet when its required artifacts
-are missing; it does not detect every stale build after a submodule update. To
-rebuild updated eSheet sources explicitly:
+are missing or its submodule revision changes. Local `@esheet/*` development
+dependencies link to that checkout, and Storybook uses its shared stylesheet.
+To rebuild updated eSheet sources explicitly:
 
 ```bash
-pnpm --dir packages/esheet --filter '@esheet/builder...' --filter '@esheet/renderer...' build
+pnpm build:esheet
 ```
 
 Storybook uses HMR for source and documentation edits. Do not restart it after
@@ -417,7 +418,7 @@ If a submodule-backed component fails to resolve, run
 ## Optional peer dependencies
 
 `react` / `react-dom` are required peers. Everything else heavy is **optional**:
-`datavis-ace`, `@mieweb/datavis`, `@esheet/builder`, `@esheet/renderer`,
+`datavis-ace`, `@mieweb/datavis`, `@esheet/core`, `@esheet/fields`, `@esheet/builder`, `@esheet/renderer`,
 `@kerebron/*`, `@mieweb/q`, `wavesurfer.js`, `@xyflow/react`, `elkjs`. Components that need them must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
@@ -451,10 +452,11 @@ Current notes:
 | [ChatComposer](src/components/ChatComposer/MAINTAINERS.md)                   | Object-URL lifecycle with an `attachmentsRef` mirror; pure state updaters; controlled menus; stable `onError` reason keys                                                                                       |
 | [CountryCodeDropdown](src/components/CountryCodeDropdown/MAINTAINERS.md)     | Base shared with `CountryDropdown` with diverging defaults (US vs. empty); empty-state contract; lazy `google-libphonenumber` singletons                                                                        |
 | [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                                                                                        |
-| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                                                                                                  |
+| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a pnpm submodule; revision-aware `build:esheet`; shared styles; Storybook-only `src`                                                                                                                                  |
 | [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Implementation is the `packages/datavis` submodule (`@mieweb/datavis`, bundled) + the `datavis-ace` dependency (transitive, external); needs `build:datavis`; context/source/grid wiring                        |
 | [Deck](src/components/Deck/MAINTAINERS.md) | Client-only `@mieweb/ui/deck` entry; JSON slide schema + `satisfies` renderer registry; CSS-only reveal gated on `data-ready`/`data-seen`; renderers resolve tone with `toneOf`; window key handler yields to inputs and tabs |
 | [EmailEditor](src/components/EmailEditor/MAINTAINERS.md) | Canvas preview (`EmailBlockPreview`) and MJML renderer (`renderEmailMjml`) must change together (validate with strict `mjml`); one DOMPurify policy (`sanitizeEmailHtml`) sanitises every output and pasted input — stored documents are never normalised in place |
+| [EncounterVisit](src/components/EncounterVisit/MAINTAINERS.md) | One eSheet response store across form, RichEdit and View; coded clinical adapters, MCP validation, protected MDY links and empty-report rendering invariants |
 | [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                                                                                             |
 | [Globe](src/components/Globe/MAINTAINERS.md)                                 | Optional `three`/`react-globe.gl` peers isolated to the `@mieweb/ui/globe` entry; WebGL palette + escaped tooltip HTML; pointer-only canvas (hosts add the keyboard path via `selectedId`)                      |
 | [MediaFeed](src/components/MediaFeed/MAINTAINERS.md)                         | Imported `news-widget` history (merge, don't squash); host owns data/navigation; feed-owned visibility via IntersectionObserver with hydration-safe fallback; consume-once `playbackRequest`; shares `MediaPlayer` with SuperChat thread previews |

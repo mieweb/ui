@@ -1,0 +1,252 @@
+/* Visit sections use document headings rather than eSheet's questionnaire cards.
+   Keep these overrides local to the encounter composition. */
+.encounter-visit .section-field-preview {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.encounter-visit .section-field-preview > h3 {
+  overflow: visible;
+  background: transparent;
+  color: inherit;
+}
+
+.encounter-visit .section-field-preview > h3 > button {
+  min-height: 44px;
+  padding: 0;
+  text-align: start;
+  font-size: 1rem;
+}
+
+.encounter-visit .section-field-preview > div[id] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.encounter-visit .renderer-body {
+  display: grid;
+  row-gap: 1.25rem;
+}
+
+.encounter-visit .section-children {
+  display: grid;
+  row-gap: 0.375rem;
+}
+
+.encounter-visit .field-wrapper {
+  min-width: 0;
+  margin-block: 0;
+  padding-block: 0;
+}
+
+.encounter-visit .renderer-readonly-banner {
+  padding-inline: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* One renderer stays mounted in every mode. The linked-field resolver reveals
+   its section and related inputs rather than creating another clinical store. */
+.encounter-visit
+  .encounter-focused
+  .renderer-body
+  > .field-wrapper:not([data-encounter-focus]) {
+  display: none;
+}
+
+.encounter-visit .encounter-mdy-editor,
+.encounter-visit .encounter-mdy-editor .kb-component,
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor) {
+  min-width: 0;
+  min-height: 44px;
+  height: auto;
+  max-height: none;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.encounter-visit .encounter-mdy-editor .kb-component,
+.encounter-visit .encounter-mdy-editor .kb-custom-menu {
+  padding-inline: 0;
+  border: 0;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  :where(h1, h2, h3, h4, h5, h6) {
+  margin-block: 1.25rem 0.375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  h1 {
+  font-size: 1.25rem;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  h2,
+.encounter-visit .encounter-mdy-view h2 {
+  font-size: 1.125rem;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  :where(h3, h4, h5, h6) {
+  font-size: 1rem;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  :where(ul, ol) {
+  margin-block: 0.375rem 0.75rem;
+  padding-inline: 1.5rem 0;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor) {
+  padding-inline: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  ul {
+  list-style-type: disc;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  ol {
+  list-style-type: decimal;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  p {
+  margin-block: 0.375rem 0.75rem;
+}
+
+.encounter-visit .encounter-mdy-editor .kb-menu__button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.encounter-visit .encounter-mdy-view {
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+}
+
+.encounter-visit .encounter-mdy-view :where(h1, h2, h3, h4, h5, h6) {
+  margin-block: 1.25rem 0.375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.encounter-visit .encounter-mdy-view h1 {
+  font-size: 1.25rem;
+}
+
+.encounter-visit .encounter-mdy-view :where(p, ul, ol, blockquote, pre) {
+  margin-block: 0.375rem 0.75rem;
+}
+
+.encounter-visit .encounter-mdy-view ul,
+.encounter-visit .encounter-mdy-view ol {
+  padding-inline-start: 1.5rem;
+}
+
+.encounter-visit .encounter-mdy-view ul {
+  list-style-type: disc;
+}
+
+.encounter-visit .encounter-mdy-view ol {
+  list-style-type: decimal;
+}
+
+.encounter-visit .encounter-mdy-view :where(pre, table) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.encounter-visit .encounter-mdy-view a {
+  color: var(--mieweb-primary-800);
+  text-decoration: underline;
+}
+
+[data-theme='dark'] .encounter-visit .encounter-mdy-view a,
+.dark .encounter-visit .encounter-mdy-view a {
+  color: var(--mieweb-primary-400);
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ul,
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ol {
+  padding-inline-start: 1.5rem;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ul {
+  list-style-type: disc;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ol {
+  list-style-type: decimal;
+}
+
+/* Clinical lists retain their controls, but share the report's section heading
+   and content inset instead of adding another card inside the document. */
+.encounter-visit [data-field-type='medicationList'] > [data-slot='card'],
+.encounter-visit [data-field-type='allergyList'] > [data-slot='card'] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.encounter-visit [data-field-type='medicationList'] [data-slot='card-header'],
+.encounter-visit [data-field-type='allergyList'] [data-slot='card-header'] {
+  display: none;
+}
+
+.encounter-visit [data-field-type='medicationList'] [data-slot='card-content'],
+.encounter-visit [data-field-type='allergyList'] [data-slot='card-content'] {
+  padding: 0;
+}
+
+.encounter-visit
+  [data-field-type='medicationList']
+  [data-slot='clinical-list-heading'],
+.encounter-visit
+  [data-field-type='medicationList']
+  [data-slot='clinical-list-row'],
+.encounter-visit
+  [data-field-type='allergyList']
+  [data-slot='clinical-list-heading'],
+.encounter-visit
+  [data-field-type='allergyList']
+  [data-slot='clinical-list-row'] {
+  padding-inline: 0;
+  border: 0;
+}

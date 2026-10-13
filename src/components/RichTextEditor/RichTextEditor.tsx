@@ -1,3 +1,4 @@
+import { useMessages } from '../../utils/messages';
 import * as React from 'react';
 import {
   Bold,
@@ -137,6 +138,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     },
     ref
   ) => {
+    const m = useMessages();
     const editorRef = React.useRef<HTMLDivElement>(null);
     const [isListening, setIsListening] = React.useState(false);
     const [speechSupported, setSpeechSupported] = React.useState(false);
@@ -390,8 +392,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('bold')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Bold"
-            title="Bold"
+            aria-label={m('Bold')}
+            title={m('Bold')}
           >
             <Bold className="h-4 w-4" />
           </Button>
@@ -402,8 +404,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('italic')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Italic"
-            title="Italic"
+            aria-label={m('Italic')}
+            title={m('Italic')}
           >
             <Italic className="h-4 w-4" />
           </Button>
@@ -414,8 +416,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('underline')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Underline"
-            title="Underline"
+            aria-label={m('Underline')}
+            title={m('Underline')}
           >
             <Underline className="h-4 w-4" />
           </Button>
@@ -429,8 +431,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('insertUnorderedList')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Bullet list"
-            title="Bullet list"
+            aria-label={m('Bullet list')}
+            title={m('Bullet list')}
           >
             <List className="h-4 w-4" />
           </Button>
@@ -441,8 +443,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('insertOrderedList')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Numbered list"
-            title="Numbered list"
+            aria-label={m('Numbered list')}
+            title={m('Numbered list')}
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
@@ -456,8 +458,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('justifyLeft')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Align left"
-            title="Align left"
+            aria-label={m('Align left')}
+            title={m('Align left')}
           >
             <AlignLeft className="h-4 w-4" />
           </Button>
@@ -468,8 +470,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('justifyCenter')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Align center"
-            title="Align center"
+            aria-label={m('Align center')}
+            title={m('Align center')}
           >
             <AlignCenter className="h-4 w-4" />
           </Button>
@@ -480,8 +482,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             onClick={() => execCommand('justifyRight')}
             disabled={disabled}
             className={iconButtonClass}
-            aria-label="Align right"
-            title="Align right"
+            aria-label={m('Align right')}
+            title={m('Align right')}
           >
             <AlignRight className="h-4 w-4" />
           </Button>
@@ -503,10 +505,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                     size="sm"
                     className="h-8 gap-1 px-2"
                     disabled={disabled}
-                    title="Insert variable"
+                    title={m('Insert variable')}
                   >
                     <Braces className="h-4 w-4" />
-                    <span className="text-xs">Variables</span>
+                    <span className="text-xs">{m('Variables')}</span>
                   </Button>
                 }
               >
@@ -534,10 +536,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 onClick={handleConvertToMustache}
                 disabled={disabled}
                 className="h-8 gap-1 px-2"
-                title="Convert <<field>> to {{field}}"
+                title={m('Convert <<field>> to {{field}}')}
               >
                 <Replace className="h-4 w-4" />
-                <span className="text-xs">{'<< >> to {{ }}'}</span>
+                <span className="text-xs">{m('<< >> to {{ }}')}</span>
               </Button>
             </>
           )}
@@ -554,10 +556,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 className={cn('h-8 gap-1 px-2', isListening && 'animate-pulse')}
                 title={
                   !speechSupported
-                    ? 'Speech recognition not supported in this browser'
+                    ? m('Speech recognition not supported in this browser')
                     : isListening
-                      ? 'Stop dictation'
-                      : 'Start dictation'
+                      ? m('Stop dictation')
+                      : m('Start dictation')
                 }
               >
                 {isListening ? (
@@ -566,7 +568,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                   <Mic className="h-4 w-4" />
                 )}
                 <span className="text-xs">
-                  {isListening ? 'Stop' : 'Dictate'}
+                  {isListening ? m('Stop') : m('Dictate')}
                 </span>
               </Button>
             </>
