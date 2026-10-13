@@ -53,7 +53,7 @@ import { VoiceSetup } from '@mieweb/ui';
 - **Models and mic on mount:** loads the speaker runtime (~50 MB) and the wake models (~6 MB, \`onnxruntime-web\`) and opens the microphone as soon as the hook initialises, before the user taps — the permission prompt appears immediately. Requires a secure context, AudioWorklet, WASM and IndexedDB.
 - **Fixed enrollment protocol:** two English phrases × 3 reps, 5 s timeout per rep, phrase validation via the wake model; a rejected rep shakes and repeats (\`deny\`). Quality depends on enrolling in the real room/mic — mismatches later show up as ignored wakes.
 - **Accessibility as implemented:** the octopus is a real \`<button>\` (\`aria-label\` "Set up your voice" in intro, disabled otherwise); "← Cancel", "Add another spot" and "Done" are \`Button\`s. Phase text ("Get ready…", "Now say it", "Got it!") changes without a live region and the progress dots are visual only; motion (float, bounce, shake, rings) does not honour \`prefers-reduced-motion\`.
-- **Physical positioning:** Cancel is \`absolute top-4 left-4\`, the success check sits at \`right:-2; bottom:-2\` — not RTL-aware. Layout uses inline styles and Ozwell accent colours (\`--mieweb-ozwell\`) over the themeable background.
+- **Positioning:** Cancel is \`absolute start-4 top-4\` and the success check sits at \`insetInlineEnd:-2; bottom:-2\` — both logical, so they mirror in RTL (the pulse rings stay physically centered, which is direction-neutral). Layout uses inline styles and Ozwell accent colours (\`--mieweb-ozwell\`) over the themeable background.
 - i18n: all copy is English and hard-coded; \`onDone\` fires only from the Done button (no auto-advance). Entry \`@mieweb/ui\`.`,
       },
     },
