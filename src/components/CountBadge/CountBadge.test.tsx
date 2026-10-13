@@ -1,15 +1,18 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
 import { CountBadge } from './CountBadge';
 
 const items = [{ id: '1', label: 'Review labs', status: 'active' as const }];
 
-/** jsdom does not cascade dir → direction; set both (see useDirection.test). */
-function setRtl(element: HTMLElement) {
-  element.setAttribute('dir', 'rtl');
-  element.style.direction = 'rtl';
+// jsdom has no [dir] cascade — set direction on the element the reactive
+// useDirection(buttonRef) hook reads, then flush its MutationObserver.
+async function setRtl(element: HTMLElement) {
+  await act(async () => {
+    element.setAttribute('dir', 'rtl');
+    element.style.direction = 'rtl';
+  });
 }
 
 function mockRect(el: HTMLElement) {
@@ -27,7 +30,7 @@ function mockRect(el: HTMLElement) {
 }
 
 /** Open the badge popover, then the first row's overflow menu. */
-function openRowMenu({ rtl = false } = {}) {
+function openRowMenu() {
   render(
     <CountBadge label="Tasks" count={1} items={items} onView={() => {}} />
   );
@@ -35,24 +38,28 @@ function openRowMenu({ rtl = false } = {}) {
   const actionBtn = screen.getByRole('button', {
     name: 'Actions for Review labs',
   });
-  if (rtl) setRtl(actionBtn);
   mockRect(actionBtn);
   fireEvent.click(actionBtn);
-  return screen.getByRole('menu');
+  return { menu: screen.getByRole('menu'), actionBtn };
 }
 
-// The same inline-end anchoring recipe is shared by DashboardWidget and
-// FileManager row menus; CountBadge stands in for all three.
+// The menu positions via useAnchoredPosition with a direction-resolved
+// placement. jsdom gives the menu zero width, so 'bottom-end' resolves to the
+// trigger's right edge (324) and 'bottom-start' to its left edge (300).
 describe('CountBadge row action menu', () => {
-  it('pins its right edge to the trigger in LTR (translateX(-100%))', () => {
-    const menu = openRowMenu();
-    expect(menu.style.left).toBe('324px'); // trigger right edge
-    expect(menu.style.transform).toBe('translateX(-100%)');
+  it('anchors to the trigger right edge in LTR (bottom-end)', () => {
+    const { menu } = openRowMenu();
+    expect(menu.style.left).toBe('324px');
+    expect(menu).toHaveAttribute('dir', 'ltr');
   });
 
-  it('pins its left edge to the trigger in RTL (no transform)', () => {
-    const menu = openRowMenu({ rtl: true });
-    expect(menu.style.left).toBe('300px'); // trigger left edge
-    expect(menu.style.transform).toBe('');
+  it('re-anchors to the left edge and restates dir when direction flips to RTL while open', async () => {
+    const { menu, actionBtn } = openRowMenu();
+    expect(menu.style.left).toBe('324px');
+
+    await setRtl(actionBtn);
+
+    expect(menu.style.left).toBe('300px');
+    expect(menu).toHaveAttribute('dir', 'rtl');
   });
 });

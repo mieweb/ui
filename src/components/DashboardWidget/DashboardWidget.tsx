@@ -2,7 +2,8 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import { isRtl } from '../../hooks/useDirection';
+import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import { useDirection } from '../../hooks/useDirection';
 import { Card, CardContent, CardHeader } from '../Card';
 import { Button } from '../Button';
 import {
@@ -450,16 +451,28 @@ function WidgetRowActionMenu<T extends Record<string, unknown>>({
   actions: WidgetTableAction<T>[];
 }) {
   const [open, setOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  // The menu's inline-end edge hugs the trigger: 'bottom-end' aligns right
+  // edges in LTR, 'bottom-start' aligns left edges in RTL. `useDirection` is
+  // reactive, so an open menu re-anchors when the nearest `dir` changes.
+  const direction = useDirection(buttonRef);
+  const {
+    anchorRef,
+    floatingRef,
+    style: menuStyle,
+  } = useAnchoredPosition<HTMLButtonElement, HTMLDivElement>({
+    open,
+    placement: direction === 'rtl' ? 'bottom-start' : 'bottom-end',
+  });
 
   // Close on outside click
   React.useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
       if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node) &&
+        floatingRef.current &&
+        !floatingRef.current.contains(e.target as Node) &&
         buttonRef.current &&
         !buttonRef.current.contains(e.target as Node)
       ) {
@@ -468,7 +481,7 @@ function WidgetRowActionMenu<T extends Record<string, unknown>>({
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
+  }, [open, floatingRef]);
 
   // Close on Escape
   React.useEffect(() => {
@@ -480,25 +493,6 @@ function WidgetRowActionMenu<T extends Record<string, unknown>>({
     return () => document.removeEventListener('keydown', handleKey);
   }, [open]);
 
-  // The menu's inline-end edge hugs the trigger: LTR pins the right edge
-  // (translateX(-100%)), RTL pins the left edge so it opens toward inline-end.
-  const [menuPos, setMenuPos] = React.useState<{
-    top: number;
-    left: number;
-    rtl: boolean;
-  } | null>(null);
-
-  React.useLayoutEffect(() => {
-    if (!open || !buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    const rtl = isRtl(buttonRef.current);
-    setMenuPos({
-      top: rect.bottom + 4,
-      left: rtl ? rect.left : rect.right,
-      rtl,
-    });
-  }, [open]);
-
   const visibleActions = actions.filter(
     (action) => !action.hidden?.(row, rowIndex)
   );
@@ -508,7 +502,10 @@ function WidgetRowActionMenu<T extends Record<string, unknown>>({
   return (
     <div className="relative">
       <button
-        ref={buttonRef}
+        ref={(el) => {
+          buttonRef.current = el;
+          anchorRef.current = el;
+        }}
         type="button"
         onClick={(e) => {
           e.stopPropagation();
@@ -529,18 +526,14 @@ function WidgetRowActionMenu<T extends Record<string, unknown>>({
       </button>
 
       {open &&
-        menuPos &&
         createPortal(
           <div
-            ref={menuRef}
+            ref={floatingRef}
             role="menu"
-            style={{
-              position: 'fixed',
-              top: menuPos.top,
-              // rtl-ignore -- fixed viewport coords; direction resolved via isRtl above
-              left: menuPos.left,
-              transform: menuPos.rtl ? undefined : 'translateX(-100%)',
-            }}
+            // Portals under <body> don't inherit a local `dir` from the
+            // trigger subtree; restate the resolved direction.
+            dir={direction}
+            style={menuStyle}
             className={cn(
               'z-[9999] min-w-[10rem]',
               'rounded-lg border border-neutral-200 bg-white py-1 shadow-lg',

@@ -765,10 +765,12 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await menu.waitFor({ state: 'visible' });
     // Geometry, not just pixels: the 5% page-diff tolerance can swallow a
     // side swap on a small menu. Poll: positioning lands in a layout effect.
+    // Equality (±0.5px), not one-sided: `left >= trigger.left` would also
+    // pass for a menu still anchored to the trigger's right edge.
     const btnBox = await actionBtn.boundingBox();
     await expect
       .poll(() => menu.evaluate((el) => el.getBoundingClientRect().left))
-      .toBeGreaterThanOrEqual(btnBox!.x - 0.5);
+      .toBeCloseTo(btnBox!.x, 0);
     await expect(page).toHaveScreenshot('countbadge-row-menu-rtl.png', {
       animations: 'disabled',
     });
