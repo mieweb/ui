@@ -345,7 +345,11 @@ export function MegaMenu({
                       className="text-foreground hover:text-primary-700 dark:hover:text-primary-300 mb-2 inline-flex items-center gap-1 text-sm font-semibold"
                     >
                       {g.label}
-                      <ChevronRight size={14} aria-hidden="true" />
+                      <ChevronRight
+                        size={14}
+                        aria-hidden="true"
+                        className="rtl:-scale-x-100"
+                      />
                     </a>
                   ) : (
                     <p className="text-foreground mb-2 text-sm font-semibold">
@@ -391,7 +395,11 @@ export function MegaMenu({
                   className="text-foreground hover:text-primary-700 dark:hover:text-primary-300 inline-flex items-center gap-1.5 text-sm font-semibold"
                 >
                   {menu.allLabel ?? 'Browse all'}
-                  <ArrowRight size={16} aria-hidden="true" />
+                  <ArrowRight
+                    size={16}
+                    aria-hidden="true"
+                    className="rtl:-scale-x-100"
+                  />
                 </a>
               ) : (
                 <span />
@@ -557,7 +565,11 @@ function FeaturedPanel({
           )}
         >
           {featured.ctaLabel}
-          <ArrowRight size={16} aria-hidden="true" />
+          <ArrowRight
+            size={16}
+            aria-hidden="true"
+            className="rtl:-scale-x-100"
+          />
         </a>
       </div>
     </div>

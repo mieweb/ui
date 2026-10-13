@@ -111,6 +111,7 @@ function CycleWheel({ nodes, n }: { nodes: CycleSlide['nodes']; n: number }) {
               tone.isLight ? 'bg-white' : 'bg-neutral-900/90'
             )}
             style={{
+              // rtl-ignore -- orbit nodes use trig coordinates; diagram stays LTR
               left: `${50 + 37.5 * Math.cos(angle)}%`,
               top: `${50 + 37.5 * Math.sin(angle)}%`,
             }}
@@ -284,6 +285,7 @@ export function AdoptionCurveRenderer({
                 : cn(tone.hairline, tone.card)
             )}
             style={{
+              // rtl-ignore -- annotation anchored to LTR timeline axis coordinates
               left: `${note.atPct}%`,
               [note.side === 'bottom' ? 'bottom' : 'top']: 0,
             }}
@@ -339,7 +341,9 @@ export function AdoptionCurveRenderer({
             />
           </svg>
         </div>
-        <div aria-hidden="true" className="mt-2 flex w-full">
+        {/* dir="ltr": the label strip must track the LTR adoption-curve bands
+            above it; letting it reverse in RTL misaligns labels and colors. */}
+        <div aria-hidden="true" dir="ltr" className="mt-2 flex w-full">
           {bands.map((b) => (
             <div
               key={b.label}
@@ -365,6 +369,7 @@ export function AdoptionCurveRenderer({
         {slide.marker && (
           <div
             className="absolute bottom-0 z-20 -translate-x-1/2 text-center"
+            // rtl-ignore -- marker anchored to LTR bar-chart axis coordinates
             style={{ left: `${slide.marker.atPct}%` }}
           >
             <div
@@ -436,6 +441,7 @@ export function DiagramRenderer({
                   tone.hairline
                 )}
                 style={{
+                  // rtl-ignore -- group outline shares the SVG edge coordinate space
                   left: `${l}%`,
                   top: `${t}%`,
                   width: `${Math.max(...xs) + 13 - l}%`,
@@ -525,6 +531,7 @@ export function DiagramRenderer({
                   tone.muted
                 )}
                 style={{
+                  // rtl-ignore -- edge label interpolated in the SVG line coordinate space
                   left: `${a.x + (b.x - a.x) * at}%`,
                   top: `${a.y + (b.y - a.y) * at}%`,
                 }}
@@ -540,6 +547,7 @@ export function DiagramRenderer({
                 key={node.id}
                 className="absolute z-[5] -translate-x-1/2 -translate-y-1/2"
                 style={{
+                  // rtl-ignore -- node positioned in the SVG edge coordinate space
                   left: `${node.x}%`,
                   top: `${node.y}%`,
                   width: `${node.w ?? 20}%`,

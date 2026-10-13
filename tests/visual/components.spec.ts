@@ -738,6 +738,35 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('countrycodedropdown-default.png');
   });
 
+  test('Dropdown - Submenu flyout opens inline-end (RTL)', async ({ page }) => {
+    // Under dir="rtl" DropdownSubmenu swaps its anchored placement to
+    // 'left-start' so the flyout, chevron, and open/close arrow keys all
+    // agree on the inline-end side.
+    await gotoStory(page, 'choice-inputs-dropdown--with-submenu', {
+      globals: 'direction:rtl',
+    });
+    await page.getByRole('button', { name: 'Export' }).click();
+    const trigger = page.locator("[data-slot='dropdown-submenu-trigger']");
+    await trigger.click();
+    const submenu = page.locator("[data-slot='dropdown-submenu']");
+    await submenu.waitFor({ state: 'visible' });
+    // The 5% page-diff tolerance can swallow a side-flip on a small panel,
+    // so assert the geometry directly: the flyout's right edge must sit at
+    // or before the trigger's left edge. Poll so the open animation (scale
+    // from the landing side) settles first.
+    const triggerBox = await trigger.evaluate((el) =>
+      ((r) => ({ left: r.left }))(el.getBoundingClientRect())
+    );
+    await expect
+      .poll(() =>
+        submenu.evaluate((el) => el.getBoundingClientRect().right)
+      )
+      .toBeLessThanOrEqual(triggerBox.left);
+    await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('Table - Default', async ({ page }) => {
     await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');
@@ -887,6 +916,31 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     });
   });
 
+  test('MegaMenu - Grouped panel (RTL)', async ({ page }) => {
+    // Grouped renders all three mirrored icon sites: the group-link
+    // ChevronRight, the "Explore the platform" allLabel ArrowRight, and
+    // the featured "Take the tour" CTA ArrowRight — each must flip via
+    // rtl:-scale-x-100 under dir="rtl".
+    await gotoStory(page, 'navigation-megamenu--grouped', {
+      globals: 'direction:rtl',
+    });
+    // The 5% page-diff tolerance can swallow icon-sized regressions, so
+    // assert the mirror directly. Tailwind 4 renders -scale-x-100 via the
+    // CSS `scale` property, not `transform`.
+    const icons = page.locator(
+      'svg.lucide-chevron-right, svg.lucide-arrow-right'
+    );
+    await expect(icons).toHaveCount(3);
+    for (const icon of await icons.all()) {
+      expect(await icon.evaluate((el) => getComputedStyle(el).scale)).toBe(
+        '-1 1'
+      );
+    }
+    await expect(page).toHaveScreenshot('megamenu-grouped-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('VideoCard - Default', async ({ page }) => {
     // Mask the YouTube thumbnail (external i.ytimg.com fetch is not
     // deterministic); the play button, duration pill, and copy stack are.
@@ -923,6 +977,55 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     });
   });
 
+  test('YearTimeline - Pinned to September (RTL)', async ({ page }) => {
+    // Deterministic pinned `now`. Locks the mirrored month grid plus the
+    // insetInlineStart positioning and rtl:translate-x mirroring of the
+    // today pill and playhead — they must stay aligned in September,
+    // measured from the right edge under dir="rtl".
+    await gotoStory(page, 'data-display-yeartimeline--pinned-to-september', {
+      globals: 'direction:rtl',
+    });
+    // The 5% page-diff tolerance can swallow marker-only regressions, so
+    // assert the geometry directly: dropping either rtl:translate-x
+    // compensation would skew one marker off the shared September line.
+    const centerX = (slot: string) =>
+      page
+        .locator(`[data-slot='${slot}']`)
+        .evaluate((el) =>
+          ((r) => r.left + r.width / 2)(el.getBoundingClientRect())
+        );
+    expect(
+      Math.abs(
+        (await centerX('year-timeline-today')) -
+          (await centerX('year-timeline-playhead'))
+      )
+    ).toBeLessThanOrEqual(1.5);
+    // The gridlines overlay must span exactly the month-scale column
+    // (inset by the label rail on the inline-start side) — reverting its
+    // insetInlineStart to physical `left` would misplace it in RTL while
+    // staying under the screenshot threshold.
+    const bounds = (locator: ReturnType<typeof page.locator>) =>
+      locator.evaluate((el) =>
+        ((r) => ({ left: r.left, right: r.right }))(el.getBoundingClientRect())
+      );
+    const gridlines = await bounds(
+      page.locator("[data-slot='year-timeline-gridlines']")
+    );
+    const monthScale = await bounds(
+      page.locator("[data-slot='year-timeline-today']").locator('..')
+    );
+    expect(Math.abs(gridlines.left - monthScale.left)).toBeLessThanOrEqual(1.5);
+    expect(Math.abs(gridlines.right - monthScale.right)).toBeLessThanOrEqual(
+      1.5
+    );
+    await expect(page).toHaveScreenshot(
+      'yeartimeline-pinned-september-rtl.png',
+      {
+        animations: 'disabled',
+      }
+    );
+  });
+
   test('SliderCalculator - ROI panel', async ({ page }) => {
     // Brand-sensitive: primary-800→950 radial panel, accent-gradient slider
     // fill, tabular-nums results.
@@ -946,6 +1049,24 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
     // the detail card is deterministic.
     await gotoStory(page, 'showcase-radialexplorer--static');
     await expect(page).toHaveScreenshot('radialexplorer-static.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('RadialExplorer - Static spoke (RTL)', async ({ page }) => {
+    // The footer CTA ArrowRight must flip via rtl:-scale-x-100; the radial
+    // wheel itself stays rotationally symmetric (rtl-ignore trig).
+    await gotoStory(page, 'showcase-radialexplorer--static', {
+      globals: 'direction:rtl',
+    });
+    // Direct mirror assertion — the icon is far smaller than the 5%
+    // page-diff tolerance (Tailwind 4 maps -scale-x-100 to CSS `scale`).
+    const ctaArrow = page.locator('svg.lucide-arrow-right');
+    await expect(ctaArrow).toHaveCount(1);
+    expect(await ctaArrow.evaluate((el) => getComputedStyle(el).scale)).toBe(
+      '-1 1'
+    );
+    await expect(page).toHaveScreenshot('radialexplorer-static-rtl.png', {
       animations: 'disabled',
     });
   });
@@ -1183,6 +1304,32 @@ test.describe('Visual Regression Tests - Deck', () => {
       ''
     );
     await expect(page).toHaveScreenshot('deck-chart.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Deck - Adoption curve labels stay LTR in RTL', async ({ page }) => {
+    // The adoption-curve SVG stays physical (LTR) by design; the label strip
+    // beneath it carries dir="ltr" so labels keep tracking their bands.
+    await gotoStory(page, 'presentations-deck--all-slide-types', {
+      globals: 'direction:rtl',
+    });
+    const slide = page.locator('[data-slot="deck-slide"][data-index="17"]');
+    await slide.scrollIntoViewIfNeeded();
+    await expect(slide).toHaveAttribute('data-seen', '');
+    const strip = slide.locator('div[dir="ltr"]');
+    await expect(strip).toHaveCount(1);
+    await expect(strip).toHaveCSS('direction', 'ltr');
+    // Flex order must not reverse: first band label (innovators) remains at
+    // the strip's left edge, last (laggards) at the right.
+    const cells = strip.locator('> div');
+    const first = await cells.first().boundingBox();
+    const last = await cells.last().boundingBox();
+    const stripBox = await strip.boundingBox();
+    if (!first || !last || !stripBox) throw new Error('strip not rendered');
+    expect(Math.abs(first.x - stripBox.x)).toBeLessThanOrEqual(1.5);
+    expect(first.x + first.width).toBeLessThanOrEqual(last.x);
+    await expect(page).toHaveScreenshot('deck-adoption-curve-rtl.png', {
       animations: 'disabled',
     });
   });

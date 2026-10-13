@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { isRtl } from '../../hooks/useDirection';
 import { cn } from '../../utils/cn';
 import { GroupPill } from './OrgChartCanvas';
 import type {
@@ -62,9 +63,7 @@ export function OrgChartTree({
     const id = current.node.id;
     const hasKids = childrenOf(forest, id).length > 0;
     const expanded = nodeContext(current).expanded;
-    const rtl =
-      !!listRef.current &&
-      getComputedStyle(listRef.current).direction === 'rtl';
+    const rtl = !!listRef.current && isRtl(listRef.current);
     let key = e.key;
     if (rtl && key === 'ArrowLeft') key = 'ArrowRight';
     else if (rtl && key === 'ArrowRight') key = 'ArrowLeft';

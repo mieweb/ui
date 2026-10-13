@@ -15,10 +15,25 @@ export function isRtlLocale(locale: string): boolean {
   return (RTL_LOCALES as readonly string[]).includes(lang);
 }
 
-function resolveDirection(element?: HTMLElement | null): Direction {
+function resolveDirection(element?: Element | null): Direction {
   if (typeof document === 'undefined') return 'ltr';
   const target = element ?? document.documentElement;
   return getComputedStyle(target).direction === 'rtl' ? 'rtl' : 'ltr';
+}
+
+/**
+ * Non-hook check for event handlers: true when the element currently renders
+ * right-to-left. Use inside `onKeyDown` to invert ArrowLeft/ArrowRight so
+ * horizontal arrows follow the *visual* direction:
+ *
+ * ```ts
+ * const rtl = isRtl(event.currentTarget);
+ * ```
+ *
+ * Prefer `useDirection()` when the direction drives rendering.
+ */
+export function isRtl(element?: Element | null): boolean {
+  return resolveDirection(element) === 'rtl';
 }
 
 /**

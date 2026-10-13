@@ -642,6 +642,9 @@ export const miewebUISafelist = [
   'origin-right',
   // RTL Phase 2: directional icon mirroring (chevrons/arrows)
   'rtl:-scale-x-100',
+  // RTL Phase 5: YearTimeline now-marker centering mirrors
+  'rtl:translate-x-1/2',
+  'rtl:translate-x-px',
   // RTL shell/misc batch: command palette, site chrome, superchat, toolbars
   'end-12',
   'md:end-4',
