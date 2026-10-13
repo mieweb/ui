@@ -195,6 +195,45 @@
       opacity: 1;
     }
   }
+
+  /* ── Animations (LoadingPage bar + skeleton shimmer; rtl: mirrors) ──── */
+  --animate-loading-bar: loading-bar 1.5s ease infinite;
+  --animate-loading-bar-rtl: loading-bar-rtl 1.5s ease infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-shimmer-rtl: shimmer-rtl 2s linear infinite;
+
+  @keyframes loading-bar {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(300%);
+    }
+  }
+  @keyframes loading-bar-rtl {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-300%);
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes shimmer-rtl {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
 }
 
 /* ============================================

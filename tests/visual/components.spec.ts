@@ -822,6 +822,56 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  test('LoadingPage - bar and shimmer animations mirror under RTL', async ({
+    page,
+  }) => {
+    // `animate-loading-bar` / `animate-shimmer` emitted no CSS at all before
+    // this batch (their keyframes were never defined), so assert they resolve
+    // to real animations and swap to the `-rtl` mirrors under dir="rtl".
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors');
+    const bar = page.locator('.animate-loading-bar');
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar');
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar-rtl');
+    await gotoStory(page, 'loading-loadingpage--skeletons', {
+      globals: 'direction:rtl',
+    });
+    const wave = page.locator('.animate-shimmer').first();
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer-rtl');
+  });
+
+  test('Deck - bar chart marker label stays centered in RTL', async ({
+    page,
+  }) => {
+    // The label anchors at `start-1/2` (right: 50% in RTL), so the physical
+    // centering translate must mirror: `-translate-x-1/2 rtl:translate-x-1/2`.
+    // Without the mirror the label lands a full label-width off the divider.
+    await gotoStory(page, 'presentations-deck--rtl');
+    const label = page
+      .locator('[data-slot="deck-bar-chart"] span.start-1\\/2')
+      .first();
+    // Center-to-center offset within a 1px subpixel-rounding budget — an
+    // unmirrored label sits a half label-width (tens of px) off the divider.
+    await expect
+      .poll(() =>
+        label.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const center = r.left + r.width / 2;
+          const p = el.parentElement!.getBoundingClientRect();
+          return Math.abs(center - (p.left + p.width / 2));
+        })
+      )
+      .toBeLessThanOrEqual(1);
+  });
+
   test('Table - Default', async ({ page }) => {
     await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');
