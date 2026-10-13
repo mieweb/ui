@@ -899,6 +899,111 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('audioplayer-podcast-player.png');
   });
 
+  test('AudioPlayer - Compact thumb anchors inline-start (RTL)', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'media-audioplayer--compact', {
+      globals: 'direction:rtl',
+    });
+    const bar = page.locator("[data-slot='audio-player-progress']");
+    const thumb = page.locator("[data-slot='audio-player-progress-thumb']");
+    // At progress 0 the thumb must sit centred on the bar's inline-start
+    // edge — the RIGHT edge in RTL. Closeness, not a one-sided bound: the
+    // old physical layout parked it on the left edge.
+    const barBox = await bar.evaluate((el) =>
+      ((r) => ({ left: r.left, right: r.right }))(el.getBoundingClientRect())
+    );
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeGreaterThanOrEqual(barBox.right - 1.5);
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeLessThanOrEqual(barBox.right + 1.5);
+    await expect(page).toHaveScreenshot('audioplayer-compact-rtl.png');
+  });
+
+  test('Slider - Thumb and fill track the value (LTR)', async ({ page }) => {
+    await gotoStory(page, 'choice-inputs-slider--with-value');
+    const track = page.locator("[data-slot='slider-track']");
+    const thumb = page.locator("[data-slot='slider-thumb']");
+    const box = await track.evaluate((el) =>
+      ((r) => ({ left: r.left, right: r.right, width: r.width }))(
+        el.getBoundingClientRect()
+      )
+    );
+    // value 75 of 0–100: thumb centre at 75% from the left edge (±1.5px).
+    const expected = box.left + box.width * 0.75;
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeGreaterThanOrEqual(expected - 1.5);
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeLessThanOrEqual(expected + 1.5);
+    await expect(page).toHaveScreenshot('slider-with-value.png');
+  });
+
+  test('Slider - Fill anchors inline-start and mirrors (RTL)', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'choice-inputs-slider--with-value', {
+      globals: 'direction:rtl',
+    });
+    const track = page.locator("[data-slot='slider-track']");
+    const range = page.locator("[data-slot='slider-range']");
+    const thumb = page.locator("[data-slot='slider-thumb']");
+    const box = await track.evaluate((el) =>
+      ((r) => ({ left: r.left, right: r.right, width: r.width }))(
+        el.getBoundingClientRect()
+      )
+    );
+    // value 75 of 0–100 in RTL: thumb centre at 75% from the RIGHT edge
+    // (±1.5px) and the fill anchored to the right edge. Closeness, not a
+    // one-sided bound: the old physical layout also kept the thumb inside
+    // the track.
+    const expected = box.right - box.width * 0.75;
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeGreaterThanOrEqual(expected - 1.5);
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeLessThanOrEqual(expected + 1.5);
+    const rangeRight = await range.evaluate(
+      (el) => el.getBoundingClientRect().right
+    );
+    expect(Math.abs(rangeRight - box.right)).toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('slider-with-value-rtl.png');
+  });
+
   test('CommandPalette - Default', async ({ page }) => {
     await gotoStory(page, 'navigation-commandpalette--default');
     await expect(page).toHaveScreenshot('commandpalette-default.png');

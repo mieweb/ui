@@ -61,7 +61,11 @@ export const SpeedMarkerMenu: React.FC<SpeedMarkerMenuProps> = ({
     <div
       ref={menuRef}
       className="border-border bg-card text-card-foreground fixed z-50 min-w-36 overflow-hidden rounded-lg border shadow-lg"
-      style={{ left: position.x, top: position.y }}
+      style={{
+        // rtl-ignore -- fixed viewport coordinate from the pointer event
+        left: position.x,
+        top: position.y,
+      }}
       role="menu"
       aria-label="Set speed marker"
     >
