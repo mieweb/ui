@@ -160,7 +160,9 @@ export interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElem
   /**
    * Marks the header of a numeric column. The cell becomes a `dir="ltr"`
    * island aligned to the physical right, matching `TableCell numeric`,
-   * so numeric columns line up the same way in LTR and RTL.
+   * so numeric columns line up the same way in LTR and RTL. The label is
+   * wrapped in `<bdi>` so RTL-script header text keeps its natural
+   * direction inside the island.
    */
   numeric?: boolean;
 }
@@ -170,6 +172,9 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
     { className, sortable, sortDirection, onSort, numeric, children, ...props },
     ref
   ) => {
+    // The th's dir="ltr" island exists purely for alignment; <bdi> restores
+    // the label's natural bidi direction so RTL-script headers read correctly.
+    const label = numeric ? <bdi>{children}</bdi> : children;
     const content = sortable ? (
       <button
         type="button"
@@ -182,11 +187,11 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
         )}
         aria-label={`Sort column ${sortDirection === 'asc' ? 'descending' : 'ascending'}`}
       >
-        {children}
+        {label}
         <SortIcon direction={sortDirection} />
       </button>
     ) : (
-      children
+      label
     );
 
     return (

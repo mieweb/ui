@@ -1009,7 +1009,12 @@ test.describe('Visual Regression Tests - Core Components', () => {
           return [s.direction, s.textAlign, s.fontVariantNumeric].join(' ');
         })
       )
-      .toContain('ltr');
+      .toBe('ltr end tabular-nums');
+    // The header label is bidi-isolated so RTL-script column names keep
+    // their natural direction inside the alignment island.
+    await expect(page.locator('th[dir="ltr"] bdi').first()).toHaveText(
+      'Quantity'
+    );
     await expect(page).toHaveScreenshot('table-footer-numeric.png');
     // RTL: cells stay dir="ltr" islands, so the digits and the physical
     // right alignment are identical to the LTR rendering.

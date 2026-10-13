@@ -81,7 +81,7 @@ The **Playground** story below deliberately hand-rolls sorting, filtering, pinne
 
 - No built-in sorting, filtering, selection, virtualisation or keyboard grid navigation; \`aria-sort\` and row selection are the host's responsibility.
 - Horizontal scrolling on narrow screens comes from the wrapper only; columns do not collapse or stack.
-- Uses logical text alignment (\`text-start\` / \`text-end\`) so RTL mirrors correctly. For numeric columns, set \`numeric\` on \`TableHead\` and \`TableCell\`: the cells become \`dir="ltr"\` islands right-aligned with \`tabular-nums\`, so digits and alignment match in LTR and RTL.`,
+- Uses logical text alignment (\`text-start\` / \`text-end\`) so RTL mirrors correctly. For numeric columns, set \`numeric\` on \`TableHead\` and \`TableCell\`: the cells become \`dir="ltr"\` islands right-aligned with \`tabular-nums\`, so digits and alignment match in LTR and RTL; header labels are wrapped in \`<bdi>\` so RTL-script column names keep their natural direction.`,
       },
     },
     catalog: {
