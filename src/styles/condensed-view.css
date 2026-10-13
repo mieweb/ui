@@ -4993,17 +4993,17 @@ body.condensed
 }
 
 /* RTL: mirror the physical translate so the thumb travels toward
-   inline-end (left) instead of exiting the compact track */
-[dir='rtl']
-  body.condensed
-  [data-slot='consent-switch-toggle'][aria-checked='true']
+   inline-end (left) instead of exiting the compact track. :dir(rtl)
+   matches the toggle's effective direction, so document-level and
+   component-scoped (<div dir="rtl">) direction both work. */
+body.condensed
+  [data-slot='consent-switch-toggle'][aria-checked='true']:dir(rtl)
   [data-slot='consent-switch-thumb'] {
   translate: -0.875rem !important;
 }
 
-[dir='rtl']
-  body.condensed
-  [data-slot='consent-switch-toggle'][aria-checked='false']
+body.condensed
+  [data-slot='consent-switch-toggle'][aria-checked='false']:dir(rtl)
   [data-slot='consent-switch-thumb'] {
   translate: -0.125rem !important;
 }
