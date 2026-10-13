@@ -379,7 +379,7 @@ export const WithSelectorsEndSlot: Story = {
     docs: {
       description: {
         story:
-          '`selectorsEndSlot` places a host control after the model selector in the row below the card — here a wake-word on/off selector. The host owns its state and disabled handling. The selector shown is the library-internal `ComposerSelector` (not exported); the public `HeyOzwellSelector` (#569) will be built on it. The slot accepts any node.',
+          '`selectorsEndSlot` places a host control after the model selector in the row below the card — here a wake-word on/off selector. The host owns its state and disabled handling. The selector shown is the library-internal `ComposerSelector` (not exported); the slot accepts any node.',
       },
     },
   },
