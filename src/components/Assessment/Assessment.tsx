@@ -43,6 +43,22 @@ import {
   useCodeLookupConfig,
   type CodeLookupProviderConfig,
 } from '../CodeLookup/context';
+import {
+  createPrescriptionPreview,
+  nextPrescriptionExpiry,
+  usePrescriptionClock,
+  getPrescriptionReadinessState,
+  PrescriptionIssueSummary,
+  type PrescriptionValidationOptions,
+} from '../PrescriptionReadiness';
+import type {
+  PrescriptionIssue,
+  PrescriptionReadiness,
+} from '../../prescribing/types';
+import type {
+  PrescriptionDetails,
+  PrescribingIntent,
+} from '../../prescribing/types';
 import type { CodifyDomain } from '../CodeLookup/CodeLookup';
 
 // =============================================================================
@@ -63,6 +79,14 @@ export type OrderType =
  */
 export interface AssessmentOrder {
   orderId: string;
+  /** Current prescription content revision, supplied by the host. */
+  prescriptionRevision?: string;
+  /** False for cancelled, discontinued, historical, or inactive prescriptions. */
+  prescriptionActive?: boolean;
+  /** Explicit intent; omitted legacy medication orders can opt in via prescribing props. */
+  prescribingIntent?: PrescribingIntent;
+  /** Canonical structured details; display/detail/code are projections. */
+  prescription?: PrescriptionDetails;
   type: OrderType;
   /** Display text, e.g. "insulin glargine 10 units qhs" */
   display: string;
@@ -318,6 +342,24 @@ export interface AssessmentProps extends Omit<
    * renderOrderSearch as `billableOnly`.
    */
   billableOnly?: boolean;
+  /** Shared client validator input for active medication orders; omit for legacy rendering. */
+  prescribing?: (
+    order: AssessmentOrder
+  ) => PrescriptionValidationOptions | undefined;
+  /** Host readiness projection keyed by unique order instance, never by drug code. */
+  readinessByOrderId?: Record<string, PrescriptionReadiness | undefined>;
+  /** Inject a simulation clock; production views expire against real time. */
+  prescriptionNow?: string;
+  /** Open the full editor; carries the same order and first actionable issue. */
+  onCompletePrescription?: (
+    order: AssessmentOrder,
+    issue?: PrescriptionIssue
+  ) => void;
+  /** Host navigation for non-editor blockers. */
+  onPrescriptionIssueAction?: (
+    order: AssessmentOrder,
+    issue: PrescriptionIssue
+  ) => void;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -418,7 +460,25 @@ function OrderRow({
   order,
   drag,
   controls,
+  prescriptionNow,
+  prescribing,
+  readiness,
+  onCompletePrescription,
+  onPrescriptionIssueAction,
+  readOnly,
 }: {
+  prescriptionNow?: string;
+  prescribing?: PrescriptionValidationOptions;
+  readiness?: PrescriptionReadiness;
+  onCompletePrescription?: (
+    order: AssessmentOrder,
+    issue?: PrescriptionIssue
+  ) => void;
+  onPrescriptionIssueAction?: (
+    order: AssessmentOrder,
+    issue: PrescriptionIssue
+  ) => void;
+  readOnly?: boolean;
   order: AssessmentOrder;
   drag: OrderDrag;
   controls?: OrderControls;
@@ -430,7 +490,17 @@ function OrderRow({
     controls?.editStart ||
     controls?.remove
   );
-  const canEdit = Boolean(controls?.edit || controls?.editStart);
+  const prescriptionEnabled =
+    order.type === 'medication' &&
+    order.prescriptionActive !== false &&
+    order.prescribingIntent !== 'history' &&
+    order.prescribingIntent !== 'administration' &&
+    Boolean(
+      order.prescribingIntent === 'prescribe' || prescribing || readiness
+    );
+  const canEdit = Boolean(
+    controls?.editStart || (controls?.edit && !order.prescription)
+  );
   const [editing, setEditing] = React.useState<{
     display: string;
     detail: string;
@@ -448,7 +518,7 @@ function OrderRow({
     // A takeover handler (e.g. MedicationEditor for medication orders) wins;
     // otherwise fall back to the inline display/detail form.
     if (controls?.editStart?.(order)) return;
-    if (controls?.edit) {
+    if (controls?.edit && !order.prescription) {
       setEditing({ display: order.display, detail: order.detail ?? '' });
     }
   };
@@ -589,7 +659,38 @@ function OrderRow({
         </div>
       ) : (
         <>
-          <OrderContent order={order} />
+          <div className="min-w-0 flex-1 space-y-1">
+            <OrderContent order={order} />
+            {prescriptionEnabled && (
+              <PrescriptionIssueSummary
+                collapsible
+                now={prescriptionNow}
+                readiness={readiness}
+                medicationName={order.display}
+                expectedOrderId={order.orderId}
+                expectedOrderRevision={
+                  prescribing?.input.orderRevision ?? order.prescriptionRevision
+                }
+                expectedContextRevision={prescribing?.input.context.revision}
+                expectedPolicyVersion={prescribing?.policy.version}
+                readOnly={readOnly}
+                onCompletePrescription={
+                  !readOnly && (onCompletePrescription || controls?.editStart)
+                    ? (issue) => {
+                        if (onCompletePrescription)
+                          onCompletePrescription(order, issue);
+                        else controls?.editStart?.(order);
+                      }
+                    : undefined
+                }
+                onIssueAction={
+                  !readOnly && onPrescriptionIssueAction
+                    ? (issue) => onPrescriptionIssueAction(order, issue)
+                    : undefined
+                }
+              />
+            )}
+          </div>
           {interactive && (
             <RowActionToolbar
               label={`Actions for ${order.display}`}
@@ -860,6 +961,11 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       onLinkOrder,
       onEditOrderStart,
       onEditOrder,
+      prescribing,
+      readinessByOrderId,
+      prescriptionNow,
+      onCompletePrescription,
+      onPrescriptionIssueAction,
       onRemoveOrder,
       onReorderItems,
       onReorderOrders,
@@ -924,6 +1030,66 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       concernById
         .get(item.concernId)
         ?.assertions.find((a) => a.id === item.assertionId);
+
+    const prescriptionRows = new Map(
+      orders.map((order) => {
+        const configuration = prescribing?.(order);
+        const readiness = createPrescriptionPreview(
+          order.prescription
+            ? {
+                ...order.prescription,
+                name: order.prescription.name ?? order.display,
+              }
+            : {
+                name: order.display,
+                sig: order.detail,
+                code: order.code
+                  ? { system: order.code.codetype, code: order.code.fullcode }
+                  : undefined,
+              },
+          configuration,
+          readinessByOrderId?.[order.orderId],
+          prescriptionNow
+        );
+        return [order.orderId, { configuration, readiness }];
+      })
+    );
+    const activePrescriptionResults = orders
+      .filter(
+        (order) =>
+          order.type === 'medication' &&
+          order.prescriptionActive !== false &&
+          order.prescribingIntent !== 'history' &&
+          order.prescribingIntent !== 'administration'
+      )
+      .flatMap((order) => [
+        readinessByOrderId?.[order.orderId],
+        prescriptionRows.get(order.orderId)?.readiness,
+      ]);
+    const prescriptionClock = usePrescriptionClock(
+      nextPrescriptionExpiry(activePrescriptionResults, prescriptionNow),
+      prescriptionNow
+    );
+    const incompletePrescriptionCount = orders.filter(
+      (order) =>
+        order.type === 'medication' &&
+        order.prescriptionActive !== false &&
+        order.prescribingIntent !== 'history' &&
+        order.prescribingIntent !== 'administration' &&
+        (order.prescribingIntent === 'prescribe' ||
+          prescribing ||
+          readinessByOrderId?.[order.orderId]) &&
+        !['complete', 'review', 'send', 'sent', 'sending'].includes(
+          getPrescriptionReadinessState({
+            readiness: prescriptionRows.get(order.orderId)?.readiness,
+            now: prescriptionClock,
+            expectedOrderId: order.orderId,
+            expectedOrderRevision:
+              prescriptionRows.get(order.orderId)?.configuration?.input
+                .orderRevision ?? order.prescriptionRevision,
+          })
+        )
+    ).length;
 
     const unlinkedOrders = orders.filter(
       (o) => !o.concernId || !items.some((i) => i.concernId === o.concernId)
@@ -1184,6 +1350,18 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             <h3 className="text-foreground text-sm font-semibold tracking-wide uppercase">
               {title}
             </h3>
+            {!showPlan && incompletePrescriptionCount > 0 && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={!onShowPlanChange}
+                onClick={() => onShowPlanChange?.(true)}
+              >
+                {incompletePrescriptionCount} prescription
+                {incompletePrescriptionCount === 1 ? '' : 's'} need attention
+              </Button>
+            )}
             {onShowPlanChange && (
               <Checkbox
                 size="sm"
@@ -1193,6 +1371,21 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               />
             )}
           </CardHeader>
+        )}
+
+        {title === null && !showPlan && incompletePrescriptionCount > 0 && (
+          <div className="border-border border-b px-4 py-3">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!onShowPlanChange}
+              onClick={() => onShowPlanChange?.(true)}
+            >
+              {incompletePrescriptionCount} prescription
+              {incompletePrescriptionCount === 1 ? '' : 's'} need attention
+            </Button>
+          </div>
         )}
 
         <CardContent className="space-y-4 px-4 py-4">
@@ -1343,6 +1536,16 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                           order={order}
                           drag={orderDrag}
                           controls={orderControls}
+                          prescriptionNow={prescriptionClock}
+                          prescribing={
+                            prescriptionRows.get(order.orderId)?.configuration
+                          }
+                          readiness={
+                            prescriptionRows.get(order.orderId)?.readiness
+                          }
+                          onCompletePrescription={onCompletePrescription}
+                          onPrescriptionIssueAction={onPrescriptionIssueAction}
+                          readOnly={readOnly}
                         />
                       ))}
                     </ul>
@@ -1548,6 +1751,14 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     order={order}
                     drag={orderDrag}
                     controls={orderControls}
+                    prescriptionNow={prescriptionClock}
+                    prescribing={
+                      prescriptionRows.get(order.orderId)?.configuration
+                    }
+                    readiness={prescriptionRows.get(order.orderId)?.readiness}
+                    onCompletePrescription={onCompletePrescription}
+                    onPrescriptionIssueAction={onPrescriptionIssueAction}
+                    readOnly={readOnly}
                   />
                 ))}
               </ul>

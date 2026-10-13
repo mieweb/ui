@@ -4,6 +4,8 @@
 
 /** @type {Record<string, string>} */
 export const entries = {
+  prescribing: 'src/prescribing.ts',
+  'prescribing-api': 'src/prescribing-api.ts',
   index: 'src/index.ts',
   'ag-grid': 'src/ag-grid.ts',
   globe: 'src/globe.ts',

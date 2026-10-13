@@ -264,6 +264,26 @@
     "./components/Markdown/styles.css": {
       "style": "./dist/components/Markdown/styles.css",
       "default": "./dist/components/Markdown/styles.css"
+    },
+    "./prescribing": {
+      "import": {
+        "types": "./dist/prescribing.d.ts",
+        "default": "./dist/prescribing.js"
+      },
+      "require": {
+        "types": "./dist/prescribing.d.cts",
+        "default": "./dist/prescribing.cjs"
+      }
+    },
+    "./prescribing/api": {
+      "import": {
+        "types": "./dist/prescribing-api.d.ts",
+        "default": "./dist/prescribing-api.js"
+      },
+      "require": {
+        "types": "./dist/prescribing-api.d.cts",
+        "default": "./dist/prescribing-api.cjs"
+      }
     }
   },
   "files": [
@@ -318,7 +338,9 @@
     "test:mobile": "npm --prefix tests/mobile test",
     "test:mobile:device": "IOS_REAL_DEVICE=1 npm --prefix tests/mobile test",
     "test:storybook": "test-storybook --url http://localhost:6006 --maxWorkers 2 --testTimeout 30000",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:prescribing:node": "vitest run --config vitest.prescribing-node.config.ts",
+    "check:prescribing-entries": "node scripts/check-prescribing-entries.mjs"
   },
   "peerDependencies": {
     "@kerebron/editor": ">=0.8.12",

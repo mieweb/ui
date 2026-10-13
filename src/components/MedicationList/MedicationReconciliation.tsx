@@ -34,6 +34,8 @@ import {
   lookupToMedicationFields,
   type CodeLookupConfig,
 } from './MedicationEditor';
+import type { MedicationListProps } from './MedicationList';
+import type { PrescriptionIssue } from '../../prescribing/types';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 
 // =============================================================================
@@ -90,6 +92,12 @@ export interface MedicationReconciliationProps {
   reconciledMessage?: string;
   /** Message shown when the medication list has no entries at all */
   emptyMessage?: string;
+  /** Prescription alerts are opt-in per row through prescribingIntent. */
+  prescribing?: MedicationListProps['prescribing'];
+  readinessByOrderId?: MedicationListProps['readinessByOrderId'];
+  prescriptionNow?: string;
+  onCompletePrescription?: MedicationListProps['onCompletePrescription'];
+  onPrescriptionIssueAction?: MedicationListProps['onPrescriptionIssueAction'];
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -105,7 +113,7 @@ function newId(): string {
 // =============================================================================
 
 type DialogState =
-  | { kind: 'correct'; medication: Medication }
+  | { kind: 'correct'; medication: Medication; issue?: PrescriptionIssue }
   | { kind: 'note'; medication: Medication }
   | { kind: 'add-task'; medication: Medication }
   | { kind: 'add' }
@@ -214,6 +222,11 @@ export function MedicationReconciliation({
   readOnly = false,
   reconciledMessage,
   emptyMessage,
+  prescribing,
+  readinessByOrderId,
+  prescriptionNow,
+  onCompletePrescription,
+  onPrescriptionIssueAction,
   className,
   'data-testid': dataTestId,
 }: MedicationReconciliationProps): React.JSX.Element {
@@ -342,6 +355,14 @@ export function MedicationReconciliation({
     <>
       <MedicationList
         medications={medications}
+        prescribing={prescribing}
+        readinessByOrderId={readinessByOrderId}
+        prescriptionNow={prescriptionNow}
+        onCompletePrescription={(medication, issue) => {
+          if (onCompletePrescription) onCompletePrescription(medication, issue);
+          else setDialog({ kind: 'correct', medication, issue });
+        }}
+        onPrescriptionIssueAction={onPrescriptionIssueAction}
         title={title}
         readOnly={readOnly}
         actions={actions}
@@ -376,6 +397,25 @@ export function MedicationReconciliation({
           key={editorTarget?.id ?? 'add'}
           open
           medication={editorTarget}
+          prescribing={
+            editorTarget?.prescribingIntent === 'prescribe'
+              ? prescribing?.(editorTarget)
+              : undefined
+          }
+          readiness={
+            editorTarget?.prescribingIntent === 'prescribe'
+              ? readinessByOrderId?.[editorTarget.id]
+              : undefined
+          }
+          prescriptionNow={prescriptionNow}
+          initialIssueField={
+            dialog?.kind === 'correct' ? dialog.issue?.fieldPath : undefined
+          }
+          onIssueAction={
+            editorTarget && onPrescriptionIssueAction
+              ? (issue) => onPrescriptionIssueAction(editorTarget, issue)
+              : undefined
+          }
           codeLookup={codeLookup === false ? false : effectiveCodeLookup}
           onClose={() => setDialog(null)}
           onSave={handleEditorSave}

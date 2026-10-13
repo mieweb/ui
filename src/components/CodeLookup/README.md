@@ -218,8 +218,10 @@ Combobox-pattern autocomplete (`role="combobox"` + floating `role="listbox"`):
 - Rows render *label first*, then `codetype code` right-aligned in small,
   domain-tinted text.
 - `onSelect` receives `{ fullid, label, codetype, fullcode, domain, score }` —
-  `fullid` is the `MedicalCodify_search` primary key, ready to persist (e.g. as
-  a `ConditionCoding` on a `ConditionAssertion`, or an `IndicationLink`).
+  `fullid` identifies the catalog entry. Persist its coding on the medication or
+  condition assertion; it is not the chart's durable `concernId`. An indication
+  links to an existing chart concern, or the host creates/resolves that concern
+  before persisting its link.
 
 ```tsx
 <CodeLookup
@@ -229,6 +231,14 @@ Combobox-pattern autocomplete (`role="combobox"` + floating `role="listbox"`):
   onSelect={(r) => attachCoding(r)}
 />
 ```
+
+For an editor, pass `clearOnSelect={false}` and `onQueryChange` to retain each
+typed draft edit and clear any previous coding immediately. `onSelect` commits
+a coded result; `onFreeText` commits the explicit free-text choice. `id`,
+`aria-label`, `aria-labelledby`, `aria-invalid`, and `aria-describedby` apply to
+the combobox input so labels and inline alerts are associated with the field.
+The input remains editable when the offline index is unavailable, allowing
+free-text drafts without implying that a code or product has been resolved.
 
 In Storybook, the 🌐 **Language** toolbar global switches the locale for the
 `Healthcare/CodeLookup` stories.
