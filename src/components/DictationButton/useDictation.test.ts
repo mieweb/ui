@@ -365,6 +365,37 @@ describe('useDictation', () => {
     expect(result.current.status).toBe('recording');
   });
 
+  it('leaves the error state as soon as a retry starts, before the mic is granted', async () => {
+    getUserMedia.mockRejectedValueOnce(new Error('denied'));
+    getUserMedia.mockReturnValueOnce(new Promise(() => {}));
+    const { result } = setup();
+
+    await act(() => result.current.start());
+    expect(result.current.status).toBe('error');
+
+    act(() => {
+      void result.current.start();
+    });
+    expect(result.current.status).toBe('idle');
+    expect(result.current.error).toBeNull();
+  });
+
+  it('reports a throwing getStream as an error and can retry', async () => {
+    const boom = new Error('listener torn down');
+    const getStream = vi.fn<() => MediaStream>(() => {
+      throw boom;
+    });
+    const { result, onError } = setup({ getStream });
+
+    await act(() => result.current.start());
+    expect(result.current.status).toBe('error');
+    expect(onError).toHaveBeenCalledWith(boom);
+
+    getStream.mockImplementation(() => fakeStream().stream);
+    await act(() => result.current.start());
+    expect(result.current.status).toBe('recording');
+  });
+
   it('auto-stops at maxDurationSeconds', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     getUserMedia.mockResolvedValue(fakeStream().stream);

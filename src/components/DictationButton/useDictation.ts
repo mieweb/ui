@@ -179,10 +179,17 @@ export function useDictation({
     if (busyRef.current) return;
     busyRef.current = true;
     const session = ++sessionRef.current;
+    setStatus('idle');
     setError(null);
     setElapsedMs(0);
 
-    const shared = liveAudio(callbacksRef.current.getStream?.());
+    let shared: MediaStream | null;
+    try {
+      shared = liveAudio(callbacksRef.current.getStream?.());
+    } catch (err) {
+      fail(err);
+      return;
+    }
     if (
       typeof MediaRecorder === 'undefined' ||
       (!shared &&
