@@ -36,7 +36,15 @@ export interface DictationButtonProps
     UseDictationOptions,
     Omit<
       React.ButtonHTMLAttributes<HTMLButtonElement>,
-      'children' | 'onClick' | 'onError' | 'disabled' | 'className'
+      // The ARIA attributes follow the dictation state; customise text through `labels`.
+      | 'children'
+      | 'onClick'
+      | 'onError'
+      | 'disabled'
+      | 'className'
+      | 'aria-label'
+      | 'aria-pressed'
+      | 'aria-busy'
     > {
   disabled?: boolean;
   size?: RecordButtonSize;
@@ -71,6 +79,7 @@ export const DictationButton = React.forwardRef<
       transcribe,
       onError,
       maxDurationSeconds,
+      getStream,
       disabled = false,
       size = 'sm',
       variant = 'ghost',
@@ -89,6 +98,7 @@ export const DictationButton = React.forwardRef<
       transcribe,
       onError,
       maxDurationSeconds,
+      getStream,
     });
 
     // Covers a pending permission prompt (status still idle) and transcribing, not just recording.

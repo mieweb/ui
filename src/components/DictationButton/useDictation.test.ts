@@ -11,6 +11,7 @@ type Listener = () => void;
 function fakeStream() {
   const endedListeners: Listener[] = [];
   const track = {
+    readyState: 'live' as 'live' | 'ended',
     stop: vi.fn(),
     addEventListener: (type: string, fn: Listener) => {
       if (type === 'ended') endedListeners.push(fn);
@@ -186,6 +187,54 @@ describe('useDictation', () => {
     await act(() => result.current.start());
     expect(result.current.status).toBe('error');
     expect(onError).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it('reuses a shared live stream without opening the mic or stopping its tracks', async () => {
+    const shared = fakeStream();
+    const transcribe = vi.fn(async () => 'shared text');
+    const { result, onText, unmount } = setup({
+      transcribe,
+      getStream: () => shared.stream,
+    });
+
+    await act(() => result.current.start());
+    expect(getUserMedia).not.toHaveBeenCalled();
+    expect(result.current.status).toBe('recording');
+
+    act(() => result.current.stop());
+    await waitFor(() => expect(onText).toHaveBeenCalledWith('shared text'));
+
+    await act(() => result.current.start());
+    act(() => result.current.cancel());
+    unmount();
+    expect(shared.track.stop).not.toHaveBeenCalled();
+  });
+
+  it('records from a shared stream even where getUserMedia is unavailable', async () => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: undefined,
+    });
+    const shared = fakeStream();
+    const { result } = setup({ getStream: () => shared.stream });
+
+    await act(() => result.current.start());
+    expect(result.current.status).toBe('recording');
+  });
+
+  it('opens its own mic when the shared stream has no live audio', async () => {
+    const ended = fakeStream();
+    ended.track.readyState = 'ended';
+    const own = fakeStream();
+    getUserMedia.mockResolvedValue(own.stream);
+    const { result } = setup({ getStream: () => ended.stream });
+
+    await act(() => result.current.start());
+    expect(getUserMedia).toHaveBeenCalledTimes(1);
+
+    act(() => result.current.cancel());
+    expect(own.track.stop).toHaveBeenCalled();
+    expect(ended.track.stop).not.toHaveBeenCalled();
   });
 
   it('surfaces permission denial as an error', async () => {

@@ -6,6 +6,7 @@ How to change `DictationButton` and `useDictation` safely. Consumer docs live in
 
 - **One session at a time.** Every async step (`getUserMedia`, `recorder.onstop`, `transcribe`) checks `sessionRef`. `cancel()` bumps the session, so late results are dropped. A new async step must check the session too.
 - **The mic is always released.** `releaseMic()` runs on stop, cancel, error and unmount. A stream that arrives after cancel (permission prompt still open) is stopped right away.
+- **A shared stream is never stopped.** A stream from `getStream` is not stored in `streamRef`, so `releaseMic()` cannot stop the host's tracks. No `ended` listener is added to it either (its tracks outlive a take; `MediaRecorder` stops by itself if they end).
 - **`busyRef` blocks a double start** while the permission prompt is open, before `status` changes.
 - **`onText` never fires after cancel**, and never for empty or blank results.
 - **`disabled` cancels in every state**, including the permission prompt (status is still `idle`) and transcribing.

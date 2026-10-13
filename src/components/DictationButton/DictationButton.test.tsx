@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { UseDictationResult } from './useDictation';
+import { useDictation, type UseDictationResult } from './useDictation';
 import { DictationButton } from './DictationButton';
 
 const hook: UseDictationResult = {
@@ -12,7 +12,7 @@ const hook: UseDictationResult = {
   cancel: vi.fn(),
 };
 
-vi.mock('./useDictation', () => ({ useDictation: () => hook }));
+vi.mock('./useDictation', () => ({ useDictation: vi.fn(() => hook) }));
 
 function setStatus(
   status: UseDictationResult['status'],
@@ -29,6 +29,22 @@ beforeEach(() => {
 });
 
 describe('DictationButton', () => {
+  it('passes getStream to the hook, not to the <button>', () => {
+    const getStream = () => null;
+    render(<DictationButton onText={vi.fn()} getStream={getStream} />);
+    expect(vi.mocked(useDictation)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ getStream })
+    );
+    expect(screen.getByRole('button')).not.toHaveAttribute('getstream');
+  });
+
+  it('keeps its state-driven accessible name over a passed aria-label', () => {
+    render(<DictationButton onText={vi.fn()} aria-label="Ignored" />);
+    expect(
+      screen.getByRole('button', { name: 'Start dictation' })
+    ).toBeInTheDocument();
+  });
+
   it('starts on click when idle and stops on click when recording', () => {
     const { rerender } = render(<DictationButton onText={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Start dictation' }));

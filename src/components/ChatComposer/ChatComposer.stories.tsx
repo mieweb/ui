@@ -189,7 +189,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
         {
           type: 'composes with',
           target: 'media-dictationbutton',
-          why: 'Put DictationButton in leadingSlot for voice typing next to a micSlot RecordButton; its onText appends to the controlled value and the user still presses Send.',
+          why: 'Put DictationButton in micSlot as the only mic for voice typing; its onText appends to the controlled value and the user still presses Send.',
         },
       ],
     },

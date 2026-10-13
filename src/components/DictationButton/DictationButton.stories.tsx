@@ -4,7 +4,6 @@ import { DictationButton, type DictationButtonProps } from './DictationButton';
 import type { DictationTranscribe } from './useDictation';
 import { Textarea } from '../Textarea';
 import { ChatComposer } from '../ChatComposer';
-import { RecordButton } from '../RecordButton';
 
 const mockTranscribe: DictationTranscribe = (audio, signal) =>
   new Promise((resolve, reject) => {
@@ -69,19 +68,12 @@ function ChatComposerWithDictation() {
         value={value}
         onValueChange={setValue}
         onSend={({ content }) => setSent((s) => [...s, content])}
-        placeholder="Dictate with the left mic, record with the right one"
-        leadingSlot={
+        placeholder="Click the mic and speak. Edit the text, then press Send."
+        micSlot={
           <DictationButton
             variant="minimal"
             transcribe={mockTranscribe}
             onText={(t) => setValue((prev) => appendText(prev, t))}
-          />
-        }
-        micSlot={
-          <RecordButton
-            variant="minimal"
-            size="sm"
-            onRecordingComplete={() => {}}
           />
         }
       />
@@ -114,7 +106,7 @@ const meta: Meta<typeof DictationButton> = {
 ### Use it when
 
 - A chat composer or text field needs **voice typing** that the user reviews and edits before sending.
-- The product already has a record-and-send mic and dictation must live **next to it**, not replace it — put \`DictationButton\` in \`ChatComposer\`'s \`leadingSlot\` and keep the existing \`RecordButton\` in \`micSlot\` (see *In Chat Composer*).
+- A chat composer needs **voice typing** — put \`DictationButton\` in \`ChatComposer\`'s \`micSlot\` as its **only** mic (see *In Chat Composer*). Recording or capturing audio belongs in a separate menu, not a second mic.
 - Audio must stay on the device by default, with an opt-in server provider chosen by the host.
 
 ### Don't use it when
@@ -133,17 +125,18 @@ const [value, setValue] = useState('');
   value={value}
   onValueChange={setValue}
   onSend={({ content }) => send(content)}
-  leadingSlot={
+  micSlot={
     <DictationButton
       variant="minimal"
       disabled={isStreaming}
       onText={(text) => setValue((prev) => (prev ? \`\${prev} \${text}\` : text))}
       // Omit for on-device Whisper. With a server, honour the signal so Escape/unmount cancels the request.
       transcribe={serverMode ? (audio, signal) => postAudio(audio, signal) : undefined}
+      // Optional: reuse a mic stream you already hold (e.g. a wake-word listener).
+      getStream={() => wakeWord.stream}
       onError={reportError}
     />
   }
-  micSlot={<RecordButton variant="minimal" size="sm" onRecordingComplete={upload} />}
 />
 \`\`\`
 
@@ -156,9 +149,10 @@ The host owns the composer value and the send; the button owns the microphone an
 - **English only on device.** The shared Whisper worker pins \`language: 'english'\`, so the default provider transcribes English. For other languages pass a \`transcribe\` provider.
 - **Limits.** Auto-stops after \`maxDurationSeconds\` (default 300; \`0\` disables). Empty or blank takes call nothing. \`Escape\` while recording, \`disabled\` turning on (including during the permission prompt or transcription), or unmount discards the take and aborts \`transcribe\` via its \`AbortSignal\`. The on-device worker cannot stop a decode already running; its result is dropped.
 - **Browsers.** Needs a secure context and microphone permission. A denied prompt shows the \`micBlocked\` label; other failures show the generic \`error\` label and pass the real \`Error\` to \`onError\`. Recording format is the browser default (\`audio/webm\`, Safari \`audio/mp4\`). Embedded browsers without real microphone access (e.g. VS Code's integrated browser) produce undecodable takes — test in Chrome, Safari or Firefox.
+- **Shared mic.** \`getStream\` reuses a stream the host already holds, so no second mic is opened (a second \`getUserMedia\` can silence a wake-word listener). The hook never stops that stream's tracks; it opens its own mic when the stream has no live audio track.
 - **Accessibility.** One \`<button>\` whose \`aria-label\` follows the state (\`start\` / \`stop\` / \`transcribing\` / error text) with \`aria-pressed\` while recording. A single \`role="status"\` region announces listening / transcribing / error; it is visually hidden unless \`showStatus\`.
 - **i18n.** Every string comes from \`labels\` (English defaults in \`defaultDictationLabels\`); \`m:ss\` uses \`formatDuration\`. RTL: symmetric \`inline-flex\` with \`gap-2\`. Speech language: see *English only on device*.
-- **DOM.** Standard button attributes (\`id\`, \`aria-describedby\`, \`data-*\`, handlers) go to the \`<button>\`; \`className\` goes to the wrapper. \`onKeyDown\` runs first and can \`preventDefault()\` to skip the Escape cancel.
+- **DOM.** Standard button attributes (\`id\`, \`aria-describedby\`, \`data-*\`, handlers) go to the \`<button>\`; \`className\` goes to the wrapper. \`aria-label\`, \`aria-pressed\` and \`aria-busy\` follow the dictation state, so they are not props — change the text through \`labels\`. \`onKeyDown\` runs first and can \`preventDefault()\` to skip the Escape cancel.
 - **Theming.** Inherits \`RecordButton\` tokens and variants. Entry \`@mieweb/ui\`.`,
       },
     },
@@ -173,7 +167,7 @@ The host owns the composer value and the send; the button owns the microphone an
         {
           type: 'composes with',
           target: 'chat-chatcomposer',
-          why: 'Goes in leadingSlot next to an existing micSlot RecordButton; onText appends to the controlled composer value and the user still presses Send.',
+          why: 'Goes in micSlot as the composer’s only mic; onText appends to the controlled composer value and the user still presses Send.',
         },
       ],
     },
@@ -192,6 +186,11 @@ The host owns the composer value and the send; the button owns the microphone an
     },
     onError: {
       description: 'Receives the underlying error (permission, provider, …).',
+      table: { disable: true },
+    },
+    getStream: {
+      description:
+        'Returns a mic stream the host already holds (e.g. a wake-word listener). Reused instead of opening a new mic; its tracks are never stopped.',
       table: { disable: true },
     },
     maxDurationSeconds: {
@@ -245,9 +244,9 @@ export const ShortLimit: Story = {
 };
 
 /**
- * Dictation next to the existing record mic. `DictationButton` sits in `leadingSlot` so it stays visible while
- * the composer has text; the original `RecordButton` stays in `micSlot` unchanged. Dictated text is appended to
- * the draft and is only sent when the user presses Send.
+ * The composer's only mic. `DictationButton` sits in `micSlot`, which stays visible while the composer has text
+ * (`micBehavior` defaults to `'always'`). Dictated text is appended to the draft and is only sent when the user
+ * presses Send.
  */
 export const InChatComposer: Story = {
   render: () => <ChatComposerWithDictation />,

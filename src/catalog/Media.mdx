@@ -52,6 +52,8 @@ import { Meta } from '@storybook/addon-docs/blocks';
   `onRecordingComplete` — play it back with an `AudioPlayer` if the user needs to hear it.
   `DictationButton` renders a controlled `RecordButton` but runs its own recorder (`useDictation`) and
   returns text instead of a `Blob`.
+- **One mic per composer.** In a `ChatComposer`, the mic in `micSlot` is `DictationButton`. Recording
+  or capturing audio goes in a separate menu, not a second mic icon.
 - **Whisper is a demo, not a peer.** The Live Demo transcribes with the repo-internal
   `whisperTranscribe` worker; only `decodeTo16kMono` is public. Hosts bring their own
   word-level timestamps.

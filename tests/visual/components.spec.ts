@@ -170,7 +170,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
   });
 
   test('DictationButton - In chat composer', async ({ page }) => {
-    // Dictation mic in leadingSlot, existing RecordButton kept in micSlot.
+    // Dictation is the composer's only mic, in micSlot.
     await gotoStory(page, 'media-dictationbutton--in-chat-composer');
     await expect(page).toHaveScreenshot('dictation-button-in-composer.png');
   });
@@ -188,6 +188,12 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'media-dictationbutton--in-chat-composer', {
       globals: 'direction:rtl',
     });
+    // The mic precedes Send in reading order, so under RTL it sits to its right.
+    const [mic, send] = await Promise.all([
+      page.locator("[data-slot='dictation-button']").boundingBox(),
+      page.locator("[data-slot='chat-composer-send-button']").boundingBox(),
+    ]);
+    expect(mic!.x).toBeGreaterThan(send!.x);
     await expect(page).toHaveScreenshot('dictation-button-in-composer-rtl.png');
   });
 
@@ -758,9 +764,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       ((r) => ({ left: r.left }))(el.getBoundingClientRect())
     );
     await expect
-      .poll(() =>
-        submenu.evaluate((el) => el.getBoundingClientRect().right)
-      )
+      .poll(() => submenu.evaluate((el) => el.getBoundingClientRect().right))
       .toBeLessThanOrEqual(triggerBox.left);
     await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
       animations: 'disabled',

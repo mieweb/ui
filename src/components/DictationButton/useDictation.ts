@@ -17,6 +17,11 @@ export interface UseDictationOptions {
   onError?: (error: Error) => void;
   /** Auto-stop after this many seconds. `0` disables the limit. Default 300. */
   maxDurationSeconds?: number;
+  /**
+   * Reuse a mic stream the host already holds (e.g. a wake-word listener) instead of opening one.
+   * Its tracks are never stopped by the hook. Falls back to `getUserMedia` when it returns no live audio.
+   */
+  getStream?: () => MediaStream | null | undefined;
 }
 
 export interface UseDictationResult {
@@ -52,6 +57,12 @@ function toError(value: unknown): Error {
   return new Error(String(value));
 }
 
+function liveAudio(stream: MediaStream | null | undefined) {
+  return stream?.getAudioTracks().some((track) => track.readyState === 'live')
+    ? stream
+    : null;
+}
+
 /**
  * Headless speech-to-text for a single speaker: record, then transcribe to editable text.
  * Owns the mic lifecycle; every async step is tied to a session id so stale results are dropped.
@@ -61,19 +72,21 @@ export function useDictation({
   transcribe,
   onError,
   maxDurationSeconds = 300,
+  getStream,
 }: UseDictationOptions): UseDictationResult {
   const [status, setStatus] = React.useState<DictationStatus>('idle');
   const [error, setError] = React.useState<Error | null>(null);
   const [elapsedMs, setElapsedMs] = React.useState(0);
 
-  const callbacksRef = React.useRef({ onText, onError, transcribe });
-  callbacksRef.current = { onText, onError, transcribe };
+  const callbacksRef = React.useRef({ onText, onError, transcribe, getStream });
+  callbacksRef.current = { onText, onError, transcribe, getStream };
   const maxMsRef = React.useRef(maxDurationSeconds * 1000);
   maxMsRef.current = maxDurationSeconds * 1000;
 
   const sessionRef = React.useRef(0);
   const busyRef = React.useRef(false);
   const mountedRef = React.useRef(true);
+  // Only streams the hook opened; a host-shared stream is never stored here, so it is never stopped.
   const streamRef = React.useRef<MediaStream | null>(null);
   const recorderRef = React.useRef<MediaRecorder | null>(null);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
@@ -169,28 +182,34 @@ export function useDictation({
     setError(null);
     setElapsedMs(0);
 
+    const shared = liveAudio(callbacksRef.current.getStream?.());
     if (
-      typeof navigator === 'undefined' ||
-      !navigator.mediaDevices?.getUserMedia ||
-      typeof MediaRecorder === 'undefined'
+      typeof MediaRecorder === 'undefined' ||
+      (!shared &&
+        (typeof navigator === 'undefined' ||
+          !navigator.mediaDevices?.getUserMedia))
     ) {
       fail(new Error('Microphone is not available in this context'));
       return;
     }
 
     let stream: MediaStream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (err) {
-      if (session === sessionRef.current) fail(err);
-      return;
+    if (shared) {
+      stream = shared;
+    } else {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err) {
+        if (session === sessionRef.current) fail(err);
+        return;
+      }
+      if (session !== sessionRef.current) {
+        // Cancelled or unmounted while the permission prompt was open.
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      streamRef.current = stream;
     }
-    if (session !== sessionRef.current) {
-      // Cancelled or unmounted while the permission prompt was open.
-      stream.getTracks().forEach((track) => track.stop());
-      return;
-    }
-    streamRef.current = stream;
 
     let recorder: MediaRecorder;
     try {
@@ -213,12 +232,15 @@ export function useDictation({
       recorderRef.current = null;
       fail((e as Event & { error?: unknown }).error ?? e);
     };
-    stream.getAudioTracks().forEach((track) => {
-      track.addEventListener('ended', () => {
-        if (recorderRef.current === recorder && recorder.state !== 'inactive')
-          recorder.stop();
+    // Shared tracks live longer than one take; MediaRecorder stops by itself if they end.
+    if (!shared) {
+      stream.getAudioTracks().forEach((track) => {
+        track.addEventListener('ended', () => {
+          if (recorderRef.current === recorder && recorder.state !== 'inactive')
+            recorder.stop();
+        });
       });
-    });
+    }
 
     recorderRef.current = recorder;
     try {
