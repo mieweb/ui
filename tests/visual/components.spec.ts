@@ -157,6 +157,37 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-condensed', { globals: 'density:condensed' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ChatComposer - Selectors end slot${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-chatcomposer--with-selectors-end-slot', {
+        ...options,
+      });
+      // The end slot follows the model selector in reading order, so it
+      // sits physically left of it under RTL and right of it otherwise.
+      const [model, slot] = await Promise.all([
+        page
+          .locator("[data-slot='composer-model-selector-trigger']")
+          .boundingBox(),
+        page.locator("[data-slot='composer-selector-trigger']").boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(slot!.x).toBeLessThan(model!.x);
+      } else {
+        expect(slot!.x).toBeGreaterThan(model!.x);
+      }
+      await expect(page).toHaveScreenshot(
+        `chat-composer-selectors-end-slot${name}.png`
+      );
+    });
+  }
+
   test('ChatComposer - With record button', async ({ page }) => {
     // The 40px RecordButton in micSlot must overflow-center in the h-8
     // control row without inflating the pill height.
@@ -708,9 +739,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       ((r) => ({ left: r.left }))(el.getBoundingClientRect())
     );
     await expect
-      .poll(() =>
-        submenu.evaluate((el) => el.getBoundingClientRect().right)
-      )
+      .poll(() => submenu.evaluate((el) => el.getBoundingClientRect().right))
       .toBeLessThanOrEqual(triggerBox.left);
     await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
       animations: 'disabled',
