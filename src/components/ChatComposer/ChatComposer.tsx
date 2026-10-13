@@ -67,8 +67,10 @@ export interface ChatComposerMenuItem {
   onSelect?: () => void;
 }
 
+// An interface (not an alias) so hosts can keep augmenting it via declaration merging.
 /** An agent shown in the composer's agent selector (trigger icon defaults to a bot glyph). */
-export type ChatComposerAgentOption = ComposerSelectorOption;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ChatComposerAgentOption extends ComposerSelectorOption {}
 
 /** Imperative handle exposed via `ref` for host-level integrations. */
 export interface ChatComposerHandle {
