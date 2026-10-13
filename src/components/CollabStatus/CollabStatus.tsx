@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { WrapText, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { isRtl } from '../../hooks/useDirection';
 import { AvatarGroup, type AvatarPresence } from '../AvatarGroup/AvatarGroup';
 
 // =============================================================================
@@ -167,9 +168,10 @@ const PANEL_OFFSET = 6;
 const VIEWPORT_PADDING = 8;
 
 /**
- * Position the panel under the trigger, right-aligned to it but clamped to the
- * viewport on both axes (it flips above the trigger when it would overflow the
- * bottom). Returns null until the panel has been measured.
+ * Position the panel under the trigger, inline-end-aligned to it (right edge
+ * in LTR, left edge in RTL) but clamped to the viewport on both axes (it flips
+ * above the trigger when it would overflow the bottom). Returns null until the
+ * panel has been measured.
  */
 function useAnchoredPanel(
   open: boolean,
@@ -192,10 +194,12 @@ function useAnchoredPanel(
       const a = anchor.getBoundingClientRect();
       const { offsetWidth: width, offsetHeight: height } = panel;
 
+      // Hug the trigger's inline-end edge; clamp result to the viewport.
+      const anchoredLeft = isRtl(anchor) ? a.left : a.right - width;
       const maxLeft = window.innerWidth - width - VIEWPORT_PADDING;
       const left = Math.max(
         VIEWPORT_PADDING,
-        Math.min(a.right - width, Math.max(VIEWPORT_PADDING, maxLeft))
+        Math.min(anchoredLeft, Math.max(VIEWPORT_PADDING, maxLeft))
       );
 
       let top = a.bottom + PANEL_OFFSET;
@@ -379,6 +383,7 @@ export function CollabStatus({
             )}
             style={{
               top: pos?.top ?? 0,
+              // rtl-ignore -- fixed viewport coords; direction resolved in useAnchoredPanel
               left: pos?.left ?? 0,
               visibility: pos ? undefined : 'hidden',
             }}

@@ -106,10 +106,17 @@ export function HandsFreeChat({
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
-        {/* Octopus in the chat header's top-right — same behavior as the <HeyOzwell> drop-in: click toggles
-            on/off, long-press / right-click opens the end-user settings menu. AIChat has no header-action
-            slot, so it's a positioned overlay. */}
-        <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
+        {/* Octopus in the chat header's top inline-end corner — same behavior as the <HeyOzwell> drop-in:
+            click toggles on/off, long-press / right-click opens the end-user settings menu. AIChat has no
+            header-action slot, so it's a positioned overlay. */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 11,
+            insetInlineEnd: 16,
+            zIndex: 10,
+          }}
+        >
           <OzwellSettingsMenu
             trigger={
               <HeyOzwellToggle

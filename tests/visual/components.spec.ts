@@ -746,6 +746,34 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  test('CountBadge - Row action menu anchors inline-end (RTL)', async ({
+    page,
+  }) => {
+    // The portal row menu hugs the trigger's inline-end edge: LTR pins its
+    // right edge to the trigger's right (translateX(-100%)); under dir="rtl"
+    // it pins its left edge to the trigger's left and opens toward the
+    // inline-end instead. DashboardWidget and FileManager share the recipe.
+    await gotoStory(page, 'data-display-countbadge--hover-menu-info', {
+      globals: 'direction:rtl',
+    });
+    await page.getByRole('button', { name: 'Open Enc 5' }).click();
+    const actionBtn = page
+      .locator('button[aria-label^="Actions for"]')
+      .first();
+    await actionBtn.click();
+    const menu = page.locator('[role="menu"]');
+    await menu.waitFor({ state: 'visible' });
+    // Geometry, not just pixels: the 5% page-diff tolerance can swallow a
+    // side swap on a small menu. Poll: positioning lands in a layout effect.
+    const btnBox = await actionBtn.boundingBox();
+    await expect
+      .poll(() => menu.evaluate((el) => el.getBoundingClientRect().left))
+      .toBeGreaterThanOrEqual(btnBox!.x - 0.5);
+    await expect(page).toHaveScreenshot('countbadge-row-menu-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('Tooltip - Logical placements (LTR)', async ({ page }) => {
     // `start`/`end` resolve against the trigger's text direction: in LTR
     // start = left of the trigger, end = right.

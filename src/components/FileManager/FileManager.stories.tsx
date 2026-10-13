@@ -55,7 +55,7 @@ The component is stateless about files: every change goes through the host and b
 - Accessibility: the drop card is a clickable \`Card\` (\`div\`) with **no \`role="button"\`, \`tabIndex\` or key handler**, and its \`<input type="file">\` is \`hidden\` and unlabelled — keyboard users cannot open the picker. The row menu button is labelled ("File actions for {filename}", \`aria-haspopup\`/\`aria-expanded\`) and the menu is \`role="menu"\` with \`menuitem\`s, closes on Escape and outside click, but has no arrow-key navigation or focus return. Progress and error text are not \`aria-live\`.
 - Drag state uses raw \`onDragOver\`/\`onDragLeave\` without a counter, so the highlight can flicker over child elements. \`uploadedAt\`, \`uploadedBy\` and \`url\` are accepted but **not rendered**.
 - i18n: "Add File", "Click or drag and drop", "Drop files here", "Uploading...", "Used Storage", "No Files", column headers and menu labels are hard-coded English; sizes are \`B/KB/MB/GB\` base-1024 with a dot decimal.
-- RTL/layout: the menu is portalled to \`document.body\` at \`left: rect.right\` with \`translateX(-100%)\` — physical right alignment; \`text-right\` on the actions cell. The table wraps with \`Table responsive\`.
+- RTL/layout: the menu is portalled to \`document.body\` anchored to the trigger's inline-end edge (direction resolved via \`isRtl\`); \`text-end\` on the actions cell. The table wraps with \`Table responsive\`.
 - Theming: mixes semantic tokens (\`text-muted-foreground\`) with hard-coded \`blue-*\`, \`gray-*\`, \`red-*\`, \`bg-white\` and per-type icon colours. Depends on \`Card\`, \`Progress\`, \`Table\`, \`Icons\`. Entry \`@mieweb/ui\` (also the default export).`,
       },
     },

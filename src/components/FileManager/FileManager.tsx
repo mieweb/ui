@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
+import { isRtl } from '../../hooks/useDirection';
 import { Card } from '../Card/Card';
 import { DownloadIcon, EyeIcon, MoreHorizontalIcon, TrashIcon } from '../Icons';
 import { Progress } from '../Progress/Progress';
@@ -450,9 +451,12 @@ function FileRowActionMenu({
     return () => document.removeEventListener('keydown', handleKey);
   }, [open]);
 
+  // The menu's inline-end edge hugs the trigger: LTR pins the right edge
+  // (translateX(-100%)), RTL pins the left edge so it opens toward inline-end.
   const [menuPos, setMenuPos] = React.useState<{
     top: number;
     left: number;
+    rtl: boolean;
   } | null>(null);
 
   React.useLayoutEffect(() => {
@@ -461,9 +465,11 @@ function FileRowActionMenu({
     function updatePosition() {
       if (!buttonRef.current) return;
       const rect = buttonRef.current.getBoundingClientRect();
+      const rtl = isRtl(buttonRef.current);
       setMenuPos({
         top: rect.bottom + 4,
-        left: rect.right,
+        left: rtl ? rect.left : rect.right,
+        rtl,
       });
     }
 
@@ -540,8 +546,9 @@ function FileRowActionMenu({
             style={{
               position: 'fixed',
               top: menuPos.top,
+              // rtl-ignore -- fixed viewport coords; direction resolved via isRtl above
               left: menuPos.left,
-              transform: 'translateX(-100%)',
+              transform: menuPos.rtl ? undefined : 'translateX(-100%)',
             }}
             className={cn(
               'z-[9999] min-w-[10rem]',
