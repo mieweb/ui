@@ -893,24 +893,33 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
-  test('BookingDialog - Condensed consent switch thumb mirrors (RTL)', async ({
+  test('BookingDialog - Consent switch thumb mirrors (RTL)', async ({
     page,
   }) => {
-    // condensed-view.css repositions the thumb with physical `translate`
-    // + `transform: none !important`, which tramples the component's
-    // rtl:-translate-x-* utilities — dedicated :dir(rtl) condensed rules
-    // mirror it. Assert the thumb travels toward inline-end (negative
-    // translate) in both states.
+    const translateX = () =>
+      page
+        .locator("[data-slot='consent-switch-thumb']")
+        .first()
+        .evaluate((el) => parseFloat(getComputedStyle(el).translate));
+    // Normal density: the component's own rtl:-translate-x-* utilities
+    // drive the travel (-0.125rem resting, -1.25rem checked).
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl',
+    });
+    const toggle = page.locator("[data-slot='consent-switch-toggle']").first();
+    await expect.poll(translateX).toBe(-2);
+    await toggle.click();
+    await expect.poll(translateX).toBe(-20);
+    // Condensed density: condensed-view.css repositions the thumb with
+    // physical `translate` + `transform: none !important`, trampling the
+    // utilities above — dedicated :dir(rtl) condensed rules mirror it
+    // (-0.125rem resting, -0.875rem checked).
     await gotoStory(page, 'users-integrations-bookingdialog--default', {
       globals: 'direction:rtl;density:condensed',
     });
-    const toggle = page.locator("[data-slot='consent-switch-toggle']").first();
-    const thumb = toggle.locator("[data-slot='consent-switch-thumb']");
-    const translateX = () =>
-      thumb.evaluate((el) => parseFloat(getComputedStyle(el).translate));
-    await expect.poll(translateX).toBe(-2); // unchecked: -0.125rem
+    await expect.poll(translateX).toBe(-2);
     await toggle.click();
-    await expect.poll(translateX).toBe(-14); // checked: -0.875rem
+    await expect.poll(translateX).toBe(-14);
     const consent = page.locator("[data-slot='booking-dialog-consent']");
     await consent.scrollIntoViewIfNeeded();
     await expect(consent).toHaveScreenshot(
