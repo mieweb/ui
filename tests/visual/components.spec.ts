@@ -746,6 +746,52 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  test('Tooltip - Logical placements (LTR)', async ({ page }) => {
+    // `start`/`end` resolve against the trigger's text direction: in LTR
+    // start = left of the trigger, end = right.
+    await gotoStory(page, 'overlays-tooltip--logical-placements');
+    const startTip = page.getByRole('tooltip').filter({ hasText: 'Inline start' });
+    const endTip = page.getByRole('tooltip').filter({ hasText: 'Inline end' });
+    const startBtn = page.getByRole('button', { name: 'Start' });
+    const endBtn = page.getByRole('button', { name: 'End' });
+    // Geometry, not just pixels: the 5% page-diff tolerance can swallow a
+    // side swap on a small tooltip. Poll: positioning lands in a rAF.
+    const startBox = await startBtn.boundingBox();
+    const endBox = await endBtn.boundingBox();
+    await expect
+      .poll(() => startTip.evaluate((el) => el.getBoundingClientRect().right))
+      .toBeLessThanOrEqual(startBox!.x);
+    await expect
+      .poll(() => endTip.evaluate((el) => el.getBoundingClientRect().left))
+      .toBeGreaterThanOrEqual(endBox!.x + endBox!.width);
+    await expect(page).toHaveScreenshot('tooltip-logical-placements.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Tooltip - Logical placements swap (RTL)', async ({ page }) => {
+    // Under dir="rtl" the logical placements mirror: start = right of the
+    // trigger, end = left.
+    await gotoStory(page, 'overlays-tooltip--logical-placements', {
+      globals: 'direction:rtl',
+    });
+    const startTip = page.getByRole('tooltip').filter({ hasText: 'Inline start' });
+    const endTip = page.getByRole('tooltip').filter({ hasText: 'Inline end' });
+    const startBtn = page.getByRole('button', { name: 'Start' });
+    const endBtn = page.getByRole('button', { name: 'End' });
+    const startBox = await startBtn.boundingBox();
+    const endBox = await endBtn.boundingBox();
+    await expect
+      .poll(() => startTip.evaluate((el) => el.getBoundingClientRect().left))
+      .toBeGreaterThanOrEqual(startBox!.x + startBox!.width);
+    await expect
+      .poll(() => endTip.evaluate((el) => el.getBoundingClientRect().right))
+      .toBeLessThanOrEqual(endBox!.x);
+    await expect(page).toHaveScreenshot('tooltip-logical-placements-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('Table - Default', async ({ page }) => {
     await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');
@@ -915,6 +961,23 @@ test.describe('Visual Regression Tests - EH Frontdoor Components', () => {
         '-1 1'
       );
     }
+    // The panel clamp is logical too: under RTL its inline-start (right)
+    // edge must align with the trigger root's right edge instead of the
+    // LTR left-anchoring. Assert closeness, not just an upper bound — the
+    // old left-anchored layout also kept the panel's right edge inside the
+    // root, so a one-sided check could not catch a regression.
+    const panel = page.locator("[data-slot='mega-menu-panel']");
+    await expect
+      .poll(() =>
+        panel.evaluate((el) => {
+          const rootRight = el.parentElement!.getBoundingClientRect().right;
+          return Math.abs(rootRight - el.getBoundingClientRect().right);
+        })
+      )
+      .toBeLessThanOrEqual(1.5);
+    expect(
+      await panel.evaluate((el) => el.getBoundingClientRect().left)
+    ).toBeGreaterThanOrEqual(15);
     await expect(page).toHaveScreenshot('megamenu-grouped-rtl.png', {
       animations: 'disabled',
     });
