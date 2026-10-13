@@ -230,6 +230,13 @@ Components must render correctly in right-to-left locales
   component emits must be added to **both**
   [src/tailwind-preset.ts](src/tailwind-preset.ts) and
   [src/tailwind-preset.cjs](src/tailwind-preset.cjs).
+- **LTR islands for inherently left-to-right content** — phone numbers,
+  dates, URLs, dial codes and numeric table cells keep their character order
+  with an explicit `dir="ltr"` on the element (see PhoneInput, DateInput,
+  WebsiteInput, CountryCodeDropdown's dial-code spans, `TableCell numeric`,
+  and the AudioPlayer waveform). Inside an island, logical utilities resolve
+  LTR — `text-end` is the physical right. Add a short comment saying why the
+  island exists, and mention it in the story's RTL note.
 - **Genuinely physical code is exempt, with a reason** — pointer-coordinate
   math, overlays anchored to an SVG coordinate space, LTR-by-convention
   charts. Annotate the line (or the line above) with

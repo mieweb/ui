@@ -61,14 +61,14 @@ A semantic \`<table>\` with library styling: \`Table\`, \`TableHeader\`, \`Table
   <TableHeader>
     <TableRow>
       <TableHead>Service</TableHead>
-      <TableHead className="text-end">Amount</TableHead>
+      <TableHead numeric>Amount</TableHead>
     </TableRow>
   </TableHeader>
   <TableBody>
     {items.map((item) => (
       <TableRow key={item.id}>
         <TableCell>{item.name}</TableCell>
-        <TableCell className="text-end">{formatMoney(item.amount)}</TableCell>
+        <TableCell numeric>{formatMoney(item.amount)}</TableCell>
       </TableRow>
     ))}
   </TableBody>
@@ -81,7 +81,7 @@ The **Playground** story below deliberately hand-rolls sorting, filtering, pinne
 
 - No built-in sorting, filtering, selection, virtualisation or keyboard grid navigation; \`aria-sort\` and row selection are the host's responsibility.
 - Horizontal scrolling on narrow screens comes from the wrapper only; columns do not collapse or stack.
-- Uses logical text alignment (\`text-start\` / \`text-end\`) so RTL mirrors correctly; number alignment is up to the consumer.`,
+- Uses logical text alignment (\`text-start\` / \`text-end\`) so RTL mirrors correctly. For numeric columns, set \`numeric\` on \`TableHead\` and \`TableCell\`: the cells become \`dir="ltr"\` islands right-aligned with \`tabular-nums\`, so digits and alignment match in LTR and RTL.`,
       },
     },
     catalog: {
@@ -800,31 +800,33 @@ export const WithFooter: Story = {
         <TableHeader>
           <TableRow>
             <TableHead>Product</TableHead>
-            <TableHead>Quantity</TableHead>
-            <TableHead className="text-right">Price</TableHead>
+            <TableHead numeric>Quantity</TableHead>
+            <TableHead numeric>Price</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow>
             <TableCell className="font-medium">Widget A</TableCell>
-            <TableCell>10</TableCell>
-            <TableCell className="text-right">$100.00</TableCell>
+            <TableCell numeric>10</TableCell>
+            <TableCell numeric>$100.00</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium">Widget B</TableCell>
-            <TableCell>5</TableCell>
-            <TableCell className="text-right">$75.00</TableCell>
+            <TableCell numeric>5</TableCell>
+            <TableCell numeric>$75.00</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium">Widget C</TableCell>
-            <TableCell>15</TableCell>
-            <TableCell className="text-right">$150.00</TableCell>
+            <TableCell numeric>15</TableCell>
+            <TableCell numeric>$150.00</TableCell>
           </TableRow>
         </TableBody>
         <TableFooter>
           <TableRow>
             <TableCell colSpan={2}>Total</TableCell>
-            <TableCell className="text-right font-bold">$325.00</TableCell>
+            <TableCell numeric className="font-bold">
+              $325.00
+            </TableCell>
           </TableRow>
         </TableFooter>
       </Table>

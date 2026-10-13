@@ -157,17 +157,28 @@ export interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElem
   sortDirection?: 'asc' | 'desc' | null;
   /** Callback when sort is triggered */
   onSort?: () => void;
+  /**
+   * Marks the header of a numeric column. The cell becomes a `dir="ltr"`
+   * island aligned to the physical right, matching `TableCell numeric`,
+   * so numeric columns line up the same way in LTR and RTL.
+   */
+  numeric?: boolean;
 }
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
-  ({ className, sortable, sortDirection, onSort, children, ...props }, ref) => {
+  (
+    { className, sortable, sortDirection, onSort, numeric, children, ...props },
+    ref
+  ) => {
     const content = sortable ? (
       <button
         type="button"
         onClick={onSort}
         className={cn(
           'hover:text-foreground flex items-center gap-1 transition-colors',
-          'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none'
+          'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none',
+          // Inside the dir="ltr" island, "end" is the physical right
+          numeric && 'w-full justify-end'
         )}
         aria-label={`Sort column ${sortDirection === 'asc' ? 'descending' : 'ascending'}`}
       >
@@ -182,6 +193,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
       <th
         ref={ref}
         data-slot="table-head"
+        dir={numeric ? 'ltr' : undefined}
         aria-sort={
           sortable
             ? sortDirection === 'asc'
@@ -194,6 +206,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
         className={cn(
           'text-muted-foreground h-12 px-4 text-start align-middle font-medium',
           '[&:has([role=checkbox])]:pe-0',
+          numeric && 'text-end',
           className
         )}
         {...props}
@@ -210,15 +223,26 @@ TableHead.displayName = 'TableHead';
 // Table Cell
 // ============================================================================
 
-export type TableCellProps = React.TdHTMLAttributes<HTMLTableCellElement>;
+export interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
+  /**
+   * Marks a numeric cell as a `dir="ltr"` island: digits, minus signs, and
+   * separators render left-to-right even in RTL, and the value aligns to the
+   * physical right in both directions (with `tabular-nums` for column
+   * alignment). Pair with `numeric` on the column's `TableHead`.
+   */
+  numeric?: boolean;
+}
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
-  ({ className, ...props }, ref) => (
+  ({ className, numeric, ...props }, ref) => (
     <td
       ref={ref}
       data-slot="table-cell"
+      dir={numeric ? 'ltr' : undefined}
       className={cn(
         'p-4 align-middle [&:has([role=checkbox])]:pe-0',
+        // Inside the dir="ltr" island, text-end is the physical right
+        numeric && 'text-end tabular-nums',
         className
       )}
       {...props}

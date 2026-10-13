@@ -642,6 +642,7 @@ module.exports = {
     'justify-center',
     'justify-between',
     'justify-start',
+    'justify-end',
     'rtl:rotate-180',
     'gap-1',
     'gap-2',

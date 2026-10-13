@@ -926,6 +926,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           pattern={inputType === 'year' ? '[0-9]{4}' : undefined}
           maxLength={inputType === 'year' ? 4 : undefined}
           placeholder={inputType === 'year' ? 'YYYY' : undefined}
+          // LTR island: date values are left-to-right even in RTL
+          dir="ltr"
           value={value.replace(/\D/g, '').slice(0, 4)}
           onChange={(event) =>
             onChange?.(event.target.value.replace(/\D/g, '').slice(0, 4))
@@ -992,6 +994,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               id={inputId}
               type="text"
               inputMode={inputType === 'date' ? 'numeric' : undefined}
+              // LTR island: formatted date/time values are left-to-right even in RTL
+              dir="ltr"
               autoComplete={autoComplete}
               placeholder={
                 isFloating
@@ -1098,6 +1102,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         ref={ref}
         type="text"
         inputMode="numeric"
+        // LTR island: MM/DD/YYYY values are left-to-right even in RTL
+        dir="ltr"
         autoComplete={autoComplete}
         placeholder={placeholder}
         value={displayValue}
