@@ -631,6 +631,54 @@ describe('ChatComposer', () => {
     expect(screen.getByRole('button', { name: /gpt-5/i })).toBeInTheDocument();
   });
 
+  it('shows the bottom row for selectorsEndSlot alone', () => {
+    const { container } = renderWithTheme(
+      <ChatComposer selectorsEndSlot={<button type="button">Voice</button>} />
+    );
+
+    const end = container.querySelector(
+      '[data-slot="chat-composer-selectors-end"]'
+    );
+    expect(end).toContainElement(screen.getByRole('button', { name: 'Voice' }));
+    expect(
+      container.querySelector('[data-slot="chat-composer-selectors"]')
+    ).toContainElement(end as HTMLElement);
+  });
+
+  it('renders selectorsEndSlot after the model selector', () => {
+    renderWithTheme(
+      <ChatComposer
+        showModelSelector
+        modelSelectorProps={{
+          models: [
+            {
+              provider: 'openai',
+              providerLabel: 'OpenAI',
+              model: 'gpt-5',
+              label: 'GPT-5',
+            },
+          ],
+          value: { provider: 'openai', model: 'gpt-5' },
+          onChange: vi.fn(),
+        }}
+        selectorsEndSlot={<button type="button">Voice</button>}
+      />
+    );
+
+    const model = screen.getByRole('button', { name: /gpt-5/i });
+    const voice = screen.getByRole('button', { name: 'Voice' });
+    expect(model.compareDocumentPosition(voice)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('omits the bottom row when no selector or end slot is set', () => {
+    const { container } = renderWithTheme(<ChatComposer />);
+    expect(
+      container.querySelector('[data-slot="chat-composer-selectors"]')
+    ).toBeNull();
+  });
+
   it('shows a read-only notice instead of the input', () => {
     renderWithTheme(<ChatComposer readOnly readOnlyMessage="No access" />);
 

@@ -6092,14 +6092,20 @@ body.condensed [data-slot='chat-composer-selectors'] {
   gap: 0.25rem !important;
 }
 
-body.condensed [data-slot='chat-composer-agent-trigger'] {
+body.condensed [data-slot='chat-composer-agent-trigger'],
+body.condensed [data-slot='composer-selector-trigger'] {
   padding: 0.125rem 0.375rem !important;
   font-size: 0.625rem !important;
 }
 
-body.condensed [data-slot='chat-composer-agent-trigger'] svg {
+body.condensed [data-slot='chat-composer-agent-trigger'] svg,
+body.condensed [data-slot='composer-selector-trigger'] svg {
   width: 0.75rem !important;
   height: 0.75rem !important;
+}
+
+body.condensed [data-slot='chat-composer-selectors-end'] {
+  gap: 0.25rem !important;
 }
 
 /* Embedded model selector (ghost trigger) – match the agent trigger
