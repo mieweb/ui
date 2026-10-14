@@ -126,7 +126,7 @@ export function LoadingBar({
         {isIndeterminate ? (
           <div
             className={cn(
-              'animate-loading-bar h-full w-1/3 rounded-full',
+              'animate-loading-bar rtl:animate-loading-bar-rtl h-full w-1/3 rounded-full',
               barColor
             )}
           />
@@ -340,7 +340,7 @@ export function LoadingSkeleton({
     'bg-gray-200 dark:bg-gray-700',
     animation === 'pulse' && 'animate-pulse',
     animation === 'wave' &&
-      'animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 bg-[length:200%_100%]'
+      'animate-shimmer rtl:animate-shimmer-rtl bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 bg-[length:200%_100%]'
   );
 
   const variantClasses = {
@@ -445,19 +445,6 @@ function PulseIndicator() {
   );
 }
 
-// Add this to your global CSS for the loading bar animation:
-// @keyframes loading-bar {
-//   0% { transform: translateX(-100%); }
-//   100% { transform: translateX(300%); }
-// }
-// .animate-loading-bar {
-//   animation: loading-bar 1.5s infinite;
-// }
-//
-// @keyframes shimmer {
-//   0% { background-position: 200% 0; }
-//   100% { background-position: -200% 0; }
-// }
-// .animate-shimmer {
-//   animation: shimmer 2s infinite linear;
-// }
+// The `loading-bar` and `shimmer` animations (plus their `-rtl` mirrors) are
+// defined in the library styles (`styles/base.css` / `styles/init.css`) and
+// the Tailwind 3 preset — no consumer CSS is required.

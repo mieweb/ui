@@ -5002,6 +5002,22 @@ body.condensed
   transform: none !important;
 }
 
+/* RTL: mirror the physical translate so the thumb travels toward
+   inline-end (left) instead of exiting the compact track. :dir(rtl)
+   matches the toggle's effective direction, so document-level and
+   component-scoped (<div dir="rtl">) direction both work. */
+body.condensed
+  [data-slot='consent-switch-toggle'][aria-checked='true']:dir(rtl)
+  [data-slot='consent-switch-thumb'] {
+  translate: -0.875rem !important;
+}
+
+body.condensed
+  [data-slot='consent-switch-toggle'][aria-checked='false']:dir(rtl)
+  [data-slot='consent-switch-thumb'] {
+  translate: -0.125rem !important;
+}
+
 body.condensed [data-slot='consent-switch-label'] {
   font-size: 0.6875rem !important;
 }
