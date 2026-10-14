@@ -11,6 +11,7 @@ How to change `DictationButton` and `useDictation` safely. Consumer docs live in
 - **`onText` never fires after cancel**, and never for empty or blank results.
 - **`disabled` cancels in every state**, including the permission prompt (status is still `idle`) and transcribing.
 - **No timeslice.** Unlike `RecordButton` and `AudioRecorder` (which call `start(100)`), `useDictation` calls `recorder.start()` without a timeslice and joins every emitted chunk into the final Blob, so each take is one complete file.
+- **`handleRef` only forwards the hook's `start` / `stop` / `cancel`.** It adds no behaviour of its own, except that `start()` does nothing while `disabled`.
 - **Escape is document-wide while recording.** The `keydown` listener is added only while `status` is `recording`, skips events that are already `defaultPrevented`, and is removed on stop, cancel and unmount.
 
 ## Extension point

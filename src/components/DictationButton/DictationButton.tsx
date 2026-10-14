@@ -31,6 +31,16 @@ export const defaultDictationLabels: DictationButtonLabels = {
   micBlocked: 'Microphone access is blocked.',
 };
 
+/** Drive dictation from code, e.g. when a wake word fires. */
+export interface DictationButtonHandle {
+  /** Does nothing while `disabled` or while a take is already in progress. */
+  start: () => void;
+  /** Stop recording and transcribe. */
+  stop: () => void;
+  /** Discard the take; `onText` will not fire. */
+  cancel: () => void;
+}
+
 export interface DictationButtonProps
   extends
     UseDictationOptions,
@@ -56,6 +66,8 @@ export interface DictationButtonProps
   /** Override any user-facing string (i18n). */
   labels?: Partial<DictationButtonLabels>;
   className?: string;
+  /** Start, stop or cancel from code. `ref` stays the `<button>`. */
+  handleRef?: React.Ref<DictationButtonHandle>;
 }
 
 const buttonState: Record<DictationStatus, RecordButtonState> = {
@@ -87,6 +99,7 @@ export const DictationButton = React.forwardRef<
       showStatus = false,
       labels: labelOverrides,
       className,
+      handleRef,
       ...rest
     },
     ref
@@ -104,6 +117,18 @@ export const DictationButton = React.forwardRef<
     React.useEffect(() => {
       if (disabled) cancel();
     }, [disabled, cancel]);
+
+    React.useImperativeHandle(
+      handleRef,
+      () => ({
+        start: () => {
+          if (!disabled) void start();
+        },
+        stop,
+        cancel,
+      }),
+      [disabled, start, stop, cancel]
+    );
 
     // Document-level so Escape works while focus stays in the composer.
     React.useEffect(() => {
