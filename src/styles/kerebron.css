@@ -280,7 +280,7 @@
 }
 
 /* Selected-list-item outline: the wide inset covers the marker side. */
-li.ProseMirror-selectednode:after {
+.kb-editor li.ProseMirror-selectednode:after {
   left: auto;
   right: auto;
   inset-inline-start: -32px;
