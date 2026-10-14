@@ -32,6 +32,7 @@ const meta: Meta = {
 - You need multiple speakers attributed in one transcript rather than a turn-taking chat — \`VisitScribe\`.
 - The product's chat is not \`AIChat\` — use \`useHeyOzwell\` and spread \`chatProps\` / \`toggleProps\` onto your own components.
 - You cannot accept an auto-started microphone: \`autoStart\` is hard-wired here, so the permission prompt appears on mount.
+- You only want the wake phrase to open dictation into your own composer, where the user reviews and sends — [DictationButton](?path=/docs/media-dictationbutton--docs) with \`handleRef\` (*Start From Code*). Its text is never auto-sent.
 
 ### Example
 

@@ -1,6 +1,7 @@
 export {
   DictationButton,
   defaultDictationLabels,
+  type DictationButtonHandle,
   type DictationButtonProps,
   type DictationButtonLabels,
 } from './DictationButton';

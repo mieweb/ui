@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { DictationButton, type DictationButtonProps } from './DictationButton';
+import {
+  DictationButton,
+  type DictationButtonHandle,
+  type DictationButtonProps,
+} from './DictationButton';
 import type { DictationTranscribe } from './useDictation';
+import { Button } from '../Button';
 import { Textarea } from '../Textarea';
 import { ChatComposer } from '../ChatComposer';
 
@@ -81,6 +86,45 @@ function ChatComposerWithDictation() {
   );
 }
 
+function StartFromCodeDemo() {
+  const dictation = React.useRef<DictationButtonHandle>(null);
+  const [text, setText] = React.useState('');
+  return (
+    <div className="flex w-[480px] max-w-full flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => dictation.current?.start()}
+        >
+          Simulate “Hey Ozwell”
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => dictation.current?.stop()}
+        >
+          Simulate “Ozwell, I’m done”
+        </Button>
+      </div>
+      <div className="flex items-end gap-2">
+        <Textarea
+          aria-label="Message"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="min-h-24 flex-1"
+        />
+        <DictationButton
+          handleRef={dictation}
+          transcribe={mockTranscribe}
+          showStatus
+          onText={(t) => setText((prev) => appendText(prev, t))}
+        />
+      </div>
+    </div>
+  );
+}
+
 const meta: Meta<typeof DictationButton> = {
   id: 'media-dictationbutton',
   title: 'Modules/Media/DictationButton',
@@ -114,7 +158,7 @@ const meta: Meta<typeof DictationButton> = {
 - The host wants the **audio itself** (voice message, upload, server pipeline) — \`RecordButton\` hands over the \`Blob\`.
 - The user should **listen back, pause, or delete** the take first — \`AudioRecorder\`.
 - You need a **speaker-labelled transcript** of a visit or meeting — \`VisitScribe\` (Voice). Dictation assumes a single speaker.
-- You need hands-free start/stop by voice — \`HandsFreeChat\` (Voice) wires the "Hey Ozwell" wake word.
+- You need a complete hands-free voice chat — [Hands-Free Chat](?path=/docs/voice-hands-free-chat--docs) (\`HandsFreeChat\`) wires the "Hey Ozwell" wake word and sends for you. To open dictation from your own wake word into a draft the user still sends, keep \`DictationButton\` and call its \`handleRef\` (see *Start From Code*).
 
 ### Example
 
@@ -150,6 +194,7 @@ The host owns the composer value and the send; the button owns the microphone an
 - **Limits.** Auto-stops after \`maxDurationSeconds\` (default 300; \`0\` disables). Empty or blank takes call nothing. \`Escape\` anywhere on the page while recording (even with focus in the composer), \`disabled\` turning on (including during the permission prompt or transcription), or unmount discards the take and aborts \`transcribe\` via its \`AbortSignal\`. The on-device worker cannot stop a decode already running; its result is dropped.
 - **Browsers.** Needs a secure context and microphone permission. A denied prompt shows the \`micBlocked\` label; other failures show the generic \`error\` label and pass the real \`Error\` to \`onError\`. Recording format is the browser default (\`audio/webm\`, Safari \`audio/mp4\`). Embedded browsers without real microphone access (e.g. VS Code's integrated browser) produce undecodable takes — test in Chrome, Safari or Firefox.
 - **Shared mic.** \`getStream\` reuses a stream the host already holds, so no second mic is opened (a second \`getUserMedia\` can silence a wake-word listener). The hook never stops that stream's tracks; it opens its own mic when the stream has no live audio track.
+- **From code.** \`handleRef\` exposes \`start()\`, \`stop()\` and \`cancel()\` (e.g. for a wake word). They behave like the button: \`start()\` does nothing while \`disabled\` or mid-take. \`ref\` stays the \`<button>\`.
 - **Accessibility.** One \`<button>\` whose \`aria-label\` follows the state (\`start\` / \`stop\` / \`transcribing\` / error text) with \`aria-pressed\` while recording. A single \`role="status"\` region announces listening / transcribing / error; it is visually hidden unless \`showStatus\`. While transcribing, the button is natively disabled (\`RecordButton\`'s \`processing\` state), which can drop keyboard focus in some browsers — move focus back to your input in \`onText\` if needed.
 - **i18n.** Every string comes from \`labels\` (English defaults in \`defaultDictationLabels\`); \`m:ss\` uses \`formatDuration\`. RTL: symmetric \`inline-flex\` with \`gap-2\`. Speech language: see *English only on device*.
 - **DOM.** Standard button attributes (\`id\`, \`aria-describedby\`, \`data-*\`, handlers) go to the \`<button>\`; \`className\` goes to the wrapper. \`aria-label\`, \`aria-pressed\` and \`aria-busy\` follow the dictation state, so they are not props — change the text through \`labels\`. \`onKeyDown\` (or any earlier handler, such as a dialog) can \`preventDefault()\` to skip the Escape cancel.
@@ -210,6 +255,11 @@ The host owns the composer value and the send; the button owns the microphone an
       description: 'Override any user-facing string (i18n).',
       table: { disable: true },
     },
+    handleRef: {
+      description:
+        'Ref to `{ start, stop, cancel }` for driving dictation from code. `ref` stays the `<button>`.',
+      table: { disable: true },
+    },
   },
   args: {
     disabled: false,
@@ -250,6 +300,15 @@ export const ShortLimit: Story = {
  */
 export const InChatComposer: Story = {
   render: () => <ChatComposerWithDictation />,
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * Started and stopped from code through `handleRef`. The two buttons stand in for the wake phrases a host would
+ * detect ("Hey Ozwell" / "Ozwell, I'm done"). Text still lands in the input and is never sent automatically.
+ */
+export const StartFromCode: Story = {
+  render: () => <StartFromCodeDemo />,
   parameters: { controls: { disable: true } },
 };
 
