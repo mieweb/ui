@@ -65,9 +65,49 @@ describe('DictationButton', () => {
     expect(hook.cancel).toHaveBeenCalledTimes(1);
   });
 
+  it('cancels on Escape while focus is in another element', () => {
+    setStatus('recording');
+    render(
+      <>
+        <textarea aria-label="Message" />
+        <DictationButton onText={vi.fn()} />
+      </>
+    );
+    const input = screen.getByRole('textbox');
+    input.focus();
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(hook.cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips Escape that another handler already prevented', () => {
+    setStatus('recording');
+    render(
+      <>
+        <textarea aria-label="Message" onKeyDown={(e) => e.preventDefault()} />
+        <DictationButton onText={vi.fn()} />
+      </>
+    );
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' });
+    expect(hook.cancel).not.toHaveBeenCalled();
+  });
+
+  it('stops listening for Escape once recording ends or it unmounts', () => {
+    setStatus('recording');
+    const { rerender, unmount } = render(<DictationButton onText={vi.fn()} />);
+    setStatus('transcribing');
+    rerender(<DictationButton onText={vi.fn()} />);
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    setStatus('recording');
+    rerender(<DictationButton onText={vi.fn()} />);
+    unmount();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(hook.cancel).not.toHaveBeenCalled();
+  });
+
   it('ignores Escape when idle', () => {
     render(<DictationButton onText={vi.fn()} />);
-    fireEvent.keyDown(screen.getByRole('button'), { key: 'Escape' });
+    fireEvent.keyDown(document, { key: 'Escape' });
     expect(hook.cancel).not.toHaveBeenCalled();
   });
 

@@ -87,7 +87,6 @@ export const DictationButton = React.forwardRef<
       showStatus = false,
       labels: labelOverrides,
       className,
-      onKeyDown,
       ...rest
     },
     ref
@@ -105,6 +104,18 @@ export const DictationButton = React.forwardRef<
     React.useEffect(() => {
       if (disabled) cancel();
     }, [disabled, cancel]);
+
+    // Document-level so Escape works while focus stays in the composer.
+    React.useEffect(() => {
+      if (status !== 'recording') return;
+      const onEscape = (e: KeyboardEvent) => {
+        if (e.key !== 'Escape' || e.defaultPrevented) return;
+        e.preventDefault();
+        cancel();
+      };
+      document.addEventListener('keydown', onEscape);
+      return () => document.removeEventListener('keydown', onEscape);
+    }, [status, cancel]);
 
     const errorText =
       error?.name === 'NotAllowedError' ? labels.micBlocked : labels.error;
@@ -141,14 +152,6 @@ export const DictationButton = React.forwardRef<
           onClick={() => {
             if (status === 'recording') stop();
             else void start();
-          }}
-          onKeyDown={(e) => {
-            onKeyDown?.(e);
-            if (e.defaultPrevented) return;
-            if (e.key === 'Escape' && status === 'recording') {
-              e.preventDefault();
-              cancel();
-            }
           }}
         />
         {showDuration && status === 'recording' && (
