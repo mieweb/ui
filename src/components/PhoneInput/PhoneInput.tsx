@@ -94,6 +94,8 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
         inputMode="numeric"
         autoComplete="tel-national"
         placeholder="(555) 555-5555"
+        // LTR island: formatted phone numbers are left-to-right even in RTL
+        dir="ltr"
         value={displayValue}
         onChange={handleChange}
         onBlur={handleBlur}

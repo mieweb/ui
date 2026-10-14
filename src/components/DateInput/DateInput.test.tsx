@@ -9,6 +9,19 @@ describe('DateInput', () => {
     vi.useRealTimers();
   });
 
+  // #319: formatted date values are LTR islands so MM/DD/YYYY keeps its
+  // order under RTL bidi — all three input paths carry dir="ltr".
+  it('marks the input dir="ltr" on every render path', () => {
+    renderWithTheme(<DateInput label="Plain" />);
+    expect(screen.getByLabelText('Plain')).toHaveAttribute('dir', 'ltr');
+
+    renderWithTheme(<DateInput label="Picker" showCalendar />);
+    expect(screen.getByLabelText('Picker')).toHaveAttribute('dir', 'ltr');
+
+    renderWithTheme(<DateInput label="Year" inputType="year" />);
+    expect(screen.getByLabelText('Year')).toHaveAttribute('dir', 'ltr');
+  });
+
   it('exposes the Input density slots when it renders its own markup', () => {
     renderWithTheme(
       <DateInput label="Service date" helperText="MM/DD/YYYY" showCalendar />

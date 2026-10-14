@@ -928,6 +928,114 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  // #319 LTR islands: phone numbers, dates, URLs and dial codes carry an
+  // explicit dir="ltr" so bidi can't reorder their separators under RTL.
+  const direction = (locator: ReturnType<Page['locator']>) =>
+    locator.evaluate((el) => getComputedStyle(el).direction);
+
+  test('PhoneInput - formatted value is an LTR island (RTL)', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'text-inputs-phoneinput--pre-filled', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[type="tel"]').first();
+    await expect(input).toHaveValue('(555) 123-4567');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('phoneinput-prefilled-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('WebsiteInput - URL is an LTR island (RTL)', async ({ page }) => {
+    await gotoStory(page, 'text-inputs-websiteinput--with-value', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[type="url"]').first();
+    await expect(input).toHaveValue('https://bluehivehealth.com');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('websiteinput-value-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('DateInput - MM/DD/YYYY is an LTR island (RTL)', async ({ page }) => {
+    await gotoStory(page, 'date-time-dateinput--default', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[inputmode="numeric"]').first();
+    await input.fill('12252024');
+    await expect(input).toHaveValue('12/25/2024');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('dateinput-value-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('CountryCodeDropdown - dial codes are LTR islands (RTL)', async ({
+    page,
+  }) => {
+    // "+1" is digits plus a direction-neutral "+": without the island, RTL
+    // bidi renders it as "1+".
+    await gotoStory(page, 'choice-inputs-countrycodedropdown--default', {
+      globals: 'direction:rtl',
+    });
+    const triggerCode = page.locator(
+      '[data-slot="country-dropdown-dialcode"]'
+    );
+    await expect(triggerCode).toHaveText('+1');
+    await expect.poll(() => direction(triggerCode)).toBe('ltr');
+    await page.locator('[data-slot="country-dropdown-trigger"]').click();
+    const optionCode = page
+      .locator('[data-slot="country-dropdown-option-dialcode"]')
+      .first();
+    await expect.poll(() => direction(optionCode)).toBe('ltr');
+    await expect(page).toHaveScreenshot('countrycodedropdown-open-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Table - numeric cells are right-aligned LTR islands', async ({
+    page,
+  }) => {
+    const priceCell = () =>
+      page.locator('td[dir="ltr"]', { hasText: '$100.00' }).first();
+    // LTR base: numeric opts in to physical right alignment + tabular-nums.
+    await gotoStory(page, 'grids-table--with-footer');
+    await expect
+      .poll(() =>
+        priceCell().evaluate((el) => {
+          const s = getComputedStyle(el);
+          return [s.direction, s.textAlign, s.fontVariantNumeric].join(' ');
+        })
+      )
+      .toBe('ltr end tabular-nums');
+    // The header label is bidi-isolated so RTL-script column names keep
+    // their natural direction inside the alignment island.
+    await expect(page.locator('th[dir="ltr"] bdi').first()).toHaveText(
+      'Quantity'
+    );
+    await expect(page).toHaveScreenshot('table-footer-numeric.png');
+    // RTL: cells stay dir="ltr" islands, so the digits and the physical
+    // right alignment are identical to the LTR rendering.
+    await gotoStory(page, 'grids-table--with-footer', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() =>
+        priceCell().evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const text = range.getBoundingClientRect();
+          // Text hugs the cell's right padding edge (p-4 = 16px) in RTL too.
+          return Math.abs(r.right - 16 - text.right);
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    await expect(page).toHaveScreenshot('table-footer-numeric-rtl.png');
+  });
+
   test('Table - Default', async ({ page }) => {
     await gotoStory(page, 'grids-table--default');
     await expect(page).toHaveScreenshot('table-default.png');
