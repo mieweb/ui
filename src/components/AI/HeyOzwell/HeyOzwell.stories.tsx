@@ -43,6 +43,7 @@ const meta: Meta = {
 - The chat should be **inline** rather than floating, or you already render your own \`AIChat\` — \`HandsFreeChat\`, or \`useHeyOzwell\` + your layout.
 - You only need push-to-talk on an existing composer — \`AIChat talkToText\` with \`transcribeBlob\` (see Chat › AIChat (Voice)).
 - The encounter is a multi-person conversation to transcribe rather than commands to an assistant — \`VisitScribe\`.
+- You only need a compact wake-word on/off in the composer row — [Hey Ozwell Selector](?path=/docs/voice-hey-ozwell-selector--docs) (\`HeyOzwellSelector\`).
 - The host cannot download models (locked-down networks, small devices) — see Limitations; consider \`transcription="server"\` or a non-voice entry point.
 
 ### Example

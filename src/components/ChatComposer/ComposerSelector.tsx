@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import { Dropdown, DropdownItem } from '../Dropdown';
+import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import { CheckIcon, ChevronUpIcon } from '../Icons';
 
 /** An option in a composer selector-row menu (agent, voice, …). */
@@ -15,6 +15,14 @@ export interface ComposerSelectorOption {
   description?: string;
 }
 
+/** A command listed after the options (e.g. "Settings…"); it does not change the value. */
+export interface ComposerSelectorAction {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  onSelect: () => void;
+}
+
 export interface ComposerSelectorProps {
   /** Options shown as `menuitemradio` items. */
   options: ComposerSelectorOption[];
@@ -22,6 +30,8 @@ export interface ComposerSelectorProps {
   value: string | null;
   /** Called with the chosen option id. */
   onChange?: (id: string) => void;
+  /** Commands shown below the options, after a separator. */
+  actions?: ComposerSelectorAction[];
   /** Accessible name, and the trigger text while nothing is selected. */
   label: string;
   /** Fixed trigger text (e.g. a feature name); defaults to the selected option's label. */
@@ -50,6 +60,7 @@ export function ComposerSelector({
   options,
   value,
   onChange,
+  actions,
   label,
   triggerLabel,
   icon,
@@ -113,6 +124,23 @@ export function ComposerSelector({
           </span>
         </DropdownItem>
       ))}
+      {actions && actions.length > 0 && (
+        <>
+          <DropdownSeparator />
+          {actions.map((action) => (
+            <DropdownItem
+              key={action.id}
+              icon={action.icon}
+              onClick={() => {
+                setOpen(false);
+                action.onSelect();
+              }}
+            >
+              {action.label}
+            </DropdownItem>
+          ))}
+        </>
+      )}
     </Dropdown>
   );
 }

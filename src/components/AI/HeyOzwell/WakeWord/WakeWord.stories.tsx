@@ -30,6 +30,7 @@ const meta: Meta<typeof WakeWordDemo> = {
 
 - You are building a **custom voice surface** and need the wake trigger and the shared mic stream without the rest of Hey Ozwell (\`useHeyOzwell\` and \`useVoiceSetup\` are built on this).
 - You want to tune detection thresholds against real speech in a real room before setting deployment defaults.
+- You need a wake-word on/off in \`ChatComposer\` — run this hook and show it with [Hey Ozwell Selector](?path=/docs/voice-hey-ozwell-selector--docs), mapping \`enabled\` / \`ready\` / \`error\` to its \`phase\`.
 
 ### Don't use it when
 
