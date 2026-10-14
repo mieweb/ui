@@ -196,6 +196,11 @@ const composerRef = useRef<ChatComposerHandle>(null);
           target: 'voice-hey-ozwell-selector',
           why: 'HeyOzwellSelector is the wake-word on/off menu for selectorsEndSlot.',
         },
+        {
+          type: 'composes with',
+          target: 'media-dictationbutton',
+          why: 'Put DictationButton in micSlot as the only mic for voice typing; its onText appends to the controlled value and the user still presses Send.',
+        },
       ],
     },
   },

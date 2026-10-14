@@ -228,6 +228,62 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('chat-composer-with-record-button.png');
   });
 
+  test('DictationButton - Mock provider', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--mock-provider');
+    await expect(page).toHaveScreenshot('dictation-button-mock-provider.png');
+  });
+
+  test('DictationButton - In chat composer', async ({ page }) => {
+    // Dictation is the composer's only mic, in micSlot.
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer');
+    await expect(page).toHaveScreenshot('dictation-button-in-composer.png');
+  });
+
+  test('DictationButton - In chat composer (dark)', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer', {
+      globals: 'theme:dark',
+    });
+    await expect(page).toHaveScreenshot(
+      'dictation-button-in-composer-dark.png'
+    );
+  });
+
+  test('DictationButton - In chat composer (RTL)', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer', {
+      globals: 'direction:rtl',
+    });
+    // The mic precedes Send in reading order, so under RTL it sits to its right.
+    const [mic, send] = await Promise.all([
+      page.locator("[data-slot='dictation-button']").boundingBox(),
+      page.locator("[data-slot='chat-composer-send-button']").boundingBox(),
+    ]);
+    expect(mic!.x).toBeGreaterThan(send!.x);
+    await expect(page).toHaveScreenshot('dictation-button-in-composer-rtl.png');
+  });
+
+  test('DictationButton - In chat composer (condensed)', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer', {
+      globals: 'density:condensed',
+    });
+    await expect(page.locator("[data-slot='dictation-button']")).toHaveCSS(
+      'gap',
+      '4px'
+    );
+    await expect(page).toHaveScreenshot(
+      'dictation-button-in-composer-condensed.png'
+    );
+  });
+
+  test('DictationButton - In chat composer (mobile stacked)', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer');
+    await expect(page).toHaveScreenshot(
+      'dictation-button-in-composer-mobile.png'
+    );
+  });
+
   test('ChatComposer - With leading slot', async ({ page }) => {
     await gotoStory(page, 'chat-chatcomposer--with-leading-slot');
     const leading = page.locator("[data-slot='chat-composer-leading-slot']");
