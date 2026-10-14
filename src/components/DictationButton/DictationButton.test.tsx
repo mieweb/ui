@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import * as React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useDictation, type UseDictationResult } from './useDictation';
-import { DictationButton } from './DictationButton';
+import { DictationButton, type DictationButtonHandle } from './DictationButton';
 
 const hook: UseDictationResult = {
   status: 'idle',
@@ -204,5 +205,28 @@ describe('DictationButton', () => {
     expect(screen.getByRole('status')).toHaveClass('sr-only');
     rerender(<DictationButton onText={vi.fn()} showStatus />);
     expect(screen.getByRole('status')).not.toHaveClass('sr-only');
+  });
+
+  it('starts, stops and cancels from handleRef while ref stays the <button>', () => {
+    const handle = React.createRef<DictationButtonHandle>();
+    const button = React.createRef<HTMLButtonElement>();
+    render(
+      <DictationButton onText={vi.fn()} ref={button} handleRef={handle} />
+    );
+    expect(button.current).toBe(screen.getByRole('button'));
+
+    act(() => handle.current!.start());
+    act(() => handle.current!.stop());
+    act(() => handle.current!.cancel());
+    expect(hook.start).toHaveBeenCalledTimes(1);
+    expect(hook.stop).toHaveBeenCalledTimes(1);
+    expect(hook.cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores handleRef start while disabled', () => {
+    const handle = React.createRef<DictationButtonHandle>();
+    render(<DictationButton onText={vi.fn()} handleRef={handle} disabled />);
+    act(() => handle.current!.start());
+    expect(hook.start).not.toHaveBeenCalled();
   });
 });
