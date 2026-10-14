@@ -234,9 +234,15 @@ function AGGridInner<TData = unknown>(
   const handleGridReady = React.useCallback(
     (event: GridReadyEvent<TData>) => {
       gridApiRef.current = event.api;
+      // Re-apply the wrapper-managed loading overlay: the [loading] effect
+      // does not rerun when only the grid instance changed (the enableRtl
+      // direction-flip remount), so a grid flipped while loading would lose
+      // its overlay. No hideOverlay() on the false path — that would suppress
+      // AG Grid's automatic no-rows overlay on fresh mounts.
+      if (loading) event.api.showLoadingOverlay();
       onGridReady?.(event);
     },
-    [onGridReady]
+    [onGridReady, loading]
   );
 
   // Handle row click
