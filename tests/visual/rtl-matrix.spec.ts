@@ -117,9 +117,11 @@ const MATRIX: {
   {
     name: 'pagination',
     story: 'grids-pagination--default',
-    // Pagination's lucide icons carry no lucide-* class — target the
-    // flip utility itself.
-    assert: iconMirrors('svg[class*="rtl:-scale-x-100"]'),
+    // Pagination's lucide icons carry no lucide-* class — anchor on the
+    // stable pagination-first slot so removing that icon's mirroring
+    // class fails the assertion (a class-based selector would silently
+    // fall through to a sibling icon that still mirrors).
+    assert: iconMirrors('[data-slot="pagination-first"] svg'),
   },
   {
     name: 'accordion',
