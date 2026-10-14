@@ -442,6 +442,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
       maxDuration = 0,
       mimeType = 'audio/webm',
       onClick,
+      'aria-label': ariaLabel,
       ...props
     },
     ref
@@ -739,7 +740,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
             getStateStyles(effectiveState, variant),
             className
           )}
-          aria-label={getAriaLabel()}
+          aria-label={ariaLabel ?? getAriaLabel()}
           aria-pressed={effectiveState === 'recording' ? true : undefined}
           aria-busy={effectiveState === 'processing' ? true : undefined}
         >
