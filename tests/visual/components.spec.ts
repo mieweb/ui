@@ -779,6 +779,36 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  test('CountBadge - Row action menu anchors inline-end (RTL)', async ({
+    page,
+  }) => {
+    // The portal row menu hugs the trigger's inline-end edge: LTR pins its
+    // right edge to the trigger's right (translateX(-100%)); under dir="rtl"
+    // it pins its left edge to the trigger's left and opens toward the
+    // inline-end instead. DashboardWidget and FileManager share the recipe.
+    await gotoStory(page, 'data-display-countbadge--hover-menu-info', {
+      globals: 'direction:rtl',
+    });
+    await page.getByRole('button', { name: 'Open Enc 5' }).click();
+    const actionBtn = page
+      .locator('button[aria-label^="Actions for"]')
+      .first();
+    await actionBtn.click();
+    const menu = page.locator('[role="menu"]');
+    await menu.waitFor({ state: 'visible' });
+    // Geometry, not just pixels: the 5% page-diff tolerance can swallow a
+    // side swap on a small menu. Poll: positioning lands in a layout effect.
+    // Equality (±0.5px), not one-sided: `left >= trigger.left` would also
+    // pass for a menu still anchored to the trigger's right edge.
+    const btnBox = await actionBtn.boundingBox();
+    await expect
+      .poll(() => menu.evaluate((el) => el.getBoundingClientRect().left))
+      .toBeCloseTo(btnBox!.x, 0);
+    await expect(page).toHaveScreenshot('countbadge-row-menu-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('Tooltip - Logical placements (LTR)', async ({ page }) => {
     // `start`/`end` resolve against the trigger's text direction: in LTR
     // start = left of the trigger, end = right.
@@ -827,6 +857,220 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('tooltip-logical-placements-rtl.png', {
       animations: 'disabled',
     });
+  });
+
+  test('LoadingPage - bar and shimmer animations mirror under RTL', async ({
+    page,
+  }) => {
+    // `animate-loading-bar` / `animate-shimmer` emitted no CSS at all before
+    // this batch (their keyframes were never defined), so assert they resolve
+    // to real animations and swap to the `-rtl` mirrors under dir="rtl".
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors');
+    const bar = page.locator('.animate-loading-bar');
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar');
+    await expect(page).toHaveScreenshot('loading-bar-colors.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar-rtl');
+    await expect(page).toHaveScreenshot('loading-bar-colors-rtl.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--skeletons');
+    const wave = page.locator('.animate-shimmer').first();
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer');
+    await expect(page).toHaveScreenshot('loading-skeletons.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--skeletons', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer-rtl');
+    await expect(page).toHaveScreenshot('loading-skeletons-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Deck - bar chart marker label stays centered in RTL', async ({
+    page,
+  }) => {
+    // The label anchors at `start-1/2` (right: 50% in RTL), so the physical
+    // centering translate must mirror: `-translate-x-1/2 rtl:translate-x-1/2`.
+    // Without the mirror the label lands a full label-width off the divider.
+    await gotoStory(page, 'presentations-deck--rtl');
+    const label = page
+      .locator('[data-slot="deck-bar-chart"] span.start-1\\/2')
+      .first();
+    // Center-to-center offset within a 1px subpixel-rounding budget — an
+    // unmirrored label sits a half label-width (tens of px) off the divider.
+    await expect
+      .poll(() =>
+        label.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const center = r.left + r.width / 2;
+          const p = el.parentElement!.getBoundingClientRect();
+          return Math.abs(center - (p.left + p.width / 2));
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    const chart = page.locator('[data-slot="deck-bar-chart"]').first();
+    await chart.scrollIntoViewIfNeeded();
+    await expect(chart).toHaveScreenshot('deck-bar-chart-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('BookingDialog - Consent switch thumb mirrors (RTL)', async ({
+    page,
+  }) => {
+    const translateX = () =>
+      page
+        .locator("[data-slot='consent-switch-thumb']")
+        .first()
+        .evaluate((el) => parseFloat(getComputedStyle(el).translate));
+    // Normal density: the component's own rtl:-translate-x-* utilities
+    // drive the travel (-0.125rem resting, -1.25rem checked).
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl',
+    });
+    const toggle = page.locator("[data-slot='consent-switch-toggle']").first();
+    await expect.poll(translateX).toBe(-2);
+    await toggle.click();
+    await expect.poll(translateX).toBe(-20);
+    // Condensed density: condensed-view.css repositions the thumb with
+    // physical `translate` + `transform: none !important`, trampling the
+    // utilities above — dedicated :dir(rtl) condensed rules mirror it
+    // (-0.125rem resting, -0.875rem checked).
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl;density:condensed',
+    });
+    await expect.poll(translateX).toBe(-2);
+    await toggle.click();
+    await expect.poll(translateX).toBe(-14);
+    const consent = page.locator("[data-slot='booking-dialog-consent']");
+    await consent.scrollIntoViewIfNeeded();
+    await expect(consent).toHaveScreenshot(
+      'booking-consent-condensed-rtl.png',
+      { animations: 'disabled' }
+    );
+  });
+
+  // #319 LTR islands: phone numbers, dates, URLs and dial codes carry an
+  // explicit dir="ltr" so bidi can't reorder their separators under RTL.
+  const direction = (locator: ReturnType<Page['locator']>) =>
+    locator.evaluate((el) => getComputedStyle(el).direction);
+
+  test('PhoneInput - formatted value is an LTR island (RTL)', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'text-inputs-phoneinput--pre-filled', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[type="tel"]').first();
+    await expect(input).toHaveValue('(555) 123-4567');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('phoneinput-prefilled-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('WebsiteInput - URL is an LTR island (RTL)', async ({ page }) => {
+    await gotoStory(page, 'text-inputs-websiteinput--with-value', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[type="url"]').first();
+    await expect(input).toHaveValue('https://bluehivehealth.com');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('websiteinput-value-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('DateInput - MM/DD/YYYY is an LTR island (RTL)', async ({ page }) => {
+    await gotoStory(page, 'date-time-dateinput--default', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[inputmode="numeric"]').first();
+    await input.fill('12252024');
+    await expect(input).toHaveValue('12/25/2024');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('dateinput-value-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('CountryCodeDropdown - dial codes are LTR islands (RTL)', async ({
+    page,
+  }) => {
+    // "+1" is digits plus a direction-neutral "+": without the island, RTL
+    // bidi renders it as "1+".
+    await gotoStory(page, 'choice-inputs-countrycodedropdown--default', {
+      globals: 'direction:rtl',
+    });
+    const triggerCode = page.locator(
+      '[data-slot="country-dropdown-dialcode"]'
+    );
+    await expect(triggerCode).toHaveText('+1');
+    await expect.poll(() => direction(triggerCode)).toBe('ltr');
+    await page.locator('[data-slot="country-dropdown-trigger"]').click();
+    const optionCode = page
+      .locator('[data-slot="country-dropdown-option-dialcode"]')
+      .first();
+    await expect.poll(() => direction(optionCode)).toBe('ltr');
+    await expect(page).toHaveScreenshot('countrycodedropdown-open-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Table - numeric cells are right-aligned LTR islands', async ({
+    page,
+  }) => {
+    const priceCell = () =>
+      page.locator('td[dir="ltr"]', { hasText: '$100.00' }).first();
+    // LTR base: numeric opts in to physical right alignment + tabular-nums.
+    await gotoStory(page, 'grids-table--with-footer');
+    await expect
+      .poll(() =>
+        priceCell().evaluate((el) => {
+          const s = getComputedStyle(el);
+          return [s.direction, s.textAlign, s.fontVariantNumeric].join(' ');
+        })
+      )
+      .toBe('ltr end tabular-nums');
+    // The header label is bidi-isolated so RTL-script column names keep
+    // their natural direction inside the alignment island.
+    await expect(page.locator('th[dir="ltr"] bdi').first()).toHaveText(
+      'Quantity'
+    );
+    await expect(page).toHaveScreenshot('table-footer-numeric.png');
+    // RTL: cells stay dir="ltr" islands, so the digits and the physical
+    // right alignment are identical to the LTR rendering.
+    await gotoStory(page, 'grids-table--with-footer', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() =>
+        priceCell().evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const text = range.getBoundingClientRect();
+          // Text hugs the cell's right padding edge (p-4 = 16px) in RTL too.
+          return Math.abs(r.right - 16 - text.right);
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    await expect(page).toHaveScreenshot('table-footer-numeric-rtl.png');
   });
 
   test('Table - Default', async ({ page }) => {

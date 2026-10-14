@@ -48,7 +48,7 @@ The host stores the unformatted digits; the component re-derives the display str
 - The blur error string \`"Please enter a valid 10-digit phone number"\` and the placeholder \`(555) 555-5555\` are hard-coded English (override the placeholder via the \`placeholder\` prop; the message cannot be replaced, only pre-empted by your own \`error\`). A host \`error\` wins over the local one.
 - Validation is length-only (10 digits); there is no area-code or carrier check and no \`libphonenumber\` dependency. 11+ digit numbers display with a \`+CC\` prefix but are reported invalid.
 - Effectively controlled: \`value\` defaults to \`''\`; there is no \`defaultValue\`.
-- RTL, dark mode and theming are whatever \`Input\` provides; the component adds no styling of its own. Depends on \`utils/phone\` (\`formatPhoneNumber\`, \`unformatPhoneNumber\`, \`isValidPhoneNumber\`).`,
+- RTL, dark mode and theming are whatever \`Input\` provides; the component adds no styling of its own, but the input itself is a \`dir="ltr"\` island so formatted numbers like \`(555) 555-5555\` keep their digit order in RTL. Depends on \`utils/phone\` (\`formatPhoneNumber\`, \`unformatPhoneNumber\`, \`isValidPhoneNumber\`).`,
       },
     },
     catalog: {

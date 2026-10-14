@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { WrapText, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useDirection } from '../../hooks/useDirection';
 import { AvatarGroup, type AvatarPresence } from '../AvatarGroup/AvatarGroup';
 
 // =============================================================================
@@ -167,15 +168,20 @@ const PANEL_OFFSET = 6;
 const VIEWPORT_PADDING = 8;
 
 /**
- * Position the panel under the trigger, right-aligned to it but clamped to the
- * viewport on both axes (it flips above the trigger when it would overflow the
- * bottom). Returns null until the panel has been measured.
+ * Position the panel under the trigger, inline-end-aligned to it (right edge
+ * in LTR, left edge in RTL) but clamped to the viewport on both axes (it flips
+ * above the trigger when it would overflow the bottom). Direction is reactive
+ * (`useDirection`), so an open panel re-anchors when the nearest `dir`
+ * changes; the returned `direction` must be restated on the portal root,
+ * which cannot inherit a local `dir` from the trigger subtree. Position is
+ * null until the panel has been measured.
  */
 function useAnchoredPanel(
   open: boolean,
   anchorRef: React.RefObject<HTMLElement | null>,
   panelRef: React.RefObject<HTMLElement | null>
 ) {
+  const direction = useDirection(anchorRef);
   const [pos, setPos] = React.useState<{ top: number; left: number } | null>(
     null
   );
@@ -192,10 +198,12 @@ function useAnchoredPanel(
       const a = anchor.getBoundingClientRect();
       const { offsetWidth: width, offsetHeight: height } = panel;
 
+      // Hug the trigger's inline-end edge; clamp result to the viewport.
+      const anchoredLeft = direction === 'rtl' ? a.left : a.right - width;
       const maxLeft = window.innerWidth - width - VIEWPORT_PADDING;
       const left = Math.max(
         VIEWPORT_PADDING,
-        Math.min(a.right - width, Math.max(VIEWPORT_PADDING, maxLeft))
+        Math.min(anchoredLeft, Math.max(VIEWPORT_PADDING, maxLeft))
       );
 
       let top = a.bottom + PANEL_OFFSET;
@@ -215,9 +223,9 @@ function useAnchoredPanel(
       window.removeEventListener('scroll', update, true);
       window.removeEventListener('resize', update);
     };
-  }, [open, anchorRef, panelRef]);
+  }, [open, anchorRef, panelRef, direction]);
 
-  return pos;
+  return { pos, direction };
 }
 
 const KIND_TONE: Record<CollabLogKind, string> = {
@@ -270,7 +278,11 @@ export function CollabStatus({
   const [wrapped, setWrapped] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
-  const pos = useAnchoredPanel(open && showLog, triggerRef, panelRef);
+  const { pos, direction } = useAnchoredPanel(
+    open && showLog,
+    triggerRef,
+    panelRef
+  );
   const titleId = React.useId();
 
   // Escape closes and returns focus; a pointer outside dismisses.
@@ -373,12 +385,16 @@ export function CollabStatus({
             role="dialog"
             aria-labelledby={titleId}
             data-slot="collab-status-panel"
+            // Portals under <body> don't inherit a local `dir` from the
+            // trigger subtree; restate the resolved direction.
+            dir={direction}
             className={cn(
               'bg-card text-card-foreground border-border fixed z-50 w-[26rem] max-w-[calc(100vw-1rem)]',
               'rounded-lg border p-3 text-xs shadow-xl'
             )}
             style={{
               top: pos?.top ?? 0,
+              // rtl-ignore -- fixed viewport coords; direction resolved reactively in useAnchoredPanel
               left: pos?.left ?? 0,
               visibility: pos ? undefined : 'hidden',
             }}

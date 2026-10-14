@@ -454,8 +454,9 @@ export interface ChatBubbleProps
   /** Show error styling (red border). */
   hasError?: boolean;
   /**
-   * Optional left-border accent color. Used by multi-participant surfaces
-   * (e.g. SuperChat) to tint a speaker's bubble; AI chat leaves it unset.
+   * Optional inline-start border accent color. Used by multi-participant
+   * surfaces (e.g. SuperChat) to tint a speaker's bubble; AI chat leaves it
+   * unset.
    */
   accent?: string;
 }
@@ -479,7 +480,11 @@ const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
           hasError && 'border border-red-300 dark:border-red-700',
           className
         )}
-        style={accent ? { borderLeft: `3px solid ${accent}`, ...style } : style}
+        style={
+          accent
+            ? { borderInlineStart: `3px solid ${accent}`, ...style }
+            : style
+        }
         {...props}
       >
         {children}
