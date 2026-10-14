@@ -158,7 +158,7 @@ const meta: Meta<typeof DictationButton> = {
 - The host wants the **audio itself** (voice message, upload, server pipeline) — \`RecordButton\` hands over the \`Blob\`.
 - The user should **listen back, pause, or delete** the take first — \`AudioRecorder\`.
 - You need a **speaker-labelled transcript** of a visit or meeting — \`VisitScribe\` (Voice). Dictation assumes a single speaker.
-- You need hands-free start/stop by voice — \`HandsFreeChat\` (Voice) wires the "Hey Ozwell" wake word. To open dictation from your own wake word, keep \`DictationButton\` and call its \`handleRef\` (see *Start From Code*).
+- You need a complete hands-free voice chat — [Hands-Free Chat](?path=/docs/voice-hands-free-chat--docs) (\`HandsFreeChat\`) wires the "Hey Ozwell" wake word and sends for you. To open dictation from your own wake word into a draft the user still sends, keep \`DictationButton\` and call its \`handleRef\` (see *Start From Code*).
 
 ### Example
 
