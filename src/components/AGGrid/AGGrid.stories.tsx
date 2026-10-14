@@ -286,6 +286,7 @@ A themed AG Grid wrapper component that integrates with the MIE Web UI design sy
 - **Visual variants**: Default, bordered, and striped styles
 - **Loading states**: Built-in loading overlay support
 - **Full AG Grid API**: Access all AG Grid features through the wrapper
+- **RTL**: the wrapper resolves the inherited \`dir\` (via \`useDirection\`) and passes AG Grid's native \`enableRtl\`, so the grid mirrors automatically under \`dir="rtl"\`. Pass \`enableRtl\` explicitly to pin a direction. \`enableRtl\` is an initial-only AG Grid option, so the grid remounts (losing sort/filter state) when the resolved direction changes — preview with the toolbar direction switch.
 
 ## Installation
 
