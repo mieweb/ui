@@ -253,3 +253,45 @@
   min-height: 0 !important;
   line-height: 1;
 }
+
+/*
+ * RTL (#319) — Kerebron's content.css/prosemirror.css use physical-direction
+ * properties, so these parts don't mirror under dir="rtl". Restate them as
+ * logical properties; resolved values are pixel-identical in LTR. The
+ * physical resets must precede the logical declarations (same specificity,
+ * last declaration wins).
+ */
+.kb-editor ul,
+.kb-editor ol {
+  padding-left: 0;
+  padding-inline-start: 30px;
+}
+
+.kb-editor blockquote {
+  padding-left: 0;
+  border-left: 0;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--kb-color-border);
+}
+
+.kb-editor li[data-type='task_item'] {
+  margin-left: 0;
+  margin-inline-start: -1.5em;
+}
+
+/* Selected-list-item outline: the wide inset covers the marker side. */
+.kb-editor li.ProseMirror-selectednode:after {
+  left: auto;
+  right: auto;
+  inset-inline-start: -32px;
+  inset-inline-end: -2px;
+}
+
+/*
+ * Code blocks are deliberate LTR islands — program code must not
+ * bidi-reorder (`;` and brackets shuffle under an inherited dir="rtl").
+ * Same convention as the AudioPlayer waveform island.
+ */
+.kb-editor .codecrock-root {
+  direction: ltr;
+}

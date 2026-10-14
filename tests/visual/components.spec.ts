@@ -1864,6 +1864,42 @@ test.describe('Visual Regression Tests - RichEditor (kerebron.css)', () => {
     await expect(page).toHaveScreenshot('richeditor-formatted-dark.png');
   });
 
+  test('RichEditor - mirrors under RTL with LTR code island', async ({
+    page,
+  }) => {
+    // Guards the kerebron.css RTL overrides (#319): Kerebron's content.css
+    // uses physical list/blockquote rules, and code blocks inherited the
+    // surrounding direction (bidi-reordering program code).
+    await gotoStory(page, formattedStory, { globals: 'direction:rtl' });
+    await waitForFormatted(page);
+    // Prose follows the inherited direction…
+    await expect(page.locator('.ProseMirror').first()).toHaveCSS(
+      'direction',
+      'rtl'
+    );
+    // …lists pad from the inline start (logical override)…
+    const list = page.locator('.kb-editor ul').first();
+    await expect(list).toHaveCSS('padding-right', '30px');
+    await expect(list).toHaveCSS('padding-left', '0px');
+    // …and code blocks stay LTR islands (code must not bidi-reorder).
+    await expect(page.locator('.codecrock-root').first()).toHaveCSS(
+      'direction',
+      'ltr'
+    );
+    await expect(page).toHaveScreenshot('richeditor-formatted-rtl.png', {
+      animations: 'disabled',
+    });
+
+    // Blockquote mirror: wrap the h1 and assert the quote bar sits on the
+    // inline-start (right) edge instead of staying physically left.
+    await page.locator('.kb-editor h1').click();
+    await page.getByRole('button', { name: 'Wrap in block quote' }).click();
+    const quote = page.locator('.kb-editor blockquote').first();
+    await expect(quote).not.toHaveCSS('border-right-width', '0px');
+    await expect(quote).toHaveCSS('border-left-width', '0px');
+    await expect(quote).toHaveCSS('padding-left', '0px');
+  });
+
   test('RichEditor - Heading dropdown opens with active state', async ({
     page,
   }) => {
