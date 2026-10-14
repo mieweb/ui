@@ -8,7 +8,10 @@ import {
   type ChatComposerMenuItem,
 } from './ChatComposer';
 import type { ProviderModelValue } from '../AI/ComposerModelSelector';
-import { ComposerSelector } from './ComposerSelector';
+import {
+  HeyOzwellSelector,
+  type HeyOzwellSelectorPhase,
+} from '../AI/HeyOzwell/HeyOzwellSelector';
 import { RecordButton } from '../RecordButton';
 import {
   useKeyboardInset,
@@ -190,6 +193,11 @@ const composerRef = useRef<ChatComposerHandle>(null);
         },
         {
           type: 'composes with',
+          target: 'voice-hey-ozwell-selector',
+          why: 'HeyOzwellSelector is the wake-word on/off menu for selectorsEndSlot.',
+        },
+        {
+          type: 'composes with',
           target: 'media-dictationbutton',
           why: 'Put DictationButton in micSlot as the only mic for voice typing; its onText appends to the controlled value and the user still presses Send.',
         },
@@ -356,18 +364,11 @@ export const WithLeadingSlot: Story = {
 };
 
 function WakeWordSelectorDemo() {
-  const [wake, setWake] = React.useState<string | null>('on');
+  const [phase, setPhase] = React.useState<HeyOzwellSelectorPhase>('listening');
   return (
-    <ComposerSelector
-      options={[
-        { id: 'on', label: 'Activate', description: 'Listen for "Hey Ozwell"' },
-        { id: 'off', label: 'Disable', description: 'Wake word off' },
-      ]}
-      value={wake}
-      onChange={setWake}
-      label="Hey Ozwell"
-      triggerLabel="Hey Ozwell"
-      icon={<AudioWaveform className="h-3.5 w-3.5" aria-hidden="true" />}
+    <HeyOzwellSelector
+      phase={phase}
+      onChange={(active) => setPhase(active ? 'listening' : 'off')}
     />
   );
 }
@@ -384,7 +385,7 @@ export const WithSelectorsEndSlot: Story = {
     docs: {
       description: {
         story:
-          '`selectorsEndSlot` places a host control after the model selector in the row below the card — here a wake-word on/off selector. The host owns its state and disabled handling. The selector shown is the library-internal `ComposerSelector` (not exported); the slot accepts any node.',
+          '`selectorsEndSlot` places a host control after the model selector in the row below the card — here `HeyOzwellSelector` (see [Hey Ozwell Selector](?path=/docs/voice-hey-ozwell-selector--docs)). The host owns its state and disabled handling; the slot accepts any node.',
       },
     },
   },

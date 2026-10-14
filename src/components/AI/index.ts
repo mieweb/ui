@@ -73,6 +73,13 @@ export {
   HeyOzwellToggle,
   type HeyOzwellToggleProps,
 } from './HeyOzwell/HeyOzwellToggle';
+export {
+  HeyOzwellSelector,
+  defaultHeyOzwellSelectorLabels,
+  type HeyOzwellSelectorProps,
+  type HeyOzwellSelectorPhase,
+  type HeyOzwellSelectorLabels,
+} from './HeyOzwell/HeyOzwellSelector';
 export { HeyOzwell, type HeyOzwellProps } from './HeyOzwell/HeyOzwell';
 export {
   OzwellSettingsMenu,
