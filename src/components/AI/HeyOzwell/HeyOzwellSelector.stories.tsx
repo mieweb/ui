@@ -22,7 +22,7 @@ const meta: Meta<typeof HeyOzwellSelector> = {
       description: {
         component: `### What it's for
 
-**The quiet "Hey Ozwell" on/off menu for the row below \`ChatComposer\`.** It shows the host's wake-word state on the trigger icon and offers Activate / Disable, plus an optional "Voice settings…" item. It is presentational: the host runs the listener (\`useWakeWord\` / \`useHeyOzwell\`) and maps it to \`phase\`.
+**The quiet "Hey Ozwell" on/off menu for the row below \`ChatComposer\`.** It shows the host's wake-word state on the trigger icon and offers Activate / Disable, plus an optional "Voice settings…" item. It is presentational: the host runs the listener (for example \`useWakeWord\`) and maps its state to \`phase\` — see the Example.
 
 | \`phase\` | Trigger |
 | --- | --- |
@@ -44,24 +44,43 @@ const meta: Meta<typeof HeyOzwellSelector> = {
 ### Example
 
 \`\`\`tsx
-import { ChatComposer, HeyOzwellSelector } from '@mieweb/ui';
+import {
+  ChatComposer,
+  HeyOzwellSelector,
+  useWakeWord,
+  type HeyOzwellSelectorPhase,
+} from '@mieweb/ui';
 
-<ChatComposer
-  onSend={send}
-  selectorsEndSlot={
-    <HeyOzwellSelector
-      phase={wake.phase}
-      error={wake.error}
-      onChange={(active) => (active ? wake.start() : wake.stop())}
-      onOpenSettings={openVoiceSettings}
+function Composer() {
+  const [enabled, setEnabled] = React.useState(false);
+  const wake = useWakeWord({ enabled, onWake: startDictation });
+  const phase: HeyOzwellSelectorPhase = !enabled
+    ? 'off'
+    : wake.error
+      ? 'error'
+      : wake.ready
+        ? 'listening'
+        : 'loading';
+
+  return (
+    <ChatComposer
+      onSend={send}
+      selectorsEndSlot={
+        <HeyOzwellSelector
+          phase={phase}
+          error={wake.error ?? undefined}
+          onChange={setEnabled}
+          onOpenSettings={openVoiceSettings}
+        />
+      }
     />
-  }
-/>
+  );
+}
 \`\`\`
 
 ### Limitations
 
-- \`onChange\` fires only when the choice changes, except that Activate from \`error\` fires again as a retry.
+- \`onChange\` fires only when the choice changes, except that Activate from \`error\` fires again as a retry. \`useWakeWord\` restarts only when \`enabled\` changes, so with the Example above the user retries by choosing Disable, then Activate.
 - A polite \`role="status"\` region announces each phase; the trigger's accessible name is "Hey Ozwell: Activate | Disable". All text comes from \`labels\` (English defaults).
 - Long \`error\` text is truncated in the menu; keep it short. Entry \`@mieweb/ui\`.`,
       },

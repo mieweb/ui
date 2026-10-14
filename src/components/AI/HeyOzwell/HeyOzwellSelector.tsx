@@ -1,9 +1,9 @@
 /**
  * Hey Ozwell — wake-word selector for the row below `ChatComposer` (mieweb/ui#569).
  *
- * Presentational: the host runs the wake-word listener and passes its `phase`; the selector shows
- * it on the trigger icon, offers Activate / Disable (and optional "Voice settings…"), and
- * announces phase changes through a polite status region.
+ * Presentational: the host runs the wake-word listener (e.g. `useWakeWord`) and maps its state to
+ * `phase`; the selector shows it on the trigger icon, offers Activate / Disable (and optional
+ * "Voice settings…"), and announces phase changes through a polite status region.
  */
 
 import * as React from 'react';
@@ -44,7 +44,7 @@ export const defaultHeyOzwellSelectorLabels: HeyOzwellSelectorLabels = {
 };
 
 export interface HeyOzwellSelectorProps {
-  /** Wake-word state from the host's listener. */
+  /** Wake-word state, mapped by the host from its listener (see the story Example). */
   phase: HeyOzwellSelectorPhase;
   /** Called with `true` for Activate and `false` for Disable when the choice changes (Activate also retries from `error`). */
   onChange: (active: boolean) => void;
