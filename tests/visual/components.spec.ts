@@ -1257,6 +1257,22 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'deprecated-aggrid--default');
     await expect(page).toHaveScreenshot('aggrid-default.png');
   });
+
+  test('AGGrid - mirrors via enableRtl (RTL)', async ({ page }) => {
+    await gotoStory(page, 'deprecated-aggrid--default', {
+      globals: 'direction:rtl',
+    });
+    // The wrapper resolves the inherited dir and passes AG Grid's native
+    // enableRtl — the root wrapper gains .ag-rtl and lays out right-to-left.
+    const root = page.locator('.ag-root-wrapper').first();
+    await expect(root).toHaveClass(/ag-rtl/);
+    await expect
+      .poll(() =>
+        root.evaluate((el) => getComputedStyle(el).direction)
+      )
+      .toBe('rtl');
+    await expect(page).toHaveScreenshot('aggrid-default-rtl.png');
+  });
 });
 
 // EH frontdoor ports (ui#420). Globe is intentionally not covered: it renders
