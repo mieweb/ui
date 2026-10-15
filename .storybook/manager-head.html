@@ -31,6 +31,42 @@
   })();
 </script>
 <!--
+  Mobile viewport fix (mieweb/ui#575): Storybook's manager sets
+  `body { position: fixed; height: 100vh }` and sizes the mobile menu drawer
+  (#storybook-mobile-menu, a bottom-anchored modal) at 80vh. On iOS Safari,
+  vh units measure the LARGE viewport (browser toolbar collapsed), so with
+  the toolbar visible the bottom of the manager — the mobile bottom bar and
+  the last items of the navigation drawer — sits behind the browser controls.
+  dvh tracks the visible viewport as toolbars expand/collapse; where dvh and
+  vh agree (desktop, Android, toolbar hidden) these rules are no-ops.
+
+  The media query is the exact complement of Storybook's desktop breakpoint
+  (min-width: 600px), so desktop layout is untouched. `!important` on body is
+  needed because Storybook's emotion-injected global rule has equal
+  specificity and loads later. The drawer's slide animation fills forward to
+  `max-height: 80vh`; it is deliberately left alone — 80vh >= 80dvh, so the
+  overridden height governs and the animation keeps working. The scroll
+  viewport gets bottom padding so the final nav item can scroll clear of the
+  home indicator / minimized toolbar (env() is 0 where there is no inset).
+-->
+<style>
+  @media not all and (min-width: 600px) {
+    body {
+      height: 100dvh !important;
+    }
+    #storybook-mobile-menu {
+      height: 80dvh;
+    }
+    #storybook-mobile-menu [data-radix-scroll-area-viewport] {
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    }
+    /* Mobile bottom bar (Sidebar / Canvas / Addons controls). */
+    section:has(button[aria-controls='storybook-mobile-menu']) {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+  }
+</style>
+<!--
   Ozwell assistant embed (hosted CDN widget from mieweb/ozwellai-api).
   Lives in the manager shell so it floats over the whole Storybook without
   polluting story canvases, visual snapshots, or the test-runner (which load
