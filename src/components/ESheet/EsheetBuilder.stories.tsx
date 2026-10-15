@@ -144,7 +144,7 @@ function TemplateEditor({ template }: { template: FormTemplate }) {
 - Persistence is entirely yours: nothing is saved, autosaved, fetched or validated against a server; \`onChange\` fires on every keystroke, so debounce before persisting.
 - Accessibility (as shipped in the pinned submodule): several axe rules are disabled in this story because the upstream markup fails them — active mode tab contrast (\`color-contrast\`), duplicate unlabeled \`<aside>\` tool panels (\`landmark-unique\`), and drag handles that are \`<div aria-label>\` without a role (\`aria-prohibited-attr\`). Drag-and-drop has no documented keyboard alternative beyond disabling it.
 - Layout: expects to fill its container (the stories use \`height: 100vh\`); it is a desktop authoring tool, not designed for small screens. Dark mode is opt-in via a \`dark\` class on \`className\`, independent of the @mieweb/ui theme provider.
-- i18n / RTL: no locale, direction or translation hooks were found in the builder source — UI strings are English and layout is LTR.
+- i18n / RTL: no locale or translation hooks were found in the builder source — UI strings are English. Layout mirrors natively under an inherited \`dir="rtl"\` (panels swap sides, toolbar flips; verify with the direction toolbar); known upstream gaps are a handful of physical-direction classes (nested-section indent border, required-asterisk spacing, assorted margins), tracked as an eSheet RTL enhancement.
 - Custom field types (\`medicationList\`, \`allergyList\`) are not part of \`@esheet/core\`'s built-in \`fieldType\` union; definitions containing them need a cast and require a core version that accepts custom field types (mieweb/eSheet#91).`,
       },
     },
