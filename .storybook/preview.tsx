@@ -5,14 +5,10 @@ import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import '../src/styles/kerebron.css';
 import './preview.css';
-// eSheet compiled CSS must load in a deterministic order: both files define
-// identical plain utilities (e.g. .ms\:hidden) but only the builder file has
-// the responsive display overrides (.ms\:lg\:flex etc.). If the renderer CSS
-// loads after the builder CSS (which depends on story visit order when each
-// story imports its own), the renderer's plain .ms\:hidden wins the cascade
-// and the builder's side panels stay hidden at every viewport width.
-import '../packages/esheet/packages/renderer/src/index.output.css';
-import '../packages/esheet/packages/builder/src/index.output.css';
+// eSheet styling is no longer imported here: @esheet/builder and
+// @esheet/renderer both `import '@esheet/styles'`, whose built dist/index.js
+// self-injects a single shared stylesheet (a #esheet-styles <style> tag) the
+// first time either package loads.
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { ccmeBrand } from '../src/brands/ccme';
 import { defaultBrand } from '../src/brands/default';
