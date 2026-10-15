@@ -5,32 +5,6 @@
   they follow the OS theme and clash with the in-app light/dark toggle.
 -->
 <!--
-  iOS-only viewport patch: iOS Safari auto-zooms the page when focusing an
-  input with a font-size < 16px — including inputs inside the cross-origin
-  Ozwell widget iframe below, whose pinned @mieweb/ui (0.9.0) predates the
-  composer 16px font floor. The zoom shoves the chat panel off-screen on
-  phones. maximum-scale=1 suppresses that auto-zoom, and on iOS it is
-  harmless for accessibility: pinch-zoom has ignored maximum-scale since
-  iOS 10. It is injected ONLY on iOS because Android browsers honor
-  maximum-scale and would lose pinch-zoom (WCAG 1.4.4) — and Android never
-  auto-zooms on focus, so it needs no shield. Appended after Storybook's
-  default viewport meta, so it wins (last parsed). Interim until
-  mieweb/ozwellai-api#298 ships.
--->
-<script>
-  (function () {
-    var isIOS =
-      /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-      // iPadOS 13+ reports as Macintosh; real Macs have no touch points.
-      (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
-    if (!isIOS) return;
-    var meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, initial-scale=1, maximum-scale=1';
-    document.head.appendChild(meta);
-  })();
-</script>
-<!--
   Mobile viewport fix (mieweb/ui#575): Storybook's manager sets
   `body { position: fixed; height: 100vh }` and sizes the mobile menu drawer
   (#storybook-mobile-menu, a bottom-anchored modal) at 80vh. On iOS Safari,
@@ -86,8 +60,14 @@
     - get_component_stories   -> the stories (variants) of one component
     - get_component_docs      -> usage docs: what it is, examples, when to use
     - open_story              -> navigate this Storybook to a story/docs page
+
+  Launcher icon, drag/keyboard repositioning (position persisted to
+  localStorage['ozwell.launcher.position']), and mobile viewport handling
+  are built into the hosted loader — no local workarounds needed. The
+  loader injects its own viewport meta only when the host page has none;
+  Storybook's manager always provides one, so that injection never fires
+  here (its user-scalable=no would violate WCAG 1.4.4 on Android).
 -->
-<script src="./ozwell-launcher.js"></script>
 <script>
   (function () {
     var OZWELL_AGENT_KEY = 'agnt_key-muncblarc362ef130f8eae23'; // site agent key for ui.mieweb.org
@@ -315,27 +295,5 @@
     script.src = 'https://ozwellapi.os.mieweb.org/widget';
     script.async = true;
     document.head.appendChild(script);
-
-    // Temporary launcher icon fix (remove when mieweb/ozwellai-api#296
-    // ships): the loader hardcodes the launcher image to the host page's
-    // /favicon.ico, which this site doesn't serve — so the button renders a
-    // broken image. Swap in the Ozwell mark this Storybook already serves
-    // for HeyOzwell. Polled rather than observed because the loader
-    // re-renders the button's innerHTML on panel toggles, restoring the
-    // broken favicon after any one-shot swap.
-    setInterval(function () {
-      var img = document.querySelector('#ozwell-chat-button img');
-      if (img && img.getAttribute('src') !== './ozwell/icon.svg') {
-        img.src = './ozwell/icon.svg';
-        // Fill the 60px circle: the loader caps .ozwell-chat-icon at 32px
-        // and pads the button. Inline styles win and are re-applied with
-        // the src whenever the loader re-renders the button.
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'contain';
-        img.parentElement.style.padding = '0';
-        img.parentElement.style.background = '#fff';
-      }
-    }, 500);
   })();
 </script>
