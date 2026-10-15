@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 
 // Regression coverage for the iOS mobile-nav fix (mieweb/ui#575).
 //
@@ -63,6 +63,25 @@ async function measureLastNavItem(page: Page) {
   );
 }
 
+/**
+ * Polls until the drawer rests at its 80dvh override height — the slide-in
+ * animation (300ms) passes through intermediate heights, so a loose
+ * threshold can sample a mid-animation frame and flake the strict
+ * assertions that follow.
+ */
+async function waitForDrawerSettled(page: Page, drawer: Locator) {
+  await expect
+    .poll(
+      async () => {
+        const height = (await drawer.boundingBox())?.height ?? 0;
+        const innerHeight = await page.evaluate(() => window.innerHeight);
+        return Math.abs(height - innerHeight * 0.8);
+      },
+      { message: 'drawer settles at 80dvh' }
+    )
+    .toBeLessThan(2);
+}
+
 async function expectLastNavItemReachable(page: Page) {
   const m = await measureLastNavItem(page);
   // Drawer height override applied: 80dvh of the (fixed) viewport.
@@ -92,20 +111,14 @@ test.describe('Manager mobile navigation (#575)', () => {
     await page.getByLabel('Open navigation menu', { exact: true }).click();
     const drawer = page.locator(DRAWER);
     await expect(drawer).toBeVisible();
-    // Let the slide-in animation (300ms, fill-forward max-height) settle so
-    // geometry is at rest.
-    await expect
-      .poll(async () => (await drawer.boundingBox())?.height ?? 0)
-      .toBeGreaterThan(400);
+    await waitForDrawerSettled(page, drawer);
 
     await expectLastNavItemReachable(page);
 
     // Shrink the viewport with the drawer open — the closest fixed-viewport
     // proxy to iOS browser controls expanding. dvh-based sizing must follow.
     await page.setViewportSize({ width: 390, height: 660 });
-    await expect
-      .poll(async () => (await drawer.boundingBox())?.height ?? 0)
-      .toBeLessThan(560);
+    await waitForDrawerSettled(page, drawer);
     await expectLastNavItemReachable(page);
   });
 
