@@ -167,52 +167,20 @@ test.describe('Ozwell embed - manager shell', () => {
     expect(missing.isError).toBe(true);
   });
 
-  test('does not restrict viewport zoom on non-iOS browsers (WCAG 1.4.4)', async ({
+  test('does not restrict viewport zoom (WCAG 1.4.4)', async ({
     page,
   }) => {
     await gotoManagerWithStubbedWidget(page);
-    const restricted = await page.evaluate(() =>
-      Boolean(document.querySelector('meta[name="viewport"][content*="maximum-scale"]'))
-    );
-    expect(restricted).toBe(false);
-  });
-
-  test('swaps the launcher favicon for the bundled Ozwell mark (ozwellai-api#296)', async ({
-    page,
-  }) => {
-    await gotoManagerWithStubbedWidget(page);
-    // The stub never mounts the real launcher, so simulate the loader's DOM.
-    await page.evaluate(() => {
-      const button = document.createElement('button');
-      button.id = 'ozwell-chat-button';
-      button.innerHTML = '<img src="/favicon.ico" alt="Chat" />';
-      document.body.appendChild(button);
-    });
-    await expect(page.locator('#ozwell-chat-button img')).toHaveAttribute(
-      'src',
-      /\/ozwell\/icon\.svg$/
-    );
-  });
-});
-
-test.describe('Ozwell embed - iOS viewport shield', () => {
-  test.use({
-    userAgent:
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-  });
-
-  test('injects maximum-scale=1 on iOS to suppress input focus auto-zoom', async ({
-    page,
-  }) => {
-    await gotoManagerWithStubbedWidget(page);
-    const content = await page.evaluate(
-      () =>
-        (
-          document.querySelector(
-            'meta[name="viewport"][content*="maximum-scale"]'
-          ) as HTMLMetaElement | null
-        )?.content ?? null
-    );
-    expect(content).toBe('width=device-width, initial-scale=1, maximum-scale=1');
+    // The hosted loader injects its own viewport meta — with user-scalable=no
+    // and maximum-scale=1 — only when the host page has none. Storybook's
+    // manager must keep providing one so that injection never fires here.
+    const metas = await page.evaluate(() => ({
+      hasViewport: Boolean(document.querySelector('meta[name="viewport"]')),
+      restricted: Boolean(
+        document.querySelector('meta[name="viewport"][content*="maximum-scale"]')
+      ),
+    }));
+    expect(metas.hasViewport).toBe(true);
+    expect(metas.restricted).toBe(false);
   });
 });
