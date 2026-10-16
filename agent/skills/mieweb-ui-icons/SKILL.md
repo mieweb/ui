@@ -24,15 +24,15 @@ import { Stethoscope, Syringe } from 'lucide-react';
 - **Sizing:** `className="h-4 w-4"` (16px) is the default inline size; `h-5 w-5` for emphasis; `h-3.5 w-3.5` in dense UI. Lucide's `size={16}` prop is equivalent.
 - **Accessibility:** icon-only controls need `aria-label`; decorative icons get `aria-hidden="true"`. A `Tooltip` is a description, not a name.
 - **Dynamic icons:** type icon props as `LucideIcon` and spread `LucideProps` — both re-exported from `@mieweb/ui`.
-- Aliases where the Lucide name differs are shown as `Alias` (`LucideName`); import the alias from `@mieweb/ui` or the Lucide name from `lucide-react`.
+- Aliases where the Lucide name differs are shown as `Alias` (`LucideName`); import the alias from `@mieweb/ui` or the Lucide name from `lucide-react`. ⚠ marks aliases shadowed at the root — see below.
 
 ## Aliased icons by category
 
-- **Navigation & UI:** `HomeIcon`, `MenuIcon`, `CloseIcon` (`X`), `ChevronDownIcon`, `ChevronUpIcon`, `ChevronLeftIcon`, `ChevronRightIcon`, `ArrowLeftIcon`, `ArrowRightIcon`, `ExternalLinkIcon`, `MoreHorizontalIcon`, `MoreVerticalIcon`
+- **Navigation & UI:** `HomeIcon`, `MenuIcon`, `CloseIcon` (`X`) ⚠, `ChevronDownIcon`, `ChevronUpIcon`, `ChevronLeftIcon`, `ChevronRightIcon`, `ArrowLeftIcon`, `ArrowRightIcon`, `ExternalLinkIcon`, `MoreHorizontalIcon`, `MoreVerticalIcon`
 - **User & Account:** `UserIcon`, `UsersIcon`, `UserPlusIcon`, `UserMinusIcon`, `UserCheckIcon`, `CircleUserIcon`, `LogInIcon`, `LogOutIcon`
-- **Actions:** `PlusIcon`, `MinusIcon`, `PencilIcon`, `TrashIcon` (`Trash2`), `CopyIcon`, `CheckIcon`, `XIcon`, `SearchIcon`, `FilterIcon`, `DownloadIcon`, `UploadIcon`, `ShareIcon`, `SaveIcon`, `RefreshIcon` (`RefreshCw`), `ThumbsUpIcon`, `ThumbsDownIcon`, `BanIcon`, `ArrowUpIcon`, `ArrowUpDownIcon`, `GripVerticalIcon`, `StickyNoteIcon`
+- **Actions:** `PlusIcon`, `MinusIcon`, `PencilIcon`, `TrashIcon` (`Trash2`), `CopyIcon`, `CheckIcon`, `XIcon`, `SearchIcon`, `FilterIcon`, `DownloadIcon`, `UploadIcon`, `ShareIcon`, `SaveIcon`, `RefreshIcon` (`RefreshCw`) ⚠, `ThumbsUpIcon`, `ThumbsDownIcon`, `BanIcon`, `ArrowUpIcon`, `ArrowUpDownIcon`, `GripVerticalIcon`, `StickyNoteIcon`
 - **Status & Feedback:** `AlertCircleIcon`, `AlertTriangleIcon`, `CheckCircleIcon`, `XCircleIcon`, `InfoIcon`, `HelpCircleIcon`, `LoaderIcon` (`Loader2`)
-- **Communication:** `BellIcon`, `BellOffIcon`, `BotIcon`, `MailIcon`, `MessageIcon` (`MessageSquare`), `MicIcon`, `PhoneIcon`, `SendIcon`, `StopIcon` (`Square`)
+- **Communication:** `BellIcon`, `BellOffIcon`, `BotIcon`, `MailIcon`, `MessageIcon` (`MessageSquare`), `MicIcon`, `PhoneIcon`, `SendIcon` ⚠, `StopIcon` (`Square`)
 - **Media & Files:** `FileIcon`, `FileTextIcon`, `FolderIcon`, `FolderOpenIcon`, `ImageIcon`, `CameraIcon`, `PaperclipIcon`, `PrinterIcon`
 - **Data & Charts:** `ActivityIcon`, `ChartIcon` (`BarChart3`), `TrendingUpIcon`, `TrendingDownIcon`, `PieChartIcon`
 - **Settings & Tools:** `SettingsIcon`, `SlidersIcon`, `WrenchIcon`, `CogIcon`
@@ -41,4 +41,13 @@ import { Stethoscope, Syringe } from 'lucide-react';
 - **Theme:** `SunIcon`, `MoonIcon`, `MonitorIcon`, `PaletteIcon`
 - **Security:** `ShieldIcon`, `ShieldCheckIcon`, `LockIcon`, `UnlockIcon`, `KeyIcon`
 - **Healthcare & Medical:** `AmbulanceIcon`, `BandageIcon`, `BoneIcon`, `BrainIcon`, `BriefcaseMedicalIcon`, `DnaIcon`, `EarIcon`, `FingerprintIcon`, `HeartPulseIcon`, `HospitalIcon`, `MicroscopeIcon`, `PillIcon`, `StethoscopeIcon`, `SyringeIcon`, `TestTubeIcon` (`TestTube2`), `TestTubesIcon`, `ThermometerIcon`, `ThermometerSunIcon`, `BabyIcon`, `AccessibilityIcon`, `BedIcon`, `BedDoubleIcon`, `BedSingleIcon`, `PatientIcon` (`CircleUserRound`), `PersonIcon` (`UserRound`), `UserRoundCheckIcon`, `UserRoundPlusIcon`, `UserRoundMinusIcon`, `UserRoundXIcon`, `CrossIcon`, `FlaskIcon` (`FlaskConical`), `FlaskRoundIcon`, `DropletIcon`, `DropletsIcon`, `ScanIcon`, `ScanLineIcon`, `ScanEyeIcon`, `RadiationIcon`, `BiohazardIcon`, `CigaretteIcon`, `CigaretteOffIcon`, `CannabisIcon`, `WeightIcon`, `ScaleIcon`, `RulerIcon`, `FootprintsIcon`, `HandIcon`, `HandMetalIcon`, `GlassesIcon`, `ScalingIcon`, `TabletsIcon`, `AllergyIcon` (`Wheat`), `AllergyOffIcon` (`WheatOff`), `HeartOffIcon`, `ShieldPlusIcon`, `ClipboardPlusIcon`, `ClipboardCheckIcon`, `FileHeartIcon`, `FilePlusIcon`, `FilePlus2Icon`, `FileCheckIcon`, `FileCheck2Icon`, `NotebookPenIcon`, `BookOpenIcon`, `BookOpenCheckIcon`, `TruckIcon`, `SparkleIcon`, `BadgeCheckIcon`, `BadgeAlertIcon`, `BadgeXIcon`, `BadgePlusIcon`, `BadgeMinusIcon`, `CircleDotIcon`, `CircleDotDashedIcon`
-- **Misc:** `HeartIcon`, `StarIcon`, `BookmarkIcon`, `FlagIcon`, `TagIcon`, `HashIcon`, `AtSignIcon`, `LinkIcon`, `ClipboardIcon`, `ClipboardListIcon`, `MapPinIcon`, `GlobeIcon`, `BuildingIcon`, `BriefcaseIcon`, `CreditCardIcon`, `DollarSignIcon`, `ZapIcon`, `SparklesIcon`
+- **Misc:** `HeartIcon`, `StarIcon`, `BookmarkIcon`, `FlagIcon`, `TagIcon`, `HashIcon`, `AtSignIcon`, `LinkIcon`, `ClipboardIcon`, `ClipboardListIcon`, `MapPinIcon`, `GlobeIcon`, `BuildingIcon`, `BriefcaseIcon`, `CreditCardIcon`, `DollarSignIcon`, `ZapIcon`, `SparklesIcon` ⚠
+
+## ⚠ Root-barrel overrides — NOT Lucide
+
+- `CloseIcon` from `@mieweb/ui` is a **custom component** from `src/components/AI`, not the Lucide `X` — Lucide props like `size={16}` do not apply
+- `RefreshIcon` from `@mieweb/ui` is a **custom component** from `src/components/AI`, not the Lucide `RefreshCw` — Lucide props like `size={16}` do not apply
+- `SendIcon` from `@mieweb/ui` is a **custom component** from `src/components/AI`, not the Lucide `Send` — Lucide props like `size={16}` do not apply
+- `SparklesIcon` from `@mieweb/ui` is a **custom component** from `src/components/AI`, not the Lucide `Sparkles` — Lucide props like `size={16}` do not apply
+
+For the Lucide version, import the Lucide name from `lucide-react` (`X`, `RefreshCw`, `Send`, `Sparkles`) or the alias from `@mieweb/ui/components/Icons`.

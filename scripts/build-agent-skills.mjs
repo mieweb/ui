@@ -132,6 +132,9 @@ function inventorySection(manifest) {
   const annotate = (e) => {
     const notes = [];
     if (e.maturity !== 'stable') notes.push(e.maturity);
+    // Components not importable from the root carry their entry point.
+    if (e.entry && e.entry !== '@mieweb/ui')
+      notes.push(`\`${e.entry.replace('@mieweb/ui', '')}\``);
     return notes.length ? `${e.name} _(${notes.join(', ')})_` : e.name;
   };
   const lines = [];
@@ -159,7 +162,10 @@ function inventorySection(manifest) {
 
 // --- Entry points (selection-relevant subset of package.json exports) -----
 const ENTRY_POINTS = [
-  ['`@mieweb/ui`', 'All general-purpose components (the default import)'],
+  [
+    '`@mieweb/ui`',
+    'General-purpose components — the default when the inventory shows no entry annotation',
+  ],
   [
     '`@mieweb/ui/datavis`',
     'DataVis NITRO grid + graph — the default for all tables (deps bundled)',
@@ -192,6 +198,14 @@ const ENTRY_POINTS = [
     'MotionProvider (keeps the motion dependency optional)',
   ],
   ['`@mieweb/ui/q`', 'Q editor (peer: @mieweb/q)'],
+  [
+    '`@mieweb/ui/components/SuperChat`',
+    'SuperChat, SuperChatInbox, SuperChatConversations — not exported from the root; plugins at `/components/SuperChat/plugins`',
+  ],
+  [
+    '`@mieweb/ui/components/<Name>`',
+    'Any single component, when the inventory annotates it with a `/components/…` entry',
+  ],
   [
     '`@mieweb/ui/ag-grid`',
     '**Deprecated** — never in new code; use `/datavis`',
@@ -244,7 +258,7 @@ ${ENTRY_POINTS.map(([e, d]) => `| ${e} | ${d} |`).join('\n')}
 
 ## Inventory
 
-Components by tier and family. Maturity noted when not stable.
+Components by tier and family. Annotations: maturity when not stable, and the import entry when it is not the root (e.g. _(\`/datavis\`)_).
 
 ${inventorySection(manifest)}
 
@@ -386,12 +400,46 @@ function buildIconsSkill() {
   }
   const total = categories.reduce((n, c) => n + c.icons.length, 0);
 
-  const show = ({ lucide, alias }) =>
-    alias === `${lucide}Icon` ? `\`${alias}\`` : `\`${alias}\` (\`${lucide}\`)`;
+  // Aliases shadowed at the root barrel: src/index.ts re-exports some *Icon
+  // names from other modules (custom components) over the Lucide aliases.
+  const aliasMap = new Map(
+    categories.flatMap((c) => c.icons.map((i) => [i.alias, i.lucide]))
+  );
+  const barrel = readFileSync(join(root, 'src/index.ts'), 'utf8');
+  const shadowed = [];
+  for (const m of barrel.matchAll(/export \{([^}]*)\} from '\.\/([^']+)'/gs)) {
+    if (m[2] === 'components/Icons') continue;
+    for (const raw of m[1].split(',')) {
+      const name = raw.trim();
+      if (aliasMap.has(name)) shadowed.push({ alias: name, module: m[2] });
+    }
+  }
+  const shadowedSet = new Set(shadowed.map((s) => s.alias));
+
+  const show = ({ lucide, alias }) => {
+    const base =
+      alias === `${lucide}Icon`
+        ? `\`${alias}\``
+        : `\`${alias}\` (\`${lucide}\`)`;
+    return shadowedSet.has(alias) ? `${base} ⚠` : base;
+  };
   const categoryList = categories
     .filter((c) => c.icons.length)
     .map((c) => `- **${c.name}:** ${c.icons.map(show).join(', ')}`)
     .join('\n');
+
+  const shadowedSection = shadowed.length
+    ? `\n## ⚠ Root-barrel overrides — NOT Lucide\n\n${shadowed
+        .map(
+          (s) =>
+            `- \`${s.alias}\` from \`@mieweb/ui\` is a **custom component** from \`src/${s.module}\`, not the Lucide \`${aliasMap.get(s.alias)}\` — Lucide props like \`size={16}\` do not apply`
+        )
+        .join(
+          '\n'
+        )}\n\nFor the Lucide version, import the Lucide name from \`lucide-react\` (${shadowed
+        .map((s) => `\`${aliasMap.get(s.alias)}\``)
+        .join(', ')}) or the alias from \`@mieweb/ui/components/Icons\`.\n`
+    : '';
 
   return {
     'SKILL.md': `---
@@ -420,12 +468,12 @@ import { Stethoscope, Syringe } from 'lucide-react';
 - **Sizing:** \`className="h-4 w-4"\` (16px) is the default inline size; \`h-5 w-5\` for emphasis; \`h-3.5 w-3.5\` in dense UI. Lucide's \`size={16}\` prop is equivalent.
 - **Accessibility:** icon-only controls need \`aria-label\`; decorative icons get \`aria-hidden="true"\`. A \`Tooltip\` is a description, not a name.
 - **Dynamic icons:** type icon props as \`LucideIcon\` and spread \`LucideProps\` — both re-exported from \`@mieweb/ui\`.
-- Aliases where the Lucide name differs are shown as \`Alias\` (\`LucideName\`); import the alias from \`@mieweb/ui\` or the Lucide name from \`lucide-react\`.
+- Aliases where the Lucide name differs are shown as \`Alias\` (\`LucideName\`); import the alias from \`@mieweb/ui\` or the Lucide name from \`lucide-react\`. ⚠ marks aliases shadowed at the root — see below.
 
 ## Aliased icons by category
 
 ${categoryList}
-`,
+${shadowedSection}`,
   };
 }
 // --- Write / check ---------------------------------------------------------

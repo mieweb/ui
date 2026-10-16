@@ -20,7 +20,7 @@ import '@mieweb/ui/styles.css'; // or init.css — REQUIRED, see pitfall below
 import '@mieweb/ui/brands/bluehive.css';
 ```
 
-Tailwind 4 consumers can layer it: `@import '@mieweb/ui/brands/bluehive.css' layer(theme);`
+Tailwind 4 consumers: keep both imports plain (unlayered), in that order. Do **not** wrap only the brand CSS in `layer(theme)` — the base stylesheet's `:root` defaults are unlayered, and unlayered declarations beat layered ones, so a layered brand's overrides would silently lose and the brand would not apply.
 
 **Runtime switching** — generate CSS from a brand config and inject it:
 
@@ -45,7 +45,7 @@ Brand CSS files emit only the **primary scale + semantic tokens**. The other sca
 
 1. **Config** — add `src/brands/<name>.ts` exporting a `BrandConfig` (`name`, `displayName`, `colors`, `typography`, `borderRadius`, `boxShadow`). Only the `primary` `ColorScale` (50–950) and `light`/`dark` `SemanticColors` are required in `colors`; `secondary`/`neutral`/`destructive`/`success`/`warning`/`info` scales and `accent` are optional and fall back to library defaults. Follow an existing brand (e.g. `src/brands/waggleline.ts`) including its header comment documenting the brand palette.
 2. **CSS** — generate and commit `src/brands/<name>.css` from the config: `generateBrandCSS(config)` produces the `:root` + dark-mode blocks. Keep the usage header comment the other brand CSS files carry. `pnpm build`'s `copy:brand-css` step copies it to `dist/brands/` automatically.
-3. **Register** — in `src/brands/index.ts`: add the named export and an entry in the lazy `brands` map.
+3. **Register** — in `src/brands/index.ts`: add the named export and an entry in the lazy `brands` map. Storybook keeps its own registry in `.storybook/preview.tsx`: add the brand to its `brands` map and to the brand toolbar `items` — unknown keys silently fall back to BlueHive, so skipping this makes step 6 impossible.
 4. **Exports** — add a `"./brands/<name>.css"` entry to `package.json` `exports` (next to the existing brand CSS entries).
 5. **Logos/assets** — only with brand-owner approval; they live under `src/brands/logos/`.
 6. **Verify** — switch Storybook to the new brand and check primary actions, semantic states, and dark mode; run `pnpm typecheck && pnpm lint`.

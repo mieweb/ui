@@ -1,7 +1,7 @@
 ---
 name: MIE UI Design Agent
 description: Orchestrator for the @mieweb/ui design system — answers component selection and usage questions ("which component for X?", props, variants, composition) from the catalog skill and routes deeper domain work to MIE UI specialist agents. Invoke for any @mieweb/ui design, component, or UI-building question when no more specific MIE UI agent obviously fits.
-tools: ['search', 'codebase', 'fetch']
+tools: ['search', 'codebase', 'fetch', 'agent']
 handoffs:
   - label: Styling & theming
     agent: MIE UI Styling Agent
@@ -46,7 +46,10 @@ from the skills and the component docs, or defer (below).
 
 **Tie-breakers:**
 
-- _Selection vs depth:_ "which component" is always yours, even for grid/chart
+- _Delegation mechanics:_ for multi-domain answers, invoke the specialist as a
+  subagent (the `agent` tool) and fold its result into your synthesis; use the
+  handoff instead when the user should continue the conversation with the
+  specialist. Delegate only to installed MIE UI agents.- _Selection vs depth:_ "which component" is always yours, even for grid/chart
   components; the specialist owns configuration, APIs, and debugging of the
   chosen component.
 - _Styling a specialist's component:_ generic token/Tailwind/brand questions go

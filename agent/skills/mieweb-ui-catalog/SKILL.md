@@ -22,7 +22,7 @@ For per-component "Which one?" comparison tables, read [selection-guidance.md](.
 
 | Entry | Use for |
 | ----- | ------- |
-| `@mieweb/ui` | All general-purpose components (the default import) |
+| `@mieweb/ui` | General-purpose components — the default when the inventory shows no entry annotation |
 | `@mieweb/ui/datavis` | DataVis NITRO grid + graph — the default for all tables (deps bundled) |
 | `@mieweb/ui/esheet` | eSheet form-field adapters |
 | `@mieweb/ui/kerebron` | RichEditor / CodeEditor (keeps Kerebron WASM optional) |
@@ -37,21 +37,23 @@ For per-component "Which one?" comparison tables, read [selection-guidance.md](.
 | `@mieweb/ui/org-chart` | OrgChart (peers: @xyflow/react, elkjs) |
 | `@mieweb/ui/motion` | MotionProvider (keeps the motion dependency optional) |
 | `@mieweb/ui/q` | Q editor (peer: @mieweb/q) |
+| `@mieweb/ui/components/SuperChat` | SuperChat, SuperChatInbox, SuperChatConversations — not exported from the root; plugins at `/components/SuperChat/plugins` |
+| `@mieweb/ui/components/<Name>` | Any single component, when the inventory annotates it with a `/components/…` entry |
 | `@mieweb/ui/ag-grid` | **Deprecated** — never in new code; use `/datavis` |
 
 ## Inventory
 
-Components by tier and family. Maturity noted when not stable.
+Components by tier and family. Annotations: maturity when not stable, and the import entry when it is not the root (e.g. _(`/datavis`)_).
 
 ### Foundations
 
-- Colors, Icons, Motion _(experimental)_, Text, ThemeProvider, VisuallyHidden
+- Colors, Icons, Motion _(experimental, `/motion`)_, Text, ThemeProvider, VisuallyHidden
 
 ### Inputs
 
 - **Actions:** Button, ButtonGroup, CopyButton, QuickAction, RowActionToolbar, Toggle
 - **Choice inputs:** Autocomplete, Checkbox, CountryCodeDropdown, CountryDropdown, Dropdown, PillSelect, Radio, Select, Slider, Switch
-- **Composite forms:** AdditionalFields, CSVColumnMapper, ESheet Builder, ESheet Renderer, LanguageSelector, LogoUploader _(experimental)_, PermissionsEditor, SliderCalculator _(experimental)_, UserPicker _(experimental)_
+- **Composite forms:** AdditionalFields, CSVColumnMapper, ESheet Builder _(`/esheet`)_, ESheet Renderer _(`/esheet`)_, LanguageSelector, LogoUploader _(experimental)_, PermissionsEditor, SliderCalculator _(experimental)_, UserPicker _(experimental)_
 - **Date & time:** BusinessHours, BusinessHoursEditor, DateInput, DateRangePicker, ScheduleCalendar, SchedulePicker
 - **Text inputs:** Address, AddressForm, InlineEdit _(experimental)_, Input, Label, PhoneInput, PhoneInputGroup, TagEditor _(experimental)_, Textarea, WebsiteInput
 
@@ -59,38 +61,38 @@ Components by tier and family. Maturity noted when not stable.
 
 - **Data display:** Avatar, Badge, CalendarHeatmap _(experimental)_, ClampedText, CountBadge, FilterSummaryBar, FreshnessBadge, Timeline, YChart _(experimental)_, YearTimeline _(experimental)_
 - **Feedback:** Alert, AlertDialog, CollabStatus, ConnectionStatus, ErrorPage, NotificationCenter, Toast
-- **Grids:** DataVis NITRO, DataVis NITRO Demos, DataVis NITRO Graph, Pagination, Sparkline, Table
+- **Grids:** DataVis NITRO _(`/datavis`)_, DataVis NITRO Demos, DataVis NITRO Graph _(`/datavis`)_, Pagination, Sparkline, Table
 - **Layout:** Accordion, AppHeader, Card, Collapsible, PageHeader, ProductVersion, ScrollArea, Separator, SiteFooter, SiteHeader
 - **Loading:** LoadingPage, Progress, Skeleton, Spinner
 - **Navigation:** Breadcrumb, CommandPalette, MegaMenu _(experimental)_, OnboardingWizard, ReadingProgressBar, SectionSpyNav, StepIndicator, TableOfContents, Tabs
 - **Overlays:** CookieConsent, DockablePanel, FloatingWindow, GlossaryTooltip, KeyboardShortcutsOverlay, Modal, Sheet, Sidebar, SourceTip, Tooltip
 - **Record details:** AvatarGroup _(experimental)_, CompletenessMeter _(experimental)_, PhiMask _(experimental)_, PropertyList _(experimental)_, Rating _(experimental)_, RecordHeader _(experimental)_, ReviewCard _(experimental)_
-- **Showcase:** Globe _(experimental)_, OrbitRing _(experimental)_, RadialExplorer _(experimental)_
+- **Showcase:** Globe _(experimental, `/globe`)_, OrbitRing _(experimental)_, RadialExplorer _(experimental)_
 
 ### Modules
 
 - **Chat:** AIChat, AIChat (Voice), AIMessage, ChatComposer _(beta)_, ComposerModelSelector, MCPToolCall, Messaging, OzwellChat, ReconciliationPanel
 - **Dashboards:** CustomizableDashboard, Dashboard (Demo) _(experimental)_, Dashboard Widgets (Demo) _(experimental)_, DashboardCustomizePanel, DashboardWidget, QuickLinksCard, ReportDashboard
-- **Editors:** EmailEditor _(experimental)_, Markdown, Q, RichEditor, RichTextEditor
+- **Editors:** EmailEditor _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor
 - **Files:** DocumentScanner, DropzoneOverlay, FileManager
-- **Media:** AudioPlayer, AudioRecorder, DictationButton _(experimental)_, MediaEditor, MediaEditor Live Demo, MediaFeed _(experimental)_, MediaPlayer, RecordButton, TranscriptView, VideoCard _(experimental)_
-- **Presentations:** Deck _(experimental)_, PointMap _(experimental)_
-- **Records:** ActionPlan _(experimental)_, ActivityFeed _(experimental)_, AssociationList _(experimental)_, FieldHistory _(experimental)_, OrgChart _(experimental)_, RecordLayout _(experimental)_
-- **SuperChat:** Conversations (List), Inbox, SuperChat (Panel)
+- **Media:** AudioPlayer, AudioRecorder, DictationButton _(experimental)_, MediaEditor, MediaEditor Live Demo, MediaFeed _(experimental, `/components/MediaFeed`)_, MediaPlayer, RecordButton, TranscriptView, VideoCard _(experimental)_
+- **Presentations:** Deck _(experimental, `/deck`)_, PointMap _(experimental, `/maps`)_
+- **Records:** ActionPlan _(experimental)_, ActivityFeed _(experimental)_, AssociationList _(experimental)_, FieldHistory _(experimental)_, OrgChart _(experimental, `/org-chart`)_, RecordLayout _(experimental)_
+- **SuperChat:** Conversations (List) _(`/components/SuperChat`)_, Inbox _(`/components/SuperChat`)_, SuperChat (Panel) _(`/components/SuperChat`)_
 - **Views:** BoardView _(alpha)_, CalendarView _(alpha)_, GanttView _(alpha)_, ListView _(alpha)_, ViewSet _(alpha)_, ViewSwitcher _(alpha)_
 - **Voice:** Hands-Free Chat, Hey Ozwell Demo, Hey Ozwell Selector _(experimental)_, Speaker Verify _(experimental)_, Visit Scribe, Voice Manager, Voice Setup, Wake Word
 
 ### Templates
 
-- **Content:** ComparisonSection _(experimental)_, FaqSection _(experimental)_, FeatureGridSection _(experimental)_, ProcessStepsSection _(experimental)_, ResourceCardsSection _(experimental)_, SplitContentSection _(experimental)_, VideoSection _(experimental)_
-- **Conversion:** CtaSection _(experimental)_, HeroSection _(experimental)_, LeadFormSection _(experimental)_, PricingSection _(experimental)_
-- **Pages:** LandingPage _(experimental)_
-- **Reports:** BenchmarkTableSection _(experimental)_, LinkGroupsSection _(experimental)_, MetricListSection _(experimental)_, MetricStatusBadge _(experimental)_, PdfEmbedSection _(experimental)_, RankedListSection _(experimental)_, ReportByline _(experimental)_, ReportLegend _(experimental)_, ReportMethodology _(experimental)_, TileCartogramSection _(experimental)_
-- **Social proof:** LogoCloudSection _(experimental)_, StatsSection _(experimental)_, TestimonialSection _(experimental)_
+- **Content:** ComparisonSection _(experimental, `/templates`)_, FaqSection _(experimental, `/templates`)_, FeatureGridSection _(experimental, `/templates`)_, ProcessStepsSection _(experimental, `/templates`)_, ResourceCardsSection _(experimental, `/templates`)_, SplitContentSection _(experimental, `/templates`)_, VideoSection _(experimental, `/templates`)_
+- **Conversion:** CtaSection _(experimental, `/templates`)_, HeroSection _(experimental, `/templates`)_, LeadFormSection _(experimental, `/templates`)_, PricingSection _(experimental, `/templates`)_
+- **Pages:** LandingPage _(experimental, `/templates`)_
+- **Reports:** BenchmarkTableSection _(experimental, `/templates`)_, LinkGroupsSection _(experimental, `/templates`)_, MetricListSection _(experimental, `/templates`)_, MetricStatusBadge _(experimental, `/templates`)_, PdfEmbedSection _(experimental, `/templates`)_, RankedListSection _(experimental, `/templates`)_, ReportByline _(experimental, `/templates`)_, ReportLegend _(experimental, `/templates`)_, ReportMethodology _(experimental, `/templates`)_, TileCartogramSection _(experimental, `/templates`)_
+- **Social proof:** LogoCloudSection _(experimental, `/templates`)_, StatsSection _(experimental, `/templates`)_, TestimonialSection _(experimental, `/templates`)_
 
 ### Healthcare
 
-- **Clinical lists:** AllergyList, AllergyListField (eSheet), CodeLookup, ConditionEditor, MedicationList, MedicationListField (eSheet), PresentingProblems, ProblemList
+- **Clinical lists:** AllergyList, AllergyListField (eSheet) _(`/esheet`)_, CodeLookup, ConditionEditor, MedicationList, MedicationListField (eSheet) _(`/esheet`)_, PresentingProblems, ProblemList
 - **Encounter & orders:** Assessment, CaseManagementHeader, HealthSurveillance, OrderEditor, PatientHeader, WebChartReportViewer
 
 ### BlueHive
@@ -105,7 +107,7 @@ Components by tier and family. Maturity noted when not stable.
 
 ### Deprecated
 
-- AGGrid _(deprecated)_, AGGrid Enhanced _(deprecated)_
+- AGGrid _(deprecated, `/ag-grid`)_, AGGrid Enhanced _(deprecated, `/ag-grid`)_
 
 ## Family policies
 
@@ -214,8 +216,9 @@ The one-line rule that governs each family. When a task touches a family, read i
 **Feedback** (Components):
 
 > **Use `Toast` for what the user just did, `Alert` for what they need to keep seeing, and
-> `AlertDialog` for what they must decide.** Toast already announces through `aria-live`; nothing
-> else in this family does, so put essential information in the page.
+> `AlertDialog` for what they must decide.** `Toast` (polite live region), `Alert`
+> (`role="alert"`, announces on mount) and `ConnectionStatus` (assertive) announce themselves —
+> never wrap them in extra live regions, and avoid mounting several announcing components at once.
 
 **Files** (Modules):
 

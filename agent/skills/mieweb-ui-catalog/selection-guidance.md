@@ -304,8 +304,9 @@ lists of options in [Choice inputs](https://ui.mieweb.org/?path=/docs/inputs-cho
 # Feedback
 
 > **Use `Toast` for what the user just did, `Alert` for what they need to keep seeing, and
-> `AlertDialog` for what they must decide.** Toast already announces through `aria-live`; nothing
-> else in this family does, so put essential information in the page.
+> `AlertDialog` for what they must decide.** `Toast` (polite live region), `Alert`
+> (`role="alert"`, announces on mount) and `ConnectionStatus` (assertive) announce themselves —
+> never wrap them in extra live regions, and avoid mounting several announcing components at once.
 
 ## Which one?
 

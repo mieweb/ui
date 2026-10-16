@@ -94,7 +94,8 @@ if (experimentalAgents) {
     );
   }
 
-  // Skills: directory granularity — managed iff SKILL.md carries the marker.
+  // Skills: per-file refresh rules, same as agents — a managed SKILL.md must
+  // not authorize clobbering an unmarked (user-created) companion file.
   const skillsTemplateDir = join(here, 'skills');
   const skillTemplates = readdirSync(skillsTemplateDir, {
     withFileTypes: true,
@@ -106,20 +107,19 @@ if (experimentalAgents) {
   for (const dir of skillTemplates) {
     const srcDir = join(skillsTemplateDir, dir);
     const skillContent = readFileSync(join(srcDir, 'SKILL.md'), 'utf8');
-    const destSkill = join(destSkillsDir, dir, 'SKILL.md');
-    if (existsSync(destSkill) && !isManaged(destSkill)) {
-      warnUserFile(`.github/skills/${dir}/`);
-    } else {
-      mkdirSync(join(destSkillsDir, dir), { recursive: true });
-      for (const f of readdirSync(srcDir).sort()) {
-        const content = readFileSync(join(srcDir, f), 'utf8');
-        writeFileSync(
-          join(destSkillsDir, dir, f),
-          f.endsWith('.md') ? withMarker(content) : content
-        );
+    let wrote = false;
+    for (const f of readdirSync(srcDir).sort()) {
+      const content = readFileSync(join(srcDir, f), 'utf8');
+      const dest = join(destSkillsDir, dir, f);
+      if (existsSync(dest) && !(f.endsWith('.md') && isManaged(dest))) {
+        warnUserFile(`.github/skills/${dir}/${f}`);
+        continue;
       }
-      console.log(`✔ wrote .github/skills/${dir}/`);
+      mkdirSync(join(destSkillsDir, dir), { recursive: true });
+      writeFileSync(dest, f.endsWith('.md') ? withMarker(content) : content);
+      wrote = true;
     }
+    if (wrote) console.log(`✔ wrote .github/skills/${dir}/`);
     skillLines.push(
       `- \`${dir}\` (\`.github/skills/${dir}/SKILL.md\`): ${frontmatterField(skillContent, 'description')}`
     );
