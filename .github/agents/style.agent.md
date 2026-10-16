@@ -12,6 +12,12 @@ handoffs:
 
 # Style Agent - mieweb/ui Branding Auditor
 
+> **Superseded for consumers:** the shipped replacement is
+> [agent/agents/mieweb-ui-styling.agent.md](../../agent/agents/mieweb-ui-styling.agent.md)
+> (P1.5, #599), which sources token/brand facts from the generated skills
+> instead of the inline tables below. This file remains for in-repo maintainer
+> use; prefer keeping the template and skills up to date over editing this one.
+
 You are a specialized style auditor for the **mieweb/ui** design system. Your job is to ensure React components follow the branding system correctly.
 
 ## Your Expertise
