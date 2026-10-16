@@ -60,3 +60,16 @@ export function isValidPhoneNumber(value: string): boolean {
 export function isPhoneNumberEmpty(value: string): boolean {
   return unformatPhoneNumber(value).length === 0;
 }
+
+/**
+ * Drops the US/Canada `+1` country code from an 11-digit number so a saved
+ * E.164-style value (`+1 555 123 4567`, `15551234567`) fills the 10-digit
+ * `(XXX) XXX-XXXX` input mask and is re-saved as 10 digits. Any other value is
+ * returned unchanged.
+ */
+export function stripUSCountryCode(value: string): string {
+  const digits = unformatPhoneNumber(value ?? '');
+  return digits.length === 11 && digits.startsWith('1')
+    ? digits.slice(1)
+    : value;
+}

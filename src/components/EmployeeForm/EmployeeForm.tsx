@@ -82,6 +82,12 @@ export interface EmployeeFormProps {
   /** Custom fields component */
   customFields?: React.ReactNode;
   /**
+   * Require Address Line 1, City, State (2 letters) and Postal Code on every
+   * save, with required markers and inline errors. Defaults to `true`; pass
+   * `false` for flows where the address is genuinely optional.
+   */
+  requireAddress?: boolean;
+  /**
    * Optional async postal-code check (e.g. against a ZIP dataset). Runs when the
    * field loses focus and again on submit; return an error message to block
    * saving, or `null` when the code is acceptable. Non-US countries can be
@@ -100,6 +106,10 @@ export interface EmployeeFormProps {
     value: string;
     onChange: (value: string) => void;
     onAddressSelect: (address: EmployeeAddress) => void;
+    /** Inline validation error for Address Line 1. */
+    error?: string;
+    /** Whether Address Line 1 is required (see `requireAddress`). */
+    required?: boolean;
   }) => React.ReactNode;
   /** Labels for i18n */
   labels?: {
@@ -124,7 +134,18 @@ export interface EmployeeFormProps {
     firstNameRequired?: string;
     lastNameRequired?: string;
     emailRequired?: string;
+    emailInvalid?: string;
     dobRequired?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    addressLine1Required?: string;
+    cityRequired?: string;
+    stateRequired?: string;
+    stateInvalid?: string;
+    postalCodeRequired?: string;
     postalCode?: string;
     checkingPostalCode?: string;
   };
@@ -171,6 +192,7 @@ export function EmployeeForm({
   onSubmit,
   onCancel,
   customFields,
+  requireAddress = true,
   validatePostalCode,
   renderAddressLine1,
   labels = {},
@@ -198,7 +220,18 @@ export function EmployeeForm({
     firstNameRequired = 'First name is required',
     lastNameRequired = 'Last name is required',
     emailRequired = 'Email is required',
+    emailInvalid = 'Enter a valid email address',
     dobRequired = 'Date of birth is required',
+    addressLine1: addressLine1Label = 'Address Line 1',
+    addressLine2: addressLine2Label = 'Address Line 2',
+    city: cityLabel = 'City',
+    state: stateLabel = 'State',
+    country: countryLabel = 'Country',
+    addressLine1Required = 'Address line 1 is required',
+    cityRequired = 'City is required',
+    stateRequired = 'State is required',
+    stateInvalid = 'Use the 2-letter state code',
+    postalCodeRequired = 'Postal code is required',
     postalCode: postalCodeLabel = 'Postal Code',
     checkingPostalCode = 'Checking…',
   } = labels;
@@ -260,7 +293,22 @@ export function EmployeeForm({
     if (!firstName.trim()) newErrors.firstName = firstNameRequired;
     if (!lastName.trim()) newErrors.lastName = lastNameRequired;
     if (!email.trim()) newErrors.email = emailRequired;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      newErrors.email = emailInvalid;
     if (!dob) newErrors.dob = dobRequired;
+
+    const street1 = (address.street1 ?? '').trim();
+    const city = (address.city ?? '').trim();
+    const state = (address.state ?? '').trim();
+    const postal = (address.postalCode ?? '').trim();
+    if (requireAddress) {
+      if (!street1) newErrors.street1 = addressLine1Required;
+      if (!city) newErrors.city = cityRequired;
+      if (!state) newErrors.state = stateRequired;
+      if (!postal) newErrors.postalCode = postalCodeRequired;
+    }
+    // A filled-in state must be the 2-letter code either way.
+    if (state && !/^[A-Za-z]{2}$/.test(state)) newErrors.state = stateInvalid;
     if (postalCodeError) newErrors.postalCode = postalCodeError;
 
     setErrors(newErrors);
@@ -292,6 +340,18 @@ export function EmployeeForm({
     });
   };
 
+  /** Update one address field and drop its stale inline error. */
+  const updateAddress = (field: keyof EmployeeAddress, value: string) => {
+    setAddress((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
   const updatePhone = (
     index: number,
     field: keyof EmployeePhone,
@@ -313,8 +373,11 @@ export function EmployeeForm({
   };
 
   return (
+    // noValidate: required/format checks run in `validate` so every problem
+    // shows inline at once instead of one native browser bubble at a time.
     <form
       onSubmit={handleSubmit}
+      noValidate
       className={cn('space-y-6', className)}
       data-slot="employee-form"
     >
@@ -412,77 +475,72 @@ export function EmployeeForm({
         <div className="space-y-4" data-slot="employee-form-address">
           {renderAddressLine1 ? (
             renderAddressLine1({
-              label: 'Address Line 1',
+              label: addressLine1Label,
               value: address.street1 ?? '',
-              onChange: (street1) =>
-                setAddress((prev) => ({ ...prev, street1 })),
-              onAddressSelect: (selected) =>
-                setAddress((prev) => ({
-                  ...prev,
-                  ...Object.fromEntries(
-                    Object.entries(selected).filter(([, v]) => Boolean(v))
-                  ),
-                })),
+              onChange: (street1) => updateAddress('street1', street1),
+              onAddressSelect: (selected) => {
+                const filled = Object.fromEntries(
+                  Object.entries(selected).filter(([, v]) => Boolean(v))
+                );
+                setAddress((prev) => ({ ...prev, ...filled }));
+                setErrors((prev) => {
+                  const next = { ...prev };
+                  Object.keys(filled).forEach((key) => delete next[key]);
+                  return next;
+                });
+              },
+              error: errors.street1,
+              required: requireAddress,
             })
           ) : (
             <Input
-              label="Address Line 1"
+              label={addressLine1Label}
               value={address.street1 ?? ''}
-              onChange={(e) =>
-                setAddress((prev) => ({ ...prev, street1: e.target.value }))
-              }
+              onChange={(e) => updateAddress('street1', e.target.value)}
+              error={errors.street1}
+              required={requireAddress}
             />
           )}
           <Input
-            label="Address Line 2"
+            label={addressLine2Label}
             value={address.street2 ?? ''}
-            onChange={(e) =>
-              setAddress((prev) => ({ ...prev, street2: e.target.value }))
-            }
+            onChange={(e) => updateAddress('street2', e.target.value)}
           />
           <div
             className="grid grid-cols-2 gap-4 sm:grid-cols-4"
             data-slot="employee-form-grid"
           >
             <Input
-              label="City"
+              label={cityLabel}
               value={address.city ?? ''}
-              onChange={(e) =>
-                setAddress((prev) => ({ ...prev, city: e.target.value }))
-              }
+              onChange={(e) => updateAddress('city', e.target.value)}
+              error={errors.city}
+              required={requireAddress}
             />
             <Input
-              label="State"
+              label={stateLabel}
               value={address.state ?? ''}
-              onChange={(e) =>
-                setAddress((prev) => ({ ...prev, state: e.target.value }))
-              }
+              onChange={(e) => updateAddress('state', e.target.value)}
+              error={errors.state}
+              required={requireAddress}
+              maxLength={2}
+              autoComplete="address-level1"
             />
             <Input
               label={postalCodeLabel}
               value={address.postalCode ?? ''}
-              onChange={(e) => {
-                setAddress((prev) => ({ ...prev, postalCode: e.target.value }));
-                if (errors.postalCode) {
-                  setErrors((prev) => {
-                    const next = { ...prev };
-                    delete next.postalCode;
-                    return next;
-                  });
-                }
-              }}
+              onChange={(e) => updateAddress('postalCode', e.target.value)}
               onBlur={() => void checkPostalCode()}
               error={errors.postalCode}
               helperText={checkingZip ? checkingPostalCode : undefined}
+              required={requireAddress}
               inputMode="numeric"
               autoComplete="postal-code"
             />
             <Input
-              label="Country"
+              label={countryLabel}
               value={address.country ?? ''}
-              onChange={(e) =>
-                setAddress((prev) => ({ ...prev, country: e.target.value }))
-              }
+              onChange={(e) => updateAddress('country', e.target.value)}
             />
           </div>
         </div>
