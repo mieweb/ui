@@ -13,10 +13,11 @@
  *             skill tells agents to read on demand.
  *
  *   tokens  → agent/skills/mieweb-ui-tokens/SKILL.md
- *             from src/tailwind-preset.ts (imported via Node type stripping,
- *             so the authoritative TS preset is the source — not the .cjs
- *             twin, which has drifted before). Canonical replacement for
- *             the token tables previously inlined in style.agent.md.
+ *             from src/tailwind-preset.ts (transpiled with the typescript
+ *             devDependency and imported, so the authoritative TS preset is
+ *             the source — not the .cjs twin, which has drifted before, #628).
+ *             Canonical replacement for the token tables previously inlined
+ *             in style.agent.md.
  *
  * The brands skill (agent/skills/mieweb-ui-brands/SKILL.md) is hand-written,
  * not generated — it documents a procedure, not extractable data.
@@ -41,7 +42,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const checkMode = process.argv.includes('--check');
@@ -65,19 +66,29 @@ function loadManifest() {
   }
 }
 
-// --- Tailwind preset (the authoritative TS file, via type stripping) ------
-function loadPreset() {
-  const json = execFileSync(
-    process.execPath,
-    [
-      '--experimental-strip-types',
-      '--no-warnings',
-      '-e',
-      `import(${JSON.stringify(join(root, 'src/tailwind-preset.ts'))}).then((m) => console.log(JSON.stringify(m.miewebUIPreset)))`,
-    ],
-    { encoding: 'utf8' }
-  );
-  return JSON.parse(json);
+// --- Tailwind preset (the authoritative TS file, transpiled) --------------
+// Transpiles with the typescript devDependency instead of Node's
+// --experimental-strip-types so the generator runs on the package.json
+// engines floor (Node 20.19; strip-types needs ≥22.6). The preset has no
+// runtime imports, so the transpiled module evaluates standalone.
+async function loadPreset() {
+  const ts = (await import('typescript')).default;
+  const source = readFileSync(join(root, 'src/tailwind-preset.ts'), 'utf8');
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ES2022,
+    },
+  });
+  const tmp = mkdtempSync(join(tmpdir(), 'mieweb-ui-preset-'));
+  const modulePath = join(tmp, 'tailwind-preset.mjs');
+  try {
+    writeFileSync(modulePath, outputText);
+    const { miewebUIPreset } = await import(pathToFileURL(modulePath).href);
+    return miewebUIPreset;
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
 }
 
 // --- src/catalog/*.mdx → selection-relevant extract per family ------------
@@ -281,8 +292,8 @@ ${guidance}
   return { 'SKILL.md': skill, 'selection-guidance.md': reference };
 }
 
-function buildTokensSkill() {
-  const preset = loadPreset();
+async function buildTokensSkill() {
+  const preset = await loadPreset();
   const { colors, fontFamily, borderRadius, boxShadow, animation, lineClamp } =
     preset.theme.extend;
 
@@ -485,7 +496,7 @@ const skills = [
 
 let stale = false;
 for (const { dir, build } of skills) {
-  const files = build();
+  const files = await build();
   for (const [name, next] of Object.entries(files)) {
     const outPath = join(root, dir, name);
     const current = existsSync(outPath) ? readFileSync(outPath, 'utf8') : null;
