@@ -84,13 +84,18 @@ execution decisions). Summarized here as the citable spec.
 
 ## Managed-file markers
 
-Every installed whole-file artifact carries a managed marker so reruns can
-refresh safely:
+Every **newly shipped** whole-file artifact (agents, skills) carries a managed
+marker so reruns can refresh safely:
 
 ```
 <!-- mieweb-ui:managed @mieweb/ui@X.Y.Z -->
 ```
 
+- **Scope:** marker-based refresh applies to `--experimental-agents` artifacts
+  only. The two legacy targets keep their existing behavior unchanged (rule
+  9's byte-identical guarantee): `.github/instructions/mieweb-ui.instructions.md`
+  is overwritten verbatim on every run (as today), and `AGENTS.md` uses its own
+  `begin`/`end` block markers.
 - **Placement:** first line of the file body — immediately after the YAML
   frontmatter block if present, otherwise line 1. (Frontmatter must stay at
   byte 0 for VS Code to parse it.)
@@ -147,7 +152,9 @@ until P1.5 ships its consumer replacement.
 
 The orchestrator (`MIE UI Design Agent`) answers **directly** from the catalog
 skill: component selection ("Card or Panel?", "which table component?" —
-always DataVis NITRO for tables), basic props/variants/composition usage,
+propose DataVis NITRO first per Rule 1 of
+[mieweb-ui.instructions.md](mieweb-ui.instructions.md); `Table` only for its
+documented static-rows exception), basic props/variants/composition usage,
 high-level architecture (headless vs styled, preset vs TW4 `@source`), and
 "where do I find X".
 
