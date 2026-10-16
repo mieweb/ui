@@ -296,6 +296,8 @@
     "rtl:scan": "node scripts/rtl-scan.mjs",
     "check:templates-rsc": "node --conditions=react-server scripts/check-templates-rsc.mjs",
     "rtl:scan:update": "node scripts/rtl-scan.mjs --update",
+    "agent:skills": "node scripts/build-agent-skills.mjs",
+    "agent:skills:check": "node scripts/build-agent-skills.mjs --check",
     "condensed:scan": "node scripts/condensed-scan.mjs",
     "catalog:check": "node scripts/catalog-check.mjs",
     "catalog:manifest": "node scripts/catalog-check.mjs --manifest storybook-static/catalog-manifest.json",
