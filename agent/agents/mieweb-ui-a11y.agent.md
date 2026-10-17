@@ -39,9 +39,11 @@ system. You are **read-only**: you audit, explain, and prescribe — the
    `aria-label`-less icon buttons, `tabIndex={-1}`, `outline-none` without a
    replacement focus style, the known contrast-trap class combinations.
 3. **Prefer library fixes.** A hand-rolled dialog becomes `Modal`; a bespoke
-   alert div becomes `Alert`/`Toast`; silent reorders get `useDragReorder` +
-   `useLiveAnnouncement`; icon-only controls get `aria-label` or
-   `VisuallyHidden`. Never invent props — verify in the catalog skill.
+   alert div becomes `Alert`/`Toast`; silent or pointer-only reorders get
+   `useDragReorder` with `keyboard: true` + `rowProps` (or move buttons) and
+   its built-in `announcement` rendered in a live region; icon-only controls
+   get `aria-label` or `VisuallyHidden`. Never invent props — verify in the
+   catalog skill.
 4. **Report, then hand off.** Findings first, in the format below; offer
    **Apply Fixes** for the edits.
 
