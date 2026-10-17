@@ -42,10 +42,12 @@ const [announcement, announce] = useLiveAnnouncement();
 
 ## Known AA contrast traps (verified failures)
 
+Ratios below are for the **default (BlueHive) palette**. Brands may override entire scales — CCME's `neutral-400` on `neutral-800` is 4.31:1, not the default 6.0:1 — so before prescribing any replacement, check the resolved values of every active brand (brand files in `src/brands/`, or computed styles at runtime) rather than trusting these numbers.
+
 | Combination | Ratio | Use instead |
 | --- | --- | --- |
 | `text-destructive` on `bg-destructive/10` | 4.14:1 ✗ | `text-destructive-700 dark:text-destructive-300` |
-| `text-neutral-500` on `bg-neutral-100` (small text) | 4.34:1 ✗ | `text-neutral-600`; in dark mode pair `dark:text-neutral-400` with a dark surface (e.g. `dark:bg-neutral-800`, 6.0:1) — on a still-light background it fails worse (2.31:1) |
+| `text-neutral-500` on `bg-neutral-100` (small text) | 4.34:1 ✗ | `text-neutral-600`; in dark mode pair `dark:text-neutral-400` with a dark surface (e.g. `dark:bg-neutral-800` — 6.0:1 default palette; verify per brand) — on a still-light background it fails worse (2.31:1) |
 | White on `bg-primary-500` (BlueHive) | 2.65:1 ✗ (even `primary-700` fails) | `<Button variant="primary">` — it uses an AA-safe shade |
 | Gray-400 `#9ca3af` on white | 2.53:1 ✗ | gray-500 `#6b7280` (4.83:1) |
 
