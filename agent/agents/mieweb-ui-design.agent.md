@@ -11,6 +11,10 @@ handoffs:
     agent: MIE UI Install Agent
     prompt: Diagnose the installation/setup problem above (peer deps, Tailwind wiring, CSS entry, dark-mode plumbing) and report the minimal fix.
     send: false
+  - label: Accessibility audit
+    agent: MIE UI A11y Agent
+    prompt: Audit the code discussed above for accessibility (ARIA naming, keyboard navigation, focus management, live regions, contrast) and report findings.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -44,8 +48,9 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | --------------------------------------------------- | -------------------- |
 | install / peer deps / preset / safelist / `@source` | MIE UI Install Agent |
 | tokens, CSS vars, Tailwind classes, brands, dark    | MIE UI Styling Agent |
+| ARIA, keyboard nav, screen readers, contrast        | MIE UI A11y Agent    |
 
-More specialists (A11y, i18n, Migration, Grids, DataVis, Views,
+More specialists (i18n, Migration, Grids, DataVis, Views,
 SuperChat, Rich Text) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
