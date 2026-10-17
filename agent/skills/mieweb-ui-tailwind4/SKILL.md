@@ -16,21 +16,24 @@ npm install -D tailwindcss@4 @tailwindcss/postcss autoprefixer
 
 `react` / `react-dom` (>=18) are the only **required** peers. Every other peer is **optional** and only needed when you import the entry that uses it (`/maps` → leaflet, `/globe` → react-globe.gl + three, `/kerebron` → @kerebron/\*, `/motion` → motion, `/q` → @mieweb/q, …) — see the catalog skill's entry-point table. A peer-dep warning for an entry you never import is noise, not a problem. Under pnpm's strict node_modules there is no hoisting: required peers must be in the app's own `package.json`; diagnose resolution with `pnpm why <pkg>`.
 
-## Tailwind 4 vs Tailwind 3 — pick the right mechanism
+## Tailwind 4 vs Tailwind 3 vs no Tailwind — pick the right mechanism
 
 | Consumer | Mechanism |
 | --- | --- |
 | Tailwind 4 (CSS-first) | `@source "../node_modules/@mieweb/ui/dist";` in the CSS entry — TW4 does **not** scan `node_modules` on its own |
 | Tailwind 3 (config-first) | `presets: [miewebUIPreset]` from `@mieweb/ui/tailwind-preset` + the exported `miewebUISafelist` + `node_modules/@mieweb/ui/dist/**/*.js` in `content` |
+| No Tailwind | `import '@mieweb/ui/styles.css'` (+ a brand CSS after it) — precompiled, fully supported; no Tailwind, PostCSS, or `@source` needed |
 
-Without `@source` (TW4) or content/safelist coverage (TW3), the library's utility classes are tree-shaken away: **black borders, missing backgrounds, broken layout** on every component.
+In a Tailwind consumer, missing `@source` (TW4) or content/safelist coverage (TW3) means the library's utility classes are tree-shaken away: **black borders, missing backgrounds, broken layout** on every component. The `@source`/safelist/PostCSS checks below apply **only** when the consumer runs its own Tailwind pipeline — don't prescribe Tailwind tooling to a precompiled-CSS app.
 
 ## CSS entry — quick start vs manual
 
-**Option A (one import):**
+**Option A (quick start)** — three lines, all in **your own** CSS entry (the first two resolve relative to your file, so they cannot live inside the package):
 
 ```css
-@import '@mieweb/ui/init.css';
+@import 'tailwindcss';
+@source "../node_modules/@mieweb/ui/dist"; /* path relative to THIS file */
+@import '@mieweb/ui/init.css'; /* dark variant + @theme fallbacks + default brand + base styles */
 ```
 
 **Option B (manual, full control)** — every line matters, in this order:
@@ -73,20 +76,22 @@ module.exports = {
 
 `tailwindcss: {}` is the Tailwind **3** plugin — with Tailwind 4 installed it silently fails or produces wrong output.
 
-## Dark mode toggle — set both hooks
+## Dark mode toggle — match the configured variant
+
+The variant selector decides which hook works: `init.css` accepts **either** `.dark` or `data-theme="dark"`, while the manual Option B variant above is attribute-only. A single-hook toggle against `init.css` is valid — diagnose by comparing the toggle to the `@custom-variant` actually in effect, not by demanding both hooks. Setting both is the compatibility-safe recommendation for new code:
 
 ```ts
 function applyTheme(t: 'light' | 'dark') {
   document.documentElement.classList.toggle('dark', t === 'dark');
-  document.documentElement.setAttribute('data-theme', t); // for @custom-variant
+  document.documentElement.setAttribute('data-theme', t);
 }
 ```
 
-Setting only one of `.dark` / `data-theme` is why "dark mode toggles but half the page stays light". Brand switching at runtime uses the `brands` barrel loader — see the `mieweb-ui-brands` skill.
+"Dark mode toggles but half the page stays light" usually means the toggle sets a hook the configured `@custom-variant` doesn't match. Brand switching at runtime uses the `brands` barrel loader — see the `mieweb-ui-brands` skill.
 
-## Wiring headless modules (ViewSet, SuperChatInbox, …)
+## Wiring headless modules
 
-Modules never fetch, subscribe, navigate, or write — you supply a small adapter:
+Modules never fetch, subscribe, navigate, or write — you supply a small adapter. The recipe below is the **collection-view contract** (`ViewSet` and friends). `SuperChatInbox` follows the same principles (host-owned state, promise-returning callbacks) but has its own props — `conversations`, `onMessageSent`, `onConversationOpened` — see the catalog skill and component docs; don't hand it collection-view props.
 
 1. **Fetch with your stack** (Meteor `useSubscribe`/`useTracker`, TanStack `useQuery`, …) and pass `items` / `loading` / `error` straight through.
 2. **Describe records once** via `accessors` (`getId`, `getTitle`, `getStatus`, …) — defined at module scope or memoized; they sit in `useMemo` deps.
@@ -99,8 +104,8 @@ Filters/selection/pagination state is yours (usually the URL); `ViewSet` owns on
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Black/missing borders, unstyled components | TW4 tree-shaking | Add the `@source` directive |
-| Dark mode toggle does nothing | Missing `@custom-variant dark` | Add it to the CSS entry |
+| Black/missing borders, unstyled components | TW4 tree-shaking (Tailwind consumers only) | Add the `@source` directive |
+| Dark mode toggle does nothing | Missing `@custom-variant dark`, or toggle sets a hook the variant doesn't match | Add the variant; align toggle with its selectors |
 | Dark toggles but surfaces stay light | Missing `var()` fallbacks / missing base stylesheet | Hex fallbacks in `@theme`; import `styles.css` or `init.css` |
 | Brand switch has no effect | Wrong import path | Barrel: `from '@mieweb/ui/brands'` |
 | Brand CSS loads but doesn't apply (TW4) | Brand import wrapped in `layer(theme)` | Keep base + brand imports plain/unlayered (brands skill) |
@@ -112,8 +117,8 @@ Filters/selection/pagination state is yours (usually the URL); `ViewSet` owns on
 
 ## Verification checklist
 
-- [ ] `@source` (TW4) or preset + safelist + content (TW3) in place
-- [ ] `@custom-variant dark` defined; toggle sets `.dark` **and** `data-theme`
+- [ ] Tailwind consumer: `@source` (TW4) or preset + safelist + content (TW3) in place. No Tailwind: `styles.css` imported
+- [ ] `@custom-variant dark` defined (Tailwind consumers); toggle sets a hook the variant matches (both `.dark` and `data-theme` for maximum compatibility)
 - [ ] All non-primary `var()` mappings carry hex fallbacks (or `init.css` is used)
 - [ ] PostCSS uses `@tailwindcss/postcss`
 - [ ] Base stylesheet imported before brand CSS, both unlayered

@@ -38,9 +38,11 @@ diagnose from evidence, then report a minimal fix — you do not edit files
    entry, `postcss.config.*`, `tailwind.config.*`, and `package.json`
    (dependencies + packageManager) before suspecting the library.
 2. **Match against the skill's troubleshooting table.** Unstyled components →
-   missing `@source`/safelist; transparent dark mode → missing fallbacks or
-   base stylesheet; dead toggle → missing `@custom-variant` or single-hook
-   toggle; silent PostCSS → TW3 plugin.
+   missing `@source`/safelist (Tailwind consumers; the precompiled
+   `styles.css` path needs neither); transparent dark mode → missing
+   fallbacks or base stylesheet; dead toggle → missing `@custom-variant`, or
+   the toggle sets a hook the configured variant doesn't match; silent
+   PostCSS → TW3 plugin.
 3. **Verify, don't assume.** Run the checks the skill prescribes (grep for
    `@source`, `@custom-variant`, fallback commas in `@theme`; `npx tsc
 --noEmit`; `pnpm why <pkg>` for resolution questions) in the consumer repo.
