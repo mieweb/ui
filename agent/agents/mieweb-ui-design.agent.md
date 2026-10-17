@@ -7,6 +7,10 @@ handoffs:
     agent: MIE UI Styling Agent
     prompt: Handle the styling/theming question above (tokens, Tailwind classes, brands, dark mode) and apply fixes where asked.
     send: false
+  - label: Install & setup
+    agent: MIE UI Install Agent
+    prompt: Diagnose the installation/setup problem above (peer deps, Tailwind wiring, CSS entry, dark-mode plumbing) and report the minimal fix.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -36,11 +40,12 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 
 ## Route to specialists
 
-| Question is about…                               | Delegate to          |
-| ------------------------------------------------ | -------------------- |
-| tokens, CSS vars, Tailwind classes, brands, dark | MIE UI Styling Agent |
+| Question is about…                                  | Delegate to          |
+| --------------------------------------------------- | -------------------- |
+| install / peer deps / preset / safelist / `@source` | MIE UI Install Agent |
+| tokens, CSS vars, Tailwind classes, brands, dark    | MIE UI Styling Agent |
 
-More specialists (Install, A11y, i18n, Migration, Grids, DataVis, Views,
+More specialists (A11y, i18n, Migration, Grids, DataVis, Views,
 SuperChat, Rich Text) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
@@ -49,7 +54,8 @@ from the skills and the component docs, or defer (below).
 - _Delegation mechanics:_ for multi-domain answers, invoke the specialist as a
   subagent (the `agent` tool) and fold its result into your synthesis; use the
   handoff instead when the user should continue the conversation with the
-  specialist. Delegate only to installed MIE UI agents.- _Selection vs depth:_ "which component" is always yours, even for grid/chart
+  specialist. Delegate only to installed MIE UI agents.
+- _Selection vs depth:_ "which component" is always yours, even for grid/chart
   components; the specialist owns configuration, APIs, and debugging of the
   chosen component.
 - _Styling a specialist's component:_ generic token/Tailwind/brand questions go
