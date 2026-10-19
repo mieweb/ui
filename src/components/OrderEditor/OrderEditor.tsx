@@ -8,7 +8,7 @@
  *
  * | `order.type` | Editor                                         |
  * |--------------|------------------------------------------------|
- * | `medication` | `MedicationEditor` (full NCPDP prescription)   |
+ * | `medication` | `MedicationEditor` (prescription draft details)   |
  * | `lab`        | `LabOrderEditor`                               |
  * | `imaging`    | `ImagingOrderEditor`                           |
  * | `referral`   | `ReferralEditor`                               |
@@ -47,12 +47,17 @@ import { Label } from '../Label';
 import { RadioGroup, Radio } from '../Radio';
 import {
   MedicationEditor,
-  labelToMedicationFields,
-  parseSig,
   type CodeLookupConfig,
+  type IndicationCodeLookupConfig,
   type Medication,
 } from '../MedicationList';
 import type { AssessmentOrder, OrderType } from '../Assessment';
+import type { ConditionConcern } from '../ProblemList';
+import type {
+  PrescriptionIssue,
+  PrescriptionReadiness,
+} from '../../prescribing/types';
+import type { PrescriptionValidationOptions } from '../PrescriptionReadiness';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 
 // =============================================================================
@@ -68,6 +73,16 @@ export interface OrderLookupResult {
   label: string;
   codetype: string;
   fullcode: string;
+  codeVersion?: string;
+  productId?: string;
+  strength?: string;
+  doseForm?: string;
+  quantityUnit?: string;
+  quantityUnits?: string[];
+  conceptSpecificity?: 'product' | 'ingredient' | 'compound';
+  controlledSchedule?: import('../../prescribing/types').ControlledSchedule;
+  observedAt?: string;
+  sourceId?: string;
 }
 
 /**
@@ -110,58 +125,87 @@ export interface OrderEditorProps {
    * `CodeLookupProvider`; pass `false` to force a plain name input.
    */
   codeLookup?: OrderCodeLookupConfig | false;
+  /** Condition coding search for the prescription's indication/concern. */
+  indicationCodeLookup?: IndicationCodeLookupConfig | false;
+  /** Existing chart concerns that can be linked by their durable identity. */
+  indicationConcerns?: ConditionConcern[];
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete order on save */
-  onSave: (order: AssessmentOrder) => void;
+  onSave: (order: AssessmentOrder) => void | Promise<void>;
+  prescribing?: PrescriptionValidationOptions;
+  readiness?: PrescriptionReadiness;
+  prescriptionNow?: string;
+  initialIssueField?: string;
+  onIssueAction?: (issue: PrescriptionIssue) => void;
+  readOnly?: boolean;
 }
 
 // =============================================================================
 // Medication mapping — AssessmentOrder ⇄ Medication (for MedicationEditor)
 // =============================================================================
 
-/** Map an order onto the `Medication` shape `MedicationEditor` edits —
- * strength/dose form/quantity unit are parsed from the display label and
- * route/frequency/PRN from the sig, so the editor opens fully populated. */
+/** Explicit structured values take precedence over legacy display projections.
+ * Label/Sig parsers are suggestions only; they do not confirm prescribing fields. */
 export function orderToMedication(order: AssessmentOrder): Medication {
-  const sig = order.detail ? parseSig(order.detail) : undefined;
   return {
     id: order.orderId,
-    name: order.display,
-    sig: order.detail,
     status: 'unreconciled',
-    indication: order.indication,
-    pharmacyNotes: order.notes,
-    ...labelToMedicationFields(order.display),
-    ...(sig && {
-      route: sig.route,
-      frequency: sig.frequency,
-      prn: sig.prn || undefined,
+    ...(order.prescription ?? {
+      sig: order.detail,
+      indication: order.indication,
+      pharmacyNotes: order.notes,
+      code: order.code
+        ? {
+            system: order.code.codetype,
+            code: order.code.fullcode,
+            display: order.display,
+          }
+        : undefined,
     }),
-    code: order.code
-      ? {
-          system: order.code.codetype,
-          code: order.code.fullcode,
-          display: order.display,
-        }
-      : undefined,
+    concernId: Object.prototype.hasOwnProperty.call(order, 'concernId')
+      ? order.concernId
+      : order.prescription?.concernId,
+    name: order.prescription?.name ?? order.display,
+    prescribingIntent: order.prescribingIntent,
+    prescriptionRevision: order.prescriptionRevision,
   };
 }
 
-/** Fold a saved `Medication` back into the order it was opened from. */
+/** Preserve every canonical prescription field, plus order/concern metadata. */
 export function medicationToOrder(
   med: Medication,
   base: AssessmentOrder
 ): AssessmentOrder {
+  const metadata = new Set([
+    'id',
+    'status',
+    'expired',
+    'discontinuedDate',
+    'note',
+    'task',
+    'prescribingIntent',
+    'prescriptionRevision',
+  ]);
+  const prescription = Object.fromEntries(
+    Object.entries(med).filter(([key]) => !metadata.has(key))
+  );
+  const concernId = Object.prototype.hasOwnProperty.call(med, 'concernId')
+    ? med.concernId
+    : Object.prototype.hasOwnProperty.call(base, 'concernId')
+      ? base.concernId
+      : base.prescription?.concernId;
   return {
     ...base,
+    concernId,
+    prescribingIntent: med.prescribingIntent ?? base.prescribingIntent,
+    prescription: { ...prescription, concernId },
     display: med.name,
     detail: med.sig || undefined,
     indication: med.indication || undefined,
     notes: med.pharmacyNotes || undefined,
     code: med.code
-      ? // keep the original fullid when the code is unchanged
-        base.code?.codetype === med.code.system &&
+      ? base.code?.codetype === med.code.system &&
         base.code?.fullcode === med.code.code
         ? base.code
         : {
@@ -476,7 +520,7 @@ export function ReferralEditor(props: TypedOrderEditorProps) {
 
 /**
  * Order editor that morphs by order type: medications get the full
- * `MedicationEditor` (NCPDP prescription), every other type gets its
+ * `MedicationEditor` (prescription draft), every other type gets its
  * dedicated editor. API-compatible with `MedicationEditor` — see the module
  * doc for the mapping.
  */
@@ -485,8 +529,16 @@ export function OrderEditor({
   order,
   defaultType = 'procedure',
   codeLookup,
+  indicationCodeLookup,
+  indicationConcerns,
   onClose,
   onSave,
+  prescribing,
+  readiness,
+  prescriptionNow,
+  initialIssueField,
+  onIssueAction,
+  readOnly,
 }: OrderEditorProps): React.JSX.Element | null {
   const type = order?.type ?? defaultType;
 
@@ -499,6 +551,12 @@ export function OrderEditor({
     return (
       <MedicationEditor
         open={open}
+        prescribing={prescribing}
+        readiness={readiness}
+        prescriptionNow={prescriptionNow}
+        initialIssueField={initialIssueField}
+        onIssueAction={onIssueAction}
+        readOnly={readOnly}
         medication={order ? orderToMedication(order) : undefined}
         codeLookup={
           codeLookup === false
@@ -513,6 +571,8 @@ export function OrderEditor({
                 locale: codeLookup.locale,
               } as CodeLookupConfig)
         }
+        indicationCodeLookup={indicationCodeLookup}
+        indicationConcerns={indicationConcerns}
         onClose={onClose}
         onSave={(med) => onSave(medicationToOrder(med, base))}
       />

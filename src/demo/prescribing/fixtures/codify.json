@@ -1,0 +1,36 @@
+{
+  "med": [
+    {
+      "fullid": "sim-a",
+      "codetype": "urn:mieweb:simulation-drug",
+      "fullcode": "sim-a",
+      "label": "SimDrug A 5 mg tablet"
+    },
+    {
+      "fullid": "sim-b",
+      "codetype": "urn:mieweb:simulation-drug",
+      "fullcode": "sim-b",
+      "label": "SimDrug B 5 mg tablet"
+    },
+    {
+      "fullid": "sim-renal",
+      "codetype": "urn:mieweb:simulation-drug",
+      "fullcode": "sim-renal",
+      "label": "SimRenal 5 mg tablet"
+    },
+    {
+      "fullid": "sim-controlled",
+      "codetype": "urn:mieweb:simulation-drug",
+      "fullcode": "sim-controlled",
+      "label": "SimControlled 5 mg tablet"
+    }
+  ],
+  "condition": [
+    {
+      "fullid": "sim-condition-1",
+      "codetype": "urn:mieweb:simulation-condition",
+      "fullcode": "sim-condition-1",
+      "label": "Synthetic indication"
+    }
+  ]
+}

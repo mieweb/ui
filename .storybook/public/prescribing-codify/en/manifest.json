@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "locale": "en",
+  "builtAt": "simulation:e0254da5846a40eb0d0edfd75884b2d9384e58ab5443cc8d0aec756e76abc437",
+  "shards": [
+    {
+      "domain": "med",
+      "file": "med.mcdx",
+      "bytes": 840,
+      "docCount": 4,
+      "tokenCount": 8
+    },
+    {
+      "domain": "condition",
+      "file": "condition.mcdx",
+      "bytes": 556,
+      "docCount": 1,
+      "tokenCount": 2
+    }
+  ]
+}

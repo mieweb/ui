@@ -27,6 +27,7 @@ import {
   MedicationReconciliation,
   type CodeLookupConfig,
   type Medication,
+  type MedicationReconciliationProps,
 } from '../components/MedicationList';
 
 // =============================================================================
@@ -65,11 +66,25 @@ export function MedicationListField({
   response,
   isPreview,
   isEnabled,
+  isReadOnly,
   onResponse,
   codeLookup,
-}: FieldComponentProps & {
+  prescribing,
+  readinessByOrderId,
+  prescriptionNow,
+  onCompletePrescription,
+  onPrescriptionIssueAction,
+}: Pick<
+  FieldComponentProps,
+  'field' | 'response' | 'isPreview' | 'isEnabled' | 'isReadOnly' | 'onResponse'
+> & {
   /** CodeLookup wiring — supplied via registerMedicationListFieldType() */
   codeLookup?: CodeLookupConfig | false;
+  prescribing?: MedicationReconciliationProps['prescribing'];
+  readinessByOrderId?: MedicationReconciliationProps['readinessByOrderId'];
+  prescriptionNow?: string;
+  onCompletePrescription?: MedicationReconciliationProps['onCompletePrescription'];
+  onPrescriptionIssueAction?: MedicationReconciliationProps['onPrescriptionIssueAction'];
 }): React.JSX.Element {
   const definition = field.definition as {
     question?: string;
@@ -92,7 +107,12 @@ export function MedicationListField({
       title={definition.question ?? 'Presenting medications'}
       quickAddOptions={definition.quickAddOptions}
       codeLookup={codeLookup}
-      readOnly={!(isPreview && isEnabled)}
+      prescribing={prescribing}
+      readinessByOrderId={readinessByOrderId}
+      prescriptionNow={prescriptionNow}
+      onCompletePrescription={onCompletePrescription}
+      onPrescriptionIssueAction={onPrescriptionIssueAction}
+      readOnly={isReadOnly || !(isPreview && isEnabled)}
     />
   );
 }
@@ -116,9 +136,14 @@ export function MedicationListField({
  */
 export function registerMedicationListFieldType(options?: {
   codeLookup?: CodeLookupConfig | false;
+  prescribing?: MedicationReconciliationProps['prescribing'];
+  readinessByOrderId?: MedicationReconciliationProps['readinessByOrderId'];
+  prescriptionNow?: string;
+  onCompletePrescription?: MedicationReconciliationProps['onCompletePrescription'];
+  onPrescriptionIssueAction?: MedicationReconciliationProps['onPrescriptionIssueAction'];
 }): void {
   const Field = (props: FieldComponentProps) => (
-    <MedicationListField {...props} codeLookup={options?.codeLookup} />
+    <MedicationListField {...props} {...options} />
   );
   registerCustomFieldTypes({
     medicationList: {

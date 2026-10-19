@@ -24,11 +24,13 @@ The **presenting-medications list with medication reconciliation**: review a pat
 
 | Component | Use when | Story |
 |---|---|---|
-| \`MedicationReconciliation\` | You want the whole workflow working out of the box — status buttons, the NCPDP \`MedicationEditor\` for Correct / Add, Notes and Add Task dialogs, remove, reorder, quick-add or an inline coded search (\`inlineAddSearch\`). Uncontrolled (\`defaultMedications\`) or controlled (\`medications\` + \`onChange\`) | **Interactive**, **Empty**, **Reconciliation** |
+| \`MedicationReconciliation\` | You want the whole workflow working out of the box — status buttons, the prescription draft \`MedicationEditor\` for Correct / Add, Notes and Add Task dialogs, remove, reorder, quick-add or an inline coded search (\`inlineAddSearch\`). Uncontrolled (\`defaultMedications\`) or controlled (\`medications\` + \`onChange\`) | **Interactive**, **Empty**, **Reconciliation** |
 | \`MedicationList\` | You need full control of the data flow and will supply your own dialogs / editor. Presentational and controlled: \`medications\` in, \`onStatusChange\` / \`onAction\` / \`onReorder\` / \`onQuickAdd\` / \`onAddOther\` out | **Headless**, **Default** and the variant stories |
 | \`registerMedicationListFieldType()\` | The list is a question inside an eSheet form | [MedicationListField (eSheet)](?path=/docs/clinical-lists-medicationlistfield-esheet--docs) |
 
 **Start with \`MedicationReconciliation\` unless you have a reason not to.** \`MedicationEditor\` (the NCPDP SCRIPT NewRx \`MedicationPrescribed\` field set — drug, code, strength, dose form, quantity, days supply, refills, DAW, sig, dates, indication, pharmacy notes) is exported on its own too, as are the parsers it uses: \`parseMedicationLabel\` ("lisinopril 20 mg tablet" → strength / dose form / quantity unit) and \`parseSig\` (route / frequency / PRN from the sig text). Drug coding is dependency-injected: \`codeLookup={{ component: CodeLookup, indexUrl }}\` (or an ambient \`CodeLookupProvider\`); omit it and the editor falls back to a plain name input. \`actions\` trims the row toolbar (\`open · correct · refill · add-task · note · remove · move-up · move-down\`); host-specific \`open\` / \`refill\` are reported through \`onAction\`, never handled.
+
+Prescription rows opt in with \`prescribingIntent: 'prescribe'\`. Pass \`prescribing(medication)\` for shared local validation, \`readinessByOrderId\` for host-confirmed checks, and \`onCompletePrescription\` to open the full editor. History and intake defaults retain ordinary reconciliation. The same pure validator is available to TypeScript clients and servers from \`@mieweb/ui/prescribing\`.
 
 ### Use it when
 
@@ -41,7 +43,7 @@ The **presenting-medications list with medication reconciliation**: review a pat
 - You need the **allergy** list — [AllergyList](?path=/docs/clinical-lists-allergylist--docs); same three-layer pattern, different model (NKA tri-state, allergy vs intolerance).
 - You are placing a **new medication order** inside the visit's plan — [Assessment](?path=/docs/encounter-orders-assessment--docs) with [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs), which morphs into this folder's \`MedicationEditor\` for \`type: 'medication'\` orders.
 - You just need a read-only medication summary in a banner — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)'s \`showMedicationBanner\` renders name / dose pills; use \`MedicationList readOnly\` only when the grouped status view matters.
-- You need drug–drug interaction, dose-range or formulary checks — nothing here validates clinical content.
+- You need a clinical knowledge engine or transmission transport: the EHR owns these providers. Supply its readiness projection to render their findings here.
 
 ### Example
 
@@ -71,7 +73,7 @@ const [meds, setMeds] = useState<Medication[]>(encounter.presentingMedications);
 
 ### Limitations
 
-- **Accessibility as implemented.** Groups are \`<section aria-label>\` with a \`<ul>\`; rows become focusable (\`tabIndex={0}\`, ↑/↓ between rows, Alt+↑/↓ to reorder) only when \`onReorder\` is set. Row actions are a \`RowActionToolbar\` (\`role="toolbar"\`, ←/→) — hover-revealed on fine-pointer devices, always visible on touch, reachable by Tab; status buttons carry \`aria-pressed\`. Status changes and reorders are announced via \`useLiveAnnouncement\` into an \`sr-only\` \`aria-live="polite"\` region; adds, removes, notes and tasks are **not** announced. The editor's derived route / frequency / PRN line is \`aria-live="polite"\`. Dialogs come from \`Modal\` (focus trap, Esc).
+- **Accessibility as implemented.** Groups are \`<section aria-label>\` with a \`<ul>\`; rows become focusable (\`tabIndex={0}\`, ↑/↓ between rows, Alt+↑/↓ to reorder) only when \`onReorder\` is set. Row actions are a \`RowActionToolbar\` (\`role="toolbar"\`, ←/→) — hover-revealed on fine-pointer devices, always visible on touch, reachable by Tab; status buttons carry \`aria-pressed\`. Status changes and reorders are announced via \`useLiveAnnouncement\` into an \`sr-only\` \`aria-live="polite"\` region; adds, removes, notes and tasks are **not** announced. The prescribing summary announces readiness politely. Parsed label and Sig values require explicit confirmation; route, frequency, dose and units are editable controls. Dialogs come from \`Modal\` (focus trap, Esc).
 - **Clinical safety.** No interaction, allergy, duplicate-therapy, dose-range or formulary checking; \`expired\` and \`discontinuedDate\` are display flags the host derives; \`parseSig\` / \`parseMedicationLabel\` are regex heuristics for English sigs and labels and can be wrong — treat their output as suggestions. Coded search only covers what the codify shards contain (RxNorm / FDB); the fallback is uncoded free text.
 - **Reordering** is confined to the same status group; cross-group moves must go through a status button.
 - **Responsive / RTL.** Rows \`flex-wrap\`; the toolbar's \`right-*\` overlay and \`pl-*\` note indents are physical, so RTL does not mirror.
@@ -183,7 +185,7 @@ export const Interactive: Story = {
 Everything works without writing any handler code:
 
 - **Status buttons** (👍 🤘 👎 ?) move the row to the matching group
-- **Correct** and **Other…** open the NCPDP \`MedicationEditor\`; the drug
+- **Correct** and **Other…** open the prescription draft \`MedicationEditor\`; the drug
   search codes against RxNorm/FDB offline (try typing "lisinopril 20") and
   auto-fills strength, dose form, and quantity unit
 - **Notes / Add Task** open small dialogs; their text appears under the row

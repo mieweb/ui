@@ -1,6 +1,20 @@
 'use client';
 
 import * as React from 'react';
+import type {
+  PrescriptionDetails,
+  DrugCoding,
+  PrescribingIntent,
+} from '../../prescribing/types';
+import {
+  PrescriptionIssueSummary,
+  createPrescriptionPreview,
+  type PrescriptionValidationOptions,
+} from '../PrescriptionReadiness';
+import type {
+  PrescriptionIssue,
+  PrescriptionReadiness,
+} from '../../prescribing/types';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
@@ -42,14 +56,7 @@ export type MedicationStatus =
   | 'unknown';
 
 /** Coding-system reference for a medication (RxNorm / FDB / NDC …). */
-export interface MedicationCode {
-  /** Coding system, e.g. 'RxNORM', 'FDB', 'NDC' */
-  system: string;
-  /** Code within the system */
-  code: string;
-  /** Human-readable label the code was selected under */
-  display?: string;
-}
+export type MedicationCode = DrugCoding;
 
 /**
  * A single medication in the presenting-medications list.
@@ -58,7 +65,7 @@ export interface MedicationCode {
  * `MedicationPrescribed` composite — see the README for the field mapping.
  * All are optional: a bare `{ id, name, status }` renders fine.
  */
-export interface Medication {
+export interface Medication extends PrescriptionDetails {
   /** Stable unique id */
   id: string;
   /** Display name, e.g. "lisinopril 10 mg tablet" (NCPDP DrugDescription) */
@@ -76,39 +83,10 @@ export interface Medication {
   /** Follow-up task attached to the medication */
   task?: string;
 
-  // —— Coding (NCPDP DrugCoded) ——
-  /** Code reference (RxNorm / FDB / NDC) */
-  code?: MedicationCode;
-
-  // —— NCPDP SCRIPT NewRx prescription fields ——
-  /** Strength, e.g. "10 mg" (Strength + StrengthUnitOfMeasure) */
-  strength?: string;
-  /** Dose form, e.g. "tablet" (DrugCoded/FormCode) */
-  doseForm?: string;
-  /** Quantity dispensed (Quantity/Value) */
-  quantity?: string;
-  /** Quantity unit of measure (Quantity/QuantityUnitOfMeasure) */
-  quantityUnit?: string;
-  /** Days supply (DaysSupply) */
-  daysSupply?: string;
-  /** Route of administration, e.g. "oral" */
-  route?: string;
-  /** Administration frequency, e.g. "Twice daily" */
-  frequency?: string;
-  /** As-needed flag (PRN) */
-  prn?: boolean;
-  /** Number of refills (NumberOfRefills) */
-  refills?: string;
-  /** Substitution / DAW: '0' permitted, '1' dispense as written */
-  substitution?: '0' | '1';
-  /** Start / written date (ISO yyyy-mm-dd) */
-  startDate?: string;
-  /** End date (ISO yyyy-mm-dd) */
-  endDate?: string;
-  /** Indication / diagnosis the medication treats */
-  indication?: string;
-  /** Note to pharmacy (Note) */
-  pharmacyNotes?: string;
+  /** Opt in to prescribing alerts; presenting medication history has no alerts by default. */
+  prescribingIntent?: PrescribingIntent;
+  /** Prescription content revision for host-confirmed readiness. */
+  prescriptionRevision?: string;
 }
 
 /** Non-status row actions revealed on hover. */
@@ -160,6 +138,20 @@ export interface MedicationListProps extends Omit<
    * patient-facing entry where suggested medications would be leading.
    */
   addSearch?: React.ReactNode;
+  /** Opt-in validator input; alerts only render for prescribingIntent: prescribe. */
+  prescribing?: (
+    medication: Medication
+  ) => PrescriptionValidationOptions | undefined;
+  readinessByOrderId?: Record<string, PrescriptionReadiness | undefined>;
+  prescriptionNow?: string;
+  onCompletePrescription?: (
+    medication: Medication,
+    issue?: PrescriptionIssue
+  ) => void;
+  onPrescriptionIssueAction?: (
+    medication: Medication,
+    issue: PrescriptionIssue
+  ) => void;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -236,7 +228,23 @@ function MedicationRow({
   onMove,
   onStatusChange,
   onAction,
+  prescriptionNow,
+  prescribing,
+  readiness,
+  onCompletePrescription,
+  onPrescriptionIssueAction,
 }: {
+  prescriptionNow?: string;
+  prescribing?: PrescriptionValidationOptions;
+  readiness?: PrescriptionReadiness;
+  onCompletePrescription?: (
+    medication: Medication,
+    issue?: PrescriptionIssue
+  ) => void;
+  onPrescriptionIssueAction?: (
+    medication: Medication,
+    issue: PrescriptionIssue
+  ) => void;
   medication: Medication;
   actions: MedicationAction[];
   readOnly: boolean;
@@ -300,6 +308,39 @@ function MedicationRow({
         <span className="text-muted-foreground/60 select-none">•</span>
       )}
       <span className="text-foreground font-medium">{medication.name}</span>
+      {medication.prescribingIntent === 'prescribe' &&
+        !medication.discontinuedDate &&
+        !medication.expired && (
+          <PrescriptionIssueSummary
+            collapsible
+            now={prescriptionNow}
+            readiness={createPrescriptionPreview(
+              medication,
+              prescribing,
+              readiness,
+              prescriptionNow
+            )}
+            medicationName={medication.name}
+            expectedOrderId={medication.id}
+            expectedOrderRevision={
+              prescribing?.input.orderRevision ??
+              medication.prescriptionRevision
+            }
+            expectedContextRevision={prescribing?.input.context.revision}
+            expectedPolicyVersion={prescribing?.policy.version}
+            readOnly={readOnly}
+            onCompletePrescription={
+              !readOnly && onCompletePrescription
+                ? (issue) => onCompletePrescription(medication, issue)
+                : undefined
+            }
+            onIssueAction={
+              !readOnly && onPrescriptionIssueAction
+                ? (issue) => onPrescriptionIssueAction(medication, issue)
+                : undefined
+            }
+          />
+        )}
       {medication.code && (
         <span
           className="text-muted-foreground/70 text-xs"
@@ -416,6 +457,11 @@ export const MedicationList = React.forwardRef<
       reconciledMessage = 'All medications reconciled.',
       emptyMessage = 'No medications recorded.',
       addSearch,
+      prescribing,
+      readinessByOrderId,
+      prescriptionNow,
+      onCompletePrescription,
+      onPrescriptionIssueAction,
       className,
       'data-testid': dataTestId,
       ...props
@@ -526,6 +572,11 @@ export const MedicationList = React.forwardRef<
                       onMove={moveMedication}
                       onStatusChange={handleStatusChange}
                       onAction={onAction}
+                      prescriptionNow={prescriptionNow}
+                      prescribing={prescribing?.(medication)}
+                      readiness={readinessByOrderId?.[medication.id]}
+                      onCompletePrescription={onCompletePrescription}
+                      onPrescriptionIssueAction={onPrescriptionIssueAction}
                     />
                   ))}
                 </ul>

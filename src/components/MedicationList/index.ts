@@ -23,4 +23,7 @@ export {
   type CodeLookupConfig,
   type MedicationLookupProps,
   type MedicationLookupResult,
+  type IndicationLookupResult,
+  type IndicationLookupProps,
+  type IndicationCodeLookupConfig,
 } from './MedicationEditor';
