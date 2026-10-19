@@ -8,24 +8,24 @@ Worker in single-digit milliseconds — no server round-trips, works offline.
 
 ## Source files
 
-The build pipeline and server-side lookup live in an **external `codify`
-repo** (private / not yet published — ask the MIE team for access), which is
+The build pipeline and server-side lookup live in **[mieweb/codify](https://github.com/mieweb/codify)**
+(private repository; access required), which is
 **not tracked here** (`packages/codify/` is gitignored). Only the browser
 engine/component live in this repo; the committed `.mcdx` shards under
 `.storybook/public/codify/` are the build output. Clone `codify` locally into
 `packages/codify/` (see [§1](#1-build-pipeline-external-codify-repo)) to
-regenerate them — the links below only resolve once it is present.
+regenerate them. The external source links below point to the Codify repository.
 
 | File | Role |
 |---|---|
-| [`packages/codify/scripts/extract.mjs`](../../../packages/codify/scripts/extract.mjs) | MariaDB → `codify.tsv` dump |
-| [`packages/codify/scripts/build-index.mjs`](../../../packages/codify/scripts/build-index.mjs) | TSV → `.mcdx` v2 shards + `manifest.json` (per locale, with usage priors) |
-| [`packages/codify/scripts/build-all.mjs`](../../../packages/codify/scripts/build-all.mjs) | builds the `en` (full) + `es` (sample) shard sets |
-| [`packages/codify/scripts/build-sqlite.mjs`](../../../packages/codify/scripts/build-sqlite.mjs) | TSV → SQLite FTS5 db for the MCP server |
-| [`packages/codify/src/mcp-server.ts`](../../../packages/codify/src/mcp-server.ts) | MCP stdio server: `lookup_code`, `get_code`, `medication_forms` |
-| [`packages/codify/aliases.json`](../../../packages/codify/aliases.json) / [`aliases-es.json`](../../../packages/codify/aliases-es.json) | curated synonym groups per locale |
-| [`packages/codify/data-samples/usage-sample.tsv`](../../../packages/codify/data-samples/usage-sample.tsv) | simulated top-200 meds/diagnoses/procedures usage |
-| [`packages/codify/data-samples/labels-es.tsv`](../../../packages/codify/data-samples/labels-es.tsv) | curated Spanish sample translations |
+| [`packages/codify/scripts/extract.mjs`](https://github.com/mieweb/codify/blob/main/scripts/extract.mjs) | MariaDB → `codify.tsv` dump |
+| [`packages/codify/scripts/build-index.mjs`](https://github.com/mieweb/codify/blob/main/scripts/build-index.mjs) | TSV → `.mcdx` v2 shards + `manifest.json` (per locale, with usage priors) |
+| [`packages/codify/scripts/build-all.mjs`](https://github.com/mieweb/codify/blob/main/scripts/build-all.mjs) | builds the `en` (full) + `es` (sample) shard sets |
+| [`packages/codify/scripts/build-sqlite.mjs`](https://github.com/mieweb/codify/blob/main/scripts/build-sqlite.mjs) | TSV → SQLite FTS5 db for the MCP server |
+| [`packages/codify/src/mcp-server.ts`](https://github.com/mieweb/codify/blob/main/src/mcp-server.ts) | MCP stdio server: `lookup_code`, `get_code`, `medication_forms` |
+| [`packages/codify/aliases.json`](https://github.com/mieweb/codify/blob/main/aliases.json) / [`aliases-es.json`](https://github.com/mieweb/codify/blob/main/aliases-es.json) | curated synonym groups per locale |
+| [`packages/codify/data-samples/usage-sample.tsv`](https://github.com/mieweb/codify/blob/main/data-samples/usage-sample.tsv) | simulated top-200 meds/diagnoses/procedures usage |
+| [`packages/codify/data-samples/labels-es.tsv`](https://github.com/mieweb/codify/blob/main/data-samples/labels-es.tsv) | curated Spanish sample translations |
 | [`engine.ts`](./engine.ts) | shard parsing + prefix/BM25 search + priors |
 | [`codify.worker.ts`](./codify.worker.ts) | Web Worker: fetch/OPFS-cache shards, answer queries |
 | [`CodeLookup.tsx`](./CodeLookup.tsx) | combobox UI component |
@@ -52,12 +52,12 @@ regenerate them — the links below only resolve once it is present.
 
 The `.mcdx` shards are committed to this repo (via git-lfs) and ship with
 Storybook, so **you only need this step when regenerating them** for testing.
-The pipeline is **not tracked here** — clone the external repo (private / not
-yet published; ask the MIE team for the location) into `packages/codify/`
+The pipeline is **not tracked here** — clone [mieweb/codify](https://github.com/mieweb/codify)
+(private repository; access required) into `packages/codify/`
 (gitignored) first:
 
 ```sh
-git clone <codify-repo-url> packages/codify
+git clone https://github.com/mieweb/codify.git packages/codify
 ```
 
 Then run its scripts directly with Node to rebuild the shards:
@@ -415,7 +415,8 @@ from the same TSV + aliases + usage + translations, and wraps it in an MCP
 stdio server (`packages/codify/src/mcp-server.ts`) so agent loops can resolve
 names → codes quickly: `lookup_code` (BM25 adjusted by usage:
 `bm25 − 0.5·ln(1+usage)`), `get_code`, and `medication_forms` (mirrors the UI
-drill-down). See `packages/codify/README.md` for client config.
+drill-down). See the [Codify README](https://github.com/mieweb/codify/blob/main/README.md)
+for client config.
 
 ## 8. Known limits / production roadmap
 
