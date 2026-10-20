@@ -133,6 +133,18 @@ const MATRIX: {
     ),
   },
   {
+    // Leading icon slot (#634): icon sits at the trigger's inline-start in
+    // both directions; the story's first panel is open, so the screenshot
+    // covers expanded and collapsed alignment at once.
+    name: 'accordion-leading-icon',
+    story: 'layout-accordion--with-leading-icons',
+    assert: sitsInline(
+      'start',
+      '[data-slot="accordion-icon"]',
+      '[data-slot="accordion-trigger"]'
+    ),
+  },
+  {
     name: 'code-lookup',
     story: 'clinical-lists-codelookup--all-domains',
     ready: async (page) => {
