@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
+import type { MacroGroup } from '../MacroLibrary';
 import {
   processDictation,
   convertAngleBracketsToMustache,
@@ -167,6 +168,149 @@ describe('RichTextEditor', () => {
       );
       paste('<b>hi</b>');
       expect(exec).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('macro addon', () => {
+    let exec: ReturnType<typeof vi.fn>;
+    let previousExec: typeof document.execCommand;
+    beforeEach(() => {
+      previousExec = document.execCommand;
+      exec = vi.fn().mockReturnValue(true);
+      document.execCommand = exec as unknown as typeof document.execCommand;
+    });
+    afterEach(() => {
+      document.execCommand = previousExec;
+    });
+
+    const macros: MacroGroup[] = [
+      {
+        id: 'library',
+        label: 'Default library',
+        macros: [
+          {
+            id: 'cardio',
+            label: 'Cardio — WNL',
+            content: 'Regular rate and rhythm.',
+            shortcut: '.c',
+          },
+        ],
+      },
+    ];
+
+    const clickMacroRow = (label: string, container: Element = document.body) =>
+      fireEvent.click(
+        Array.from(
+          container.querySelectorAll<HTMLButtonElement>('[data-macro-row]')
+        ).find((row) => row.textContent?.includes(label))!
+      );
+
+    it('renders no macro UI without the macros prop', () => {
+      renderWithTheme(<RichTextEditor value="" onChange={() => {}} />);
+      expect(screen.queryByRole('button', { name: /macros/i })).toBeNull();
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
+    });
+
+    it('toggles the docked panel from the toolbar', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          aria-label="Review of Systems"
+        />
+      );
+      const toggle = screen.getByRole('button', { name: /macros/i });
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
+      fireEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        document.querySelector('[data-slot="macro-library"]')
+      ).not.toBeNull();
+      // Panel names its insertion target after the editor's label.
+      expect(screen.getByText('Review of Systems')).toBeInTheDocument();
+    });
+
+    it('opens initially with defaultMacrosOpen', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          defaultMacrosOpen
+        />
+      );
+      expect(
+        document.querySelector('[data-slot="macro-library"]')
+      ).not.toBeNull();
+    });
+
+    it('inserts the macro content through the undo-aware command', () => {
+      const onChange = vi.fn();
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={onChange}
+          macros={macros}
+          defaultMacrosOpen
+          aria-label="Body"
+        />
+      );
+      clickMacroRow('Cardio — WNL');
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    it('inserts only into its own editor when multiple instances exist', () => {
+      const onChangeA = vi.fn();
+      const onChangeB = vi.fn();
+      renderWithTheme(
+        <>
+          <RichTextEditor
+            value=""
+            onChange={onChangeA}
+            macros={macros}
+            defaultMacrosOpen
+            aria-label="Editor A"
+          />
+          <RichTextEditor
+            value=""
+            onChange={onChangeB}
+            macros={macros}
+            defaultMacrosOpen
+            aria-label="Editor B"
+          />
+        </>
+      );
+      const editorB = screen.getByRole('textbox', { name: 'Editor B' });
+      const wrapperB = editorB.closest('[data-slot="rich-text-editor"]')!;
+      clickMacroRow('Cardio — WNL', wrapperB);
+      expect(onChangeB).toHaveBeenCalled();
+      expect(onChangeA).not.toHaveBeenCalled();
+      // Insertion focused the associated editor, not the other instance.
+      expect(document.activeElement).toBe(editorB);
+    });
+
+    it('closing the panel returns focus to the editor', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          defaultMacrosOpen
+          aria-label="Body"
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Close macros' }));
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
+      expect(document.activeElement).toBe(
+        screen.getByRole('textbox', { name: 'Body' })
+      );
     });
   });
 });

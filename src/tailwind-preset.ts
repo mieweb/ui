@@ -1530,6 +1530,19 @@ export const miewebUISafelist = [
   'transition-[width]',
   'z-[5]',
   'z-[80]',
+  // MacroLibrary panel docked in RichTextEditor — search inset, shortcut chips, peek
+  'dark:border-warning-700',
+  'hover:text-primary',
+  'md:absolute',
+  'md:border-t-0',
+  'md:end-0',
+  'md:inset-y-0',
+  'md:me-72',
+  'md:min-h-[400px]',
+  'md:w-72',
+  'start-2.5',
+  'text-[11px]',
+  'whitespace-pre-line',
 ];
 
 export interface MiewebUIPreset {

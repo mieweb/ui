@@ -12,10 +12,12 @@ import {
   Replace,
   Mic,
   MicOff,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Separator } from '../Separator';
+import { MacroLibrary, type Macro, type MacroGroup } from '../MacroLibrary';
 import {
   Dropdown,
   DropdownItem,
@@ -69,6 +71,17 @@ export interface RichTextEditorProps {
    * DOM. Without it, pasted markup is inserted as the browser provides it.
    */
   sanitizeHtml?: (html: string) => string;
+  /**
+   * Grouped macros for the optional macro addon. When omitted the editor is
+   * unchanged. When provided, a "Macros" toolbar toggle docks a searchable
+   * macro panel inside the editor; selecting a macro inserts its content at
+   * the retained caret position.
+   */
+  macros?: MacroGroup[];
+  /** Open the macro panel initially. Defaults to false. */
+  defaultMacrosOpen?: boolean;
+  /** Forwarded to the macro panel's "Save as macro" action. */
+  onCreateMacro?: () => void;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
 }
@@ -133,6 +146,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       onDictationError,
       disabled = false,
       sanitizeHtml,
+      macros,
+      defaultMacrosOpen = false,
+      onCreateMacro,
       'aria-label': ariaLabel,
     },
     ref
@@ -143,8 +159,14 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
     const isListeningRef = React.useRef(false);
     const shouldRestartRef = React.useRef(false);
+    const [macrosOpen, setMacrosOpen] = React.useState(defaultMacrosOpen);
+    // Last caret/selection inside the editable region, retained while the
+    // macro panel has focus so insertion lands where the clinician left off.
+    const savedRangeRef = React.useRef<Range | null>(null);
+    const macroPanelId = React.useId();
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
+    const hasMacros = Boolean(macros);
     const isEmpty = isHtmlEmpty(value);
 
     React.useImperativeHandle(ref, () => editorRef.current as HTMLDivElement);
@@ -261,6 +283,66 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const reportError = (message: string) => {
       if (onDictationError) onDictationError(message);
       else if (typeof console !== 'undefined') console.warn(message);
+    };
+
+    /** Bookmark the selection whenever it lives inside the editable region. */
+    const saveSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !editorRef.current)
+        return;
+      const range = selection.getRangeAt(0);
+      if (editorRef.current.contains(range.commonAncestorContainer)) {
+        savedRangeRef.current = range.cloneRange();
+      }
+    };
+
+    const insertMacro = (macro: Macro) => {
+      if (disabled || !editorRef.current) return;
+      editorRef.current.focus();
+
+      const saved = savedRangeRef.current;
+      const selection = window.getSelection();
+      if (
+        saved &&
+        selection &&
+        editorRef.current.contains(saved.commonAncestorContainer)
+      ) {
+        selection.removeAllRanges();
+        selection.addRange(saved);
+      }
+
+      // execCommand participates in the browser's native undo stack, so a
+      // macro insertion can be reverted with a single undo.
+      let inserted = false;
+      try {
+        inserted = document.execCommand('insertText', false, macro.content);
+      } catch {
+        inserted = false;
+      }
+      if (!inserted) {
+        // Fallback (and jsdom path): manual range insertion.
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          const fragment = document.createDocumentFragment();
+          const lines = macro.content.split('\n');
+          lines.forEach((line, index) => {
+            fragment.appendChild(document.createTextNode(line));
+            if (index < lines.length - 1) {
+              fragment.appendChild(document.createElement('br'));
+            }
+          });
+          range.insertNode(fragment);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          editorRef.current.innerHTML += macro.content.replace(/\n/g, '<br>');
+        }
+      }
+      saveSelection();
+      updateContent();
     };
 
     const toggleDictation = async () => {
@@ -506,7 +588,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                     title="Insert variable"
                   >
                     <Braces className="h-4 w-4" />
-                    <span className="text-xs">Variables</span>
+                    <span className="ms-1 text-xs">Variables</span>
                   </Button>
                 }
               >
@@ -537,7 +619,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 title="Convert <<field>> to {{field}}"
               >
                 <Replace className="h-4 w-4" />
-                <span className="text-xs">{'<< >> to {{ }}'}</span>
+                <span className="ms-1 text-xs">{'<< >> to {{ }}'}</span>
               </Button>
             </>
           )}
@@ -565,41 +647,87 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 ) : (
                   <Mic className="h-4 w-4" />
                 )}
-                <span className="text-xs">
+                <span className="ms-1 text-xs">
                   {isListening ? 'Stop' : 'Dictate'}
                 </span>
               </Button>
             </>
           )}
+
+          {hasMacros && (
+            <>
+              <Separator orientation="vertical" className="mx-1 h-6" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setMacrosOpen((open) => !open)}
+                disabled={disabled}
+                className={cn('h-8 gap-1 px-2', macrosOpen && 'bg-muted')}
+                aria-expanded={macrosOpen}
+                aria-controls={macrosOpen ? macroPanelId : undefined}
+                title={macrosOpen ? 'Hide macros' : 'Show macros'}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span className="ms-1 text-xs">Macros</span>
+              </Button>
+            </>
+          )}
         </div>
 
-        <div className="relative flex-1">
-          {isEmpty && placeholder && (
-            <div
-              aria-hidden="true"
-              className="text-muted-foreground pointer-events-none absolute start-0 top-0 p-4"
-            >
-              {placeholder}
-            </div>
-          )}
+        <div className="relative flex min-h-0 flex-1 flex-col">
           <div
-            ref={editorRef}
-            role="textbox"
-            aria-multiline="true"
-            aria-label={ariaLabel ?? placeholder}
-            contentEditable={!disabled}
-            tabIndex={disabled ? -1 : 0}
-            onInput={updateContent}
-            onPaste={handlePaste}
-            onDrop={handleDrop}
             className={cn(
-              'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
-              'prose prose-sm max-w-none',
-              disabled &&
-                'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300'
+              'relative flex-1',
+              hasMacros && macrosOpen && 'md:me-72'
             )}
-            suppressContentEditableWarning
-          />
+          >
+            {isEmpty && placeholder && (
+              <div
+                aria-hidden="true"
+                className="text-muted-foreground pointer-events-none absolute start-0 top-0 p-4"
+              >
+                {placeholder}
+              </div>
+            )}
+            <div
+              ref={editorRef}
+              role="textbox"
+              aria-multiline="true"
+              aria-label={ariaLabel ?? placeholder}
+              contentEditable={!disabled}
+              tabIndex={disabled ? -1 : 0}
+              onInput={updateContent}
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onBlur={hasMacros ? saveSelection : undefined}
+              onKeyUp={hasMacros ? saveSelection : undefined}
+              onMouseUp={hasMacros ? saveSelection : undefined}
+              className={cn(
+                'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
+                'prose prose-sm max-w-none',
+                hasMacros && macrosOpen && 'md:min-h-[400px]',
+                disabled &&
+                  'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300'
+              )}
+              suppressContentEditableWarning
+            />
+          </div>
+
+          {hasMacros && macrosOpen && (
+            <MacroLibrary
+              id={macroPanelId}
+              groups={macros!}
+              onSelect={insertMacro}
+              targetLabel={ariaLabel ?? placeholder}
+              onClose={() => {
+                setMacrosOpen(false);
+                editorRef.current?.focus();
+              }}
+              onCreateMacro={onCreateMacro}
+              className="border-border max-h-72 border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
+            />
+          )}
         </div>
       </div>
     );
