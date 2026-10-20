@@ -166,6 +166,46 @@ describe('Accordion', () => {
         warn.mockRestore();
       }
     });
+
+    // The dev warning fires once per session, so the remaining rejection
+    // tests assert non-rendering only.
+    it('rejects custom (non-library) function components', () => {
+      const CustomIcon = () => <svg data-testid="custom-icon" />;
+      renderWithTheme(
+        <Accordion
+          items={[
+            {
+              ...ITEMS[0],
+              icon: CustomIcon as unknown as AccordionItem['icon'],
+            },
+          ]}
+        />
+      );
+      expect(triggerIcon('Question A')).toBeNull();
+      expect(screen.queryByTestId('custom-icon')).toBeNull();
+    });
+
+    it('rejects malformed $$typeof-tagged objects without crashing', () => {
+      const malformed = {
+        $$typeof: Symbol.for('react.unknown'),
+        render: 'not-a-function',
+      };
+      renderWithTheme(
+        <Accordion
+          items={[
+            {
+              ...ITEMS[0],
+              icon: malformed as unknown as AccordionItem['icon'],
+            },
+          ]}
+        />
+      );
+      // Renders the item normally with no icon instead of throwing
+      expect(
+        screen.getByRole('button', { name: 'Question A' })
+      ).toBeInTheDocument();
+      expect(triggerIcon('Question A')).toBeNull();
+    });
   });
 
   it('hides collapsed panels from AT and keyboard via aria-hidden + inert', () => {

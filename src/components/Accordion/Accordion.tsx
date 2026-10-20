@@ -83,17 +83,25 @@ export interface AccordionProps
 // Accordion
 // =============================================================================
 
-// Leading icons are restricted to library icon components (lucide-react
-// forwardRef components or plain function components). Elements
-// (`<Icon />`), strings, and other nodes are rejected so the slot cannot be
-// abused as a free-form content area.
+// Leading icons are restricted to library icon components. Every
+// lucide-react icon (and therefore the `@mieweb/ui` Icons barrel) is a
+// `forwardRef` exotic component, so the guard requires exactly that shape:
+// `$$typeof` of react.forward_ref with a callable `render`. Plain function
+// components, elements (`<Icon />`), strings, memo wrappers, and malformed
+// tagged objects are all rejected, so the slot cannot be abused as a
+// free-form content area and invalid values cannot crash the render.
+// A true identity allowlist would require bundling the entire icon set
+// (defeating lucide's tree-shaking) — the `LucideIcon` type remains the
+// compile-time library-membership contract, and the unit test rendering a
+// real library icon guards this shape against lucide upgrades.
+const FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
+
 function isLibraryIcon(icon: unknown): icon is LucideIcon {
-  if (typeof icon === 'function') return true;
   return (
     typeof icon === 'object' &&
     icon !== null &&
-    '$$typeof' in icon &&
-    !React.isValidElement(icon)
+    (icon as { $$typeof?: unknown }).$$typeof === FORWARD_REF_TYPE &&
+    typeof (icon as { render?: unknown }).render === 'function'
   );
 }
 
