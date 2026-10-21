@@ -150,49 +150,50 @@ const BLOCK_BOUNDARY =
   /^(BR|DIV|P|LI|UL|OL|TABLE|TR|TD|TH|H[1-6]|BLOCKQUOTE|PRE|HR)$/;
 
 /**
- * Last visible character rendered inside `node`: ' ' when it ends with a
- * line break or block element, '' when it renders nothing.
+ * Last non-empty text node rendered inside `node`, or 'boundary' when it
+ * ends with a line break or block element.
  */
-function lastVisibleChar(node: Node): string {
+function lastTextWithin(node: Node): Text | 'boundary' | null {
   if (node.nodeType === Node.TEXT_NODE) {
-    return (node.textContent ?? '').slice(-1);
+    return (node.textContent ?? '').length > 0 ? (node as Text) : null;
   }
-  if (node.nodeType !== Node.ELEMENT_NODE) return '';
-  if (BLOCK_BOUNDARY.test((node as HTMLElement).tagName)) return ' ';
+  if (node.nodeType !== Node.ELEMENT_NODE) return null;
+  if (BLOCK_BOUNDARY.test((node as HTMLElement).tagName)) return 'boundary';
   for (let child = node.lastChild; child; child = child.previousSibling) {
-    const char = lastVisibleChar(child);
-    if (char) return char;
+    const found = lastTextWithin(child);
+    if (found) return found;
   }
-  return '';
+  return null;
 }
 
 /**
- * Visible character immediately before `node`, looking across adjacent
- * inline elements (e.g. `etc<strong>.c</strong>` reads as "etc.c"). Block
- * elements and <br> count as whitespace boundaries, including a trailing
- * <br> inside an inline sibling (e.g. `<strong>one<br></strong>`).
+ * Previous visible text node before `node`, looking across adjacent inline
+ * elements (e.g. the "." in `.<b>c</b>` precedes the "c"). Returns null at
+ * a block/line-break boundary or the editor root, where a word cannot
+ * continue.
  */
-function visibleCharBefore(node: Node, root: HTMLElement): string {
+function previousVisibleText(node: Node, root: HTMLElement): Text | null {
   let current: Node = node;
   while (current !== root) {
     let sibling: Node | null = current.previousSibling;
     while (sibling) {
-      const char = lastVisibleChar(sibling);
-      if (char) return char;
+      const found = lastTextWithin(sibling);
+      if (found === 'boundary') return null;
+      if (found) return found;
       sibling = sibling.previousSibling;
     }
     const parent: Node | null = current.parentNode;
-    if (!parent) return ' ';
+    if (!parent) return null;
     if (
       parent !== root &&
       parent.nodeType === Node.ELEMENT_NODE &&
       BLOCK_BOUNDARY.test((parent as HTMLElement).tagName)
     ) {
-      return ' ';
+      return null;
     }
     current = parent;
   }
-  return ' ';
+  return null;
 }
 
 /**
@@ -456,23 +457,31 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         (node.textContent ?? '').slice(0, caret.startOffset)
       );
       if (!typed) return;
-      // A token at the start of its text node may continue a visible word
-      // from an adjacent inline node (`etc<strong>.c</strong>` → "etc.c").
-      const tokenStart = caret.startOffset - typed[1].length;
-      if (
-        tokenStart === 0 &&
-        /\S/.test(visibleCharBefore(node, editorRef.current))
-      )
-        return;
-      const token = typed[1].toLowerCase();
+      // Collect the complete visible token — a word may span adjacent
+      // inline nodes (`.<b>c</b>` is ".c"; `etc<strong>.c</strong>` is
+      // "etc.c", which matches no shortcut and is left alone).
+      let token = typed[1];
+      let startNode: Node = node;
+      let startOffset = caret.startOffset - typed[1].length;
+      while (startOffset === 0) {
+        const prev = previousVisibleText(startNode, editorRef.current);
+        if (!prev) break;
+        const text = prev.textContent ?? '';
+        const continued = /(\S+)$/.exec(text);
+        if (!continued) break;
+        token = continued[1] + token;
+        startNode = prev;
+        startOffset = text.length - continued[1].length;
+      }
+      const lowered = token.toLowerCase();
       const macro = macros
         .flatMap((group) => group.macros)
-        .find((candidate) => candidate.shortcut?.toLowerCase() === token);
+        .find((candidate) => candidate.shortcut?.toLowerCase() === lowered);
       if (!macro) return;
 
       event.preventDefault();
       const replaceRange = document.createRange();
-      replaceRange.setStart(node, tokenStart);
+      replaceRange.setStart(startNode, startOffset);
       replaceRange.setEnd(node, caret.startOffset);
       selection.removeAllRanges();
       selection.addRange(replaceRange);

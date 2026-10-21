@@ -419,6 +419,31 @@ describe('RichTextEditor', () => {
         expect(notPrevented).toBe(true);
       });
 
+      it('expands a shortcut split across inline nodes by formatting', () => {
+        const editor = renderEditor();
+        // .<b>c</b> — visibly ".c", bolded mid-shortcut.
+        editor.appendChild(document.createTextNode('.'));
+        const bold = document.createElement('b');
+        const boldText = document.createTextNode('c');
+        bold.appendChild(boldText);
+        editor.appendChild(bold);
+        const range = document.createRange();
+        range.setStart(boldText, 1);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        fireEvent.keyDown(editor, { key: ' ' });
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+        // The replacement selection spans the whole token, not just "c".
+        const replaced = window.getSelection()!.getRangeAt(0);
+        expect(replaced.toString()).toBe('.c');
+      });
+
       it('expands after a trailing line break inside an inline sibling', () => {
         const editor = renderEditor();
         // <strong>one<br></strong>.c — the <br> ends the word, so ".c" is

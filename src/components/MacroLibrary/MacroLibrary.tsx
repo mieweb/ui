@@ -179,6 +179,8 @@ function MacroRow({
         <span className="flex items-center gap-2">
           {macro.shortcut && (
             <span
+              // Shortcuts are typed sequences; keep them LTR in RTL locales.
+              dir="ltr"
               className={cn(
                 'border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]',
                 isPrevious &&
