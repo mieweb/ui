@@ -365,10 +365,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       }
     };
 
-    const insertMacro = (macro: Macro) => {
-      if (disabled || !editorRef.current) return;
+    /** Focus the editor and restore the bookmarked selection if still valid. */
+    const focusRestoringSelection = () => {
+      if (!editorRef.current) return;
       editorRef.current.focus();
-
       const saved = savedRangeRef.current;
       const selection = window.getSelection();
       if (
@@ -379,7 +379,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         selection.removeAllRanges();
         selection.addRange(saved);
       }
+    };
 
+    const insertMacro = (macro: Macro) => {
+      if (disabled || !editorRef.current) return;
+      focusRestoringSelection();
       insertTextAtSelection(macro.content);
     };
 
@@ -872,7 +876,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               targetLabel={ariaLabel ?? placeholder}
               onClose={() => {
                 setMacrosOpen(false);
-                editorRef.current?.focus();
+                // Selecting text in the panel moves the document selection;
+                // put the caret back where the user left it.
+                focusRestoringSelection();
               }}
               onCreateMacro={onCreateMacro}
               labels={macroLabels}

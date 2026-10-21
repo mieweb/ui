@@ -461,7 +461,9 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
 
               {visibleGroups.map((group) => {
                 const isPrevious = group.kind === 'previous';
-                const isCollapsed = !searching && collapsed[group.id];
+                // Strict check: ids like "constructor" must not read
+                // inherited Object.prototype members as collapsed state.
+                const isCollapsed = !searching && collapsed[group.id] === true;
                 const GroupIcon = isPrevious ? HistoryIcon : BookOpenIcon;
                 return (
                   <div
@@ -480,7 +482,7 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                       onClick={() =>
                         setCollapsed((prev) => ({
                           ...prev,
-                          [group.id]: !prev[group.id],
+                          [group.id]: prev[group.id] !== true,
                         }))
                       }
                     >
