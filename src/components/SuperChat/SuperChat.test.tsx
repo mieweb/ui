@@ -1499,6 +1499,150 @@ describe('SuperChat', () => {
   });
 });
 
+describe('SuperChat threading', () => {
+  const threaded: SuperChatConversation = {
+    id: 'c-thread',
+    title: 'Rounds',
+    participants: [
+      { id: 'u1', kind: 'human', name: 'Alice Reyes' },
+      { id: 'a1', kind: 'agent', name: 'Triage Agent', color: '#2563eb' },
+      { id: 'u2', kind: 'human', name: 'Sam Carter' },
+    ],
+    thread: [
+      {
+        id: 't1',
+        participantId: 'u1',
+        text: 'root',
+        time: '2026-06-07T09:00:00Z',
+      },
+      {
+        id: 't2',
+        participantId: 'a1',
+        parentId: 't1',
+        text: 'reply one',
+        time: '2026-06-07T09:00:30Z',
+      },
+      {
+        id: 't3',
+        participantId: 'u2',
+        parentId: 't2',
+        text: 'nested reply',
+        time: '2026-06-07T09:01:00Z',
+      },
+      {
+        id: 't4',
+        participantId: 'u1',
+        text: 'second root',
+        time: '2026-06-07T09:02:00Z',
+      },
+    ],
+  };
+
+  it('auto-enables threading and shows a collapse toggle on messages with replies', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={threaded} currentParticipantId="u1" />
+      </div>
+    );
+    // Roots + replies all render.
+    expect(screen.getByText('root')).toBeInTheDocument();
+    expect(screen.getByText('reply one')).toBeInTheDocument();
+    expect(screen.getByText('nested reply')).toBeInTheDocument();
+    // Collapse toggles appear on the two messages that have replies (t1, t2).
+    expect(
+      screen.getAllByRole('button', { name: /Collapse replies/i })
+    ).toHaveLength(2);
+  });
+
+  it('collapses a subtree and reveals it again via the replies pill', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={threaded} currentParticipantId="u1" />
+      </div>
+    );
+    // Collapse the root: both descendants (reply one, nested reply) hide.
+    const rootToggle = screen
+      .getByText('root')
+      .closest('[data-slot="superchat-message"]')!
+      .querySelector<HTMLButtonElement>(
+        '[data-slot="superchat-thread-toggle"]'
+      )!;
+    await user.click(rootToggle);
+    expect(screen.queryByText('reply one')).toBeNull();
+    expect(screen.queryByText('nested reply')).toBeNull();
+    // A "2 replies" pill offers to expand (exact name avoids the toggle's
+    // "Expand 2 replies" aria-label).
+    const pill = screen.getByRole('button', { name: '2 replies' });
+    await user.click(pill);
+    expect(screen.getByText('reply one')).toBeInTheDocument();
+    expect(screen.getByText('nested reply')).toBeInTheDocument();
+  });
+
+  it('defaultCollapsed hides replies on first render', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          defaultCollapsed
+        />
+      </div>
+    );
+    expect(screen.getByText('root')).toBeInTheDocument();
+    expect(screen.getByText('second root')).toBeInTheDocument();
+    expect(screen.queryByText('reply one')).toBeNull();
+    expect(screen.queryByText('nested reply')).toBeNull();
+  });
+
+  it('threaded={false} keeps the flat thread (no collapse toggles)', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          threaded={false}
+        />
+      </div>
+    );
+    expect(screen.getByText('reply one')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Collapse replies/i })
+    ).toBeNull();
+  });
+
+  it('SuperChatInbox forwards threaded and defaultCollapsed to the active panel', () => {
+    const { container, rerender } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={[threaded]}
+          currentParticipantId="u1"
+          defaultCollapsed
+        />
+      </div>
+    );
+    const panel = () =>
+      within(container.querySelector('[data-slot="superchat"]') as HTMLElement);
+    expect(panel().getByText('second root')).toBeInTheDocument();
+    expect(panel().queryByText('reply one')).toBeNull();
+
+    rerender(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={[threaded]}
+          currentParticipantId="u1"
+          threaded={false}
+        />
+      </div>
+    );
+    expect(panel().getByText('reply one')).toBeInTheDocument();
+    expect(
+      panel().queryByRole('button', { name: /Collapse replies/i })
+    ).toBeNull();
+  });
+});
+
 describe('SuperChatConversations', () => {
   const conversations: SuperChatConversation[] = [
     {

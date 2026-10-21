@@ -40,6 +40,12 @@ import {
   acceptTokensFor,
 } from './parts';
 import { VirtualThread } from './VirtualThread';
+import {
+  buildThreadTree,
+  collapsibleIds,
+  flattenThreadTree,
+  type ThreadNode,
+} from './thread-tree';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -107,6 +113,16 @@ export interface SuperChatProps {
    * messages) stay responsive. Off by default — enable for long histories.
    */
   virtualized?: boolean;
+  /**
+   * Render replies (messages carrying a `parentId`) as an indented, collapsible
+   * tree instead of a flat list. Siblings stay ordered by `time`; any message
+   * with replies can be collapsed. When omitted, threading turns on
+   * automatically if the conversation contains at least one reply. Threading is
+   * not supported together with `virtualized` (the flat list is used instead).
+   */
+  threaded?: boolean;
+  /** Collapse every thread with replies on first render. Defaults to `false`. */
+  defaultCollapsed?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /**
@@ -192,6 +208,8 @@ export function SuperChat({
   acceptedFileTypes,
   order = 'asc',
   virtualized = false,
+  threaded,
+  defaultCollapsed = false,
   linkBuilder,
   defaultCopyFormat,
   className,
@@ -662,6 +680,57 @@ export function SuperChat({
     return order === 'desc' ? sorted.reverse() : sorted;
   }, [conversation, order]);
 
+  // --- Threading (reply tree) ----------------------------------------------
+  // Threading applies to the plain (non-virtualized) path. When `threaded` is
+  // omitted it auto-enables as soon as any message carries a parent.
+  const threadTree = React.useMemo(
+    () => buildThreadTree(conversation.thread),
+    [conversation.thread]
+  );
+  const useThreaded =
+    !virtualized &&
+    threaded !== false &&
+    (threaded === true || threadTree.hasThreading);
+
+  const [collapsedIds, setCollapsedIds] = React.useState<Set<string>>(() =>
+    defaultCollapsed ? collapsibleIds(threadTree.roots) : new Set()
+  );
+  React.useEffect(() => {
+    setCollapsedIds(
+      defaultCollapsed ? collapsibleIds(threadTree.roots) : new Set()
+    );
+  }, [threadTree, defaultCollapsed]);
+
+  const toggleReplies = React.useCallback((id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  // Stable per-id toggle handlers keep MessageRow's memoization intact (a fresh
+  // closure each render would re-run the Markdown pipeline for every row).
+  const toggleHandlersRef = React.useRef(new Map<string, () => void>());
+  const getToggleHandler = React.useCallback(
+    (id: string) => {
+      const cache = toggleHandlersRef.current;
+      let handler = cache.get(id);
+      if (!handler) {
+        handler = () => toggleReplies(id);
+        cache.set(id, handler);
+      }
+      return handler;
+    },
+    [toggleReplies]
+  );
+
+  const visibleThreadNodes = React.useMemo(
+    () => flattenThreadTree(threadTree.roots, collapsedIds, order === 'desc'),
+    [threadTree, collapsedIds, order]
+  );
+
   const turnIndex = React.useMemo(
     () =>
       turnStartId && order !== 'desc'
@@ -691,6 +760,49 @@ export function SuperChat({
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
     />
   );
+
+  // A single threaded row: indentation + a thread guide for nested replies,
+  // with the collapse control wired through MessageRow.
+  const renderThreadNode = (node: ThreadNode) => {
+    const m = node.message;
+    const hasReplies = node.children.length > 0;
+    return (
+      <div
+        key={m.id}
+        data-slot="superchat-thread-branch"
+        style={
+          node.depth > 0 ? { marginInlineStart: node.depth * 20 } : undefined
+        }
+        className={cn(
+          node.depth > 0 &&
+            'border-s border-neutral-200 ps-3 dark:border-neutral-700'
+        )}
+      >
+        <MessageRow
+          message={m}
+          participant={participantById.get(m.participantId)}
+          isSelf={
+            !!currentParticipantId && m.participantId === currentParticipantId
+          }
+          renderText={renderText}
+          linkBuilder={linkBuilder}
+          onReferenceClick={onReferenceClick}
+          editable={editable}
+          onMessageEdited={handleMessageEdited}
+          defaultCopyFormat={defaultCopyFormat}
+          onOpenMedia={handleOpenMedia}
+          openMediaLabel={labels.openMedia}
+          playMediaLabel={labels.playMedia}
+          mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
+          mediaRetryLabel={mediaFeedProps?.labels?.retry}
+          threaded
+          replyCount={node.descendantCount}
+          collapsed={collapsedIds.has(m.id)}
+          onToggleReplies={hasReplies ? getToggleHandler(m.id) : undefined}
+        />
+      </div>
+    );
+  };
 
   // Stable edit handler so memoized rows don't re-render when the conversation
   // changes. Latest `onMessageEdited`/`conversation` are read from refs.
@@ -943,18 +1055,24 @@ export function SuperChat({
               className="flex-1 overflow-y-auto p-4"
             >
               <div ref={threadContentRef} className="space-y-4">
-                {(turnIndex === -1
-                  ? orderedThread
-                  : orderedThread.slice(0, turnIndex)
-                ).map(renderMessageRow)}
-                {turnIndex !== -1 && (
-                  <div
-                    data-slot="superchat-turn"
-                    className="space-y-4"
-                    style={{ minHeight: turnMinHeight }}
-                  >
-                    {orderedThread.slice(turnIndex).map(renderMessageRow)}
-                  </div>
+                {useThreaded ? (
+                  visibleThreadNodes.map(renderThreadNode)
+                ) : (
+                  <>
+                    {(turnIndex === -1
+                      ? orderedThread
+                      : orderedThread.slice(0, turnIndex)
+                    ).map(renderMessageRow)}
+                    {turnIndex !== -1 && (
+                      <div
+                        data-slot="superchat-turn"
+                        className="space-y-4"
+                        style={{ minHeight: turnMinHeight }}
+                      >
+                        {orderedThread.slice(turnIndex).map(renderMessageRow)}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

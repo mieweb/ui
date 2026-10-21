@@ -66,6 +66,10 @@ export interface SuperChatInboxProps {
   order?: 'asc' | 'desc';
   /** Virtualize the message thread (windowed rendering) for long histories. */
   virtualized?: boolean;
+  /** Threaded (reply-tree) rendering for the active conversation; see {@link SuperChatProps.threaded}. */
+  threaded?: SuperChatProps['threaded'];
+  /** Collapse every thread with replies on first render; see {@link SuperChatProps.defaultCollapsed}. */
+  defaultCollapsed?: SuperChatProps['defaultCollapsed'];
   /** Show the conversation sidebar. */
   showSidebar?: boolean;
   /** Build hrefs for `ref` thread items. */
@@ -123,6 +127,8 @@ export function SuperChatInbox({
   acceptedFileTypes,
   order,
   virtualized,
+  threaded,
+  defaultCollapsed,
   showSidebar = true,
   linkBuilder,
   defaultCopyFormat,
@@ -194,6 +200,8 @@ export function SuperChatInbox({
           acceptedFileTypes={acceptedFileTypes}
           order={order}
           virtualized={virtualized}
+          threaded={threaded}
+          defaultCollapsed={defaultCollapsed}
           linkBuilder={linkBuilder}
           defaultCopyFormat={defaultCopyFormat}
           onMessageSent={onMessageSent}
