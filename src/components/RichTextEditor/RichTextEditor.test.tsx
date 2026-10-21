@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
+import type { MacroGroup } from '../MacroLibrary';
 import {
   processDictation,
   convertAngleBracketsToMustache,
@@ -167,6 +168,338 @@ describe('RichTextEditor', () => {
       );
       paste('<b>hi</b>');
       expect(exec).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('macro addon', () => {
+    let exec: ReturnType<typeof vi.fn>;
+    let previousExec: typeof document.execCommand;
+    beforeEach(() => {
+      previousExec = document.execCommand;
+      exec = vi.fn().mockReturnValue(true);
+      document.execCommand = exec as unknown as typeof document.execCommand;
+    });
+    afterEach(() => {
+      document.execCommand = previousExec;
+    });
+
+    const macros: MacroGroup[] = [
+      {
+        id: 'library',
+        label: 'Default library',
+        macros: [
+          {
+            id: 'cardio',
+            label: 'Cardio — WNL',
+            content: 'Regular rate and rhythm.',
+            shortcut: '.c',
+          },
+        ],
+      },
+    ];
+
+    const clickMacroRow = (label: string, container: Element = document.body) =>
+      fireEvent.click(
+        Array.from(
+          container.querySelectorAll<HTMLButtonElement>('[data-macro-row]')
+        ).find((row) => row.textContent?.includes(label))!
+      );
+
+    it('renders no macro UI without the macros prop', () => {
+      renderWithTheme(<RichTextEditor value="" onChange={() => {}} />);
+      expect(screen.queryByRole('button', { name: /macros/i })).toBeNull();
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
+    });
+
+    it('toggles the docked panel from the toolbar', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          aria-label="Review of Systems"
+        />
+      );
+      const toggle = screen.getByRole('button', { name: /macros/i });
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
+      fireEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        document.querySelector('[data-slot="macro-library"]')
+      ).not.toBeNull();
+      // Panel names its insertion target after the editor's label.
+      expect(screen.getByText('Review of Systems')).toBeInTheDocument();
+    });
+
+    it('forwards macroLabels to the toggle and the docked panel', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          defaultMacrosOpen
+          macroLabels={{
+            macros: 'Textbausteine',
+            hideMacros: 'Textbausteine ausblenden',
+            searchPlaceholder: 'Textbausteine suchen…',
+          }}
+        />
+      );
+      const toggle = screen.getByRole('button', { name: 'Textbausteine' });
+      expect(toggle).toHaveAttribute('title', 'Textbausteine ausblenden');
+      expect(
+        screen.getByPlaceholderText('Textbausteine suchen…')
+      ).toBeInTheDocument();
+    });
+
+    it('opens initially with defaultMacrosOpen', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          defaultMacrosOpen
+        />
+      );
+      expect(
+        document.querySelector('[data-slot="macro-library"]')
+      ).not.toBeNull();
+    });
+
+    it('inserts the macro content through the undo-aware command', () => {
+      const onChange = vi.fn();
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={onChange}
+          macros={macros}
+          defaultMacrosOpen
+          aria-label="Body"
+        />
+      );
+      clickMacroRow('Cardio — WNL');
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    it('inserts only into its own editor when multiple instances exist', () => {
+      const onChangeA = vi.fn();
+      const onChangeB = vi.fn();
+      renderWithTheme(
+        <>
+          <RichTextEditor
+            value=""
+            onChange={onChangeA}
+            macros={macros}
+            defaultMacrosOpen
+            aria-label="Editor A"
+          />
+          <RichTextEditor
+            value=""
+            onChange={onChangeB}
+            macros={macros}
+            defaultMacrosOpen
+            aria-label="Editor B"
+          />
+        </>
+      );
+      const editorB = screen.getByRole('textbox', { name: 'Editor B' });
+      const wrapperB = editorB.closest('[data-slot="rich-text-editor"]')!;
+      clickMacroRow('Cardio — WNL', wrapperB);
+      expect(onChangeB).toHaveBeenCalled();
+      expect(onChangeA).not.toHaveBeenCalled();
+      // Insertion focused the associated editor, not the other instance.
+      expect(document.activeElement).toBe(editorB);
+    });
+
+    it('closing the panel returns focus to the editor', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          defaultMacrosOpen
+          aria-label="Body"
+        />
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Close macros' }));
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
+      expect(document.activeElement).toBe(
+        screen.getByRole('textbox', { name: 'Body' })
+      );
+    });
+
+    describe('typed shortcut expansion', () => {
+      /** Place `text` in the editor with the caret at its end, then press space. */
+      const typeAndPressSpace = (editor: HTMLElement, text: string) => {
+        const textNode = document.createTextNode(text);
+        editor.appendChild(textNode);
+        const range = document.createRange();
+        range.setStart(textNode, text.length);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return fireEvent.keyDown(editor, { key: ' ' });
+      };
+
+      const renderEditor = (onChange = vi.fn()) => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={onChange}
+            macros={macros}
+            aria-label="Body"
+          />
+        );
+        return screen.getByRole('textbox', { name: 'Body' });
+      };
+
+      it('expands a shortcut followed by space, consuming the space', () => {
+        const onChange = vi.fn();
+        const editor = renderEditor(onChange);
+        const notPrevented = typeAndPressSpace(editor, 'Note .c');
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+        // The triggering space is consumed (default prevented) and the
+        // replacement range covers exactly the typed shortcut.
+        expect(notPrevented).toBe(false);
+        expect(window.getSelection()?.toString()).toBe('.c');
+        expect(onChange).toHaveBeenCalled();
+      });
+
+      it('matches shortcuts case-insensitively', () => {
+        const editor = renderEditor();
+        typeAndPressSpace(editor, '.C');
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('leaves unknown tokens alone', () => {
+        const editor = renderEditor();
+        const notPrevented = typeAndPressSpace(editor, 'Note .zz');
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+      });
+
+      it('does not expand mid-word shortcut text', () => {
+        const editor = renderEditor();
+        // ".c" is a suffix of a longer token, not a standalone shortcut.
+        typeAndPressSpace(editor, 'etc.c');
+        expect(exec).not.toHaveBeenCalled();
+      });
+
+      it('does not expand when the word continues in an adjacent inline node', () => {
+        const editor = renderEditor();
+        // etc<strong>.c</strong> — visibly "etc.c", one word.
+        editor.appendChild(document.createTextNode('etc'));
+        const strong = document.createElement('strong');
+        const shortcutNode = document.createTextNode('.c');
+        strong.appendChild(shortcutNode);
+        editor.appendChild(strong);
+        const range = document.createRange();
+        range.setStart(shortcutNode, 2);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const notPrevented = fireEvent.keyDown(editor, { key: ' ' });
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+      });
+
+      it('expands a shortcut split across inline nodes by formatting', () => {
+        const editor = renderEditor();
+        // .<b>c</b> — visibly ".c", bolded mid-shortcut.
+        editor.appendChild(document.createTextNode('.'));
+        const bold = document.createElement('b');
+        const boldText = document.createTextNode('c');
+        bold.appendChild(boldText);
+        editor.appendChild(bold);
+        const range = document.createRange();
+        range.setStart(boldText, 1);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        fireEvent.keyDown(editor, { key: ' ' });
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+        // The replacement selection spans the whole token, not just "c".
+        const replaced = window.getSelection()!.getRangeAt(0);
+        expect(replaced.toString()).toBe('.c');
+      });
+
+      it('expands after a trailing line break inside an inline sibling', () => {
+        const editor = renderEditor();
+        // <strong>one<br></strong>.c — the <br> ends the word, so ".c" is
+        // a standalone token even though the sibling's text ends in "e".
+        const strong = document.createElement('strong');
+        strong.appendChild(document.createTextNode('one'));
+        strong.appendChild(document.createElement('br'));
+        editor.appendChild(strong);
+        const shortcutNode = document.createTextNode('.c');
+        editor.appendChild(shortcutNode);
+        const range = document.createRange();
+        range.setStart(shortcutNode, 2);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        fireEvent.keyDown(editor, { key: ' ' });
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('does not expand during IME composition', () => {
+        const editor = renderEditor();
+        const textNode = document.createTextNode('.c');
+        editor.appendChild(textNode);
+        const range = document.createRange();
+        range.setStart(textNode, 2);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const notPrevented = fireEvent.keyDown(editor, {
+          key: ' ',
+          isComposing: true,
+        });
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+      });
+
+      it('does not expand while the editor is disabled', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            disabled
+            aria-label="Body"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'Body' });
+        typeAndPressSpace(editor, '.c');
+        expect(exec).not.toHaveBeenCalled();
+      });
     });
   });
 });

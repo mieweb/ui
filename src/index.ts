@@ -107,6 +107,7 @@ export * from './components/LanguageSelector';
 export * from './components/ListView';
 export * from './components/LoadingPage';
 export * from './components/LogoUploader';
+export * from './components/MacroLibrary';
 export * from './components/Markdown';
 export * from './components/MedicationList';
 export * from './components/MediaEditor';
