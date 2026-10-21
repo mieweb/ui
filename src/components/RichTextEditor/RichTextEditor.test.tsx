@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
 import type { MacroGroup } from '../MacroLibrary';
@@ -604,6 +604,17 @@ describe('RichTextEditor', () => {
       expect(notPrevented).toBe(true);
     });
 
+    it.each(['constructor', 'toString', '__proto__'])(
+      'leaves inherited object property "%s" unchanged',
+      (word) => {
+        const editor = renderEditor();
+        const notPrevented = typeAndPressSpace(editor, word);
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+        expect(editor.textContent).toBe(word);
+      }
+    );
+
     it('ignores a token preceded by text in an adjacent inline node', () => {
       // note <b>##</b> — the line starts with "note", not the token.
       const editor = renderEditor();
@@ -692,6 +703,72 @@ describe('RichTextEditor', () => {
         false,
         'Regular rate and rhythm.'
       );
+    });
+  });
+
+  describe('dictation with a hidden toolbar', () => {
+    class MockRecognition {
+      static instances: MockRecognition[] = [];
+      continuous = false;
+      interimResults = false;
+      lang = '';
+      maxAlternatives = 1;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      onresult: unknown = null;
+      onerror: unknown = null;
+      start = vi.fn(() => this.onstart?.());
+      stop = vi.fn();
+      constructor() {
+        MockRecognition.instances.push(this);
+      }
+    }
+    const win = window as unknown as Record<string, unknown>;
+    let getUserMedia: ReturnType<typeof vi.fn>;
+    beforeEach(() => {
+      MockRecognition.instances = [];
+      win.SpeechRecognition = MockRecognition;
+      getUserMedia = vi.fn().mockResolvedValue({ getTracks: () => [] });
+      Object.defineProperty(navigator, 'mediaDevices', {
+        value: { getUserMedia },
+        configurable: true,
+      });
+    });
+    afterEach(() => {
+      delete win.SpeechRecognition;
+    });
+
+    const editorProps = (toolbar?: 'visible' | 'hidden') => (
+      <RichTextEditor
+        value=""
+        onChange={() => {}}
+        aria-label="Body"
+        toolbar={toolbar}
+      />
+    );
+
+    it('stops a running dictation when the toolbar is hidden', async () => {
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      await waitFor(() => expect(MockRecognition.instances).toHaveLength(1));
+      const recognition = MockRecognition.instances[0];
+      expect(recognition.start).toHaveBeenCalled();
+      view.rerender(editorProps('hidden'));
+      expect(recognition.stop).toHaveBeenCalled();
+    });
+
+    it('cancels a start awaiting microphone permission when the toolbar hides', async () => {
+      let grantPermission: (value: { getTracks: () => [] }) => void;
+      getUserMedia.mockImplementation(
+        () => new Promise((resolve) => (grantPermission = resolve))
+      );
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      view.rerender(editorProps('hidden'));
+      grantPermission!({ getTracks: () => [] });
+      await waitFor(() => expect(getUserMedia).toHaveBeenCalled());
+      // Permission resolved after the toolbar hid — no session may start.
+      expect(MockRecognition.instances).toHaveLength(0);
     });
   });
 });

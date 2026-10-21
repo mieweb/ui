@@ -271,6 +271,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
     const hasMacros = Boolean(macros);
     const isEmpty = isHtmlEmpty(value);
+    const toolbarVisible = toolbar !== 'hidden';
+    // Mirrored into a ref so async dictation code can read the live value
+    // after awaiting microphone permission.
+    const toolbarVisibleRef = React.useRef(toolbarVisible);
 
     React.useImperativeHandle(ref, () => editorRef.current as HTMLDivElement);
 
@@ -287,6 +291,20 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         }
       };
     }, []);
+
+    // Hiding the toolbar removes the Stop control and listening indicator,
+    // so a running dictation must not keep inserting text (and restarting
+    // through onend) with no way to stop it.
+    React.useEffect(() => {
+      toolbarVisibleRef.current = toolbarVisible;
+      if (toolbarVisible) return;
+      if (recognitionRef.current && isListeningRef.current) {
+        shouldRestartRef.current = false;
+        isListeningRef.current = false;
+        recognitionRef.current.stop();
+        setIsListening(false);
+      }
+    }, [toolbarVisible]);
 
     React.useEffect(() => {
       if (editorRef.current && editorRef.current.innerHTML !== value) {
@@ -553,8 +571,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     ) => {
       const collected = collectTokenBeforeCaret();
       if (!collected || !collected.atLineStart) return false;
+      // Own-property check: tokens like "constructor" or "toString" resolve
+      // inherited object members and must not be treated as rules.
+      if (!Object.hasOwn(MARKDOWN_BLOCK_RULES, collected.token)) return false;
       const rule = MARKDOWN_BLOCK_RULES[collected.token];
-      if (!rule) return false;
 
       event.preventDefault();
       const replaceRange = selectCollectedToken(collected);
@@ -624,6 +644,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         );
         return;
       }
+
+      // The toolbar (and its Stop control) may have been hidden while
+      // awaiting microphone permission — do not start an unstoppable session.
+      if (!toolbarVisibleRef.current) return;
 
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
@@ -708,7 +732,6 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     const iconButtonClass = 'h-8 w-8 p-0';
-    const toolbarVisible = toolbar !== 'hidden';
 
     return (
       <div

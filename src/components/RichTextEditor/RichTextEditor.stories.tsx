@@ -23,7 +23,7 @@ const meta: Meta<typeof RichTextEditor> = {
 
 ### Don't use it when
 
-- The stored format is **Markdown**, you need headings/tables/code blocks, real undo history or **multi-user collaboration** — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
+- The stored format is **Markdown**, you need links/images/tables/code blocks, real undo history or **multi-user collaboration** — \`RichEditor\` (\`@mieweb/ui/kerebron\`). Headings H1–H3 alone no longer force the switch — the opt-in \`markdownShortcuts\` covers them here.
 - Plain text is enough — \`Textarea\`; a single line — \`Input\`.
 - The HTML will be rendered to other users without sanitising: the editor emits raw \`innerHTML\` and does not sanitise pasted content.
 - You need offline/on-device speech recognition — the Web Speech API streams to the vendor's service; see \`RecordButton\` + your own transcription for a blob-based flow.
@@ -55,7 +55,7 @@ The host owns the HTML string and is responsible for sanitising it before storag
 ### Limitations
 
 - Accessibility: the editable region is labelled by \`aria-label\` **or falls back to the placeholder text**; toolbar icon buttons have \`aria-label\` + \`title\` (Bold, Italic, Underline, Bullet list, Numbered list, Align left/center/right), while Variables, Convert and Dictate rely on visible text. No \`aria-pressed\` reflects the current formatting, no \`aria-live\` announces dictation start/stop or errors (they go to \`onDictationError\`, else \`console.warn\`). The placeholder is \`aria-hidden\`.
-- Formatting is \`document.execCommand\` — deprecated, browser-dependent markup (\`<b>\` vs \`<strong>\`, inline styles for alignment), and there are no headings, links, images, tables or code. Undo/redo is the browser's native contentEditable history. Setting \`value\` externally rewrites \`innerHTML\` and **drops the caret**.
+- Formatting is \`document.execCommand\` — deprecated, browser-dependent markup (\`<b>\` vs \`<strong>\`, inline styles for alignment), and there are no links, images, tables or code; headings are limited to H1–H3 via the opt-in \`markdownShortcuts\` block rules (no toolbar heading control). Undo/redo is the browser's native contentEditable history. Setting \`value\` externally rewrites \`innerHTML\` and **drops the caret**.
 - Dictation: requests \`getUserMedia\` first to force the permission prompt, then runs \`SpeechRecognition\` with \`lang\` hard-coded to \`en-US\`, \`continuous\`, auto-restarting on end; only final results are inserted. Unsupported browsers (Firefox) get a disabled button with an English \`title\`. \`processDictation\`'s punctuation heuristics are English-only.
 - The \`<< >>\` converter and \`{{ }}\` tokens are plain text — nothing validates that a variable exists. \`insertValue\` with newlines becomes \`<br>\`s.
 - \`markdownShortcuts\` covers **block rules only** (headings, lists, block quote) at the start of a line; inline markdown (\`**bold**\`, \`[links]\`) is not interpreted, and the stored format remains HTML. With \`toolbar="hidden"\` there is no pointer-accessible formatting UI — typed shortcuts and the browser's native \u2318/Ctrl+B/I/U are the only input paths.
