@@ -12,7 +12,7 @@ const meta: Meta<typeof RichTextEditor> = {
       description: {
         component: `### What it's for
 
-**A lightweight HTML editor for templated notes and letters, with variable insertion, macros and dictation.** \`RichTextEditor\` is a \`contentEditable\` \`div\` (\`role="textbox" aria-multiline\`) that mirrors its \`innerHTML\` to \`value\` / \`onChange\` — the stored format is **HTML**. The toolbar uses \`document.execCommand\` for bold, italic, underline, bullet/numbered lists and left/center/right alignment. Pass \`variableGroups\` (\`{ label, variables: [{ label, value, insertValue? }] }\`) to get a searchable **Variables** \`Dropdown\` that inserts \`{{tokens}}\` at the caret, plus a **\`<< >>\` to \`{{ }}\`** converter (\`convertAngleBracketsToMustache\`). Pass \`macros\` (\`MacroGroup[]\`) to add a **Macros** toolbar toggle that docks a \`MacroLibrary\` panel inside the editor frame — searchable, grouped snippets inserted at the remembered caret through the native undo stack (\`defaultMacrosOpen\`, \`onCreateMacro\`); omit it and the editor is unchanged. \`enableDictation\` (default \`true\`) adds a **Dictate** button on the Web Speech API (\`SpeechRecognition\` / \`webkitSpeechRecognition\`) that runs spoken punctuation through \`processDictation\` ("period" → ".", "new paragraph", …). \`placeholder\`, \`disabled\`, \`aria-label\`, \`onDictationError\` complete the surface; the ref is the editable \`div\`. Everything ships on the main \`@mieweb/ui\` entry with no extra peers.
+**A lightweight HTML editor for templated notes and letters, with variable insertion, macros and dictation.** \`RichTextEditor\` is a \`contentEditable\` \`div\` (\`role="textbox" aria-multiline\`) that mirrors its \`innerHTML\` to \`value\` / \`onChange\` — the stored format is **HTML**. The toolbar uses \`document.execCommand\` for bold, italic, underline, bullet/numbered lists and left/center/right alignment. Pass \`variableGroups\` (\`{ label, variables: [{ label, value, insertValue? }] }\`) to get a searchable **Variables** \`Dropdown\` that inserts \`{{tokens}}\` at the caret, plus a **\`<< >>\` to \`{{ }}\`** converter (\`convertAngleBracketsToMustache\`). Pass \`macros\` (\`MacroGroup[]\`) to add a **Macros** toolbar toggle that docks a \`MacroLibrary\` panel inside the editor frame — searchable, grouped snippets inserted at the remembered caret through the native undo stack (\`defaultMacrosOpen\`, \`onCreateMacro\`); omit it and the editor is unchanged. \`enableDictation\` (default \`true\`) adds a **Dictate** button on the Web Speech API (\`SpeechRecognition\` / \`webkitSpeechRecognition\`) that runs spoken punctuation through \`processDictation\` ("period" → ".", "new paragraph", …). \`toolbar="hidden"\` removes the toolbar for chromeless surfaces, and \`markdownShortcuts\` expands block tokens typed at the start of a line (\`#\`/\`##\`/\`###\` + space → heading, \`-\`/\`*\` → bullet list, \`1.\` → numbered list, \`>\` → block quote) — pair them so formatting stays reachable without chrome. \`placeholder\`, \`disabled\`, \`aria-label\`, \`onDictationError\` complete the surface; the ref is the editable \`div\`. Everything ships on the main \`@mieweb/ui\` entry with no extra peers.
 
 ### Use it when
 
@@ -58,6 +58,7 @@ The host owns the HTML string and is responsible for sanitising it before storag
 - Formatting is \`document.execCommand\` — deprecated, browser-dependent markup (\`<b>\` vs \`<strong>\`, inline styles for alignment), and there are no headings, links, images, tables or code. Undo/redo is the browser's native contentEditable history. Setting \`value\` externally rewrites \`innerHTML\` and **drops the caret**.
 - Dictation: requests \`getUserMedia\` first to force the permission prompt, then runs \`SpeechRecognition\` with \`lang\` hard-coded to \`en-US\`, \`continuous\`, auto-restarting on end; only final results are inserted. Unsupported browsers (Firefox) get a disabled button with an English \`title\`. \`processDictation\`'s punctuation heuristics are English-only.
 - The \`<< >>\` converter and \`{{ }}\` tokens are plain text — nothing validates that a variable exists. \`insertValue\` with newlines becomes \`<br>\`s.
+- \`markdownShortcuts\` covers **block rules only** (headings, lists, block quote) at the start of a line; inline markdown (\`**bold**\`, \`[links]\`) is not interpreted, and the stored format remains HTML. With \`toolbar="hidden"\` there is no pointer-accessible formatting UI — typed shortcuts and the browser's native \u2318/Ctrl+B/I/U are the only input paths.
 - The surface uses \`prose prose-sm\` classes that **have no effect** unless the host installs \`@tailwindcss/typography\`; \`min-h-[250px]\` is fixed. RTL: alignment commands are physical (\`justifyLeft\`/\`justifyRight\`), the placeholder is anchored \`left-0\`, and the toolbar is a symmetric flex row.
 - Theming: \`border-border\`, \`bg-background\`, \`bg-muted\`, \`text-muted-foreground\`; disabled text hard-codes \`neutral-700/300\`. Depends on \`Button\`, \`Separator\`, \`Dropdown\`, \`lucide-react\`. Entry \`@mieweb/ui\`.`,
       },
@@ -174,4 +175,61 @@ export const Disabled: Story = {
       />
     </div>
   ),
+};
+
+function MarkdownShortcutsExample() {
+  const [value, setValue] = useState('');
+  return (
+    <div className="max-w-2xl">
+      <RichTextEditor
+        value={value}
+        onChange={setValue}
+        markdownShortcuts
+        placeholder="Type ## then space for a heading, - for a bullet list, 1. for a numbered list, > for a quote…"
+        aria-label="Note body"
+      />
+    </div>
+  );
+}
+
+export const MarkdownShortcuts: Story = {
+  name: 'Markdown shortcuts',
+  render: () => <MarkdownShortcutsExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `markdownShortcuts`, block tokens typed at the start of a line expand on space: `#`/`##`/`###` → headings, `-`/`*` → bullet list, `1.` → numbered list, `>` → block quote. Inline markdown is not interpreted.',
+      },
+    },
+  },
+};
+
+function HiddenToolbarExample() {
+  const [value, setValue] = useState('');
+  return (
+    <div className="max-w-2xl">
+      <RichTextEditor
+        value={value}
+        onChange={setValue}
+        toolbar="hidden"
+        markdownShortcuts
+        placeholder="A chromeless surface — use markdown shortcuts or ⌘/Ctrl+B/I/U…"
+        aria-label="Note body"
+      />
+    </div>
+  );
+}
+
+export const HiddenToolbar: Story = {
+  name: 'Hidden toolbar',
+  render: () => <HiddenToolbarExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`toolbar="hidden"` removes the toolbar entirely for chromeless, document-like surfaces. Pair it with `markdownShortcuts` so formatting stays reachable.',
+      },
+    },
+  },
 };

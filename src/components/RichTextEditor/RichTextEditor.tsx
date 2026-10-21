@@ -99,6 +99,20 @@ export interface RichTextEditorProps {
   };
   /** Forwarded to the macro panel's "Save as macro" action. */
   onCreateMacro?: () => void;
+  /**
+   * Toolbar visibility. `'hidden'` removes the toolbar entirely for
+   * chromeless surfaces (typed shortcuts keep working; pair with
+   * `markdownShortcuts` so formatting stays reachable). Defaults to
+   * `'visible'` — existing consumers are unchanged.
+   */
+  toolbar?: 'visible' | 'hidden';
+  /**
+   * Expand markdown-style block shortcuts typed at the start of a line and
+   * followed by a space: `#`/`##`/`###` → headings, `-`/`*` → bullet list,
+   * `1.` → numbered list, `>` → block quote. Inline rules (`**bold**`) are
+   * not interpreted. Defaults to false.
+   */
+  markdownShortcuts?: boolean;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
 }
@@ -148,6 +162,24 @@ function getSpeechRecognition(): SpeechRecognitionCtor | undefined {
 /** Elements that end a visible word, equivalent to whitespace. */
 const BLOCK_BOUNDARY =
   /^(BR|DIV|P|LI|UL|OL|TABLE|TR|TD|TH|H[1-6]|BLOCKQUOTE|PRE|HR)$/;
+
+/**
+ * Markdown-style block tokens expanded on space at the start of a line.
+ * Values feed `document.execCommand`; block rules only — inline markdown
+ * (e.g. `**bold**`) is intentionally not interpreted.
+ */
+const MARKDOWN_BLOCK_RULES: Record<
+  string,
+  { command: string; value?: string }
+> = {
+  '#': { command: 'formatBlock', value: 'h1' },
+  '##': { command: 'formatBlock', value: 'h2' },
+  '###': { command: 'formatBlock', value: 'h3' },
+  '-': { command: 'insertUnorderedList' },
+  '*': { command: 'insertUnorderedList' },
+  '1.': { command: 'insertOrderedList' },
+  '>': { command: 'formatBlock', value: 'blockquote' },
+};
 
 /**
  * Last non-empty text node rendered inside `node`, or 'boundary' when it
@@ -218,6 +250,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       defaultMacrosOpen = false,
       macroLabels,
       onCreateMacro,
+      toolbar = 'visible',
+      markdownShortcuts = false,
       'aria-label': ariaLabel,
     },
     ref
@@ -427,43 +461,26 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     /**
-     * Expand a typed macro shortcut (dot phrase). When the word immediately
-     * before the caret matches a macro shortcut and the user presses space,
-     * the shortcut is replaced with the macro content in a single undoable
-     * edit; the triggering space is consumed.
+     * The visible word immediately before the collapsed caret, spanning
+     * adjacent inline nodes (`.<b>c</b>` is ".c"). Returns the token, the
+     * range coordinates to replace it, and whether it sits at the start of
+     * its line (nothing but a block boundary before it).
      */
-    const expandTypedShortcut = (
-      event: React.KeyboardEvent<HTMLDivElement>
-    ) => {
-      if (
-        disabled ||
-        event.key !== ' ' ||
-        // Space during IME composition selects/converts a candidate; never
-        // hijack it for macro expansion.
-        event.nativeEvent.isComposing ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        !macros
-      )
-        return;
+    const collectTokenBeforeCaret = () => {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0 || !selection.isCollapsed)
-        return;
+        return null;
       const caret = selection.getRangeAt(0);
       const node = caret.startContainer;
       if (
         node.nodeType !== Node.TEXT_NODE ||
         !editorRef.current?.contains(node)
       )
-        return;
+        return null;
       const typed = /(\S+)$/.exec(
         (node.textContent ?? '').slice(0, caret.startOffset)
       );
-      if (!typed) return;
-      // Collect the complete visible token — a word may span adjacent
-      // inline nodes (`.<b>c</b>` is ".c"; `etc<strong>.c</strong>` is
-      // "etc.c", which matches no shortcut and is left alone).
+      if (!typed) return null;
       let token = typed[1];
       let startNode: Node = node;
       let startOffset = caret.startOffset - typed[1].length;
@@ -477,19 +494,111 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         startNode = prev;
         startOffset = text.length - continued[1].length;
       }
-      const lowered = token.toLowerCase();
+      const atLineStart =
+        startOffset === 0 && !previousVisibleText(startNode, editorRef.current);
+      return {
+        token,
+        startNode,
+        startOffset,
+        caretNode: node,
+        caretOffset: caret.startOffset,
+        atLineStart,
+        selection,
+      };
+    };
+
+    /** Select `collected`'s token so the next editing command replaces it. */
+    const selectCollectedToken = (
+      collected: NonNullable<ReturnType<typeof collectTokenBeforeCaret>>
+    ) => {
+      const replaceRange = document.createRange();
+      replaceRange.setStart(collected.startNode, collected.startOffset);
+      replaceRange.setEnd(collected.caretNode, collected.caretOffset);
+      collected.selection.removeAllRanges();
+      collected.selection.addRange(replaceRange);
+      return replaceRange;
+    };
+
+    /**
+     * Expand a typed macro shortcut (dot phrase). When the word immediately
+     * before the caret matches a macro shortcut and the user presses space,
+     * the shortcut is replaced with the macro content in a single undoable
+     * edit; the triggering space is consumed.
+     */
+    const expandTypedShortcut = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      if (!macros) return;
+      const collected = collectTokenBeforeCaret();
+      if (!collected) return;
+      const lowered = collected.token.toLowerCase();
       const macro = macros
         .flatMap((group) => group.macros)
         .find((candidate) => candidate.shortcut?.toLowerCase() === lowered);
       if (!macro) return;
 
       event.preventDefault();
-      const replaceRange = document.createRange();
-      replaceRange.setStart(startNode, startOffset);
-      replaceRange.setEnd(node, caret.startOffset);
-      selection.removeAllRanges();
-      selection.addRange(replaceRange);
+      selectCollectedToken(collected);
       insertTextAtSelection(macro.content);
+    };
+
+    /**
+     * Apply a markdown block rule when the token before the caret starts its
+     * line and matches `MARKDOWN_BLOCK_RULES` (`##` + space → heading). The
+     * token removal and the block command both run through execCommand so
+     * the expansion stays natively undoable. Returns true when handled.
+     */
+    const applyMarkdownShortcut = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      const collected = collectTokenBeforeCaret();
+      if (!collected || !collected.atLineStart) return false;
+      const rule = MARKDOWN_BLOCK_RULES[collected.token];
+      if (!rule) return false;
+
+      event.preventDefault();
+      const replaceRange = selectCollectedToken(collected);
+      let deleted = false;
+      try {
+        deleted = document.execCommand('delete', false);
+      } catch {
+        deleted = false;
+      }
+      if (!deleted) {
+        // Fallback (and jsdom path): manual removal, caret at the line start.
+        replaceRange.deleteContents();
+        replaceRange.collapse(true);
+        collected.selection.removeAllRanges();
+        collected.selection.addRange(replaceRange);
+      }
+      try {
+        document.execCommand(rule.command, false, rule.value);
+      } catch {
+        // jsdom: no execCommand — the token is still consumed.
+      }
+      editorRef.current?.focus();
+      saveSelection();
+      updateContent();
+      return true;
+    };
+
+    /** Space-keydown pipeline: markdown block rules, then macro shortcuts. */
+    const handleEditorKeyDown = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      if (
+        disabled ||
+        event.key !== ' ' ||
+        // Space during IME composition selects/converts a candidate; never
+        // hijack it for shortcut expansion.
+        event.nativeEvent.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey
+      )
+        return;
+      if (markdownShortcuts && applyMarkdownShortcut(event)) return;
+      expandTypedShortcut(event);
     };
 
     const toggleDictation = async () => {
@@ -599,6 +708,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     const iconButtonClass = 'h-8 w-8 p-0';
+    const toolbarVisible = toolbar !== 'hidden';
 
     return (
       <div
@@ -608,225 +718,230 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
           className
         )}
       >
-        <div
-          data-slot="rich-text-editor-toolbar"
-          className="border-border bg-muted/30 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2"
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('bold')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Bold"
-            title="Bold"
+        {toolbarVisible && (
+          <div
+            data-slot="rich-text-editor-toolbar"
+            className="border-border bg-muted/30 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2"
           >
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('italic')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Italic"
-            title="Italic"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('underline')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Underline"
-            title="Underline"
-          >
-            <Underline className="h-4 w-4" />
-          </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('bold')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Bold"
+              title="Bold"
+            >
+              <Bold className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('italic')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Italic"
+              title="Italic"
+            >
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('underline')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Underline"
+              title="Underline"
+            >
+              <Underline className="h-4 w-4" />
+            </Button>
 
-          <Separator orientation="vertical" className="mx-1 h-6" />
+            <Separator orientation="vertical" className="mx-1 h-6" />
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('insertUnorderedList')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Bullet list"
-            title="Bullet list"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('insertOrderedList')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Numbered list"
-            title="Numbered list"
-          >
-            <ListOrdered className="h-4 w-4" />
-          </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('insertUnorderedList')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Bullet list"
+              title="Bullet list"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('insertOrderedList')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Numbered list"
+              title="Numbered list"
+            >
+              <ListOrdered className="h-4 w-4" />
+            </Button>
 
-          <Separator orientation="vertical" className="mx-1 h-6" />
+            <Separator orientation="vertical" className="mx-1 h-6" />
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('justifyLeft')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Align left"
-            title="Align left"
-          >
-            <AlignLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('justifyCenter')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Align center"
-            title="Align center"
-          >
-            <AlignCenter className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('justifyRight')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Align right"
-            title="Align right"
-          >
-            <AlignRight className="h-4 w-4" />
-          </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('justifyLeft')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Align left"
+              title="Align left"
+            >
+              <AlignLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('justifyCenter')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Align center"
+              title="Align center"
+            >
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('justifyRight')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label="Align right"
+              title="Align right"
+            >
+              <AlignRight className="h-4 w-4" />
+            </Button>
 
-          {hasVariables && (
-            <>
-              <Separator orientation="vertical" className="mx-1 h-6" />
-              <Dropdown
-                placement="bottom-start"
-                width={240}
-                searchable
-                searchPlaceholder="Search variables…"
-                searchAriaLabel="Search template variables"
-                disabled={disabled}
-                trigger={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 gap-1 px-2"
-                    disabled={disabled}
-                    title="Insert variable"
-                  >
-                    <Braces className="h-4 w-4" />
-                    <span className="ms-1 text-xs">Variables</span>
-                  </Button>
-                }
-              >
-                {variableGroups!.map((group, groupIndex) => (
-                  <React.Fragment key={group.label}>
-                    {groupIndex > 0 && <DropdownSeparator />}
-                    <DropdownLabel>{group.label}</DropdownLabel>
-                    {group.variables.map((variable) => (
-                      <DropdownItem
-                        key={variable.value}
-                        onClick={() => insertVariable(variable)}
-                      >
-                        {variable.label}
-                      </DropdownItem>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </Dropdown>
+            {hasVariables && (
+              <>
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Dropdown
+                  placement="bottom-start"
+                  width={240}
+                  searchable
+                  searchPlaceholder="Search variables…"
+                  searchAriaLabel="Search template variables"
+                  disabled={disabled}
+                  trigger={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-1 px-2"
+                      disabled={disabled}
+                      title="Insert variable"
+                    >
+                      <Braces className="h-4 w-4" />
+                      <span className="ms-1 text-xs">Variables</span>
+                    </Button>
+                  }
+                >
+                  {variableGroups!.map((group, groupIndex) => (
+                    <React.Fragment key={group.label}>
+                      {groupIndex > 0 && <DropdownSeparator />}
+                      <DropdownLabel>{group.label}</DropdownLabel>
+                      {group.variables.map((variable) => (
+                        <DropdownItem
+                          key={variable.value}
+                          onClick={() => insertVariable(variable)}
+                        >
+                          {variable.label}
+                        </DropdownItem>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </Dropdown>
 
-              <Separator orientation="vertical" className="mx-1 h-6" />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleConvertToMustache}
-                disabled={disabled}
-                className="h-8 gap-1 px-2"
-                title="Convert <<field>> to {{field}}"
-              >
-                <Replace className="h-4 w-4" />
-                <span className="ms-1 text-xs">{'<< >> to {{ }}'}</span>
-              </Button>
-            </>
-          )}
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleConvertToMustache}
+                  disabled={disabled}
+                  className="h-8 gap-1 px-2"
+                  title="Convert <<field>> to {{field}}"
+                >
+                  <Replace className="h-4 w-4" />
+                  <span className="ms-1 text-xs">{'<< >> to {{ }}'}</span>
+                </Button>
+              </>
+            )}
 
-          {enableDictation && (
-            <>
-              <Separator orientation="vertical" className="mx-1 h-6" />
-              <Button
-                type="button"
-                variant={isListening ? 'danger' : 'ghost'}
-                size="sm"
-                onClick={toggleDictation}
-                disabled={disabled || !speechSupported}
-                className={cn('h-8 gap-1 px-2', isListening && 'animate-pulse')}
-                title={
-                  !speechSupported
-                    ? 'Speech recognition not supported in this browser'
-                    : isListening
-                      ? 'Stop dictation'
-                      : 'Start dictation'
-                }
-              >
-                {isListening ? (
-                  <MicOff className="h-4 w-4" />
-                ) : (
-                  <Mic className="h-4 w-4" />
-                )}
-                <span className="ms-1 text-xs">
-                  {isListening ? 'Stop' : 'Dictate'}
-                </span>
-              </Button>
-            </>
-          )}
+            {enableDictation && (
+              <>
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Button
+                  type="button"
+                  variant={isListening ? 'danger' : 'ghost'}
+                  size="sm"
+                  onClick={toggleDictation}
+                  disabled={disabled || !speechSupported}
+                  className={cn(
+                    'h-8 gap-1 px-2',
+                    isListening && 'animate-pulse'
+                  )}
+                  title={
+                    !speechSupported
+                      ? 'Speech recognition not supported in this browser'
+                      : isListening
+                        ? 'Stop dictation'
+                        : 'Start dictation'
+                  }
+                >
+                  {isListening ? (
+                    <MicOff className="h-4 w-4" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
+                  <span className="ms-1 text-xs">
+                    {isListening ? 'Stop' : 'Dictate'}
+                  </span>
+                </Button>
+              </>
+            )}
 
-          {hasMacros && (
-            <>
-              <Separator orientation="vertical" className="mx-1 h-6" />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setMacrosOpen((open) => !open)}
-                disabled={disabled}
-                className={cn('h-8 gap-1 px-2', macrosOpen && 'bg-muted')}
-                aria-expanded={macrosOpen}
-                aria-controls={macrosOpen ? macroPanelId : undefined}
-                title={
-                  macrosOpen
-                    ? (macroLabels?.hideMacros ?? 'Hide macros')
-                    : (macroLabels?.showMacros ?? 'Show macros')
-                }
-              >
-                <BookOpen className="h-4 w-4" />
-                <span className="ms-1 text-xs">
-                  {macroLabels?.macros ?? 'Macros'}
-                </span>
-              </Button>
-            </>
-          )}
-        </div>
+            {hasMacros && (
+              <>
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMacrosOpen((open) => !open)}
+                  disabled={disabled}
+                  className={cn('h-8 gap-1 px-2', macrosOpen && 'bg-muted')}
+                  aria-expanded={macrosOpen}
+                  aria-controls={macrosOpen ? macroPanelId : undefined}
+                  title={
+                    macrosOpen
+                      ? (macroLabels?.hideMacros ?? 'Hide macros')
+                      : (macroLabels?.showMacros ?? 'Show macros')
+                  }
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span className="ms-1 text-xs">
+                    {macroLabels?.macros ?? 'Macros'}
+                  </span>
+                </Button>
+              </>
+            )}
+          </div>
+        )}
 
         <div className="relative flex min-h-0 flex-1 flex-col">
           <div
@@ -854,7 +969,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onPaste={handlePaste}
               onDrop={handleDrop}
               onBlur={hasMacros ? saveSelection : undefined}
-              onKeyDown={hasMacros ? expandTypedShortcut : undefined}
+              onKeyDown={
+                hasMacros || markdownShortcuts ? handleEditorKeyDown : undefined
+              }
               onKeyUp={hasMacros ? saveSelection : undefined}
               onMouseUp={hasMacros ? saveSelection : undefined}
               className={cn(
