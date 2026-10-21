@@ -12,10 +12,17 @@ import {
   Replace,
   Mic,
   MicOff,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Separator } from '../Separator';
+import {
+  MacroLibrary,
+  type Macro,
+  type MacroGroup,
+  type MacroLibraryProps,
+} from '../MacroLibrary';
 import {
   Dropdown,
   DropdownItem,
@@ -69,6 +76,29 @@ export interface RichTextEditorProps {
    * DOM. Without it, pasted markup is inserted as the browser provides it.
    */
   sanitizeHtml?: (html: string) => string;
+  /**
+   * Grouped macros for the optional macro addon. When omitted the editor is
+   * unchanged. When provided, a "Macros" toolbar toggle docks a searchable
+   * macro panel inside the editor; selecting a macro inserts its content at
+   * the retained caret position. Typing a macro shortcut (e.g. `.b`)
+   * followed by a space expands it in place, panel open or not.
+   */
+  macros?: MacroGroup[];
+  /** Open the macro panel initially. Defaults to false. */
+  defaultMacrosOpen?: boolean;
+  /**
+   * Overridable labels for the macro addon (i18n). Panel labels are
+   * forwarded to the docked `MacroLibrary`; `macros` doubles as the toolbar
+   * toggle text, and `showMacros`/`hideMacros` set the toggle's title.
+   */
+  macroLabels?: MacroLibraryProps['labels'] & {
+    /** Toggle title while the panel is closed. Defaults to "Show macros". */
+    showMacros?: string;
+    /** Toggle title while the panel is open. Defaults to "Hide macros". */
+    hideMacros?: string;
+  };
+  /** Forwarded to the macro panel's "Save as macro" action. */
+  onCreateMacro?: () => void;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
 }
@@ -115,6 +145,57 @@ function getSpeechRecognition(): SpeechRecognitionCtor | undefined {
   return w.SpeechRecognition || w.webkitSpeechRecognition;
 }
 
+/** Elements that end a visible word, equivalent to whitespace. */
+const BLOCK_BOUNDARY =
+  /^(BR|DIV|P|LI|UL|OL|TABLE|TR|TD|TH|H[1-6]|BLOCKQUOTE|PRE|HR)$/;
+
+/**
+ * Last non-empty text node rendered inside `node`, or 'boundary' when it
+ * ends with a line break or block element.
+ */
+function lastTextWithin(node: Node): Text | 'boundary' | null {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return (node.textContent ?? '').length > 0 ? (node as Text) : null;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return null;
+  if (BLOCK_BOUNDARY.test((node as HTMLElement).tagName)) return 'boundary';
+  for (let child = node.lastChild; child; child = child.previousSibling) {
+    const found = lastTextWithin(child);
+    if (found) return found;
+  }
+  return null;
+}
+
+/**
+ * Previous visible text node before `node`, looking across adjacent inline
+ * elements (e.g. the "." in `.<b>c</b>` precedes the "c"). Returns null at
+ * a block/line-break boundary or the editor root, where a word cannot
+ * continue.
+ */
+function previousVisibleText(node: Node, root: HTMLElement): Text | null {
+  let current: Node = node;
+  while (current !== root) {
+    let sibling: Node | null = current.previousSibling;
+    while (sibling) {
+      const found = lastTextWithin(sibling);
+      if (found === 'boundary') return null;
+      if (found) return found;
+      sibling = sibling.previousSibling;
+    }
+    const parent: Node | null = current.parentNode;
+    if (!parent) return null;
+    if (
+      parent !== root &&
+      parent.nodeType === Node.ELEMENT_NODE &&
+      BLOCK_BOUNDARY.test((parent as HTMLElement).tagName)
+    ) {
+      return null;
+    }
+    current = parent;
+  }
+  return null;
+}
+
 /**
  * A presentational rich-text editor with formatting, template-variable
  * insertion and optional speech-to-text dictation. Content is supplied and
@@ -133,6 +214,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       onDictationError,
       disabled = false,
       sanitizeHtml,
+      macros,
+      defaultMacrosOpen = false,
+      macroLabels,
+      onCreateMacro,
       'aria-label': ariaLabel,
     },
     ref
@@ -143,8 +228,14 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
     const isListeningRef = React.useRef(false);
     const shouldRestartRef = React.useRef(false);
+    const [macrosOpen, setMacrosOpen] = React.useState(defaultMacrosOpen);
+    // Last caret/selection inside the editable region, retained while the
+    // macro panel has focus so insertion lands where the clinician left off.
+    const savedRangeRef = React.useRef<Range | null>(null);
+    const macroPanelId = React.useId();
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
+    const hasMacros = Boolean(macros);
     const isEmpty = isHtmlEmpty(value);
 
     React.useImperativeHandle(ref, () => editorRef.current as HTMLDivElement);
@@ -261,6 +352,144 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const reportError = (message: string) => {
       if (onDictationError) onDictationError(message);
       else if (typeof console !== 'undefined') console.warn(message);
+    };
+
+    /** Bookmark the selection whenever it lives inside the editable region. */
+    const saveSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !editorRef.current)
+        return;
+      const range = selection.getRangeAt(0);
+      if (editorRef.current.contains(range.commonAncestorContainer)) {
+        savedRangeRef.current = range.cloneRange();
+      }
+    };
+
+    /** Focus the editor and restore the bookmarked selection if still valid. */
+    const focusRestoringSelection = () => {
+      if (!editorRef.current) return;
+      editorRef.current.focus();
+      const saved = savedRangeRef.current;
+      const selection = window.getSelection();
+      if (
+        saved &&
+        selection &&
+        editorRef.current.contains(saved.commonAncestorContainer)
+      ) {
+        selection.removeAllRanges();
+        selection.addRange(saved);
+      }
+    };
+
+    const insertMacro = (macro: Macro) => {
+      if (disabled || !editorRef.current) return;
+      focusRestoringSelection();
+      insertTextAtSelection(macro.content);
+    };
+
+    /**
+     * Replace the current selection with plain text. execCommand participates
+     * in the browser's native undo stack, so an insertion can be reverted
+     * with a single undo.
+     */
+    const insertTextAtSelection = (content: string) => {
+      let inserted = false;
+      try {
+        inserted = document.execCommand('insertText', false, content);
+      } catch {
+        inserted = false;
+      }
+      if (!inserted) {
+        // Fallback (and jsdom path): manual range insertion. Content is
+        // always inserted as text nodes, never parsed as HTML.
+        const fragment = document.createDocumentFragment();
+        const lines = content.split('\n');
+        lines.forEach((line, index) => {
+          fragment.appendChild(document.createTextNode(line));
+          if (index < lines.length - 1) {
+            fragment.appendChild(document.createElement('br'));
+          }
+        });
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(fragment);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else if (editorRef.current) {
+          editorRef.current.appendChild(fragment);
+        }
+      }
+      saveSelection();
+      updateContent();
+    };
+
+    /**
+     * Expand a typed macro shortcut (dot phrase). When the word immediately
+     * before the caret matches a macro shortcut and the user presses space,
+     * the shortcut is replaced with the macro content in a single undoable
+     * edit; the triggering space is consumed.
+     */
+    const expandTypedShortcut = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      if (
+        disabled ||
+        event.key !== ' ' ||
+        // Space during IME composition selects/converts a candidate; never
+        // hijack it for macro expansion.
+        event.nativeEvent.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        !macros
+      )
+        return;
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !selection.isCollapsed)
+        return;
+      const caret = selection.getRangeAt(0);
+      const node = caret.startContainer;
+      if (
+        node.nodeType !== Node.TEXT_NODE ||
+        !editorRef.current?.contains(node)
+      )
+        return;
+      const typed = /(\S+)$/.exec(
+        (node.textContent ?? '').slice(0, caret.startOffset)
+      );
+      if (!typed) return;
+      // Collect the complete visible token — a word may span adjacent
+      // inline nodes (`.<b>c</b>` is ".c"; `etc<strong>.c</strong>` is
+      // "etc.c", which matches no shortcut and is left alone).
+      let token = typed[1];
+      let startNode: Node = node;
+      let startOffset = caret.startOffset - typed[1].length;
+      while (startOffset === 0) {
+        const prev = previousVisibleText(startNode, editorRef.current);
+        if (!prev) break;
+        const text = prev.textContent ?? '';
+        const continued = /(\S+)$/.exec(text);
+        if (!continued) break;
+        token = continued[1] + token;
+        startNode = prev;
+        startOffset = text.length - continued[1].length;
+      }
+      const lowered = token.toLowerCase();
+      const macro = macros
+        .flatMap((group) => group.macros)
+        .find((candidate) => candidate.shortcut?.toLowerCase() === lowered);
+      if (!macro) return;
+
+      event.preventDefault();
+      const replaceRange = document.createRange();
+      replaceRange.setStart(startNode, startOffset);
+      replaceRange.setEnd(node, caret.startOffset);
+      selection.removeAllRanges();
+      selection.addRange(replaceRange);
+      insertTextAtSelection(macro.content);
     };
 
     const toggleDictation = async () => {
@@ -506,7 +735,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                     title="Insert variable"
                   >
                     <Braces className="h-4 w-4" />
-                    <span className="text-xs">Variables</span>
+                    <span className="ms-1 text-xs">Variables</span>
                   </Button>
                 }
               >
@@ -537,7 +766,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 title="Convert <<field>> to {{field}}"
               >
                 <Replace className="h-4 w-4" />
-                <span className="text-xs">{'<< >> to {{ }}'}</span>
+                <span className="ms-1 text-xs">{'<< >> to {{ }}'}</span>
               </Button>
             </>
           )}
@@ -565,41 +794,97 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 ) : (
                   <Mic className="h-4 w-4" />
                 )}
-                <span className="text-xs">
+                <span className="ms-1 text-xs">
                   {isListening ? 'Stop' : 'Dictate'}
+                </span>
+              </Button>
+            </>
+          )}
+
+          {hasMacros && (
+            <>
+              <Separator orientation="vertical" className="mx-1 h-6" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setMacrosOpen((open) => !open)}
+                disabled={disabled}
+                className={cn('h-8 gap-1 px-2', macrosOpen && 'bg-muted')}
+                aria-expanded={macrosOpen}
+                aria-controls={macrosOpen ? macroPanelId : undefined}
+                title={
+                  macrosOpen
+                    ? (macroLabels?.hideMacros ?? 'Hide macros')
+                    : (macroLabels?.showMacros ?? 'Show macros')
+                }
+              >
+                <BookOpen className="h-4 w-4" />
+                <span className="ms-1 text-xs">
+                  {macroLabels?.macros ?? 'Macros'}
                 </span>
               </Button>
             </>
           )}
         </div>
 
-        <div className="relative flex-1">
-          {isEmpty && placeholder && (
-            <div
-              aria-hidden="true"
-              className="text-muted-foreground pointer-events-none absolute start-0 top-0 p-4"
-            >
-              {placeholder}
-            </div>
-          )}
+        <div className="relative flex min-h-0 flex-1 flex-col">
           <div
-            ref={editorRef}
-            role="textbox"
-            aria-multiline="true"
-            aria-label={ariaLabel ?? placeholder}
-            contentEditable={!disabled}
-            tabIndex={disabled ? -1 : 0}
-            onInput={updateContent}
-            onPaste={handlePaste}
-            onDrop={handleDrop}
             className={cn(
-              'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
-              'prose prose-sm max-w-none',
-              disabled &&
-                'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300'
+              'relative flex-1',
+              hasMacros && macrosOpen && 'md:me-72'
             )}
-            suppressContentEditableWarning
-          />
+          >
+            {isEmpty && placeholder && (
+              <div
+                aria-hidden="true"
+                className="text-muted-foreground pointer-events-none absolute start-0 top-0 p-4"
+              >
+                {placeholder}
+              </div>
+            )}
+            <div
+              ref={editorRef}
+              role="textbox"
+              aria-multiline="true"
+              aria-label={ariaLabel ?? placeholder}
+              contentEditable={!disabled}
+              tabIndex={disabled ? -1 : 0}
+              onInput={updateContent}
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onBlur={hasMacros ? saveSelection : undefined}
+              onKeyDown={hasMacros ? expandTypedShortcut : undefined}
+              onKeyUp={hasMacros ? saveSelection : undefined}
+              onMouseUp={hasMacros ? saveSelection : undefined}
+              className={cn(
+                'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
+                'prose prose-sm max-w-none',
+                hasMacros && macrosOpen && 'md:min-h-[400px]',
+                disabled &&
+                  'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300'
+              )}
+              suppressContentEditableWarning
+            />
+          </div>
+
+          {hasMacros && macrosOpen && (
+            <MacroLibrary
+              id={macroPanelId}
+              groups={macros!}
+              onSelect={insertMacro}
+              targetLabel={ariaLabel ?? placeholder}
+              onClose={() => {
+                setMacrosOpen(false);
+                // Selecting text in the panel moves the document selection;
+                // put the caret back where the user left it.
+                focusRestoringSelection();
+              }}
+              onCreateMacro={onCreateMacro}
+              labels={macroLabels}
+              className="border-border max-h-72 border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
+            />
+          )}
         </div>
       </div>
     );

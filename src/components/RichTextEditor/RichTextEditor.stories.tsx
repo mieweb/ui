@@ -12,12 +12,13 @@ const meta: Meta<typeof RichTextEditor> = {
       description: {
         component: `### What it's for
 
-**A lightweight HTML editor for templated notes and letters, with variable insertion and dictation.** \`RichTextEditor\` is a \`contentEditable\` \`div\` (\`role="textbox" aria-multiline\`) that mirrors its \`innerHTML\` to \`value\` / \`onChange\` — the stored format is **HTML**. The toolbar uses \`document.execCommand\` for bold, italic, underline, bullet/numbered lists and left/center/right alignment. Pass \`variableGroups\` (\`{ label, variables: [{ label, value, insertValue? }] }\`) to get a searchable **Variables** \`Dropdown\` that inserts \`{{tokens}}\` at the caret, plus a **\`<< >>\` to \`{{ }}\`** converter (\`convertAngleBracketsToMustache\`). \`enableDictation\` (default \`true\`) adds a **Dictate** button on the Web Speech API (\`SpeechRecognition\` / \`webkitSpeechRecognition\`) that runs spoken punctuation through \`processDictation\` ("period" → ".", "new paragraph", …). \`placeholder\`, \`disabled\`, \`aria-label\`, \`onDictationError\` complete the surface; the ref is the editable \`div\`. Everything ships on the main \`@mieweb/ui\` entry with no extra peers.
+**A lightweight HTML editor for templated notes and letters, with variable insertion, macros and dictation.** \`RichTextEditor\` is a \`contentEditable\` \`div\` (\`role="textbox" aria-multiline\`) that mirrors its \`innerHTML\` to \`value\` / \`onChange\` — the stored format is **HTML**. The toolbar uses \`document.execCommand\` for bold, italic, underline, bullet/numbered lists and left/center/right alignment. Pass \`variableGroups\` (\`{ label, variables: [{ label, value, insertValue? }] }\`) to get a searchable **Variables** \`Dropdown\` that inserts \`{{tokens}}\` at the caret, plus a **\`<< >>\` to \`{{ }}\`** converter (\`convertAngleBracketsToMustache\`). Pass \`macros\` (\`MacroGroup[]\`) to add a **Macros** toolbar toggle that docks a \`MacroLibrary\` panel inside the editor frame — searchable, grouped snippets inserted at the remembered caret through the native undo stack (\`defaultMacrosOpen\`, \`onCreateMacro\`); omit it and the editor is unchanged. \`enableDictation\` (default \`true\`) adds a **Dictate** button on the Web Speech API (\`SpeechRecognition\` / \`webkitSpeechRecognition\`) that runs spoken punctuation through \`processDictation\` ("period" → ".", "new paragraph", …). \`placeholder\`, \`disabled\`, \`aria-label\`, \`onDictationError\` complete the surface; the ref is the editable \`div\`. Everything ships on the main \`@mieweb/ui\` entry with no extra peers.
 
 ### Use it when
 
 - The output is stored or mailed as **HTML** — employer letters, case notes, message templates — and the writer needs basic formatting plus merge fields.
 - Users fill in **template variables** from a known catalogue, or convert legacy \`<<field>>\` markers.
+- The note is assembled from reusable boilerplate — exam normals, standard instructions — supplied as \`macros\` and inserted from the docked \`MacroLibrary\` panel or by typing a shortcut (\`.b\` + space) directly in the note.
 - Clinicians dictate into the note and the browser (Chrome/Edge/Safari) exposes \`SpeechRecognition\`.
 
 ### Don't use it when
@@ -78,6 +79,11 @@ The host owns the HTML string and is responsible for sanitising it before storag
           type: 'alternative to',
           target: 'editors-emaileditor',
           why: 'RichTextEditor for a single formatted HTML body; EmailEditor when the message needs layout blocks and is sent as an email.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-macrolibrary',
+          why: 'The macros prop docks a MacroLibrary panel inside the editor frame; the editor restores the saved caret and inserts the chosen macro through the native undo stack.',
         },
         {
           type: 'uses',
