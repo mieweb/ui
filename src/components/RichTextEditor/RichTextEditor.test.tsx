@@ -232,6 +232,27 @@ describe('RichTextEditor', () => {
       expect(screen.getByText('Review of Systems')).toBeInTheDocument();
     });
 
+    it('forwards macroLabels to the toggle and the docked panel', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          macros={macros}
+          defaultMacrosOpen
+          macroLabels={{
+            macros: 'Textbausteine',
+            hideMacros: 'Textbausteine ausblenden',
+            searchPlaceholder: 'Textbausteine suchen…',
+          }}
+        />
+      );
+      const toggle = screen.getByRole('button', { name: 'Textbausteine' });
+      expect(toggle).toHaveAttribute('title', 'Textbausteine ausblenden');
+      expect(
+        screen.getByPlaceholderText('Textbausteine suchen…')
+      ).toBeInTheDocument();
+    });
+
     it('opens initially with defaultMacrosOpen', () => {
       renderWithTheme(
         <RichTextEditor

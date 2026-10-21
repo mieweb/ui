@@ -26,7 +26,7 @@ const meta: Meta<typeof MacroLibrary> = {
 - Inserting **merge-field tokens** (\`{{employee.name}}\`) — that's \`RichTextEditor\`'s built-in Variables \`Dropdown\`.
 - You need a global command surface with actions, not text insertion — \`CommandPalette\`.
 - A simple single-pick from a flat list is enough — \`Dropdown\` or \`AutoComplete\`.
-- Content must be fetched per-keystroke from a server — the panel filters a provided in-memory list; do your own async search upstream and pass results in.
+- Content must be fetched per-keystroke from a server — the panel's search filters a provided in-memory list and its query is not exposed, so server-driven search needs its own search UI upstream.
 
 ### Example
 

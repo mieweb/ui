@@ -17,7 +17,12 @@ import {
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Separator } from '../Separator';
-import { MacroLibrary, type Macro, type MacroGroup } from '../MacroLibrary';
+import {
+  MacroLibrary,
+  type Macro,
+  type MacroGroup,
+  type MacroLibraryProps,
+} from '../MacroLibrary';
 import {
   Dropdown,
   DropdownItem,
@@ -81,6 +86,17 @@ export interface RichTextEditorProps {
   macros?: MacroGroup[];
   /** Open the macro panel initially. Defaults to false. */
   defaultMacrosOpen?: boolean;
+  /**
+   * Overridable labels for the macro addon (i18n). Panel labels are
+   * forwarded to the docked `MacroLibrary`; `macros` doubles as the toolbar
+   * toggle text, and `showMacros`/`hideMacros` set the toggle's title.
+   */
+  macroLabels?: MacroLibraryProps['labels'] & {
+    /** Toggle title while the panel is closed. Defaults to "Show macros". */
+    showMacros?: string;
+    /** Toggle title while the panel is open. Defaults to "Hide macros". */
+    hideMacros?: string;
+  };
   /** Forwarded to the macro panel's "Save as macro" action. */
   onCreateMacro?: () => void;
   /** Accessible label for the editable region. */
@@ -149,6 +165,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       sanitizeHtml,
       macros,
       defaultMacrosOpen = false,
+      macroLabels,
       onCreateMacro,
       'aria-label': ariaLabel,
     },
@@ -328,25 +345,26 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         inserted = false;
       }
       if (!inserted) {
-        // Fallback (and jsdom path): manual range insertion.
+        // Fallback (and jsdom path): manual range insertion. Content is
+        // always inserted as text nodes, never parsed as HTML.
+        const fragment = document.createDocumentFragment();
+        const lines = content.split('\n');
+        lines.forEach((line, index) => {
+          fragment.appendChild(document.createTextNode(line));
+          if (index < lines.length - 1) {
+            fragment.appendChild(document.createElement('br'));
+          }
+        });
         const sel = window.getSelection();
         if (sel && sel.rangeCount > 0) {
           const range = sel.getRangeAt(0);
           range.deleteContents();
-          const fragment = document.createDocumentFragment();
-          const lines = content.split('\n');
-          lines.forEach((line, index) => {
-            fragment.appendChild(document.createTextNode(line));
-            if (index < lines.length - 1) {
-              fragment.appendChild(document.createElement('br'));
-            }
-          });
           range.insertNode(fragment);
           range.collapse(false);
           sel.removeAllRanges();
           sel.addRange(range);
         } else if (editorRef.current) {
-          editorRef.current.innerHTML += content.replace(/\n/g, '<br>');
+          editorRef.current.appendChild(fragment);
         }
       }
       saveSelection();
@@ -720,10 +738,16 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 className={cn('h-8 gap-1 px-2', macrosOpen && 'bg-muted')}
                 aria-expanded={macrosOpen}
                 aria-controls={macrosOpen ? macroPanelId : undefined}
-                title={macrosOpen ? 'Hide macros' : 'Show macros'}
+                title={
+                  macrosOpen
+                    ? (macroLabels?.hideMacros ?? 'Hide macros')
+                    : (macroLabels?.showMacros ?? 'Show macros')
+                }
               >
                 <BookOpen className="h-4 w-4" />
-                <span className="ms-1 text-xs">Macros</span>
+                <span className="ms-1 text-xs">
+                  {macroLabels?.macros ?? 'Macros'}
+                </span>
               </Button>
             </>
           )}
@@ -780,6 +804,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 editorRef.current?.focus();
               }}
               onCreateMacro={onCreateMacro}
+              labels={macroLabels}
               className="border-border max-h-72 border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
             />
           )}
