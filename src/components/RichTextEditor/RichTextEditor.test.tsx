@@ -312,5 +312,72 @@ describe('RichTextEditor', () => {
         screen.getByRole('textbox', { name: 'Body' })
       );
     });
+
+    describe('typed shortcut expansion', () => {
+      /** Place `text` in the editor with the caret at its end, then press space. */
+      const typeAndPressSpace = (editor: HTMLElement, text: string) => {
+        const textNode = document.createTextNode(text);
+        editor.appendChild(textNode);
+        const range = document.createRange();
+        range.setStart(textNode, text.length);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return fireEvent.keyDown(editor, { key: ' ' });
+      };
+
+      const renderEditor = (onChange = vi.fn()) => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={onChange}
+            macros={macros}
+            aria-label="Body"
+          />
+        );
+        return screen.getByRole('textbox', { name: 'Body' });
+      };
+
+      it('expands a shortcut followed by space, consuming the space', () => {
+        const onChange = vi.fn();
+        const editor = renderEditor(onChange);
+        const notPrevented = typeAndPressSpace(editor, 'Note .c');
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+        // The triggering space is consumed (default prevented) and the
+        // replacement range covers exactly the typed shortcut.
+        expect(notPrevented).toBe(false);
+        expect(window.getSelection()?.toString()).toBe('.c');
+        expect(onChange).toHaveBeenCalled();
+      });
+
+      it('matches shortcuts case-insensitively', () => {
+        const editor = renderEditor();
+        typeAndPressSpace(editor, '.C');
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('leaves unknown tokens alone', () => {
+        const editor = renderEditor();
+        const notPrevented = typeAndPressSpace(editor, 'Note .zz');
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+      });
+
+      it('does not expand mid-word shortcut text', () => {
+        const editor = renderEditor();
+        // ".c" is a suffix of a longer token, not a standalone shortcut.
+        typeAndPressSpace(editor, 'etc.c');
+        expect(exec).not.toHaveBeenCalled();
+      });
+    });
   });
 });

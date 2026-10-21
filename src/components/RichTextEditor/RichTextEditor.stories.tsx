@@ -18,7 +18,7 @@ const meta: Meta<typeof RichTextEditor> = {
 
 - The output is stored or mailed as **HTML** — employer letters, case notes, message templates — and the writer needs basic formatting plus merge fields.
 - Users fill in **template variables** from a known catalogue, or convert legacy \`<<field>>\` markers.
-- The note is assembled from reusable boilerplate — exam normals, standard instructions — supplied as \`macros\` and inserted from the docked \`MacroLibrary\` panel.
+- The note is assembled from reusable boilerplate — exam normals, standard instructions — supplied as \`macros\` and inserted from the docked \`MacroLibrary\` panel or by typing a shortcut (\`.b\` + space) directly in the note.
 - Clinicians dictate into the note and the browser (Chrome/Edge/Safari) exposes \`SpeechRecognition\`.
 
 ### Don't use it when

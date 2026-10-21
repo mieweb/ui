@@ -75,7 +75,8 @@ export interface RichTextEditorProps {
    * Grouped macros for the optional macro addon. When omitted the editor is
    * unchanged. When provided, a "Macros" toolbar toggle docks a searchable
    * macro panel inside the editor; selecting a macro inserts its content at
-   * the retained caret position.
+   * the retained caret position. Typing a macro shortcut (e.g. `.b`)
+   * followed by a space expands it in place, panel open or not.
    */
   macros?: MacroGroup[];
   /** Open the macro panel initially. Defaults to false. */
@@ -311,11 +312,18 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         selection.addRange(saved);
       }
 
-      // execCommand participates in the browser's native undo stack, so a
-      // macro insertion can be reverted with a single undo.
+      insertTextAtSelection(macro.content);
+    };
+
+    /**
+     * Replace the current selection with plain text. execCommand participates
+     * in the browser's native undo stack, so an insertion can be reverted
+     * with a single undo.
+     */
+    const insertTextAtSelection = (content: string) => {
       let inserted = false;
       try {
-        inserted = document.execCommand('insertText', false, macro.content);
+        inserted = document.execCommand('insertText', false, content);
       } catch {
         inserted = false;
       }
@@ -326,7 +334,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
           const range = sel.getRangeAt(0);
           range.deleteContents();
           const fragment = document.createDocumentFragment();
-          const lines = macro.content.split('\n');
+          const lines = content.split('\n');
           lines.forEach((line, index) => {
             fragment.appendChild(document.createTextNode(line));
             if (index < lines.length - 1) {
@@ -337,12 +345,58 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
           range.collapse(false);
           sel.removeAllRanges();
           sel.addRange(range);
-        } else {
-          editorRef.current.innerHTML += macro.content.replace(/\n/g, '<br>');
+        } else if (editorRef.current) {
+          editorRef.current.innerHTML += content.replace(/\n/g, '<br>');
         }
       }
       saveSelection();
       updateContent();
+    };
+
+    /**
+     * Expand a typed macro shortcut (dot phrase). When the word immediately
+     * before the caret matches a macro shortcut and the user presses space,
+     * the shortcut is replaced with the macro content in a single undoable
+     * edit; the triggering space is consumed.
+     */
+    const expandTypedShortcut = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      if (
+        event.key !== ' ' ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        !macros
+      )
+        return;
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !selection.isCollapsed)
+        return;
+      const caret = selection.getRangeAt(0);
+      const node = caret.startContainer;
+      if (
+        node.nodeType !== Node.TEXT_NODE ||
+        !editorRef.current?.contains(node)
+      )
+        return;
+      const typed = /(\S+)$/.exec(
+        (node.textContent ?? '').slice(0, caret.startOffset)
+      );
+      if (!typed) return;
+      const token = typed[1].toLowerCase();
+      const macro = macros
+        .flatMap((group) => group.macros)
+        .find((candidate) => candidate.shortcut?.toLowerCase() === token);
+      if (!macro) return;
+
+      event.preventDefault();
+      const replaceRange = document.createRange();
+      replaceRange.setStart(node, caret.startOffset - typed[1].length);
+      replaceRange.setEnd(node, caret.startOffset);
+      selection.removeAllRanges();
+      selection.addRange(replaceRange);
+      insertTextAtSelection(macro.content);
     };
 
     const toggleDictation = async () => {
@@ -701,6 +755,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onPaste={handlePaste}
               onDrop={handleDrop}
               onBlur={hasMacros ? saveSelection : undefined}
+              onKeyDown={hasMacros ? expandTypedShortcut : undefined}
               onKeyUp={hasMacros ? saveSelection : undefined}
               onMouseUp={hasMacros ? saveSelection : undefined}
               className={cn(
