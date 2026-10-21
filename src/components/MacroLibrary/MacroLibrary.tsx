@@ -331,6 +331,8 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
     };
 
     const handlePanelKeyDown = (event: React.KeyboardEvent) => {
+      // Escape during IME composition cancels the composition; never close.
+      if (event.nativeEvent.isComposing) return;
       if (event.key === 'Escape' && onClose) {
         event.stopPropagation();
         onClose();
@@ -338,6 +340,8 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
     };
 
     const handleSearchKeyDown = (event: React.KeyboardEvent) => {
+      // ArrowDown during IME composition navigates conversion candidates.
+      if (event.nativeEvent.isComposing) return;
       if (event.key === 'ArrowDown') {
         event.preventDefault();
         moveFocus(1);
@@ -345,6 +349,7 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
     };
 
     const handleRowKeyDown = (event: React.KeyboardEvent) => {
+      if (event.nativeEvent.isComposing) return;
       if (event.key === 'ArrowDown') {
         event.preventDefault();
         moveFocus(1);
@@ -355,10 +360,14 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
     };
 
     return (
-      // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- keydown only delegates Escape-to-close from focusable children
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- keydown only delegates Escape-to-close from focusable children
       <div
         ref={ref}
         id={id}
+        role="group"
+        aria-label={
+          targetLabel ? `${labels.insertInto} ${targetLabel}` : labels.macros
+        }
         data-slot="macro-library"
         className={cn('bg-muted/20 flex min-h-0 flex-col', className)}
         onKeyDown={handlePanelKeyDown}
@@ -415,6 +424,11 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                   aria-controls={`${panelId}-list`}
                 />
               </div>
+            </div>
+
+            {/* Persistent polite region so a failed search is announced. */}
+            <div role="status" className="sr-only">
+              {noResults ? `${labels.noResults} “${trimmed}”` : ''}
             </div>
 
             <div

@@ -58,6 +58,10 @@ describe('MacroLibrary', () => {
     );
     expect(screen.getByText('Review of Systems')).toBeInTheDocument();
     expect(screen.getByText(/Insert into/)).toBeInTheDocument();
+    // The panel is a named group so multiple docked panels are told apart.
+    expect(
+      screen.getByRole('group', { name: 'Insert into Review of Systems' })
+    ).toBeInTheDocument();
   });
 
   it('calls onSelect with the chosen macro', () => {
@@ -149,9 +153,16 @@ describe('MacroLibrary', () => {
       fireEvent.change(screen.getByLabelText('Search macros'), {
         target: { value: 'xyzzy' },
       });
-      expect(screen.getByText(/No macros match/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/No macros match/, { selector: 'p' })
+      ).toBeInTheDocument();
+      // The persistent polite region announces the failed search.
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'No macros match “xyzzy”'
+      );
       fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
       expect(screen.getByText('Back pain — normal')).toBeInTheDocument();
+      expect(screen.getByRole('status')).toHaveTextContent('');
     });
   });
 
@@ -276,6 +287,20 @@ describe('MacroLibrary', () => {
         key: 'Escape',
       });
       expect(onClose).toHaveBeenCalled();
+    });
+
+    it('leaves IME composition keystrokes alone', () => {
+      const onClose = vi.fn();
+      renderWithTheme(
+        <MacroLibrary groups={GROUPS} onSelect={() => {}} onClose={onClose} />
+      );
+      const search = screen.getByLabelText('Search macros');
+      search.focus();
+      // ArrowDown navigates conversion candidates; Escape cancels composition.
+      fireEvent.keyDown(search, { key: 'ArrowDown', isComposing: true });
+      expect(document.activeElement).toBe(search);
+      fireEvent.keyDown(search, { key: 'Escape', isComposing: true });
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 
