@@ -1,12 +1,14 @@
 /**
- * POC (quick & dirty): every capture source in one `+` menu on ChatComposer,
- * with a "Dock as caption ribbon" toggle that pins them as
- * `Capture: [Audio] [Screen Recording] [Image] [File] [Document] …`
+ * POC (quick & dirty): every capture source in one `+` menu on ChatComposer
+ * (full labels), with a "Dock as caption ribbon" toggle that pins them as
+ * icon-only buttons with tooltips, grouped:
+ * `Record: [Audio] [Screen]  Capture: [Image] [Screen] [File] [Document] …`
  * attached to the top edge of the input.
  *
  * Captures are a list; each declares `available`, so the ribbon/menu only
  * shows what works on the current runtime (browser, Cordova, Capacitor):
- * - Screen Recording needs getDisplayMedia — absent in iOS/Android WebViews.
+ * - Record/Capture Screen need getDisplayMedia — absent in iOS/Android
+ *   WebViews.
  * - Document is the native iOS/Android document camera, only when a
  *   Capacitor or Cordova document-scanner plugin is present (or the host
  *   passes `scanDocument`).
@@ -24,6 +26,7 @@ import {
   File as FileGlyph,
   Mic,
   MonitorPlay,
+  MonitorUp,
   Pin,
   PinOff,
   ScanBarcode,
@@ -35,24 +38,35 @@ import {
   type ChatComposerHandle,
   type ChatComposerMenuItem,
 } from './ChatComposer';
+import { Tooltip } from '../Tooltip';
 import { cn } from '../../utils/cn';
 
 // ---------------------------------------------------------------------------
 // Capture model
 // ---------------------------------------------------------------------------
 
+export type CaptureGroup = 'record' | 'capture';
+
 export interface CaptureAction {
   id: string;
+  /** Menu text, ribbon tooltip and accessible name. */
   label: string;
   icon: React.ReactNode;
   run: () => void;
+  /** Ribbon section. Default `capture`. */
+  group?: CaptureGroup;
   /** Hidden when false (e.g. unsupported on this runtime). Default true. */
   available?: boolean;
   /** Recording in progress — renders red with a stop affordance. */
   active?: boolean;
-  /** Accessible name when it differs from the visible label. */
-  ariaLabel?: string;
+  /** Short text shown beside the ribbon icon (e.g. elapsed time). */
+  badge?: string;
 }
+
+const groupLabels: Record<CaptureGroup, string> = {
+  record: 'Record:',
+  capture: 'Capture:',
+};
 
 /** Native document camera → scanned pages as Files. */
 export type ScanDocument = () => Promise<File[]>;
@@ -139,12 +153,36 @@ function detectSupport() {
   const hasRecorder = typeof MediaRecorder !== 'undefined';
   return {
     audio: hasRecorder && !!media?.getUserMedia,
-    screen: hasRecorder && !!media?.getDisplayMedia,
+    screenRecording: hasRecorder && !!media?.getDisplayMedia,
+    screenshot: !!media?.getDisplayMedia,
   };
 }
 
+async function captureScreenFrame(): Promise<File> {
+  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+  try {
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.muted = true;
+    await video.play();
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d')?.drawImage(video, 0, 0);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/png')
+    );
+    if (!blob) throw new Error('Capture failed');
+    return new File([blob], `screenshot-${Date.now()}.png`, {
+      type: 'image/png',
+    });
+  } finally {
+    stream.getTracks().forEach((t) => t.stop());
+  }
+}
+
 // ---------------------------------------------------------------------------
-// Shared recorder for Audio + Screen Recording
+// Shared recorder for Record audio + Record screen
 // ---------------------------------------------------------------------------
 
 function useMediaRecording({
@@ -253,38 +291,56 @@ function CaptureRibbon({
   return (
     <div
       role="toolbar"
-      aria-label="Capture"
+      aria-label="Record and capture"
       data-slot="chat-composer-capture-ribbon"
       className={cn(
         'mx-4 -mb-px flex items-center gap-1 overflow-x-auto rounded-t-xl border border-b-0 px-1.5 py-1',
         'border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800'
       )}
     >
-      <span
-        aria-hidden="true"
-        className="shrink-0 ps-1 pe-0.5 text-xs font-semibold text-neutral-500 dark:text-neutral-400"
-      >
-        Capture:
-      </span>
-      {captures.map((c) => (
-        <button
-          key={c.id}
-          type="button"
-          onClick={c.run}
-          aria-label={c.ariaLabel}
-          aria-pressed={c.active}
-          className={cn(
-            'flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium',
-            'focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:outline-none',
-            c.active
-              ? 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
-              : 'text-neutral-700 hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700'
-          )}
-        >
-          {c.icon}
-          {c.label}
-        </button>
-      ))}
+      {(Object.keys(groupLabels) as CaptureGroup[]).map((group, index) => {
+        const items = captures.filter((c) => (c.group ?? 'capture') === group);
+        if (!items.length) return null;
+        return (
+          <div
+            key={group}
+            role="group"
+            aria-label={groupLabels[group].replace(':', '')}
+            className={cn(
+              'flex shrink-0 items-center gap-0.5',
+              index > 0 &&
+                'ms-1 border-s border-neutral-200 ps-2 dark:border-neutral-700'
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className="pe-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400"
+            >
+              {groupLabels[group]}
+            </span>
+            {items.map((c) => (
+              <Tooltip key={c.id} content={c.label} placement="top">
+                <button
+                  type="button"
+                  onClick={c.run}
+                  aria-label={c.label}
+                  aria-pressed={c.active}
+                  className={cn(
+                    'flex h-7 min-w-7 shrink-0 items-center justify-center gap-1 rounded-lg px-1.5 text-xs font-medium tabular-nums',
+                    'focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:outline-none',
+                    c.active
+                      ? 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
+                      : 'text-neutral-700 hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700'
+                  )}
+                >
+                  {c.icon}
+                  {c.badge && <span aria-hidden="true">{c.badge}</span>}
+                </button>
+              </Tooltip>
+            ))}
+          </div>
+        );
+      })}
       <button
         type="button"
         onClick={onUndock}
@@ -391,16 +447,18 @@ function ComposerWithCaptureRibbon({
   const recordingIcon = (idle: React.ReactNode, recording: boolean) =>
     recording ? <Square className={iconClass} aria-hidden="true" /> : idle;
 
+  const recordIconClass = cn(iconClass, 'text-red-600');
+
   const captures: CaptureAction[] = [
     {
-      id: 'audio',
-      label: audio.recording ? `Audio ${audio.elapsed}` : 'Audio',
-      ariaLabel: audio.recording ? 'Stop audio recording' : 'Record audio',
+      id: 'record-audio',
+      group: 'record',
+      label: audio.recording
+        ? `Stop audio recording (${audio.elapsed})`
+        : 'Record audio',
+      badge: audio.recording ? audio.elapsed : undefined,
       icon: recordingIcon(
-        <AudioLines
-          className={cn(iconClass, 'text-red-600')}
-          aria-hidden="true"
-        />,
+        <AudioLines className={recordIconClass} aria-hidden="true" />,
         audio.recording
       ),
       run: runSafely(audio.toggle, 'Microphone access was blocked'),
@@ -408,39 +466,44 @@ function ComposerWithCaptureRibbon({
       available: support.audio,
     },
     {
-      id: 'screen',
+      id: 'record-screen',
+      group: 'record',
       label: screen.recording
-        ? `Screen Recording ${screen.elapsed}`
-        : 'Screen Recording',
-      ariaLabel: screen.recording
-        ? 'Stop screen recording'
-        : 'Start screen recording',
+        ? `Stop screen recording (${screen.elapsed})`
+        : 'Record screen',
+      badge: screen.recording ? screen.elapsed : undefined,
       icon: recordingIcon(
-        <MonitorPlay className={iconClass} aria-hidden="true" />,
+        <MonitorPlay className={recordIconClass} aria-hidden="true" />,
         screen.recording
       ),
       run: runSafely(screen.toggle, 'Screen recording cancelled'),
       active: screen.recording,
-      available: support.screen,
+      available: support.screenRecording,
     },
     {
       id: 'image',
-      label: 'Image',
-      ariaLabel: 'Attach image',
+      label: 'Capture image',
       icon: <Camera className={iconClass} aria-hidden="true" />,
       run: () => imageInputRef.current?.click(),
     },
     {
+      id: 'screenshot',
+      label: 'Capture screen',
+      icon: <MonitorUp className={iconClass} aria-hidden="true" />,
+      run: runSafely(async () => {
+        attach([await captureScreenFrame()], 'Screenshot attached');
+      }, 'Screen capture cancelled'),
+      available: support.screenshot,
+    },
+    {
       id: 'file',
-      label: 'File',
-      ariaLabel: 'Attach file',
+      label: 'Attach file',
       icon: <FileGlyph className={iconClass} aria-hidden="true" />,
       run: () => fileInputRef.current?.click(),
     },
     {
       id: 'document',
-      label: 'Document',
-      ariaLabel: 'Scan document',
+      label: 'Scan document',
       icon: <ScanText className={iconClass} aria-hidden="true" />,
       run: runSafely(async () => {
         const pages = (await documentScanner?.()) ?? [];
@@ -565,28 +628,30 @@ const meta = {
       description: {
         component: `### What it's for
 
-**POC.** Every capture source in one \`+\` menu on \`ChatComposer\`, plus a **Dock as caption ribbon** toggle that pins them to the top edge of the input as \`Capture: [Audio] [Screen Recording] [Image] [File] [Document]\`. Undock from the pin at the ribbon's end.
+**POC.** Every capture source in one \`+\` menu on \`ChatComposer\` (full labels), plus a **Dock as caption ribbon** toggle that pins them to the top edge of the input as icon-only buttons with tooltips, grouped as \`Record: [Audio] [Screen]  Capture: [Image] [Screen] [File] [Document]\`. Undock from the pin at the ribbon's end.
 
 ### Captures are conditional
 
-Each capture declares \`available\`; unavailable ones are hidden in both the menu and the ribbon. Target runtimes: browser, **Cordova**, **Capacitor**.
+Each capture declares \`available\` and a \`group\` (\`record\` or \`capture\`); unavailable ones are hidden in both the menu and the ribbon. Target runtimes: browser, **Cordova**, **Capacitor**.
 
-| Capture | Needs | Browser | Cordova / Capacitor (iOS, Android) |
-| --- | --- | --- | --- |
-| Audio | \`MediaRecorder\` + \`getUserMedia\` | yes | yes (iOS 14.3+ WKWebView; add mic usage description) |
-| Screen Recording | \`getDisplayMedia\` | desktop | hidden (WebViews lack it) |
-| Image / File | \`<input type="file">\` | yes | yes (native picker / camera sheet) |
-| Document | native document camera plugin | hidden | Capacitor \`capacitor-document-scanner\` or Cordova \`cordova-plugin-document-scanner\`, auto-detected; or pass \`scanDocument\` |
-| Others | host \`extraCaptures\` | — | — |
+| Group | Item (menu label) | Needs | Browser | Cordova / Capacitor (iOS, Android) |
+| --- | --- | --- | --- | --- |
+| Record | Audio (Record audio) | \`MediaRecorder\` + \`getUserMedia\` | yes | yes (iOS 14.3+ WKWebView; add mic usage description) |
+| Record | Screen (Record screen) | \`MediaRecorder\` + \`getDisplayMedia\` | desktop | hidden (WebViews lack it) |
+| Capture | Image (Capture image) | \`<input type="file" accept="image/*">\` | yes | yes (native photo picker / camera sheet) |
+| Capture | Screen (Capture screen) — still screenshot | \`getDisplayMedia\` | desktop | hidden |
+| Capture | File (Attach file) | \`<input type="file">\` | yes | yes |
+| Capture | Document (Scan document) | native document camera plugin | hidden | Capacitor \`capacitor-document-scanner\` or Cordova \`cordova-plugin-document-scanner\`, auto-detected; or pass \`scanDocument\` |
+| Any | Others | host \`extraCaptures\` | — | — |
 
-### Voice to text vs. Audio
+### Voice to text vs. Record audio
 
-- **Voice to text** — blue mic to the right of the input only (not a capture). Live speech recognition streamed into the draft (Web Speech API; native apps will need a speech plugin).
-- **Audio** — a capture. Records a clip with a running timer and attaches it to the message.
+- **Voice to text** — blue mic to the right of the input only (not in the menu or ribbon). Live speech recognition streamed into the draft (Web Speech API; native apps will need a speech plugin).
+- **Record audio** — records a clip, showing a running timer beside the stop icon, and attaches it to the message.
 
 ### How it's built
 
-Pure composition over \`ChatComposer\`'s public API — \`addMenuItems\`, \`micSlot\`, \`ref.addFiles\`. Audio and Screen Recording share one \`MediaRecorder\` hook. No library changes.`,
+Pure composition over \`ChatComposer\`'s public API — \`addMenuItems\`, \`micSlot\`, \`ref.addFiles\` — plus the library \`Tooltip\`. Record audio and Record screen share one \`MediaRecorder\` hook. No library changes.`,
       },
     },
   },
@@ -612,8 +677,7 @@ export const NativeWithDocument: Story = {
     extraCaptures: [
       {
         id: 'barcode',
-        label: 'Barcode',
-        ariaLabel: 'Scan barcode',
+        label: 'Scan barcode',
         icon: <ScanBarcode className={iconClass} aria-hidden="true" />,
         run: () => window.alert('Host barcode scanner would open here'),
       },
