@@ -226,8 +226,11 @@ function useMediaRecording({
   );
 
   const toggle = async () => {
-    if (recorderRef.current?.state === 'recording') {
-      recorderRef.current.stop();
+    // The ref holds the recorder until its onstop finishes, so this also
+    // blocks new starts while a stopped take is still being finalized.
+    const current = recorderRef.current;
+    if (current) {
+      if (current.state === 'recording') current.stop();
       return;
     }
     // Ignore clicks while the permission / share prompt is still open.
@@ -254,7 +257,7 @@ function useMediaRecording({
       };
       recorder.onstop = () => {
         stopTracks();
-        recorderRef.current = null;
+        if (recorderRef.current === recorder) recorderRef.current = null;
         if (session !== sessionRef.current) return;
         const type = recorder.mimeType || `${kind}/webm`;
         const prefix = kind === 'audio' ? 'audio' : 'screen-recording';
