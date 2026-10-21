@@ -185,6 +185,15 @@ async function captureScreenFrame(): Promise<File> {
 // Shared recorder for Record audio + Record screen
 // ---------------------------------------------------------------------------
 
+/** File extension for a MediaRecorder MIME type (Safari mp4, Firefox ogg, Chrome webm). */
+function fileExtension(mimeType: string): string {
+  const [container] = mimeType.split(';');
+  if (container === 'audio/mp4') return 'm4a';
+  if (container === 'video/mp4') return 'mp4';
+  if (container.endsWith('/ogg')) return 'ogg';
+  return 'webm';
+}
+
 function useMediaRecording({
   kind,
   getStream,
@@ -235,30 +244,38 @@ function useMediaRecording({
       stream.getTracks().forEach((t) => t.stop());
       return;
     }
-    const recorder = new MediaRecorder(stream);
-    const chunks: Blob[] = [];
-    recorder.ondataavailable = (e) => {
-      if (e.data.size) chunks.push(e.data);
-    };
-    recorder.onstop = () => {
-      stream.getTracks().forEach((t) => t.stop());
-      recorderRef.current = null;
-      if (session !== sessionRef.current) return;
-      const type = recorder.mimeType || `${kind}/webm`;
-      const ext = type.includes('mp4')
-        ? kind === 'audio'
-          ? 'm4a'
-          : 'mp4'
-        : 'webm';
-      const prefix = kind === 'audio' ? 'audio' : 'screen-recording';
-      onFile(new File(chunks, `${prefix}-${Date.now()}.${ext}`, { type }));
-      setStartedAt(null);
-    };
-    // The user can end a screen share from the browser's own UI.
-    stream.getVideoTracks()[0]?.addEventListener('ended', () => {
-      if (recorder.state === 'recording') recorder.stop();
-    });
-    recorder.start();
+    const stopTracks = () => stream.getTracks().forEach((t) => t.stop());
+    let recorder: MediaRecorder;
+    try {
+      recorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size) chunks.push(e.data);
+      };
+      recorder.onstop = () => {
+        stopTracks();
+        recorderRef.current = null;
+        if (session !== sessionRef.current) return;
+        const type = recorder.mimeType || `${kind}/webm`;
+        const prefix = kind === 'audio' ? 'audio' : 'screen-recording';
+        onFile(
+          new File(chunks, `${prefix}-${Date.now()}.${fileExtension(type)}`, {
+            type,
+          })
+        );
+        setStartedAt(null);
+      };
+      // The user can end a screen share from the browser's own UI.
+      stream.getVideoTracks()[0]?.addEventListener('ended', () => {
+        if (recorder.state === 'recording') recorder.stop();
+      });
+      recorder.start();
+    } catch (error) {
+      // Without a running recorder there is no Stop control, so release the
+      // mic / screen share here before reporting the failure.
+      stopTracks();
+      throw error;
+    }
     recorderRef.current = recorder;
     setStartedAt(Date.now());
     setNow(Date.now());
@@ -681,7 +698,18 @@ const meta = {
       description: {
         component: `### What it's for
 
-**POC.** Every capture source in one \`+\` menu on \`ChatComposer\` (full labels), plus a **Dock as caption ribbon** toggle that pins them to the top edge of the input as icon-only buttons with tooltips, grouped as \`Record: [Audio] [Screen]  Capture: [Image] [Screen] [File] [Document]\`. Undock from the pin at the ribbon's end.
+**POC.** Every capture source in one \`+\` menu on [ChatComposer](?path=/docs/chat-chatcomposer--docs) (full labels), plus a **Dock as caption ribbon** toggle that pins them to the top edge of the input as icon-only buttons with tooltips, grouped as \`Record: [Audio] [Screen]  Capture: [Image] [Screen] [File] [Document]\`. Undock from the pin at the ribbon's end.
+
+### Use it when
+
+- You are evaluating how a chat input should offer **several attachment sources at once** (recordings, screenshots, files, native document scans) and want them one click away while chatting.
+- The host is a **Cordova or Capacitor** app as well as the web, and the set of captures should adapt to what each runtime supports.
+
+### Don't use it when
+
+- You only need the standard attach + voice input — use [ChatComposer](?path=/docs/chat-chatcomposer--docs) directly (its \`+\` menu already attaches files, \`micSlot\` takes a recorder or dictation button).
+- You need **one document turned into fields** (ID, insurance card) with preview, validation and an extraction round-trip — use [DocumentScanner](?path=/docs/files-documentscanner--docs). It is a web flow (upload, mobile \`capture\` input, desktop webcam with edge detection) that sends to \`onScan\`. This POC's **Document** is different: it opens the **native iOS/Android document camera** through a plugin and just attaches the scanned pages to the message.
+- You need production code — this is an experimental Storybook composition, not a library export.
 
 ### Captures are conditional
 
@@ -704,8 +732,34 @@ Each capture declares \`available\` and a \`group\` (\`record\` or \`capture\`);
 
 ### How it's built
 
-Pure composition over \`ChatComposer\`'s public API — \`addMenuItems\`, \`micSlot\`, \`ref.addFiles\` — plus the library \`Tooltip\`. Record audio and Record screen share one \`MediaRecorder\` hook. No library changes.`,
+Pure composition over \`ChatComposer\`'s public API — \`addMenuItems\`, \`micSlot\`, \`ref.addFiles\` — plus the library \`Tooltip\`. Record audio and Record screen share one \`MediaRecorder\` hook. No library changes.
+
+### Limitations
+
+- **Native adapters are unverified.** The Capacitor and Cordova document-scanner adapters follow each plugin's documented API but have not been run on a device; Storybook exercises Document only through a mock scanner.
+- Voice to text uses the Web Speech API, which iOS/Android WebViews generally lack, so native apps need a speech plugin before the mic works there.
+- Strings are hard-coded English (POC); a library version would take them as props.
+- On narrow screens the ribbon scrolls horizontally rather than wrapping.`,
       },
+    },
+    catalog: {
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'chat-chatcomposer',
+          why: 'Built entirely on ChatComposer: captures go in addMenuItems, files are staged with ref.addFiles, and the voice-to-text mic sits in micSlot.',
+        },
+        {
+          type: 'alternative to',
+          target: 'files-documentscanner',
+          why: 'DocumentScanner is the web flow for turning one document into fields (upload, mobile capture input, webcam, then onScan); this POC’s Document opens the native iOS/Android document camera via a Cordova/Capacitor plugin and only attaches the pages to a chat message.',
+        },
+        {
+          type: 'uses',
+          target: 'overlays-tooltip',
+          why: 'Docked ribbon buttons are icon-only; Tooltip shows each capture’s name on hover and focus.',
+        },
+      ],
     },
   },
 } satisfies Meta<typeof ComposerWithCaptureRibbon>;
