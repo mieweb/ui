@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { gotoStory } from './helpers';
+import { expectDocumentDirection, gotoStory } from './helpers';
 
 // Warm up the server before running tests
 test.beforeAll(async ({ browser }) => {
@@ -178,6 +178,78 @@ test.describe('Visual Regression Tests - Core Components', () => {
     // control row without inflating the pill height.
     await gotoStory(page, 'chat-chatcomposer--with-record-button');
     await expect(page).toHaveScreenshot('chat-composer-with-record-button.png');
+  });
+
+  // Capture ribbon POC (#637): docked Record/Capture ribbon above the input.
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ChatComposer capture ribbon - Docked${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(
+        page,
+        'chat-chatcomposer-action-ribbon-poc--native-with-document',
+        { ...options }
+      );
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+      const ribbon = page.locator("[data-slot='chat-composer-capture-ribbon']");
+      await expect(ribbon).toBeVisible();
+      // Record leads Capture in reading order: physically right of it under
+      // RTL, left of it otherwise.
+      const [record, capture] = await Promise.all([
+        ribbon.getByRole('group', { name: 'Record' }).boundingBox(),
+        ribbon.getByRole('group', { name: 'Capture' }).boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(record!.x).toBeGreaterThan(capture!.x);
+      } else {
+        expect(record!.x).toBeLessThan(capture!.x);
+      }
+      if (viewport) {
+        const box = await ribbon.boundingBox();
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(ribbon).toHaveScreenshot(
+        `chat-composer-capture-ribbon${name}.png`
+      );
+    });
+  }
+
+  test('ChatComposer capture ribbon - Dock and undock from the + menu', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'chat-chatcomposer-action-ribbon-poc--menu-only');
+    const ribbon = page.locator("[data-slot='chat-composer-capture-ribbon']");
+    await expect(ribbon).toHaveCount(0);
+
+    await page.locator("[data-slot='chat-composer-add-button']").click();
+    const dockToggle = page.getByRole('menuitemcheckbox', {
+      name: 'Dock as caption ribbon',
+    });
+    await expect(dockToggle).toHaveAttribute('aria-checked', 'false');
+    await dockToggle.click();
+    await expect(ribbon).toBeVisible();
+
+    await ribbon.getByRole('button', { name: 'Undock capture ribbon' }).click();
+    await expect(ribbon).toHaveCount(0);
+  });
+
+  test('ChatComposer capture ribbon - Scan document attaches a page', async ({
+    page,
+  }) => {
+    await gotoStory(
+      page,
+      'chat-chatcomposer-action-ribbon-poc--native-with-document'
+    );
+    await page.getByRole('button', { name: 'Scan document' }).click();
+    await expect(page.getByRole('status')).toHaveText('Scanned 1 page(s)');
+    await expect(
+      page.locator("[data-slot='chat-composer-attachments']")
+    ).toBeVisible();
   });
 
   test('DictationButton - Mock provider', async ({ page }) => {
@@ -798,9 +870,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       globals: 'direction:rtl',
     });
     await page.getByRole('button', { name: 'Open Enc 5' }).click();
-    const actionBtn = page
-      .locator('button[aria-label^="Actions for"]')
-      .first();
+    const actionBtn = page.locator('button[aria-label^="Actions for"]').first();
     await actionBtn.click();
     const menu = page.locator('[role="menu"]');
     await menu.waitFor({ state: 'visible' });
@@ -1025,9 +1095,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'choice-inputs-countrycodedropdown--default', {
       globals: 'direction:rtl',
     });
-    const triggerCode = page.locator(
-      '[data-slot="country-dropdown-dialcode"]'
-    );
+    const triggerCode = page.locator('[data-slot="country-dropdown-dialcode"]');
     await expect(triggerCode).toHaveText('+1');
     await expect.poll(() => direction(triggerCode)).toBe('ltr');
     await page.locator('[data-slot="country-dropdown-trigger"]').click();
@@ -1312,9 +1380,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     const root = page.locator('.ag-root-wrapper').first();
     await expect(root).toHaveClass(/ag-rtl/);
     await expect
-      .poll(() =>
-        root.evaluate((el) => getComputedStyle(el).direction)
-      )
+      .poll(() => root.evaluate((el) => getComputedStyle(el).direction))
       .toBe('rtl');
     await expect(page).toHaveScreenshot('aggrid-default-rtl.png');
   });

@@ -195,6 +195,9 @@ function useMediaRecording({
   onFile: (file: File) => void;
 }) {
   const recorderRef = React.useRef<MediaRecorder | null>(null);
+  // Bumped on unmount so a permission prompt that resolves later is discarded.
+  const sessionRef = React.useRef(0);
+  const pendingRef = React.useRef(false);
   const [startedAt, setStartedAt] = React.useState<number | null>(null);
   const [now, setNow] = React.useState(0);
 
@@ -206,6 +209,7 @@ function useMediaRecording({
 
   React.useEffect(
     () => () => {
+      sessionRef.current += 1;
       if (recorderRef.current?.state === 'recording')
         recorderRef.current.stop();
     },
@@ -217,7 +221,20 @@ function useMediaRecording({
       recorderRef.current.stop();
       return;
     }
-    const stream = await getStream();
+    // Ignore clicks while the permission / share prompt is still open.
+    if (pendingRef.current) return;
+    pendingRef.current = true;
+    const session = sessionRef.current;
+    let stream: MediaStream;
+    try {
+      stream = await getStream();
+    } finally {
+      pendingRef.current = false;
+    }
+    if (session !== sessionRef.current) {
+      stream.getTracks().forEach((t) => t.stop());
+      return;
+    }
     const recorder = new MediaRecorder(stream);
     const chunks: Blob[] = [];
     recorder.ondataavailable = (e) => {
@@ -225,6 +242,8 @@ function useMediaRecording({
     };
     recorder.onstop = () => {
       stream.getTracks().forEach((t) => t.stop());
+      recorderRef.current = null;
+      if (session !== sessionRef.current) return;
       const type = recorder.mimeType || `${kind}/webm`;
       const ext = type.includes('mp4')
         ? kind === 'audio'
@@ -233,7 +252,6 @@ function useMediaRecording({
         : 'webm';
       const prefix = kind === 'audio' ? 'audio' : 'screen-recording';
       onFile(new File(chunks, `${prefix}-${Date.now()}.${ext}`, { type }));
-      recorderRef.current = null;
       setStartedAt(null);
     };
     // The user can end a screen share from the browser's own UI.
@@ -314,6 +332,8 @@ function CaptureRibbon({
           >
             <span
               aria-hidden="true"
+              // dir="auto" keeps the colon after the label text in RTL pages.
+              dir="auto"
               className="pe-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400"
             >
               {groupLabels[group]}
@@ -389,8 +409,10 @@ function ComposerWithCaptureRibbon({
 
   const attach = (files: File[], message: string) => {
     if (!files.length) return;
-    composerRef.current?.addFiles(files);
+    // addFiles reports rejections synchronously via onError, which then
+    // replaces this optimistic message.
     setStatus(message);
+    composerRef.current?.addFiles(files);
   };
 
   const audio = useMediaRecording({
@@ -414,9 +436,21 @@ function ComposerWithCaptureRibbon({
     e.target.value = '';
   };
 
+  /** Ends dictation and detaches handlers so no late result can touch the draft. */
+  const stopVoiceToText = () => {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+    rec.onresult = null;
+    rec.onend = null;
+    rec.stop();
+    recognitionRef.current = null;
+    setListening(false);
+  };
+
   const toggleVoiceToText = () => {
     if (listening) {
-      recognitionRef.current?.stop();
+      stopVoiceToText();
+      setStatus('Voice to text stopped');
       return;
     }
     const Recognition = getSpeechRecognition();
@@ -433,6 +467,7 @@ function ComposerWithCaptureRibbon({
       setValue(base ? `${base} ${text}` : text);
     };
     rec.onend = () => {
+      recognitionRef.current = null;
       setListening(false);
       setStatus('Voice to text stopped');
     };
@@ -442,7 +477,16 @@ function ComposerWithCaptureRibbon({
     setStatus('Listening — speech appears in the input live');
   };
 
-  React.useEffect(() => () => recognitionRef.current?.stop(), []);
+  React.useEffect(
+    () => () => {
+      const rec = recognitionRef.current;
+      if (!rec) return;
+      rec.onresult = null;
+      rec.onend = null;
+      rec.stop();
+    },
+    []
+  );
 
   const recordingIcon = (idle: React.ReactNode, recording: boolean) =>
     recording ? <Square className={iconClass} aria-hidden="true" /> : idle;
@@ -531,14 +575,22 @@ function ComposerWithCaptureRibbon({
   ];
 
   return (
-    <div className="w-[720px] max-w-full">
+    <div className="w-[min(720px,calc(100vw-2rem))]">
       {docked && (
         <CaptureRibbon captures={captures} onUndock={() => setDocked(false)} />
       )}
       <ChatComposer
         ref={composerRef}
         value={value}
-        onValueChange={setValue}
+        onValueChange={(next) => {
+          // A manual edit ends dictation so results can't overwrite it.
+          if (recognitionRef.current) {
+            stopVoiceToText();
+            setStatus('Voice to text stopped (manual edit)');
+          }
+          setValue(next);
+        }}
+        onError={(message) => setStatus(message)}
         placeholder="Message Ozwell..."
         allowAttachments={false}
         addMenuItems={menuItems}
@@ -562,6 +614,7 @@ function ComposerWithCaptureRibbon({
           </button>
         }
         onSend={() => {
+          stopVoiceToText();
           setValue('');
           setStatus('Sent');
         }}
