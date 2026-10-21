@@ -128,8 +128,35 @@ function MacroRow({
   onRowKeyDown,
 }: MacroRowProps) {
   const [truncated, setTruncated] = React.useState(false);
+  const rowRef = React.useRef<HTMLButtonElement>(null);
+  const lessRef = React.useRef<HTMLButtonElement>(null);
+  // Toggling unmounts the activated control; move focus to its replacement
+  // ("less" on expand, the row on collapse — the "more" chip is hidden until
+  // hover/focus) so keyboard focus never drops to <body> and Escape keeps
+  // closing the panel.
+  const focusAfterToggle = React.useRef(false);
+  React.useEffect(() => {
+    if (!focusAfterToggle.current) return;
+    focusAfterToggle.current = false;
+    (isPeeked ? lessRef.current : rowRef.current)?.focus();
+  }, [isPeeked]);
+  const handleToggle = () => {
+    focusAfterToggle.current = true;
+    onTogglePeek();
+  };
+  // Remeasure on resize: docking/undocking or narrowing the panel can clamp
+  // content without a React render.
+  const previewObserver = React.useRef<ResizeObserver | null>(null);
   const measurePreview = (el: HTMLSpanElement | null) => {
-    if (el) setTruncated(el.scrollHeight > el.clientHeight);
+    previewObserver.current?.disconnect();
+    previewObserver.current = null;
+    if (!el) return;
+    const measure = () => setTruncated(el.scrollHeight > el.clientHeight);
+    measure();
+    if (typeof ResizeObserver !== 'undefined') {
+      previewObserver.current = new ResizeObserver(measure);
+      previewObserver.current.observe(el);
+    }
   };
   return (
     <div
@@ -139,6 +166,7 @@ function MacroRow({
       <button
         type="button"
         data-macro-row
+        ref={rowRef}
         className="focus-visible:ring-ring text-foreground hover:text-primary flex w-full cursor-pointer flex-col items-stretch gap-0.5 rounded-md px-2 py-1.5 text-start focus-visible:ring-2 focus-visible:outline-none"
         onClick={() => onSelect(macro)}
         onKeyDown={onRowKeyDown}
@@ -179,13 +207,14 @@ function MacroRow({
       )}
       {truncated && !isPeeked && (
         // Overlays the end of the clamped second line; revealed on row
-        // hover or keyboard focus so short rows stay entirely clean.
+        // hover or keyboard focus so short rows stay entirely clean. Always
+        // visible on devices without hover (touch).
         <button
           type="button"
-          className="bg-muted text-muted-foreground hover:text-primary focus-visible:ring-ring invisible absolute end-1.5 bottom-1.5 flex cursor-pointer items-center rounded-sm px-1 text-[11px] leading-4 group-focus-within/macro:visible group-hover/macro:visible hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          className="bg-muted text-muted-foreground hover:text-primary focus-visible:ring-ring invisible absolute end-1.5 bottom-1.5 flex cursor-pointer items-center rounded-sm px-1 text-[11px] leading-4 group-focus-within/macro:visible group-hover/macro:visible hover:underline focus-visible:ring-2 focus-visible:outline-none [@media(hover:none)]:visible"
           aria-expanded={false}
           aria-label={`${labels.showFullContent}: ${macro.label}`}
-          onClick={onTogglePeek}
+          onClick={handleToggle}
         >
           {labels.more}
           <ChevronRightIcon
@@ -198,11 +227,12 @@ function MacroRow({
         <span className="-mt-1 flex justify-end px-2 pb-1">
           <button
             type="button"
+            ref={lessRef}
             className="text-muted-foreground hover:text-primary focus-visible:ring-ring cursor-pointer rounded text-[11px] hover:underline focus-visible:ring-2 focus-visible:outline-none"
             aria-expanded
             aria-controls={peekId}
             aria-label={`${labels.hideFullContent}: ${macro.label}`}
-            onClick={onTogglePeek}
+            onClick={handleToggle}
           >
             {labels.less}
           </button>

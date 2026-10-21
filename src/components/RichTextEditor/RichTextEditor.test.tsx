@@ -399,6 +399,40 @@ describe('RichTextEditor', () => {
         typeAndPressSpace(editor, 'etc.c');
         expect(exec).not.toHaveBeenCalled();
       });
+
+      it('does not expand when the word continues in an adjacent inline node', () => {
+        const editor = renderEditor();
+        // etc<strong>.c</strong> — visibly "etc.c", one word.
+        editor.appendChild(document.createTextNode('etc'));
+        const strong = document.createElement('strong');
+        const shortcutNode = document.createTextNode('.c');
+        strong.appendChild(shortcutNode);
+        editor.appendChild(strong);
+        const range = document.createRange();
+        range.setStart(shortcutNode, 2);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const notPrevented = fireEvent.keyDown(editor, { key: ' ' });
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+      });
+
+      it('does not expand while the editor is disabled', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            disabled
+            aria-label="Body"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'Body' });
+        typeAndPressSpace(editor, '.c');
+        expect(exec).not.toHaveBeenCalled();
+      });
     });
   });
 });

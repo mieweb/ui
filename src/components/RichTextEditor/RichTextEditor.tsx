@@ -145,6 +145,44 @@ function getSpeechRecognition(): SpeechRecognitionCtor | undefined {
   return w.SpeechRecognition || w.webkitSpeechRecognition;
 }
 
+/** Elements that end a visible word, equivalent to whitespace. */
+const BLOCK_BOUNDARY =
+  /^(BR|DIV|P|LI|UL|OL|TABLE|TR|TD|TH|H[1-6]|BLOCKQUOTE|PRE|HR)$/;
+
+/**
+ * Visible character immediately before `node`, looking across adjacent
+ * inline elements (e.g. `etc<strong>.c</strong>` reads as "etc.c"). Block
+ * elements and <br> count as whitespace boundaries.
+ */
+function visibleCharBefore(node: Node, root: HTMLElement): string {
+  let current: Node = node;
+  while (current !== root) {
+    let sibling: Node | null = current.previousSibling;
+    while (sibling) {
+      if (
+        sibling.nodeType === Node.ELEMENT_NODE &&
+        BLOCK_BOUNDARY.test((sibling as HTMLElement).tagName)
+      ) {
+        return ' ';
+      }
+      const text = sibling.textContent ?? '';
+      if (text.length > 0) return text.slice(-1);
+      sibling = sibling.previousSibling;
+    }
+    const parent: Node | null = current.parentNode;
+    if (!parent) return ' ';
+    if (
+      parent !== root &&
+      parent.nodeType === Node.ELEMENT_NODE &&
+      BLOCK_BOUNDARY.test((parent as HTMLElement).tagName)
+    ) {
+      return ' ';
+    }
+    current = parent;
+  }
+  return ' ';
+}
+
 /**
  * A presentational rich-text editor with formatting, template-variable
  * insertion and optional speech-to-text dictation. Content is supplied and
@@ -381,6 +419,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       event: React.KeyboardEvent<HTMLDivElement>
     ) => {
       if (
+        disabled ||
         event.key !== ' ' ||
         event.ctrlKey ||
         event.metaKey ||
@@ -402,6 +441,14 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         (node.textContent ?? '').slice(0, caret.startOffset)
       );
       if (!typed) return;
+      // A token at the start of its text node may continue a visible word
+      // from an adjacent inline node (`etc<strong>.c</strong>` → "etc.c").
+      const tokenStart = caret.startOffset - typed[1].length;
+      if (
+        tokenStart === 0 &&
+        /\S/.test(visibleCharBefore(node, editorRef.current))
+      )
+        return;
       const token = typed[1].toLowerCase();
       const macro = macros
         .flatMap((group) => group.macros)
@@ -410,7 +457,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
       event.preventDefault();
       const replaceRange = document.createRange();
-      replaceRange.setStart(node, caret.startOffset - typed[1].length);
+      replaceRange.setStart(node, tokenStart);
       replaceRange.setEnd(node, caret.startOffset);
       selection.removeAllRanges();
       selection.addRange(replaceRange);

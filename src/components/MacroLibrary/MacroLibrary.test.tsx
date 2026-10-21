@@ -177,6 +177,24 @@ describe('MacroLibrary', () => {
       expect(less).toHaveAttribute('aria-expanded', 'true');
       expect(less).toHaveTextContent('less');
     });
+
+    it('moves focus to the replacement toggle so Escape keeps working', () => {
+      renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={() => {}} />);
+      const more = screen.getByRole('button', {
+        name: /Show full content: Back pain — normal/,
+      });
+      fireEvent.click(more);
+      const less = screen.getByRole('button', {
+        name: /Hide full content: Back pain — normal/,
+      });
+      expect(document.activeElement).toBe(less);
+      fireEvent.click(less);
+      // The "more" chip is hidden until hover/focus, so collapse focuses the
+      // row button instead.
+      const active = document.activeElement as HTMLElement;
+      expect(active).toHaveAttribute('data-macro-row');
+      expect(active).toHaveTextContent('Back pain — normal');
+    });
   });
 
   describe('truncation', () => {

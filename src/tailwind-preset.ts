@@ -1538,6 +1538,7 @@ export const miewebUISafelist = [
   'group/macro',
   'group-focus-within/macro:visible',
   'group-hover/macro:visible',
+  '[@media(hover:none)]:visible',
   'hover:text-primary',
   'leading-4',
   'md:absolute',
