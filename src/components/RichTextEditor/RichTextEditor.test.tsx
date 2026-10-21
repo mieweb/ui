@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
 import type { MacroGroup } from '../MacroLibrary';
@@ -500,6 +500,275 @@ describe('RichTextEditor', () => {
         typeAndPressSpace(editor, '.c');
         expect(exec).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('toolbar visibility', () => {
+    it('removes the toolbar when toolbar="hidden"', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          toolbar="hidden"
+          aria-label="Body"
+        />
+      );
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Bold' })).toBeNull();
+      // The editable region itself is unaffected.
+      expect(screen.getByRole('textbox', { name: 'Body' })).toBeInTheDocument();
+    });
+  });
+
+  describe('markdown shortcuts', () => {
+    let exec: ReturnType<typeof vi.fn>;
+    let previousExec: typeof document.execCommand;
+    beforeEach(() => {
+      previousExec = document.execCommand;
+      exec = vi.fn().mockReturnValue(true);
+      document.execCommand = exec as unknown as typeof document.execCommand;
+    });
+    afterEach(() => {
+      document.execCommand = previousExec;
+    });
+
+    /** Place `text` in the editor with the caret at its end, then press space. */
+    const typeAndPressSpace = (editor: HTMLElement, text: string) => {
+      const textNode = document.createTextNode(text);
+      editor.appendChild(textNode);
+      const range = document.createRange();
+      range.setStart(textNode, text.length);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return fireEvent.keyDown(editor, { key: ' ' });
+    };
+
+    const renderEditor = (
+      props: Partial<Parameters<typeof RichTextEditor>[0]> = {}
+    ) => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          markdownShortcuts
+          aria-label="Body"
+          {...props}
+        />
+      );
+      return screen.getByRole('textbox', { name: 'Body' });
+    };
+
+    it.each<[string, string, string | undefined]>([
+      ['#', 'formatBlock', 'h1'],
+      ['##', 'formatBlock', 'h2'],
+      ['###', 'formatBlock', 'h3'],
+      ['-', 'insertUnorderedList', undefined],
+      ['*', 'insertUnorderedList', undefined],
+      ['1.', 'insertOrderedList', undefined],
+      ['>', 'formatBlock', 'blockquote'],
+    ])('expands "%s" + space at line start', (token, command, value) => {
+      const editor = renderEditor();
+      const notPrevented = typeAndPressSpace(editor, token);
+      // The typed token is removed, then the block command is applied —
+      // both through execCommand so the expansion is natively undoable.
+      expect(exec).toHaveBeenNthCalledWith(1, 'delete', false);
+      expect(exec).toHaveBeenNthCalledWith(2, command, false, value);
+      expect(notPrevented).toBe(false);
+    });
+
+    it('reports the transformed content to onChange', () => {
+      const onChange = vi.fn();
+      const editor = renderEditor({ onChange });
+      typeAndPressSpace(editor, '##');
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    it('is off by default', () => {
+      renderWithTheme(
+        <RichTextEditor value="" onChange={() => {}} aria-label="Body" />
+      );
+      const editor = screen.getByRole('textbox', { name: 'Body' });
+      const notPrevented = typeAndPressSpace(editor, '##');
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it('ignores tokens that are not at the start of a line', () => {
+      const editor = renderEditor();
+      const notPrevented = typeAndPressSpace(editor, 'note ##');
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it.each(['constructor', 'toString', '__proto__'])(
+      'leaves inherited object property "%s" unchanged',
+      (word) => {
+        const editor = renderEditor();
+        const notPrevented = typeAndPressSpace(editor, word);
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+        expect(editor.textContent).toBe(word);
+      }
+    );
+
+    it('ignores a token preceded by text in an adjacent inline node', () => {
+      // note <b>##</b> — the line starts with "note", not the token.
+      const editor = renderEditor();
+      editor.appendChild(document.createTextNode('note '));
+      const bold = document.createElement('b');
+      const tokenNode = document.createTextNode('##');
+      bold.appendChild(tokenNode);
+      editor.appendChild(bold);
+      const range = document.createRange();
+      range.setStart(tokenNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      const notPrevented = fireEvent.keyDown(editor, { key: ' ' });
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it('treats text after a line break as a line start', () => {
+      const editor = renderEditor();
+      editor.appendChild(document.createTextNode('one'));
+      editor.appendChild(document.createElement('br'));
+      const tokenNode = document.createTextNode('##');
+      editor.appendChild(tokenNode);
+      const range = document.createRange();
+      range.setStart(tokenNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      fireEvent.keyDown(editor, { key: ' ' });
+      expect(exec).toHaveBeenNthCalledWith(2, 'formatBlock', false, 'h2');
+    });
+
+    it('does not expand during IME composition', () => {
+      const editor = renderEditor();
+      const textNode = document.createTextNode('##');
+      editor.appendChild(textNode);
+      const range = document.createRange();
+      range.setStart(textNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      const notPrevented = fireEvent.keyDown(editor, {
+        key: ' ',
+        isComposing: true,
+      });
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it('does not expand while the editor is disabled', () => {
+      const editor = renderEditor({ disabled: true });
+      typeAndPressSpace(editor, '##');
+      expect(exec).not.toHaveBeenCalled();
+    });
+
+    it('falls back to manual token removal when execCommand fails', () => {
+      exec.mockReturnValue(false);
+      const editor = renderEditor();
+      typeAndPressSpace(editor, '##');
+      expect(editor.textContent).toBe('');
+    });
+
+    it('coexists with macro shortcut expansion', () => {
+      const macros: MacroGroup[] = [
+        {
+          id: 'library',
+          label: 'Default library',
+          macros: [
+            {
+              id: 'cardio',
+              label: 'Cardio — WNL',
+              content: 'Regular rate and rhythm.',
+              shortcut: '.c',
+            },
+          ],
+        },
+      ];
+      const editor = renderEditor({ macros });
+      typeAndPressSpace(editor, '.c');
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+    });
+  });
+
+  describe('dictation with a hidden toolbar', () => {
+    class MockRecognition {
+      static instances: MockRecognition[] = [];
+      continuous = false;
+      interimResults = false;
+      lang = '';
+      maxAlternatives = 1;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      onresult: unknown = null;
+      onerror: unknown = null;
+      start = vi.fn(() => this.onstart?.());
+      stop = vi.fn();
+      constructor() {
+        MockRecognition.instances.push(this);
+      }
+    }
+    const win = window as unknown as Record<string, unknown>;
+    let getUserMedia: ReturnType<typeof vi.fn>;
+    beforeEach(() => {
+      MockRecognition.instances = [];
+      win.SpeechRecognition = MockRecognition;
+      getUserMedia = vi.fn().mockResolvedValue({ getTracks: () => [] });
+      Object.defineProperty(navigator, 'mediaDevices', {
+        value: { getUserMedia },
+        configurable: true,
+      });
+    });
+    afterEach(() => {
+      delete win.SpeechRecognition;
+    });
+
+    const editorProps = (toolbar?: 'visible' | 'hidden') => (
+      <RichTextEditor
+        value=""
+        onChange={() => {}}
+        aria-label="Body"
+        toolbar={toolbar}
+      />
+    );
+
+    it('stops a running dictation when the toolbar is hidden', async () => {
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      await waitFor(() => expect(MockRecognition.instances).toHaveLength(1));
+      const recognition = MockRecognition.instances[0];
+      expect(recognition.start).toHaveBeenCalled();
+      view.rerender(editorProps('hidden'));
+      expect(recognition.stop).toHaveBeenCalled();
+    });
+
+    it('cancels a start awaiting microphone permission when the toolbar hides', async () => {
+      let grantPermission: (value: { getTracks: () => [] }) => void;
+      getUserMedia.mockImplementation(
+        () => new Promise((resolve) => (grantPermission = resolve))
+      );
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      view.rerender(editorProps('hidden'));
+      grantPermission!({ getTracks: () => [] });
+      await waitFor(() => expect(getUserMedia).toHaveBeenCalled());
+      // Permission resolved after the toolbar hid — no session may start.
+      expect(MockRecognition.instances).toHaveLength(0);
     });
   });
 });
