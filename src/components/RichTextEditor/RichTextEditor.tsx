@@ -421,6 +421,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       if (
         disabled ||
         event.key !== ' ' ||
+        // Space during IME composition selects/converts a candidate; never
+        // hijack it for macro expansion.
+        event.nativeEvent.isComposing ||
         event.ctrlKey ||
         event.metaKey ||
         event.altKey ||

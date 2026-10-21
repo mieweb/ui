@@ -92,13 +92,18 @@ function matchesQuery(macro: Macro, query: string): boolean {
   );
 }
 
+/** Query is a prefix of the macro's shortcut identifier. */
+function isShortcutHit(macro: Macro, query: string): boolean {
+  return (
+    query.length > 0 &&
+    (macro.shortcut ?? '').toLowerCase().startsWith(query.toLowerCase())
+  );
+}
+
 /** Shortcut-prefix matches rank before everything else. */
 function rankMacros(macros: Macro[], query: string): Macro[] {
-  const q = query.toLowerCase();
-  const isShortcutHit = (m: Macro) =>
-    q.length > 0 && (m.shortcut ?? '').toLowerCase().startsWith(q);
   return [...macros].sort(
-    (a, b) => Number(isShortcutHit(b)) - Number(isShortcutHit(a))
+    (a, b) => Number(isShortcutHit(b, query)) - Number(isShortcutHit(a, query))
   );
 }
 
@@ -190,7 +195,7 @@ function MacroRow({
         {!isPeeked && (
           <span
             ref={measurePreview}
-            className="text-muted-foreground line-clamp-2 text-xs"
+            className="text-muted-foreground line-clamp-2 text-xs break-words"
           >
             {macro.content}
           </span>
@@ -200,7 +205,7 @@ function MacroRow({
         <div
           id={peekId}
           data-slot="macro-library-peek"
-          className="text-muted-foreground px-2 pb-1 text-xs whitespace-pre-line"
+          className="text-muted-foreground px-2 pb-1 text-xs break-words whitespace-pre-line"
         >
           {macro.content}
         </div>
@@ -291,7 +296,15 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
             )
           : group.macros,
       }))
-      .filter((group) => group.macros.length > 0);
+      .filter((group) => group.macros.length > 0)
+      // Groups containing shortcut-prefix hits rank first so ".c" reaches
+      // the macro with that shortcut before incidental content matches in
+      // earlier groups; the stable sort keeps group context otherwise.
+      .sort(
+        (a, b) =>
+          Number(b.macros.some((m) => isShortcutHit(m, trimmed))) -
+          Number(a.macros.some((m) => isShortcutHit(m, trimmed)))
+      );
 
     const hasMacros = groups.some((g) => g.macros.length > 0);
     const noResults = hasMacros && searching && visibleGroups.length === 0;

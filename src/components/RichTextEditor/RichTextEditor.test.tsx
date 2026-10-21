@@ -419,6 +419,24 @@ describe('RichTextEditor', () => {
         expect(notPrevented).toBe(true);
       });
 
+      it('does not expand during IME composition', () => {
+        const editor = renderEditor();
+        const textNode = document.createTextNode('.c');
+        editor.appendChild(textNode);
+        const range = document.createRange();
+        range.setStart(textNode, 2);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const notPrevented = fireEvent.keyDown(editor, {
+          key: ' ',
+          isComposing: true,
+        });
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+      });
+
       it('does not expand while the editor is disabled', () => {
         renderWithTheme(
           <RichTextEditor

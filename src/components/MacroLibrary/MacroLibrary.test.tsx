@@ -102,6 +102,48 @@ describe('MacroLibrary', () => {
       expect(rows[0]).toHaveTextContent('Cardio — WNL');
     });
 
+    it('ranks shortcut hits first across groups', () => {
+      renderWithTheme(
+        <MacroLibrary
+          groups={[
+            {
+              id: 'previous',
+              label: 'Previous values',
+              kind: 'previous',
+              macros: [
+                {
+                  id: 'prev-note',
+                  label: 'Last plan',
+                  content: 'Patient used .c macro previously.',
+                },
+              ],
+            },
+            {
+              id: 'library',
+              label: 'Library',
+              macros: [
+                {
+                  id: 'cardio',
+                  label: 'Cardio — WNL',
+                  shortcut: '.c',
+                  content: 'Regular rate and rhythm.',
+                },
+              ],
+            },
+          ]}
+          onSelect={() => {}}
+        />
+      );
+      fireEvent.change(screen.getByLabelText('Search macros'), {
+        target: { value: '.c' },
+      });
+      // The group with the shortcut hit outranks the earlier group whose
+      // match is incidental content, so ArrowDown reaches it first.
+      const rows = Array.from(document.querySelectorAll('[data-macro-row]'));
+      expect(rows[0]).toHaveTextContent('Cardio — WNL');
+      expect(rows[1]).toHaveTextContent('Last plan');
+    });
+
     it('shows a no-results state with a clear action', () => {
       renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={() => {}} />);
       fireEvent.change(screen.getByLabelText('Search macros'), {
