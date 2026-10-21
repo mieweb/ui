@@ -1069,6 +1069,22 @@ export const miewebUISafelist = [
   'min-h-[76px]',
   'min-h-[96px]',
   'min-h-[120px]',
+  // Textarea auto-grow default (ui#632) — single-line baselines matching the
+  // Input heights, tuned padding so one line + padding + borders equals the
+  // Input size token, floating-label single-line minimums, and the resize
+  // handle variants. (min-h-8 is safelisted above.)
+  'min-h-10',
+  'min-h-12',
+  'py-[5px]',
+  'py-[7px]',
+  'py-[9px]',
+  'min-h-[50px]',
+  'min-h-[58px]',
+  'min-h-[66px]',
+  'resize-none',
+  'resize-y',
+  'resize-x',
+  'resize',
   // Floating-group field boxes (labelVariant="floating" on RadioGroup /
   // CheckboxGroup) share the floating input heights as min-heights. sr-only
   // visually hides the group legend (and the hideLabel input label) while

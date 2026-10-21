@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Textarea } from './Textarea';
+import { Input } from '../Input';
 
 const meta: Meta<typeof Textarea> = {
   id: 'text-inputs-textarea',
@@ -12,7 +13,7 @@ const meta: Meta<typeof Textarea> = {
       description: {
         component: `### What it's for
 
-The multi-line counterpart of \`Input\`, sharing its anatomy — \`label\` (\`labelVariant\` \`stacked\` | \`floating\`, \`hideLabel\`), \`helperText\`, \`error\`, \`required\` + \`requiredVariant\`, \`size\`, \`hasError\` — and adding what long text needs: \`maxLength\` + \`showCount\` (a live \`n/max\` counter), \`autoResize\` (grows to fit content) and \`resize\` \`none\` | \`vertical\` | \`horizontal\` | \`both\`. The folder exports \`Textarea\` and \`textareaVariants\`.
+The multi-line counterpart of \`Input\`, sharing its anatomy — \`label\` (\`labelVariant\` \`stacked\` | \`floating\`, \`hideLabel\`), \`helperText\`, \`error\`, \`required\` + \`requiredVariant\`, \`size\`, \`hasError\` — and adding what long text needs: \`maxLength\` + \`showCount\` (a live \`n/max\` counter), \`autoResize\` (on by default — an empty textarea starts at the same height as a single-line \`Input\` and grows/shrinks with content, while the native drag handle still works and sets a new minimum) and \`resize\` \`none\` | \`vertical\` | \`horizontal\` | \`both\`. The folder exports \`Textarea\` and \`textareaVariants\`.
 
 ### Use it when
 
@@ -36,18 +37,17 @@ const [note, setNote] = React.useState('');
   onChange={(e) => setNote(e.target.value)}
   maxLength={500}
   showCount
-  autoResize
   helperText="Visible to the patient."
 />
 \`\`\`
 
-Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an internal copy only so the counter stays correct.
+Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an internal copy only so the counter stays correct. The field starts at single-line height and grows with content; pass \`rows\` for a taller floor or \`autoResize={false}\` for classic fixed sizing.
 
 ### Limitations
 
 - Same wiring as \`Input\`: \`<label htmlFor>\`, \`aria-invalid\` always rendered, \`aria-describedby\` → error (\`<p role="alert">\`) or helper text, plus the counter's id when \`showCount\` is on. Helper text is hidden while an error shows.
 - The counter turns red at \`maxLength\` but does not announce it; \`maxLength\` is enforced by the native attribute, so the user is simply stopped from typing.
-- \`autoResize\` sets \`style.height\` from \`scrollHeight\` on every change and forces \`resize: none\`; \`rows\` still sets the initial height.
+- \`autoResize\` (the default) syncs \`style.height\` from \`scrollHeight\` (typing, controlled updates, mount-time prefill, and width changes via ResizeObserver). The native drag handle stays available: a dragged height becomes the new growth floor, \`rows\` raises the starting floor, and a \`max-h-*\` class caps growth and restores internal scrolling. \`autoResize={false}\` keeps the classic fixed \`min-h\` sizing.
 - \`ref\` is forwarded through \`useImperativeHandle\`, so it is populated after mount, not during the first render.
 - RTL-safe (\`start-3\`, \`ms-1\`); the footer uses \`justify-between\` so the counter sits at the end. Dark mode via the same semantic tokens as \`Input\`.
 - No built-in strings; depends on \`Input\` for \`RequiredMark\`.`,
@@ -89,7 +89,8 @@ Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an 
     resize: {
       control: 'select',
       options: ['none', 'vertical', 'horizontal', 'both'],
-      description: 'User resize handle; forced to none when autoResize is on.',
+      description:
+        'User resize handle; with autoResize, dragging it sets a new growth floor.',
     },
     showCount: {
       control: 'boolean',
@@ -134,7 +135,7 @@ export const Default: Story = {
     size: 'md',
     resize: 'vertical',
     showCount: false,
-    autoResize: false,
+    autoResize: true,
     disabled: false,
     hasError: false,
     helperText: '',
@@ -217,13 +218,68 @@ export const NoResize: Story = {
 };
 
 export const AutoResize: Story = {
+  name: 'Auto-grow (default)',
   render: () => (
     <div className="w-80">
       <Textarea
-        label="Auto-resize"
-        placeholder="This textarea grows as you type..."
-        autoResize
-        helperText="The textarea will automatically grow to fit the content"
+        label="Auto-grow"
+        placeholder="Starts one line tall…"
+        helperText="Grows with content and shrinks when it's removed; dragging the handle sets a new minimum"
+      />
+    </div>
+  ),
+};
+
+export const MatchesInputHeight: Story = {
+  name: 'Matches Input height',
+  render: () => (
+    <div className="w-80 space-y-4">
+      <Input label="Single-line input" placeholder="Input" />
+      <Textarea label="Empty textarea" placeholder="Textarea" />
+      <p className="text-muted-foreground text-xs">
+        An empty auto-growing textarea matches the single-line input height for
+        each size.
+      </p>
+    </div>
+  ),
+};
+
+export const Prefilled: Story = {
+  render: () => (
+    <div className="w-80">
+      <Textarea
+        label="Prefilled"
+        defaultValue={
+          'Prefilled content is measured on first render,\nso this textarea mounts at three lines tall\nwithout any typing.'
+        }
+      />
+    </div>
+  ),
+};
+
+export const RowsFloor: Story = {
+  name: 'Rows as growth floor',
+  render: () => (
+    <div className="w-80">
+      <Textarea
+        label="Comments"
+        rows={4}
+        placeholder="Starts four lines tall…"
+        helperText="rows={4} keeps the field at least four lines; content can still grow it"
+      />
+    </div>
+  ),
+};
+
+export const FixedHeight: Story = {
+  name: 'Fixed height (autoResize off)',
+  render: () => (
+    <div className="w-80">
+      <Textarea
+        label="Fixed height"
+        autoResize={false}
+        placeholder="Classic fixed-height textarea…"
+        helperText="Keeps the fixed min-height; no auto-growing"
       />
     </div>
   ),

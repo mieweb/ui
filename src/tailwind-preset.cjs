@@ -1003,6 +1003,22 @@ module.exports = {
     'start-2.5',
     'text-[11px]',
     'whitespace-pre-line',
+    // Textarea auto-grow default (ui#632) — single-line baselines matching the
+    // Input heights, tuned padding so one line + padding + borders equals the
+    // Input size token, floating-label single-line minimums, and the resize
+    // handle variants.
+    'min-h-10',
+    'min-h-12',
+    'py-[5px]',
+    'py-[7px]',
+    'py-[9px]',
+    'min-h-[50px]',
+    'min-h-[58px]',
+    'min-h-[66px]',
+    'resize-none',
+    'resize-y',
+    'resize-x',
+    'resize',
     // Motion preset safelist: fallback animations and runtime-selected scale origins
     'animate-fade-in',
     'origin-top',
