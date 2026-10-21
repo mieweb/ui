@@ -39,6 +39,8 @@ describe('Textarea', () => {
       expect(textarea).toHaveClass('min-h-10');
       // The native drag handle stays available alongside auto-grow.
       expect(textarea).toHaveClass('resize-y');
+      // Exposes the mode to the condensed stylesheet.
+      expect(textarea).toHaveAttribute('data-auto-resize', 'true');
     });
 
     it('uses size-matched single-line baselines', () => {
@@ -101,6 +103,45 @@ describe('Textarea', () => {
       expect(screen.getByRole('textbox')).toHaveAttribute('rows', '5');
     });
 
+    it('preserves a consumer-configured initial height as the growth floor', async () => {
+      const user = userEvent.setup();
+      let mounted: HTMLTextAreaElement | null = null;
+      renderWithTheme(
+        <Textarea
+          label="Notes"
+          style={{ height: '160px' }}
+          ref={(el) => {
+            if (el && !mounted) {
+              mounted = el;
+              mockScrollHeight(el, () => 40);
+              const metric = () => {
+                const h = parseInt(el.style.height, 10);
+                return Number.isNaN(h) ? 160 : h;
+              };
+              Object.defineProperty(el, 'offsetHeight', {
+                configurable: true,
+                get: metric,
+              });
+              Object.defineProperty(el, 'clientHeight', {
+                configurable: true,
+                get: metric,
+              });
+            }
+          }}
+        />
+      );
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      // Mount measurement keeps the configured 160px as the floor.
+      expect(textarea.style.height).toBe('160px');
+      // Content below the floor does not shrink it.
+      await user.type(textarea, 'short');
+      expect(textarea.style.height).toBe('160px');
+      // Content above the floor still grows past it.
+      mockScrollHeight(textarea, () => 240);
+      await user.type(textarea, ' more');
+      expect(textarea.style.height).toBe('240px');
+    });
+
     it('keeps a user-dragged height as the growth floor', async () => {
       const user = userEvent.setup();
       renderWithTheme(<Textarea label="Notes" />);
@@ -130,6 +171,7 @@ describe('Textarea', () => {
       expect(textarea).toHaveClass('min-h-[80px]');
       expect(textarea).toHaveClass('resize-y');
       expect(textarea).not.toHaveAttribute('rows');
+      expect(textarea).not.toHaveAttribute('data-auto-resize');
     });
 
     it('does not force rows or adjust height', async () => {

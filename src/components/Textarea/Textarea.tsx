@@ -248,10 +248,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // Auto-resize logic: collapse to natural height, then grow to fit
     // content. CSS min-height (single-line baseline) and rows (via
-    // scrollHeight) act as floors; dragging the native resize handle sets a
-    // user floor; a consumer max-height still caps the rendered height.
+    // scrollHeight) act as floors; a consumer-configured initial height
+    // (style/class) and dragging the native resize handle set a user floor;
+    // a consumer max-height still caps the rendered height.
     const userFloorRef = React.useRef<number | null>(null);
     const expectedHeightRef = React.useRef<number | null>(null);
+    const initialFloorCapturedRef = React.useRef(false);
 
     const adjustHeight = React.useCallback(() => {
       const textarea = internalRef.current;
@@ -263,18 +265,37 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           userFloorRef.current ?? 0
         );
         textarea.style.height = `${next}px`;
-        expectedHeightRef.current = next;
+        // Record the actual rendered height (a CSS max-height may clamp the
+        // value we set) so clamping is never mistaken for a manual drag.
+        expectedHeightRef.current = textarea.offsetHeight || next;
       }
     }, [autoResize]);
 
     // Measures prefilled values on mount and controlled values on update.
+    // On mount, a consumer-configured initial height (inline style or a
+    // height class) that exceeds the content height becomes the growth
+    // floor — auto-sizing must not collapse below a configured baseline.
     React.useEffect(() => {
+      const textarea = internalRef.current;
+      if (textarea && autoResize && !initialFloorCapturedRef.current) {
+        initialFloorCapturedRef.current = true;
+        const configured = textarea.offsetHeight;
+        adjustHeight();
+        if (configured - textarea.offsetHeight > 1) {
+          userFloorRef.current = configured;
+          textarea.style.height = `${configured}px`;
+          expectedHeightRef.current = textarea.offsetHeight || configured;
+        }
+        return;
+      }
       adjustHeight();
-    }, [currentValue, adjustHeight]);
+    }, [currentValue, adjustHeight, autoResize]);
 
     // Re-measure when the available width changes (wrapping changes), and
     // detect heights we didn't set ourselves — the user dragging the native
     // resize handle — adopting the dragged height as the new growth floor.
+    // The drag check runs first so a diagonal resize (width + height in one
+    // notification) keeps the dragged height through the re-measure.
     React.useEffect(() => {
       const textarea = internalRef.current;
       if (!autoResize || !textarea || typeof ResizeObserver === 'undefined') {
@@ -282,16 +303,15 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       }
       let lastWidth = textarea.offsetWidth;
       const observer = new ResizeObserver(() => {
-        if (textarea.offsetWidth !== lastWidth) {
-          lastWidth = textarea.offsetWidth;
-          adjustHeight();
-          return;
-        }
         const expected = expectedHeightRef.current;
         const height = textarea.offsetHeight;
         if (expected !== null && Math.abs(height - expected) > 1) {
           userFloorRef.current = height;
           expectedHeightRef.current = height;
+        }
+        if (textarea.offsetWidth !== lastWidth) {
+          lastWidth = textarea.offsetWidth;
+          adjustHeight();
         }
       });
       observer.observe(textarea);
@@ -327,6 +347,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     const textareaElement = (
       <textarea
         data-slot="textarea"
+        data-auto-resize={autoResize ? 'true' : undefined}
         ref={internalRef}
         id={textareaId}
         value={value}
