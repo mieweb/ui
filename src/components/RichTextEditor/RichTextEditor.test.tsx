@@ -419,6 +419,30 @@ describe('RichTextEditor', () => {
         expect(notPrevented).toBe(true);
       });
 
+      it('expands after a trailing line break inside an inline sibling', () => {
+        const editor = renderEditor();
+        // <strong>one<br></strong>.c — the <br> ends the word, so ".c" is
+        // a standalone token even though the sibling's text ends in "e".
+        const strong = document.createElement('strong');
+        strong.appendChild(document.createTextNode('one'));
+        strong.appendChild(document.createElement('br'));
+        editor.appendChild(strong);
+        const shortcutNode = document.createTextNode('.c');
+        editor.appendChild(shortcutNode);
+        const range = document.createRange();
+        range.setStart(shortcutNode, 2);
+        range.collapse(true);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        fireEvent.keyDown(editor, { key: ' ' });
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
       it('does not expand during IME composition', () => {
         const editor = renderEditor();
         const textNode = document.createTextNode('.c');

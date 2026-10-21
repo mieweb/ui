@@ -150,23 +150,35 @@ const BLOCK_BOUNDARY =
   /^(BR|DIV|P|LI|UL|OL|TABLE|TR|TD|TH|H[1-6]|BLOCKQUOTE|PRE|HR)$/;
 
 /**
+ * Last visible character rendered inside `node`: ' ' when it ends with a
+ * line break or block element, '' when it renders nothing.
+ */
+function lastVisibleChar(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return (node.textContent ?? '').slice(-1);
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return '';
+  if (BLOCK_BOUNDARY.test((node as HTMLElement).tagName)) return ' ';
+  for (let child = node.lastChild; child; child = child.previousSibling) {
+    const char = lastVisibleChar(child);
+    if (char) return char;
+  }
+  return '';
+}
+
+/**
  * Visible character immediately before `node`, looking across adjacent
  * inline elements (e.g. `etc<strong>.c</strong>` reads as "etc.c"). Block
- * elements and <br> count as whitespace boundaries.
+ * elements and <br> count as whitespace boundaries, including a trailing
+ * <br> inside an inline sibling (e.g. `<strong>one<br></strong>`).
  */
 function visibleCharBefore(node: Node, root: HTMLElement): string {
   let current: Node = node;
   while (current !== root) {
     let sibling: Node | null = current.previousSibling;
     while (sibling) {
-      if (
-        sibling.nodeType === Node.ELEMENT_NODE &&
-        BLOCK_BOUNDARY.test((sibling as HTMLElement).tagName)
-      ) {
-        return ' ';
-      }
-      const text = sibling.textContent ?? '';
-      if (text.length > 0) return text.slice(-1);
+      const char = lastVisibleChar(sibling);
+      if (char) return char;
       sibling = sibling.previousSibling;
     }
     const parent: Node | null = current.parentNode;
