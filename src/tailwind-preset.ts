@@ -1572,6 +1572,29 @@ export const miewebUISafelist = [
   'start-2.5',
   'text-[11px]',
   'whitespace-pre-line',
+  // RichTextEditor block gutter menu — hover-revealed `+` button
+  'group/rte-body',
+  'group-hover/rte-body:opacity-100',
+  // RichTextEditor editable region — baseline block styles (preflight strips
+  // heading/list/quote styling; `prose` needs @tailwindcss/typography)
+  '[&_h1]:my-3',
+  '[&_h1]:text-2xl',
+  '[&_h1]:font-bold',
+  '[&_h2]:my-3',
+  '[&_h2]:text-xl',
+  '[&_h2]:font-bold',
+  '[&_h3]:my-2',
+  '[&_h3]:text-lg',
+  '[&_h3]:font-semibold',
+  '[&_ul]:my-2',
+  '[&_ol]:my-2',
+  '[&_ol]:list-decimal',
+  '[&_ol]:ps-6',
+  '[&_blockquote]:my-2',
+  '[&_blockquote]:border-s-4',
+  '[&_blockquote]:border-border',
+  '[&_blockquote]:ps-3',
+  '[&_blockquote]:text-muted-foreground',
 ];
 
 export interface MiewebUIPreset {

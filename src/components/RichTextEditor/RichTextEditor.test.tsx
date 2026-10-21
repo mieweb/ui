@@ -771,4 +771,219 @@ describe('RichTextEditor', () => {
       expect(MockRecognition.instances).toHaveLength(0);
     });
   });
+
+  describe('block gutter menu', () => {
+    let exec: ReturnType<typeof vi.fn>;
+    let previousExec: typeof document.execCommand;
+    beforeEach(() => {
+      previousExec = document.execCommand;
+      exec = vi.fn().mockReturnValue(true);
+      document.execCommand = exec as unknown as typeof document.execCommand;
+    });
+    afterEach(() => {
+      document.execCommand = previousExec;
+    });
+
+    const macros: MacroGroup[] = [
+      {
+        id: 'library',
+        label: 'Default library',
+        macros: [
+          {
+            id: 'cardio',
+            label: 'Cardio — WNL',
+            content: 'Regular rate and rhythm.',
+            shortcut: '.c',
+          },
+        ],
+      },
+    ];
+
+    const renderEditor = (
+      props: Partial<Parameters<typeof RichTextEditor>[0]> = {}
+    ) => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          blockMenu
+          aria-label="Body"
+          {...props}
+        />
+      );
+      return screen.getByRole('textbox', { name: 'Body' });
+    };
+
+    const openMenu = () =>
+      fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+
+    it('renders no gutter button without blockMenu', () => {
+      renderWithTheme(
+        <RichTextEditor value="" onChange={() => {}} aria-label="Body" />
+      );
+      expect(screen.queryByRole('button', { name: 'Block menu' })).toBeNull();
+    });
+
+    it('renders no gutter button while disabled', () => {
+      renderEditor({ disabled: true });
+      expect(screen.queryByRole('button', { name: 'Block menu' })).toBeNull();
+    });
+
+    it('lists the block formats and the toolbar toggle', () => {
+      renderEditor();
+      openMenu();
+      for (const label of [
+        'Text',
+        'Heading 1',
+        'Heading 2',
+        'Heading 3',
+        'Bullet list',
+        'Numbered list',
+        'Quote',
+        'Hide toolbar',
+      ]) {
+        expect(
+          screen.getByRole('menuitem', { name: label })
+        ).toBeInTheDocument();
+      }
+    });
+
+    it.each<[string, string, string | undefined]>([
+      ['Text', 'formatBlock', 'p'],
+      ['Heading 1', 'formatBlock', 'h1'],
+      ['Heading 2', 'formatBlock', 'h2'],
+      ['Heading 3', 'formatBlock', 'h3'],
+      ['Bullet list', 'insertUnorderedList', undefined],
+      ['Numbered list', 'insertOrderedList', undefined],
+      ['Quote', 'formatBlock', 'blockquote'],
+    ])('applies "%s" to the target block', (label, command, value) => {
+      const onChange = vi.fn();
+      const editor = renderEditor({ onChange });
+      const line = document.createElement('div');
+      line.textContent = 'hello';
+      editor.appendChild(line);
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: label }));
+      expect(exec).toHaveBeenCalledWith(command, false, value);
+      expect(onChange).toHaveBeenCalled();
+      // The command ran with the selection placed in the target block.
+      expect(window.getSelection()!.anchorNode).toBe(line);
+    });
+
+    it('moves focus to the first menu item on open', async () => {
+      renderEditor();
+      openMenu();
+      await waitFor(() =>
+        expect(screen.getByRole('menuitem', { name: 'Text' })).toHaveFocus()
+      );
+    });
+
+    it('closes with Escape', async () => {
+      renderEditor();
+      openMenu();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    });
+
+    it('opens with Ctrl+/ targeting the caret block', () => {
+      const editor = renderEditor();
+      const line = document.createElement('div');
+      const textNode = document.createTextNode('hello');
+      line.appendChild(textNode);
+      editor.appendChild(line);
+      const range = document.createRange();
+      range.setStart(textNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      const notPrevented = fireEvent.keyDown(editor, {
+        key: '/',
+        ctrlKey: true,
+      });
+      expect(notPrevented).toBe(false);
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Heading 2' }));
+      // The caret position captured at open time is the command target.
+      expect(exec).toHaveBeenCalledWith('formatBlock', false, 'h2');
+      expect(window.getSelection()!.anchorNode).toBe(textNode);
+    });
+
+    it('opens with Cmd+/', () => {
+      const editor = renderEditor();
+      fireEvent.keyDown(editor, { key: '/', metaKey: true });
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+    });
+
+    it('offers "Insert macro…" only when macros are provided', () => {
+      renderEditor();
+      openMenu();
+      expect(
+        screen.queryByRole('menuitem', { name: 'Insert macro…' })
+      ).toBeNull();
+    });
+
+    it('opens the macro panel from the menu', () => {
+      renderEditor({ macros });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      expect(
+        document.querySelector('[data-slot="macro-library"]')
+      ).not.toBeNull();
+    });
+
+    it('hides the toolbar from the menu and reports the change', () => {
+      const onToolbarChange = vi.fn();
+      renderEditor({ onToolbarChange });
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).not.toBeNull();
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Hide toolbar' }));
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).toBeNull();
+      expect(onToolbarChange).toHaveBeenCalledWith('hidden');
+    });
+
+    it('shows a toolbar hidden via defaultToolbar', () => {
+      renderEditor({ defaultToolbar: 'hidden' });
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).toBeNull();
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Show toolbar' }));
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).not.toBeNull();
+    });
+
+    it('leaves a controlled toolbar to the host', () => {
+      const onToolbarChange = vi.fn();
+      renderEditor({ toolbar: 'visible', onToolbarChange });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Hide toolbar' }));
+      // Controlled: visibility only changes when the host updates the prop.
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).not.toBeNull();
+      expect(onToolbarChange).toHaveBeenCalledWith('hidden');
+    });
+
+    it('externalizes the menu labels', () => {
+      renderEditor({
+        blockMenuLabels: {
+          blockMenu: 'Blockmenü',
+          heading1: 'Überschrift 1',
+          hideToolbar: 'Werkzeugleiste ausblenden',
+        },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Blockmenü' }));
+      expect(
+        screen.getByRole('menuitem', { name: 'Überschrift 1' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('menuitem', { name: 'Werkzeugleiste ausblenden' })
+      ).toBeInTheDocument();
+    });
+  });
 });
