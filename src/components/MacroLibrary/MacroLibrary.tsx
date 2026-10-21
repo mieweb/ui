@@ -5,7 +5,6 @@ import {
   BookOpenIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  ChevronUpIcon,
   CloseIcon,
   PlusIcon,
 } from '../Icons';
@@ -78,6 +77,8 @@ const DEFAULT_LABELS = {
   clearSearch: 'Clear search',
   showFullContent: 'Show full content',
   hideFullContent: 'Hide full content',
+  more: 'more',
+  less: 'less',
 };
 
 /** Case-insensitive match across label, shortcut, keywords and content. */
@@ -98,6 +99,116 @@ function rankMacros(macros: Macro[], query: string): Macro[] {
     q.length > 0 && (m.shortcut ?? '').toLowerCase().startsWith(q);
   return [...macros].sort(
     (a, b) => Number(isShortcutHit(b)) - Number(isShortcutHit(a))
+  );
+}
+
+interface MacroRowProps {
+  macro: Macro;
+  isPrevious: boolean;
+  isPeeked: boolean;
+  peekId: string;
+  labels: typeof DEFAULT_LABELS;
+  onSelect: (macro: Macro) => void;
+  onTogglePeek: () => void;
+  onRowKeyDown: (event: React.KeyboardEvent) => void;
+}
+
+/**
+ * One macro row. The two-line preview measures its own clamping so the
+ * "more" toggle only appears when content is actually truncated.
+ */
+function MacroRow({
+  macro,
+  isPrevious,
+  isPeeked,
+  peekId,
+  labels,
+  onSelect,
+  onTogglePeek,
+  onRowKeyDown,
+}: MacroRowProps) {
+  const [truncated, setTruncated] = React.useState(false);
+  const measurePreview = (el: HTMLSpanElement | null) => {
+    if (el) setTruncated(el.scrollHeight > el.clientHeight);
+  };
+  return (
+    <div
+      data-slot="macro-library-item"
+      className="group/macro hover:bg-muted/60 relative rounded-md"
+    >
+      <button
+        type="button"
+        data-macro-row
+        className="focus-visible:ring-ring text-foreground hover:text-primary flex w-full cursor-pointer flex-col items-stretch gap-0.5 rounded-md px-2 py-1.5 text-start focus-visible:ring-2 focus-visible:outline-none"
+        onClick={() => onSelect(macro)}
+        onKeyDown={onRowKeyDown}
+      >
+        <span className="flex items-center gap-2">
+          {macro.shortcut && (
+            <span
+              className={cn(
+                'border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]',
+                isPrevious &&
+                  'border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-700 dark:bg-warning-950 dark:text-warning-300'
+              )}
+            >
+              {macro.shortcut}
+            </span>
+          )}
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">
+            {macro.label}
+          </span>
+        </span>
+        {!isPeeked && (
+          <span
+            ref={measurePreview}
+            className="text-muted-foreground line-clamp-2 text-xs"
+          >
+            {macro.content}
+          </span>
+        )}
+      </button>
+      {isPeeked && (
+        <div
+          id={peekId}
+          data-slot="macro-library-peek"
+          className="text-muted-foreground px-2 pb-1 text-xs whitespace-pre-line"
+        >
+          {macro.content}
+        </div>
+      )}
+      {truncated && !isPeeked && (
+        // Overlays the end of the clamped second line; revealed on row
+        // hover or keyboard focus so short rows stay entirely clean.
+        <button
+          type="button"
+          className="bg-muted text-muted-foreground hover:text-primary focus-visible:ring-ring invisible absolute end-1.5 bottom-1.5 flex cursor-pointer items-center rounded-sm px-1 text-[11px] leading-4 group-focus-within/macro:visible group-hover/macro:visible hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          aria-expanded={false}
+          aria-label={`${labels.showFullContent}: ${macro.label}`}
+          onClick={onTogglePeek}
+        >
+          {labels.more}
+          <ChevronRightIcon
+            aria-hidden="true"
+            className="h-3 w-3 rtl:-scale-x-100"
+          />
+        </button>
+      )}
+      {isPeeked && (
+        <span className="-mt-1 flex justify-end px-2 pb-1">
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-primary focus-visible:ring-ring cursor-pointer rounded text-[11px] hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            aria-expanded
+            aria-controls={peekId}
+            aria-label={`${labels.hideFullContent}: ${macro.label}`}
+            onClick={onTogglePeek}
+          >
+            {labels.less}
+          </button>
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -335,78 +446,20 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                     {!isCollapsed &&
                       group.macros.map((macro) => {
                         const isPeeked = peeked === macro.id;
-                        const peekId = `${panelId}-peek-${macro.id}`;
                         return (
-                          <div
+                          <MacroRow
                             key={macro.id}
-                            data-slot="macro-library-item"
-                            className="hover:bg-muted/60 relative rounded-md"
-                          >
-                            <button
-                              type="button"
-                              data-macro-row
-                              className="focus-visible:ring-ring text-foreground hover:text-primary flex w-full cursor-pointer flex-col items-stretch gap-0.5 rounded-md px-2 py-1.5 text-start focus-visible:ring-2 focus-visible:outline-none"
-                              onClick={() => onSelect(macro)}
-                              onKeyDown={handleRowKeyDown}
-                            >
-                              <span className="flex items-center gap-2">
-                                {macro.shortcut && (
-                                  <span
-                                    className={cn(
-                                      'border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]',
-                                      isPrevious &&
-                                        'border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-700 dark:bg-warning-950 dark:text-warning-300'
-                                    )}
-                                  >
-                                    {macro.shortcut}
-                                  </span>
-                                )}
-                                <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                                  {macro.label}
-                                </span>
-                              </span>
-                              {!isPeeked && (
-                                <span className="text-muted-foreground line-clamp-2 text-xs">
-                                  {macro.content}
-                                </span>
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute end-1 top-1.5 rounded p-0.5 focus-visible:ring-2 focus-visible:outline-none"
-                              aria-expanded={isPeeked}
-                              aria-controls={isPeeked ? peekId : undefined}
-                              aria-label={`${
-                                isPeeked
-                                  ? labels.hideFullContent
-                                  : labels.showFullContent
-                              }: ${macro.label}`}
-                              onClick={() =>
-                                setPeeked(isPeeked ? null : macro.id)
-                              }
-                            >
-                              {isPeeked ? (
-                                <ChevronUpIcon
-                                  aria-hidden="true"
-                                  className="h-3.5 w-3.5"
-                                />
-                              ) : (
-                                <ChevronDownIcon
-                                  aria-hidden="true"
-                                  className="h-3.5 w-3.5"
-                                />
-                              )}
-                            </button>
-                            {isPeeked && (
-                              <div
-                                id={peekId}
-                                data-slot="macro-library-peek"
-                                className="border-border bg-background text-foreground mx-2 mb-2 rounded border border-dashed p-2 text-xs whitespace-pre-line"
-                              >
-                                {macro.content}
-                              </div>
-                            )}
-                          </div>
+                            macro={macro}
+                            isPrevious={isPrevious}
+                            isPeeked={isPeeked}
+                            peekId={`${panelId}-peek-${macro.id}`}
+                            labels={labels}
+                            onSelect={onSelect}
+                            onTogglePeek={() =>
+                              setPeeked(isPeeked ? null : macro.id)
+                            }
+                            onRowKeyDown={handleRowKeyDown}
+                          />
                         );
                       })}
                   </div>

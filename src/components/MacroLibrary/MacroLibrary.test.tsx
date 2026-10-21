@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { MacroLibrary, type MacroGroup } from './MacroLibrary';
@@ -136,15 +136,56 @@ describe('MacroLibrary', () => {
   });
 
   describe('peek', () => {
+    const heights: Record<string, PropertyDescriptor | undefined> = {};
+    beforeEach(() => {
+      // jsdom has no layout; pretend every preview is clamped so the
+      // "more" toggle renders.
+      for (const prop of ['scrollHeight', 'clientHeight'] as const) {
+        heights[prop] = Object.getOwnPropertyDescriptor(
+          Element.prototype,
+          prop
+        );
+      }
+      Object.defineProperty(Element.prototype, 'scrollHeight', {
+        configurable: true,
+        get: () => 40,
+      });
+      Object.defineProperty(Element.prototype, 'clientHeight', {
+        configurable: true,
+        get: () => 20,
+      });
+    });
+    afterEach(() => {
+      for (const prop of ['scrollHeight', 'clientHeight'] as const) {
+        const original = heights[prop];
+        if (original) Object.defineProperty(Element.prototype, prop, original);
+      }
+    });
+
     it('reveals the full content before insertion', () => {
       renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={() => {}} />);
-      const peek = screen.getByRole('button', {
+      const more = screen.getByRole('button', {
         name: /Show full content: Back pain — normal/,
       });
-      fireEvent.click(peek);
+      expect(more).toHaveTextContent('more');
+      fireEvent.click(more);
       const full = document.querySelector('[data-slot="macro-library-peek"]');
       expect(full).toHaveTextContent('Full range of motion.');
-      expect(peek).toHaveAttribute('aria-expanded', 'true');
+      const less = screen.getByRole('button', {
+        name: /Hide full content: Back pain — normal/,
+      });
+      expect(less).toHaveAttribute('aria-expanded', 'true');
+      expect(less).toHaveTextContent('less');
+    });
+  });
+
+  describe('truncation', () => {
+    it('hides the more toggle when the preview is not clamped', () => {
+      // jsdom's zero heights mean nothing measures as truncated.
+      renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={() => {}} />);
+      expect(
+        screen.queryByRole('button', { name: /Show full content/ })
+      ).toBeNull();
     });
   });
 
