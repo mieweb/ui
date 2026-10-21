@@ -1560,6 +1560,13 @@ body.condensed [data-slot='textarea'] {
   border-radius: 0.375rem !important;
 }
 
+/* Auto-growing textareas (the default) start at the condensed Input height:
+   one text line (1.5rem) + 0.0625rem padding + 1px border per side ≈ 1.75rem.
+   The legacy fixed-height mode above keeps its taller minimum. */
+body.condensed [data-slot='textarea'][data-auto-resize] {
+  min-height: 1.75rem !important;
+}
+
 /* Label: smaller text */
 body.condensed [data-slot='textarea-label'] {
   font-size: 0.6875rem !important;
