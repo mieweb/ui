@@ -29,9 +29,9 @@ import {
   MonitorUp,
   Pin,
   PinOff,
-  ScanBarcode,
   ScanText,
   Square,
+  SquareDashed,
 } from 'lucide-react';
 import {
   ChatComposer,
@@ -642,7 +642,7 @@ Each capture declares \`available\` and a \`group\` (\`record\` or \`capture\`);
 | Capture | Screen (Capture screen) — still screenshot | \`getDisplayMedia\` | desktop | hidden |
 | Capture | File (Attach file) | \`<input type="file">\` | yes | yes |
 | Capture | Document (Scan document) | native document camera plugin | hidden | Capacitor \`capacitor-document-scanner\` or Cordova \`cordova-plugin-document-scanner\`, auto-detected; or pass \`scanDocument\` |
-| Any | Others | host \`extraCaptures\` | — | — |
+| Any | Custom (empty slot) | host \`extraCaptures\` — any \`{ id, label, icon, run, group?, available? }\` | — | — |
 
 ### Voice to text vs. Record audio
 
@@ -667,8 +667,8 @@ export const MenuOnly: Story = { args: { defaultDocked: false } };
 export const Docked: Story = { args: { defaultDocked: true } };
 
 /**
- * Simulates a Cordova/Capacitor app with a native document scanner, plus a
- * host-supplied extra capture (Barcode) to show the list is open-ended.
+ * Simulates a Cordova/Capacitor app with a native document scanner, plus an
+ * empty host slot showing where a custom capture plugs in via `extraCaptures`.
  */
 export const NativeWithDocument: Story = {
   args: {
@@ -676,10 +676,15 @@ export const NativeWithDocument: Story = {
     scanDocument: mockScanDocument,
     extraCaptures: [
       {
-        id: 'barcode',
-        label: 'Scan barcode',
-        icon: <ScanBarcode className={iconClass} aria-hidden="true" />,
-        run: () => window.alert('Host barcode scanner would open here'),
+        id: 'custom-slot',
+        label: 'Custom capture (empty slot)',
+        icon: (
+          <SquareDashed
+            className={cn(iconClass, 'text-neutral-400')}
+            aria-hidden="true"
+          />
+        ),
+        run: () => {},
       },
     ],
   },
