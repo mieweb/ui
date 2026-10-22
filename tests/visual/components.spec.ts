@@ -2119,4 +2119,75 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
       .toBe('1');
     await expect(page).toHaveScreenshot('richtextarea-grown.png');
   });
+
+  test('RichTextArea - Narrow empty field keeps the placeholder to one line', async ({
+    page,
+  }) => {
+    // Chromeless surfaces have no wrapper clipping; a long hint must
+    // truncate instead of wrapping below the one-row field.
+    await page.setViewportSize({ width: 320, height: 640 });
+    await gotoStory(page, story);
+    const wrapper = page.locator(wrapperSel);
+    const placeholder = wrapper.locator('div[aria-hidden="true"]');
+    const wrapperBox = await wrapper.boundingBox();
+    const hintBox = await placeholder.boundingBox();
+    expect(hintBox!.y + hintBox!.height).toBeLessThanOrEqual(
+      wrapperBox!.y + wrapperBox!.height + 0.5
+    );
+    expect(
+      await placeholder.evaluate((el) => getComputedStyle(el).textOverflow)
+    ).toBe('ellipsis');
+  });
+
+  test('RichTextArea - Condensed gutter trigger stays inside the empty field', async ({
+    page,
+  }) => {
+    await gotoStory(page, story, { globals: 'density:condensed' });
+    const wrapper = page.locator(wrapperSel);
+    // Condensed single-line baseline: 26px editable + the wrapper's borders.
+    const wrapperBox = await wrapper.boundingBox();
+    expect(Math.abs(wrapperBox!.height - 28)).toBeLessThanOrEqual(1);
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    // The trigger must sit inside the one-line field both at rest and once
+    // hover repositions it beside the hovered row.
+    const within = async () => {
+      const box = (await button.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(wrapperBox!.y - 0.5);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        wrapperBox!.y + wrapperBox!.height + 0.5
+      );
+    };
+    await within();
+    await page.locator(editorSel).hover();
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await within();
+    await expect(page).toHaveScreenshot('richtextarea-condensed.png');
+  });
+
+  test('RichTextArea - Condensed macro panel keeps its working height', async ({
+    page,
+  }) => {
+    // The compact condensed minimum must release when the macro panel —
+    // absolutely stretched over the editor body — needs md working space.
+    await gotoStory(page, 'editors-richtextarea--with-macros', {
+      globals: 'density:condensed',
+    });
+    const editor = page.locator(editorSel);
+    await editor.hover();
+    await page
+      .locator('[data-slot="rich-text-editor-block-gutter"] button')
+      .click();
+    await page.getByRole('menuitem', { name: 'Insert macro…' }).click();
+    await expect(editor).toHaveAttribute('data-macros-open', '');
+    const editorBox = await editor.boundingBox();
+    expect(editorBox!.height).toBeGreaterThanOrEqual(399);
+    await expect(
+      page.getByRole('button', { name: 'Cardio — WNL' })
+    ).toBeVisible();
+    await expect(page).toHaveScreenshot('richtextarea-condensed-macros.png');
+  });
 });

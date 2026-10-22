@@ -93,7 +93,12 @@ describe('RichTextArea', () => {
         aria-label="Comment"
       />
     );
-    expect(screen.getByText('Add a comment…')).toBeInTheDocument();
+    const hint = screen.getByText('Add a comment…');
+    expect(hint).toBeInTheDocument();
+    // Chromeless surfaces have no wrapper clipping, so a long placeholder
+    // must stay one ellipsized line bounded to the field's width.
+    expect(hint.className).toContain('truncate');
+    expect(hint.className).toContain('end-0');
   });
 
   it('disables editing when disabled', () => {
@@ -104,6 +109,37 @@ describe('RichTextArea', () => {
       'contenteditable',
       'false'
     );
+  });
+
+  it('marks the editable while the macro panel is open (density CSS hook)', () => {
+    renderWithTheme(
+      <RichTextArea
+        value=""
+        onChange={() => {}}
+        macros={macros}
+        defaultMacrosOpen
+        aria-label="Comment"
+      />
+    );
+    // condensed-view.css keys off this to release its compact single-line
+    // minimum so the stretched panel keeps its md working height.
+    expect(screen.getByRole('textbox', { name: 'Comment' })).toHaveAttribute(
+      'data-macros-open'
+    );
+  });
+
+  it('does not mark the editable while the macro panel is closed', () => {
+    renderWithTheme(
+      <RichTextArea
+        value=""
+        onChange={() => {}}
+        macros={macros}
+        aria-label="Comment"
+      />
+    );
+    expect(
+      screen.getByRole('textbox', { name: 'Comment' })
+    ).not.toHaveAttribute('data-macros-open');
   });
 
   describe('typed shortcuts', () => {

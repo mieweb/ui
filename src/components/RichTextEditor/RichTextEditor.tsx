@@ -365,6 +365,21 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     // row is hovered.
     const [gutterTop, setGutterTop] = React.useState(chromeless ? 7 : 16);
     const gutterWrapperRef = React.useRef<HTMLDivElement>(null);
+    // Density styles (condensed-view.css) shrink that padding under the
+    // defaults above, which would leave the at-rest trigger hanging below a
+    // one-line condensed field — re-measure it from the live editable.
+    React.useLayoutEffect(() => {
+      if (!blockMenu || !editorRef.current) return;
+      const padding = parseFloat(
+        getComputedStyle(editorRef.current).paddingTop
+      );
+      if (!Number.isNaN(padding)) {
+        setGutterTop((current) => {
+          const next = Math.round(padding);
+          return current === next ? current : next;
+        });
+      }
+    }, [blockMenu]);
     const hoverBlockNodeRef = React.useRef<Node | null>(null);
     // Where the chosen menu action is applied: the hovered block's start
     // (mouse) or the caret position (Ctrl/Cmd+/), captured at open time.
@@ -1339,7 +1354,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 aria-hidden="true"
                 className={cn(
                   'text-muted-foreground pointer-events-none absolute start-0 top-0',
-                  chromeless ? 'px-3 py-[7px] text-base' : 'p-4',
+                  // Chromeless hosts drop the wrapper's clipping, so a long
+                  // placeholder must stay a single ellipsized line (as a
+                  // native textarea clips its own) instead of wrapping out
+                  // of the one-row field.
+                  chromeless ? 'end-0 truncate px-3 py-[7px] text-base' : 'p-4',
                   blockMenu && 'ps-10'
                 )}
               >
@@ -1352,6 +1371,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               aria-multiline="true"
               aria-label={ariaLabel ?? placeholder}
               contentEditable={!disabled}
+              // Styling hook: condensed-view.css must not pin the editable
+              // to its compact single-line minimum while the macro panel
+              // (absolutely stretched over this region) needs the md
+              // min-h-[400px] working space below.
+              data-macros-open={hasMacros && macrosOpen ? '' : undefined}
               tabIndex={disabled ? -1 : 0}
               onInput={updateContent}
               onPaste={handlePaste}

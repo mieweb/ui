@@ -1596,19 +1596,41 @@ body.condensed [data-slot='rich-text-editor'][data-chromeless] {
   border-radius: 0.375rem !important;
 }
 
-/* Editable region and its placeholder: start at the condensed Input height.
-   The border sits on the wrapper here, so the inner minimum subtracts it
-   (Textarea's 1.75rem single-line baseline − 1px border per side). */
+/* Editable region and its placeholder: condensed Input padding and text. */
 body.condensed
   [data-slot='rich-text-editor'][data-chromeless]
   [contenteditable],
 body.condensed
   [data-slot='rich-text-editor'][data-chromeless]
   div[aria-hidden='true'] {
-  min-height: calc(1.75rem - 2px) !important;
   padding-top: 0.0625rem !important;
   padding-bottom: 0.0625rem !important;
   font-size: 0.75rem !important;
+}
+
+/* Start at the condensed Input height — but only while the macro panel is
+   closed: open, the panel stretches over this region and the editable must
+   keep its own md:min-h-[400px] working space (data-macros-open is set by
+   RichTextEditor). The border sits on the wrapper here, so the inner
+   minimum subtracts it (Textarea's 1.75rem baseline − 1px per side). */
+body.condensed
+  [data-slot='rich-text-editor'][data-chromeless]
+  [contenteditable]:not([data-macros-open]),
+body.condensed
+  [data-slot='rich-text-editor'][data-chromeless]
+  div[aria-hidden='true'] {
+  min-height: calc(1.75rem - 2px) !important;
+}
+
+/* Block gutter trigger: the global condensed Button height (1.75rem) would
+   overflow the one-line field above; keep it a compact square instead. */
+body.condensed
+  [data-slot='rich-text-editor-block-gutter']
+  [data-slot='button'] {
+  height: 1.25rem !important;
+  width: 1.25rem !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 /* ── Select ── */
