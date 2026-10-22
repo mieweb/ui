@@ -182,8 +182,11 @@ import {
 
 export function MyInbox({ conversations, currentParticipantId }) {
   const [activeId, setActiveId] = React.useState(conversations[0]?.id);
+  // Search nested `children` too, so selecting a sub-conversation keeps the panel.
   const active =
-    conversations.find((c) => c.id === activeId) ?? conversations[0];
+    conversations
+      .flatMap((c) => [c, ...(c.children ?? [])])
+      .find((c) => c.id === activeId) ?? conversations[0];
 
   return (
     <div style={{ display: 'flex', height: 480 }}>

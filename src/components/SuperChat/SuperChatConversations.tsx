@@ -68,11 +68,19 @@ export function SuperChatConversations({
   // The top-level entry holding the active item (itself, or a child's parent).
   const activeTopId = active?.parent?.id ?? activeId;
 
-  // Accordion: at most one entry is open. `openId` is the user's choice (`null`
-  // = all closed); until there is one, the entry holding the active item opens.
-  const [openId, setOpenId] = React.useState<string | null>();
-  const isExpanded = (c: SuperChatConversation) =>
-    (openId === undefined ? activeTopId : openId) === c.id;
+  // Accordion: at most one entry is open. By default it is the entry holding
+  // the active item. A header click records an explicit choice (`null` = all
+  // closed) scoped to the entry it selected, so the choice lapses as soon as
+  // the selection moves to another entry (e.g. the host selects elsewhere).
+  const [openChoice, setOpenChoice] = React.useState<{
+    topId: string;
+    openId: string | null;
+  }>();
+  const openId =
+    openChoice && openChoice.topId === activeTopId
+      ? openChoice.openId
+      : activeTopId;
+  const isExpanded = (c: SuperChatConversation) => openId === c.id;
   const groupIdPrefix = React.useId();
 
   const sortedConversations = React.useMemo(
@@ -90,13 +98,14 @@ export function SuperChatConversations({
   // messages and expands it (closing any other); clicking it again while
   // active toggles it.
   const selectHeader = (c: SuperChatConversation) => {
-    setOpenId(c.id === activeId && isExpanded(c) ? null : c.id);
+    const collapse = c.id === activeId && isExpanded(c);
+    setOpenChoice({ topId: c.id, openId: collapse ? null : c.id });
     selectConversation(c);
   };
 
   // Opening a plain entry hands the accordion back to the active item.
   const selectTopLevel = (c: SuperChatConversation) => {
-    setOpenId(undefined);
+    setOpenChoice(undefined);
     selectConversation(c);
   };
 

@@ -1612,6 +1612,114 @@ describe('SuperChat threading', () => {
     ).toBeNull();
   });
 
+  it('keeps collapse choices when the thread updates', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={threaded} currentParticipantId="u1" />
+      </div>
+    );
+    const rootToggle = screen
+      .getByText('root')
+      .closest('[data-slot="superchat-message"]')!
+      .querySelector<HTMLButtonElement>(
+        '[data-slot="superchat-thread-toggle"]'
+      )!;
+    await user.click(rootToggle);
+    expect(screen.queryByText('reply one')).toBeNull();
+
+    rerender(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={{
+            ...threaded,
+            thread: [
+              ...threaded.thread,
+              {
+                id: 't5',
+                participantId: 'a1',
+                text: 'late arrival',
+                time: '2026-06-07T09:03:00Z',
+              },
+            ],
+          }}
+          currentParticipantId="u1"
+        />
+      </div>
+    );
+    expect(screen.getByText('late arrival')).toBeInTheDocument();
+    expect(screen.queryByText('reply one')).toBeNull();
+  });
+
+  it("reveals the local user's own reply inside a collapsed branch", () => {
+    const { rerender } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          defaultCollapsed
+        />
+      </div>
+    );
+    expect(screen.queryByText('reply one')).toBeNull();
+
+    rerender(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={{
+            ...threaded,
+            thread: [
+              ...threaded.thread,
+              {
+                id: 't6',
+                participantId: 'u1',
+                parentId: 't3',
+                text: 'my own reply',
+                time: '2026-06-07T09:04:00Z',
+              },
+            ],
+          }}
+          currentParticipantId="u1"
+          defaultCollapsed
+        />
+      </div>
+    );
+    expect(screen.getByText('my own reply')).toBeInTheDocument();
+    expect(screen.getByText('nested reply')).toBeInTheDocument();
+  });
+
+  it('never collapses replies under system rows (they have no toggle)', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={{
+            ...threaded,
+            thread: [
+              {
+                id: 's1',
+                participantId: 'u1',
+                type: 'system',
+                text: 'Shift change',
+                time: '2026-06-07T08:59:00Z',
+              },
+              {
+                id: 's2',
+                participantId: 'a1',
+                parentId: 's1',
+                text: 'handoff note',
+                time: '2026-06-07T08:59:30Z',
+              },
+            ],
+          }}
+          currentParticipantId="u1"
+          defaultCollapsed
+        />
+      </div>
+    );
+    expect(screen.getByText('handoff note')).toBeInTheDocument();
+  });
+
   it('SuperChatInbox forwards threaded and defaultCollapsed to the active panel', () => {
     const { container, rerender } = render(
       <div style={{ height: 400 }}>
@@ -1911,6 +2019,56 @@ describe('SuperChatInbox', () => {
       const header = screen.getByRole('button', { name: /^Bed 12/ });
       expect(header).toHaveAttribute('aria-expanded', 'true');
       expect(header).not.toHaveAttribute('aria-current');
+    });
+
+    it('follows host-driven selection after a header click', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const withTwoRooms: SuperChatConversation[] = [
+        ...rooms,
+        {
+          id: 'room2',
+          title: 'Bed 14',
+          participants,
+          thread: [{ ...older, id: 'r2' }],
+          children: [
+            {
+              id: 'room2:older',
+              title: 'Older',
+              participants,
+              thread: [{ ...older, id: 'r2' }],
+            },
+          ],
+        },
+      ];
+      const renderList = (activeConversationId: string) => (
+        <SuperChatConversations
+          conversations={withTwoRooms}
+          activeConversationId={activeConversationId}
+        />
+      );
+      const { rerender } = render(renderList('other'));
+      await user.click(screen.getByRole('button', { name: /^Bed 12/ }));
+      rerender(renderList('room')); // the host follows the click
+      expect(screen.getByRole('button', { name: /^Bed 12/ })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      );
+
+      // The host then moves the selection to a child of another room.
+      rerender(renderList('room2:older'));
+      expect(screen.getByRole('button', { name: /^Bed 14/ })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      );
+      expect(screen.getByRole('button', { name: /^Bed 12/ })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+      expect(
+        screen.getByRole('button', { name: 'Older 1 messages' })
+      ).toHaveAttribute('aria-current', 'true');
     });
 
     it('keeps only one header open at a time', async () => {

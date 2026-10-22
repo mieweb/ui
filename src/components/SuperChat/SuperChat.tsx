@@ -41,8 +41,10 @@ import {
 } from './parts';
 import { VirtualThread } from './VirtualThread';
 import {
+  ancestorIds,
   buildThreadTree,
   collapsibleIds,
+  EMPTY_THREAD_TREE,
   flattenThreadTree,
   type ThreadNode,
 } from './thread-tree';
@@ -469,6 +471,87 @@ export function SuperChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversation.id, order]);
 
+  // --- Threading (reply tree) ----------------------------------------------
+  // Threading applies to the plain (non-virtualized) path. When `threaded` is
+  // omitted it auto-enables as soon as any message carries a parent. The tree
+  // is only built when threading can apply, so the flat and virtualized paths
+  // skip that work on every thread update (e.g. streamed tokens).
+  const threadingPossible = !virtualized && threaded !== false;
+  const threadTree = React.useMemo(
+    () =>
+      threadingPossible
+        ? buildThreadTree(conversation.thread)
+        : EMPTY_THREAD_TREE,
+    [threadingPossible, conversation.thread]
+  );
+  const useThreaded =
+    threadingPossible && (threaded === true || threadTree.hasThreading);
+
+  // Collapse state is the user's per-message choices layered over
+  // `defaultCollapsed`: thread updates (appends, edits, streaming) keep the
+  // choices, and branches that appear later follow `defaultCollapsed`. The
+  // choices reset when the conversation or `defaultCollapsed` changes.
+  const collapseScope = JSON.stringify([conversation.id, defaultCollapsed]);
+  const [collapseChoices, setCollapseChoices] = React.useState(() => ({
+    scope: collapseScope,
+    byId: new Map<string, boolean>(),
+  }));
+  if (collapseChoices.scope !== collapseScope) {
+    setCollapseChoices({ scope: collapseScope, byId: new Map() });
+  }
+  const collapsedIds = React.useMemo(() => {
+    const ids = new Set<string>();
+    for (const id of collapsibleIds(threadTree.roots)) {
+      if (collapseChoices.byId.get(id) ?? defaultCollapsed) ids.add(id);
+    }
+    return ids;
+  }, [threadTree, collapseChoices, defaultCollapsed]);
+
+  const defaultCollapsedRef = React.useRef(defaultCollapsed);
+  defaultCollapsedRef.current = defaultCollapsed;
+  const toggleReplies = React.useCallback((id: string) => {
+    setCollapseChoices((prev) => {
+      const byId = new Map(prev.byId);
+      byId.set(id, !(prev.byId.get(id) ?? defaultCollapsedRef.current));
+      return { ...prev, byId };
+    });
+  }, []);
+
+  // Expand every collapsed ancestor of a message so it becomes visible.
+  const revealMessage = React.useCallback(
+    (id: string) => {
+      const ancestors = ancestorIds(threadTree.roots, id);
+      if (ancestors.length === 0) return;
+      setCollapseChoices((prev) => {
+        const byId = new Map(prev.byId);
+        for (const ancestor of ancestors) byId.set(ancestor, false);
+        return { ...prev, byId };
+      });
+    },
+    [threadTree]
+  );
+
+  const visibleThreadNodes = React.useMemo(
+    () => flattenThreadTree(threadTree.roots, collapsedIds, order === 'desc'),
+    [threadTree, collapsedIds, order]
+  );
+
+  // Stable per-id toggle handlers keep MessageRow's memoization intact (a fresh
+  // closure each render would re-run the Markdown pipeline for every row).
+  const toggleHandlersRef = React.useRef(new Map<string, () => void>());
+  const getToggleHandler = React.useCallback(
+    (id: string) => {
+      const cache = toggleHandlersRef.current;
+      let handler = cache.get(id);
+      if (!handler) {
+        handler = () => toggleReplies(id);
+        cache.set(id, handler);
+      }
+      return handler;
+    },
+    [toggleReplies]
+  );
+
   const threadLength = conversation.thread.length;
 
   // New-message policy: follow while pinned, always follow the local user's
@@ -537,6 +620,8 @@ export function SuperChat({
         // No turn reserve under the virtualizer — pin the own send instead.
         scrollToBottom('auto');
       } else {
+        // A threaded reply can land inside a collapsed branch: open it.
+        if (useThreaded) revealMessage(turnStart);
         // Own send: open a new anchored turn (the layout effect below scrolls
         // it to the top of the viewport once the reserve is in place).
         setTurnStartId(turnStart);
@@ -610,6 +695,25 @@ export function SuperChat({
     if (!turnStartId || anchoredTurnRef.current === turnStartId) return;
     const container = threadRef.current;
     if (!container) return;
+    const behavior = prefersReducedMotion ? 'auto' : 'smooth';
+    if (useThreaded) {
+      // Threaded rows have no turn wrapper (a reply can land mid-tree), so
+      // bring the sent message itself into view: follow the bottom when it is
+      // the newest visible row, otherwise anchor it to the top.
+      const target = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          '[data-slot="superchat-thread-branch"]'
+        )
+      ).find((el) => el.dataset.messageId === turnStartId);
+      if (!target) return;
+      if (visibleThreadNodes.at(-1)?.message.id === turnStartId) {
+        scrollToBottom(behavior);
+      } else {
+        anchorToTurnStart(target, behavior);
+      }
+      anchoredTurnRef.current = turnStartId;
+      return;
+    }
     // Just under a full viewport (minus the p-4 padding) so the anchored
     // bubble's top lands at the top edge of the scroll area.
     const reserve = Math.max(0, container.clientHeight - 32);
@@ -621,16 +725,19 @@ export function SuperChat({
       '[data-slot="superchat-turn"]'
     );
     if (target) {
-      anchorToTurnStart(target, prefersReducedMotion ? 'auto' : 'smooth');
+      anchorToTurnStart(target, behavior);
       anchoredTurnRef.current = turnStartId;
     }
   }, [
     turnStartId,
     turnMinHeight,
     anchorToTurnStart,
+    scrollToBottom,
     prefersReducedMotion,
     threadRef,
     activeView,
+    useThreaded,
+    visibleThreadNodes,
   ]);
 
   // Snapshot the ids after the policy effect above so it always diffs against
@@ -680,57 +787,6 @@ export function SuperChat({
     return order === 'desc' ? sorted.reverse() : sorted;
   }, [conversation, order]);
 
-  // --- Threading (reply tree) ----------------------------------------------
-  // Threading applies to the plain (non-virtualized) path. When `threaded` is
-  // omitted it auto-enables as soon as any message carries a parent.
-  const threadTree = React.useMemo(
-    () => buildThreadTree(conversation.thread),
-    [conversation.thread]
-  );
-  const useThreaded =
-    !virtualized &&
-    threaded !== false &&
-    (threaded === true || threadTree.hasThreading);
-
-  const [collapsedIds, setCollapsedIds] = React.useState<Set<string>>(() =>
-    defaultCollapsed ? collapsibleIds(threadTree.roots) : new Set()
-  );
-  React.useEffect(() => {
-    setCollapsedIds(
-      defaultCollapsed ? collapsibleIds(threadTree.roots) : new Set()
-    );
-  }, [threadTree, defaultCollapsed]);
-
-  const toggleReplies = React.useCallback((id: string) => {
-    setCollapsedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  // Stable per-id toggle handlers keep MessageRow's memoization intact (a fresh
-  // closure each render would re-run the Markdown pipeline for every row).
-  const toggleHandlersRef = React.useRef(new Map<string, () => void>());
-  const getToggleHandler = React.useCallback(
-    (id: string) => {
-      const cache = toggleHandlersRef.current;
-      let handler = cache.get(id);
-      if (!handler) {
-        handler = () => toggleReplies(id);
-        cache.set(id, handler);
-      }
-      return handler;
-    },
-    [toggleReplies]
-  );
-
-  const visibleThreadNodes = React.useMemo(
-    () => flattenThreadTree(threadTree.roots, collapsedIds, order === 'desc'),
-    [threadTree, collapsedIds, order]
-  );
-
   const turnIndex = React.useMemo(
     () =>
       turnStartId && order !== 'desc'
@@ -770,6 +826,7 @@ export function SuperChat({
       <div
         key={m.id}
         data-slot="superchat-thread-branch"
+        data-message-id={m.id}
         style={
           node.depth > 0 ? { marginInlineStart: node.depth * 20 } : undefined
         }
