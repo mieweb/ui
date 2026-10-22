@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
 import type { MacroGroup } from '../MacroLibrary';
@@ -500,6 +500,625 @@ describe('RichTextEditor', () => {
         typeAndPressSpace(editor, '.c');
         expect(exec).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('toolbar visibility', () => {
+    it('removes the toolbar when toolbar="hidden"', () => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          toolbar="hidden"
+          aria-label="Body"
+        />
+      );
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Bold' })).toBeNull();
+      // The editable region itself is unaffected.
+      expect(screen.getByRole('textbox', { name: 'Body' })).toBeInTheDocument();
+    });
+  });
+
+  describe('markdown shortcuts', () => {
+    let exec: ReturnType<typeof vi.fn>;
+    let previousExec: typeof document.execCommand;
+    beforeEach(() => {
+      previousExec = document.execCommand;
+      exec = vi.fn().mockReturnValue(true);
+      document.execCommand = exec as unknown as typeof document.execCommand;
+    });
+    afterEach(() => {
+      document.execCommand = previousExec;
+    });
+
+    /** Place `text` in the editor with the caret at its end, then press space. */
+    const typeAndPressSpace = (editor: HTMLElement, text: string) => {
+      const textNode = document.createTextNode(text);
+      editor.appendChild(textNode);
+      const range = document.createRange();
+      range.setStart(textNode, text.length);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return fireEvent.keyDown(editor, { key: ' ' });
+    };
+
+    const renderEditor = (
+      props: Partial<Parameters<typeof RichTextEditor>[0]> = {}
+    ) => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          markdownShortcuts
+          aria-label="Body"
+          {...props}
+        />
+      );
+      return screen.getByRole('textbox', { name: 'Body' });
+    };
+
+    it.each<[string, string, string | undefined]>([
+      ['#', 'formatBlock', 'h1'],
+      ['##', 'formatBlock', 'h2'],
+      ['###', 'formatBlock', 'h3'],
+      ['-', 'insertUnorderedList', undefined],
+      ['*', 'insertUnorderedList', undefined],
+      ['1.', 'insertOrderedList', undefined],
+      ['>', 'formatBlock', 'blockquote'],
+    ])('expands "%s" + space at line start', (token, command, value) => {
+      const editor = renderEditor();
+      const notPrevented = typeAndPressSpace(editor, token);
+      // The typed token is removed, then the block command is applied —
+      // both through execCommand so the expansion is natively undoable.
+      expect(exec).toHaveBeenNthCalledWith(1, 'delete', false);
+      expect(exec).toHaveBeenNthCalledWith(2, command, false, value);
+      expect(notPrevented).toBe(false);
+    });
+
+    it('reports the transformed content to onChange', () => {
+      const onChange = vi.fn();
+      const editor = renderEditor({ onChange });
+      typeAndPressSpace(editor, '##');
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    it('is off by default', () => {
+      renderWithTheme(
+        <RichTextEditor value="" onChange={() => {}} aria-label="Body" />
+      );
+      const editor = screen.getByRole('textbox', { name: 'Body' });
+      const notPrevented = typeAndPressSpace(editor, '##');
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it('ignores tokens that are not at the start of a line', () => {
+      const editor = renderEditor();
+      const notPrevented = typeAndPressSpace(editor, 'note ##');
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it.each(['constructor', 'toString', '__proto__'])(
+      'leaves inherited object property "%s" unchanged',
+      (word) => {
+        const editor = renderEditor();
+        const notPrevented = typeAndPressSpace(editor, word);
+        expect(exec).not.toHaveBeenCalled();
+        expect(notPrevented).toBe(true);
+        expect(editor.textContent).toBe(word);
+      }
+    );
+
+    it('ignores a token preceded by text in an adjacent inline node', () => {
+      // note <b>##</b> — the line starts with "note", not the token.
+      const editor = renderEditor();
+      editor.appendChild(document.createTextNode('note '));
+      const bold = document.createElement('b');
+      const tokenNode = document.createTextNode('##');
+      bold.appendChild(tokenNode);
+      editor.appendChild(bold);
+      const range = document.createRange();
+      range.setStart(tokenNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      const notPrevented = fireEvent.keyDown(editor, { key: ' ' });
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it('treats text after a line break as a line start', () => {
+      const editor = renderEditor();
+      editor.appendChild(document.createTextNode('one'));
+      editor.appendChild(document.createElement('br'));
+      const tokenNode = document.createTextNode('##');
+      editor.appendChild(tokenNode);
+      const range = document.createRange();
+      range.setStart(tokenNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      fireEvent.keyDown(editor, { key: ' ' });
+      expect(exec).toHaveBeenNthCalledWith(2, 'formatBlock', false, 'h2');
+    });
+
+    it('does not expand during IME composition', () => {
+      const editor = renderEditor();
+      const textNode = document.createTextNode('##');
+      editor.appendChild(textNode);
+      const range = document.createRange();
+      range.setStart(textNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      const notPrevented = fireEvent.keyDown(editor, {
+        key: ' ',
+        isComposing: true,
+      });
+      expect(exec).not.toHaveBeenCalled();
+      expect(notPrevented).toBe(true);
+    });
+
+    it('does not expand while the editor is disabled', () => {
+      const editor = renderEditor({ disabled: true });
+      typeAndPressSpace(editor, '##');
+      expect(exec).not.toHaveBeenCalled();
+    });
+
+    it('falls back to manual token removal when execCommand fails', () => {
+      exec.mockReturnValue(false);
+      const editor = renderEditor();
+      typeAndPressSpace(editor, '##');
+      expect(editor.textContent).toBe('');
+    });
+
+    it('coexists with macro shortcut expansion', () => {
+      const macros: MacroGroup[] = [
+        {
+          id: 'library',
+          label: 'Default library',
+          macros: [
+            {
+              id: 'cardio',
+              label: 'Cardio — WNL',
+              content: 'Regular rate and rhythm.',
+              shortcut: '.c',
+            },
+          ],
+        },
+      ];
+      const editor = renderEditor({ macros });
+      typeAndPressSpace(editor, '.c');
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+    });
+  });
+
+  describe('dictation with a hidden toolbar', () => {
+    class MockRecognition {
+      static instances: MockRecognition[] = [];
+      continuous = false;
+      interimResults = false;
+      lang = '';
+      maxAlternatives = 1;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      onresult: unknown = null;
+      onerror: unknown = null;
+      start = vi.fn(() => this.onstart?.());
+      stop = vi.fn();
+      constructor() {
+        MockRecognition.instances.push(this);
+      }
+    }
+    const win = window as unknown as Record<string, unknown>;
+    let getUserMedia: ReturnType<typeof vi.fn>;
+    beforeEach(() => {
+      MockRecognition.instances = [];
+      win.SpeechRecognition = MockRecognition;
+      getUserMedia = vi.fn().mockResolvedValue({ getTracks: () => [] });
+      Object.defineProperty(navigator, 'mediaDevices', {
+        value: { getUserMedia },
+        configurable: true,
+      });
+    });
+    afterEach(() => {
+      delete win.SpeechRecognition;
+    });
+
+    const editorProps = (toolbar?: 'visible' | 'hidden') => (
+      <RichTextEditor
+        value=""
+        onChange={() => {}}
+        aria-label="Body"
+        toolbar={toolbar}
+      />
+    );
+
+    it('stops a running dictation when the toolbar is hidden', async () => {
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      await waitFor(() => expect(MockRecognition.instances).toHaveLength(1));
+      const recognition = MockRecognition.instances[0];
+      expect(recognition.start).toHaveBeenCalled();
+      view.rerender(editorProps('hidden'));
+      expect(recognition.stop).toHaveBeenCalled();
+    });
+
+    it('cancels a start awaiting microphone permission when the toolbar hides', async () => {
+      let grantPermission: (value: { getTracks: () => [] }) => void;
+      getUserMedia.mockImplementation(
+        () => new Promise((resolve) => (grantPermission = resolve))
+      );
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      view.rerender(editorProps('hidden'));
+      grantPermission!({ getTracks: () => [] });
+      await waitFor(() => expect(getUserMedia).toHaveBeenCalled());
+      // Permission resolved after the toolbar hid — no session may start.
+      expect(MockRecognition.instances).toHaveLength(0);
+    });
+  });
+
+  describe('block gutter menu', () => {
+    let exec: ReturnType<typeof vi.fn>;
+    let previousExec: typeof document.execCommand;
+    beforeEach(() => {
+      previousExec = document.execCommand;
+      exec = vi.fn().mockReturnValue(true);
+      document.execCommand = exec as unknown as typeof document.execCommand;
+    });
+    afterEach(() => {
+      document.execCommand = previousExec;
+    });
+
+    const macros: MacroGroup[] = [
+      {
+        id: 'library',
+        label: 'Default library',
+        macros: [
+          {
+            id: 'cardio',
+            label: 'Cardio — WNL',
+            content: 'Regular rate and rhythm.',
+            shortcut: '.c',
+          },
+        ],
+      },
+    ];
+
+    const renderEditor = (
+      props: Partial<Parameters<typeof RichTextEditor>[0]> = {}
+    ) => {
+      renderWithTheme(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          blockMenu
+          aria-label="Body"
+          {...props}
+        />
+      );
+      return screen.getByRole('textbox', { name: 'Body' });
+    };
+
+    const openMenu = () =>
+      fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+
+    // jsdom has no layout, so hover targeting needs hand-mocked rects.
+    const rectFor = (top: number, height: number, width = 100) =>
+      ({
+        top,
+        bottom: top + height,
+        left: 0,
+        right: width,
+        width,
+        height,
+        x: 0,
+        y: top,
+        toJSON: () => ({}),
+      }) as ReturnType<Element['getBoundingClientRect']>;
+
+    const mockRect = (el: HTMLElement, top: number, height: number) => {
+      el.getBoundingClientRect = () => rectFor(top, height);
+    };
+
+    it('renders no gutter button without blockMenu', () => {
+      renderWithTheme(
+        <RichTextEditor value="" onChange={() => {}} aria-label="Body" />
+      );
+      expect(screen.queryByRole('button', { name: 'Block menu' })).toBeNull();
+    });
+
+    it('renders no gutter button while disabled', () => {
+      renderEditor({ disabled: true });
+      expect(screen.queryByRole('button', { name: 'Block menu' })).toBeNull();
+    });
+
+    it('lists the block formats and the toolbar toggle', () => {
+      renderEditor();
+      openMenu();
+      for (const label of [
+        'Text',
+        'Heading 1',
+        'Heading 2',
+        'Heading 3',
+        'Bullet list',
+        'Numbered list',
+        'Quote',
+        'Hide toolbar',
+      ]) {
+        expect(
+          screen.getByRole('menuitem', { name: label })
+        ).toBeInTheDocument();
+      }
+    });
+
+    it.each<[string, string, string | undefined]>([
+      ['Text', 'formatBlock', 'p'],
+      ['Heading 1', 'formatBlock', 'h1'],
+      ['Heading 2', 'formatBlock', 'h2'],
+      ['Heading 3', 'formatBlock', 'h3'],
+      ['Bullet list', 'insertUnorderedList', undefined],
+      ['Numbered list', 'insertOrderedList', undefined],
+      ['Quote', 'formatBlock', 'blockquote'],
+    ])('applies "%s" to the target block', (label, command, value) => {
+      const onChange = vi.fn();
+      const editor = renderEditor({ onChange });
+      const line = document.createElement('div');
+      line.textContent = 'hello';
+      editor.appendChild(line);
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: label }));
+      expect(exec).toHaveBeenCalledWith(command, false, value);
+      expect(onChange).toHaveBeenCalled();
+      // The command ran with the selection placed in the target block.
+      expect(window.getSelection()!.anchorNode).toBe(line);
+    });
+
+    it('targets the hovered block rather than the first', () => {
+      const editor = renderEditor();
+      const first = document.createElement('p');
+      first.textContent = 'one';
+      const second = document.createElement('p');
+      second.textContent = 'two';
+      editor.append(first, second);
+      mockRect(first, 10, 20);
+      mockRect(second, 40, 20);
+      // Bubbles up to the gutter wrapper's mousemove handler.
+      fireEvent.mouseMove(editor, { clientY: 45 });
+      const gutter = document.querySelector(
+        '[data-slot="rich-text-editor-block-gutter"]'
+      ) as HTMLElement;
+      expect(gutter.style.top).toBe('40px');
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Heading 2' }));
+      expect(exec).toHaveBeenCalledWith('formatBlock', false, 'h2');
+      expect(window.getSelection()!.anchorNode).toBe(second);
+    });
+
+    it('ignores collapsed whitespace between blocks', () => {
+      const editor = renderEditor();
+      const first = document.createElement('p');
+      first.textContent = 'one';
+      const second = document.createElement('p');
+      second.textContent = 'two';
+      // Formatted HTML: whitespace-only text nodes between and after blocks.
+      editor.append(
+        first,
+        document.createTextNode('\n'),
+        second,
+        document.createTextNode('\n')
+      );
+      mockRect(first, 10, 20);
+      mockRect(second, 40, 20);
+      // Collapsed whitespace measures 0×0 at the origin, like in browsers.
+      const originalRangeRect = Range.prototype.getBoundingClientRect;
+      Range.prototype.getBoundingClientRect = () => rectFor(0, 0, 0);
+      try {
+        fireEvent.mouseMove(editor, { clientY: 45 });
+      } finally {
+        Range.prototype.getBoundingClientRect = originalRangeRect;
+      }
+      // The trailing whitespace node (top 0 ≤ 45, iterated last) must not
+      // steal the target or pin the gutter to the top.
+      const gutter = document.querySelector(
+        '[data-slot="rich-text-editor-block-gutter"]'
+      ) as HTMLElement;
+      expect(gutter.style.top).toBe('40px');
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Quote' }));
+      expect(window.getSelection()!.anchorNode).toBe(second);
+    });
+
+    it('moves focus to the first menu item on open', async () => {
+      renderEditor();
+      openMenu();
+      await waitFor(() =>
+        expect(screen.getByRole('menuitem', { name: 'Text' })).toHaveFocus()
+      );
+    });
+
+    it('closes with Escape', async () => {
+      renderEditor();
+      openMenu();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    });
+
+    it('restores editor focus and the target caret on Escape', async () => {
+      const editor = renderEditor();
+      const line = document.createElement('div');
+      const textNode = document.createTextNode('hello');
+      line.appendChild(textNode);
+      editor.appendChild(line);
+      const range = document.createRange();
+      range.setStart(textNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      fireEvent.keyDown(editor, { key: '/', ctrlKey: true });
+      // Wait for focus to land in the menu — the case Escape must unwind.
+      await waitFor(() =>
+        expect(screen.getByRole('menuitem', { name: 'Text' })).toHaveFocus()
+      );
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+      expect(editor).toHaveFocus();
+      const restored = window.getSelection()!;
+      expect(restored.anchorNode).toBe(textNode);
+      expect(restored.anchorOffset).toBe(2);
+    });
+
+    it('opens with Ctrl+/ targeting the caret block', () => {
+      const editor = renderEditor();
+      const line = document.createElement('div');
+      const textNode = document.createTextNode('hello');
+      line.appendChild(textNode);
+      editor.appendChild(line);
+      const range = document.createRange();
+      range.setStart(textNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      const notPrevented = fireEvent.keyDown(editor, {
+        key: '/',
+        ctrlKey: true,
+      });
+      expect(notPrevented).toBe(false);
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Heading 2' }));
+      // The caret position captured at open time is the command target.
+      expect(exec).toHaveBeenCalledWith('formatBlock', false, 'h2');
+      expect(window.getSelection()!.anchorNode).toBe(textNode);
+    });
+
+    it('opens with Cmd+/', () => {
+      const editor = renderEditor();
+      fireEvent.keyDown(editor, { key: '/', metaKey: true });
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+    });
+
+    it('offers "Insert macro…" only when macros are provided', () => {
+      renderEditor();
+      openMenu();
+      expect(
+        screen.queryByRole('menuitem', { name: 'Insert macro…' })
+      ).toBeNull();
+    });
+
+    it('opens the macro panel from the menu', () => {
+      renderEditor({ macros });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      expect(
+        document.querySelector('[data-slot="macro-library"]')
+      ).not.toBeNull();
+    });
+
+    it('inserts the macro at the menu target even after the panel takes focus', () => {
+      const editor = renderEditor({ macros });
+      const first = document.createElement('p');
+      first.textContent = 'one';
+      const second = document.createElement('p');
+      second.textContent = 'two';
+      editor.append(first, second);
+      mockRect(first, 10, 20);
+      mockRect(second, 40, 20);
+      // The caret lives in the FIRST paragraph…
+      const caret = document.createRange();
+      caret.setStart(first.firstChild!, 1);
+      caret.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(caret);
+      // …while the gutter menu targets the SECOND.
+      fireEvent.mouseMove(editor, { clientY: 45 });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      // The panel's search field steals focus; the editor's blur re-saves
+      // the live selection — which must already match the menu target, or
+      // the bookmark gets clobbered and the macro lands at the old caret.
+      fireEvent.blur(editor);
+      fireEvent.click(
+        Array.from(
+          document.querySelectorAll<HTMLButtonElement>('[data-macro-row]')
+        ).find((row) => row.textContent?.includes('Cardio — WNL'))!
+      );
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+      expect(window.getSelection()!.anchorNode).toBe(second);
+    });
+
+    it('hides the toolbar from the menu and reports the change', () => {
+      const onToolbarChange = vi.fn();
+      renderEditor({ onToolbarChange });
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).not.toBeNull();
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Hide toolbar' }));
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).toBeNull();
+      expect(onToolbarChange).toHaveBeenCalledWith('hidden');
+    });
+
+    it('shows a toolbar hidden via defaultToolbar', () => {
+      renderEditor({ defaultToolbar: 'hidden' });
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).toBeNull();
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Show toolbar' }));
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).not.toBeNull();
+    });
+
+    it('leaves a controlled toolbar to the host', () => {
+      const onToolbarChange = vi.fn();
+      renderEditor({ toolbar: 'visible', onToolbarChange });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Hide toolbar' }));
+      // Controlled: visibility only changes when the host updates the prop.
+      expect(
+        document.querySelector('[data-slot="rich-text-editor-toolbar"]')
+      ).not.toBeNull();
+      expect(onToolbarChange).toHaveBeenCalledWith('hidden');
+    });
+
+    it('externalizes the menu labels', () => {
+      renderEditor({
+        blockMenuLabels: {
+          blockMenu: 'Blockmenü',
+          heading1: 'Überschrift 1',
+          hideToolbar: 'Werkzeugleiste ausblenden',
+        },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Blockmenü' }));
+      expect(
+        screen.getByRole('menuitem', { name: 'Überschrift 1' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('menuitem', { name: 'Werkzeugleiste ausblenden' })
+      ).toBeInTheDocument();
     });
   });
 });

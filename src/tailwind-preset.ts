@@ -1069,6 +1069,28 @@ export const miewebUISafelist = [
   'min-h-[76px]',
   'min-h-[96px]',
   'min-h-[120px]',
+  // Textarea auto-grow default (ui#632) — single-line baselines matching the
+  // Input heights, tuned padding so one line + padding + borders equals the
+  // Input size token, floating-label single-line minimums, and the resize
+  // handle variants. (min-h-8 is safelisted above.)
+  'min-h-10',
+  'min-h-12',
+  'py-[5px]',
+  'py-[7px]',
+  'py-[9px]',
+  'min-h-[50px]',
+  'min-h-[58px]',
+  'min-h-[66px]',
+  'resize-none',
+  'resize-y',
+  'resize-x',
+  'resize',
+  // RichTextArea (ui#639) — chromeless RichTextEditor single-line baseline
+  // and the Textarea-matched focus ring on the wrapper.
+  'min-h-[38px]',
+  'focus-within:ring-2',
+  'focus-within:ring-ring',
+  'focus-within:border-transparent',
   // Floating-group field boxes (labelVariant="floating" on RadioGroup /
   // CheckboxGroup) share the floating input heights as min-heights. sr-only
   // visually hides the group legend (and the hideLabel input label) while
@@ -1556,6 +1578,29 @@ export const miewebUISafelist = [
   'start-2.5',
   'text-[11px]',
   'whitespace-pre-line',
+  // RichTextEditor block gutter menu — hover-revealed `+` button
+  'group/rte-body',
+  'group-hover/rte-body:opacity-100',
+  // RichTextEditor editable region — baseline block styles (preflight strips
+  // heading/list/quote styling; `prose` needs @tailwindcss/typography)
+  '[&_h1]:my-3',
+  '[&_h1]:text-2xl',
+  '[&_h1]:font-bold',
+  '[&_h2]:my-3',
+  '[&_h2]:text-xl',
+  '[&_h2]:font-bold',
+  '[&_h3]:my-2',
+  '[&_h3]:text-lg',
+  '[&_h3]:font-semibold',
+  '[&_ul]:my-2',
+  '[&_ol]:my-2',
+  '[&_ol]:list-decimal',
+  '[&_ol]:ps-6',
+  '[&_blockquote]:my-2',
+  '[&_blockquote]:border-s-4',
+  '[&_blockquote]:border-border',
+  '[&_blockquote]:ps-3',
+  '[&_blockquote]:text-muted-foreground',
 ];
 
 export interface MiewebUIPreset {

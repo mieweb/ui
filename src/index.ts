@@ -173,6 +173,7 @@ export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
+export * from './components/RichTextArea';
 export * from './components/RichTextEditor';
 export * from './components/RowActionToolbar';
 export * from './components/ScheduleCalendar';
