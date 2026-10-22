@@ -817,6 +817,24 @@ describe('RichTextEditor', () => {
     const openMenu = () =>
       fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
 
+    // jsdom has no layout, so hover targeting needs hand-mocked rects.
+    const rectFor = (top: number, height: number, width = 100) =>
+      ({
+        top,
+        bottom: top + height,
+        left: 0,
+        right: width,
+        width,
+        height,
+        x: 0,
+        y: top,
+        toJSON: () => ({}),
+      }) as ReturnType<Element['getBoundingClientRect']>;
+
+    const mockRect = (el: HTMLElement, top: number, height: number) => {
+      el.getBoundingClientRect = () => rectFor(top, height);
+    };
+
     it('renders no gutter button without blockMenu', () => {
       renderWithTheme(
         <RichTextEditor value="" onChange={() => {}} aria-label="Body" />
@@ -870,6 +888,61 @@ describe('RichTextEditor', () => {
       expect(window.getSelection()!.anchorNode).toBe(line);
     });
 
+    it('targets the hovered block rather than the first', () => {
+      const editor = renderEditor();
+      const first = document.createElement('p');
+      first.textContent = 'one';
+      const second = document.createElement('p');
+      second.textContent = 'two';
+      editor.append(first, second);
+      mockRect(first, 10, 20);
+      mockRect(second, 40, 20);
+      // Bubbles up to the gutter wrapper's mousemove handler.
+      fireEvent.mouseMove(editor, { clientY: 45 });
+      const gutter = document.querySelector(
+        '[data-slot="rich-text-editor-block-gutter"]'
+      ) as HTMLElement;
+      expect(gutter.style.top).toBe('40px');
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Heading 2' }));
+      expect(exec).toHaveBeenCalledWith('formatBlock', false, 'h2');
+      expect(window.getSelection()!.anchorNode).toBe(second);
+    });
+
+    it('ignores collapsed whitespace between blocks', () => {
+      const editor = renderEditor();
+      const first = document.createElement('p');
+      first.textContent = 'one';
+      const second = document.createElement('p');
+      second.textContent = 'two';
+      // Formatted HTML: whitespace-only text nodes between and after blocks.
+      editor.append(
+        first,
+        document.createTextNode('\n'),
+        second,
+        document.createTextNode('\n')
+      );
+      mockRect(first, 10, 20);
+      mockRect(second, 40, 20);
+      // Collapsed whitespace measures 0×0 at the origin, like in browsers.
+      const originalRangeRect = Range.prototype.getBoundingClientRect;
+      Range.prototype.getBoundingClientRect = () => rectFor(0, 0, 0);
+      try {
+        fireEvent.mouseMove(editor, { clientY: 45 });
+      } finally {
+        Range.prototype.getBoundingClientRect = originalRangeRect;
+      }
+      // The trailing whitespace node (top 0 ≤ 45, iterated last) must not
+      // steal the target or pin the gutter to the top.
+      const gutter = document.querySelector(
+        '[data-slot="rich-text-editor-block-gutter"]'
+      ) as HTMLElement;
+      expect(gutter.style.top).toBe('40px');
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Quote' }));
+      expect(window.getSelection()!.anchorNode).toBe(second);
+    });
+
     it('moves focus to the first menu item on open', async () => {
       renderEditor();
       openMenu();
@@ -883,6 +956,31 @@ describe('RichTextEditor', () => {
       openMenu();
       fireEvent.keyDown(document, { key: 'Escape' });
       await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    });
+
+    it('restores editor focus and the target caret on Escape', async () => {
+      const editor = renderEditor();
+      const line = document.createElement('div');
+      const textNode = document.createTextNode('hello');
+      line.appendChild(textNode);
+      editor.appendChild(line);
+      const range = document.createRange();
+      range.setStart(textNode, 2);
+      range.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      fireEvent.keyDown(editor, { key: '/', ctrlKey: true });
+      // Wait for focus to land in the menu — the case Escape must unwind.
+      await waitFor(() =>
+        expect(screen.getByRole('menuitem', { name: 'Text' })).toHaveFocus()
+      );
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+      expect(editor).toHaveFocus();
+      const restored = window.getSelection()!;
+      expect(restored.anchorNode).toBe(textNode);
+      expect(restored.anchorOffset).toBe(2);
     });
 
     it('opens with Ctrl+/ targeting the caret block', () => {

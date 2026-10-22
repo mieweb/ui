@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { gotoStory } from './helpers';
+import { gotoStory, expectDocumentDirection } from './helpers';
 
 // Warm up the server before running tests
 test.beforeAll(async ({ browser }) => {
@@ -1974,5 +1974,87 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await gotoEditor(page);
     await expect(page).toHaveScreenshot('emaileditor-mobile.png');
+  });
+});
+
+test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
+  const story = 'editors-richtexteditor--block-menu';
+  const editorSel = '[contenteditable="true"]';
+  const gutterSel = '[data-slot="rich-text-editor-block-gutter"]';
+
+  // The gutter is hover-revealed, so it never appears in static snapshots;
+  // assert its reveal, row tracking, and inline-start anchoring with
+  // geometry in BOTH directions — the 5% screenshot tolerance can swallow
+  // a button-sized regression (CONTRIBUTING.md → "Testing in RTL").
+  for (const direction of ['ltr', 'rtl'] as const) {
+    test(`RichTextEditor - Gutter tracks the hovered row (${direction.toUpperCase()})`, async ({
+      page,
+    }) => {
+      await gotoStory(
+        page,
+        story,
+        direction === 'rtl' ? { globals: 'direction:rtl' } : {}
+      );
+      await expectDocumentDirection(page, direction);
+      // Hover the SECOND block (first <p>; an <h2> precedes it) so the
+      // assertions cover row targeting, not the first-block fallback.
+      const row = page.locator(`${editorSel} > p`).first();
+      await row.hover();
+      const button = page.locator(`${gutterSel} button`);
+      await expect
+        .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+        .toBe('1');
+      const rowBox = await row.boundingBox();
+      const gutterBox = await page.locator(gutterSel).boundingBox();
+      // The button rides beside the hovered row…
+      expect(Math.abs(gutterBox!.y - rowBox!.y)).toBeLessThanOrEqual(4);
+      // …in the editor's inline-start gutter (start-1 ≈ 4px; equality, not
+      // one-sided, so an end-anchored button cannot pass).
+      const editorBox = await page.locator(editorSel).boundingBox();
+      const startGap =
+        direction === 'rtl'
+          ? editorBox!.x + editorBox!.width - (gutterBox!.x + gutterBox!.width)
+          : gutterBox!.x - editorBox!.x;
+      expect(startGap).toBeGreaterThanOrEqual(0);
+      expect(startGap).toBeLessThanOrEqual(12);
+      await expect(page).toHaveScreenshot(
+        `richtexteditor-block-gutter-${direction}.png`
+      );
+    });
+  }
+
+  test('RichTextEditor - Menu formats the hovered row with visible block styles', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    const row = page.locator(`${editorSel} > p`).first();
+    const rowText = await row.textContent();
+    await row.hover();
+    await page.locator(`${gutterSel} button`).click();
+    await page.getByRole('menuitem', { name: 'Heading 1' }).click();
+    // The hovered row — not the first block — became the heading…
+    const h1 = page.locator(`${editorSel} > h1`);
+    await expect(h1).toHaveText(rowText!);
+    // …and the baseline block styles survive Tailwind preflight (no
+    // @tailwindcss/typography in this build).
+    const h1Style = await h1.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { fontSize: parseFloat(s.fontSize), fontWeight: s.fontWeight };
+    });
+    expect(h1Style.fontSize).toBeGreaterThanOrEqual(24);
+    expect(Number(h1Style.fontWeight)).toBeGreaterThanOrEqual(700);
+    // Quote the remaining paragraph: a visible inline-start border.
+    const lastRow = page.locator(`${editorSel} > p`).last();
+    await lastRow.hover();
+    await page.locator(`${gutterSel} button`).click();
+    await page.getByRole('menuitem', { name: 'Quote' }).click();
+    const quote = page.locator(`${editorSel} > blockquote`);
+    await expect(quote).toBeVisible();
+    expect(
+      await quote.evaluate((el) =>
+        parseFloat(getComputedStyle(el).borderInlineStartWidth)
+      )
+    ).toBeGreaterThan(0);
+    await expect(page).toHaveScreenshot('richtexteditor-block-formats.png');
   });
 });

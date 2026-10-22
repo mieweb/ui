@@ -730,6 +730,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       for (const child of Array.from(editorRef.current.childNodes)) {
         const rect = nodeRect(child);
         if (!rect) continue;
+        // Collapsed whitespace between blocks (formatted HTML) measures 0×0
+        // at the origin; its top of 0 always passes the comparison below and
+        // would steal the target from the visible row. Zero-width nodes that
+        // still have a height (an empty rendered line) remain eligible.
+        if (rect.width === 0 && rect.height === 0) continue;
         if (target === null || rect.top <= event.clientY) {
           target = child;
           top = rect.top;
@@ -756,6 +761,22 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         const block =
           hoverBlockNodeRef.current ?? editorRef.current?.firstChild ?? null;
         blockTargetRangeRef.current = block ? rangeAtStartOf(block) : null;
+      } else if (
+        editorRef.current &&
+        document.activeElement?.closest('[role="menu"]')
+      ) {
+        // Escape: focus sits on a menu item about to unmount — without a
+        // hand-off it falls to <body> and typing stops editing. Outside
+        // clicks have already moved focus, so they skip this branch.
+        const editor = editorRef.current;
+        editor.focus();
+        const target = blockTargetRangeRef.current;
+        const selection = window.getSelection();
+        if (target && selection && editor.contains(target.startContainer)) {
+          selection.removeAllRanges();
+          selection.addRange(target);
+          saveSelection();
+        }
       }
       setBlockMenuOpen(open);
     };
@@ -1273,6 +1294,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                           savedRangeRef.current = blockTargetRangeRef.current;
                         }
                         setMacrosOpen(true);
+                        // The activated item unmounts with the menu; keep
+                        // focus in the editor rather than letting it fall
+                        // to <body>.
+                        editorRef.current?.focus();
                       }}
                     >
                       {blockMenuLabels?.insertMacro ?? 'Insert macro…'}
@@ -1284,6 +1309,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                       setToolbarVisibility(
                         toolbarVisible ? 'hidden' : 'visible'
                       );
+                      // See the macro item: the menu unmounts on close.
+                      editorRef.current?.focus();
                     }}
                   >
                     {toolbarVisible
