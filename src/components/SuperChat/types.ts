@@ -231,6 +231,7 @@ export interface SuperChatConversation {
    * Nested sub-conversations, e.g. date-range slices of this conversation. The
    * conversation list renders them as an accordion under this entry (in the
    * given order), and opening one shows its own `thread` in the panel.
+   * One level only: `children` of a child are ignored by the list and inbox.
    */
   children?: SuperChatConversation[];
 }
