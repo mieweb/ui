@@ -694,7 +694,6 @@ module.exports = {
     '[&_pre]:[direction:ltr]',
     // SuperChat nested conversations (accordion chevron + indented children).
     'rotate-90',
-    'rtl:rotate-90',
     'ms-5',
     'space-y-0.5',
     'py-1.5',

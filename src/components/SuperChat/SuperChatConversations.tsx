@@ -153,8 +153,10 @@ export function SuperChatConversations({
                     size={14}
                     aria-hidden="true"
                     className={cn(
-                      'shrink-0 text-neutral-500 transition-transform rtl:rotate-180',
-                      expanded && 'rotate-90 rtl:rotate-90'
+                      'shrink-0 text-neutral-500 transition-transform',
+                      // Down when open (no mirroring needed); otherwise it
+                      // points toward the inline end.
+                      expanded ? 'rotate-90' : 'rtl:-scale-x-100'
                     )}
                   />
                 )}
