@@ -2058,3 +2058,65 @@ test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
     await expect(page).toHaveScreenshot('richtexteditor-block-formats.png');
   });
 });
+
+test.describe('Visual Regression Tests - RichTextArea', () => {
+  const story = 'editors-richtextarea--basic';
+  const wrapperSel = '[data-slot="rich-text-editor"][data-chromeless]';
+  const editorSel = '[contenteditable="true"]';
+
+  for (const direction of ['ltr', 'rtl'] as const) {
+    test(`RichTextArea - Single-line start that auto-grows (${direction.toUpperCase()})`, async ({
+      page,
+    }) => {
+      await gotoStory(
+        page,
+        story,
+        direction === 'rtl' ? { globals: 'direction:rtl' } : {}
+      );
+      await expectDocumentDirection(page, direction);
+      // At rest the surface matches the md Textarea / Input row: 40px
+      // (38px editable + the wrapper's 1px borders).
+      const wrapper = page.locator(wrapperSel);
+      const restBox = await wrapper.boundingBox();
+      expect(Math.abs(restBox!.height - 40)).toBeLessThanOrEqual(1);
+      await expect(page).toHaveScreenshot(
+        `richtextarea-single-line-${direction}.png`
+      );
+      // Typing a markdown shortcut formats without any toolbar, and the
+      // surface grows with the content instead of scrolling.
+      const editor = page.locator(editorSel);
+      await editor.click();
+      await page.keyboard.type('## ');
+      await page.keyboard.type('Visit summary');
+      await page.keyboard.press('Enter');
+      await page.keyboard.type('Grows with content.');
+      await expect(page.locator(`${editorSel} > h2`)).toHaveText(
+        'Visit summary'
+      );
+      const grownBox = await wrapper.boundingBox();
+      expect(grownBox!.height).toBeGreaterThan(restBox!.height + 20);
+    });
+  }
+
+  test('RichTextArea - Grown content with the gutter menu available', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    const editor = page.locator(editorSel);
+    await editor.click();
+    await page.keyboard.type('## ');
+    await page.keyboard.type('Visit summary');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('A plain row under the heading.');
+    // The hover gutter stays available on the chromeless surface.
+    const row = page.locator(`${editorSel} > div`).last();
+    await row.hover();
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await expect(page).toHaveScreenshot('richtextarea-grown.png');
+  });
+});
