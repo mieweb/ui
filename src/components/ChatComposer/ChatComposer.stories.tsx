@@ -201,6 +201,11 @@ const composerRef = useRef<ChatComposerHandle>(null);
           target: 'media-dictationbutton',
           why: 'Put DictationButton in micSlot as the only mic for voice typing; its onText appends to the controlled value and the user still presses Send.',
         },
+        {
+          type: 'composes with',
+          target: 'chat-chatcomposer-action-ribbon-poc',
+          why: 'Experimental: the Composer Action Ribbon POC puts recordings, screenshots, files and native document scans in one + menu with a dockable Record/Capture ribbon, using addMenuItems, micSlot and ref.addFiles.',
+        },
       ],
     },
   },
