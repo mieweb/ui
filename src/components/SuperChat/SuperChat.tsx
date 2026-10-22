@@ -596,11 +596,6 @@ export function SuperChat({
     const grew = threadLength > prevThreadLengthRef.current;
     prevThreadLengthRef.current = threadLength;
     if (grew && activeView === 'media') pendingMediaAppendRef.current = true;
-    if (order === 'desc') {
-      const el = threadRef.current;
-      if (el) el.scrollTop = 0;
-      return;
-    }
     const prevIds = prevMessageIdsRef.current;
     // The latest newly appended own message (in thread order) starts a turn.
     let turnStart: string | undefined;
@@ -614,14 +609,20 @@ export function SuperChat({
         }
       }
     }
+    // A threaded own reply can land inside a collapsed branch: open it, in
+    // either order.
+    if (turnStart && useThreaded) revealMessage(turnStart);
+    if (order === 'desc') {
+      const el = threadRef.current;
+      if (el) el.scrollTop = 0;
+      return;
+    }
     if (turnStart) {
       if (activeView === 'media') pendingMediaOwnSendRef.current = true;
       if (virtualized) {
         // No turn reserve under the virtualizer — pin the own send instead.
         scrollToBottom('auto');
       } else {
-        // A threaded reply can land inside a collapsed branch: open it.
-        if (useThreaded) revealMessage(turnStart);
         // Own send: open a new anchored turn (the layout effect below scrolls
         // it to the top of the viewport once the reserve is in place).
         setTurnStartId(turnStart);

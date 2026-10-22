@@ -731,6 +731,7 @@ export const MessageRow = React.memo(function MessageRow({
   const editRef = React.useRef<HTMLTextAreaElement>(null);
   // The rendered bubble content, read at copy time for the rich-text payload.
   const bubbleRef = React.useRef<HTMLDivElement>(null);
+  const replyToggleRef = React.useRef<HTMLButtonElement>(null);
   // Grow the editor to fit its content (accounts for wrapped lines, not just
   // explicit newlines), clamped by the textarea's CSS max-height.
   const autosize = React.useCallback(() => {
@@ -1030,6 +1031,7 @@ export const MessageRow = React.memo(function MessageRow({
         >
           {showReplyToggle && (
             <button
+              ref={replyToggleRef}
               type="button"
               onClick={onToggleReplies}
               aria-expanded={!collapsed}
@@ -1042,7 +1044,11 @@ export const MessageRow = React.memo(function MessageRow({
               className="-ms-1 inline-flex h-4 w-4 shrink-0 items-center justify-center self-center rounded text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
             >
               {collapsed ? (
-                <ChevronRightIcon size={14} aria-hidden="true" />
+                <ChevronRightIcon
+                  size={14}
+                  aria-hidden="true"
+                  className="rtl:-scale-x-100"
+                />
               ) : (
                 <ChevronDownIcon size={14} aria-hidden="true" />
               )}
@@ -1227,11 +1233,20 @@ export const MessageRow = React.memo(function MessageRow({
         {showReplyToggle && collapsed && (
           <button
             type="button"
-            onClick={onToggleReplies}
+            onClick={() => {
+              // The pill unmounts once expanded; keep focus on this thread by
+              // handing it to the persistent collapse toggle first.
+              replyToggleRef.current?.focus();
+              onToggleReplies?.();
+            }}
             data-slot="superchat-thread-replies"
             className="mt-0.5 inline-flex items-center gap-1 self-start rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-[11px] font-medium text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
           >
-            <ChevronRightIcon size={12} aria-hidden="true" />
+            <ChevronRightIcon
+              size={12}
+              aria-hidden="true"
+              className="rtl:-scale-x-100"
+            />
             {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
           </button>
         )}

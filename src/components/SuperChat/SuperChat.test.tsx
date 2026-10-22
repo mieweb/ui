@@ -1689,6 +1689,73 @@ describe('SuperChat threading', () => {
     expect(screen.getByText('nested reply')).toBeInTheDocument();
   });
 
+  it('reveals an own reply inside a collapsed branch in descending order', () => {
+    const { rerender } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          order="desc"
+          defaultCollapsed
+        />
+      </div>
+    );
+    expect(screen.queryByText('nested reply')).toBeNull();
+
+    rerender(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={{
+            ...threaded,
+            thread: [
+              ...threaded.thread,
+              {
+                id: 't7',
+                participantId: 'u1',
+                parentId: 't3',
+                text: 'my feed reply',
+                time: '2026-06-07T09:04:00Z',
+              },
+            ],
+          }}
+          currentParticipantId="u1"
+          order="desc"
+          defaultCollapsed
+        />
+      </div>
+    );
+    expect(screen.getByText('my feed reply')).toBeInTheDocument();
+  });
+
+  it('keeps keyboard focus on the thread when expanding via the replies pill', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          defaultCollapsed
+        />
+      </div>
+    );
+    const rootRow = screen
+      .getByText('root')
+      .closest('[data-slot="superchat-message"]') as HTMLElement;
+    const pill = rootRow.querySelector<HTMLButtonElement>(
+      '[data-slot="superchat-thread-replies"]'
+    )!;
+    pill.focus();
+    await user.keyboard('{Enter}');
+
+    expect(screen.getByText('reply one')).toBeInTheDocument();
+    const toggle = rootRow.querySelector<HTMLButtonElement>(
+      '[data-slot="superchat-thread-toggle"]'
+    )!;
+    expect(toggle).toHaveFocus();
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('never collapses replies under system rows (they have no toggle)', () => {
     render(
       <div style={{ height: 400 }}>
