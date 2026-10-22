@@ -1,3 +1,4 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   Q,
@@ -6,7 +7,33 @@ import {
   qLandingPageAgentConfig,
   qTwilioAgentSchema,
 } from './index';
-import '@mieweb/q/style.css';
+// NOT a side-effect import: @mieweb/q ships a full unlayered Tailwind build
+// whose .px-3/.opacity-0/… outrank @mieweb/ui utilities. Storybook prefetches
+// story modules on sidebar hover, so a plain `import '…/style.css'` here would
+// inject it into the preview for good and visibly break every other story
+// (lost paddings, dead hover reveals). Inline the text and mount it only while
+// a Q story is on canvas.
+import qStyles from '@mieweb/q/style.css?inline';
+
+const QStyleScope = ({ children }: { children: React.ReactNode }) => {
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => {
+    const el = document.createElement('style');
+    el.setAttribute('data-q-story-styles', '');
+    el.textContent = qStyles;
+    document.head.appendChild(el);
+    setReady(true);
+    return () => el.remove();
+  }, []);
+  // Hold rendering until the styles exist to avoid an unstyled flash.
+  return ready ? children : null;
+};
+
+const withQStyles = (Story: React.ComponentType) => (
+  <QStyleScope>
+    <Story />
+  </QStyleScope>
+);
 
 const sampleTwilioConfig = {
   ...createQTwilioAgentConfig(),
@@ -30,6 +57,7 @@ const meta: Meta<typeof Q> = {
   title: 'Modules/Editors/Q',
   component: Q,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  decorators: [withQStyles],
   parameters: {
     layout: 'fullscreen',
     a11y: {

@@ -11,6 +11,7 @@ import {
 } from 'ag-grid-community';
 import { cn } from '../../utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { useDirection } from '../../hooks/useDirection';
 import type { BrandConfig } from '../../brands/types';
 
 // Register AG Grid Community modules
@@ -95,6 +96,14 @@ export interface AGGridProps<TData = unknown>
   noDataMessage?: string;
   /** Custom loading message */
   loadingMessage?: string;
+  /**
+   * Render the grid right-to-left. Defaults to the direction inherited from
+   * the nearest `dir` attribute (via `useDirection`), so the grid mirrors
+   * automatically under `<html dir="rtl">`. Pass explicitly to pin a
+   * direction. `enableRtl` is an initial-only AG Grid option, so the grid
+   * remounts (losing sort/filter state) when the resolved value changes.
+   */
+  enableRtl?: boolean;
 }
 
 // ============================================================================
@@ -201,12 +210,18 @@ function AGGridInner<TData = unknown>(
     filterable = true,
     noDataMessage = 'No data to display',
     loadingMessage = 'Loading...',
+    enableRtl,
     ...props
   }: AGGridProps<TData>,
   ref: React.ForwardedRef<AgGridReact<TData>>
 ) {
   const internalRef = React.useRef<AgGridReact<TData>>(null);
   const gridApiRef = React.useRef<GridApi<TData> | null>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Mirror the grid under dir="rtl" unless the caller pins a direction.
+  const direction = useDirection(containerRef);
+  const resolvedEnableRtl = enableRtl ?? direction === 'rtl';
 
   React.useEffect(() => {
     warnDeprecatedOnce();
@@ -219,9 +234,15 @@ function AGGridInner<TData = unknown>(
   const handleGridReady = React.useCallback(
     (event: GridReadyEvent<TData>) => {
       gridApiRef.current = event.api;
+      // Re-apply the wrapper-managed loading overlay: the [loading] effect
+      // does not rerun when only the grid instance changed (the enableRtl
+      // direction-flip remount), so a grid flipped while loading would lose
+      // its overlay. No hideOverlay() on the false path — that would suppress
+      // AG Grid's automatic no-rows overlay on fresh mounts.
+      if (loading) event.api.showLoadingOverlay();
       onGridReady?.(event);
     },
-    [onGridReady]
+    [onGridReady, loading]
   );
 
   // Handle row click
@@ -290,6 +311,7 @@ function AGGridInner<TData = unknown>(
 
   return (
     <div
+      ref={containerRef}
       data-slot="ag-grid"
       className={cn(agGridVariants({ variant, size, brand }), className)}
       style={{
@@ -307,7 +329,11 @@ function AGGridInner<TData = unknown>(
       data-brand={brand}
     >
       <AgGridReact<TData>
+        // enableRtl is an initial-only AG Grid option — remount on change so
+        // live dir flips (e.g. the Storybook direction toolbar) take effect.
+        key={resolvedEnableRtl ? 'rtl' : 'ltr'}
         ref={resolvedRef as React.RefObject<AgGridReact<TData>>}
+        enableRtl={resolvedEnableRtl}
         columnDefs={columnDefs}
         rowData={rowData}
         defaultColDef={mergedDefaultColDef}

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { isRtl } from '../../hooks/useDirection';
 
 // ============================================================================
 // Types & Interfaces
@@ -239,7 +240,11 @@ function ProgressBar({
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !progressRef.current || duration <= 0) return;
     const rect = progressRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    // Progress fills from the inline-start edge: left→right in LTR,
+    // right→left in RTL.
+    const x = isRtl(progressRef.current)
+      ? rect.right - e.clientX
+      : e.clientX - rect.left;
     const percentage = x / rect.width;
     onSeek(percentage * duration);
   };
@@ -263,10 +268,16 @@ function ProgressBar({
       onKeyDown={(e) => {
         if (disabled) return;
         const step = duration * 0.05; // 5% steps
-        if (e.key === 'ArrowRight') {
-          onSeek(Math.min(currentTime + step, duration));
-        } else if (e.key === 'ArrowLeft') {
-          onSeek(Math.max(currentTime - step, 0));
+        // Horizontal arrows follow the visual direction: in RTL the bar
+        // fills right→left, so ArrowLeft seeks forward.
+        const rtl = isRtl(e.currentTarget);
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          const forward = (e.key === 'ArrowRight') !== rtl;
+          onSeek(
+            forward
+              ? Math.min(currentTime + step, duration)
+              : Math.max(currentTime - step, 0)
+          );
         }
       }}
     >
@@ -275,8 +286,9 @@ function ProgressBar({
         style={{ width: `${progress}%` }}
       />
       <div
+        data-slot="audio-player-progress-thumb"
         className="bg-primary-800 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all"
-        style={{ left: `calc(${progress}% - 6px)` }}
+        style={{ insetInlineStart: `calc(${progress}% - 6px)` }}
       />
     </div>
   );
@@ -535,6 +547,10 @@ function Waveform({
     <div
       ref={containerRef}
       data-slot="audio-player-waveform"
+      // WaveSurfer draws its canvas physically left→right regardless of
+      // document direction, so the waveform is an LTR island — cursor math,
+      // click/keyboard seeking, and the canvas all stay physical.
+      dir="ltr"
       role={showHoverCursor ? 'slider' : undefined}
       aria-label={showHoverCursor ? 'Audio progress' : undefined}
       aria-valuemin={showHoverCursor ? 0 : undefined}
@@ -565,6 +581,7 @@ function Waveform({
       {showHoverCursor && isHovering && isLoaded && (
         <div
           className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5"
+          // rtl-ignore -- anchored to the WaveSurfer canvas, an LTR island
           style={{ left: `${hoverPosition}%`, backgroundColor: cursorColor }}
         />
       )}

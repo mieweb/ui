@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { isRtl } from '../../hooks/useDirection';
 
 // ============================================================================
 // Slider Variants
@@ -28,7 +29,7 @@ const sliderTrackVariants = cva(
 );
 
 const sliderRangeVariants = cva(
-  ['absolute h-full rounded-full transition-all duration-75 ease-out'],
+  ['absolute start-0 h-full rounded-full transition-all duration-75 ease-out'],
   {
     variants: {
       variant: {
@@ -47,7 +48,7 @@ const sliderRangeVariants = cva(
 
 const sliderThumbVariants = cva(
   [
-    'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
+    'absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rtl:translate-x-1/2',
     'rounded-full border-2 bg-white',
     'shadow-md transition-shadow duration-150',
     'cursor-grab active:cursor-grabbing',
@@ -214,10 +215,12 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         const track = trackRef.current;
         if (!track) return clampedValue;
         const rect = track.getBoundingClientRect();
-        const ratio = Math.min(
-          Math.max((clientX - rect.left) / rect.width, 0),
-          1
-        );
+        // Value grows toward the inline-end edge: left→right in LTR,
+        // right→left in RTL.
+        const offset = isRtl(track)
+          ? rect.right - clientX
+          : clientX - rect.left;
+        const ratio = Math.min(Math.max(offset / rect.width, 0), 1);
         const raw = min + ratio * (max - min);
         // Snap to step relative to min
         const stepped = min + Math.round((raw - min) / safeStep) * safeStep;
@@ -283,13 +286,22 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent) => {
         if (disabled) return;
+        // Horizontal arrows follow the visual direction: in RTL the slider
+        // fills right→left, so ArrowLeft increases and ArrowRight decreases.
+        const rtl = isRtl(e.currentTarget);
         let newValue: number | null = null;
         switch (e.key) {
           case 'ArrowRight':
+          case 'ArrowLeft': {
+            const increase = (e.key === 'ArrowRight') !== rtl;
+            newValue = increase
+              ? Math.min(clampedValue + safeStep, max)
+              : Math.max(clampedValue - safeStep, min);
+            break;
+          }
           case 'ArrowUp':
             newValue = Math.min(clampedValue + safeStep, max);
             break;
-          case 'ArrowLeft':
           case 'ArrowDown':
             newValue = Math.max(clampedValue - safeStep, min);
             break;
@@ -410,7 +422,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           <div
             data-slot="slider-thumb"
             className={sliderThumbVariants({ size, variant })}
-            style={{ left: `${percentage}%` }}
+            style={{ insetInlineStart: `${percentage}%` }}
             aria-hidden="true"
           />
         </div>

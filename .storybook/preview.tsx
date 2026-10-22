@@ -5,8 +5,10 @@ import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import '../src/styles/kerebron.css';
 import './preview.css';
-// eSheet shares one stylesheet across fields, renderer and builder.
-import '../packages/esheet/packages/styles/src/index.output.css';
+// eSheet styling is no longer imported here: @esheet/builder and
+// @esheet/renderer both `import '@esheet/styles'`, whose built dist/index.js
+// self-injects a single shared stylesheet (a #esheet-styles <style> tag) the
+// first time either package loads.
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { ccmeBrand } from '../src/brands/ccme';
 import { defaultBrand } from '../src/brands/default';

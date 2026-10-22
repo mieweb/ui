@@ -156,6 +156,8 @@ export const miewebUISafelist = [
   '[&_video]:w-full',
   'min-h-8',
   '[&_[data-slot=button-label]]:whitespace-normal',
+  '[&>[data-slot=dropdown-item-label]]:min-w-0',
+  '[&>[data-slot=dropdown-item-label]]:flex-1',
   // EmailEditor: block frames, innermost-hover toolbar reveal, email-content
   // spacing in the canvas, and the stacked/side-by-side panel layout.
   '[[data-slot=email-editor-block]:hover:not(:has([data-slot=email-editor-block]:hover))>&]:opacity-100',
@@ -706,9 +708,18 @@ export const miewebUISafelist = [
   'start-1',
   'first:border-s-0',
   'rtl:origin-right',
+  // RTL Phase 2: MegaMenu panel transform origin mirror
+  'rtl:origin-top-right',
   // RTL Phase 2: Toast slide-in animation + RTL mirror
   'animate-slide-in-right',
   'rtl:animate-slide-in-left',
+  // RTL Phase 2 transforms batch: LoadingPage bar/shimmer + RTL mirrors,
+  // BookingDialog consent-switch thumb mirror
+  'animate-loading-bar',
+  'rtl:animate-loading-bar-rtl',
+  'animate-shimmer',
+  'rtl:animate-shimmer-rtl',
+  'rtl:-translate-x-5',
   // Motion CSS fallbacks — applied by `<Animated>` only when no motion runtime
   // is active, so the scanner never sees them on a literal element.
   'animate-fade-in',
@@ -1137,6 +1148,28 @@ export const miewebUISafelist = [
   'min-h-[76px]',
   'min-h-[96px]',
   'min-h-[120px]',
+  // Textarea auto-grow default (ui#632) — single-line baselines matching the
+  // Input heights, tuned padding so one line + padding + borders equals the
+  // Input size token, floating-label single-line minimums, and the resize
+  // handle variants. (min-h-8 is safelisted above.)
+  'min-h-10',
+  'min-h-12',
+  'py-[5px]',
+  'py-[7px]',
+  'py-[9px]',
+  'min-h-[50px]',
+  'min-h-[58px]',
+  'min-h-[66px]',
+  'resize-none',
+  'resize-y',
+  'resize-x',
+  'resize',
+  // RichTextArea (ui#639) — chromeless RichTextEditor single-line baseline
+  // and the Textarea-matched focus ring on the wrapper.
+  'min-h-[38px]',
+  'focus-within:ring-2',
+  'focus-within:ring-ring',
+  'focus-within:border-transparent',
   // Floating-group field boxes (labelVariant="floating" on RadioGroup /
   // CheckboxGroup) share the floating input heights as min-heights. sr-only
   // visually hides the group legend (and the hideLabel input label) while
@@ -1230,6 +1263,7 @@ export const miewebUISafelist = [
   'justify-center',
   'justify-between',
   'justify-start',
+  'justify-end',
   'rtl:rotate-180',
   'gap-1',
   'gap-2',
@@ -1597,6 +1631,55 @@ export const miewebUISafelist = [
   'transition-[width]',
   'z-[5]',
   'z-[80]',
+  // MacroLibrary panel docked in RichTextEditor — search inset, shortcut chips, peek
+  '-mt-1',
+  'bottom-1.5',
+  'dark:border-warning-700',
+  'end-1.5',
+  'group/macro',
+  'group-focus-within/macro:visible',
+  'group-hover/macro:visible',
+  '[@media(hover:none)]:visible',
+  'hover:text-primary',
+  'items-stretch',
+  'leading-4',
+  'md:absolute',
+  'md:border-t-0',
+  'md:end-0',
+  'md:inset-y-0',
+  'md:me-72',
+  'md:min-h-[400px]',
+  'md:w-72',
+  'p-1.5',
+  'py-1.5',
+  'py-8',
+  'py-10',
+  'start-2.5',
+  'text-[11px]',
+  'whitespace-pre-line',
+  // RichTextEditor block gutter menu — hover-revealed `+` button
+  'group/rte-body',
+  'group-hover/rte-body:opacity-100',
+  // RichTextEditor editable region — baseline block styles (preflight strips
+  // heading/list/quote styling; `prose` needs @tailwindcss/typography)
+  '[&_h1]:my-3',
+  '[&_h1]:text-2xl',
+  '[&_h1]:font-bold',
+  '[&_h2]:my-3',
+  '[&_h2]:text-xl',
+  '[&_h2]:font-bold',
+  '[&_h3]:my-2',
+  '[&_h3]:text-lg',
+  '[&_h3]:font-semibold',
+  '[&_ul]:my-2',
+  '[&_ol]:my-2',
+  '[&_ol]:list-decimal',
+  '[&_ol]:ps-6',
+  '[&_blockquote]:my-2',
+  '[&_blockquote]:border-s-4',
+  '[&_blockquote]:border-border',
+  '[&_blockquote]:ps-3',
+  '[&_blockquote]:text-muted-foreground',
 ];
 
 export interface MiewebUIPreset {
@@ -1797,6 +1880,22 @@ export const miewebUIPreset: MiewebUIPreset = {
           '0%': { transform: 'translateX(-100%)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
         },
+        'loading-bar': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(300%)' },
+        },
+        'loading-bar-rtl': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-300%)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
+        'shimmer-rtl': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
         'scale-in': {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
@@ -1823,6 +1922,10 @@ export const miewebUIPreset: MiewebUIPreset = {
         'slide-in-from-bottom': 'slide-in-from-bottom 150ms ease-out',
         'slide-in-right': 'slide-in-right 300ms ease-out',
         'slide-in-left': 'slide-in-left 300ms ease-out',
+        'loading-bar': 'loading-bar 1.5s ease infinite',
+        'loading-bar-rtl': 'loading-bar-rtl 1.5s ease infinite',
+        shimmer: 'shimmer 2s linear infinite',
+        'shimmer-rtl': 'shimmer-rtl 2s linear infinite',
         'scale-in': 'scale-in 150ms ease-out',
         'ozwell-message-flare': 'ozwell-message-flare 1.8s ease-out',
       },

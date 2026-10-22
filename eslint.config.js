@@ -55,6 +55,8 @@ export default [
         HTMLAnchorElement: 'readonly',
         SVGSVGElement: 'readonly',
         Node: 'readonly',
+        Range: 'readonly',
+        Text: 'readonly',
         // Events
         KeyboardEvent: 'readonly',
         MouseEvent: 'readonly',

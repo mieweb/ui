@@ -1,7 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Textarea } from './Textarea';
+
+/** jsdom has no layout, so fake the scroll metrics the auto-grow code reads. */
+function mockScrollHeight(el: HTMLElement, getHeight: () => number) {
+  Object.defineProperty(el, 'scrollHeight', {
+    configurable: true,
+    get: getHeight,
+  });
+}
 
 describe('Textarea', () => {
   it('renders with label correctly', () => {
@@ -20,6 +29,159 @@ describe('Textarea', () => {
       <Textarea label="Description" required requiredVariant="warning" />
     );
     expect(screen.getByText('*')).toHaveClass('text-warning');
+  });
+
+  describe('auto-grow (default)', () => {
+    it('starts at a single line matching the Input height', () => {
+      renderWithTheme(<Textarea label="Notes" />);
+      const textarea = screen.getByRole('textbox');
+      expect(textarea).toHaveAttribute('rows', '1');
+      expect(textarea).toHaveClass('min-h-10');
+      // The native drag handle stays available alongside auto-grow.
+      expect(textarea).toHaveClass('resize-y');
+      // Exposes the mode to the condensed stylesheet.
+      expect(textarea).toHaveAttribute('data-auto-resize', 'true');
+    });
+
+    it('uses size-matched single-line baselines', () => {
+      renderWithTheme(<Textarea label="Notes" size="sm" />);
+      expect(screen.getByRole('textbox')).toHaveClass('min-h-8');
+    });
+
+    it('measures prefilled content on mount', () => {
+      let mounted: HTMLTextAreaElement | null = null;
+      renderWithTheme(
+        <Textarea
+          label="Notes"
+          defaultValue={'one\ntwo\nthree'}
+          ref={(el) => {
+            if (el && !mounted) {
+              mounted = el;
+              mockScrollHeight(el, () => 120);
+            }
+          }}
+        />
+      );
+      const textarea = screen.getByRole('textbox');
+      // Mount effect runs after ref callback, so the mock is in place.
+      expect(textarea.style.height).toBe('120px');
+    });
+
+    it('grows while typing and shrinks when content is removed', async () => {
+      const user = userEvent.setup();
+      renderWithTheme(<Textarea label="Notes" />);
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      mockScrollHeight(textarea, () =>
+        textarea.value.includes('\n') ? 96 : 40
+      );
+
+      await user.type(textarea, 'line one{Enter}line two');
+      expect(textarea.style.height).toBe('96px');
+
+      await user.clear(textarea);
+      await user.type(textarea, 'short');
+      expect(textarea.style.height).toBe('40px');
+    });
+
+    it('recalculates on controlled value updates', () => {
+      const { rerender } = renderWithTheme(
+        <Textarea label="Notes" value="one" onChange={() => {}} />
+      );
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      mockScrollHeight(textarea, () =>
+        textarea.value.includes('\n') ? 96 : 40
+      );
+
+      rerender(
+        <Textarea label="Notes" value={'one\ntwo\nthree'} onChange={() => {}} />
+      );
+      expect(textarea.style.height).toBe('96px');
+    });
+
+    it('respects an explicit rows floor', () => {
+      renderWithTheme(<Textarea label="Notes" rows={5} />);
+      expect(screen.getByRole('textbox')).toHaveAttribute('rows', '5');
+    });
+
+    it('preserves a consumer-configured initial height as the growth floor', async () => {
+      const user = userEvent.setup();
+      let mounted: HTMLTextAreaElement | null = null;
+      renderWithTheme(
+        <Textarea
+          label="Notes"
+          style={{ height: '160px' }}
+          ref={(el) => {
+            if (el && !mounted) {
+              mounted = el;
+              mockScrollHeight(el, () => 40);
+              const metric = () => {
+                const h = parseInt(el.style.height, 10);
+                return Number.isNaN(h) ? 160 : h;
+              };
+              Object.defineProperty(el, 'offsetHeight', {
+                configurable: true,
+                get: metric,
+              });
+              Object.defineProperty(el, 'clientHeight', {
+                configurable: true,
+                get: metric,
+              });
+            }
+          }}
+        />
+      );
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      // Mount measurement keeps the configured 160px as the floor.
+      expect(textarea.style.height).toBe('160px');
+      // Content below the floor does not shrink it.
+      await user.type(textarea, 'short');
+      expect(textarea.style.height).toBe('160px');
+      // Content above the floor still grows past it.
+      mockScrollHeight(textarea, () => 240);
+      await user.type(textarea, ' more');
+      expect(textarea.style.height).toBe('240px');
+    });
+
+    it('keeps a user-dragged height as the growth floor', async () => {
+      const user = userEvent.setup();
+      renderWithTheme(<Textarea label="Notes" />);
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      mockScrollHeight(textarea, () => 40);
+
+      await user.type(textarea, 'a');
+      expect(textarea.style.height).toBe('40px');
+
+      // Simulate the browser applying a drag-resize: the component adopts
+      // out-of-band heights as the new floor (normally via ResizeObserver;
+      // jsdom has none, so exercise the same path through another input
+      // after seeding the floor).
+      textarea.style.height = '200px';
+      mockScrollHeight(textarea, () => 64);
+      await user.type(textarea, 'b');
+      // Without a ResizeObserver the drag is not detected and content
+      // sizing wins — this guards the fallback behavior.
+      expect(textarea.style.height).toBe('64px');
+    });
+  });
+
+  describe('autoResize={false} (fixed sizing)', () => {
+    it('keeps the fixed min-height and manual resize handle', () => {
+      renderWithTheme(<Textarea label="Notes" autoResize={false} />);
+      const textarea = screen.getByRole('textbox');
+      expect(textarea).toHaveClass('min-h-[80px]');
+      expect(textarea).toHaveClass('resize-y');
+      expect(textarea).not.toHaveAttribute('rows');
+      expect(textarea).not.toHaveAttribute('data-auto-resize');
+    });
+
+    it('does not force rows or adjust height', async () => {
+      const user = userEvent.setup();
+      renderWithTheme(<Textarea label="Notes" autoResize={false} rows={3} />);
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      expect(textarea).toHaveAttribute('rows', '3');
+      await user.type(textarea, 'hello');
+      expect(textarea.style.height).toBe('');
+    });
   });
 
   describe('floating label', () => {

@@ -110,10 +110,10 @@ function IntakeForm({ definition, draft }: { definition: FormDefinition; draft?:
 
 ### Limitations
 
-- Separate install: install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer) for the shared \`@mieweb/ui/esheet\` entry. The renderer and builder import the shared \`@esheet/styles\` stylesheet automatically; load \`@mieweb/ui/styles.css\` for the composed UI components.
+- Separate install: install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer) for the shared \`@mieweb/ui/esheet\` entry. The renderer and builder import the shared \`@esheet/styles\` stylesheet automatically; it self-injects at runtime, so no manual CSS copying is required (a plain stylesheet is also available at \`@esheet/styles/styles.css\`). Load \`@mieweb/ui/styles.css\` for the composed UI components.
 - Imperative API: there is no \`onChange\` / \`onSubmit\` and no submit button — read answers via the ref. Validation runs only when you call \`getValidResponse()\`; \`getRawResponse()\` returns unvalidated state.
 - Accessibility depends on \`@esheet/fields\`' field markup; the renderer shell itself sets one \`aria-*\` attribute and no landmark roles. A known upstream contrast failure on the selected option card (mieweb/eSheet#170) is excluded from axe in the *PreFilled* story.
-- i18n / RTL: no locale, direction or translation hooks were found in the renderer source; built-in strings are English and layout is LTR. Dark mode is a \`dark\` class on \`className\`, not the @mieweb/ui theme provider.
+- i18n / RTL: no locale or translation hooks were found in the renderer source — built-in strings are English. Layout mirrors natively under an inherited \`dir="rtl"\` (verify with the direction toolbar); known upstream gaps are a handful of physical-direction classes (nested-section indent border, text-field unit suffix overlay, validation-panel accent border), tracked as an eSheet RTL enhancement. Dark mode is a \`dark\` class on \`className\`, not the @mieweb/ui theme provider.
 - Format auto-detection converts SurveyJS / MCP input to a \`FormDefinition\` internally — the response shape you get back is eSheet's \`FormResponse\`, not the source dialect's. Custom field types require a core that accepts them (mieweb/eSheet#91).`,
       },
     },
@@ -196,7 +196,7 @@ function RendererDemo(props: EsheetRendererProps) {
           .filter(Boolean)
           .join(' ')}
       />
-      <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+      <div style={{ marginTop: '1rem', textAlign: 'end' }}>
         <button
           onClick={handleSubmit}
           style={{

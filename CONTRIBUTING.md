@@ -231,6 +231,13 @@ Components must render correctly in right-to-left locales
   component emits must be added to **both**
   [src/tailwind-preset.ts](src/tailwind-preset.ts) and
   [src/tailwind-preset.cjs](src/tailwind-preset.cjs).
+- **LTR islands for inherently left-to-right content** — phone numbers,
+  dates, URLs, dial codes and numeric table cells keep their character order
+  with an explicit `dir="ltr"` on the element (see PhoneInput, DateInput,
+  WebsiteInput, CountryCodeDropdown's dial-code spans, `TableCell numeric`,
+  and the AudioPlayer waveform). Inside an island, logical utilities resolve
+  LTR — `text-end` is the physical right. Add a short comment saying why the
+  island exists, and mention it in the story's RTL note.
 - **Genuinely physical code is exempt, with a reason** — pointer-coordinate
   math, overlays anchored to an SVG coordinate space, LTR-by-convention
   charts. Annotate the line (or the line above) with
@@ -455,6 +462,7 @@ Current notes:
 | [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a pnpm submodule; revision-aware `build:esheet`; shared styles; Storybook-only `src`                                                                                                                                  |
 | [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Implementation is the `packages/datavis` submodule (`@mieweb/datavis`, bundled) + the `datavis-ace` dependency (transitive, external); needs `build:datavis`; context/source/grid wiring                        |
 | [Deck](src/components/Deck/MAINTAINERS.md) | Client-only `@mieweb/ui/deck` entry; JSON slide schema + `satisfies` renderer registry; CSS-only reveal gated on `data-ready`/`data-seen`; renderers resolve tone with `toneOf`; window key handler yields to inputs and tabs |
+| [DictationButton](src/components/DictationButton/MAINTAINERS.md) | Session-guarded mic lifecycle; `transcribe` extension point; default provider shares the Whisper worker (shared model setting, English-only, no mid-decode cancel) |
 | [EmailEditor](src/components/EmailEditor/MAINTAINERS.md) | Canvas preview (`EmailBlockPreview`) and MJML renderer (`renderEmailMjml`) must change together (validate with strict `mjml`); one DOMPurify policy (`sanitizeEmailHtml`) sanitises every output and pasted input — stored documents are never normalised in place |
 | [EncounterVisit](src/components/EncounterVisit/MAINTAINERS.md) | One eSheet response store across form, RichEdit and View; coded clinical adapters, MCP validation, protected MDY links and empty-report rendering invariants |
 | [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                                                                                             |
