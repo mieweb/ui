@@ -1012,21 +1012,52 @@ describe('RichTextEditor', () => {
       expect(screen.getByRole('menu')).toBeInTheDocument();
     });
 
-    it('offers "Insert macro…" only when macros are provided', () => {
+    it('offers the macro menu entries only when macros are provided', () => {
       renderEditor();
       openMenu();
       expect(
-        screen.queryByRole('menuitem', { name: 'Insert macro…' })
+        screen.queryByRole('menuitem', { name: 'Insert macro' })
       ).toBeNull();
+      expect(
+        screen.queryByRole('menuitem', { name: 'Show macro library' })
+      ).toBeNull();
+    });
+
+    it('disables the "Insert macro" submenu when the groups are empty', () => {
+      renderEditor({ macros: [{ id: 'g', label: 'Group', macros: [] }] });
+      openMenu();
+      expect(
+        screen.getByRole('menuitem', { name: 'Insert macro' })
+      ).toBeDisabled();
+      // The library item stays available — its panel owns the empty state.
+      expect(
+        screen.getByRole('menuitem', { name: 'Show macro library' })
+      ).not.toBeDisabled();
     });
 
     it('opens the macro panel from the menu', () => {
       renderEditor({ macros });
       openMenu();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      fireEvent.click(
+        screen.getByRole('menuitem', { name: 'Show macro library' })
+      );
       expect(
         document.querySelector('[data-slot="macro-library"]')
       ).not.toBeNull();
+    });
+
+    it('inserts a macro directly from the "Insert macro" submenu', () => {
+      renderEditor({ macros });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: /Cardio — WNL/ }));
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+      // No panel was docked — the submenu inserts without the library.
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
     });
 
     it('inserts the macro at the menu target even after the panel takes focus', () => {
@@ -1048,7 +1079,9 @@ describe('RichTextEditor', () => {
       // …while the gutter menu targets the SECOND.
       fireEvent.mouseMove(editor, { clientY: 45 });
       openMenu();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      fireEvent.click(
+        screen.getByRole('menuitem', { name: 'Show macro library' })
+      );
       // The panel's search field steals focus; the editor's blur re-saves
       // the live selection — which must already match the menu target, or
       // the bookmark gets clobbered and the macro lands at the old caret.

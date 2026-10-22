@@ -29,6 +29,7 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownSeparator,
+  DropdownSubmenu,
 } from '../Dropdown';
 import {
   processDictation,
@@ -69,8 +70,10 @@ export interface RichTextEditorBlockMenuLabels {
   numberedList?: string;
   /** "Quote" menu item. */
   quote?: string;
-  /** "Insert macro…" menu item (shown when `macros` is provided). */
+  /** "Insert macro" submenu parent (shown when `macros` is provided). */
   insertMacro?: string;
+  /** "Show macro library" menu item (shown when `macros` is provided). */
+  showMacroLibrary?: string;
   /** Toolbar toggle item while the toolbar is hidden. */
   showToolbar?: string;
   /** Toolbar toggle item while the toolbar is visible. */
@@ -346,6 +349,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
     const hasMacros = Boolean(macros);
+    const hasMacroEntries = Boolean(
+      macros?.some((group) => group.macros.length > 0)
+    );
     const isEmpty = isHtmlEmpty(value);
     const [uncontrolledToolbar, setUncontrolledToolbar] =
       React.useState(defaultToolbar);
@@ -1339,27 +1345,96 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                     </DropdownItem>
                   ))}
                   <DropdownSeparator />
-                  {hasMacros && (
-                    <DropdownItem
-                      onClick={() => {
-                        setBlockMenuOpen(false);
-                        // Macro insertion restores the bookmarked selection;
-                        // point it at the menu's target block.
-                        if (blockTargetRangeRef.current) {
-                          savedRangeRef.current = blockTargetRangeRef.current;
-                        }
-                        setMacrosOpen(true);
-                        // The activated item unmounts with the menu; move
-                        // focus back AND apply the bookmark to the live
-                        // selection — a bare focus() would leave the old
-                        // caret live, and the editor's onBlur (fired when
-                        // the panel's search field takes focus) would then
-                        // re-save it over the menu's target.
-                        focusRestoringSelection();
-                      }}
-                    >
-                      {blockMenuLabels?.insertMacro ?? 'Insert macro…'}
-                    </DropdownItem>
+                  {hasMacros && macros && (
+                    <>
+                      <DropdownSubmenu
+                        label={blockMenuLabels?.insertMacro ?? 'Insert macro'}
+                        // No macros to offer — the panel's empty state (via
+                        // "Show macro library") explains the situation.
+                        disabled={!hasMacroEntries}
+                      >
+                        {/* Children are built per render even while closed
+                            (the menu JSX lives in the editor's tree), so
+                            skip the catalog walk until the menu is open. */}
+                        {blockMenuOpen &&
+                          macros.flatMap((group) => [
+                            // Group headings only earn their row when there
+                            // is more than one group to tell apart.
+                            ...(macros.length > 1
+                              ? [
+                                  <DropdownLabel key={`h:${group.id}`}>
+                                    {group.label}
+                                  </DropdownLabel>,
+                                ]
+                              : []),
+                            ...group.macros.map((macro) => (
+                              <DropdownItem
+                                // Serialized pair: plain `${a}-${b}` joins
+                                // collide ('a-b','c' vs 'a','b-c') and can
+                                // alias a heading key.
+                                key={`m:${JSON.stringify([group.id, macro.id])}`}
+                                // The item's label slot is a flex item with
+                                // min-width:auto, so it refuses to shrink and
+                                // a long macro name overflows instead of
+                                // hitting the truncate below. Scoped here
+                                // rather than changed in DropdownItem, whose
+                                // other consumers size to content.
+                                className="[&>[data-slot=dropdown-item-label]]:min-w-0 [&>[data-slot=dropdown-item-label]]:flex-1"
+                                onClick={() => {
+                                  setBlockMenuOpen(false);
+                                  // Insertion lands at the menu's target
+                                  // block, mirroring the panel flow.
+                                  if (blockTargetRangeRef.current) {
+                                    savedRangeRef.current =
+                                      blockTargetRangeRef.current;
+                                  }
+                                  insertMacro(macro);
+                                }}
+                              >
+                                <span className="flex min-w-0 items-center gap-2">
+                                  {macro.shortcut && (
+                                    <span
+                                      // Shortcuts are typed sequences; keep
+                                      // them LTR in RTL locales.
+                                      dir="ltr"
+                                      className="border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]"
+                                    >
+                                      {macro.shortcut}
+                                    </span>
+                                  )}
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {macro.label}
+                                  </span>
+                                </span>
+                              </DropdownItem>
+                            )),
+                          ])}
+                      </DropdownSubmenu>
+                      <DropdownItem
+                        onClick={() => {
+                          setBlockMenuOpen(false);
+                          // Macro insertion restores the bookmarked
+                          // selection; point it at the menu's target block.
+                          if (blockTargetRangeRef.current) {
+                            savedRangeRef.current = blockTargetRangeRef.current;
+                          }
+                          setMacrosOpen(true);
+                          // The activated item unmounts with the menu; move
+                          // focus back AND apply the bookmark to the live
+                          // selection — a bare focus() would leave the old
+                          // caret live, and the editor's onBlur (fired when
+                          // the panel's search field takes focus) would then
+                          // re-save it over the menu's target.
+                          focusRestoringSelection();
+                        }}
+                      >
+                        {blockMenuLabels?.showMacroLibrary ??
+                          'Show macro library'}
+                      </DropdownItem>
+                      {/* The toolbar toggle is editor chrome, not a macro
+                          action — keep it visually apart. */}
+                      <DropdownSeparator />
+                    </>
                   )}
                   <DropdownItem
                     onClick={() => {

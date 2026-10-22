@@ -12,7 +12,7 @@ const meta: Meta<typeof RichTextArea> = {
       description: {
         component: `### What it's for
 
-**A textarea-like rich text surface.** \`RichTextArea\` looks like the auto-growing \`Textarea\` — bordered, one Input row tall, grows with content — but is \`RichTextEditor\` in chromeless mode underneath. The toolbar starts hidden; formatting is reached by typing (markdown block shortcuts are on by default: \`##\` + space → heading, \`-\` → bullet list, \`1.\` → numbered list, \`>\` → quote), from the Notion-style **block gutter menu** (hover a row for the \`+\` button, or Ctrl/Cmd+/), or by choosing "Show toolbar" from that menu. Pass \`macros\` and \`.shortcut\` + space expands dot phrases in place, with "Insert macro…" in the gutter menu docking the searchable \`MacroLibrary\` panel.
+**A textarea-like rich text surface.** \`RichTextArea\` looks like the auto-growing \`Textarea\` — bordered, one Input row tall, grows with content — but is \`RichTextEditor\` in chromeless mode underneath. The toolbar starts hidden; formatting is reached by typing (markdown block shortcuts are on by default: \`##\` + space → heading, \`-\` → bullet list, \`1.\` → numbered list, \`>\` → quote), from the Notion-style **block gutter menu** (hover a row for the \`+\` button, or Ctrl/Cmd+/), or by choosing "Show toolbar" from that menu. Pass \`macros\` and \`.shortcut\` + space expands dot phrases in place; the gutter menu gains an "Insert macro" flyout of every macro plus "Show macro library", docking the searchable \`MacroLibrary\` panel.
 
 **The value contract is RichTextEditor's: \`value\` / \`onChange\` carry HTML, not plain text.** That is the whole reason this is a separate component — grafting rich text onto \`Textarea\` would silently change what \`onChange\` delivers to form posts and native bindings.
 
@@ -68,7 +68,7 @@ The host owns the HTML string and is responsible for sanitising it before storag
         {
           type: 'composes with',
           target: 'editors-macrolibrary',
-          why: 'The macros prop enables .shortcut dot-phrase expansion and an "Insert macro…" gutter menu item that docks the MacroLibrary panel.',
+          why: 'The macros prop enables .shortcut dot-phrase expansion, an "Insert macro" gutter flyout, and a "Show macro library" item that docks the MacroLibrary panel.',
         },
       ],
     },
@@ -107,7 +107,7 @@ export const Basic: Story = {
 
 function WithMacrosExample() {
   const [value, setValue] = useState(
-    '<p>Exam reviewed. Type .c or .r then space, or hover a row and pick “Insert macro…”.</p>'
+    '<p>Exam reviewed. Type .c or .r then space, or hover a row and pick “Insert macro”.</p>'
   );
   return (
     <div className="max-w-2xl">
@@ -148,7 +148,7 @@ export const WithMacros: Story = {
     docs: {
       description: {
         story:
-          'With `macros`, typing a `.shortcut` + space expands it in place, and the gutter menu gains “Insert macro…”, docking the searchable MacroLibrary panel.',
+          'With `macros`, typing a `.shortcut` + space expands it in place, and the gutter menu gains an “Insert macro” flyout plus “Show macro library”, docking the searchable MacroLibrary panel.',
       },
     },
   },

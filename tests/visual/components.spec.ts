@@ -2296,7 +2296,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await page
       .locator('[data-slot="rich-text-editor-block-gutter"] button')
       .click();
-    await page.getByRole('menuitem', { name: 'Insert macro…' }).click();
+    await page.getByRole('menuitem', { name: 'Show macro library' }).click();
     await expect(editor).toHaveAttribute('data-macros-open', '');
     const editorBox = await editor.boundingBox();
     expect(editorBox!.height).toBeGreaterThanOrEqual(399);
