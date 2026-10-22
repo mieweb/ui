@@ -1087,7 +1087,7 @@ export const miewebUISafelist = [
   'resize-y',
   'resize-x',
   'resize',
-  // RichTextArea (ui#639) — chromeless RichTextEditor single-line baseline
+  // TextAreaRich (ui#639) — chromeless RichTextEditor single-line baseline
   // and the Textarea-matched focus ring on the wrapper.
   'min-h-[38px]',
   'focus-within:ring-2',

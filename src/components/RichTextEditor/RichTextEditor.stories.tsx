@@ -78,8 +78,8 @@ The host owns the HTML string and is responsible for sanitising it before storag
         },
         {
           type: 'alternative to',
-          target: 'editors-richtextarea',
-          why: 'RichTextArea packages this editor chromeless — hidden toolbar, markdown shortcuts, block gutter menu — in Textarea-matched chrome for comment-sized fields; RichTextEditor for full documents with the toolbar on.',
+          target: 'editors-textarearich',
+          why: 'TextAreaRich packages this editor chromeless — hidden toolbar, markdown shortcuts, block gutter menu — in Textarea-matched chrome for comment-sized fields; RichTextEditor for full documents with the toolbar on.',
         },
         {
           type: 'alternative to',

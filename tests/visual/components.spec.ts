@@ -2125,13 +2125,13 @@ test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
   });
 });
 
-test.describe('Visual Regression Tests - RichTextArea', () => {
-  const story = 'editors-richtextarea--basic';
+test.describe('Visual Regression Tests - TextAreaRich', () => {
+  const story = 'editors-textarearich--basic';
   const wrapperSel = '[data-slot="rich-text-editor"][data-chromeless]';
   const editorSel = '[contenteditable="true"]';
 
   for (const direction of ['ltr', 'rtl'] as const) {
-    test(`RichTextArea - Single-line start that auto-grows (${direction.toUpperCase()})`, async ({
+    test(`TextAreaRich - Single-line start that auto-grows (${direction.toUpperCase()})`, async ({
       page,
     }) => {
       await gotoStory(
@@ -2146,7 +2146,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
       const restBox = await wrapper.boundingBox();
       expect(Math.abs(restBox!.height - 40)).toBeLessThanOrEqual(1);
       await expect(page).toHaveScreenshot(
-        `richtextarea-single-line-${direction}.png`
+        `textarearich-single-line-${direction}.png`
       );
       // Typing a markdown shortcut formats without any toolbar, and the
       // surface grows with the content instead of scrolling.
@@ -2164,7 +2164,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     });
   }
 
-  test('RichTextArea - Grown content with the gutter menu available', async ({
+  test('TextAreaRich - Grown content with the gutter menu available', async ({
     page,
   }) => {
     await gotoStory(page, story);
@@ -2183,10 +2183,10 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await expect
       .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
       .toBe('1');
-    await expect(page).toHaveScreenshot('richtextarea-grown.png');
+    await expect(page).toHaveScreenshot('textarearich-grown.png');
   });
 
-  test('RichTextArea - Gutter trigger follows the field when content is cleared', async ({
+  test('TextAreaRich - Gutter trigger follows the field when content is cleared', async ({
     page,
   }) => {
     // Hovering a lower row parks the trigger beside it; clearing the content
@@ -2235,7 +2235,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await within();
   });
 
-  test('RichTextArea - Narrow empty field keeps the placeholder to one line', async ({
+  test('TextAreaRich - Narrow empty field keeps the placeholder to one line', async ({
     page,
   }) => {
     // Chromeless surfaces have no wrapper clipping; a long hint must
@@ -2254,7 +2254,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     ).toBe('ellipsis');
   });
 
-  test('RichTextArea - Condensed gutter trigger stays inside the empty field', async ({
+  test('TextAreaRich - Condensed gutter trigger stays inside the empty field', async ({
     page,
   }) => {
     await gotoStory(page, story, { globals: 'density:condensed' });
@@ -2280,15 +2280,15 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
       .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
       .toBe('1');
     await within();
-    await expect(page).toHaveScreenshot('richtextarea-condensed.png');
+    await expect(page).toHaveScreenshot('textarearich-condensed.png');
   });
 
-  test('RichTextArea - Condensed macro panel keeps its working height', async ({
+  test('TextAreaRich - Condensed macro panel keeps its working height', async ({
     page,
   }) => {
     // The compact condensed minimum must release when the macro panel —
     // absolutely stretched over the editor body — needs md working space.
-    await gotoStory(page, 'editors-richtextarea--with-macros', {
+    await gotoStory(page, 'editors-textarearich--with-macros', {
       globals: 'density:condensed',
     });
     const editor = page.locator(editorSel);
@@ -2303,6 +2303,6 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await expect(
       page.getByRole('button', { name: 'Cardio — WNL' })
     ).toBeVisible();
-    await expect(page).toHaveScreenshot('richtextarea-condensed-macros.png');
+    await expect(page).toHaveScreenshot('textarearich-condensed-macros.png');
   });
 });

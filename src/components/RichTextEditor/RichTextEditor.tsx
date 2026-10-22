@@ -168,7 +168,7 @@ export interface RichTextEditorProps {
    * Textarea-like surface: removes the wrapper border/radius and starts the
    * editable at a single Input-row height that auto-grows with content
    * (matching `Textarea`'s `md` metrics). The host supplies the chrome —
-   * `RichTextArea` is the packaged pairing. Defaults to false.
+   * `TextAreaRich` is the packaged pairing. Defaults to false.
    */
   chromeless?: boolean;
   /** Accessible label for the editable region. */
