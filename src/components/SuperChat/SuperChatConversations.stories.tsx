@@ -40,6 +40,8 @@ const meta: Meta<typeof SuperChatConversations> = {
 
 **The SuperChat conversation switcher: a sidebar listing host-owned conversations, newest activity first, with unread badges, last-message preview and an optional "+" action.** \`SuperChatConversations\` takes \`conversations: SuperChatConversation[]\` and sorts them by \`lastActivity\` (falling back to the latest message \`time\`). Selection is controlled with \`activeConversationId\` or uncontrolled with \`defaultActiveConversationId\` (default: the first conversation); when the requested id disappears the first conversation is highlighted instead. \`onConversationOpened(conversation)\` fires on click; \`onNewConversation\` adds the "New conversation" button. It renders an \`<aside aria-label="Conversations">\` (\`data-slot="superchat-conversations"\`) with a \`role="list"\` of \`role="listitem"\` buttons, the active one marked \`aria-current="true"\`; the unread count carries an \`sr-only\` "unread messages" suffix. Fixed \`w-64\` with a trailing border; override with \`className\`.
 
+A conversation with \`children\` (sub-conversations such as date ranges or filtered slices of it) renders as an accordion header: opening it shows all of its messages and expands its children (\`aria-expanded\`, one header open at a time), and each child opens just its own \`thread\`. Children keep the given order and show their message count. See the Inbox **Nested conversations** story, and [DataVis Chat](?path=/docs/grids-datavis-chat--docs), which nests each room's date buckets this way.
+
 ### Use it when
 
 - You are composing a **custom inbox layout** with \`SuperChat\` — a three-column page, a drawer, a list that lives in a different region than the panel — and want the same list \`SuperChatInbox\` uses.

@@ -769,6 +769,12 @@ export const miewebUISafelist = [
   'focus-visible:ring-primary-500',
   'dark:hover:bg-neutral-700',
   'dark:hover:text-neutral-100',
+  // SuperChat nested conversations (accordion chevron + indented children).
+  'rotate-90',
+  'rtl:rotate-90',
+  'ms-5',
+  'space-y-0.5',
+  'py-1.5',
   // SuperChat mermaid diagram wrapper — arbitrary variants applied to the
   // injected <svg> so the diagram sizes naturally instead of collapsing.
   '[&_svg]:h-auto',

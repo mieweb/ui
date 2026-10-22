@@ -227,6 +227,12 @@ export interface SuperChatConversation {
   participants: Participant[];
   /** Ordered thread items. */
   thread: SuperChatMessage[];
+  /**
+   * Nested sub-conversations, e.g. date-range slices of this conversation. The
+   * conversation list renders them as an accordion under this entry (in the
+   * given order), and opening one shows its own `thread` in the panel.
+   */
+  children?: SuperChatConversation[];
 }
 
 /** Builds an href for a reference item (e.g. doc/rx/appt deep link). */

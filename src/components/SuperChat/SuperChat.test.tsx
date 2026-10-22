@@ -1813,6 +1813,148 @@ describe('SuperChatInbox', () => {
     await user.click(screen.getByRole('button', { name: /Follow-up/ }));
     expect(panel().getByText('second conversation')).toBeInTheDocument();
   });
+
+  describe('nested children (accordion)', () => {
+    const today: SuperChatConversation['thread'][number] = {
+      id: 'n1',
+      participantId: 'u1',
+      text: 'sent today',
+      time: '2026-06-07T09:00:00Z',
+    };
+    const older: SuperChatConversation['thread'][number] = {
+      id: 'n2',
+      participantId: 'u1',
+      text: 'sent long ago',
+      time: '2025-01-07T09:00:00Z',
+    };
+    const participants = [
+      { id: 'u1', kind: 'human' as const, name: 'Alice Reyes' },
+    ];
+    const rooms: SuperChatConversation[] = [
+      {
+        id: 'room',
+        title: 'Bed 12',
+        participants,
+        thread: [older, today],
+        children: [
+          { id: 'room:today', title: 'Today', participants, thread: [today] },
+          { id: 'room:older', title: 'Older', participants, thread: [older] },
+        ],
+      },
+      {
+        id: 'other',
+        title: 'Pharmacy',
+        participants,
+        thread: [{ ...today, id: 'o1', text: 'pharmacy note' }],
+      },
+    ];
+
+    function renderRooms() {
+      return render(
+        <div style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={rooms}
+            currentParticipantId="u1"
+            defaultActiveConversationId="other"
+          />
+        </div>
+      );
+    }
+
+    it('opens a header with all messages and nests its children', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const { container } = renderRooms();
+      const header = screen.getByRole('button', { name: /^Bed 12/ });
+      expect(header).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByRole('button', { name: /^Today/ })).toBeNull();
+
+      await user.click(header);
+      expect(header).toHaveAttribute('aria-expanded', 'true');
+      expect(header).toHaveAttribute('aria-current', 'true');
+      const panel = within(
+        container.querySelector('[data-slot="superchat"]') as HTMLElement
+      );
+      expect(panel.getByText('sent today')).toBeInTheDocument();
+      expect(panel.getByText('sent long ago')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Today 1 messages' })
+      ).toBeInTheDocument();
+
+      // Clicking the active header again collapses it.
+      await user.click(header);
+      expect(header).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByRole('button', { name: /^Today/ })).toBeNull();
+    });
+
+    it('opens a child with only its messages and the parent in the title', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const { container } = renderRooms();
+      await user.click(screen.getByRole('button', { name: /^Bed 12/ }));
+      const child = screen.getByRole('button', { name: 'Older 1 messages' });
+      await user.click(child);
+
+      expect(child).toHaveAttribute('aria-current', 'true');
+      const panelEl = container.querySelector(
+        '[data-slot="superchat"]'
+      ) as HTMLElement;
+      const panel = within(panelEl);
+      expect(panel.getByText('sent long ago')).toBeInTheDocument();
+      expect(panel.queryByText('sent today')).toBeNull();
+      expect(
+        panel.getByRole('heading', { name: 'Bed 12 · Older' })
+      ).toBeInTheDocument();
+      // The parent stays expanded but is no longer the current item.
+      const header = screen.getByRole('button', { name: /^Bed 12/ });
+      expect(header).toHaveAttribute('aria-expanded', 'true');
+      expect(header).not.toHaveAttribute('aria-current');
+    });
+
+    it('keeps only one header open at a time', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const withTwoRooms = [
+        ...rooms,
+        {
+          id: 'room2',
+          title: 'Bed 14',
+          participants,
+          thread: [{ ...older, id: 'r2' }],
+          children: [
+            {
+              id: 'room2:older',
+              title: 'Older',
+              participants,
+              thread: [{ ...older, id: 'r2' }],
+            },
+          ],
+        },
+      ];
+      render(
+        <div style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={withTwoRooms}
+            currentParticipantId="u1"
+            defaultActiveConversationId="other"
+          />
+        </div>
+      );
+      const bed12 = screen.getByRole('button', { name: /^Bed 12/ });
+      const bed14 = screen.getByRole('button', { name: /^Bed 14/ });
+      await user.click(bed12);
+      await user.click(bed14);
+      expect(bed14).toHaveAttribute('aria-expanded', 'true');
+      expect(bed12).toHaveAttribute('aria-expanded', 'false');
+
+      // Opening a plain entry closes the accordion.
+      await user.click(screen.getByRole('button', { name: /^Pharmacy/ }));
+      expect(bed14).toHaveAttribute('aria-expanded', 'false');
+    });
+  });
 });
 
 describe('SuperChat composer options', () => {

@@ -498,6 +498,12 @@ module.exports = {
     'dark:text-neutral-300',
     'dark:hover:bg-neutral-700',
     'dark:hover:text-neutral-100',
+    // SuperChat nested conversations (accordion chevron + indented children).
+    'rotate-90',
+    'rtl:rotate-90',
+    'ms-5',
+    'space-y-0.5',
+    'py-1.5',
     'text-[11px]',
     'text-[13px]',
     'px-3.5',
