@@ -228,7 +228,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
 
     await page.locator("[data-slot='chat-composer-add-button']").click();
     const dockToggle = page.getByRole('menuitemcheckbox', {
-      name: 'Dock as caption ribbon',
+      name: 'Dock capture ribbon',
     });
     await expect(dockToggle).toHaveAttribute('aria-checked', 'false');
     await dockToggle.click();

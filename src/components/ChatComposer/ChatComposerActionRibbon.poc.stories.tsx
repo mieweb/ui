@@ -1,6 +1,6 @@
 /**
  * POC (quick & dirty): every capture source in one `+` menu on ChatComposer
- * (full labels), with a "Dock as caption ribbon" toggle that pins them as
+ * (full labels), with a "Dock capture ribbon" toggle that pins them as
  * icon-only buttons with tooltips, grouped:
  * `Record: [Audio] [Screen]  Capture: [Image] [Screen] [File] [Document] …`
  * attached to the top edge of the input.
@@ -587,7 +587,7 @@ function ComposerWithCaptureRibbon({
     })),
     {
       id: 'dock',
-      label: 'Dock as caption ribbon',
+      label: 'Dock capture ribbon',
       icon: <Pin className={iconClass} aria-hidden="true" />,
       checked: docked,
       onSelect: () => setDocked((d) => !d),
@@ -701,7 +701,7 @@ const meta = {
       description: {
         component: `### What it's for
 
-**POC.** Every capture source in one \`+\` menu on [ChatComposer](?path=/docs/chat-chatcomposer--docs) (full labels), plus a **Dock as caption ribbon** toggle that pins them to the top edge of the input as icon-only buttons with tooltips, grouped as \`Record: [Audio] [Screen]  Capture: [Image] [Screen] [File] [Document]\`. Undock from the pin at the ribbon's end.
+**POC.** Every capture source in one \`+\` menu on [ChatComposer](?path=/docs/chat-chatcomposer--docs) (full labels), plus a **Dock capture ribbon** toggle that pins them to the top edge of the input as icon-only buttons with tooltips, grouped as \`Record: [Audio] [Screen]  Capture: [Image] [Screen] [File] [Document]\`. Undock from the pin at the ribbon's end.
 
 ### Use it when
 
@@ -770,7 +770,7 @@ Pure composition over \`ChatComposer\`'s public API — \`addMenuItems\`, \`micS
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Everything lives under `+`; pick "Dock as caption ribbon" to pin it. */
+/** Everything lives under `+`; pick "Dock capture ribbon" to pin it. */
 export const MenuOnly: Story = { args: { defaultDocked: false } };
 
 /** Ribbon docked to the input. Document is hidden: no native scanner on the web. */
