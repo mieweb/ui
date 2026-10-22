@@ -22,10 +22,31 @@ import {
   attributeSegments,
   mergeTurns,
   inferSpeakerRoles,
+  speakerIdForCluster,
+  type AnonymousSegmentAttribution,
+  type AnonymousSpeakerActivity,
   type DiarizedSegment,
+  type DiarizedAttribution,
+  type TranscriptSegment,
 } from '../diarize';
 
 const SR = 16000; // decodeTo16kMono / transcribeSegments work in 16 kHz seconds
+
+export interface ExperimentalDiarizationInput {
+  segments: TranscriptSegment[];
+  samples: Float32Array;
+  sampleRate: number;
+  embeddedSegments: { idx: number; emb: Float32Array }[];
+  options: {
+    threshold: number;
+    maxSpeakers?: number;
+    minSegmentSeconds: number;
+  };
+}
+
+export type ExperimentalDiarizer = (
+  input: ExperimentalDiarizationInput
+) => AnonymousSegmentAttribution[] | Promise<AnonymousSegmentAttribution[]>;
 
 export interface UseDiarizationOptions {
   /** Cluster merge cutoff (cosine distance). Higher → fewer speakers (merges more). Default 0.65. */
@@ -50,6 +71,10 @@ export interface UseDiarizationOptions {
    *  (`useVoiceSetup` / `VoiceManager`), or scoped users get "Speaker N" (or another user's labels)
    *  from the legacy shared store. Omit for the original unscoped store. */
   voiceprintNamespace?: string;
+  /** [Experimental] Swap the default clusterer for a recorded-clip diarizer adapter (for example Nemotron).
+   *  The adapter still runs inside this hook's namespace-guarded flow, while enrolled-name anchoring,
+   *  optional role inference, and result publication remain here. */
+  experimentalDiarizer?: ExperimentalDiarizer;
 }
 
 export interface UseDiarizationResult {
@@ -75,6 +100,87 @@ function windowFor(
   return b > a ? samples.subarray(a, b) : samples.subarray(0, 0);
 }
 
+function defaultAttributions(
+  segments: TranscriptSegment[],
+  clusters: number[]
+): AnonymousSegmentAttribution[] {
+  return segments.map((segment, i) => {
+    const speakerId = speakerIdForCluster(clusters[i] ?? 0);
+    return {
+      speakerId,
+      attribution: 'single',
+      confidence: 1,
+      speakerActivities: [
+        {
+          speakerId,
+          start: segment.start,
+          end: segment.end,
+          confidence: 1,
+        },
+      ],
+    };
+  });
+}
+
+function speakerActivitiesForSegment(
+  segment: TranscriptSegment,
+  primarySpeakerId: string,
+  speakerActivities: AnonymousSpeakerActivity[] | undefined,
+  confidence?: number
+): AnonymousSpeakerActivity[] {
+  if (!speakerActivities?.length) {
+    return [
+      {
+        speakerId: primarySpeakerId,
+        start: segment.start,
+        end: segment.end,
+        confidence,
+      },
+    ];
+  }
+  const normalized = speakerActivities.map((activity) => ({
+    speakerId: activity.speakerId.trim(),
+    start: Math.min(
+      segment.end,
+      Math.max(segment.start, Math.min(activity.start, activity.end))
+    ),
+    end: Math.max(
+      Math.min(
+        segment.end,
+        Math.max(segment.start, Math.max(activity.start, activity.end))
+      ),
+      Math.min(
+        segment.end,
+        Math.max(segment.start, Math.min(activity.start, activity.end))
+      )
+    ),
+    confidence: activity.confidence,
+  }));
+  const nonBlank = normalized.filter(
+    (activity) => activity.speakerId.length > 0
+  );
+  return nonBlank.some((activity) => activity.speakerId === primarySpeakerId)
+    ? nonBlank
+    : [
+        {
+          speakerId: primarySpeakerId,
+          start: segment.start,
+          end: segment.end,
+          confidence,
+        },
+        ...nonBlank,
+      ];
+}
+
+function attributionForSegment(
+  attribution: DiarizedAttribution | undefined,
+  speakerActivities: AnonymousSpeakerActivity[]
+): DiarizedAttribution {
+  if (attribution) return attribution;
+  if (speakerActivities.length > 1) return 'overlap';
+  return 'single';
+}
+
 export function useDiarization(
   options: UseDiarizationOptions = {}
 ): UseDiarizationResult {
@@ -87,6 +193,7 @@ export function useDiarization(
     enabled = true,
     minSegmentSeconds = 1.0,
     voiceprintNamespace,
+    experimentalDiarizer,
   } = options;
   // loads the TitaNet runtime (only when enabled); scoped so identify() anchors to the right store
   const sv = useSpeakerVerify({ enabled, voiceprintNamespace });
@@ -143,39 +250,103 @@ export function useDiarization(
         if (!embedded.length)
           throw new Error('no embeddable segments (runtime not ready?)');
 
-        // 3. cluster the embedded segments
-        const clusterOf = clusterEmbeddings(
-          embedded.map((e) => e.emb),
-          { threshold, maxSpeakers }
-        );
-        // map: original segment index → cluster id (nearest kept segment for dropped ones)
-        const segCluster = new Array<number>(segments.length).fill(-1);
-        embedded.forEach((e, k) => (segCluster[e.idx] = clusterOf[k]));
-        for (let i = 0; i < segments.length; i++) {
-          if (segCluster[i] !== -1) continue;
-          // borrow the previous (or next) embedded segment's cluster for continuity
-          let j = i - 1;
-          while (j >= 0 && segCluster[j] === -1) j--;
-          if (j < 0) {
-            j = i + 1;
-            while (j < segments.length && segCluster[j] === -1) j++;
+        let anonymous: AnonymousSegmentAttribution[];
+        if (experimentalDiarizer) {
+          anonymous = await experimentalDiarizer({
+            segments,
+            samples,
+            sampleRate: SR,
+            embeddedSegments: embedded,
+            options: { threshold, maxSpeakers, minSegmentSeconds },
+          });
+          assertNamespace();
+          if (anonymous.length !== segments.length) {
+            throw new Error(
+              `experimental diarizer returned ${anonymous.length} segments for ${segments.length} transcript segments`
+            );
           }
-          segCluster[i] =
-            j >= 0 && j < segments.length && segCluster[j] !== -1
-              ? segCluster[j]
-              : 0;
+        } else {
+          // 3. cluster the embedded segments
+          const clusterOf = clusterEmbeddings(
+            embedded.map((e) => e.emb),
+            { threshold, maxSpeakers }
+          );
+          // map: original segment index → cluster id (nearest kept segment for dropped ones)
+          const segCluster = new Array<number>(segments.length).fill(-1);
+          embedded.forEach((e, k) => (segCluster[e.idx] = clusterOf[k]));
+          for (let i = 0; i < segments.length; i++) {
+            if (segCluster[i] !== -1) continue;
+            // borrow the previous (or next) embedded segment's cluster for continuity
+            let j = i - 1;
+            while (j >= 0 && segCluster[j] === -1) j--;
+            if (j < 0) {
+              j = i + 1;
+              while (j < segments.length && segCluster[j] === -1) j++;
+            }
+            segCluster[i] =
+              j >= 0 && j < segments.length && segCluster[j] !== -1
+                ? segCluster[j]
+                : 0;
+          }
+          anonymous = defaultAttributions(segments, segCluster);
         }
 
+        const speakerStartById = new Map<string, number>();
+        const registerSpeakerId = (speakerId: string, start: number) => {
+          const id = speakerId.trim();
+          if (!id) throw new Error('diarization returned an empty speaker id');
+          speakerStartById.set(
+            id,
+            Math.min(speakerStartById.get(id) ?? Infinity, start)
+          );
+          return id;
+        };
+        const normalized = anonymous.map((entry, i) => {
+          const speakerId = registerSpeakerId(
+            entry.speakerId,
+            segments[i].start
+          );
+          const speakerActivities = speakerActivitiesForSegment(
+            segments[i],
+            speakerId,
+            entry.speakerActivities,
+            entry.confidence
+          ).map((activity) => ({
+            ...activity,
+            speakerId: registerSpeakerId(activity.speakerId, activity.start),
+          }));
+          return {
+            speakerId,
+            speakerActivities,
+            attribution: attributionForSegment(
+              entry.attribution,
+              speakerActivities
+            ),
+            confidence: entry.confidence,
+            provisional: entry.provisional,
+          };
+        });
+        const orderedSpeakerIds = [...speakerStartById.entries()]
+          .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))
+          .map(([speakerId]) => speakerId);
+        const clusterBySpeakerId = new Map(
+          orderedSpeakerIds.map((speakerId, cluster) => [speakerId, cluster])
+        );
+        const segCluster = normalized.map(
+          (entry) => clusterBySpeakerId.get(entry.speakerId) ?? 0
+        );
+
         // 4. anchor each cluster to an enrolled voice (identify the longest segment in the cluster)
-        // reduce, not Math.max(0, ...clusterOf): spreading a large array throws RangeError on long visits
-        const clusterCount = clusterOf.reduce((m, x) => (x > m ? x : m), 0) + 1;
+        // reduce, not Math.max(0, ...segCluster): spreading a large array throws RangeError on long visits
+        const clusterCount =
+          segCluster.reduce((m, x) => (x > m ? x : m), 0) + 1;
         const names: Record<number, string> = {};
         for (let c = 0; c < clusterCount; c++) {
           // longest embedded segment in this cluster = the most reliable to identify
           let repIdx = -1;
           let repLen = -1;
-          embedded.forEach((e, k) => {
-            if (clusterOf[k] !== c) return;
+          embedded.forEach((e) => {
+            if (segCluster[e.idx] !== c) return;
             const len = windows[e.idx].length;
             if (len > repLen) {
               repLen = len;
@@ -189,7 +360,30 @@ export function useDiarization(
 
         // 5. attribute → (optionally) LLM role inference for unknowns → (optionally) merge turns
         const labels = labelClusters(segCluster, names);
-        let out = attributeSegments(segments, segCluster, labels);
+        let out: DiarizedSegment[] = attributeSegments(
+          segments,
+          segCluster,
+          labels
+        ).map((segment, i) => {
+          const entry = normalized[i];
+          const speakerActivities = entry.speakerActivities.map((activity) => {
+            const cluster =
+              clusterBySpeakerId.get(activity.speakerId) ?? segment.cluster;
+            return {
+              ...activity,
+              cluster,
+              speaker: labels[cluster] ?? `Speaker ${cluster + 1}`,
+            };
+          });
+          return {
+            ...segment,
+            speakerId: entry.speakerId,
+            speakerActivities,
+            attribution: entry.attribution,
+            confidence: entry.confidence ?? segment.confidence,
+            provisional: entry.provisional,
+          };
+        });
         if (inferRoles && isOzwellConfigured()) {
           try {
             out = await inferSpeakerRoles(out, (p) => askOzwell(p));
@@ -216,6 +410,7 @@ export function useDiarization(
       merge,
       inferRoles,
       minSegmentSeconds,
+      experimentalDiarizer,
     ]
   );
 
