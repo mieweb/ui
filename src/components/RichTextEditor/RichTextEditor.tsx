@@ -29,6 +29,7 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownSeparator,
+  DropdownSubmenu,
 } from '../Dropdown';
 import {
   processDictation,
@@ -69,8 +70,10 @@ export interface RichTextEditorBlockMenuLabels {
   numberedList?: string;
   /** "Quote" menu item. */
   quote?: string;
-  /** "Insert macro…" menu item (shown when `macros` is provided). */
+  /** "Insert macro" submenu parent (shown when `macros` is provided). */
   insertMacro?: string;
+  /** "Show macro library" menu item (shown when `macros` is provided). */
+  showMacroLibrary?: string;
   /** Toolbar toggle item while the toolbar is hidden. */
   showToolbar?: string;
   /** Toolbar toggle item while the toolbar is visible. */
@@ -1339,27 +1342,79 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                     </DropdownItem>
                   ))}
                   <DropdownSeparator />
-                  {hasMacros && (
-                    <DropdownItem
-                      onClick={() => {
-                        setBlockMenuOpen(false);
-                        // Macro insertion restores the bookmarked selection;
-                        // point it at the menu's target block.
-                        if (blockTargetRangeRef.current) {
-                          savedRangeRef.current = blockTargetRangeRef.current;
-                        }
-                        setMacrosOpen(true);
-                        // The activated item unmounts with the menu; move
-                        // focus back AND apply the bookmark to the live
-                        // selection — a bare focus() would leave the old
-                        // caret live, and the editor's onBlur (fired when
-                        // the panel's search field takes focus) would then
-                        // re-save it over the menu's target.
-                        focusRestoringSelection();
-                      }}
-                    >
-                      {blockMenuLabels?.insertMacro ?? 'Insert macro…'}
-                    </DropdownItem>
+                  {hasMacros && macros && (
+                    <>
+                      <DropdownSubmenu
+                        label={blockMenuLabels?.insertMacro ?? 'Insert macro'}
+                      >
+                        {macros.flatMap((group) => [
+                          // Group headings only earn their row when there is
+                          // more than one group to tell apart.
+                          ...(macros.length > 1
+                            ? [
+                                <DropdownLabel key={`${group.id}-label`}>
+                                  {group.label}
+                                </DropdownLabel>,
+                              ]
+                            : []),
+                          ...group.macros.map((macro) => (
+                            <DropdownItem
+                              key={`${group.id}-${macro.id}`}
+                              onClick={() => {
+                                setBlockMenuOpen(false);
+                                // Insertion lands at the menu's target
+                                // block, mirroring the panel flow.
+                                if (blockTargetRangeRef.current) {
+                                  savedRangeRef.current =
+                                    blockTargetRangeRef.current;
+                                }
+                                insertMacro(macro);
+                              }}
+                            >
+                              <span className="flex min-w-0 items-center gap-2">
+                                {macro.shortcut && (
+                                  <span
+                                    // Shortcuts are typed sequences; keep
+                                    // them LTR in RTL locales.
+                                    dir="ltr"
+                                    className="border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]"
+                                  >
+                                    {macro.shortcut}
+                                  </span>
+                                )}
+                                <span className="min-w-0 flex-1 truncate">
+                                  {macro.label}
+                                </span>
+                              </span>
+                            </DropdownItem>
+                          )),
+                        ])}
+                      </DropdownSubmenu>
+                      <DropdownItem
+                        onClick={() => {
+                          setBlockMenuOpen(false);
+                          // Macro insertion restores the bookmarked
+                          // selection; point it at the menu's target block.
+                          if (blockTargetRangeRef.current) {
+                            savedRangeRef.current = blockTargetRangeRef.current;
+                          }
+                          setMacrosOpen(true);
+                          // The activated item unmounts with the menu; move
+                          // focus back AND apply the bookmark to the live
+                          // selection — a bare focus() would leave the old
+                          // caret live, and the editor's onBlur (fired when
+                          // the panel's search field takes focus) would then
+                          // re-save it over the menu's target.
+                          focusRestoringSelection();
+                        }}
+                      >
+                        {blockMenuLabels?.showMacroLibrary ??
+                          'Show macro library'}
+                      </DropdownItem>
+                      {/* The toolbar toggle is editor chrome, not a macro
+                          action — keep it visually apart. */}
+                      <DropdownSeparator />
+                    </>
                   )}
                   <DropdownItem
                     onClick={() => {

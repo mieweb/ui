@@ -13,7 +13,7 @@ const meta: Meta<typeof MacroLibrary> = {
       description: {
         component: `### What it's for
 
-**A searchable, grouped panel of reusable text snippets ("macros") that inserts into a partner editor.** \`MacroLibrary\` renders app-supplied \`groups\` (\`{ id, label, kind?, macros: [{ id, label, content, shortcut?, keywords? }] }\`) as collapsible sections with a search \`Input\` that matches label, shortcut identifier (\`.b\`, \`.c\`), keywords and content — shortcut-prefix matches rank first. Each row shows the label, an optional monospace shortcut chip and a two-line content preview; when the preview truncates, a "more" link revealed on hover/focus expands the full content before committing. Groups with \`kind: 'previous'\` (e.g. values from earlier encounters) get a distinct history icon and amber shortcut chips so they can't be mistaken for the default library. Selecting a row calls \`onSelect(macro)\` — the component holds **no clinical content and performs no insertion itself**; the host editor owns both. \`targetLabel\` names the destination ("Insert into …") so the association is explicit, \`onClose\` adds a close button and Escape handling, and \`onCreateMacro\` reveals a "Save as macro" footer for user-defined macros. Keyboard: ArrowDown from search enters the list, arrows rove across rows, ArrowUp from the first row returns to search.
+**A searchable, grouped panel of reusable text snippets ("macros") that inserts into a partner editor.** \`MacroLibrary\` renders app-supplied \`groups\` (\`{ id, label, kind?, macros: [{ id, label, content, shortcut?, keywords? }] }\`) as collapsible sections with a search \`Input\` that matches label, shortcut identifier (\`.b\`, \`.c\`), keywords and content — shortcut-prefix matches rank first. Each row shows a single line: an optional monospace shortcut chip and the label — the content itself is inserted, not previewed. Groups with \`kind: 'previous'\` (e.g. values from earlier encounters) get a distinct history icon and amber shortcut chips so they can't be mistaken for the default library. Selecting a row calls \`onSelect(macro)\` — the component holds **no clinical content and performs no insertion itself**; the host editor owns both. \`targetLabel\` names the destination ("Insert into …") so the association is explicit, \`onClose\` adds a close button and Escape handling, and \`onCreateMacro\` reveals a "Save as macro" footer for user-defined macros. Keyboard: ArrowDown from search enters the list, arrows rove across rows, ArrowUp from the first row returns to search.
 
 ### Use it when
 
@@ -58,8 +58,8 @@ const groups: MacroGroup[] = [
 
 - The panel is **presentation + selection only**: no persistence, no macro editing, no server search. \`onCreateMacro\` just notifies the host — building the save flow is the app's job.
 - Search is case-insensitive substring matching with shortcut-prefix ranking; there is no fuzzy matching or highlighting of matched text.
-- Accessibility: rows are real \`<button>\`s with roving arrow-key focus (not a \`listbox\`); group headers expose \`aria-expanded\`; the search input is labelled and \`aria-controls\` the list; previews are \`line-clamp-2\` with a "more" toggle (rendered only when content truncates; revealed on row hover or keyboard focus) whose \`aria-label\` names the macro. Collapse state is ignored while searching so matches never hide.
-- Content is treated as plain text (\`whitespace-pre-line\` in the peek); HTML in \`content\` is not rendered here — the inserting editor decides how to handle newlines.
+- Accessibility: rows are real \`<button>\`s with roving arrow-key focus (not a \`listbox\`); group headers expose \`aria-expanded\`; the search input is labelled and \`aria-controls\` the list. Collapse state is ignored while searching so matches never hide.
+- Rows show only the label and shortcut — there is no content preview or expansion, so writers must know macros by name (search does match content text). HTML in \`content\` is not rendered here — the inserting editor decides how to handle newlines.
 - Theming: \`bg-muted\`, \`border-border\`, \`text-muted-foreground\`, amber \`warning\` tokens for previous-value chips. Depends on \`Button\`, \`Input\`, \`lucide-react\`. Entry \`@mieweb/ui\`.`,
       },
     },
@@ -74,7 +74,7 @@ const groups: MacroGroup[] = [
         {
           type: 'composes with',
           target: 'editors-richtextarea',
-          why: 'RichTextArea forwards its macros prop to the underlying RichTextEditor; the gutter menu’s “Insert macro…” docks this panel beside the textarea-like surface.',
+          why: 'RichTextArea forwards its macros prop to the underlying RichTextEditor; the gutter menu’s “Show macro library” docks this panel beside the textarea-like surface.',
         },
         {
           type: 'uses',
