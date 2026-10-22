@@ -109,7 +109,7 @@ const meta: Meta<typeof SuperChatInbox> = {
       description: {
         component: `### What it's for
 
-**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
+**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Conversations may nest \`children\` (e.g. date ranges or filtered slices); the list shows them as an accordion under their parent, and opening a child shows only its \`thread\`, titled *Parent · Child* — see the **Nested conversations** story. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
 
 Messages can also carry explicit \`media: SuperChatMediaAttachment[]\` records (stable attachment ID, kind and source, with optional title/caption/poster). The thread opens by default. Press **Play** on an attachment to open that clip in the media feed; **Back to conversation** returns to the same reading position and draft. There is no header view toggle. \`view\` / \`onViewChange\` let the host control this navigation, and \`defaultView\` supplies the initial choice. The media view composes [MediaFeed](?path=/docs/media-mediafeed--docs), derives items through \`getConversationMediaItems\`, and retains the conversation header and composer. Both views address the same messages and participants. \`mediaFeedProps\` supplies feed playback configuration, labels, custom media and action slots; \`mediaLabels\` localizes the return control and attachment actions. Attachment upload and persistence still belong to the host. Open the **Media Conversation** story for a local video/image example.
 
@@ -636,4 +636,57 @@ export const MediaConversation: Story = {
     },
   },
   render: () => <MediaConversationDemo />,
+};
+
+// Filtered slices of the rich conversation, nested under it as children.
+const nestedConversation: SuperChatConversation = {
+  ...richConversation,
+  children: [
+    {
+      id: `${richConversation.id}:agents`,
+      title: 'Agent messages',
+      participants: richConversation.participants,
+      thread: richConversation.thread.filter(
+        (m) =>
+          richConversation.participants.find((p) => p.id === m.participantId)
+            ?.kind === 'agent'
+      ),
+    },
+    {
+      id: `${richConversation.id}:team`,
+      title: 'Care team messages',
+      participants: richConversation.participants,
+      thread: richConversation.thread.filter(
+        (m) =>
+          richConversation.participants.find((p) => p.id === m.participantId)
+            ?.kind === 'human'
+      ),
+    },
+  ],
+};
+
+export const NestedConversations: Story = {
+  name: 'Nested conversations',
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The first conversation has children — filtered slices of its thread. Its list entry is an accordion header: opening it shows every message and expands the slices; opening a slice shows only those messages, titled “Parent · Slice”. Opening another entry closes the accordion. DataVis Chat uses the same model to nest each room’s date buckets (Today, Earlier this week, …).',
+      },
+    },
+  },
+  args: {
+    conversations: [nestedConversation, secondConversation],
+    currentParticipantId: 'u1',
+    renderPlugins: [
+      createCodePlugin(),
+      createMathPlugin(),
+      createGenUIPlugin(registry),
+      createMermaidPlugin(),
+      createNitroTablePlugin(),
+    ],
+    readOnly: true,
+    className: 'w-full',
+  },
 };

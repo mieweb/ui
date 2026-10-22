@@ -10,6 +10,8 @@ import * as React from 'react';
 import { cva } from 'class-variance-authority';
 import {
   Check as CheckIcon,
+  ChevronDown as ChevronDownIcon,
+  ChevronRight as ChevronRightIcon,
   Clipboard as ClipboardIcon,
   Ellipsis as EllipsisIcon,
   Pencil as PencilIcon,
@@ -53,6 +55,25 @@ export function lastActivityOf(c: SuperChatConversation): number {
   if (c.lastActivity) return new Date(c.lastActivity).getTime();
   const last = lastMessageByTime(c.thread);
   return last ? new Date(last.time).getTime() : 0;
+}
+
+/**
+ * Find a conversation by id among top-level conversations and their nested
+ * `children`, returning it with its parent (if nested).
+ */
+export function findConversation(
+  conversations: SuperChatConversation[],
+  id: string | undefined
+):
+  | { conversation: SuperChatConversation; parent?: SuperChatConversation }
+  | undefined {
+  if (id === undefined) return undefined;
+  for (const conversation of conversations) {
+    if (conversation.id === id) return { conversation };
+    const child = conversation.children?.find((c) => c.id === id);
+    if (child) return { conversation: child, parent: conversation };
+  }
+  return undefined;
 }
 
 /** Compute mentioned participant ids from `@Name` tokens in the draft. */
@@ -654,6 +675,17 @@ interface MessageRowProps {
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
   mediaRetryLabel?: string;
+  /**
+   * Threaded rendering. Forces left alignment (so indentation reads as a tree)
+   * and enables the reply-collapse control. Bubble colors still reflect `isSelf`.
+   */
+  threaded?: boolean;
+  /** Number of nested replies under this message; shows the collapse toggle when > 0. */
+  replyCount?: number;
+  /** Whether this message's replies are currently collapsed. */
+  collapsed?: boolean;
+  /** Toggle this message's collapsed state. */
+  onToggleReplies?: () => void;
 }
 
 /**
@@ -680,6 +712,10 @@ export const MessageRow = React.memo(function MessageRow({
   playMediaLabel = 'Play',
   mediaErrorLabel,
   mediaRetryLabel,
+  threaded = false,
+  replyCount = 0,
+  collapsed = false,
+  onToggleReplies,
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasBody =
@@ -695,6 +731,7 @@ export const MessageRow = React.memo(function MessageRow({
   const editRef = React.useRef<HTMLTextAreaElement>(null);
   // The rendered bubble content, read at copy time for the rich-text payload.
   const bubbleRef = React.useRef<HTMLDivElement>(null);
+  const replyToggleRef = React.useRef<HTMLButtonElement>(null);
   // Grow the editor to fit its content (accounts for wrapped lines, not just
   // explicit newlines), clamped by the textarea's CSS max-height.
   const autosize = React.useCallback(() => {
@@ -939,6 +976,11 @@ export const MessageRow = React.memo(function MessageRow({
       : []),
   ];
 
+  // Threaded mode left-aligns every row so indentation reads as a tree; the
+  // bubble variant still reflects `isSelf`, keeping self/other colors native.
+  const alignSelf = isSelf && !threaded;
+  const showReplyToggle = threaded && replyCount > 0;
+
   return (
     <div
       data-slot="superchat-message"
@@ -946,7 +988,7 @@ export const MessageRow = React.memo(function MessageRow({
       aria-label={`${authorName}, ${formatTime(message.time)}`}
       className={cn(
         'group flex gap-2',
-        isSelf ? 'flex-row-reverse' : 'flex-row'
+        alignSelf ? 'flex-row-reverse' : 'flex-row'
       )}
     >
       {/* Avatar gutter: the sticky overflow (⋯) and the end-of-message action
@@ -960,7 +1002,7 @@ export const MessageRow = React.memo(function MessageRow({
         {hasActions && (
           <>
             <MessageOverflowMenu
-              isSelf={isSelf}
+              isSelf={alignSelf}
               actions={actions}
               footerVisible={collapseToMenu ? false : footerVisible}
             />
@@ -968,7 +1010,7 @@ export const MessageRow = React.memo(function MessageRow({
               <MessageActionsBar
                 ref={actionsBarRef}
                 actions={actions}
-                isSelf={isSelf}
+                isSelf={alignSelf}
               />
             )}
           </>
@@ -980,13 +1022,38 @@ export const MessageRow = React.memo(function MessageRow({
       <div
         className={cn(
           'flex min-w-0 flex-1 flex-col gap-1',
-          isSelf && 'items-end'
+          alignSelf && 'items-end'
         )}
       >
         <div
           data-slot="superchat-message-meta"
           className="flex items-baseline gap-2"
         >
+          {showReplyToggle && (
+            <button
+              ref={replyToggleRef}
+              type="button"
+              onClick={onToggleReplies}
+              aria-expanded={!collapsed}
+              aria-label={
+                collapsed
+                  ? `Expand ${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}`
+                  : 'Collapse replies'
+              }
+              data-slot="superchat-thread-toggle"
+              className="-ms-1 inline-flex h-4 w-4 shrink-0 items-center justify-center self-center rounded text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            >
+              {collapsed ? (
+                <ChevronRightIcon
+                  size={14}
+                  aria-hidden="true"
+                  className="rtl:-scale-x-100"
+                />
+              ) : (
+                <ChevronDownIcon size={14} aria-hidden="true" />
+              )}
+            </button>
+          )}
           <span
             className="text-xs font-medium"
             style={accentTextColor ? { color: accentTextColor } : undefined}
@@ -1018,7 +1085,7 @@ export const MessageRow = React.memo(function MessageRow({
         <div
           className={cn(
             'flex w-full items-center gap-1',
-            isSelf ? 'flex-row-reverse' : 'flex-row'
+            alignSelf ? 'flex-row-reverse' : 'flex-row'
           )}
         >
           <ChatBubble
@@ -1163,6 +1230,26 @@ export const MessageRow = React.memo(function MessageRow({
             )}
           </ChatBubble>
         </div>
+        {showReplyToggle && collapsed && (
+          <button
+            type="button"
+            onClick={() => {
+              // The pill unmounts once expanded; keep focus on this thread by
+              // handing it to the persistent collapse toggle first.
+              replyToggleRef.current?.focus();
+              onToggleReplies?.();
+            }}
+            data-slot="superchat-thread-replies"
+            className="mt-0.5 inline-flex items-center gap-1 self-start rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-[11px] font-medium text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          >
+            <ChevronRightIcon
+              size={12}
+              aria-hidden="true"
+              className="rtl:-scale-x-100"
+            />
+            {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+          </button>
+        )}
       </div>
     </div>
   );

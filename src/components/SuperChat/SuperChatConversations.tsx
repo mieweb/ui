@@ -3,7 +3,9 @@
  * `@mieweb/ui`.
  *
  * Renders the host-owned conversations sorted by last activity, with unread
- * badges and an optional "new conversation" action. Supports both controlled
+ * badges and an optional "new conversation" action. Conversations with
+ * `children` render as accordion headers with their sub-conversations nested
+ * beneath (e.g. date-range slices of a room). Supports both controlled
  * (`activeConversationId`) and uncontrolled (`defaultActiveConversationId`)
  * selection. Pair with {@link SuperChat} for the message panel, or use
  * {@link SuperChatInbox} for the combined surface.
@@ -12,7 +14,13 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Animated, AnimatedPresence } from '../../motion';
-import { sidebarItem, lastActivityOf, lastMessageByTime } from './parts';
+import { ChevronRight as ChevronRightIcon } from 'lucide-react';
+import {
+  findConversation,
+  sidebarItem,
+  lastActivityOf,
+  lastMessageByTime,
+} from './parts';
 import type { SuperChatConversation } from './types';
 
 // ============================================================================
@@ -55,9 +63,25 @@ export function SuperChatConversations({
   const requestedId = activeConversationId ?? internalActive;
   // Fall back to the first conversation when the requested id no longer exists
   // (e.g. the active conversation was removed) so an item stays highlighted.
-  const activeId = conversations.some((c) => c.id === requestedId)
-    ? requestedId
-    : conversations[0]?.id;
+  const active = findConversation(conversations, requestedId);
+  const activeId = active ? requestedId : conversations[0]?.id;
+  // The top-level entry holding the active item (itself, or a child's parent).
+  const activeTopId = active?.parent?.id ?? activeId;
+
+  // Accordion: at most one entry is open. By default it is the entry holding
+  // the active item. A header click records an explicit choice (`null` = all
+  // closed) scoped to the entry it selected, so the choice lapses as soon as
+  // the selection moves to another entry (e.g. the host selects elsewhere).
+  const [openChoice, setOpenChoice] = React.useState<{
+    topId: string;
+    openId: string | null;
+  }>();
+  const openId =
+    openChoice && openChoice.topId === activeTopId
+      ? openChoice.openId
+      : activeTopId;
+  const isExpanded = (c: SuperChatConversation) => openId === c.id;
+  const groupIdPrefix = React.useId();
 
   const sortedConversations = React.useMemo(
     () =>
@@ -68,6 +92,21 @@ export function SuperChatConversations({
   const selectConversation = (c: SuperChatConversation) => {
     if (activeConversationId === undefined) setInternalActive(c.id);
     onConversationOpened?.(c);
+  };
+
+  // An entry with children is an accordion header: opening it shows all of its
+  // messages and expands it (closing any other); clicking it again while
+  // active toggles it.
+  const selectHeader = (c: SuperChatConversation) => {
+    const collapse = c.id === activeId && isExpanded(c);
+    setOpenChoice({ topId: c.id, openId: collapse ? null : c.id });
+    selectConversation(c);
+  };
+
+  // Opening a plain entry hands the accordion back to the active item.
+  const selectTopLevel = (c: SuperChatConversation) => {
+    setOpenChoice(undefined);
+    selectConversation(c);
   };
 
   return (
@@ -102,14 +141,34 @@ export function SuperChatConversations({
         {sortedConversations.map((c) => {
           const last = lastMessageByTime(c.thread);
           const isActive = c.id === activeId;
+          const children = c.children ?? [];
+          const hasChildren = children.length > 0;
+          const expanded = hasChildren && isExpanded(c);
+          const groupId = `${groupIdPrefix}-${c.id}`;
           return (
             <div key={c.id} role="listitem">
               <button
                 type="button"
                 aria-current={isActive ? 'true' : undefined}
-                onClick={() => selectConversation(c)}
+                aria-expanded={hasChildren ? expanded : undefined}
+                aria-controls={expanded ? groupId : undefined}
+                onClick={() =>
+                  hasChildren ? selectHeader(c) : selectTopLevel(c)
+                }
                 className={sidebarItem({ active: isActive })}
               >
+                {hasChildren && (
+                  <ChevronRightIcon
+                    size={14}
+                    aria-hidden="true"
+                    className={cn(
+                      'shrink-0 text-neutral-500 transition-transform',
+                      // Down when open (no mirroring needed); otherwise it
+                      // points toward the inline end.
+                      expanded ? 'rotate-90' : 'rtl:-scale-x-100'
+                    )}
+                  />
+                )}
                 <span className="flex-1 truncate">
                   <span className="block truncate font-medium">{c.title}</span>
                   {last?.text && (
@@ -134,6 +193,38 @@ export function SuperChatConversations({
                   )}
                 </AnimatedPresence>
               </button>
+              {expanded && (
+                <div
+                  id={groupId}
+                  data-slot="superchat-conversation-children"
+                  role="list"
+                  aria-label={c.title}
+                  className="ms-5 mt-1 space-y-0.5 border-s border-neutral-200 ps-2 dark:border-neutral-700"
+                >
+                  {children.map((child) => {
+                    const isChildActive = child.id === activeId;
+                    return (
+                      <div key={child.id} role="listitem">
+                        <button
+                          type="button"
+                          aria-current={isChildActive ? 'true' : undefined}
+                          onClick={() => selectConversation(child)}
+                          className={cn(
+                            sidebarItem({ active: isChildActive }),
+                            'py-1.5'
+                          )}
+                        >
+                          <span className="flex-1 truncate">{child.title}</span>
+                          <span className="text-xs text-neutral-500 tabular-nums dark:text-neutral-400">
+                            {child.thread.length}
+                            <span className="sr-only"> messages</span>
+                          </span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}

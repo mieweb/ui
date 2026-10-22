@@ -88,7 +88,21 @@ if (!reason) {
 
 console.log(`[build:datavis] rebuilding: ${reason}`);
 execFileSync('npm', ['ci'], { cwd: submodule, stdio: 'inherit' });
-execFileSync('npm', ['run', 'build'], { cwd: submodule, stdio: 'inherit' });
+// Inside this monorepo, build DataVis against the local ui *source*: it is
+// typechecked against `../../src` and its declarations are emitted without a
+// second check, so it never depends on the ui `dist` (which `prebuild` has not
+// built yet). Without the sibling ui source, fall back to the published
+// @mieweb/ui.
+const localUiSource = existsSync(join(root, 'src', 'index.ts'));
+if (!localUiSource) {
+  console.log(
+    '[build:datavis] sibling ui source not found — building against published @mieweb/ui'
+  );
+}
+execFileSync('npm', ['run', localUiSource ? 'build:local-ui' : 'build'], {
+  cwd: submodule,
+  stdio: 'inherit',
+});
 
 if (rev) {
   writeFileSync(stampFile, `${rev}\n`);

@@ -15,6 +15,7 @@ import {
 import type { SuperChatConversation } from './index';
 import { conversation, richConversation, registry } from './storyData';
 import { markdownShowcaseConversation } from './storyData';
+import { threadedConversation } from './storyData';
 import { fullHeightChat } from '../../../.storybook/full-height';
 import { MotionProvider } from '../../motion/MotionProvider';
 import { Button } from '../Button';
@@ -53,6 +54,17 @@ const meta: Meta<typeof SuperChat> = {
       control: 'boolean',
       description:
         'Windowed rendering — only mount rows near the viewport. Recommended for long threads.',
+      table: { category: 'Behavior' },
+    },
+    threaded: {
+      control: 'boolean',
+      description:
+        'Render replies (messages with `parentId`) as an indented, collapsible tree. Auto-enables when the thread contains replies.',
+      table: { category: 'Behavior' },
+    },
+    defaultCollapsed: {
+      control: 'boolean',
+      description: 'Collapse every thread with replies on first render.',
       table: { category: 'Behavior' },
     },
     currentParticipantId: {
@@ -396,6 +408,61 @@ export const Reverse: Story = {
       onReferenceClick={(ref) => console.log('ref', ref)}
       linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
     />
+  ),
+};
+
+// Threaded replies: `parentId` links messages into a collapsible tree. Same
+// native bubbles/avatars/copy actions — only indentation and the collapse
+// toggle are added.
+export const Threaded: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    readOnly: false,
+    trustedContent: false,
+    threaded: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Replies carry a `parentId`, so the thread renders as an indented,',
+          'collapsible tree. Messages that share a parent stay ordered by `time`,',
+          'exactly like the flat view. Click the chevron next to an author to',
+          'collapse or expand that reply subtree. Bubbles, avatars, speaker-colour',
+          'accents, and the per-message Copy menu are the native SuperChat pieces —',
+          'only the indentation and collapse control are added.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <InteractivePanel {...args} initial={threadedConversation} />
+  ),
+};
+
+// The same threaded conversation, collapsed on first render.
+export const ThreadedCollapsed: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    readOnly: false,
+    trustedContent: false,
+    threaded: true,
+    defaultCollapsed: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The same threaded conversation with `defaultCollapsed`, so every thread',
+          'that has replies starts collapsed — each root shows a "N replies" pill.',
+          'Useful for long histories where readers scan roots first and expand the',
+          'threads they care about.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <InteractivePanel {...args} initial={threadedConversation} />
   ),
 };
 
