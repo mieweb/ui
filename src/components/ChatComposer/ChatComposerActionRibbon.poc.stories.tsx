@@ -657,7 +657,7 @@ function ComposerWithCaptureRibbon({
       <p
         role="status"
         aria-live="polite"
-        className="mt-2 text-xs text-neutral-500"
+        className="mt-2 text-xs text-neutral-500 dark:text-neutral-400"
       >
         {status}
       </p>
