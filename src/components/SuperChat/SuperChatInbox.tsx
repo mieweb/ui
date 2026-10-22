@@ -14,6 +14,7 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { SuperChat, type SuperChatProps } from './SuperChat';
 import { SuperChatConversations } from './SuperChatConversations';
+import { findConversation } from './parts';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -144,8 +145,21 @@ export function SuperChatInbox({
     defaultActiveConversationId ?? conversations[0]?.id
   );
   const requestedId = activeConversationId ?? internalActive;
-  const active =
-    conversations.find((c) => c.id === requestedId) ?? conversations[0];
+  const found = findConversation(conversations, requestedId);
+  const foundConversation = found?.conversation;
+  const foundParent = found?.parent;
+  // A nested conversation keeps its parent's name in the panel title so the
+  // context (e.g. which room a date slice belongs to) stays visible.
+  const active = React.useMemo(
+    () =>
+      foundConversation && foundParent
+        ? {
+            ...foundConversation,
+            title: `${foundParent.title} · ${foundConversation.title}`,
+          }
+        : (foundConversation ?? conversations[0]),
+    [foundConversation, foundParent, conversations]
+  );
   // Resolve the active id from the conversation actually shown so the sidebar
   // highlight never disagrees with the panel when `conversations` changes.
   const activeId = active?.id;

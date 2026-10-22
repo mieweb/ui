@@ -57,6 +57,25 @@ export function lastActivityOf(c: SuperChatConversation): number {
   return last ? new Date(last.time).getTime() : 0;
 }
 
+/**
+ * Find a conversation by id among top-level conversations and their nested
+ * `children`, returning it with its parent (if nested).
+ */
+export function findConversation(
+  conversations: SuperChatConversation[],
+  id: string | undefined
+):
+  | { conversation: SuperChatConversation; parent?: SuperChatConversation }
+  | undefined {
+  if (id === undefined) return undefined;
+  for (const conversation of conversations) {
+    if (conversation.id === id) return { conversation };
+    const child = conversation.children?.find((c) => c.id === id);
+    if (child) return { conversation: child, parent: conversation };
+  }
+  return undefined;
+}
+
 /** Compute mentioned participant ids from `@Name` tokens in the draft. */
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
