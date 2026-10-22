@@ -349,6 +349,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
     const hasMacros = Boolean(macros);
+    const hasMacroEntries = Boolean(
+      macros?.some((group) => group.macros.length > 0)
+    );
     const isEmpty = isHtmlEmpty(value);
     const [uncontrolledToolbar, setUncontrolledToolbar] =
       React.useState(defaultToolbar);
@@ -1346,49 +1349,59 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                     <>
                       <DropdownSubmenu
                         label={blockMenuLabels?.insertMacro ?? 'Insert macro'}
+                        // No macros to offer — the panel's empty state (via
+                        // "Show macro library") explains the situation.
+                        disabled={!hasMacroEntries}
                       >
-                        {macros.flatMap((group) => [
-                          // Group headings only earn their row when there is
-                          // more than one group to tell apart.
-                          ...(macros.length > 1
-                            ? [
-                                <DropdownLabel key={`${group.id}-label`}>
-                                  {group.label}
-                                </DropdownLabel>,
-                              ]
-                            : []),
-                          ...group.macros.map((macro) => (
-                            <DropdownItem
-                              key={`${group.id}-${macro.id}`}
-                              onClick={() => {
-                                setBlockMenuOpen(false);
-                                // Insertion lands at the menu's target
-                                // block, mirroring the panel flow.
-                                if (blockTargetRangeRef.current) {
-                                  savedRangeRef.current =
-                                    blockTargetRangeRef.current;
-                                }
-                                insertMacro(macro);
-                              }}
-                            >
-                              <span className="flex min-w-0 items-center gap-2">
-                                {macro.shortcut && (
-                                  <span
-                                    // Shortcuts are typed sequences; keep
-                                    // them LTR in RTL locales.
-                                    dir="ltr"
-                                    className="border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]"
-                                  >
-                                    {macro.shortcut}
+                        {/* Children are built per render even while closed
+                            (the menu JSX lives in the editor's tree), so
+                            skip the catalog walk until the menu is open. */}
+                        {blockMenuOpen &&
+                          macros.flatMap((group) => [
+                            // Group headings only earn their row when there
+                            // is more than one group to tell apart.
+                            ...(macros.length > 1
+                              ? [
+                                  <DropdownLabel key={`h:${group.id}`}>
+                                    {group.label}
+                                  </DropdownLabel>,
+                                ]
+                              : []),
+                            ...group.macros.map((macro) => (
+                              <DropdownItem
+                                // Serialized pair: plain `${a}-${b}` joins
+                                // collide ('a-b','c' vs 'a','b-c') and can
+                                // alias a heading key.
+                                key={`m:${JSON.stringify([group.id, macro.id])}`}
+                                onClick={() => {
+                                  setBlockMenuOpen(false);
+                                  // Insertion lands at the menu's target
+                                  // block, mirroring the panel flow.
+                                  if (blockTargetRangeRef.current) {
+                                    savedRangeRef.current =
+                                      blockTargetRangeRef.current;
+                                  }
+                                  insertMacro(macro);
+                                }}
+                              >
+                                <span className="flex min-w-0 items-center gap-2">
+                                  {macro.shortcut && (
+                                    <span
+                                      // Shortcuts are typed sequences; keep
+                                      // them LTR in RTL locales.
+                                      dir="ltr"
+                                      className="border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]"
+                                    >
+                                      {macro.shortcut}
+                                    </span>
+                                  )}
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {macro.label}
                                   </span>
-                                )}
-                                <span className="min-w-0 flex-1 truncate">
-                                  {macro.label}
                                 </span>
-                              </span>
-                            </DropdownItem>
-                          )),
-                        ])}
+                              </DropdownItem>
+                            )),
+                          ])}
                       </DropdownSubmenu>
                       <DropdownItem
                         onClick={() => {

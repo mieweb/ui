@@ -1023,6 +1023,18 @@ describe('RichTextEditor', () => {
       ).toBeNull();
     });
 
+    it('disables the "Insert macro" submenu when the groups are empty', () => {
+      renderEditor({ macros: [{ id: 'g', label: 'Group', macros: [] }] });
+      openMenu();
+      expect(
+        screen.getByRole('menuitem', { name: 'Insert macro' })
+      ).toBeDisabled();
+      // The library item stays available — its panel owns the empty state.
+      expect(
+        screen.getByRole('menuitem', { name: 'Show macro library' })
+      ).not.toBeDisabled();
+    });
+
     it('opens the macro panel from the menu', () => {
       renderEditor({ macros });
       openMenu();
