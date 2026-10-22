@@ -161,6 +161,13 @@ export interface RichTextEditorProps {
    * not interpreted. Defaults to false.
    */
   markdownShortcuts?: boolean;
+  /**
+   * Textarea-like surface: removes the wrapper border/radius and starts the
+   * editable at a single Input-row height that auto-grows with content
+   * (matching `Textarea`'s `md` metrics). The host supplies the chrome —
+   * `RichTextArea` is the packaged pairing. Defaults to false.
+   */
+  chromeless?: boolean;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
 }
@@ -320,6 +327,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       blockMenu = false,
       blockMenuLabels,
       markdownShortcuts = false,
+      chromeless = false,
       'aria-label': ariaLabel,
     },
     ref
@@ -352,11 +360,49 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     // --- Block gutter menu state ---
     const [blockMenuOpen, setBlockMenuOpen] = React.useState(false);
-    // Offset of the gutter button within the editor body; 16 aligns with the
-    // editable region's p-4 before any row is hovered.
-    const [gutterTop, setGutterTop] = React.useState(16);
+    // Offset of the gutter button within the editor body; aligns with the
+    // editable region's top padding (p-4 / chromeless py-[7px]) before any
+    // row is hovered.
+    const [gutterTop, setGutterTop] = React.useState(chromeless ? 7 : 16);
     const gutterWrapperRef = React.useRef<HTMLDivElement>(null);
+    // Density styles (condensed-view.css) shrink that padding under the
+    // defaults above, which would leave the at-rest trigger hanging below a
+    // one-line condensed field — measure it from the live editable.
+    const measureRestGutterTop = React.useCallback(() => {
+      const fallback = chromeless ? 7 : 16;
+      if (!editorRef.current) return fallback;
+      const padding = parseFloat(
+        getComputedStyle(editorRef.current).paddingTop
+      );
+      return Number.isNaN(padding) ? fallback : Math.round(padding);
+    }, [chromeless]);
+    React.useLayoutEffect(() => {
+      if (!blockMenu || !editorRef.current) return;
+      setGutterTop((current) => {
+        const next = measureRestGutterTop();
+        return current === next ? current : next;
+      });
+    }, [blockMenu, measureRestGutterTop]);
     const hoverBlockNodeRef = React.useRef<Node | null>(null);
+    /** Park the trigger back at its rest offset and forget the hovered row. */
+    const resetGutter = React.useCallback(() => {
+      hoverBlockNodeRef.current = null;
+      const next = measureRestGutterTop();
+      setGutterTop((current) => (current === next ? current : next));
+    }, [measureRestGutterTop]);
+    /** Content edits can delete the hovered row (or every row) while the
+     *  trigger still floats at the old offset — below a field that shrank,
+     *  now that chromeless mode no longer clips the wrapper. */
+    const reconcileGutterWithContent = React.useCallback(() => {
+      if (!blockMenu || !editorRef.current) return;
+      const hovered = hoverBlockNodeRef.current;
+      if (
+        (hovered && !editorRef.current.contains(hovered)) ||
+        !editorRef.current.hasChildNodes()
+      ) {
+        resetGutter();
+      }
+    }, [blockMenu, resetGutter]);
     // Where the chosen menu action is applied: the hovered block's start
     // (mouse) or the caret position (Ctrl/Cmd+/), captured at open time.
     const blockTargetRangeRef = React.useRef<Range | null>(null);
@@ -395,11 +441,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     React.useEffect(() => {
       if (editorRef.current && editorRef.current.innerHTML !== value) {
         editorRef.current.innerHTML = value;
+        reconcileGutterWithContent();
       }
-    }, [value]);
+    }, [value, reconcileGutterWithContent]);
 
     const updateContent = () => {
       if (editorRef.current) onChange(editorRef.current.innerHTML);
+      reconcileGutterWithContent();
     };
 
     // Pasted/dropped HTML otherwise lands in the live DOM unfiltered, where
@@ -740,7 +788,12 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
           top = rect.top;
         }
       }
-      if (!target || top === null) return;
+      if (!target || top === null) {
+        // Every row is gone (e.g. the controlled value was cleared) — don't
+        // leave the trigger floating at the deleted row's offset.
+        resetGutter();
+        return;
+      }
       hoverBlockNodeRef.current = target;
       const wrapperTop = gutterWrapperRef.current.getBoundingClientRect().top;
       const next = Math.max(Math.round(top - wrapperTop), 4);
@@ -1000,8 +1053,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     return (
       <div
         data-slot="rich-text-editor"
+        data-chromeless={chromeless || undefined}
         className={cn(
-          'border-border bg-background flex flex-col overflow-hidden rounded-lg border',
+          'bg-background flex flex-col',
+          !chromeless && 'border-border overflow-hidden rounded-lg border',
           className
         )}
       >
@@ -1327,7 +1382,12 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               <div
                 aria-hidden="true"
                 className={cn(
-                  'text-muted-foreground pointer-events-none absolute start-0 top-0 p-4',
+                  'text-muted-foreground pointer-events-none absolute start-0 top-0',
+                  // Chromeless hosts drop the wrapper's clipping, so a long
+                  // placeholder must stay a single ellipsized line (as a
+                  // native textarea clips its own) instead of wrapping out
+                  // of the one-row field.
+                  chromeless ? 'end-0 truncate px-3 py-[7px] text-base' : 'p-4',
                   blockMenu && 'ps-10'
                 )}
               >
@@ -1340,6 +1400,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               aria-multiline="true"
               aria-label={ariaLabel ?? placeholder}
               contentEditable={!disabled}
+              // Styling hook: condensed-view.css must not pin the editable
+              // to its compact single-line minimum while the macro panel
+              // (absolutely stretched over this region) needs the md
+              // min-h-[400px] working space below.
+              data-macros-open={hasMacros && macrosOpen ? '' : undefined}
               tabIndex={disabled ? -1 : 0}
               onInput={updateContent}
               onPaste={handlePaste}
@@ -1353,7 +1418,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onKeyUp={hasMacros ? saveSelection : undefined}
               onMouseUp={hasMacros ? saveSelection : undefined}
               className={cn(
-                'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
+                'overflow-y-auto focus:outline-none',
+                // Chromeless surfaces start one Input row tall (Textarea md
+                // metrics: 24px line + 7px padding + the host's 1px borders
+                // = h-10) and auto-grow with content.
+                chromeless
+                  ? 'min-h-[38px] px-3 py-[7px] text-base'
+                  : 'min-h-[250px] p-4',
                 'prose prose-sm max-w-none',
                 // Baseline block styles: Tailwind preflight strips heading,
                 // list and quote styling, and the `prose` classes above only

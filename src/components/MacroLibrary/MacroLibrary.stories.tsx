@@ -72,6 +72,11 @@ const groups: MacroGroup[] = [
           why: 'RichTextEditor docks MacroLibrary inside its frame via the macros prop and performs the undo-aware insertion at the saved caret.',
         },
         {
+          type: 'composes with',
+          target: 'editors-richtextarea',
+          why: 'RichTextArea forwards its macros prop to the underlying RichTextEditor; the gutter menu’s “Insert macro…” docks this panel beside the textarea-like surface.',
+        },
+        {
           type: 'uses',
           target: 'text-inputs-input',
           why: 'The macro search box is an Input with a leading search icon.',

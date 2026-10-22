@@ -1085,6 +1085,12 @@ export const miewebUISafelist = [
   'resize-y',
   'resize-x',
   'resize',
+  // RichTextArea (ui#639) — chromeless RichTextEditor single-line baseline
+  // and the Textarea-matched focus ring on the wrapper.
+  'min-h-[38px]',
+  'focus-within:ring-2',
+  'focus-within:ring-ring',
+  'focus-within:border-transparent',
   // Floating-group field boxes (labelVariant="floating" on RadioGroup /
   // CheckboxGroup) share the floating input heights as min-heights. sr-only
   // visually hides the group legend (and the hideLabel input label) while

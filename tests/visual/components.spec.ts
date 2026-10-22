@@ -2058,3 +2058,185 @@ test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
     await expect(page).toHaveScreenshot('richtexteditor-block-formats.png');
   });
 });
+
+test.describe('Visual Regression Tests - RichTextArea', () => {
+  const story = 'editors-richtextarea--basic';
+  const wrapperSel = '[data-slot="rich-text-editor"][data-chromeless]';
+  const editorSel = '[contenteditable="true"]';
+
+  for (const direction of ['ltr', 'rtl'] as const) {
+    test(`RichTextArea - Single-line start that auto-grows (${direction.toUpperCase()})`, async ({
+      page,
+    }) => {
+      await gotoStory(
+        page,
+        story,
+        direction === 'rtl' ? { globals: 'direction:rtl' } : {}
+      );
+      await expectDocumentDirection(page, direction);
+      // At rest the surface matches the md Textarea / Input row: 40px
+      // (38px editable + the wrapper's 1px borders).
+      const wrapper = page.locator(wrapperSel);
+      const restBox = await wrapper.boundingBox();
+      expect(Math.abs(restBox!.height - 40)).toBeLessThanOrEqual(1);
+      await expect(page).toHaveScreenshot(
+        `richtextarea-single-line-${direction}.png`
+      );
+      // Typing a markdown shortcut formats without any toolbar, and the
+      // surface grows with the content instead of scrolling.
+      const editor = page.locator(editorSel);
+      await editor.click();
+      await page.keyboard.type('## ');
+      await page.keyboard.type('Visit summary');
+      await page.keyboard.press('Enter');
+      await page.keyboard.type('Grows with content.');
+      await expect(page.locator(`${editorSel} > h2`)).toHaveText(
+        'Visit summary'
+      );
+      const grownBox = await wrapper.boundingBox();
+      expect(grownBox!.height).toBeGreaterThan(restBox!.height + 20);
+    });
+  }
+
+  test('RichTextArea - Grown content with the gutter menu available', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    const editor = page.locator(editorSel);
+    await editor.click();
+    await page.keyboard.type('## ');
+    await page.keyboard.type('Visit summary');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('A plain row under the heading.');
+    // The hover gutter stays available on the chromeless surface.
+    const row = page.locator(`${editorSel} > div`).last();
+    await row.hover();
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await expect(page).toHaveScreenshot('richtextarea-grown.png');
+  });
+
+  test('RichTextArea - Gutter trigger follows the field when content is cleared', async ({
+    page,
+  }) => {
+    // Hovering a lower row parks the trigger beside it; clearing the content
+    // shrinks the chromeless field (which no longer clips its wrapper) back
+    // to one row, and the trigger must come back inside it.
+    await gotoStory(page, story);
+    const editor = page.locator(editorSel);
+    await editor.click();
+    await page.keyboard.type('First row');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Second row');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Third row');
+    await page.locator(`${editorSel} > div`).last().hover();
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    const grownButtonBox = (await button.boundingBox())!;
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    const wrapper = page.locator(wrapperSel);
+    await expect
+      .poll(async () => (await wrapper.boundingBox())!.height)
+      .toBeLessThanOrEqual(41);
+    // Before any corrective hover, the trigger has already been parked back
+    // at the rest offset instead of the deleted row's.
+    const within = async () => {
+      const wrapperBox = (await wrapper.boundingBox())!;
+      const box = (await button.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(wrapperBox.y - 0.5);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        wrapperBox.y + wrapperBox.height + 0.5
+      );
+      return box;
+    };
+    const restBox = await within();
+    expect(restBox.y).toBeLessThan(grownButtonBox.y);
+    // And the hover reveal shows it in that position.
+    await editor.hover();
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await within();
+  });
+
+  test('RichTextArea - Narrow empty field keeps the placeholder to one line', async ({
+    page,
+  }) => {
+    // Chromeless surfaces have no wrapper clipping; a long hint must
+    // truncate instead of wrapping below the one-row field.
+    await page.setViewportSize({ width: 320, height: 640 });
+    await gotoStory(page, story);
+    const wrapper = page.locator(wrapperSel);
+    const placeholder = wrapper.locator('div[aria-hidden="true"]');
+    const wrapperBox = await wrapper.boundingBox();
+    const hintBox = await placeholder.boundingBox();
+    expect(hintBox!.y + hintBox!.height).toBeLessThanOrEqual(
+      wrapperBox!.y + wrapperBox!.height + 0.5
+    );
+    expect(
+      await placeholder.evaluate((el) => getComputedStyle(el).textOverflow)
+    ).toBe('ellipsis');
+  });
+
+  test('RichTextArea - Condensed gutter trigger stays inside the empty field', async ({
+    page,
+  }) => {
+    await gotoStory(page, story, { globals: 'density:condensed' });
+    const wrapper = page.locator(wrapperSel);
+    // Condensed single-line baseline: 26px editable + the wrapper's borders.
+    const wrapperBox = await wrapper.boundingBox();
+    expect(Math.abs(wrapperBox!.height - 28)).toBeLessThanOrEqual(1);
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    // The trigger must sit inside the one-line field both at rest and once
+    // hover repositions it beside the hovered row.
+    const within = async () => {
+      const box = (await button.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(wrapperBox!.y - 0.5);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        wrapperBox!.y + wrapperBox!.height + 0.5
+      );
+    };
+    await within();
+    await page.locator(editorSel).hover();
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await within();
+    await expect(page).toHaveScreenshot('richtextarea-condensed.png');
+  });
+
+  test('RichTextArea - Condensed macro panel keeps its working height', async ({
+    page,
+  }) => {
+    // The compact condensed minimum must release when the macro panel —
+    // absolutely stretched over the editor body — needs md working space.
+    await gotoStory(page, 'editors-richtextarea--with-macros', {
+      globals: 'density:condensed',
+    });
+    const editor = page.locator(editorSel);
+    await editor.hover();
+    await page
+      .locator('[data-slot="rich-text-editor-block-gutter"] button')
+      .click();
+    await page.getByRole('menuitem', { name: 'Insert macro…' }).click();
+    await expect(editor).toHaveAttribute('data-macros-open', '');
+    const editorBox = await editor.boundingBox();
+    expect(editorBox!.height).toBeGreaterThanOrEqual(399);
+    await expect(
+      page.getByRole('button', { name: 'Cardio — WNL' })
+    ).toBeVisible();
+    await expect(page).toHaveScreenshot('richtextarea-condensed-macros.png');
+  });
+});
