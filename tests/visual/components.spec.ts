@@ -2120,6 +2120,55 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await expect(page).toHaveScreenshot('richtextarea-grown.png');
   });
 
+  test('RichTextArea - Gutter trigger follows the field when content is cleared', async ({
+    page,
+  }) => {
+    // Hovering a lower row parks the trigger beside it; clearing the content
+    // shrinks the chromeless field (which no longer clips its wrapper) back
+    // to one row, and the trigger must come back inside it.
+    await gotoStory(page, story);
+    const editor = page.locator(editorSel);
+    await editor.click();
+    await page.keyboard.type('First row');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Second row');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Third row');
+    await page.locator(`${editorSel} > div`).last().hover();
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    const grownButtonBox = (await button.boundingBox())!;
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    const wrapper = page.locator(wrapperSel);
+    await expect
+      .poll(async () => (await wrapper.boundingBox())!.height)
+      .toBeLessThanOrEqual(41);
+    // Before any corrective hover, the trigger has already been parked back
+    // at the rest offset instead of the deleted row's.
+    const within = async () => {
+      const wrapperBox = (await wrapper.boundingBox())!;
+      const box = (await button.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(wrapperBox.y - 0.5);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        wrapperBox.y + wrapperBox.height + 0.5
+      );
+      return box;
+    };
+    const restBox = await within();
+    expect(restBox.y).toBeLessThan(grownButtonBox.y);
+    // And the hover reveal shows it in that position.
+    await editor.hover();
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await within();
+  });
+
   test('RichTextArea - Narrow empty field keeps the placeholder to one line', async ({
     page,
   }) => {

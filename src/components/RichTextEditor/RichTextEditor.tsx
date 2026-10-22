@@ -367,20 +367,42 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const gutterWrapperRef = React.useRef<HTMLDivElement>(null);
     // Density styles (condensed-view.css) shrink that padding under the
     // defaults above, which would leave the at-rest trigger hanging below a
-    // one-line condensed field — re-measure it from the live editable.
-    React.useLayoutEffect(() => {
-      if (!blockMenu || !editorRef.current) return;
+    // one-line condensed field — measure it from the live editable.
+    const measureRestGutterTop = React.useCallback(() => {
+      const fallback = chromeless ? 7 : 16;
+      if (!editorRef.current) return fallback;
       const padding = parseFloat(
         getComputedStyle(editorRef.current).paddingTop
       );
-      if (!Number.isNaN(padding)) {
-        setGutterTop((current) => {
-          const next = Math.round(padding);
-          return current === next ? current : next;
-        });
-      }
-    }, [blockMenu]);
+      return Number.isNaN(padding) ? fallback : Math.round(padding);
+    }, [chromeless]);
+    React.useLayoutEffect(() => {
+      if (!blockMenu || !editorRef.current) return;
+      setGutterTop((current) => {
+        const next = measureRestGutterTop();
+        return current === next ? current : next;
+      });
+    }, [blockMenu, measureRestGutterTop]);
     const hoverBlockNodeRef = React.useRef<Node | null>(null);
+    /** Park the trigger back at its rest offset and forget the hovered row. */
+    const resetGutter = React.useCallback(() => {
+      hoverBlockNodeRef.current = null;
+      const next = measureRestGutterTop();
+      setGutterTop((current) => (current === next ? current : next));
+    }, [measureRestGutterTop]);
+    /** Content edits can delete the hovered row (or every row) while the
+     *  trigger still floats at the old offset — below a field that shrank,
+     *  now that chromeless mode no longer clips the wrapper. */
+    const reconcileGutterWithContent = React.useCallback(() => {
+      if (!blockMenu || !editorRef.current) return;
+      const hovered = hoverBlockNodeRef.current;
+      if (
+        (hovered && !editorRef.current.contains(hovered)) ||
+        !editorRef.current.hasChildNodes()
+      ) {
+        resetGutter();
+      }
+    }, [blockMenu, resetGutter]);
     // Where the chosen menu action is applied: the hovered block's start
     // (mouse) or the caret position (Ctrl/Cmd+/), captured at open time.
     const blockTargetRangeRef = React.useRef<Range | null>(null);
@@ -419,11 +441,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     React.useEffect(() => {
       if (editorRef.current && editorRef.current.innerHTML !== value) {
         editorRef.current.innerHTML = value;
+        reconcileGutterWithContent();
       }
-    }, [value]);
+    }, [value, reconcileGutterWithContent]);
 
     const updateContent = () => {
       if (editorRef.current) onChange(editorRef.current.innerHTML);
+      reconcileGutterWithContent();
     };
 
     // Pasted/dropped HTML otherwise lands in the live DOM unfiltered, where
@@ -764,7 +788,12 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
           top = rect.top;
         }
       }
-      if (!target || top === null) return;
+      if (!target || top === null) {
+        // Every row is gone (e.g. the controlled value was cleared) — don't
+        // leave the trigger floating at the deleted row's offset.
+        resetGutter();
+        return;
+      }
       hoverBlockNodeRef.current = target;
       const wrapperTop = gutterWrapperRef.current.getBoundingClientRect().top;
       const next = Math.max(Math.round(top - wrapperTop), 4);
