@@ -1294,10 +1294,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                           savedRangeRef.current = blockTargetRangeRef.current;
                         }
                         setMacrosOpen(true);
-                        // The activated item unmounts with the menu; keep
-                        // focus in the editor rather than letting it fall
-                        // to <body>.
-                        editorRef.current?.focus();
+                        // The activated item unmounts with the menu; move
+                        // focus back AND apply the bookmark to the live
+                        // selection — a bare focus() would leave the old
+                        // caret live, and the editor's onBlur (fired when
+                        // the panel's search field takes focus) would then
+                        // re-save it over the menu's target.
+                        focusRestoringSelection();
                       }}
                     >
                       {blockMenuLabels?.insertMacro ?? 'Insert macro…'}

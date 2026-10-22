@@ -1029,6 +1029,43 @@ describe('RichTextEditor', () => {
       ).not.toBeNull();
     });
 
+    it('inserts the macro at the menu target even after the panel takes focus', () => {
+      const editor = renderEditor({ macros });
+      const first = document.createElement('p');
+      first.textContent = 'one';
+      const second = document.createElement('p');
+      second.textContent = 'two';
+      editor.append(first, second);
+      mockRect(first, 10, 20);
+      mockRect(second, 40, 20);
+      // The caret lives in the FIRST paragraph…
+      const caret = document.createRange();
+      caret.setStart(first.firstChild!, 1);
+      caret.collapse(true);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(caret);
+      // …while the gutter menu targets the SECOND.
+      fireEvent.mouseMove(editor, { clientY: 45 });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      // The panel's search field steals focus; the editor's blur re-saves
+      // the live selection — which must already match the menu target, or
+      // the bookmark gets clobbered and the macro lands at the old caret.
+      fireEvent.blur(editor);
+      fireEvent.click(
+        Array.from(
+          document.querySelectorAll<HTMLButtonElement>('[data-macro-row]')
+        ).find((row) => row.textContent?.includes('Cardio — WNL'))!
+      );
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+      expect(window.getSelection()!.anchorNode).toBe(second);
+    });
+
     it('hides the toolbar from the menu and reports the change', () => {
       const onToolbarChange = vi.fn();
       renderEditor({ onToolbarChange });
