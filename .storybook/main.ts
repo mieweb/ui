@@ -199,7 +199,11 @@ function ychartGitInfoPlugin(): Plugin {
 const ychartDependencyNames = readDependencyNames('ychart');
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../packages/datavis/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
   addons: [
     '@storybook/addon-a11y',
     {

@@ -9,6 +9,7 @@ import { create } from 'storybook/theming/create';
 import { Button } from 'storybook/internal/components';
 import { GithubIcon, MobileIcon, ShareAltIcon } from '@storybook/icons';
 import { buildArgsParam } from 'storybook/internal/router';
+import { githubSourceUrl } from './github-source';
 import { serializeProjectGlobals } from './mobile-preview';
 
 // Brand theme configurations for the Storybook manager UI
@@ -667,10 +668,7 @@ function GitHubSourceTool() {
 
   if (!sourcePath) return null;
 
-  const githubUrl = `https://github.com/mieweb/ui/blob/main/${sourcePath
-    .split('/')
-    .map(encodeURIComponent)
-    .join('/')}`;
+  const githubUrl = githubSourceUrl(sourcePath);
 
   return React.createElement(
     Button,
