@@ -1373,6 +1373,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                                 // collide ('a-b','c' vs 'a','b-c') and can
                                 // alias a heading key.
                                 key={`m:${JSON.stringify([group.id, macro.id])}`}
+                                // The item's label slot is a flex item with
+                                // min-width:auto, so it refuses to shrink and
+                                // a long macro name overflows instead of
+                                // hitting the truncate below. Scoped here
+                                // rather than changed in DropdownItem, whose
+                                // other consumers size to content.
+                                className="[&>[data-slot=dropdown-item-label]]:min-w-0 [&>[data-slot=dropdown-item-label]]:flex-1"
                                 onClick={() => {
                                   setBlockMenuOpen(false);
                                   // Insertion lands at the menu's target

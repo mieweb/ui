@@ -79,6 +79,8 @@ export const miewebUISafelist = [
   '[&_video]:w-full',
   'min-h-8',
   '[&_[data-slot=button-label]]:whitespace-normal',
+  '[&>[data-slot=dropdown-item-label]]:min-w-0',
+  '[&>[data-slot=dropdown-item-label]]:flex-1',
   // EmailEditor: block frames, innermost-hover toolbar reveal, email-content
   // spacing in the canvas, and the stacked/side-by-side panel layout.
   '[[data-slot=email-editor-block]:hover:not(:has([data-slot=email-editor-block]:hover))>&]:opacity-100',
