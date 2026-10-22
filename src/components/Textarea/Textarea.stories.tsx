@@ -24,7 +24,7 @@ The multi-line counterpart of \`Input\`, sharing its anatomy — \`label\` (\`la
 
 - The value fits on one line — \`Input\`.
 - The value is HTML and the writer occasionally needs headings, lists or macros in a
-  textarea-like surface — \`RichTextArea\`.
+  textarea-like surface — \`TextAreaRich\`.
 - The text needs formatting, headings or collaborative editing — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
 - You need a fixed-height, read-only block — plain \`Text\`.
 
@@ -75,8 +75,8 @@ Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an 
         },
         {
           type: 'alternative to',
-          target: 'editors-richtextarea',
-          why: 'RichTextArea looks like Textarea at rest but emits HTML with markdown shortcuts, a block gutter menu and macros; Textarea when the consumer needs plain text.',
+          target: 'editors-textarearich',
+          why: 'TextAreaRich looks like Textarea at rest but emits HTML with markdown shortcuts, a block gutter menu and macros; Textarea when the consumer needs plain text.',
         },
       ],
     },
