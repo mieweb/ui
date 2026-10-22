@@ -5,7 +5,8 @@
  * `parentId`, these helpers assemble the reply tree used by the threaded
  * rendering path: siblings (and roots) stay ordered by `time`, replies nest
  * under their parent, and unknown parents / cycles fall back to roots so every
- * message renders exactly once.
+ * message renders exactly once. All traversals are iterative and linear, so
+ * arbitrarily deep reply chains are safe.
  */
 
 import type { SuperChatMessage } from './types';
@@ -56,15 +57,22 @@ export function buildThreadTree(thread: SuperChatMessage[]): ThreadTree {
     });
   }
 
+  // A message nests under its parent unless its ancestor chain loops; those
+  // chains (and anything hanging off them) fall back to roots.
+  const parentOf = (node: ThreadNode): ThreadNode | undefined => {
+    const parentId = node.message.parentId;
+    return parentId && parentId !== node.message.id
+      ? nodesById.get(parentId)
+      : undefined;
+  };
+  const cyclic = findCyclicChains(nodesById, parentOf);
+
   const roots: ThreadNode[] = [];
   let hasThreading = false;
-
   for (const message of thread) {
     const node = nodesById.get(message.id)!;
-    const parentId = message.parentId;
-    const parent =
-      parentId && parentId !== message.id ? nodesById.get(parentId) : undefined;
-    if (parent && !createsCycle(parent, node, nodesById)) {
+    const parent = parentOf(node);
+    if (parent && !cyclic.has(message.id)) {
       parent.children.push(node);
       hasThreading = true;
     } else {
@@ -72,39 +80,70 @@ export function buildThreadTree(thread: SuperChatMessage[]): ThreadTree {
     }
   }
 
-  const assignDepth = (node: ThreadNode, depth: number): number => {
-    node.depth = depth;
-    node.children.sort(byTimeThenOrder);
-    let descendants = node.children.length;
-    for (const child of node.children) {
-      descendants += assignDepth(child, depth + 1);
-    }
-    node.descendantCount = descendants;
-    return descendants;
-  };
-
+  // Iterative (no recursion, so arbitrarily deep chains are safe): assign
+  // depths and sort children top-down, then total descendants bottom-up.
   roots.sort(byTimeThenOrder);
-  for (const root of roots) assignDepth(root, 0);
+  const preorder: ThreadNode[] = [];
+  const stack = [...roots].reverse();
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    preorder.push(node);
+    node.children.sort(byTimeThenOrder);
+    for (let i = node.children.length - 1; i >= 0; i--) {
+      node.children[i].depth = node.depth + 1;
+      stack.push(node.children[i]);
+    }
+  }
+  for (let i = preorder.length - 1; i >= 0; i--) {
+    const node = preorder[i];
+    node.descendantCount = node.children.reduce(
+      (sum, child) => sum + 1 + child.descendantCount,
+      0
+    );
+  }
 
   return { roots, hasThreading };
 }
 
-/** Walk up from `parent` to detect whether attaching `node` would form a cycle. */
-function createsCycle(
-  parent: ThreadNode,
-  node: ThreadNode,
-  nodesById: Map<string, ThreadNode>
-): boolean {
-  let current: ThreadNode | undefined = parent;
-  const guard = new Set<string>();
-  while (current) {
-    if (current === node) return true;
-    if (guard.has(current.message.id)) return true;
-    guard.add(current.message.id);
-    const parentId: string | undefined = current.message.parentId;
-    current = parentId ? nodesById.get(parentId) : undefined;
+/**
+ * Ids of messages whose ancestor chain loops (including those on the loop).
+ * Each chain is walked once and its result memoized, so this is linear in the
+ * thread length.
+ */
+function findCyclicChains(
+  nodesById: Map<string, ThreadNode>,
+  parentOf: (node: ThreadNode) => ThreadNode | undefined
+): Set<string> {
+  const resolved = new Map<string, boolean>();
+  for (const start of nodesById.values()) {
+    const path: ThreadNode[] = [];
+    const onPath = new Set<string>();
+    let current: ThreadNode | undefined = start;
+    let loops = false;
+    while (current && !resolved.has(current.message.id)) {
+      if (onPath.has(current.message.id)) {
+        loops = true;
+        break;
+      }
+      onPath.add(current.message.id);
+      path.push(current);
+      current = parentOf(current);
+    }
+    if (!loops && current) loops = resolved.get(current.message.id)!;
+    for (const node of path) resolved.set(node.message.id, loops);
   }
-  return false;
+  const ids = new Set<string>();
+  for (const [id, loops] of resolved) if (loops) ids.add(id);
+  return ids;
+}
+
+/**
+ * Whether a message's row can show the collapse control. System notices and
+ * reference chips render without the message chrome that carries it (see
+ * `MessageRow`), so they never collapse.
+ */
+export function canToggleReplies(message: SuperChatMessage): boolean {
+  return message.type !== 'system' && !(message.type === 'ref' && message.ref);
 }
 
 /**
@@ -118,27 +157,50 @@ export function flattenThreadTree(
   reverseRoots = false
 ): ThreadNode[] {
   const out: ThreadNode[] = [];
-  const walk = (nodes: ThreadNode[]) => {
-    for (const node of nodes) {
-      out.push(node);
-      if (node.children.length > 0 && !collapsedIds.has(node.message.id)) {
-        walk(node.children);
+  const stack = reverseRoots ? [...roots] : [...roots].reverse();
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    out.push(node);
+    if (node.children.length > 0 && !collapsedIds.has(node.message.id)) {
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        stack.push(node.children[i]);
       }
     }
-  };
-  walk(reverseRoots ? [...roots].reverse() : roots);
+  }
   return out;
 }
 
-/** All ids of nodes that have replies (i.e. can be collapsed). */
+/** Ids of nodes that have replies and can show the collapse control. */
 export function collapsibleIds(roots: ThreadNode[]): Set<string> {
   const ids = new Set<string>();
-  const walk = (nodes: ThreadNode[]) => {
-    for (const node of nodes) {
-      if (node.children.length > 0) ids.add(node.message.id);
-      walk(node.children);
+  const stack = [...roots];
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    if (node.children.length > 0 && canToggleReplies(node.message)) {
+      ids.add(node.message.id);
     }
-  };
-  walk(roots);
+    stack.push(...node.children);
+  }
   return ids;
 }
+
+/** Ids of every ancestor of `id` (nearest first), for revealing a message. */
+export function ancestorIds(roots: ThreadNode[], id: string): string[] {
+  const parentById = new Map<string, string>();
+  const stack = [...roots];
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    for (const child of node.children) {
+      parentById.set(child.message.id, node.message.id);
+      stack.push(child);
+    }
+  }
+  const ids: string[] = [];
+  for (let p = parentById.get(id); p !== undefined; p = parentById.get(p)) {
+    ids.push(p);
+  }
+  return ids;
+}
+
+/** A tree with no messages, for when threading cannot be used. */
+export const EMPTY_THREAD_TREE: ThreadTree = { roots: [], hasThreading: false };

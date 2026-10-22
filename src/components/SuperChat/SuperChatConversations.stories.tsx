@@ -59,7 +59,10 @@ A conversation with \`children\` (sub-conversations such as date ranges or filte
 import { SuperChatConversations, SuperChat } from '@mieweb/ui/components/SuperChat';
 
 const [activeId, setActiveId] = useState(conversations[0]?.id);
-const active = conversations.find((c) => c.id === activeId);
+// Search nested \`children\` too, so selecting a sub-conversation keeps the panel.
+const active = conversations
+  .flatMap((c) => [c, ...(c.children ?? [])])
+  .find((c) => c.id === activeId);
 
 <div style={{ display: 'flex', height: 520 }}>
   <SuperChatConversations
