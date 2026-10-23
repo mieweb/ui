@@ -202,9 +202,9 @@ describe('Encounter coded clinical fields', () => {
     fireEvent.click(
       dialog.getByRole('button', { name: 'Select medication result' })
     );
-    fireEvent.change(dialog.getByLabelText('Sig (patient directions)'), {
-      target: { value: '1 tablet by mouth daily' },
-    });
+    const sig = dialog.getByLabelText('Sig (patient directions)');
+    sig.innerHTML = '<p>1 tablet by mouth daily</p>';
+    fireEvent.input(sig);
     fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(onResponse).toHaveBeenCalledOnce();
     expect(latest()).toMatchObject({
@@ -297,9 +297,9 @@ describe('Encounter coded clinical fields', () => {
     );
     const dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Save' })).toBeEnabled();
-    fireEvent.change(dialog.getByLabelText('Sig (patient directions)'), {
-      target: { value: 'Continue prior directions' },
-    });
+    const sig = dialog.getByLabelText('Sig (patient directions)');
+    sig.innerHTML = '<p>Continue prior directions</p>';
+    fireEvent.input(sig);
     fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toEqual({
       medications: [

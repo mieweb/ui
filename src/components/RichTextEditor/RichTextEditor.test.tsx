@@ -770,6 +770,47 @@ describe('RichTextEditor', () => {
       // Permission resolved after the toolbar hid — no session may start.
       expect(MockRecognition.instances).toHaveLength(0);
     });
+
+    it('stops a running dictation when the editor becomes readOnly', async () => {
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      await waitFor(() => expect(MockRecognition.instances).toHaveLength(1));
+      const recognition = MockRecognition.instances[0];
+      expect(recognition.start).toHaveBeenCalled();
+      view.rerender(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          aria-label="Body"
+          readOnly
+        />
+      );
+      expect(recognition.stop).toHaveBeenCalled();
+    });
+
+    it('ignores late recognition results once readOnly', async () => {
+      const onChange = vi.fn();
+      const props = (readOnly?: boolean) => (
+        <RichTextEditor
+          value=""
+          onChange={onChange}
+          aria-label="Body"
+          readOnly={readOnly}
+        />
+      );
+      const view = renderWithTheme(props());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      await waitFor(() => expect(MockRecognition.instances).toHaveLength(1));
+      const recognition = MockRecognition.instances[0];
+      view.rerender(props(true));
+      // A result that was already in flight when the field became readOnly
+      // must not edit the editor or reach the host.
+      (recognition.onresult as (event: unknown) => void)?.({
+        resultIndex: 0,
+        results: [{ isFinal: true, 0: { transcript: 'hello' }, length: 1 }],
+      });
+      expect(onChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('block gutter menu', () => {

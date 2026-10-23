@@ -269,9 +269,9 @@ describe('ConditionEditor message localization', () => {
     expect(screen.getByRole('group', { name: 'Gravité' })).toBeInTheDocument();
     expect(screen.getByLabelText('Statut')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Léger' }));
-    fireEvent.change(screen.getByLabelText('Remarque'), {
-      target: { value: 'Patient-authored English note.' },
-    });
+    const note = screen.getByLabelText('Remarque');
+    note.innerHTML = '<p>Patient-authored English note.</p>';
+    fireEvent.input(note);
     fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
     expect(onSave.mock.calls[0][0]).toMatchObject({
       text: 'Essential hypertension',
