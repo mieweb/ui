@@ -70,8 +70,9 @@ const [note, setNote] = React.useState('');
   editor. CSS selectors targeting a visible \`textarea\` element no longer
   match — style via \`[data-slot]\` hooks instead.
 - Error/helper/count are wired to the editable region via
-  \`aria-describedby\`; the label is announced via \`aria-label\` (a
-  contenteditable region cannot be targeted by \`htmlFor\`).
+  \`aria-describedby\`. External \`<label htmlFor={id}>\` pairs keep working:
+  the field bridges them via \`aria-labelledby\` and click-to-focus, since a
+  contenteditable region cannot be targeted by \`htmlFor\` natively.
 
 ### TextAreaPlain — the native escape hatch
 

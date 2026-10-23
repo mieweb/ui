@@ -20,13 +20,25 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * Newline normalization applied to every incoming plain value: a native
+ * textarea's API value never contains CR, so CRLF/CR collapse to LF before
+ * any conversion. Without this, `'a\r\nb'` would leave a literal CR inside a
+ * paragraph and gain a blank line on the next round-trip.
+ */
+function normalizeNewlines(text: string): string {
+  return text.replace(/\r\n?/g, '\n');
+}
+
+/**
  * Converts plain text to the editor's HTML: each line becomes a paragraph,
- * empty lines become `<p><br></p>`. `htmlToPlain(plainToHtml(text)) === text`
- * for every string, so stored plain values survive untouched.
+ * empty lines become `<p><br></p>`. Newlines are normalized to LF first
+ * (matching native textarea behaviour); after that,
+ * `htmlToPlain(plainToHtml(text)) === text` for every string, so stored
+ * plain values survive untouched.
  */
 export function plainToHtml(text: string): string {
   if (!text) return '';
-  return text
+  return normalizeNewlines(text)
     .split('\n')
     .map((line) => (line ? `<p>${escapeHtml(line)}</p>` : '<p><br></p>'))
     .join('');
@@ -46,18 +58,41 @@ const BLOCK_TAGS = new Set([
   'PRE',
 ]);
 
-function nodeToText(node: Node): string {
-  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
-  if (node.nodeType !== Node.ELEMENT_NODE) return '';
-  const el = node as Element;
-  if (el.tagName === 'BR') return '\n';
-  const inner = Array.from(el.childNodes).map(nodeToText).join('');
-  if (BLOCK_TAGS.has(el.tagName)) {
-    // A block is its own line. A lone <br> inside a block is the "empty
-    // paragraph" convention, not an extra line break.
-    return (inner === '\n' ? '' : inner) + '\n';
+/** Tags whose text is invisible — contributing it would leak code as text. */
+const IGNORED_TAGS = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT']);
+
+function nodeListToText(nodes: Iterable<Node>): string {
+  let out = '';
+  for (const node of nodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      out += node.textContent ?? '';
+      continue;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) continue;
+    const el = node as Element;
+    if (IGNORED_TAGS.has(el.tagName)) continue;
+    if (el.tagName === 'BR') {
+      out += '\n';
+      continue;
+    }
+    if (BLOCK_TAGS.has(el.tagName)) {
+      // A block starts its own line — inline content before it
+      // (`a<div>b</div>`) must not fuse with the block's first line.
+      if (out && !out.endsWith('\n')) out += '\n';
+      let inner = nodeListToText(el.childNodes);
+      // A lone <br> inside a block is the "empty paragraph" convention,
+      // not an extra line break.
+      if (inner === '\n') inner = '';
+      out += inner;
+      // A block ends its own line — but a nested block
+      // (`<blockquote><p>a</p></blockquote>`) already supplied the
+      // newline; adding another would fabricate a blank line.
+      if (inner === '' || !inner.endsWith('\n')) out += '\n';
+      continue;
+    }
+    out += nodeListToText(el.childNodes);
   }
-  return inner;
+  return out;
 }
 
 /** Extracts plain text from editor HTML: blocks and `<br>` become newlines. */
@@ -67,8 +102,18 @@ export function htmlToPlain(html: string): string {
   // Read-only text extraction into a detached element; nothing is inserted
   // into the page.
   root.innerHTML = html;
-  const text = Array.from(root.childNodes).map(nodeToText).join('');
+  const text = nodeListToText(root.childNodes);
   return text.endsWith('\n') ? text.slice(0, -1) : text;
+}
+
+/**
+ * Paste/drop insertion policy: clipboard HTML is flattened to escaped plain
+ * paragraphs before it reaches the live editable, so clipboard styles, host
+ * CSS classes and embedded content never become active inside a field whose
+ * contract is plain text.
+ */
+function sanitizePastedHtml(html: string): string {
+  return plainToHtml(htmlToPlain(html));
 }
 
 // --- dev-only one-time warnings for dropped native behaviours ---------------
@@ -116,12 +161,21 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       value,
       defaultValue,
       onChange,
+      onBlur,
+      onFocus,
+      onKeyDown,
+      onKeyUp,
       name,
+      form,
+      id,
+      rows,
       required,
+      readOnly,
       disabled,
       placeholder,
       'aria-describedby': ariaDescribedBy,
       'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
     },
     ref
   ) => {
@@ -159,12 +213,15 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     const helperId = `${reactId}-helper`;
     const countId = `${reactId}-count`;
 
-    const controlledValue = value !== undefined ? String(value) : undefined;
+    const controlledValue =
+      value !== undefined ? normalizeNewlines(String(value)) : undefined;
 
     const [state, setState] = React.useState(() => {
       const plain =
         controlledValue ??
-        (defaultValue !== undefined ? String(defaultValue) : '');
+        (defaultValue !== undefined
+          ? normalizeNewlines(String(defaultValue))
+          : '');
       return { html: plainToHtml(plain), plain };
     });
 
@@ -177,6 +234,22 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     const hiddenRef = React.useRef<HTMLTextAreaElement>(null);
     const editorWrapperRef = React.useRef<HTMLDivElement>(null);
+
+    // Rejected-edit resync. When a controlled parent refuses an edit, the
+    // committed value never changes — the optimistic state above is reverted
+    // during the same render — so the editor's [value]-gated sync never
+    // fires and its DOM would keep the rejected text. Compare *plain* text
+    // (not HTML) so accepted edits keep the user's rich formatting.
+    React.useEffect(() => {
+      const editable =
+        editorWrapperRef.current?.querySelector<HTMLElement>(
+          '[role="textbox"]'
+        );
+      if (editable && htmlToPlain(editable.innerHTML) !== state.plain) {
+        editable.innerHTML = state.html;
+      }
+    });
+
     const focusEditor = React.useCallback(() => {
       editorWrapperRef.current
         ?.querySelector<HTMLElement>('[role="textbox"]')
@@ -197,6 +270,45 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       };
       return node;
     }, [focusEditor]);
+
+    // External-label bridge: existing call sites pair
+    // `<Label htmlFor={id}>` with `<Textarea id={id}>`. The id now lands on a
+    // contenteditable div, which `htmlFor` neither names nor focuses. Find
+    // the external label, point `aria-labelledby` at it (restoring the
+    // accessible name) and focus the editor when it is clicked.
+    const [externalLabelId, setExternalLabelId] = React.useState<string>();
+    React.useEffect(() => {
+      if (!id) return;
+      const externalLabel = document.querySelector<HTMLLabelElement>(
+        `label[for="${globalThis.CSS.escape(id)}"]`
+      );
+      if (!externalLabel) return;
+      if (!externalLabel.id) externalLabel.id = `${reactId}-external-label`;
+      setExternalLabelId(externalLabel.id);
+      const handleClick = () => focusEditor();
+      externalLabel.addEventListener('click', handleClick);
+      return () => externalLabel.removeEventListener('click', handleClick);
+    }, [id, reactId, focusEditor]);
+
+    // Re-targets editor events at the mirror so legacy handlers keep reading
+    // `event.target.value` as plain text, like they did on the native
+    // textarea. Own enumerable props are copied onto an object with the same
+    // prototype so SyntheticEvent methods (preventDefault…) stay available.
+    const retargetEvent = React.useCallback(
+      <E extends React.SyntheticEvent>(event: E): E => {
+        const node = hiddenRef.current;
+        if (!node) return event;
+        return Object.assign(
+          Object.create(Object.getPrototypeOf(event) as object),
+          event,
+          { target: node, currentTarget: node }
+        ) as E;
+      },
+      []
+    );
+
+    type MirrorFocusEvent = React.FocusEvent<HTMLTextAreaElement>;
+    type MirrorKeyboardEvent = React.KeyboardEvent<HTMLTextAreaElement>;
 
     const handleHtmlChange = (html: string) => {
       const plain = htmlToPlain(html);
@@ -239,6 +351,15 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     const characterCount = state.plain.length;
 
+    // The editable's own metrics (RichTextEditor pins `text-base` and a
+    // one-row min-height): `size` restyles the font, `rows` restores the
+    // size-aware growth floor a native textarea got for free.
+    const lineHeightPx = size === 'sm' ? 20 : size === 'lg' ? 28 : 24;
+    const editorStyle = rows
+      ? // 7px block padding each side, matching the editable's py-[7px].
+        { minHeight: `${rows * lineHeightPx + 14}px` }
+      : undefined;
+
     return (
       <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
         {label && (
@@ -253,15 +374,62 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             {required && <RequiredMark variant={requiredVariant} />}
           </label>
         )}
-        <div ref={editorWrapperRef} className="w-full">
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions --
+            not interactive itself: delegates events bubbling from the
+            contenteditable textbox inside, like a native field's wrapper */}
+        <div
+          ref={editorWrapperRef}
+          className="w-full"
+          // Composed like native textarea events: blur/focus only fire when
+          // focus actually leaves/enters the field (moves inside the editor
+          // chrome — gutter menu, toolbar — don't count), and all events are
+          // re-targeted at the mirror so `event.target.value` stays plain.
+          onBlur={
+            onBlur &&
+            ((event: React.FocusEvent<HTMLDivElement>) => {
+              if (event.currentTarget.contains(event.relatedTarget)) return;
+              onBlur(retargetEvent(event) as unknown as MirrorFocusEvent);
+            })
+          }
+          onFocus={
+            onFocus &&
+            ((event: React.FocusEvent<HTMLDivElement>) => {
+              if (event.currentTarget.contains(event.relatedTarget)) return;
+              onFocus(retargetEvent(event) as unknown as MirrorFocusEvent);
+            })
+          }
+          onKeyDown={
+            onKeyDown &&
+            ((event: React.KeyboardEvent<HTMLDivElement>) =>
+              onKeyDown(retargetEvent(event) as unknown as MirrorKeyboardEvent))
+          }
+          onKeyUp={
+            onKeyUp &&
+            ((event: React.KeyboardEvent<HTMLDivElement>) =>
+              onKeyUp(retargetEvent(event) as unknown as MirrorKeyboardEvent))
+          }
+        >
           <TextAreaRich
             value={state.html}
             onChange={handleHtmlChange}
             placeholder={placeholder}
             disabled={disabled}
+            readOnly={readOnly}
+            id={id}
+            sanitizeHtml={sanitizePastedHtml}
             aria-label={ariaLabel ?? label}
+            aria-labelledby={ariaLabelledBy ?? externalLabelId}
             aria-describedby={describedByIds}
             aria-invalid={invalid || undefined}
+            aria-required={required || undefined}
+            editorClassName={cn(
+              // A native textarea renders repeated spaces and tabs
+              // faithfully; normal HTML layout would collapse them.
+              'whitespace-pre-wrap',
+              size === 'sm' && 'text-sm',
+              size === 'lg' && 'text-lg'
+            )}
+            editorStyle={editorStyle}
             className={cn(
               size === 'sm' && 'text-sm',
               size === 'lg' && 'text-lg',
@@ -281,6 +449,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           tabIndex={-1}
           aria-hidden="true"
           name={name}
+          form={form}
           required={required}
           disabled={disabled}
           value={state.plain}

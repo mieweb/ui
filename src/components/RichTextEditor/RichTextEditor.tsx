@@ -171,12 +171,28 @@ export interface RichTextEditorProps {
    * `TextAreaRich` is the packaged pairing. Defaults to false.
    */
   chromeless?: boolean;
+  /** Id applied to the editable region (deep links, `aria-labelledby`). */
+  id?: string;
+  /**
+   * Prevent editing and formatting while keeping the region focusable and
+   * its text selectable — the contenteditable analogue of a native
+   * textarea's `readOnly`. The block gutter menu is hidden.
+   */
+  readOnly?: boolean;
+  /** Extra class for the editable region itself (fonts, whitespace). */
+  editorClassName?: string;
+  /** Inline style for the editable region (e.g. a row-derived min-height). */
+  editorStyle?: React.CSSProperties;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
+  /** Id(s) of element(s) labelling the editable region. */
+  'aria-labelledby'?: string;
   /** Ids of elements describing the editable region (errors, helper text). */
   'aria-describedby'?: string;
   /** Marks the editable region invalid for assistive technology. */
   'aria-invalid'?: React.AriaAttributes['aria-invalid'];
+  /** Marks the editable region required for assistive technology. */
+  'aria-required'?: React.AriaAttributes['aria-required'];
 }
 
 // --- Minimal Web Speech API typings (absent from the standard DOM lib) ---
@@ -335,12 +351,21 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       blockMenuLabels,
       markdownShortcuts = false,
       chromeless = false,
+      id,
+      readOnly = false,
+      editorClassName,
+      editorStyle,
       'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
       'aria-describedby': ariaDescribedBy,
       'aria-invalid': ariaInvalid,
+      'aria-required': ariaRequired,
     },
     ref
   ) => {
+    // Shared guard: read-only blocks edits exactly like disabled does, but
+    // keeps the region focusable and selectable.
+    const inert = disabled || readOnly;
     const editorRef = React.useRef<HTMLDivElement>(null);
     const [isListening, setIsListening] = React.useState(false);
     const [speechSupported, setSpeechSupported] = React.useState(false);
@@ -499,14 +524,14 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     const execCommand = (command: string) => {
-      if (disabled) return;
+      if (inert) return;
       document.execCommand(command, false);
       editorRef.current?.focus();
       updateContent();
     };
 
     const handleConvertToMustache = () => {
-      if (disabled || !editorRef.current) return;
+      if (inert || !editorRef.current) return;
       editorRef.current.innerHTML = convertAngleBracketsToMustache(
         editorRef.current.innerHTML
       );
@@ -514,7 +539,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     const insertVariable = (variable: RichTextVariable) => {
-      if (disabled || !editorRef.current) return;
+      if (inert || !editorRef.current) return;
       editorRef.current.focus();
       const textToInsert = variable.insertValue ?? variable.value;
 
@@ -580,7 +605,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     const insertMacro = (macro: Macro) => {
-      if (disabled || !editorRef.current) return;
+      if (inert || !editorRef.current) return;
       focusRestoringSelection();
       insertTextAtSelection(macro.content);
     };
@@ -752,7 +777,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const handleEditorKeyDown = (
       event: React.KeyboardEvent<HTMLDivElement>
     ) => {
-      if (disabled) return;
+      if (inert) return;
       if (
         blockMenu &&
         event.key === '/' &&
@@ -875,7 +900,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     /** Apply a block command from the menu to the captured target range. */
     const applyBlockFormat = (command: string, value?: string) => {
-      if (disabled || !editorRef.current) return;
+      if (inert || !editorRef.current) return;
       setBlockMenuOpen(false);
       editorRef.current.focus();
       const target = blockTargetRangeRef.current;
@@ -1244,7 +1269,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                   variant={isListening ? 'danger' : 'ghost'}
                   size="sm"
                   onClick={toggleDictation}
-                  disabled={disabled || !speechSupported}
+                  disabled={inert || !speechSupported}
                   className={cn(
                     'h-8 gap-1 px-2',
                     isListening && 'animate-pulse'
@@ -1309,7 +1334,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               blockMenu && !disabled ? handleGutterMouseMove : undefined
             }
           >
-            {blockMenu && !disabled && (
+            {blockMenu && !inert && (
               <div
                 data-slot="rich-text-editor-block-gutter"
                 className="absolute start-1 z-10"
@@ -1469,7 +1494,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                   // native textarea clips its own) instead of wrapping out
                   // of the one-row field.
                   chromeless ? 'end-0 truncate px-3 py-[7px] text-base' : 'p-4',
-                  blockMenu && 'ps-10'
+                  blockMenu && 'ps-10',
+                  // Keep the placeholder's font in step with the editable
+                  // when the host restyles it (e.g. Textarea's `size`).
+                  editorClassName
                 )}
               >
                 {placeholder}
@@ -1477,12 +1505,16 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             )}
             <div
               ref={editorRef}
+              id={id}
               role="textbox"
               aria-multiline="true"
               aria-label={ariaLabel ?? placeholder}
+              aria-labelledby={ariaLabelledBy}
               aria-describedby={ariaDescribedBy}
               aria-invalid={ariaInvalid}
-              contentEditable={!disabled}
+              aria-required={ariaRequired}
+              aria-readonly={readOnly || undefined}
+              contentEditable={!inert}
               // Styling hook: condensed-view.css must not pin the editable
               // to its compact single-line minimum while the macro panel
               // (absolutely stretched over this region) needs the md
@@ -1522,8 +1554,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 blockMenu && 'ps-10',
                 hasMacros && macrosOpen && 'md:min-h-[400px]',
                 disabled &&
-                  'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300'
+                  'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300',
+                editorClassName
               )}
+              style={editorStyle}
               suppressContentEditableWarning
             />
           </div>

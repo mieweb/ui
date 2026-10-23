@@ -45,6 +45,12 @@ the previous native implementation is now **`TextAreaPlain`**
 - **Controlled transforms reset formatting.** Echoing `event.target.value`
   back unchanged preserves the on-screen formatting; transforming it
   (uppercasing, trimming) resyncs the editor to plain paragraphs.
+- **Kept working:** `readOnly`, `required`, `rows` (minimum height), `size`,
+  `form`, `onFocus`/`onBlur`/`onKeyDown`/`onKeyUp` (retargeted so
+  `event.target.value` reads plain text), and external
+  `<label htmlFor={id}>` pairs (bridged via `aria-labelledby` plus
+  click-to-focus). `\r\n` in values is normalized to `\n`, and pasted or
+  dropped rich content is flattened to plain text before it enters the field.
 
 ## Chat composer
 

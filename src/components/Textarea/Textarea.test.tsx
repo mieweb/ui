@@ -216,3 +216,179 @@ describe('Textarea (rich compat)', () => {
     expect(warn.mock.calls.length).toBe(before);
   });
 });
+
+describe('Textarea (native parity hardening)', () => {
+  it('normalizes CRLF and lone CR like a native textarea', () => {
+    expect(plainToHtml('a\r\nb')).toBe('<p>a</p><p>b</p>');
+    expect(plainToHtml('a\rb')).toBe('<p>a</p><p>b</p>');
+    renderWithTheme(
+      <Textarea label="Notes" value={'a\r\nb'} onChange={() => {}} />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    expect(editor.innerHTML).toBe('<p>a</p><p>b</p>');
+    const mirror = document.querySelector<HTMLTextAreaElement>(
+      '[data-slot="textarea-mirror"]'
+    )!;
+    expect(mirror.value).toBe('a\nb');
+  });
+
+  it('keeps line boundaries between inline runs and blocks', () => {
+    // Inline text before a block starts its own line…
+    expect(htmlToPlain('a<div>b</div>')).toBe('a\nb');
+    // …an empty block after inline text is an empty line…
+    expect(htmlToPlain('a<div><br></div>')).toBe('a\n');
+    // …and nested blocks don't fabricate blank lines.
+    expect(htmlToPlain('<blockquote><p>a</p></blockquote><p>b</p>')).toBe(
+      'a\nb'
+    );
+  });
+
+  it('forwards the form attribute to the mirror', () => {
+    renderWithTheme(
+      <>
+        <form id="profile" />
+        <Textarea label="Notes" name="notes" form="profile" />
+      </>
+    );
+    const mirror = document.querySelector<HTMLTextAreaElement>(
+      '[data-slot="textarea-mirror"]'
+    )!;
+    expect(mirror).toHaveAttribute('form', 'profile');
+    expect(mirror.form?.id).toBe('profile');
+  });
+
+  it('announces required on the editable region', () => {
+    renderWithTheme(<Textarea label="Notes" required />);
+    expect(screen.getByRole('textbox', { name: /Notes/ })).toHaveAttribute(
+      'aria-required',
+      'true'
+    );
+  });
+
+  it('readOnly prevents editing but keeps the region focusable', () => {
+    renderWithTheme(
+      <Textarea label="Notes" value="locked" onChange={() => {}} readOnly />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    expect(editor).toHaveAttribute('contenteditable', 'false');
+    expect(editor).toHaveAttribute('aria-readonly', 'true');
+    expect(editor).toHaveAttribute('tabindex', '0');
+    // The block gutter menu is editing chrome; it must not render.
+    expect(screen.queryByRole('button', { name: 'Block menu' })).toBeNull();
+  });
+
+  it('preserves whitespace and maps size and rows onto the editable', () => {
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        size="sm"
+        rows={4}
+        value="a  b"
+        onChange={() => {}}
+      />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    expect(editor.className).toContain('whitespace-pre-wrap');
+    expect(editor.className).toContain('text-sm');
+    expect(editor.className).not.toContain('text-base');
+    // 4 rows × 20px sm line height + 14px block padding.
+    expect(editor.style.minHeight).toBe('94px');
+  });
+
+  it('bridges an external <label htmlFor> to the editable', () => {
+    renderWithTheme(
+      <>
+        <label htmlFor="ord-detail">Instructions</label>
+        <Textarea id="ord-detail" />
+      </>
+    );
+    const editor = screen.getByRole('textbox', { name: 'Instructions' });
+    expect(editor).toHaveAttribute('id', 'ord-detail');
+    const externalLabel = document.querySelector('label[for="ord-detail"]')!;
+    expect(editor.getAttribute('aria-labelledby')).toBe(externalLabel.id);
+    fireEvent.click(externalLabel);
+    expect(document.activeElement).toBe(editor);
+  });
+
+  it('composes onKeyDown/onKeyUp with the mirror as the event target', () => {
+    const keys: Array<{ key: string; value: string }> = [];
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        value="hi"
+        onChange={() => {}}
+        onKeyDown={(e) =>
+          keys.push({
+            key: e.key,
+            value:
+              e.target instanceof HTMLTextAreaElement ? e.target.value : '?',
+          })
+        }
+      />
+    );
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Notes' }), {
+      key: 'Enter',
+    });
+    expect(keys).toEqual([{ key: 'Enter', value: 'hi' }]);
+  });
+
+  it('fires onBlur only when focus leaves the field', () => {
+    const onBlur = vi.fn();
+    renderWithTheme(
+      <Textarea label="Notes" value="" onChange={() => {}} onBlur={onBlur} />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    // Focus moving to the field's own chrome (the gutter button) is an
+    // internal move, like clicking a native textarea's scrollbar.
+    const gutter = screen.getByRole('button', { name: 'Block menu' });
+    fireEvent.blur(editor, { relatedTarget: gutter });
+    expect(onBlur).not.toHaveBeenCalled();
+    fireEvent.blur(editor, { relatedTarget: document.body });
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
+
+  it('sanitizes pasted HTML to escaped plain paragraphs', () => {
+    const execCommand = vi.fn();
+    (document as Document & { execCommand: typeof execCommand }).execCommand =
+      execCommand;
+    renderWithTheme(<Textarea label="Notes" value="" onChange={() => {}} />);
+    fireEvent.paste(screen.getByRole('textbox', { name: 'Notes' }), {
+      clipboardData: {
+        getData: () =>
+          '<div class="host-css" style="position:fixed">x<script>y</script></div>',
+      },
+    });
+    expect(execCommand).toHaveBeenCalledWith(
+      'insertHTML',
+      false,
+      // Flattened to text: markup, styles and classes are gone.
+      '<p>x</p>'
+    );
+  });
+
+  it('resyncs the editor DOM when a controlled parent rejects an edit', () => {
+    function Harness() {
+      const [value, setValue] = React.useState('abc');
+      return (
+        <Textarea
+          label="Notes"
+          value={value}
+          onChange={(e) => {
+            // Reject anything longer than three characters.
+            if (e.target.value.length <= 3) setValue(e.target.value);
+          }}
+        />
+      );
+    }
+    renderWithTheme(<Harness />);
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    editEditor(editor, '<p>abcd</p>');
+    // The parent kept 'abc'; the visible editor must not keep 'abcd'.
+    expect(editor.innerHTML).toBe('<p>abc</p>');
+    expect(
+      document.querySelector<HTMLTextAreaElement>(
+        '[data-slot="textarea-mirror"]'
+      )!.value
+    ).toBe('abc');
+  });
+});
