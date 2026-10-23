@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Textarea } from './Textarea';
-import { Input } from '../Input';
+import { TextAreaPlain } from '../TextAreaPlain';
 
 const meta: Meta<typeof Textarea> = {
   id: 'text-inputs-textarea',
@@ -13,20 +13,34 @@ const meta: Meta<typeof Textarea> = {
       description: {
         component: `### What it's for
 
-The multi-line counterpart of \`Input\`, sharing its anatomy — \`label\` (\`labelVariant\` \`stacked\` | \`floating\`, \`hideLabel\`), \`helperText\`, \`error\`, \`required\` + \`requiredVariant\`, \`size\`, \`hasError\` — and adding what long text needs: \`maxLength\` + \`showCount\` (a live \`n/max\` counter), \`autoResize\` (on by default — an empty textarea starts at the same height as a single-line \`Input\` and grows/shrinks with content, while the native drag handle still works and sets a new minimum) and \`resize\` \`none\` | \`vertical\` | \`horizontal\` | \`both\`. The folder exports \`Textarea\` and \`textareaVariants\`.
+The default multi-line field — and it is **rich text underneath**. \`Textarea\`
+keeps the classic plain-text contract (\`value\`, \`defaultValue\` and
+\`onChange\`'s \`event.target.value\` are plain strings, \`name\` posts plain
+text, \`ref.current.value\` reads plain text) while rendering \`TextAreaRich\`:
+toolbar hidden until requested, markdown block shortcuts (\`##\` + space →
+heading), and the Notion-style block gutter menu. Every note field gets
+formatting for free without changing its data layer.
+
+Field anatomy follows \`Input\`: \`label\` (+ \`hideLabel\`), \`helperText\`,
+\`error\`, \`required\` + \`requiredVariant\`, \`size\`, \`hasError\`, and
+\`maxLength\` + \`showCount\` render a live character counter.
 
 ### Use it when
 
 - The user writes a sentence or more: notes, comments, descriptions, reasons.
-- There is a character budget the user should see while typing (\`maxLength\` + \`showCount\`).
+- The host stores plain text but writers benefit from visible structure while
+  composing.
 
 ### Don't use it when
 
+- The host should **persist** the formatting — use \`TextAreaRich\` (its
+  \`value\`/\`onChange\` carry HTML).
+- You need the native \`<textarea>\` element: hard \`maxLength\` enforcement,
+  native validation/autofill, drag-resize, floating labels — use
+  \`TextAreaPlain\`.
 - The value fits on one line — \`Input\`.
-- The value is HTML and the writer occasionally needs headings, lists or macros in a
-  textarea-like surface — \`TextAreaRich\`.
-- The text needs formatting, headings or collaborative editing — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
-- You need a fixed-height, read-only block — plain \`Text\`.
+- The text needs the always-on toolbar, merge variables or dictation —
+  \`RichTextEditor\`.
 
 ### Example
 
@@ -37,22 +51,39 @@ const [note, setNote] = React.useState('');
   label="Visit note"
   value={note}
   onChange={(e) => setNote(e.target.value)}
-  maxLength={500}
-  showCount
   helperText="Visible to the patient."
 />
 \`\`\`
 
-Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an internal copy only so the counter stays correct. The field starts at single-line height and grows with content; pass \`rows\` for a taller floor or \`autoResize={false}\` for classic fixed sizing.
-
 ### Limitations
 
-- Same wiring as \`Input\`: \`<label htmlFor>\`, \`aria-invalid\` always rendered, \`aria-describedby\` → error (\`<p role="alert">\`) or helper text, plus the counter's id when \`showCount\` is on. Helper text is hidden while an error shows.
-- The counter turns red at \`maxLength\` but does not announce it; \`maxLength\` is enforced by the native attribute, so the user is simply stopped from typing.
-- \`autoResize\` (the default) syncs \`style.height\` from \`scrollHeight\` (typing, controlled updates, mount-time prefill, and width changes via ResizeObserver). The native drag handle stays available: a dragged height — like a consumer-configured initial height (\`rows\`, a height class or inline style) — becomes the growth floor, and a \`max-h-*\` class caps growth and restores internal scrolling. \`autoResize={false}\` keeps the classic fixed \`min-h\` sizing. In condensed density the empty field matches the condensed Input height.
-- \`ref\` is forwarded through \`useImperativeHandle\`, so it is populated after mount, not during the first render.
-- RTL-safe (\`start-3\`, \`ms-1\`); the footer uses \`justify-between\` so the counter sits at the end. Dark mode via the same semantic tokens as \`Input\`.
-- No built-in strings; depends on \`Input\` for \`RequiredMark\`.`,
+- Formatting the user applies is visible while editing but **only plain text
+  is reported** — headings/bold/lists are flattened to lines. Hosts that echo
+  the controlled value back unchanged keep the on-screen formatting; hosts
+  that transform it (uppercase, trim) reset the field to plain paragraphs.
+- \`maxLength\` is not enforced while typing (the counter still shows the
+  budget and turns red); \`labelVariant="floating"\`, \`resize\` and
+  \`autoResize={false}\` fall back with a one-time dev console warning. Use
+  \`TextAreaPlain\` when those native behaviours are requirements.
+- A hidden \`<textarea>\` mirrors the plain value so \`name\` form posts and
+  \`ref.current.value\` keep working; \`ref.current.focus()\` focuses the
+  editor. CSS selectors targeting a visible \`textarea\` element no longer
+  match — style via \`[data-slot]\` hooks instead.
+- Error/helper/count are wired to the editable region via
+  \`aria-describedby\`. External \`<label htmlFor={id}>\` pairs keep working:
+  the field bridges them via \`aria-labelledby\` and click-to-focus, since a
+  contenteditable region cannot be targeted by \`htmlFor\` natively.
+
+### TextAreaPlain — the native escape hatch
+
+\`TextAreaPlain\` (exported from \`@mieweb/ui\`) is the previous native
+\`<textarea>\` implementation with the exact same props: hard \`maxLength\`
+enforcement, native validation/autofill, drag-resize (\`resize\`), fixed
+heights (\`autoResize={false}\`, \`rows\`), and \`labelVariant="floating"\`.
+Swap the import — \`Textarea\` → \`TextAreaPlain\` — and nothing else
+changes. Or opt out in place: \`<Textarea richText={false} />\` renders
+\`TextAreaPlain\` without changing the import — no gutter menu, no
+formatting, no HTML. See the escape-hatch stories below.`,
       },
     },
     catalog: {
@@ -60,23 +91,23 @@ Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an 
       relationships: [
         {
           type: 'alternative to',
-          target: 'text-inputs-input',
-          why: 'Textarea for multi-line text with character count and auto-resize; Input for one line.',
+          target: 'editors-textarearich',
+          why: 'Textarea is TextAreaRich with a plain-text value contract and Input-style field chrome; TextAreaRich when the host persists the HTML.',
         },
         {
           type: 'alternative to',
-          target: 'editors-richeditor',
-          why: 'RichEditor when the text needs formatting or collaboration; Textarea for plain multi-line text.',
+          target: 'text-inputs-input',
+          why: 'Textarea for multi-line text; Input for one line.',
         },
         {
           type: 'alternative to',
           target: 'editors-richtexteditor',
-          why: 'RichTextEditor when the note needs bold/lists/alignment, merge variables or dictation; Textarea for plain multi-line text.',
+          why: 'RichTextEditor when the host persists HTML and needs the always-on toolbar, merge variables or dictation; Textarea keeps a plain-text contract.',
         },
         {
           type: 'alternative to',
-          target: 'editors-textarearich',
-          why: 'TextAreaRich looks like Textarea at rest but emits HTML with markdown shortcuts, a block gutter menu and macros; Textarea when the consumer needs plain text.',
+          target: 'editors-richeditor',
+          why: 'RichEditor when the text needs Markdown, links/tables/code or collaboration; Textarea for plain multi-line text.',
         },
       ],
     },
@@ -87,321 +118,190 @@ Pass \`value\` for controlled use; with \`defaultValue\` the component keeps an 
       control: 'select',
       options: ['sm', 'md', 'lg'],
     },
-    labelVariant: {
-      control: 'select',
-      options: ['stacked', 'floating'],
-      description:
-        'stacked: label above the field. floating: label rests inside and floats on focus/value (ignores placeholder).',
-    },
-    resize: {
-      control: 'select',
-      options: ['none', 'vertical', 'horizontal', 'both'],
-      description:
-        'User resize handle; with autoResize, dragging it sets a new growth floor.',
-    },
     showCount: {
-      control: 'boolean',
-    },
-    autoResize: {
       control: 'boolean',
     },
     disabled: {
       control: 'boolean',
     },
-    hasError: {
+    richText: {
       control: 'boolean',
-    },
-    label: {
-      control: 'text',
-    },
-    placeholder: {
-      control: 'text',
-    },
-    helperText: {
-      control: 'text',
-    },
-    error: {
-      control: 'text',
-    },
-    maxLength: {
-      control: 'number',
-    },
-    rows: {
-      control: 'number',
+      description:
+        'Set false to opt out of the rich surface: renders the native TextAreaPlain — no gutter menu, no formatting, no HTML.',
+      table: { defaultValue: { summary: 'true' } },
     },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof Textarea>;
 
 export const Default: Story = {
   args: {
-    label: 'Description',
-    placeholder: 'Enter a description...',
-    size: 'md',
-    resize: 'vertical',
-    showCount: false,
-    autoResize: true,
-    disabled: false,
-    hasError: false,
-    helperText: '',
-    error: '',
-    maxLength: undefined,
+    label: 'Notes',
+    placeholder: 'Add a note…',
+    richText: true,
   },
-  decorators: [
-    (Story) => (
-      <div className="w-80">
-        <Story />
-      </div>
-    ),
-  ],
+  render: (args) => (
+    <div className="w-96">
+      <Textarea {...args} />
+    </div>
+  ),
 };
 
 export const WithHelperText: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Bio"
-        placeholder="Tell us about yourself..."
-        helperText="Write a brief description of yourself"
-      />
+  args: {
+    label: 'Visit note',
+    placeholder: 'Describe the visit…',
+    helperText: 'Visible to the patient.',
+  },
+  render: (args) => (
+    <div className="w-96">
+      <Textarea {...args} />
     </div>
   ),
 };
 
 export const WithCharacterCount: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Tweet"
-        placeholder="What's happening?"
-        maxLength={280}
-        showCount
-      />
+  args: {
+    label: 'Bio',
+    placeholder: 'Tell us about yourself…',
+    maxLength: 280,
+    showCount: true,
+  },
+  render: (args) => (
+    <div className="w-96">
+      <Textarea {...args} />
     </div>
   ),
 };
 
 export const WithError: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Message"
-        placeholder="Enter your message..."
-        error="Message is required"
-        hasError
-      />
-    </div>
-  ),
-};
-
-export const Small: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea label="Comment" placeholder="Add a comment..." size="sm" />
-    </div>
-  ),
-};
-
-export const Large: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea label="Article" placeholder="Write your article..." size="lg" />
-    </div>
-  ),
-};
-
-export const NoResize: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Fixed size"
-        placeholder="This textarea cannot be resized"
-        resize="none"
-      />
-    </div>
-  ),
-};
-
-export const AutoResize: Story = {
-  name: 'Auto-grow (default)',
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Auto-grow"
-        placeholder="Starts one line tall…"
-        helperText="Grows with content and shrinks when it's removed; dragging the handle sets a new minimum"
-      />
-    </div>
-  ),
-};
-
-export const MatchesInputHeight: Story = {
-  name: 'Matches Input height',
-  render: () => (
-    <div className="w-80 space-y-4">
-      <Input label="Single-line input" placeholder="Input" />
-      <Textarea label="Empty textarea" placeholder="Textarea" />
-      <p className="text-muted-foreground text-xs">
-        An empty auto-growing textarea matches the single-line input height for
-        each size.
-      </p>
+  args: {
+    label: 'Reason',
+    error: 'A reason is required.',
+    required: true,
+  },
+  render: (args) => (
+    <div className="w-96">
+      <Textarea {...args} />
     </div>
   ),
 };
 
 export const Prefilled: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Prefilled"
-        defaultValue={
-          'Prefilled content is measured on first render,\nso this textarea mounts at three lines tall\nwithout any typing.'
-        }
-      />
-    </div>
-  ),
-};
-
-export const RowsFloor: Story = {
-  name: 'Rows as growth floor',
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Comments"
-        rows={4}
-        placeholder="Starts four lines tall…"
-        helperText="rows={4} keeps the field at least four lines; content can still grow it"
-      />
-    </div>
-  ),
-};
-
-export const FixedHeight: Story = {
-  name: 'Fixed height (autoResize off)',
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Fixed height"
-        autoResize={false}
-        placeholder="Classic fixed-height textarea…"
-        helperText="Keeps the fixed min-height; no auto-growing"
-      />
+  args: {
+    label: 'Assessment',
+    defaultValue: 'Patient reports feeling well.\n\nNo acute distress.',
+  },
+  render: (args) => (
+    <div className="w-96">
+      <Textarea {...args} />
     </div>
   ),
 };
 
 export const Disabled: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Disabled"
-        placeholder="This textarea is disabled"
-        disabled
-        defaultValue="You cannot edit this content"
-      />
+  args: {
+    label: 'Locked note',
+    defaultValue: 'Signed and locked.',
+    disabled: true,
+  },
+  render: (args) => (
+    <div className="w-96">
+      <Textarea {...args} />
     </div>
   ),
 };
 
-export const MaxLengthReached: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea
-        label="Limited input"
-        maxLength={50}
-        showCount
-        defaultValue="This text is at the maximum character limit!"
-      />
-    </div>
-  ),
-};
-
-function ControlledTextareaDemo() {
-  const [value, setValue] = React.useState('');
-
-  return (
-    <div className="w-80 space-y-4">
-      <Textarea
-        label="Controlled textarea"
-        placeholder="Type something..."
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        showCount
-        maxLength={200}
-      />
-      <p className="text-muted-foreground text-xs">
-        Characters: <code className="font-mono">{value.length}</code>
-      </p>
-    </div>
-  );
-}
-
-export const Controlled: Story = {
-  render: () => <ControlledTextareaDemo />,
-};
-
-export const ContactForm: Story = {
-  render: () => (
-    <div className="w-96 space-y-4">
-      <h3 className="text-lg font-semibold">Contact Us</h3>
-      <Textarea
-        label="Your message"
-        placeholder="How can we help you?"
-        rows={5}
-        maxLength={1000}
-        showCount
-        helperText="Please provide as much detail as possible"
-      />
-    </div>
-  ),
+/**
+ * The plain-text contract in action: formatting is visible while editing, but
+ * `onChange` reports plain text — shown live under the field.
+ */
+export const PlainTextContract: Story = {
+  render: function PlainTextContractStory() {
+    const [value, setValue] = React.useState(
+      'Try the block menu or type ## and a space.'
+    );
+    return (
+      <div className="w-96 space-y-3">
+        <Textarea
+          label="Note"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <pre className="bg-muted text-muted-foreground max-h-40 overflow-auto rounded-md p-2 text-xs whitespace-pre-wrap">
+          {JSON.stringify(value)}
+        </pre>
+      </div>
+    );
+  },
 };
 
 export const AllSizes: Story = {
   render: () => (
-    <div className="w-80 space-y-6">
-      <Textarea label="Small" placeholder="Small textarea" size="sm" />
-      <Textarea
-        label="Medium"
-        placeholder="Medium textarea (default)"
-        size="md"
-      />
-      <Textarea label="Large" placeholder="Large textarea" size="lg" />
+    <div className="w-96 space-y-4">
+      <Textarea label="Small" size="sm" placeholder="Small" />
+      <Textarea label="Medium" size="md" placeholder="Medium" />
+      <Textarea label="Large" size="lg" placeholder="Large" />
     </div>
   ),
 };
 
-export const FloatingLabel: Story = {
+/**
+ * `richText={false}` opts a field out of the rich surface in place: the same
+ * `Textarea` import renders the native `TextAreaPlain` — no gutter menu, no
+ * formatting, no HTML — and native behaviours return.
+ */
+export const PlainOptOut: Story = {
+  name: 'Plain opt-out (richText false)',
   args: {
-    label: 'Description',
-    labelVariant: 'floating',
+    label: 'Plain-only note',
+    richText: false,
+    defaultValue: 'Typing *markdown* or **shortcuts** here stays literal.',
+    helperText: 'Native textarea: no gutter menu, no formatting.',
   },
 };
 
-export const FloatingLabelWithValue: Story = {
-  args: {
-    label: 'Description',
-    labelVariant: 'floating',
-    defaultValue: 'A multi-line note that sits below the floated label.',
-  },
-};
-
-export const FloatingLabelSizes: Story = {
+/**
+ * `TextAreaPlain` is the previous native `<textarea>` implementation with the
+ * same props — swap the import when you need hard `maxLength` enforcement,
+ * native validation/autofill, drag-resize or fixed heights.
+ */
+export const EscapeHatchTextAreaPlain: Story = {
+  name: 'TextAreaPlain (native escape hatch)',
   render: () => (
-    <div className="w-80 space-y-6">
-      <Textarea label="Small" labelVariant="floating" size="sm" />
-      <Textarea label="Medium" labelVariant="floating" size="md" />
-      <Textarea label="Large" labelVariant="floating" size="lg" />
+    <div className="w-96 space-y-4">
+      <TextAreaPlain
+        label="Hard character limit"
+        maxLength={80}
+        showCount
+        helperText="The native maxLength stops typing at 80."
+      />
+      <TextAreaPlain
+        label="Fixed height, drag to resize"
+        autoResize={false}
+        rows={3}
+        resize="vertical"
+      />
     </div>
   ),
 };
 
-export const FloatingLabelWithError: Story = {
-  args: {
-    label: 'Description',
-    labelVariant: 'floating',
-    defaultValue: 'Too short',
-    error: 'Description must be at least 20 characters.',
-  },
+/**
+ * `TextAreaPlain` also keeps the floating label variant, which the rich
+ * surface cannot render.
+ */
+export const EscapeHatchFloatingLabel: Story = {
+  name: 'TextAreaPlain (floating label)',
+  render: () => (
+    <div className="w-96 space-y-4">
+      <TextAreaPlain label="Floating label" labelVariant="floating" />
+      <TextAreaPlain
+        label="Floating with value"
+        labelVariant="floating"
+        defaultValue="Prefilled content keeps the label floated."
+      />
+    </div>
+  ),
 };

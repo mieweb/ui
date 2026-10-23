@@ -1,1 +1,6 @@
-export { Textarea, textareaVariants, type TextareaProps } from './Textarea';
+export {
+  Textarea,
+  plainToHtml,
+  htmlToPlain,
+  type TextareaProps,
+} from './Textarea';
