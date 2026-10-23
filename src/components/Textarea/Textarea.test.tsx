@@ -348,6 +348,39 @@ describe('Textarea (native parity hardening)', () => {
     expect(onBlur).toHaveBeenCalledTimes(1);
   });
 
+  it('treats the portalled block menu as inside the field', () => {
+    const onBlur = vi.fn();
+    const onFocus = vi.fn();
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        value=""
+        onChange={() => {}}
+        onBlur={onBlur}
+        onFocus={onFocus}
+      />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+    // The menu mounts in a portal under document.body (outside the
+    // wrapper's DOM) and focuses its first item on open.
+    const item = screen.getByRole('menuitem', { name: 'Text' });
+    expect(editor.parentElement?.contains(item)).toBe(false);
+    // Into the menu: not a blur.
+    fireEvent.blur(editor, { relatedTarget: item });
+    expect(onBlur).not.toHaveBeenCalled();
+    // Within the menu: neither blur nor focus.
+    const second = screen.getByRole('menuitem', { name: 'Heading 1' });
+    fireEvent.blur(item, { relatedTarget: second });
+    expect(onBlur).not.toHaveBeenCalled();
+    // Back into the editor: not a focus entry.
+    fireEvent.focus(editor, { relatedTarget: second });
+    expect(onFocus).not.toHaveBeenCalled();
+    // Out of the menu to the page: a real blur.
+    fireEvent.blur(item, { relatedTarget: document.body });
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
+
   it('sanitizes pasted HTML to escaped plain paragraphs', () => {
     const execCommand = vi.fn();
     (document as Document & { execCommand: typeof execCommand }).execCommand =
@@ -413,6 +446,19 @@ describe('Textarea (native parity hardening)', () => {
     );
     // …and so does a leading empty cell.
     expect(htmlToPlain('<tr><td></td><td>Drug</td></tr>')).toBe('\tDrug');
+  });
+
+  it('drops pretty-printed indentation between table elements', () => {
+    // Whitespace between structural table tags is markup formatting…
+    expect(
+      htmlToPlain(
+        '<table><tr>\n  <td>Drug</td>\n  <td>Dose</td>\n</tr></table>'
+      )
+    ).toBe('Drug\tDose');
+    // …while whitespace inside a cell is content.
+    expect(htmlToPlain('<tr><td>81  mg</td><td> qd </td></tr>')).toBe(
+      '81  mg\t qd '
+    );
   });
 
   it('parses untrusted markup with the inert template parser', () => {

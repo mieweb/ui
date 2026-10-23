@@ -78,6 +78,19 @@ const BLOCK_TAGS = new Set([
 /** Table cells separate with tabs; their row supplies the newline. */
 const CELL_TAGS = new Set(['TD', 'TH']);
 
+/**
+ * Structural table tags never render text of their own — whitespace-only
+ * text nodes directly under them are pretty-printing between cells/rows
+ * (`<tr>\n  <td>`), not field content.
+ */
+const TABLE_STRUCTURE_TAGS = new Set([
+  'TABLE',
+  'THEAD',
+  'TBODY',
+  'TFOOT',
+  'TR',
+]);
+
 /** Tags whose text is invisible — contributing it would leak code as text. */
 const IGNORED_TAGS = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT']);
 
@@ -89,6 +102,12 @@ function nodeListToText(nodes: Iterable<Node>): string {
   for (const node of nodes) {
     if (node.nodeType === Node.TEXT_NODE) {
       const text = node.textContent ?? '';
+      const parentTag = node.parentElement?.tagName;
+      // Indentation between structural table elements is markup
+      // formatting, not content — whitespace inside cells still counts.
+      if (!text.trim() && parentTag && TABLE_STRUCTURE_TAGS.has(parentTag)) {
+        continue;
+      }
       out += text;
       // Inter-cell whitespace from pretty-printed table markup does not
       // break the cell sequence.
@@ -340,6 +359,28 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
     type MirrorFocusEvent = React.FocusEvent<HTMLTextAreaElement>;
     type MirrorKeyboardEvent = React.KeyboardEvent<HTMLTextAreaElement>;
 
+    // Focus boundary that includes the editor's own portals: the block
+    // gutter menu mounts under `document.body` and moves focus to its first
+    // item on open, so DOM containment alone would fire the host's blur
+    // mid-format (a blur-to-save consumer would commit early). A portal is
+    // ours when a trigger inside this wrapper `aria-controls` its menu.
+    const focusStaysInside = (
+      event: React.FocusEvent<HTMLDivElement>
+    ): boolean => {
+      const related = event.relatedTarget;
+      if (!related) return false;
+      if (event.currentTarget.contains(related)) return true;
+      const menuId = related
+        .closest('[data-slot="dropdown-menu"]')
+        ?.querySelector('[role="menu"]')?.id;
+      return (
+        !!menuId &&
+        !!event.currentTarget.querySelector(
+          `[aria-controls="${globalThis.CSS.escape(menuId)}"]`
+        )
+      );
+    };
+
     const handleHtmlChange = (html: string) => {
       const plain = htmlToPlain(html);
       setState({ html, plain });
@@ -417,14 +458,14 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
           onBlur={
             onBlur &&
             ((event: React.FocusEvent<HTMLDivElement>) => {
-              if (event.currentTarget.contains(event.relatedTarget)) return;
+              if (focusStaysInside(event)) return;
               onBlur(retargetEvent(event) as unknown as MirrorFocusEvent);
             })
           }
           onFocus={
             onFocus &&
             ((event: React.FocusEvent<HTMLDivElement>) => {
-              if (event.currentTarget.contains(event.relatedTarget)) return;
+              if (focusStaysInside(event)) return;
               onFocus(retargetEvent(event) as unknown as MirrorFocusEvent);
             })
           }
