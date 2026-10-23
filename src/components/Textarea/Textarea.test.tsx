@@ -187,10 +187,11 @@ describe('Textarea (rich compat)', () => {
     renderWithTheme(
       <Textarea label="Notes" value="locked" onChange={() => {}} disabled />
     );
-    expect(screen.getByRole('textbox', { name: 'Notes' })).toHaveAttribute(
-      'contenteditable',
-      'false'
-    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    expect(editor).toHaveAttribute('contenteditable', 'false');
+    // Announced like a native disabled textarea (also the axe
+    // color-contrast exemption for the dimmed content).
+    expect(editor).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('warns once about dropped native behaviours', () => {

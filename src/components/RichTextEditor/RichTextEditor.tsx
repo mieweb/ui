@@ -1540,6 +1540,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               aria-invalid={ariaInvalid}
               aria-required={ariaRequired}
               aria-readonly={readOnly || undefined}
+              // A native disabled control announces its state (and axe
+              // exempts it from color-contrast); a contenteditable div
+              // must say so explicitly.
+              aria-disabled={disabled || undefined}
               contentEditable={!inert}
               // Styling hook: condensed-view.css must not pin the editable
               // to its compact single-line minimum while the macro panel
