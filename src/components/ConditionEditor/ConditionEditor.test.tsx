@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithDarkTheme, renderWithTheme } from '../../test/test-utils';
 import { ConditionEditor } from './ConditionEditor';
+import { MessagesProvider } from '../../utils/messages';
 import type { ConditionConcern } from '../ProblemList';
 
 const concern: ConditionConcern = {
@@ -232,5 +233,55 @@ describe('ConditionEditor', () => {
       'bg-warning/10',
       'dark:text-warning-200'
     );
+  });
+});
+
+describe('ConditionEditor message localization', () => {
+  it('translates controls and status labels while retaining clinical text, terminology and enum values', () => {
+    const onSave = vi.fn();
+    renderWithTheme(
+      <MessagesProvider
+        messages={{
+          labels: {
+            'Problem name': 'Nom du problème',
+            Severity: 'Gravité',
+            'Verification status': 'Statut',
+            mild: 'Léger',
+            Save: 'Enregistrer',
+            Note: 'Remarque',
+          },
+        }}
+      >
+        <ConditionEditor
+          mode="refine"
+          open
+          concern={concern}
+          renderCodeSearch={false}
+          onOpenChange={() => {}}
+          onSave={onSave}
+        />
+      </MessagesProvider>
+    );
+    expect(screen.getByLabelText(/Nom du problème/)).toHaveValue(
+      'Essential hypertension'
+    );
+    expect(screen.getByLabelText('Code 1')).toHaveValue('I10');
+    expect(screen.getByRole('group', { name: 'Gravité' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Statut')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Léger' }));
+    const note = screen.getByLabelText('Remarque');
+    note.innerHTML = '<p>Patient-authored English note.</p>';
+    fireEvent.input(note);
+    fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
+    expect(onSave.mock.calls[0][0]).toMatchObject({
+      text: 'Essential hypertension',
+      verificationStatus: 'confirmed',
+      severity: 'mild',
+      note: 'Patient-authored English note.',
+      coding: [
+        { system: 'ICD-10-CM', code: 'I10', display: 'Essential hypertension' },
+        { system: 'SNOMED', code: '59621000' },
+      ],
+    });
   });
 });

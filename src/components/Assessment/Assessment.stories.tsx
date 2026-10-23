@@ -34,6 +34,7 @@ The visit's **Assessment & Plan**: an ordered list (\`items: AssessmentItem[]\` 
 
 ### Don't use it when
 
+- You need the whole visit document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) includes this assessment model alongside narrative sections, repeatable vitals, clinical lists and MCP tools in one eSheet response store. Use Assessment directly when the host owns its items and orders independently.
 - You need the **chart** problem list with statuses and assertion history — [ProblemList](?path=/docs/clinical-lists-problemlist--docs).
 - You need to record which problems are **relevant** this visit (Addressed / Relevant Hx / Noted) rather than assessed with a plan — [PresentingProblems](?path=/docs/clinical-lists-presentingproblems--docs). Typical flow: PresentingProblems at the start of the visit, Assessment at the end.
 - You need to **edit** an assertion or an order in full — pair with [ConditionEditor](?path=/docs/clinical-lists-conditioneditor--docs) (\`refine\` / \`revise\`) and [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs) (\`onEditOrderStart\`); Assessment itself only edits an order's \`display\` / \`detail\` inline.
@@ -87,6 +88,11 @@ const [orderEditing, setOrderEditing] = useState<AssessmentOrder | null>(null);
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'encounter-orders-encountervisit',
+          why: 'EncounterVisit records Assessment concerns, assertions and linked orders as one section of an eSheet visit; use Assessment directly for a standalone controlled plan.',
+        },
         {
           type: 'composes with',
           target: 'encounter-orders-ordereditor',

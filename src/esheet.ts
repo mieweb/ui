@@ -12,6 +12,9 @@
 // Core types
 export { type FormDefinition } from '@esheet/core';
 
+// Visit documents and their in-process MCP bridge.
+export * from './components/EncounterVisit';
+
 // Builder
 export { EsheetBuilder, type EsheetBuilderProps } from '@esheet/builder';
 

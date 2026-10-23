@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
@@ -246,6 +248,7 @@ function MedicationRow({
   onStatusChange?: (medication: Medication, status: MedicationStatus) => void;
   onAction?: (medication: Medication, action: MedicationAction) => void;
 }) {
+  const m = useMessages();
   const handleRowKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.target !== e.currentTarget) return;
     if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
@@ -278,7 +281,9 @@ function MedicationRow({
       onKeyDown={drag.enabled ? handleRowKeyDown : undefined}
       aria-label={
         drag.enabled
-          ? `${medication.name}. Alt plus arrow keys to reorder.`
+          ? m('{name}. Alt plus arrow keys to reorder.', {
+              name: medication.name,
+            })
           : undefined
       }
       {...drag.rowProps(medication.id)}
@@ -313,12 +318,12 @@ function MedicationRow({
       )}
       {medication.expired && (
         <span className="text-sm font-bold text-red-600 dark:text-red-400">
-          EXPIRED
+          {m('EXPIRED')}
         </span>
       )}
       {medication.discontinuedDate && (
         <span className="text-muted-foreground text-sm">
-          Discontinued on: {medication.discontinuedDate}
+          {m('Discontinued on:')} {medication.discontinuedDate}
         </span>
       )}
       {(medication.note || medication.task) && (
@@ -332,17 +337,19 @@ function MedicationRow({
           {medication.task && (
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <CalendarCheckIcon size={12} />
-              Task: {medication.task}
+              {m('Task:')} {medication.task}
             </span>
           )}
         </span>
       )}
 
       {!readOnly && (
-        <RowActionToolbar label={`Actions for ${medication.name}`}>
+        <RowActionToolbar
+          label={m('Actions for {name}', { name: medication.name })}
+        >
           {actions.includes('open') && (
             <RowIconButton
-              label={ACTION_META.open.label}
+              label={m(ACTION_META.open.label)}
               icon={ACTION_META.open.icon}
               onClick={() => onAction?.(medication, 'open')}
             />
@@ -350,7 +357,7 @@ function MedicationRow({
           {STATUS_BUTTON_META.map(({ status, label, icon }) => (
             <RowIconButton
               key={status}
-              label={label}
+              label={m(label)}
               icon={icon}
               active={medication.status === status}
               onClick={() => onStatusChange?.(medication, status)}
@@ -361,7 +368,7 @@ function MedicationRow({
             .map((action) => (
               <RowIconButton
                 key={action}
-                label={ACTION_META[action].label}
+                label={m(ACTION_META[action].label)}
                 icon={ACTION_META[action].icon}
                 onClick={() => onAction?.(medication, action)}
               />
@@ -422,17 +429,21 @@ export const MedicationList = React.forwardRef<
     },
     ref
   ) => {
+    const m = useMessages();
     // clears-then-sets so repeated identical messages re-announce
     const [announcement, setAnnouncement] = useLiveAnnouncement();
 
     const handleStatusChange = React.useCallback(
       (medication: Medication, status: MedicationStatus) => {
         setAnnouncement(
-          `${medication.name} marked ${MEDICATION_STATUS_LABELS[status]}`
+          m('{name} marked {status}', {
+            name: medication.name,
+            status: m(MEDICATION_STATUS_LABELS[status]),
+          })
         );
         onStatusChange?.(medication, status);
       },
-      [onStatusChange, setAnnouncement]
+      [m, onStatusChange, setAnnouncement]
     );
 
     const groups = GROUP_ORDER.map((status) => ({
@@ -459,7 +470,7 @@ export const MedicationList = React.forwardRef<
           ? undefined
           : (ids) => {
               // announce pointer drops too, not just keyboard moves
-              setAnnouncement('Medication list reordered');
+              setAnnouncement(m('Medication list reordered'));
               onReorder(ids);
             },
       canDropOn: (dragged, target) => statusOf(dragged) === statusOf(target),
@@ -482,11 +493,13 @@ export const MedicationList = React.forwardRef<
         if (to < 0 || to >= medications.length) return;
         [ids[from], ids[to]] = [ids[to], ids[from]];
         setAnnouncement(
-          `${medication.name} moved ${dir === -1 ? 'up' : 'down'}`
+          m(dir === -1 ? '{name} moved up' : '{name} moved down', {
+            name: medication.name,
+          })
         );
         onReorder(ids);
       },
-      [medications, onReorder, readOnly, setAnnouncement]
+      [m, medications, onReorder, readOnly, setAnnouncement]
     );
 
     return (
@@ -500,19 +513,19 @@ export const MedicationList = React.forwardRef<
         {title !== null && (
           <CardHeader className="border-border bg-muted/50 border-b px-4 py-3">
             <h3 className="text-foreground text-sm font-semibold tracking-wide uppercase">
-              {title}
+              {m(title)}
             </h3>
           </CardHeader>
         )}
 
         <CardContent className="space-y-6 px-4 py-4">
           {groups.map(({ status, label, items }) => (
-            <section key={status} aria-label={label}>
+            <section key={status} aria-label={m(label)}>
               <h4
                 data-slot="clinical-list-heading"
                 className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
               >
-                {label}
+                {m(label)}
               </h4>
               {items.length > 0 ? (
                 <ul className="mt-1">
@@ -531,14 +544,14 @@ export const MedicationList = React.forwardRef<
                 </ul>
               ) : medications.length === 0 ? (
                 <p className="text-muted-foreground mt-2 text-sm">
-                  {emptyMessage}
+                  {m(emptyMessage)}
                 </p>
               ) : (
                 <p className="text-muted-foreground mt-2 flex items-center gap-1.5 text-sm">
                   <Badge variant="success" size="sm">
                     ✓
                   </Badge>
-                  {reconciledMessage}
+                  {m(reconciledMessage)}
                 </p>
               )}
             </section>
@@ -548,7 +561,7 @@ export const MedicationList = React.forwardRef<
             (addSearch || quickAddOptions?.length || onAddOther) && (
               <div className="space-y-2">
                 <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                  Add medication
+                  {m('Add medication')}
                 </span>
                 {addSearch}
                 {(quickAddOptions?.length || onAddOther) && (
@@ -573,7 +586,7 @@ export const MedicationList = React.forwardRef<
                         leftIcon={<PlusIcon size={12} />}
                         className="h-auto rounded-full px-2.5 py-1 text-xs"
                       >
-                        Other…
+                        {m('Other…')}
                       </Button>
                     )}
                   </div>
