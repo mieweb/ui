@@ -223,6 +223,15 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
     },
     ref
   ) => {
+    // One-time upgrade notice: this surface replaced the native <textarea>
+    // in 0.12.0 — reaches exactly the developers affected, in dev only.
+    warnOnce(
+      'rich-upgrade',
+      'Since 0.12.0 Textarea renders a rich text surface (plain-text value ' +
+        'contract unchanged). Watch for: CSS "textarea" selectors, E2E ' +
+        'fill()/type(), and maxLength no longer blocking typing. Opt out per ' +
+        'field with richText={false} or use TextAreaPlain. See MIGRATION.md.'
+    );
     if (labelVariant === 'floating') {
       warnOnce(
         'floating',
