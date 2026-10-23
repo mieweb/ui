@@ -2,13 +2,22 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { RequiredMark } from '../Input';
 import { TextAreaRich } from '../TextAreaRich';
+import { TextAreaPlain } from '../TextAreaPlain';
 import type { TextAreaPlainProps } from '../TextAreaPlain';
 
 /**
  * `Textarea` keeps `TextAreaPlain`'s prop surface so existing call sites
  * compile unchanged while rendering `TextAreaRich` underneath.
  */
-export type TextareaProps = TextAreaPlainProps;
+export interface TextareaProps extends TextAreaPlainProps {
+  /**
+   * Set `false` to opt out of the rich surface: renders the native
+   * `TextAreaPlain` instead — no block gutter menu, no formatting, no HTML —
+   * and restores every native textarea behaviour (`maxLength` enforcement,
+   * `resize`, `autoResize={false}`, floating labels).
+   */
+  richText?: boolean;
+}
 
 // --- plain text <-> HTML (lossless round-trip for plain text) --------------
 
@@ -155,22 +164,10 @@ function warnOnce(key: string, message: string): void {
 }
 
 /**
- * A multi-line text input that is rich text underneath. `Textarea` keeps its
- * plain-text contract — `value`, `defaultValue` and `onChange`'s
- * `event.target.value` are plain strings — while rendering `TextAreaRich`
- * (hidden toolbar, markdown shortcuts, block gutter menu) so every note
- * field gets formatting for free.
- *
- * Formatting the user applies is visible while editing but only the plain
- * text is reported through `onChange`; hosts that persist HTML should use
- * `TextAreaRich` directly. Need the native `<textarea>` element (hard
- * `maxLength`, native validation, autofill, drag-resize, floating label) —
- * use `TextAreaPlain`.
- *
- * A hidden `<textarea>` mirrors the plain value so `name` form posts and
- * `ref.current.value` keep working; `ref.current.focus()` focuses the editor.
+ * The rich implementation behind `Textarea` (see its docs). Separate
+ * component so the `richText={false}` branch never mounts these hooks.
  */
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
   (
     {
       label,
@@ -529,6 +526,33 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       </div>
     );
   }
+);
+
+RichTextarea.displayName = 'RichTextarea';
+
+/**
+ * A multi-line text input that is rich text underneath. `Textarea` keeps its
+ * plain-text contract — `value`, `defaultValue` and `onChange`'s
+ * `event.target.value` are plain strings — while rendering `TextAreaRich`
+ * (hidden toolbar, markdown shortcuts, block gutter menu) so every note
+ * field gets formatting for free.
+ *
+ * Formatting the user applies is visible while editing but only the plain
+ * text is reported through `onChange`; hosts that persist HTML should use
+ * `TextAreaRich` directly. Need the native `<textarea>` element (hard
+ * `maxLength`, native validation, autofill, drag-resize, floating label) —
+ * pass `richText={false}` or use `TextAreaPlain`.
+ *
+ * A hidden `<textarea>` mirrors the plain value so `name` form posts and
+ * `ref.current.value` keep working; `ref.current.focus()` focuses the editor.
+ */
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ richText = true, ...props }, ref) =>
+    richText ? (
+      <RichTextarea ref={ref} {...props} />
+    ) : (
+      <TextAreaPlain ref={ref} {...props} />
+    )
 );
 
 Textarea.displayName = 'Textarea';

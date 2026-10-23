@@ -444,3 +444,46 @@ describe('Textarea (native parity hardening)', () => {
     expect(ancestorKeyDown).not.toHaveBeenCalled();
   });
 });
+
+describe('Textarea richText={false} (plain opt-out)', () => {
+  it('renders the native textarea with no rich editor chrome', () => {
+    const { container } = renderWithTheme(
+      <Textarea label="Notes" richText={false} defaultValue="plain" />
+    );
+    const field = screen.getByRole('textbox', { name: 'Notes' });
+    expect(field.tagName).toBe('TEXTAREA');
+    expect(field).toHaveValue('plain');
+    // No contenteditable surface, no gutter trigger.
+    expect(container.querySelector('[contenteditable]')).toBeNull();
+    expect(
+      container.querySelector('[data-slot="rich-text-editor-block-gutter"]')
+    ).toBeNull();
+  });
+
+  it('keeps typed markup as literal text', () => {
+    let reported = '';
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        richText={false}
+        value=""
+        onChange={(e) => {
+          reported = e.target.value;
+        }}
+      />
+    );
+    fireEvent.change(screen.getByRole('textbox', { name: 'Notes' }), {
+      target: { value: '<b>bold?</b>' },
+    });
+    expect(reported).toBe('<b>bold?</b>');
+  });
+
+  it('forwards the ref to the real textarea element', () => {
+    const ref = React.createRef<HTMLTextAreaElement>();
+    renderWithTheme(
+      <Textarea label="Notes" richText={false} ref={ref} defaultValue="x" />
+    );
+    expect(ref.current?.tagName).toBe('TEXTAREA');
+    expect(ref.current?.value).toBe('x');
+  });
+});

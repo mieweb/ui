@@ -24,7 +24,7 @@ the previous native implementation is now **`TextAreaPlain`**
 | ----------------------------------------------------------------------------------- | ----------------------------------------------- |
 | A multi-line note field storing plain text (the default)                            | `Textarea` — no code changes                    |
 | To **persist** the formatting (value is HTML)                                       | `TextAreaRich`                                  |
-| The native `<textarea>` element: hard `maxLength`, native validation/autofill, drag-resize, floating labels, element-targeting CSS/refs | `TextAreaPlain` — same props as the old `Textarea` |
+| The native `<textarea>` element: hard `maxLength`, native validation/autofill, drag-resize, floating labels, element-targeting CSS/refs | `TextAreaPlain` — same props as the old `Textarea` — or `<Textarea richText={false}>` to opt out in place |
 
 ### Behaviour changes to review
 

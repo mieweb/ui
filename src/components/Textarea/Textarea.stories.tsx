@@ -81,7 +81,9 @@ const [note, setNote] = React.useState('');
 enforcement, native validation/autofill, drag-resize (\`resize\`), fixed
 heights (\`autoResize={false}\`, \`rows\`), and \`labelVariant="floating"\`.
 Swap the import — \`Textarea\` → \`TextAreaPlain\` — and nothing else
-changes. See the escape-hatch stories below.`,
+changes. Or opt out in place: \`<Textarea richText={false} />\` renders
+\`TextAreaPlain\` without changing the import — no gutter menu, no
+formatting, no HTML. See the escape-hatch stories below.`,
       },
     },
     catalog: {
@@ -122,6 +124,12 @@ changes. See the escape-hatch stories below.`,
     disabled: {
       control: 'boolean',
     },
+    richText: {
+      control: 'boolean',
+      description:
+        'Set false to opt out of the rich surface: renders the native TextAreaPlain — no gutter menu, no formatting, no HTML.',
+      table: { defaultValue: { summary: 'true' } },
+    },
   },
 };
 
@@ -132,6 +140,7 @@ export const Default: Story = {
   args: {
     label: 'Notes',
     placeholder: 'Add a note…',
+    richText: true,
   },
   render: (args) => (
     <div className="w-96">
@@ -237,6 +246,21 @@ export const AllSizes: Story = {
       <Textarea label="Large" size="lg" placeholder="Large" />
     </div>
   ),
+};
+
+/**
+ * `richText={false}` opts a field out of the rich surface in place: the same
+ * `Textarea` import renders the native `TextAreaPlain` — no gutter menu, no
+ * formatting, no HTML — and native behaviours return.
+ */
+export const PlainOptOut: Story = {
+  name: 'Plain opt-out (richText false)',
+  args: {
+    label: 'Plain-only note',
+    richText: false,
+    defaultValue: 'Typing *markdown* or **shortcuts** here stays literal.',
+    helperText: 'Native textarea: no gutter menu, no formatting.',
+  },
 };
 
 /**
