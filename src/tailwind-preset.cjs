@@ -1050,6 +1050,9 @@ module.exports = {
     'focus-within:ring-2',
     'focus-within:ring-ring',
     'focus-within:border-transparent',
+    // Textarea compat (ui#649) — error styling on the focused rich surface.
+    'focus-within:ring-destructive',
+    'focus-within:border-destructive',
     // Motion preset safelist: fallback animations and runtime-selected scale origins
     'animate-fade-in',
     'origin-top',

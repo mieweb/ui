@@ -54,9 +54,20 @@ const BLOCK_TAGS = new Set([
   'H5',
   'H6',
   'LI',
+  'UL',
+  'OL',
   'BLOCKQUOTE',
   'PRE',
+  'TABLE',
+  'CAPTION',
+  'THEAD',
+  'TBODY',
+  'TFOOT',
+  'TR',
 ]);
+
+/** Table cells separate with tabs; their row supplies the newline. */
+const CELL_TAGS = new Set(['TD', 'TH']);
 
 /** Tags whose text is invisible — contributing it would leak code as text. */
 const IGNORED_TAGS = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT']);
@@ -73,6 +84,11 @@ function nodeListToText(nodes: Iterable<Node>): string {
     if (IGNORED_TAGS.has(el.tagName)) continue;
     if (el.tagName === 'BR') {
       out += '\n';
+      continue;
+    }
+    if (CELL_TAGS.has(el.tagName)) {
+      if (out && !out.endsWith('\n') && !out.endsWith('\t')) out += '\t';
+      out += nodeListToText(el.childNodes);
       continue;
     }
     if (BLOCK_TAGS.has(el.tagName)) {
@@ -98,11 +114,13 @@ function nodeListToText(nodes: Iterable<Node>): string {
 /** Extracts plain text from editor HTML: blocks and `<br>` become newlines. */
 export function htmlToPlain(html: string): string {
   if (!html) return '';
-  const root = document.createElement('div');
-  // Read-only text extraction into a detached element; nothing is inserted
-  // into the page.
+  // A <template> is the spec's inert parser: untrusted markup (pasted HTML
+  // reaches this extractor) cannot load resources or run handlers like
+  // `<img onerror>` while being read — unlike a detached <div>, whose
+  // subtree is still "browsing-context connected" enough to fetch.
+  const root = document.createElement('template');
   root.innerHTML = html;
-  const text = nodeListToText(root.childNodes);
+  const text = nodeListToText(root.content.childNodes);
   return text.endsWith('\n') ? text.slice(0, -1) : text;
 }
 
@@ -292,17 +310,22 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // Re-targets editor events at the mirror so legacy handlers keep reading
     // `event.target.value` as plain text, like they did on the native
-    // textarea. Own enumerable props are copied onto an object with the same
-    // prototype so SyntheticEvent methods (preventDefault…) stay available.
+    // textarea. The original event is the prototype — reads and propagation
+    // state delegate to it — with only the targets overridden;
+    // stopPropagation/preventDefault forward to the original so React's
+    // dispatch loop (which checks the original) honours them.
     const retargetEvent = React.useCallback(
       <E extends React.SyntheticEvent>(event: E): E => {
         const node = hiddenRef.current;
         if (!node) return event;
-        return Object.assign(
-          Object.create(Object.getPrototypeOf(event) as object),
-          event,
-          { target: node, currentTarget: node }
-        ) as E;
+        const retargeted = Object.create(event) as E;
+        Object.defineProperties(retargeted, {
+          target: { value: node, enumerable: true },
+          currentTarget: { value: node, enumerable: true },
+          stopPropagation: { value: () => event.stopPropagation() },
+          preventDefault: { value: () => event.preventDefault() },
+        });
+        return retargeted;
       },
       []
     );

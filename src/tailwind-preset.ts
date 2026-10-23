@@ -1093,6 +1093,9 @@ export const miewebUISafelist = [
   'focus-within:ring-2',
   'focus-within:ring-ring',
   'focus-within:border-transparent',
+  // Textarea compat (ui#649) — error styling on the focused rich surface.
+  'focus-within:ring-destructive',
+  'focus-within:border-destructive',
   // Floating-group field boxes (labelVariant="floating" on RadioGroup /
   // CheckboxGroup) share the floating input heights as min-heights. sr-only
   // visually hides the group legend (and the hideLabel input label) while

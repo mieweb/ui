@@ -394,6 +394,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     // Mirrored into a ref so async dictation code can read the live value
     // after awaiting microphone permission.
     const toolbarVisibleRef = React.useRef(toolbarVisible);
+    // Same for disabled/readOnly: recognition callbacks outlive renders.
+    const inertRef = React.useRef(inert);
 
     // --- Block gutter menu state ---
     const [blockMenuOpen, setBlockMenuOpen] = React.useState(false);
@@ -474,6 +476,20 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         setIsListening(false);
       }
     }, [toolbarVisible]);
+
+    // Turning disabled/readOnly mid-dictation must stop recognition: the
+    // Stop button is disabled while inert, and onresult would otherwise keep
+    // editing a field the user can no longer change.
+    React.useEffect(() => {
+      inertRef.current = inert;
+      if (!inert) return;
+      if (recognitionRef.current && isListeningRef.current) {
+        shouldRestartRef.current = false;
+        isListeningRef.current = false;
+        recognitionRef.current.stop();
+        setIsListening(false);
+      }
+    }, [inert]);
 
     React.useEffect(() => {
       if (editorRef.current && editorRef.current.innerHTML !== value) {
@@ -956,9 +972,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         return;
       }
 
-      // The toolbar (and its Stop control) may have been hidden while
-      // awaiting microphone permission — do not start an unstoppable session.
-      if (!toolbarVisibleRef.current) return;
+      // The toolbar (and its Stop control) may have been hidden — or the
+      // editor made disabled/readOnly — while awaiting microphone
+      // permission; do not start an unstoppable or read-only session.
+      if (!toolbarVisibleRef.current || inertRef.current) return;
 
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
@@ -973,6 +990,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       };
 
       recognition.onresult = (event) => {
+        if (inertRef.current) return;
         let finalTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
@@ -1017,9 +1035,17 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       };
 
       recognition.onend = () => {
-        if (shouldRestartRef.current && isListeningRef.current) {
+        if (
+          shouldRestartRef.current &&
+          isListeningRef.current &&
+          !inertRef.current
+        ) {
           setTimeout(() => {
-            if (shouldRestartRef.current && isListeningRef.current) {
+            if (
+              shouldRestartRef.current &&
+              isListeningRef.current &&
+              !inertRef.current
+            ) {
               try {
                 recognition.start();
               } catch {

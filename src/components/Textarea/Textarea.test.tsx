@@ -391,4 +391,46 @@ describe('Textarea (native parity hardening)', () => {
       )!.value
     ).toBe('abc');
   });
+
+  it('keeps nested list and table boundaries', () => {
+    expect(
+      htmlToPlain(
+        '<ul><li>Parent<ul><li>Child</li></ul></li><li>Sibling</li></ul>'
+      )
+    ).toBe('Parent\nChild\nSibling');
+    expect(
+      htmlToPlain(
+        '<table><tbody><tr><td>Drug</td><td>Dose</td></tr><tr><td>Aspirin</td><td>81 mg</td></tr></tbody></table>'
+      )
+    ).toBe('Drug\tDose\nAspirin\t81 mg');
+  });
+
+  it('parses untrusted markup with the inert template parser', () => {
+    // Table fragments only survive the <template> parsing context — a <div>
+    // parser (which can also load resources and run handlers while reading)
+    // would silently drop the row/cell tags.
+    expect(htmlToPlain('<tr><td>Drug</td><td>Dose</td></tr>')).toBe(
+      'Drug\tDose'
+    );
+  });
+
+  it('lets handlers stop propagation to ancestor React handlers', () => {
+    const ancestorKeyDown = vi.fn();
+    renderWithTheme(
+      <div onKeyDown={ancestorKeyDown} role="presentation">
+        <Textarea
+          label="Notes"
+          value=""
+          onChange={() => {}}
+          onKeyDown={(e) => e.stopPropagation()}
+        />
+      </div>
+    );
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Notes' }), {
+      key: 'Escape',
+    });
+    // The retargeted event delegates stopPropagation to the original, so
+    // React's dispatch loop must not reach the ancestor handler.
+    expect(ancestorKeyDown).not.toHaveBeenCalled();
+  });
 });
