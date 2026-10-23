@@ -14,7 +14,7 @@ const meta: Meta<typeof TextAreaRich> = {
 
 **A textarea-like rich text surface.** \`TextAreaRich\` looks like the auto-growing \`Textarea\` — bordered, one Input row tall, grows with content — but is \`RichTextEditor\` in chromeless mode underneath. The toolbar starts hidden; formatting is reached by typing (markdown block shortcuts are on by default: \`##\` + space → heading, \`-\` → bullet list, \`1.\` → numbered list, \`>\` → quote), from the Notion-style **block gutter menu** (hover a row for the \`+\` button, or Ctrl/Cmd+/), or by choosing "Show toolbar" from that menu. Pass \`macros\` and \`.shortcut\` + space expands dot phrases in place; the gutter menu gains an "Insert macro" flyout of every macro plus "Show macro library", docking the searchable \`MacroLibrary\` panel.
 
-**The value contract is RichTextEditor's: \`value\` / \`onChange\` carry HTML, not plain text.** That is the whole reason this is a separate component — grafting rich text onto \`Textarea\` would silently change what \`onChange\` delivers to form posts and native bindings.
+**The value contract is RichTextEditor's: \`value\` / \`onChange\` carry HTML, not plain text.** That is the difference from \`Textarea\`, which renders this same surface but flattens the value to a plain string for form posts and native bindings — use \`TextAreaRich\` when the host persists the HTML.
 
 ### Use it when
 
@@ -58,7 +58,7 @@ The host owns the HTML string and is responsible for sanitising it before storag
         {
           type: 'alternative to',
           target: 'text-inputs-textarea',
-          why: 'Textarea is a native textarea emitting plain text for forms and bindings; TextAreaRich looks the same at rest but emits HTML with markdown shortcuts, a block gutter menu and macros.',
+          why: 'Textarea renders this same surface but flattens the value to plain text for forms and bindings; TextAreaRich hands the host the HTML to persist.',
         },
         {
           type: 'alternative to',

@@ -1,250 +1,218 @@
-import { describe, it, expect } from 'vitest';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import * as React from 'react';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
-import { Textarea } from './Textarea';
+import { Textarea, plainToHtml, htmlToPlain } from './Textarea';
 
-/** jsdom has no layout, so fake the scroll metrics the auto-grow code reads. */
-function mockScrollHeight(el: HTMLElement, getHeight: () => number) {
-  Object.defineProperty(el, 'scrollHeight', {
-    configurable: true,
-    get: getHeight,
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+/** Replace the editable's content and fire input, like a user edit. */
+const editEditor = (editor: HTMLElement, html: string) => {
+  editor.innerHTML = html;
+  fireEvent.input(editor);
+};
+
+describe('plainToHtml / htmlToPlain', () => {
+  it.each([
+    ['', ''],
+    ['hello', '<p>hello</p>'],
+    ['a\nb', '<p>a</p><p>b</p>'],
+    ['a\n\nb', '<p>a</p><p><br></p><p>b</p>'],
+    ['\na', '<p><br></p><p>a</p>'],
+    ['a\n', '<p>a</p><p><br></p>'],
+    ['<b> & "quotes"', '<p>&lt;b&gt; &amp; "quotes"</p>'],
+  ])('converts %j to %j and back', (plain, html) => {
+    expect(plainToHtml(plain)).toBe(html);
+    expect(htmlToPlain(html)).toBe(plain);
   });
-}
 
-describe('Textarea', () => {
-  it('renders with label correctly', () => {
-    renderWithTheme(<Textarea label="Description" />);
-    expect(screen.getByLabelText('Description')).toBeInTheDocument();
-  });
-
-  it('shows required indicator and sets required when required', () => {
-    renderWithTheme(<Textarea label="Description" required />);
-    expect(screen.getByText('*')).toBeInTheDocument();
-    expect(screen.getByRole('textbox')).toBeRequired();
-  });
-
-  it('uses the warning color for soft requirements', () => {
-    renderWithTheme(
-      <Textarea label="Description" required requiredVariant="warning" />
+  it('flattens rich editor HTML to lines', () => {
+    expect(htmlToPlain('<h2>Title</h2><p><strong>bold</strong> text</p>')).toBe(
+      'Title\nbold text'
     );
-    expect(screen.getByText('*')).toHaveClass('text-warning');
+    expect(htmlToPlain('<ul><li>one</li><li>two</li></ul>')).toBe('one\ntwo');
+    expect(htmlToPlain('<p>a<br>b</p>')).toBe('a\nb');
+    // The editor's empty state is one empty paragraph.
+    expect(htmlToPlain('<p><br></p>')).toBe('');
+  });
+});
+
+describe('Textarea (rich compat)', () => {
+  it('renders a rich text surface with the label wired up', () => {
+    renderWithTheme(<Textarea label="Notes" />);
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    expect(editor).toHaveAttribute('contenteditable', 'true');
+    expect(
+      document.querySelector('[data-slot="rich-text-editor"]')
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-slot="textarea-label"]')
+    ).toHaveTextContent('Notes');
   });
 
-  describe('auto-grow (default)', () => {
-    it('starts at a single line matching the Input height', () => {
-      renderWithTheme(<Textarea label="Notes" />);
-      const textarea = screen.getByRole('textbox');
-      expect(textarea).toHaveAttribute('rows', '1');
-      expect(textarea).toHaveClass('min-h-10');
-      // The native drag handle stays available alongside auto-grow.
-      expect(textarea).toHaveClass('resize-y');
-      // Exposes the mode to the condensed stylesheet.
-      expect(textarea).toHaveAttribute('data-auto-resize', 'true');
-    });
+  it('renders multi-line values as one paragraph per line', () => {
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        value={'line one\nline two'}
+        onChange={() => {}}
+      />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    expect(editor.innerHTML).toBe('<p>line one</p><p>line two</p>');
+  });
 
-    it('uses size-matched single-line baselines', () => {
-      renderWithTheme(<Textarea label="Notes" size="sm" />);
-      expect(screen.getByRole('textbox')).toHaveClass('min-h-8');
-    });
+  it('reports plain text through event.target.value with the field name', () => {
+    const seen: Array<{ value: string; name: string }> = [];
+    const onChange = vi.fn((e: React.ChangeEvent<HTMLTextAreaElement>) =>
+      // Consumers read synchronously inside the handler; the target is the
+      // live mirror node, so its value follows later re-renders.
+      seen.push({ value: e.target.value, name: e.target.name })
+    );
+    renderWithTheme(
+      <Textarea label="Notes" name="notes" value="" onChange={onChange} />
+    );
+    editEditor(
+      screen.getByRole('textbox', { name: 'Notes' }),
+      '<p><strong>bold</strong> move</p><p>second</p>'
+    );
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(seen[0]).toEqual({ value: 'bold move\nsecond', name: 'notes' });
+  });
 
-    it('measures prefilled content on mount', () => {
-      let mounted: HTMLTextAreaElement | null = null;
-      renderWithTheme(
+  it('keeps rich formatting when the controlled value round-trips', () => {
+    function Harness() {
+      const [value, setValue] = React.useState('');
+      return (
         <Textarea
           label="Notes"
-          defaultValue={'one\ntwo\nthree'}
-          ref={(el) => {
-            if (el && !mounted) {
-              mounted = el;
-              mockScrollHeight(el, () => 120);
-            }
-          }}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
         />
       );
-      const textarea = screen.getByRole('textbox');
-      // Mount effect runs after ref callback, so the mock is in place.
-      expect(textarea.style.height).toBe('120px');
-    });
-
-    it('grows while typing and shrinks when content is removed', async () => {
-      const user = userEvent.setup();
-      renderWithTheme(<Textarea label="Notes" />);
-      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-      mockScrollHeight(textarea, () =>
-        textarea.value.includes('\n') ? 96 : 40
-      );
-
-      await user.type(textarea, 'line one{Enter}line two');
-      expect(textarea.style.height).toBe('96px');
-
-      await user.clear(textarea);
-      await user.type(textarea, 'short');
-      expect(textarea.style.height).toBe('40px');
-    });
-
-    it('recalculates on controlled value updates', () => {
-      const { rerender } = renderWithTheme(
-        <Textarea label="Notes" value="one" onChange={() => {}} />
-      );
-      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-      mockScrollHeight(textarea, () =>
-        textarea.value.includes('\n') ? 96 : 40
-      );
-
-      rerender(
-        <Textarea label="Notes" value={'one\ntwo\nthree'} onChange={() => {}} />
-      );
-      expect(textarea.style.height).toBe('96px');
-    });
-
-    it('respects an explicit rows floor', () => {
-      renderWithTheme(<Textarea label="Notes" rows={5} />);
-      expect(screen.getByRole('textbox')).toHaveAttribute('rows', '5');
-    });
-
-    it('preserves a consumer-configured initial height as the growth floor', async () => {
-      const user = userEvent.setup();
-      let mounted: HTMLTextAreaElement | null = null;
-      renderWithTheme(
-        <Textarea
-          label="Notes"
-          style={{ height: '160px' }}
-          ref={(el) => {
-            if (el && !mounted) {
-              mounted = el;
-              mockScrollHeight(el, () => 40);
-              const metric = () => {
-                const h = parseInt(el.style.height, 10);
-                return Number.isNaN(h) ? 160 : h;
-              };
-              Object.defineProperty(el, 'offsetHeight', {
-                configurable: true,
-                get: metric,
-              });
-              Object.defineProperty(el, 'clientHeight', {
-                configurable: true,
-                get: metric,
-              });
-            }
-          }}
-        />
-      );
-      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-      // Mount measurement keeps the configured 160px as the floor.
-      expect(textarea.style.height).toBe('160px');
-      // Content below the floor does not shrink it.
-      await user.type(textarea, 'short');
-      expect(textarea.style.height).toBe('160px');
-      // Content above the floor still grows past it.
-      mockScrollHeight(textarea, () => 240);
-      await user.type(textarea, ' more');
-      expect(textarea.style.height).toBe('240px');
-    });
-
-    it('keeps a user-dragged height as the growth floor', async () => {
-      const user = userEvent.setup();
-      renderWithTheme(<Textarea label="Notes" />);
-      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-      mockScrollHeight(textarea, () => 40);
-
-      await user.type(textarea, 'a');
-      expect(textarea.style.height).toBe('40px');
-
-      // Simulate the browser applying a drag-resize: the component adopts
-      // out-of-band heights as the new floor (normally via ResizeObserver;
-      // jsdom has none, so exercise the same path through another input
-      // after seeding the floor).
-      textarea.style.height = '200px';
-      mockScrollHeight(textarea, () => 64);
-      await user.type(textarea, 'b');
-      // Without a ResizeObserver the drag is not detected and content
-      // sizing wins — this guards the fallback behavior.
-      expect(textarea.style.height).toBe('64px');
-    });
+    }
+    renderWithTheme(<Harness />);
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    editEditor(editor, '<p><strong>bold</strong> move</p>');
+    // The host echoed 'bold move' back; the on-screen HTML keeps the <strong>.
+    expect(editor.innerHTML).toContain('<strong>bold</strong>');
   });
 
-  describe('autoResize={false} (fixed sizing)', () => {
-    it('keeps the fixed min-height and manual resize handle', () => {
-      renderWithTheme(<Textarea label="Notes" autoResize={false} />);
-      const textarea = screen.getByRole('textbox');
-      expect(textarea).toHaveClass('min-h-[80px]');
-      expect(textarea).toHaveClass('resize-y');
-      expect(textarea).not.toHaveAttribute('rows');
-      expect(textarea).not.toHaveAttribute('data-auto-resize');
-    });
-
-    it('does not force rows or adjust height', async () => {
-      const user = userEvent.setup();
-      renderWithTheme(<Textarea label="Notes" autoResize={false} rows={3} />);
-      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
-      expect(textarea).toHaveAttribute('rows', '3');
-      await user.type(textarea, 'hello');
-      expect(textarea.style.height).toBe('');
-    });
+  it('resyncs when the parent changes the value externally', () => {
+    const { rerender } = renderWithTheme(
+      <Textarea label="Notes" value="first" onChange={() => {}} />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    editEditor(editor, '<p><em>first</em></p>');
+    rerender(<Textarea label="Notes" value="replaced" onChange={() => {}} />);
+    expect(editor.innerHTML).toBe('<p>replaced</p>');
   });
 
-  describe('floating label', () => {
-    it('associates the floating label with the textarea', () => {
-      renderWithTheme(<Textarea label="Description" labelVariant="floating" />);
-      expect(screen.getByLabelText('Description')).toBeInTheDocument();
-    });
+  it('supports uncontrolled use via defaultValue', () => {
+    renderWithTheme(<Textarea label="Notes" defaultValue={'a\nb'} />);
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    expect(editor.innerHTML).toBe('<p>a</p><p>b</p>');
+  });
 
-    it('shows required indicator inside the floating label', () => {
-      renderWithTheme(
-        <Textarea label="Description" labelVariant="floating" required />
-      );
-      expect(screen.getByText('*')).toBeInTheDocument();
-      expect(screen.getByRole('textbox')).toBeRequired();
-    });
+  it('mirrors the plain value into a hidden textarea for form posts', () => {
+    renderWithTheme(
+      <Textarea label="Notes" name="notes" value={'a\nb'} onChange={() => {}} />
+    );
+    const mirror = document.querySelector<HTMLTextAreaElement>(
+      '[data-slot="textarea-mirror"]'
+    )!;
+    expect(mirror.name).toBe('notes');
+    expect(mirror.value).toBe('a\nb');
+    expect(mirror).toHaveAttribute('hidden');
+  });
 
-    it('applies peer and floating padding classes', () => {
-      renderWithTheme(<Textarea label="Description" labelVariant="floating" />);
-      const textarea = screen.getByRole('textbox');
-      expect(textarea).toHaveClass('peer');
-      expect(textarea).toHaveClass('pt-6');
-    });
+  it('exposes the plain value and editor focus through the forwarded ref', () => {
+    const ref = React.createRef<HTMLTextAreaElement>();
+    renderWithTheme(
+      <Textarea ref={ref} label="Notes" value="hello" onChange={() => {}} />
+    );
+    expect(ref.current?.value).toBe('hello');
+    ref.current?.focus();
+    expect(document.activeElement).toBe(
+      screen.getByRole('textbox', { name: 'Notes' })
+    );
+  });
 
-    it('uses a space placeholder and ignores a user placeholder', () => {
-      renderWithTheme(
-        <Textarea
-          label="Description"
-          labelVariant="floating"
-          placeholder="Enter a description..."
-        />
-      );
-      expect(screen.getByRole('textbox')).toHaveAttribute('placeholder', ' ');
-    });
+  it('wires error, helper and count into aria-describedby', () => {
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        error="Required."
+        helperText="Hidden while erroring"
+        showCount
+        value="abc"
+        onChange={() => {}}
+      />
+    );
+    const editor = screen.getByRole('textbox', { name: 'Notes' });
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('Required.');
+    expect(screen.queryByText('Hidden while erroring')).toBeNull();
+    const count = document.querySelector('[data-slot="textarea-count"]')!;
+    expect(count).toHaveTextContent('3');
+    const describedBy = editor.getAttribute('aria-describedby')!;
+    expect(describedBy).toContain(alert.id);
+    expect(describedBy).toContain(count.id);
+    expect(editor).toHaveAttribute('aria-invalid', 'true');
+  });
 
-    it('keeps the stacked placeholder when not floating', () => {
-      renderWithTheme(
-        <Textarea label="Description" placeholder="Enter a description..." />
-      );
-      expect(screen.getByRole('textbox')).toHaveAttribute(
-        'placeholder',
-        'Enter a description...'
-      );
-    });
+  it('shows helper text when there is no error', () => {
+    renderWithTheme(<Textarea label="Notes" helperText="Be concise." />);
+    expect(screen.getByText('Be concise.')).toBeInTheDocument();
+  });
 
-    it('falls back to stacked rendering when hideLabel is set', () => {
-      renderWithTheme(
-        <Textarea label="Notes" labelVariant="floating" hideLabel />
-      );
-      const label = screen.getByText('Notes');
-      expect(label).toHaveClass('sr-only');
-      expect(screen.getByRole('textbox')).not.toHaveClass('peer');
-    });
+  it('shows the count against maxLength and flags overflow', () => {
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        maxLength={3}
+        showCount
+        value="abcd"
+        onChange={() => {}}
+      />
+    );
+    const count = document.querySelector('[data-slot="textarea-count"]')!;
+    expect(count).toHaveTextContent('4/3');
+    expect(count.className).toContain('text-destructive');
+  });
 
-    it('still renders error message below the textarea', () => {
-      renderWithTheme(
-        <Textarea label="Description" labelVariant="floating" error="Bad" />
-      );
-      expect(screen.getByText('Bad')).toBeInTheDocument();
-      expect(screen.getByRole('textbox')).toHaveAttribute(
-        'aria-invalid',
-        'true'
-      );
-      expect(screen.getByText('Description')).toHaveClass('text-destructive');
-    });
+  it('disables editing when disabled', () => {
+    renderWithTheme(
+      <Textarea label="Notes" value="locked" onChange={() => {}} disabled />
+    );
+    expect(screen.getByRole('textbox', { name: 'Notes' })).toHaveAttribute(
+      'contenteditable',
+      'false'
+    );
+  });
+
+  it('warns once about dropped native behaviours', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    renderWithTheme(
+      <Textarea
+        label="Notes"
+        labelVariant="floating"
+        autoResize={false}
+        resize="none"
+      />
+    );
+    const messages = warn.mock.calls
+      .map(([message]) => String(message))
+      .filter((message) => message.startsWith('[mieweb/ui Textarea]'));
+    expect(messages.some((m) => m.includes('floating'))).toBe(true);
+    expect(messages.some((m) => m.includes('autoResize'))).toBe(true);
+    expect(messages.some((m) => m.includes('resize is ignored'))).toBe(true);
+    const before = warn.mock.calls.length;
+    renderWithTheme(
+      <Textarea label="Again" labelVariant="floating" autoResize={false} />
+    );
+    expect(warn.mock.calls.length).toBe(before);
   });
 });

@@ -1,421 +1,296 @@
 import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import { RequiredMark, type RequiredMarkVariant } from '../Input';
+import { RequiredMark } from '../Input';
+import { TextAreaRich } from '../TextAreaRich';
+import type { TextAreaPlainProps } from '../TextAreaPlain';
 
-const textareaVariants = cva(
-  [
-    'w-full px-3 py-2',
-    'border border-input rounded-lg',
-    'bg-background text-foreground',
-    'placeholder:text-muted-foreground',
-    'transition-colors duration-200',
-    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-    'disabled:cursor-not-allowed disabled:opacity-50',
-    'resize-y',
-  ],
-  {
-    variants: {
-      size: {
-        sm: 'text-sm min-h-[60px]',
-        md: 'text-base min-h-[80px]',
-        lg: 'text-lg min-h-[100px]',
-      },
-      hasError: {
-        true: 'border-destructive focus:ring-destructive',
-        false: '',
-      },
-      resize: {
-        none: 'resize-none',
-        vertical: 'resize-y',
-        horizontal: 'resize-x',
-        both: 'resize',
-      },
-      labelVariant: {
-        stacked: '',
-        floating: 'peer placeholder:text-transparent',
-      },
-      autoResize: {
-        true: '',
-        false: '',
-      },
-    },
-    compoundVariants: [
-      // Floating labels reserve top padding so entered text always starts
-      // below the floated label, plus a little extra min-height.
-      {
-        labelVariant: 'floating',
-        size: 'sm',
-        className: 'pt-5 min-h-[76px]',
-      },
-      {
-        labelVariant: 'floating',
-        size: 'md',
-        className: 'pt-6 min-h-[96px]',
-      },
-      {
-        labelVariant: 'floating',
-        size: 'lg',
-        className: 'pt-7 min-h-[120px]',
-      },
-      // Auto-growing textareas start at the same visual height as a
-      // single-line Input (h-8/h-10/h-12): min-height matches the Input
-      // size token and the vertical padding is tuned so one line of text
-      // plus padding plus borders lands exactly on that height.
-      {
-        autoResize: true,
-        labelVariant: 'stacked',
-        size: 'sm',
-        className: 'min-h-8 py-[5px]',
-      },
-      {
-        autoResize: true,
-        labelVariant: 'stacked',
-        size: 'md',
-        className: 'min-h-10 py-[7px]',
-      },
-      {
-        autoResize: true,
-        labelVariant: 'stacked',
-        size: 'lg',
-        className: 'min-h-12 py-[9px]',
-      },
-      // Floating label + auto-grow: single line below the floated label.
-      {
-        autoResize: true,
-        labelVariant: 'floating',
-        size: 'sm',
-        className: 'min-h-[50px]',
-      },
-      {
-        autoResize: true,
-        labelVariant: 'floating',
-        size: 'md',
-        className: 'min-h-[58px]',
-      },
-      {
-        autoResize: true,
-        labelVariant: 'floating',
-        size: 'lg',
-        className: 'min-h-[66px]',
-      },
-    ],
-    defaultVariants: {
-      size: 'md',
-      hasError: false,
-      resize: 'vertical',
-      labelVariant: 'stacked',
-      autoResize: true,
-    },
-  }
-);
+/**
+ * `Textarea` keeps `TextAreaPlain`'s prop surface so existing call sites
+ * compile unchanged while rendering `TextAreaRich` underneath.
+ */
+export type TextareaProps = TextAreaPlainProps;
 
-const floatingLabelVariants = cva(
-  [
-    'absolute start-3 pointer-events-none select-none',
-    'transition-all duration-200 ease-out',
-  ],
-  {
-    variants: {
-      size: {
-        sm: [
-          'text-sm top-3',
-          'peer-focus:top-1 peer-[:not(:placeholder-shown)]:top-1 peer-autofill:top-1',
-          'peer-focus:text-[0.65rem] peer-[:not(:placeholder-shown)]:text-[0.65rem] peer-autofill:text-[0.65rem]',
-        ],
-        md: [
-          'text-base top-4',
-          'peer-focus:top-1.5 peer-[:not(:placeholder-shown)]:top-1.5 peer-autofill:top-1.5',
-          'peer-focus:text-xs peer-[:not(:placeholder-shown)]:text-xs peer-autofill:text-xs',
-        ],
-        lg: [
-          'text-lg top-5',
-          'peer-focus:top-2 peer-[:not(:placeholder-shown)]:top-2 peer-autofill:top-2',
-          'peer-focus:text-sm peer-[:not(:placeholder-shown)]:text-sm peer-autofill:text-sm',
-        ],
-      },
-      hasError: {
-        true: 'text-destructive',
-        false: 'text-muted-foreground',
-      },
-    },
-    defaultVariants: {
-      size: 'md',
-      hasError: false,
-    },
-  }
-);
+// --- plain text <-> HTML (lossless round-trip for plain text) --------------
 
-export interface TextareaProps
-  extends
-    Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
-    Omit<VariantProps<typeof textareaVariants>, 'labelVariant'> {
-  /** Label for the textarea */
-  label?: string;
-  /**
-   * How the label is rendered.
-   * - `stacked` (default): label above the textarea.
-   * - `floating`: label rests inside the textarea like a placeholder and
-   *   floats to the top (staying inside it) when focused or filled.
-   *   Ignores `placeholder`; when `hideLabel` is set, falls back to a
-   *   visually-hidden stacked label.
-   */
-  labelVariant?: 'stacked' | 'floating';
-  /** Whether the label should be visually hidden */
-  hideLabel?: boolean;
-  /** Error message to display */
-  error?: string;
-  /** Helper text to display */
-  helperText?: string;
-  /** Maximum character count */
-  maxLength?: number;
-  /** Show character count */
-  showCount?: boolean;
-  /**
-   * Grow and shrink with content (default). The empty control matches a
-   * single-line `Input`'s height; `rows` sets a taller growth floor, and
-   * dragging the native resize handle sets a new floor the same way. Set
-   * `false` for a classic fixed-height textarea.
-   */
-  autoResize?: boolean;
-  /**
-   * Color of the required asterisk.
-   * - `default`: destructive (hard requirement).
-   * - `warning`: warning color (soft requirement / recommended).
-   */
-  requiredVariant?: RequiredMarkVariant;
+function escapeHtml(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 
 /**
- * A multi-line text input component with character count and auto-resize.
+ * Converts plain text to the editor's HTML: each line becomes a paragraph,
+ * empty lines become `<p><br></p>`. `htmlToPlain(plainToHtml(text)) === text`
+ * for every string, so stored plain values survive untouched.
+ */
+export function plainToHtml(text: string): string {
+  if (!text) return '';
+  return text
+    .split('\n')
+    .map((line) => (line ? `<p>${escapeHtml(line)}</p>` : '<p><br></p>'))
+    .join('');
+}
+
+const BLOCK_TAGS = new Set([
+  'P',
+  'DIV',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'LI',
+  'BLOCKQUOTE',
+  'PRE',
+]);
+
+function nodeToText(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
+  if (node.nodeType !== Node.ELEMENT_NODE) return '';
+  const el = node as Element;
+  if (el.tagName === 'BR') return '\n';
+  const inner = Array.from(el.childNodes).map(nodeToText).join('');
+  if (BLOCK_TAGS.has(el.tagName)) {
+    // A block is its own line. A lone <br> inside a block is the "empty
+    // paragraph" convention, not an extra line break.
+    return (inner === '\n' ? '' : inner) + '\n';
+  }
+  return inner;
+}
+
+/** Extracts plain text from editor HTML: blocks and `<br>` become newlines. */
+export function htmlToPlain(html: string): string {
+  if (!html) return '';
+  const root = document.createElement('div');
+  // Read-only text extraction into a detached element; nothing is inserted
+  // into the page.
+  root.innerHTML = html;
+  const text = Array.from(root.childNodes).map(nodeToText).join('');
+  return text.endsWith('\n') ? text.slice(0, -1) : text;
+}
+
+// --- dev-only one-time warnings for dropped native behaviours ---------------
+
+const warned = new Set<string>();
+function warnOnce(key: string, message: string): void {
+  if (process.env.NODE_ENV !== 'production' && !warned.has(key)) {
+    warned.add(key);
+    console.warn(`[mieweb/ui Textarea] ${message}`);
+  }
+}
+
+/**
+ * A multi-line text input that is rich text underneath. `Textarea` keeps its
+ * plain-text contract — `value`, `defaultValue` and `onChange`'s
+ * `event.target.value` are plain strings — while rendering `TextAreaRich`
+ * (hidden toolbar, markdown shortcuts, block gutter menu) so every note
+ * field gets formatting for free.
  *
- * @example
- * ```tsx
- * <Textarea label="Description" placeholder="Enter a description..." />
- * <Textarea
- *   label="Bio"
- *   maxLength={280}
- *   showCount
- *   helperText="Tell us about yourself"
- * />
- * ```
+ * Formatting the user applies is visible while editing but only the plain
+ * text is reported through `onChange`; hosts that persist HTML should use
+ * `TextAreaRich` directly. Need the native `<textarea>` element (hard
+ * `maxLength`, native validation, autofill, drag-resize, floating label) —
+ * use `TextAreaPlain`.
+ *
+ * A hidden `<textarea>` mirrors the plain value so `name` form posts and
+ * `ref.current.value` keep working; `ref.current.focus()` focuses the editor.
  */
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
-      className,
-      size,
-      hasError,
-      resize,
       label,
       labelVariant = 'stacked',
       hideLabel,
       error,
       helperText,
       maxLength,
-      showCount = false,
+      showCount,
       autoResize = true,
-      required = false,
       requiredVariant,
-      id,
-      rows,
+      size = 'md',
+      hasError,
+      resize,
+      className,
       value,
       defaultValue,
       onChange,
+      name,
+      required,
+      disabled,
       placeholder,
       'aria-describedby': ariaDescribedBy,
-      ...props
+      'aria-label': ariaLabel,
     },
     ref
   ) => {
-    const internalRef = React.useRef<HTMLTextAreaElement>(null);
-    const [internalValue, setInternalValue] = React.useState(
-      (defaultValue as string) || ''
-    );
+    if (labelVariant === 'floating') {
+      warnOnce(
+        'floating',
+        'labelVariant="floating" is not supported by the rich surface; ' +
+          'falling back to a stacked label. Use TextAreaPlain for floating labels.'
+      );
+    }
+    if (autoResize === false) {
+      warnOnce(
+        'autoResize',
+        'autoResize={false} is ignored; the rich surface always grows with ' +
+          'content. Use TextAreaPlain for a fixed-height textarea.'
+      );
+    }
+    if (resize !== undefined) {
+      warnOnce(
+        'resize',
+        'resize is ignored; the rich surface has no native resize handle. ' +
+          'Use TextAreaPlain for drag-resizing.'
+      );
+    }
+    if (maxLength !== undefined) {
+      warnOnce(
+        'maxLength',
+        'maxLength is not enforced while typing; the character count still ' +
+          'reflects it. Enforce limits in onChange or use TextAreaPlain.'
+      );
+    }
 
-    const generatedId = React.useId();
-    const textareaId = id || generatedId;
-    const errorId = `${textareaId}-error`;
-    const helperId = `${textareaId}-helper`;
-    const countId = `${textareaId}-count`;
+    const reactId = React.useId();
+    const errorId = `${reactId}-error`;
+    const helperId = `${reactId}-helper`;
+    const countId = `${reactId}-count`;
 
-    // Combine refs
-    React.useImperativeHandle(ref, () => internalRef.current!);
+    const controlledValue = value !== undefined ? String(value) : undefined;
 
-    // Get current value
-    const currentValue = value !== undefined ? String(value) : internalValue;
-    const characterCount = currentValue.length;
+    const [state, setState] = React.useState(() => {
+      const plain =
+        controlledValue ??
+        (defaultValue !== undefined ? String(defaultValue) : '');
+      return { html: plainToHtml(plain), plain };
+    });
 
-    // Auto-resize logic: collapse to natural height, then grow to fit
-    // content. CSS min-height (single-line baseline) and rows (via
-    // scrollHeight) act as floors; a consumer-configured initial height
-    // (style/class) and dragging the native resize handle set a user floor;
-    // a consumer max-height still caps the rendered height.
-    const userFloorRef = React.useRef<number | null>(null);
-    const expectedHeightRef = React.useRef<number | null>(null);
-    const initialFloorCapturedRef = React.useRef(false);
+    // Controlled resync: only when the parent hands us a value different from
+    // the plain text we last reported — echoing our own value back (the usual
+    // controlled round-trip) keeps the user's rich formatting intact.
+    if (controlledValue !== undefined && controlledValue !== state.plain) {
+      setState({ html: plainToHtml(controlledValue), plain: controlledValue });
+    }
 
-    const adjustHeight = React.useCallback(() => {
-      const textarea = internalRef.current;
-      if (textarea && autoResize) {
-        textarea.style.height = 'auto';
-        const borders = textarea.offsetHeight - textarea.clientHeight;
-        const next = Math.max(
-          textarea.scrollHeight + borders,
-          userFloorRef.current ?? 0
-        );
-        textarea.style.height = `${next}px`;
-        // Record the actual rendered height (a CSS max-height may clamp the
-        // value we set) so clamping is never mistaken for a manual drag.
-        expectedHeightRef.current = textarea.offsetHeight || next;
+    const hiddenRef = React.useRef<HTMLTextAreaElement>(null);
+    const editorWrapperRef = React.useRef<HTMLDivElement>(null);
+    const focusEditor = React.useCallback(() => {
+      editorWrapperRef.current
+        ?.querySelector<HTMLElement>('[role="textbox"]')
+        ?.focus();
+    }, []);
+
+    // The forwarded ref is the hidden mirror <textarea> — `ref.current.value`
+    // reads the current plain text — with focus/blur redirected to the editor.
+    React.useImperativeHandle(ref, () => {
+      const node = hiddenRef.current as HTMLTextAreaElement;
+      node.focus = focusEditor;
+      node.blur = () => {
+        const editable =
+          editorWrapperRef.current?.querySelector<HTMLElement>(
+            '[role="textbox"]'
+          );
+        if (document.activeElement === editable) editable?.blur();
+      };
+      return node;
+    }, [focusEditor]);
+
+    const handleHtmlChange = (html: string) => {
+      const plain = htmlToPlain(html);
+      setState({ html, plain });
+      const node = hiddenRef.current;
+      if (onChange && node) {
+        node.value = plain;
+        const nativeEvent = new Event('change');
+        onChange({
+          target: node,
+          currentTarget: node,
+          type: 'change',
+          bubbles: false,
+          cancelable: false,
+          defaultPrevented: false,
+          eventPhase: 0,
+          isTrusted: false,
+          timeStamp: Date.now(),
+          nativeEvent,
+          preventDefault: () => {},
+          stopPropagation: () => {},
+          isDefaultPrevented: () => false,
+          isPropagationStopped: () => false,
+          persist: () => {},
+        } as React.ChangeEvent<HTMLTextAreaElement>);
       }
-    }, [autoResize]);
+    };
 
-    // Measures prefilled values on mount and controlled values on update.
-    // On mount, a consumer-configured initial height (inline style or a
-    // height class) that exceeds the content height becomes the growth
-    // floor — auto-sizing must not collapse below a configured baseline.
-    React.useEffect(() => {
-      const textarea = internalRef.current;
-      if (textarea && autoResize && !initialFloorCapturedRef.current) {
-        initialFloorCapturedRef.current = true;
-        const configured = textarea.offsetHeight;
-        adjustHeight();
-        if (configured - textarea.offsetHeight > 1) {
-          userFloorRef.current = configured;
-          textarea.style.height = `${configured}px`;
-          expectedHeightRef.current = textarea.offsetHeight || configured;
-        }
-        return;
-      }
-      adjustHeight();
-    }, [currentValue, adjustHeight, autoResize]);
+    const showError = !!error;
+    const invalid = hasError || showError;
+    const describedByIds =
+      [
+        showError ? errorId : null,
+        helperText && !showError ? helperId : null,
+        showCount ? countId : null,
+        ariaDescribedBy,
+      ]
+        .filter(Boolean)
+        .join(' ') || undefined;
 
-    // Re-measure when the available width changes (wrapping changes), and
-    // detect heights we didn't set ourselves — the user dragging the native
-    // resize handle — adopting the dragged height as the new growth floor.
-    // The drag check runs first so a diagonal resize (width + height in one
-    // notification) keeps the dragged height through the re-measure.
-    React.useEffect(() => {
-      const textarea = internalRef.current;
-      if (!autoResize || !textarea || typeof ResizeObserver === 'undefined') {
-        return;
-      }
-      let lastWidth = textarea.offsetWidth;
-      const observer = new ResizeObserver(() => {
-        const expected = expectedHeightRef.current;
-        const height = textarea.offsetHeight;
-        if (expected !== null && Math.abs(height - expected) > 1) {
-          userFloorRef.current = height;
-          expectedHeightRef.current = height;
-        }
-        if (textarea.offsetWidth !== lastWidth) {
-          lastWidth = textarea.offsetWidth;
-          adjustHeight();
-        }
-      });
-      observer.observe(textarea);
-      return () => observer.disconnect();
-    }, [autoResize, adjustHeight]);
-
-    // Handle change
-    const handleChange = React.useCallback(
-      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        if (value === undefined) {
-          setInternalValue(e.target.value);
-        }
-        onChange?.(e);
-        adjustHeight();
-      },
-      [value, onChange, adjustHeight]
-    );
-
-    // Build aria-describedby
-    const describedByIds = [
-      error ? errorId : null,
-      helperText && !error ? helperId : null,
-      showCount ? countId : null,
-      ariaDescribedBy,
-    ]
-      .filter(Boolean)
-      .join(' ');
-
-    const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
-
-    const requiredMark = required && <RequiredMark variant={requiredVariant} />;
-
-    const textareaElement = (
-      <textarea
-        data-slot="textarea"
-        data-auto-resize={autoResize ? 'true' : undefined}
-        ref={internalRef}
-        id={textareaId}
-        value={value}
-        defaultValue={value === undefined ? defaultValue : undefined}
-        onChange={handleChange}
-        maxLength={maxLength}
-        aria-invalid={hasError || !!error}
-        aria-describedby={describedByIds || undefined}
-        required={required}
-        // Auto-grow starts at one visible line; an explicit rows raises the
-        // floor (scrollHeight never reports less than the rows box).
-        rows={autoResize ? (rows ?? 1) : rows}
-        // A single-space placeholder keeps :placeholder-shown reliable so the
-        // label can float via CSS alone.
-        placeholder={isFloating ? ' ' : placeholder}
-        className={cn(
-          textareaVariants({
-            size,
-            hasError: hasError || !!error,
-            resize,
-            labelVariant: isFloating ? 'floating' : 'stacked',
-            autoResize,
-          }),
-          className
-        )}
-        {...props}
-      />
-    );
+    const characterCount = state.plain.length;
 
     return (
       <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
-        {label && !isFloating && (
+        {label && (
           <label
             data-slot="textarea-label"
-            htmlFor={textareaId}
             className={cn(
               'text-foreground text-sm font-medium',
               hideLabel && 'sr-only'
             )}
           >
             {label}
-            {requiredMark}
+            {required && <RequiredMark variant={requiredVariant} />}
           </label>
         )}
-        {isFloating ? (
-          <div className="relative">
-            {textareaElement}
-            <label
-              data-slot="textarea-label"
-              htmlFor={textareaId}
-              className={floatingLabelVariants({
-                size,
-                hasError: hasError || !!error,
-              })}
-            >
-              {label}
-              {requiredMark}
-            </label>
-          </div>
-        ) : (
-          textareaElement
-        )}
+        <div ref={editorWrapperRef} className="w-full">
+          <TextAreaRich
+            value={state.html}
+            onChange={handleHtmlChange}
+            placeholder={placeholder}
+            disabled={disabled}
+            aria-label={ariaLabel ?? label}
+            aria-describedby={describedByIds}
+            aria-invalid={invalid || undefined}
+            className={cn(
+              size === 'sm' && 'text-sm',
+              size === 'lg' && 'text-lg',
+              invalid &&
+                'border-destructive focus-within:ring-destructive focus-within:border-destructive',
+              disabled && 'cursor-not-allowed opacity-50',
+              className
+            )}
+          />
+        </div>
+        {/* Mirrors the plain value for form posts and the forwarded ref. */}
+        <textarea
+          data-slot="textarea-mirror"
+          ref={hiddenRef}
+          hidden
+          readOnly
+          tabIndex={-1}
+          aria-hidden="true"
+          name={name}
+          required={required}
+          disabled={disabled}
+          value={state.plain}
+        />
         <div
           data-slot="textarea-footer"
           className="flex items-center justify-between gap-2"
         >
           <div className="flex-1">
-            {error && (
+            {showError && (
               <p
                 id={errorId}
                 data-slot="textarea-error"
@@ -425,7 +300,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                 {error}
               </p>
             )}
-            {helperText && !error && (
+            {helperText && !showError && (
               <p
                 id={helperId}
                 data-slot="textarea-helper"
@@ -456,4 +331,4 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
 Textarea.displayName = 'Textarea';
 
-export { Textarea, textareaVariants };
+export { Textarea };

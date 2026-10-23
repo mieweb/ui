@@ -173,6 +173,10 @@ export interface RichTextEditorProps {
   chromeless?: boolean;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
+  /** Ids of elements describing the editable region (errors, helper text). */
+  'aria-describedby'?: string;
+  /** Marks the editable region invalid for assistive technology. */
+  'aria-invalid'?: React.AriaAttributes['aria-invalid'];
 }
 
 // --- Minimal Web Speech API typings (absent from the standard DOM lib) ---
@@ -332,6 +336,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       markdownShortcuts = false,
       chromeless = false,
       'aria-label': ariaLabel,
+      'aria-describedby': ariaDescribedBy,
+      'aria-invalid': ariaInvalid,
     },
     ref
   ) => {
@@ -1474,6 +1480,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               role="textbox"
               aria-multiline="true"
               aria-label={ariaLabel ?? placeholder}
+              aria-describedby={ariaDescribedBy}
+              aria-invalid={ariaInvalid}
               contentEditable={!disabled}
               // Styling hook: condensed-view.css must not pin the editable
               // to its compact single-line minimum while the macro panel
