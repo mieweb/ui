@@ -79,6 +79,12 @@ const definition: EncounterVisitDefinition = {
   ],
 };
 
+const modeSwitch = () => screen.getByRole('combobox', { name: 'Visit mode' });
+const selectMode = (label: 'eSheet' | 'RichEdit' | 'View') => {
+  fireEvent.click(modeSwitch());
+  fireEvent.click(screen.getByRole('option', { name: label }));
+};
+
 describe('EncounterVisit mode synchronization', () => {
   it('requires a compatible explicit definition before opening a native eSheet MDY', () => {
     const original = parseEncounterMdy(
@@ -205,10 +211,7 @@ describe('EncounterVisit mode synchronization', () => {
     });
     await waitFor(() => expect(focus).toHaveBeenCalledOnce());
     expect(scroll).toHaveBeenCalledWith({ block: 'start', behavior: 'auto' });
-    expect(screen.getByRole('tab', { name: 'eSheet' })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(modeSwitch()).toHaveTextContent('eSheet');
     expect(ref.current!.getSnapshot().mdy).toContain(
       'Final unreported keystroke.'
     );
@@ -228,13 +231,13 @@ describe('EncounterVisit mode synchronization', () => {
         .upsertVitals('vitals', { id: 'one', systolic: 142, diastolic: 88 });
     });
     const clinicalResponses = ref.current!.getSnapshot().responses;
-    fireEvent.click(screen.getByRole('tab', { name: 'RichEdit' }));
+    selectMode('RichEdit');
     const editor = await screen.findByRole('textbox', {
       name: 'Encounter narrative',
     });
     const body = `${(editor as HTMLTextAreaElement).value}\n\n### Discussion\n\nFree text stays in the document.`;
     fireEvent.change(editor, { target: { value: body } });
-    fireEvent.click(screen.getByRole('tab', { name: 'View' }));
+    selectMode('View');
     await waitFor(() =>
       expect(
         screen.getByRole('region', { name: 'Visit note preview' })
@@ -253,13 +256,8 @@ describe('EncounterVisit mode synchronization', () => {
         String(observation.value).includes('Free text')
       )
     ).toBe(false);
-    fireEvent.click(screen.getByRole('tab', { name: 'RichEdit' }));
-    await waitFor(() =>
-      expect(screen.getByRole('tab', { name: 'RichEdit' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      )
-    );
+    selectMode('RichEdit');
+    await waitFor(() => expect(modeSwitch()).toHaveTextContent('RichEdit'));
     fireEvent.change(editor, {
       target: { value: `${body}\n\nLast keystroke.` },
     });
@@ -284,7 +282,7 @@ describe('EncounterVisit mode synchronization', () => {
           `# Visit\n\n## Measurements\n\n[—](mdy:${vitals.id})\n\n### Discussion\n\nAuthored prose.`
         );
     });
-    fireEvent.click(screen.getByRole('tab', { name: 'RichEdit' }));
+    selectMode('RichEdit');
     fireEvent.click(
       await screen.findByRole('button', { name: 'Edit linked vitals' })
     );
@@ -310,7 +308,7 @@ describe('EncounterVisit mode synchronization', () => {
     });
     expect(ref.current!.getSnapshot().mdy).toContain('138/86');
     expect(ref.current!.getSnapshot().mdy).toContain('Authored prose.');
-    fireEvent.click(screen.getByRole('tab', { name: 'eSheet' }));
+    selectMode('eSheet');
     await waitFor(() =>
       expect(screen.getAllByLabelText('Systolic')).toHaveLength(2)
     );
@@ -337,19 +335,16 @@ describe('EncounterVisit mode synchronization', () => {
         screen.getByRole('region', { name: 'Visit note preview' })
       ).toHaveTextContent('Free report text.')
     );
-    expect(screen.getByRole('tab', { name: 'View' })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(modeSwitch()).toHaveTextContent('View');
     expect(ref.current!.getTools().setDocumentBody('overwrite')).toMatchObject({
       success: false,
       error: { code: 'READ_ONLY' },
     });
-    fireEvent.click(screen.getByRole('tab', { name: 'RichEdit' }));
+    selectMode('RichEdit');
     expect(
       await screen.findByRole('textbox', { name: 'Encounter narrative' })
     ).toHaveAttribute('readonly');
-    fireEvent.click(screen.getByRole('tab', { name: 'eSheet' }));
+    selectMode('eSheet');
     await waitFor(() =>
       expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveTextContent(
         'Back pain'

@@ -47,14 +47,15 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     const hpi = await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.input(hpi, { target: { innerHTML: 'Draft retained' } });
     expect(
-      screen.getByRole('tablist', { name: 'Mode de visite' })
+      screen.getByRole('combobox', { name: 'Mode de visite' })
     ).toBeInTheDocument();
     expect(screen.getByText('Patient anonyme')).toBeInTheDocument();
     expect(
       screen.getByText('1 sur 3 sections documentées')
     ).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent(
-      '1 observations documentées'
+    expect(screen.getByText('1 observations documentées')).toHaveAttribute(
+      'role',
+      'status'
     );
     rerender(<EncounterVisit ref={ref} definition={definition} />);
     expect(screen.getByRole('textbox', { name: 'HPI' })).toBe(hpi);
@@ -155,7 +156,8 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     );
     expect(snapshot.observations).toHaveLength(1);
     expect(onChange.mock.lastCall?.[0].responses).toEqual(snapshot.responses);
-    fireEvent.click(screen.getByRole('tab', { name: 'View' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Visit mode' }));
+    fireEvent.click(screen.getByRole('option', { name: 'View' }));
     await waitFor(() =>
       expect(
         screen.getByRole('region', { name: 'Visit note preview' })

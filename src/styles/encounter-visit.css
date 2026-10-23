@@ -1,31 +1,5 @@
-/* Visit sections use document headings rather than eSheet's questionnaire cards.
-   Keep these overrides local to the encounter composition. */
-.encounter-visit .section-field-preview {
-  overflow: visible;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.encounter-visit .section-field-preview > h3 {
-  overflow: visible;
-  background: transparent;
-  color: inherit;
-}
-
-.encounter-visit .section-field-preview > h3 > button {
-  min-height: 44px;
-  padding: 0;
-  text-align: start;
-  font-size: 1rem;
-}
-
-.encounter-visit .section-field-preview > div[id] {
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
+/* Sections render through the mieweb/ui Accordion (EncounterSectionField);
+   only the layout rhythm below is encounter-specific. */
 .encounter-visit .renderer-body {
   display: grid;
   row-gap: 1.25rem;
@@ -148,6 +122,43 @@
 .encounter-visit .encounter-mdy-editor .kb-menu__button {
   min-width: 44px;
   min-height: 44px;
+}
+
+/* The view switcher overlays the toolbar's inline start; reserve its lane so
+   toolbar buttons never slide underneath it (w-28 switcher + ms-1 inset). */
+.encounter-visit .encounter-mdy-editor .kb-custom-menu {
+  padding-inline-start: 7.5rem;
+}
+
+/* Above Kerebron's sticky menubar (z-index 1000). */
+.encounter-visit .encounter-view-switch {
+  z-index: 1001;
+}
+
+/* The linked-field resolver is a full-screen takeover; sticky chrome must not
+   paint over its backdrop. */
+.encounter-visit .encounter-view-switch[inert] {
+  visibility: hidden;
+}
+
+.encounter-visit .encounter-rich-chrome[inert]:not(.encounter-rich-collapsed) {
+  visibility: hidden;
+}
+
+/* Outside RichEdit the toolbar stays as the visit's constant chrome: keep it
+   visible (dimmed) and hide only the document body. */
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu {
+  z-index: 20;
+  opacity: 0.55;
+}
+
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu__editor,
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu__overflow-menu {
+  display: none;
+}
+
+.encounter-visit .encounter-rich-collapsed {
+  margin-block-end: 0.5rem;
 }
 
 .encounter-visit .encounter-mdy-view {

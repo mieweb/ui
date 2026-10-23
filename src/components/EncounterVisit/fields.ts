@@ -1,4 +1,9 @@
-import { getFieldComponent, registerCustomFieldTypes } from '@esheet/fields';
+import {
+  getFieldComponent,
+  registerCustomFieldTypes,
+  registerFieldComponents,
+  SectionField,
+} from '@esheet/fields';
 import { EncounterVitalsField } from './EncounterVitalsField';
 import { EncounterAssessmentField } from './EncounterAssessmentField';
 import { EncounterNarrativeField } from './EncounterNarrativeField';
@@ -6,9 +11,16 @@ import { EncounterMedicationField } from './EncounterMedicationField';
 import { EncounterAllergyField } from './EncounterAllergyField';
 import { EncounterConditionsField } from './EncounterConditionsField';
 import { EncounterPlanField } from './EncounterPlanField';
+import { EncounterSectionField } from './EncounterSectionField';
 
 /** Register encounter fields when missing, retaining any host-supplied editors. */
 export function registerEncounterFieldTypes(): void {
+  // Take over the built-in section renderer (the component itself delegates to
+  // the stock SectionField outside EncounterSectionContext). Hosts that
+  // registered their own section component keep it.
+  const section = getFieldComponent('section');
+  if (section === undefined || section === SectionField)
+    registerFieldComponents({ section: EncounterSectionField });
   const clinicalFields = {
     encounterMedications: {
       label: 'Encounter medications',

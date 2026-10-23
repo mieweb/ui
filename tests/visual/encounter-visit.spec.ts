@@ -47,10 +47,16 @@ async function readMdyData(
   return parse(mdy.slice(opening, closing));
 }
 
+async function selectVisitMode(page: Page, label: string) {
+  await page.getByRole('combobox', { name: 'Visit mode' }).click();
+  await page.getByRole('option', { name: label, exact: true }).click();
+}
+
 async function showView(page: Page) {
-  const tab = page.getByRole('tab', { name: 'View', exact: true });
-  await tab.click();
-  await expect(tab).toHaveAttribute('aria-selected', 'true');
+  await selectVisitMode(page, 'View');
+  await expect(
+    page.getByRole('combobox', { name: 'Visit mode' })
+  ).toContainText('View');
   const preview = page.getByRole('region', { name: 'Visit note preview' });
   await expect(preview).toBeAttached();
   await expect(preview).toHaveAttribute('aria-busy', 'false');
@@ -283,7 +289,7 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   expect(nativeRecordIds).toHaveLength(5);
   for (const id of nativeRecordIds) expect(id).toEqual(expect.any(String));
 
-  await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
+  await selectVisitMode(page, 'RichEdit');
   const editor = page.getByRole('textbox', { name: 'Encounter narrative' });
   for (const text of [
     'lisinopril 10 mg tablet',
@@ -315,7 +321,7 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   await page.screenshot({
     path: test.info().outputPath('coded-visit-phone.png'),
   });
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   const afterModes = await readVisit(page);
   for (const [id, response] of Object.entries(before.responses)) {
     if (id.startsWith('encounter:'))
@@ -402,7 +408,7 @@ test('a selected common finding appends once and preserves authored narrative ac
   const answer = before.responses['encounter:hpi:narrative'].answer;
   expect(answer).toContain(authored);
   expect(answer).toContain('Denies fever.');
-  await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
+  await selectVisitMode(page, 'RichEdit');
   const editor = page.getByRole('textbox', { name: 'Encounter narrative' });
   await expect(editor).toContainText(authored, { timeout: 30000 });
   await expect(editor).toContainText('Denies fever.');
@@ -411,7 +417,7 @@ test('a selected common finding appends once and preserves authored narrative ac
   await expect(preview).toContainText('Denies fever.');
   const mdy = await readMdyData(page);
   expect(mdy.response['encounter:hpi:narrative'].answer).toBe(answer);
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await expect(narrative).toContainText(authored);
   await expect(narrative).toContainText('Denies fever.');
 });
@@ -431,7 +437,7 @@ test('phone RichEdit preserves authored headings and free prose across modes', a
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(story);
-  await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
+  await selectVisitMode(page, 'RichEdit');
   const editor = page.getByRole('textbox', { name: 'Encounter narrative' });
   const title = editor.getByRole('heading', {
     name: 'Encounter visit',
@@ -457,7 +463,7 @@ test('phone RichEdit preserves authored headings and free prose across modes', a
   }
   await expect(editor).toContainText('—');
   await page
-    .getByRole('tab', { name: 'RichEdit', exact: true })
+    .getByRole('combobox', { name: 'Visit mode' })
     .scrollIntoViewIfNeeded();
   await expect(page).toHaveScreenshot('encounter-mobile-rich-edit.png');
 
@@ -478,14 +484,14 @@ test('phone RichEdit preserves authored headings and free prose across modes', a
   await expect(preview).not.toContainText('—');
   await expect(preview).not.toContainText('Medical history:');
   await expect(page).toHaveScreenshot('encounter-mobile-view.png');
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await expect(
     page.getByRole('textbox', { name: 'History of present illness' })
   ).toContainText(
     '45-year-old male with pre-diabetes, back pain and hypertension.'
   );
   await expect(page.getByLabel('Systolic', { exact: true })).toHaveCount(0);
-  await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
+  await selectVisitMode(page, 'RichEdit');
   await expect(heading).toBeVisible();
   await expect(editor).toContainText(prose);
   await expect(
@@ -514,7 +520,7 @@ test('View omits uncaptured prompts and keeps a captured zero measurement', asyn
   await expect(preview).not.toContainText('—');
   await expect(preview.getByRole('listitem')).toHaveCount(0);
 
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   const narrative = page.getByRole('textbox', {
     name: 'History of present illness',
   });
@@ -526,7 +532,7 @@ test('View omits uncaptured prompts and keeps a captured zero measurement', asyn
   await expect(preview).not.toContainText('back pain');
   await expect(preview).not.toContainText('—');
 
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await page
     .getByRole('combobox', { name: 'Go to section' })
     .selectOption('vitals');
@@ -534,7 +540,7 @@ test('View omits uncaptured prompts and keeps a captured zero measurement', asyn
   preview = await showView(page);
   await expect(preview.getByRole('heading')).toHaveCount(0);
   await expect(preview.getByRole('listitem')).toHaveCount(0);
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await page.getByLabel('Pain', { exact: true }).fill('0');
   preview = await showView(page);
   await expect(preview.getByRole('heading')).toHaveText([
@@ -544,7 +550,7 @@ test('View omits uncaptured prompts and keeps a captured zero measurement', asyn
   await expect(preview).toContainText('Pain score: 0');
   await expect(preview).not.toContainText('—');
   await expect(preview).not.toContainText('History of present illness');
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await expect(page.getByLabel('Pain', { exact: true })).toHaveValue('0');
 });
 
@@ -553,7 +559,7 @@ test('a linked field resolves to the same eSheet BP data on a phone', async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(story);
-  await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
+  await selectVisitMode(page, 'RichEdit');
   const editor = page.getByRole('textbox', { name: 'Encounter narrative' });
   await continueAfterHeading(
     page,
@@ -587,10 +593,10 @@ test('a linked field resolves to the same eSheet BP data on a phone', async ({
   const preview = await showView(page);
   await expect(preview).toContainText('142/88');
   await expect(preview).toContainText(prose);
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await expect(page.getByLabel('Systolic', { exact: true })).toHaveValue('142');
   await expect(page.getByLabel('Diastolic', { exact: true })).toHaveValue('88');
-  await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
+  await selectVisitMode(page, 'RichEdit');
   await expect(linkedVitals).toContainText('142/88');
   await expect(editor).toContainText(prose);
 });
@@ -606,7 +612,7 @@ test('read-only visits keep the report and RichEdit from capturing changes', asy
   await expect(preview.getByRole('textbox')).toHaveCount(0);
   await expect(preview.getByRole('button')).toHaveCount(0);
   await expect(preview.locator('[contenteditable=true]')).toHaveCount(0);
-  await page.getByRole('tab', { name: 'RichEdit', exact: true }).click();
+  await selectVisitMode(page, 'RichEdit');
   const editor = page.getByRole('textbox', { name: 'Encounter narrative' });
   await expect(editor).toContainText('back pain', { timeout: 30000 });
   await expect(editor).toHaveAttribute('contenteditable', 'false');
@@ -628,7 +634,7 @@ test('read-only visits keep the report and RichEdit from capturing changes', asy
   await expect(
     editor.getByRole('button', { name: /^Linked field/ }).first()
   ).toHaveAttribute('aria-disabled', 'true');
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await expect(
     page.getByRole('textbox', { name: 'History of present illness' })
   ).toContainText(
@@ -681,7 +687,7 @@ test('the Templit report safely renders malformed and executable Markdown from M
   );
   await expect(safeLink).toHaveAttribute('rel', 'noopener noreferrer');
   expect(dialogs).toBe(0);
-  await page.getByRole('tab', { name: 'eSheet', exact: true }).click();
+  await selectVisitMode(page, 'eSheet');
   await expect(
     page.getByRole('textbox', { name: 'History of present illness' })
   ).toContainText('back pain');
@@ -699,10 +705,11 @@ test('encounter visit mirrors its section navigation in RTL', async ({
   const selectBounds = await navigation.getByRole('combobox').boundingBox();
   const labelBounds = await navigation.locator('label').boundingBox();
   expect(selectBounds!.x + selectBounds!.width).toBeLessThan(labelBounds!.x);
-  await expect(page.locator('.section-field-preview').first()).toHaveCSS(
-    'border-top-width',
-    '0px'
-  );
+  const sectionBorder = await page
+    .locator('.section-field-preview > div')
+    .first()
+    .evaluate((card) => parseFloat(getComputedStyle(card).borderTopWidth));
+  expect(sectionBorder).toBeGreaterThan(0);
   await expect(page).toHaveScreenshot('encounter-desktop-rtl.png');
 });
 
@@ -799,7 +806,7 @@ for (const variant of [
   });
 }
 
-test('expanded translated controls fit a phone and keep section navigation below the mode tabs', async ({
+test('expanded translated controls fit a phone and keep section navigation below the narrative toolbar', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -812,16 +819,15 @@ test('expanded translated controls fit a phone and keep section navigation below
   });
   await navigation.selectOption('vitals');
   await expect(navigation).toBeInViewport();
-  const tabs = await page.getByRole('tablist').boundingBox();
+  const toolbar = await page.locator('.kb-custom-menu').boundingBox();
   const nav = await page
     .getByRole('navigation', { name: 'Visit sections' })
     .boundingBox();
-  expect(nav!.y).toBeGreaterThanOrEqual(tabs!.y + tabs!.height - 1);
-  const modeBar = await page.locator('.encounter-mode-bar').boundingBox();
+  expect(nav!.y).toBeGreaterThanOrEqual(toolbar!.y + toolbar!.height - 1);
   const target = await page
     .locator('[data-field-id="encounter:vitals:section"]')
     .boundingBox();
-  expect(target!.y).toBeGreaterThanOrEqual(modeBar!.y + modeBar!.height);
+  expect(target!.y).toBeGreaterThanOrEqual(nav!.y + nav!.height - 1);
   await page.screenshot({
     path: test.info().outputPath('translated-phone.png'),
   });
@@ -835,12 +841,7 @@ test('expanded translated controls fit a phone and keep section navigation below
     .click();
   await page.getByLabel('Sistólica', { exact: true }).fill('142');
   await page.getByLabel('Diastólica', { exact: true }).fill('88');
-  await page
-    .getByRole('tab', {
-      name: 'Revisión final del documento clínico',
-      exact: true,
-    })
-    .click();
+  await selectVisitMode(page, 'Revisión final del documento clínico');
   const preview = page.getByRole('region', {
     name: 'Vista previa del documento clínico',
   });

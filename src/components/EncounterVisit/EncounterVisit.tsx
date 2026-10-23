@@ -11,6 +11,7 @@ import {
 } from '../CodeLookup/context';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
+import { Select } from '../Select';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import type { RichEditorHandle } from '../RichEditor';
 import { EncounterMdyView } from './EncounterMdyView';
@@ -29,6 +30,7 @@ import {
   getEncounterSectionFieldIds,
 } from './definition';
 import { registerEncounterFieldTypes } from './fields';
+import { EncounterSectionContext } from './EncounterSectionField';
 import { createEncounterSnapshot } from './model';
 import { createEncounterVisitTools, type EncounterVisitTools } from './mcp';
 import {
@@ -251,7 +253,6 @@ const EncounterVisitSession = React.forwardRef<
     stableDefinition.sections[0].id
   );
   const [mode, setModeState] = React.useState<EncounterVisitMode>(defaultMode);
-  const [richMounted, setRichMounted] = React.useState(defaultMode === 'rich');
   const [modePending, setModePending] = React.useState(false);
   const [pendingSection, setPendingSection] = React.useState<string | null>(
     null
@@ -272,6 +273,7 @@ const EncounterVisitSession = React.forwardRef<
     onSubmit,
     readOnly,
     saving,
+    mode,
     m,
   });
   latest.current = {
@@ -280,6 +282,7 @@ const EncounterVisitSession = React.forwardRef<
     onSubmit,
     readOnly,
     saving,
+    mode,
     m,
   };
   const responses = React.useRef(initialSeed);
@@ -305,8 +308,11 @@ const EncounterVisitSession = React.forwardRef<
   }, []);
 
   const flushEditor = React.useCallback(async () => {
+    // The editor stays mounted across modes but only authors the document
+    // while rich mode is active; skip flushing its synced copy otherwise.
     if (
       richEditor.current &&
+      latest.current.mode === 'rich' &&
       !latest.current.readOnly &&
       !latest.current.saving
     ) {
@@ -327,9 +333,9 @@ const EncounterVisitSession = React.forwardRef<
       if (!['esheet', 'rich', 'view'].includes(next)) return;
       setModePending(true);
       try {
-        if (richEditor.current) await flushEditor();
+        if (richEditor.current && latest.current.mode === 'rich')
+          await flushEditor();
         setResolverField(null);
-        if (next === 'rich') setRichMounted(true);
         if (sectionId !== undefined) {
           setActiveSection(sectionId);
           setPendingSection(sectionId);
@@ -377,11 +383,16 @@ const EncounterVisitSession = React.forwardRef<
     );
     toggle?.click();
     section.tabIndex = -1;
-    const modeBarHeight =
-      root.current
-        ?.querySelector<HTMLElement>('.encounter-mode-bar')
-        ?.getBoundingClientRect().height ?? 0;
-    section.style.scrollMarginTop = `${modeBarHeight + 8}px`;
+    // Sticky chrome above the form: the narrative toolbar plus the section nav.
+    const chromeHeight = Array.from(
+      root.current?.querySelectorAll<HTMLElement>(
+        '.encounter-mdy-editor .kb-custom-menu, .encounter-section-nav'
+      ) ?? []
+    ).reduce(
+      (total, element) => total + element.getBoundingClientRect().height,
+      0
+    );
+    section.style.scrollMarginTop = `${chromeHeight + 8}px`;
     section.focus({ preventScroll: true });
     section.scrollIntoView?.({ block: 'start', behavior: 'auto' });
   }, [mode, pendingSection]);
@@ -591,7 +602,8 @@ const EncounterVisitSession = React.forwardRef<
     submissionPending.current = true;
     try {
       try {
-        if (richEditor.current) await flushEditor();
+        if (richEditor.current && latest.current.mode === 'rich')
+          await flushEditor();
       } catch (error) {
         setSaveMessage(
           error instanceof Error
@@ -653,7 +665,6 @@ const EncounterVisitSession = React.forwardRef<
     )
   );
   const componentId = React.useId();
-  const panelId = `${componentId}-document`;
   const resolverTitleId = `${componentId}-resolver-title`;
   const selectId = `${componentId}-section`;
 
@@ -697,111 +708,103 @@ const EncounterVisitSession = React.forwardRef<
 
       <div className="min-w-0">
         <div
-          inert={resolverField !== null}
-          className="encounter-mode-bar bg-background sticky top-0 z-20 px-2 sm:px-3"
-        >
-          <div
-            role="tablist"
-            tabIndex={-1}
-            aria-label={m('Visit mode')}
-            className="grid grid-cols-3 gap-1"
-            onKeyDown={(event) => {
-              const modes: EncounterVisitMode[] = ['esheet', 'rich', 'view'];
-              const current = modes.indexOf(mode);
-              const rtl =
-                getComputedStyle(event.currentTarget).direction === 'rtl';
-              const delta =
-                event.key === 'ArrowRight'
-                  ? rtl
-                    ? -1
-                    : 1
-                  : event.key === 'ArrowLeft'
-                    ? rtl
-                      ? 1
-                      : -1
-                    : 0;
-              const index =
-                event.key === 'Home'
-                  ? 0
-                  : event.key === 'End'
-                    ? 2
-                    : delta
-                      ? (current + delta + 3) % 3
-                      : -1;
-              if (index < 0 || modePending) return;
-              event.preventDefault();
-              const tabs = event.currentTarget;
-              void setMode(modes[index]).then(() =>
-                tabs
-                  .querySelectorAll<HTMLButtonElement>('[role="tab"]')
-                  .item(index)
-                  ?.focus()
-              );
-            }}
-          >
-            {(['esheet', 'rich', 'view'] as const).map((value) => (
-              <button
-                key={value}
-                id={`${componentId}-${value}`}
-                type="button"
-                role="tab"
-                aria-selected={mode === value}
-                aria-controls={panelId}
-                tabIndex={mode === value ? 0 : -1}
-                disabled={modePending || saving}
-                className={cn(
-                  'focus-visible:ring-primary-500 min-h-11 min-w-0 rounded px-2 text-base break-words whitespace-normal focus-visible:ring-2 focus-visible:outline-none',
-                  mode === value
-                    ? 'bg-muted font-semibold'
-                    : 'text-muted-foreground'
-                )}
-                onClick={() => void setMode(value)}
-              >
-                {m(
-                  value === 'esheet'
-                    ? 'eSheet'
-                    : value === 'rich'
-                      ? 'RichEdit'
-                      : 'View'
-                )}
-              </button>
-            ))}
-          </div>
-          <nav
-            hidden={mode !== 'esheet'}
-            inert={resolverField !== null}
-            aria-label={m('Visit sections')}
-            className="bg-background sticky top-11 z-20 py-1"
-          >
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor={selectId}
-                className="text-muted-foreground max-w-[50%] shrink-0 text-sm break-words"
-              >
-                {m('Go to section')}
-              </label>
-              <select
-                id={selectId}
-                className="bg-background focus-visible:ring-primary-500 min-h-11 min-w-0 flex-1 rounded px-1 text-base focus-visible:ring-2 focus-visible:outline-none"
-                value={activeSection}
-                onChange={(event) => focusSection(event.target.value)}
-              >
-                {stableDefinition.sections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {m(section.title)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </nav>
-        </div>
-        <div
-          id={panelId}
-          role="tabpanel"
-          aria-labelledby={`${componentId}-${mode}`}
           data-slot="encounter-visit-document"
           className="min-w-0 px-2 pt-2 pb-4 sm:px-3"
         >
+          {/* Rides the narrative toolbar row: a zero-height sticky overlay so
+              the switcher pins together with the toolbar while scrolling. */}
+          <div
+            inert={resolverField !== null}
+            className="encounter-view-switch pointer-events-none sticky top-0 flex h-0 justify-start"
+          >
+            <Select
+              aria-label={m('Visit mode')}
+              size="sm"
+              className="pointer-events-auto ms-1 mt-1.5 w-28"
+              value={mode}
+              disabled={modePending || saving}
+              options={[
+                { value: 'esheet', label: m('eSheet') },
+                { value: 'rich', label: m('RichEdit') },
+                { value: 'view', label: m('View') },
+              ]}
+              onValueChange={(value) =>
+                void setMode(value as EncounterVisitMode)
+              }
+            />
+          </div>
+          {/* Always mounted: the narrative toolbar is the visit's constant
+              chrome. Outside RichEdit only the document body is hidden. */}
+          <div
+            inert={mode !== 'rich' || resolverField !== null}
+            className={cn(
+              'encounter-rich-chrome',
+              mode !== 'rich' && 'encounter-rich-collapsed'
+            )}
+          >
+            <EncounterEditorBoundary
+              fallback={
+                <p role="alert">
+                  {m(
+                    'Rich editor is unavailable. Continue editing in eSheet or review this visit in View.'
+                  )}
+                </p>
+              }
+            >
+              <React.Suspense
+                fallback={<p role="status">{m('Loading rich editor…')}</p>}
+              >
+                <EncounterMdyEditor
+                  ref={richEditor}
+                  body={
+                    getEncounterDocumentBody(snapshot.responses) ?? richBodySeed
+                  }
+                  fieldIds={mdyFields.map((field) => field.id)}
+                  fields={mdyFields.map((field) => ({
+                    id: field.id,
+                    display: field.display,
+                    label: field.label,
+                  }))}
+                  onChange={writeBody}
+                  onFieldActivate={(id) => void activateResolver(id)}
+                  disabled={
+                    readOnly ||
+                    saving ||
+                    mode !== 'rich' ||
+                    resolverField !== null
+                  }
+                />
+              </React.Suspense>
+            </EncounterEditorBoundary>
+          </div>
+          {mode === 'esheet' && (
+            <nav
+              inert={resolverField !== null}
+              aria-label={m('Visit sections')}
+              className="encounter-section-nav bg-background sticky top-11 z-20 py-1"
+            >
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor={selectId}
+                  className="text-muted-foreground max-w-[50%] shrink-0 text-sm break-words"
+                >
+                  {m('Go to section')}
+                </label>
+                <select
+                  id={selectId}
+                  className="bg-background focus-visible:ring-primary-500 min-h-11 min-w-0 flex-1 rounded px-1 text-base focus-visible:ring-2 focus-visible:outline-none"
+                  value={activeSection}
+                  onChange={(event) => focusSection(event.target.value)}
+                >
+                  {stableDefinition.sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {m(section.title)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </nav>
+          )}
           {showErrors && snapshot.errors.length > 0 && (
             <div
               role="alert"
@@ -856,64 +859,22 @@ const EncounterVisitSession = React.forwardRef<
                 </Button>
               </div>
             )}
-            <EsheetRenderer
-              ref={renderer}
-              formDataInput={rendererInput.definition}
-              initialResponses={rendererInput.responses}
-              onReady={handleReady}
-              strict
-              touchMode
-              readOnly={readOnly || saving}
-              fitToContainer
-              topNavigation={false}
-              bottomNavigation={false}
-              className="encounter-visit-renderer"
-            />
+            <EncounterSectionContext.Provider value={true}>
+              <EsheetRenderer
+                ref={renderer}
+                formDataInput={rendererInput.definition}
+                initialResponses={rendererInput.responses}
+                onReady={handleReady}
+                strict
+                touchMode
+                readOnly={readOnly || saving}
+                fitToContainer
+                topNavigation={false}
+                bottomNavigation={false}
+                className="encounter-visit-renderer"
+              />
+            </EncounterSectionContext.Provider>
           </div>
-          {richMounted && (
-            <div hidden={mode !== 'rich'} inert={resolverField !== null}>
-              <p className="text-muted-foreground mb-2 text-sm">
-                {m(
-                  'Write headings and free text. Select a linked value to edit its eSheet data.'
-                )}
-              </p>
-              <EncounterEditorBoundary
-                fallback={
-                  <p role="alert">
-                    {m(
-                      'Rich editor is unavailable. Continue editing in eSheet or review this visit in View.'
-                    )}
-                  </p>
-                }
-              >
-                <React.Suspense
-                  fallback={<p role="status">{m('Loading rich editor…')}</p>}
-                >
-                  <EncounterMdyEditor
-                    ref={richEditor}
-                    body={
-                      getEncounterDocumentBody(snapshot.responses) ??
-                      richBodySeed
-                    }
-                    fieldIds={mdyFields.map((field) => field.id)}
-                    fields={mdyFields.map((field) => ({
-                      id: field.id,
-                      display: field.display,
-                      label: field.label,
-                    }))}
-                    onChange={writeBody}
-                    onFieldActivate={(id) => void activateResolver(id)}
-                    disabled={
-                      readOnly ||
-                      saving ||
-                      mode !== 'rich' ||
-                      resolverField !== null
-                    }
-                  />
-                </React.Suspense>
-              </EncounterEditorBoundary>
-            </div>
-          )}
           {mode === 'view' && <EncounterMdyView source={snapshot.mdy} />}
         </div>
       </div>

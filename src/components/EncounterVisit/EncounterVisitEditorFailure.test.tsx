@@ -36,18 +36,21 @@ describe('EncounterVisit optional rich editor failure', () => {
           defaultMode={defaultMode}
         />
       );
-      if (defaultMode === 'esheet')
-        fireEvent.click(screen.getByRole('tab', { name: 'RichEdit' }));
+      const selectMode = (label: string) => {
+        fireEvent.click(screen.getByRole('combobox', { name: 'Visit mode' }));
+        fireEvent.click(screen.getByRole('option', { name: label }));
+      };
+      if (defaultMode === 'esheet') selectMode('RichEdit');
       expect(await screen.findByRole('alert')).toHaveTextContent(
         'Rich editor is unavailable'
       );
-      fireEvent.click(screen.getByRole('tab', { name: 'View' }));
+      selectMode('View');
       await waitFor(() =>
         expect(
           screen.getByRole('region', { name: 'Visit note preview' })
         ).toHaveTextContent('Recorded back pain.')
       );
-      fireEvent.click(screen.getByRole('tab', { name: 'eSheet' }));
+      selectMode('eSheet');
       await waitFor(() =>
         expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveTextContent(
           'Recorded back pain.'

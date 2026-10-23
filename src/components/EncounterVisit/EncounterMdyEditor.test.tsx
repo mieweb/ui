@@ -157,7 +157,8 @@ describe('EncounterMdyEditor setup failure recovery', () => {
       />
     );
     await screen.findByRole('alert');
-    fireEvent.click(screen.getByRole('tab', { name: 'View' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Visit mode' }));
+    fireEvent.click(screen.getByRole('option', { name: 'View' }));
     await waitFor(() =>
       expect(
         screen.getByRole('region', { name: 'Visit note preview' })
@@ -166,7 +167,8 @@ describe('EncounterMdyEditor setup failure recovery', () => {
     expect(
       screen.getByRole('region', { name: 'Visit note preview' })
     ).toHaveTextContent('Recorded back pain.');
-    fireEvent.click(screen.getByRole('tab', { name: 'eSheet' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Visit mode' }));
+    fireEvent.click(screen.getByRole('option', { name: 'eSheet' }));
     await waitFor(() =>
       expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveTextContent(
         'Recorded back pain.'
