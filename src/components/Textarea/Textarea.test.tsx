@@ -405,6 +405,15 @@ describe('Textarea (native parity hardening)', () => {
     ).toBe('Drug\tDose\nAspirin\t81 mg');
   });
 
+  it('keeps empty table cells in their column', () => {
+    // An empty middle cell still owns its column…
+    expect(htmlToPlain('<tr><td>Drug</td><td></td><td>Dose</td></tr>')).toBe(
+      'Drug\t\tDose'
+    );
+    // …and so does a leading empty cell.
+    expect(htmlToPlain('<tr><td></td><td>Drug</td></tr>')).toBe('\tDrug');
+  });
+
   it('parses untrusted markup with the inert template parser', () => {
     // Table fragments only survive the <template> parsing context — a <div>
     // parser (which can also load resources and run handlers while reading)

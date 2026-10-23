@@ -74,23 +74,33 @@ const IGNORED_TAGS = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT']);
 
 function nodeListToText(nodes: Iterable<Node>): string {
   let out = '';
+  // Cell separators are positional, not content-based: an empty cell still
+  // owns a column, so `Drug | (blank) | Dose` must stay `Drug\t\tDose`.
+  let afterCell = false;
   for (const node of nodes) {
     if (node.nodeType === Node.TEXT_NODE) {
-      out += node.textContent ?? '';
+      const text = node.textContent ?? '';
+      out += text;
+      // Inter-cell whitespace from pretty-printed table markup does not
+      // break the cell sequence.
+      if (text.trim()) afterCell = false;
       continue;
     }
     if (node.nodeType !== Node.ELEMENT_NODE) continue;
     const el = node as Element;
     if (IGNORED_TAGS.has(el.tagName)) continue;
     if (el.tagName === 'BR') {
+      afterCell = false;
       out += '\n';
       continue;
     }
     if (CELL_TAGS.has(el.tagName)) {
-      if (out && !out.endsWith('\n') && !out.endsWith('\t')) out += '\t';
+      if (afterCell) out += '\t';
       out += nodeListToText(el.childNodes);
+      afterCell = true;
       continue;
     }
+    afterCell = false;
     if (BLOCK_TAGS.has(el.tagName)) {
       // A block starts its own line — inline content before it
       // (`a<div>b</div>`) must not fuse with the block's first line.
