@@ -30,19 +30,19 @@ It's surfaced to consumers through a **separate entry**,
 - **You edit the submodule, not `src`.** Changes to builder/renderer behavior go
   into `packages/esheet/...` and must be committed in that submodule's repo, then
   the submodule pointer bumped here.
+- **Library builds use the npm packages.** The `@esheet/*` packages are resolved
+  from npm; the library build does not require the submodule.
 - **Storybook uses the submodule source directly.** [.storybook/main.ts](../../../.storybook/main.ts)
   aliases `@esheet/<pkg>` → `packages/esheet/packages/<pkg>/src/index.ts`, so
-  stories pick up source edits with HMR — no rebuild needed for Storybook.
-- **The library build needs a built submodule.** `prebuild` runs `build:esheet`,
-  which nx-builds the five projects (only if their `dist` is missing). If you
-  change submodule source and build the library, force a rebuild of those
-  packages.
+  stories pick up source edits with HMR. `prestorybook` and `build-storybook`
+  run `build:esheet`, which nx-builds the five projects if their `dist` is
+  missing.
 
 ## Gotchas
 
-- `@esheet/*` failing to resolve almost always means the submodule isn't
-  initialized (`git submodule update --init --recursive`) or hasn't been built
-  (`pnpm build:esheet`).
+- **In Storybook,** `@esheet/*` failing to resolve usually means the submodule
+  isn't initialized (`git submodule update --init --recursive`) or hasn't been
+  built (`pnpm build:esheet`).
 - **Vitest excludes `packages/esheet/**`** — submodule code has its own tests;
   don't expect this repo's `pnpm test` to cover it.
 - Keep `src/esheet.ts`'s re-export surface minimal and stable — it's the public

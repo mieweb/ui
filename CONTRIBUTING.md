@@ -372,10 +372,11 @@ sentences live there and are quoted verbatim elsewhere.
   bundled (they're peers). Legacy `ag-grid-*` peers remain external for compatibility.
 - **CSS:** `pnpm build:css` compiles `src/styles/base.css` → `dist/styles.css`
   via the Tailwind CLI; brand CSS is copied into `dist/brands/`.
-- **Submodule builds:** `prebuild` runs `build:esheet` and `build:datavis`,
-  which build the `@esheet/*` packages (nx) and the `@mieweb/datavis` submodule
-  before the main build. The full build runs with `--max-old-space-size=8192`
-  because the type graph is large.
+- **Submodule builds:** `prebuild` builds the `@mieweb/datavis` submodule.
+  Library builds resolve `@esheet/*` from npm and do not need the eSheet
+  submodule; Storybook aliases those packages to submodule source, so
+  `prestorybook` and `build-storybook` build it. The full build runs with
+  `--max-old-space-size=8192` because the type graph is large.
 
 ## Testing
 
@@ -458,7 +459,7 @@ Current notes:
 | [ChatComposer](src/components/ChatComposer/MAINTAINERS.md)                   | Object-URL lifecycle with an `attachmentsRef` mirror; pure state updaters; controlled menus; stable `onError` reason keys                                                                                       |
 | [CountryCodeDropdown](src/components/CountryCodeDropdown/MAINTAINERS.md)     | Base shared with `CountryDropdown` with diverging defaults (US vs. empty); empty-state contract; lazy `google-libphonenumber` singletons                                                                        |
 | [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                                                                                        |
-| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                                                                                                  |
+| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Library uses npm packages; Storybook uses the submodule (nx) and needs `build:esheet`; Storybook-only `src`                                                                                                    |
 | [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Implementation is the `packages/datavis` submodule (`@mieweb/datavis`, bundled) + the `datavis-ace` dependency (transitive, external); needs `build:datavis`; context/source/grid wiring                        |
 | [Deck](src/components/Deck/MAINTAINERS.md) | Client-only `@mieweb/ui/deck` entry; JSON slide schema + `satisfies` renderer registry; CSS-only reveal gated on `data-ready`/`data-seen`; renderers resolve tone with `toneOf`; window key handler yields to inputs and tabs |
 | [DictationButton](src/components/DictationButton/MAINTAINERS.md) | Session-guarded mic lifecycle; `transcribe` extension point; default provider shares the Whisper worker (shared model setting, English-only, no mid-decode cancel) |

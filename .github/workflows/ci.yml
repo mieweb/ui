@@ -190,6 +190,20 @@ jobs:
       - name: Check @mieweb/ui/templates is Server Component safe
         run: pnpm check:templates-rsc
 
+      # Installable tarball of this run's build, so downstream apps can QA
+      # unreleased changes without building @mieweb/ui from source (#644).
+      # Consumers find the run by commit (runs API, head_sha=<sha>) and
+      # download this artifact from it.
+      - name: Pack package
+        run: pnpm pack --pack-destination package-tarball
+
+      - name: Upload package tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: mieweb-ui-package
+          path: package-tarball/*.tgz
+          if-no-files-found: error
+
       - name: Build Storybook
         run: pnpm build-storybook
         env:
