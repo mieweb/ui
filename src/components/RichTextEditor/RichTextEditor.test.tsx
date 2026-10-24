@@ -770,6 +770,47 @@ describe('RichTextEditor', () => {
       // Permission resolved after the toolbar hid — no session may start.
       expect(MockRecognition.instances).toHaveLength(0);
     });
+
+    it('stops a running dictation when the editor becomes readOnly', async () => {
+      const view = renderWithTheme(editorProps());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      await waitFor(() => expect(MockRecognition.instances).toHaveLength(1));
+      const recognition = MockRecognition.instances[0];
+      expect(recognition.start).toHaveBeenCalled();
+      view.rerender(
+        <RichTextEditor
+          value=""
+          onChange={() => {}}
+          aria-label="Body"
+          readOnly
+        />
+      );
+      expect(recognition.stop).toHaveBeenCalled();
+    });
+
+    it('ignores late recognition results once readOnly', async () => {
+      const onChange = vi.fn();
+      const props = (readOnly?: boolean) => (
+        <RichTextEditor
+          value=""
+          onChange={onChange}
+          aria-label="Body"
+          readOnly={readOnly}
+        />
+      );
+      const view = renderWithTheme(props());
+      fireEvent.click(await screen.findByRole('button', { name: /dictate/i }));
+      await waitFor(() => expect(MockRecognition.instances).toHaveLength(1));
+      const recognition = MockRecognition.instances[0];
+      view.rerender(props(true));
+      // A result that was already in flight when the field became readOnly
+      // must not edit the editor or reach the host.
+      (recognition.onresult as (event: unknown) => void)?.({
+        resultIndex: 0,
+        results: [{ isFinal: true, 0: { transcript: 'hello' }, length: 1 }],
+      });
+      expect(onChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('block gutter menu', () => {
@@ -1012,21 +1053,52 @@ describe('RichTextEditor', () => {
       expect(screen.getByRole('menu')).toBeInTheDocument();
     });
 
-    it('offers "Insert macro…" only when macros are provided', () => {
+    it('offers the macro menu entries only when macros are provided', () => {
       renderEditor();
       openMenu();
       expect(
-        screen.queryByRole('menuitem', { name: 'Insert macro…' })
+        screen.queryByRole('menuitem', { name: 'Insert macro' })
       ).toBeNull();
+      expect(
+        screen.queryByRole('menuitem', { name: 'Show macro library' })
+      ).toBeNull();
+    });
+
+    it('disables the "Insert macro" submenu when the groups are empty', () => {
+      renderEditor({ macros: [{ id: 'g', label: 'Group', macros: [] }] });
+      openMenu();
+      expect(
+        screen.getByRole('menuitem', { name: 'Insert macro' })
+      ).toBeDisabled();
+      // The library item stays available — its panel owns the empty state.
+      expect(
+        screen.getByRole('menuitem', { name: 'Show macro library' })
+      ).not.toBeDisabled();
     });
 
     it('opens the macro panel from the menu', () => {
       renderEditor({ macros });
       openMenu();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      fireEvent.click(
+        screen.getByRole('menuitem', { name: 'Show macro library' })
+      );
       expect(
         document.querySelector('[data-slot="macro-library"]')
       ).not.toBeNull();
+    });
+
+    it('inserts a macro directly from the "Insert macro" submenu', () => {
+      renderEditor({ macros });
+      openMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: /Cardio — WNL/ }));
+      expect(exec).toHaveBeenCalledWith(
+        'insertText',
+        false,
+        'Regular rate and rhythm.'
+      );
+      // No panel was docked — the submenu inserts without the library.
+      expect(document.querySelector('[data-slot="macro-library"]')).toBeNull();
     });
 
     it('inserts the macro at the menu target even after the panel takes focus', () => {
@@ -1048,7 +1120,9 @@ describe('RichTextEditor', () => {
       // …while the gutter menu targets the SECOND.
       fireEvent.mouseMove(editor, { clientY: 45 });
       openMenu();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Insert macro…' }));
+      fireEvent.click(
+        screen.getByRole('menuitem', { name: 'Show macro library' })
+      );
       // The panel's search field steals focus; the editor's blur re-saves
       // the live selection — which must already match the menu target, or
       // the bookmark gets clobbered and the macro lands at the old caret.

@@ -3,6 +3,55 @@
 Breaking-change recipes for `@mieweb/ui` consumers. Each section is anchored
 so release notes and dev-console notices can deep-link to it.
 
+## Textarea is rich text underneath (0.12.0)
+
+**`Textarea` now renders `TextAreaRich`** (hidden toolbar, markdown block
+shortcuts, Notion-style block gutter menu) while keeping its plain-text
+contract: `value`, `defaultValue` and `onChange`'s `event.target.value` are
+still plain strings, `name` still posts plain text through a hidden mirror
+`<textarea>`, and `ref.current.value` / `ref.current.focus()` keep working.
+Formatting is visible while composing but flattened to lines when reported —
+hosts that persist the value store the same plain text as before.
+
+Related renames (also 0.12.0): **`RichTextArea` → `TextAreaRich`**
+(deprecated aliases `RichTextArea` / `RichTextAreaProps` still exported), and
+the previous native implementation is now **`TextAreaPlain`**
+(`textareaVariants` moved with it).
+
+### Pick your lane
+
+| You need…                                                                          | Use                                            |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------- |
+| A multi-line note field storing plain text (the default)                            | `Textarea` — no code changes                    |
+| To **persist** the formatting (value is HTML)                                       | `TextAreaRich`                                  |
+| The native `<textarea>` element: hard `maxLength`, native validation/autofill, drag-resize, floating labels, element-targeting CSS/refs | `TextAreaPlain` — same props as the old `Textarea` — or `<Textarea richText={false}>` to opt out in place |
+
+### Behaviour changes to review
+
+- **`maxLength` is no longer enforced while typing.** The counter
+  (`showCount`) still renders and turns red past the limit. Enforce limits in
+  `onChange` or switch to `TextAreaPlain`.
+- **`labelVariant="floating"`, `resize` and `autoResize={false}` are ignored**
+  (stacked label, no drag handle, always auto-grows) with a one-time dev
+  console warning.
+- **Native validation, autofill and IME/browser integrations** tied to a
+  visible `<textarea>` element no longer apply.
+- **DOM shape changed.** There is no visible `<textarea>`; the surface is a
+  `contenteditable` region inside `[data-slot="rich-text-editor"]`, plus a
+  hidden mirror `[data-slot="textarea-mirror"]` carrying `name`/`value`. CSS
+  selectors like `textarea { … }` no longer match — target the existing
+  `[data-slot="textarea-*"]` hooks instead. Tests using
+  `getByRole('textbox')` keep working.
+- **Controlled transforms reset formatting.** Echoing `event.target.value`
+  back unchanged preserves the on-screen formatting; transforming it
+  (uppercasing, trimming) resyncs the editor to plain paragraphs.
+- **Kept working:** `readOnly`, `required`, `rows` (minimum height), `size`,
+  `form`, `onFocus`/`onBlur`/`onKeyDown`/`onKeyUp` (retargeted so
+  `event.target.value` reads plain text), and external
+  `<label htmlFor={id}>` pairs (bridged via `aria-labelledby` plus
+  click-to-focus). `\r\n` in values is normalized to `\n`, and pasted or
+  dropped rich content is flattened to plain text before it enters the field.
+
 ## Chat composer
 
 **`MessageComposer` was retired in 0.10.0.** The shared **`ChatComposer`** is

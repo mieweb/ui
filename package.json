@@ -451,7 +451,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "datavis-ace": "4.1.0",
-    "dompurify": "^3.4.0",
+    "dompurify": "^3.4.17",
     "google-libphonenumber": "^3.2.44",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.562.0",

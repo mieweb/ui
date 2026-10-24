@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
-import { RichTextArea } from './RichTextArea';
+import { TextAreaRich } from './TextAreaRich';
 import type { MacroGroup } from '../MacroLibrary';
 
 const macros: MacroGroup[] = [
@@ -32,10 +32,10 @@ const typeAndPressSpace = (editor: HTMLElement, text: string) => {
   return fireEvent.keyDown(editor, { key: ' ' });
 };
 
-describe('RichTextArea', () => {
+describe('TextAreaRich', () => {
   it('renders an editable textbox without a toolbar', () => {
     renderWithTheme(
-      <RichTextArea value="" onChange={() => {}} aria-label="Comment" />
+      <TextAreaRich value="" onChange={() => {}} aria-label="Comment" />
     );
     expect(
       screen.getByRole('textbox', { name: 'Comment' })
@@ -47,7 +47,7 @@ describe('RichTextArea', () => {
 
   it('is a chromeless RichTextEditor in Textarea chrome, one row tall', () => {
     renderWithTheme(
-      <RichTextArea value="" onChange={() => {}} aria-label="Comment" />
+      <TextAreaRich value="" onChange={() => {}} aria-label="Comment" />
     );
     const wrapper = document.querySelector('[data-slot="rich-text-editor"]')!;
     expect(wrapper).toHaveAttribute('data-chromeless');
@@ -63,7 +63,7 @@ describe('RichTextArea', () => {
 
   it('renders the block gutter menu button', () => {
     renderWithTheme(
-      <RichTextArea value="" onChange={() => {}} aria-label="Comment" />
+      <TextAreaRich value="" onChange={() => {}} aria-label="Comment" />
     );
     expect(
       screen.getByRole('button', { name: 'Block menu' })
@@ -72,7 +72,7 @@ describe('RichTextArea', () => {
 
   it('can start with the toolbar visible via defaultToolbar', () => {
     renderWithTheme(
-      <RichTextArea
+      <TextAreaRich
         value=""
         onChange={() => {}}
         defaultToolbar="visible"
@@ -86,7 +86,7 @@ describe('RichTextArea', () => {
 
   it('renders the placeholder when empty', () => {
     renderWithTheme(
-      <RichTextArea
+      <TextAreaRich
         value=""
         onChange={() => {}}
         placeholder="Add a comment…"
@@ -103,7 +103,7 @@ describe('RichTextArea', () => {
 
   it('disables editing when disabled', () => {
     renderWithTheme(
-      <RichTextArea value="<p>Read only</p>" onChange={() => {}} disabled />
+      <TextAreaRich value="<p>Read only</p>" onChange={() => {}} disabled />
     );
     expect(screen.getByRole('textbox')).toHaveAttribute(
       'contenteditable',
@@ -113,7 +113,7 @@ describe('RichTextArea', () => {
 
   it('marks the editable while the macro panel is open (density CSS hook)', () => {
     renderWithTheme(
-      <RichTextArea
+      <TextAreaRich
         value=""
         onChange={() => {}}
         macros={macros}
@@ -130,7 +130,7 @@ describe('RichTextArea', () => {
 
   it('does not mark the editable while the macro panel is closed', () => {
     renderWithTheme(
-      <RichTextArea
+      <TextAreaRich
         value=""
         onChange={() => {}}
         macros={macros}
@@ -156,7 +156,7 @@ describe('RichTextArea', () => {
 
     it('expands markdown block shortcuts by default', () => {
       renderWithTheme(
-        <RichTextArea value="" onChange={() => {}} aria-label="Comment" />
+        <TextAreaRich value="" onChange={() => {}} aria-label="Comment" />
       );
       const editor = screen.getByRole('textbox', { name: 'Comment' });
       const notPrevented = typeAndPressSpace(editor, '##');
@@ -167,7 +167,7 @@ describe('RichTextArea', () => {
 
     it('lets hosts opt out of markdown shortcuts', () => {
       renderWithTheme(
-        <RichTextArea
+        <TextAreaRich
           value=""
           onChange={() => {}}
           markdownShortcuts={false}
@@ -182,7 +182,7 @@ describe('RichTextArea', () => {
 
     it('expands macro dot phrases when macros are provided', () => {
       renderWithTheme(
-        <RichTextArea
+        <TextAreaRich
           value=""
           onChange={() => {}}
           macros={macros}

@@ -2,12 +2,12 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { RichTextEditor, type RichTextEditorProps } from '../RichTextEditor';
 
-export interface RichTextAreaProps extends Omit<
+export interface TextAreaRichProps extends Omit<
   RichTextEditorProps,
   'chromeless' | 'blockMenu' | 'defaultToolbar'
 > {
   /**
-   * Initial toolbar visibility when `toolbar` is uncontrolled. RichTextArea
+   * Initial toolbar visibility when `toolbar` is uncontrolled. TextAreaRich
    * is chromeless, so this defaults to `'hidden'`; the block gutter menu's
    * "Show toolbar" reveals it on demand.
    */
@@ -25,7 +25,7 @@ export interface RichTextAreaProps extends Omit<
  * not plain text. Need plain text for form posts or native bindings — use
  * `Textarea`. Need the full always-on toolbar — use `RichTextEditor`.
  */
-const RichTextArea = React.forwardRef<HTMLDivElement, RichTextAreaProps>(
+const TextAreaRich = React.forwardRef<HTMLDivElement, TextAreaRichProps>(
   (
     { className, markdownShortcuts = true, defaultToolbar = 'hidden', ...rest },
     ref
@@ -49,6 +49,6 @@ const RichTextArea = React.forwardRef<HTMLDivElement, RichTextAreaProps>(
   )
 );
 
-RichTextArea.displayName = 'RichTextArea';
+TextAreaRich.displayName = 'TextAreaRich';
 
-export { RichTextArea };
+export { TextAreaRich };

@@ -180,6 +180,78 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('chat-composer-with-record-button.png');
   });
 
+  // Capture ribbon POC (#637): docked Record/Capture ribbon above the input.
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ChatComposer capture ribbon - Docked${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(
+        page,
+        'chat-chatcomposer-action-ribbon-poc--native-with-document',
+        { ...options }
+      );
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+      const ribbon = page.locator("[data-slot='chat-composer-capture-ribbon']");
+      await expect(ribbon).toBeVisible();
+      // Record leads Capture in reading order: physically right of it under
+      // RTL, left of it otherwise.
+      const [record, capture] = await Promise.all([
+        ribbon.getByRole('group', { name: 'Record' }).boundingBox(),
+        ribbon.getByRole('group', { name: 'Capture' }).boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(record!.x).toBeGreaterThan(capture!.x);
+      } else {
+        expect(record!.x).toBeLessThan(capture!.x);
+      }
+      if (viewport) {
+        const box = await ribbon.boundingBox();
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(ribbon).toHaveScreenshot(
+        `chat-composer-capture-ribbon${name}.png`
+      );
+    });
+  }
+
+  test('ChatComposer capture ribbon - Dock and undock from the + menu', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'chat-chatcomposer-action-ribbon-poc--menu-only');
+    const ribbon = page.locator("[data-slot='chat-composer-capture-ribbon']");
+    await expect(ribbon).toHaveCount(0);
+
+    await page.locator("[data-slot='chat-composer-add-button']").click();
+    const dockToggle = page.getByRole('menuitemcheckbox', {
+      name: 'Dock capture ribbon',
+    });
+    await expect(dockToggle).toHaveAttribute('aria-checked', 'false');
+    await dockToggle.click();
+    await expect(ribbon).toBeVisible();
+
+    await ribbon.getByRole('button', { name: 'Undock capture ribbon' }).click();
+    await expect(ribbon).toHaveCount(0);
+  });
+
+  test('ChatComposer capture ribbon - Scan document attaches a page', async ({
+    page,
+  }) => {
+    await gotoStory(
+      page,
+      'chat-chatcomposer-action-ribbon-poc--native-with-document'
+    );
+    await page.getByRole('button', { name: 'Scan document' }).click();
+    await expect(page.getByRole('status')).toHaveText('Scanned 1 page(s)');
+    await expect(
+      page.locator("[data-slot='chat-composer-attachments']")
+    ).toBeVisible();
+  });
+
   test('DictationButton - Mock provider', async ({ page }) => {
     await gotoStory(page, 'media-dictationbutton--mock-provider');
     await expect(page).toHaveScreenshot('dictation-button-mock-provider.png');
@@ -798,9 +870,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       globals: 'direction:rtl',
     });
     await page.getByRole('button', { name: 'Open Enc 5' }).click();
-    const actionBtn = page
-      .locator('button[aria-label^="Actions for"]')
-      .first();
+    const actionBtn = page.locator('button[aria-label^="Actions for"]').first();
     await actionBtn.click();
     const menu = page.locator('[role="menu"]');
     await menu.waitFor({ state: 'visible' });
@@ -1025,9 +1095,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'choice-inputs-countrycodedropdown--default', {
       globals: 'direction:rtl',
     });
-    const triggerCode = page.locator(
-      '[data-slot="country-dropdown-dialcode"]'
-    );
+    const triggerCode = page.locator('[data-slot="country-dropdown-dialcode"]');
     await expect(triggerCode).toHaveText('+1');
     await expect.poll(() => direction(triggerCode)).toBe('ltr');
     await page.locator('[data-slot="country-dropdown-trigger"]').click();
@@ -1312,9 +1380,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     const root = page.locator('.ag-root-wrapper').first();
     await expect(root).toHaveClass(/ag-rtl/);
     await expect
-      .poll(() =>
-        root.evaluate((el) => getComputedStyle(el).direction)
-      )
+      .poll(() => root.evaluate((el) => getComputedStyle(el).direction))
       .toBe('rtl');
     await expect(page).toHaveScreenshot('aggrid-default-rtl.png');
   });
@@ -2059,13 +2125,13 @@ test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
   });
 });
 
-test.describe('Visual Regression Tests - RichTextArea', () => {
-  const story = 'editors-richtextarea--basic';
+test.describe('Visual Regression Tests - TextAreaRich', () => {
+  const story = 'editors-textarearich--basic';
   const wrapperSel = '[data-slot="rich-text-editor"][data-chromeless]';
   const editorSel = '[contenteditable="true"]';
 
   for (const direction of ['ltr', 'rtl'] as const) {
-    test(`RichTextArea - Single-line start that auto-grows (${direction.toUpperCase()})`, async ({
+    test(`TextAreaRich - Single-line start that auto-grows (${direction.toUpperCase()})`, async ({
       page,
     }) => {
       await gotoStory(
@@ -2080,7 +2146,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
       const restBox = await wrapper.boundingBox();
       expect(Math.abs(restBox!.height - 40)).toBeLessThanOrEqual(1);
       await expect(page).toHaveScreenshot(
-        `richtextarea-single-line-${direction}.png`
+        `textarearich-single-line-${direction}.png`
       );
       // Typing a markdown shortcut formats without any toolbar, and the
       // surface grows with the content instead of scrolling.
@@ -2098,7 +2164,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     });
   }
 
-  test('RichTextArea - Grown content with the gutter menu available', async ({
+  test('TextAreaRich - Grown content with the gutter menu available', async ({
     page,
   }) => {
     await gotoStory(page, story);
@@ -2117,10 +2183,10 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await expect
       .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
       .toBe('1');
-    await expect(page).toHaveScreenshot('richtextarea-grown.png');
+    await expect(page).toHaveScreenshot('textarearich-grown.png');
   });
 
-  test('RichTextArea - Gutter trigger follows the field when content is cleared', async ({
+  test('TextAreaRich - Gutter trigger follows the field when content is cleared', async ({
     page,
   }) => {
     // Hovering a lower row parks the trigger beside it; clearing the content
@@ -2169,7 +2235,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await within();
   });
 
-  test('RichTextArea - Narrow empty field keeps the placeholder to one line', async ({
+  test('TextAreaRich - Narrow empty field keeps the placeholder to one line', async ({
     page,
   }) => {
     // Chromeless surfaces have no wrapper clipping; a long hint must
@@ -2188,7 +2254,7 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     ).toBe('ellipsis');
   });
 
-  test('RichTextArea - Condensed gutter trigger stays inside the empty field', async ({
+  test('TextAreaRich - Condensed gutter trigger stays inside the empty field', async ({
     page,
   }) => {
     await gotoStory(page, story, { globals: 'density:condensed' });
@@ -2214,15 +2280,15 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
       .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
       .toBe('1');
     await within();
-    await expect(page).toHaveScreenshot('richtextarea-condensed.png');
+    await expect(page).toHaveScreenshot('textarearich-condensed.png');
   });
 
-  test('RichTextArea - Condensed macro panel keeps its working height', async ({
+  test('TextAreaRich - Condensed macro panel keeps its working height', async ({
     page,
   }) => {
     // The compact condensed minimum must release when the macro panel —
     // absolutely stretched over the editor body — needs md working space.
-    await gotoStory(page, 'editors-richtextarea--with-macros', {
+    await gotoStory(page, 'editors-textarearich--with-macros', {
       globals: 'density:condensed',
     });
     const editor = page.locator(editorSel);
@@ -2230,13 +2296,13 @@ test.describe('Visual Regression Tests - RichTextArea', () => {
     await page
       .locator('[data-slot="rich-text-editor-block-gutter"] button')
       .click();
-    await page.getByRole('menuitem', { name: 'Insert macro…' }).click();
+    await page.getByRole('menuitem', { name: 'Show macro library' }).click();
     await expect(editor).toHaveAttribute('data-macros-open', '');
     const editorBox = await editor.boundingBox();
     expect(editorBox!.height).toBeGreaterThanOrEqual(399);
     await expect(
       page.getByRole('button', { name: 'Cardio — WNL' })
     ).toBeVisible();
-    await expect(page).toHaveScreenshot('richtextarea-condensed-macros.png');
+    await expect(page).toHaveScreenshot('textarearich-condensed-macros.png');
   });
 });

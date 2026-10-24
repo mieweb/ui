@@ -7,18 +7,19 @@ import { Meta } from '@storybook/addon-docs/blocks';
 > **What is the stored format, and who edits it?** Markdown that people write (and maybe
 > co-write) → `RichEditor`. HTML for templated letters with merge fields and dictation →
 > `RichTextEditor`. HTML in a surface that should look like a plain textarea until asked →
-> `RichTextArea`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
+> `TextAreaRich`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
 > Markdown that is only **read** → `MarkdownRenderer`. A structured agent
-> configuration with a YAML/JSON pane → `Q`. Plain text → [Textarea](?path=/docs/text-inputs-textarea--docs)
-> (Text inputs).
+> configuration with a YAML/JSON pane → `Q`. Plain text storage with rich composing →
+> [Textarea](?path=/docs/text-inputs-textarea--docs) (Text inputs) — it renders `TextAreaRich`
+> but keeps a plain-text `value`.
 
 ## Which one?
 
 | Component                                                  | Use it when                                                                                                                                        | Not when                                                                                                                                   |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | [RichEditor](?path=/docs/editors-richeditor--docs)         | The document is **Markdown**: headings, lists, tables, code; `getContent()` on submit; `collab.room` for Yjs co-editing; `CodeEditor` for source   | The stored format is HTML or you need merge variables/dictation — `RichTextEditor`; the host cannot add the Kerebron peers and WASM assets |
-| [RichTextEditor](?path=/docs/editors-richtexteditor--docs) | The document is **HTML**: bold/italic/underline, lists, alignment, opt-in markdown block shortcuts (H1–H3, lists, quote), `variableGroups` inserting `{{tokens}}`, Web Speech dictation; no peers | You need Markdown, real undo history, links/tables/code or collaboration — `RichEditor`; plain text — `Textarea`; a textarea-like surface with the toolbar hidden — `RichTextArea`             |
-| [RichTextArea](?path=/docs/editors-richtextarea--docs)     | A **textarea-like** HTML surface: starts one Input row tall and auto-grows, toolbar hidden until asked, markdown block shortcuts, a Notion-style `+` gutter menu, `.shortcut` macros           | The value must be **plain text** (form posts, bindings) — `Textarea`; a full document with an always-on toolbar, variables or dictation — `RichTextEditor`                                     |
+| [RichTextEditor](?path=/docs/editors-richtexteditor--docs) | The document is **HTML**: bold/italic/underline, lists, alignment, opt-in markdown block shortcuts (H1–H3, lists, quote), `variableGroups` inserting `{{tokens}}`, Web Speech dictation; no peers | You need Markdown, real undo history, links/tables/code or collaboration — `RichEditor`; plain text — `Textarea`; a textarea-like surface with the toolbar hidden — `TextAreaRich`             |
+| [TextAreaRich](?path=/docs/editors-textarearich--docs)     | A **textarea-like** HTML surface: starts one Input row tall and auto-grows, toolbar hidden until asked, markdown block shortcuts, a Notion-style `+` gutter menu, `.shortcut` macros           | The value must be **plain text** (form posts, bindings) — `Textarea` (this surface with a plain-text contract); a full document with an always-on toolbar, variables or dictation — `RichTextEditor`                                     |
 | [EmailEditor](?path=/docs/editors-emaileditor--docs)       | The document is an **email**: hero, columns, buttons, images, social, footer blocks on a drag-to-reorder canvas; `renderEmailMjml` serialises it   | A single formatted body — `RichTextEditor`; sending, recipients and templates are the host's                                               |
 | [Markdown](?path=/docs/editors-markdown--docs)             | **Displaying** Markdown: sanitised HTML, code highlighting, `mermaid` / `csv` / `survey` / `html` fences, `streaming` for token-by-token AI output | The user edits the text — `RichEditor` / `RichTextEditor`; the source is HTML                                                              |
 | [Q](?path=/docs/editors-q--docs)                           | Admins configure an **agent** (prompt, tools, telephony) through a schema-generated form and see the YAML/JSON; `onSubmit(yaml)`, `onConfigChange` | Free-form prose — `RichEditor`; general clinical/business forms — ESheet (Composite forms)                                                 |
@@ -27,7 +28,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 | Entry                 | Exports                                                                                                     | Peers (all optional in `package.json`)                                                                                                                         | Styles                                                                       |
 | --------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `@mieweb/ui`          | `RichTextEditor`, `RichTextArea`, `EmailEditor` + `renderEmailMjml`, `MarkdownRenderer` + blocks, `useMarkdown`, `Textarea` | `mermaid`, `papaparse`, `js-yaml` — only for the matching Markdown fence; `mjml` or `mjml-browser` to compile `renderEmailMjml` output (host-side, not a peer) | `@mieweb/ui/styles.css`, `@mieweb/ui/markdown.css`                           |
+| `@mieweb/ui`          | `RichTextEditor`, `TextAreaRich`, `EmailEditor` + `renderEmailMjml`, `MarkdownRenderer` + blocks, `useMarkdown`, `Textarea` | `mermaid`, `papaparse`, `js-yaml` — only for the matching Markdown fence; `mjml` or `mjml-browser` to compile `renderEmailMjml` output (host-side, not a peer) | `@mieweb/ui/styles.css`, `@mieweb/ui/markdown.css`                           |
 | `@mieweb/ui/kerebron` | `RichEditor`, `CodeEditor`, `CollabConfig`                                                                  | `@kerebron/editor`, `@kerebron/editor-kits`, `@kerebron/wasm` (`>=0.8.12`); for `collab`: `@kerebron/extension-yjs`, `yjs`, `y-protocols`                      | `@mieweb/ui/kerebron.css`; serve `@kerebron/wasm/assets` at `/kerebron-wasm` |
 | `@mieweb/ui/q`        | `Q`, presets (`qAgentSchema`, `qTwilioAgentSchema`, …), `@mieweb/q` re-exports                              | `@mieweb/q` (`1.0.0`)                                                                                                                                          | `@mieweb/q/style.css`                                                        |
 
@@ -43,7 +44,7 @@ those editors do not pay for ProseMirror, WASM grammars or Q's form engine.
   undo, plus the two things `RichEditor` lacks — a searchable **Variables** `Dropdown` for
   `{{merge.fields}}` and a **Dictate** button on the Web Speech API. Pick by what you store and
   whether the note needs merge fields; they are declared `alternative to` each other.
-- **RichTextArea is RichTextEditor in textarea clothing — the value contract decides.**
+- **TextAreaRich is RichTextEditor in textarea clothing — the value contract decides.**
   It composes `RichTextEditor` in chromeless mode (hidden toolbar, markdown shortcuts, the
   block gutter menu, macros) inside `Textarea`-matched chrome. It still emits **HTML**:
   if the consumer expects plain text, use `Textarea` — swapping one for the other silently

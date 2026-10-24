@@ -75,10 +75,6 @@ const DEFAULT_LABELS = {
   emptyHint: 'The application has not provided a macro list.',
   noResults: 'No macros match',
   clearSearch: 'Clear search',
-  showFullContent: 'Show full content',
-  hideFullContent: 'Hide full content',
-  more: 'more',
-  less: 'less',
 };
 
 /** Case-insensitive match across label, shortcut, keywords and content. */
@@ -104,148 +100,6 @@ function isShortcutHit(macro: Macro, query: string): boolean {
 function rankMacros(macros: Macro[], query: string): Macro[] {
   return [...macros].sort(
     (a, b) => Number(isShortcutHit(b, query)) - Number(isShortcutHit(a, query))
-  );
-}
-
-interface MacroRowProps {
-  macro: Macro;
-  isPrevious: boolean;
-  isPeeked: boolean;
-  peekId: string;
-  labels: typeof DEFAULT_LABELS;
-  onSelect: (macro: Macro) => void;
-  onTogglePeek: () => void;
-  onRowKeyDown: (event: React.KeyboardEvent) => void;
-}
-
-/**
- * One macro row. The two-line preview measures its own clamping so the
- * "more" toggle only appears when content is actually truncated.
- */
-function MacroRow({
-  macro,
-  isPrevious,
-  isPeeked,
-  peekId,
-  labels,
-  onSelect,
-  onTogglePeek,
-  onRowKeyDown,
-}: MacroRowProps) {
-  const [truncated, setTruncated] = React.useState(false);
-  const rowRef = React.useRef<HTMLButtonElement>(null);
-  const lessRef = React.useRef<HTMLButtonElement>(null);
-  // Toggling unmounts the activated control; move focus to its replacement
-  // ("less" on expand, the row on collapse — the "more" chip is hidden until
-  // hover/focus) so keyboard focus never drops to <body> and Escape keeps
-  // closing the panel.
-  const focusAfterToggle = React.useRef(false);
-  React.useEffect(() => {
-    if (!focusAfterToggle.current) return;
-    focusAfterToggle.current = false;
-    (isPeeked ? lessRef.current : rowRef.current)?.focus();
-  }, [isPeeked]);
-  const handleToggle = () => {
-    focusAfterToggle.current = true;
-    onTogglePeek();
-  };
-  // Remeasure on resize: docking/undocking or narrowing the panel can clamp
-  // content without a React render.
-  const previewObserver = React.useRef<ResizeObserver | null>(null);
-  const measurePreview = (el: HTMLSpanElement | null) => {
-    previewObserver.current?.disconnect();
-    previewObserver.current = null;
-    if (!el) return;
-    const measure = () => setTruncated(el.scrollHeight > el.clientHeight);
-    measure();
-    if (typeof ResizeObserver !== 'undefined') {
-      previewObserver.current = new ResizeObserver(measure);
-      previewObserver.current.observe(el);
-    }
-  };
-  return (
-    <div
-      data-slot="macro-library-item"
-      className="group/macro hover:bg-muted/60 relative rounded-md"
-    >
-      <button
-        type="button"
-        data-macro-row
-        ref={rowRef}
-        className="focus-visible:ring-ring text-foreground hover:text-primary flex w-full cursor-pointer flex-col items-stretch gap-0.5 rounded-md px-2 py-1.5 text-start focus-visible:ring-2 focus-visible:outline-none"
-        onClick={() => onSelect(macro)}
-        onKeyDown={onRowKeyDown}
-      >
-        <span className="flex items-center gap-2">
-          {macro.shortcut && (
-            <span
-              // Shortcuts are typed sequences; keep them LTR in RTL locales.
-              dir="ltr"
-              className={cn(
-                'border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]',
-                isPrevious &&
-                  'border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-700 dark:bg-warning-950 dark:text-warning-300'
-              )}
-            >
-              {macro.shortcut}
-            </span>
-          )}
-          <span className="min-w-0 flex-1 truncate text-sm font-medium">
-            {macro.label}
-          </span>
-        </span>
-        {!isPeeked && (
-          <span
-            ref={measurePreview}
-            className="text-muted-foreground line-clamp-2 text-xs break-words"
-          >
-            {macro.content}
-          </span>
-        )}
-      </button>
-      {isPeeked && (
-        <div
-          id={peekId}
-          data-slot="macro-library-peek"
-          className="text-muted-foreground px-2 pb-1 text-xs break-words whitespace-pre-line"
-        >
-          {macro.content}
-        </div>
-      )}
-      {truncated && !isPeeked && (
-        // Overlays the end of the clamped second line; revealed on row
-        // hover or keyboard focus so short rows stay entirely clean. Always
-        // visible on devices without hover (touch).
-        <button
-          type="button"
-          className="bg-muted text-muted-foreground hover:text-primary focus-visible:ring-ring invisible absolute end-1.5 bottom-1.5 flex cursor-pointer items-center rounded-sm px-1 text-[11px] leading-4 group-focus-within/macro:visible group-hover/macro:visible hover:underline focus-visible:ring-2 focus-visible:outline-none [@media(hover:none)]:visible"
-          aria-expanded={false}
-          aria-label={`${labels.showFullContent}: ${macro.label}`}
-          onClick={handleToggle}
-        >
-          {labels.more}
-          <ChevronRightIcon
-            aria-hidden="true"
-            className="h-3 w-3 rtl:-scale-x-100"
-          />
-        </button>
-      )}
-      {isPeeked && (
-        <span className="-mt-1 flex justify-end px-2 pb-1">
-          <button
-            type="button"
-            ref={lessRef}
-            className="text-muted-foreground hover:text-primary focus-visible:ring-ring cursor-pointer rounded text-[11px] hover:underline focus-visible:ring-2 focus-visible:outline-none"
-            aria-expanded
-            aria-controls={peekId}
-            aria-label={`${labels.hideFullContent}: ${macro.label}`}
-            onClick={handleToggle}
-          >
-            {labels.less}
-          </button>
-        </span>
-      )}
-    </div>
   );
 }
 
@@ -276,7 +130,6 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
     const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>(
       {}
     );
-    const [peeked, setPeeked] = React.useState<string | null>(null);
     const listRef = React.useRef<HTMLDivElement>(null);
     const searchRef = React.useRef<HTMLInputElement>(null);
     const panelId = React.useId();
@@ -505,24 +358,35 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                     </button>
 
                     {!isCollapsed &&
-                      group.macros.map((macro) => {
-                        const isPeeked = peeked === macro.id;
-                        return (
-                          <MacroRow
-                            key={macro.id}
-                            macro={macro}
-                            isPrevious={isPrevious}
-                            isPeeked={isPeeked}
-                            peekId={`${panelId}-peek-${macro.id}`}
-                            labels={labels}
-                            onSelect={onSelect}
-                            onTogglePeek={() =>
-                              setPeeked(isPeeked ? null : macro.id)
-                            }
-                            onRowKeyDown={handleRowKeyDown}
-                          />
-                        );
-                      })}
+                      group.macros.map((macro) => (
+                        <button
+                          key={macro.id}
+                          type="button"
+                          data-macro-row
+                          data-slot="macro-library-item"
+                          className="focus-visible:ring-ring text-foreground hover:bg-muted/60 hover:text-primary flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-start focus-visible:ring-2 focus-visible:outline-none"
+                          onClick={() => onSelect(macro)}
+                          onKeyDown={handleRowKeyDown}
+                        >
+                          {macro.shortcut && (
+                            <span
+                              // Shortcuts are typed sequences; keep them LTR
+                              // in RTL locales.
+                              dir="ltr"
+                              className={cn(
+                                'border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]',
+                                isPrevious &&
+                                  'border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-700 dark:bg-warning-950 dark:text-warning-300'
+                              )}
+                            >
+                              {macro.shortcut}
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                            {macro.label}
+                          </span>
+                        </button>
+                      ))}
                   </div>
                 );
               })}

@@ -13,7 +13,7 @@ overrides:
   "flatted@<3.4.2": "3.4.2"
   "picomatch@>=4.0.0 <4.0.4": "4.0.4"
   "uuid@<11.1.1": "11.1.1"
-  "dompurify@<3.4.0": "3.4.0"
+  "dompurify@<3.4.17": "3.4.17"
 
 patchedDependencies:
   # kerebron regression hit by the storybook a11y CI job: the code-block

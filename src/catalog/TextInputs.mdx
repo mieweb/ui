@@ -4,7 +4,8 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Text inputs
 
-> **What is the value?** Free text on one line → `Input`; several lines → `Textarea`. A phone
+> **What is the value?** Free text on one line → `Input`; several lines → `Textarea` (a rich
+> surface that keeps a plain-text value — `TextAreaPlain` for the native element). A phone
 > number → `PhoneInput` (or `PhoneInputGroup` for a typed list); a URL → `WebsiteInput` (or
 > `WebsiteInputGroup`) — never a raw `type="tel"` / `type="url"`. A postal address → `AddressForm`
 > to edit, `Address` to show. Every field gets an associated label: the `label` prop where the
@@ -15,7 +16,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 | Component                                                        | Use it when                                                                             | Not when                                                 |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | [Input](?path=/docs/text-inputs-input--docs)                     | One line of free text or a native type (`email`, `password`, `number`)                  | Phone / URL / date / fixed options — see the specialists |
-| [Textarea](?path=/docs/text-inputs-textarea--docs)               | A sentence or more of **plain text**; a visible character budget (`showCount`)          | The value is HTML with occasional formatting/macros — [RichTextArea](?path=/docs/editors-richtextarea--docs); full documents — `RichEditor` / `RichTextEditor` |
+| [Textarea](?path=/docs/text-inputs-textarea--docs)               | A sentence or more stored as **plain text** — rich formatting while composing ([TextAreaRich](?path=/docs/editors-textarearich--docs) underneath), plain string through `onChange`  | The host **persists** HTML — [TextAreaRich](?path=/docs/editors-textarearich--docs); native `<textarea>` behaviours (hard `maxLength`, validation, drag-resize, floating label) — `TextAreaPlain` (documented on the Textarea page); full documents — `RichEditor` / `RichTextEditor` |
 | [Label](?path=/docs/text-inputs-label--docs)                     | Labelling a control with no `label` prop (raw `<select>`, custom)                       | The control already takes `label`                        |
 | [PhoneInput](?path=/docs/text-inputs-phoneinput--docs)           | Exactly one US/Canada number stored as 10 digits                                        | Several typed numbers — `PhoneInputGroup`; international |
 | [PhoneInputGroup](?path=/docs/text-inputs-phoneinputgroup--docs) | A record holds several numbers and the type (cell, work, fax) matters                   | One number; rows need extra fields                       |
@@ -31,7 +32,7 @@ Dates go to [DateInput](?path=/docs/date-time-dateinput--docs); fixed option set
 
 ## How they fit together
 
-- `Input` is the base: `Textarea` mirrors its anatomy and borrows `RequiredMark`; `PhoneInput`,
+- `Input` is the base: `Textarea` and `TextAreaPlain` mirror its anatomy and borrow `RequiredMark`; `PhoneInput`,
   `WebsiteInput` and every field of `AddressForm` _are_ `Input`s with a preset `type`,
   `inputMode`, `autoComplete` and blur validation.
 - `PhoneInputGroup` and `WebsiteInputGroup` are the same repeater pattern (row = specialised

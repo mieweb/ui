@@ -1589,7 +1589,7 @@ body.condensed [data-slot='textarea-count'] {
   font-size: 0.625rem !important;
 }
 
-/* ── RichTextArea (chromeless RichTextEditor) ── */
+/* ── TextAreaRich (chromeless RichTextEditor) ── */
 
 /* Wrapper: condensed radius to match the condensed Textarea */
 body.condensed [data-slot='rich-text-editor'][data-chromeless] {

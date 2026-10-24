@@ -79,6 +79,8 @@ export const miewebUISafelist = [
   '[&_video]:w-full',
   'min-h-8',
   '[&_[data-slot=button-label]]:whitespace-normal',
+  '[&>[data-slot=dropdown-item-label]]:min-w-0',
+  '[&>[data-slot=dropdown-item-label]]:flex-1',
   // EmailEditor: block frames, innermost-hover toolbar reveal, email-content
   // spacing in the canvas, and the stacked/side-by-side panel layout.
   '[[data-slot=email-editor-block]:hover:not(:has([data-slot=email-editor-block]:hover))>&]:opacity-100',
@@ -1085,12 +1087,15 @@ export const miewebUISafelist = [
   'resize-y',
   'resize-x',
   'resize',
-  // RichTextArea (ui#639) — chromeless RichTextEditor single-line baseline
+  // TextAreaRich (ui#639) — chromeless RichTextEditor single-line baseline
   // and the Textarea-matched focus ring on the wrapper.
   'min-h-[38px]',
   'focus-within:ring-2',
   'focus-within:ring-ring',
   'focus-within:border-transparent',
+  // Textarea compat (ui#649) — error styling on the focused rich surface.
+  'focus-within:ring-destructive',
+  'focus-within:border-destructive',
   // Floating-group field boxes (labelVariant="floating" on RadioGroup /
   // CheckboxGroup) share the floating input heights as min-heights. sr-only
   // visually hides the group legend (and the hideLabel input label) while
