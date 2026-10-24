@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { Plus } from 'lucide-react';
 import type { FieldComponentProps } from '@esheet/core';
 import { Button } from '../Button';
+import { DateInput } from '../DateInput';
 import { Input } from '../Input';
 import type {
   EncounterVitalNumericKey,
@@ -237,9 +239,11 @@ export function EncounterVitalsField({
       aria-label={definition.question ?? m('Vitals')}
       className="space-y-3"
     >
-      <p className="text-muted-foreground text-sm">
-        {m('Leave unmeasured values blank.')}
-      </p>
+      {!parsed.error && parsed.value.readings.length > 0 && (
+        <p className="text-muted-foreground text-sm">
+          {m('Leave unmeasured values blank.')}
+        </p>
+      )}
       {parsed.error && (
         <div
           role="alert"
@@ -258,7 +262,7 @@ export function EncounterVitalsField({
           {/* eslint-enable jsx-a11y/no-noninteractive-tabindex */}
         </div>
       )}
-      {!parsed.error && parsed.value.readings.length === 0 && (
+      {readOnly && !parsed.error && parsed.value.readings.length === 0 && (
         <p className="text-muted-foreground text-sm">
           {m('No measurements recorded.')}
         </p>
@@ -338,34 +342,46 @@ export function EncounterVitalsField({
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="col-span-2 min-w-0 sm:col-span-1">
-                <Input
-                  label={m('Recorded at')}
-                  type={
-                    !reading.recordedAt ||
-                    (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(
-                      reading.recordedAt
-                    ) &&
-                      !readingIssues.some((issue) =>
-                        issue.path?.endsWith('.recordedAt')
-                      ))
-                      ? 'datetime-local'
-                      : 'text'
-                  }
-                  className="min-h-11"
-                  value={reading.recordedAt ?? ''}
-                  readOnly={readOnly}
-                  disabled={!isEnabled}
-                  title={m("Optional; use the visit's local date and time.")}
-                  error={
-                    recordedAtIssue ? m(recordedAtIssue.message) : undefined
-                  }
-                  onChange={(event) => {
-                    if (!readOnly)
-                      updateReading(reading.id, {
-                        recordedAt: event.target.value || undefined,
-                      });
-                  }}
-                />
+                {/* DateInput hides values it cannot parse, so odd stored
+                    values (UTC offsets, invalid dates) fall back to a plain
+                    text input where the original stays visible and fixable. */}
+                {!reading.recordedAt ||
+                (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(reading.recordedAt) &&
+                  !recordedAtIssue) ? (
+                  <DateInput
+                    label={m('Recorded at')}
+                    inputType="datetime-local"
+                    className="min-h-11"
+                    value={reading.recordedAt ?? ''}
+                    disabled={!isEnabled}
+                    title={m("Optional; use the visit's local date and time.")}
+                    onChange={(value) => {
+                      if (!readOnly)
+                        updateReading(reading.id, {
+                          recordedAt: value || undefined,
+                        });
+                    }}
+                  />
+                ) : (
+                  <Input
+                    label={m('Recorded at')}
+                    type="text"
+                    className="min-h-11"
+                    value={reading.recordedAt ?? ''}
+                    readOnly={readOnly}
+                    disabled={!isEnabled}
+                    title={m("Optional; use the visit's local date and time.")}
+                    error={
+                      recordedAtIssue ? m(recordedAtIssue.message) : undefined
+                    }
+                    onChange={(event) => {
+                      if (!readOnly)
+                        updateReading(reading.id, {
+                          recordedAt: event.target.value || undefined,
+                        });
+                    }}
+                  />
+                )}
               </div>
               <Input
                 label={m('Position')}
@@ -423,7 +439,8 @@ export function EncounterVitalsField({
         <Button
           type="button"
           variant="ghost"
-          className="min-h-11"
+          leftIcon={<Plus aria-hidden="true" />}
+          className="text-primary-800 hover:bg-primary-50 hover:text-primary-900 active:bg-primary-100 dark:text-primary-400 dark:hover:bg-primary-950 dark:hover:text-primary-200 min-h-11"
           onClick={() =>
             commit({
               ...parsed.value,

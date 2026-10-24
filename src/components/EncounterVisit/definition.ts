@@ -555,8 +555,6 @@ export const DEFAULT_ENCOUNTER_VISIT_DEFINITION: EncounterVisitDefinition = {
     {
       id: 'vitals',
       title: 'Vitals',
-      description:
-        'Record measured values. Add another reading for repeated measurements.',
       kind: 'vitals',
     },
     {

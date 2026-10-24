@@ -18,6 +18,27 @@
   padding-block: 0;
 }
 
+/* Touch mode inflates only button:not([data-slot]); selected finding badges
+   are spans, so size them (and their remove buttons) to match. */
+.encounter-visit
+  .esheet-touch-active
+  [data-slot='encounter-common-findings']
+  [data-slot='badge'] {
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+.encounter-visit
+  .esheet-touch-active
+  [data-slot='encounter-common-findings']
+  [data-slot='badge-remove'] {
+  display: inline-flex;
+  min-width: 36px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+}
+
 .encounter-visit .renderer-readonly-banner {
   padding-inline: 0;
   border: 0;
