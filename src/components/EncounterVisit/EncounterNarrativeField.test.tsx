@@ -253,9 +253,6 @@ describe('EncounterNarrativeField', () => {
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
     expect(screen.getByRole('textbox')).toHaveTextContent('');
     expect(fieldProps.onResponse).not.toHaveBeenCalled();
-    expect(
-      screen.getByText('Common findings').closest('details')
-    ).toHaveAttribute('open');
     expect(screen.getByRole('button', { name: 'Add No trauma' })).toBeEnabled();
     expect(
       screen.getByRole('group', {
@@ -264,45 +261,55 @@ describe('EncounterNarrativeField', () => {
     ).toBeInTheDocument();
   });
 
-  it('keeps editor focus during pointer selection so the focus-only toolbar cannot move the picker', async () => {
+  it('appends an explicit finding to existing narrative content', async () => {
     const user = userEvent.setup();
     const fieldProps = findingProps({ response: { answer: 'Back pain' } });
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
-    const editor = screen.getByRole('textbox');
-    const summary = screen.getByText('Common findings');
-    const details = summary.closest('details')!;
-    editor.focus();
-    const mouseDown = new globalThis.MouseEvent('mousedown', {
-      bubbles: true,
-      cancelable: true,
-    });
-    fireEvent(summary, mouseDown);
-    expect(mouseDown.defaultPrevented).toBe(true);
-    expect(details.open).toBe(true);
-    expect(editor).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Add No trauma' }));
-    expect(editor).toHaveFocus();
     expect(fieldProps.onResponse).toHaveBeenLastCalledWith(
       expect.objectContaining({ answer: 'Back pain\nNo recent trauma.' })
     );
   });
 
-  it('leaves keyboard events and normal focus outside the narrative unchanged', async () => {
+  it('removes a plain-text finding line and its code when unselected', () => {
+    const onResponse = vi.fn();
+    function Harness() {
+      const [response, setResponse] = React.useState<FieldResponse>({
+        answer: 'Back pain\nNo recent trauma.\nSleeping well.',
+        attributes: {
+          encounterNarrativeFindings: JSON.stringify([commonFindings[0]]),
+          encounterNarrativeFindingsText:
+            'Back pain\nNo recent trauma.\nSleeping well.',
+        },
+      });
+      return (
+        <EncounterNarrativeField
+          {...findingProps()}
+          response={response}
+          onResponse={(next) => {
+            onResponse(next);
+            setResponse(next);
+          }}
+        />
+      );
+    }
+    renderWithTheme(<Harness />);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove No trauma' }));
+    expect(onResponse).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        answer: 'Back pain\nSleeping well.',
+        attributes: expect.objectContaining({
+          encounterNarrativeFindings: '[]',
+        }),
+      })
+    );
+    expect(screen.getByRole('button', { name: 'Add No trauma' })).toBeEnabled();
+  });
+
+  it('activates findings from the keyboard', async () => {
     const user = userEvent.setup();
     const fieldProps = findingProps();
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
-    const summary = screen.getByText('Common findings');
-    summary.focus();
-    expect(summary).toHaveFocus();
-    expect(fireEvent.mouseDown(summary)).toBe(true);
-    expect(fireEvent.keyDown(summary, { key: 'Enter' })).toBe(true);
-    expect(fireEvent.keyDown(summary, { key: ' ' })).toBe(true);
-    // jsdom does not implement summary keyboard activation; native clicks
-    // still collapse/reopen the disclosure, and button keyboard activation works.
-    fireEvent.click(summary);
-    expect(summary.closest('details')).not.toHaveAttribute('open');
-    fireEvent.click(summary);
-    expect(summary.closest('details')).toHaveAttribute('open');
     const button = screen.getByRole('button', { name: 'Add No trauma' });
     button.focus();
     expect(button).toHaveFocus();
@@ -340,8 +347,8 @@ describe('EncounterNarrativeField', () => {
     renderWithTheme(<Harness />);
     fireEvent.click(screen.getByRole('button', { name: 'Add No trauma' }));
     expect(
-      screen.getByRole('button', { name: 'Added No trauma' })
-    ).toBeDisabled();
+      screen.getByRole('button', { name: 'Remove No trauma' })
+    ).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole('button', { name: 'Add Worse with movement' })
     );
@@ -362,8 +369,22 @@ describe('EncounterNarrativeField', () => {
     expect(screen.getByRole('textbox').querySelector('b')).toHaveTextContent(
       'Back pain'
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Added No trauma' }));
-    expect(onResponse).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove No trauma' }));
+    const unselectedAnswer =
+      'Back pain\nPatient reports discomfort.\nPain worsens with movement.';
+    expect(onResponse).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        answer: unselectedAnswer,
+        attributes: expect.objectContaining({
+          hostAttribute: 'retain',
+          encounterNarrativeHtml:
+            '<p><b>Back pain</b></p><p>Patient reports discomfort.</p><p>Pain worsens with movement.</p>',
+          encounterNarrativeFindings: JSON.stringify([commonFindings[1]]),
+          encounterNarrativeFindingsText: unselectedAnswer,
+        }),
+      })
+    );
+    expect(screen.getByRole('button', { name: 'Add No trauma' })).toBeEnabled();
   });
 
   it('deduplicates rapid picks even while the host has not refreshed response props', () => {
@@ -451,8 +472,8 @@ describe('EncounterNarrativeField', () => {
       <EncounterNarrativeField {...fieldProps} />
     );
     expect(
-      screen.getByRole('button', { name: 'Added No trauma' })
-    ).toBeDisabled();
+      screen.getByRole('button', { name: 'Remove No trauma' })
+    ).toBeInTheDocument();
     rerender(
       <EncounterNarrativeField
         {...fieldProps}
@@ -477,7 +498,7 @@ describe('EncounterNarrativeField', () => {
     (state) => {
       const fieldProps = findingProps(state);
       renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
-      expect(screen.queryByText('Common findings')).not.toBeInTheDocument();
+      expect(screen.queryByRole('group')).not.toBeInTheDocument();
       expect(fieldProps.onResponse).not.toHaveBeenCalled();
     }
   );
@@ -488,7 +509,7 @@ describe('EncounterNarrativeField', () => {
       <EncounterNarrativeField {...fieldProps} />
     );
     rerender(<EncounterNarrativeField {...fieldProps} isReadOnly />);
-    expect(screen.queryByText('Common findings')).not.toBeInTheDocument();
+    expect(screen.queryByRole('group')).not.toBeInTheDocument();
     expect(fieldProps.onResponse).not.toHaveBeenCalled();
   });
 

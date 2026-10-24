@@ -1,9 +1,10 @@
 import * as React from 'react';
 import DOMPurify from 'dompurify';
-import { ChevronDown, Check } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 import type { FieldComponentProps, FieldResponse } from '@esheet/core';
-import { Button } from '../Button';
-import { RichTextEditor } from '../RichTextEditor';
+import { Badge, badgeVariants } from '../Badge';
+import { cn } from '../../utils/cn';
+import { TextAreaRich } from '../TextAreaRich';
 import type { EncounterNarrativeFinding } from './types';
 import { useEncounterMessages } from './messages';
 import {
@@ -111,10 +112,11 @@ export function EncounterNarrativeField({
 }: FieldComponentProps): React.JSX.Element {
   const m = useEncounterMessages();
   const editorRef = React.useRef<HTMLDivElement>(null);
+  const chipsRef = React.useRef<HTMLDivElement>(null);
+  const pendingFocusId = React.useRef<string | null>(null);
   const responseRef = React.useRef(response);
   responseRef.current = response;
   const labelId = React.useId();
-  const findingsId = React.useId();
   const definition = field.definition as {
     question?: string;
     unit?: string;
@@ -167,7 +169,42 @@ export function EncounterNarrativeField({
     const nextHtml = hasEncounterNarrativeFindingText(answer, finding.text)
       ? responseHtml(previous)
       : `${answer.trim() ? responseHtml(previous) : ''}<p>${textToHtml(finding.text)}</p>`;
+    pendingFocusId.current = finding.id;
     publish(nextHtml, previous, getEncounterNarrativeFindings(next));
+  };
+
+  const removeFinding = (finding: EncounterNarrativeFinding) => {
+    if (readOnly) return;
+    const previous = responseRef.current;
+    const selected = getEncounterNarrativeFindings(previous).filter(
+      (item) => item.id !== finding.id
+    );
+    pendingFocusId.current = finding.id;
+    const body = document.createElement('div');
+    body.innerHTML = responseHtml(previous);
+    const matches = Array.from(body.querySelectorAll('p, div, li')).filter(
+      (block) => (block.textContent ?? '').trim() === finding.text.trim()
+    );
+    // The innermost matching block, so a wrapper holding only the finding's
+    // paragraph is not removed along with unrelated siblings.
+    const target = matches.find(
+      (block) =>
+        !matches.some((other) => other !== block && block.contains(other))
+    );
+    if (target) {
+      const list = target.closest('ul, ol');
+      target.remove();
+      if (list && !list.children.length) list.remove();
+      publish(body.innerHTML, previous, selected);
+      return;
+    }
+    // Plain-text narratives have no block markup; drop the matching line.
+    const lines = (previous?.answer ?? '').replace(/\r\n?/g, '\n').split('\n');
+    const index = lines.findIndex(
+      (line) => line.trim() === finding.text.trim()
+    );
+    if (index >= 0) lines.splice(index, 1);
+    publish(textToHtml(lines.join('\n').trim()), previous, selected);
   };
 
   React.useEffect(() => {
@@ -179,6 +216,23 @@ export function EncounterNarrativeField({
       String(isRequired || isSoftRequired)
     );
   }, [isRequired, isSoftRequired, labelId, readOnly]);
+
+  // Toggling a chip swaps its add button and removable badge, so keyboard
+  // focus would fall to the body; hand it to the replacement control.
+  React.useEffect(() => {
+    if (!pendingFocusId.current) return;
+    const chip = chipsRef.current?.querySelector<HTMLElement>(
+      `[data-finding-id="${globalThis.CSS.escape(pendingFocusId.current)}"]`
+    );
+    const control =
+      chip instanceof HTMLButtonElement
+        ? chip
+        : chip?.querySelector<HTMLButtonElement>('[data-slot="badge-remove"]');
+    if (control && document.activeElement === document.body) {
+      pendingFocusId.current = null;
+      control.focus();
+    }
+  });
 
   return (
     <div data-slot="encounter-narrative" className="min-w-0">
@@ -196,7 +250,7 @@ export function EncounterNarrativeField({
           <span className="text-destructive ms-0.5">*</span>
         )}
       </div>
-      <RichTextEditor
+      <TextAreaRich
         ref={editorRef}
         value={html}
         onChange={(value) => {
@@ -213,66 +267,60 @@ export function EncounterNarrativeField({
           );
         }}
         aria-label={question}
-        placeholder={readOnly ? m('Not documented') : m('Enter narrative…')}
         disabled={readOnly}
         enableDictation={false}
+        defaultToolbar="visible"
         sanitizeHtml={sanitizeEncounterNarrativeHtml}
-        className="[&_[role=textbox]]:text-foreground overflow-visible rounded-none border-0 bg-transparent [&_.pointer-events-none]:px-0 [&_.pointer-events-none]:py-1.5 [&_[data-slot=rich-text-editor-toolbar]]:static [&_[data-slot=rich-text-editor-toolbar]]:hidden [&_[data-slot=rich-text-editor-toolbar]]:border-0 [&_[data-slot=rich-text-editor-toolbar]]:bg-transparent [&_[data-slot=rich-text-editor-toolbar]]:p-0 focus-within:[&_[data-slot=rich-text-editor-toolbar]]:flex [&_[data-slot=rich-text-editor-toolbar]>*:nth-child(n+7)]:hidden [&_[data-slot=rich-text-editor-toolbar]>button]:h-11 [&_[data-slot=rich-text-editor-toolbar]>button]:w-11 [&_[role=textbox]]:min-h-11 [&_[role=textbox]]:cursor-text [&_[role=textbox]]:overflow-visible [&_[role=textbox]]:bg-transparent [&_[role=textbox]]:px-0 [&_[role=textbox]]:py-1.5 [&_[role=textbox]]:text-base [&_[role=textbox]]:leading-7 [&_[role=textbox]]:break-words [&_[role=textbox]]:whitespace-pre-wrap [&_[role=textbox]_li]:my-0 [&_[role=textbox]_ol]:my-1 [&_[role=textbox]_p]:my-0 [&_[role=textbox]_ul]:my-1"
+        className="mt-1"
       />
       {!readOnly && findings.length > 0 && (
-        <details
-          open
-          className="group"
-          data-slot="encounter-common-findings"
-          onMouseDownCapture={(event) => {
-            // Keep the focus-only toolbar in place until click completes.
-            // Native summary toggling and keyboard focus remain unchanged.
-            if (editorRef.current?.contains(document.activeElement))
-              event.preventDefault();
-          }}
-        >
-          <summary
-            aria-controls={findingsId}
-            className="text-muted-foreground focus-visible:ring-ring flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden"
-          >
-            <ChevronDown
-              aria-hidden="true"
-              className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none"
-            />
-            {m('Common findings')}
-          </summary>
+        <div data-slot="encounter-common-findings" className="mt-1.5">
           <div
-            id={findingsId}
+            ref={chipsRef}
             role="group"
             aria-label={m('{question} common findings', { question })}
-            className="flex flex-wrap gap-1 pb-1"
+            className="flex flex-wrap gap-1.5"
           >
             {findings.map((finding) => {
               const selected = selectedFindings.some(
                 (item) => item.id === finding.id
               );
-              return (
-                <Button
+              return selected ? (
+                <Badge
                   key={finding.id}
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto min-h-11 max-w-full px-2 text-start font-normal whitespace-normal [&>span]:text-wrap [&>span]:whitespace-normal"
+                  data-finding-id={finding.id}
+                  variant="success"
+                  icon={<Check aria-hidden="true" className="h-3.5 w-3.5" />}
                   title={finding.text}
-                  aria-label={m(
-                    selected ? 'Added {finding}' : 'Add {finding}',
-                    { finding: finding.label }
-                  )}
-                  disabled={selected}
-                  leftIcon={selected ? <Check aria-hidden="true" /> : undefined}
-                  onClick={() => addFinding(finding)}
+                  onRemove={() => removeFinding(finding)}
+                  removeLabel={m('Remove {finding}', {
+                    finding: finding.label,
+                  })}
                 >
                   {finding.label}
-                </Button>
+                </Badge>
+              ) : (
+                <button
+                  key={finding.id}
+                  type="button"
+                  data-finding-id={finding.id}
+                  className={cn(
+                    badgeVariants({ variant: 'secondary' }),
+                    'focus-visible:ring-ring cursor-pointer hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:hover:bg-neutral-700'
+                  )}
+                  title={finding.text}
+                  aria-label={m('Add {finding}', { finding: finding.label })}
+                  onClick={() => addFinding(finding)}
+                >
+                  <span className="me-1 shrink-0">
+                    <Plus aria-hidden="true" className="h-3.5 w-3.5" />
+                  </span>
+                  {finding.label}
+                </button>
               );
             })}
           </div>
-        </details>
+        </div>
       )}
     </div>
   );

@@ -7,7 +7,9 @@
 
 .encounter-visit .section-children {
   display: grid;
-  row-gap: 0.375rem;
+  /* Larger than the editor-to-findings gap so each question reads
+     as its own group instead of blending into the next. */
+  row-gap: 2rem;
 }
 
 .encounter-visit .field-wrapper {

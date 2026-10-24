@@ -386,7 +386,6 @@ test('a selected common finding appends once and preserves authored narrative ac
   const field = page
     .locator('[data-slot=encounter-narrative]')
     .filter({ has: narrative });
-  await expect(field.locator('details')).toHaveAttribute('open', '');
   await expect(
     field.getByRole('button', { name: 'Add No fever', exact: true })
   ).toBeVisible();
@@ -399,8 +398,8 @@ test('a selected common finding appends once and preserves authored narrative ac
   await expect(narrative).toContainText(authored);
   await expect(narrative).toContainText('Denies fever.');
   await expect(
-    field.getByRole('button', { name: 'Added No fever', exact: true })
-  ).toBeDisabled();
+    field.getByRole('button', { name: 'Remove No fever', exact: true })
+  ).toBeVisible();
   expect((await narrative.innerText()).match(/Denies fever\./g)).toHaveLength(
     1
   );
