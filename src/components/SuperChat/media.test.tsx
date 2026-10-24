@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -98,6 +99,7 @@ function mockNativePlayback() {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe('getConversationMediaItems', () => {
@@ -578,6 +580,11 @@ describe('SuperChat media view', () => {
     });
 
     it('pins a virtualized own send to the newest message when returning from media', () => {
+      // @tanstack/virtual-core debounces its isScrolling reset (150ms) after a
+      // scroll event and never clears that timeout on unmount. Fake timers let
+      // us flush it inside the test so it cannot fire after the jsdom
+      // environment is torn down ("ReferenceError: window is not defined").
+      vi.useFakeTimers();
       mockThreadLayout();
       const { container, rerender } = render(
         <SuperChat
@@ -617,6 +624,9 @@ describe('SuperChat media view', () => {
       expect(
         container.querySelector('[data-slot="superchat-turn"]')
       ).toBeNull();
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
     });
 
     it('reveals an incoming stream on return and keeps its reading hold', () => {
