@@ -8,7 +8,9 @@ export interface WaveformPeaks {
 }
 
 /** 20 ms buckets: detailed enough at the narrowest zoom, ~1 MB for an hour. */
-export const PEAKS_PER_SECOND = 50;
+const PEAKS_PER_SECOND = 50;
+/** Decoding needs memory proportional to length (~1 GB for 45 min of 48 kHz stereo); past this, skip the waveform. */
+const MAX_DECODE_BYTES = 50 * 1024 * 1024;
 
 export function computePeaks(
   samples: ArrayLike<number>,
@@ -30,7 +32,7 @@ export function computePeaks(
 
 /**
  * Uses `provided` peaks when the host has them (e.g. samples it already decoded); otherwise decodes
- * `src` once. Decoding holds the whole recording in memory, so hosts with long recordings should pass peaks.
+ * `src` once, unless the file is too large to decode safely. Hosts with long recordings should pass peaks.
  */
 export function useWaveformPeaks(
   src: string | null | undefined,
@@ -44,9 +46,11 @@ export function useWaveformPeaks(
     const abort = new AbortController();
     fetch(src, { signal: abort.signal })
       .then((response) => response.blob())
-      .then(decodeTo16kMono)
-      .then((samples) => {
-        if (!abort.signal.aborted) setDecoded(computePeaks(samples, 16000));
+      .then((blob) => {
+        if (blob.size > MAX_DECODE_BYTES) return;
+        return decodeTo16kMono(blob).then((samples) => {
+          if (!abort.signal.aborted) setDecoded(computePeaks(samples, 16000));
+        });
       })
       .catch(() => {
         /* no waveform; playback and lanes still work */

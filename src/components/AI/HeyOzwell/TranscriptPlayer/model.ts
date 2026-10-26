@@ -34,7 +34,7 @@ export interface TimelineView {
 }
 
 /** Readable on light and dark backgrounds; repeats after eight speakers. */
-export const SPEAKER_COLORS = [
+const SPEAKER_COLORS = [
   '#dc2626',
   '#a3b818',
   '#16a34a',
@@ -51,26 +51,33 @@ const UTTERANCE_GAP_SECONDS = 1.5;
 /** Narrowest zoom, so a lane bar is never wider than the screen for a word. */
 export const MIN_VIEW_SECONDS = 10;
 /** Initial window for long recordings; shorter ones fit entirely. */
-export const DEFAULT_VIEW_SECONDS = 300;
+const DEFAULT_VIEW_SECONDS = 300;
 
 const seconds = (ms: number) => ms / 1000;
+/** Seconds from a host-supplied millisecond value; missing or invalid values count as 0. */
+export const finiteSeconds = (ms: number | undefined) =>
+  Number.isFinite(ms) ? (ms as number) / 1000 : 0;
 
 /** Utterances from transcript segments, or from words grouped by speaker when there are none. */
 export function toUtterances(transcript: Transcript): Utterance[] {
+  // The Transcript contract does not require order; everything downstream reads by start time.
   if (transcript.segments?.length)
-    return transcript.segments.map((s, i) => ({
-      id: `u${i}`,
-      speakerId: s.speakerId ?? UNKNOWN_SPEAKER_ID,
-      start: seconds(s.startMs),
-      end: seconds(s.endMs),
-      text: s.text.trim(),
-      ...(s.overlapSpeakerIds?.length
-        ? { overlapSpeakerIds: s.overlapSpeakerIds }
-        : {}),
-    }));
+    return transcript.segments
+      .map((s, i) => ({
+        id: `u${i}`,
+        speakerId: s.speakerId ?? UNKNOWN_SPEAKER_ID,
+        start: seconds(s.startMs),
+        end: seconds(s.endMs),
+        text: s.text.trim(),
+        ...(s.overlapSpeakerIds?.length
+          ? { overlapSpeakerIds: s.overlapSpeakerIds }
+          : {}),
+      }))
+      .sort((a, b) => a.start - b.start);
 
   const out: Utterance[] = [];
-  for (const word of transcript.words) {
+  const words = [...transcript.words].sort((a, b) => a.startMs - b.startMs);
+  for (const word of words) {
     if (isSilenceType(word.wordType)) continue;
     const speakerId = word.speakerId ?? UNKNOWN_SPEAKER_ID;
     const last = out[out.length - 1];
@@ -79,7 +86,7 @@ export function toUtterances(transcript: Transcript): Utterance[] {
       last.speakerId === speakerId &&
       seconds(word.startMs) - last.end <= UTTERANCE_GAP_SECONDS
     ) {
-      last.end = seconds(word.endMs);
+      last.end = Math.max(last.end, seconds(word.endMs));
       last.text = `${last.text} ${word.text}`.trim();
     } else {
       out.push({
@@ -99,7 +106,7 @@ export function toLaneSegments(
   transcript: Transcript,
   utterances: readonly Utterance[]
 ): LaneSegment[] {
-  const source = transcript.speakerActivity
+  const source = transcript.speakerActivity?.length
     ? transcript.speakerActivity.map((a) => ({
         speakerId: a.speakerId || UNKNOWN_SPEAKER_ID,
         start: seconds(a.startMs),
@@ -173,7 +180,7 @@ export function hasOverlap(segments: readonly LaneSegment[]): boolean {
   return false;
 }
 
-/** The utterance under `time`; with overlap, the one that started last. */
+/** The utterance under `time`, from utterances sorted by start; with overlap, the one that started last. */
 export function activeUtteranceAt(
   utterances: readonly Utterance[],
   time: number

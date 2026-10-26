@@ -50,24 +50,28 @@ export interface SpeakerLanesProps {
   /** Id of the segment being played on its own. */
   playingId: string | null;
   onPlaySegment: (segment: LaneSegment) => void;
+  onPause: () => void;
   onSeek: (time: number) => void;
   labels: TranscriptPlayerLabels;
 }
 
 /**
- * One lane per speaker. Hover or focus a segment for its details; click (or Enter) plays just that
- * segment; click empty lane space to seek. Arrow keys move between a lane's segments.
+ * One lane per speaker. Hover or focus a segment for its details (Escape hides them); click (or
+ * Enter) plays just that segment, again pauses it; click empty lane space to seek. Arrow keys move
+ * between a lane's segments in the visible window.
  */
-export function SpeakerLanes({
+export const SpeakerLanes = React.memo(function SpeakerLanes({
   speakers,
   segments,
   view,
   playingId,
   onPlaySegment,
+  onPause,
   onSeek,
   labels,
 }: SpeakerLanesProps) {
   const [hovered, setHovered] = React.useState<LaneSegment | null>(null);
+  const [focusedId, setFocusedId] = React.useState<string | null>(null);
   const hideTimer = React.useRef<number | undefined>(undefined);
   const show = (segment: LaneSegment) => {
     window.clearTimeout(hideTimer.current);
@@ -81,11 +85,25 @@ export function SpeakerLanes({
     );
   };
   React.useEffect(() => () => window.clearTimeout(hideTimer.current), []);
+  // New segment data makes a hovered segment stale (old times, old interval).
+  React.useEffect(() => {
+    window.clearTimeout(hideTimer.current);
+    setHovered(null);
+  }, [segments]);
 
   const end = view.start + view.span;
-  const visible = segments.filter((s) => s.end > view.start && s.start < end);
+  // The focused segment stays rendered when the view moves, so keyboard focus is not dropped.
+  const visible = segments.filter(
+    (s) => (s.end > view.start && s.start < end) || s.id === focusedId
+  );
 
-  const moveFocus = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const onSegmentKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Escape' && hovered) {
+      event.stopPropagation();
+      window.clearTimeout(hideTimer.current);
+      setHovered(null);
+      return;
+    }
     const keys: Record<string, (i: number, n: number) => number> = {
       ArrowRight: (i, n) => Math.min(n - 1, i + 1),
       ArrowLeft: (i) => Math.max(0, i - 1),
@@ -134,12 +152,20 @@ export function SpeakerLanes({
                     tabIndex={i === 0 ? 0 : -1}
                     aria-label={describe(segment, speaker.name, labels)}
                     aria-pressed={isPlaying}
-                    onClick={() => onPlaySegment(segment)}
-                    onKeyDown={moveFocus}
+                    onClick={() =>
+                      isPlaying ? onPause() : onPlaySegment(segment)
+                    }
+                    onKeyDown={onSegmentKey}
                     onMouseEnter={() => show(segment)}
                     onMouseLeave={hide}
-                    onFocus={() => show(segment)}
-                    onBlur={hide}
+                    onFocus={() => {
+                      setFocusedId(segment.id);
+                      show(segment);
+                    }}
+                    onBlur={() => {
+                      setFocusedId(null);
+                      hide();
+                    }}
                     className={cn(
                       // The outline keeps every turn's edges at 3:1+ against the lane, whatever the speaker colour.
                       'focus-visible:ring-ring absolute inset-y-0 rounded-sm ring-inset focus-visible:ring-2 focus-visible:outline-none',
@@ -182,8 +208,11 @@ export function SpeakerLanes({
                   <span>
                     <span className="block font-semibold">{speaker.name}</span>
                     <span className="tabular-nums opacity-75">
-                      {formatClock(hovered.start)} – {formatClock(hovered.end)}{' '}
-                      ({labels.formatDuration(hovered.end - hovered.start)})
+                      {labels.segmentRange(
+                        formatClock(hovered.start),
+                        formatClock(hovered.end),
+                        labels.formatDuration(hovered.end - hovered.start)
+                      )}
                     </span>
                   </span>
                 </div>
@@ -194,4 +223,4 @@ export function SpeakerLanes({
       })}
     </div>
   );
-}
+});

@@ -33,6 +33,7 @@ import {
   activeUtteranceAt,
   clampView,
   filterUtterances,
+  finiteSeconds,
   followView,
   formatClock,
   hasOverlap,
@@ -147,13 +148,17 @@ export function TranscriptPlayer({
   );
   const talk = React.useMemo(() => talkTime(segments), [segments]);
   const overlapping = React.useMemo(() => hasOverlap(segments), [segments]);
-
-  const duration = Math.max(
-    playback.duration,
-    transcript.durationMs / 1000,
-    segments.reduce((end, s) => Math.max(end, s.end), 0),
-    utterances.reduce((end, u) => Math.max(end, u.end), 0)
+  const dataEnd = React.useMemo(
+    () =>
+      [
+        finiteSeconds(transcript.durationMs),
+        ...segments.map((s) => s.end),
+        ...utterances.map((u) => u.end),
+      ].reduce((end, t) => (Number.isFinite(t) && t > end ? t : end), 0),
+    [transcript.durationMs, segments, utterances]
   );
+
+  const duration = Math.max(playback.duration, dataEnd);
 
   const [userView, setUserView] = React.useState<TimelineView | null>(null);
   const [follow, setFollow] = React.useState(true);
@@ -170,7 +175,10 @@ export function TranscriptPlayer({
     setQuery('');
   }, [src]);
 
-  const view = clampView(userView ?? initialView(duration), duration);
+  const view = React.useMemo(
+    () => clampView(userView ?? initialView(duration), duration),
+    [userView, duration]
+  );
   const { currentTime, playing } = playback;
 
   React.useEffect(() => {
@@ -196,19 +204,27 @@ export function TranscriptPlayer({
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       // The Fullscreen API handles Escape itself; this covers browsers without it.
       if (event.key !== 'Escape' || document.fullscreenElement) return;
-      if ((event.target as Element | null)?.closest?.('[aria-expanded="true"]'))
-        return;
+      const target = event.target as HTMLInputElement | null;
+      // Escape first closes an open menu, or clears a search box.
+      if (target?.closest?.('[aria-expanded="true"]')) return;
+      if (target?.type === 'search' && target.value) return;
       setFullscreen(false);
     };
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       restore();
+      // Also covers unmounting while fullscreen, which would otherwise leave the page fullscreen.
+      if (document.fullscreenElement === document.documentElement)
+        void document.exitFullscreen?.()?.catch(() => {});
       button?.focus();
     };
   }, [fullscreen]);
 
-  const visibleSpeakers = speakers.filter((s) => !hidden.has(s.id));
+  const visibleSpeakers = React.useMemo(
+    () => speakers.filter((s) => !hidden.has(s.id)),
+    [speakers, hidden]
+  );
   const visibleSegments = React.useMemo(
     () => segments.filter((s) => !hidden.has(s.speakerId)),
     [segments, hidden]
@@ -217,12 +233,27 @@ export function TranscriptPlayer({
     () => filterUtterances(utterances, hidden, query),
     [utterances, hidden, query]
   );
-  const active = activeUtteranceAt(utterances, currentTime);
+  const active = activeUtteranceAt(shown, currentTime);
   const playingId = (playing && playback.range?.id) || null;
   // A refused play() can be retried; only a recording that failed to load disables playback.
   const canPlay = Boolean(src) && playback.error !== 'load';
 
-  const { playRange, seek } = playback;
+  const { playRange, seek, pause } = playback;
+  // A seek while paused does not move the view on its own, so keep the playhead on screen here.
+  const seekTo = React.useCallback(
+    (time: number) => {
+      seek(time);
+      if (follow)
+        setUserView((current) =>
+          followView(
+            clampView(current ?? initialView(duration), duration),
+            Math.min(Math.max(0, time), duration),
+            duration
+          )
+        );
+    },
+    [seek, follow, duration]
+  );
   const playSegment = React.useCallback(
     (s: LaneSegment) => {
       setFollow(true);
@@ -277,7 +308,7 @@ export function TranscriptPlayer({
       playback.toggle();
     } else if (event.key in step) {
       event.preventDefault();
-      seek(currentTime + step[event.key]);
+      seekTo(currentTime + step[event.key]);
     }
   };
 
@@ -381,7 +412,7 @@ export function TranscriptPlayer({
               onValueChange={(v) => playback.setRate(Number(v))}
               options={PLAYBACK_SPEEDS.map((s) => ({
                 value: String(s),
-                label: `${s}x`,
+                label: labels.formatSpeed(s),
               }))}
             />
             <button
@@ -419,7 +450,7 @@ export function TranscriptPlayer({
               )}
               onKeyDown={onSeekKey}
               onClick={(e) =>
-                seek(timeAtPointer(e.clientX, e.currentTarget, view))
+                seekTo(timeAtPointer(e.clientX, e.currentTarget, view))
               }
               className="focus-visible:ring-ring cursor-pointer rounded focus-visible:ring-2 focus-visible:outline-none"
             >
@@ -429,12 +460,14 @@ export function TranscriptPlayer({
 
           {visibleSpeakers.length > 0 ? (
             <SpeakerLanes
+              key={src ?? ''}
               speakers={visibleSpeakers}
               segments={visibleSegments}
               view={view}
               playingId={playingId}
               onPlaySegment={playSegment}
-              onSeek={seek}
+              onPause={pause}
+              onSeek={seekTo}
               labels={labels}
             />
           ) : (
@@ -587,7 +620,7 @@ export function TranscriptPlayer({
             playingId={playingId}
             query={query}
             onPlay={playUtterance}
-            onPause={playback.pause}
+            onPause={pause}
             labels={labels}
             emptyMessage={
               utterances.length === 0 ? labels.noTranscript : labels.noMatches

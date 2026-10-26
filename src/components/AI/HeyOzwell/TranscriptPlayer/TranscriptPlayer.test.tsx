@@ -1,4 +1,11 @@
-import { act, cleanup, render, screen, within } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Transcript } from '../../../TranscriptView/transcript';
@@ -115,6 +122,102 @@ const lane = (name: string) =>
   screen.getByRole('group', { name: `${name} speaking turns` });
 
 describe('TranscriptPlayer', () => {
+  it('hides segment details on Escape', async () => {
+    renderPlayer();
+    act(() => within(lane('Patient')).getByRole('button').focus());
+    expect(screen.getByText('0:02 – 0:05 (2.5s)')).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByText('0:02 – 0:05 (2.5s)')).not.toBeInTheDocument();
+  });
+
+  it('survives a missing duration and keeps a paused keyboard seek on screen', async () => {
+    renderPlayer({
+      transcript: {
+        ...transcript,
+        durationMs: Number.NaN,
+        segments: [
+          ...(transcript.segments ?? []),
+          {
+            text: 'Much later.',
+            startMs: 3_590_000,
+            endMs: 3_600_000,
+            speakerId: 'doc',
+            words: [],
+          },
+        ],
+      },
+    });
+    const windowSlider = screen.getByRole('slider', {
+      name: 'Visible part of the recording',
+    });
+    expect(windowSlider).toHaveAttribute('aria-valuetext', '0:00 to 5:00');
+    screen.getByRole('slider', { name: 'Seek' }).focus();
+    await userEvent.keyboard('{End}');
+    expect(windowSlider).toHaveAttribute('aria-valuetext', '55:00 to 1:00:00');
+  });
+
+  it('marks the visible line active when an overlapping line is hidden', async () => {
+    renderPlayer({
+      transcript: {
+        durationMs: 10000,
+        speakers: transcript.speakers,
+        words: [],
+        segments: [
+          {
+            text: 'Long answer',
+            startMs: 0,
+            endMs: 8000,
+            speakerId: 'doc',
+            words: [],
+          },
+          {
+            text: 'Mm-hm',
+            startMs: 4000,
+            endMs: 6000,
+            speakerId: 'pt',
+            words: [],
+          },
+        ],
+      },
+    });
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Patient' }));
+    screen.getByRole('slider', { name: 'Seek' }).focus();
+    await userEvent.keyboard('{ArrowRight}');
+    expect(
+      screen.getByText('Long answer').closest('[role="listitem"]')
+    ).toHaveAttribute('aria-current', 'true');
+  });
+
+  it('closes a stale segment tooltip when the activity changes', async () => {
+    const { rerender } = renderPlayer();
+    await userEvent.hover(within(lane('Patient')).getByRole('button'));
+    expect(screen.getByText('0:02 – 0:05 (2.5s)')).toBeInTheDocument();
+    rerender(
+      <TranscriptPlayer
+        src="visit.wav"
+        transcript={{
+          ...transcript,
+          speakerActivity: [{ speakerId: 'pt', startMs: 3000, endMs: 5000 }],
+        }}
+        peaks={peaks}
+      />
+    );
+    expect(screen.queryByText('0:02 – 0:05 (2.5s)')).not.toBeInTheDocument();
+  });
+
+  it('stops following playback when the reader scrolls the transcript away', async () => {
+    renderPlayer();
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Play Dr. Smith at 0:06' })
+    );
+    // Past the window in which scroll events are the list's own follow-along.
+    vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 1000);
+    fireEvent.scroll(screen.getByRole('list', { name: 'Transcript' }));
+    expect(
+      screen.getByRole('button', { name: 'Back to current' })
+    ).toBeInTheDocument();
+  });
+
   it('keeps the clock in sync from timeupdate when animation frames are paused', async () => {
     vi.stubGlobal('requestAnimationFrame', () => 0);
     renderPlayer();
@@ -188,14 +291,19 @@ describe('TranscriptPlayer', () => {
     renderPlayer();
     const line = screen.getByRole('button', { name: 'Play Dr. Smith at 0:06' });
     await userEvent.click(line);
-    const playing = screen.getByRole('button', {
-      name: 'Playing Dr. Smith at 0:06',
-    });
-    await userEvent.click(playing);
+    expect(line).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(line);
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
     expect(
       screen.getByRole('button', { name: 'Play Dr. Smith at 0:06' })
     ).toHaveAttribute('aria-pressed', 'false');
+
+    // A playing lane segment pauses on a second press too.
+    const segment = within(lane('Patient')).getByRole('button');
+    await userEvent.click(segment);
+    expect(segment).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(segment);
+    expect(segment).toHaveAttribute('aria-pressed', 'false');
 
     vi.mocked(HTMLMediaElement.prototype.play).mockRejectedValueOnce(
       Object.assign(new Error('blocked'), { name: 'NotAllowedError' })

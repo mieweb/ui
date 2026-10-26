@@ -40,6 +40,12 @@ export interface TranscriptPlayerLabels {
   unknownSpeaker: string;
   /** A length of time, e.g. a segment or a speaker's talk time. Default `4.2s`, or `m:ss` from a minute. */
   formatDuration: (seconds: number) => string;
+  /** Playback speed option, e.g. `1.5x`. */
+  formatSpeed: (rate: number) => string;
+  /** A speaker's share of the recording, 0–1, e.g. `42%`. */
+  formatShare: (fraction: number) => string;
+  /** Visible times in the segment tooltip; values arrive formatted. */
+  segmentRange: (start: string, end: string, length: string) => string;
   /** Accessible name of a speaker's lane. */
   speakingTurns: (speaker: string) => string;
   /** A lane segment; times arrive formatted. */
@@ -50,8 +56,8 @@ export interface TranscriptPlayerLabels {
     length: string
   ) => string;
   playSegment: (segment: string) => string;
+  /** The line's play button; `aria-pressed` tells whether it is playing. */
   playLine: (speaker: string, time: string) => string;
-  playingLine: (speaker: string, time: string) => string;
   overlapWith: (speakers: string) => string;
   seekValue: (current: string, total: string) => string;
   windowValue: (start: string, end: string) => string;
@@ -96,12 +102,14 @@ export const DEFAULT_TRANSCRIPT_PLAYER_LABELS: TranscriptPlayerLabels = {
   hint: 'Hover a coloured segment for details, then click it (or a transcript line) to play just that part. Drag the box in the overview to move through long recordings.',
   unknownSpeaker: 'Unknown speaker',
   formatDuration: formatSpan,
+  formatSpeed: (rate) => `${rate}x`,
+  formatShare: (fraction) => `${Math.round(fraction * 100)}%`,
+  segmentRange: (start, end, length) => `${start} – ${end} (${length})`,
   speakingTurns: (speaker) => `${speaker} speaking turns`,
   segment: (speaker, start, end, length) =>
     `${speaker}, ${start} to ${end} (${length})`,
   playSegment: (segment) => `Play ${segment}`,
   playLine: (speaker, time) => `Play ${speaker} at ${time}`,
-  playingLine: (speaker, time) => `Playing ${speaker} at ${time}`,
   overlapWith: (speakers) => `Overlaps ${speakers}`,
   seekValue: (current, total) => `${current} of ${total}`,
   windowValue: (start, end) => `${start} to ${end}`,

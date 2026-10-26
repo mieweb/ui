@@ -34,8 +34,11 @@ export function Waveform({
     if (!canvas || !ctx || width === 0) return;
     const height = canvas.clientHeight;
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
+    // Redrawn every frame while playing; reallocating the buffer only when its size changes.
+    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+    }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
     if (!peaks || view.span <= 0) return;

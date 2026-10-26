@@ -6,7 +6,8 @@ import type { TranscriptPlayerLabels } from './labels';
 import { formatClock, type PlayerSpeaker, type Utterance } from './model';
 
 /** Plain rendering is simpler and fine below this; above it rows are virtualized. */
-export const VIRTUALIZE_AFTER = 150;
+const VIRTUALIZE_AFTER = 150;
+const FOLLOW_SCROLL_MS = 400;
 const USER_SCROLL_KEYS = new Set([
   'ArrowUp',
   'ArrowDown',
@@ -41,6 +42,8 @@ const Row = React.memo(function Row({
   onPlay,
   onPause,
   labels,
+  setSize,
+  posInSet,
 }: {
   utterance: Utterance;
   speaker: PlayerSpeaker | undefined;
@@ -52,9 +55,12 @@ const Row = React.memo(function Row({
   onPlay: (u: Utterance) => void;
   onPause: () => void;
   labels: TranscriptPlayerLabels;
+  /** Set when virtualized, so screen readers know the full length and position. */
+  setSize?: number;
+  posInSet?: number;
 }) {
   const name = speaker?.name ?? labels.unknownSpeaker;
-  const color = speaker?.color ?? '#6b7280';
+  const color = speaker?.color ?? 'currentColor';
   const time = formatClock(utterance.start);
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- whole-row click target; keyboard users use the row's play button
@@ -62,6 +68,8 @@ const Row = React.memo(function Row({
       role="listitem"
       data-id={utterance.id}
       aria-current={active || undefined}
+      aria-setsize={setSize}
+      aria-posinset={posInSet}
       onClick={() => onPlay(utterance)}
       className={cn(
         'flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm',
@@ -70,9 +78,7 @@ const Row = React.memo(function Row({
     >
       <button
         type="button"
-        aria-label={
-          playing ? labels.playingLine(name, time) : labels.playLine(name, time)
-        }
+        aria-label={labels.playLine(name, time)}
         aria-pressed={playing}
         onClick={(e) => {
           e.stopPropagation();
@@ -92,7 +98,9 @@ const Row = React.memo(function Row({
       </span>
       <span
         className="text-foreground flex w-24 shrink-0 items-center gap-1.5 rounded px-1.5 py-0.5 text-xs font-medium"
-        style={{ backgroundColor: `${color}1f` }}
+        style={{
+          backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+        }}
       >
         <span
           aria-hidden="true"
@@ -146,6 +154,8 @@ export function TranscriptList({
 }: TranscriptListProps) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [detached, setDetached] = React.useState(false);
+  /** Until this time, scroll events come from our own follow-along, not the reader. */
+  const followUntil = React.useRef(0);
   const virtualize = utterances.length > VIRTUALIZE_AFTER;
   const virtualizer = useVirtualizer({
     count: virtualize ? utterances.length : 0,
@@ -157,6 +167,7 @@ export function TranscriptList({
 
   const scrollToActive = React.useCallback(() => {
     if (!activeId) return;
+    followUntil.current = Date.now() + FOLLOW_SCROLL_MS;
     if (virtualize) {
       const index = utterances.findIndex((u) => u.id === activeId);
       if (index >= 0) virtualizer.scrollToIndex(index, { align: 'auto' });
@@ -171,6 +182,19 @@ export function TranscriptList({
     if (!detached) scrollToActive();
   }, [activeId, detached, scrollToActive]);
 
+  // Catches scrollbar drags too: the reader has scrolled away once the active line is out of view.
+  const onScroll = () => {
+    const container = scrollRef.current;
+    if (detached || !activeId || !container || Date.now() < followUntil.current)
+      return;
+    const line = container
+      .querySelector(`[data-id="${activeId}"]`)
+      ?.getBoundingClientRect();
+    const view = container.getBoundingClientRect();
+    if (!line || line.bottom <= view.top || line.top >= view.bottom)
+      setDetached(true);
+  };
+
   const play = React.useCallback(
     (u: Utterance) => {
       setDetached(false);
@@ -179,7 +203,7 @@ export function TranscriptList({
     [onPlay]
   );
 
-  const row = (u: Utterance) => (
+  const row = (u: Utterance, index?: number) => (
     <Row
       utterance={u}
       speaker={speakersById.get(u.speakerId)}
@@ -192,6 +216,8 @@ export function TranscriptList({
       onPlay={play}
       onPause={onPause}
       labels={labels}
+      setSize={index === undefined ? undefined : utterances.length}
+      posInSet={index === undefined ? undefined : index + 1}
     />
   );
 
@@ -216,6 +242,7 @@ export function TranscriptList({
         tabIndex={0}
         onWheel={() => setDetached(true)}
         onTouchMove={() => setDetached(true)}
+        onScroll={onScroll}
         onKeyDown={(e) => {
           if (e.target === e.currentTarget && USER_SCROLL_KEYS.has(e.key))
             setDetached(true);
@@ -235,7 +262,7 @@ export function TranscriptList({
                 className="absolute inset-x-0 top-0"
                 style={{ transform: `translateY(${item.start}px)` }}
               >
-                {row(utterances[item.index])}
+                {row(utterances[item.index], item.index)}
               </div>
             ))}
           </div>

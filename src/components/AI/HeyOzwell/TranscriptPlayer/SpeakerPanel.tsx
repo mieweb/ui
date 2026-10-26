@@ -40,8 +40,7 @@ export function SpeakerPanel({
         <ul className="space-y-2.5">
           {speakers.map((speaker) => {
             const seconds = talkTime.get(speaker.id) ?? 0;
-            const share =
-              duration > 0 ? Math.round((seconds / duration) * 100) : 0;
+            const share = duration > 0 ? seconds / duration : 0;
             return (
               <li key={speaker.id} className="flex items-center gap-2 text-sm">
                 <span
@@ -59,8 +58,8 @@ export function SpeakerPanel({
                 <span className="text-muted-foreground ms-auto tabular-nums">
                   {labels.formatDuration(seconds)}
                 </span>
-                <span className="text-muted-foreground w-10 text-end tabular-nums">
-                  {share}%
+                <span className="text-muted-foreground min-w-10 text-end tabular-nums">
+                  {labels.formatShare(share)}
                 </span>
               </li>
             );

@@ -99,6 +99,12 @@ describe('toLaneSegments and toSpeakers', () => {
   });
 
   it('falls back to utterances and names unknown speakers', () => {
+    expect(
+      toLaneSegments(
+        { ...transcript, speakerActivity: [] },
+        toUtterances(transcript)
+      )
+    ).toHaveLength(3);
     const lanes = toLaneSegments(transcript, toUtterances(transcript));
     const speakers = toSpeakers(
       transcript,
@@ -129,6 +135,19 @@ describe('talk time and overlap', () => {
     const utterances = toUtterances(transcript);
     expect(activeUtteranceAt(utterances, 1.7)?.id).toBe('u1');
     expect(activeUtteranceAt(utterances, 3.5)).toBeNull();
+  });
+
+  it('orders unsorted segments by start so the active line is still found', () => {
+    const utterances = toUtterances({
+      durationMs: 12000,
+      words: [],
+      segments: [
+        { text: 'later', startMs: 10000, endMs: 12000, words: [] },
+        { text: 'earlier', startMs: 2000, endMs: 4000, words: [] },
+      ],
+    });
+    expect(utterances.map((u) => u.text)).toEqual(['earlier', 'later']);
+    expect(activeUtteranceAt(utterances, 2.5)?.text).toBe('earlier');
   });
 
   it('filters by hidden speakers and case-insensitive search', () => {

@@ -41,6 +41,7 @@ import { TranscriptPlayer, type Transcript } from '@mieweb/ui';
 
 // The host owns the audio URL: create it for the recording, revoke it when done.
 const src = useMemo(() => URL.createObjectURL(recording), [recording]);
+useEffect(() => () => URL.revokeObjectURL(src), [src]);
 
 const transcript: Transcript = {
   durationMs: 9000,
@@ -67,11 +68,11 @@ const transcript: Transcript = {
 ### Limitations
 
 - **Experimental.** Props may change while mieweb/ui#654 is validated.
-- **Waveform.** Without \`peaks\`, the player fetches and decodes the audio once to draw it; pass \`computePeaks(samples, sampleRate)\` for long recordings you have already decoded.
+- **Waveform.** Without \`peaks\`, the player fetches and decodes the audio once to draw it, and skips files over 50 MB (decoding needs memory in proportion to length). Pass \`computePeaks(samples, sampleRate)\` for long recordings you have already decoded.
 - **Audio** must be playable by an \`<audio>\` element; the host owns \`src\` (for example an object URL) and revokes it.
 - **Timeline is left to right** in every locale, as in other audio tools; the rest of the layout follows the page direction. Times use \`m:ss\` / \`h:mm:ss\`.
-- **i18n.** Every string is in \`labels\` (English defaults in \`DEFAULT_TRANSCRIPT_PLAYER_LABELS\`); strings with values are functions.
-- **Keyboard.** Seek slider: arrows ±5 s, Home/End, Space/Enter plays. Lane segments: Tab into a lane, arrows move between its segments, Enter plays. The overview window moves with arrows.
+- **i18n.** Every string is in \`labels\` (English defaults in \`DEFAULT_TRANSCRIPT_PLAYER_LABELS\`); strings with values are functions, including \`formatDuration\`, \`formatSpeed\` and \`formatShare\`.
+- **Keyboard.** Seek slider: arrows ±5 s, Home/End, Space/Enter plays. Lane segments: Tab into a lane, arrows move between its segments in the visible window, Enter plays (again pauses), Escape hides the details. The overview window moves with arrows. Full screen: the page behind is inert, and Escape leaves.
 - Speaker colours repeat after eight speakers.`,
       },
     },

@@ -13,7 +13,7 @@ async function box(page: Page, locator: ReturnType<Page['locator']>) {
   return b;
 }
 
-/** The 0.4 s segment (first in the first lane) sits at the lane's physical left in both directions. */
+/** The first segment (0.3 s) sits at the lane's physical left in both directions. */
 async function expectTimelineLtr(page: Page) {
   const lane = page.getByRole('group', { name: 'Dr. Smith speaking turns' });
   const laneBox = await box(page, lane);

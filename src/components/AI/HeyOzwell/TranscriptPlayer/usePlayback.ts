@@ -6,7 +6,6 @@ import * as React from 'react';
 import type { TimeRange } from './model';
 
 export interface Playback {
-  ready: boolean;
   playing: boolean;
   /** Seconds. */
   currentTime: number;
@@ -31,7 +30,6 @@ export interface Playback {
 export function usePlayback(src: string | null | undefined): Playback {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const rangeRef = React.useRef<Playback['range']>(null);
-  const [ready, setReady] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
@@ -66,7 +64,6 @@ export function usePlayback(src: string | null | undefined): Playback {
   volumeRef.current = volume;
 
   React.useEffect(() => {
-    setReady(false);
     setPlaying(false);
     setCurrentTime(0);
     setDuration(0);
@@ -82,10 +79,11 @@ export function usePlayback(src: string | null | undefined): Playback {
     const on = (type: string, handler: () => void) =>
       audio.addEventListener(type, handler, { signal: events.signal });
 
-    on('loadedmetadata', () => {
+    // MediaRecorder webm often reports Infinity until the end is known; durationchange brings the real value.
+    const syncDuration = () =>
       setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
-      setReady(true);
-    });
+    on('loadedmetadata', syncDuration);
+    on('durationchange', syncDuration);
     on('play', () => setPlaying(true));
     on('pause', () => {
       setPlaying(false);
@@ -162,7 +160,14 @@ export function usePlayback(src: string | null | undefined): Playback {
   const playRange = React.useCallback<Playback['playRange']>(
     (next) => {
       const audio = audioRef.current;
-      if (!audio || next.end <= next.start) return;
+      if (!audio) return;
+      // An empty interval has nothing to play; move there so the click still does something.
+      if (next.end <= next.start) {
+        setRange(null);
+        audio.currentTime = next.start;
+        setCurrentTime(next.start);
+        return;
+      }
       setRange(next);
       audio.currentTime = next.start;
       setCurrentTime(next.start);
@@ -182,7 +187,6 @@ export function usePlayback(src: string | null | undefined): Playback {
   }, []);
 
   return {
-    ready,
     playing,
     currentTime,
     duration,
