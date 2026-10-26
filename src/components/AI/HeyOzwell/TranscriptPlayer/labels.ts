@@ -1,4 +1,6 @@
 /** Every user-facing string in TranscriptPlayer, so hosts can translate them. */
+import { formatSpan } from './model';
+
 export interface TranscriptPlayerLabels {
   recording: string;
   play: string;
@@ -36,6 +38,8 @@ export interface TranscriptPlayerLabels {
   overlapNote: string;
   hint: string;
   unknownSpeaker: string;
+  /** A length of time, e.g. a segment or a speaker's talk time. Default `4.2s`, or `m:ss` from a minute. */
+  formatDuration: (seconds: number) => string;
   /** Accessible name of a speaker's lane. */
   speakingTurns: (speaker: string) => string;
   /** A lane segment; times arrive formatted. */
@@ -91,6 +95,7 @@ export const DEFAULT_TRANSCRIPT_PLAYER_LABELS: TranscriptPlayerLabels = {
     'People talked over each other, so shares can add up to more than 100%.',
   hint: 'Hover a coloured segment for details, then click it (or a transcript line) to play just that part. Drag the box in the overview to move through long recordings.',
   unknownSpeaker: 'Unknown speaker',
+  formatDuration: formatSpan,
   speakingTurns: (speaker) => `${speaker} speaking turns`,
   segment: (speaker, start, end, length) =>
     `${speaker}, ${start} to ${end} (${length})`,

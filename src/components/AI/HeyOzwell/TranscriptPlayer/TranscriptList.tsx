@@ -39,6 +39,7 @@ const Row = React.memo(function Row({
   playing,
   query,
   onPlay,
+  onPause,
   labels,
 }: {
   utterance: Utterance;
@@ -49,6 +50,7 @@ const Row = React.memo(function Row({
   playing: boolean;
   query: string;
   onPlay: (u: Utterance) => void;
+  onPause: () => void;
   labels: TranscriptPlayerLabels;
 }) {
   const name = speaker?.name ?? labels.unknownSpeaker;
@@ -74,7 +76,8 @@ const Row = React.memo(function Row({
         aria-pressed={playing}
         onClick={(e) => {
           e.stopPropagation();
-          onPlay(utterance);
+          if (playing) onPause();
+          else onPlay(utterance);
         }}
         className="border-border text-foreground hover:bg-muted focus-visible:ring-ring flex h-6 w-6 shrink-0 items-center justify-center rounded-full border focus-visible:ring-2 focus-visible:outline-none"
       >
@@ -88,10 +91,15 @@ const Row = React.memo(function Row({
         {time}
       </span>
       <span
-        className="w-24 shrink-0 truncate rounded px-1.5 py-0.5 text-center text-xs font-medium"
-        style={{ color, backgroundColor: `${color}1f` }}
+        className="text-foreground flex w-24 shrink-0 items-center gap-1.5 rounded px-1.5 py-0.5 text-xs font-medium"
+        style={{ backgroundColor: `${color}1f` }}
       >
-        {name}
+        <span
+          aria-hidden="true"
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{ backgroundColor: color }}
+        />
+        <span className="truncate">{name}</span>
       </span>
       <span className="min-w-0 flex-1">
         {utterance.text ? (
@@ -116,6 +124,7 @@ export interface TranscriptListProps {
   playingId: string | null;
   query: string;
   onPlay: (u: Utterance) => void;
+  onPause: () => void;
   emptyMessage: string;
   labels: TranscriptPlayerLabels;
 }
@@ -131,6 +140,7 @@ export function TranscriptList({
   playingId,
   query,
   onPlay,
+  onPause,
   emptyMessage,
   labels,
 }: TranscriptListProps) {
@@ -180,6 +190,7 @@ export function TranscriptList({
       playing={u.id === playingId}
       query={query}
       onPlay={play}
+      onPause={onPause}
       labels={labels}
     />
   );

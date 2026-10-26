@@ -115,6 +115,50 @@ const lane = (name: string) =>
   screen.getByRole('group', { name: `${name} speaking turns` });
 
 describe('TranscriptPlayer', () => {
+  it('stops interval playback on timeupdate when animation frames are paused', async () => {
+    vi.stubGlobal('requestAnimationFrame', () => 0);
+    renderPlayer();
+    await userEvent.click(within(lane('Patient')).getByRole('button'));
+    act(() => {
+      if (audio) audio.currentTime = 5.2;
+      audio?.dispatchEvent(new Event('timeupdate'));
+    });
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(audio?.currentTime).toBe(5);
+  });
+
+  it('pauses from a playing line and keeps the main button usable after a refused play', async () => {
+    renderPlayer();
+    const line = screen.getByRole('button', { name: 'Play Dr. Smith at 0:06' });
+    await userEvent.click(line);
+    const playing = screen.getByRole('button', {
+      name: 'Playing Dr. Smith at 0:06',
+    });
+    await userEvent.click(playing);
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(
+      screen.getByRole('button', { name: 'Play Dr. Smith at 0:06' })
+    ).toHaveAttribute('aria-pressed', 'false');
+
+    vi.mocked(HTMLMediaElement.prototype.play).mockRejectedValueOnce(
+      Object.assign(new Error('blocked'), { name: 'NotAllowedError' })
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Play' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Playback failed.'
+    );
+    const main = screen.getByRole('button', { name: 'Play' });
+    expect(main).toBeEnabled();
+    await userEvent.click(main);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('formats durations through labels', async () => {
+    renderPlayer({ labels: { formatDuration: (s) => `${s.toFixed(1)} s` } });
+    await userEvent.hover(within(lane('Patient')).getByRole('button'));
+    expect(screen.getByText('0:02 – 0:05 (2.5 s)')).toBeInTheDocument();
+  });
+
   it('shows segment details on hover without starting playback', async () => {
     renderPlayer();
     const segment = within(lane('Patient')).getByRole('button');

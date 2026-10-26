@@ -4,7 +4,6 @@ import { cn } from '../../../../utils/cn';
 import type { TranscriptPlayerLabels } from './labels';
 import {
   formatClock,
-  formatSpan,
   type LaneSegment,
   type PlayerSpeaker,
   type TimelineView,
@@ -40,7 +39,7 @@ function describe(
     name,
     formatClock(segment.start),
     formatClock(segment.end),
-    formatSpan(segment.end - segment.start)
+    labels.formatDuration(segment.end - segment.start)
   );
 }
 
@@ -154,6 +153,7 @@ export function SpeakerLanes({
                           : 'opacity-75 hover:opacity-100'
                     )}
                     style={{
+                      // rtl-ignore -- time axis inside the player's dir="ltr" timeline, matches clientX seek math
                       left: `${left * 100}%`,
                       width: `${width * 100}%`,
                       minWidth: 2,
@@ -167,6 +167,7 @@ export function SpeakerLanes({
                   className="absolute bottom-full z-20 mb-2 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-neutral-900 px-2.5 py-1.5 text-xs whitespace-nowrap text-white shadow-md dark:bg-neutral-100 dark:text-neutral-900"
                   style={{
                     // Kept off the edges so the centred tooltip is never clipped.
+                    // rtl-ignore -- time axis inside the player's dir="ltr" timeline
                     left: `${Math.min(85, Math.max(15, viewFraction((hovered.start + hovered.end) / 2, view) * 100))}%`,
                   }}
                   onMouseEnter={() => show(hovered)}
@@ -187,7 +188,7 @@ export function SpeakerLanes({
                     <span className="block font-semibold">{speaker.name}</span>
                     <span className="tabular-nums opacity-75">
                       {formatClock(hovered.start)} – {formatClock(hovered.end)}{' '}
-                      ({formatSpan(hovered.end - hovered.start)})
+                      ({labels.formatDuration(hovered.end - hovered.start)})
                     </span>
                   </span>
                 </div>

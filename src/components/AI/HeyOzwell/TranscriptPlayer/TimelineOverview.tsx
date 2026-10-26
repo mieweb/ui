@@ -156,6 +156,7 @@ export function TimelineOverview({
             onKeyDown={onKeyDown}
             className="border-primary-500 bg-primary-500/15 focus-visible:ring-ring absolute inset-y-0 cursor-grab rounded border focus-visible:ring-2 focus-visible:outline-none active:cursor-grabbing"
             style={{
+              // rtl-ignore -- time axis inside the player's dir="ltr" timeline, matches clientX drag math
               left: `${left * 100}%`,
               width: `${Math.max(0.5, (right - left) * 100)}%`,
             }}
@@ -163,7 +164,10 @@ export function TimelineOverview({
           <span
             aria-hidden="true"
             className="bg-foreground pointer-events-none absolute inset-y-0 w-px"
-            style={{ left: `${viewFraction(currentTime, whole) * 100}%` }}
+            style={{
+              // rtl-ignore -- time axis inside the player's dir="ltr" timeline
+              left: `${viewFraction(currentTime, whole) * 100}%`,
+            }}
           />
         </div>
         <button
@@ -184,7 +188,10 @@ export function TimelineOverview({
           <span
             key={t}
             className="absolute -translate-x-1/2"
-            style={{ left: `${viewFraction(t, whole) * 100}%` }}
+            style={{
+              // rtl-ignore -- time axis inside the player's dir="ltr" timeline
+              left: `${viewFraction(t, whole) * 100}%`,
+            }}
           >
             {formatClock(t)}
           </span>

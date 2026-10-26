@@ -94,7 +94,6 @@ export function TranscriptPlayer({
   labels: labelOverrides,
   className,
 }: TranscriptPlayerProps) {
-  const rootRef = React.useRef<HTMLDivElement>(null);
   const transcriptHeadingId = React.useId();
   const labels = React.useMemo(
     () => ({ ...DEFAULT_TRANSCRIPT_PLAYER_LABELS, ...labelOverrides }),
@@ -160,8 +159,9 @@ export function TranscriptPlayer({
   }, [follow, playing, currentTime, duration, view]);
 
   React.useEffect(() => {
-    const onChange = () =>
-      setFullscreen(document.fullscreenElement === rootRef.current);
+    const onChange = () => {
+      if (!document.fullscreenElement) setFullscreen(false);
+    };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
@@ -176,8 +176,9 @@ export function TranscriptPlayer({
     [utterances, hidden, query]
   );
   const active = activeUtteranceAt(utterances, currentTime);
-  const playingId = playback.range?.id ?? null;
-  const canPlay = Boolean(src) && !playback.error;
+  const playingId = (playing && playback.range?.id) || null;
+  // A refused play() can be retried; only a recording that failed to load disables playback.
+  const canPlay = Boolean(src) && playback.error !== 'load';
 
   const { playRange, seek } = playback;
   const playSegment = React.useCallback(
@@ -239,8 +240,14 @@ export function TranscriptPlayer({
   };
 
   const toggleFullscreen = () => {
-    if (document.fullscreenElement) void document.exitFullscreen?.();
-    else void rootRef.current?.requestFullscreen?.();
+    if (fullscreen) {
+      setFullscreen(false);
+      if (document.fullscreenElement) void document.exitFullscreen?.();
+      return;
+    }
+    // Fullscreen the page and pin the player over it, so menus portaled to <body> stay visible.
+    setFullscreen(true);
+    void document.documentElement.requestFullscreen?.()?.catch(() => {});
   };
 
   const playhead = viewFraction(currentTime, view);
@@ -251,10 +258,9 @@ export function TranscriptPlayer({
 
   return (
     <div
-      ref={rootRef}
       className={cn(
         'text-foreground flex flex-col gap-4',
-        fullscreen && 'bg-background overflow-y-auto p-6',
+        fullscreen && 'bg-background fixed inset-0 z-50 overflow-y-auto p-6',
         className
       )}
     >
@@ -279,7 +285,7 @@ export function TranscriptPlayer({
               />
             )}
           </button>
-          <span className="text-sm tabular-nums">
+          <span dir="ltr" className="text-sm tabular-nums">
             {formatClock(currentTime)}{' '}
             <span className="text-muted-foreground">
               / {formatClock(duration)}
@@ -401,7 +407,10 @@ export function TranscriptPlayer({
                 <span
                   key={t}
                   className="absolute -translate-x-1/2"
-                  style={{ left: `${viewFraction(t, view) * 100}%` }}
+                  style={{
+                    // rtl-ignore -- time axis inside the player's dir="ltr" timeline
+                    left: `${viewFraction(t, view) * 100}%`,
+                  }}
                 >
                   {formatClock(t)}
                 </span>
@@ -414,6 +423,7 @@ export function TranscriptPlayer({
               aria-hidden="true"
               className="pointer-events-none absolute inset-y-0"
               style={{
+                // rtl-ignore -- time axis inside the player's dir="ltr" timeline
                 left: `calc(${TRACK_OFFSET} + (100% - ${TRACK_OFFSET}) * ${playhead})`,
               }}
             >
@@ -526,6 +536,7 @@ export function TranscriptPlayer({
             playingId={playingId}
             query={query}
             onPlay={playUtterance}
+            onPause={playback.pause}
             labels={labels}
             emptyMessage={
               utterances.length === 0 ? labels.noTranscript : labels.noMatches

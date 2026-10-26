@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Checkbox } from '../../../Checkbox/Checkbox';
 import type { TranscriptPlayerLabels } from './labels';
-import { formatSpan, type PlayerSpeaker } from './model';
+import { type PlayerSpeaker } from './model';
 
 export interface SpeakerPanelProps {
   speakers: readonly PlayerSpeaker[];
@@ -57,7 +57,7 @@ export function SpeakerPanel({
                   className="shrink-0"
                 />
                 <span className="text-muted-foreground ms-auto tabular-nums">
-                  {formatSpan(seconds)}
+                  {labels.formatDuration(seconds)}
                 </span>
                 <span className="text-muted-foreground w-10 text-end tabular-nums">
                   {share}%

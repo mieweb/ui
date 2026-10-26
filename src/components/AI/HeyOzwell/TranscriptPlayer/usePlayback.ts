@@ -45,6 +45,20 @@ export function usePlayback(src: string | null | undefined): Playback {
     setRangeState(next);
   }, []);
 
+  /** Pauses at the end of interval playback; true when it stopped. */
+  const stopAtRangeEnd = React.useCallback(
+    (audio: HTMLAudioElement) => {
+      const r = rangeRef.current;
+      if (!r || audio.currentTime < r.end) return false;
+      audio.pause();
+      audio.currentTime = r.end;
+      setCurrentTime(r.end);
+      setRange(null);
+      return true;
+    },
+    [setRange]
+  );
+
   // Speed and volume carry over to the next recording; everything else starts fresh.
   const rateRef = React.useRef(rate);
   rateRef.current = rate;
@@ -76,6 +90,10 @@ export function usePlayback(src: string | null | undefined): Playback {
     on('pause', () => setPlaying(false));
     on('ended', () => setRange(null));
     on('seeked', () => setCurrentTime(audio.currentTime));
+    // rAF is paused in background tabs; timeupdate still fires, so it also enforces the interval end.
+    on('timeupdate', () => {
+      stopAtRangeEnd(audio);
+    });
     on('error', () => setError('load'));
     audio.src = src;
     audioRef.current = audio;
@@ -87,7 +105,7 @@ export function usePlayback(src: string | null | undefined): Playback {
       audio.load();
       audioRef.current = null;
     };
-  }, [src, setRange]);
+  }, [src, setRange, stopAtRangeEnd]);
 
   // Smooth playhead while playing, and the stop point for interval playback.
   React.useEffect(() => {
@@ -95,22 +113,15 @@ export function usePlayback(src: string | null | undefined): Playback {
     if (!playing || !audio) return;
     let frame = 0;
     const tick = () => {
-      const r = rangeRef.current;
-      if (r && audio.currentTime >= r.end) {
-        audio.pause();
-        audio.currentTime = r.end;
-        setCurrentTime(r.end);
-        setRange(null);
-        return;
-      }
       setCurrentTime(audio.currentTime);
-      frame = requestAnimationFrame(tick);
+      if (!stopAtRangeEnd(audio)) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, setRange]);
+  }, [playing, stopAtRangeEnd]);
 
   const start = React.useCallback((audio: HTMLAudioElement) => {
+    setError((e) => (e === 'play' ? null : e));
     audio.play()?.catch((e: unknown) => {
       // A play() interrupted by pause() or a new src is expected; anything else is reported.
       if ((e as { name?: string } | null)?.name !== 'AbortError')
