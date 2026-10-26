@@ -166,6 +166,18 @@ export {
   type UseVisitScribeResult,
 } from './HeyOzwell/useVisitScribe';
 
+// Transcript Player — review a diarized recording: who-spoke-when lanes, waveform, synced transcript.
+export {
+  TranscriptPlayer,
+  type TranscriptPlayerProps,
+  type TranscriptPlayerLabels,
+} from './HeyOzwell/TranscriptPlayer/TranscriptPlayer';
+export { DEFAULT_TRANSCRIPT_PLAYER_LABELS } from './HeyOzwell/TranscriptPlayer/labels';
+export {
+  computePeaks,
+  type WaveformPeaks,
+} from './HeyOzwell/TranscriptPlayer/peaks';
+
 // Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
 export {
   useDiarization,

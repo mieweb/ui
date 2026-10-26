@@ -1,0 +1,553 @@
+/**
+ * TranscriptPlayer (mieweb/ui#654): a clinical audio review surface. One playhead is shared by the
+ * waveform, the who-spoke-when lanes, a zoomable overview of the whole recording and a searchable
+ * transcript. Segments and transcript lines play just their own interval. Data is the library's
+ * `Transcript`; its optional `speakerActivity` keeps overlapping speech intact in the lanes.
+ */
+import {
+  LocateFixed,
+  Maximize2,
+  Minimize2,
+  Pause,
+  Play,
+  Search,
+  Volume2,
+  VolumeX,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../../../utils/cn';
+import { Input } from '../../../Input/Input';
+import { Select } from '../../../Select/Select';
+import { Slider } from '../../../Slider/Slider';
+import {
+  PLAYBACK_SPEEDS,
+  type Transcript,
+} from '../../../TranscriptView/transcript';
+import {
+  DEFAULT_TRANSCRIPT_PLAYER_LABELS,
+  type TranscriptPlayerLabels,
+} from './labels';
+import {
+  activeUtteranceAt,
+  clampView,
+  filterUtterances,
+  followView,
+  formatClock,
+  hasOverlap,
+  initialView,
+  MIN_VIEW_SECONDS,
+  talkTime,
+  ticksFor,
+  toLaneSegments,
+  toSpeakers,
+  toUtterances,
+  zoomView,
+  type LaneSegment,
+  type TimelineView,
+  type Utterance,
+} from './model';
+import { useWaveformPeaks, type WaveformPeaks } from './peaks';
+import {
+  SpeakerLanes,
+  ROW_GRID,
+  timeAtPointer,
+  viewFraction,
+} from './SpeakerLanes';
+import { SpeakerPanel } from './SpeakerPanel';
+import { TimelineOverview } from './TimelineOverview';
+import { TranscriptList } from './TranscriptList';
+import { usePlayback } from './usePlayback';
+import { Waveform } from './Waveform';
+
+export type { TranscriptPlayerLabels } from './labels';
+export type { WaveformPeaks } from './peaks';
+
+export interface TranscriptPlayerProps {
+  /** Audio URL, e.g. `URL.createObjectURL(blob)`. The host owns and revokes it. */
+  src: string | null | undefined;
+  transcript: Transcript;
+  /** Maps `Speaker.id` to a display name, as in `TranscriptView`. */
+  speakerLabels?: Record<string, string>;
+  /** Precomputed waveform; recommended for long recordings to avoid decoding them again. */
+  peaks?: WaveformPeaks;
+  /** Replaces any of the English UI strings, for translation. */
+  labels?: Partial<TranscriptPlayerLabels>;
+  className?: string;
+}
+
+const SEEK_STEP_SECONDS = 5;
+const ALL_SPEAKERS = '__all__';
+const SOME_SPEAKERS = '__some__';
+/** Width of the label column plus its gap in `ROW_GRID`, for overlays that span the track column. */
+const TRACK_OFFSET = '7.25rem';
+
+const iconButton =
+  'text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-ring rounded-md p-1.5 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40 aria-pressed:text-primary-700 dark:aria-pressed:text-primary-300';
+
+export function TranscriptPlayer({
+  src,
+  transcript,
+  speakerLabels,
+  peaks: providedPeaks,
+  labels: labelOverrides,
+  className,
+}: TranscriptPlayerProps) {
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const transcriptHeadingId = React.useId();
+  const labels = React.useMemo(
+    () => ({ ...DEFAULT_TRANSCRIPT_PLAYER_LABELS, ...labelOverrides }),
+    [labelOverrides]
+  );
+  const playback = usePlayback(src);
+  const peaks = useWaveformPeaks(src, providedPeaks);
+
+  const utterances = React.useMemo(
+    () => toUtterances(transcript),
+    [transcript]
+  );
+  const segments = React.useMemo(
+    () => toLaneSegments(transcript, utterances),
+    [transcript, utterances]
+  );
+  const speakers = React.useMemo(
+    () =>
+      toSpeakers(
+        transcript,
+        [...segments, ...utterances].map((s) => s.speakerId),
+        speakerLabels,
+        labels.unknownSpeaker
+      ),
+    [transcript, segments, utterances, speakerLabels, labels.unknownSpeaker]
+  );
+  const speakersById = React.useMemo(
+    () => new Map(speakers.map((s) => [s.id, s])),
+    [speakers]
+  );
+  const talk = React.useMemo(() => talkTime(segments), [segments]);
+  const overlapping = React.useMemo(() => hasOverlap(segments), [segments]);
+
+  const duration = Math.max(
+    playback.duration,
+    transcript.durationMs / 1000,
+    segments.reduce((end, s) => Math.max(end, s.end), 0),
+    utterances.reduce((end, u) => Math.max(end, u.end), 0)
+  );
+
+  const [userView, setUserView] = React.useState<TimelineView | null>(null);
+  const [follow, setFollow] = React.useState(true);
+  const [hidden, setHidden] = React.useState<ReadonlySet<string>>(new Set());
+  const [query, setQuery] = React.useState('');
+  const [fullscreen, setFullscreen] = React.useState(false);
+  const [lastVolume, setLastVolume] = React.useState(1);
+
+  // A new recording starts fresh; edits to the same recording's transcript keep the view.
+  React.useEffect(() => {
+    setUserView(null);
+    setFollow(true);
+    setHidden(new Set());
+    setQuery('');
+  }, [src]);
+
+  const view = clampView(userView ?? initialView(duration), duration);
+  const { currentTime, playing } = playback;
+
+  React.useEffect(() => {
+    if (!follow || !playing) return;
+    const next = followView(view, currentTime, duration);
+    if (next.start !== view.start) setUserView(next);
+  }, [follow, playing, currentTime, duration, view]);
+
+  React.useEffect(() => {
+    const onChange = () =>
+      setFullscreen(document.fullscreenElement === rootRef.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const visibleSpeakers = speakers.filter((s) => !hidden.has(s.id));
+  const visibleSegments = React.useMemo(
+    () => segments.filter((s) => !hidden.has(s.speakerId)),
+    [segments, hidden]
+  );
+  const shown = React.useMemo(
+    () => filterUtterances(utterances, hidden, query),
+    [utterances, hidden, query]
+  );
+  const active = activeUtteranceAt(utterances, currentTime);
+  const playingId = playback.range?.id ?? null;
+  const canPlay = Boolean(src) && !playback.error;
+
+  const { playRange, seek } = playback;
+  const playSegment = React.useCallback(
+    (s: LaneSegment) => {
+      setFollow(true);
+      playRange(s);
+    },
+    [playRange]
+  );
+  const playUtterance = React.useCallback(
+    (u: Utterance) => {
+      setFollow(true);
+      playRange(u);
+    },
+    [playRange]
+  );
+  const navigate = (next: TimelineView) => {
+    setFollow(false);
+    setUserView(next);
+  };
+  const zoom = (factor: number) => {
+    const anchor =
+      currentTime >= view.start && currentTime <= view.start + view.span
+        ? currentTime
+        : view.start + view.span / 2;
+    setUserView(zoomView(view, factor, anchor, duration));
+  };
+
+  const toggleSpeaker = React.useCallback((id: string) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+  const visibleIds = visibleSpeakers.map((s) => s.id);
+  const filterValue =
+    hidden.size === 0
+      ? ALL_SPEAKERS
+      : visibleIds.length === 1
+        ? visibleIds[0]
+        : SOME_SPEAKERS;
+
+  const onSeekKey = (event: React.KeyboardEvent) => {
+    const step: Record<string, number> = {
+      ArrowLeft: -SEEK_STEP_SECONDS,
+      ArrowRight: SEEK_STEP_SECONDS,
+      Home: -duration,
+      End: duration,
+    };
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault();
+      playback.toggle();
+    } else if (event.key in step) {
+      event.preventDefault();
+      seek(currentTime + step[event.key]);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen?.();
+    else void rootRef.current?.requestFullscreen?.();
+  };
+
+  const playhead = viewFraction(currentTime, view);
+  const playheadVisible =
+    duration > 0 &&
+    currentTime >= view.start &&
+    currentTime <= view.start + view.span;
+
+  return (
+    <div
+      ref={rootRef}
+      className={cn(
+        'text-foreground flex flex-col gap-4',
+        fullscreen && 'bg-background overflow-y-auto p-6',
+        className
+      )}
+    >
+      <section
+        aria-label={labels.recording}
+        className="border-border bg-card text-card-foreground sticky top-0 z-10 rounded-xl border p-4"
+      >
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button
+            type="button"
+            onClick={playback.toggle}
+            disabled={!canPlay}
+            aria-label={playing ? labels.pause : labels.play}
+            className="bg-primary-800 hover:bg-primary-900 focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50"
+          >
+            {playing ? (
+              <Pause aria-hidden="true" className="h-4 w-4 fill-current" />
+            ) : (
+              <Play
+                aria-hidden="true"
+                className="ms-0.5 h-4 w-4 fill-current"
+              />
+            )}
+          </button>
+          <span className="text-sm tabular-nums">
+            {formatClock(currentTime)}{' '}
+            <span className="text-muted-foreground">
+              / {formatClock(duration)}
+            </span>
+          </span>
+          {playback.error && (
+            <span role="alert" className="text-destructive text-sm">
+              {playback.error === 'load' ? labels.loadError : labels.playError}
+            </span>
+          )}
+          {!src && (
+            <span className="text-muted-foreground text-sm">
+              {labels.noRecording}
+            </span>
+          )}
+          <div className="ms-auto flex items-center gap-2">
+            <button
+              type="button"
+              className={iconButton}
+              aria-label={playback.volume === 0 ? labels.unmute : labels.mute}
+              onClick={() => {
+                if (playback.volume === 0) playback.setVolume(lastVolume || 1);
+                else {
+                  setLastVolume(playback.volume);
+                  playback.setVolume(0);
+                }
+              }}
+            >
+              {playback.volume === 0 ? (
+                <VolumeX aria-hidden="true" className="h-4 w-4" />
+              ) : (
+                <Volume2 aria-hidden="true" className="h-4 w-4" />
+              )}
+            </button>
+            <Slider
+              aria-label={labels.volume}
+              min={0}
+              max={1}
+              step={0.05}
+              value={playback.volume}
+              onValueChange={playback.setVolume}
+              size="sm"
+              className="w-24"
+            />
+            <Select
+              aria-label={labels.playbackSpeed}
+              size="sm"
+              className="w-20"
+              value={String(playback.rate)}
+              onValueChange={(v) => playback.setRate(Number(v))}
+              options={PLAYBACK_SPEEDS.map((s) => ({
+                value: String(s),
+                label: `${s}x`,
+              }))}
+            />
+            <button
+              type="button"
+              className={iconButton}
+              aria-label={
+                fullscreen ? labels.exitFullScreen : labels.fullScreen
+              }
+              onClick={toggleFullscreen}
+            >
+              {fullscreen ? (
+                <Minimize2 aria-hidden="true" className="h-4 w-4" />
+              ) : (
+                <Maximize2 aria-hidden="true" className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Time runs left to right in every locale, as in other audio tools. */}
+        <div dir="ltr" className="relative space-y-1.5">
+          <div className={ROW_GRID}>
+            <span />
+            <div
+              role="slider"
+              tabIndex={0}
+              aria-label={labels.seek}
+              aria-valuemin={0}
+              aria-valuemax={Math.round(duration)}
+              aria-valuenow={Math.round(currentTime)}
+              aria-valuetext={labels.seekValue(
+                formatClock(currentTime),
+                formatClock(duration)
+              )}
+              onKeyDown={onSeekKey}
+              onClick={(e) =>
+                seek(timeAtPointer(e.clientX, e.currentTarget, view))
+              }
+              className="focus-visible:ring-ring cursor-pointer rounded focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <Waveform peaks={peaks} view={view} currentTime={currentTime} />
+            </div>
+          </div>
+
+          {visibleSpeakers.length > 0 ? (
+            <SpeakerLanes
+              speakers={visibleSpeakers}
+              segments={visibleSegments}
+              view={view}
+              currentTime={currentTime}
+              playingId={playingId}
+              onPlaySegment={playSegment}
+              onSeek={seek}
+              labels={labels}
+            />
+          ) : (
+            <p className="text-muted-foreground py-2 text-center text-xs">
+              {speakers.length ? labels.allSpeakersHidden : labels.noActivity}
+            </p>
+          )}
+
+          <div className={cn(ROW_GRID, 'h-4')} aria-hidden="true">
+            <span />
+            <div className="text-muted-foreground relative text-[11px] tabular-nums">
+              {ticksFor(view).map((t) => (
+                <span
+                  key={t}
+                  className="absolute -translate-x-1/2"
+                  style={{ left: `${viewFraction(t, view) * 100}%` }}
+                >
+                  {formatClock(t)}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {playheadVisible && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0"
+              style={{
+                left: `calc(${TRACK_OFFSET} + (100% - ${TRACK_OFFSET}) * ${playhead})`,
+              }}
+            >
+              <span className="bg-primary-600 absolute inset-y-0 w-0.5 -translate-x-1/2" />
+              <span className="bg-primary-600 absolute -top-5 -translate-x-1/2 rounded px-1 text-[10px] font-medium text-white tabular-nums">
+                {formatClock(currentTime)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div dir="ltr" className={cn(ROW_GRID, 'mt-3 items-start')}>
+          <div className="flex items-center">
+            <button
+              type="button"
+              className={iconButton}
+              aria-label={labels.zoomOut}
+              disabled={view.span >= duration}
+              onClick={() => zoom(2)}
+            >
+              <ZoomOut aria-hidden="true" className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className={iconButton}
+              aria-label={labels.zoomIn}
+              disabled={view.span <= Math.min(MIN_VIEW_SECONDS, duration)}
+              onClick={() => zoom(0.5)}
+            >
+              <ZoomIn aria-hidden="true" className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className={iconButton}
+              aria-label={labels.followPlayback}
+              aria-pressed={follow}
+              onClick={() => setFollow((f) => !f)}
+            >
+              <LocateFixed aria-hidden="true" className="h-4 w-4" />
+            </button>
+          </div>
+          <TimelineOverview
+            speakers={visibleSpeakers}
+            segments={visibleSegments}
+            duration={duration}
+            view={view}
+            currentTime={currentTime}
+            onViewChange={navigate}
+            labels={labels}
+          />
+        </div>
+      </section>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <section
+          aria-labelledby={transcriptHeadingId}
+          className="border-border bg-card text-card-foreground rounded-xl border p-4"
+        >
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <h3 id={transcriptHeadingId} className="text-base font-semibold">
+              {labels.transcript}
+            </h3>
+            <div className="relative min-w-40 flex-1">
+              <Search
+                aria-hidden="true"
+                className="text-muted-foreground pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2"
+              />
+              <Input
+                type="search"
+                label={labels.searchTranscript}
+                hideLabel
+                placeholder={labels.searchPlaceholder}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                size="sm"
+                className="ps-8"
+              />
+            </div>
+            <Select
+              aria-label={labels.showSpeakers}
+              size="sm"
+              className="w-44"
+              value={filterValue}
+              onValueChange={(v) => {
+                if (v === ALL_SPEAKERS) setHidden(new Set());
+                else if (v !== SOME_SPEAKERS)
+                  setHidden(
+                    new Set(speakers.filter((s) => s.id !== v).map((s) => s.id))
+                  );
+              }}
+              options={[
+                { value: ALL_SPEAKERS, label: labels.allSpeakers },
+                ...speakers.map((s) => ({ value: s.id, label: s.name })),
+                ...(filterValue === SOME_SPEAKERS
+                  ? [
+                      {
+                        value: SOME_SPEAKERS,
+                        label: labels.someSpeakers,
+                        disabled: true,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          </div>
+          <TranscriptList
+            utterances={shown}
+            speakersById={speakersById}
+            activeId={active?.id ?? null}
+            playingId={playingId}
+            query={query}
+            onPlay={playUtterance}
+            labels={labels}
+            emptyMessage={
+              utterances.length === 0 ? labels.noTranscript : labels.noMatches
+            }
+          />
+        </section>
+
+        <div className="space-y-4">
+          <SpeakerPanel
+            speakers={speakers}
+            talkTime={talk}
+            duration={duration}
+            hidden={hidden}
+            onToggle={toggleSpeaker}
+            overlapping={overlapping}
+            labels={labels}
+          />
+          <p className="text-muted-foreground bg-muted/50 rounded-xl p-4 text-xs">
+            {labels.hint}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
