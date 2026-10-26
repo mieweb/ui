@@ -102,7 +102,6 @@ describe('EncounterConditionsField', () => {
 
   it('does not duplicate a current condition when its code is selected again', () => {
     const { latest } = renderConditions({ concerns: [hypertensionConcern] });
-    openAddCondition();
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(latest<ConditionsValue>().concerns).toEqual([hypertensionConcern]);
   });
@@ -118,7 +117,6 @@ describe('EncounterConditionsField', () => {
       ],
     };
     const { latest } = renderConditions({ concerns: [imported] });
-    openAddCondition();
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(latest<ConditionsValue>().concerns).toEqual([imported]);
   });
