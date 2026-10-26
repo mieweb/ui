@@ -27,6 +27,9 @@ import {
 
 const SR = 16000; // decodeTo16kMono / transcribeSegments work in 16 kHz seconds
 
+/** Min cosine to name a speaker from an enrolled TitaNet voice. */
+export const DEFAULT_IDENTIFY_THRESHOLD = 0.45;
+
 export interface UseDiarizationOptions {
   /** Cluster merge cutoff (cosine distance). Higher → fewer speakers (merges more). Default 0.65. */
   threshold?: number;
@@ -81,7 +84,7 @@ export function useDiarization(
   const {
     threshold = 0.65,
     maxSpeakers,
-    identifyThreshold = 0.45,
+    identifyThreshold = DEFAULT_IDENTIFY_THRESHOLD,
     merge = true,
     inferRoles = false,
     enabled = true,
