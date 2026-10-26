@@ -88,6 +88,9 @@ export const miewebUISafelist = [
   'min-w-40',
   'h-80',
   'dark:bg-primary-950/40',
+  'ring-inset',
+  'ring-foreground',
+  'ring-foreground/70',
   'aria-pressed:text-primary-700',
   'dark:aria-pressed:text-primary-300',
   // EmailEditor: block frames, innermost-hover toolbar reveal, email-content

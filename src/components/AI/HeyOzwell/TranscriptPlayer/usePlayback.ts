@@ -87,12 +87,18 @@ export function usePlayback(src: string | null | undefined): Playback {
       setReady(true);
     });
     on('play', () => setPlaying(true));
-    on('pause', () => setPlaying(false));
-    on('ended', () => setRange(null));
+    on('pause', () => {
+      setPlaying(false);
+      setCurrentTime(audio.currentTime);
+    });
+    on('ended', () => {
+      setRange(null);
+      setCurrentTime(audio.currentTime);
+    });
     on('seeked', () => setCurrentTime(audio.currentTime));
-    // rAF is paused in background tabs; timeupdate still fires, so it also enforces the interval end.
+    // rAF is paused in background tabs; timeupdate still fires, so it also keeps time and enforces the interval end.
     on('timeupdate', () => {
-      stopAtRangeEnd(audio);
+      if (!stopAtRangeEnd(audio)) setCurrentTime(audio.currentTime);
     });
     on('error', () => setError('load'));
     audio.src = src;

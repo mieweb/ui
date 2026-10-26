@@ -51,6 +51,13 @@ test.describe('TranscriptPlayer', () => {
 
       await expectTimelineLtr(page);
       if (!viewport) await expectTranscriptAtInlineStart(page, name === '-rtl');
+      expect(
+        await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth -
+            document.documentElement.clientWidth
+        )
+      ).toBeLessThanOrEqual(0);
 
       await expect(page).toHaveScreenshot(`transcript-player${name}.png`, {
         animations: 'disabled',

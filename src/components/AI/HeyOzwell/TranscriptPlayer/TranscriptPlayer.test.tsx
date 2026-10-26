@@ -115,6 +115,63 @@ const lane = (name: string) =>
   screen.getByRole('group', { name: `${name} speaking turns` });
 
 describe('TranscriptPlayer', () => {
+  it('keeps the clock in sync from timeupdate when animation frames are paused', async () => {
+    vi.stubGlobal('requestAnimationFrame', () => 0);
+    renderPlayer();
+    await userEvent.click(screen.getByRole('button', { name: 'Play' }));
+    act(() => {
+      if (audio) audio.currentTime = 7.4;
+      audio?.dispatchEvent(new Event('timeupdate'));
+    });
+    expect(screen.getByRole('slider', { name: 'Seek' })).toHaveAttribute(
+      'aria-valuetext',
+      '0:07 of 0:10'
+    );
+  });
+
+  it('filters to the unknown speaker and shows it as the selection', async () => {
+    renderPlayer({
+      transcript: {
+        ...transcript,
+        segments: [
+          ...(transcript.segments ?? []),
+          { text: 'Mm-hm.', startMs: 9200, endMs: 9600, words: [] },
+        ],
+      },
+    });
+    await userEvent.click(
+      screen.getByRole('combobox', { name: 'Show speakers' })
+    );
+    await userEvent.click(
+      screen.getByRole('option', { name: 'Unknown speaker' })
+    );
+    expect(
+      screen.getByRole('combobox', { name: 'Show speakers' })
+    ).toHaveTextContent('Unknown speaker');
+    expect(screen.getByText('Mm-hm.')).toBeInTheDocument();
+    expect(screen.queryByText('Let me look.')).not.toBeInTheDocument();
+  });
+
+  it('makes the page behind a fullscreen player inert and exits on Escape without the Fullscreen API', async () => {
+    render(
+      <>
+        <button type="button">Host control</button>
+        <TranscriptPlayer
+          src="visit.wav"
+          transcript={transcript}
+          peaks={peaks}
+        />
+      </>
+    );
+    const host = screen.getByRole('button', { name: 'Host control' });
+    await userEvent.click(screen.getByRole('button', { name: 'Full screen' }));
+    expect(host).toHaveAttribute('inert');
+
+    await userEvent.keyboard('{Escape}');
+    expect(host).not.toHaveAttribute('inert');
+    expect(screen.getByRole('button', { name: 'Full screen' })).toHaveFocus();
+  });
+
   it('stops interval playback on timeupdate when animation frames are paused', async () => {
     vi.stubGlobal('requestAnimationFrame', () => 0);
     renderPlayer();

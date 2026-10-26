@@ -78,8 +78,27 @@ export interface TranscriptPlayerProps {
 }
 
 const SEEK_STEP_SECONDS = 5;
-const ALL_SPEAKERS = '__all__';
-const SOME_SPEAKERS = '__some__';
+const ALL_SPEAKERS = 'all';
+const SOME_SPEAKERS = 'some';
+/** Speaker ids can be empty or anything, so their filter values live in their own namespace. */
+const SPEAKER_PREFIX = 'speaker:';
+
+/** Makes everything outside `element` inert (siblings up to <body>); returns the undo. */
+function inertOutside(element: HTMLElement): () => void {
+  const changed: Element[] = [];
+  for (
+    let node: HTMLElement | null = element;
+    node && node !== document.body;
+    node = node.parentElement
+  ) {
+    for (const sibling of Array.from(node.parentElement?.children ?? [])) {
+      if (sibling === node || sibling.hasAttribute('inert')) continue;
+      sibling.setAttribute('inert', '');
+      changed.push(sibling);
+    }
+  }
+  return () => changed.forEach((el) => el.removeAttribute('inert'));
+}
 /** Width of the label column plus its gap in `ROW_GRID`, for overlays that span the track column. */
 const TRACK_OFFSET = '7.25rem';
 
@@ -94,6 +113,8 @@ export function TranscriptPlayer({
   labels: labelOverrides,
   className,
 }: TranscriptPlayerProps) {
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const fullscreenButtonRef = React.useRef<HTMLButtonElement>(null);
   const transcriptHeadingId = React.useId();
   const labels = React.useMemo(
     () => ({ ...DEFAULT_TRANSCRIPT_PLAYER_LABELS, ...labelOverrides }),
@@ -166,6 +187,27 @@ export function TranscriptPlayer({
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
+  // While the player covers the page, the page behind it is inert; menus portaled later stay usable.
+  React.useEffect(() => {
+    const root = rootRef.current;
+    const button = fullscreenButtonRef.current;
+    if (!fullscreen || !root) return;
+    const restore = inertOutside(root);
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      // The Fullscreen API handles Escape itself; this covers browsers without it.
+      if (event.key !== 'Escape' || document.fullscreenElement) return;
+      if ((event.target as Element | null)?.closest?.('[aria-expanded="true"]'))
+        return;
+      setFullscreen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      restore();
+      button?.focus();
+    };
+  }, [fullscreen]);
+
   const visibleSpeakers = speakers.filter((s) => !hidden.has(s.id));
   const visibleSegments = React.useMemo(
     () => segments.filter((s) => !hidden.has(s.speakerId)),
@@ -220,7 +262,7 @@ export function TranscriptPlayer({
     hidden.size === 0
       ? ALL_SPEAKERS
       : visibleIds.length === 1
-        ? visibleIds[0]
+        ? SPEAKER_PREFIX + visibleIds[0]
         : SOME_SPEAKERS;
 
   const onSeekKey = (event: React.KeyboardEvent) => {
@@ -258,6 +300,7 @@ export function TranscriptPlayer({
 
   return (
     <div
+      ref={rootRef}
       className={cn(
         'text-foreground flex flex-col gap-4',
         fullscreen && 'bg-background fixed inset-0 z-50 overflow-y-auto p-6',
@@ -342,6 +385,7 @@ export function TranscriptPlayer({
               }))}
             />
             <button
+              ref={fullscreenButtonRef}
               type="button"
               className={iconButton}
               aria-label={
@@ -388,7 +432,6 @@ export function TranscriptPlayer({
               speakers={visibleSpeakers}
               segments={visibleSegments}
               view={view}
-              currentTime={currentTime}
               playingId={playingId}
               onPlaySegment={playSegment}
               onSeek={seek}
@@ -428,7 +471,7 @@ export function TranscriptPlayer({
               }}
             >
               <span className="bg-primary-600 absolute inset-y-0 w-0.5 -translate-x-1/2" />
-              <span className="bg-primary-600 absolute -top-5 -translate-x-1/2 rounded px-1 text-[10px] font-medium text-white tabular-nums">
+              <span className="bg-primary-800 absolute -top-5 -translate-x-1/2 rounded px-1 text-[10px] font-medium text-white tabular-nums">
                 {formatClock(currentTime)}
               </span>
             </div>
@@ -477,7 +520,7 @@ export function TranscriptPlayer({
         </div>
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <section
           aria-labelledby={transcriptHeadingId}
           className="border-border bg-card text-card-foreground rounded-xl border p-4"
@@ -509,14 +552,21 @@ export function TranscriptPlayer({
               value={filterValue}
               onValueChange={(v) => {
                 if (v === ALL_SPEAKERS) setHidden(new Set());
-                else if (v !== SOME_SPEAKERS)
+                else if (v.startsWith(SPEAKER_PREFIX)) {
+                  const id = v.slice(SPEAKER_PREFIX.length);
                   setHidden(
-                    new Set(speakers.filter((s) => s.id !== v).map((s) => s.id))
+                    new Set(
+                      speakers.filter((s) => s.id !== id).map((s) => s.id)
+                    )
                   );
+                }
               }}
               options={[
                 { value: ALL_SPEAKERS, label: labels.allSpeakers },
-                ...speakers.map((s) => ({ value: s.id, label: s.name })),
+                ...speakers.map((s) => ({
+                  value: SPEAKER_PREFIX + s.id,
+                  label: s.name,
+                })),
                 ...(filterValue === SOME_SPEAKERS
                   ? [
                       {
@@ -530,6 +580,7 @@ export function TranscriptPlayer({
             />
           </div>
           <TranscriptList
+            key={src ?? ''}
             utterances={shown}
             speakersById={speakersById}
             activeId={active?.id ?? null}

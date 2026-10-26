@@ -108,7 +108,7 @@ const Row = React.memo(function Row({
           <span className="text-muted-foreground italic">{labels.noWords}</span>
         )}
         {overlap && (
-          <span className="text-muted-foreground border-border ms-2 inline-block rounded border px-1.5 text-[11px] whitespace-nowrap">
+          <span className="text-muted-foreground border-border ms-2 inline-block max-w-full rounded border px-1.5 text-[11px] break-words">
             {labels.overlapWith(overlap)}
           </span>
         )}
@@ -195,6 +195,16 @@ export function TranscriptList({
     />
   );
 
+  if (utterances.length === 0)
+    return (
+      <p
+        role="status"
+        className="text-muted-foreground flex h-80 items-center justify-center p-6 text-center text-sm"
+      >
+        {emptyMessage}
+      </p>
+    );
+
   return (
     <div className="relative">
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- the handlers only notice the reader scrolling */}
@@ -212,11 +222,7 @@ export function TranscriptList({
         }}
         className="focus-visible:ring-ring h-80 overflow-y-auto rounded-lg focus-visible:ring-2 focus-visible:outline-none"
       >
-        {utterances.length === 0 ? (
-          <p className="text-muted-foreground p-6 text-center text-sm">
-            {emptyMessage}
-          </p>
-        ) : virtualize ? (
+        {virtualize ? (
           <div
             className="relative w-full"
             style={{ height: virtualizer.getTotalSize() }}

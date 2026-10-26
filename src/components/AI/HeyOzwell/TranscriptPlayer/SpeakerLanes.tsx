@@ -47,7 +47,6 @@ export interface SpeakerLanesProps {
   speakers: readonly PlayerSpeaker[];
   segments: readonly LaneSegment[];
   view: TimelineView;
-  currentTime: number;
   /** Id of the segment being played on its own. */
   playingId: string | null;
   onPlaySegment: (segment: LaneSegment) => void;
@@ -63,7 +62,6 @@ export function SpeakerLanes({
   speakers,
   segments,
   view,
-  currentTime,
   playingId,
   onPlaySegment,
   onSeek,
@@ -128,8 +126,6 @@ export function SpeakerLanes({
                 const left = viewFraction(segment.start, view);
                 const width = viewFraction(segment.end, view) - left;
                 const isPlaying = segment.id === playingId;
-                const isCurrent =
-                  currentTime >= segment.start && currentTime < segment.end;
                 return (
                   <button
                     key={segment.id}
@@ -145,12 +141,11 @@ export function SpeakerLanes({
                     onFocus={() => show(segment)}
                     onBlur={hide}
                     className={cn(
-                      'focus-visible:ring-ring absolute inset-y-0 rounded-sm transition-opacity focus-visible:ring-2 focus-visible:outline-none',
+                      // The outline keeps every turn's edges at 3:1+ against the lane, whatever the speaker colour.
+                      'focus-visible:ring-ring absolute inset-y-0 rounded-sm ring-inset focus-visible:ring-2 focus-visible:outline-none',
                       isPlaying
-                        ? 'ring-foreground opacity-100 ring-2'
-                        : isCurrent
-                          ? 'opacity-100'
-                          : 'opacity-75 hover:opacity-100'
+                        ? 'ring-foreground ring-2'
+                        : 'ring-foreground/70 ring-1'
                     )}
                     style={{
                       // rtl-ignore -- time axis inside the player's dir="ltr" timeline, matches clientX seek math
