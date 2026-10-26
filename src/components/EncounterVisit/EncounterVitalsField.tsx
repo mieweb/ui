@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import type { FieldComponentProps } from '@esheet/core';
 import { Button } from '../Button';
 import { DateInput } from '../DateInput';
@@ -278,7 +278,10 @@ export function EncounterVitalsField({
           issue.path?.endsWith('.recordedAt')
         );
         return (
-          <fieldset key={reading.id} className="min-w-0 space-y-3">
+          <fieldset
+            key={reading.id}
+            className="bg-muted/40 min-w-0 space-y-3 rounded-lg p-3"
+          >
             <legend className="sr-only">
               {m('Measurement set {number}', { number: index + 1 })}
             </legend>
@@ -290,7 +293,8 @@ export function EncounterVitalsField({
                 <Button
                   type="button"
                   variant="ghost"
-                  className="min-h-11 shrink-0"
+                  size="icon"
+                  className="shrink-0"
                   aria-label={m('Remove measurement set {number}', {
                     number: index + 1,
                   })}
@@ -306,7 +310,7 @@ export function EncounterVitalsField({
                     })
                   }
                 >
-                  {m('Remove')}
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </Button>
               )}
             </div>
