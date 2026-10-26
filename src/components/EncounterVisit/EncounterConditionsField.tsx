@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { FieldComponentProps } from '@esheet/core';
-import { Plus, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { ProblemList, currentAssertion } from '../ProblemList';
 import {
   ConditionEditor,
@@ -15,6 +15,8 @@ import {
   InvalidClinicalAnswer,
   clinicalAnswerResponse,
   clinicalRequiresCoding,
+  ClinicalAddButton,
+  clinicalEntryCardClasses,
   EncounterAssertionDateInput,
   useEncounterAssertionDate,
   matchingConditionCode,
@@ -206,7 +208,7 @@ export function EncounterConditionsField({
   return (
     <section aria-label={label} className="min-w-0 space-y-2">
       {!readOnly && (adding || editingConcern || value.concerns.length > 0) && (
-        <div className="bg-muted/40 min-w-0 space-y-3 rounded-lg p-3">
+        <div className={clinicalEntryCardClasses}>
           <div className="flex items-center justify-between gap-2">
             <h4 className="min-w-0 font-semibold break-words">
               {editingConcern ? (
@@ -315,15 +317,10 @@ export function EncounterConditionsField({
         !editingConcern &&
         value.concerns.length === 0 &&
         (codeLookup || !requireCoding) && (
-          <Button
-            type="button"
-            variant="ghost"
-            leftIcon={<Plus aria-hidden="true" />}
-            className="text-primary-800 hover:bg-primary-50 hover:text-primary-900 active:bg-primary-100 dark:text-primary-400 dark:hover:bg-primary-950 dark:hover:text-primary-200 min-h-11"
+          <ClinicalAddButton
+            label={m('Add condition')}
             onClick={() => setAdding(true)}
-          >
-            {m('Add condition')}
-          </Button>
+          />
         )}
       {!readOnly && requireCoding && !codeLookup && (
         <p className="text-muted-foreground text-sm">

@@ -161,6 +161,15 @@ const FORM_TO_UNIT: Record<string, string> = {
 };
 
 /**
+ * Quantity unit implied by a dose form (tablet → tablet, solution →
+ * milliliter, …); unrecognized forms fall back to the form itself.
+ */
+export function doseFormToQuantityUnit(doseForm: string): string | undefined {
+  const normalized = doseForm.toLowerCase().trim();
+  return (FORM_TO_UNIT[normalized] ?? normalized) || undefined;
+}
+
+/**
  * Parse strength + dose form out of a coded drug label,
  * e.g. "lisinopril 20 mg tablet" → { strength: '20 mg', doseForm: 'tablet' }.
  */
@@ -248,7 +257,7 @@ export function labelToMedicationFields(label: string): Partial<Medication> {
     ...(strength && { strength }),
     ...(doseForm && {
       doseForm,
-      quantityUnit: FORM_TO_UNIT[doseForm] ?? doseForm,
+      quantityUnit: doseFormToQuantityUnit(doseForm),
     }),
   };
 }
@@ -421,13 +430,11 @@ export function MedicationEditor({
                   value={draft.doseForm ?? ''}
                   onChange={(e) => {
                     const doseForm = e.target.value;
-                    const normalized = doseForm.toLowerCase().trim();
                     // Quantity unit follows the dose form (tablet → tablet,
                     // solution → milliliter, …)
                     patch({
                       doseForm,
-                      quantityUnit:
-                        (FORM_TO_UNIT[normalized] ?? normalized) || undefined,
+                      quantityUnit: doseFormToQuantityUnit(doseForm),
                     });
                   }}
                 />

@@ -137,7 +137,6 @@ test('encounter visit on a phone with repeated coordinated BP', async ({
     )
   ).toBe(true);
   for (const [sectionId, fieldType] of [
-    ['medications', 'encounterMedications'],
     ['allergies', 'encounterAllergies'],
   ]) {
     await page
@@ -166,6 +165,9 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   await navigation.selectOption('medications');
   const medications = page.locator('[data-field-type=encounterMedications]');
   await medications
+    .getByRole('button', { name: 'Add medication', exact: true })
+    .click();
+  await medications
     .locator('[data-slot=sample-clinical-catalog] input')
     .fill('lisinopril');
   await medications
@@ -174,7 +176,9 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
       exact: true,
     })
     .click();
-  await expect(medications).toContainText('lisinopril 10 mg tablet');
+  // The picked name lives in the card's search input; the hint line
+  // carries the coding as text.
+  await expect(medications).toContainText('Coded: FDB 244899');
 
   await navigation.selectOption('allergies');
   const allergies = page.locator('[data-field-type=encounterAllergies]');

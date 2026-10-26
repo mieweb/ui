@@ -48,7 +48,9 @@ formatting when appending. Invalidate stale selection metadata after an external
 text replacement; do not infer a selection from prose that happens to match.
 
 Clinical sections compose the existing healthcare components:
-`MedicationReconciliation`, `AllergyManager`, `ProblemList` for Conditions, and
+inline prescription cards built on `MedicationEditor`'s field helpers,
+`AllergyManager`, `ProblemList` for
+Conditions, and
 `Assessment` for Assessment and Plan. The Plan variant captures coded medication,
 lab, procedure and referral orders, with optional supplementary narrative.
 Keep the stable Plan narrative field ID when adding its structured value field.

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { FieldComponentProps } from '@esheet/core';
+import { Plus } from 'lucide-react';
 import type { AssessmentProps } from '../Assessment';
 import type { CodifyDomain } from '../CodeLookup/CodeLookup';
 import type { CodeLookupProviderConfig } from '../CodeLookup/context';
@@ -117,6 +118,31 @@ export function codedOrderSearch(
 
 export const clinicalAssessmentClasses =
   'rounded-none border-0 bg-transparent shadow-none [&_.border-dashed]:rounded-none [&_.border-dashed]:border-0 [&_.border-dashed]:bg-transparent [&_.border-dashed]:p-0 [&_.min-w-64]:min-w-0 [&_[data-slot=assessment-problem]]:rounded-none [&_[data-slot=assessment-problem]]:border-0 [&_[data-slot=assessment-problem]]:px-0 [&_[data-slot=assessment-problem]>ul]:ms-0 [&_[data-slot=assessment-problem]>ul]:border-0 [&_[data-slot=assessment-problem]>ul]:ps-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11 [&_select]:min-h-11 [&>[data-slot=card-content]]:p-0 [&>[data-slot=card-content]>section]:border-0 [&>[data-slot=card-content]>section]:bg-transparent [&>[data-slot=card-content]>section]:px-0';
+
+/** Muted entry card that progressive-disclosure clinical fields expand into. */
+export const clinicalEntryCardClasses =
+  'bg-muted/40 min-w-0 space-y-3 rounded-lg p-3';
+
+/** Ghost "+ Add …" affordance shown while a clinical entry card is collapsed. */
+export function ClinicalAddButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}): React.JSX.Element {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      leftIcon={<Plus aria-hidden="true" />}
+      className="text-primary-800 hover:bg-primary-50 hover:text-primary-900 active:bg-primary-100 dark:text-primary-400 dark:hover:bg-primary-950 dark:hover:text-primary-200 min-h-11"
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+}
 
 export function InvalidClinicalAnswer({
   label,

@@ -145,7 +145,7 @@ function renderField(
 }
 
 describe('Encounter coded clinical fields', () => {
-  it('adds coded medications through MedicationReconciliation and retains the selected code and native metadata', () => {
+  it('adds coded medications through the inline catalog search and retains the selected code and native metadata', () => {
     const { onResponse, latest } = renderField(
       EncounterMedicationField,
       'encounterMedications',
@@ -159,6 +159,7 @@ describe('Encounter coded clinical fields', () => {
         },
       }
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
     expect(screen.queryByRole('button', { name: 'Use free text' })).toBeNull();
     fireEvent.click(
       screen.getByRole('button', { name: 'Select incomplete result' })
@@ -190,26 +191,25 @@ describe('Encounter coded clinical fields', () => {
     expect(onResponse.mock.calls.at(-1)![0]).not.toHaveProperty('selected');
   });
 
-  it('requires a selected medication code before saving the proper prescription editor', () => {
+  it('holds inline prescription details in a local draft until a catalog pick names and codes the medication', () => {
     const { onResponse, latest } = renderField(
       EncounterMedicationField,
       'encounterMedications'
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
-    const dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByRole('button', { name: 'Save' })).toBeDisabled();
-    expect(dialog.queryByRole('button', { name: 'Use free text' })).toBeNull();
-    fireEvent.click(
-      dialog.getByRole('button', { name: 'Select medication result' })
-    );
-    const sig = dialog.getByLabelText('Sig (patient directions)');
+    fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    const sig = screen.getByLabelText('Sig (patient directions)');
     sig.innerHTML = '<p>1 tablet by mouth daily</p>';
     fireEvent.input(sig);
-    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
+    expect(onResponse).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Select medication result' })
+    );
     expect(onResponse).toHaveBeenCalledOnce();
     expect(latest()).toMatchObject({
       medications: [
         {
+          name: 'lisinopril 10 mg tablet',
           code: { system: 'RxNORM', code: '314076' },
           route: 'oral',
           frequency: 'Once daily',
@@ -290,17 +290,10 @@ describe('Encounter coded clinical fields', () => {
     expect(
       screen.getByText(/Imported medications without a code/)
     ).toBeInTheDocument();
-    fireEvent.click(
-      within(
-        screen.getByRole('toolbar', { name: 'Actions for Imported drug' })
-      ).getByRole('button', { name: 'Correct' })
-    );
-    const dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByRole('button', { name: 'Save' })).toBeEnabled();
-    const sig = dialog.getByLabelText('Sig (patient directions)');
+    const card = within(screen.getByRole('group', { name: 'Medication 1' }));
+    const sig = card.getByLabelText('Sig (patient directions)');
     sig.innerHTML = '<p>Continue prior directions</p>';
     fireEvent.input(sig);
-    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toEqual({
       medications: [
         {
@@ -382,6 +375,8 @@ describe('Encounter coded clinical fields', () => {
           <Component {...fieldProps(fieldType, { form, onResponse })} />
         </CodeLookupProvider>
       );
+      if (fieldType === 'encounterMedications')
+        fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
       const pick = delayedPick;
       act(() => form.getState().setReadOnly(true));
       expect(screen.queryByRole('button')).toBeNull();
@@ -450,33 +445,38 @@ describe('optional coding in encounter medication and allergy adapters', () => {
       const { latest } = renderField(component, fieldType, undefined, {
         requireCoding: false,
       });
+      if (fieldType === 'encounterMedications')
+        fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
       fireEvent.click(screen.getByRole('button', { name: 'Use free text' }));
       const entries = latest<Record<string, Record<string, unknown>[]>>()[key];
       expect(entries[0][value]).toBe('Unknown drug');
       expect(entries[0]).not.toHaveProperty('code');
     }
   );
-  it.each([
-    {
-      component: EncounterMedicationField,
-      fieldType: 'encounterMedications',
-      button: 'Other…',
-    },
-    {
-      component: EncounterAllergyField,
-      fieldType: 'encounterAllergies',
-      button: 'Add allergy…',
-    },
-  ])(
-    'offers the proper uncoded editor without a catalog only when configured for $fieldType',
-    ({ component, fieldType, button }) => {
-      renderField(component, fieldType, undefined, {
-        requireCoding: false,
-        catalog: false,
-      });
-      expect(screen.getByRole('button', { name: button })).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: button }));
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-    }
-  );
+  it('captures uncoded medications through the inline name input without a catalog only with requireCoding false', () => {
+    const { latest } = renderField(
+      EncounterMedicationField,
+      'encounterMedications',
+      undefined,
+      { requireCoding: false, catalog: false }
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.change(screen.getByLabelText('Medication'), {
+      target: { value: 'Aspirin' },
+    });
+    const { medications } = latest<{
+      medications: Record<string, unknown>[];
+    }>();
+    expect(medications[0]).toMatchObject({ name: 'Aspirin' });
+    expect(medications[0]).not.toHaveProperty('code');
+  });
+  it('offers the proper uncoded allergy editor without a catalog only when configured', () => {
+    renderField(EncounterAllergyField, 'encounterAllergies', undefined, {
+      requireCoding: false,
+      catalog: false,
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Add allergy…' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
 });

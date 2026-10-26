@@ -17,6 +17,7 @@ export {
   MedicationEditor,
   parseMedicationLabel,
   parseSig,
+  doseFormToQuantityUnit,
   labelToMedicationFields,
   lookupToMedicationFields,
   type MedicationEditorProps,
