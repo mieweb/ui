@@ -51,6 +51,11 @@ function edit(html: string) {
   fireEvent.input(screen.getByRole('textbox'), { target: { innerHTML: html } });
 }
 
+// The findings panel docks only while the clinician is in the field.
+function focusNarrative() {
+  fireEvent.focus(screen.getByRole('textbox'));
+}
+
 const commonFindings = [
   {
     id: 'no-trauma',
@@ -248,20 +253,29 @@ describe('EncounterNarrativeField', () => {
     ).toBe('<p><i>Text</i> detail</p>');
   });
 
-  it('offers findings immediately without capturing any suggestion before an explicit selection', () => {
+  it('rests as a plain input and offers findings while the clinician is in the field', () => {
     const fieldProps = findingProps();
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
     expect(screen.getByRole('textbox')).toHaveTextContent('');
+    // At rest the section is only the one-line input.
+    expect(screen.queryByRole('button', { name: /No trauma/ })).toBeNull();
+    focusNarrative();
     expect(fieldProps.onResponse).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: /No trauma/ })).toBeEnabled();
     // Compact panel: finding rows only — no header, search box or group
     // heading doubling the vertical space.
     expect(screen.queryByRole('searchbox')).toBeNull();
     expect(screen.queryByText('Common findings')).toBeNull();
+    // Moving on to another field puts the findings away again.
+    fireEvent.blur(screen.getByRole('textbox'), {
+      relatedTarget: document.body,
+    });
+    expect(screen.queryByRole('button', { name: /No trauma/ })).toBeNull();
   });
 
   it('labels each finding macro with its derived dot-phrase shortcut', () => {
     renderWithTheme(<EncounterNarrativeField {...findingProps()} />);
+    focusNarrative();
     expect(screen.getByRole('button', { name: /No trauma/ })).toHaveTextContent(
       '.nt'
     );
@@ -274,6 +288,7 @@ describe('EncounterNarrativeField', () => {
     const user = userEvent.setup();
     const fieldProps = findingProps({ response: { answer: 'Back pain' } });
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
+    focusNarrative();
     await user.click(screen.getByRole('button', { name: /No trauma/ }));
     expect(fieldProps.onResponse).toHaveBeenLastCalledWith(
       expect.objectContaining({ answer: 'Back pain\nNo recent trauma.' })
@@ -284,6 +299,7 @@ describe('EncounterNarrativeField', () => {
     const user = userEvent.setup();
     const fieldProps = findingProps();
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
+    focusNarrative();
     const button = screen.getByRole('button', { name: /No trauma/ });
     button.focus();
     expect(button).toHaveFocus();
@@ -319,6 +335,7 @@ describe('EncounterNarrativeField', () => {
       );
     }
     renderWithTheme(<Harness />);
+    focusNarrative();
     fireEvent.click(screen.getByRole('button', { name: /No trauma/ }));
     fireEvent.click(
       screen.getByRole('button', { name: /Worse with movement/ })
@@ -362,6 +379,7 @@ describe('EncounterNarrativeField', () => {
   it('deduplicates rapid picks even while the host has not refreshed response props', () => {
     const fieldProps = findingProps({ response: { answer: 'Back pain' } });
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
+    focusNarrative();
     const button = screen.getByRole('button', { name: /No trauma/ });
     fireEvent.click(button);
     fireEvent.click(button);
@@ -381,6 +399,7 @@ describe('EncounterNarrativeField', () => {
       response: { answer: 'Back pain\nNo recent trauma.' },
     });
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
+    focusNarrative();
     fireEvent.click(screen.getByRole('button', { name: /No trauma/ }));
     const next = vi.mocked(fieldProps.onResponse).mock.calls[0][0];
     expect(next.answer).toBe('Back pain\nNo recent trauma.');
@@ -393,6 +412,7 @@ describe('EncounterNarrativeField', () => {
       response: { answer: 'Discussed whether there was No recent trauma.' },
     });
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
+    focusNarrative();
     fireEvent.click(screen.getByRole('button', { name: /No trauma/ }));
     expect(fieldProps.onResponse).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -418,6 +438,7 @@ describe('EncounterNarrativeField', () => {
       );
     }
     renderWithTheme(<Harness />);
+    focusNarrative();
     fireEvent.click(screen.getByRole('button', { name: /No trauma/ }));
     edit('<p><b>No recent trauma.</b></p><p>More history.</p>');
     let next = onResponse.mock.calls.at(-1)![0];
@@ -443,6 +464,7 @@ describe('EncounterNarrativeField', () => {
     const { rerender } = renderWithTheme(
       <EncounterNarrativeField {...fieldProps} />
     );
+    focusNarrative();
     rerender(
       <EncounterNarrativeField
         {...fieldProps}
@@ -467,6 +489,7 @@ describe('EncounterNarrativeField', () => {
     (state) => {
       const fieldProps = findingProps(state);
       renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
+      focusNarrative();
       expect(screen.queryByRole('button', { name: /No trauma/ })).toBeNull();
       expect(fieldProps.onResponse).not.toHaveBeenCalled();
     }
@@ -477,6 +500,7 @@ describe('EncounterNarrativeField', () => {
     const { rerender } = renderWithTheme(
       <EncounterNarrativeField {...fieldProps} />
     );
+    focusNarrative();
     rerender(<EncounterNarrativeField {...fieldProps} isReadOnly />);
     expect(screen.queryByRole('button', { name: /No trauma/ })).toBeNull();
     expect(fieldProps.onResponse).not.toHaveBeenCalled();
@@ -503,6 +527,7 @@ describe('EncounterNarrativeField', () => {
       } as unknown as FieldDefinition,
     };
     renderWithTheme(<EncounterNarrativeField {...fieldProps} />);
+    focusNarrative();
     expect(screen.queryByRole('button', { name: 'Duplicate' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Blank' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /Literal text/ }));

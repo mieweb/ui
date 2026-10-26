@@ -642,6 +642,7 @@ module.exports = {
     // VideoCard hover-preview progress bar rounds its leading-fill edge.
     'rounded-e-full',
     'transition-colors',
+    'transition-[min-height]',
     'hover:text-white',
     'hover:text-foreground',
     'h-0.5',

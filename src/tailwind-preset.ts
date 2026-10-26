@@ -1188,6 +1188,7 @@ export const miewebUISafelist = [
   'pointer-events-none',
   'select-none',
   'transition-all',
+  'transition-[min-height]',
   'duration-200',
   'ease-out',
   'top-0.5',

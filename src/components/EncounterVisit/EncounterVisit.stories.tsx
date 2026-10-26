@@ -6,6 +6,7 @@ import {
   EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
 } from './definition';
 import { executeEncounterVisitToolCall, type EncounterVisitTools } from './mcp';
+import { MotionProvider } from '../../motion/MotionProvider';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import type { CodeLookupProps } from '../CodeLookup/CodeLookup';
@@ -144,6 +145,15 @@ const meta: Meta<typeof EncounterVisit> = {
   title: 'Healthcare/Encounter & orders/EncounterVisit',
   component: EncounterVisit,
   tags: ['autodocs', 'scope:domain-specific', 'maturity:experimental'],
+  // Hosts that install @mieweb/ui/motion get spring-driven open/close on the
+  // focus-docked findings panel; without it the CSS fallback applies.
+  decorators: [
+    (Story) => (
+      <MotionProvider>
+        <Story />
+      </MotionProvider>
+    ),
+  ],
   parameters: {
     layout: 'fullscreen',
     docs: {

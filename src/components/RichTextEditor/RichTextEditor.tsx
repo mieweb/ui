@@ -25,6 +25,7 @@ import {
   type MacroGroup,
   type MacroLibraryProps,
 } from '../MacroLibrary';
+import { Animated, AnimatedPresence } from '../../motion';
 import {
   Dropdown,
   DropdownItem,
@@ -116,6 +117,15 @@ export interface RichTextEditorProps {
   macros?: MacroGroup[];
   /** Open the macro panel initially. Defaults to false. */
   defaultMacrosOpen?: boolean;
+  /**
+   * Focus-driven macro panel: the field rests as a plain input, the panel
+   * animates in while focus is anywhere inside the editor frame (editable,
+   * toolbar, gutter or the panel itself) and animates away when focus
+   * leaves. Overrides `defaultMacrosOpen`; Escape-to-close is disabled since
+   * visibility follows focus. Pairs well with `compactMacros`. Defaults to
+   * false.
+   */
+  macrosOnFocus?: boolean;
   /**
    * Dock the macro panel in `MacroLibrary`'s compact mode (no header,
    * search, or library group headings) and shrink the macros-open working
@@ -359,6 +369,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       sanitizeHtml,
       macros,
       defaultMacrosOpen = false,
+      macrosOnFocus = false,
       compactMacros = false,
       onMacroInsert,
       macroLabels,
@@ -392,7 +403,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
     const isListeningRef = React.useRef(false);
     const shouldRestartRef = React.useRef(false);
-    const [macrosOpen, setMacrosOpen] = React.useState(defaultMacrosOpen);
+    const [macrosOpen, setMacrosOpen] = React.useState(
+      defaultMacrosOpen && !macrosOnFocus
+    );
     // Last caret/selection inside the editable region, retained while the
     // macro panel has focus so insertion lands where the clinician left off.
     const savedRangeRef = React.useRef<Range | null>(null);
@@ -1171,6 +1184,25 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       <div
         data-slot="rich-text-editor"
         data-chromeless={chromeless || undefined}
+        // Focus-driven macros: open while focus is anywhere inside the frame
+        // (focus events bubble in React), close only when it truly leaves —
+        // a macro pick or a toolbar click moves focus within and stays open.
+        onFocus={
+          hasMacros && macrosOnFocus ? () => setMacrosOpen(true) : undefined
+        }
+        onBlur={
+          hasMacros && macrosOnFocus
+            ? (event) => {
+                if (
+                  !event.currentTarget.contains(
+                    event.relatedTarget as Node | null
+                  )
+                ) {
+                  setMacrosOpen(false);
+                }
+              }
+            : undefined
+        }
         className={cn(
           'bg-background flex flex-col',
           !chromeless && 'border-border overflow-hidden rounded-lg border',
@@ -1642,6 +1674,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 hasMacros &&
                   macrosOpen &&
                   (compactMacros ? 'md:min-h-[140px]' : 'md:min-h-[250px]'),
+                // Focus mode grows the field from one row on focus — ease the
+                // jump instead of snapping.
+                hasMacros &&
+                  macrosOnFocus &&
+                  'transition-[min-height] duration-200 ease-out motion-reduce:transition-none',
                 disabled &&
                   'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300',
                 editorClassName
@@ -1651,23 +1688,49 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             />
           </div>
 
-          {hasMacros && macrosOpen && (
-            <MacroLibrary
-              id={macroPanelId}
-              groups={macros!}
-              onSelect={insertMacro}
-              targetLabel={ariaLabel ?? placeholder}
-              onClose={() => {
-                setMacrosOpen(false);
-                // Selecting text in the panel moves the document selection;
-                // put the caret back where the user left it.
-                focusRestoringSelection();
-              }}
-              onCreateMacro={onCreateMacro}
-              labels={macroLabels}
-              compact={compactMacros}
-              className="border-border max-h-72 border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
-            />
+          {hasMacros && (
+            <AnimatedPresence>
+              {macrosOpen && (
+                <Animated
+                  key="macro-panel"
+                  preset="menu"
+                  mode="presence"
+                  // The side the panel occupies, resolved to a physical edge
+                  // so the closed nudge retreats toward the editor.
+                  custom={
+                    typeof document !== 'undefined' && document.dir === 'rtl'
+                      ? 'left'
+                      : 'right'
+                  }
+                  fallbackClassName="animate-fade-in"
+                  className="border-border flex max-h-72 flex-col border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
+                >
+                  <MacroLibrary
+                    id={macroPanelId}
+                    groups={macros!}
+                    onSelect={insertMacro}
+                    targetLabel={ariaLabel ?? placeholder}
+                    onClose={
+                      // Focus mode: visibility follows focus; a close that
+                      // refocuses the editor would just reopen the panel.
+                      macrosOnFocus
+                        ? undefined
+                        : () => {
+                            setMacrosOpen(false);
+                            // Selecting text in the panel moves the document
+                            // selection; put the caret back where the user
+                            // left it.
+                            focusRestoringSelection();
+                          }
+                    }
+                    onCreateMacro={onCreateMacro}
+                    labels={macroLabels}
+                    compact={compactMacros}
+                    className="min-h-0 flex-1"
+                  />
+                </Animated>
+              )}
+            </AnimatedPresence>
           )}
         </div>
       </div>

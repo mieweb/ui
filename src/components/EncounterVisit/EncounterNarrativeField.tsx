@@ -260,7 +260,10 @@ export function EncounterNarrativeField({
         disabled={readOnly}
         enableDictation={false}
         macros={readOnly ? undefined : macros}
-        defaultMacrosOpen
+        // The field rests as a plain one-line input; the findings panel
+        // animates in while the clinician is writing in the section and
+        // animates away when focus moves on.
+        macrosOnFocus
         // One short, well-known findings list per section: the panel header,
         // search box, and group heading would double the vertical space for
         // no navigation value.

@@ -292,6 +292,61 @@ describe('RichTextEditor', () => {
       ).not.toBeNull();
     });
 
+    describe('macrosOnFocus', () => {
+      const panel = () => document.querySelector('[data-slot="macro-library"]');
+
+      it('rests closed, opens on focus and closes when focus leaves the field', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        expect(panel()).toBeNull();
+        fireEvent.focus(editor);
+        expect(panel()).not.toBeNull();
+        fireEvent.blur(editor, { relatedTarget: document.body });
+        expect(panel()).toBeNull();
+      });
+
+      it('stays open while focus moves into the panel itself', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        const row =
+          document.querySelector<HTMLButtonElement>('[data-macro-row]')!;
+        fireEvent.blur(editor, { relatedTarget: row });
+        expect(panel()).not.toBeNull();
+        fireEvent.blur(row, { relatedTarget: document.body });
+        expect(panel()).toBeNull();
+      });
+
+      it('rests closed even with defaultMacrosOpen', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            defaultMacrosOpen
+          />
+        );
+        expect(panel()).toBeNull();
+      });
+    });
+
     it('inserts the macro content through the undo-aware command', () => {
       const onChange = vi.fn();
       renderWithTheme(
