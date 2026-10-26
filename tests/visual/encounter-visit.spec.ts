@@ -207,6 +207,9 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   await navigation.selectOption('conditions');
   const conditions = page.locator('[data-field-type=encounterConditions]');
   await conditions
+    .getByRole('button', { name: 'Add condition', exact: true })
+    .click();
+  await conditions
     .getByRole('searchbox', { name: 'Add condition', exact: true })
     .fill('hypertension');
   await conditions

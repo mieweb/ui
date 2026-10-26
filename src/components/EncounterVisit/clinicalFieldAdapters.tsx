@@ -10,6 +10,11 @@ import { isEncounterDate } from './date';
 import { useEncounterMessages } from './messages';
 import { Input } from '../Input';
 import { Button } from '../Button';
+import { DateInput } from '../DateInput';
+import {
+  dateToDisplayFormat,
+  displayFormatToDateString,
+} from '../../utils/date';
 
 function FreeClinicalEntry({
   placeholder,
@@ -255,17 +260,29 @@ export function EncounterAssertionDateInput({
 }) {
   const m = useEncounterMessages();
   const id = React.useId();
+  const [display, setDisplay] = React.useState(() => dateToDisplayFormat(date));
+  React.useEffect(() => {
+    setDisplay((current) =>
+      displayFormatToDateString(current) === date
+        ? current
+        : dateToDisplayFormat(date)
+    );
+  }, [date]);
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-2">
       <label htmlFor={id} className="text-sm">
         {m('Assertion date')}
       </label>
-      <Input
+      <DateInput
         id={id}
-        type="date"
-        value={date}
-        onChange={(event) => setDate(event.target.value)}
-        className="min-h-11 w-auto"
+        value={display}
+        onChange={(value) => {
+          setDisplay(value);
+          setDate(displayFormatToDateString(value));
+        }}
+        showCalendar
+        width="fixed"
+        className="min-h-11"
       />
       {!isEncounterDate(date) && (
         <span className="text-muted-foreground text-sm">

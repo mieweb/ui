@@ -97,7 +97,7 @@ function SampleCatalog({
     setQuery(clearOnSelect === false ? result.label : '');
   };
   return (
-    <div className="min-w-0 space-y-1" data-slot="sample-clinical-catalog">
+    <div className="relative min-w-0" data-slot="sample-clinical-catalog">
       <input
         type="search"
         aria-label={
@@ -114,27 +114,31 @@ function SampleCatalog({
           }
         }}
       />
-      {matches.map((result) => (
-        <Button
-          key={result.fullid}
-          type="button"
-          variant="secondary"
-          className="min-h-11 w-full justify-start text-start whitespace-normal"
-          aria-label={`Select ${result.label} (${result.codetype} ${result.fullcode})`}
-          onClick={() => select(result)}
-        >
-          {result.label} · {result.codetype} {result.fullcode}
-        </Button>
-      ))}
-      {query.trim() && !matches.length && (
-        <p className="text-muted-foreground text-xs" role="status">
-          No match in this small Storybook sample catalog.
-        </p>
-      )}
-      {onFreeText && query.trim() && (
-        <Button type="button" onClick={() => onFreeText(query.trim())}>
-          Use uncoded free text
-        </Button>
+      {query.trim() && (
+        <div className="bg-card border-border absolute start-0 end-0 top-full z-50 mt-1 space-y-1 rounded-md border p-1 shadow-lg">
+          {matches.map((result) => (
+            <Button
+              key={result.fullid}
+              type="button"
+              variant="secondary"
+              className="min-h-11 w-full justify-start text-start whitespace-normal"
+              aria-label={`Select ${result.label} (${result.codetype} ${result.fullcode})`}
+              onClick={() => select(result)}
+            >
+              {result.label} · {result.codetype} {result.fullcode}
+            </Button>
+          ))}
+          {!matches.length && (
+            <p className="text-muted-foreground p-1 text-xs" role="status">
+              No match in this small Storybook sample catalog.
+            </p>
+          )}
+          {onFreeText && (
+            <Button type="button" onClick={() => onFreeText(query.trim())}>
+              Use uncoded free text
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

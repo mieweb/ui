@@ -28,9 +28,14 @@ function renderConditions(
   );
 }
 
+function openAddCondition() {
+  fireEvent.click(screen.getByRole('button', { name: 'Add condition' }));
+}
+
 describe('EncounterConditionsField', () => {
   it('captures a selected real diagnosis code in the shared ProblemList model', () => {
     const { latest, lookupProps, container } = renderConditions();
+    openAddCondition();
     expect(lookupProps()).toMatchObject({
       indexUrl: '/clinical-codify',
       domains: ['condition'],
@@ -86,20 +91,18 @@ describe('EncounterConditionsField', () => {
     ).toBeInTheDocument();
   });
 
-  it('resolves a coded condition without losing its coding', () => {
+  it('deletes a condition and its coding from the visit', () => {
     const { latest } = renderConditions({ concerns: [hypertensionConcern] });
-    fireEvent.click(screen.getByRole('button', { name: /resolve/i }));
-    expect(latest<ConditionsValue>().concerns[0]).toEqual({
-      ...hypertensionConcern,
-      clinicalStatus: 'resolved',
-    });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(latest<ConditionsValue>().concerns).toEqual([]);
     expect(
-      screen.getByRole('region', { name: 'Resolved' })
-    ).toBeInTheDocument();
+      screen.queryByRole('region', { name: 'Unconfirmed' })
+    ).not.toBeInTheDocument();
   });
 
   it('does not duplicate a current condition when its code is selected again', () => {
     const { latest } = renderConditions({ concerns: [hypertensionConcern] });
+    openAddCondition();
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(latest<ConditionsValue>().concerns).toEqual([hypertensionConcern]);
   });
@@ -115,6 +118,7 @@ describe('EncounterConditionsField', () => {
       ],
     };
     const { latest } = renderConditions({ concerns: [imported] });
+    openAddCondition();
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(latest<ConditionsValue>().concerns).toEqual([imported]);
   });
@@ -135,6 +139,7 @@ describe('EncounterConditionsField', () => {
 
   it('rejects a delayed code pick after the form is frozen for save', () => {
     const { form, lookupProps, onResponse } = renderConditions();
+    openAddCondition();
     const delayedPick = lookupProps().onSelect;
     act(() => form.getState().setReadOnly(true));
     act(() => delayedPick?.(conditionPick));
@@ -144,6 +149,7 @@ describe('EncounterConditionsField', () => {
 
   it('rejects malformed code picks and codes from the wrong clinical domain', () => {
     const { lookupProps, onResponse } = renderConditions();
+    openAddCondition();
     act(() => lookupProps().onSelect?.({ ...conditionPick, fullcode: '' }));
     act(() => lookupProps().onSelect?.({ ...conditionPick, domain: 'med' }));
     expect(onResponse).not.toHaveBeenCalled();
@@ -167,7 +173,7 @@ describe('EncounterConditionsField', () => {
     expect(
       screen.getByText(/coded condition search is unavailable/i)
     ).toBeInTheDocument();
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Add condition')).not.toBeInTheDocument();
     expect(onResponse).not.toHaveBeenCalled();
   });
 
@@ -190,10 +196,11 @@ describe('explicit assertion date and uncoded condition configuration', () => {
     const { latest, Lookup } = renderConditions(undefined, {
       encounterDate: null,
     });
+    openAddCondition();
     expect(screen.getByLabelText('Assertion date')).toHaveValue('');
     expect(Lookup).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText('Assertion date'), {
-      target: { value: '2020-02-29' },
+      target: { value: '02/29/2020' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(latest<ConditionsValue>().concerns[0].assertions[0].date).toBe(
@@ -202,6 +209,7 @@ describe('explicit assertion date and uncoded condition configuration', () => {
   });
   it('rejects a delayed coded selection after the explicit date is cleared', () => {
     const { lookupProps, onResponse } = renderConditions();
+    openAddCondition();
     const delayed = lookupProps().onSelect;
     fireEvent.change(screen.getByLabelText('Assertion date'), {
       target: { value: '' },
@@ -214,6 +222,7 @@ describe('explicit assertion date and uncoded condition configuration', () => {
       provider: false,
       requireCoding: false,
     });
+    openAddCondition();
     fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
     const dialog = within(screen.getByRole('dialog'));
     fireEvent.change(dialog.getByLabelText(/Problem name/), {

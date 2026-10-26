@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { FieldComponentProps } from '@esheet/core';
+import { Plus, X } from 'lucide-react';
 import { ProblemList, currentAssertion } from '../ProblemList';
 import {
   ConditionEditor,
@@ -58,6 +59,7 @@ export function EncounterConditionsField({
   const assertionDate = useEncounterAssertionDate(field);
   const currentDate = React.useRef(assertionDate);
   currentDate.current = assertionDate;
+  const [adding, setAdding] = React.useState(false);
   const [manualEditing, setManualEditing] = React.useState(false);
   const state = useClinicalFormState(form);
   const codeLookup = useCodeLookupConfig();
@@ -73,10 +75,9 @@ export function EncounterConditionsField({
   const canEdit = React.useRef(!readOnly);
   currentValue.current = value;
   canEdit.current = !readOnly;
-  const [editing, setEditing] = React.useState<{
-    concernId: string;
-    mode: 'refinement' | 'revision';
-  } | null>(null);
+  const [editing, setEditing] = React.useState<{ concernId: string } | null>(
+    null
+  );
   const definition = field.definition as { question?: string };
   const label = definition.question ?? m('Conditions');
   const commit = (
@@ -121,7 +122,7 @@ export function EncounterConditionsField({
                     ...concern.assertions,
                     {
                       ...assertion,
-                      changeType: editing.mode,
+                      changeType: 'refinement' as const,
                       supersedes: currentAssertion(concern)?.id,
                     },
                   ],
@@ -160,149 +161,181 @@ export function EncounterConditionsField({
     ? value.concerns.find(({ concernId }) => concernId === editing.concernId)
     : undefined;
   const Lookup = codeLookup?.component;
-  return (
-    <section aria-label={label} className="min-w-0 space-y-2">
-      <ProblemList
-        concerns={value.concerns}
-        title={null}
-        readOnly={readOnly}
-        actions={[
-          ...(assertionDate.valid && (codeLookup || !requireCoding)
-            ? (['refine', 'revise'] as const)
-            : []),
-          'resolve',
-          'move-up',
-          'move-down',
-        ]}
-        className="rounded-none border-0 bg-transparent shadow-none [&_[data-slot=clinical-list-heading]]:border-0 [&_button]:min-h-11 [&_button]:min-w-11 [&>[data-slot=card-content]]:p-0"
-        onAction={(concern, action) => {
-          if (readOnly) return;
-          if (action === 'resolve') {
-            commit((next) => ({
-              ...next,
-              concerns: next.concerns.map((candidate) =>
-                candidate.concernId === concern.concernId
-                  ? { ...candidate, clinicalStatus: 'resolved' }
-                  : candidate
-              ),
-            }));
-          } else if (action === 'refine' || action === 'revise') {
-            setEditing({
-              concernId: concern.concernId,
-              mode: action === 'refine' ? 'refinement' : 'revision',
-            });
-            if (!codeLookup) setManualEditing(true);
-          }
-        }}
-        onReorder={(ids) =>
+  const problemList = (
+    <ProblemList
+      concerns={value.concerns}
+      title={null}
+      readOnly={readOnly}
+      actions={[
+        ...(assertionDate.valid && (codeLookup || !requireCoding)
+          ? (['refine'] as const)
+          : []),
+        'remove',
+      ]}
+      inlineActions
+      className="rounded-none border-0 bg-transparent shadow-none [&_[data-slot=clinical-list-heading]]:hidden [&_button]:min-h-11 [&_button]:min-w-11 [&>[data-slot=card-content]]:space-y-2 [&>[data-slot=card-content]]:p-0"
+      onAction={(concern, action) => {
+        if (readOnly) return;
+        if (action === 'remove') {
+          setEditing((current) =>
+            current?.concernId === concern.concernId ? null : current
+          );
           commit((next) => ({
             ...next,
-            concerns: reorderClinicalEntries(
-              next.concerns,
-              ids,
-              ({ concernId }) => concernId
+            concerns: next.concerns.filter(
+              (candidate) => candidate.concernId !== concern.concernId
             ),
-          }))
+          }));
+        } else if (action === 'refine') {
+          setEditing({ concernId: concern.concernId });
+          if (!codeLookup) setManualEditing(true);
         }
-      />
-      {!readOnly && <EncounterAssertionDateInput {...assertionDate} />}
-      {!readOnly && assertionDate.valid && Lookup && codeLookup && (
-        <div className="min-w-0 space-y-2">
-          {editingConcern && (
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span>
-                {editing?.mode === 'refinement' ? m('Refine') : m('Revise')}{' '}
-                {currentAssertion(editingConcern)?.text}
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                className="min-h-11"
-                onClick={() => setEditing(null)}
-              >
-                {m('Cancel')}
-              </Button>
-            </div>
+      }}
+      onReorder={(ids) =>
+        commit((next) => ({
+          ...next,
+          concerns: reorderClinicalEntries(
+            next.concerns,
+            ids,
+            ({ concernId }) => concernId
+          ),
+        }))
+      }
+    />
+  );
+  return (
+    <section aria-label={label} className="min-w-0 space-y-2">
+      {!readOnly && (adding || editingConcern || value.concerns.length > 0) && (
+        <div className="bg-muted/40 min-w-0 space-y-3 rounded-lg p-3">
+          {(adding || editingConcern) && (
+            <>
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="min-w-0 font-semibold break-words">
+                  {editingConcern ? (
+                    <>
+                      {m('Refine')} {currentAssertion(editingConcern)?.text}
+                    </>
+                  ) : (
+                    m('Add condition')
+                  )}
+                </h4>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  aria-label={m('Cancel')}
+                  onClick={() => {
+                    setEditing(null);
+                    setAdding(false);
+                    setManualEditing(false);
+                  }}
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
+              <div className="flex min-w-0 flex-wrap items-center gap-3">
+                <EncounterAssertionDateInput {...assertionDate} />
+                {assertionDate.valid && Lookup && codeLookup && (
+                  <div className="min-w-0 flex-1 basis-56">
+                    <Lookup
+                      key={editing ? editing.concernId : 'add'}
+                      indexUrl={codeLookup.indexUrl}
+                      locale={codeLookup.locale}
+                      domains={['condition']}
+                      preferCodetypes={['ICD10']}
+                      bare
+                      clearOnSelect
+                      initialQuery={
+                        editingConcern
+                          ? currentAssertion(editingConcern)?.text
+                          : ''
+                      }
+                      aria-label={
+                        editingConcern
+                          ? m('Recode condition')
+                          : m('Add condition')
+                      }
+                      placeholder={
+                        editingConcern
+                          ? m('Search replacement diagnosis…')
+                          : m('Search conditions…')
+                      }
+                      onSelect={(pick) => {
+                        if (
+                          !pick.fullid?.trim() ||
+                          !pick.codetype?.trim() ||
+                          !pick.fullcode?.trim() ||
+                          !pick.label?.trim() ||
+                          pick.domain !== 'condition'
+                        )
+                          return;
+                        recordAssertion(
+                          {
+                            text: pick.label,
+                            verificationStatus: 'unconfirmed',
+                            coding: [
+                              {
+                                system: pick.codetype,
+                                code: pick.fullcode,
+                                display: pick.label,
+                                primary: true,
+                              },
+                            ],
+                          },
+                          pick
+                        );
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              {assertionDate.valid && !requireCoding && (
+                <>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setEditing(null);
+                      setManualEditing(true);
+                    }}
+                  >
+                    {m('Other…')}
+                  </Button>
+                  <ConditionEditor
+                    mode={editing ? 'refine' : 'add'}
+                    open={manualEditing}
+                    onOpenChange={setManualEditing}
+                    concern={editingConcern}
+                    renderCodeSearch={false}
+                    onSave={(draft) => recordAssertion(draft)}
+                  />
+                </>
+              )}
+            </>
           )}
-          <Lookup
-            key={editing ? `${editing.concernId}:${editing.mode}` : 'add'}
-            indexUrl={codeLookup.indexUrl}
-            locale={codeLookup.locale}
-            domains={['condition']}
-            preferCodetypes={['ICD10']}
-            bare
-            clearOnSelect
-            initialQuery={
-              editingConcern ? currentAssertion(editingConcern)?.text : ''
-            }
-            aria-label={
-              editingConcern ? m('Recode condition') : m('Add condition')
-            }
-            placeholder={
-              editingConcern
-                ? m('Search replacement diagnosis…')
-                : m('Search conditions…')
-            }
-            onSelect={(pick) => {
-              if (
-                !pick.fullid?.trim() ||
-                !pick.codetype?.trim() ||
-                !pick.fullcode?.trim() ||
-                !pick.label?.trim() ||
-                pick.domain !== 'condition'
-              )
-                return;
-              recordAssertion(
-                {
-                  text: pick.label,
-                  verificationStatus: 'unconfirmed',
-                  coding: [
-                    {
-                      system: pick.codetype,
-                      code: pick.fullcode,
-                      display: pick.label,
-                      primary: true,
-                    },
-                  ],
-                },
-                pick
-              );
-            }}
-          />
+          {value.concerns.length > 0 && problemList}
         </div>
       )}
-      {!readOnly && assertionDate.valid && !requireCoding && (
-        <>
+      {!readOnly &&
+        !adding &&
+        !editingConcern &&
+        (codeLookup || !requireCoding) && (
           <Button
             type="button"
-            onClick={() => {
-              setEditing(null);
-              setManualEditing(true);
-            }}
+            variant="ghost"
+            leftIcon={<Plus aria-hidden="true" />}
+            className="text-primary-800 hover:bg-primary-50 hover:text-primary-900 active:bg-primary-100 dark:text-primary-400 dark:hover:bg-primary-950 dark:hover:text-primary-200 min-h-11"
+            onClick={() => setAdding(true)}
           >
-            {m('Other…')}
+            {m('Add condition')}
           </Button>
-          <ConditionEditor
-            mode={
-              editing?.mode === 'refinement'
-                ? 'refine'
-                : editing
-                  ? 'revise'
-                  : 'add'
-            }
-            open={manualEditing}
-            onOpenChange={setManualEditing}
-            concern={editingConcern}
-            renderCodeSearch={false}
-            onSave={(draft) => recordAssertion(draft)}
-          />
-        </>
-      )}
+        )}
       {!readOnly && requireCoding && !codeLookup && (
         <p className="text-muted-foreground text-sm">
           {m('Coded condition search is unavailable.')}
         </p>
       )}
+      {readOnly && problemList}
     </section>
   );
 }

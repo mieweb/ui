@@ -441,7 +441,9 @@ describe('EncounterAssessmentField coded capture', () => {
       screen.queryByRole('button', { name: 'Add order' })
     ).not.toBeInTheDocument();
     expect(screen.queryByLabelText('What to add')).not.toBeInTheDocument();
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('textbox', { name: 'Clinical entry' })
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -481,6 +483,9 @@ describe('clinical native response metadata', () => {
         undefined,
         { initialResponse: original, pick }
       );
+      if (fieldType === 'encounterConditions') {
+        fireEvent.click(screen.getByRole('button', { name: 'Add condition' }));
+      }
       fireEvent.click(
         screen.getByRole('button', { name: 'Pick coded finding' })
       );

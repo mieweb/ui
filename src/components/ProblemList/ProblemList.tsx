@@ -21,6 +21,7 @@ import {
   HelpCircleIcon,
   GripVerticalIcon,
   StickyNoteIcon,
+  TrashIcon,
 } from '../Icons';
 import {
   useDragReorder,
@@ -169,6 +170,7 @@ export type ProblemListAction =
   | 'revise'
   | 'resolve'
   | 'relate'
+  | 'remove'
   | 'move-up'
   | 'move-down';
 
@@ -191,8 +193,10 @@ export interface ProblemListProps extends Omit<
    * encounter/patient object lives and feed them back in.
    */
   onReorder?: (concernIds: string[]) => void;
-  /** Which row actions to show (default: all) */
+  /** Which row actions to show (default: all except 'remove') */
   actions?: ProblemListAction[];
+  /** Show row actions in flow, always visible, instead of the hover-reveal overlay */
+  inlineActions?: boolean;
   /** Hide all action buttons (display only) */
   readOnly?: boolean;
   /** Message shown when there are no concerns */
@@ -269,6 +273,7 @@ const ACTION_META: Record<
   revise: { label: 'Revise (prior was wrong)', icon: RefreshIcon },
   resolve: { label: 'Resolve', icon: CheckCircleIcon },
   relate: { label: 'Relate to another problem', icon: LinkIcon },
+  remove: { label: 'Delete', icon: TrashIcon },
   'move-up': { label: 'Move up (Alt+↑)', icon: ChevronUpIcon },
   'move-down': { label: 'Move down (Alt+↓)', icon: ChevronDownIcon },
 };
@@ -518,6 +523,7 @@ function AssertionTimeline({ concern }: { concern: ConditionConcern }) {
 function ConcernRow({
   concern,
   actions,
+  inlineActions,
   readOnly,
   canReorder,
   drag,
@@ -525,6 +531,7 @@ function ConcernRow({
 }: {
   concern: ConditionConcern;
   actions: ProblemListAction[];
+  inlineActions: boolean;
   readOnly: boolean;
   canReorder: boolean;
   drag: UseDragReorderReturn;
@@ -651,6 +658,7 @@ function ConcernRow({
           <RowActionToolbar
             label={m('Actions for {name}', { name: current.text })}
             align="top"
+            reveal={inlineActions ? 'always' : 'hover'}
           >
             {visibleActions.map((action) => (
               <RowIconButton
@@ -726,6 +734,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
       onAddProblem,
       onReorder,
       actions = DEFAULT_ACTIONS,
+      inlineActions = false,
       readOnly = false,
       emptyMessage = 'No problems recorded.',
       className,
@@ -862,6 +871,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
                       key={concern.concernId}
                       concern={concern}
                       actions={actions}
+                      inlineActions={inlineActions}
                       readOnly={readOnly}
                       canReorder={drag.enabled}
                       drag={drag}
