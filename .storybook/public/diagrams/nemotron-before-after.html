@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Speaker diarization: before and after Nemotron (mieweb/ui#492)</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1f2328;
+        --muted: #59636e;
+        --border: #d0d7de;
+        --card: #f6f8fa;
+        --keep: #e8f0fe;
+        --keep-border: #4a6fa5;
+        --new: #fff4e5;
+        --new-border: #d98b1a;
+        --gone: #fdecec;
+        --gone-border: #c0392b;
+        --arrow: #8c959f;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d1117;
+          --fg: #e6edf3;
+          --muted: #9198a1;
+          --border: #30363d;
+          --card: #161b22;
+          --keep: #13233d;
+          --keep-border: #6e9bd8;
+          --new: #2e2310;
+          --new-border: #e3a54a;
+          --gone: #3a1718;
+          --gone-border: #e5534b;
+          --arrow: #6e7681;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          14px/1.45 system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 0.25rem;
+      }
+      h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.75rem;
+      }
+      h3 {
+        font-size: 0.9rem;
+        margin: 1rem 0 0.5rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      p {
+        margin: 0 0 0.75rem;
+      }
+      .lede {
+        color: var(--muted);
+        margin-block-end: 1rem;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-block-end: 1.25rem;
+        padding: 0;
+        list-style: none;
+      }
+      .legend li {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .swatch {
+        inline-size: 0.9rem;
+        block-size: 0.9rem;
+        border-radius: 3px;
+        border: 2px solid;
+      }
+      .columns {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.25rem;
+      }
+      section.panel {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+        background: var(--card);
+      }
+      ol.flow {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.4rem;
+      }
+      ol.flow > li {
+        position: relative;
+        border: 2px solid var(--keep-border);
+        background: var(--keep);
+        border-radius: 8px;
+        padding: 0.55rem 0.7rem;
+      }
+      ol.flow > li:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        inset-inline-start: 50%;
+        inset-block-end: -1.3rem;
+        block-size: 1.1rem;
+        border-inline-start: 2px solid var(--arrow);
+      }
+      ol.flow > li.new {
+        border-color: var(--new-border);
+        background: var(--new);
+      }
+      ol.flow > li.gone {
+        border-color: var(--gone-border);
+        background: var(--gone);
+      }
+      .par {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-block-start: 0.4rem;
+      }
+      .par > div {
+        border: 2px solid var(--keep-border);
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 0.4rem 0.5rem;
+      }
+      .par > div.new {
+        border-color: var(--new-border);
+      }
+      .title {
+        font-weight: 600;
+      }
+      .meta {
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0 0.35rem;
+        border-radius: 4px;
+        margin-inline-start: 0.35rem;
+        border: 1px solid currentColor;
+      }
+      .tag.gone {
+        color: var(--gone-border);
+      }
+      .tag.new {
+        color: var(--new-border);
+      }
+      ul.issues {
+        margin: 0.75rem 0 0;
+        padding-inline-start: 1.1rem;
+      }
+      ul.issues li {
+        margin-block-end: 0.25rem;
+      }
+      .lanes {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.75rem;
+        line-height: 1.35;
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0.4rem 0 0;
+        padding: 0.4rem;
+        border-radius: 6px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+      }
+      table {
+        inline-size: 100%;
+        border-collapse: collapse;
+        margin-block-start: 1.5rem;
+        font-size: 0.85rem;
+      }
+      caption {
+        text-align: start;
+        font-weight: 600;
+        margin-block-end: 0.5rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 0.4rem 0.55rem;
+        text-align: start;
+        vertical-align: top;
+      }
+      thead th {
+        background: var(--card);
+      }
+      footer {
+        margin-block-start: 1rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Speaker diarization: before and after Nemotron</h1>
+      <p class="lede">
+        mieweb/ui#492. How a recorded visit becomes
+        <em>"Dr. Smith: … / Speaker 2: …"</em>, today and in the Phase 0 proof
+        of concept. Both run entirely in the browser; audio never leaves the
+        page.
+      </p>
+
+      <ul class="legend" aria-label="Legend">
+        <li>
+          <span
+            class="swatch"
+            style="background: var(--keep); border-color: var(--keep-border)"
+          ></span
+          >Kept as-is
+        </li>
+        <li>
+          <span
+            class="swatch"
+            style="background: var(--new); border-color: var(--new-border)"
+          ></span
+          >New
+        </li>
+        <li>
+          <span
+            class="swatch"
+            style="background: var(--gone); border-color: var(--gone-border)"
+          ></span
+          >Removed from this path
+        </li>
+      </ul>
+
+      <div class="columns">
+        <section class="panel" aria-labelledby="before-h">
+          <h2 id="before-h">
+            Before: Whisper + TitaNet clustering
+            <span class="tag gone">legacy</span>
+          </h2>
+          <p class="meta">
+            <code>VisitScribe</code> → <code>useVisitScribe</code> →
+            <code>useDiarization</code> → <code>diarize.ts</code>
+          </p>
+
+          <h3>Enrollment (once per person)</h3>
+          <ol class="flow" aria-label="Legacy enrollment flow">
+            <li>
+              <span class="title">VoiceSetup records phrase samples</span>
+            </li>
+            <li>
+              <span class="title">TitaNet embedding → centroid</span>
+              <span class="meta">One vector per voice; sherpa-onnx WASM, main thread</span>
+            </li>
+            <li>
+              <span class="title">IndexedDB voiceprint store</span>
+              <span class="meta">Scoped by <code>voiceprintNamespace</code> (PR #407)</span>
+            </li>
+          </ol>
+
+          <h3>Each recording (after Stop)</h3>
+          <ol class="flow" aria-label="Legacy recording flow">
+            <li>
+              <span class="title">Whisper turbo → text segments</span>
+              <span class="meta">~1.3 GB, Web Worker; assumes one speaker per segment</span>
+            </li>
+            <li class="gone">
+              <span class="title">TitaNet embed <em>every</em> segment</span>
+              <span class="meta">Work grows with meeting length; segments &lt; 1 s skipped and borrow a neighbour's speaker</span>
+            </li>
+            <li class="gone">
+              <span class="title">JS agglomerative clustering</span>
+              <span class="meta">Cosine threshold 0.65, optional max speakers</span>
+            </li>
+            <li>
+              <span class="title">Match clusters to enrolled TitaNet voiceprints</span>
+            </li>
+            <li>
+              <span class="title"><code>DiarizedSegment[]</code></span>
+              <span class="meta">One <code>speaker</code> string per segment; labels only after Stop</span>
+            </li>
+          </ol>
+
+          <ul class="issues" aria-label="Known weaknesses">
+            <li><strong>Overlap:</strong> two voices in one segment → a mixed fingerprint → phantom or wrong speaker.</li>
+            <li><strong>Interjections:</strong> "Tuesday" (0.5 s) is credited to whoever spoke before.</li>
+            <li><strong>No live labels:</strong> clustering needs the whole clip.</li>
+          </ul>
+        </section>
+
+        <section class="panel" aria-labelledby="after-h">
+          <h2 id="after-h">
+            After: Whisper + Nemotron with stored voiceprints
+            <span class="tag new">Phase 0 POC</span>
+          </h2>
+          <p class="meta">
+            New experimental component (working name <code>SpeakerScribe</code>); legacy stays intact
+          </p>
+
+          <h3>Enrollment (once per person)</h3>
+          <ol class="flow" aria-label="New enrollment flow">
+            <li class="new">
+              <span class="title">Record a short voice sample</span>
+            </li>
+            <li class="new">
+              <span class="title">Nemotron runs once → speaker-memory frames</span>
+              <span class="meta">The "Nemotron voiceprint": up to ~33 frames × 512 values, stamped with the model revision</span>
+            </li>
+            <li>
+              <span class="title">IndexedDB voiceprint store</span>
+              <span class="meta">Same namespace isolation; separate record type from TitaNet prints</span>
+            </li>
+          </ol>
+
+          <h3>Each recording</h3>
+          <ol class="flow" aria-label="New recording flow">
+            <li class="new">
+              <span class="title">Pre-fill Nemotron's speaker memory</span>
+              <span class="meta">Lane 0 = Dr. Smith, lane 1 = Nurse… no audio replay</span>
+            </li>
+            <li>
+              <span class="title">Run in parallel</span>
+              <div class="par">
+                <div>
+                  <span class="title">Whisper turbo</span>
+                  <span class="meta">Word timestamps</span>
+                </div>
+                <div class="new">
+                  <span class="title">Nemotron 3 Diarization</span>
+                  <span class="meta">8 lanes, 80 ms frames; ORT 1.30 worker; 73–398 MB</span>
+                </div>
+              </div>
+              <pre class="lanes" aria-label="Example lane activity: lane 1 and lane 2 overlap between 2 and 3 seconds">
+lane 0 Dr. Smith ████████████░░░░░░░░░░░░░░██████
+lane 1 Speaker 2 ░░░░░░░░░░░░██████████░░░░░░░░░░
+lane 2 Speaker 3 ░░░░░░░░░░░░░░░░██████░░░░░░░░░░</pre>
+            </li>
+            <li class="new">
+              <span class="title">Align each word to active lane(s)</span>
+              <span class="meta">single / overlap / uncertain</span>
+            </li>
+            <li>
+              <span class="title"><code>DiarizedSegment[]</code> + optional overlap fields</span>
+              <span class="meta">Seeded lanes are already named; new voices stay "Speaker N"</span>
+            </li>
+          </ol>
+
+          <ul class="issues" aria-label="What changes">
+            <li><strong>Overlap</strong> is represented natively (two lanes lit at once).</li>
+            <li><strong>Short interjections</strong> get their own lane; no 1 s minimum.</li>
+            <li><strong>No per-segment TitaNet or clustering;</strong> live labels become possible (Phase 1).</li>
+          </ul>
+        </section>
+      </div>
+
+      <table>
+        <caption>Side by side</caption>
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Before (legacy)</th>
+            <th scope="col">After (Phase 0 POC)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Words</th>
+            <td>Whisper turbo</td>
+            <td>Whisper turbo (unchanged)</td>
+          </tr>
+          <tr>
+            <th scope="row">Who spoke when</th>
+            <td>TitaNet per segment + clustering</td>
+            <td>Nemotron 3 Diarization</td>
+          </tr>
+          <tr>
+            <th scope="row">Who is it</th>
+            <td>TitaNet cosine vs enrolled centroids</td>
+            <td>Pre-filled Nemotron lanes (stored speaker-memory frames)</td>
+          </tr>
+          <tr>
+            <th scope="row">Speaker models in Visit Scribe</th>
+            <td>TitaNet (~50 MB, main thread)</td>
+            <td>Nemotron (73–398 MB, worker)</td>
+          </tr>
+          <tr>
+            <th scope="row">Cost that grows with meeting length</th>
+            <td>Whisper + TitaNet over all speech</td>
+            <td>Whisper + Nemotron over all speech</td>
+          </tr>
+          <tr>
+            <th scope="row">Overlapping speech</th>
+            <td>Not representable</td>
+            <td>Two lanes active; word flagged as overlap</td>
+          </tr>
+          <tr>
+            <th scope="row">Confidence threshold for identity</th>
+            <td>Yes (cosine + AS-norm z-score)</td>
+            <td>Not built in; Phase 0 measures lane probability as a score</td>
+          </tr>
+          <tr>
+            <th scope="row">Hey Ozwell doctor gate</th>
+            <td>TitaNet</td>
+            <td>TitaNet (unchanged in Phase 0)</td>
+          </tr>
+          <tr>
+            <th scope="row">Re-enrollment needed</th>
+            <td>No</td>
+            <td>Yes, once (TitaNet prints are not convertible)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <footer>
+        Sizes from <code>HeyOzwell.mdx</code> and the Diarization Bench
+        <code>modelConfig.ts</code>. Plan: <code>nemotron-plan.md</code>.
+      </footer>
+    </main>
+  </body>
+</html>

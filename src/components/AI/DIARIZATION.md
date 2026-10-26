@@ -18,7 +18,8 @@ never leaves the browser).
   speaker-labeled transcript to the assistant instead of a flat blob.
 - **Defaults tuned for over-splitting:** the merge threshold moved 0.5 → **0.65** and a **1.0s minimum
   segment** was added, because short/varied segments were splitting one person into several speakers.
-- **Still pending:** Phase 3 (overlap-aware pyannote WASM), and moving model hosting off personal accounts.
+- **Still pending:** moving model hosting off personal accounts. Phase 3 (pyannote WASM) is superseded by
+  the Nemotron proof of concept in [nemotron-plan.md](../../../nemotron-plan.md).
 
 ## We already have the hard parts
 Diarization = segment → embed → cluster → (optionally) identify → align to a transcript. We ship every
@@ -81,9 +82,10 @@ Combination: **anchor the known → LLM-guess the unknown roles → let the doct
    voices → attributed transcript. Doctor (and enrolled staff) named; others `Speaker N`. Surfaced in
    `<VisitScribe>` + conversation mode.
 2. ✅ **LLM role inference** for the unknown speakers (manual relabel via VoiceManager rename).
-3. **Accuracy upgrade:** build the sherpa-onnx *speaker-diarization* WASM (same recipe as the speaker-verify
-   build, on the os.mieweb.org container) — pyannote segmentation for better boundaries + overlap handling —
-   and swap it in behind the same `diarize()` interface.
+3. ~~**Accuracy upgrade:** build the sherpa-onnx *speaker-diarization* WASM (pyannote segmentation) and swap
+   it in behind the same `diarize()` interface.~~ Superseded by Nemotron 3 Diarization, which handles overlap
+   natively and runs on ONNX Runtime Web without a custom WASM build: see
+   [nemotron-plan.md](../../../nemotron-plan.md) and the experimental `SpeakerScribe`.
 
 ## What needs the Linux container (not buildable on the Mac)
 Only Phase 3 (the pyannote-segmentation WASM). The MVP runs entirely on assets we already ship.

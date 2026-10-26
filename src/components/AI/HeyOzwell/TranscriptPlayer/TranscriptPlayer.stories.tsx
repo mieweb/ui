@@ -20,7 +20,7 @@ const meta: Meta<typeof TranscriptPlayer> = {
 
 **Reviewing a diarized recording: who spoke when, and what they said.** \`TranscriptPlayer\` takes an audio \`src\` and a \`Transcript\` and shows one playhead across a waveform, one lane per speaker, an overview of the whole recording with a draggable window, and a searchable transcript. Hover a lane segment for its speaker and times; click it, or a transcript line, to play just that interval. The speaker panel shows each person's talk time and share and hides or shows them. Long recordings open on a 5-minute window you can zoom and pan; long transcripts are virtualized.
 
-Lanes come from \`transcript.speakerActivity\` when present (raw diarizer output, so overlap and "mm-hm" with no words stay visible), else from \`segments\`. A segment's \`overlapSpeakerIds\` shows as "Overlaps …" on its line.
+Lanes come from \`transcript.speakerActivity\` when present (raw diarizer output, so overlap and "mm-hm" with no words stay visible), else from \`segments\`. A segment's \`overlapSpeakerIds\` shows as "Overlaps …" on its line. \`useNemotronDiarization\` produces this shape, and \`SpeakerScribe\` uses the player for its result.
 
 ### Use it when
 
@@ -83,6 +83,11 @@ const transcript: Transcript = {
           type: 'alternative to',
           target: 'media-transcriptview',
           why: 'TranscriptView for read-along next to a host player; TranscriptPlayer when reviewers need who-spoke-when lanes, overlap and segment playback built in.',
+        },
+        {
+          type: 'composes with',
+          target: 'voice-speaker-scribe',
+          why: 'SpeakerScribe shows its Nemotron result (Transcript + peaks) in TranscriptPlayer.',
         },
       ],
     },
