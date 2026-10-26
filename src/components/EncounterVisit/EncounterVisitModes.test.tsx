@@ -289,9 +289,7 @@ describe('EncounterVisit mode synchronization', () => {
     expect(
       await screen.findByRole('dialog', { name: 'Vitals' })
     ).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Add measurement set' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add vitals set' }));
     fireEvent.change(screen.getByLabelText('Systolic'), {
       target: { value: '142' },
     });

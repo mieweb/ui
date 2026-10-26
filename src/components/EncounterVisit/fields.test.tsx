@@ -101,9 +101,7 @@ describe('EncounterVitalsField', () => {
         ],
       }
     );
-    const reading = within(
-      screen.getByRole('group', { name: 'Measurement set 1' })
-    );
+    const reading = within(screen.getByRole('group', { name: 'Vitals set 1' }));
     expect(
       reading.getByRole('group', { name: 'Blood pressure (mmHg)' })
     ).toBeInTheDocument();
@@ -159,25 +157,21 @@ describe('EncounterVitalsField', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('adds empty measurement sets with stable distinct ids and removes only the chosen set', () => {
+  it('adds empty vitals sets with stable distinct ids and removes only the chosen set', () => {
     const { latest } = renderControlledField(
       EncounterVitalsField,
       'encounterVitals'
     );
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Add measurement set' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add vitals set' }));
     const firstId = latest<EncounterVitalsValue>().readings[0].id;
     expect(latest<EncounterVitalsValue>().readings[0]).toEqual({ id: firstId });
     fireEvent.change(screen.getByLabelText('Pulse'), {
       target: { value: '76' },
     });
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Add measurement set' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add vitals set' }));
     expect(latest<EncounterVitalsValue>().readings[1].id).not.toBe(firstId);
     fireEvent.click(
-      screen.getByRole('button', { name: 'Remove measurement set 2' })
+      screen.getByRole('button', { name: 'Remove vitals set 2' })
     );
     expect(latest<EncounterVitalsValue>().readings).toEqual([
       { id: firstId, pulse: 76 },
@@ -195,7 +189,7 @@ describe('EncounterVitalsField', () => {
       );
       expect(screen.getByLabelText('Pulse')).toHaveAttribute('readonly');
       expect(
-        screen.queryByRole('button', { name: /measurement set/i })
+        screen.queryByRole('button', { name: /vitals set/i })
       ).not.toBeInTheDocument();
       fireEvent.change(screen.getByLabelText('Pulse'), {
         target: { value: '99' },
@@ -304,7 +298,7 @@ describe('EncounterVitalsField', () => {
     ).toHaveAttribute('role', 'alert');
   });
 
-  it('removes a measurement set together with its associated invalid drafts', () => {
+  it('removes a vitals set together with its associated invalid drafts', () => {
     const { latest } = renderControlledField(
       EncounterVitalsField,
       'encounterVitals',
@@ -314,7 +308,7 @@ describe('EncounterVitalsField', () => {
       }
     );
     fireEvent.click(
-      screen.getByRole('button', { name: 'Remove measurement set 1' })
+      screen.getByRole('button', { name: 'Remove vitals set 1' })
     );
     expect(latest<EncounterVitalsValue>().readings).toEqual([
       { id: 'second', pulse: 75 },
@@ -353,7 +347,7 @@ describe('EncounterVitalsField', () => {
       );
       expect(screen.getByText(answer)).toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: 'Add measurement set' })
+        screen.queryByRole('button', { name: 'Add vitals set' })
       ).not.toBeInTheDocument();
       expect(props.onResponse).not.toHaveBeenCalled();
     }

@@ -285,7 +285,7 @@ export const Localized: Story = {
         'Go to section': 'Ir a la sección del documento clínico',
         Systolic: 'Sistólica',
         Diastolic: 'Diastólica',
-        'Add measurement set': 'Agregar un conjunto de mediciones',
+        'Add vitals set': 'Agregar un conjunto de signos vitales',
         'Visit note preview': 'Vista previa del documento clínico',
         'Save visit': 'Guardar la visita',
       },

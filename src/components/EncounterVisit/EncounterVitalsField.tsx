@@ -283,11 +283,11 @@ export function EncounterVitalsField({
             className="bg-muted/40 min-w-0 space-y-3 rounded-lg p-3"
           >
             <legend className="sr-only">
-              {m('Measurement set {number}', { number: index + 1 })}
+              {m('Vitals set {number}', { number: index + 1 })}
             </legend>
             <div className="flex items-center justify-between gap-2">
               <h4 className="font-semibold">
-                {m('Measurement set {number}', { number: index + 1 })}
+                {m('Vitals set {number}', { number: index + 1 })}
               </h4>
               {!readOnly && (
                 <Button
@@ -295,7 +295,7 @@ export function EncounterVitalsField({
                   variant="ghost"
                   size="icon"
                   className="shrink-0"
-                  aria-label={m('Remove measurement set {number}', {
+                  aria-label={m('Remove vitals set {number}', {
                     number: index + 1,
                   })}
                   onClick={() =>
@@ -452,7 +452,7 @@ export function EncounterVitalsField({
             })
           }
         >
-          {m('Add measurement set')}
+          {m('Add vitals set')}
         </Button>
       )}
     </section>

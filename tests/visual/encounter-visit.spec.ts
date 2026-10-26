@@ -84,7 +84,7 @@ test('encounter visit on desktop', async ({ page }) => {
   await page
     .getByRole('combobox', { name: 'Go to section' })
     .selectOption('vitals');
-  await page.getByRole('button', { name: 'Add measurement set' }).click();
+  await page.getByRole('button', { name: 'Add vitals set' }).click();
   await page.getByLabel('Systolic', { exact: true }).fill('142');
   await page.getByLabel('Diastolic', { exact: true }).fill('88');
   await page.getByLabel('Pulse', { exact: true }).fill('76');
@@ -109,10 +109,10 @@ test('encounter visit on a phone with repeated coordinated BP', async ({
   await expect(
     page.getByRole('combobox', { name: 'Go to section' })
   ).toBeInViewport();
-  await page.getByRole('button', { name: 'Add measurement set' }).click();
+  await page.getByRole('button', { name: 'Add vitals set' }).click();
   await page.getByLabel('Systolic', { exact: true }).fill('142');
   await page.getByLabel('Diastolic', { exact: true }).fill('88');
-  await page.getByRole('button', { name: 'Add measurement set' }).click();
+  await page.getByRole('button', { name: 'Add vitals set' }).click();
   await expect(page.getByLabel('Systolic', { exact: true })).toHaveCount(2);
   await page.getByLabel('Systolic', { exact: true }).nth(1).fill('138');
   await page.getByLabel('Diastolic', { exact: true }).nth(1).fill('86');
@@ -548,7 +548,7 @@ test('View omits uncaptured prompts and keeps a captured zero measurement', asyn
   await page
     .getByRole('combobox', { name: 'Go to section' })
     .selectOption('vitals');
-  await page.getByRole('button', { name: 'Add measurement set' }).click();
+  await page.getByRole('button', { name: 'Add vitals set' }).click();
   preview = await showView(page);
   await expect(preview.getByRole('heading')).toHaveCount(0);
   await expect(preview.getByRole('listitem')).toHaveCount(0);
@@ -588,7 +588,7 @@ test('a linked field resolves to the same eSheet BP data on a phone', async ({
   const resolver = page.getByRole('dialog', { name: 'Vitals', exact: true });
   await expect(resolver).toBeVisible();
   const addMeasurement = resolver.getByRole('button', {
-    name: 'Add measurement set',
+    name: 'Add vitals set',
   });
   await expect(addMeasurement).toBeFocused();
   await expect(
@@ -852,7 +852,7 @@ test('expanded translated controls fit a phone and keep section navigation below
     )
   ).toBe(true);
   await page
-    .getByRole('button', { name: 'Agregar un conjunto de mediciones' })
+    .getByRole('button', { name: 'Agregar un conjunto de signos vitales' })
     .click();
   await page.getByLabel('Sistólica', { exact: true }).fill('142');
   await page.getByLabel('Diastólica', { exact: true }).fill('88');

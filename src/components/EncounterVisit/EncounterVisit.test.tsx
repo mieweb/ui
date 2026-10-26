@@ -253,9 +253,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error('Storage is offline'));
     render(<EncounterVisit definition={definition} onSubmit={onSubmit} />);
     await screen.findByRole('textbox', { name: 'HPI' });
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Add measurement set' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add vitals set' }));
     fireEvent.change(screen.getByLabelText('Systolic'), {
       target: { value: '142' },
     });
