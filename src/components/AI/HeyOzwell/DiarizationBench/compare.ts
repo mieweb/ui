@@ -37,6 +37,9 @@ export interface IdentificationResult {
 
 const FRAME_SECONDS = 0.01;
 
+/** Who a span belongs to for scoring: its lane/cluster when known, so equal names stay distinct. */
+const keyOf = (span: SpeakerSpan) => span.id ?? span.speaker;
+
 /** Speakers active in each 10 ms frame, as indices into `speakers`. */
 function toFrames(
   spans: SpeakerSpan[],
@@ -45,7 +48,7 @@ function toFrames(
 ): Set<number>[] {
   const frames = Array.from({ length: numFrames }, () => new Set<number>());
   for (const span of spans) {
-    const index = speakers.indexOf(span.speaker);
+    const index = speakers.indexOf(keyOf(span));
     const from = Math.round(span.start / FRAME_SECONDS);
     const to = Math.min(numFrames, Math.round(span.end / FRAME_SECONDS));
     for (let frame = from; frame < to; frame++) frames[frame].add(index);
@@ -54,7 +57,7 @@ function toFrames(
 }
 
 function speakersOf(spans: SpeakerSpan[]): string[] {
-  return [...new Set(spans.map((span) => span.speaker))];
+  return [...new Set(spans.map(keyOf))];
 }
 
 function frameCount(...groups: SpeakerSpan[][]): number {
@@ -77,36 +80,67 @@ export function summarize(
   };
 }
 
-/** Best one-to-one hypothesis → reference speaker mapping by co-occurring frames (exhaustive; ≤ 8 speakers). */
+/**
+ * Best one-to-one hypothesis → reference speaker mapping by co-occurring frames: the Hungarian
+ * algorithm (O(n³)) on a square matrix padded with zeros. Pairs with no overlap map to -1.
+ */
 function bestMapping(overlap: number[][], numReference: number): number[] {
-  let best: number[] = [];
-  let bestScore = -1;
-  const mapping: number[] = [];
-  const used = new Array<boolean>(numReference).fill(false);
-
-  const visit = (hyp: number, score: number) => {
-    if (hyp === overlap.length) {
-      if (score > bestScore) {
-        bestScore = score;
-        best = [...mapping];
+  const rows = overlap.length;
+  const n = Math.max(rows, numReference);
+  const cost = (i: number, j: number) =>
+    i < rows && j < numReference ? -overlap[i][j] : 0;
+  // 1-based potentials and matching; column 0 is the algorithm's sentinel.
+  const u = new Array<number>(n + 1).fill(0);
+  const v = new Array<number>(n + 1).fill(0);
+  const rowOf = new Array<number>(n + 1).fill(0);
+  const way = new Array<number>(n + 1).fill(0);
+  for (let i = 1; i <= n; i++) {
+    rowOf[0] = i;
+    let col = 0;
+    const minv = new Array<number>(n + 1).fill(Infinity);
+    const used = new Array<boolean>(n + 1).fill(false);
+    do {
+      used[col] = true;
+      const row = rowOf[col];
+      let delta = Infinity;
+      let next = 0;
+      for (let j = 1; j <= n; j++) {
+        if (used[j]) continue;
+        const reduced = cost(row - 1, j - 1) - u[row] - v[j];
+        if (reduced < minv[j]) {
+          minv[j] = reduced;
+          way[j] = col;
+        }
+        if (minv[j] < delta) {
+          delta = minv[j];
+          next = j;
+        }
       }
-      return;
-    }
-    mapping[hyp] = -1;
-    visit(hyp + 1, score);
-    for (let ref = 0; ref < numReference; ref++) {
-      if (used[ref]) continue;
-      used[ref] = true;
-      mapping[hyp] = ref;
-      visit(hyp + 1, score + overlap[hyp][ref]);
-      used[ref] = false;
-    }
-  };
-  visit(0, 0);
-  return best;
+      for (let j = 0; j <= n; j++) {
+        if (used[j]) {
+          u[rowOf[j]] += delta;
+          v[j] -= delta;
+        } else minv[j] -= delta;
+      }
+      col = next;
+    } while (rowOf[col] !== 0);
+    do {
+      const prev = way[col];
+      rowOf[col] = rowOf[prev];
+      col = prev;
+    } while (col !== 0);
+  }
+
+  const mapping = new Array<number>(rows).fill(-1);
+  for (let j = 1; j <= n; j++) {
+    const i = rowOf[j] - 1;
+    if (i < rows && j - 1 < numReference && overlap[i][j - 1] > 0)
+      mapping[i] = j - 1;
+  }
+  return mapping;
 }
 
-/** Both span sets on a shared 10 ms frame grid, with the best hypothesis → reference speaker mapping. */
+/** Both span sets on a shared 10 ms frame grid, with co-occurring frames per speaker pair. */
 function align(reference: SpeakerSpan[], hypothesis: SpeakerSpan[]) {
   const refSpeakers = speakersOf(reference);
   const hypSpeakers = speakersOf(hypothesis);
@@ -119,8 +153,7 @@ function align(reference: SpeakerSpan[], hypothesis: SpeakerSpan[]) {
   );
   for (let frame = 0; frame < numFrames; frame++)
     for (const h of hyp[frame]) for (const r of ref[frame]) overlap[h][r]++;
-  const mapping = bestMapping(overlap, refSpeakers.length);
-  return { refSpeakers, hypSpeakers, numFrames, ref, hyp, mapping };
+  return { refSpeakers, hypSpeakers, numFrames, ref, hyp, overlap };
 }
 
 /** Frame-based diarization error rate (10 ms frames, no collar, overlap included). */
@@ -128,7 +161,11 @@ export function diarizationErrorRate(
   reference: SpeakerSpan[],
   hypothesis: SpeakerSpan[]
 ): DiarizationError {
-  const { numFrames, ref, hyp, mapping } = align(reference, hypothesis);
+  const { refSpeakers, numFrames, ref, hyp, overlap } = align(
+    reference,
+    hypothesis
+  );
+  const mapping = bestMapping(overlap, refSpeakers.length);
 
   let missed = 0;
   let falseAlarm = 0;
@@ -159,23 +196,29 @@ export function diarizationErrorRate(
 }
 
 /**
- * Speaker-level identity check. A hypothesis speaker counts as named when its label is in `enrolled`;
- * reference labels must use the same names for enrolled people.
+ * Speaker-level identity check. Each hypothesis speaker (lane or cluster) is judged on its own
+ * against the reference speaker it overlaps most, so fragments of one person are scored separately.
+ * It counts as named when its label is in `enrolled`; reference labels must use the same names.
  */
 export function identification(
   reference: SpeakerSpan[],
   hypothesis: SpeakerSpan[],
   enrolled: readonly string[]
 ): IdentificationResult {
-  const { refSpeakers, hypSpeakers, mapping } = align(reference, hypothesis);
+  const { refSpeakers, hypSpeakers, overlap } = align(reference, hypothesis);
   const result: IdentificationResult = {
     correct: 0,
     falseAccept: 0,
     missed: 0,
   };
-  hypSpeakers.forEach((name, h) => {
-    const truth = mapping[h] >= 0 ? refSpeakers[mapping[h]] : undefined;
-    if (enrolled.includes(name)) {
+  hypSpeakers.forEach((key, h) => {
+    const name = hypothesis.find((span) => keyOf(span) === key)?.speaker;
+    let best = -1;
+    overlap[h].forEach((frames, r) => {
+      if (frames > 0 && (best < 0 || frames > overlap[h][best])) best = r;
+    });
+    const truth = best >= 0 ? refSpeakers[best] : undefined;
+    if (name !== undefined && enrolled.includes(name)) {
       if (name === truth) result.correct++;
       else result.falseAccept++;
     } else if (truth !== undefined && enrolled.includes(truth)) {

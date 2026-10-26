@@ -5,9 +5,12 @@ import type {
   TranscriptWord,
 } from '../../../TranscriptView/transcript';
 import type { TranscriptSegment } from '../../diarize';
+import { UTTERANCE_GAP_SECONDS } from '../TranscriptPlayer/model';
 
 export interface SpeakerSpan {
   speaker: string;
+  /** Stable lane or cluster id, when several can share one `speaker` name. */
+  id?: string;
   /** Seconds. */
   start: number;
   /** Seconds. */
@@ -46,6 +49,7 @@ export function spansFromFrames(
       if (active || start < 0) continue;
       spans.push({
         speaker: names?.[speaker] ?? `Speaker ${speaker + 1}`,
+        id: `lane-${speaker}`,
         start: start * frameDurationSeconds,
         end: frame * frameDurationSeconds,
       });
@@ -104,9 +108,9 @@ function laneMeans(
 /**
  * Builds a `Transcript` from Whisper words and Nemotron lanes. Each lane is a speaker (`lane-N`).
  * Every word goes to its most active lane; consecutive words on the same lane form a segment,
- * split where overlap starts or stops, and `overlapSpeakerIds` lists the other lanes heard. Words
- * no lane claims still go to the most active lane. `speakerActivity` is the raw lane activity,
- * so overlap and wordless speech ("mm-hm") stay visible.
+ * split at pauses longer than the player's utterance gap and wherever the set of other lanes heard
+ * (`overlapSpeakerIds`) changes. Words no lane claims still go to the most active lane.
+ * `speakerActivity` is the raw lane activity, so overlap and wordless speech ("mm-hm") stay visible.
  */
 export function transcriptFromFrames(
   words: readonly TranscriptSegment[],
@@ -134,17 +138,17 @@ export function transcriptFromFrames(
     };
 
     const last = segments[segments.length - 1];
+    const lastOthers = last?.overlapSpeakerIds ?? [];
     if (
       last &&
       last.speakerId === speakerId &&
-      Boolean(last.overlapSpeakerIds) === others.length > 0
+      spoken.startMs - last.endMs <= UTTERANCE_GAP_SECONDS * 1000 &&
+      lastOthers.length === others.length &&
+      others.every((id) => lastOthers.includes(id))
     ) {
       last.endMs = spoken.endMs;
       last.text = `${last.text} ${spoken.text}`;
       last.words.push(spoken);
-      for (const id of others)
-        if (!last.overlapSpeakerIds?.includes(id))
-          last.overlapSpeakerIds?.push(id);
       continue;
     }
     segments.push({

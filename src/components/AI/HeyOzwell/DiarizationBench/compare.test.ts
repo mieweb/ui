@@ -39,6 +39,31 @@ describe('identification', () => {
       missed: 0,
     });
   });
+
+  it('keeps two lanes given the same name apart, so the stranger is a false accept', () => {
+    const hypothesis: SpeakerSpan[] = [
+      { speaker: 'Dr. Smith', id: 'lane-0', start: 0, end: 2 },
+      { speaker: 'Dr. Smith', id: 'lane-1', start: 2, end: 4 },
+    ];
+    expect(identification(truth, hypothesis, enrolled)).toEqual({
+      correct: 1,
+      falseAccept: 1,
+      missed: 0,
+    });
+    expect(summarize(hypothesis).speakers).toBe(2);
+  });
+
+  it('judges each fragment against its own best reference speaker', () => {
+    const hypothesis: SpeakerSpan[] = [
+      { speaker: 'Dr. Smith', id: 'lane-0', start: 0, end: 0.5 },
+      { speaker: 'Speaker 1', id: 'lane-1', start: 0.5, end: 2 },
+    ];
+    expect(identification(truth, hypothesis, enrolled)).toEqual({
+      correct: 1,
+      falseAccept: 0,
+      missed: 1,
+    });
+  });
 });
 
 describe('longestSoloWindow', () => {
@@ -70,8 +95,8 @@ describe('spansFromFrames', () => {
       0.9, 0.1, 0.9, 0.8, 0.2, 0.8, 0.1, 0.1,
     ]);
     expect(spansFromFrames(probabilities, 2, 0.5)).toEqual([
-      { speaker: 'Speaker 1', start: 0, end: 1 },
-      { speaker: 'Speaker 2', start: 0.5, end: 1.5 },
+      { speaker: 'Speaker 1', id: 'lane-0', start: 0, end: 1 },
+      { speaker: 'Speaker 2', id: 'lane-1', start: 0.5, end: 1.5 },
     ]);
   });
 
@@ -127,5 +152,38 @@ describe('diarizationErrorRate', () => {
     ]);
     expect(result.falseAlarm).toBeCloseTo(1);
     expect(result.der).toBeCloseTo(0.25);
+  });
+
+  it('maps many over-split speakers quickly (no exhaustive search)', () => {
+    // 40 one-second fragments of two reference speakers, each its own cluster.
+    const truth: SpeakerSpan[] = [
+      { speaker: 'A', start: 0, end: 20 },
+      { speaker: 'B', start: 20, end: 40 },
+    ];
+    const fragments: SpeakerSpan[] = Array.from({ length: 40 }, (_, i) => ({
+      speaker: `Speaker ${i + 1}`,
+      id: `cluster-${i}`,
+      start: i,
+      end: i + 1,
+    }));
+    const started = performance.now();
+    const result = diarizationErrorRate(truth, fragments);
+    expect(performance.now() - started).toBeLessThan(1000);
+    // Only one fragment per reference speaker can map; the other 38 s are confusion.
+    expect(result.confusion).toBeCloseTo(38);
+    expect(result.missed).toBeCloseTo(0);
+  });
+
+  it('finds the best one-to-one mapping, not a greedy one', () => {
+    const truth: SpeakerSpan[] = [
+      { speaker: 'A', start: 0, end: 3 },
+      { speaker: 'B', start: 3, end: 5 },
+    ];
+    // x→B plus y→A (3 s matched) beats x→A alone (2 s).
+    const hypothesis: SpeakerSpan[] = [
+      { speaker: 'x', start: 1, end: 5 },
+      { speaker: 'y', start: 0, end: 1 },
+    ];
+    expect(diarizationErrorRate(truth, hypothesis).confusion).toBeCloseTo(2);
   });
 });

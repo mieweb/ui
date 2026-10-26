@@ -111,4 +111,36 @@ describe('transcriptFromFrames', () => {
       []
     );
   });
+
+  it('splits at long pauses and wherever the other speakers heard change', () => {
+    // Lane 0 talks for 10 s; lane 1 joins at 1–2 s, lane 2 at 3–4 s.
+    const lanes = frames(100, (f) => [
+      0,
+      ...(f >= 10 && f < 20 ? [1] : []),
+      ...(f >= 30 && f < 40 ? [2] : []),
+    ]);
+    const transcript = transcriptFromFrames(
+      [
+        word('a', 0.1, 0.3),
+        word('b', 0.5, 0.8),
+        word('c', 1.2, 1.5),
+        word('d', 1.6, 1.9),
+        word('e', 3.2, 3.5),
+        word('f', 5.0, 5.3),
+        word('g', 7.0, 7.3),
+      ],
+      lanes,
+      names,
+      10
+    );
+    expect(
+      transcript.segments?.map((s) => [s.text, s.overlapSpeakerIds])
+    ).toEqual([
+      ['a b', undefined],
+      ['c d', ['lane-1']],
+      ['e', ['lane-2']],
+      ['f', undefined],
+      ['g', undefined],
+    ]);
+  });
 });
