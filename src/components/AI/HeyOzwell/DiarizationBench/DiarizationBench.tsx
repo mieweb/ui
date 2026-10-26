@@ -46,6 +46,7 @@ interface PipelineResult {
   identity: IdentificationResult | null;
   /** Model load (Nemotron only; the current pipeline's first run includes its own load). */
   loadMs: number | null;
+  /** Audio in to named spans: decoding, diarization and naming (see the note under the table). */
   processingMs: number;
   /** TitaNet naming of Nemotron lanes (Nemotron + TitaNet only). */
   identifyMs: number | null;
@@ -164,39 +165,48 @@ function MetricsTable({
     ['False accepts', (r) => String(r.identity?.falseAccept ?? '—')],
     ['Missed enrolled', (r) => String(r.identity?.missed ?? '—')],
     ['Model load (ms)', (r) => fmt(r.loadMs, 0)],
-    ['Processing (ms)', (r) => fmt(r.processingMs, 0)],
-    ['TitaNet naming (ms)', (r) => fmt(r.identifyMs, 0)],
+    ['Total processing (ms)', (r) => fmt(r.processingMs, 0)],
+    ['of which TitaNet naming (ms)', (r) => fmt(r.identifyMs, 0)],
     ['Real-time factor', (r) => fmt(r.realTimeFactor, 3)],
   ];
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr>
-          <th scope="col" className="text-start">
-            Metric
-          </th>
-          {results.map((r) => (
-            <th key={r.name} scope="col" className="text-start">
-              {r.name}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map(([label, value]) => (
-          <tr key={label} className="border-border border-t">
-            <th scope="row" className="py-1 text-start font-normal">
-              {label}
+    <figure className="space-y-2">
+      <table className="w-full text-sm">
+        <thead>
+          <tr>
+            <th scope="col" className="text-start">
+              Metric
             </th>
             {results.map((r) => (
-              <td key={r.name} className="py-1 tabular-nums">
-                {value(r)}
-              </td>
+              <th key={r.name} scope="col" className="text-start">
+                {r.name}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map(([label, value]) => (
+            <tr key={label} className="border-border border-t">
+              <th scope="row" className="py-1 text-start font-normal">
+                {label}
+              </th>
+              {results.map((r) => (
+                <td key={r.name} className="py-1 tabular-nums">
+                  {value(r)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <figcaption className="text-muted-foreground text-xs">
+        Total processing runs from the audio file to named speaker spans,
+        decoding included, model load excluded. The current pipeline&apos;s
+        total includes Whisper, because it diarizes Whisper segments; the
+        Nemotron totals do not, because Nemotron diarizes the audio directly (a
+        scribe still runs Whisper for the words).
+      </figcaption>
+    </figure>
   );
 }
 
@@ -210,6 +220,13 @@ export function DiarizationBench() {
   const [duration, setDuration] = React.useState(0);
   const [results, setResults] = React.useState<PipelineResult[]>([]);
   const [error, setError] = React.useState<string | null>(null);
+  // Results belong to the clip they were measured on.
+  const selectClip = (next: Clip) => {
+    setClip(next);
+    setResults([]);
+    setError(null);
+    setDuration(0);
+  };
   // Loads TitaNet and warms Whisper only once a clip is chosen, so opening the docs page downloads nothing.
   const current = useDiarization({ enabled: clip !== null });
   const sv = useSpeakerVerify({ enabled: clip !== null });
@@ -228,7 +245,9 @@ export function DiarizationBench() {
     try {
       const reference = parseReference(referenceText);
       setStage('Decoding audio');
+      const decodeStarted = performance.now();
       const samples = await decodeTo16kMono(clip.blob);
+      const decodeMs = performance.now() - decodeStarted;
       const seconds = samples.length / SAMPLE_RATE;
       setDuration(seconds);
       const titaNetVoices = sv.listVoices().map((v) => v.label);
@@ -249,8 +268,9 @@ export function DiarizationBench() {
       const next = [
         toResult({
           name: 'Current (Whisper + TitaNet)',
-          spans: segments.map(({ speaker, start, end }) => ({
+          spans: segments.map(({ speaker, cluster, start, end }) => ({
             speaker,
+            id: `cluster-${cluster}`,
             start,
             end,
           })),
@@ -265,6 +285,7 @@ export function DiarizationBench() {
       setStage('Naming lanes with TitaNet');
       const identifyStarted = performance.now();
       const titaNetLaneNames = titaNetNames(anonymous, samples, sv.identify);
+      const identifyMs = performance.now() - identifyStarted;
       next.push(
         toResult({
           name: `Nemotron + TitaNet (${model})`,
@@ -277,9 +298,9 @@ export function DiarizationBench() {
           reference,
           enrolled: titaNetVoices,
           durationSeconds: seconds,
-          processingMs: anonymous.inferenceMs,
+          processingMs: decodeMs + anonymous.inferenceMs + identifyMs,
           loadMs: anonymous.loadMs,
-          identifyMs: performance.now() - identifyStarted,
+          identifyMs,
         })
       );
 
@@ -302,7 +323,7 @@ export function DiarizationBench() {
             reference,
             enrolled,
             durationSeconds: seconds,
-            processingMs: seeded.inferenceMs,
+            processingMs: decodeMs + seeded.inferenceMs,
             loadMs: seeded.loadMs,
           })
         );
@@ -337,7 +358,7 @@ export function DiarizationBench() {
             disabled={busy}
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) setClip({ blob: file, name: file.name });
+              if (file) selectClip({ blob: file, name: file.name });
             }}
           />
         </label>
@@ -348,7 +369,10 @@ export function DiarizationBench() {
             disabled={busy}
             aria-label="Record a clip"
             onRecordingComplete={(blob) =>
-              setClip({ blob, name: `recording-${new Date().toISOString()}` })
+              selectClip({
+                blob,
+                name: `recording-${new Date().toISOString()}`,
+              })
             }
           />
         </div>

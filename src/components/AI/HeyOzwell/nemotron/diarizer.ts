@@ -278,7 +278,7 @@ export class StreamingDiarizer {
       (this.featureConfig.nFft >> 1);
 
     const drop = this.chunkStart - this.bufferStart;
-    this.buffer = this.buffer.slice(drop);
+    this.buffer = this.buffer.subarray(drop);
     this.bufferStart = this.chunkStart;
   }
 

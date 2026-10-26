@@ -16,13 +16,13 @@ export function SpeakerTimeline({
   spans,
   duration,
 }: SpeakerTimelineProps) {
-  const speakers = [...new Set(spans.map((s) => s.speaker))];
+  const rows = [...new Map(spans.map((s) => [s.id ?? s.speaker, s.speaker]))];
   if (duration <= 0) return null;
   return (
     <figure className="space-y-1">
       <figcaption className="text-sm font-medium">{label}</figcaption>
-      {speakers.map((speaker, i) => (
-        <div key={speaker} className="flex items-center gap-2">
+      {rows.map(([key, speaker], i) => (
+        <div key={key} className="flex items-center gap-2">
           <span className="text-muted-foreground w-24 shrink-0 truncate text-xs">
             {speaker}
           </span>
@@ -32,7 +32,7 @@ export function SpeakerTimeline({
             aria-label={`${speaker} activity`}
           >
             {spans
-              .filter((s) => s.speaker === speaker)
+              .filter((s) => (s.id ?? s.speaker) === key)
               .map((s, k) => (
                 <span
                   key={k}

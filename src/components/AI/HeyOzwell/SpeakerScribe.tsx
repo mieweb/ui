@@ -80,7 +80,12 @@ function ClipPicker({
 }
 
 /** Enroll voices, analyze a clip, and correct the labelled transcript. */
-export function SpeakerScribe({
+export function SpeakerScribe(props: SpeakerScribeProps) {
+  // A different user starts from a clean slate: no clips, results or comparison carry over.
+  return <ScribeSession key={props.voiceprintNamespace ?? ''} {...props} />;
+}
+
+function ScribeSession({
   title = 'Speaker Scribe',
   subtitle = 'Overlap-aware, on-device speaker labels with Nemotron 3 Diarization.',
   voiceprintNamespace,
@@ -359,7 +364,7 @@ export function SpeakerScribe({
         </section>
       )}
 
-      {compare && legacy.result && legacyClip === clip && (
+      {compare && legacy.result && legacyClip && legacyClip === clip && (
         <section aria-labelledby="speaker-scribe-legacy" className="space-y-2">
           <h2 id="speaker-scribe-legacy" className="text-sm font-semibold">
             Legacy (Whisper + TitaNet clustering)

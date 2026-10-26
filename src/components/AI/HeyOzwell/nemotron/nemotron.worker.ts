@@ -52,12 +52,19 @@ let current: { key: string; diarizer: StreamingDiarizer } | null = null;
 function loadOrt(): Promise<Ort> {
   ortPromise ??= import(
     /* @vite-ignore */ `${ORT_BASE}ort.webgpu.min.mjs`
-  ).then((ort: Ort) => {
-    ort.env.wasm.wasmPaths = ORT_BASE;
-    // Nested pthread workers deadlock inside a worker, so ORT must stay single-threaded here.
-    ort.env.wasm.numThreads = 1;
-    return ort;
-  });
+  ).then(
+    (ort: Ort) => {
+      ort.env.wasm.wasmPaths = ORT_BASE;
+      // Nested pthread workers deadlock inside a worker, so ORT must stay single-threaded here.
+      ort.env.wasm.numThreads = 1;
+      return ort;
+    },
+    (error: unknown) => {
+      // Let the next request retry a failed download.
+      ortPromise = null;
+      throw error;
+    }
+  );
   return ortPromise;
 }
 

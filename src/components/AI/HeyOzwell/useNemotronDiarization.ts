@@ -174,6 +174,7 @@ export function useNemotronDiarization({
           },
         ];
         await saveNemotronVoiceprints(next, nsRef.current);
+        assertNamespace();
         setPrints(next);
       }),
     [track, variant, executionProvider]
@@ -181,9 +182,10 @@ export function useNemotronDiarization({
 
   const removeVoice = React.useCallback(
     (name: string) =>
-      track(async () => {
+      track(async (assertNamespace) => {
         const next = printsRef.current.filter((p) => p.name !== name);
         await saveNemotronVoiceprints(next, nsRef.current);
+        assertNamespace();
         setPrints(next);
       }),
     [track]
