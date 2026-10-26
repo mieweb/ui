@@ -413,6 +413,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
     const hasMacros = Boolean(macros);
+    // Focus mode at rest: the field is a bare one-line input — no block-menu
+    // indent, no gutter `+` on hover — until focus grows it.
+    const macrosResting = hasMacros && macrosOnFocus && !macrosOpen;
     const hasMacroEntries = Boolean(
       macros?.some((group) => group.macros.length > 0)
     );
@@ -1193,13 +1196,22 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         onBlur={
           hasMacros && macrosOnFocus
             ? (event) => {
+                const related = event.relatedTarget as HTMLElement | null;
+                if (related && event.currentTarget.contains(related)) return;
+                // The block gutter's dropdown mounts in a portal under
+                // document.body (outside this frame); focus moving into our
+                // own menu is an internal move, not leaving the field.
+                const menuId = related
+                  ?.closest('[data-slot="dropdown-menu"]')
+                  ?.querySelector('[role="menu"]')?.id;
                 if (
-                  !event.currentTarget.contains(
-                    event.relatedTarget as Node | null
+                  menuId &&
+                  event.currentTarget.querySelector(
+                    `[aria-controls="${globalThis.CSS.escape(menuId)}"]`
                   )
-                ) {
-                  setMacrosOpen(false);
-                }
+                )
+                  return;
+                setMacrosOpen(false);
               }
             : undefined
         }
@@ -1446,7 +1458,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               blockMenu && !disabled ? handleGutterMouseMove : undefined
             }
           >
-            {blockMenu && !inert && (
+            {blockMenu && !inert && !macrosResting && (
               <div
                 data-slot="rich-text-editor-block-gutter"
                 className="absolute start-1 z-10"
@@ -1606,7 +1618,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                   // native textarea clips its own) instead of wrapping out
                   // of the one-row field.
                   chromeless ? 'end-0 truncate px-3 py-[7px] text-base' : 'p-4',
-                  blockMenu && 'ps-10',
+                  blockMenu && !macrosResting && 'ps-10',
                   // Keep the placeholder's font in step with the editable
                   // when the host restyles it (e.g. Textarea's `size`).
                   editorClassName
@@ -1667,18 +1679,19 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 '[&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6',
                 '[&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6',
                 '[&_blockquote]:border-border [&_blockquote]:text-muted-foreground [&_blockquote]:my-2 [&_blockquote]:border-s-4 [&_blockquote]:ps-3',
-                blockMenu && 'ps-10',
+                blockMenu && !macrosResting && 'ps-10',
                 // Tall enough for the docked panel's search plus a few rows
                 // without forcing the host form to scroll; the compact panel
                 // is just rows, so it needs far less.
                 hasMacros &&
                   macrosOpen &&
                   (compactMacros ? 'md:min-h-[140px]' : 'md:min-h-[250px]'),
-                // Focus mode grows the field from one row on focus — ease the
-                // jump instead of snapping.
+                // Focus mode grows the field from one row on focus (and, with
+                // the block gutter, indents it) — ease the jump instead of
+                // snapping.
                 hasMacros &&
                   macrosOnFocus &&
-                  'transition-[min-height] duration-200 ease-out motion-reduce:transition-none',
+                  'transition-[min-height,padding] duration-200 ease-out motion-reduce:transition-none',
                 disabled &&
                   'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300',
                 editorClassName

@@ -345,6 +345,49 @@ describe('RichTextEditor', () => {
         );
         expect(panel()).toBeNull();
       });
+
+      it('rests without the block-menu indent or gutter, restoring both on focus', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        expect(screen.queryByRole('button', { name: 'Block menu' })).toBeNull();
+        expect(editor).not.toHaveClass('ps-10');
+        fireEvent.focus(editor);
+        expect(
+          screen.getByRole('button', { name: 'Block menu' })
+        ).toBeInTheDocument();
+        expect(editor).toHaveClass('ps-10');
+      });
+
+      it('keeps the field expanded while its portalled block menu has focus', async () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+        // The menu mounts in a portal under document.body, outside the frame.
+        const item = await screen.findByRole('menuitem', { name: 'Text' });
+        fireEvent.blur(editor, { relatedTarget: item });
+        expect(panel()).not.toBeNull();
+        fireEvent.blur(item, { relatedTarget: document.body });
+        expect(panel()).toBeNull();
+      });
     });
 
     it('inserts the macro content through the undo-aware command', () => {
