@@ -832,6 +832,8 @@ test('expanded translated controls fit a phone and keep section navigation below
   });
   await navigation.selectOption('vitals');
   await expect(navigation).toBeInViewport();
+  // The toolbar can momentarily report no box while the scroll settles.
+  await expect(page.locator('.kb-custom-menu')).toBeVisible();
   const toolbar = await page.locator('.kb-custom-menu').boundingBox();
   const nav = await page
     .getByRole('navigation', { name: 'Visit sections' })

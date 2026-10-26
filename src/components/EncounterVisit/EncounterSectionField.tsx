@@ -1,7 +1,6 @@
 import * as React from 'react';
-import type { LucideIcon } from 'lucide-react';
 import type { FieldComponentProps, SectionFieldDefinition } from '@esheet/core';
-import { SECTION_ICONS, SectionField } from '@esheet/fields';
+import { SectionField } from '@esheet/fields';
 import { RequiredMark } from '../Input';
 
 type EncounterSectionFieldProps = FieldComponentProps & {
@@ -16,8 +15,8 @@ export const EncounterSectionContext = React.createContext(false);
 
 /**
  * Section renderer registered for encounter visits: inside the encounter
- * composition, preview-mode sections render as a plain labelled group (icon
- * + heading, always-visible children); builder mode and non-encounter hosts
+ * composition, preview-mode sections render as a plain labelled group
+ * (heading + always-visible children); builder mode and non-encounter hosts
  * delegate to the stock SectionField.
  */
 export function EncounterSectionField(props: EncounterSectionFieldProps) {
@@ -29,18 +28,9 @@ export function EncounterSectionField(props: EncounterSectionFieldProps) {
   if (!inEncounter || !isPreview) return <SectionField {...props} />;
 
   const title = def.title || 'Section';
-  const Icon = def.sectionIcon
-    ? (SECTION_ICONS[def.sectionIcon] as LucideIcon)
-    : undefined;
   return (
     <div className="section-field-preview grid gap-3">
       <h3 className="text-foreground m-0 flex items-center gap-2 text-base font-semibold">
-        {Icon && (
-          <Icon
-            aria-hidden="true"
-            className="text-muted-foreground h-5 w-5 shrink-0"
-          />
-        )}
         <span className="min-w-0 break-words">
           {title}
           {(isRequired || isSoftRequired) && (
