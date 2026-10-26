@@ -58,6 +58,14 @@ export interface MacroLibraryProps {
   onCreateMacro?: () => void;
   /** Autofocus the search input on mount. Defaults to false. */
   autoFocusSearch?: boolean;
+  /**
+   * Minimal chrome for short, space-constrained lists: hides the header,
+   * the search input, and library group headings so the panel is just the
+   * macro rows. Previous-value groups keep their heading so prior answers
+   * stay visually distinct. Escape-to-close still works when `onClose` is
+   * provided. Defaults to false.
+   */
+  compact?: boolean;
   /** Additional class for the panel root. */
   className?: string;
   /** Overridable labels for i18n. */
@@ -124,6 +132,7 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
       onClose,
       onCreateMacro,
       autoFocusSearch = false,
+      compact = false,
       className,
       labels: labelOverrides,
     },
@@ -247,59 +256,63 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
         className={cn('bg-muted/20 flex min-h-0 flex-col', className)}
         onKeyDown={handlePanelKeyDown}
       >
-        <div
-          data-slot="macro-library-header"
-          className="border-border flex items-center justify-between gap-2 border-b px-3 py-2"
-        >
-          <span className="text-muted-foreground min-w-0 truncate text-xs">
-            {targetLabel ? (
-              <>
-                {labels.insertInto}{' '}
-                <span className="text-foreground font-semibold">
-                  {targetLabel}
-                </span>
-              </>
-            ) : (
-              labels.macros
+        {!compact && (
+          <div
+            data-slot="macro-library-header"
+            className="border-border flex items-center justify-between gap-2 border-b px-3 py-2"
+          >
+            <span className="text-muted-foreground min-w-0 truncate text-xs">
+              {targetLabel ? (
+                <>
+                  {labels.insertInto}{' '}
+                  <span className="text-foreground font-semibold">
+                    {targetLabel}
+                  </span>
+                </>
+              ) : (
+                labels.macros
+              )}
+            </span>
+            {onClose && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 shrink-0 p-0"
+                onClick={onClose}
+                aria-label={labels.close}
+              >
+                <CloseIcon className="h-3.5 w-3.5" />
+              </Button>
             )}
-          </span>
-          {onClose && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 shrink-0 p-0"
-              onClick={onClose}
-              aria-label={labels.close}
-            >
-              <CloseIcon className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         {hasMacros ? (
           <>
-            <div className="px-3 pt-2">
-              <div className="relative">
-                <SearchIcon
-                  aria-hidden="true"
-                  className="text-muted-foreground pointer-events-none absolute start-2.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2"
-                />
-                <Input
-                  ref={searchRef}
-                  label={labels.searchLabel}
-                  hideLabel
-                  size="sm"
-                  type="search"
-                  placeholder={labels.searchPlaceholder}
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  className="ps-8"
-                  aria-controls={`${panelId}-list`}
-                />
+            {!compact && (
+              <div className="px-3 pt-2">
+                <div className="relative">
+                  <SearchIcon
+                    aria-hidden="true"
+                    className="text-muted-foreground pointer-events-none absolute start-2.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2"
+                  />
+                  <Input
+                    ref={searchRef}
+                    label={labels.searchLabel}
+                    hideLabel
+                    size="sm"
+                    type="search"
+                    placeholder={labels.searchPlaceholder}
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    className="ps-8"
+                    aria-controls={`${panelId}-list`}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Persistent polite region so a failed search is announced. */}
             <div role="status" className="sr-only">
@@ -354,38 +367,42 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                     data-group-id={group.id}
                     data-kind={group.kind ?? 'library'}
                   >
-                    <button
-                      type="button"
-                      className={cn(
-                        'text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 rounded px-2 pt-2.5 pb-1 text-start text-[11px] font-semibold tracking-wide uppercase',
-                        isPrevious && 'text-warning-700 dark:text-warning-400'
-                      )}
-                      aria-expanded={!isCollapsed}
-                      disabled={searching}
-                      onClick={() =>
-                        setCollapsed((prev) => ({
-                          ...prev,
-                          [group.id]: prev[group.id] !== true,
-                        }))
-                      }
-                    >
-                      <GroupIcon aria-hidden="true" className="h-3 w-3" />
-                      <span className="min-w-0 flex-1 truncate">
-                        {group.label}
-                      </span>
-                      {!searching &&
-                        (isCollapsed ? (
-                          <ChevronRightIcon
-                            aria-hidden="true"
-                            className="h-3 w-3"
-                          />
-                        ) : (
-                          <ChevronDownIcon
-                            aria-hidden="true"
-                            className="h-3 w-3"
-                          />
-                        ))}
-                    </button>
+                    {/* Compact keeps only previous-value headings: prior
+                        answers must stay distinct from library content. */}
+                    {(!compact || isPrevious) && (
+                      <button
+                        type="button"
+                        className={cn(
+                          'text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 rounded px-2 pt-2.5 pb-1 text-start text-[11px] font-semibold tracking-wide uppercase',
+                          isPrevious && 'text-warning-700 dark:text-warning-400'
+                        )}
+                        aria-expanded={!isCollapsed}
+                        disabled={searching}
+                        onClick={() =>
+                          setCollapsed((prev) => ({
+                            ...prev,
+                            [group.id]: prev[group.id] !== true,
+                          }))
+                        }
+                      >
+                        <GroupIcon aria-hidden="true" className="h-3 w-3" />
+                        <span className="min-w-0 flex-1 truncate">
+                          {group.label}
+                        </span>
+                        {!searching &&
+                          (isCollapsed ? (
+                            <ChevronRightIcon
+                              aria-hidden="true"
+                              className="h-3 w-3"
+                            />
+                          ) : (
+                            <ChevronDownIcon
+                              aria-hidden="true"
+                              className="h-3 w-3"
+                            />
+                          ))}
+                      </button>
+                    )}
 
                     {!isCollapsed &&
                       visibleMacros.map((macro) => (

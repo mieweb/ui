@@ -117,6 +117,12 @@ export interface RichTextEditorProps {
   /** Open the macro panel initially. Defaults to false. */
   defaultMacrosOpen?: boolean;
   /**
+   * Dock the macro panel in `MacroLibrary`'s compact mode (no header,
+   * search, or library group headings) and shrink the macros-open working
+   * space to match — for short lists in dense forms. Defaults to false.
+   */
+  compactMacros?: boolean;
+  /**
    * Called on any explicit macro invocation: a pick from the macro panel or
    * the block gutter flyout, or a typed `.shortcut` expansion. Return `true`
    * to take over the insertion: the editor skips its caret insertion and the
@@ -353,6 +359,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       sanitizeHtml,
       macros,
       defaultMacrosOpen = false,
+      compactMacros = false,
       onMacroInsert,
       macroLabels,
       onCreateMacro,
@@ -1595,7 +1602,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               // Styling hook: condensed-view.css must not pin the editable
               // to its compact single-line minimum while the macro panel
               // (absolutely stretched over this region) needs the md
-              // min-h-[250px] working space below.
+              // macros-open working space below.
               data-macros-open={hasMacros && macrosOpen ? '' : undefined}
               tabIndex={disabled ? -1 : 0}
               onInput={updateContent}
@@ -1630,8 +1637,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 '[&_blockquote]:border-border [&_blockquote]:text-muted-foreground [&_blockquote]:my-2 [&_blockquote]:border-s-4 [&_blockquote]:ps-3',
                 blockMenu && 'ps-10',
                 // Tall enough for the docked panel's search plus a few rows
-                // without forcing the host form to scroll.
-                hasMacros && macrosOpen && 'md:min-h-[250px]',
+                // without forcing the host form to scroll; the compact panel
+                // is just rows, so it needs far less.
+                hasMacros &&
+                  macrosOpen &&
+                  (compactMacros ? 'md:min-h-[140px]' : 'md:min-h-[250px]'),
                 disabled &&
                   'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300',
                 editorClassName
@@ -1655,6 +1665,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               }}
               onCreateMacro={onCreateMacro}
               labels={macroLabels}
+              compact={compactMacros}
               className="border-border max-h-72 border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
             />
           )}

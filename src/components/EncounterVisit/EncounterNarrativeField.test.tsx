@@ -254,9 +254,10 @@ describe('EncounterNarrativeField', () => {
     expect(screen.getByRole('textbox')).toHaveTextContent('');
     expect(fieldProps.onResponse).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: /No trauma/ })).toBeEnabled();
-    expect(
-      screen.getByRole('searchbox', { name: 'Search macros' })
-    ).toBeInTheDocument();
+    // Compact panel: finding rows only — no header, search box or group
+    // heading doubling the vertical space.
+    expect(screen.queryByRole('searchbox')).toBeNull();
+    expect(screen.queryByText('Common findings')).toBeNull();
   });
 
   it('labels each finding macro with its derived dot-phrase shortcut', () => {

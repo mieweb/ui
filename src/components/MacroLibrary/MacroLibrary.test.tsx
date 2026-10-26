@@ -74,6 +74,30 @@ describe('MacroLibrary', () => {
     ).toBeInTheDocument();
   });
 
+  it('compact drops the header, search and library group headings but keeps previous-value headings', () => {
+    renderWithTheme(
+      <MacroLibrary
+        groups={GROUPS}
+        onSelect={() => {}}
+        targetLabel="Review of Systems"
+        onClose={() => {}}
+        compact
+      />
+    );
+    // The accessible group name survives without the visual header.
+    expect(
+      screen.getByRole('group', { name: 'Insert into Review of Systems' })
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-slot="macro-library-header"]')
+    ).toBeNull();
+    expect(screen.queryByRole('searchbox')).toBeNull();
+    expect(screen.queryByText('Default library')).toBeNull();
+    // Prior answers must stay distinct from library content.
+    expect(screen.getByText('Previous values')).toBeInTheDocument();
+    expect(screen.getByText('Back pain — normal')).toBeInTheDocument();
+  });
+
   it('calls onSelect with the chosen macro', () => {
     const onSelect = vi.fn();
     renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={onSelect} />);

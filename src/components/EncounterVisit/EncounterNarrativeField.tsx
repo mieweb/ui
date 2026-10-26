@@ -261,6 +261,10 @@ export function EncounterNarrativeField({
         enableDictation={false}
         macros={readOnly ? undefined : macros}
         defaultMacrosOpen
+        // One short, well-known findings list per section: the panel header,
+        // search box, and group heading would double the vertical space for
+        // no navigation value.
+        compactMacros
         macroLabels={{
           macros: m('Macros'),
           showMacros: m('Show macros'),
