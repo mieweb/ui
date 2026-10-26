@@ -1,9 +1,7 @@
 import * as React from 'react';
 import DOMPurify from 'dompurify';
-import { Check, Plus } from 'lucide-react';
 import type { FieldComponentProps, FieldResponse } from '@esheet/core';
-import { Badge, badgeVariants } from '../Badge';
-import { cn } from '../../utils/cn';
+import type { MacroGroup } from '../MacroLibrary';
 import { TextAreaRich } from '../TextAreaRich';
 import type { EncounterNarrativeFinding } from './types';
 import { useEncounterMessages } from './messages';
@@ -99,6 +97,29 @@ function responseHtml(response?: FieldResponse): string {
   return textToHtml(answer);
 }
 
+/**
+ * Typeable dot-phrase shortcuts, one per finding ("No fever" → `.nf`), built
+ * from each label's word initials with numeric suffixes on collision.
+ */
+function findingShortcuts(
+  findings: EncounterNarrativeFinding[]
+): Map<string, string> {
+  const used = new Set<string>();
+  const shortcuts = new Map<string, string>();
+  for (const finding of findings) {
+    const initials = (finding.label.match(/[\p{L}\p{N}]+/gu) ?? [])
+      .map((word) => word[0])
+      .join('')
+      .toLowerCase();
+    if (!initials) continue;
+    let candidate = `.${initials}`;
+    for (let n = 2; used.has(candidate); n += 1) candidate = `.${initials}${n}`;
+    used.add(candidate);
+    shortcuts.set(finding.id, candidate);
+  }
+  return shortcuts;
+}
+
 /** A report-like narrative surface that grows with its content, backed by eSheet text. */
 export function EncounterNarrativeField({
   field,
@@ -112,8 +133,6 @@ export function EncounterNarrativeField({
 }: FieldComponentProps): React.JSX.Element {
   const m = useEncounterMessages();
   const editorRef = React.useRef<HTMLDivElement>(null);
-  const chipsRef = React.useRef<HTMLDivElement>(null);
-  const pendingFocusId = React.useRef<string | null>(null);
   const responseRef = React.useRef(response);
   responseRef.current = response;
   const labelId = React.useId();
@@ -131,7 +150,24 @@ export function EncounterNarrativeField({
   const findings = validEncounterNarrativeFindings(
     definition._sourceData?.encounterFindings
   );
-  const selectedFindings = getEncounterNarrativeFindings(response);
+  // Common findings dock as a section-specific macro group; picking one
+  // inserts its text at the caret like any other macro. Each gets a derived
+  // dot-phrase so it can also be typed inline (`.nf` + space).
+  const shortcuts = findingShortcuts(findings);
+  const macros: MacroGroup[] | undefined = findings.length
+    ? [
+        {
+          id: 'common-findings',
+          label: m('Common findings'),
+          macros: findings.map((finding) => ({
+            id: finding.id,
+            label: finding.label,
+            content: finding.text,
+            shortcut: shortcuts.get(finding.id),
+          })),
+        },
+      ]
+    : undefined;
 
   const publish = (
     value: string,
@@ -158,55 +194,6 @@ export function EncounterNarrativeField({
     onResponse(next);
   };
 
-  const addFinding = (finding: EncounterNarrativeFinding) => {
-    if (readOnly) return;
-    const previous = responseRef.current;
-    const next = applyEncounterNarrativeFinding(previous, finding);
-    if (next === previous) return;
-    const answer = previous?.answer ?? '';
-    // An explicit pick may code an already entered matching line, but never
-    // inserts the same line twice or treats unpicked prose as coded capture.
-    const nextHtml = hasEncounterNarrativeFindingText(answer, finding.text)
-      ? responseHtml(previous)
-      : `${answer.trim() ? responseHtml(previous) : ''}<p>${textToHtml(finding.text)}</p>`;
-    pendingFocusId.current = finding.id;
-    publish(nextHtml, previous, getEncounterNarrativeFindings(next));
-  };
-
-  const removeFinding = (finding: EncounterNarrativeFinding) => {
-    if (readOnly) return;
-    const previous = responseRef.current;
-    const selected = getEncounterNarrativeFindings(previous).filter(
-      (item) => item.id !== finding.id
-    );
-    pendingFocusId.current = finding.id;
-    const body = document.createElement('div');
-    body.innerHTML = responseHtml(previous);
-    const matches = Array.from(body.querySelectorAll('p, div, li')).filter(
-      (block) => (block.textContent ?? '').trim() === finding.text.trim()
-    );
-    // The innermost matching block, so a wrapper holding only the finding's
-    // paragraph is not removed along with unrelated siblings.
-    const target = matches.find(
-      (block) =>
-        !matches.some((other) => other !== block && block.contains(other))
-    );
-    if (target) {
-      const list = target.closest('ul, ol');
-      target.remove();
-      if (list && !list.children.length) list.remove();
-      publish(body.innerHTML, previous, selected);
-      return;
-    }
-    // Plain-text narratives have no block markup; drop the matching line.
-    const lines = (previous?.answer ?? '').replace(/\r\n?/g, '\n').split('\n');
-    const index = lines.findIndex(
-      (line) => line.trim() === finding.text.trim()
-    );
-    if (index >= 0) lines.splice(index, 1);
-    publish(textToHtml(lines.join('\n').trim()), previous, selected);
-  };
-
   React.useEffect(() => {
     editorRef.current?.setAttribute('dir', 'auto');
     editorRef.current?.setAttribute('aria-readonly', String(readOnly));
@@ -216,23 +203,6 @@ export function EncounterNarrativeField({
       String(isRequired || isSoftRequired)
     );
   }, [isRequired, isSoftRequired, labelId, readOnly]);
-
-  // Toggling a chip swaps its add button and removable badge, so keyboard
-  // focus would fall to the body; hand it to the replacement control.
-  React.useEffect(() => {
-    if (!pendingFocusId.current) return;
-    const chip = chipsRef.current?.querySelector<HTMLElement>(
-      `[data-finding-id="${globalThis.CSS.escape(pendingFocusId.current)}"]`
-    );
-    const control =
-      chip instanceof HTMLButtonElement
-        ? chip
-        : chip?.querySelector<HTMLButtonElement>('[data-slot="badge-remove"]');
-    if (control && document.activeElement === document.body) {
-      pendingFocusId.current = null;
-      control.focus();
-    }
-  });
 
   return (
     <div data-slot="encounter-narrative" className="min-w-0">
@@ -266,62 +236,49 @@ export function EncounterNarrativeField({
             )
           );
         }}
+        // An explicit macro invocation — a panel pick or a typed dot-phrase
+        // — codes the finding: its text is appended as its own line (never
+        // duplicated) and recorded in the response's finding provenance.
+        // Typed prose that merely matches macro content stays uncoded.
+        onMacroInsert={(macro) => {
+          const finding = findings.find((item) => item.id === macro.id);
+          if (!finding || readOnly) return true;
+          const previous = responseRef.current;
+          const next = applyEncounterNarrativeFinding(previous, finding);
+          if (next === previous) return true;
+          const answer = previous?.answer ?? '';
+          const nextHtml = hasEncounterNarrativeFindingText(
+            answer,
+            finding.text
+          )
+            ? responseHtml(previous)
+            : `${answer.trim() ? responseHtml(previous) : ''}<p>${textToHtml(finding.text)}</p>`;
+          publish(nextHtml, previous, getEncounterNarrativeFindings(next));
+          return true;
+        }}
         aria-label={question}
         disabled={readOnly}
         enableDictation={false}
-        defaultToolbar="visible"
+        macros={readOnly ? undefined : macros}
+        defaultMacrosOpen
+        macroLabels={{
+          macros: m('Macros'),
+          showMacros: m('Show macros'),
+          hideMacros: m('Hide macros'),
+          insertInto: m('Insert into'),
+          searchPlaceholder: m('Search macros…'),
+          searchLabel: m('Search macros'),
+          close: m('Close macros'),
+          empty: m('No macros available'),
+          emptyHint: m('The application has not provided a macro list.'),
+          noResults: m('No macros match'),
+          clearSearch: m('Clear search'),
+          // {count} is substituted by MacroLibrary per group.
+          showMore: m('Show {count} more'),
+        }}
         sanitizeHtml={sanitizeEncounterNarrativeHtml}
         className="mt-1"
       />
-      {!readOnly && findings.length > 0 && (
-        <div data-slot="encounter-common-findings" className="mt-1.5">
-          <div
-            ref={chipsRef}
-            role="group"
-            aria-label={m('{question} common findings', { question })}
-            className="flex flex-wrap gap-1.5"
-          >
-            {findings.map((finding) => {
-              const selected = selectedFindings.some(
-                (item) => item.id === finding.id
-              );
-              return selected ? (
-                <Badge
-                  key={finding.id}
-                  data-finding-id={finding.id}
-                  variant="success"
-                  icon={<Check aria-hidden="true" className="h-3.5 w-3.5" />}
-                  title={finding.text}
-                  onRemove={() => removeFinding(finding)}
-                  removeLabel={m('Remove {finding}', {
-                    finding: finding.label,
-                  })}
-                >
-                  {finding.label}
-                </Badge>
-              ) : (
-                <button
-                  key={finding.id}
-                  type="button"
-                  data-finding-id={finding.id}
-                  className={cn(
-                    badgeVariants({ variant: 'secondary' }),
-                    'focus-visible:ring-ring cursor-pointer hover:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:hover:bg-neutral-700'
-                  )}
-                  title={finding.text}
-                  aria-label={m('Add {finding}', { finding: finding.label })}
-                  onClick={() => addFinding(finding)}
-                >
-                  <span className="me-1 shrink-0">
-                    <Plus aria-hidden="true" className="h-3.5 w-3.5" />
-                  </span>
-                  {finding.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

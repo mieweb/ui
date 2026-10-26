@@ -117,6 +117,16 @@ export interface RichTextEditorProps {
   /** Open the macro panel initially. Defaults to false. */
   defaultMacrosOpen?: boolean;
   /**
+   * Called on any explicit macro invocation: a pick from the macro panel or
+   * the block gutter flyout, or a typed `.shortcut` expansion. Return `true`
+   * to take over the insertion: the editor skips its caret insertion and the
+   * host applies the content through its own value update (e.g. appending a
+   * coded finding as its own line). For typed shortcuts the editor removes
+   * the typed token (and publishes that edit) before consulting the
+   * callback, so a host that takes over computes from a token-free value.
+   */
+  onMacroInsert?: (macro: Macro) => boolean | void;
+  /**
    * Overridable labels for the macro addon (i18n). Panel labels are
    * forwarded to the docked `MacroLibrary`; `macros` doubles as the toolbar
    * toggle text, and `showMacros`/`hideMacros` set the toggle's title.
@@ -343,6 +353,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       sanitizeHtml,
       macros,
       defaultMacrosOpen = false,
+      onMacroInsert,
       macroLabels,
       onCreateMacro,
       toolbar,
@@ -495,7 +506,22 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     React.useEffect(() => {
       if (editorRef.current && editorRef.current.innerHTML !== value) {
+        const hadFocus = document.activeElement === editorRef.current;
         editorRef.current.innerHTML = value;
+        if (hadFocus) {
+          // The replacement destroyed the nodes holding the caret, which
+          // collapses the selection to the top of the document. Park it
+          // after the last block instead so typing continues on the next
+          // line below the newly applied content (e.g. a host-appended
+          // macro line).
+          const range = document.createRange();
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          savedRangeRef.current = range.cloneRange();
+        }
         reconcileGutterWithContent();
       }
     }, [value, reconcileGutterWithContent]);
@@ -624,6 +650,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const insertMacro = (macro: Macro) => {
       if (inert || !editorRef.current) return;
+      if (onMacroInsert?.(macro) === true) return;
       focusRestoringSelection();
       insertTextAtSelection(macro.content);
     };
@@ -727,6 +754,27 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     /**
+     * Delete the selected range through execCommand so the removal joins
+     * the native undo stack, with a manual fallback for jsdom. Leaves a
+     * collapsed caret where the selection started.
+     */
+    const deleteSelectedRange = (replaceRange: Range) => {
+      let deleted = false;
+      try {
+        deleted = document.execCommand('delete', false);
+      } catch {
+        deleted = false;
+      }
+      if (!deleted) {
+        replaceRange.deleteContents();
+        replaceRange.collapse(true);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(replaceRange);
+      }
+    };
+
+    /**
      * Expand a typed macro shortcut (dot phrase). When the word immediately
      * before the caret matches a macro shortcut and the user presses space,
      * the shortcut is replaced with the macro content in a single undoable
@@ -745,6 +793,16 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       if (!macro) return;
 
       event.preventDefault();
+      if (onMacroInsert) {
+        // Remove the typed token and publish that edit first, so a host
+        // that takes over the insertion computes from a token-free value.
+        deleteSelectedRange(selectCollectedToken(collected));
+        saveSelection();
+        updateContent();
+        if (onMacroInsert(macro) === true) return;
+        insertTextAtSelection(macro.content);
+        return;
+      }
       selectCollectedToken(collected);
       insertTextAtSelection(macro.content);
     };
@@ -766,20 +824,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       const rule = MARKDOWN_BLOCK_RULES[collected.token];
 
       event.preventDefault();
-      const replaceRange = selectCollectedToken(collected);
-      let deleted = false;
-      try {
-        deleted = document.execCommand('delete', false);
-      } catch {
-        deleted = false;
-      }
-      if (!deleted) {
-        // Fallback (and jsdom path): manual removal, caret at the line start.
-        replaceRange.deleteContents();
-        replaceRange.collapse(true);
-        collected.selection.removeAllRanges();
-        collected.selection.addRange(replaceRange);
-      }
+      deleteSelectedRange(selectCollectedToken(collected));
       try {
         document.execCommand(rule.command, false, rule.value);
       } catch {
@@ -1550,7 +1595,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               // Styling hook: condensed-view.css must not pin the editable
               // to its compact single-line minimum while the macro panel
               // (absolutely stretched over this region) needs the md
-              // min-h-[400px] working space below.
+              // min-h-[250px] working space below.
               data-macros-open={hasMacros && macrosOpen ? '' : undefined}
               tabIndex={disabled ? -1 : 0}
               onInput={updateContent}
@@ -1584,7 +1629,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 '[&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6',
                 '[&_blockquote]:border-border [&_blockquote]:text-muted-foreground [&_blockquote]:my-2 [&_blockquote]:border-s-4 [&_blockquote]:ps-3',
                 blockMenu && 'ps-10',
-                hasMacros && macrosOpen && 'md:min-h-[400px]',
+                // Tall enough for the docked panel's search plus a few rows
+                // without forcing the host form to scroll.
+                hasMacros && macrosOpen && 'md:min-h-[250px]',
                 disabled &&
                   'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300',
                 editorClassName

@@ -1,4 +1,4 @@
-/* Sections render through the mieweb/ui Accordion (EncounterSectionField);
+/* Sections render as plain labelled groups (EncounterSectionField);
    only the layout rhythm below is encounter-specific. */
 .encounter-visit .renderer-body {
   display: grid;
@@ -16,27 +16,6 @@
   min-width: 0;
   margin-block: 0;
   padding-block: 0;
-}
-
-/* Touch mode inflates only button:not([data-slot]); selected finding badges
-   are spans, so size them (and their remove buttons) to match. */
-.encounter-visit
-  .esheet-touch-active
-  [data-slot='encounter-common-findings']
-  [data-slot='badge'] {
-  min-height: 44px;
-  font-size: 1rem;
-}
-
-.encounter-visit
-  .esheet-touch-active
-  [data-slot='encounter-common-findings']
-  [data-slot='badge-remove'] {
-  display: inline-flex;
-  min-width: 36px;
-  min-height: 36px;
-  align-items: center;
-  justify-content: center;
 }
 
 .encounter-visit .renderer-readonly-banner {
@@ -148,9 +127,11 @@
 }
 
 /* The view switcher overlays the toolbar's inline start; reserve its lane so
-   toolbar buttons never slide underneath it (w-28 switcher + ms-1 inset). */
+   toolbar buttons never slide underneath it (w-28 switcher + ms-1 inset).
+   Margin, not padding: Kerebron sizes its overflow collapse from the
+   toolbar's offsetWidth, which includes padding but not margin. */
 .encounter-visit .encounter-mdy-editor .kb-custom-menu {
-  padding-inline-start: 7.5rem;
+  margin-inline-start: 7.5rem;
 }
 
 /* Above Kerebron's sticky menubar (z-index 1000). */

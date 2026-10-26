@@ -1651,7 +1651,7 @@ export const miewebUISafelist = [
   'md:end-0',
   'md:inset-y-0',
   'md:me-72',
-  'md:min-h-[400px]',
+  'md:min-h-[250px]',
   'md:w-72',
   'p-1.5',
   'py-1.5',

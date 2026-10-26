@@ -119,6 +119,31 @@ describe('RichTextEditor', () => {
     ).toBeInTheDocument();
   });
 
+  it('moves the caret to the end when a focused editor gets a new value', () => {
+    const props = (value: string) => (
+      <RichTextEditor value={value} onChange={() => {}} aria-label="Note" />
+    );
+    const view = renderWithTheme(props('<p>Existing line.</p>'));
+    const editor = screen.getByRole('textbox', { name: /note/i });
+    editor.focus();
+    // Park the caret at the start so the external update has to move it.
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    // A host taking over a macro insertion replaces the controlled value.
+    view.rerender(props('<p>Existing line.</p><p>Denies fever.</p>'));
+
+    const caret = window.getSelection()!.getRangeAt(0);
+    const end = document.createRange();
+    end.selectNodeContents(editor);
+    end.collapse(false);
+    expect(caret.compareBoundaryPoints(Range.START_TO_START, end)).toBe(0);
+  });
+
   describe('paste sanitisation', () => {
     // jsdom has no execCommand; the component inserts pasted HTML through it.
     const exec = vi.fn().mockReturnValue(true);
@@ -379,6 +404,55 @@ describe('RichTextEditor', () => {
       it('matches shortcuts case-insensitively', () => {
         const editor = renderEditor();
         typeAndPressSpace(editor, '.C');
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('removes the typed token, then defers to onMacroInsert when it takes over', () => {
+        const onChange = vi.fn();
+        const onMacroInsert = vi.fn().mockReturnValue(true);
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={onChange}
+            macros={macros}
+            onMacroInsert={onMacroInsert}
+            aria-label="Body"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'Body' });
+        typeAndPressSpace(editor, '.c');
+        // The token removal is published before the host is consulted, so a
+        // host that takes over computes from a token-free value.
+        expect(exec).toHaveBeenCalledWith('delete', false);
+        expect(onChange).toHaveBeenCalled();
+        expect(onMacroInsert).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'cardio' })
+        );
+        expect(exec).not.toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('inserts inline when onMacroInsert declines a typed shortcut', () => {
+        const onMacroInsert = vi.fn().mockReturnValue(false);
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            onMacroInsert={onMacroInsert}
+            aria-label="Body"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'Body' });
+        typeAndPressSpace(editor, '.c');
+        expect(exec).toHaveBeenCalledWith('delete', false);
         expect(exec).toHaveBeenCalledWith(
           'insertText',
           false,

@@ -380,10 +380,6 @@ const EncounterVisitSession = React.forwardRef<
     ).find((element) => element.dataset.fieldId === fieldId);
     setPendingSection(null);
     if (!section) return;
-    const toggle = section.querySelector<HTMLButtonElement>(
-      'button[aria-expanded="false"]'
-    );
-    toggle?.click();
     section.tabIndex = -1;
     // Sticky chrome above the form: the narrative toolbar plus the section nav.
     const chromeHeight = Array.from(
@@ -541,12 +537,6 @@ const EncounterVisitSession = React.forwardRef<
     const wrapper = Array.from(
       root.current?.querySelectorAll<HTMLElement>('[data-field-id]') ?? []
     ).find((element) => element.dataset.fieldId === resolvedNativeFieldId);
-    const section = Array.from(sections ?? []).find((element) =>
-      element.hasAttribute('data-encounter-focus')
-    );
-    section
-      ?.querySelector<HTMLButtonElement>('button[aria-expanded="false"]')
-      ?.click();
     wrapper
       ?.querySelector<HTMLElement>('input, select, [role="textbox"], button')
       ?.focus();

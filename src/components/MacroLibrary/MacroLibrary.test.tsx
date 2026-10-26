@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { MacroLibrary, type MacroGroup } from './MacroLibrary';
 
@@ -195,6 +195,52 @@ describe('MacroLibrary', () => {
         target: { value: 'cardio' },
       });
       expect(screen.getByText('Cardio — WNL')).toBeInTheDocument();
+    });
+
+    describe('long groups', () => {
+      const MANY: MacroGroup[] = [
+        {
+          id: 'library',
+          label: 'Default library',
+          macros: Array.from({ length: 7 }, (_, index) => ({
+            id: `m${index + 1}`,
+            label: `Macro ${index + 1}`,
+            content: `Content ${index + 1}`,
+          })),
+        },
+      ];
+
+      it('previews the first four macros behind a show-more row', () => {
+        renderWithTheme(<MacroLibrary groups={MANY} onSelect={() => {}} />);
+        expect(screen.getByText('Macro 4')).toBeInTheDocument();
+        expect(screen.queryByText('Macro 5')).toBeNull();
+        expect(
+          screen.getByRole('button', { name: 'Show 3 more' })
+        ).toBeInTheDocument();
+      });
+
+      it('expands the group and focuses the first revealed macro', async () => {
+        renderWithTheme(<MacroLibrary groups={MANY} onSelect={() => {}} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Show 3 more' }));
+        expect(screen.getByText('Macro 7')).toBeInTheDocument();
+        expect(
+          screen.queryByRole('button', { name: /Show \d+ more/ })
+        ).toBeNull();
+        await waitFor(() =>
+          expect(document.activeElement).toHaveTextContent('Macro 5')
+        );
+      });
+
+      it('shows every match while searching', () => {
+        renderWithTheme(<MacroLibrary groups={MANY} onSelect={() => {}} />);
+        fireEvent.change(screen.getByLabelText('Search macros'), {
+          target: { value: 'Content' },
+        });
+        expect(screen.getByText('Macro 7')).toBeInTheDocument();
+        expect(
+          screen.queryByRole('button', { name: /Show \d+ more/ })
+        ).toBeNull();
+      });
     });
   });
 

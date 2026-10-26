@@ -219,6 +219,22 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
 
   await navigation.selectOption('plan');
   const plan = page.locator('[data-field-type=encounterPlan]');
+  // The row toolbar is a hover-revealed overlay; centre the row away from
+  // the sticky footer and hover it so the toolbar accepts pointer events.
+  const hypertensionRow = plan
+    .locator('[data-slot=assessment-problem]')
+    .filter({ hasText: 'Essential hypertension' });
+  await hypertensionRow.evaluate((el) =>
+    el.scrollIntoView({ block: 'center' })
+  );
+  await hypertensionRow.hover();
+  await plan
+    .getByRole('toolbar', {
+      name: 'Actions for Essential hypertension',
+      exact: true,
+    })
+    .getByRole('button', { name: 'Add order', exact: true })
+    .click();
   const indicatedOrder = plan.getByRole('form', {
     name: 'Add order for Essential hypertension',
     exact: true,
@@ -386,20 +402,17 @@ test('a selected common finding appends once and preserves authored narrative ac
   const field = page
     .locator('[data-slot=encounter-narrative]')
     .filter({ has: narrative });
-  await expect(
-    field.getByRole('button', { name: 'Add No fever', exact: true })
-  ).toBeVisible();
+  // The row's accessible name includes its derived dot-phrase badge.
+  const noFever = field.getByRole('button', { name: /No fever/ });
+  await expect(noFever).toBeVisible();
   await page.screenshot({
     path: test.info().outputPath('common-findings-phone.png'),
   });
-  await field
-    .getByRole('button', { name: 'Add No fever', exact: true })
-    .click();
+  await noFever.click();
   await expect(narrative).toContainText(authored);
   await expect(narrative).toContainText('Denies fever.');
-  await expect(
-    field.getByRole('button', { name: 'Remove No fever', exact: true })
-  ).toBeVisible();
+  // A second explicit pick of an already-captured finding never duplicates.
+  await noFever.click();
   expect((await narrative.innerText()).match(/Denies fever\./g)).toHaveLength(
     1
   );
@@ -704,11 +717,6 @@ test('encounter visit mirrors its section navigation in RTL', async ({
   const selectBounds = await navigation.getByRole('combobox').boundingBox();
   const labelBounds = await navigation.locator('label').boundingBox();
   expect(selectBounds!.x + selectBounds!.width).toBeLessThan(labelBounds!.x);
-  const sectionBorder = await page
-    .locator('.section-field-preview > div')
-    .first()
-    .evaluate((card) => parseFloat(getComputedStyle(card).borderTopWidth));
-  expect(sectionBorder).toBeGreaterThan(0);
   await expect(page).toHaveScreenshot('encounter-desktop-rtl.png');
 });
 
@@ -736,9 +744,12 @@ test('narratives use the phone width and grow with entered content', async ({
   expect(original!.x).toBeLessThanOrEqual(12);
   expect(original!.width).toBeGreaterThanOrEqual(366);
   expect(original!.height).toBeLessThan(100);
-  await expect(
-    page.getByRole('button', { name: 'Bold', exact: true })
-  ).toBeHidden();
+  // Toolbars stay hidden until requested from the block gutter menu.
+  const hpiField = page
+    .locator('[data-slot=encounter-narrative]')
+    .filter({ has: narrative });
+  const bold = hpiField.getByRole('button', { name: 'Bold', exact: true });
+  await expect(bold).toBeHidden();
   const paragraphs = Array.from(
     { length: 12 },
     (_, index) =>
@@ -752,20 +763,20 @@ test('narratives use the phone width and grow with entered content', async ({
       (element) => element.scrollHeight <= element.clientHeight + 1
     )
   ).toBe(true);
-  await expect(
-    page.getByRole('button', { name: 'Bold', exact: true })
-  ).toBeVisible();
+  await expect(bold).toBeHidden();
   await narrative.fill('Back pain');
   expect((await narrative.boundingBox())!.height).toBeLessThan(100);
-  await narrative.press('ControlOrMeta+A');
-  await page.getByRole('button', { name: 'Bold', exact: true }).click();
-  await expect(narrative.locator('b,strong')).toContainText('Back pain');
-  await page
-    .getByRole('heading', { name: 'Encounter visit', exact: true })
+  await narrative.click();
+  await hpiField
+    .getByRole('button', { name: 'Block menu', exact: true })
     .click();
-  await expect(
-    page.getByRole('button', { name: 'Bold', exact: true })
-  ).toBeHidden();
+  await page
+    .getByRole('menuitem', { name: 'Show toolbar', exact: true })
+    .click();
+  await expect(bold).toBeVisible();
+  await narrative.press('ControlOrMeta+A');
+  await bold.click();
+  await expect(narrative.locator('b,strong')).toContainText('Back pain');
   await expect(page).toHaveScreenshot('encounter-mobile-edited.png');
 });
 
@@ -813,6 +824,9 @@ test('expanded translated controls fit a phone and keep section navigation below
     '/iframe.html?id=encounter-orders-encountervisit--localized&viewMode=story'
   );
   await expect(page.getByText('Paciente anónimo')).toBeVisible();
+  // The go-to-section scroll measures sticky chrome, so wait for the
+  // async-mounted narrative toolbar before navigating.
+  await expect(page.locator('.kb-custom-menu')).toBeVisible();
   const navigation = page.getByRole('combobox', {
     name: 'Ir a la sección del documento clínico',
   });

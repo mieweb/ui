@@ -1,5 +1,5 @@
 diff --git a/esm/CustomMenuPlugin.js b/esm/CustomMenuPlugin.js
-index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227e3bc7c2b 100644
+index d630c6893dd77f148ca72cf2b137364bbce3830c..0fa65138fb002f878dccd254910c28f0dbf9c6a3 100644
 --- a/esm/CustomMenuPlugin.js
 +++ b/esm/CustomMenuPlugin.js
 @@ -38,6 +38,12 @@ export class CustomMenuView {
@@ -149,7 +149,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
          // Clear toolbar again and re-render only visible items
          this.toolbar.innerHTML = '';
          // Track previous group index for inserting separators between groups
-@@ -1514,11 +1545,29 @@ export class CustomMenuView {
+@@ -1514,11 +1545,36 @@ export class CustomMenuView {
          }
      }
      update(view, prevState) {
@@ -180,6 +180,13 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
 +        }
 +        if (this.pinnedDropdownMenu) {
 +            this.dropdownUpdates.forEach((update) => update(state));
++        }
++        // In-place updates can widen items (e.g. the heading dropdown label
++        // tracking the caret), which the ResizeObserver cannot see because
++        // the toolbar's own box does not change. Re-split visible/overflow
++        // items whenever the refreshed content no longer fits.
++        if (this.toolbar.scrollWidth > this.toolbar.clientWidth) {
++            this.render();
 +        }
      }
      destroy() {

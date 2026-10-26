@@ -1610,7 +1610,7 @@ body.condensed
 
 /* Start at the condensed Input height — but only while the macro panel is
    closed: open, the panel stretches over this region and the editable must
-   keep its own md:min-h-[400px] working space (data-macros-open is set by
+   keep its own md:min-h-[250px] working space (data-macros-open is set by
    RichTextEditor). The border sits on the wrapper here, so the inner
    minimum subtracts it (Textarea's 1.75rem baseline − 1px per side). */
 body.condensed
