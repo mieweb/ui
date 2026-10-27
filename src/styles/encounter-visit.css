@@ -139,6 +139,18 @@
   z-index: 1001;
 }
 
+/* The switcher's lane shares the toolbar surface so the pinned row reads as
+   one continuous bar in every mode. */
+.encounter-visit .encounter-view-switch::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: 7.5rem;
+  height: 2.75rem;
+  background: var(--kb-color-surface-elevated, var(--mieweb-background, #fff));
+}
+
 /* The linked-field resolver is a full-screen takeover; sticky chrome must not
    paint over its backdrop. */
 .encounter-visit .encounter-view-switch[inert] {
@@ -150,9 +162,15 @@
 }
 
 /* Outside RichEdit the toolbar stays as the visit's constant chrome: keep it
-   visible (dimmed) and hide only the document body. */
+   visible (dimmed) and hide only the document body. Kerebron's own sticky
+   menubar has no travel room once the body collapses, so the collapsed chrome
+   itself pins instead — the surface stays opaque and only the controls dim so
+   scrolled content never bleeds through. */
 .encounter-visit .encounter-rich-collapsed .kb-custom-menu {
   z-index: 20;
+}
+
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu > * {
   opacity: 0.55;
 }
 
@@ -161,8 +179,19 @@
   display: none;
 }
 
+/* Kerebron's shell keeps its document padding (60px !important) even with the
+   body hidden; drop it so the pinned surface is exactly the toolbar, not a
+   dead band. !important is required to beat the library's own !important. */
+.encounter-visit .encounter-rich-collapsed .kb-component {
+  padding-block-end: 0 !important;
+}
+
 .encounter-visit .encounter-rich-collapsed {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   margin-block-end: 0.5rem;
+  background: var(--kb-color-surface-elevated, var(--mieweb-background, #fff));
 }
 
 .encounter-visit .encounter-mdy-view {

@@ -12,7 +12,6 @@ import {
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { Select } from '../Select';
-import { Switch } from '../Switch';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import type { RichEditorHandle } from '../RichEditor';
 import { EncounterMdyView } from './EncounterMdyView';
@@ -262,7 +261,6 @@ const EncounterVisitSession = React.forwardRef<
   const resolverTrap = React.useRef<HTMLDivElement>(null);
   const richEditor = React.useRef<RichEditorHandle>(null);
   const [showErrors, setShowErrors] = React.useState(false);
-  const [touchMode, setTouchMode] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const submissionPending = React.useRef(false);
   const [saveMessage, setSaveMessage] = React.useState('');
@@ -688,23 +686,14 @@ const EncounterVisitSession = React.forwardRef<
             </p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <p className="text-muted-foreground text-xs">
-            <bdi>
-              {m('{count} of {total} sections documented', {
-                count: documentedSections.length,
-                total: stableDefinition.sections.length,
-              })}
-            </bdi>
-          </p>
-          <Switch
-            size="sm"
-            label={m('Touch mode')}
-            labelPosition="left"
-            checked={touchMode}
-            onCheckedChange={setTouchMode}
-          />
-        </div>
+        <p className="text-muted-foreground text-xs">
+          <bdi>
+            {m('{count} of {total} sections documented', {
+              count: documentedSections.length,
+              total: stableDefinition.sections.length,
+            })}
+          </bdi>
+        </p>
       </header>
 
       <div className="min-w-0">
@@ -867,7 +856,6 @@ const EncounterVisitSession = React.forwardRef<
                 initialResponses={rendererInput.responses}
                 onReady={handleReady}
                 strict
-                touchMode={touchMode}
                 readOnly={readOnly || saving}
                 fitToContainer
                 topNavigation={false}
