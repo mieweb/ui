@@ -29,8 +29,8 @@ export function EncounterSectionField(props: EncounterSectionFieldProps) {
 
   const title = def.title || 'Section';
   return (
-    <div className="section-field-preview grid gap-3">
-      <h3 className="text-foreground m-0 flex items-center gap-2 text-base font-semibold">
+    <div className="section-field-preview grid gap-1.5">
+      <h3 className="text-foreground m-0 flex items-center gap-2 text-sm font-medium">
         <span className="min-w-0 break-words">
           {title}
           {(isRequired || isSoftRequired) && (
