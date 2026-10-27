@@ -520,8 +520,27 @@ const EncounterVisitSession = React.forwardRef<
         first.focus();
       }
     };
+    // Dropdown portals its menus (and submenus) to document.body, so a Move
+    // menu opened from resolver content lives outside the container. Follow
+    // the aria-controls chain back to the trigger to keep those menus inside
+    // the trap's focus scope for keyboard users.
+    const inScope = (target: Element): boolean => {
+      if (container.contains(target)) return true;
+      const portal = target.closest<HTMLElement>(
+        '[data-slot="dropdown-menu"], [data-slot="dropdown-submenu"]'
+      );
+      const menuId =
+        portal?.getAttribute('role') === 'menu'
+          ? portal.id
+          : portal?.querySelector('[role="menu"]')?.id;
+      if (!menuId) return false;
+      const trigger = Array.from(
+        document.querySelectorAll<HTMLElement>('[aria-controls]')
+      ).find((element) => element.getAttribute('aria-controls') === menuId);
+      return trigger ? inScope(trigger) : false;
+    };
     const trapFocus = (event: FocusEvent) => {
-      if (event.target instanceof Node && !container.contains(event.target))
+      if (event.target instanceof Element && !inScope(event.target))
         (focusable()[0] ?? container).focus();
     };
     container.addEventListener('keydown', trapTab);

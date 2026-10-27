@@ -7,7 +7,11 @@ import {
 } from '../Assessment';
 import { currentAssertion, type ConditionConcern } from '../ProblemList';
 import { useCodeLookupConfig } from '../CodeLookup/context';
-import { validateEncounterConditions, validateEncounterPlan } from './model';
+import {
+  validAssessmentItem,
+  validateEncounterConditions,
+  validateEncounterPlan,
+} from './model';
 import type { EncounterPlanValue } from './types';
 import { useEncounterMessages } from './messages';
 import {
@@ -86,6 +90,7 @@ function getPlanConcerns(state: FormState): {
         }
       }
       for (const item of assessment.items ?? []) {
+        if (!validAssessmentItem(item)) continue;
         if (
           concerns
             .get(item.concernId)

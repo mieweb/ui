@@ -754,6 +754,65 @@ describe('encounter validation', () => {
     expect(validateEncounterAssessment(value)).toEqual([]);
     expect(parseEncounterAssessment(JSON.stringify(value))).toEqual(value);
   });
+
+  it.each([
+    {},
+    [null],
+    [{ id: 'obs-1' }],
+    [{ id: '', date: '2026-10-10', text: 'Improving' }],
+    [{ id: 'obs-1', date: 'last week', text: 'Improving' }],
+    [{ id: 'obs-1', date: '2026-10-10', text: 'Improving', author: 5 }],
+  ])(
+    'rejects malformed concern observations %j instead of crashing rendering',
+    (observations) => {
+      const value = globalThis.structuredClone(
+        assessment
+      ) as EncounterAssessmentValue;
+      Object.assign(value.concerns[0], { observations });
+      expect(validateEncounterAssessment(value)).toContainEqual(
+        expect.objectContaining({
+          code: 'invalid-value',
+          path: 'concerns.0.observations',
+        })
+      );
+      // Import must preserve-and-report; ProblemList reads o.id/o.date/o.text
+      // straight off each observation in the history tooltip.
+      expect(parseEncounterAssessment(JSON.stringify(value))).toEqual({
+        concerns: [],
+        items: [],
+        orders: [],
+      });
+      expect(
+        validateEncounterConditions({ concerns: value.concerns })
+      ).toContainEqual(
+        expect.objectContaining({ path: 'concerns.0.observations' })
+      );
+    }
+  );
+
+  it('accepts dated concern observations through validation and import', () => {
+    const value = globalThis.structuredClone(assessment);
+    value.concerns[0].observations = [
+      { id: 'obs-1', date: '2026-10-10', text: 'Improving', author: 'Dr. Kim' },
+    ];
+    expect(validateEncounterAssessment(value)).toEqual([]);
+    expect(parseEncounterAssessment(JSON.stringify(value))).toEqual(value);
+  });
+
+  it('rejects a non-string assessment item note instead of rendering it', () => {
+    const value = globalThis.structuredClone(
+      assessment
+    ) as EncounterAssessmentValue;
+    Object.assign(value.items[0], { note: {} });
+    expect(validateEncounterAssessment(value)).toContainEqual(
+      expect.objectContaining({ code: 'invalid-value', path: 'items.0' })
+    );
+    expect(parseEncounterAssessment(JSON.stringify(value))).toEqual({
+      concerns: [],
+      items: [],
+      orders: [],
+    });
+  });
 });
 
 describe('calendar-valid explicit clinical dates', () => {

@@ -216,6 +216,43 @@ describe('EncounterPlanField', () => {
     expect(onResponse).not.toHaveBeenCalled();
   });
 
+  it('skips sibling assessment items with malformed notes instead of rendering them', () => {
+    const form = createFormStore();
+    form.getState().loadDefinition({
+      id: 'coded-visit',
+      pages: [
+        {
+          id: 'visit',
+          fields: [
+            { id: 'assessment', fieldType: 'encounterAssessment' },
+          ] as unknown as FieldDefinition[],
+        },
+      ],
+    });
+    form.getState().setResponse('assessment', {
+      answer: JSON.stringify({
+        concerns: [hypertensionConcern],
+        items: [
+          {
+            concernId: hypertensionConcern.concernId,
+            assertionId: hypertensionConcern.assertions[0].id,
+            note: {},
+          },
+        ],
+        orders: [],
+      }),
+    });
+    const { onResponse } = renderPlan(
+      { orders: [codedOrder] },
+      { props: { form } }
+    );
+    // The concern projects from its current assertion; the malformed item is
+    // never handed to Assessment (which renders item.note as a React child).
+    expect(screen.getByText('Essential hypertension')).toBeInTheDocument();
+    expect(screen.getByText('Hemoglobin A1c')).toBeInTheDocument();
+    expect(onResponse).not.toHaveBeenCalled();
+  });
+
   it.each([{ isPreview: false }, { isEnabled: false }, { isReadOnly: true }])(
     'retains coded orders and prevents edits in eSheet state %j',
     (props) => {

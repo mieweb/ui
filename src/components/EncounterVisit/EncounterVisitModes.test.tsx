@@ -312,6 +312,72 @@ describe('EncounterVisit mode synchronization', () => {
     );
   });
 
+  it('keeps portaled Move menus reachable inside the linked-field resolver focus trap', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    render(
+      <EncounterVisit
+        ref={ref}
+        definition={{
+          id: 'plan-test',
+          title: 'Anonymous visit',
+          sections: [
+            { id: 'hpi', title: 'HPI', kind: 'narrative' },
+            {
+              id: 'assessment',
+              title: 'Assessment',
+              kind: 'assessment',
+              requireCoding: false,
+            },
+          ],
+        }}
+      />
+    );
+    await screen.findByRole('textbox', { name: 'HPI' });
+    act(() => {
+      ref.current!.getTools().updateSection('assessment', {
+        concerns: ['bp', 'back'].map((concernId) => ({
+          concernId,
+          clinicalStatus: 'active',
+          assertions: [
+            {
+              id: `${concernId}-today`,
+              date: '2026-10-10',
+              text: concernId === 'bp' ? 'Hypertension' : 'Back pain',
+              verificationStatus: 'confirmed',
+            },
+          ],
+        })),
+        items: [
+          { concernId: 'bp', assertionId: 'bp-today' },
+          { concernId: 'back', assertionId: 'back-today' },
+        ],
+        orders: [
+          {
+            orderId: 'a1c',
+            type: 'lab',
+            display: 'Hemoglobin A1c',
+            concernId: 'bp',
+          },
+        ],
+      });
+    });
+    selectMode('RichEdit');
+    // The mock editor activates the last linked field — the assessment section.
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit linked vitals' })
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'Assessment' });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Move Hemoglobin A1c' })
+    );
+    // The menu portals to document.body; the trap must treat it as in scope
+    // instead of yanking focus back and closing it on keyboard entry.
+    const item = await screen.findByRole('menuitem', { name: /Move to:/ });
+    expect(dialog.contains(item)).toBe(false);
+    act(() => item.focus());
+    expect(document.activeElement).toBe(item);
+  });
+
   it('restores a portable document and allows read-only mode switching without changing answers', async () => {
     const original = createEncounterSnapshot(definition, {
       [getEncounterFieldId('hpi')]: { answer: 'Back pain' },

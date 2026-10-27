@@ -1,4 +1,5 @@
 import { currentAssertion, type ConditionConcern } from '../ProblemList';
+import type { AssessmentItem } from '../Assessment';
 import type { FieldResponse } from '@esheet/core';
 import { DateTime } from 'luxon';
 import { isEncounterDate } from './date';
@@ -425,6 +426,16 @@ function duplicateIds(values: Record<string, unknown>[], key: string): boolean {
   return new Set(values.map((value) => value[key])).size !== values.length;
 }
 
+/** Shape guard shared with Plan's sibling-item projection: ids plus an optional string note. */
+export function validAssessmentItem(value: unknown): value is AssessmentItem {
+  return (
+    record(value) &&
+    nonempty(value.concernId) &&
+    nonempty(value.assertionId) &&
+    optionalStrings(value, ['note'])
+  );
+}
+
 export function validateEncounterAssessment(
   value: unknown,
   fieldId = '',
@@ -501,6 +512,23 @@ export function validateEncounterAssessment(
         `${path}.relationships`
       );
     }
+    if (
+      concern.observations !== undefined &&
+      (!Array.isArray(concern.observations) ||
+        concern.observations.some(
+          (observation: unknown) =>
+            !record(observation) ||
+            !nonempty(observation.id) ||
+            !nonempty(observation.text) ||
+            !isEncounterDate(observation.date) ||
+            !optionalStrings(observation, ['author'])
+        ))
+    ) {
+      add(
+        'Concern observations must be an array of records with an id, text and a valid YYYY-MM-DD date.',
+        `${path}.observations`
+      );
+    }
     const assertionIds = new Set<string>();
     concerns.set(concern.concernId, assertionIds);
     concern.assertions.forEach((assertion: unknown, assertionIndex: number) => {
@@ -567,12 +595,7 @@ export function validateEncounterAssessment(
   const itemIds = new Set<string>();
   value.items.forEach((item: unknown, index: number) => {
     const path = `items.${index}`;
-    if (
-      !record(item) ||
-      !nonempty(item.concernId) ||
-      !nonempty(item.assertionId) ||
-      !optionalStrings(item, ['note'])
-    ) {
+    if (!validAssessmentItem(item)) {
       add('Assessment items require concern and assertion ids.', path);
       return;
     }
