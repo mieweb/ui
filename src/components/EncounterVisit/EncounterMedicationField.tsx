@@ -456,7 +456,11 @@ export function EncounterMedicationField({
           ))}
           {!readOnly && !draft && (codeLookup || !requireCoding) && (
             <ClinicalAddButton
-              label={cards.length > 0 ? m('Add another') : m('Add medication')}
+              label={
+                cards.length > 0
+                  ? m('Add another medication')
+                  : m('Add medication')
+              }
               onClick={() =>
                 setDraft({
                   id: globalThis.crypto.randomUUID(),

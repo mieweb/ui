@@ -250,6 +250,8 @@ export interface AssessmentProps extends Omit<
   addModes?: readonly AssessmentAddMode[];
   /** Accessible label for the global capture form; distinguish multiple editors on one page. */
   addFormLabel?: string;
+  /** Rendered at the start of the global add row (e.g. an assertion date input). */
+  addFormStart?: React.ReactNode;
   /** Remove a problem from this visit's assessment, not its longitudinal record. */
   onRemoveAssessment?: (item: AssessmentItem) => void;
   /**
@@ -865,6 +867,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       orderActions = ['edit', 'remove', 'move'],
       addModes,
       addFormLabel = 'Add concern or order',
+      addFormStart,
       onRemoveAssessment,
       onAddOrder,
       onAddAssessment,
@@ -1414,8 +1417,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               <div
                 role="form"
                 aria-label={m(addFormLabel)}
-                className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
+                className="border-border bg-muted/40 flex flex-col items-stretch gap-2 rounded-md border border-dashed p-2 sm:flex-row sm:flex-wrap sm:items-end"
               >
+                {addFormStart}
                 <select
                   aria-label={m('What to add')}
                   data-slot="select-trigger"

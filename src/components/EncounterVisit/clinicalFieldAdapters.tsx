@@ -295,8 +295,8 @@ export function EncounterAssertionDateInput({
     );
   }, [date]);
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-2">
-      <label htmlFor={id} className="text-sm">
+    <div className="flex min-w-0 flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-medium">
         {m('Assertion date')}
       </label>
       <DateInput

@@ -236,10 +236,10 @@ export function EncounterConditionsField({
               </Button>
             )}
           </div>
-          <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <EncounterAssertionDateInput {...assertionDate} />
             {assertionDate.valid && Lookup && codeLookup && (
-              <div className="min-w-0 flex-1 basis-56">
+              <div className="min-w-0 flex-1 sm:basis-56">
                 <Lookup
                   key={editing ? editing.concernId : 'add'}
                   indexUrl={codeLookup.indexUrl}

@@ -146,12 +146,14 @@ export function EncounterAssessmentField({
   }
   return (
     <section className="space-y-2">
-      {!readOnly && <EncounterAssertionDateInput {...assertionDate} />}
       <Assessment
         concerns={concerns}
         items={value.items}
         orders={value.orders}
         title={null}
+        addFormStart={
+          !readOnly && <EncounterAssertionDateInput {...assertionDate} />
+        }
         aria-label={definition.question ?? m('Assessment and plan')}
         className="rounded-none border-0 bg-transparent shadow-none [&_.border-dashed]:rounded-none [&_.border-dashed]:border-0 [&_.border-dashed]:bg-transparent [&_.border-dashed]:p-0 [&_.min-w-64]:min-w-0 [&_[data-slot=assessment-problem]]:rounded-none [&_[data-slot=assessment-problem]]:border-0 [&_[data-slot=assessment-problem]]:px-0 [&_[data-slot=assessment-problem]>ul]:ms-0 [&_[data-slot=assessment-problem]>ul]:border-0 [&_[data-slot=assessment-problem]>ul]:ps-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11 [&_select]:min-h-11 [&>[data-slot=card-content]]:p-0 [&>[data-slot=card-content]>section]:border-0 [&>[data-slot=card-content]>section]:bg-transparent [&>[data-slot=card-content]>section]:px-0"
         readOnly={readOnly}
