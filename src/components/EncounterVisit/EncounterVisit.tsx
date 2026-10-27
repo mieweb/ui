@@ -794,7 +794,9 @@ const EncounterVisitSession = React.forwardRef<
             <nav
               inert={resolverField !== null}
               aria-label={m('Visit sections')}
-              className="encounter-section-nav bg-background sticky top-11 z-20 py-1"
+              // Jump navigation earns its keep only on small screens where the
+              // full visit is a long scroll; desktop shows sections in view.
+              className="encounter-section-nav bg-background sticky top-11 z-20 py-1 sm:hidden"
             >
               <div className="flex items-center gap-2">
                 <label

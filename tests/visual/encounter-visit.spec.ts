@@ -80,10 +80,11 @@ test('encounter visit on desktop', async ({ page }) => {
   await expect(
     page.getByRole('textbox', { name: 'History of present illness' })
   ).toContainText(/back pain/);
+  // The go-to-section nav is a small-screen affordance only.
+  await expect(
+    page.getByRole('navigation', { name: 'Visit sections' })
+  ).toBeHidden();
   await expect(page).toHaveScreenshot('encounter-desktop.png');
-  await page
-    .getByRole('combobox', { name: 'Go to section' })
-    .selectOption('vitals');
   await page.getByRole('button', { name: 'Add vitals set' }).click();
   await page.getByLabel('Systolic', { exact: true }).fill('142');
   await page.getByLabel('Diastolic', { exact: true }).fill('88');
@@ -696,6 +697,12 @@ test('encounter visit mirrors its section navigation in RTL', async ({
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${story}&globals=direction:rtl`);
+  await expect(
+    page.getByRole('textbox', { name: 'History of present illness' })
+  ).toContainText(/back pain/);
+  await expect(page).toHaveScreenshot('encounter-desktop-rtl.png');
+  // The section nav only renders on small screens.
+  await page.setViewportSize({ width: 390, height: 844 });
   const navigation = page.getByRole('navigation', { name: 'Visit sections' });
   await expect(navigation).toHaveCSS('direction', 'rtl');
   await expect(navigation).toHaveCSS('border-left-width', '0px');
@@ -703,7 +710,6 @@ test('encounter visit mirrors its section navigation in RTL', async ({
   const selectBounds = await navigation.getByRole('combobox').boundingBox();
   const labelBounds = await navigation.locator('label').boundingBox();
   expect(selectBounds!.x + selectBounds!.width).toBeLessThan(labelBounds!.x);
-  await expect(page).toHaveScreenshot('encounter-desktop-rtl.png');
 });
 
 test('encounter visit follows the dark Enterprise Health theme', async ({
