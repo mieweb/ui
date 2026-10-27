@@ -161,17 +161,28 @@
   visibility: hidden;
 }
 
-/* Outside RichEdit the toolbar stays as the visit's constant chrome: keep it
-   visible (dimmed) and hide only the document body. Kerebron's own sticky
-   menubar has no travel room once the body collapses, so the collapsed chrome
-   itself pins instead — the surface stays opaque and only the controls dim so
-   scrolled content never bleeds through. */
+/* Outside RichEdit the toolbar stays as the visit's constant chrome, but it
+   empties down to a bare bar carrying only the view switcher. Kerebron's own
+   sticky menubar has no travel room once the body collapses, so the collapsed
+   chrome itself pins instead — the surface stays opaque so scrolled content
+   never bleeds through. The controls keep their layout box (visibility, not
+   display) so the bar's height never jumps between modes. */
 .encounter-visit .encounter-rich-collapsed .kb-custom-menu {
   z-index: 20;
 }
 
+/* Returning to RichEdit fades the controls back into view (base.css zeroes
+   transition durations under prefers-reduced-motion). */
+.encounter-visit .encounter-rich-chrome .kb-custom-menu > * {
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
 .encounter-visit .encounter-rich-collapsed .kb-custom-menu > * {
-  opacity: 0.55;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(4px);
 }
 
 .encounter-visit .encounter-rich-collapsed .kb-custom-menu__editor,

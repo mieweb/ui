@@ -745,7 +745,9 @@ const EncounterVisitSession = React.forwardRef<
             />
           </div>
           {/* Always mounted: the narrative toolbar is the visit's constant
-              chrome. Outside RichEdit only the document body is hidden. */}
+              chrome. Outside RichEdit the document body is hidden and the bar
+              empties to just the view switcher; the controls fade back in
+              when RichEdit returns. */}
           <div
             inert={mode !== 'rich' || resolverField !== null}
             className={cn(
