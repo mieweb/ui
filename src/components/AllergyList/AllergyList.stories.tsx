@@ -20,7 +20,7 @@ The **allergy / intolerance list**, following the same layered pattern as [Medic
 |---|---|
 | \`AllergyManager\` | You want the whole workflow — the allergy editor (Correct / Add with coded drug allergens), the note dialog, remove, reorder, the NKA flow and an optional \`inlineAddSearch\` bar. Uncontrolled (\`defaultAllergies\`) or controlled (\`allergies\` + \`onChange\`) |
 | \`AllergyList\` | You need full control and will supply your own dialogs. Presentational and controlled: \`allergies\` in; \`onAction(allergy, 'correct' \\| 'note' \\| 'remove')\`, \`onReorder\`, \`onAdd\`, \`onNoKnownAllergiesChange\` out |
-| \`EncounterVisit\` | You need allergy capture alongside narrative, vitals, medications, conditions and plan in one eSheet visit, with MDY review and MCP tools — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs). Its allergy field composes \`AllergyManager\` with coded capture enabled |
+| \`EncounterVisit\` | You need allergy capture alongside narrative, vitals, medications, conditions and plan in one eSheet visit, with MDY review and MCP tools — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs). Its allergy field captures the same \`Allergy\` model through inline cards with coded capture enabled; it does not include this manager's dialogs or reordering |
 | \`registerAllergyListFieldType()\` | The list is a question inside an eSheet form — [AllergyListField (eSheet)](?path=/docs/clinical-lists-allergylistfield-esheet--docs) |
 
 The \`Allergy\` model loosely follows FHIR \`AllergyIntolerance\`: \`allergen\` (+ optional \`code\`), \`type\` (\`drug · food · environmental · other\` — the grouping), \`kind\` (\`allergy\` vs \`intolerance\`, because an intolerance mislabelled as an allergy causes unnecessary avoidance of first-line drugs), \`reaction\`, \`severity\` (badge colour), \`onsetDate\`, \`note\`, \`inactive\` (struck through). The empty state is deliberately **tri-state**: \`noKnownAllergies\` undefined renders "Allergy status not recorded." until the *Confirm: no known allergies* button records **✓ No known allergies (NKA)** — an empty list must never silently read as "no allergies". Drug-allergen coding is injected via \`codeLookup={{ component: CodeLookup, indexUrl }}\` (or an ambient \`CodeLookupProvider\`); food / environmental allergens permit free text by default. Enable \`AllergyManager requireCode\` to require coded new allergens: non-drug search then uses SNOMED substance concepts in the host’s condition catalog, and capture requires a catalog provider. EncounterVisit enables this policy by default. \`ALLERGY_TYPE_LABELS\` and the model types are exported.
@@ -35,7 +35,7 @@ The \`Allergy\` model loosely follows FHIR \`AllergyIntolerance\`: \`allergen\` 
 
 - You only need a red **allergy banner** on a header — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)'s \`allergies\` + \`showAllergyBanner\` renders name pills; use \`AllergyList readOnly\` only when grouping and severity matter.
 - The list is **medications** to reconcile — [MedicationList](?path=/docs/clinical-lists-medicationlist--docs).
-- You are documenting a **whole visit** with linked clinical sections, report review and MCP access — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) composes AllergyManager and stores its answer in the shared visit response.
+- You are documenting a **whole visit** with linked clinical sections, report review and MCP access — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) captures allergies through inline cards over the shared \`Allergy\` model and stores its answer in the shared visit response.
 - You need allergy checking against orders (drug–allergy interaction alerts) — nothing here cross-references medications.
 
 ### Example
@@ -82,7 +82,7 @@ When a first allergy is recorded while NKA is set, \`AllergyManager\` calls \`on
         {
           type: 'composes with',
           target: 'encounter-orders-encountervisit',
-          why: 'EncounterVisit composes AllergyManager over this list for coded allergy capture and explicit NKA within a complete eSheet visit, sharing responses with MDY and MCP.',
+          why: 'EncounterVisit captures the shared Allergy model through inline cards with coded capture and explicit NKA within a complete eSheet visit, sharing responses with MDY and MCP; use AllergyManager directly for the dialog and reorder workflow.',
         },
         {
           type: 'uses',

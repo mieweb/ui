@@ -1,6 +1,7 @@
 import { act, fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { AssessmentOrder } from '../Assessment';
+import { createFormStore, type FieldDefinition } from '@esheet/core';
 import type { FieldResponse } from '@esheet/core';
 import { EncounterConditionsField } from './EncounterConditionsField';
 import { EncounterPlanField } from './EncounterPlanField';
@@ -364,6 +365,57 @@ describe('EncounterAssessmentField coded capture', () => {
       concerns: [],
       items: [],
       orders: [{ ...codedOrder, concernId: undefined }],
+    });
+  });
+
+  it('unlinks plan orders that referenced a removed assessment-created concern', () => {
+    const form = createFormStore();
+    form.getState().loadDefinition({
+      id: 'coded-visit',
+      pages: [
+        {
+          id: 'visit',
+          fields: [
+            { id: 'plan', fieldType: 'encounterPlan' },
+          ] as unknown as FieldDefinition[],
+        },
+      ],
+    });
+    form.getState().setResponse('plan', {
+      answer: JSON.stringify({
+        orders: [
+          {
+            orderId: 'ecg',
+            type: 'procedure',
+            display: 'Electrocardiogram',
+            concernId: 'hypertension',
+          },
+        ],
+      }),
+    });
+    renderClinicalField(
+      EncounterAssessmentField,
+      'encounterAssessment',
+      {
+        concerns: [hypertensionConcern],
+        items: [
+          { concernId: 'hypertension', assertionId: 'hypertension-assertion' },
+        ],
+        orders: [],
+      },
+      { props: { form } }
+    );
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Remove Essential hypertension from assessment',
+      })
+    );
+    // The visit-level validator requires plan orders to link to an existing
+    // concern, so the dangling reference must be cleared to keep Save open.
+    expect(JSON.parse(form.getState().responses.plan!.answer!)).toEqual({
+      orders: [
+        { orderId: 'ecg', type: 'procedure', display: 'Electrocardiogram' },
+      ],
     });
   });
 

@@ -230,17 +230,77 @@ export function getExternalEncounterConditions(
 }
 
 /**
- * Deleting a Conditions entry repairs assessment answers that referenced it:
- * the assessment row is removed and linked orders are kept but unlinked.
- * Without this, the dangling reference turns the whole assessment into an
- * uneditable raw-answer error that blocks Save with no UI route to repair it.
+ * Deleting a concern (from Conditions or an assessment section) repairs the
+ * answers that referenced it: assessment rows are removed with their linked
+ * orders kept but unlinked, and plan orders are unlinked when the concern no
+ * longer resolves anywhere in the visit. Without this, the dangling reference
+ * turns the assessment into an uneditable raw-answer error or fails the plan
+ * order's visit-level link check, blocking Save with no UI route to repair it.
  */
-export function repairEncounterAssessmentReferences(
+export function repairEncounterConcernReferences(
   state: import('@esheet/core').FormState,
   concernId: string
 ): void {
+  // The canonical validator resolves plan links against every Conditions and
+  // assessment answer, so plan orders stay linked while the id exists anywhere.
+  let stillResolves = false;
   for (const { definition } of Object.values(state.normalized.byId)) {
-    if (String(definition.fieldType) !== 'encounterAssessment') continue;
+    const fieldType = String(definition.fieldType);
+    if (
+      fieldType !== 'encounterConditions' &&
+      fieldType !== 'encounterAssessment'
+    )
+      continue;
+    const answer = state.responses[definition.id]?.answer;
+    if (!answer) continue;
+    try {
+      const parsed: unknown = JSON.parse(answer);
+      const concerns = (parsed as { concerns?: { concernId?: string }[] })
+        ?.concerns;
+      if (
+        Array.isArray(concerns) &&
+        concerns.some((concern) => concern?.concernId === concernId)
+      ) {
+        stillResolves = true;
+        break;
+      }
+    } catch {
+      // The source field retains and reports malformed data.
+    }
+  }
+  for (const { definition } of Object.values(state.normalized.byId)) {
+    const fieldType = String(definition.fieldType);
+    if (fieldType === 'encounterPlan' && !stillResolves) {
+      const response = state.responses[definition.id];
+      if (!response?.answer) continue;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(response.answer);
+      } catch {
+        continue; // The plan field retains and reports malformed data.
+      }
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+        continue;
+      const value = parsed as Partial<import('./types').EncounterPlanValue>;
+      const orders = Array.isArray(value.orders) ? value.orders : [];
+      if (!orders.some((order) => order?.concernId === concernId)) continue;
+      state.setResponse(
+        definition.id,
+        clinicalAnswerResponse(
+          response,
+          JSON.stringify({
+            ...value,
+            orders: orders.map((order) =>
+              order?.concernId === concernId
+                ? { ...order, concernId: undefined }
+                : order
+            ),
+          })
+        )
+      );
+      continue;
+    }
+    if (fieldType !== 'encounterAssessment') continue;
     const response = state.responses[definition.id];
     if (!response?.answer) continue;
     let parsed: unknown;

@@ -14,6 +14,7 @@ import {
   useEncounterAssertionDate,
   getExternalEncounterConditions,
   matchingConditionCode,
+  repairEncounterConcernReferences,
   useClinicalFormState,
 } from './clinicalFieldAdapters';
 
@@ -230,7 +231,10 @@ export function EncounterAssessmentField({
               }
             : undefined
         }
-        onRemoveAssessment={(item) =>
+        onRemoveAssessment={(item) => {
+          const wasLocal = currentValue.current.concerns.some(
+            (concern) => concern.concernId === item.concernId
+          );
           commit((next) => ({
             ...next,
             // Removing the row also drops its local concern record — nothing
@@ -247,8 +251,12 @@ export function EncounterAssessmentField({
                 ? { ...order, concernId: undefined }
                 : order
             ),
-          }))
-        }
+          }));
+          // Dropping a local concern can strand references in other sections
+          // (plan orders link by concernId); repair them so Save stays open.
+          if (wasLocal && canEdit.current)
+            repairEncounterConcernReferences(form.getState(), item.concernId);
+        }}
         onAddOrder={
           codeLookup || !requireCoding
             ? (item, order) => {

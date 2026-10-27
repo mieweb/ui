@@ -21,7 +21,7 @@ import {
   useEncounterAssertionDate,
   matchingConditionCode,
   reorderClinicalEntries,
-  repairEncounterAssessmentReferences,
+  repairEncounterConcernReferences,
   useClinicalFormState,
 } from './clinicalFieldAdapters';
 
@@ -192,7 +192,7 @@ export function EncounterConditionsField({
           // Auto-repair assessment rows that referenced the deleted concern
           // so the visit never holds a dangling reference blocking Save.
           if (canEdit.current)
-            repairEncounterAssessmentReferences(
+            repairEncounterConcernReferences(
               form.getState(),
               concern.concernId
             );

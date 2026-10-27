@@ -111,6 +111,7 @@ describe('EncounterConditionsField', () => {
           fields: [
             { id: 'assessment', fieldType: 'encounterAssessment' },
             { id: 'local', fieldType: 'encounterAssessment' },
+            { id: 'plan', fieldType: 'encounterPlan' },
           ] as unknown as FieldDefinition[],
         },
       ],
@@ -143,6 +144,19 @@ describe('EncounterConditionsField', () => {
     form
       .getState()
       .setResponse('local', { answer: JSON.stringify(localValue) });
+    // Plan links resolve against every section, so the surviving local
+    // concern keeps this order linked after the Conditions entry is deleted.
+    const planValue = {
+      orders: [
+        {
+          orderId: 'ecg',
+          type: 'procedure',
+          display: 'Electrocardiogram',
+          concernId: 'hypertension',
+        },
+      ],
+    };
+    form.getState().setResponse('plan', { answer: JSON.stringify(planValue) });
     renderConditions({ concerns: [hypertensionConcern] }, { props: { form } });
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(JSON.parse(form.getState().responses.assessment!.answer!)).toEqual({
@@ -152,6 +166,9 @@ describe('EncounterConditionsField', () => {
     });
     expect(JSON.parse(form.getState().responses.local!.answer!)).toEqual(
       localValue
+    );
+    expect(JSON.parse(form.getState().responses.plan!.answer!)).toEqual(
+      planValue
     );
   });
 
