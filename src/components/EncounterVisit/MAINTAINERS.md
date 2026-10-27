@@ -49,7 +49,8 @@ text replacement; do not infer a selection from prose that happens to match.
 
 Clinical sections compose the existing healthcare components:
 inline prescription cards built on `MedicationEditor`'s field helpers,
-`AllergyManager`, `ProblemList` for
+inline allergy cards (with explicit no-known-allergies capture),
+`ProblemList` for
 Conditions, and
 `Assessment` for Assessment and Plan. The Plan variant captures coded medication,
 lab, procedure and referral orders, with optional supplementary narrative.

@@ -225,9 +225,11 @@ describe('Encounter coded clinical fields', () => {
       'encounterAllergies'
     );
     fireEvent.click(
-      screen.getByRole('button', { name: /no known allergies/i })
+      screen.getByRole('checkbox', { name: 'No known allergies (NKA)' })
     );
     expect(latest()).toEqual({ allergies: [], noKnownAllergies: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Add allergy' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
     fireEvent.click(
       screen.getByRole('button', { name: 'Select incomplete result' })
     );
@@ -248,23 +250,25 @@ describe('Encounter coded clinical fields', () => {
     expect(screen.queryByText('No known allergies (NKA)')).toBeNull();
   });
 
-  it('codes non-drug allergens through SNOMED substance search in the AllergyManager editor', () => {
-    const { latest } = renderField(EncounterAllergyField, 'encounterAllergies');
-    fireEvent.click(screen.getByRole('button', { name: 'Add allergy…' }));
-    const dialog = within(screen.getByRole('dialog'));
-    fireEvent.click(dialog.getByRole('combobox', { name: 'Type' }));
-    fireEvent.click(screen.getByRole('option', { name: 'Food' }));
-    expect(dialog.getByTestId('catalog-domain')).toHaveTextContent('condition');
-    expect(dialog.getByTestId('catalog-system')).toHaveTextContent('SNOMED US');
-    expect(dialog.getByRole('button', { name: 'Save' })).toBeDisabled();
-    expect(dialog.queryByRole('button', { name: 'Use free text' })).toBeNull();
-    fireEvent.click(
-      dialog.getByRole('button', { name: 'Select substance result' })
+  it('codes non-drug allergens through SNOMED substance search in the inline allergy card', () => {
+    const { onResponse, latest } = renderField(
+      EncounterAllergyField,
+      'encounterAllergies'
     );
-    fireEvent.change(dialog.getByLabelText('Reaction'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Add allergy' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.click(screen.getByRole('combobox', { name: 'Type' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Food' }));
+    expect(screen.getByTestId('catalog-domain')).toHaveTextContent('condition');
+    expect(screen.getByTestId('catalog-system')).toHaveTextContent('SNOMED US');
+    expect(onResponse).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Use free text' })).toBeNull();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Select substance result' })
+    );
+    fireEvent.change(screen.getByLabelText('Reaction'), {
       target: { value: 'Hives' },
     });
-    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toMatchObject({
       allergies: [
         {
@@ -317,7 +321,7 @@ describe('Encounter coded clinical fields', () => {
         screen.getByText(/Connect .* terminology catalog/)
       ).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Other…' })).toBeNull();
-      expect(screen.queryByRole('button', { name: 'Add allergy…' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Add allergy' })).toBeNull();
     }
   );
 
@@ -445,8 +449,14 @@ describe('optional coding in encounter medication and allergy adapters', () => {
       const { latest } = renderField(component, fieldType, undefined, {
         requireCoding: false,
       });
-      if (fieldType === 'encounterMedications')
-        fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
+      fireEvent.click(
+        screen.getByRole('button', {
+          name:
+            fieldType === 'encounterMedications'
+              ? 'Add medication'
+              : 'Add allergy',
+        })
+      );
       fireEvent.click(screen.getByRole('button', { name: 'Use free text' }));
       const entries = latest<Record<string, Record<string, unknown>[]>>()[key];
       expect(entries[0][value]).toBe('Unknown drug');
@@ -471,12 +481,20 @@ describe('optional coding in encounter medication and allergy adapters', () => {
     expect(medications[0]).toMatchObject({ name: 'Aspirin' });
     expect(medications[0]).not.toHaveProperty('code');
   });
-  it('offers the proper uncoded allergy editor without a catalog only when configured', () => {
-    renderField(EncounterAllergyField, 'encounterAllergies', undefined, {
-      requireCoding: false,
-      catalog: false,
+  it('captures uncoded allergies through the inline allergen input without a catalog only with requireCoding false', () => {
+    const { latest } = renderField(
+      EncounterAllergyField,
+      'encounterAllergies',
+      undefined,
+      { requireCoding: false, catalog: false }
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add allergy' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.change(screen.getByLabelText('Allergen'), {
+      target: { value: 'Pollen' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Add allergy…' }));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    const { allergies } = latest<{ allergies: Record<string, unknown>[] }>();
+    expect(allergies[0]).toMatchObject({ allergen: 'Pollen' });
+    expect(allergies[0]).not.toHaveProperty('code');
   });
 });

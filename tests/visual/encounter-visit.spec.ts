@@ -136,22 +136,6 @@ test('encounter visit on a phone with repeated coordinated BP', async ({
       () => document.documentElement.scrollWidth <= window.innerWidth
     )
   ).toBe(true);
-  for (const [sectionId, fieldType] of [
-    ['allergies', 'encounterAllergies'],
-  ]) {
-    await page
-      .getByRole('combobox', { name: 'Go to section' })
-      .selectOption(sectionId);
-    const clinicalList = page.locator(
-      `[data-field-type=${fieldType}] [data-slot=card]`
-    );
-    await expect(clinicalList).toHaveCSS('border-top-width', '0px');
-    await expect(clinicalList.locator('[data-slot=card-content]')).toHaveCSS(
-      'padding-inline-start',
-      '0px'
-    );
-    expect((await clinicalList.boundingBox())!.x).toBeLessThanOrEqual(12);
-  }
 });
 
 test('coded healthcare capture survives mode changes, MCP edits and portable MDY', async ({
@@ -183,30 +167,25 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   await navigation.selectOption('allergies');
   const allergies = page.locator('[data-field-type=encounterAllergies]');
   await allergies
-    .getByRole('button', { name: 'Add allergy…', exact: true })
+    .getByRole('button', { name: 'Add allergy', exact: true })
     .click();
-  const allergyEditor = page.getByRole('dialog', {
-    name: 'Add Allergy',
-    exact: true,
-  });
-  await allergyEditor
+  await allergies
     .getByRole('combobox', { name: 'Type', exact: true })
     .click();
   await page.getByRole('option', { name: 'Food', exact: true }).click();
-  await allergyEditor
+  await allergies
     .locator('[data-slot=sample-clinical-catalog] input')
     .fill('Peanut');
-  await allergyEditor
+  await allergies
     .getByRole('button', {
       name: 'Select Peanut substance (SNOMED US 762952008)',
       exact: true,
     })
     .click();
-  await allergyEditor.getByLabel('Reaction', { exact: true }).fill('Hives');
-  await allergyEditor
-    .getByRole('button', { name: 'Save', exact: true })
-    .click();
-  await expect(allergies).toContainText('Peanut substance');
+  await allergies.getByLabel('Reaction', { exact: true }).fill('Hives');
+  // The picked allergen lives in the card's search input; the hint line
+  // carries the coding as text.
+  await expect(allergies).toContainText('Coded: SNOMED US 762952008');
 
   await navigation.selectOption('conditions');
   const conditions = page.locator('[data-field-type=encounterConditions]');
