@@ -104,6 +104,17 @@ function ensureFields(): void {
   registerEncounterFieldTypes();
 }
 
+// eSheet registers its stock field components once, inside the first
+// EsheetRenderer render — after ensureFields() in our render body — clobbering
+// the encounter section override. Today that is harmless by accident of
+// timing: fields only mount after the renderer's passive init effect, and the
+// onReady snapshot update re-renders this component (re-taking the override)
+// in the same batch. The settling pass below removes the timing dependency:
+// the first mounted visit re-asserts the override pre-paint and remounts its
+// renderer, so the override wins the first paint no matter when eSheet runs
+// its default registration. Every later render self-heals via ensureFields().
+let esheetDefaultsSettled = false;
+
 /** A configurable visit document, backed by a single native eSheet renderer. */
 export const EncounterVisit = React.forwardRef<
   EncounterVisitHandle,
@@ -224,6 +235,16 @@ const EncounterVisitSession = React.forwardRef<
   ref
 ) {
   ensureFields();
+  const [fieldsSettled, setFieldsSettled] = React.useState(
+    () => esheetDefaultsSettled
+  );
+  React.useLayoutEffect(() => {
+    if (!esheetDefaultsSettled) {
+      esheetDefaultsSettled = true;
+      ensureFields();
+    }
+    setFieldsSettled(true);
+  }, []);
   const m = useEncounterMessages();
   // Content identity prevents a host's inline config object from resetting answers.
   const definitionJson = JSON.stringify(definition);
@@ -851,6 +872,7 @@ const EncounterVisitSession = React.forwardRef<
             )}
             <EncounterSectionContext.Provider value={true}>
               <EsheetRenderer
+                key={fieldsSettled ? 'settled' : 'priming'}
                 ref={renderer}
                 formDataInput={rendererInput.definition}
                 initialResponses={rendererInput.responses}
