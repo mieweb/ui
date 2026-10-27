@@ -303,14 +303,20 @@ export function EncounterAllergyField({
     Boolean(error);
   const canEdit = React.useRef(!readOnly);
   canEdit.current = !readOnly;
+  const currentValue = React.useRef(value);
+  currentValue.current = value;
   const definition = field.definition as { question?: string };
-  const commitValue = (next: AllergyValue) => {
+  const commitValue = (update: (next: AllergyValue) => AllergyValue) => {
     if (
       !canEdit.current ||
       form.getState().readOnly ||
       form.getState().disposed
     )
       return;
+    // Advance the ref so a second commit in the same event builds on this
+    // update instead of the stale render value.
+    const next = update(currentValue.current);
+    currentValue.current = next;
     onResponse(
       clinicalAnswerResponse(
         form.getState().responses[field.definition.id] ?? response,
@@ -318,13 +324,16 @@ export function EncounterAllergyField({
       )
     );
   };
-  const commit = (allergies: Allergy[]) =>
-    commitValue({
-      ...value,
-      allergies,
-      // Any recorded allergy clears the no-known-allergies flag.
-      noKnownAllergies:
-        allergies.length > 0 ? undefined : value.noKnownAllergies,
+  const commit = (update: (next: AllergyValue) => Allergy[]) =>
+    commitValue((current) => {
+      const allergies = update(current);
+      return {
+        ...current,
+        allergies,
+        // Any recorded allergy clears the no-known-allergies flag.
+        noKnownAllergies:
+          allergies.length > 0 ? undefined : current.noKnownAllergies,
+      };
     });
   const patchAllergy = (allergy: Allergy, patch: Partial<Allergy>) => {
     if (draft && allergy.id === draft.id) {
@@ -333,11 +342,11 @@ export function EncounterAllergyField({
         // Named — promote the draft into the committed answer. The card
         // keeps its key (the id), so focus and lookup state survive.
         setDraft(null);
-        commit([...value.allergies, next]);
+        commit((current) => [...current.allergies, next]);
       } else setDraft(next);
     } else {
-      commit(
-        value.allergies.map((candidate) =>
+      commit((current) =>
+        current.allergies.map((candidate) =>
           candidate.id === allergy.id ? { ...candidate, ...patch } : candidate
         )
       );
@@ -398,7 +407,9 @@ export function EncounterAllergyField({
               onRemove={() => {
                 if (draft && allergy.id === draft.id) setDraft(null);
                 else
-                  commit(value.allergies.filter(({ id }) => id !== allergy.id));
+                  commit((current) =>
+                    current.allergies.filter(({ id }) => id !== allergy.id)
+                  );
               }}
             />
           ))}
@@ -407,10 +418,10 @@ export function EncounterAllergyField({
               label={m('No known allergies (NKA)')}
               checked={value.noKnownAllergies ?? false}
               onChange={(event) =>
-                commitValue({
-                  ...value,
+                commitValue((current) => ({
+                  ...current,
                   noKnownAllergies: event.target.checked,
-                })
+                }))
               }
             />
           )}

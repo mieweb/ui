@@ -38,7 +38,7 @@ The **presenting-medications list with medication reconciliation**: review a pat
 
 ### Don't use it when
 
-- You need a complete encounter document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) composes medication reconciliation with narrative sections, coordinated vitals, assessment and MCP tools in one eSheet response store. Use MedicationReconciliation directly for a standalone list workflow.
+- You need a complete encounter document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) captures coded medications through inline prescription cards in one eSheet response store, without reconciliation statuses. Use MedicationReconciliation directly when every row must end up Taking / Not taking / Unknown.
 - You need the **allergy** list — [AllergyList](?path=/docs/clinical-lists-allergylist--docs); same three-layer pattern, different model (NKA tri-state, allergy vs intolerance).
 - You are placing a **new medication order** inside the visit's plan — [Assessment](?path=/docs/encounter-orders-assessment--docs) with [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs), which morphs into this folder's \`MedicationEditor\` for \`type: 'medication'\` orders.
 - You just need a read-only medication summary in a banner — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)'s \`showMedicationBanner\` renders name / dose pills; use \`MedicationList readOnly\` only when the grouped status view matters.
@@ -86,7 +86,7 @@ const [meds, setMeds] = useState<Medication[]>(encounter.presentingMedications);
         {
           type: 'composes with',
           target: 'encounter-orders-encountervisit',
-          why: 'EncounterVisit includes medication reconciliation as an eSheet-backed clinical section; use MedicationReconciliation directly when only the list workflow is needed.',
+          why: "EncounterVisit's medication section captures the same coded Medication records through inline cards without reconciliation statuses; use MedicationReconciliation when rows must be reconciled.",
         },
         {
           type: 'composes with',

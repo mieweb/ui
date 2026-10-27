@@ -117,8 +117,11 @@ function AllergyEditor({
   }, []);
 
   const hasCode = Boolean(draft.code?.system.trim() && draft.code.code.trim());
+  // Only records that were uncoded on entry are exempt from requireCode —
+  // an originally coded allergy must keep (or replace) its code.
   const unchangedLegacyAllergen =
     allergy &&
+    !allergy.code &&
     draft.allergen === allergy.allergen &&
     (draft.type ?? 'drug') === (allergy.type ?? 'drug');
   const canSave =

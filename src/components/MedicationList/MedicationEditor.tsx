@@ -341,7 +341,10 @@ export function MedicationEditor({
   };
 
   const hasCode = Boolean(draft.code?.system.trim() && draft.code.code.trim());
-  const unchangedLegacyName = medication && draft.name === medication.name;
+  // Only records that were uncoded on entry are exempt from requireCode —
+  // an originally coded medication must keep (or replace) its code.
+  const unchangedLegacyName =
+    medication && !medication.code && draft.name === medication.name;
   const canSave =
     draft.name.trim().length > 0 &&
     (!requireCode || hasCode || Boolean(unchangedLegacyName));
@@ -354,7 +357,7 @@ export function MedicationEditor({
         <ModalTitle>
           {medication ? m('Correct Medication') : m('Add Medication')}
         </ModalTitle>
-        <ModalClose />
+        <ModalClose aria-label={m('Close')} />
       </ModalHeader>
       <ModalBody className="space-y-5">
         <div ref={bodyRef} className="contents">

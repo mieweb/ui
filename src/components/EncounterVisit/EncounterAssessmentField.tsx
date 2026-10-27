@@ -97,6 +97,8 @@ export function EncounterAssessmentField({
     state.disposed;
   const currentResponse = React.useRef(response);
   currentResponse.current = response;
+  const currentValue = React.useRef(value);
+  currentValue.current = value;
   const canEdit = React.useRef(!readOnly);
   canEdit.current = !readOnly;
   const renderSearch = React.useMemo(
@@ -107,19 +109,26 @@ export function EncounterAssessmentField({
     [codeLookup, requireCoding, m]
   );
   const definition = field.definition as { question?: string };
-  const commit = (next: EncounterAssessmentValue) => {
+  const commit = (
+    update: (next: EncounterAssessmentValue) => EncounterAssessmentValue
+  ) => {
     if (
-      canEdit.current &&
-      !form.getState().readOnly &&
-      !form.getState().disposed
+      !canEdit.current ||
+      form.getState().readOnly ||
+      form.getState().disposed
     )
-      onResponse(
-        clinicalAnswerResponse(
-          form.getState().responses[field.definition.id] ??
-            currentResponse.current,
-          JSON.stringify(next)
-        )
-      );
+      return;
+    // Advance the ref so a second commit in the same event (e.g. link +
+    // reorder from one drop) builds on this update instead of the stale value.
+    const next = update(currentValue.current);
+    currentValue.current = next;
+    onResponse(
+      clinicalAnswerResponse(
+        form.getState().responses[field.definition.id] ??
+          currentResponse.current,
+        JSON.stringify(next)
+      )
+    );
   };
   if (error) {
     return (
@@ -173,10 +182,10 @@ export function EncounterAssessmentField({
                 const existingAssertion =
                   existingConcern && currentAssertion(existingConcern);
                 if (existingConcern && existingAssertion) {
-                  commit({
-                    ...value,
+                  commit((next) => ({
+                    ...next,
                     items: [
-                      ...value.items.filter(
+                      ...next.items.filter(
                         (item) => item.concernId !== existingConcern.concernId
                       ),
                       {
@@ -184,15 +193,15 @@ export function EncounterAssessmentField({
                         assertionId: existingAssertion.id,
                       },
                     ],
-                  });
+                  }));
                   return;
                 }
                 const concernId = globalThis.crypto.randomUUID();
                 const assertionId = globalThis.crypto.randomUUID();
-                commit({
-                  ...value,
+                commit((next) => ({
+                  ...next,
                   concerns: [
-                    ...value.concerns,
+                    ...next.concerns,
                     {
                       concernId,
                       clinicalStatus: 'active',
@@ -216,81 +225,87 @@ export function EncounterAssessmentField({
                       ],
                     },
                   ],
-                  items: [...value.items, { concernId, assertionId }],
-                });
+                  items: [...next.items, { concernId, assertionId }],
+                }));
               }
             : undefined
         }
         onRemoveAssessment={(item) =>
-          commit({
-            ...value,
-            items: value.items.filter(
+          commit((next) => ({
+            ...next,
+            // Removing the row also drops its local concern record — nothing
+            // else can reference it once the orders below are unlinked, and an
+            // orphaned uncoded concern would block Save with no visible repair.
+            concerns: next.concerns.filter(
+              (concern) => concern.concernId !== item.concernId
+            ),
+            items: next.items.filter(
               (candidate) => candidate.concernId !== item.concernId
             ),
-            orders: value.orders.map((order) =>
+            orders: next.orders.map((order) =>
               order.concernId === item.concernId
                 ? { ...order, concernId: undefined }
                 : order
             ),
-          })
+          }))
         }
         onAddOrder={
           codeLookup || !requireCoding
             ? (item, order) => {
                 if (requireCoding && !order.code) return;
-                commit({
-                  ...value,
+                commit((next) => ({
+                  ...next,
                   orders: [
-                    ...value.orders,
+                    ...next.orders,
                     {
                       ...order,
                       orderId: globalThis.crypto.randomUUID(),
                       concernId: item?.concernId,
                     },
                   ],
-                });
+                }));
               }
             : undefined
         }
         onEditOrder={(order, changes) =>
-          commit({
-            ...value,
-            orders: value.orders.map((candidate) =>
+          commit((next) => ({
+            ...next,
+            orders: next.orders.map((candidate) =>
               candidate.orderId === order.orderId
                 ? { ...candidate, ...changes }
                 : candidate
             ),
-          })
+          }))
         }
         onRemoveOrder={(order) =>
-          commit({
-            ...value,
-            orders: value.orders.filter(
+          commit((next) => ({
+            ...next,
+            orders: next.orders.filter(
               (candidate) => candidate.orderId !== order.orderId
             ),
-          })
+          }))
         }
         onLinkOrder={(order, concernId) =>
-          commit({
-            ...value,
-            orders: value.orders.map((candidate) =>
+          commit((next) => ({
+            ...next,
+            orders: next.orders.map((candidate) =>
               candidate.orderId === order.orderId
                 ? { ...candidate, concernId }
                 : candidate
             ),
-          })
+          }))
         }
         onReorderItems={(ids) =>
-          commit({
-            ...value,
-            items: reorder(value.items, ids, (item) => item.concernId),
-          })
+          commit((next) => ({
+            ...next,
+            items: reorder(next.items, ids, (item) => item.concernId),
+          }))
         }
         onReorderOrders={(ids) =>
-          commit({
-            ...value,
-            orders: reorder(value.orders, ids, (order) => order.orderId),
-          })
+          commit((next) => ({
+            ...next,
+            orders: reorder(next.orders, ids, (order) => order.orderId),
+          }))
         }
       />
     </section>

@@ -21,6 +21,7 @@ import {
   useEncounterAssertionDate,
   matchingConditionCode,
   reorderClinicalEntries,
+  repairEncounterAssessmentReferences,
   useClinicalFormState,
 } from './clinicalFieldAdapters';
 
@@ -124,7 +125,7 @@ export function EncounterConditionsField({
                     ...concern.assertions,
                     {
                       ...assertion,
-                      changeType: 'refinement' as const,
+                      changeType: draft.changeType ?? ('refinement' as const),
                       supersedes: currentAssertion(concern)?.id,
                     },
                   ],
@@ -188,6 +189,13 @@ export function EncounterConditionsField({
               (candidate) => candidate.concernId !== concern.concernId
             ),
           }));
+          // Auto-repair assessment rows that referenced the deleted concern
+          // so the visit never holds a dangling reference blocking Save.
+          if (canEdit.current)
+            repairEncounterAssessmentReferences(
+              form.getState(),
+              concern.concernId
+            );
         } else if (action === 'refine') {
           setEditing({ concernId: concern.concernId });
           if (!codeLookup) setManualEditing(true);
@@ -293,7 +301,8 @@ export function EncounterConditionsField({
               <Button
                 type="button"
                 onClick={() => {
-                  setEditing(null);
+                  // Keep `editing` so an in-progress refine stays a refinement
+                  // of the selected concern instead of adding a new one.
                   setManualEditing(true);
                 }}
               >

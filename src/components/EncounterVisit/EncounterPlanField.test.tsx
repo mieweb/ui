@@ -131,6 +131,44 @@ describe('EncounterPlanField', () => {
     expect(latest<PlanValue>().orders[0]).toEqual(codedOrder);
   });
 
+  it('keeps a drop-linked order attached to its new concern when the same drop also reorders', () => {
+    const unlinked: AssessmentOrder = {
+      orderId: 'bmp',
+      type: 'lab',
+      display: 'Basic metabolic panel',
+      code: { fullid: 'LOINC|51990-0', codetype: 'LOINC', fullcode: '51990-0' },
+    };
+    const { latest } = renderPlan(
+      { orders: [codedOrder, unlinked] },
+      { seedConcerns: [hypertensionConcern] }
+    );
+    const dataTransfer = {
+      effectAllowed: '',
+      dropEffect: '',
+      setData: () => {},
+      getData: () => 'bmp',
+    };
+    fireEvent.dragStart(
+      screen
+        .getByText('Basic metabolic panel')
+        .closest('[draggable="true"]') as HTMLElement,
+      { dataTransfer }
+    );
+    fireEvent.drop(
+      screen
+        .getByText('Hemoglobin A1c')
+        .closest('[draggable="true"]') as HTMLElement,
+      { dataTransfer }
+    );
+    // One drop fires onLinkOrder then onReorderOrders synchronously; the
+    // reorder commit must build on the link commit, not the stale value.
+    const { orders } = latest<PlanValue>();
+    expect(orders.map((order) => order.orderId)).toEqual(['bmp', 'a1c']);
+    expect(orders.find((order) => order.orderId === 'bmp')).toMatchObject({
+      concernId: 'hypertension',
+    });
+  });
+
   it('removes an order without mutating conditions or other coded orders', () => {
     const other = {
       ...codedOrder,
@@ -258,6 +296,24 @@ describe('EncounterAssessmentField coded capture', () => {
     ]);
   });
 
+  it('accepts diagnosis picks in the unified auto add mode without a domain restriction', () => {
+    const { latest, lookupProps } = renderClinicalField(
+      EncounterAssessmentField,
+      'encounterAssessment'
+    );
+    fireEvent.change(screen.getByLabelText('What to add'), {
+      target: { value: 'auto' },
+    });
+    expect(lookupProps().domains).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
+    expect(
+      latest<{ concerns: (typeof hypertensionConcern)[] }>().concerns[0]
+        .assertions[0].coding
+    ).toEqual([
+      { system: 'ICD10', code: 'I10', display: 'Essential hypertension' },
+    ]);
+  });
+
   it('assesses an existing native condition by coded identity without copying its concerns', () => {
     const { latest, form } = renderClinicalField(
       EncounterAssessmentField,
@@ -278,6 +334,37 @@ describe('EncounterAssessmentField coded capture', () => {
     expect(screen.getByText('Essential hypertension')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(latest<{ items: unknown[] }>().items).toHaveLength(1);
+  });
+
+  it('drops the orphaned local concern when its assessment row is removed', () => {
+    const uncodedConcern = {
+      ...hypertensionConcern,
+      source: 'manuallyAdded' as const,
+      assertions: [{ ...hypertensionConcern.assertions[0], coding: undefined }],
+    };
+    const { latest } = renderClinicalField(
+      EncounterAssessmentField,
+      'encounterAssessment',
+      {
+        concerns: [uncodedConcern],
+        items: [
+          { concernId: 'hypertension', assertionId: 'hypertension-assertion' },
+        ],
+        orders: [codedOrder],
+      }
+    );
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Remove Essential hypertension from assessment',
+      })
+    );
+    // The uncoded record must not stay behind in concerns, where it would
+    // block Save on required coding with no visible row to repair.
+    expect(latest()).toEqual({
+      concerns: [],
+      items: [],
+      orders: [{ ...codedOrder, concernId: undefined }],
+    });
   });
 
   it.each(['ICD-10-CM', 'http://hl7.org/fhir/sid/icd-10-cm'])(

@@ -37,7 +37,12 @@ function appendedRichAttributes(
     !hasNarrativeTagsOnly(html)
   )
     return {};
-  const next = `${previous.trim() ? html : ''}<p>${escapedTextHtml(finding.text)}${finding.text.endsWith('\n') ? '<br>' : ''}</p>`;
+  // The plain append reuses a trailing newline as the separator, so drop one
+  // trailing break to keep the HTML-derived text aligned with the answer.
+  const aligned = previous.endsWith('\n')
+    ? html.replace(/<br\s*\/?>((?:<\/(?:p|div|ul|ol|li)\s*>|\s)*)$/i, '$1')
+    : html;
+  const next = `${previous.trim() ? aligned : ''}<p>${escapedTextHtml(finding.text)}${finding.text.endsWith('\n') ? '<br>' : ''}</p>`;
   return { [HTML_ATTRIBUTE]: next, [TEXT_ATTRIBUTE]: answer };
 }
 

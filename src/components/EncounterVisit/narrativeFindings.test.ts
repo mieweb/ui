@@ -81,6 +81,41 @@ describe('narrative finding provenance without a DOM', () => {
     ).toBe(response.answer);
   });
 
+  it('keeps rich formatting aligned with the plain answer when it ends in blank lines', () => {
+    // `<b>History.</b><br><br>` derives the plain answer `History.\n`; the
+    // plain append reuses that newline as the separator, so the rich append
+    // must drop one trailing break or the browser text gate rejects the html.
+    for (const [previous, html, aligned] of [
+      ['History.\n', '<b>History.</b><br><br>', '<b>History.</b><br>'],
+      ['History.\n', '<p>History.</p><p><br></p>', '<p>History.</p><p></p>'],
+      ['History.', '<b>History.</b>', '<b>History.</b>'],
+    ]) {
+      const response = applyEncounterNarrativeFinding(
+        {
+          answer: previous,
+          attributes: {
+            encounterNarrativeText: previous,
+            encounterNarrativeHtml: html,
+          },
+        },
+        finding
+      );
+      expect(response.answer).toBe(
+        `${previous}${previous.endsWith('\n') ? '' : '\n'}${finding.text}`
+      );
+      expect(response.attributes?.encounterNarrativeHtml).toBe(
+        `${aligned}<p>${finding.text}</p>`
+      );
+      expect(
+        encounterNarrativeText(
+          sanitizeEncounterNarrativeHtml(
+            response.attributes!.encounterNarrativeHtml
+          )
+        )
+      ).toBe(response.answer);
+    }
+  });
+
   it('does not promote a stale old rich baseline or imported tags and attributes', () => {
     for (const attributes of [
       {

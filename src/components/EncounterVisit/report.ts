@@ -4,6 +4,7 @@ import type { EncounterMdyField } from './mdy';
 const HEADINGS = 'h1,h2,h3,h4,h5,h6';
 const MEDIA = 'img,video,audio';
 const EMPTY_FIELD = 'data-encounter-empty-field';
+const CAPTURED_FIELD = 'data-encounter-captured-field';
 const CAPTURED_HEADING = 'data-encounter-captured-heading';
 
 function hasContent(node: Element | globalThis.DocumentFragment): boolean {
@@ -42,9 +43,12 @@ export function createEncounterReportHtml(
     'text/html'
   );
   document
-    .querySelectorAll(`[${EMPTY_FIELD}],[${CAPTURED_HEADING}]`)
+    .querySelectorAll(
+      `[${EMPTY_FIELD}],[${CAPTURED_FIELD}],[${CAPTURED_HEADING}]`
+    )
     .forEach((node) => {
       node.removeAttribute(EMPTY_FIELD);
+      node.removeAttribute(CAPTURED_FIELD);
       node.removeAttribute(CAPTURED_HEADING);
     });
   document.querySelectorAll<HTMLAnchorElement>('a').forEach((link) => {
@@ -62,9 +66,15 @@ export function createEncounterReportHtml(
       marker.setAttribute(EMPTY_FIELD, id);
       link.replaceWith(marker);
     } else if (href.startsWith('mdy:') || (id && fieldIds.has(id))) {
-      if (id && fieldIds.has(id))
+      if (id && fieldIds.has(id)) {
         link.closest(HEADINGS)?.setAttribute(CAPTURED_HEADING, '');
-      link.replaceWith(...link.childNodes);
+        // Mark the captured projection so label-only pruning and table
+        // cleanup never mistake its text for an empty prompt label.
+        const captured = document.createElement('span');
+        captured.setAttribute(CAPTURED_FIELD, id);
+        captured.append(...link.childNodes);
+        link.replaceWith(captured);
+      } else link.replaceWith(...link.childNodes);
     } else {
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noopener noreferrer');
@@ -110,16 +120,29 @@ export function createEncounterReportHtml(
       remaining.querySelectorAll('strong,b').forEach((label) => {
         if (labels.has(promptText(label.textContent))) label.remove();
       });
-      // Delete a label-only prompt row; text in a populated authored row stays.
+      // Delete a label-only prompt row; text in a populated authored row
+      // stays, and a row holding a captured projection is never pruned.
+      const scaffoldText = (text: string | null) =>
+        labels.has(promptText(text)) || /^[\s:：;,|]*$/.test(text ?? '');
+      const labelOnly =
+        row.tagName === 'TR'
+          ? Array.from(remaining.children).every((cell) =>
+              scaffoldText(cell.textContent)
+            )
+          : scaffoldText(remaining.textContent);
       if (
-        (labels.has(promptText(remaining.textContent)) ||
-          /^[\s:：;,|]*$/.test(remaining.textContent ?? '')) &&
-        !remaining.querySelector(MEDIA)
+        labelOnly &&
+        !remaining.querySelector(MEDIA) &&
+        !remaining.querySelector(`[${CAPTURED_FIELD}]`)
       ) {
         if (row.tagName === 'TR' && table?.querySelector('[rowspan]')) {
           // A spanning cell depends on the number of rows beneath it. Keep
-          // this prompt row's cells so its removal cannot regroup later data.
-          Array.from(row.children).forEach((cell) => cell.replaceChildren());
+          // this prompt row's cells so its removal cannot regroup later data,
+          // and keep a spanning label since later rows still rely on it.
+          Array.from(row.children).forEach((cell) => {
+            if (Number(cell.getAttribute('rowspan') ?? '1') > 1) return;
+            cell.replaceChildren();
+          });
         } else row.remove();
       }
     }
@@ -127,28 +150,38 @@ export function createEncounterReportHtml(
   });
   removeEmptyContainers(report.body);
   touchedTables.forEach((table) => {
-    if (!Array.from(table.querySelectorAll('td')).some(hasContent))
+    if (Array.from(table.querySelectorAll('td')).some(hasContent)) return;
+    if (table.querySelector(`[${CAPTURED_FIELD}]`)) return;
+    // Header-only rows are prompt scaffolding, but a th beside data cells is
+    // a row label, and a caption is authored prose — both are report content.
+    const caption = table.querySelector('caption');
+    const hasRowLabelContent = Array.from(table.querySelectorAll('tr'))
+      .filter((row) => row.querySelector('td'))
+      .some((row) => Array.from(row.querySelectorAll('th')).some(hasContent));
+    if (!hasRowLabelContent && !(caption && hasContent(caption)))
       table.remove();
   });
 
-  // Work upward: a parent survives whenever a child has report content.
+  // Work upward: a parent survives whenever a child has report content. Track
+  // the nearest surviving boundary per level — scanning the suffix for every
+  // heading is quadratic in large authored documents.
   const headings = Array.from(report.body.querySelectorAll(HEADINGS));
+  const nextSurviving: (Element | undefined)[] = [];
+  const recordSurvivor = (heading: Element, level: number) => {
+    for (let l = level; l <= 6; l += 1) nextSurviving[l] = heading;
+  };
   for (let index = headings.length - 1; index >= 0; index -= 1) {
     const heading = headings[index];
-    if (!report.body.contains(heading)) continue;
-    if (heading.hasAttribute(CAPTURED_HEADING)) continue;
+    const level = Number(heading.tagName.slice(1));
+    if (heading.hasAttribute(CAPTURED_HEADING)) {
+      recordSurvivor(heading, level);
+      continue;
+    }
     if (!hasContent(heading)) {
       heading.remove();
       continue;
     }
-    const level = Number(heading.tagName.slice(1));
-    const next = headings
-      .slice(index + 1)
-      .find(
-        (candidate) =>
-          report.body.contains(candidate) &&
-          Number(candidate.tagName.slice(1)) <= level
-      );
+    const next = nextSurviving[level];
     const range = report.createRange();
     range.setStartAfter(heading);
     if (next) range.setEndBefore(next);
@@ -162,8 +195,13 @@ export function createEncounterReportHtml(
     if (!hasContent(contents)) {
       range.deleteContents();
       heading.remove();
+    } else {
+      recordSurvivor(heading, level);
     }
   }
+  report
+    .querySelectorAll(`[${CAPTURED_FIELD}]`)
+    .forEach((node) => node.replaceWith(...node.childNodes));
   report
     .querySelectorAll(`[${CAPTURED_HEADING}]`)
     .forEach((node) => node.removeAttribute(CAPTURED_HEADING));

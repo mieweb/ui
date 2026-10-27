@@ -358,18 +358,27 @@ export function EncounterMedicationField({
     Boolean(error);
   const canEdit = React.useRef(!readOnly);
   canEdit.current = !readOnly;
+  const currentValue = React.useRef(value);
+  currentValue.current = value;
   const definition = field.definition as { question?: string };
-  const commit = (medications: Medication[]) => {
+  const commit = (update: (next: MedicationValue) => Medication[]) => {
     if (
       !canEdit.current ||
       form.getState().readOnly ||
       form.getState().disposed
     )
       return;
+    // Advance the ref so a second commit in the same event builds on this
+    // update instead of the stale render value.
+    const next = {
+      ...currentValue.current,
+      medications: update(currentValue.current),
+    };
+    currentValue.current = next;
     onResponse(
       clinicalAnswerResponse(
         form.getState().responses[field.definition.id] ?? response,
-        JSON.stringify({ ...value, medications })
+        JSON.stringify(next)
       )
     );
   };
@@ -383,11 +392,11 @@ export function EncounterMedicationField({
         // Named — promote the draft into the committed answer. The card
         // keeps its key (the id), so focus and lookup state survive.
         setDraft(null);
-        commit([...value.medications, next]);
+        commit((current) => [...current.medications, next]);
       } else setDraft(next);
     } else {
-      commit(
-        value.medications.map((candidate) =>
+      commit((current) =>
+        current.medications.map((candidate) =>
           candidate.id === medication.id
             ? { ...candidate, ...patch }
             : candidate
@@ -448,8 +457,8 @@ export function EncounterMedicationField({
               onRemove={() => {
                 if (draft && medication.id === draft.id) setDraft(null);
                 else
-                  commit(
-                    value.medications.filter(({ id }) => id !== medication.id)
+                  commit((current) =>
+                    current.medications.filter(({ id }) => id !== medication.id)
                   );
               }}
             />

@@ -148,7 +148,7 @@ function MedicationDialog({
         <ModalTitle>
           {dialog.kind === 'note' ? m('Medication Notes') : m('Add Task')}
         </ModalTitle>
-        <ModalClose />
+        <ModalClose aria-label={m('Close')} />
       </ModalHeader>
       <ModalBody className="space-y-4">
         <p className="text-muted-foreground text-sm">

@@ -175,9 +175,9 @@ const meta: Meta<typeof EncounterVisit> = {
       description: {
         component: `### What it's for
 
-A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medication reconciliation, allergies, coded conditions, assessment and coded plan orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, a plan narrative and follow-up / appointment details are included in the default eleven-section template. Patient identity is not captured.
+A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medications, allergies, coded conditions, assessment and coded plan orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, a plan narrative and follow-up / appointment details are included in the default eleven-section template. Patient identity is not captured.
 
-Inline medication and allergy cards, ProblemList and Assessment supply the healthcare capture controls. New medications, allergens, conditions and plan orders require a selected terminology code. Common findings dock beside each narrative field as a section-specific macro panel, open by default; picking a macro inserts its line at the caret and codes the finding, and editing the line away removes its code. Explicit selections append to narrative text without replacing authored content or auto-recording normal findings. The examples use a small, **Storybook-only sample catalog** with representative code selections. Production applications supply their real CodeLookup component and catalog URL through \`codeLookup\` or an enclosing \`CodeLookupProvider\`. Non-drug allergens require SNOMED substance concepts in the host catalog; these are never inferred from names.
+Inline medication and allergy cards, ProblemList and Assessment supply the healthcare capture controls. New medications, allergens, conditions and plan orders require a selected terminology code. Common findings dock beside each narrative field as a section-specific macro panel that opens while the field has focus and closes when focus leaves; picking a macro inserts its line at the caret and codes the finding, and editing the line away removes its code. Explicit selections append to narrative text without replacing authored content or auto-recording normal findings. The examples use a small, **Storybook-only sample catalog** with representative code selections. Production applications supply their real CodeLookup component and catalog URL through \`codeLookup\` or an enclosing \`CodeLookupProvider\`. Non-drug allergens require SNOMED substance concepts in the host catalog; these are never inferred from names.
 
 The visit mode dropdown at the start of the always-visible narrative toolbar switches one draft between three projections: **eSheet** offers memory aids and coded capture, **RichEdit** uses Kerebron for headings and free Markdown prose with protected data links, and **View** renders the flattened MDY through mieweb/templit for a final report check. View omits uncaptured field prompts and empty section headings, while retaining authored prose and entered values such as zero or a negative choice. Select a linked value in RichEdit to open its eSheet section with related inputs. Changes update every projection of that field. Free prose stays in the document body; it is not automatically promoted to a coded observation.
 
@@ -190,7 +190,7 @@ The visit reads as a continuous report with small outer insets and no nested sec
 
 ### Don't use it when
 
-- You only need a medication list or assessment panel; use those standalone components.
+- You only need a standalone list or panel — [ProblemList](?path=/docs/clinical-lists-problemlist--docs), [MedicationReconciliation](?path=/docs/clinical-lists-medicationlist--docs), [AllergyList](?path=/docs/clinical-lists-allergylist--docs) or [Assessment](?path=/docs/encounter-orders-assessment--docs) used directly.
 - You need a scheduling backend, clinical decision support, or a signed medical record workflow. These remain host responsibilities.
 
 ### Example
@@ -255,7 +255,12 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
         {
           type: 'composes with',
           target: 'clinical-lists-medicationlist',
-          why: 'Medication reconciliation is recorded in the visit response.',
+          why: 'The visit medication section captures the same coded Medication records through inline cards; use MedicationReconciliation directly when rows must be reconciled.',
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-problemlist',
+          why: 'The visit Conditions section renders ProblemList over its eSheet-native concerns; use ProblemList directly for a host-controlled longitudinal chart list.',
         },
         {
           type: 'composes with',

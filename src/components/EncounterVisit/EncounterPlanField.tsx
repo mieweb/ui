@@ -144,11 +144,15 @@ export function EncounterPlanField({
       !currentValue.current
     )
       return;
+    // Advance the ref so a second commit in the same event (e.g. link +
+    // reorder from one drop) builds on this update instead of the stale value.
+    const next = update(currentValue.current);
+    currentValue.current = next;
     onResponse(
       clinicalAnswerResponse(
         form.getState().responses[field.definition.id] ??
           currentResponse.current,
-        JSON.stringify(update(currentValue.current))
+        JSON.stringify(next)
       )
     );
   };

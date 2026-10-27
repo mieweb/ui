@@ -445,6 +445,27 @@ export function validateEncounterAssessment(
     if (localConcernIds.has(concern.concernId))
       add('Concern ids must be unique.', `${path}.concernId`);
     localConcernIds.add(concern.concernId);
+    if (
+      concern.relationships !== undefined &&
+      (!Array.isArray(concern.relationships) ||
+        concern.relationships.some(
+          (relationship: unknown) =>
+            !record(relationship) ||
+            !nonempty(relationship.concernId) ||
+            ![
+              'caused-by',
+              'evolved-from',
+              'differential-sibling',
+              'complication-of',
+            ].includes(relationship.type as string) ||
+            !optionalStrings(relationship, ['display'])
+        ))
+    ) {
+      add(
+        'Concern relationships must be an array of records with a supported type and a concernId.',
+        `${path}.relationships`
+      );
+    }
     const assertionIds = new Set<string>();
     concerns.set(concern.concernId, assertionIds);
     concern.assertions.forEach((assertion: unknown, assertionIndex: number) => {
@@ -476,6 +497,17 @@ export function validateEncounterAssessment(
           `${assertionPath}.id`
         );
       assertionIds.add(assertion.id);
+      if (
+        assertion.changeType !== undefined &&
+        !['refinement', 'revision', 'progression', 'reattribution'].includes(
+          assertion.changeType as string
+        )
+      ) {
+        add(
+          'Assertion changeType must be refinement, revision, progression or reattribution.',
+          `${assertionPath}.changeType`
+        );
+      }
       if (
         assertion.coding !== undefined &&
         (!Array.isArray(assertion.coding) ||

@@ -119,7 +119,12 @@ function IntakeForm({ definition, draft }: { definition: FormDefinition; draft?:
     },
     catalog: {
       entry: '@mieweb/ui/esheet',
-      peers: ['@esheet/renderer', '@esheet/core'],
+      peers: [
+        '@esheet/core',
+        '@esheet/fields',
+        '@esheet/renderer',
+        '@esheet/builder',
+      ],
       relationships: [
         {
           type: 'composes with',

@@ -168,7 +168,7 @@ keep loading `@mieweb/ui/styles.css` for the composed controls. EncounterVisit's
 RichEdit mode also needs the Kerebron peers, CSS and WASM assets. **With Kerebron
 0.8.12, the host must override every `prosemirror-view` resolution to 1.42.3.**
 The library's development override does not configure an installed consumer.
-Follow the shipped [eSheet and EncounterVisit setup](MIGRATION.md#esheet-and-encountervisit)
+Follow the shipped [eSheet and EncounterVisit setup](https://github.com/mieweb/ui/blob/main/MIGRATION.md#esheet-and-encountervisit)
 for the package-manager configuration and verification command.
 
 ## Explore and Compose Components

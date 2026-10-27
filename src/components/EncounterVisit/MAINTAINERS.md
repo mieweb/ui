@@ -36,8 +36,9 @@ both the recorded baseline and the markup's text match the current answer.
 An MCP text replacement therefore cannot restore stale formatting.
 
 Common findings are configured on narrative sections and text observations.
-They dock beside the narrative field as a section-specific macro group, open
-by default, each labelled with a derived dot-phrase shortcut. A finding is
+They dock beside the narrative field as a section-specific macro group that
+opens while the field has focus and closes when focus leaves (the field sets
+`macrosOnFocus`), each labelled with a derived dot-phrase shortcut. A finding is
 coded only after an explicit macro invocation — a panel pick or a typed
 dot-phrase (`onMacroInsert`); it never fills normal
 findings by default. Editing a finding's line away drops its code.

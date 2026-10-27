@@ -1,5 +1,6 @@
 import { act, fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { createFormStore, type FieldDefinition } from '@esheet/core';
 import { EncounterConditionsField } from './EncounterConditionsField';
 import type { ConditionConcern } from '../ProblemList';
 import {
@@ -98,6 +99,60 @@ describe('EncounterConditionsField', () => {
     expect(
       screen.queryByRole('region', { name: 'Unconfirmed' })
     ).not.toBeInTheDocument();
+  });
+
+  it('repairs assessment rows that referenced a deleted condition', () => {
+    const form = createFormStore();
+    form.getState().loadDefinition({
+      id: 'coded-visit',
+      pages: [
+        {
+          id: 'visit',
+          fields: [
+            { id: 'assessment', fieldType: 'encounterAssessment' },
+            { id: 'local', fieldType: 'encounterAssessment' },
+          ] as unknown as FieldDefinition[],
+        },
+      ],
+    });
+    form.getState().setResponse('assessment', {
+      answer: JSON.stringify({
+        concerns: [],
+        items: [
+          { concernId: 'hypertension', assertionId: 'hypertension-assertion' },
+        ],
+        orders: [
+          {
+            orderId: 'a1c',
+            type: 'lab',
+            display: 'Hemoglobin A1c',
+            concernId: 'hypertension',
+          },
+        ],
+      }),
+    });
+    // A local concern takes precedence over Conditions, so its references
+    // stay valid after the Conditions entry is deleted.
+    const localValue = {
+      concerns: [hypertensionConcern],
+      items: [
+        { concernId: 'hypertension', assertionId: 'hypertension-assertion' },
+      ],
+      orders: [],
+    };
+    form
+      .getState()
+      .setResponse('local', { answer: JSON.stringify(localValue) });
+    renderConditions({ concerns: [hypertensionConcern] }, { props: { form } });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(JSON.parse(form.getState().responses.assessment!.answer!)).toEqual({
+      concerns: [],
+      items: [],
+      orders: [{ orderId: 'a1c', type: 'lab', display: 'Hemoglobin A1c' }],
+    });
+    expect(JSON.parse(form.getState().responses.local!.answer!)).toEqual(
+      localValue
+    );
   });
 
   it('does not duplicate a current condition when its code is selected again', () => {
@@ -231,5 +286,46 @@ describe('explicit assertion date and uncoded condition configuration', () => {
     expect(assertion.text).toBe('Explicit uncoded symptom');
     expect(assertion.coding).toEqual([]);
     expect(assertion.date).toBe('2026-10-10');
+  });
+  it('preserves the condition editor changeType instead of forcing refinement', () => {
+    const { latest } = renderConditions(
+      { concerns: [hypertensionConcern] },
+      { provider: false, requireCoding: false }
+    );
+    fireEvent.click(screen.getByRole('button', { name: /refine/i }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.click(dialog.getByLabelText(/Disease progressed/));
+    fireEvent.change(dialog.getByLabelText(/Problem name/), {
+      target: { value: 'Hypertensive heart disease' },
+    });
+    fireEvent.click(dialog.getByRole('button', { name: /save/i }));
+    const concern = latest<ConditionsValue>().concerns[0];
+    expect(concern.concernId).toBe('hypertension');
+    expect(concern.assertions[1]).toMatchObject({
+      text: 'Hypertensive heart disease',
+      changeType: 'progression',
+      supersedes: 'hypertension-assertion',
+    });
+  });
+  it('keeps an in-progress refinement when the uncoded Other… editor records it', () => {
+    const { latest } = renderConditions(
+      { concerns: [hypertensionConcern] },
+      { requireCoding: false }
+    );
+    fireEvent.click(screen.getByRole('button', { name: /refine/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.change(dialog.getByLabelText(/Problem name/), {
+      target: { value: 'Uncoded refinement' },
+    });
+    fireEvent.click(dialog.getByRole('button', { name: /save/i }));
+    const value = latest<ConditionsValue>();
+    expect(value.concerns).toHaveLength(1);
+    expect(value.concerns[0].concernId).toBe('hypertension');
+    expect(value.concerns[0].assertions[1]).toMatchObject({
+      text: 'Uncoded refinement',
+      changeType: 'refinement',
+      supersedes: 'hypertension-assertion',
+    });
   });
 });

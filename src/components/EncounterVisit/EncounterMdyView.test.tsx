@@ -241,4 +241,84 @@ describe('Encounter MDY final report', () => {
       result.querySelector('[data-encounter-captured-heading]')
     ).toBeNull();
   });
+
+  it('keeps tables whose content lives in row-label headers, captions or captured header cells', () => {
+    const result = report(
+      '<h1>Visit</h1><h2>Grids</h2>' +
+        '<table><tr><th>Morning readings</th><td><a href="mdy:am">—</a></td></tr></table>' +
+        '<table><caption>Authored caption</caption>' +
+        '<tr><th>Pulse</th><td><a href="mdy:pulse">—</a></td></tr></table>' +
+        '<table><tr><th><a href="mdy:weight">82 kg</a></th></tr>' +
+        '<tr><td><a href="mdy:am">—</a></td></tr></table>',
+      [
+        field('am', 'AM', true),
+        field('pulse', 'Pulse', true),
+        field('weight', 'Weight', false),
+      ]
+    );
+    const tables = result.querySelectorAll('table');
+    expect(tables).toHaveLength(3);
+    expect(tables[0].textContent).toContain('Morning readings');
+    expect(tables[1].textContent).toBe('Authored caption');
+    expect(tables[2].textContent).toContain('82 kg');
+    expect(result.querySelector('[data-encounter-captured-field]')).toBeNull();
+  });
+
+  it('removes a prompt row whose labels sit in separate plain cells', () => {
+    const result = report(
+      '<h1>Visit</h1><h2>Vitals</h2>' +
+        '<table><tr><td>Pulse</td><td><a href="mdy:pulse">—</a></td>' +
+        '<td>Temperature</td><td><a href="mdy:temp">—</a></td></tr>' +
+        '<tr><td>BP</td><td>142/88</td></tr></table>',
+      [field('pulse', 'Pulse', true), field('temp', 'Temperature', true)]
+    );
+    expect(
+      Array.from(result.querySelectorAll('tr'), (row) => row.textContent)
+    ).toEqual(['BP142/88']);
+  });
+
+  it('keeps a spanning label cell when clearing an empty prompt row beneath it', () => {
+    const result = report(
+      '<h1>Visit</h1><h2>Readings</h2>' +
+        '<table><tr><td rowspan="2">Pulse</td>' +
+        '<td><strong>Pulse:</strong> <a href="mdy:am">—</a></td></tr>' +
+        '<tr><td>80</td></tr><tr><td>BP</td><td>142/88</td></tr></table>',
+      [field('am', 'Pulse', true)]
+    );
+    const rows = result.querySelectorAll('tr');
+    expect(rows).toHaveLength(3);
+    expect(rows[0].firstElementChild?.getAttribute('rowspan')).toBe('2');
+    expect(rows[0].textContent).toBe('Pulse');
+    expect(rows[1].textContent).toBe('80');
+    expect(rows[2].textContent).toBe('BP142/88');
+  });
+
+  it('never prunes a row holding a captured value that matches an empty prompt label', () => {
+    const result = report(
+      '<h1>Visit</h1><h2>Vitals</h2>' +
+        '<ul><li><a href="mdy:status">Pulse</a> <strong>Pulse:</strong> ' +
+        '<a href="mdy:pulse">—</a></li></ul>',
+      [field('status', 'Status', false), field('pulse', 'Pulse', true)]
+    );
+    expect(
+      Array.from(result.querySelectorAll('li'), (row) => row.textContent)
+    ).toEqual(['Pulse Pulse: ']);
+    expect(result.querySelector('[data-encounter-captured-field]')).toBeNull();
+  });
+
+  it('uses a captured heading as the boundary when pruning the empty section before it', () => {
+    const result = report(
+      '<h1>Visit</h1><h2>Empty section</h2><p><a href="mdy:empty">—</a></p>' +
+        '<h2><a href="mdy:cc">Headache</a></h2><p>Notes.</p>',
+      [field('empty', 'Empty', true), field('cc', 'Chief complaint', false)]
+    );
+    expect(
+      Array.from(
+        result.querySelectorAll('h1,h2'),
+        (heading) => heading.textContent
+      )
+    ).toEqual(['Visit', 'Headache']);
+    expect(result.textContent).not.toContain('Empty section');
+    expect(result.textContent).toContain('Notes.');
+  });
 });

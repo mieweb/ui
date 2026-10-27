@@ -76,12 +76,9 @@ export function codedOrderSearch(
         />
       );
     const Lookup = config.component;
-    const allowedDomains = (domains ?? [
-      'med',
-      'lab',
-      'procedure',
-      'vaccine',
-    ]) as CodifyDomain[];
+    // Auto mode passes `domains: undefined` — search every domain so the
+    // unified add row can also return conditions and program codes.
+    const allowedDomains = domains as CodifyDomain[] | undefined;
     return (
       <Lookup
         indexUrl={config.indexUrl}
@@ -100,7 +97,8 @@ export function codedOrderSearch(
             !result.codetype?.trim() ||
             !result.fullcode?.trim() ||
             !result.label?.trim() ||
-            !allowedDomains.includes(result.domain as CodifyDomain)
+            (allowedDomains !== undefined &&
+              !allowedDomains.includes(result.domain as CodifyDomain))
           )
             return;
           onPick({
@@ -198,7 +196,16 @@ export function reorderClinicalEntries<T>(
   ];
 }
 
-/** Canonical Conditions stay in their own native eSheet answers. */
+/**
+ * Canonical Conditions stay in their own native eSheet answers.
+ *
+ * Only `encounterConditions` fields are indexed: a concern recorded inside an
+ * assessment section is not referenceable from another assessment section.
+ * Cross-referencing between multiple assessment sections is intentionally
+ * unsupported in the editing UI — record shared concerns in a Conditions
+ * section instead. (The canonical validator in model.ts still accepts such
+ * references in imported data via `getEncounterConcerns`.)
+ */
 export function getExternalEncounterConditions(
   state: import('@esheet/core').FormState
 ): import('../ProblemList').ConditionConcern[] {
@@ -220,6 +227,58 @@ export function getExternalEncounterConditions(
     }
   }
   return [...byId.values()];
+}
+
+/**
+ * Deleting a Conditions entry repairs assessment answers that referenced it:
+ * the assessment row is removed and linked orders are kept but unlinked.
+ * Without this, the dangling reference turns the whole assessment into an
+ * uneditable raw-answer error that blocks Save with no UI route to repair it.
+ */
+export function repairEncounterAssessmentReferences(
+  state: import('@esheet/core').FormState,
+  concernId: string
+): void {
+  for (const { definition } of Object.values(state.normalized.byId)) {
+    if (String(definition.fieldType) !== 'encounterAssessment') continue;
+    const response = state.responses[definition.id];
+    if (!response?.answer) continue;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(response.answer);
+    } catch {
+      continue; // The assessment field retains and reports malformed data.
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+      continue;
+    const value = parsed as Partial<import('./types').EncounterAssessmentValue>;
+    const items = Array.isArray(value.items) ? value.items : [];
+    const orders = Array.isArray(value.orders) ? value.orders : [];
+    const concerns = Array.isArray(value.concerns) ? value.concerns : [];
+    // A local concern with the same id takes precedence over Conditions, so
+    // references to it stay valid after the Conditions entry is deleted.
+    if (concerns.some((concern) => concern?.concernId === concernId)) continue;
+    if (
+      !items.some((item) => item?.concernId === concernId) &&
+      !orders.some((order) => order?.concernId === concernId)
+    )
+      continue;
+    state.setResponse(
+      definition.id,
+      clinicalAnswerResponse(
+        response,
+        JSON.stringify({
+          ...value,
+          items: items.filter((item) => item?.concernId !== concernId),
+          orders: orders.map((order) =>
+            order?.concernId === concernId
+              ? { ...order, concernId: undefined }
+              : order
+          ),
+        })
+      )
+    );
+  }
 }
 
 /** Normalize the systems accepted by the shared condition editor and native imports. */

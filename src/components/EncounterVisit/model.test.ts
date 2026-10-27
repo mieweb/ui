@@ -657,6 +657,50 @@ describe('encounter validation', () => {
       assessment
     );
   });
+
+  it('rejects malformed concern relationships and assertion change types', () => {
+    const nonArrayRelationships = {
+      ...assessment,
+      concerns: [{ ...assessment.concerns[0], relationships: {} }],
+    } as unknown;
+    expect(validateEncounterAssessment(nonArrayRelationships)).toContainEqual(
+      expect.objectContaining({
+        code: 'invalid-value',
+        path: 'concerns.0.relationships',
+      })
+    );
+    const incompleteRelationship = {
+      ...assessment,
+      concerns: [
+        { ...assessment.concerns[0], relationships: [{ type: 'caused-by' }] },
+      ],
+    } as unknown;
+    expect(validateEncounterAssessment(incompleteRelationship)).toContainEqual(
+      expect.objectContaining({
+        code: 'invalid-value',
+        path: 'concerns.0.relationships',
+      })
+    );
+    const badChangeType = globalThis.structuredClone(
+      assessment
+    ) as EncounterAssessmentValue;
+    Object.assign(badChangeType.concerns[0].assertions[0], {
+      changeType: 'invalid',
+    });
+    expect(validateEncounterAssessment(badChangeType)).toContainEqual(
+      expect.objectContaining({
+        code: 'invalid-value',
+        path: 'concerns.0.assertions.0.changeType',
+      })
+    );
+    const valid = globalThis.structuredClone(assessment);
+    valid.concerns[0].relationships = [
+      { type: 'caused-by', concernId: 'other', display: 'Other concern' },
+    ];
+    valid.concerns[0].assertions[0].changeType = 'progression';
+    expect(validateEncounterAssessment(valid)).toEqual([]);
+    expect(parseEncounterAssessment(JSON.stringify(valid))).toEqual(valid);
+  });
 });
 
 describe('calendar-valid explicit clinical dates', () => {

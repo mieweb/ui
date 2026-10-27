@@ -62,6 +62,14 @@ If the host also declares `prosemirror-view` directly, pin that dependency to
 must be 1.42.3. Keep this requirement until a tested Kerebron release shares the
 same view version without an override.
 
+**Recommended for EncounterVisit hosts:** resolve `js-yaml` to **4.3.2 or
+newer**. `@mieweb/templit` 0.2.0 (a direct dependency used by
+`renderEncounterMdy` for the document's YAML envelope) pins js-yaml 4.1.0,
+which lacks the parser merge-limit hardening. This library's checkout applies
+the override locally, but overrides do not propagate to installed apps — add
+the same `js-yaml: ">=4.3.2"` override/resolution shown above for
+`prosemirror-view`, until a Templit release ships the corrected parser.
+
 ## Textarea is rich text underneath (0.12.0)
 
 **`Textarea` now renders `TextAreaRich`** (hidden toolbar, markdown block

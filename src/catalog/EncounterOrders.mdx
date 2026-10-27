@@ -29,8 +29,10 @@ import { Meta } from '@storybook/addon-docs/blocks';
 ## Data contracts
 
 `EncounterVisit` uses one native eSheet response map across eSheet, RichEdit
-and the Templit report view. Its medication and allergy sections use
-`MedicationReconciliation` and `AllergyManager`; Conditions uses `ProblemList`,
+and the Templit report view. Its medication and allergy sections capture coded
+`Medication[]` and `Allergy` records through inline cards — use
+`MedicationReconciliation` or `AllergyManager` directly when you need a
+standalone list workflow with reconciliation statuses. Conditions uses `ProblemList`,
 and Assessment/Plan use `Assessment` with coded orders. Supply the host's
 terminology catalog through `codeLookup` or an ambient `CodeLookupProvider`.
 Plan orders link to the recorded Conditions by `concernId`; narrative Plan
