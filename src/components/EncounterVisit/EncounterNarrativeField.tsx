@@ -17,7 +17,12 @@ const TEXT_ATTRIBUTE = 'encounterNarrativeText';
 const FINDINGS_ATTRIBUTE = 'encounterNarrativeFindings';
 const FINDINGS_TEXT_ATTRIBUTE = 'encounterNarrativeFindingsText';
 
-/** Keep visit formatting small: no links, media, styles, or imported document chrome. */
+/**
+ * Keep visit formatting small: no links, media, styles, or imported document
+ * chrome. Every block format the editor's block menu and markdown shortcuts
+ * offer (headings 1–3, quote, lists) is allowed, so published formatting
+ * survives reopening the field.
+ */
 export function sanitizeEncounterNarrativeHtml(html: string): string {
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
@@ -29,6 +34,10 @@ export function sanitizeEncounterNarrativeHtml(html: string): string {
       'em',
       'i',
       'u',
+      'h1',
+      'h2',
+      'h3',
+      'blockquote',
       'ul',
       'ol',
       'li',
@@ -67,7 +76,17 @@ export function encounterNarrativeText(html: string): string {
       text += '\n';
       return;
     }
-    const isBlock = ['P', 'DIV', 'UL', 'OL', 'LI'].includes(node.tagName);
+    const isBlock = [
+      'P',
+      'DIV',
+      'H1',
+      'H2',
+      'H3',
+      'BLOCKQUOTE',
+      'UL',
+      'OL',
+      'LI',
+    ].includes(node.tagName);
     if (isBlock) lineBreak();
     if (node.tagName === 'LI') {
       const list = node.parentElement;
@@ -282,6 +301,20 @@ export function EncounterNarrativeField({
           clearSearch: m('Clear search'),
           // {count} is substituted by MacroLibrary per group.
           showMore: m('Show {count} more'),
+        }}
+        blockMenuLabels={{
+          blockMenu: m('Block menu'),
+          text: m('Text'),
+          heading1: m('Heading 1'),
+          heading2: m('Heading 2'),
+          heading3: m('Heading 3'),
+          bulletList: m('Bullet list'),
+          numberedList: m('Numbered list'),
+          quote: m('Quote'),
+          insertMacro: m('Insert macro'),
+          showMacroLibrary: m('Show macro library'),
+          showToolbar: m('Show toolbar'),
+          hideToolbar: m('Hide toolbar'),
         }}
         sanitizeHtml={sanitizeEncounterNarrativeHtml}
         className="mt-1"

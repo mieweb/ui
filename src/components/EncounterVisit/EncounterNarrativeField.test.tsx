@@ -15,6 +15,7 @@ import {
   encounterNarrativeText,
   sanitizeEncounterNarrativeHtml,
 } from './EncounterNarrativeField';
+import { EncounterMessagesProvider } from './messages';
 import { getEncounterNarrativeFindings } from './narrativeFindings';
 
 function props(
@@ -251,6 +252,17 @@ describe('EncounterNarrativeField', () => {
         '<p style="text-align:center"><i>Text</i><span> detail</span></p>'
       )
     ).toBe('<p><i>Text</i> detail</p>');
+  });
+
+  it('keeps every block format the editor menu offers through save and reopen', () => {
+    // Heading 1–3 and Quote are in TextAreaRich's block menu and markdown
+    // shortcuts; publishing must not strip them (mieweb/ui#564 review).
+    const html =
+      '<h1>Visit</h1><h2>History</h2><h3>Detail</h3><blockquote>Patient words</blockquote><p>Prose</p>';
+    expect(sanitizeEncounterNarrativeHtml(html)).toBe(html);
+    expect(encounterNarrativeText(html)).toBe(
+      'Visit\nHistory\nDetail\nPatient words\nProse'
+    );
   });
 
   it('rests as a plain input and offers findings while the clinician is in the field', () => {
@@ -504,6 +516,22 @@ describe('EncounterNarrativeField', () => {
     rerender(<EncounterNarrativeField {...fieldProps} isReadOnly />);
     expect(screen.queryByRole('button', { name: /No trauma/ })).toBeNull();
     expect(fieldProps.onResponse).not.toHaveBeenCalled();
+  });
+
+  it('localizes the block gutter menu through the visit messages', () => {
+    renderWithTheme(
+      <EncounterMessagesProvider
+        messages={{
+          labels: { 'Block menu': 'Blockmenü', 'Heading 1': 'Überschrift 1' },
+        }}
+      >
+        <EncounterNarrativeField {...props()} />
+      </EncounterMessagesProvider>
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Blockmenü' }));
+    expect(
+      screen.getByRole('menuitem', { name: 'Überschrift 1' })
+    ).toBeInTheDocument();
   });
 
   it('escapes configured finding text and ignores malformed or duplicate suggestions', () => {
