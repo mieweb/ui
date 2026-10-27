@@ -494,6 +494,29 @@ describe('EncounterVisit in-process tools', () => {
         })
       )
     ).toBe('INVALID_RESPONSE');
+    expect(
+      errorCode(
+        ctx.tools.updateSection('assessment', {
+          concerns: [
+            {
+              concernId: 'bp',
+              clinicalStatus: 'active',
+              assertions: [
+                {
+                  id: 'a1',
+                  date: '2026-10-10',
+                  text: 'Hypertension',
+                  verificationStatus: 'unconfirmed',
+                  uncertainty: { fields: { onset: null } },
+                },
+              ],
+            },
+          ],
+          items: [],
+          orders: [],
+        })
+      )
+    ).toBe('INVALID_RESPONSE');
     expect(errorCode(ctx.tools.updateSection('hpi', {}))).toBe(
       'WRONG_SECTION_KIND'
     );

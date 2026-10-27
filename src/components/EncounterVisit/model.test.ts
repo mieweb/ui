@@ -12,6 +12,7 @@ import {
   parseEncounterAssessment,
   parseEncounterVitals,
   validateEncounterAssessment,
+  validateEncounterConditions,
   validateEncounterResponses,
   validateEncounterVitals,
 } from './model';
@@ -700,6 +701,58 @@ describe('encounter validation', () => {
     valid.concerns[0].assertions[0].changeType = 'progression';
     expect(validateEncounterAssessment(valid)).toEqual([]);
     expect(parseEncounterAssessment(JSON.stringify(valid))).toEqual(valid);
+  });
+
+  it.each([
+    'high',
+    { overall: 'certain' },
+    { fields: [] },
+    { fields: { onset: null } },
+    { fields: { onset: { known: 'no' } } },
+    { fields: { onset: { known: false, reason: 'forgot' } } },
+    { fields: { onset: { known: true, confidence: 'certain' } } },
+    { fields: { dosage: { known: false } } },
+  ])(
+    'rejects malformed assertion uncertainty %j instead of crashing rendering',
+    (uncertainty) => {
+      const value = globalThis.structuredClone(
+        assessment
+      ) as EncounterAssessmentValue;
+      Object.assign(value.concerns[0].assertions[0], { uncertainty });
+      expect(validateEncounterAssessment(value)).toContainEqual(
+        expect.objectContaining({
+          code: 'invalid-value',
+          path: 'concerns.0.assertions.0.uncertainty',
+        })
+      );
+      // The import path must preserve-and-report, never hand the malformed
+      // block to ProblemList (its badge reads fields[x].known directly).
+      expect(parseEncounterAssessment(JSON.stringify(value))).toEqual({
+        concerns: [],
+        items: [],
+        orders: [],
+      });
+      expect(
+        validateEncounterConditions({ concerns: value.concerns })
+      ).toContainEqual(
+        expect.objectContaining({
+          path: 'concerns.0.assertions.0.uncertainty',
+        })
+      );
+    }
+  );
+
+  it('accepts a complete uncertainty block through validation and import', () => {
+    const value = globalThis.structuredClone(assessment);
+    value.concerns[0].assertions[0].uncertainty = {
+      overall: 'medium',
+      fields: {
+        onset: { known: false, reason: 'asked-unknown', note: 'since youth' },
+        severity: { known: true, confidence: 'medium' },
+      },
+    };
+    expect(validateEncounterAssessment(value)).toEqual([]);
+    expect(parseEncounterAssessment(JSON.stringify(value))).toEqual(value);
   });
 });
 

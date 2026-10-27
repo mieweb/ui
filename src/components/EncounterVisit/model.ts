@@ -329,6 +329,41 @@ function validCode(value: unknown): boolean {
   );
 }
 
+// Mirrors ProblemList's Uncertainty/FieldUncertainty shapes: rendering reads
+// `known`/`reason`/`confidence` straight off each field record, so a malformed
+// block must be caught here, not at render time.
+function validFieldUncertainty(value: unknown): boolean {
+  return (
+    record(value) &&
+    typeof value.known === 'boolean' &&
+    (value.reason === undefined ||
+      ['asked-unknown', 'not-asked', 'masked', 'unavailable'].includes(
+        value.reason as string
+      )) &&
+    (value.confidence === undefined ||
+      ['low', 'medium', 'high'].includes(value.confidence as string)) &&
+    optionalStrings(value, ['note'])
+  );
+}
+
+function validUncertainty(value: unknown): boolean {
+  if (!record(value)) return false;
+  if (
+    value.overall !== undefined &&
+    !['confirmed', 'low', 'medium', 'high'].includes(value.overall as string)
+  ) {
+    return false;
+  }
+  if (value.fields === undefined) return true;
+  if (!record(value.fields)) return false;
+  return Object.entries(value.fields).every(
+    ([field, fieldUncertainty]) =>
+      ['coding', 'onset', 'severity', 'laterality', 'bodySite'].includes(
+        field
+      ) && validFieldUncertainty(fieldUncertainty)
+  );
+}
+
 function validMedication(value: unknown): value is Medication {
   return (
     record(value) &&
@@ -516,6 +551,15 @@ export function validateEncounterAssessment(
         add(
           'Assertion coding must contain system and code strings.',
           `${assertionPath}.coding`
+        );
+      }
+      if (
+        assertion.uncertainty !== undefined &&
+        !validUncertainty(assertion.uncertainty)
+      ) {
+        add(
+          'Assertion uncertainty must use supported overall confidence and per-field known/reason/confidence records.',
+          `${assertionPath}.uncertainty`
         );
       }
     });
