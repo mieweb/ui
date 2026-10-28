@@ -186,9 +186,18 @@ import { RichTextEsheet } from '@mieweb/ui/esheet';
     { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
     { role: 'Provider', name: 'Dr. Casey Morgan', detail: 'NPI 1234567890' },
   ]}
-  onSubmit={(document) => save(document.mdy)}
+  // Persist both: responses reopen the draft, MDY is the portable export.
+  onSubmit={(document) =>
+    save({ responses: document.responses, mdy: document.mdy })
+  }
 />
-\`\`\``,
+\`\`\`
+
+### Limitations
+
+- **MDY is export-only.** The Markdown body cannot be loaded back; reopen a draft by passing the saved \`responses\` as \`initialResponses\`.
+- **Rich formatting lives in the responses**, as sanitized markup in response attributes — the MDY body is the plain narrative text.
+- **\`initialResponses\` is read once per \`definition.id\`**; later changes to the prop do not reset an open draft.`,
       },
     },
     catalog: {

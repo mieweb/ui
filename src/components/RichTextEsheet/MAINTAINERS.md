@@ -33,8 +33,13 @@ serialized definition + parties).
 The portable output is MDY via `createRichTextEsheetSnapshot`: YAML front
 matter (`richTextEsheet` id/title plus `parties`) and a Markdown body with one
 `##` heading per documented section. Undocumented sections are omitted from
-the body. Narrative answers stay plain text in `FieldResponse.answer`; rich
-markup handling lives in the shared `EsheetNarrativeField`, not here.
+the body. Authored text stays literal when the body is rendered — Markdown
+punctuation and HTML are escaped and editor line breaks become paragraphs —
+and completion/body honor both `answer` and `selected` native response shapes
+(same rule as encounter MDY). Narrative answers stay plain text in
+`FieldResponse.answer`; rich markup handling lives in the shared
+`EsheetNarrativeField`, not here. MDY is export-only: reopening a draft
+requires the snapshot's native `responses`.
 
 Required sections block save with a focusable error summary rather than
 discarding the draft. Save failures keep the draft editable. All user-facing

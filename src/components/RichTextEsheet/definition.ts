@@ -128,8 +128,13 @@ export function validateRichTextEsheetDefinition(
 export function partyFindings(
   parties: RichTextEsheetParty[] | undefined
 ): NarrativeFinding[] {
-  return (parties ?? []).map((party, index) => ({
-    id: `party:${index}`,
+  return (parties ?? []).map((party) => ({
+    // Content-derived identity: editing or reordering a party yields a new
+    // macro id, so the updated text stays insertable after an earlier
+    // version was applied (selection dedupe is by id).
+    id: `party:${encodeURIComponent(party.role)}:${encodeURIComponent(
+      party.name
+    )}:${encodeURIComponent(party.detail ?? '')}`,
     label: `${party.role}: ${party.name}`,
     text: party.detail ? `${party.name} (${party.detail})` : party.name,
   }));
@@ -160,21 +165,25 @@ export function createRichTextEsheetFormDefinition(
             });
           }
           // eSheet deliberately keeps custom types outside its built-in TypeScript union.
+          const fieldType = section.fieldType ?? 'esheetNarrative';
           fields.push({
             id: getRichTextEsheetFieldId(section.id),
-            fieldType: section.fieldType ?? 'esheetNarrative',
+            fieldType,
             question: section.title,
             required: section.required,
             width: 'full',
-            _sourceData: section.fieldType
-              ? undefined
-              : {
-                  narrativeHideLabel: true,
-                  narrativeFindings: [
-                    ...(section.findings ?? []),
-                    ...partyMacros,
-                  ],
-                },
+            // Keyed off the resolved type: an explicit 'esheetNarrative'
+            // override keeps its findings, macros and hidden label.
+            _sourceData:
+              fieldType === 'esheetNarrative'
+                ? {
+                    narrativeHideLabel: true,
+                    narrativeFindings: [
+                      ...(section.findings ?? []),
+                      ...partyMacros,
+                    ],
+                  }
+                : undefined,
           } as unknown as FieldDefinition);
           return {
             id: getRichTextEsheetSectionFieldId(section.id),
@@ -190,12 +199,67 @@ export function createRichTextEsheetFormDefinition(
   };
 }
 
-function sectionAnswer(
+function record(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function hasValue(value: unknown): boolean {
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (typeof value === 'number' || typeof value === 'boolean') return true;
+  if (Array.isArray(value)) return value.some(hasValue);
+  if (record(value)) return Object.values(value).some(hasValue);
+  return false;
+}
+
+function valueText(value: unknown): string {
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value);
+  if (Array.isArray(value))
+    return value.map(valueText).filter(Boolean).join(', ');
+  return '';
+}
+
+/** Selection labels alone are not a selected value (same rule as encounter MDY). */
+function selectedText(selected: unknown): string {
+  if (Array.isArray(selected))
+    return selected.map(selectedText).filter(Boolean).join(', ');
+  if (!record(selected)) return '';
+  if ('value' in selected) {
+    if (!hasValue(selected.value)) return '';
+    const text = valueText(selected.value);
+    const label =
+      typeof selected.label === 'string' ? selected.label.trim() : '';
+    return label && label !== text ? `${label}: ${text}` : text;
+  }
+  return Object.values(selected).map(selectedText).filter(Boolean).join(', ');
+}
+
+/** Normalize the supported native response shapes — text answers and selections. */
+function sectionText(
   responses: RichTextEsheetResponses,
   sectionId: string
 ): string {
-  const answer = responses[getRichTextEsheetFieldId(sectionId)]?.answer;
-  return typeof answer === 'string' ? answer : '';
+  const response = responses[getRichTextEsheetFieldId(sectionId)];
+  return valueText(response?.answer) || selectedText(response?.selected);
+}
+
+// Mirrors EncounterVisit's mdy.ts escaping; consolidate in Phase 3 of #665.
+function markdownText(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/[\\[\]`*_~<>]/g, '\\$&');
+}
+
+function markdownHeading(value: string): string {
+  return markdownText(value).replace(/\r?\n/g, ' · ');
+}
+
+/** Authored plain text stays literal; editor line breaks become Markdown paragraphs. */
+function markdownBody(value: string): string {
+  return value
+    .split(/\r?\n/)
+    .map((line) => markdownText(line.trim()))
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 /** Derive the full document state — progress, validation and portable MDY — from native responses. */
@@ -206,7 +270,7 @@ export function createRichTextEsheetSnapshot(
 ): RichTextEsheetSnapshot {
   validateRichTextEsheetDefinition(definition);
   const documentedSections = definition.sections
-    .filter((section) => sectionAnswer(responses, section.id).trim().length > 0)
+    .filter((section) => sectionText(responses, section.id).length > 0)
     .map((section) => section.id);
   const errors = definition.sections
     .filter(
@@ -224,11 +288,13 @@ export function createRichTextEsheetSnapshot(
     .filter((section) => documentedSections.includes(section.id))
     .map(
       (section) =>
-        `## ${section.title}\n\n${sectionAnswer(responses, section.id).trim()}`
+        `## ${markdownHeading(section.title)}\n\n${markdownBody(
+          sectionText(responses, section.id)
+        )}`
     )
     .join('\n\n');
-  const mdy = `---\n${stringify(frontMatter)}---\n\n# ${definition.title}\n${
-    body ? `\n${body}\n` : ''
-  }`;
+  const mdy = `---\n${stringify(frontMatter)}---\n\n# ${markdownHeading(
+    definition.title
+  )}\n${body ? `\n${body}\n` : ''}`;
   return { definition, responses, documentedSections, errors, mdy };
 }

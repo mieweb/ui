@@ -308,7 +308,13 @@ const RichTextEsheetSession = React.forwardRef<
                     className="text-destructive min-h-11 text-start underline underline-offset-2"
                     onClick={() => focusSection(issue.sectionId)}
                   >
-                    {m(issue.message)}
+                    {/* Stable template key; the host-authored title is a substitution. */}
+                    {m('{section} is required.', {
+                      section:
+                        stable.definition.sections.find(
+                          (section) => section.id === issue.sectionId
+                        )?.title ?? issue.sectionId,
+                    })}
                   </button>
                 </li>
               ))}
