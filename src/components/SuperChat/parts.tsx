@@ -680,6 +680,11 @@ interface MessageRowProps {
    * and enables the reply-collapse control. Bubble colors still reflect `isSelf`.
    */
   threaded?: boolean;
+  /**
+   * Author of the message this one replies to. Added to the row's accessible
+   * name so the reply relationship is not conveyed by indentation alone.
+   */
+  replyToName?: string;
   /** Number of nested replies under this message; shows the collapse toggle when > 0. */
   replyCount?: number;
   /** Whether this message's replies are currently collapsed. */
@@ -713,6 +718,7 @@ export const MessageRow = React.memo(function MessageRow({
   mediaErrorLabel,
   mediaRetryLabel,
   threaded = false,
+  replyToName,
   replyCount = 0,
   collapsed = false,
   onToggleReplies,
@@ -985,7 +991,9 @@ export const MessageRow = React.memo(function MessageRow({
     <div
       data-slot="superchat-message"
       role="article"
-      aria-label={`${authorName}, ${formatTime(message.time)}`}
+      aria-label={`${authorName}, ${formatTime(message.time)}${
+        replyToName ? `, reply to ${replyToName}` : ''
+      }`}
       className={cn(
         'group flex gap-2',
         alignSelf ? 'flex-row-reverse' : 'flex-row'
