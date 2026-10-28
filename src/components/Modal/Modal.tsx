@@ -144,6 +144,7 @@ function Modal({
 }: ModalProps) {
   const generatedId = React.useId();
   const modalId = id || generatedId;
+  const pointerDownOnOverlay = React.useRef(false);
 
   /*
    * The dialog outlives `open`.
@@ -202,7 +203,13 @@ function Modal({
   // Handle overlay click
   const handleOverlayClick = React.useCallback(
     (e: React.MouseEvent) => {
-      if (closeOnOverlayClick && e.target === e.currentTarget) {
+      const startedOnOverlay = pointerDownOnOverlay.current;
+      pointerDownOnOverlay.current = false;
+      if (
+        closeOnOverlayClick &&
+        startedOnOverlay &&
+        e.target === e.currentTarget
+      ) {
         onOpenChange(false);
       }
     },
@@ -266,6 +273,14 @@ function Modal({
               {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
               <div
                 className="flex min-h-full items-center justify-center p-0 sm:p-4"
+                onPointerDown={(e) => {
+                  pointerDownOnOverlay.current = e.target === e.currentTarget;
+                }}
+                onPointerUp={(e) => {
+                  if (e.target !== e.currentTarget) {
+                    pointerDownOnOverlay.current = false;
+                  }
+                }}
                 onClick={handleOverlayClick}
               >
                 {/* Content */}
