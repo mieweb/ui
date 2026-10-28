@@ -195,7 +195,7 @@ The one clickable control for actions: six intents (\`primary\`, \`secondary\`, 
     },
     size: {
       control: 'select',
-      options: ['sm', 'md', 'lg', 'icon'],
+      options: ['sm', 'md', 'lg', 'icon', 'icon-sm'],
     },
     fullWidth: {
       control: 'boolean',

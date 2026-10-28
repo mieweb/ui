@@ -2,6 +2,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Pause, Play } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../../../../utils/cn';
+import { Button } from '../../../Button';
 import type { TranscriptPlayerLabels } from './labels';
 import { formatClock, type PlayerSpeaker, type Utterance } from './model';
 
@@ -76,8 +77,10 @@ const Row = React.memo(function Row({
         active ? 'bg-primary-50 dark:bg-primary-950/40' : 'hover:bg-muted/60'
       )}
     >
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         aria-label={labels.playLine(name, time)}
         aria-pressed={playing}
         onClick={(e) => {
@@ -85,14 +88,14 @@ const Row = React.memo(function Row({
           if (playing) onPause();
           else onPlay(utterance);
         }}
-        className="border-border text-foreground hover:bg-muted focus-visible:ring-ring flex h-6 w-6 shrink-0 items-center justify-center rounded-full border focus-visible:ring-2 focus-visible:outline-none"
+        className="border-border text-foreground h-6 w-6 shrink-0 rounded-full border"
       >
         {playing ? (
           <Pause aria-hidden="true" className="h-3 w-3 fill-current" />
         ) : (
           <Play aria-hidden="true" className="ms-0.5 h-3 w-3 fill-current" />
         )}
-      </button>
+      </Button>
       <span className="text-muted-foreground w-12 shrink-0 pt-0.5 text-xs tabular-nums">
         {time}
       </span>
@@ -273,16 +276,18 @@ export function TranscriptList({
         )}
       </div>
       {detached && activeId && (
-        <button
+        <Button
           type="button"
+          variant="primary"
+          size="sm"
           onClick={() => {
             setDetached(false);
             scrollToActive();
           }}
-          className="bg-primary-800 hover:bg-primary-900 focus-visible:ring-ring absolute end-4 bottom-3 rounded-full px-3 py-1 text-xs font-medium text-white shadow focus-visible:ring-2 focus-visible:outline-none"
+          className="absolute end-4 bottom-3 rounded-full shadow"
         >
           {labels.backToCurrent}
-        </button>
+        </Button>
       )}
     </div>
   );

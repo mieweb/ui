@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../../../../utils/cn';
+import { Button } from '../../../Button';
 import { Input } from '../../../Input/Input';
 import { Select } from '../../../Select/Select';
 import { Slider } from '../../../Slider/Slider';
@@ -103,8 +104,9 @@ function inertOutside(element: HTMLElement): () => void {
 /** Width of the label column plus its gap in `ROW_GRID`, for overlays that span the track column. */
 const TRACK_OFFSET = '7.25rem';
 
-const iconButton =
-  'text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-ring rounded-md p-1.5 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40 aria-pressed:text-primary-700 dark:aria-pressed:text-primary-300';
+/** Pressed state for toggle buttons such as Follow playback. */
+const pressedButton =
+  'aria-pressed:bg-primary-50 aria-pressed:text-primary-800 dark:aria-pressed:bg-primary-950 dark:aria-pressed:text-primary-200';
 
 export function TranscriptPlayer({
   src,
@@ -338,17 +340,28 @@ export function TranscriptPlayer({
         className
       )}
     >
+      {src && (
+        // eslint-disable-next-line jsx-a11y/media-has-caption -- the synced transcript below is the text alternative
+        <audio
+          key={src}
+          ref={playback.setMediaElement}
+          src={src}
+          preload="metadata"
+        />
+      )}
       <section
         aria-label={labels.recording}
         className="border-border bg-card text-card-foreground sticky top-0 z-10 rounded-xl border p-4"
       >
         <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <button
+          <Button
             type="button"
+            variant="primary"
+            size="icon"
             onClick={playback.toggle}
             disabled={!canPlay}
             aria-label={playing ? labels.pause : labels.play}
-            className="bg-primary-800 hover:bg-primary-900 focus-visible:ring-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50"
+            className="shrink-0 rounded-full"
           >
             {playing ? (
               <Pause aria-hidden="true" className="h-4 w-4 fill-current" />
@@ -358,7 +371,7 @@ export function TranscriptPlayer({
                 className="ms-0.5 h-4 w-4 fill-current"
               />
             )}
-          </button>
+          </Button>
           <span dir="ltr" className="text-sm tabular-nums">
             {formatClock(currentTime)}{' '}
             <span className="text-muted-foreground">
@@ -376,9 +389,10 @@ export function TranscriptPlayer({
             </span>
           )}
           <div className="ms-auto flex items-center gap-2">
-            <button
+            <Button
               type="button"
-              className={iconButton}
+              variant="ghost"
+              size="icon-sm"
               aria-label={playback.volume === 0 ? labels.unmute : labels.mute}
               onClick={() => {
                 if (playback.volume === 0) playback.setVolume(lastVolume || 1);
@@ -393,7 +407,7 @@ export function TranscriptPlayer({
               ) : (
                 <Volume2 aria-hidden="true" className="h-4 w-4" />
               )}
-            </button>
+            </Button>
             <Slider
               aria-label={labels.volume}
               min={0}
@@ -415,10 +429,11 @@ export function TranscriptPlayer({
                 label: labels.formatSpeed(s),
               }))}
             />
-            <button
+            <Button
               ref={fullscreenButtonRef}
               type="button"
-              className={iconButton}
+              variant="ghost"
+              size="icon-sm"
               aria-label={
                 fullscreen ? labels.exitFullScreen : labels.fullScreen
               }
@@ -429,7 +444,7 @@ export function TranscriptPlayer({
               ) : (
                 <Maximize2 aria-hidden="true" className="h-4 w-4" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -513,33 +528,37 @@ export function TranscriptPlayer({
 
         <div dir="ltr" className={cn(ROW_GRID, 'mt-3 items-start')}>
           <div className="flex items-center">
-            <button
+            <Button
               type="button"
-              className={iconButton}
+              variant="ghost"
+              size="icon-sm"
               aria-label={labels.zoomOut}
               disabled={view.span >= duration}
               onClick={() => zoom(2)}
             >
               <ZoomOut aria-hidden="true" className="h-4 w-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className={iconButton}
+              variant="ghost"
+              size="icon-sm"
               aria-label={labels.zoomIn}
               disabled={view.span <= Math.min(MIN_VIEW_SECONDS, duration)}
               onClick={() => zoom(0.5)}
             >
               <ZoomIn aria-hidden="true" className="h-4 w-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className={iconButton}
+              variant="ghost"
+              size="icon-sm"
+              className={pressedButton}
               aria-label={labels.followPlayback}
               aria-pressed={follow}
               onClick={() => setFollow((f) => !f)}
             >
               <LocateFixed aria-hidden="true" className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
           <TimelineOverview
             speakers={visibleSpeakers}

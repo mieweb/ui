@@ -51,9 +51,6 @@ const transcript: Transcript = {
 const peaks = { data: new Float32Array(10).fill(0.5), perSecond: 1 };
 
 let audio: HTMLMediaElement | null = null;
-const remember = (element: HTMLMediaElement) => {
-  audio = element;
-};
 const times = new WeakMap<HTMLMediaElement, number>();
 
 beforeEach(() => {
@@ -79,17 +76,6 @@ beforeEach(() => {
       times.set(this, value);
     },
   });
-  // The player creates its audio element off-DOM; keep a handle to the latest one.
-  Object.defineProperty(HTMLMediaElement.prototype, 'src', {
-    configurable: true,
-    get(this: HTMLMediaElement) {
-      return this.getAttribute('src') ?? '';
-    },
-    set(this: HTMLMediaElement, value: string) {
-      remember(this);
-      this.setAttribute('src', value);
-    },
-  });
   vi.stubGlobal('requestAnimationFrame', (cb: (time: number) => void) =>
     window.setTimeout(() => cb(performance.now()), 16)
   );
@@ -108,8 +94,8 @@ afterEach(() => {
 
 const renderPlayer = (
   props: Partial<Parameters<typeof TranscriptPlayer>[0]> = {}
-) =>
-  render(
+) => {
+  const result = render(
     <TranscriptPlayer
       src="visit.wav"
       transcript={transcript}
@@ -117,6 +103,9 @@ const renderPlayer = (
       {...props}
     />
   );
+  audio = document.querySelector('audio');
+  return result;
+};
 
 const lane = (name: string) =>
   screen.getByRole('group', { name: `${name} speaking turns` });

@@ -1,15 +1,20 @@
 /**
- * One audio element for the whole player: global playback, interval playback that stops at the
- * interval's end, seek, speed and volume. Everything resets when `src` changes.
+ * TranscriptPlayer's playback, layered on the shared `useMediaTransport` (element listeners,
+ * play/pause state, duration, speed, seek). Adds what the transport does not have: interval
+ * playback that stops at the interval's end, a smooth rAF playhead, volume, and play() refusals
+ * reported as an error. Render `<audio ref={setMediaElement} key={src} src={src} />`.
  */
 import * as React from 'react';
+import { useMediaTransport } from '../../../../hooks/useMediaTransport';
 import type { TimeRange } from './model';
 
 export interface Playback {
+  /** Callback ref for the player's `<audio>` element. */
+  setMediaElement: (element: HTMLMediaElement | null) => void;
   playing: boolean;
   /** Seconds. */
   currentTime: number;
-  /** Seconds; 0 until metadata loads. */
+  /** Seconds; 0 until known. */
   duration: number;
   rate: number;
   volume: number;
@@ -28,12 +33,9 @@ export interface Playback {
 }
 
 export function usePlayback(src: string | null | undefined): Playback {
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const audioRef = React.useRef<HTMLMediaElement | null>(null);
   const rangeRef = React.useRef<Playback['range']>(null);
-  const [playing, setPlaying] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(0);
-  const [duration, setDuration] = React.useState(0);
-  const [rate, setRateState] = React.useState(1);
   const [volume, setVolumeState] = React.useState(1);
   const [error, setError] = React.useState<Playback['error']>(null);
   const [range, setRangeState] = React.useState<Playback['range']>(null);
@@ -45,7 +47,7 @@ export function usePlayback(src: string | null | undefined): Playback {
 
   /** Pauses at the end of interval playback; true when it stopped. */
   const stopAtRangeEnd = React.useCallback(
-    (audio: HTMLAudioElement) => {
+    (audio: HTMLMediaElement) => {
       const r = rangeRef.current;
       if (!r || audio.currentTime < r.end) return false;
       audio.pause();
@@ -57,59 +59,48 @@ export function usePlayback(src: string | null | undefined): Playback {
     [setRange]
   );
 
-  // Speed and volume carry over to the next recording; everything else starts fresh.
-  const rateRef = React.useRef(rate);
-  rateRef.current = rate;
+  const transport = useMediaTransport({
+    errorLabel: 'recording',
+    onError: () => setError('load'),
+    // rAF is paused in background tabs; timeupdate still fires, so it also keeps time and enforces the interval end.
+    onTimeUpdate: (ms) => {
+      const audio = audioRef.current;
+      if (audio && stopAtRangeEnd(audio)) return;
+      setCurrentTime(ms / 1000);
+    },
+    onStateChange: (state) => {
+      if (state === 'paused' && audioRef.current)
+        setCurrentTime(audioRef.current.currentTime);
+    },
+    onEnded: () => setRange(null),
+  });
+  const {
+    setMediaElement: attachTransport,
+    isPlaying: playing,
+    durationMs,
+    playbackRate: rate,
+    setPlaybackRate: setRate,
+    seekToMs,
+    pause,
+  } = transport;
+
+  // Volume carries over to the next recording; position, interval and errors start fresh.
   const volumeRef = React.useRef(volume);
   volumeRef.current = volume;
+  const setMediaElement = React.useCallback(
+    (element: HTMLMediaElement | null) => {
+      audioRef.current = element;
+      if (element) element.volume = volumeRef.current;
+      attachTransport(element);
+    },
+    [attachTransport]
+  );
 
   React.useEffect(() => {
-    setPlaying(false);
     setCurrentTime(0);
-    setDuration(0);
     setError(null);
     setRange(null);
-    if (!src) return;
-
-    const audio = document.createElement('audio');
-    audio.preload = 'metadata';
-    audio.playbackRate = rateRef.current;
-    audio.volume = volumeRef.current;
-    const events = new AbortController();
-    const on = (type: string, handler: () => void) =>
-      audio.addEventListener(type, handler, { signal: events.signal });
-
-    // MediaRecorder webm often reports Infinity until the end is known; durationchange brings the real value.
-    const syncDuration = () =>
-      setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
-    on('loadedmetadata', syncDuration);
-    on('durationchange', syncDuration);
-    on('play', () => setPlaying(true));
-    on('pause', () => {
-      setPlaying(false);
-      setCurrentTime(audio.currentTime);
-    });
-    on('ended', () => {
-      setRange(null);
-      setCurrentTime(audio.currentTime);
-    });
-    on('seeked', () => setCurrentTime(audio.currentTime));
-    // rAF is paused in background tabs; timeupdate still fires, so it also keeps time and enforces the interval end.
-    on('timeupdate', () => {
-      if (!stopAtRangeEnd(audio)) setCurrentTime(audio.currentTime);
-    });
-    on('error', () => setError('load'));
-    audio.src = src;
-    audioRef.current = audio;
-
-    return () => {
-      events.abort();
-      audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
-      audioRef.current = null;
-    };
-  }, [src, setRange, stopAtRangeEnd]);
+  }, [src, setRange]);
 
   // Smooth playhead while playing, and the stop point for interval playback.
   React.useEffect(() => {
@@ -124,7 +115,8 @@ export function usePlayback(src: string | null | undefined): Playback {
     return () => cancelAnimationFrame(frame);
   }, [playing, stopAtRangeEnd]);
 
-  const start = React.useCallback((audio: HTMLAudioElement) => {
+  // The transport's play() ignores refusals; this reports them so the user can retry.
+  const start = React.useCallback((audio: HTMLMediaElement) => {
     setError((e) => (e === 'play' ? null : e));
     audio.play()?.catch((e: unknown) => {
       // A play() interrupted by pause() or a new src is expected; anything else is reported.
@@ -141,8 +133,6 @@ export function usePlayback(src: string | null | undefined): Playback {
     start(audio);
   }, [start, setRange]);
 
-  const pause = React.useCallback(() => audioRef.current?.pause(), []);
-
   const seek = React.useCallback(
     (time: number) => {
       const audio = audioRef.current;
@@ -151,35 +141,25 @@ export function usePlayback(src: string | null | undefined): Playback {
       const t = Math.min(Math.max(0, time), max);
       const r = rangeRef.current;
       if (r && (t < r.start || t >= r.end)) setRange(null);
-      audio.currentTime = t;
+      seekToMs(t * 1000);
       setCurrentTime(t);
     },
-    [setRange]
+    [setRange, seekToMs]
   );
 
   const playRange = React.useCallback<Playback['playRange']>(
     (next) => {
       const audio = audioRef.current;
       if (!audio) return;
-      // An empty interval has nothing to play; move there so the click still does something.
-      if (next.end <= next.start) {
-        setRange(null);
-        audio.currentTime = next.start;
-        setCurrentTime(next.start);
-        return;
-      }
-      setRange(next);
-      audio.currentTime = next.start;
+      const playable = next.end > next.start;
+      setRange(playable ? next : null);
+      seekToMs(next.start * 1000);
       setCurrentTime(next.start);
-      start(audio);
+      // An empty interval has nothing to play; moving there still answers the click.
+      if (playable) start(audio);
     },
-    [start, setRange]
+    [start, setRange, seekToMs]
   );
-
-  const setRate = React.useCallback((next: number) => {
-    setRateState(next);
-    if (audioRef.current) audioRef.current.playbackRate = next;
-  }, []);
 
   const setVolume = React.useCallback((next: number) => {
     setVolumeState(next);
@@ -187,9 +167,10 @@ export function usePlayback(src: string | null | undefined): Playback {
   }, []);
 
   return {
+    setMediaElement,
     playing,
     currentTime,
-    duration,
+    duration: durationMs / 1000,
     rate,
     volume,
     error,

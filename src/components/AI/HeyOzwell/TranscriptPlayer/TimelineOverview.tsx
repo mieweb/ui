@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
+import { Button } from '../../../Button';
 import type { TranscriptPlayerLabels } from './labels';
 import {
   clampView,
@@ -119,15 +120,17 @@ export function TimelineOverview({
   return (
     <div>
       <div className="flex items-center gap-1">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-sm"
           aria-label={labels.earlier}
           disabled={view.start <= 0}
           onClick={() => pan(-view.span)}
-          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded p-0.5 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
+          className="shrink-0"
         >
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
-        </button>
+        </Button>
         <div
           ref={trackRef}
           className="bg-muted/60 border-border relative flex-1 cursor-pointer touch-none rounded border"
@@ -170,19 +173,21 @@ export function TimelineOverview({
             }}
           />
         </div>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-sm"
           aria-label={labels.later}
           disabled={view.start + view.span >= duration}
           onClick={() => pan(view.span)}
-          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded p-0.5 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
+          className="shrink-0"
         >
           <ChevronRight aria-hidden="true" className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
       <div
         aria-hidden="true"
-        className="text-muted-foreground relative mx-6 mt-1 h-4 text-[11px] tabular-nums"
+        className="text-muted-foreground relative mx-9 mt-1 h-4 text-[11px] tabular-nums"
       >
         {ticksFor(whole).map((t) => (
           <span

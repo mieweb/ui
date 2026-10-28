@@ -1,6 +1,7 @@
 import { Play } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../../../../utils/cn';
+import { Button } from '../../../Button';
 import type { TranscriptPlayerLabels } from './labels';
 import {
   formatClock,
@@ -194,17 +195,19 @@ export const SpeakerLanes = React.memo(function SpeakerLanes({
                   onMouseEnter={() => show(hovered)}
                   onMouseLeave={hide}
                 >
-                  <button
+                  <Button
                     type="button"
+                    variant="primary"
+                    size="icon-sm"
                     tabIndex={-1}
                     aria-label={labels.playSegment(
                       describe(hovered, speaker.name, labels)
                     )}
                     onClick={() => onPlaySegment(hovered)}
-                    className="bg-primary-800 hover:bg-primary-900 flex h-6 w-6 items-center justify-center rounded-full text-white"
+                    className="h-6 w-6 rounded-full"
                   >
                     <Play aria-hidden="true" className="h-3 w-3 fill-current" />
-                  </button>
+                  </Button>
                   <span>
                     <span className="block font-semibold">{speaker.name}</span>
                     <span className="tabular-nums opacity-75">

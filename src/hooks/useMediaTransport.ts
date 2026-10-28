@@ -183,6 +183,8 @@ export function useMediaTransport(
       setDurationMs(toMs(element.duration));
       emitTime();
     };
+    // MediaRecorder webm often reports Infinity until the end is known.
+    const onDurationChange = () => setDurationMs(toMs(element.duration));
     const onTimeUpdateEvt = () => emitTime();
     const onPlay = () => setState('playing');
     const onPlaying = () => setState('playing');
@@ -205,6 +207,7 @@ export function useMediaTransport(
     element.addEventListener('loadstart', onLoadStart);
     element.addEventListener('canplay', onCanPlay);
     element.addEventListener('loadedmetadata', onLoadedMetadata);
+    element.addEventListener('durationchange', onDurationChange);
     element.addEventListener('timeupdate', onTimeUpdateEvt);
     element.addEventListener('play', onPlay);
     element.addEventListener('playing', onPlaying);
@@ -212,15 +215,14 @@ export function useMediaTransport(
     element.addEventListener('ended', onEndedEvt);
     element.addEventListener('error', onErrorEvt);
 
-    // Sync duration if metadata is already available on attach.
-    if (Number.isFinite(element.duration)) {
-      setDurationMs(toMs(element.duration));
-    }
+    // Sync duration on attach; a new element must not inherit the previous one's.
+    setDurationMs(toMs(element.duration));
 
     return () => {
       element.removeEventListener('loadstart', onLoadStart);
       element.removeEventListener('canplay', onCanPlay);
       element.removeEventListener('loadedmetadata', onLoadedMetadata);
+      element.removeEventListener('durationchange', onDurationChange);
       element.removeEventListener('timeupdate', onTimeUpdateEvt);
       element.removeEventListener('play', onPlay);
       element.removeEventListener('playing', onPlaying);
