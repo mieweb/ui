@@ -1198,19 +1198,21 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             ? (event) => {
                 const related = event.relatedTarget as HTMLElement | null;
                 if (related && event.currentTarget.contains(related)) return;
-                // The block gutter's dropdown mounts in a portal under
-                // document.body (outside this frame); focus moving into our
-                // own menu is an internal move, not leaving the field.
-                const menuId = related
-                  ?.closest('[data-slot="dropdown-menu"]')
-                  ?.querySelector('[role="menu"]')?.id;
-                if (
-                  menuId &&
-                  event.currentTarget.querySelector(
-                    `[aria-controls="${globalThis.CSS.escape(menuId)}"]`
-                  )
-                )
-                  return;
+                // The block gutter's dropdown — and its "Insert macro"
+                // submenu — mount in portals under document.body (outside
+                // this frame); focus moving into our own menu tree is an
+                // internal move, not leaving the field. Walk each menu back
+                // to its trigger (a submenu's trigger sits in the parent
+                // menu's portal) until one lands inside this frame.
+                let menu = related?.closest<HTMLElement>('[role="menu"]');
+                while (menu && menu.id) {
+                  const trigger = document.querySelector(
+                    `[aria-controls="${globalThis.CSS.escape(menu.id)}"]`
+                  );
+                  if (!trigger) break;
+                  if (event.currentTarget.contains(trigger)) return;
+                  menu = trigger.closest<HTMLElement>('[role="menu"]');
+                }
                 setMacrosOpen(false);
               }
             : undefined
@@ -1543,6 +1545,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                                     savedRangeRef.current =
                                       blockTargetRangeRef.current;
                                   }
+                                  // The menu unmounts with this pick; hand
+                                  // focus back to the editor (host-handled
+                                  // picks skip insertMacro's own focus) so a
+                                  // focus-driven field can rest on the next
+                                  // click away. Panel picks keep focus on
+                                  // their row for keyboard multi-pick.
+                                  focusRestoringSelection();
                                   insertMacro(macro);
                                 }}
                               >

@@ -388,6 +388,66 @@ describe('RichTextEditor', () => {
         fireEvent.blur(item, { relatedTarget: document.body });
         expect(panel()).toBeNull();
       });
+
+      it('keeps the field expanded while the "Insert macro" submenu has focus', async () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+        fireEvent.click(
+          await screen.findByRole('menuitem', { name: 'Insert macro' })
+        );
+        // The submenu lives in its own portal whose trigger sits in the root
+        // menu's portal — two hops from the editor frame. Focus moving there
+        // must not collapse the field, or the pending click never lands.
+        const item = await screen.findByRole('menuitem', {
+          name: /Cardio — WNL/,
+        });
+        fireEvent.blur(editor, { relatedTarget: item });
+        expect(panel()).not.toBeNull();
+        fireEvent.click(item);
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('returns focus to the editor after a host-handled submenu pick', async () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            onMacroInsert={() => true}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+        fireEvent.click(
+          await screen.findByRole('menuitem', { name: 'Insert macro' })
+        );
+        fireEvent.click(
+          await screen.findByRole('menuitem', { name: /Cardio — WNL/ })
+        );
+        // The menu unmounts with the pick; without a hand-off, focus falls to
+        // <body> and the focus-driven field can never rest again — blurring
+        // requires focusing first.
+        expect(document.activeElement).toBe(editor);
+      });
     });
 
     it('inserts the macro content through the undo-aware command', () => {
