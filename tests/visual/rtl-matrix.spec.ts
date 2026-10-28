@@ -277,6 +277,28 @@ const MATRIX: {
     ),
   },
   {
+    // Collapsed reply tree: both the row toggle and the "N replies" pill
+    // chevrons point toward the inline end.
+    name: 'superchat-threaded-collapsed',
+    story: 'superchat-superchat-panel--threaded-collapsed',
+    ready: async (page) => {
+      await page
+        .locator('[data-slot="superchat-thread-replies"]')
+        .first()
+        .waitFor({ state: 'visible' });
+    },
+    assert: async (page, direction) => {
+      await iconMirrors('[data-slot="superchat-thread-toggle"] svg')(
+        page,
+        direction
+      );
+      await iconMirrors('[data-slot="superchat-thread-replies"] svg')(
+        page,
+        direction
+      );
+    },
+  },
+  {
     name: 'avatar-group',
     story: 'record-details-avatargroup--default',
     assert: avatarsStackTowardInlineEnd(

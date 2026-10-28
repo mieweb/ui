@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { gotoStory } from './helpers';
+import { gotoStory, expectDocumentDirection } from './helpers';
 
 // Warm up the server before running tests
 test.beforeAll(async ({ browser }) => {
@@ -596,6 +596,107 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('superchat-read-only.png');
   });
 
+  test.describe('SuperChat - nested conversations and reply tree', () => {
+    // Message times print in the local zone; pin it so baselines match CI.
+    test.use({ timezoneId: 'UTC', locale: 'en-US' });
+
+    const conversationList = (page: Page) =>
+      page.locator("[data-slot='superchat-conversations']");
+    const headerChevron = (page: Page) =>
+      page
+        .locator(
+          "[data-slot='superchat-conversation-list'] button[aria-expanded] svg"
+        )
+        .first();
+    const chevronTransform = (page: Page) =>
+      headerChevron(page).evaluate((el) => {
+        const style = getComputedStyle(el);
+        return { rotate: style.rotate, scale: style.scale };
+      });
+
+    test('Inbox - Nested conversation child selected', async ({ page }) => {
+      await gotoStory(page, 'superchat-inbox--nested-conversations');
+      const child = page.getByRole('button', { name: /^Agent messages/ });
+      await child.click();
+      await expect(child).toHaveAttribute('aria-current', 'true');
+      await expect(
+        page.locator("[data-slot='superchat'] h2").first()
+      ).toHaveText(/· Agent messages$/);
+      // Open header: chevron points down.
+      // The chevron animates between states; wait for it to settle.
+      await expect
+        .poll(() => chevronTransform(page))
+        .toEqual({
+          rotate: '90deg',
+          scale: 'none',
+        });
+      await expect(conversationList(page)).toHaveScreenshot(
+        'superchat-nested-conversations.png'
+      );
+    });
+
+    test('Inbox - Nested conversations (RTL)', async ({ page }) => {
+      await gotoStory(page, 'superchat-inbox--nested-conversations', {
+        globals: 'direction:rtl',
+      });
+      await expectDocumentDirection(page, 'rtl');
+      const children = page.locator(
+        "[data-slot='superchat-conversation-children']"
+      );
+      // Children indent from, and draw their guide on, the inline start —
+      // the right edge under RTL.
+      expect(
+        await children.evaluate((el) => {
+          const style = getComputedStyle(el);
+          return {
+            borderLeftWidth: style.borderLeftWidth,
+            borderRightWidth: style.borderRightWidth,
+            marginRight: style.marginRight,
+          };
+        })
+      ).toEqual({
+        borderLeftWidth: '0px',
+        borderRightWidth: '1px',
+        marginRight: '20px',
+      });
+      // Open: points down, unmirrored (mirroring would flip it up).
+      // The chevron animates between states; wait for it to settle.
+      await expect
+        .poll(() => chevronTransform(page))
+        .toEqual({
+          rotate: '90deg',
+          scale: 'none',
+        });
+      await expect(conversationList(page)).toHaveScreenshot(
+        'superchat-nested-conversations-rtl.png'
+      );
+
+      // Collapsing the active header mirrors the chevron toward the inline end.
+      await page.getByRole('button', { name: /^Patient 4821/ }).click();
+      await expect(children).toHaveCount(0);
+      // The chevron animates between states; wait for it to settle.
+      await expect
+        .poll(() => chevronTransform(page))
+        .toEqual({
+          rotate: 'none',
+          scale: '-1 1',
+        });
+    });
+
+    test('Reply tree expanded', async ({ page }) => {
+      await gotoStory(page, 'superchat-superchat-panel--threaded');
+      const thread = page.locator("[data-slot='superchat-thread']");
+      await thread.waitFor({ state: 'visible' });
+      // A reply indents toward the inline end of its parent.
+      const branches = page.locator("[data-slot='superchat-thread-branch']");
+      const root = await branches.nth(0).boundingBox();
+      const reply = await branches.nth(1).boundingBox();
+      if (!root || !reply) throw new Error('Thread branches not rendered');
+      expect(reply.x).toBeGreaterThan(root.x);
+      await expect(thread).toHaveScreenshot('superchat-threaded.png');
+    });
+  });
+
   test('AIChat - Playground', async ({ page }) => {
     // AIChat with the embedded ChatComposer.
     await gotoStory(page, 'chat-aichat--playground');
@@ -798,9 +899,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       globals: 'direction:rtl',
     });
     await page.getByRole('button', { name: 'Open Enc 5' }).click();
-    const actionBtn = page
-      .locator('button[aria-label^="Actions for"]')
-      .first();
+    const actionBtn = page.locator('button[aria-label^="Actions for"]').first();
     await actionBtn.click();
     const menu = page.locator('[role="menu"]');
     await menu.waitFor({ state: 'visible' });
@@ -1025,9 +1124,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'choice-inputs-countrycodedropdown--default', {
       globals: 'direction:rtl',
     });
-    const triggerCode = page.locator(
-      '[data-slot="country-dropdown-dialcode"]'
-    );
+    const triggerCode = page.locator('[data-slot="country-dropdown-dialcode"]');
     await expect(triggerCode).toHaveText('+1');
     await expect.poll(() => direction(triggerCode)).toBe('ltr');
     await page.locator('[data-slot="country-dropdown-trigger"]').click();
@@ -1312,9 +1409,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     const root = page.locator('.ag-root-wrapper').first();
     await expect(root).toHaveClass(/ag-rtl/);
     await expect
-      .poll(() =>
-        root.evaluate((el) => getComputedStyle(el).direction)
-      )
+      .poll(() => root.evaluate((el) => getComputedStyle(el).direction))
       .toBe('rtl');
     await expect(page).toHaveScreenshot('aggrid-default-rtl.png');
   });
