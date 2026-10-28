@@ -76,8 +76,14 @@ export function SuperChatConversations({
     topId: string;
     openId: string | null;
   }>();
-  const openId =
-    openChoice && openChoice.topId === activeTopId
+  // An active child always keeps its parent open, and that supersedes (and
+  // discards) any earlier open/closed choice for the parent.
+  if (active?.parent && openChoice?.topId === active.parent.id) {
+    setOpenChoice(undefined);
+  }
+  const openId = active?.parent
+    ? active.parent.id
+    : openChoice && openChoice.topId === activeTopId
       ? openChoice.openId
       : activeTopId;
   const isExpanded = (c: SuperChatConversation) => openId === c.id;

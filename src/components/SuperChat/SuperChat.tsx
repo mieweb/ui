@@ -12,7 +12,7 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Reply } from 'lucide-react';
 import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import {
@@ -430,11 +430,16 @@ export function SuperChat({
     (launcher ?? threadRef.current)?.focus({ preventScroll: true });
   }, [activeView, conversation.id, threadRef]);
   const [hasNewBelow, setHasNewBelow] = React.useState(false);
+  // Threaded mode: the newest incoming reply that landed mid-thread (under an
+  // older root, or inside a collapsed branch) rather than at the bottom.
+  const [unseenReplyId, setUnseenReplyId] = React.useState<string | null>(null);
   // Own-send turn anchoring (ChatGPT/Claude-style): the freshly sent message
   // opens a "turn" that reserves a viewport of space, anchored so the bubble
   // sits at the top and replies stream into the space below. Plain thread
   // only — the virtualizer owns row layout, so virtualized mode keeps the
-  // pin-to-bottom behavior for own sends.
+  // pin-to-bottom behavior for own sends. In threaded mode there is no turn
+  // wrapper; the id is just the message to bring into view (an own send, or
+  // an unseen reply opened from the jump control).
   const [turnStartId, setTurnStartId] = React.useState<string | null>(null);
   const [turnMinHeight, setTurnMinHeight] = React.useState<number>();
   const anchoredTurnRef = React.useRef<string | null>(null);
@@ -467,6 +472,7 @@ export function SuperChat({
       scrollToBottom('auto');
     }
     setHasNewBelow(false);
+    setUnseenReplyId(null);
     // `threadRef`/`scrollToBottom` are stable for the hook instance.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversation.id, order]);
@@ -613,6 +619,13 @@ export function SuperChat({
     // either order.
     if (turnStart && useThreaded) revealMessage(turnStart);
     if (order === 'desc') {
+      if (turnStart && useThreaded) {
+        // The reply can sit far down the feed under an older root; the
+        // branch-targeting layout effect brings it into view.
+        if (activeView === 'media') pendingMediaOwnSendRef.current = true;
+        setTurnStartId(turnStart);
+        return;
+      }
       const el = threadRef.current;
       if (el) el.scrollTop = 0;
       return;
@@ -628,6 +641,18 @@ export function SuperChat({
         setTurnStartId(turnStart);
       }
     } else if (grew) {
+      if (useThreaded) {
+        // A reply to an older root lands mid-thread (or inside a collapsed
+        // branch), where following the bottom would show nothing new: point
+        // the jump control at it instead.
+        const bottomId = visibleThreadNodes.at(-1)?.message.id;
+        const added = [...conversation.thread]
+          .sort(byTime)
+          .filter((message) => !prevIds.has(message.id));
+        const midThread = added.filter((message) => message.id !== bottomId);
+        if (midThread.length > 0) setUnseenReplyId(midThread.at(-1)!.id);
+        if (midThread.length === added.length) return;
+      }
       const newest = [...conversation.thread].sort(byTime).at(-1);
       if (newest?.status === 'streaming') {
         // An incoming stream fills below the fold instead of pushing the
@@ -699,18 +724,23 @@ export function SuperChat({
     const behavior = prefersReducedMotion ? 'auto' : 'smooth';
     if (useThreaded) {
       // Threaded rows have no turn wrapper (a reply can land mid-tree), so
-      // bring the sent message itself into view: follow the bottom when it is
-      // the newest visible row, otherwise anchor it to the top.
+      // bring the sent message itself into view: stay at the newest edge when
+      // it is the newest visible row (bottom, or top for a feed), otherwise
+      // anchor it to the top of the viewport.
       const target = Array.from(
         container.querySelectorAll<HTMLElement>(
           '[data-slot="superchat-thread-branch"]'
         )
       ).find((el) => el.dataset.messageId === turnStartId);
       if (!target) return;
-      if (visibleThreadNodes.at(-1)?.message.id === turnStartId) {
-        scrollToBottom(behavior);
-      } else {
+      const newestVisible =
+        order === 'desc' ? visibleThreadNodes[0] : visibleThreadNodes.at(-1);
+      if (newestVisible?.message.id !== turnStartId) {
         anchorToTurnStart(target, behavior);
+      } else if (order === 'desc') {
+        container.scrollTop = 0;
+      } else {
+        scrollToBottom(behavior);
       }
       anchoredTurnRef.current = turnStartId;
       return;
@@ -739,6 +769,7 @@ export function SuperChat({
     activeView,
     useThreaded,
     visibleThreadNodes,
+    order,
   ]);
 
   // Snapshot the ids after the policy effect above so it always diffs against
@@ -776,6 +807,16 @@ export function SuperChat({
   const handleJumpToBottom = React.useCallback(() => {
     scrollToBottom(prefersReducedMotion ? 'auto' : 'smooth');
   }, [scrollToBottom, prefersReducedMotion]);
+
+  // Open the unseen reply's branch and bring it into view through the same
+  // branch-targeting layout effect an own threaded send uses.
+  const handleJumpToReply = React.useCallback(() => {
+    if (!unseenReplyId) return;
+    revealMessage(unseenReplyId);
+    anchoredTurnRef.current = null;
+    setTurnStartId(unseenReplyId);
+    setUnseenReplyId(null);
+  }, [unseenReplyId, revealMessage]);
 
   const participantById = React.useMemo(() => {
     const map = new Map<string, Participant>();
@@ -828,8 +869,12 @@ export function SuperChat({
         key={m.id}
         data-slot="superchat-thread-branch"
         data-message-id={m.id}
+        // Capped so deep chains stay readable on narrow screens; the logical
+        // depth is unchanged and each reply names its parent for AT.
         style={
-          node.depth > 0 ? { marginInlineStart: node.depth * 20 } : undefined
+          node.depth > 0
+            ? { marginInlineStart: `min(${node.depth * 20}px, 30%)` }
+            : undefined
         }
         className={cn(
           node.depth > 0 &&
@@ -854,6 +899,12 @@ export function SuperChat({
           mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
           mediaRetryLabel={mediaFeedProps?.labels?.retry}
           threaded
+          replyToName={
+            node.parent
+              ? (participantById.get(node.parent.message.participantId)?.name ??
+                'Unknown')
+              : undefined
+          }
           replyCount={node.descendantCount}
           collapsed={collapsedIds.has(m.id)}
           onToggleReplies={hasReplies ? getToggleHandler(m.id) : undefined}
@@ -1141,7 +1192,7 @@ export function SuperChat({
             fade, so the button's `-translate-x-1/2` never meets a motion
             transform. */}
           <AnimatedPresence>
-            {order !== 'desc' && !isAtBottom && (
+            {order !== 'desc' && (!isAtBottom || unseenReplyId) && (
               <Animated
                 key="jump-to-bottom"
                 preset="fade"
@@ -1151,7 +1202,24 @@ export function SuperChat({
                 <JumpToBottomButton
                   dataSlot="superchat-jump-to-bottom"
                   hasNewMessages={hasNewBelow}
-                  onClick={handleJumpToBottom}
+                  onClick={
+                    unseenReplyId ? handleJumpToReply : handleJumpToBottom
+                  }
+                  target={
+                    unseenReplyId
+                      ? {
+                          hint: 'New reply',
+                          ariaLabel: 'New reply — show it',
+                          icon: (
+                            <Reply
+                              size={16}
+                              aria-hidden="true"
+                              className="rtl:-scale-x-100"
+                            />
+                          ),
+                        }
+                      : undefined
+                  }
                 />
               </Animated>
             )}

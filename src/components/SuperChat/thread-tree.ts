@@ -15,6 +15,8 @@ import type { SuperChatMessage } from './types';
 export interface ThreadNode {
   message: SuperChatMessage;
   children: ThreadNode[];
+  /** The message this one replies to (absent for roots). */
+  parent?: ThreadNode;
   /** Nesting depth from the root (roots are `0`). */
   depth: number;
   /** Count of all nested replies below this node (for the collapse toggle). */
@@ -73,6 +75,7 @@ export function buildThreadTree(thread: SuperChatMessage[]): ThreadTree {
     const node = nodesById.get(message.id)!;
     const parent = parentOf(node);
     if (parent && !cyclic.has(message.id)) {
+      node.parent = parent;
       parent.children.push(node);
       hasThreading = true;
     } else {

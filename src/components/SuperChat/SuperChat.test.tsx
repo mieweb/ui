@@ -1727,6 +1727,175 @@ describe('SuperChat threading', () => {
     expect(screen.getByText('my feed reply')).toBeInTheDocument();
   });
 
+  it('scrolls an own reply under an older root into view in descending order', () => {
+    const { container, rerender } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      </div>
+    );
+    const thread = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-thread"]'
+    )!;
+    Object.defineProperty(thread, 'scrollHeight', {
+      configurable: true,
+      value: 2000,
+    });
+    Object.defineProperty(thread, 'clientHeight', {
+      configurable: true,
+      value: 400,
+    });
+    // jsdom has no layout: place the new reply 900px down the feed.
+    const rect = vi
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: Element) {
+        const top = (this as HTMLElement).dataset?.messageId === 't8' ? 900 : 0;
+        return {
+          x: 0,
+          y: top,
+          top,
+          left: 0,
+          right: 100,
+          bottom: top + 40,
+          width: 100,
+          height: 40,
+          toJSON: () => ({}),
+        } as ReturnType<Element['getBoundingClientRect']>;
+      });
+    try {
+      rerender(
+        <div style={{ height: 400 }}>
+          <SuperChat
+            conversation={{
+              ...threaded,
+              thread: [
+                ...threaded.thread,
+                {
+                  id: 't8',
+                  participantId: 'u1',
+                  parentId: 't1',
+                  text: 'late reply to the first root',
+                  time: '2026-06-07T09:05:00Z',
+                },
+              ],
+            }}
+            currentParticipantId="u1"
+            order="desc"
+          />
+        </div>
+      );
+      // Anchored to the top of the viewport instead of reset to the feed top.
+      expect(thread.scrollTop).toBe(900);
+    } finally {
+      rect.mockRestore();
+    }
+  });
+
+  it('points the jump control at an incoming reply that lands mid-thread', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const { fireEvent } = await import('@testing-library/react');
+    const user = userEvent.setup();
+    const withReply = (collapsed: boolean) => (
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={{
+            ...threaded,
+            thread: [
+              ...threaded.thread,
+              {
+                id: 't9',
+                participantId: 'a1',
+                parentId: 't2',
+                text: 'incoming mid-thread reply',
+                time: '2026-06-07T09:06:00Z',
+              },
+            ],
+          }}
+          currentParticipantId="u1"
+          defaultCollapsed={collapsed}
+        />
+      </div>
+    );
+    const { container, rerender } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          defaultCollapsed
+        />
+      </div>
+    );
+    const thread = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-thread"]'
+    )!;
+    Object.defineProperty(thread, 'scrollHeight', {
+      configurable: true,
+      value: 1000,
+    });
+    Object.defineProperty(thread, 'clientHeight', {
+      configurable: true,
+      value: 400,
+    });
+    thread.scrollTop = 600; // pinned to the bottom
+    fireEvent.scroll(thread);
+
+    rerender(withReply(true));
+    // Nothing changed at the bottom, so the view stays put and the reply —
+    // hidden in a collapsed branch — is offered through the jump control.
+    expect(thread.scrollTop).toBe(600);
+    expect(screen.queryByText('incoming mid-thread reply')).toBeNull();
+    const jump = screen.getByRole('button', { name: 'New reply — show it' });
+    expect(jump).toHaveTextContent('New reply');
+
+    await user.click(jump);
+    expect(screen.getByText('incoming mid-thread reply')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'New reply — show it' })
+    ).toBeNull();
+  });
+
+  it('names the parent author in each reply row for assistive technology', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={threaded} currentParticipantId="u1" />
+      </div>
+    );
+    const rowOf = (text: string) =>
+      screen.getByText(text).closest('[role="article"]')!;
+    expect(rowOf('root').getAttribute('aria-label')).not.toMatch(/reply to/);
+    expect(rowOf('reply one').getAttribute('aria-label')).toMatch(
+      /, reply to Alice Reyes$/
+    );
+    expect(rowOf('nested reply').getAttribute('aria-label')).toMatch(
+      /, reply to Triage Agent$/
+    );
+  });
+
+  it('caps reply indentation for deep chains', () => {
+    const deep: SuperChatConversation = {
+      ...threaded,
+      thread: Array.from({ length: 30 }, (_, i) => ({
+        id: `d${i}`,
+        participantId: 'u1',
+        text: `depth ${i}`,
+        time: new Date(Date.UTC(2026, 5, 7, 9, i)).toISOString(),
+        ...(i > 0 ? { parentId: `d${i - 1}` } : {}),
+      })),
+    };
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={deep} currentParticipantId="u1" />
+      </div>
+    );
+    const branch = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-thread-branch"][data-message-id="d29"]'
+    )!;
+    expect(branch.getAttribute('style')).toContain('min(580px, 30%)');
+  });
+
   it('keeps keyboard focus on the thread when expanding via the replies pill', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
@@ -2135,6 +2304,49 @@ describe('SuperChatInbox', () => {
       );
       expect(
         screen.getByRole('button', { name: 'Older 1 messages' })
+      ).toHaveAttribute('aria-current', 'true');
+    });
+
+    it('keeps an active child visible even after its parent was collapsed', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const withTwoRooms: SuperChatConversation[] = [
+        ...rooms,
+        {
+          id: 'room2',
+          title: 'Bed 14',
+          participants,
+          thread: [{ ...older, id: 'r2' }],
+        },
+      ];
+      const renderList = (activeConversationId: string) => (
+        <SuperChatConversations
+          conversations={withTwoRooms}
+          activeConversationId={activeConversationId}
+        />
+      );
+      const bed12 = () => screen.getByRole('button', { name: /^Bed 12/ });
+      const { rerender } = render(renderList('room'));
+      await user.click(bed12()); // collapse the active room
+      expect(bed12()).toHaveAttribute('aria-expanded', 'false');
+
+      // Direct: the host selects a child of the collapsed room.
+      rerender(renderList('room:older'));
+      expect(bed12()).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        screen.getByRole('button', { name: 'Older 1 messages' })
+      ).toHaveAttribute('aria-current', 'true');
+
+      // Return: collapse again, select elsewhere, then come back to a child.
+      rerender(renderList('room'));
+      await user.click(bed12());
+      expect(bed12()).toHaveAttribute('aria-expanded', 'false');
+      rerender(renderList('room2'));
+      rerender(renderList('room:today'));
+      expect(bed12()).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        screen.getByRole('button', { name: 'Today 1 messages' })
       ).toHaveAttribute('aria-current', 'true');
     });
 
