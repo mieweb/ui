@@ -15,6 +15,10 @@ handoffs:
     agent: MIE UI A11y Agent
     prompt: Audit the code discussed above for accessibility (ARIA naming, keyboard navigation, focus management, live regions, contrast) and report findings.
     send: false
+  - label: i18n/RTL audit
+    agent: MIE UI i18n Agent
+    prompt: Audit the code discussed above for internationalization and RTL compliance (string externalization, locale-bundle completeness, Intl formatting, logical properties) and report findings.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -49,8 +53,9 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | install / peer deps / preset / safelist / `@source` | MIE UI Install Agent |
 | tokens, CSS vars, Tailwind classes, brands, dark    | MIE UI Styling Agent |
 | ARIA, keyboard nav, screen readers, contrast        | MIE UI A11y Agent    |
+| translations, locale bundles, Intl formats, RTL     | MIE UI i18n Agent    |
 
-More specialists (i18n, Migration, Grids, DataVis, Views,
+More specialists (Migration, Grids, DataVis, Views,
 SuperChat, Rich Text) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
@@ -66,8 +71,8 @@ from the skills and the component docs, or defer (below).
 - _Styling a specialist's component:_ generic token/Tailwind/brand questions go
   to the Styling Agent; component-specific theming APIs stay with that
   component's specialist (or with you while none exists).
-- _Cross-cutting audits win:_ a11y/i18n questions route to those auditors once
-  they ship, no matter which component they concern.
+- _Cross-cutting audits win:_ a11y/i18n questions route to those auditors, no
+  matter which component they concern.
 
 ## Rules
 

@@ -46,7 +46,7 @@ first.
    component-scoped styles.
 6. **Physical direction classes** — `ml-*`/`pl-*`/`left-*`/`text-left` in new
    code; prefer logical `ms-*`/`ps-*`/`start-*`/`text-start` (RTL rule). Flag
-   it, and route deeper i18n/RTL audits to that specialist once it ships.
+   it, and route deeper i18n/RTL audits to the **MIE UI i18n Agent**.
 7. **Hand-rolled animation** — bespoke keyframes or transition soup where a
    library `animate-*` class or motion preset exists.
 

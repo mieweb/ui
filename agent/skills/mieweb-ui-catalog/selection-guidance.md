@@ -259,17 +259,20 @@ lists of options in [Choice inputs](https://ui.mieweb.org/?path=/docs/inputs-cho
 
 > **What is the stored format, and who edits it?** Markdown that people write (and maybe
 > co-write) → `RichEditor`. HTML for templated letters with merge fields and dictation →
-> `RichTextEditor`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
+> `RichTextEditor`. HTML in a surface that should look like a plain textarea until asked →
+> `TextAreaRich`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
 > Markdown that is only **read** → `MarkdownRenderer`. A structured agent
-> configuration with a YAML/JSON pane → `Q`. Plain text → [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs)
-> (Text inputs).
+> configuration with a YAML/JSON pane → `Q`. Plain text storage with rich composing →
+> [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) (Text inputs) — it renders `TextAreaRich`
+> but keeps a plain-text `value`.
 
 ## Which one?
 
 | Component | Use it when | Not when |
 | --- | --- | --- |
 | [RichEditor](https://ui.mieweb.org/?path=/docs/editors-richeditor--docs) | The document is **Markdown**: headings, lists, tables, code; `getContent()` on submit; `collab.room` for Yjs co-editing; `CodeEditor` for source | The stored format is HTML or you need merge variables/dictation — `RichTextEditor`; the host cannot add the Kerebron peers and WASM assets |
-| [RichTextEditor](https://ui.mieweb.org/?path=/docs/editors-richtexteditor--docs) | The document is **HTML**: bold/italic/underline, lists, alignment, `variableGroups` inserting `{{tokens}}`, Web Speech dictation; no peers | You need Markdown, real undo history, headings/tables or collaboration — `RichEditor`; plain text — `Textarea` |
+| [RichTextEditor](https://ui.mieweb.org/?path=/docs/editors-richtexteditor--docs) | The document is **HTML**: bold/italic/underline, lists, alignment, opt-in markdown block shortcuts (H1–H3, lists, quote), `variableGroups` inserting `{{tokens}}`, Web Speech dictation; no peers | You need Markdown, real undo history, links/tables/code or collaboration — `RichEditor`; plain text — `Textarea`; a textarea-like surface with the toolbar hidden — `TextAreaRich` |
+| [TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich--docs) | A **textarea-like** HTML surface: starts one Input row tall and auto-grows, toolbar hidden until asked, markdown block shortcuts, a Notion-style `+` gutter menu, `.shortcut` macros | The value must be **plain text** (form posts, bindings) — `Textarea` (this surface with a plain-text contract); a full document with an always-on toolbar, variables or dictation — `RichTextEditor` |
 | [EmailEditor](https://ui.mieweb.org/?path=/docs/editors-emaileditor--docs) | The document is an **email**: hero, columns, buttons, images, social, footer blocks on a drag-to-reorder canvas; `renderEmailMjml` serialises it | A single formatted body — `RichTextEditor`; sending, recipients and templates are the host's |
 | [Markdown](https://ui.mieweb.org/?path=/docs/editors-markdown--docs) | **Displaying** Markdown: sanitised HTML, code highlighting, `mermaid` / `csv` / `survey` / `html` fences, `streaming` for token-by-token AI output | The user edits the text — `RichEditor` / `RichTextEditor`; the source is HTML |
 | [Q](https://ui.mieweb.org/?path=/docs/editors-q--docs) | Admins configure an **agent** (prompt, tools, telephony) through a schema-generated form and see the YAML/JSON; `onSubmit(yaml)`, `onConfigChange` | Free-form prose — `RichEditor`; general clinical/business forms — ESheet (Composite forms) |
@@ -279,7 +282,9 @@ lists of options in [Choice inputs](https://ui.mieweb.org/?path=/docs/inputs-cho
 <!-- source: src/catalog/EncounterOrders.mdx (Healthcare) -->
 # Encounter & orders
 
-> **What does the page lead with, and what data does it get?** Today's conclusions and the
+> **What does the page lead with, and what data does it get?** A whole visit document with
+> narrative, observations, coordinated vitals and MCP tools → `EncounterVisit` (eSheet-backed).
+> Today's conclusions and the
 > orders placed for each problem → `Assessment` (plain props: concerns, items, orders). One
 > order in full → `OrderEditor` (morphs by type). What is _due_ from surveillance programs
 > and quality measures → `HealthSurveillance` (`PatientHistory` + `programs.json`). The banner
@@ -291,6 +296,7 @@ lists of options in [Choice inputs](https://ui.mieweb.org/?path=/docs/inputs-cho
 
 | Component | Use it when | Not when |
 | --- | --- | --- |
+| [EncounterVisit](https://ui.mieweb.org/?path=/docs/encounter-orders-encountervisit--docs) | A mobile-friendly anonymous visit document with configurable narrative / observation sections, repeated BP and other vitals, clinical lists, assessment and MCP tools sharing native eSheet responses | A single list or order panel; backend scheduling, signed records or clinical decision support |
 | [Assessment](https://ui.mieweb.org/?path=/docs/encounter-orders-assessment--docs) | The visit's **A&P**: `items` point at today's assertion of each concern; `orders` nest under problems via `concernId` (the durable IndicationLink); unified coded add row; unlinked bucket; drag to re-link | The chart problem list — `ProblemList`; relevance tagging — `PresentingProblems`; full order edits — `OrderEditor`; a due list — `HealthSurveillance` |
 | [OrderEditor](https://ui.mieweb.org/?path=/docs/encounter-orders-ordereditor--docs) | Editing one `AssessmentOrder` in full. Morphs: `medication` → `MedicationEditor` (NCPDP); `lab` / `imaging` / `procedure` / `referral` → typed editors with coded search, priority, timing, body site / refer-to | The inline display / detail edit Assessment already offers; reconciling presenting meds — `MedicationReconciliation` |
 | [HealthSurveillance](https://ui.mieweb.org/?path=/docs/encounter-orders-healthsurveillance--docs) | Showing what is **overdue / due / pending / done** for OSHA / DOT programs (`enrolledKeys`) and CMS eCQMs, from `evaluateDue(history, programs)`; each item is a picklist of satisfying orders → `onOrderMany` | You need the plan itself — `Assessment`; an order-history grid — the story-only `ChartOrdersGrid` demo on NITRO; rules beyond periodicity + age / sex gates |
@@ -631,7 +637,8 @@ executive summary (numbers as lettermark icons) and outlook, and `LeadFormSectio
 <!-- source: src/catalog/TextInputs.mdx (Inputs) -->
 # Text inputs
 
-> **What is the value?** Free text on one line → `Input`; several lines → `Textarea`. A phone
+> **What is the value?** Free text on one line → `Input`; several lines → `Textarea` (a rich
+> surface that keeps a plain-text value — `TextAreaPlain` for the native element). A phone
 > number → `PhoneInput` (or `PhoneInputGroup` for a typed list); a URL → `WebsiteInput` (or
 > `WebsiteInputGroup`) — never a raw `type="tel"` / `type="url"`. A postal address → `AddressForm`
 > to edit, `Address` to show. Every field gets an associated label: the `label` prop where the
@@ -642,7 +649,7 @@ executive summary (numbers as lettermark icons) and outlook, and `LeadFormSectio
 | Component | Use it when | Not when |
 | --- | --- | --- |
 | [Input](https://ui.mieweb.org/?path=/docs/text-inputs-input--docs) | One line of free text or a native type (`email`, `password`, `number`) | Phone / URL / date / fixed options — see the specialists |
-| [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) | A sentence or more; a visible character budget (`showCount`) | Formatted or collaborative text — `RichEditor` |
+| [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) | A sentence or more stored as **plain text** — rich formatting while composing ([TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich--docs) underneath), plain string through `onChange` | The host **persists** HTML — [TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich--docs); native `<textarea>` behaviours (hard `maxLength`, validation, drag-resize, floating label) — `TextAreaPlain` (documented on the Textarea page); full documents — `RichEditor` / `RichTextEditor` |
 | [Label](https://ui.mieweb.org/?path=/docs/text-inputs-label--docs) | Labelling a control with no `label` prop (raw `<select>`, custom) | The control already takes `label` |
 | [PhoneInput](https://ui.mieweb.org/?path=/docs/text-inputs-phoneinput--docs) | Exactly one US/Canada number stored as 10 digits | Several typed numbers — `PhoneInputGroup`; international |
 | [PhoneInputGroup](https://ui.mieweb.org/?path=/docs/text-inputs-phoneinputgroup--docs) | A record holds several numbers and the type (cell, work, fax) matters | One number; rows need extra fields |

@@ -7,7 +7,7 @@ description: Component inventory and selection guidance for the @mieweb/ui desig
 
 # @mieweb/ui component catalog
 
-266 cataloged components. Full docs: https://ui.mieweb.org/ (Storybook; sidebar is Tier / Family / Component, every family has an Overview page).
+271 cataloged components. Full docs: https://ui.mieweb.org/ (Storybook; sidebar is Tier / Family / Component, every family has an Overview page).
 
 For per-component "Which one?" comparison tables, read [selection-guidance.md](./selection-guidance.md) in this skill and jump to the family's section.
 
@@ -71,16 +71,16 @@ Components by tier and family. Annotations: maturity when not stable, and the im
 
 ### Modules
 
-- **Chat:** AIChat, AIChat (Voice), AIMessage, ChatComposer _(beta)_, ComposerModelSelector, MCPToolCall, Messaging, OzwellChat, ReconciliationPanel
+- **Chat:** AIChat, AIChat (Voice), AIMessage, ChatComposer _(beta)_, Composer Action Ribbon (POC) _(experimental)_, ComposerModelSelector, MCPToolCall, Messaging, OzwellChat, ReconciliationPanel
 - **Dashboards:** CustomizableDashboard, Dashboard (Demo) _(experimental)_, Dashboard Widgets (Demo) _(experimental)_, DashboardCustomizePanel, DashboardWidget, QuickLinksCard, ReportDashboard
-- **Editors:** EmailEditor _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor
+- **Editors:** EmailEditor _(experimental)_, MacroLibrary _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor, TextAreaRich _(experimental)_
 - **Files:** DocumentScanner, DropzoneOverlay, FileManager
 - **Media:** AudioPlayer, AudioRecorder, DictationButton _(experimental)_, MediaEditor, MediaEditor Live Demo, MediaFeed _(experimental, `/components/MediaFeed`)_, MediaPlayer, RecordButton, TranscriptView, VideoCard _(experimental)_
 - **Presentations:** Deck _(experimental, `/deck`)_, PointMap _(experimental, `/maps`)_
 - **Records:** ActionPlan _(experimental)_, ActivityFeed _(experimental)_, AssociationList _(experimental)_, FieldHistory _(experimental)_, OrgChart _(experimental, `/org-chart`)_, RecordLayout _(experimental)_
 - **SuperChat:** Conversations (List) _(`/components/SuperChat`)_, Inbox _(`/components/SuperChat`)_, SuperChat (Panel) _(`/components/SuperChat`)_
 - **Views:** BoardView _(alpha)_, CalendarView _(alpha)_, GanttView _(alpha)_, ListView _(alpha)_, ViewSet _(alpha)_, ViewSwitcher _(alpha)_
-- **Voice:** Hands-Free Chat, Hey Ozwell Demo, Hey Ozwell Selector _(experimental)_, Speaker Verify _(experimental)_, Visit Scribe, Voice Manager, Voice Setup, Wake Word
+- **Voice:** Hands-Free Chat, Hey Ozwell Demo, Hey Ozwell Selector _(experimental)_, Speaker Verify _(experimental)_, Transcript Player _(experimental)_, Visit Scribe, Voice Manager, Voice Setup, Wake Word
 
 ### Templates
 
@@ -93,7 +93,7 @@ Components by tier and family. Annotations: maturity when not stable, and the im
 ### Healthcare
 
 - **Clinical lists:** AllergyList, AllergyListField (eSheet) _(`/esheet`)_, CodeLookup, ConditionEditor, MedicationList, MedicationListField (eSheet) _(`/esheet`)_, PresentingProblems, ProblemList
-- **Encounter & orders:** Assessment, CaseManagementHeader, HealthSurveillance, OrderEditor, PatientHeader, WebChartReportViewer
+- **Encounter & orders:** Assessment, CaseManagementHeader, EncounterVisit _(experimental, `/esheet`)_, HealthSurveillance, OrderEditor, PatientHeader, WebChartReportViewer
 
 ### BlueHive
 
@@ -198,14 +198,18 @@ The one-line rule that governs each family. When a task touches a family, read i
 
 > **What is the stored format, and who edits it?** Markdown that people write (and maybe
 > co-write) → `RichEditor`. HTML for templated letters with merge fields and dictation →
-> `RichTextEditor`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
+> `RichTextEditor`. HTML in a surface that should look like a plain textarea until asked →
+> `TextAreaRich`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
 > Markdown that is only **read** → `MarkdownRenderer`. A structured agent
-> configuration with a YAML/JSON pane → `Q`. Plain text → [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs)
-> (Text inputs).
+> configuration with a YAML/JSON pane → `Q`. Plain text storage with rich composing →
+> [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) (Text inputs) — it renders `TextAreaRich`
+> but keeps a plain-text `value`.
 
 **Encounter & orders** (Healthcare):
 
-> **What does the page lead with, and what data does it get?** Today's conclusions and the
+> **What does the page lead with, and what data does it get?** A whole visit document with
+> narrative, observations, coordinated vitals and MCP tools → `EncounterVisit` (eSheet-backed).
+> Today's conclusions and the
 > orders placed for each problem → `Assessment` (plain props: concerns, items, orders). One
 > order in full → `OrderEditor` (morphs by type). What is _due_ from surveillance programs
 > and quality measures → `HealthSurveillance` (`PatientHistory` + `programs.json`). The banner
@@ -321,7 +325,8 @@ The one-line rule that governs each family. When a task touches a family, read i
 
 **Text inputs** (Inputs):
 
-> **What is the value?** Free text on one line → `Input`; several lines → `Textarea`. A phone
+> **What is the value?** Free text on one line → `Input`; several lines → `Textarea` (a rich
+> surface that keeps a plain-text value — `TextAreaPlain` for the native element). A phone
 > number → `PhoneInput` (or `PhoneInputGroup` for a typed list); a URL → `WebsiteInput` (or
 > `WebsiteInputGroup`) — never a raw `type="tel"` / `type="url"`. A postal address → `AddressForm`
 > to edit, `Address` to show. Every field gets an associated label: the `label` prop where the
