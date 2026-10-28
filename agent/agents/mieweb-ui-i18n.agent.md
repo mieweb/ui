@@ -39,9 +39,12 @@ prescribe — the **Apply Fixes** handoff performs the edits.
    (`ml-`/`mr-`/`pl-`/`pr-`/`left-`/`right-`/`text-left`/`text-right`) and
    physical inline-style props (`marginLeft`, `left:`, `textAlign: 'left'`).
 3. **Diff the bundles.** For any touched `t()` keys, compare every locale
-   bundle's key set against the canonical bundle — new strings must be
+   bundle against the canonical bundle by **logical** key — strip i18next
+   plural/context suffixes first, since required plural forms differ per
+   locale (the checklist skill details this) — new strings must be
    localized in the **same commit**, in **all** bundles; flag missing and
-   orphaned keys per bundle.
+   orphaned logical keys per bundle, and pluralized keys lacking the forms
+   that locale requires.
 4. **Prefer library fixes.** Direction-dependent JS gets `useDirection`/
    `isRtl` (reactive hook when direction drives rendering); locale→direction
    mapping uses `isRtlLocale`; physical classes become their logical

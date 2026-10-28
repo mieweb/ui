@@ -31,9 +31,15 @@ line, issue, and fix.
    must land with entries in **every** locale bundle in the same commit —
    not just `en-US`. A key present in the canonical bundle but missing from
    any sibling bundle is a finding (i18next silently falls back to
-   `fallbackLng`, so the gap ships invisibly). Audit by diffing key sets:
-   every bundle must have exactly the canonical bundle's keys — flag missing
-   *and* orphaned (removed-from-canonical but lingering) keys.
+   `fallbackLng`, so the gap ships invisibly). Audit by diffing **logical**
+   keys: strip i18next plural suffixes (`_zero`, `_one`, `_two`, `_few`,
+   `_many`, `_other`) and context suffixes before comparing, because the
+   required plural forms differ per locale (English needs `items_one`/
+   `items_other`; Arabic needs all six) — a raw key-set diff would flag
+   Arabic's extra forms as orphaned and pass an Arabic bundle that only has
+   the English two. Flag missing and orphaned logical keys, and separately
+   verify each pluralized key carries the plural forms **that locale's**
+   CLDR rules require.
 3. **Formatting via `Intl` with the active locale.** Dates, numbers, and
    currency go through `Intl.*` / `toLocale*` APIs with the locale flowing
    from the active language — `useLocale()` where the datavis-style
@@ -89,12 +95,17 @@ Set direction at the root: `<html dir="rtl">` (or a scoped
 
 ## Adding a locale (datavis-style setup)
 
-1. Add `<locale>.json` next to the existing bundles with the **complete**
-   key set of the canonical bundle.
+1. Add `<locale>.json` next to the existing bundles covering every
+   **logical** key of the canonical bundle, with the plural forms the new
+   locale's CLDR rules require (not a copy of the canonical bundle's
+   suffixes).
 2. Register it in the i18next `resources` map where `ensureI18nInit()` (or
    the app's equivalent init) builds the instance.
 3. Expose it in the app's language selector; on change call
-   `i18n.changeLanguage(code)` and update `dir` if `isRtlLocale(code)`.
+   `i18n.changeLanguage(code)` and set `dir` on **every** change —
+   `document.documentElement.dir = isRtlLocale(code) ? 'rtl' : 'ltr'` —
+   never only when the new locale is RTL, or switching back to an LTR
+   language leaves the UI mirrored.
 4. Verify `Intl` output (dates, numbers) in the new locale — no code changes
    should be needed if locales were never hardcoded.
 
@@ -111,7 +122,7 @@ Set direction at the root: `<html dir="rtl">` (or a scoped
 ## Verification checklist
 
 - [ ] No hardcoded user-facing strings — all text through `t()`
-- [ ] Every locale bundle has exactly the canonical bundle's keys (new keys added to all bundles in the same commit)
+- [ ] Every locale bundle covers the canonical bundle's logical keys (plural/context suffixes stripped), with each locale's own required plural forms; new keys added to all bundles in the same commit
 - [ ] No hardcoded locale tags — `Intl`/`toLocale*` driven by the active language
 - [ ] No concatenation around `t()` — interpolation and `count` plurals
 - [ ] No new physical-direction classes or inline styles; directional icons flip; arrow keys follow visual direction
