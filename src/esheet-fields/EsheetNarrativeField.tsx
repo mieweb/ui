@@ -17,6 +17,7 @@
 import * as React from 'react';
 import DOMPurify from 'dompurify';
 import type { FieldComponentProps, FieldResponse } from '@esheet/core';
+import { getFieldComponent, registerCustomFieldTypes } from '@esheet/fields';
 import type { MacroGroup } from '../components/MacroLibrary';
 import { TextAreaRich } from '../components/TextAreaRich';
 import { useMessages } from '../utils/messages';
@@ -352,4 +353,24 @@ export function EsheetNarrativeField({
       />
     </div>
   );
+}
+
+/**
+ * Register the `esheetNarrative` field type with eSheet.
+ * Call once before rendering EsheetBuilder or EsheetRenderer. Hosts that
+ * already registered their own `esheetNarrative` component keep it.
+ */
+export function registerEsheetNarrativeFieldType(): void {
+  if (getFieldComponent('esheetNarrative')) return;
+  registerCustomFieldTypes({
+    esheetNarrative: {
+      label: 'Narrative',
+      category: 'rich',
+      answerType: 'text',
+      hasOptions: false,
+      hasMatrix: false,
+      defaultProps: { question: 'Narrative' },
+      component: EsheetNarrativeField,
+    },
+  });
 }

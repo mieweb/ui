@@ -25,6 +25,7 @@ const meta: Meta<typeof TextAreaRich> = {
 
 - The consumer needs **plain text** — form posts, eSheet bindings, anything that treats the value as a string of words — use \`Textarea\`.
 - The writer works in a full document with an always-visible toolbar, merge variables or dictation — use \`RichTextEditor\`.
+- An eSheet should guide a whole multi-section document with memory-aid macros — use [RichTextEsheet](?path=/docs/editors-richtextesheet--docs) (\`@mieweb/ui/esheet\`).
 - The stored format is **Markdown** or you need links/tables/code/collaboration — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
 
 ### Example
