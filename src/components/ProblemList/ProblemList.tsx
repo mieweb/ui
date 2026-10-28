@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages, type MessageTranslator } from '../../utils/messages';
+
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
@@ -19,6 +21,7 @@ import {
   HelpCircleIcon,
   GripVerticalIcon,
   StickyNoteIcon,
+  TrashIcon,
 } from '../Icons';
 import {
   useDragReorder,
@@ -167,6 +170,7 @@ export type ProblemListAction =
   | 'revise'
   | 'resolve'
   | 'relate'
+  | 'remove'
   | 'move-up'
   | 'move-down';
 
@@ -189,8 +193,10 @@ export interface ProblemListProps extends Omit<
    * encounter/patient object lives and feed them back in.
    */
   onReorder?: (concernIds: string[]) => void;
-  /** Which row actions to show (default: all) */
+  /** Which row actions to show (default: all except 'remove') */
   actions?: ProblemListAction[];
+  /** Show row actions in flow, always visible, instead of the hover-reveal overlay */
+  inlineActions?: boolean;
   /** Hide all action buttons (display only) */
   readOnly?: boolean;
   /** Message shown when there are no concerns */
@@ -267,6 +273,7 @@ const ACTION_META: Record<
   revise: { label: 'Revise (prior was wrong)', icon: RefreshIcon },
   resolve: { label: 'Resolve', icon: CheckCircleIcon },
   relate: { label: 'Relate to another problem', icon: LinkIcon },
+  remove: { label: 'Delete', icon: TrashIcon },
   'move-up': { label: 'Move up (Alt+↑)', icon: ChevronUpIcon },
   'move-down': { label: 'Move down (Alt+↓)', icon: ChevronDownIcon },
 };
@@ -316,7 +323,8 @@ const UNCERTAIN_FIELD_LABELS: Record<UncertainConditionField, string> = {
 
 function describeFieldUncertainty(
   field: UncertainConditionField,
-  f: FieldUncertainty
+  f: FieldUncertainty,
+  m: MessageTranslator
 ): string {
   const label = UNCERTAIN_FIELD_LABELS[field];
   if (!f.known) {
@@ -324,9 +332,11 @@ function describeFieldUncertainty(
       f.reason === 'asked-unknown'
         ? 'asked — unknown'
         : (f.reason ?? 'unknown').replace(/-/g, ' ');
-    return `${label}: ${reason}${f.note ? ` (${f.note})` : ''}`;
+    return `${m(label)}: ${m(reason)}${f.note ? ` (${f.note})` : ''}`;
   }
-  return `${label}: ${f.confidence ?? 'uncertain'} confidence${f.note ? ` (${f.note})` : ''}`;
+  return `${m(label)}: ${m('{confidence} confidence', {
+    confidence: m(f.confidence ?? 'uncertain'),
+  })}${f.note ? ` (${f.note})` : ''}`;
 }
 
 // =============================================================================
@@ -340,6 +350,7 @@ function describeFieldUncertainty(
  * display name, and crosswalk provenance — lives in the tooltip.
  */
 export function CodingChips({ coding }: { coding?: ConditionCoding[] }) {
+  const m = useMessages();
   if (!coding?.length) return null;
   const icd = coding.filter((c) => c.system.startsWith('ICD'));
   const inline = icd.length > 0 ? icd : coding.filter((c) => c.primary);
@@ -352,8 +363,10 @@ export function CodingChips({ coding }: { coding?: ConditionCoding[] }) {
             <span key={`${c.system}:${c.code}`}>
               {c.system} {c.code}
               {c.display ? ` — ${c.display}` : ''}
-              {c.primary ? ' · primary' : ''}
-              {c.mappedFrom ? ` · mapped from ${c.mappedFrom}` : ''}
+              {c.primary ? m(' · primary') : ''}
+              {c.mappedFrom
+                ? m(' · mapped from {source}', { source: c.mappedFrom })
+                : ''}
             </span>
           ))}
         </span>
@@ -365,7 +378,7 @@ export function CodingChips({ coding }: { coding?: ConditionCoding[] }) {
         tabIndex={0}
         className="text-muted-foreground focus-visible:ring-ring rounded text-xs whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none"
       >
-        ({label || 'coded'})
+        ({label || m('coded')})
       </span>
     </Tooltip>
   );
@@ -376,23 +389,26 @@ export function CodingChips({ coding }: { coding?: ConditionCoding[] }) {
  * coding background, and recent observations.
  */
 export function concernHistoryContent(
-  concern: ConditionConcern
+  concern: ConditionConcern,
+  m: MessageTranslator = (message) => message
 ): React.ReactNode {
   return (
     <span className="flex max-w-xs flex-col gap-1">
-      <span className="font-semibold">History</span>
+      <span className="font-semibold">{m('History')}</span>
       {[...concern.assertions].reverse().map((a) => (
         <span key={a.id}>
           {a.date} — {a.text}
           {a.changeType
-            ? ` (${CHANGE_TYPE_LABELS[a.changeType].toLowerCase()})`
+            ? ` (${m(CHANGE_TYPE_LABELS[a.changeType]).toLocaleLowerCase()})`
             : ''}
-          {a.verificationStatus === 'refuted' ? ' — refuted' : ''}
+          {a.verificationStatus === 'refuted'
+            ? ` — ${m('Refuted').toLocaleLowerCase()}`
+            : ''}
         </span>
       ))}
       {concern.observations && concern.observations.length > 0 && (
         <>
-          <span className="mt-1 font-semibold">Observations</span>
+          <span className="mt-1 font-semibold">{m('Observations')}</span>
           {[...concern.observations]
             .reverse()
             .slice(0, 3)
@@ -405,7 +421,7 @@ export function concernHistoryContent(
       )}
       {(currentAssertion(concern)?.coding?.length ?? 0) > 0 && (
         <>
-          <span className="mt-1 font-semibold">Coding</span>
+          <span className="mt-1 font-semibold">{m('Coding')}</span>
           {currentAssertion(concern)!.coding!.map((c) => (
             <span key={`${c.system}:${c.code}`}>
               {c.system} {c.code}
@@ -424,6 +440,7 @@ export function UncertaintyBadge({
 }: {
   uncertainty?: Uncertainty;
 }) {
+  const m = useMessages();
   if (!uncertainty) return null;
   const fieldEntries = Object.entries(uncertainty.fields ?? {}) as Array<
     [UncertainConditionField, FieldUncertainty]
@@ -434,24 +451,29 @@ export function UncertaintyBadge({
       : null;
   if (!overall && fieldEntries.length === 0) return null;
   const lines = [
-    ...(overall ? [`Overall certainty: ${overall}`] : []),
-    ...fieldEntries.map(([field, f]) => describeFieldUncertainty(field, f)),
+    ...(overall
+      ? [m('Overall certainty: {certainty}', { certainty: m(overall) })]
+      : []),
+    ...fieldEntries.map(([field, f]) => describeFieldUncertainty(field, f, m)),
   ];
   return (
     <Tooltip content={lines.join(' · ')}>
       <Badge variant="warning" size="sm" className="gap-1">
         <HelpCircleIcon size={10} />
-        {overall ? `${overall} certainty` : `${fieldEntries.length} uncertain`}
+        {overall
+          ? m('{certainty} certainty', { certainty: m(overall) })
+          : m('{count} uncertain', { count: fieldEntries.length })}
       </Badge>
     </Tooltip>
   );
 }
 
 function AssertionTimeline({ concern }: { concern: ConditionConcern }) {
+  const m = useMessages();
   const items = [...concern.assertions].reverse(); // newest first
   return (
     <ol
-      aria-label="Assertion history"
+      aria-label={m('Assertion history')}
       className="border-border ms-1.5 mt-2 space-y-2 border-s ps-4"
     >
       {items.map((a) => {
@@ -479,11 +501,11 @@ function AssertionTimeline({ concern }: { concern: ConditionConcern }) {
               </span>
               {a.changeType && (
                 <Badge variant="secondary" size="sm">
-                  {CHANGE_TYPE_LABELS[a.changeType]}
+                  {m(CHANGE_TYPE_LABELS[a.changeType])}
                 </Badge>
               )}
               <Badge variant={verification.variant} size="sm">
-                {verification.label}
+                {m(verification.label)}
               </Badge>
               <UncertaintyBadge uncertainty={a.uncertainty} />
               <CodingChips coding={a.coding} />
@@ -501,6 +523,7 @@ function AssertionTimeline({ concern }: { concern: ConditionConcern }) {
 function ConcernRow({
   concern,
   actions,
+  inlineActions,
   readOnly,
   canReorder,
   drag,
@@ -508,11 +531,13 @@ function ConcernRow({
 }: {
   concern: ConditionConcern;
   actions: ProblemListAction[];
+  inlineActions: boolean;
   readOnly: boolean;
   canReorder: boolean;
   drag: UseDragReorderReturn;
   onAction?: (concern: ConditionConcern, action: ProblemListAction) => void;
 }) {
+  const m = useMessages();
   const [expanded, setExpanded] = React.useState(false);
   const current = currentAssertion(concern);
   const hasHistory = concern.assertions.length > 1;
@@ -560,7 +585,13 @@ function ConcernRow({
       tabIndex={0}
       onKeyDown={handleRowKeyDown}
       {...drag.rowProps(concern.concernId)}
-      aria-label={`${current.text}. ${hasHistory ? 'Press Enter to toggle history. ' : ''}${canReorder ? 'Alt plus arrow keys to reorder.' : ''}`}
+      aria-label={[
+        `${current.text}.`,
+        hasHistory ? m('Press Enter to toggle history.') : '',
+        canReorder ? m('Alt plus arrow keys to reorder.') : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       className={cn(
         'group border-border/60 relative border-b px-1 py-2',
         'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
@@ -581,7 +612,7 @@ function ConcernRow({
         )}
         {/* Hover (or long-press on touch) the name for the complete background:
             assertion history, observations, and coding provenance. */}
-        <Tooltip content={concernHistoryContent(concern)}>
+        <Tooltip content={concernHistoryContent(concern, m)}>
           <span className="text-foreground font-medium">{current.text}</span>
         </Tooltip>
         <CodingChips coding={current.coding} />
@@ -592,14 +623,14 @@ function ConcernRow({
               variant={VERIFICATION_BADGE[current.verificationStatus].variant}
               size="sm"
             >
-              {VERIFICATION_BADGE[current.verificationStatus].label}
+              {m(VERIFICATION_BADGE[current.verificationStatus].label)}
             </Badge>
           )}
         <UncertaintyBadge uncertainty={current.uncertainty} />
         {concern.relationships?.map((r) => (
           <Badge key={`${r.type}:${r.concernId}`} variant="outline" size="sm">
             <LinkIcon size={10} className="me-1" />
-            {r.type.replace(/-/g, ' ')}
+            {m(r.type.replace(/-/g, ' '))}
             {r.display ? `: ${r.display}` : ''}
           </Badge>
         ))}
@@ -619,16 +650,20 @@ function ConcernRow({
             }
             className="text-muted-foreground h-auto px-1.5 py-0.5 text-xs"
           >
-            {concern.assertions.length} assertions
+            {m('{count} assertions', { count: concern.assertions.length })}
           </Button>
         )}
 
         {!readOnly && (
-          <RowActionToolbar label={`Actions for ${current.text}`} align="top">
+          <RowActionToolbar
+            label={m('Actions for {name}', { name: current.text })}
+            align="top"
+            reveal={inlineActions ? 'always' : 'hover'}
+          >
             {visibleActions.map((action) => (
               <RowIconButton
                 key={action}
-                label={ACTION_META[action].label}
+                label={m(ACTION_META[action].label)}
                 icon={ACTION_META[action].icon}
                 onClick={() => onAction?.(concern, action)}
               />
@@ -643,9 +678,9 @@ function ConcernRow({
           {concern.observations && concern.observations.length > 0 && (
             <div className="ms-1.5 mt-2 ps-4">
               <h5 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                Observations
+                {m('Observations')}
               </h5>
-              <ol aria-label="Observations" className="mt-1 space-y-1">
+              <ol aria-label={m('Observations')} className="mt-1 space-y-1">
                 {[...concern.observations].reverse().map((o) => (
                   <li key={o.id} className="flex flex-wrap gap-x-2 text-sm">
                     <span className="text-muted-foreground text-xs tabular-nums">
@@ -699,6 +734,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
       onAddProblem,
       onReorder,
       actions = DEFAULT_ACTIONS,
+      inlineActions = false,
       readOnly = false,
       emptyMessage = 'No problems recorded.',
       className,
@@ -707,6 +743,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
     },
     ref
   ) => {
+    const m = useMessages();
     const [draft, setDraft] = React.useState('');
     // clears-then-sets so repeated identical messages re-announce
     const [announcement, setAnnouncement] = useLiveAnnouncement();
@@ -738,11 +775,13 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
         [ids[from], ids[to]] = [ids[to], ids[from]];
         const current = currentAssertion(concern);
         setAnnouncement(
-          `${current?.text ?? concern.concernId} moved ${dir === -1 ? 'up' : 'down'}`
+          m(dir === -1 ? '{name} moved up' : '{name} moved down', {
+            name: current?.text ?? concern.concernId,
+          })
         );
         onReorder(ids);
       },
-      [concerns, onReorder, readOnly, setAnnouncement]
+      [concerns, onReorder, readOnly, setAnnouncement, m]
     );
 
     const handleAction = React.useCallback(
@@ -775,7 +814,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
           ? undefined
           : (newIds) => {
               // announce pointer drops too, not just keyboard moves
-              setAnnouncement('Problem list reordered');
+              setAnnouncement(m('Problem list reordered'));
               onReorder(newIds);
             },
       canDropOn: (dragged, target) => groupOf(dragged) === groupOf(target),
@@ -811,19 +850,19 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
         {title !== null && (
           <CardHeader className="border-border bg-muted/50 border-b px-4 py-3">
             <h3 className="text-foreground text-sm font-semibold tracking-wide uppercase">
-              {title}
+              {m(title)}
             </h3>
           </CardHeader>
         )}
 
         <CardContent className="space-y-6 px-4 py-4">
           {groups.map(({ key, label, items }) => (
-            <section key={key} aria-label={label}>
+            <section key={key} aria-label={m(label)}>
               <h4
                 data-slot="clinical-list-heading"
                 className="border-border text-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase"
               >
-                {label}
+                {m(label)}
               </h4>
               {items.length > 0 ? (
                 <ul className="mt-1">
@@ -832,6 +871,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
                       key={concern.concernId}
                       concern={concern}
                       actions={actions}
+                      inlineActions={inlineActions}
                       readOnly={readOnly}
                       canReorder={drag.enabled}
                       drag={drag}
@@ -841,7 +881,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
                 </ul>
               ) : (
                 <p className="text-muted-foreground mt-2 text-sm">
-                  {emptyMessage}
+                  {m(emptyMessage)}
                 </p>
               )}
             </section>
@@ -857,8 +897,8 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') submitDraft();
                 }}
-                placeholder="Add problem (name is enough)…"
-                aria-label="Add problem"
+                placeholder={m('Add problem (name is enough)…')}
+                aria-label={m('Add problem')}
                 className={cn(
                   'border-border bg-background text-foreground placeholder:text-muted-foreground',
                   'h-8 flex-1 rounded-md border px-2.5 text-sm',
@@ -873,7 +913,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
                 leftIcon={<PlusIcon size={12} />}
                 className="h-8"
               >
-                Add
+                {m('Add')}
               </Button>
             </div>
           )}

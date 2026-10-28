@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 /**
  * AllergyManager — batteries-included allergy list.
  *
@@ -60,6 +62,8 @@ export interface AllergyManagerProps {
    * `CodeLookupProvider`; pass `false` to force plain text.
    */
   codeLookup?: CodeLookupConfig | false;
+  /** Require coded new allergens; non-drug searches use SNOMED substance concepts. */
+  requireCode?: boolean;
   /** Render an inline allergen search bar in the add section (requires codeLookup) */
   inlineAddSearch?: boolean;
   /** Hide all action affordances (display only) */
@@ -88,14 +92,17 @@ const TYPE_OPTIONS = [
 function AllergyEditor({
   allergy,
   codeLookup,
+  requireCode = false,
   onClose,
   onSave,
 }: {
   allergy?: Allergy;
   codeLookup?: CodeLookupConfig;
+  requireCode?: boolean;
   onClose: () => void;
   onSave: (allergy: Allergy) => void;
 }) {
+  const m = useMessages();
   const [draft, setDraft] = React.useState<Allergy>(
     () => allergy ?? { id: newId(), allergen: '', type: 'drug' }
   );
@@ -109,59 +116,87 @@ function AllergyEditor({
     bodyRef.current?.querySelector('input')?.focus();
   }, []);
 
-  const canSave = draft.allergen.trim().length > 0;
+  const hasCode = Boolean(draft.code?.system.trim() && draft.code.code.trim());
+  // Only records that were uncoded on entry are exempt from requireCode —
+  // an originally coded allergy must keep (or replace) its code.
+  const unchangedLegacyAllergen =
+    allergy &&
+    !allergy.code &&
+    draft.allergen === allergy.allergen &&
+    (draft.type ?? 'drug') === (allergy.type ?? 'drug');
+  const canSave =
+    draft.allergen.trim().length > 0 &&
+    (!requireCode || hasCode || Boolean(unchangedLegacyAllergen));
 
-  // CodeLookup's shards cover drugs (RxNorm/FDB — the 'med' domain); food
-  // and environmental allergens have no shard, so the search only renders
-  // for drug-type allergies and other types use a plain text input.
+  // Required coding uses the host's SNOMED substance concepts for non-drug
+  // allergens. The host must include those concepts in its condition shards.
   const isDrug = (draft.type ?? 'drug') === 'drug';
 
   return (
     <Modal open onOpenChange={(o) => !o && onClose()} size="md">
       <ModalHeader>
-        <ModalTitle>{allergy ? 'Correct Allergy' : 'Add Allergy'}</ModalTitle>
-        <ModalClose />
+        <ModalTitle>
+          {allergy ? m('Correct Allergy') : m('Add Allergy')}
+        </ModalTitle>
+        <ModalClose aria-label={m('Close')} />
       </ModalHeader>
       <ModalBody className="space-y-4">
         <div ref={bodyRef} className="contents">
           <RadioGroup
             name="alg-kind"
-            label="Mechanism"
-            description="A true immune-mediated allergy, or a non-immune intolerance (e.g. GI upset)"
+            label={m('Mechanism')}
+            description={m(
+              'A true immune-mediated allergy, or a non-immune intolerance (e.g. GI upset)'
+            )}
             value={draft.kind ?? 'allergy'}
             onValueChange={(v) => patch({ kind: v as AllergyKind })}
             orientation="horizontal"
             size="sm"
           >
-            <Radio value="allergy" label="Allergy" />
-            <Radio value="intolerance" label="Intolerance" />
+            <Radio value="allergy" label={m('Allergy')} />
+            <Radio value="intolerance" label={m('Intolerance')} />
           </RadioGroup>
 
           <Select
-            label="Type"
-            options={TYPE_OPTIONS}
+            label={m('Type')}
+            options={TYPE_OPTIONS.map((option) => ({
+              ...option,
+              label: m(option.label),
+            }))}
             value={draft.type ?? 'drug'}
             onValueChange={(v) => {
               const type = v as AllergyType;
               // A drug code is wrong on a non-drug allergen.
               patch({
                 type,
-                ...(type !== 'drug' && { code: undefined }),
+                ...(type !== (draft.type ?? 'drug') && { code: undefined }),
               });
             }}
           />
 
-          {isDrug && codeLookup ? (
+          {codeLookup && (isDrug || requireCode) ? (
             <div className="space-y-1.5">
-              <Label htmlFor="alg-search">Allergen</Label>
+              <Label htmlFor="alg-search">{m('Allergen')}</Label>
               <codeLookup.component
                 indexUrl={codeLookup.indexUrl}
                 locale={codeLookup.locale}
-                domains={['med']}
+                domains={isDrug ? ['med'] : ['condition']}
+                searchCodetypes={isDrug ? undefined : ['SNOMED US']}
                 bare
                 clearOnSelect={false}
-                placeholder="Search drug allergens — e.g. penicillin"
-                onSelect={(result) =>
+                placeholder={
+                  isDrug
+                    ? m('Search drug allergens — e.g. penicillin')
+                    : m('Search SNOMED allergen substances')
+                }
+                initialQuery={allergy?.allergen || undefined}
+                initialSearch={allergy ? !allergy.code : undefined}
+                onSelect={(result) => {
+                  if (
+                    requireCode &&
+                    (!result.codetype.trim() || !result.fullcode.trim())
+                  )
+                    return;
                   patch({
                     allergen: result.label,
                     code: {
@@ -169,33 +204,47 @@ function AllergyEditor({
                       code: result.fullcode,
                       display: result.label,
                     },
-                  })
-                }
-                onFreeText={(text) =>
-                  patch({ allergen: text, code: undefined })
+                  });
+                }}
+                onFreeText={
+                  requireCode
+                    ? undefined
+                    : (text) => patch({ allergen: text, code: undefined })
                 }
               />
               <p className="text-muted-foreground text-xs">
                 {draft.code
-                  ? `Coded: ${draft.code.system} ${draft.code.code}`
+                  ? m('Coded: {system} {code}', {
+                      system: draft.code.system,
+                      code: draft.code.code,
+                    })
                   : draft.allergen
-                    ? `Uncoded free text: "${draft.allergen}"`
-                    : 'Pick a result to code the allergen, or press Enter for free text'}
+                    ? m('Uncoded free text: "{name}"', {
+                        name: draft.allergen,
+                      })
+                    : requireCode
+                      ? m('Pick a catalog result to code the allergen')
+                      : m(
+                          'Pick a result to code the allergen, or press Enter for free text'
+                        )}
               </p>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <Label htmlFor="alg-name">Allergen</Label>
+              <Label htmlFor="alg-name">{m('Allergen')}</Label>
               <Input
                 id="alg-name"
                 value={draft.allergen}
-                onChange={(e) => patch({ allergen: e.target.value })}
+                readOnly={requireCode}
+                onChange={(e) =>
+                  patch({ allergen: e.target.value, code: undefined })
+                }
               />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <Label htmlFor="alg-reaction">Reaction</Label>
+            <Label htmlFor="alg-reaction">{m('Reaction')}</Label>
             <Input
               id="alg-reaction"
               value={draft.reaction ?? ''}
@@ -205,7 +254,7 @@ function AllergyEditor({
 
           <RadioGroup
             name="alg-severity"
-            label="Severity"
+            label={m('Severity')}
             value={draft.severity ?? ''}
             onValueChange={(v) =>
               patch({ severity: (v || undefined) as AllergySeverity })
@@ -213,13 +262,13 @@ function AllergyEditor({
             orientation="horizontal"
             size="sm"
           >
-            <Radio value="mild" label="Mild" />
-            <Radio value="moderate" label="Moderate" />
-            <Radio value="severe" label="Severe" />
+            <Radio value="mild" label={m('Mild')} />
+            <Radio value="moderate" label={m('Moderate')} />
+            <Radio value="severe" label={m('Severe')} />
           </RadioGroup>
 
           <div className="space-y-1.5">
-            <Label htmlFor="alg-onset">Onset date</Label>
+            <Label htmlFor="alg-onset">{m('Onset date')}</Label>
             <DateInput
               id="alg-onset"
               value={draft.onsetDate ?? ''}
@@ -228,7 +277,7 @@ function AllergyEditor({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="alg-note">Note</Label>
+            <Label htmlFor="alg-note">{m('Note')}</Label>
             <Textarea
               id="alg-note"
               value={draft.note ?? ''}
@@ -240,7 +289,7 @@ function AllergyEditor({
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {m('Cancel')}
         </Button>
         <Button
           onClick={() => {
@@ -249,7 +298,7 @@ function AllergyEditor({
           }}
           disabled={!canSave}
         >
-          Save
+          {m('Save')}
         </Button>
       </ModalFooter>
     </Modal>
@@ -287,11 +336,13 @@ export function AllergyManager({
   onNoKnownAllergiesChange,
   title = 'Allergies',
   codeLookup,
+  requireCode = false,
   inlineAddSearch = false,
   readOnly = false,
   className,
   'data-testid': dataTestId,
 }: AllergyManagerProps): React.JSX.Element {
+  const m = useMessages();
   const isControlled = controlled !== undefined;
   const [internal, setInternal] = React.useState<Allergy[]>(
     defaultAllergies ?? []
@@ -310,11 +361,11 @@ export function AllergyManager({
 
   const commit = (next: Allergy[]) => {
     if (!isControlled) setInternal(next);
-    onChange?.(next);
     // Any recorded allergy clears the NKA flag.
     if (next.length > 0 && noKnownAllergies) {
       onNoKnownAllergiesChange?.(false);
     }
+    onChange?.(next);
   };
 
   const handleAction = (allergy: Allergy, action: AllergyAction) => {
@@ -340,8 +391,15 @@ export function AllergyManager({
         domains={['med']}
         bare
         clearOnSelect
-        placeholder="Search drug allergens to add — use Add allergy… for food/environmental"
-        onSelect={(result) =>
+        placeholder={m(
+          'Search drug allergens to add — use Add allergy… for food/environmental'
+        )}
+        onSelect={(result) => {
+          if (
+            requireCode &&
+            (!result.codetype.trim() || !result.fullcode.trim())
+          )
+            return;
           commit([
             ...allergies,
             {
@@ -354,12 +412,18 @@ export function AllergyManager({
                 display: result.label,
               },
             },
-          ])
-        }
-        onFreeText={(text) =>
-          // this search bar is explicitly for drug allergens — free-text
-          // entries carry type 'drug' like the coded path
-          commit([...allergies, { id: newId(), allergen: text, type: 'drug' }])
+          ]);
+        }}
+        onFreeText={
+          requireCode
+            ? undefined
+            : (text) =>
+                // this search bar is explicitly for drug allergens — free-text
+                // entries carry type 'drug' like the coded path
+                commit([
+                  ...allergies,
+                  { id: newId(), allergen: text, type: 'drug' },
+                ])
         }
       />
     ) : undefined;
@@ -378,7 +442,11 @@ export function AllergyManager({
           )
         }
         addSearch={addSearch}
-        onAdd={() => setDialog({ kind: 'add' })}
+        onAdd={
+          requireCode && !effectiveCodeLookup
+            ? undefined
+            : () => setDialog({ kind: 'add' })
+        }
         readOnly={readOnly}
         className={className}
         data-testid={dataTestId}
@@ -389,6 +457,7 @@ export function AllergyManager({
           key={dialog.kind === 'correct' ? dialog.allergy.id : 'add'}
           allergy={dialog.kind === 'correct' ? dialog.allergy : undefined}
           codeLookup={effectiveCodeLookup}
+          requireCode={requireCode}
           onClose={() => setDialog(null)}
           onSave={(saved) => {
             if (dialog.kind === 'correct') {
@@ -403,15 +472,15 @@ export function AllergyManager({
       {dialog?.kind === 'note' && (
         <Modal open onOpenChange={(o) => !o && setDialog(null)} size="md">
           <ModalHeader>
-            <ModalTitle>Allergy Notes</ModalTitle>
-            <ModalClose />
+            <ModalTitle>{m('Allergy Notes')}</ModalTitle>
+            <ModalClose aria-label={m('Close')} />
           </ModalHeader>
           <ModalBody className="space-y-4">
             <p className="text-muted-foreground text-sm">
               {dialog.allergy.allergen}
             </p>
             <div className="space-y-1.5">
-              <Label htmlFor="alg-note-dlg">Note</Label>
+              <Label htmlFor="alg-note-dlg">{m('Note')}</Label>
               <Textarea
                 id="alg-note-dlg"
                 value={noteDraft}
@@ -422,7 +491,7 @@ export function AllergyManager({
           </ModalBody>
           <ModalFooter>
             <Button variant="secondary" onClick={() => setDialog(null)}>
-              Cancel
+              {m('Cancel')}
             </Button>
             <Button
               onClick={() => {
@@ -436,7 +505,7 @@ export function AllergyManager({
                 setDialog(null);
               }}
             >
-              Save
+              {m('Save')}
             </Button>
           </ModalFooter>
         </Modal>

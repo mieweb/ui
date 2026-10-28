@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 /**
  * MedicationReconciliation — batteries-included medication reconciliation.
  *
@@ -77,6 +79,8 @@ export interface MedicationReconciliationProps {
    * ```
    */
   codeLookup?: CodeLookupConfig | false;
+  /** Require a catalog selection for new medications; existing uncoded records remain editable. */
+  requireCode?: boolean;
   /**
    * Render an inline CodeLookup search bar in the add-medication section
    * (requires `codeLookup`). Picks add immediately as Unreconciled — the
@@ -121,6 +125,7 @@ function MedicationDialog({
   onClose: () => void;
   onSave: (fields: Record<string, string>) => void;
 }) {
+  const m = useMessages();
   const [form, setForm] = React.useState<Record<string, string>>(() =>
     dialog.kind === 'note'
       ? ({ note: dialog.medication.note ?? '' } as Record<string, string>)
@@ -141,9 +146,9 @@ function MedicationDialog({
     <Modal open onOpenChange={(open) => !open && onClose()} size="md">
       <ModalHeader>
         <ModalTitle>
-          {dialog.kind === 'note' ? 'Medication Notes' : 'Add Task'}
+          {dialog.kind === 'note' ? m('Medication Notes') : m('Add Task')}
         </ModalTitle>
-        <ModalClose />
+        <ModalClose aria-label={m('Close')} />
       </ModalHeader>
       <ModalBody className="space-y-4">
         <p className="text-muted-foreground text-sm">
@@ -151,7 +156,7 @@ function MedicationDialog({
         </p>
         {dialog.kind === 'note' ? (
           <div className="space-y-1.5">
-            <Label htmlFor="med-note">Note</Label>
+            <Label htmlFor="med-note">{m('Note')}</Label>
             <Textarea
               id="med-note"
               value={form.note}
@@ -161,22 +166,22 @@ function MedicationDialog({
           </div>
         ) : (
           <div className="space-y-1.5">
-            <Label htmlFor="med-task">Task</Label>
+            <Label htmlFor="med-task">{m('Task')}</Label>
             <Textarea
               id="med-task"
               value={form.task}
               onChange={set('task')}
               rows={3}
-              placeholder="Follow-up task for this medication"
+              placeholder={m('Follow-up task for this medication')}
             />
           </div>
         )}
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {m('Cancel')}
         </Button>
-        <Button onClick={handleSave}>Save</Button>
+        <Button onClick={handleSave}>{m('Save')}</Button>
       </ModalFooter>
     </Modal>
   );
@@ -210,6 +215,7 @@ export function MedicationReconciliation({
   actions = MANAGED_ACTIONS,
   onAction,
   codeLookup,
+  requireCode = false,
   inlineAddSearch = false,
   readOnly = false,
   reconciledMessage,
@@ -217,6 +223,7 @@ export function MedicationReconciliation({
   className,
   'data-testid': dataTestId,
 }: MedicationReconciliationProps): React.JSX.Element {
+  const m = useMessages();
   const isControlled = controlledMedications !== undefined;
   const [internal, setInternal] = React.useState<Medication[]>(
     defaultMedications ?? []
@@ -322,8 +329,13 @@ export function MedicationReconciliation({
         domains={['med']}
         bare
         clearOnSelect
-        placeholder="Search medications to add"
-        onSelect={(result) =>
+        placeholder={m('Search medications to add')}
+        onSelect={(result) => {
+          if (
+            requireCode &&
+            (!result.codetype.trim() || !result.fullcode.trim())
+          )
+            return;
           commit([
             ...medications,
             {
@@ -332,9 +344,9 @@ export function MedicationReconciliation({
               status: 'unreconciled',
               ...lookupToMedicationFields(result),
             },
-          ])
-        }
-        onFreeText={(text) => addMedication(text)}
+          ]);
+        }}
+        onFreeText={requireCode ? undefined : (text) => addMedication(text)}
       />
     ) : undefined;
 
@@ -354,9 +366,13 @@ export function MedicationReconciliation({
             )
           )
         }
-        quickAddOptions={quickAddOptions}
+        quickAddOptions={requireCode ? undefined : quickAddOptions}
         onQuickAdd={(name) => addMedication(name)}
-        onAddOther={() => setDialog({ kind: 'add' })}
+        onAddOther={
+          requireCode && !effectiveCodeLookup
+            ? undefined
+            : () => setDialog({ kind: 'add' })
+        }
         addSearch={addSearch}
         reconciledMessage={reconciledMessage}
         emptyMessage={emptyMessage}
@@ -377,6 +393,7 @@ export function MedicationReconciliation({
           open
           medication={editorTarget}
           codeLookup={codeLookup === false ? false : effectiveCodeLookup}
+          requireCode={requireCode}
           onClose={() => setDialog(null)}
           onSave={handleEditorSave}
         />

@@ -56,6 +56,11 @@ const esheetSourceAliases = ['core', 'fields', 'adapters', 'builder', 'renderer'
   }),
 );
 
+esheetSourceAliases.push({
+  find: /^@esheet\/styles$/,
+  replacement: path.join(esheetPackagesDir, 'styles/src/index.output.css'),
+});
+
 const localUiAliases = [
   {
     find: /^@mieweb\/ui\/components\/(.+)$/,

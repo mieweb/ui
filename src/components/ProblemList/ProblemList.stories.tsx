@@ -33,6 +33,7 @@ The **chart-scope problem list**: one row per \`ConditionConcern\` — the durab
 ### Don't use it when
 
 - You need the **encounter view** — which of these concerns is relevant *this visit* and how (Addressed / Relevant Hx / Noted) — [PresentingProblems](?path=/docs/clinical-lists-presentingproblems--docs). Relevance lives on the encounter reference, never on the concern.
+- The problem list belongs to a whole visit document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs)'s Conditions section renders this list from its shared eSheet response store; use ProblemList directly for a host-controlled longitudinal chart list.
 - You need today's **assessment and plan**, with orders nested under problems — [Assessment](?path=/docs/encounter-orders-assessment--docs).
 - You need to **edit** an assertion (codes, severity, onset, uncertainty) — pair with [ConditionEditor](?path=/docs/clinical-lists-conditioneditor--docs); ProblemList only emits \`refine\` / \`revise\` / \`relate\` / \`observe\` intents.
 - Your data is a flat list of diagnosis strings with no history or coding — a \`Table\` or plain list is simpler; the concern/assertion model is the whole point here.
@@ -88,6 +89,11 @@ The host appends the new assertion (and, for a \`revision\`, marks the supersede
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'encounter-orders-encountervisit',
+          why: "EncounterVisit's Conditions section renders this list over its eSheet-native concerns; use ProblemList directly for a host-controlled longitudinal chart list.",
+        },
         {
           type: 'composes with',
           target: 'clinical-lists-presentingproblems',

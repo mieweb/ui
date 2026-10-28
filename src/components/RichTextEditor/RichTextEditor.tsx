@@ -1,3 +1,4 @@
+import { useMessages } from '../../utils/messages';
 import * as React from 'react';
 import {
   Bold,
@@ -24,6 +25,7 @@ import {
   type MacroGroup,
   type MacroLibraryProps,
 } from '../MacroLibrary';
+import { Animated, AnimatedPresence } from '../../motion';
 import {
   Dropdown,
   DropdownItem,
@@ -115,6 +117,31 @@ export interface RichTextEditorProps {
   macros?: MacroGroup[];
   /** Open the macro panel initially. Defaults to false. */
   defaultMacrosOpen?: boolean;
+  /**
+   * Focus-driven macro panel: the field rests as a plain input, the panel
+   * animates in while focus is anywhere inside the editor frame (editable,
+   * toolbar, gutter or the panel itself) and animates away when focus
+   * leaves. Overrides `defaultMacrosOpen`; Escape-to-close is disabled since
+   * visibility follows focus. Pairs well with `compactMacros`. Defaults to
+   * false.
+   */
+  macrosOnFocus?: boolean;
+  /**
+   * Dock the macro panel in `MacroLibrary`'s compact mode (no header,
+   * search, or library group headings) and shrink the macros-open working
+   * space to match — for short lists in dense forms. Defaults to false.
+   */
+  compactMacros?: boolean;
+  /**
+   * Called on any explicit macro invocation: a pick from the macro panel or
+   * the block gutter flyout, or a typed `.shortcut` expansion. Return `true`
+   * to take over the insertion: the editor skips its caret insertion and the
+   * host applies the content through its own value update (e.g. appending a
+   * coded finding as its own line). For typed shortcuts the editor removes
+   * the typed token (and publishes that edit) before consulting the
+   * callback, so a host that takes over computes from a token-free value.
+   */
+  onMacroInsert?: (macro: Macro) => boolean | void;
   /**
    * Overridable labels for the macro addon (i18n). Panel labels are
    * forwarded to the docked `MacroLibrary`; `macros` doubles as the toolbar
@@ -342,6 +369,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       sanitizeHtml,
       macros,
       defaultMacrosOpen = false,
+      macrosOnFocus = false,
+      compactMacros = false,
+      onMacroInsert,
       macroLabels,
       onCreateMacro,
       toolbar,
@@ -363,6 +393,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     },
     ref
   ) => {
+    const m = useMessages();
     // Shared guard: read-only blocks edits exactly like disabled does, but
     // keeps the region focusable and selectable.
     const inert = disabled || readOnly;
@@ -372,7 +403,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
     const isListeningRef = React.useRef(false);
     const shouldRestartRef = React.useRef(false);
-    const [macrosOpen, setMacrosOpen] = React.useState(defaultMacrosOpen);
+    const [macrosOpen, setMacrosOpen] = React.useState(
+      defaultMacrosOpen && !macrosOnFocus
+    );
     // Last caret/selection inside the editable region, retained while the
     // macro panel has focus so insertion lands where the clinician left off.
     const savedRangeRef = React.useRef<Range | null>(null);
@@ -380,6 +413,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
     const hasMacros = Boolean(macros);
+    // Focus mode at rest: the field is a bare one-line input — no block-menu
+    // indent, no gutter `+` on hover — until focus grows it.
+    const macrosResting = hasMacros && macrosOnFocus && !macrosOpen;
     const hasMacroEntries = Boolean(
       macros?.some((group) => group.macros.length > 0)
     );
@@ -493,7 +529,22 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     React.useEffect(() => {
       if (editorRef.current && editorRef.current.innerHTML !== value) {
+        const hadFocus = document.activeElement === editorRef.current;
         editorRef.current.innerHTML = value;
+        if (hadFocus) {
+          // The replacement destroyed the nodes holding the caret, which
+          // collapses the selection to the top of the document. Park it
+          // after the last block instead so typing continues on the next
+          // line below the newly applied content (e.g. a host-appended
+          // macro line).
+          const range = document.createRange();
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          savedRangeRef.current = range.cloneRange();
+        }
         reconcileGutterWithContent();
       }
     }, [value, reconcileGutterWithContent]);
@@ -622,6 +673,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const insertMacro = (macro: Macro) => {
       if (inert || !editorRef.current) return;
+      if (onMacroInsert?.(macro) === true) return;
       focusRestoringSelection();
       insertTextAtSelection(macro.content);
     };
@@ -725,6 +777,27 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     /**
+     * Delete the selected range through execCommand so the removal joins
+     * the native undo stack, with a manual fallback for jsdom. Leaves a
+     * collapsed caret where the selection started.
+     */
+    const deleteSelectedRange = (replaceRange: Range) => {
+      let deleted = false;
+      try {
+        deleted = document.execCommand('delete', false);
+      } catch {
+        deleted = false;
+      }
+      if (!deleted) {
+        replaceRange.deleteContents();
+        replaceRange.collapse(true);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(replaceRange);
+      }
+    };
+
+    /**
      * Expand a typed macro shortcut (dot phrase). When the word immediately
      * before the caret matches a macro shortcut and the user presses space,
      * the shortcut is replaced with the macro content in a single undoable
@@ -743,6 +816,16 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       if (!macro) return;
 
       event.preventDefault();
+      if (onMacroInsert) {
+        // Remove the typed token and publish that edit first, so a host
+        // that takes over the insertion computes from a token-free value.
+        deleteSelectedRange(selectCollectedToken(collected));
+        saveSelection();
+        updateContent();
+        if (onMacroInsert(macro) === true) return;
+        insertTextAtSelection(macro.content);
+        return;
+      }
       selectCollectedToken(collected);
       insertTextAtSelection(macro.content);
     };
@@ -764,20 +847,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       const rule = MARKDOWN_BLOCK_RULES[collected.token];
 
       event.preventDefault();
-      const replaceRange = selectCollectedToken(collected);
-      let deleted = false;
-      try {
-        deleted = document.execCommand('delete', false);
-      } catch {
-        deleted = false;
-      }
-      if (!deleted) {
-        // Fallback (and jsdom path): manual removal, caret at the line start.
-        replaceRange.deleteContents();
-        replaceRange.collapse(true);
-        collected.selection.removeAllRanges();
-        collected.selection.addRange(replaceRange);
-      }
+      deleteSelectedRange(selectCollectedToken(collected));
       try {
         document.execCommand(rule.command, false, rule.value);
       } catch {
@@ -1117,6 +1187,36 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       <div
         data-slot="rich-text-editor"
         data-chromeless={chromeless || undefined}
+        // Focus-driven macros: open while focus is anywhere inside the frame
+        // (focus events bubble in React), close only when it truly leaves —
+        // a macro pick or a toolbar click moves focus within and stays open.
+        onFocus={
+          hasMacros && macrosOnFocus ? () => setMacrosOpen(true) : undefined
+        }
+        onBlur={
+          hasMacros && macrosOnFocus
+            ? (event) => {
+                const related = event.relatedTarget as HTMLElement | null;
+                if (related && event.currentTarget.contains(related)) return;
+                // The block gutter's dropdown — and its "Insert macro"
+                // submenu — mount in portals under document.body (outside
+                // this frame); focus moving into our own menu tree is an
+                // internal move, not leaving the field. Walk each menu back
+                // to its trigger (a submenu's trigger sits in the parent
+                // menu's portal) until one lands inside this frame.
+                let menu = related?.closest<HTMLElement>('[role="menu"]');
+                while (menu && menu.id) {
+                  const trigger = document.querySelector(
+                    `[aria-controls="${globalThis.CSS.escape(menu.id)}"]`
+                  );
+                  if (!trigger) break;
+                  if (event.currentTarget.contains(trigger)) return;
+                  menu = trigger.closest<HTMLElement>('[role="menu"]');
+                }
+                setMacrosOpen(false);
+              }
+            : undefined
+        }
         className={cn(
           'bg-background flex flex-col',
           !chromeless && 'border-border overflow-hidden rounded-lg border',
@@ -1135,8 +1235,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('bold')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Bold"
-              title="Bold"
+              aria-label={m('Bold')}
+              title={m('Bold')}
             >
               <Bold className="h-4 w-4" />
             </Button>
@@ -1147,8 +1247,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('italic')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Italic"
-              title="Italic"
+              aria-label={m('Italic')}
+              title={m('Italic')}
             >
               <Italic className="h-4 w-4" />
             </Button>
@@ -1159,8 +1259,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('underline')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Underline"
-              title="Underline"
+              aria-label={m('Underline')}
+              title={m('Underline')}
             >
               <Underline className="h-4 w-4" />
             </Button>
@@ -1174,8 +1274,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('insertUnorderedList')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Bullet list"
-              title="Bullet list"
+              aria-label={m('Bullet list')}
+              title={m('Bullet list')}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -1186,8 +1286,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('insertOrderedList')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Numbered list"
-              title="Numbered list"
+              aria-label={m('Numbered list')}
+              title={m('Numbered list')}
             >
               <ListOrdered className="h-4 w-4" />
             </Button>
@@ -1201,8 +1301,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('justifyLeft')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Align left"
-              title="Align left"
+              aria-label={m('Align left')}
+              title={m('Align left')}
             >
               <AlignLeft className="h-4 w-4" />
             </Button>
@@ -1213,8 +1313,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('justifyCenter')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Align center"
-              title="Align center"
+              aria-label={m('Align center')}
+              title={m('Align center')}
             >
               <AlignCenter className="h-4 w-4" />
             </Button>
@@ -1225,8 +1325,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               onClick={() => execCommand('justifyRight')}
               disabled={disabled}
               className={iconButtonClass}
-              aria-label="Align right"
-              title="Align right"
+              aria-label={m('Align right')}
+              title={m('Align right')}
             >
               <AlignRight className="h-4 w-4" />
             </Button>
@@ -1248,10 +1348,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                       size="sm"
                       className="h-8 gap-1 px-2"
                       disabled={disabled}
-                      title="Insert variable"
+                      title={m('Insert variable')}
                     >
                       <Braces className="h-4 w-4" />
-                      <span className="ms-1 text-xs">Variables</span>
+                      <span className="ms-1 text-xs">{m('Variables')}</span>
                     </Button>
                   }
                 >
@@ -1279,10 +1379,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                   onClick={handleConvertToMustache}
                   disabled={disabled}
                   className="h-8 gap-1 px-2"
-                  title="Convert <<field>> to {{field}}"
+                  title={m('Convert <<field>> to {{field}}')}
                 >
                   <Replace className="h-4 w-4" />
-                  <span className="ms-1 text-xs">{'<< >> to {{ }}'}</span>
+                  <span className="ms-1 text-xs">{m('<< >> to {{ }}')}</span>
                 </Button>
               </>
             )}
@@ -1302,10 +1402,10 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                   )}
                   title={
                     !speechSupported
-                      ? 'Speech recognition not supported in this browser'
+                      ? m('Speech recognition not supported in this browser')
                       : isListening
-                        ? 'Stop dictation'
-                        : 'Start dictation'
+                        ? m('Stop dictation')
+                        : m('Start dictation')
                   }
                 >
                   {isListening ? (
@@ -1314,7 +1414,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                     <Mic className="h-4 w-4" />
                   )}
                   <span className="ms-1 text-xs">
-                    {isListening ? 'Stop' : 'Dictate'}
+                    {isListening ? m('Stop') : m('Dictate')}
                   </span>
                 </Button>
               </>
@@ -1360,7 +1460,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               blockMenu && !disabled ? handleGutterMouseMove : undefined
             }
           >
-            {blockMenu && !inert && (
+            {blockMenu && !inert && !macrosResting && (
               <div
                 data-slot="rich-text-editor-block-gutter"
                 className="absolute start-1 z-10"
@@ -1445,6 +1545,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                                     savedRangeRef.current =
                                       blockTargetRangeRef.current;
                                   }
+                                  // The menu unmounts with this pick; hand
+                                  // focus back to the editor (host-handled
+                                  // picks skip insertMacro's own focus) so a
+                                  // focus-driven field can rest on the next
+                                  // click away. Panel picks keep focus on
+                                  // their row for keyboard multi-pick.
+                                  focusRestoringSelection();
                                   insertMacro(macro);
                                 }}
                               >
@@ -1520,7 +1627,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                   // native textarea clips its own) instead of wrapping out
                   // of the one-row field.
                   chromeless ? 'end-0 truncate px-3 py-[7px] text-base' : 'p-4',
-                  blockMenu && 'ps-10',
+                  blockMenu && !macrosResting && 'ps-10',
                   // Keep the placeholder's font in step with the editable
                   // when the host restyles it (e.g. Textarea's `size`).
                   editorClassName
@@ -1548,7 +1655,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               // Styling hook: condensed-view.css must not pin the editable
               // to its compact single-line minimum while the macro panel
               // (absolutely stretched over this region) needs the md
-              // min-h-[400px] working space below.
+              // macros-open working space below.
               data-macros-open={hasMacros && macrosOpen ? '' : undefined}
               tabIndex={disabled ? -1 : 0}
               onInput={updateContent}
@@ -1581,8 +1688,19 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                 '[&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6',
                 '[&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6',
                 '[&_blockquote]:border-border [&_blockquote]:text-muted-foreground [&_blockquote]:my-2 [&_blockquote]:border-s-4 [&_blockquote]:ps-3',
-                blockMenu && 'ps-10',
-                hasMacros && macrosOpen && 'md:min-h-[400px]',
+                blockMenu && !macrosResting && 'ps-10',
+                // Tall enough for the docked panel's search plus a few rows
+                // without forcing the host form to scroll; the compact panel
+                // is just rows, so it needs far less.
+                hasMacros &&
+                  macrosOpen &&
+                  (compactMacros ? 'md:min-h-[140px]' : 'md:min-h-[250px]'),
+                // Focus mode grows the field from one row on focus (and, with
+                // the block gutter, indents it) — ease the jump instead of
+                // snapping.
+                hasMacros &&
+                  macrosOnFocus &&
+                  'transition-[min-height,padding] duration-200 ease-out motion-reduce:transition-none',
                 disabled &&
                   'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300',
                 editorClassName
@@ -1592,22 +1710,49 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             />
           </div>
 
-          {hasMacros && macrosOpen && (
-            <MacroLibrary
-              id={macroPanelId}
-              groups={macros!}
-              onSelect={insertMacro}
-              targetLabel={ariaLabel ?? placeholder}
-              onClose={() => {
-                setMacrosOpen(false);
-                // Selecting text in the panel moves the document selection;
-                // put the caret back where the user left it.
-                focusRestoringSelection();
-              }}
-              onCreateMacro={onCreateMacro}
-              labels={macroLabels}
-              className="border-border max-h-72 border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
-            />
+          {hasMacros && (
+            <AnimatedPresence>
+              {macrosOpen && (
+                <Animated
+                  key="macro-panel"
+                  preset="menu"
+                  mode="presence"
+                  // The side the panel occupies, resolved to a physical edge
+                  // so the closed nudge retreats toward the editor.
+                  custom={
+                    typeof document !== 'undefined' && document.dir === 'rtl'
+                      ? 'left'
+                      : 'right'
+                  }
+                  fallbackClassName="animate-fade-in"
+                  className="border-border flex max-h-72 flex-col border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
+                >
+                  <MacroLibrary
+                    id={macroPanelId}
+                    groups={macros!}
+                    onSelect={insertMacro}
+                    targetLabel={ariaLabel ?? placeholder}
+                    onClose={
+                      // Focus mode: visibility follows focus; a close that
+                      // refocuses the editor would just reopen the panel.
+                      macrosOnFocus
+                        ? undefined
+                        : () => {
+                            setMacrosOpen(false);
+                            // Selecting text in the panel moves the document
+                            // selection; put the caret back where the user
+                            // left it.
+                            focusRestoringSelection();
+                          }
+                    }
+                    onCreateMacro={onCreateMacro}
+                    labels={macroLabels}
+                    compact={compactMacros}
+                    className="min-h-0 flex-1"
+                  />
+                </Animated>
+              )}
+            </AnimatedPresence>
           )}
         </div>
       </div>

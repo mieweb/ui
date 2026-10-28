@@ -1,0 +1,307 @@
+/* Sections render as plain labelled groups (EncounterSectionField);
+   only the layout rhythm below is encounter-specific. */
+.encounter-visit .renderer-body {
+  display: grid;
+  row-gap: 1.25rem;
+}
+
+.encounter-visit .section-children {
+  display: grid;
+  /* Larger than the editor-to-findings gap so each question reads
+     as its own group instead of blending into the next. */
+  row-gap: 2rem;
+}
+
+.encounter-visit .field-wrapper {
+  min-width: 0;
+  margin-block: 0;
+  padding-block: 0;
+}
+
+.encounter-visit .renderer-readonly-banner {
+  padding-inline: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* One renderer stays mounted in every mode. The linked-field resolver reveals
+   its section and related inputs rather than creating another clinical store. */
+.encounter-visit
+  .encounter-focused
+  .renderer-body
+  > .field-wrapper:not([data-encounter-focus]) {
+  display: none;
+}
+
+.encounter-visit .encounter-mdy-editor,
+.encounter-visit .encounter-mdy-editor .kb-component,
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor) {
+  min-width: 0;
+  min-height: 44px;
+  height: auto;
+  max-height: none;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.encounter-visit .encounter-mdy-editor .kb-component,
+.encounter-visit .encounter-mdy-editor .kb-custom-menu {
+  padding-inline: 0;
+  border: 0;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  :where(h1, h2, h3, h4, h5, h6) {
+  margin-block: 1.25rem 0.375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  h1 {
+  font-size: 1.25rem;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  h2,
+.encounter-visit .encounter-mdy-view h2 {
+  font-size: 1.125rem;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  :where(h3, h4, h5, h6) {
+  font-size: 1rem;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  :where(ul, ol) {
+  margin-block: 0.375rem 0.75rem;
+  padding-inline: 1.5rem 0;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor) {
+  padding-inline: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  ul {
+  list-style-type: disc;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  ol {
+  list-style-type: decimal;
+}
+
+.encounter-visit
+  .encounter-mdy-editor
+  :is(.kb-editor, .kb-custom-menu__editor)
+  p {
+  margin-block: 0.375rem 0.75rem;
+}
+
+.encounter-visit .encounter-mdy-editor .kb-menu__button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* The view switcher overlays the toolbar's inline start; reserve its lane so
+   toolbar buttons never slide underneath it (w-28 switcher + ms-1 inset).
+   Margin, not padding: Kerebron sizes its overflow collapse from the
+   toolbar's offsetWidth, which includes padding but not margin. */
+.encounter-visit .encounter-mdy-editor .kb-custom-menu {
+  margin-inline-start: 7.5rem;
+}
+
+/* Above Kerebron's sticky menubar (z-index 1000). */
+.encounter-visit .encounter-view-switch {
+  z-index: 1001;
+}
+
+/* The switcher's lane shares the toolbar surface so the pinned row reads as
+   one continuous bar in every mode. */
+.encounter-visit .encounter-view-switch::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: 7.5rem;
+  height: 2.75rem;
+  background: var(--kb-color-surface-elevated, var(--mieweb-background, #fff));
+}
+
+/* The linked-field resolver is a full-screen takeover; sticky chrome must not
+   paint over its backdrop. */
+.encounter-visit .encounter-view-switch[inert] {
+  visibility: hidden;
+}
+
+.encounter-visit .encounter-rich-chrome[inert]:not(.encounter-rich-collapsed) {
+  visibility: hidden;
+}
+
+/* Outside RichEdit the toolbar stays as the visit's constant chrome, but it
+   empties down to a bare bar carrying only the view switcher. Kerebron's own
+   sticky menubar has no travel room once the body collapses, so the collapsed
+   chrome itself pins instead — the surface stays opaque so scrolled content
+   never bleeds through. The controls keep their layout box (visibility, not
+   display) so the bar's height never jumps between modes. */
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu {
+  z-index: 20;
+}
+
+/* Returning to RichEdit fades the controls back into view (base.css zeroes
+   transition durations under prefers-reduced-motion). */
+.encounter-visit .encounter-rich-chrome .kb-custom-menu > * {
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu > * {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu__editor,
+.encounter-visit .encounter-rich-collapsed .kb-custom-menu__overflow-menu {
+  display: none;
+}
+
+/* Kerebron's shell keeps its document padding (60px !important) even with the
+   body hidden; drop it so the pinned surface is exactly the toolbar, not a
+   dead band. !important is required to beat the library's own !important. */
+.encounter-visit .encounter-rich-collapsed .kb-component {
+  padding-block-end: 0 !important;
+}
+
+.encounter-visit .encounter-rich-collapsed {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin-block-end: 0.5rem;
+  background: var(--kb-color-surface-elevated, var(--mieweb-background, #fff));
+}
+
+.encounter-visit .encounter-mdy-view {
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+}
+
+.encounter-visit .encounter-mdy-view :where(h1, h2, h3, h4, h5, h6) {
+  margin-block: 1.25rem 0.375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.encounter-visit .encounter-mdy-view h1 {
+  font-size: 1.25rem;
+}
+
+.encounter-visit .encounter-mdy-view :where(p, ul, ol, blockquote, pre) {
+  margin-block: 0.375rem 0.75rem;
+}
+
+.encounter-visit .encounter-mdy-view ul,
+.encounter-visit .encounter-mdy-view ol {
+  padding-inline-start: 1.5rem;
+}
+
+.encounter-visit .encounter-mdy-view ul {
+  list-style-type: disc;
+}
+
+.encounter-visit .encounter-mdy-view ol {
+  list-style-type: decimal;
+}
+
+.encounter-visit .encounter-mdy-view :where(pre, table) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.encounter-visit .encounter-mdy-view a {
+  color: var(--mieweb-primary-800);
+  text-decoration: underline;
+}
+
+[data-theme='dark'] .encounter-visit .encounter-mdy-view a,
+.dark .encounter-visit .encounter-mdy-view a {
+  color: var(--mieweb-primary-400);
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ul,
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ol {
+  padding-inline-start: 1.5rem;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ul {
+  list-style-type: disc;
+}
+
+.encounter-visit [data-slot='encounter-narrative'] [role='textbox'] ol {
+  list-style-type: decimal;
+}
+
+/* Clinical lists retain their controls, but share the report's section heading
+   and content inset instead of adding another card inside the document. */
+.encounter-visit [data-field-type='medicationList'] > [data-slot='card'],
+.encounter-visit [data-field-type='allergyList'] > [data-slot='card'] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.encounter-visit [data-field-type='medicationList'] [data-slot='card-header'],
+.encounter-visit [data-field-type='allergyList'] [data-slot='card-header'] {
+  display: none;
+}
+
+.encounter-visit [data-field-type='medicationList'] [data-slot='card-content'],
+.encounter-visit [data-field-type='allergyList'] [data-slot='card-content'] {
+  padding: 0;
+}
+
+.encounter-visit
+  [data-field-type='medicationList']
+  [data-slot='clinical-list-heading'],
+.encounter-visit
+  [data-field-type='medicationList']
+  [data-slot='clinical-list-row'],
+.encounter-visit
+  [data-field-type='allergyList']
+  [data-slot='clinical-list-heading'],
+.encounter-visit
+  [data-field-type='allergyList']
+  [data-slot='clinical-list-row'] {
+  padding-inline: 0;
+  border: 0;
+}

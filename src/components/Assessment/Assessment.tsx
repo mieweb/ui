@@ -1,5 +1,7 @@
 'use client';
 
+import { useMessages } from '../../utils/messages';
+
 import * as React from 'react';
 import { isRtl } from '../../hooks/useDirection';
 import { cn } from '../../utils/cn';
@@ -246,6 +248,10 @@ export interface AssessmentProps extends Omit<
   orderActions?: readonly AssessmentOrderAction[];
   /** Modes available in the global add row. */
   addModes?: readonly AssessmentAddMode[];
+  /** Accessible label for the global capture form; distinguish multiple editors on one page. */
+  addFormLabel?: string;
+  /** Rendered at the start of the global add row (e.g. an assertion date input). */
+  addFormStart?: React.ReactNode;
   /** Remove a problem from this visit's assessment, not its longitudinal record. */
   onRemoveAssessment?: (item: AssessmentItem) => void;
   /**
@@ -355,22 +361,23 @@ const ACTION_META: Record<
 // =============================================================================
 
 function OrderContent({ order }: { order: AssessmentOrder }) {
+  const m = useMessages();
   const meta = ORDER_TYPE_META[order.type];
   const Icon = meta.icon;
   return (
     <span className="text-muted-foreground flex items-center gap-2 text-sm">
-      <Tooltip content={meta.label}>
+      <Tooltip content={m(meta.label)}>
         <Icon size={14} />
       </Tooltip>
       {/* the tooltip is pointer-only — give non-pointer users the label */}
-      <span className="sr-only">{meta.label}</span>
+      <span className="sr-only">{m(meta.label)}</span>
       <span className="text-foreground">{order.display}</span>
       {order.priority && order.priority !== 'routine' && (
         <Badge
           variant={order.priority === 'stat' ? 'danger' : 'warning'}
           size="sm"
         >
-          {order.priority}
+          {m(order.priority)}
         </Badge>
       )}
       {order.detail && <span className="text-xs">{order.detail}</span>}
@@ -423,6 +430,7 @@ function OrderRow({
   drag: OrderDrag;
   controls?: OrderControls;
 }) {
+  const m = useMessages();
   const interactive = Boolean(
     controls?.moveWithin ||
     controls?.moveToProblem ||
@@ -503,7 +511,10 @@ function OrderRow({
       onKeyDown={interactive && !editing ? handleKeyDown : undefined}
       aria-label={
         interactive && !editing
-          ? `${order.display}. Alt plus up or down to reorder; Alt plus left or right to move to another problem.`
+          ? m(
+              '{name}. Alt plus up or down to reorder; Alt plus left or right to move to another problem.',
+              { name: order.display }
+            )
           : undefined
       }
       {...(editing ? {} : drag.rowProps(order))}
@@ -529,7 +540,7 @@ function OrderRow({
       {editing ? (
         <div
           role="form"
-          aria-label={`Edit order ${order.display}`}
+          aria-label={m('Edit order {name}', { name: order.display })}
           className="flex flex-1 flex-wrap items-center gap-1.5"
         >
           <div className="min-w-40 flex-1">
@@ -547,7 +558,7 @@ function OrderRow({
                 if (e.key === 'Enter') saveEdit();
                 else if (e.key === 'Escape') setEditing(null);
               }}
-              aria-label="Order description"
+              aria-label={m('Order description')}
               className="h-7"
             />
           </div>
@@ -564,8 +575,8 @@ function OrderRow({
                 if (e.key === 'Enter') saveEdit();
                 else if (e.key === 'Escape') setEditing(null);
               }}
-              placeholder="detail (sig, timing…)"
-              aria-label="Order detail"
+              placeholder={m('detail (sig, timing…)')}
+              aria-label={m('Order detail')}
               className="h-7 text-xs"
             />
           </div>
@@ -576,7 +587,7 @@ function OrderRow({
             disabled={!editing.display.trim()}
             className="h-7 text-xs"
           >
-            Save
+            {m('Save')}
           </Button>
           <Button
             variant="ghost"
@@ -584,7 +595,7 @@ function OrderRow({
             onClick={() => setEditing(null)}
             className="h-7 text-xs"
           >
-            Cancel
+            {m('Cancel')}
           </Button>
         </div>
       ) : (
@@ -592,12 +603,12 @@ function OrderRow({
           <OrderContent order={order} />
           {interactive && (
             <RowActionToolbar
-              label={`Actions for ${order.display}`}
+              label={m('Actions for {name}', { name: order.display })}
               group="order"
             >
               {canEdit && (
                 <RowIconButton
-                  label="Edit"
+                  label={m('Edit')}
                   icon={PencilIcon}
                   size="sm"
                   onClick={beginEdit}
@@ -615,7 +626,7 @@ function OrderRow({
                     <Button
                       variant="ghost"
                       size="icon"
-                      aria-label={`Move ${order.display}`}
+                      aria-label={m('Move {name}', { name: order.display })}
                       className="h-7 w-7 shrink-0"
                     >
                       <MoreVerticalIcon size={14} />
@@ -629,13 +640,13 @@ function OrderRow({
                         icon={<ChevronUpIcon size={14} />}
                         onClick={pick(() => controls.moveWithin?.(order, -1))}
                       >
-                        Move up
+                        {m('Move up')}
                       </DropdownItem>
                       <DropdownItem
                         icon={<ChevronDownIcon size={14} />}
                         onClick={pick(() => controls.moveWithin?.(order, 1))}
                       >
-                        Move down
+                        {m('Move down')}
                       </DropdownItem>
                     </>
                   )}
@@ -655,7 +666,7 @@ function OrderRow({
                                 controls.moveToProblem?.(order, t.concernId)
                               )}
                             >
-                              Move to: {t.label}
+                              {m('Move to: {name}', { name: t.label })}
                             </DropdownItem>
                           ))}
                       </>
@@ -664,7 +675,7 @@ function OrderRow({
               )}
               {controls?.remove && (
                 <RowIconButton
-                  label="Remove"
+                  label={m('Remove')}
                   icon={TrashIcon}
                   size="sm"
                   onClick={() => controls.remove?.(order)}
@@ -696,6 +707,7 @@ function AddOrderForm({
   onCancel: () => void;
   renderSearch?: AssessmentProps['renderOrderSearch'];
 }) {
+  const m = useMessages();
   const [type, setType] = React.useState<'auto' | OrderType>(
     renderSearch ? 'auto' : 'medication'
   );
@@ -730,11 +742,11 @@ function AddOrderForm({
     <div
       id={id}
       role="form"
-      aria-label={`Add order for ${problemText}`}
+      aria-label={m('Add order for {name}', { name: problemText })}
       className="border-border bg-muted/40 ms-2.5 mt-1.5 flex flex-wrap items-center gap-1.5 rounded-md border border-dashed p-2"
     >
       <select
-        aria-label="Order type filter"
+        aria-label={m('Order type filter')}
         data-slot="select-trigger"
         value={type}
         onChange={(e) => setType(e.target.value as 'auto' | OrderType)}
@@ -747,10 +759,10 @@ function AddOrderForm({
           'focus:ring-ring focus:ring-2 focus:outline-none'
         )}
       >
-        {renderSearch && <option value="auto">Auto</option>}
+        {renderSearch && <option value="auto">{m('Auto')}</option>}
         {(Object.keys(ORDER_TYPE_META) as OrderType[]).map((t) => (
           <option key={t} value={t}>
-            {ORDER_TYPE_META[t].label}
+            {m(ORDER_TYPE_META[t].label)}
           </option>
         ))}
       </select>
@@ -760,7 +772,7 @@ function AddOrderForm({
           {renderSearch({
             domains:
               type === 'auto' ? undefined : ORDER_TYPE_SEARCH_DOMAINS[type],
-            placeholder: ORDER_TYPE_PLACEHOLDERS[type],
+            placeholder: m(ORDER_TYPE_PLACEHOLDERS[type]),
             onPick: handlePick,
             onFreeText: (text) => {
               const t = text.trim();
@@ -784,8 +796,8 @@ function AddOrderForm({
                 if (e.key === 'Enter') submit();
                 else if (e.key === 'Escape') onCancel();
               }}
-              placeholder="e.g. lisinopril 10 mg tablet — 1 po daily"
-              aria-label="Order description"
+              placeholder={m('e.g. lisinopril 10 mg tablet — 1 po daily')}
+              aria-label={m('Order description')}
             />
           </div>
           <Button
@@ -796,7 +808,7 @@ function AddOrderForm({
             leftIcon={<PlusIcon size={12} />}
             className="h-8"
           >
-            Add
+            {m('Add')}
           </Button>
         </>
       )}
@@ -806,7 +818,7 @@ function AddOrderForm({
         onClick={onCancel}
         className={renderSearch ? 'h-10' : 'h-8'}
       >
-        Done
+        {m('Done')}
       </Button>
     </div>
   );
@@ -854,6 +866,8 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       ] as AssessmentRowAction[],
       orderActions = ['edit', 'remove', 'move'],
       addModes,
+      addFormLabel = 'Add concern or order',
+      addFormStart,
       onRemoveAssessment,
       onAddOrder,
       onAddAssessment,
@@ -873,6 +887,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     },
     ref
   ) => {
+    const m = useMessages();
     const instanceId = React.useId();
     const [addingFor, setAddingFor] = React.useState<string | null>(null);
     const requestedAddModes: readonly AssessmentAddMode[] = addModes ?? [
@@ -946,7 +961,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         readOnly || !rowActions.includes('move') || !onReorderItems
           ? undefined
           : (ids) => {
-              setAnnouncement('Assessment concerns reordered');
+              setAnnouncement(m('Assessment concerns reordered'));
               onReorderItems(ids);
             },
     });
@@ -985,7 +1000,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     )
                   );
                   setAnnouncement(
-                    `${order.display} moved ${dir === -1 ? 'up' : 'down'}`
+                    m(dir === -1 ? '{name} moved up' : '{name} moved down', {
+                      name: order.display,
+                    })
                   );
                 }
               : undefined,
@@ -994,7 +1011,10 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               ? (order, concernId) => {
                   onLinkOrder(order, concernId);
                   setAnnouncement(
-                    `${order.display} moved to ${problemLabel(concernId)}`
+                    m('{name} moved to {target}', {
+                      name: order.display,
+                      target: problemLabel(concernId),
+                    })
                   );
                 }
               : undefined,
@@ -1002,7 +1022,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             orderActions.includes('edit') && onEditOrder
               ? (order, changes) => {
                   onEditOrder(order, changes);
-                  setAnnouncement(`${changes.display} updated`);
+                  setAnnouncement(
+                    m('{name} updated', { name: changes.display })
+                  );
                 }
               : undefined,
           editStart: orderActions.includes('edit')
@@ -1012,7 +1034,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             orderActions.includes('remove') && onRemoveOrder
               ? (order) => {
                   onRemoveOrder(order);
-                  setAnnouncement(`${order.display} removed`);
+                  setAnnouncement(m('{name} removed', { name: order.display }));
                 }
               : undefined,
           adjacentProblem: (order, dir) => {
@@ -1057,10 +1079,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       if (dragged.concernId !== target.concernId && target.concernId) {
         onLinkOrder?.(dragged, target.concernId); // move to the other problem
         setAnnouncement(
-          `${dragged.display} moved to ${problemLabel(target.concernId)}`
+          m('{name} moved to {target}', {
+            name: dragged.display,
+            target: problemLabel(target.concernId),
+          })
         );
       } else {
-        setAnnouncement(`${dragged.display} reordered`);
+        setAnnouncement(m('{name} reordered', { name: dragged.display }));
       }
       onReorderOrders?.(
         reorderIds(
@@ -1160,7 +1185,10 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             if (dragged.concernId !== concernId) {
               onLinkOrder?.(dragged, concernId);
               setAnnouncement(
-                `${dragged.display} moved to ${problemLabel(concernId)}`
+                m('{name} moved to {target}', {
+                  name: dragged.display,
+                  target: problemLabel(concernId),
+                })
               );
             }
             resetOrderDrag();
@@ -1182,14 +1210,14 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         {title !== null && (
           <CardHeader className="border-border bg-muted/50 flex flex-row items-center justify-between border-b px-4 py-3">
             <h3 className="text-foreground text-sm font-semibold tracking-wide uppercase">
-              {title}
+              {m(title)}
             </h3>
             {onShowPlanChange && (
               <Checkbox
                 size="sm"
                 checked={showPlan}
                 onChange={(e) => onShowPlanChange(e.target.checked)}
-                label="Show plan"
+                label={m('Show plan')}
               />
             )}
           </CardHeader>
@@ -1198,7 +1226,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         <CardContent className="space-y-4 px-4 py-4">
           {items.length === 0 && (
             <p className="text-muted-foreground text-sm">
-              No problems assessed this visit.
+              {m('No problems assessed this visit.')}
             </p>
           )}
 
@@ -1260,14 +1288,16 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     </span>
                     {assertion.verificationStatus !== 'confirmed' && (
                       <Badge variant="warning" size="sm">
-                        {assertion.verificationStatus}
+                        {m(assertion.verificationStatus)}
                       </Badge>
                     )}
                     <CodingChips coding={assertion.coding} />
 
                     {!readOnly && showConcernToolbar && (
                       <RowActionToolbar
-                        label={`Actions for ${assertion.text}`}
+                        label={m('Actions for {name}', {
+                          name: assertion.text,
+                        })}
                         align="top"
                         className={cn(
                           'pointer-fine:group-has-[[data-order-id]:hover]:pointer-events-none',
@@ -1281,7 +1311,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                           return (
                             <RowIconButton
                               key={action}
-                              label={meta.label}
+                              label={m(meta.label)}
                               icon={meta.icon}
                               size="sm"
                               expanded={
@@ -1311,13 +1341,17 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                         {rowActions.includes('remove') &&
                           onRemoveAssessment && (
                             <RowIconButton
-                              label={`Remove ${assertion.text} from assessment`}
+                              label={m('Remove {name} from assessment', {
+                                name: assertion.text,
+                              })}
                               icon={TrashIcon}
                               size="sm"
                               onClick={() => {
                                 onRemoveAssessment(item);
                                 setAnnouncement(
-                                  `${assertion.text} removed from assessment`
+                                  m('{name} removed from assessment', {
+                                    name: assertion.text,
+                                  })
                                 );
                               }}
                             />
@@ -1334,7 +1368,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
 
                   {showPlan && linkedOrders.length > 0 && (
                     <ul
-                      aria-label={`Plan for ${assertion.text}`}
+                      aria-label={m('Plan for {name}', {
+                        name: assertion.text,
+                      })}
                       className="border-border ms-2.5 mt-1.5 border-s ps-4"
                     >
                       {linkedOrders.map((order) => (
@@ -1355,7 +1391,10 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                       onSubmit={(order) => {
                         onAddOrder(item, order);
                         setAnnouncement(
-                          `${order.display} added to ${assertion.text}`
+                          m('{name} added to {target}', {
+                            name: order.display,
+                            target: assertion.text,
+                          })
                         );
                         setAddingFor(null);
                       }}
@@ -1377,11 +1416,12 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             (onAddAssessment || onAddOrder) && (
               <div
                 role="form"
-                aria-label="Add concern or order"
-                className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
+                aria-label={m(addFormLabel)}
+                className="border-border bg-muted/40 flex flex-col items-stretch gap-2 rounded-md border border-dashed p-2 sm:flex-row sm:flex-wrap sm:items-end"
               >
+                {addFormStart}
                 <select
-                  aria-label="What to add"
+                  aria-label={m('What to add')}
                   data-slot="select-trigger"
                   value={addMode}
                   onChange={(e) => {
@@ -1394,13 +1434,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   )}
                 >
                   {availableAddModes.includes('auto') && (
-                    <option value="auto">Add (auto)</option>
+                    <option value="auto">{m('Add (auto)')}</option>
                   )}
                   {availableAddModes.includes('problem') && onAddAssessment && (
-                    <option value="problem">Add concern</option>
+                    <option value="problem">{m('Add concern')}</option>
                   )}
                   {availableAddModes.includes('order') && onAddOrder && (
-                    <option value="order">Add order</option>
+                    <option value="order">{m('Add order')}</option>
                   )}
                 </select>
                 <div className="min-w-64 flex-1">
@@ -1425,12 +1465,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     preferCodetypes:
                       addMode !== 'order' ? ['ICD10'] : undefined,
                     billableOnly: addMode !== 'order' && billableOnly,
-                    placeholder:
+                    placeholder: m(
                       addMode === 'problem'
                         ? 'Search diagnoses & programs… (try "chf" or "hearing conservation")'
                         : addMode === 'order'
                           ? 'Search medications, labs, imaging, procedures…'
-                          : 'Add concern or order… (a diagnosis or surveillance program becomes a concern; meds, labs & imaging become orders)',
+                          : 'Add concern or order… (a diagnosis or surveillance program becomes a concern; meds, labs & imaging become orders)'
+                    ),
                     onPick: (pick) => {
                       const asProblem =
                         addMode === 'problem' ||
@@ -1477,15 +1518,15 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 {addMode === 'auto' && pendingFreeText !== null && (
                   <div
                     role="group"
-                    aria-label={`Add "${pendingFreeText}" as`}
+                    aria-label={m('Add "{name}" as', { name: pendingFreeText })}
                     className="flex w-full flex-wrap items-center gap-1.5 ps-1"
                   >
                     <span className="text-muted-foreground text-sm">
-                      Add{' '}
+                      {m('Add')}{' '}
                       <span className="text-foreground font-medium">
                         “{pendingFreeText}”
                       </span>{' '}
-                      as:
+                      {m('as:')}
                     </span>
                     {onAddAssessment && (
                       <Button
@@ -1497,7 +1538,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                           setPendingFreeText(null);
                         }}
                       >
-                        Concern
+                        {m('Concern')}
                       </Button>
                     )}
                     {onAddOrder && (
@@ -1513,7 +1554,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                           setPendingFreeText(null);
                         }}
                       >
-                        Order
+                        {m('Order')}
                       </Button>
                     )}
                     <Button
@@ -1522,7 +1563,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                       className="h-7 text-xs"
                       onClick={() => setPendingFreeText(null)}
                     >
-                      Cancel
+                      {m('Cancel')}
                     </Button>
                   </div>
                 )}
@@ -1532,12 +1573,12 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
           {/* Unlinked orders bucket — only takes space once something is in it */}
           {showPlan && unlinkedOrders.length > 0 && (
             <section
-              aria-label="Orders not linked to a concern"
+              aria-label={m('Orders not linked to a concern')}
               className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-950"
             >
               <h4 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900 dark:text-amber-200">
                 <AlertCircleIcon size={14} />
-                Orders not linked to a concern
+                {m('Orders not linked to a concern')}
               </h4>
               <ul className="mt-1">
                 {unlinkedOrders.map((order) => (

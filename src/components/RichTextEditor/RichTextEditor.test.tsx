@@ -119,6 +119,31 @@ describe('RichTextEditor', () => {
     ).toBeInTheDocument();
   });
 
+  it('moves the caret to the end when a focused editor gets a new value', () => {
+    const props = (value: string) => (
+      <RichTextEditor value={value} onChange={() => {}} aria-label="Note" />
+    );
+    const view = renderWithTheme(props('<p>Existing line.</p>'));
+    const editor = screen.getByRole('textbox', { name: /note/i });
+    editor.focus();
+    // Park the caret at the start so the external update has to move it.
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    // A host taking over a macro insertion replaces the controlled value.
+    view.rerender(props('<p>Existing line.</p><p>Denies fever.</p>'));
+
+    const caret = window.getSelection()!.getRangeAt(0);
+    const end = document.createRange();
+    end.selectNodeContents(editor);
+    end.collapse(false);
+    expect(caret.compareBoundaryPoints(Range.START_TO_START, end)).toBe(0);
+  });
+
   describe('paste sanitisation', () => {
     // jsdom has no execCommand; the component inserts pasted HTML through it.
     const exec = vi.fn().mockReturnValue(true);
@@ -267,6 +292,164 @@ describe('RichTextEditor', () => {
       ).not.toBeNull();
     });
 
+    describe('macrosOnFocus', () => {
+      const panel = () => document.querySelector('[data-slot="macro-library"]');
+
+      it('rests closed, opens on focus and closes when focus leaves the field', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        expect(panel()).toBeNull();
+        fireEvent.focus(editor);
+        expect(panel()).not.toBeNull();
+        fireEvent.blur(editor, { relatedTarget: document.body });
+        expect(panel()).toBeNull();
+      });
+
+      it('stays open while focus moves into the panel itself', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        const row =
+          document.querySelector<HTMLButtonElement>('[data-macro-row]')!;
+        fireEvent.blur(editor, { relatedTarget: row });
+        expect(panel()).not.toBeNull();
+        fireEvent.blur(row, { relatedTarget: document.body });
+        expect(panel()).toBeNull();
+      });
+
+      it('rests closed even with defaultMacrosOpen', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            defaultMacrosOpen
+          />
+        );
+        expect(panel()).toBeNull();
+      });
+
+      it('rests without the block-menu indent or gutter, restoring both on focus', () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        expect(screen.queryByRole('button', { name: 'Block menu' })).toBeNull();
+        expect(editor).not.toHaveClass('ps-10');
+        fireEvent.focus(editor);
+        expect(
+          screen.getByRole('button', { name: 'Block menu' })
+        ).toBeInTheDocument();
+        expect(editor).toHaveClass('ps-10');
+      });
+
+      it('keeps the field expanded while its portalled block menu has focus', async () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+        // The menu mounts in a portal under document.body, outside the frame.
+        const item = await screen.findByRole('menuitem', { name: 'Text' });
+        fireEvent.blur(editor, { relatedTarget: item });
+        expect(panel()).not.toBeNull();
+        fireEvent.blur(item, { relatedTarget: document.body });
+        expect(panel()).toBeNull();
+      });
+
+      it('keeps the field expanded while the "Insert macro" submenu has focus', async () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+        fireEvent.click(
+          await screen.findByRole('menuitem', { name: 'Insert macro' })
+        );
+        // The submenu lives in its own portal whose trigger sits in the root
+        // menu's portal — two hops from the editor frame. Focus moving there
+        // must not collapse the field, or the pending click never lands.
+        const item = await screen.findByRole('menuitem', {
+          name: /Cardio — WNL/,
+        });
+        fireEvent.blur(editor, { relatedTarget: item });
+        expect(panel()).not.toBeNull();
+        fireEvent.click(item);
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('returns focus to the editor after a host-handled submenu pick', async () => {
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            onMacroInsert={() => true}
+            macrosOnFocus
+            blockMenu
+            aria-label="HPI"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'HPI' });
+        fireEvent.focus(editor);
+        fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+        fireEvent.click(
+          await screen.findByRole('menuitem', { name: 'Insert macro' })
+        );
+        fireEvent.click(
+          await screen.findByRole('menuitem', { name: /Cardio — WNL/ })
+        );
+        // The menu unmounts with the pick; without a hand-off, focus falls to
+        // <body> and the focus-driven field can never rest again — blurring
+        // requires focusing first.
+        expect(document.activeElement).toBe(editor);
+      });
+    });
+
     it('inserts the macro content through the undo-aware command', () => {
       const onChange = vi.fn();
       renderWithTheme(
@@ -379,6 +562,55 @@ describe('RichTextEditor', () => {
       it('matches shortcuts case-insensitively', () => {
         const editor = renderEditor();
         typeAndPressSpace(editor, '.C');
+        expect(exec).toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('removes the typed token, then defers to onMacroInsert when it takes over', () => {
+        const onChange = vi.fn();
+        const onMacroInsert = vi.fn().mockReturnValue(true);
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={onChange}
+            macros={macros}
+            onMacroInsert={onMacroInsert}
+            aria-label="Body"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'Body' });
+        typeAndPressSpace(editor, '.c');
+        // The token removal is published before the host is consulted, so a
+        // host that takes over computes from a token-free value.
+        expect(exec).toHaveBeenCalledWith('delete', false);
+        expect(onChange).toHaveBeenCalled();
+        expect(onMacroInsert).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'cardio' })
+        );
+        expect(exec).not.toHaveBeenCalledWith(
+          'insertText',
+          false,
+          'Regular rate and rhythm.'
+        );
+      });
+
+      it('inserts inline when onMacroInsert declines a typed shortcut', () => {
+        const onMacroInsert = vi.fn().mockReturnValue(false);
+        renderWithTheme(
+          <RichTextEditor
+            value=""
+            onChange={() => {}}
+            macros={macros}
+            onMacroInsert={onMacroInsert}
+            aria-label="Body"
+          />
+        );
+        const editor = screen.getByRole('textbox', { name: 'Body' });
+        typeAndPressSpace(editor, '.c');
+        expect(exec).toHaveBeenCalledWith('delete', false);
         expect(exec).toHaveBeenCalledWith(
           'insertText',
           false,

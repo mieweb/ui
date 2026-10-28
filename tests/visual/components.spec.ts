@@ -2299,7 +2299,7 @@ test.describe('Visual Regression Tests - TextAreaRich', () => {
     await page.getByRole('menuitem', { name: 'Show macro library' }).click();
     await expect(editor).toHaveAttribute('data-macros-open', '');
     const editorBox = await editor.boundingBox();
-    expect(editorBox!.height).toBeGreaterThanOrEqual(399);
+    expect(editorBox!.height).toBeGreaterThanOrEqual(249);
     await expect(
       page.getByRole('button', { name: 'Cardio — WNL' })
     ).toBeVisible();
