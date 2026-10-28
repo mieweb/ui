@@ -32,13 +32,17 @@ line, issue, and fix.
    not just `en-US`. A key present in the canonical bundle but missing from
    any sibling bundle is a finding (i18next silently falls back to
    `fallbackLng`, so the gap ships invisibly). Audit by diffing **logical**
-   keys: strip i18next plural suffixes (`_zero`, `_one`, `_two`, `_few`,
-   `_many`, `_other`) and context suffixes before comparing, because the
+   keys: strip only the trailing i18next plural suffix (`_zero`, `_one`,
+   `_two`, `_few`, `_many`, `_other`) before comparing, because the
    required plural forms differ per locale (English needs `items_one`/
    `items_other`; Arabic needs all six) — a raw key-set diff would flag
    Arabic's extra forms as orphaned and pass an Arabic bundle that only has
-   the English two. Flag missing and orphaned logical keys, and separately
-   verify each pluralized key carries the plural forms **that locale's**
+   the English two. **Keep context suffixes** (`invite_admin`,
+   `invite_guest`) — each context variant is a distinct message, so
+   stripping them would hide a locale that's missing `invite_guest`; a
+   combined key like `invite_admin_one` normalizes to `invite_admin`. Flag
+   missing and orphaned logical keys, and separately verify each pluralized
+   key (per context variant) carries the plural forms **that locale's**
    CLDR rules require.
 3. **Formatting via `Intl` with the active locale.** Dates, numbers, and
    currency go through `Intl.*` / `toLocale*` APIs with the locale flowing
@@ -122,7 +126,7 @@ Set direction at the root: `<html dir="rtl">` (or a scoped
 ## Verification checklist
 
 - [ ] No hardcoded user-facing strings — all text through `t()`
-- [ ] Every locale bundle covers the canonical bundle's logical keys (plural/context suffixes stripped), with each locale's own required plural forms; new keys added to all bundles in the same commit
+- [ ] Every locale bundle covers the canonical bundle's logical keys (plural suffixes stripped, context variants kept distinct), with each locale's own required plural forms; new keys added to all bundles in the same commit
 - [ ] No hardcoded locale tags — `Intl`/`toLocale*` driven by the active language
 - [ ] No concatenation around `t()` — interpolation and `count` plurals
 - [ ] No new physical-direction classes or inline styles; directional icons flip; arrow keys follow visual direction
