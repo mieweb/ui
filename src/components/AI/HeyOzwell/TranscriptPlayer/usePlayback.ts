@@ -155,10 +155,11 @@ export function usePlayback(src: string | null | undefined): Playback {
       setRange(playable ? next : null);
       seekToMs(next.start * 1000);
       setCurrentTime(next.start);
-      // An empty interval has nothing to play; moving there still answers the click.
+      // An empty interval has nothing to play; stop and move there so the click still answers.
       if (playable) start(audio);
+      else pause();
     },
-    [start, setRange, seekToMs]
+    [start, pause, setRange, seekToMs]
   );
 
   const setVolume = React.useCallback((next: number) => {

@@ -62,8 +62,11 @@ module.exports = {
     'ring-inset',
     'ring-foreground',
     'ring-foreground/70',
-    'aria-pressed:text-primary-700',
-    'dark:aria-pressed:text-primary-300',
+    'aria-pressed:bg-primary-50',
+    'aria-pressed:text-primary-800',
+    'dark:aria-pressed:bg-primary-950',
+    'dark:aria-pressed:text-primary-200',
+    'mx-9',
     // EmailEditor: block frames, innermost-hover toolbar reveal, email-content
     // spacing in the canvas, and the stacked/side-by-side panel layout.
     '[[data-slot=email-editor-block]:hover:not(:has([data-slot=email-editor-block]:hover))>&]:opacity-100',

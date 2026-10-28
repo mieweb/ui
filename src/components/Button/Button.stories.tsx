@@ -126,7 +126,7 @@ const meta: Meta<typeof Button> = {
       description: {
         component: `### What it's for
 
-The one clickable control for actions: six intents (\`primary\`, \`secondary\`, \`outline\`, \`ghost\`, \`danger\`, \`link\`), four sizes (\`sm\`, \`md\`, \`lg\`, \`icon\`), \`leftIcon\` / \`rightIcon\` slots and an \`isLoading\` state that swaps in a spinner and \`loadingText\`. It is a real \`<button>\` with \`forwardRef\`, so every native attribute (\`type\`, \`disabled\`, \`aria-*\`) passes through.
+The one clickable control for actions: six intents (\`primary\`, \`secondary\`, \`outline\`, \`ghost\`, \`danger\`, \`link\`), five sizes (\`sm\`, \`md\`, \`lg\`, \`icon\`, and \`icon-sm\` for dense toolbars and list rows), \`leftIcon\` / \`rightIcon\` slots and an \`isLoading\` state that swaps in a spinner and \`loadingText\`. It is a real \`<button>\` with \`forwardRef\`, so every native attribute (\`type\`, \`disabled\`, \`aria-*\`) passes through.
 
 **Icon placement:** prefer the \`leftIcon\` / \`rightIcon\` props — they render outside the truncating label, never shrink, and inherit the button's \`gap\`. Icons inside \`children\` are also supported (the label keeps SVGs inline so they never wrap onto their own line), but they truncate together with the text; use the props when the icon must stay visible.
 
@@ -159,7 +159,7 @@ The one clickable control for actions: six intents (\`primary\`, \`secondary\`, 
 
 ### Limitations
 
-- Keyboard and focus are native; a visible \`focus-visible\` ring is always rendered. An \`icon\` button has no text, so **you must pass \`aria-label\`**.
+- Keyboard and focus are native; a visible \`focus-visible\` ring is always rendered. An \`icon\` or \`icon-sm\` button has no text, so **you must pass \`aria-label\`**.
 - While \`isLoading\`, the button is disabled and announces \`loadingText\` — keep that text short and translated.
 - Labels render in a \`data-slot="button-label"\` span with \`truncate\`; without a \`ButtonGroup\` a long label is silently clipped.
 - Colours are brand tokens with \`dark:\` variants; there is no per-brand override API beyond \`className\`.

@@ -91,6 +91,22 @@ export const SpeakerLanes = React.memo(function SpeakerLanes({
     window.clearTimeout(hideTimer.current);
     setHovered(null);
   }, [segments]);
+  // Escape dismisses the details wherever focus is (they also open on pointer hover).
+  const lanesRef = React.useRef<HTMLDivElement>(null);
+  const isOpen = hovered !== null;
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      // Swallow it only when it was meant for the lanes; elsewhere menus and dialogs still get it.
+      if (lanesRef.current?.contains(document.activeElement))
+        event.stopPropagation();
+      window.clearTimeout(hideTimer.current);
+      setHovered(null);
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [isOpen]);
 
   const end = view.start + view.span;
   // The focused segment stays rendered when the view moves, so keyboard focus is not dropped.
@@ -99,12 +115,6 @@ export const SpeakerLanes = React.memo(function SpeakerLanes({
   );
 
   const onSegmentKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === 'Escape' && hovered) {
-      event.stopPropagation();
-      window.clearTimeout(hideTimer.current);
-      setHovered(null);
-      return;
-    }
     const keys: Record<string, (i: number, n: number) => number> = {
       ArrowRight: (i, n) => Math.min(n - 1, i + 1),
       ArrowLeft: (i) => Math.max(0, i - 1),
@@ -123,7 +133,7 @@ export const SpeakerLanes = React.memo(function SpeakerLanes({
   };
 
   return (
-    <div className="space-y-1.5">
+    <div ref={lanesRef} className="space-y-1.5">
       {speakers.map((speaker) => {
         const lane = visible.filter((s) => s.speakerId === speaker.id);
         return (

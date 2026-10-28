@@ -171,4 +171,52 @@ describe('useMediaTransport', () => {
     act(() => el.dispatchEvent(new Event('play')));
     expect(onStateChange).not.toHaveBeenCalled();
   });
+
+  it('follows durationchange (e.g. MediaRecorder webm learning its length)', () => {
+    const { result } = mount();
+    const media = el as { duration: number };
+    media.duration = Infinity;
+    act(() => el.dispatchEvent(new Event('durationchange')));
+    expect(result.current.durationMs).toBe(0);
+    media.duration = 42;
+    act(() => el.dispatchEvent(new Event('durationchange')));
+    expect(result.current.durationMs).toBe(42_000);
+  });
+
+  it('resets when the element detaches or is replaced', () => {
+    const { result } = mount();
+    act(() => el.dispatchEvent(new Event('play')));
+    expect(result.current.isPlaying).toBe(true);
+
+    const next = makeMediaElement();
+    (next as { duration: number }).duration = Number.NaN;
+    act(() => result.current.setMediaElement(next));
+    expect(result.current.state).toBe('paused');
+    expect(result.current.durationMs).toBe(0);
+
+    act(() => next.dispatchEvent(new Event('loadedmetadata')));
+    act(() => result.current.setMediaElement(null));
+    expect(result.current.state).toBe('idle');
+    expect(result.current.durationMs).toBe(0);
+    expect(result.current.currentTimeMs).toBe(0);
+  });
+
+  it('keeps an error when the element is swapped out for an error panel', () => {
+    const onStateChange = vi.fn();
+    const { result } = mount({ onStateChange });
+    act(() => el.dispatchEvent(new Event('error')));
+    act(() => result.current.setMediaElement(null));
+    expect(result.current.state).toBe('error');
+    expect(onStateChange).not.toHaveBeenCalledWith('idle');
+  });
+
+  it('only leaves loading on canplay, so a seek mid-playback does not drop playing', () => {
+    const { result } = mount();
+    act(() => el.dispatchEvent(new Event('play')));
+    act(() => el.dispatchEvent(new Event('canplay')));
+    expect(result.current.state).toBe('playing');
+    act(() => el.dispatchEvent(new Event('loadstart')));
+    act(() => el.dispatchEvent(new Event('canplay')));
+    expect(result.current.state).toBe('idle');
+  });
 });

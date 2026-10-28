@@ -91,8 +91,8 @@ const toMs = (seconds: number): number =>
  * returned {@link UseMediaTransportReturn.setMediaElement} callback to an
  * `<audio>`/`<video>` `ref` and the hook wires the native listeners.
  *
- * Shared by `MediaPlayer` (ms API) and, at the boundary, `AudioPlayer`
- * (seconds API — convert with `ms / 1000`). The WaveSurfer waveform variant is
+ * Shared by `MediaPlayer` (ms API) and TranscriptPlayer's `usePlayback` (seconds,
+ * converted at the boundary). The WaveSurfer waveform variant is
  * out of scope; this hook targets native media transport only.
  *
  * @example
@@ -168,7 +168,14 @@ export function useMediaTransport(
 
   // Attach native transport listeners whenever an element mounts.
   useEffect(() => {
-    if (!element) return;
+    if (!element) {
+      // A detached element (e.g. the source was removed) leaves nothing playing or loaded;
+      // an error stays visible to hosts that swap the element for an error panel.
+      if (stateRef.current !== 'error') setState('idle');
+      setDurationMs(0);
+      setCurrentTimeMs(0);
+      return;
+    }
 
     const emitTime = () => {
       const ms = toMs(element.currentTime);
@@ -178,7 +185,11 @@ export function useMediaTransport(
     };
 
     const onLoadStart = () => setState('loading');
-    const onCanPlay = () => setState('idle');
+    // canplay can also follow a seek mid-playback; only leave the loading state here.
+    const onCanPlay = () => {
+      if (stateRef.current === 'loading')
+        setState(element.paused ? 'idle' : 'playing');
+    };
     const onLoadedMetadata = () => {
       setDurationMs(toMs(element.duration));
       emitTime();
@@ -215,8 +226,11 @@ export function useMediaTransport(
     element.addEventListener('ended', onEndedEvt);
     element.addEventListener('error', onErrorEvt);
 
-    // Sync duration on attach; a new element must not inherit the previous one's.
+    // Sync on attach; a new element must not inherit the previous one's duration or play state.
     setDurationMs(toMs(element.duration));
+    if (element.paused && stateRef.current === 'playing') setState('paused');
+    // e.g. a 404 that failed before hydration attached these listeners.
+    if (element.error) onErrorEvt();
 
     return () => {
       element.removeEventListener('loadstart', onLoadStart);

@@ -138,7 +138,13 @@ export function TranscriptPlayer({
     () =>
       toSpeakers(
         transcript,
-        [...segments, ...utterances].map((s) => s.speakerId),
+        [
+          ...segments.map((s) => s.speakerId),
+          ...utterances.flatMap((u) => [
+            u.speakerId,
+            ...(u.overlapSpeakerIds ?? []),
+          ]),
+        ],
         speakerLabels,
         labels.unknownSpeaker
       ),

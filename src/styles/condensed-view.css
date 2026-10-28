@@ -1714,6 +1714,11 @@ body.condensed [data-slot='button'][data-size='icon-sm'] {
   padding-right: 0 !important;
 }
 
+/* Circular buttons (e.g. media play) stay circular */
+body.condensed [data-slot='button'].rounded-full {
+  border-radius: 9999px !important;
+}
+
 /* ── Checkbox ── */
 
 /* Wrapper: tighter gap */

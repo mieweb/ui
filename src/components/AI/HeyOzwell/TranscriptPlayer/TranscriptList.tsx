@@ -176,9 +176,18 @@ export function TranscriptList({
       if (index >= 0) virtualizer.scrollToIndex(index, { align: 'auto' });
       return;
     }
-    scrollRef.current
+    // Scroll only the list: scrollIntoView would also scroll the host page.
+    const container = scrollRef.current;
+    const line = container
       ?.querySelector(`[data-id="${activeId}"]`)
-      ?.scrollIntoView?.({ block: 'nearest' });
+      ?.getBoundingClientRect();
+    if (!container || !line) return;
+    const view = container.getBoundingClientRect();
+    // Like scrollIntoView 'nearest': a line taller than the list is aligned by its top.
+    if (line.top < view.top || line.height > container.clientHeight)
+      container.scrollTop += line.top - view.top;
+    else if (line.bottom > view.bottom)
+      container.scrollTop += line.bottom - view.bottom;
   }, [activeId, utterances, virtualize, virtualizer]);
 
   React.useEffect(() => {

@@ -66,7 +66,6 @@ beforeEach(() => {
   ) {
     this.dispatchEvent(new Event('pause'));
   });
-  vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
   Object.defineProperty(HTMLMediaElement.prototype, 'currentTime', {
     configurable: true,
     get(this: HTMLMediaElement) {
@@ -85,7 +84,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  // Unmount while the media mocks are still installed; the player pauses and unloads on cleanup.
+  // Unmount while the media mocks are still installed; removing the <audio> pauses it.
   cleanup();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
@@ -111,6 +110,114 @@ const lane = (name: string) =>
   screen.getByRole('group', { name: `${name} speaking turns` });
 
 describe('TranscriptPlayer', () => {
+  it('hides hover details on Escape even when focus is elsewhere', async () => {
+    renderPlayer();
+    screen.getByRole('button', { name: 'Play' }).focus();
+    await userEvent.hover(within(lane('Patient')).getByRole('button'));
+    expect(screen.getByText('0:02 \u2013 0:05 (2.5s)')).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    expect(
+      screen.queryByText('0:02 \u2013 0:05 (2.5s)')
+    ).not.toBeInTheDocument();
+  });
+
+  it('follows playback by scrolling only the transcript list, never the page', async () => {
+    const scrollIntoView = vi.fn();
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      renderPlayer();
+      const list = screen.getByRole('list', { name: 'Transcript' });
+      const rect = (top: number, height: number) =>
+        ({ top, bottom: top + height, height }) as ReturnType<
+          Element['getBoundingClientRect']
+        >;
+      Object.defineProperty(list, 'clientHeight', { value: 100 });
+      vi.spyOn(list, 'getBoundingClientRect').mockReturnValue(rect(0, 100));
+      const line = list.querySelector<HTMLElement>('[data-id="u2"]');
+      if (line)
+        vi.spyOn(line, 'getBoundingClientRect').mockReturnValue(rect(300, 40));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Play Dr. Smith at 0:06' })
+      );
+      expect(list.scrollTop).toBe(240);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  it('names speakers that appear only as overlap, using speakerLabels', () => {
+    renderPlayer({
+      speakerLabels: { doc: 'Dr. Smith' },
+      transcript: {
+        durationMs: 5000,
+        words: [],
+        segments: [
+          {
+            text: 'Better but sore.',
+            startMs: 0,
+            endMs: 3000,
+            speakerId: 'pt',
+            overlapSpeakerIds: ['doc'],
+            words: [],
+          },
+        ],
+      },
+    });
+    expect(screen.getByText('Overlaps Dr. Smith')).toBeInTheDocument();
+  });
+
+  it('pauses when a zero-length line is chosen during playback', async () => {
+    renderPlayer({
+      transcript: {
+        ...transcript,
+        segments: [
+          ...(transcript.segments ?? []),
+          {
+            text: 'Blip',
+            startMs: 9500,
+            endMs: 9500,
+            speakerId: 'pt',
+            words: [],
+          },
+        ],
+      },
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Play' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Play Patient at 0:09' })
+    );
+    expect(audio?.currentTime).toBe(9.5);
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+  });
+
+  it('drops the old recording length when the recording is removed', () => {
+    const original = Object.getOwnPropertyDescriptor(
+      HTMLMediaElement.prototype,
+      'duration'
+    );
+    Object.defineProperty(HTMLMediaElement.prototype, 'duration', {
+      configurable: true,
+      get: () => 3600,
+    });
+    try {
+      const { rerender } = renderPlayer();
+      act(() => {
+        audio?.dispatchEvent(new Event('loadedmetadata'));
+      });
+      const seek = () => screen.getByRole('slider', { name: 'Seek' });
+      expect(seek()).toHaveAttribute('aria-valuetext', '0:00 of 1:00:00');
+      rerender(
+        <TranscriptPlayer src={null} transcript={transcript} peaks={peaks} />
+      );
+      expect(seek()).toHaveAttribute('aria-valuetext', '0:00 of 0:10');
+    } finally {
+      if (original)
+        Object.defineProperty(HTMLMediaElement.prototype, 'duration', original);
+    }
+  });
+
   it('hides segment details on Escape', async () => {
     renderPlayer();
     act(() => within(lane('Patient')).getByRole('button').focus());
