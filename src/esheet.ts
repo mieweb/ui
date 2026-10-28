@@ -36,6 +36,22 @@ export {
   registerAllergyListFieldType,
   type AllergyListFieldValue,
 } from './esheet-fields/AllergyListField';
+export {
+  EsheetNarrativeField,
+  narrativeText,
+  sanitizeNarrativeHtml,
+  type EsheetNarrativeFieldProps,
+} from './esheet-fields/EsheetNarrativeField';
+export {
+  applyNarrativeFinding,
+  getNarrativeFindings,
+  hasNarrativeFindingText,
+  NARRATIVE_ATTRIBUTES,
+  validNarrativeFindings,
+  type NarrativeAttributeNames,
+  type NarrativeCode,
+  type NarrativeFinding,
+} from './esheet-fields/narrativeFindings';
 
 // Convenience: register every @mieweb/ui custom field type in one call
 export {
