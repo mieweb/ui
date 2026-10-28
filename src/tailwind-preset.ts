@@ -160,6 +160,21 @@ export const miewebUISafelist = [
   '[&_[data-slot=button-label]]:whitespace-normal',
   '[&>[data-slot=dropdown-item-label]]:min-w-0',
   '[&>[data-slot=dropdown-item-label]]:flex-1',
+  // TranscriptPlayer: timeline grid, transcript/panel layout, overview window and playhead.
+  'grid-cols-[6.5rem_minmax(0,1fr)]',
+  'lg:grid-cols-[minmax(0,1fr)_18rem]',
+  '-top-5',
+  'min-w-40',
+  'h-80',
+  'dark:bg-primary-950/40',
+  'ring-inset',
+  'ring-foreground',
+  'ring-foreground/70',
+  'aria-pressed:bg-primary-50',
+  'aria-pressed:text-primary-800',
+  'dark:aria-pressed:bg-primary-950',
+  'dark:aria-pressed:text-primary-200',
+  'mx-9',
   // EmailEditor: block frames, innermost-hover toolbar reveal, email-content
   // spacing in the canvas, and the stacked/side-by-side panel layout.
   '[[data-slot=email-editor-block]:hover:not(:has([data-slot=email-editor-block]:hover))>&]:opacity-100',

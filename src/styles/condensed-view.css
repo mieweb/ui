@@ -1707,10 +1707,16 @@ body.condensed [data-slot='button'] {
 }
 
 /* Icon-only button: square condensed size */
-body.condensed [data-slot='button'][data-size='icon'] {
+body.condensed [data-slot='button'][data-size='icon'],
+body.condensed [data-slot='button'][data-size='icon-sm'] {
   width: 1.75rem !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+/* Circular buttons (e.g. media play) stay circular */
+body.condensed [data-slot='button'].rounded-full {
+  border-radius: 9999px !important;
 }
 
 /* ── Checkbox ── */
