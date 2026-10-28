@@ -645,11 +645,18 @@ export function SuperChat({
         // A reply to an older root lands mid-thread (or inside a collapsed
         // branch), where following the bottom would show nothing new: point
         // the jump control at it instead.
-        const bottomId = visibleThreadNodes.at(-1)?.message.id;
         const added = [...conversation.thread]
           .sort(byTime)
           .filter((message) => !prevIds.has(message.id));
-        const midThread = added.filter((message) => message.id !== bottomId);
+        // The trailing run of new visible rows is what landed at the bottom.
+        const addedIds = new Set(added.map((message) => message.id));
+        const atBottom = new Set<string>();
+        for (let i = visibleThreadNodes.length - 1; i >= 0; i--) {
+          const id = visibleThreadNodes[i].message.id;
+          if (!addedIds.has(id)) break;
+          atBottom.add(id);
+        }
+        const midThread = added.filter((message) => !atBottom.has(message.id));
         if (midThread.length > 0) setUnseenReplyId(midThread.at(-1)!.id);
         if (midThread.length === added.length) return;
       }

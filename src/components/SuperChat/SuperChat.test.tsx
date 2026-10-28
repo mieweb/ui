@@ -1857,6 +1857,58 @@ describe('SuperChat threading', () => {
     ).toBeNull();
   });
 
+  it('follows a batch of new roots without a "New reply" hint', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const { container, rerender } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={threaded} currentParticipantId="u1" />
+      </div>
+    );
+    const thread = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-thread"]'
+    )!;
+    Object.defineProperty(thread, 'scrollHeight', {
+      configurable: true,
+      value: 1000,
+    });
+    Object.defineProperty(thread, 'clientHeight', {
+      configurable: true,
+      value: 400,
+    });
+    thread.scrollTop = 600; // pinned to the bottom
+    fireEvent.scroll(thread);
+
+    rerender(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={{
+            ...threaded,
+            thread: [
+              ...threaded.thread,
+              {
+                id: 'r1',
+                participantId: 'a1',
+                text: 'first new root',
+                time: '2026-06-07T09:06:00Z',
+              },
+              {
+                id: 'r2',
+                participantId: 'a1',
+                text: 'second new root',
+                time: '2026-06-07T09:07:00Z',
+              },
+            ],
+          }}
+          currentParticipantId="u1"
+        />
+      </div>
+    );
+    expect(thread.scrollTop).toBe(thread.scrollHeight);
+    expect(
+      screen.queryByRole('button', { name: 'New reply — show it' })
+    ).toBeNull();
+  });
+
   it('names the parent author in each reply row for assistive technology', () => {
     render(
       <div style={{ height: 400 }}>
