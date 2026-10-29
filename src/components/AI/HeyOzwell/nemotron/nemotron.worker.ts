@@ -1,5 +1,4 @@
 /// <reference lib="webworker" />
-import { ONNX_RUNTIME_CDN as ORT_BASE } from '../../modelCache';
 import type { Ort } from './diarizer';
 import { StreamingDiarizer, loadDiarizerSource } from './diarizer';
 import {
@@ -32,6 +31,8 @@ export type NemotronRequest =
       kind: 'start';
       id: number;
       modelBaseUrl: string;
+      /** ONNX Runtime Web's `dist/` URL, with a trailing slash. */
+      ortBase: string;
     } & NemotronStreamOptions)
   | { kind: 'push'; id: number; samples: Float32Array }
   | { kind: 'finish'; id: number };
@@ -67,12 +68,11 @@ let ortPromise: Promise<Ort> | null = null;
 let current: { key: string; diarizer: StreamingDiarizer } | null = null;
 const streams = new Map<number, Stream>();
 
-function loadOrt(): Promise<Ort> {
-  ortPromise ??= import(
-    /* @vite-ignore */ `${ORT_BASE}ort.webgpu.min.mjs`
-  ).then(
+/** Loads the runtime once per worker; later bases are ignored. */
+function loadOrt(base: string): Promise<Ort> {
+  ortPromise ??= import(/* @vite-ignore */ `${base}ort.webgpu.min.mjs`).then(
     (ort: Ort) => {
-      ort.env.wasm.wasmPaths = ORT_BASE;
+      ort.env.wasm.wasmPaths = base;
       // Nested pthread workers deadlock inside a worker, so ORT must stay single-threaded here.
       ort.env.wasm.numThreads = 1;
       return ort;
@@ -131,7 +131,8 @@ async function loadModel(
     variant,
     executionProvider,
     modelBaseUrl,
-  }: NemotronModel & { modelBaseUrl: string }
+    ortBase,
+  }: NemotronModel & { modelBaseUrl: string; ortBase: string }
 ): Promise<{ key: string; diarizer: StreamingDiarizer; loadMs: number }> {
   const key = `${modelBaseUrl}|${variant}|${executionProvider}`;
   if (current?.key === key) return { ...current, loadMs: 0 };
@@ -144,7 +145,7 @@ async function loadModel(
 
   const started = performance.now();
   post({ type: 'stage', id, stage: 'Loading ONNX Runtime' });
-  const ort = await loadOrt();
+  const ort = await loadOrt(ortBase);
   post({ type: 'stage', id, stage: 'Downloading model' });
   const source = await loadDiarizerSource(modelBaseUrl, variant, cachedFetch);
   post({ type: 'stage', id, stage: 'Building session' });

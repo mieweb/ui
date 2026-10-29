@@ -17,13 +17,19 @@
 const registered = new Set<string>();
 
 /** The one ONNX Runtime Web build the voice models run on; keep in step with package.json. */
-export const ONNX_RUNTIME_CDN =
+const ONNX_RUNTIME_CDN =
   'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/';
 
 /** Where a host serves the voice models from: one base URL, or a URL per area. See AI/MODEL-HOSTING.md. */
 export type AssetGlobal =
   | string
-  | { base?: string; wakeword?: string; svRuntime?: string; nemotron?: string };
+  | {
+      base?: string;
+      wakeword?: string;
+      svRuntime?: string;
+      nemotron?: string;
+      ort?: string;
+    };
 
 /**
  * The host's `window.__ozwellAssets`. Storybook runs stories in an iframe and a console-set global often
@@ -39,6 +45,30 @@ export function readAssetGlobal(): AssetGlobal | undefined {
     }
   };
   return get(window) || get(window.parent) || get(window.top);
+}
+
+/** The absolute http(s) URL, without a trailing slash, set for `area` in the object form; else undefined. */
+export function configuredAssetUrl(
+  area: 'nemotron' | 'ort'
+): string | undefined {
+  const assets = readAssetGlobal();
+  const configured = typeof assets === 'object' ? assets[area] : undefined;
+  if (!configured) return undefined;
+  try {
+    const url = new URL(configured, window.location.href);
+    if (url.protocol === 'https:' || url.protocol === 'http:')
+      return url.href.replace(/\/$/, '');
+  } catch {
+    /* reported below */
+  }
+  console.warn(`[modelCache] ignoring invalid __ozwellAssets.${area} URL`);
+  return undefined;
+}
+
+/** Where ONNX Runtime Web's files are loaded from: `__ozwellAssets.ort` for a self-hosted copy, else jsDelivr. */
+export function onnxRuntimeBase(): string {
+  const configured = configuredAssetUrl('ort');
+  return configured ? `${configured}/` : ONNX_RUNTIME_CDN;
 }
 
 export function registerModelServiceWorker(

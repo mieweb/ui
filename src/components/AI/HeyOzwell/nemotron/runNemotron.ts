@@ -1,4 +1,4 @@
-import { readAssetGlobal } from '../../modelCache';
+import { configuredAssetUrl, onnxRuntimeBase } from '../../modelCache';
 import { resampleTo16kMono } from '../../whisperTranscribe';
 import { openRollingRecorder } from '../audio';
 import { MODEL_BASE_URL } from './modelConfig';
@@ -18,25 +18,6 @@ export type NemotronResult = Omit<
 
 /** A minute of 16 kHz audio: files are fed to the worker in pieces this size so its memory stays flat. */
 const PIECE_SAMPLES = 60 * 16000;
-
-/**
- * Where the checkpoint is served from: `window.__ozwellAssets.nemotron` (a copy of the pinned revision's
- * files, same layout) or Hugging Face. Only an http(s) URL is accepted.
- */
-function modelBaseUrl(): string {
-  const assets = readAssetGlobal();
-  const configured = typeof assets === 'object' ? assets.nemotron : undefined;
-  if (!configured) return MODEL_BASE_URL;
-  try {
-    const url = new URL(configured, window.location.href);
-    if (url.protocol === 'https:' || url.protocol === 'http:')
-      return url.href.replace(/\/$/, '');
-  } catch {
-    /* reported below */
-  }
-  console.warn('[nemotron] ignoring invalid __ozwellAssets.nemotron URL');
-  return MODEL_BASE_URL;
-}
 
 let defaultModel: Promise<NemotronModel> | null = null;
 
@@ -140,7 +121,10 @@ export function openNemotronStream(
     ...options,
     kind: 'start',
     id,
-    modelBaseUrl: modelBaseUrl(),
+    // A copy of the pinned revision's files (same layout) at `__ozwellAssets.nemotron`, else Hugging Face.
+    modelBaseUrl: configuredAssetUrl('nemotron') ?? MODEL_BASE_URL,
+    // Resolved here: the inline worker has no page URL to resolve a relative path against.
+    ortBase: onnxRuntimeBase(),
   } satisfies NemotronRequest);
   return {
     push: async (samples) => {
