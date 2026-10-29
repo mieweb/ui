@@ -29,6 +29,17 @@ test('support ticket on a phone keeps the save footer sticky without overflow', 
   const problem = page.getByRole('textbox', { name: /Problem description/ });
   await expect(problem).toBeVisible();
   await expect(page).toHaveScreenshot('richtext-esheet-mobile.png');
+  // Picking macros must not blur the editor: the docked panel stays open so
+  // several can be chosen in a row and typing can continue (mobile keyboards
+  // would otherwise dismiss).
+  await problem.click();
+  await page.getByRole('button', { name: 'Error message shown' }).click();
+  await expect(problem).toBeFocused();
+  const reporter = page.getByRole('button', { name: 'Reporter: Alex Chen' });
+  await expect(reporter).toBeVisible();
+  await reporter.click();
+  await expect(problem).toBeFocused();
+  await expect(problem).toContainText('Alex Chen');
   const footer = page.locator('[data-slot=richtext-esheet] footer');
   await expect(footer).toHaveCSS('position', 'sticky');
   await expect(
@@ -42,7 +53,7 @@ test('support ticket on a phone keeps the save footer sticky without overflow', 
   // Required sections surface a focusable error summary instead of saving.
   await page.getByRole('button', { name: 'Save document' }).click();
   const alert = page.getByRole('alert');
-  await expect(alert).toContainText('Problem description is required.');
+  await expect(alert).not.toContainText('Problem description is required.');
   await alert
     .getByRole('button', { name: 'Steps to reproduce is required.' })
     .click();

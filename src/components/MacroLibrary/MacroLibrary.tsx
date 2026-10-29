@@ -116,6 +116,17 @@ function rankMacros(macros: Macro[], query: string): Macro[] {
 }
 
 /**
+ * Keep the editor focused while picking with a pointer: cancelling mousedown's
+ * default stops the button from stealing focus (on touch the compatibility
+ * mousedown would otherwise blur the editor and dismiss the keyboard), so a
+ * focus-docked panel stays open across multiple picks. Keyboard roving focus
+ * is unaffected.
+ */
+function preservePointerFocus(event: React.MouseEvent) {
+  event.preventDefault();
+}
+
+/**
  * A searchable, grouped macro browser designed to dock inside an editor's
  * chrome. Editor-agnostic: selecting a macro calls `onSelect` and the host
  * performs the insertion. Previous-value groups (`kind: 'previous'`) are
@@ -378,6 +389,7 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                         )}
                         aria-expanded={!isCollapsed}
                         disabled={searching}
+                        onMouseDown={preservePointerFocus}
                         onClick={() =>
                           setCollapsed((prev) => ({
                             ...prev,
@@ -412,6 +424,7 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                           data-macro-row
                           data-slot="macro-library-item"
                           className="focus-visible:ring-ring text-foreground hover:bg-muted/60 hover:text-primary flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-start focus-visible:ring-2 focus-visible:outline-none"
+                          onMouseDown={preservePointerFocus}
                           onClick={() => onSelect(macro)}
                           onKeyDown={handleRowKeyDown}
                         >
@@ -440,6 +453,7 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                         data-macro-row
                         data-slot="macro-library-show-more"
                         className="focus-visible:ring-ring text-muted-foreground hover:bg-muted/60 hover:text-primary flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-start text-xs font-medium focus-visible:ring-2 focus-visible:outline-none"
+                        onMouseDown={preservePointerFocus}
                         onClick={() => expandGroup(group.id)}
                         onKeyDown={handleRowKeyDown}
                       >
