@@ -12,7 +12,7 @@
  * Needs `onnxruntime-web` (pnpm add) and the VAD model at /wakeword/silero-vad.onnx.
  */
 import * as React from 'react';
-import { registerModelServiceWorker } from '../../modelCache';
+import { readAssetGlobal, registerModelServiceWorker } from '../../modelCache';
 import { getModelBytes } from './lib/opfs.js';
 
 export interface UseWakeWordOpts {
@@ -76,22 +76,6 @@ const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
 // (a base URL string, or { base, wakeword }) → `DEFAULT_ASSET` (the hosted HuggingFace base above). The
 // default fetches the ~6 MB of models from the hosted repo so a fresh clone runs with no config; override
 // the prop/global to point elsewhere (a local copy or a mieweb-owned host).
-type AssetGlobal =
-  | string
-  | { base?: string; wakeword?: string; svRuntime?: string };
-// Storybook runs stories in an iframe; a console-set window.__ozwellAssets often lands on the parent
-// frame, so check current → parent → top (all same-origin).
-function readAssetGlobal(): AssetGlobal | undefined {
-  if (typeof window === 'undefined') return undefined; // SSR / Node — no window
-  const get = (w?: Window | null): AssetGlobal | undefined => {
-    try {
-      return (w as unknown as { __ozwellAssets?: AssetGlobal })?.__ozwellAssets;
-    } catch {
-      return undefined;
-    }
-  };
-  return get(window) || get(window.parent) || get(window.top);
-}
 function resolveAssetBase(override?: string): string {
   const strip = (s: string) => s.replace(/\/$/, '');
   // The `assetBase` prop is a ROOT base (same shape as the string `window.__ozwellAssets`), so append

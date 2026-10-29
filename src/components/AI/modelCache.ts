@@ -16,6 +16,27 @@
  */
 const registered = new Set<string>();
 
+/** Where a host serves the voice models from: one base URL, or a URL per area. See AI/MODEL-HOSTING.md. */
+export type AssetGlobal =
+  | string
+  | { base?: string; wakeword?: string; svRuntime?: string; nemotron?: string };
+
+/**
+ * The host's `window.__ozwellAssets`. Storybook runs stories in an iframe and a console-set global often
+ * lands on the parent frame, so this checks current → parent → top (all same-origin).
+ */
+export function readAssetGlobal(): AssetGlobal | undefined {
+  if (typeof window === 'undefined') return undefined; // SSR / Node — no window
+  const get = (w?: Window | null): AssetGlobal | undefined => {
+    try {
+      return (w as unknown as { __ozwellAssets?: AssetGlobal })?.__ozwellAssets;
+    } catch {
+      return undefined;
+    }
+  };
+  return get(window) || get(window.parent) || get(window.top);
+}
+
 export function registerModelServiceWorker(
   swUrl = '/ozwell-model-sw.js'
 ): void {
