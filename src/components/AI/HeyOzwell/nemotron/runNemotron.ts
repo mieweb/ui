@@ -38,6 +38,38 @@ function modelBaseUrl(): string {
   return MODEL_BASE_URL;
 }
 
+let defaultModel: Promise<NemotronModel> | null = null;
+
+/**
+ * The model for this device: fp32 on WebGPU for desktops with a GPU (WebGPU runs only the fp32 graph
+ * correctly), else int8 on WASM. Voiceprints are tied to a variant, so keep using this one.
+ */
+export function defaultNemotronModel(): Promise<NemotronModel> {
+  defaultModel ??= (async () => {
+    const nav =
+      typeof navigator === 'undefined'
+        ? undefined
+        : (navigator as typeof navigator & {
+            gpu?: { requestAdapter: () => Promise<unknown> };
+            userAgentData?: { mobile?: boolean };
+          });
+    const userAgent = nav?.userAgent ?? '';
+    // iPadOS reports a Mac user agent; touch support tells them apart.
+    const mobile =
+      nav?.userAgentData?.mobile ??
+      (/Android|iPhone|iPad|iPod|Mobi/i.test(userAgent) ||
+        (/Macintosh/.test(userAgent) && (nav?.maxTouchPoints ?? 0) > 1));
+    const adapter =
+      !mobile && nav?.gpu
+        ? await nav.gpu.requestAdapter().catch(() => null)
+        : null;
+    return adapter
+      ? { variant: 'model', executionProvider: 'webgpu' }
+      : { variant: 'model_quantized', executionProvider: 'wasm' };
+  })();
+  return defaultModel;
+}
+
 let worker: Worker | null = null;
 let nextId = 0;
 const listeners = new Map<number, (message: NemotronWorkerMessage) => void>();
@@ -151,11 +183,11 @@ export async function runNemotron(
  * be used, e.g. once a user who records visits signs in.
  */
 export async function warmNemotron(
-  model: NemotronModel,
+  model?: NemotronModel,
   onStage?: (stage: string) => void
 ): Promise<void> {
   await openNemotronStream(
-    { ...model, streamingMode: 'offline' },
+    { ...(model ?? (await defaultNemotronModel())), streamingMode: 'offline' },
     onStage
   ).finish();
 }

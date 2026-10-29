@@ -53,7 +53,8 @@ Built on \`useNemotronDiarization\` (\`enroll\`, \`removeVoice\`, \`diarize\`, \
 - **Identity has no confidence threshold.** A similar-sounding stranger can be named as an enrolled person.
 - **Words no lane claims** go to the most active lane; there is no separate "uncertain" marker.
 - **Edits** change names and line speakers only; the lanes keep what the diarizer heard.
-- **Downloads:** ONNX Runtime Web 1.30 from jsDelivr and Nemotron weights (int8, ~121 MB) from Hugging Face, plus Whisper (turbo ~1.3 GB).
+- **Downloads:** ONNX Runtime Web 1.30 from jsDelivr and Nemotron weights from Hugging Face, kept in the browser's Cache API after the first visit: fp32 on WebGPU (~398 MB) on desktops with a GPU, else int8 on WASM (~121 MB). Plus Whisper (turbo ~1.3 GB).
+- **Recording** labels speakers while it records, so results follow soon after **Stop**; uploads are processed a minute at a time.
 - **i18n:** Speaker Scribe's own strings are English and not yet externalised; \`TranscriptPlayer\` takes \`labels\`.`,
       },
     },

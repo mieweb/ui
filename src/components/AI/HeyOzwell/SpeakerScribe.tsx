@@ -101,7 +101,8 @@ function ScribeSession({
   const [recording, setRecording] = React.useState<'voice' | 'clip' | null>(
     null
   );
-  const busy = nemo.busy || recording !== null;
+  // The device's model is picked a moment after mount.
+  const busy = nemo.busy || recording !== null || !nemo.model;
   const recordingProps = (picker: 'voice' | 'clip') => ({
     recording: recording === picker,
     onRecordingChange: (on: boolean) => setRecording(on ? picker : null),
