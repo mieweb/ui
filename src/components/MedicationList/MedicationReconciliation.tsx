@@ -7,7 +7,7 @@ import { useMessages } from '../../utils/messages';
  *
  * Wraps the presentational `MedicationList` with the full interaction layer:
  * status changes, Correct / Notes / Add Task modal dialogs, reordering,
- * removal, and adding medications (quick-add pills + "Other…" modal).
+ * removal, and adding medications (quick-add pills + "Add" editor modal).
  *
  * Works standalone (uncontrolled with `defaultMedications`, or controlled
  * with `medications` + `onChange`) and is the engine behind the eSheet

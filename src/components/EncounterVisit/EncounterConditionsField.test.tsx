@@ -29,21 +29,17 @@ function renderConditions(
   );
 }
 
-function openAddCondition() {
-  fireEvent.click(screen.getByRole('button', { name: 'Add condition' }));
-}
-
 describe('EncounterConditionsField', () => {
   it('captures a selected real diagnosis code in the shared ProblemList model', () => {
     const { latest, lookupProps, container } = renderConditions();
-    openAddCondition();
     expect(lookupProps()).toMatchObject({
       indexUrl: '/clinical-codify',
       domains: ['condition'],
       preferCodetypes: ['ICD10'],
       clearOnSelect: true,
     });
-    expect(lookupProps().onFreeText).toBeUndefined();
+    // Stock ProblemList capture supports free text alongside coded picks.
+    expect(lookupProps().onFreeText).toBeTypeOf('function');
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     const value = latest<ConditionsValue>();
     expect(value.concerns).toHaveLength(1);
@@ -77,7 +73,12 @@ describe('EncounterConditionsField', () => {
       }
     );
     fireEvent.click(screen.getByRole('button', { name: /refine/i }));
-    fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.click(dialog.getByRole('button', { name: 'Pick coded finding' }));
+    fireEvent.change(dialog.getByLabelText(/Problem name/), {
+      target: { value: 'Hypertensive heart disease without heart failure' },
+    });
+    fireEvent.click(dialog.getByRole('button', { name: /save/i }));
     const concern = latest<ConditionsValue>().concerns[0];
     expect(concern.concernId).toBe('hypertension');
     expect(concern.assertions[0]).toEqual(hypertensionConcern.assertions[0]);
@@ -85,7 +86,9 @@ describe('EncounterConditionsField', () => {
       changeType: 'refinement',
       supersedes: 'hypertension-assertion',
       text: 'Hypertensive heart disease without heart failure',
-      coding: [{ system: 'ICD10', code: 'I11.9' }],
+      coding: expect.arrayContaining([
+        expect.objectContaining({ system: 'ICD-10-CM', code: 'I11.9' }),
+      ]),
     });
     expect(
       screen.getByRole('button', { name: '2 assertions' })
@@ -172,25 +175,16 @@ describe('EncounterConditionsField', () => {
     );
   });
 
-  it('does not duplicate a current condition when its code is selected again', () => {
+  it('appends a new concern for each code pick without deduplicating against existing concerns', () => {
     const { latest } = renderConditions({ concerns: [hypertensionConcern] });
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
-    expect(latest<ConditionsValue>().concerns).toEqual([hypertensionConcern]);
-  });
-
-  it('does not duplicate a native canonical ICD-10-CM condition when selected from the lookup', () => {
-    const imported = {
-      ...hypertensionConcern,
-      assertions: [
-        {
-          ...hypertensionConcern.assertions[0],
-          coding: [{ system: 'ICD-10-CM', code: 'I10' }],
-        },
-      ],
-    };
-    const { latest } = renderConditions({ concerns: [imported] });
-    fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
-    expect(latest<ConditionsValue>().concerns).toEqual([imported]);
+    const concerns = latest<ConditionsValue>().concerns;
+    expect(concerns).toHaveLength(2);
+    expect(concerns[0]).toEqual(hypertensionConcern);
+    expect(concerns[1]).toMatchObject({
+      source: 'manuallyAdded',
+      assertions: [{ coding: [{ system: 'ICD10', code: 'I10' }] }],
+    });
   });
 
   it.each([{ isPreview: false }, { isEnabled: false }, { isReadOnly: true }])(
@@ -209,7 +203,6 @@ describe('EncounterConditionsField', () => {
 
   it('rejects a delayed code pick after the form is frozen for save', () => {
     const { form, lookupProps, onResponse } = renderConditions();
-    openAddCondition();
     const delayedPick = lookupProps().onSelect;
     act(() => form.getState().setReadOnly(true));
     act(() => delayedPick?.(conditionPick));
@@ -217,16 +210,18 @@ describe('EncounterConditionsField', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  it('rejects malformed code picks and codes from the wrong clinical domain', () => {
-    const { lookupProps, onResponse } = renderConditions();
-    openAddCondition();
-    act(() => lookupProps().onSelect?.({ ...conditionPick, fullcode: '' }));
-    act(() => lookupProps().onSelect?.({ ...conditionPick, domain: 'med' }));
-    expect(onResponse).not.toHaveBeenCalled();
+  it('captures picks without usable codes as uncoded concerns', () => {
+    const { latest, lookupProps } = renderConditions();
+    act(() =>
+      lookupProps().onSelect?.({ ...conditionPick, codetype: '', fullcode: '' })
+    );
+    const assertion = latest<ConditionsValue>().concerns[0].assertions[0];
+    expect(assertion.text).toBe('Essential hypertension');
+    expect(assertion).not.toHaveProperty('coding');
   });
 
-  it('keeps imported uncoded conditions readable without offering an uncoded Add fallback', () => {
-    const { onResponse } = renderConditions(
+  it('keeps imported uncoded conditions readable and captures free text through the list add row without a catalog', () => {
+    const { latest } = renderConditions(
       {
         concerns: [
           {
@@ -240,11 +235,18 @@ describe('EncounterConditionsField', () => {
       { provider: false }
     );
     expect(screen.getByText('Essential hypertension')).toBeInTheDocument();
-    expect(
-      screen.getByText(/coded condition search is unavailable/i)
-    ).toBeInTheDocument();
-    expect(screen.queryByLabelText('Add condition')).not.toBeInTheDocument();
-    expect(onResponse).not.toHaveBeenCalled();
+    // Without a catalog, ProblemList's own free-text add row takes over.
+    const input = screen.getByLabelText('Add problem');
+    fireEvent.change(input, { target: { value: 'New symptom' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    const concerns = latest<ConditionsValue>().concerns;
+    expect(concerns).toHaveLength(2);
+    expect(concerns[1].assertions[0]).toMatchObject({
+      text: 'New symptom',
+      verificationStatus: 'unconfirmed',
+      date: '2026-10-10',
+    });
+    expect(concerns[1].assertions[0]).not.toHaveProperty('coding');
   });
 
   it('retains a malformed answer and prevents destructive replacement', () => {
@@ -252,7 +254,7 @@ describe('EncounterConditionsField', () => {
       initialAnswer: '{"concerns":[{"coding":"wrong"}]}',
     });
     expect(screen.getByRole('alert')).toHaveTextContent('"coding":"wrong"');
-    expect(screen.getByLabelText('Original Conditions answer')).toHaveAttribute(
+    expect(screen.getByLabelText('Original condition answer')).toHaveAttribute(
       'tabindex',
       '0'
     );
@@ -262,38 +264,23 @@ describe('EncounterConditionsField', () => {
 });
 
 describe('explicit assertion date and uncoded condition configuration', () => {
-  it('requires explicit date entry and records a historical encounter date without clock inference', () => {
-    const { latest, Lookup } = renderConditions(undefined, {
+  it('ignores picks and free text when the host provides no encounter date', () => {
+    const { lookupProps, onResponse } = renderConditions(undefined, {
       encounterDate: null,
     });
-    openAddCondition();
-    expect(screen.getByLabelText('Assertion date')).toHaveValue('');
-    expect(Lookup).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByLabelText('Assertion date'), {
-      target: { value: '02/29/2020' },
-    });
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
-    expect(latest<ConditionsValue>().concerns[0].assertions[0].date).toBe(
-      '2020-02-29'
-    );
-  });
-  it('rejects a delayed coded selection after the explicit date is cleared', () => {
-    const { lookupProps, onResponse } = renderConditions();
-    openAddCondition();
-    const delayed = lookupProps().onSelect;
-    fireEvent.change(screen.getByLabelText('Assertion date'), {
-      target: { value: '' },
-    });
-    act(() => delayed?.(conditionPick));
+    act(() => lookupProps().onFreeText?.('Undated symptom'));
     expect(onResponse).not.toHaveBeenCalled();
   });
-  it('allows an explicit uncoded condition through the proper condition editor when coding is optional', () => {
-    const { latest } = renderConditions(undefined, {
-      provider: false,
-      requireCoding: false,
-    });
-    openAddCondition();
-    fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
+  it('allows an explicit uncoded condition through the proper condition editor', () => {
+    const { latest } = renderConditions(undefined, { provider: false });
+    // Two 'Add' buttons without a catalog: the free-text row's (disabled while
+    // empty) and the editor pill — click the enabled editor pill.
+    fireEvent.click(
+      screen
+        .getAllByRole('button', { name: 'Add' })
+        .find((button) => !(button as HTMLButtonElement).disabled)!
+    );
     const dialog = within(screen.getByRole('dialog'));
     fireEvent.change(dialog.getByLabelText(/Problem name/), {
       target: { value: 'Explicit uncoded symptom' },
@@ -307,7 +294,7 @@ describe('explicit assertion date and uncoded condition configuration', () => {
   it('preserves the condition editor changeType instead of forcing refinement', () => {
     const { latest } = renderConditions(
       { concerns: [hypertensionConcern] },
-      { provider: false, requireCoding: false }
+      { provider: false }
     );
     fireEvent.click(screen.getByRole('button', { name: /refine/i }));
     const dialog = within(screen.getByRole('dialog'));
@@ -324,13 +311,9 @@ describe('explicit assertion date and uncoded condition configuration', () => {
       supersedes: 'hypertension-assertion',
     });
   });
-  it('keeps an in-progress refinement when the uncoded Other… editor records it', () => {
-    const { latest } = renderConditions(
-      { concerns: [hypertensionConcern] },
-      { requireCoding: false }
-    );
+  it('records an uncoded refinement through the condition editor when a catalog is available', () => {
+    const { latest } = renderConditions({ concerns: [hypertensionConcern] });
     fireEvent.click(screen.getByRole('button', { name: /refine/i }));
-    fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
     const dialog = within(screen.getByRole('dialog'));
     fireEvent.change(dialog.getByLabelText(/Problem name/), {
       target: { value: 'Uncoded refinement' },

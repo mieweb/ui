@@ -64,7 +64,6 @@ export function renderClinicalField(
     initialAnswer?: string;
     initialResponse?: FieldResponse;
     encounterDate?: string | null;
-    requireCoding?: boolean;
     messages?: ComponentMessages;
   } = {}
 ): RenderResult & {
@@ -102,7 +101,6 @@ export function renderClinicalField(
             options.encounterDate === null
               ? undefined
               : (options.encounterDate ?? '2026-10-10'),
-          encounterRequireCoding: options.requireCoding ?? true,
         },
         question:
           fieldType === 'encounterConditions'

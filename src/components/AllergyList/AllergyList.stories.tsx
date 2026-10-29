@@ -169,7 +169,7 @@ export const Interactive: StoryObj<typeof AllergyManager> = {
 
 - Hover/focus a row for **Correct / Notes / Remove**; drag by the grip to
   reorder within a category
-- **Correct** and **Add allergy…** open the editor: **Allergy vs
+- **Correct** and the **Add** pill open the editor: **Allergy vs
   Intolerance** mechanism radio (an intolerance mislabeled as an allergy
   causes unnecessary avoidance of first-line drugs — intolerances get a
   gray badge), type-driven allergen input (Drug → coded RxNorm/FDB search;
@@ -206,7 +206,7 @@ explicit NKA affordance:
 - Typing in the search bar and picking a result adds a coded drug allergen
   immediately (free text works for foods/other); adding any allergy
   clears the NKA flag automatically
-- Use **Add allergy…** for full detail (reaction, severity, onset)
+- Use the **Add** pill for full detail (reaction, severity, onset)
         `,
       },
     },

@@ -189,7 +189,7 @@ export const Interactive: Story = {
 Everything works without writing any handler code:
 
 - **Status buttons** (👍 🤘 👎 ?) move the row to the matching group
-- **Correct** and **Other…** open the NCPDP \`MedicationEditor\`; the drug
+- **Correct** and the **Add** pill open the NCPDP \`MedicationEditor\`; the drug
   search codes against RxNorm/FDB offline (try typing "lisinopril 20") and
   auto-fills strength, dose form, and quantity unit
 - **Notes / Add Task** open small dialogs; their text appears under the row
@@ -432,7 +432,7 @@ quick-add pills would *lead the patient*, so this variant omits
   one. Free text (Enter) works for anything not found
 - Then record *how they're taking it*: hover/tap the new row and hit
   👍 / 🤘 / 👎 / ? — two interactions per medication total
-- "Other…" is still there for entries needing full prescription detail
+- The **Add** pill is still there for entries needing full prescription detail
 
 For clinician-facing quick picks, add \`quickAddOptions\` back — see
 **Interactive**.

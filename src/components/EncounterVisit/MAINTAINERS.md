@@ -49,8 +49,8 @@ formatting when appending. Invalidate stale selection metadata after an external
 text replacement; do not infer a selection from prose that happens to match.
 
 Clinical sections compose the existing healthcare components:
-inline prescription cards built on `MedicationEditor`'s field helpers,
-inline allergy cards (with explicit no-known-allergies capture),
+`MedicationReconciliation` for Medications,
+`AllergyManager` for Allergies (with explicit no-known-allergies capture),
 `ProblemList` for
 Conditions, and
 `Assessment` for Assessment and Plan. The Plan variant captures coded medication,
@@ -63,23 +63,26 @@ refining a condition must not silently revise a recorded assessment.
 The host supplies its terminology catalog through `EncounterVisit.codeLookup`
 or an enclosing `CodeLookupProvider`. Keep the context scope mounted when lookup
 wiring appears, changes or disappears so a late catalog load cannot reset the
-visit draft. Clinical entries require a selected
-code by default (`section.requireCoding ?? true`). An absent provider disables coded capture; it must not introduce a
-free-text fallback or fabricated code. Medication lookup uses the medication
-domain; conditions use condition codes, and non-drug allergies require substance
-concepts in the host's condition-domain SNOMED catalog. Default definitions set
-`requireCoding: true`; legacy imported uncoded records remain visible with
-"Coding required" and fail validation until coded. Explicit `requireCoding: false`
-enables the existing clinical components' uncoded entry paths in both UI and MCP.
+visit draft. Capture follows the stock components' capture-first behavior: the
+coded search is the primary path and each component's own free-text entry stays
+available; codes are never fabricated. Validation still requires codes by
+default (`section.requireCoding ?? true`): uncoded entries — newly typed or
+legacy imports — remain visible, render "Coding required" in the report, and
+fail validation until coded. Explicit `requireCoding: false` lifts that
+validation in both UI and MCP. Medication lookup uses the medication
+domain; conditions use condition codes; non-drug allergens are recorded as free
+text through the allergy editor. An absent provider leaves the components'
+built-in uncoded entry paths.
 Standalone medication/allergy
 components retain their existing behavior unless `requireCode` is enabled.
 Only an explicit no-known-allergies flag exports
 [SNOMED CT 716186003](https://www.hl7.org/fhir/uv/ipa/STU1/AllergyIntolerance-NKAExample.html).
 
 Assertion dates are real ISO calendar dates (`YYYY-MM-DD`). The host may provide
-`definition.encounterDate`; otherwise the Conditions/Assessment fields require
-an explicit date entry before creating an assertion. Never infer the clinical
-date from the device clock. Dates and codes already on imported records remain
+`definition.encounterDate`; without a valid date the Conditions/Assessment
+fields do not create assertions — new entries are ignored rather than dated
+from the device clock. Never infer the clinical date from the device clock.
+Dates and codes already on imported records remain
 unchanged until the user explicitly edits them.
 
 `EncounterVisit.messages` accepts an English-keyed `labels` dictionary and/or a
