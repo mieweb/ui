@@ -1,10 +1,9 @@
 /**
- * SpeakerScribe: experimental successor to VisitScribe (mieweb/ui#492, Phase 0).
+ * SpeakerScribe: experimental Nemotron successor to VisitScribe (mieweb/ui#492).
  *
  * Enroll voices with Nemotron, record or drop a clip, and review the overlap-aware, speaker-labelled
- * result in `TranscriptPlayer`. Speakers can be renamed, merged and reassigned per line. "Compare
- * with legacy" runs `useDiarization` on the same clip. All on-device; audio never leaves the page.
- * Not exported from the package yet.
+ * result in `TranscriptPlayer`. Speakers can be renamed, merged and reassigned per line. All
+ * on-device; audio never leaves the page. Not exported from the package yet.
  */
 import * as React from 'react';
 import { cn } from '../../../utils/cn';
@@ -12,16 +11,9 @@ import { Badge } from '../../Badge';
 import { Button } from '../../Button';
 import { Input } from '../../Input';
 import { RecordButton } from '../../RecordButton';
-import { Switch } from '../../Switch';
-import {
-  VARIANT_INFO,
-  type ExecutionProvider,
-  type ModelVariant,
-} from './nemotron/modelConfig';
 import { applySpeakerEdits } from './speakerEdits';
 import { formatClock } from './TranscriptPlayer/model';
 import { TranscriptPlayer } from './TranscriptPlayer/TranscriptPlayer';
-import { useDiarization } from './useDiarization';
 import {
   MIN_ENROLL_SECONDS,
   useNemotronDiarization,
@@ -35,38 +27,40 @@ export interface SpeakerScribeProps {
   className?: string;
 }
 
-const MODELS = (Object.keys(VARIANT_INFO) as ModelVariant[]).flatMap(
-  (variant) =>
-    VARIANT_INFO[variant].backends.map((backend) => ({
-      value: `${variant}|${backend}`,
-      label: `${VARIANT_INFO[variant].label} · ${backend === 'wasm' ? 'WASM' : 'WebGPU'} (~${VARIANT_INFO[variant].sizeMb} MB)`,
-    }))
-);
-
 /** Record with the mic or pick an audio file; both hand back a Blob. */
 function ClipPicker({
   label,
   disabled,
+  recording,
+  onRecordingChange,
   onPick,
 }: {
   label: string;
   disabled: boolean;
+  /** This picker is recording, so its Stop must stay usable. */
+  recording: boolean;
+  onRecordingChange: (recording: boolean) => void;
   onPick: (blob: Blob) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
       <RecordButton
         size="sm"
-        disabled={disabled}
+        disabled={disabled && !recording}
         aria-label={`Record ${label}`}
-        onRecordingComplete={(blob) => onPick(blob)}
+        onRecordingStart={() => onRecordingChange(true)}
+        onRecordingError={() => onRecordingChange(false)}
+        onRecordingComplete={(blob) => {
+          onRecordingChange(false);
+          onPick(blob);
+        }}
       />
       <label className="text-muted-foreground flex items-center gap-2">
         or upload
         <input
           type="file"
           accept="audio/*"
-          disabled={disabled}
+          disabled={disabled || recording}
           aria-label={`Upload ${label}`}
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -81,7 +75,7 @@ function ClipPicker({
 
 /** Enroll voices, analyze a clip, and correct the labelled transcript. */
 export function SpeakerScribe(props: SpeakerScribeProps) {
-  // A different user starts from a clean slate: no clips, results or comparison carry over.
+  // A different user starts from a clean slate: no clips or results carry over.
   return <ScribeSession key={props.voiceprintNamespace ?? ''} {...props} />;
 }
 
@@ -91,38 +85,29 @@ function ScribeSession({
   voiceprintNamespace,
   className,
 }: SpeakerScribeProps) {
-  const [model, setModel] = React.useState(MODELS[0].value);
-  const [variant, executionProvider] = model.split('|') as [
-    ModelVariant,
-    ExecutionProvider,
-  ];
-  const nemo = useNemotronDiarization({
-    variant,
-    executionProvider,
-    voiceprintNamespace,
-  });
-  const [compare, setCompare] = React.useState(false);
-  const legacy = useDiarization({ enabled: compare, voiceprintNamespace });
+  const nemo = useNemotronDiarization({ voiceprintNamespace });
 
   const [voiceName, setVoiceName] = React.useState('');
   const [clip, setClip] = React.useState<Blob | null>(null);
   /** The clip behind `nemo.result`, which `clip` runs ahead of while analysing. */
   const [resultClip, setResultClip] = React.useState<Blob | null>(null);
-  const [legacyClip, setLegacyClip] = React.useState<Blob | null>(null);
-  const busy = nemo.busy || legacy.busy;
-  const waitingForLegacy = compare && !legacy.ready;
+  /** Which picker is recording; everything else waits until it stops. */
+  const [recording, setRecording] = React.useState<'voice' | 'clip' | null>(
+    null
+  );
+  const busy = nemo.busy || recording !== null;
+  const recordingProps = (picker: 'voice' | 'clip') => ({
+    recording: recording === picker,
+    onRecordingChange: (on: boolean) => setRecording(on ? picker : null),
+  });
 
   const analyze = async (blob: Blob) => {
     setClip(blob);
     try {
       await nemo.diarize(blob);
       setResultClip(blob);
-      if (compare && legacy.ready) {
-        await legacy.diarize(blob);
-        setLegacyClip(blob);
-      }
     } catch {
-      /* surfaced through the hooks' `error` */
+      /* surfaced through `nemo.error` */
     }
   };
 
@@ -163,18 +148,16 @@ function ScribeSession({
   const lines = transcript?.segments ?? [];
   const speakers = transcript?.speakers ?? [];
 
-  const error = nemo.error ?? legacy.error;
+  const error = nemo.error;
   const status = nemo.busy
     ? `${nemo.stage || 'Working'}…`
-    : legacy.busy
-      ? 'Running the legacy pipeline…'
-      : waitingForLegacy
-        ? 'Loading the legacy speaker model…'
-        : error
-          ? error
-          : transcript
-            ? `${lines.length} line${lines.length === 1 ? '' : 's'} · ${speakers.length} speaker${speakers.length === 1 ? '' : 's'}`
-            : 'Enroll voices (optional), then record or upload a clip.';
+    : recording
+      ? 'Recording…'
+      : error
+        ? error
+        : transcript
+          ? `${lines.length} line${lines.length === 1 ? '' : 's'} · ${speakers.length} speaker${speakers.length === 1 ? '' : 's'}`
+          : 'Enroll voices (optional), then record or upload a clip.';
 
   return (
     <div
@@ -226,6 +209,7 @@ function ScribeSession({
           <ClipPicker
             label={`a ${MIN_ENROLL_SECONDS}+ second voice sample`}
             disabled={busy || !voiceName.trim()}
+            {...recordingProps('voice')}
             onPick={(blob) => void enroll(blob)}
           />
         </div>
@@ -239,39 +223,18 @@ function ScribeSession({
         <h2 id="speaker-scribe-clip" className="text-sm font-semibold">
           Clip
         </h2>
-        <ClipPicker
-          label="a clip to analyze"
-          disabled={busy || waitingForLegacy}
-          onPick={(blob) => void analyze(blob)}
-        />
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm">
-          <label className="flex items-center gap-2">
-            Model
-            <select
-              value={model}
-              disabled={busy}
-              onChange={(e) => setModel(e.target.value)}
-              className="border-border bg-background text-foreground rounded-md border px-2 py-1"
-            >
-              {MODELS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Switch
-            size="sm"
-            checked={compare}
-            onCheckedChange={setCompare}
+        <div className="flex flex-wrap items-center gap-3">
+          <ClipPicker
+            label="a clip to analyze"
             disabled={busy}
-            label="Compare with legacy"
+            {...recordingProps('clip')}
+            onPick={(blob) => void analyze(blob)}
           />
           {clip && (
             <Button
               variant="outline"
               size="sm"
-              disabled={busy || waitingForLegacy}
+              disabled={busy}
               onClick={() => void analyze(clip)}
             >
               Re-analyze
@@ -361,26 +324,6 @@ function ScribeSession({
             transcript={transcript}
             peaks={result.peaks}
           />
-        </section>
-      )}
-
-      {compare && legacy.result && legacyClip && legacyClip === clip && (
-        <section aria-labelledby="speaker-scribe-legacy" className="space-y-2">
-          <h2 id="speaker-scribe-legacy" className="text-sm font-semibold">
-            Legacy (Whisper + TitaNet clustering)
-          </h2>
-          <ol className="border-border divide-border divide-y rounded-xl border">
-            {legacy.result.map((turn, i) => (
-              <li key={i} className="p-3 text-sm">
-                <span className="text-xs font-semibold">{turn.speaker}</span>
-                <span className="text-muted-foreground text-xs">
-                  {' '}
-                  · {turn.start.toFixed(1)}s
-                </span>
-                <p className="mt-0.5">{turn.text}</p>
-              </li>
-            ))}
-          </ol>
         </section>
       )}
     </div>

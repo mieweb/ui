@@ -1,21 +1,12 @@
-/** Turns Nemotron's per-frame lane probabilities into named spans and a diarized `Transcript`. */
+/** Turns Nemotron's per-frame lane probabilities into a diarized `Transcript`. */
 import type {
+  SpeakerActivity,
   Transcript,
   TranscriptSegment as TranscriptSegmentMs,
   TranscriptWord,
 } from '../../../TranscriptView/transcript';
 import type { TranscriptSegment } from '../../diarize';
 import { UTTERANCE_GAP_SECONDS } from '../TranscriptPlayer/model';
-
-export interface SpeakerSpan {
-  speaker: string;
-  /** Stable lane or cluster id, when several can share one `speaker` name. */
-  id?: string;
-  /** Seconds. */
-  start: number;
-  /** Seconds. */
-  end: number;
-}
 
 /** Row-major `numFrames x numSpeakers` lane probabilities, as returned by `runNemotron`. */
 export interface LaneFrames {
@@ -25,40 +16,33 @@ export interface LaneFrames {
 }
 
 const ACTIVE = 0.5;
+const ms = (seconds: number) => Math.round(seconds * 1000);
 
-/** Per-frame lane probabilities → one span per run above `threshold`. Unnamed lanes are "Speaker N" by arrival. */
-export function spansFromFrames(
-  probabilities: Float32Array,
-  numSpeakers: number,
-  frameDurationSeconds: number,
-  {
-    threshold = ACTIVE,
-    minSeconds = 0,
-    names,
-  }: { threshold?: number; minSeconds?: number; names?: readonly string[] } = {}
-): SpeakerSpan[] {
+/** One stretch per run of frames where a lane (`lane-N`) is active, in time order. */
+function laneActivity({
+  probabilities,
+  numSpeakers,
+  frameDurationSeconds,
+}: LaneFrames): SpeakerActivity[] {
   const numFrames = probabilities.length / numSpeakers;
-  const spans: SpeakerSpan[] = [];
-  for (let speaker = 0; speaker < numSpeakers; speaker++) {
+  const activity: SpeakerActivity[] = [];
+  for (let lane = 0; lane < numSpeakers; lane++) {
     let start = -1;
     for (let frame = 0; frame <= numFrames; frame++) {
       const active =
         frame < numFrames &&
-        probabilities[frame * numSpeakers + speaker] > threshold;
+        probabilities[frame * numSpeakers + lane] > ACTIVE;
       if (active && start < 0) start = frame;
       if (active || start < 0) continue;
-      spans.push({
-        speaker: names?.[speaker] ?? `Speaker ${speaker + 1}`,
-        id: `lane-${speaker}`,
-        start: start * frameDurationSeconds,
-        end: frame * frameDurationSeconds,
+      activity.push({
+        speakerId: `lane-${lane}`,
+        startMs: ms(start * frameDurationSeconds),
+        endMs: ms(frame * frameDurationSeconds),
       });
       start = -1;
     }
   }
-  return spans
-    .filter((span) => span.end - span.start >= minSeconds)
-    .sort((a, b) => a.start - b.start);
+  return activity.sort((a, b) => a.startMs - b.startMs);
 }
 
 /** Display name per lane: the first lanes take the enrolled names, the rest "Speaker N" by first activity. */
@@ -118,7 +102,6 @@ export function transcriptFromFrames(
   names: readonly string[],
   durationSeconds: number
 ): Transcript {
-  const ms = (seconds: number) => Math.round(seconds * 1000);
   const ids = names.map((_, lane) => `lane-${lane}`);
   const segments: TranscriptSegmentMs[] = [];
   for (const word of words) {
@@ -161,16 +144,7 @@ export function transcriptFromFrames(
     });
   }
 
-  const speakerActivity = spansFromFrames(
-    frames.probabilities,
-    frames.numSpeakers,
-    frames.frameDurationSeconds,
-    { names: ids }
-  ).map((span) => ({
-    speakerId: span.speaker,
-    startMs: ms(span.start),
-    endMs: ms(span.end),
-  }));
+  const speakerActivity = laneActivity(frames);
   const heard = new Set([
     ...segments.map((s) => s.speakerId),
     ...speakerActivity.map((a) => a.speakerId),

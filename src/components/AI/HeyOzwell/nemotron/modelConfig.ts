@@ -7,14 +7,11 @@ export const MODEL_BASE_URL = `https://huggingface.co/onnx-community/Nemotron-3-
 
 export type ExecutionProvider = 'webgpu' | 'wasm';
 
-export const MODEL_VARIANTS = [
-  'model',
-  'model_fp16',
-  'model_quantized',
-  'model_q4',
-  'model_q4f16',
-] as const;
-export type ModelVariant = (typeof MODEL_VARIANTS)[number];
+/**
+ * `model` is fp32 (~398 MB), `model_quantized` int8 (~121 MB). WebGPU only has kernels for the fp32
+ * graph: the quantised graphs fail to build there.
+ */
+export type ModelVariant = 'model' | 'model_quantized';
 
 export const STREAMING_MODES = [
   'ultra_low_latency',
@@ -23,25 +20,6 @@ export const STREAMING_MODES = [
   'offline',
 ] as const;
 export type StreamingMode = (typeof STREAMING_MODES)[number];
-
-export interface VariantInfo {
-  label: string;
-  /** Approximate download size of the weights, in megabytes. */
-  sizeMb: number;
-  /**
-   * Backends this variant gives correct output on. WebGPU only has kernels for the float32 graph:
-   * the quantised graphs fail to build, and the float16 one builds but returns degraded output.
-   */
-  backends: readonly ExecutionProvider[];
-}
-
-export const VARIANT_INFO: Record<ModelVariant, VariantInfo> = {
-  model: { label: 'fp32', sizeMb: 398, backends: ['webgpu', 'wasm'] },
-  model_fp16: { label: 'fp16', sizeMb: 200, backends: ['wasm'] },
-  model_quantized: { label: 'int8', sizeMb: 121, backends: ['wasm'] },
-  model_q4: { label: 'q4', sizeMb: 83, backends: ['wasm'] },
-  model_q4f16: { label: 'q4f16', sizeMb: 73, backends: ['wasm'] },
-};
 
 /** `config.json` of the checkpoint, narrowed to the fields the browser runtime needs. */
 export interface ModelConfig {

@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  laneNames,
-  spansFromFrames,
-  transcriptFromFrames,
-} from './attribution';
+import { laneNames, transcriptFromFrames } from './attribution';
 
 /** Builds `numFrames x 3` frames of 0.1 s where `active(frame)` lists the lit lanes. */
 function frames(numFrames: number, active: (frame: number) => number[]) {
@@ -29,22 +25,6 @@ describe('laneNames', () => {
       'Dr. Smith',
       'Speaker 1',
       'Speaker 2',
-    ]);
-  });
-});
-
-describe('spansFromFrames', () => {
-  it('uses lane names when given', () => {
-    const spans = spansFromFrames(
-      conversation.probabilities,
-      conversation.numSpeakers,
-      conversation.frameDurationSeconds,
-      { names: ['Dr. Smith', 'Speaker 1', 'Speaker 2'] }
-    );
-    expect(spans.map((s) => s.speaker)).toEqual([
-      'Dr. Smith',
-      'Speaker 1',
-      'Dr. Smith',
     ]);
   });
 });
