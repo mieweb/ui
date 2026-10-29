@@ -96,8 +96,8 @@ Models are cached across app opens so a returning user loads from disk, not the 
   (~85 s), then **~10 s from cache** on later opens. The SW deliberately does NOT touch the Whisper files.
 - **Nemotron 3 Diarization** (int8 ~121 MB or fp32 ~398 MB, experimental) — loaded by the Nemotron worker from
   `onnx-community/Nemotron-3-Diarization-ONNX` at the pinned `MODEL_REVISION`, and kept in the Cache API
-  (`ozwell-nemotron-<revision>`; older revisions are deleted). `warmNemotron(model)` downloads and loads it
-  in the background. To serve a copy of that revision's files (same layout), set
+  (`ozwell-nemotron-<revision>`; older revisions are deleted). `warmNemotron()` downloads and loads the
+  device's default model (`defaultNemotronModel()`) in the background. To serve a copy of that revision's files (same layout), set
   `window.__ozwellAssets = { nemotron: 'https://…' }`; only the object form moves Nemotron, so an existing
   string `__ozwellAssets` for the wake and speaker models is unaffected.
 

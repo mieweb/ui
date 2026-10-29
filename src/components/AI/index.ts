@@ -180,6 +180,7 @@ export {
 
 // Nemotron diarization (experimental) — preload the model in the background before it is needed.
 export {
+  defaultNemotronModel,
   warmNemotron,
   type NemotronModel,
 } from './HeyOzwell/nemotron/runNemotron';
