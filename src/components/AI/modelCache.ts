@@ -16,6 +16,10 @@
  */
 const registered = new Set<string>();
 
+/** The one ONNX Runtime Web build the voice models run on; keep in step with package.json. */
+export const ONNX_RUNTIME_CDN =
+  'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/';
+
 /** Where a host serves the voice models from: one base URL, or a URL per area. See AI/MODEL-HOSTING.md. */
 export type AssetGlobal =
   | string

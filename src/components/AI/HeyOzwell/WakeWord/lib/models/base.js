@@ -2,6 +2,9 @@
 import { ONNX } from "../onnx.js";
 import { getModelBytes } from "../opfs.js";
 
+// ONNX Runtime Web runs one session at a time; overlapping runs fail with "Session already started".
+let runQueue = Promise.resolve();
+
 /**
  * Base class for ONNX models
  */
@@ -129,6 +132,12 @@ export class ONNXModel {
      */
     async run(input) {
         await this.waitUntilLoaded();
+        const turn = runQueue.then(() => this.timedExecute(input));
+        runQueue = turn.catch(() => {});
+        return turn;
+    }
+
+    async timedExecute(input) {
         const currentTime = new Date().getTime();
         const result = await this.execute(input);
         const executionDuration = new Date().getTime() - currentTime;
