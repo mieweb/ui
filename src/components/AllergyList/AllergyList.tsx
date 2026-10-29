@@ -473,7 +473,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
                   leftIcon={<PlusIcon size={12} />}
                   className="h-auto rounded-full px-2.5 py-1 text-xs"
                 >
-                  {m('Add allergy…')}
+                  {m('Add')}
                 </Button>
               )}
             </div>

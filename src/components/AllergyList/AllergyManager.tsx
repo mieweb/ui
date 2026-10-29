@@ -392,7 +392,7 @@ export function AllergyManager({
         bare
         clearOnSelect
         placeholder={m(
-          'Search drug allergens to add — use Add allergy… for food/environmental'
+          'Search drug allergens to add — use Add for food/environmental'
         )}
         onSelect={(result) => {
           if (

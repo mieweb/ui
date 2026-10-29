@@ -586,7 +586,7 @@ export const MedicationList = React.forwardRef<
                         leftIcon={<PlusIcon size={12} />}
                         className="h-auto rounded-full px-2.5 py-1 text-xs"
                       >
-                        {m('Other…')}
+                        {m('Add')}
                       </Button>
                     )}
                   </div>

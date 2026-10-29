@@ -159,12 +159,11 @@ describe('Encounter coded clinical fields', () => {
         },
       }
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
-    expect(screen.queryByRole('button', { name: 'Use free text' })).toBeNull();
     fireEvent.click(
       screen.getByRole('button', { name: 'Select incomplete result' })
     );
     expect(onResponse).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Use free text' })).toBeNull();
     fireEvent.click(
       screen.getByRole('button', { name: 'Select medication result' })
     );
@@ -191,21 +190,27 @@ describe('Encounter coded clinical fields', () => {
     expect(onResponse.mock.calls.at(-1)![0]).not.toHaveProperty('selected');
   });
 
-  it('holds inline prescription details in a local draft until a catalog pick names and codes the medication', () => {
+  it('captures prescription details through the medication editor after a coded pick', () => {
     const { onResponse, latest } = renderField(
       EncounterMedicationField,
       'encounterMedications'
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-    const sig = screen.getByLabelText('Sig (patient directions)');
-    sig.innerHTML = '<p>1 tablet by mouth daily</p>';
-    fireEvent.input(sig);
-    expect(onResponse).not.toHaveBeenCalled();
     fireEvent.click(
       screen.getByRole('button', { name: 'Select medication result' })
     );
     expect(onResponse).toHaveBeenCalledOnce();
+    fireEvent.click(
+      within(
+        screen.getByRole('toolbar', {
+          name: 'Actions for lisinopril 10 mg tablet',
+        })
+      ).getByRole('button', { name: 'Correct' })
+    );
+    const dialog = within(screen.getByRole('dialog'));
+    const sig = dialog.getByLabelText('Sig (patient directions)');
+    sig.innerHTML = '<p>1 tablet by mouth daily</p>';
+    fireEvent.input(sig);
+    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toMatchObject({
       medications: [
         {
@@ -225,11 +230,9 @@ describe('Encounter coded clinical fields', () => {
       'encounterAllergies'
     );
     fireEvent.click(
-      screen.getByRole('checkbox', { name: 'No known allergies (NKA)' })
+      screen.getByRole('button', { name: 'Confirm: no known allergies' })
     );
     expect(latest()).toEqual({ allergies: [], noKnownAllergies: true });
-    fireEvent.click(screen.getByRole('button', { name: 'Add allergy' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
     fireEvent.click(
       screen.getByRole('button', { name: 'Select incomplete result' })
     );
@@ -250,25 +253,26 @@ describe('Encounter coded clinical fields', () => {
     expect(screen.queryByText('No known allergies (NKA)')).toBeNull();
   });
 
-  it('codes non-drug allergens through SNOMED substance search in the inline allergy card', () => {
+  it('codes non-drug allergens through SNOMED substance search in the allergy editor', () => {
     const { onResponse, latest } = renderField(
       EncounterAllergyField,
       'encounterAllergies'
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Add allergy' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-    fireEvent.click(screen.getByRole('combobox', { name: 'Type' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add allergy…' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.click(dialog.getByRole('combobox', { name: 'Type' }));
     fireEvent.click(screen.getByRole('option', { name: 'Food' }));
-    expect(screen.getByTestId('catalog-domain')).toHaveTextContent('condition');
-    expect(screen.getByTestId('catalog-system')).toHaveTextContent('SNOMED US');
+    expect(dialog.getByTestId('catalog-domain')).toHaveTextContent('condition');
+    expect(dialog.getByTestId('catalog-system')).toHaveTextContent('SNOMED US');
     expect(onResponse).not.toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: 'Use free text' })).toBeNull();
+    expect(dialog.queryByRole('button', { name: 'Use free text' })).toBeNull();
     fireEvent.click(
-      screen.getByRole('button', { name: 'Select substance result' })
+      dialog.getByRole('button', { name: 'Select substance result' })
     );
-    fireEvent.change(screen.getByLabelText('Reaction'), {
+    fireEvent.change(dialog.getByLabelText('Reaction'), {
       target: { value: 'Hives' },
     });
+    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toMatchObject({
       allergies: [
         {
@@ -294,10 +298,16 @@ describe('Encounter coded clinical fields', () => {
     expect(
       screen.getByText(/Imported medications without a code/)
     ).toBeInTheDocument();
-    const card = within(screen.getByRole('group', { name: 'Medication 1' }));
-    const sig = card.getByLabelText('Sig (patient directions)');
+    fireEvent.click(
+      within(
+        screen.getByRole('toolbar', { name: 'Actions for Imported drug' })
+      ).getByRole('button', { name: 'Correct' })
+    );
+    const dialog = within(screen.getByRole('dialog'));
+    const sig = dialog.getByLabelText('Sig (patient directions)');
     sig.innerHTML = '<p>Continue prior directions</p>';
     fireEvent.input(sig);
+    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toEqual({
       medications: [
         {
@@ -379,8 +389,6 @@ describe('Encounter coded clinical fields', () => {
           <Component {...fieldProps(fieldType, { form, onResponse })} />
         </CodeLookupProvider>
       );
-      if (fieldType === 'encounterMedications')
-        fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
       const pick = delayedPick;
       act(() => form.getState().setReadOnly(true));
       expect(screen.queryByRole('button')).toBeNull();
@@ -449,50 +457,44 @@ describe('optional coding in encounter medication and allergy adapters', () => {
       const { latest } = renderField(component, fieldType, undefined, {
         requireCoding: false,
       });
-      fireEvent.click(
-        screen.getByRole('button', {
-          name:
-            fieldType === 'encounterMedications'
-              ? 'Add medication'
-              : 'Add allergy',
-        })
-      );
       fireEvent.click(screen.getByRole('button', { name: 'Use free text' }));
       const entries = latest<Record<string, Record<string, unknown>[]>>()[key];
       expect(entries[0][value]).toBe('Unknown drug');
       expect(entries[0]).not.toHaveProperty('code');
     }
   );
-  it('captures uncoded medications through the inline name input without a catalog only with requireCoding false', () => {
+  it('captures uncoded medications through the medication editor without a catalog only with requireCoding false', () => {
     const { latest } = renderField(
       EncounterMedicationField,
       'encounterMedications',
       undefined,
       { requireCoding: false, catalog: false }
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Add medication' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-    fireEvent.change(screen.getByLabelText('Medication'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.change(dialog.getByRole('textbox', { name: 'Medication' }), {
       target: { value: 'Aspirin' },
     });
+    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     const { medications } = latest<{
       medications: Record<string, unknown>[];
     }>();
     expect(medications[0]).toMatchObject({ name: 'Aspirin' });
     expect(medications[0]).not.toHaveProperty('code');
   });
-  it('captures uncoded allergies through the inline allergen input without a catalog only with requireCoding false', () => {
+  it('captures uncoded allergies through the allergy editor without a catalog only with requireCoding false', () => {
     const { latest } = renderField(
       EncounterAllergyField,
       'encounterAllergies',
       undefined,
       { requireCoding: false, catalog: false }
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Add allergy' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-    fireEvent.change(screen.getByLabelText('Allergen'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Add allergy…' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.change(dialog.getByRole('textbox', { name: 'Allergen' }), {
       target: { value: 'Pollen' },
     });
+    fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     const { allergies } = latest<{ allergies: Record<string, unknown>[] }>();
     expect(allergies[0]).toMatchObject({ allergen: 'Pollen' });
     expect(allergies[0]).not.toHaveProperty('code');

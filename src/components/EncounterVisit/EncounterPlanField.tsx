@@ -6,7 +6,6 @@ import {
   type AssessmentOrder,
 } from '../Assessment';
 import { currentAssertion, type ConditionConcern } from '../ProblemList';
-import { useCodeLookupConfig } from '../CodeLookup/context';
 import {
   validAssessmentItem,
   validateEncounterConditions,
@@ -15,10 +14,7 @@ import {
 import type { EncounterPlanValue } from './types';
 import { useEncounterMessages } from './messages';
 import {
-  clinicalAssessmentClasses,
   clinicalAnswerResponse,
-  clinicalRequiresCoding,
-  codedOrderSearch,
   InvalidClinicalAnswer,
   reorderClinicalEntries,
   useClinicalFormState,
@@ -120,9 +116,7 @@ export function EncounterPlanField({
     [response?.answer]
   );
   const m = useEncounterMessages();
-  const requireCoding = clinicalRequiresCoding(field);
   const state = useClinicalFormState(form);
-  const codeLookup = useCodeLookupConfig();
   const readOnly =
     !(isPreview && isEnabled) ||
     Boolean(isReadOnly) ||
@@ -161,13 +155,6 @@ export function EncounterPlanField({
       )
     );
   };
-  const renderSearch = React.useMemo(
-    () =>
-      codeLookup || !requireCoding
-        ? codedOrderSearch(codeLookup, requireCoding, m)
-        : undefined,
-    [codeLookup, requireCoding, m]
-  );
 
   if (!value)
     return <InvalidClinicalAnswer label={label} answer={response?.answer} />;
@@ -178,31 +165,23 @@ export function EncounterPlanField({
         concerns={concerns}
         items={items}
         orders={value.orders}
-        title={null}
-        className={clinicalAssessmentClasses}
+        title={label}
         readOnly={readOnly}
-        rowActions={codeLookup || !requireCoding ? ['add-order'] : []}
+        rowActions={['add-order']}
         addModes={['order']}
         addFormLabel="Add plan order"
-        defaultAddMode="order"
-        renderOrderSearch={renderSearch}
-        onAddOrder={
-          codeLookup || !requireCoding
-            ? (item, order) => {
-                if (requireCoding && !order.code) return;
-                commit((next) => ({
-                  ...next,
-                  orders: [
-                    ...next.orders,
-                    {
-                      ...order,
-                      orderId: globalThis.crypto.randomUUID(),
-                      concernId: item?.concernId,
-                    },
-                  ],
-                }));
-              }
-            : undefined
+        onAddOrder={(item, order) =>
+          commit((next) => ({
+            ...next,
+            orders: [
+              ...next.orders,
+              {
+                ...order,
+                orderId: globalThis.crypto.randomUUID(),
+                concernId: item?.concernId,
+              },
+            ],
+          }))
         }
         onEditOrder={(order, changes) =>
           commit((next) => ({
@@ -243,11 +222,6 @@ export function EncounterPlanField({
           }))
         }
       />
-      {!readOnly && requireCoding && !codeLookup && (
-        <p className="text-muted-foreground text-sm">
-          {m('Coded order search is unavailable.')}
-        </p>
-      )}
     </section>
   );
 }

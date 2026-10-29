@@ -1,146 +1,10 @@
 import * as React from 'react';
 import type { FieldComponentProps } from '@esheet/core';
-import { Plus } from 'lucide-react';
-import type { AssessmentProps } from '../Assessment';
-import type { CodifyDomain } from '../CodeLookup/CodeLookup';
-import type { CodeLookupProviderConfig } from '../CodeLookup/context';
 import { normalizeConditionCodingSystem } from '../ConditionEditor';
 import { currentAssertion } from '../ProblemList';
 import { validateEncounterConditions } from './model';
 import { isEncounterDate } from './date';
 import { useEncounterMessages } from './messages';
-import { Input } from '../Input';
-import { Button } from '../Button';
-import { DateInput } from '../DateInput';
-import {
-  dateToDisplayFormat,
-  displayFormatToDateString,
-} from '../../utils/date';
-
-function FreeClinicalEntry({
-  placeholder,
-  translate,
-  onFreeText,
-}: {
-  placeholder: string;
-  translate: (message: string) => string;
-  onFreeText?: (text: string) => void;
-}) {
-  const [text, setText] = React.useState('');
-  return (
-    <div className="flex min-w-0 flex-wrap gap-2">
-      <Input
-        aria-label={translate('Clinical entry')}
-        placeholder={placeholder}
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-      />
-      <Button
-        type="button"
-        disabled={!text.trim()}
-        onClick={() => {
-          onFreeText?.(text.trim());
-          setText('');
-        }}
-      >
-        {translate('Add')}
-      </Button>
-    </div>
-  );
-}
-
-/** Coded capture shares the host's lookup without importing its worker. */
-export function codedOrderSearch(
-  config: CodeLookupProviderConfig | null,
-  requireCoding = true,
-  translate: (message: string) => string = (message) => message
-): Exclude<AssessmentProps['renderOrderSearch'], false | undefined> {
-  const CodedOrderSearch: Exclude<
-    AssessmentProps['renderOrderSearch'],
-    false | undefined
-  > = ({
-    domains,
-    preferDomains,
-    preferCodetypes,
-    billableOnly,
-    placeholder,
-    onPick,
-    onFreeText,
-  }) => {
-    if (!config)
-      return (
-        <FreeClinicalEntry
-          placeholder={placeholder}
-          translate={translate}
-          onFreeText={onFreeText}
-        />
-      );
-    const Lookup = config.component;
-    // Auto mode passes `domains: undefined` — search every domain so the
-    // unified add row can also return conditions and program codes.
-    const allowedDomains = domains as CodifyDomain[] | undefined;
-    return (
-      <Lookup
-        indexUrl={config.indexUrl}
-        locale={config.locale}
-        domains={allowedDomains}
-        preferDomains={preferDomains as CodifyDomain[] | undefined}
-        preferCodetypes={preferCodetypes}
-        billableOnly={billableOnly}
-        bare
-        clearOnSelect
-        placeholder={placeholder}
-        onFreeText={requireCoding ? undefined : onFreeText}
-        onSelect={(result) => {
-          if (
-            !result.fullid?.trim() ||
-            !result.codetype?.trim() ||
-            !result.fullcode?.trim() ||
-            !result.label?.trim() ||
-            (allowedDomains !== undefined &&
-              !allowedDomains.includes(result.domain as CodifyDomain))
-          )
-            return;
-          onPick({
-            fullid: result.fullid,
-            label: result.label,
-            codetype: result.codetype,
-            fullcode: result.fullcode,
-          });
-        }}
-      />
-    );
-  };
-  return CodedOrderSearch;
-}
-
-export const clinicalAssessmentClasses =
-  'rounded-none border-0 bg-transparent shadow-none [&_.border-dashed]:rounded-none [&_.border-dashed]:border-0 [&_.border-dashed]:bg-transparent [&_.border-dashed]:p-0 [&_.min-w-64]:min-w-0 [&_[data-slot=assessment-problem]]:rounded-none [&_[data-slot=assessment-problem]]:border-0 [&_[data-slot=assessment-problem]]:px-0 [&_[data-slot=assessment-problem]>ul]:ms-0 [&_[data-slot=assessment-problem]>ul]:border-0 [&_[data-slot=assessment-problem]>ul]:ps-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11 [&_select]:min-h-11 [&>[data-slot=card-content]]:p-0 [&>[data-slot=card-content]>section]:border-0 [&>[data-slot=card-content]>section]:bg-transparent [&>[data-slot=card-content]>section]:px-0';
-
-/** Muted entry card that progressive-disclosure clinical fields expand into. */
-export const clinicalEntryCardClasses =
-  'bg-muted/40 min-w-0 space-y-3 rounded-lg p-3';
-
-/** Ghost "+ Add …" affordance shown while a clinical entry card is collapsed. */
-export function ClinicalAddButton({
-  label,
-  onClick,
-}: {
-  label: string;
-  onClick: () => void;
-}): React.JSX.Element {
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      leftIcon={<Plus aria-hidden="true" />}
-      className="text-primary-800 hover:bg-primary-50 hover:text-primary-900 active:bg-primary-100 dark:text-primary-400 dark:hover:bg-primary-950 dark:hover:text-primary-200 min-h-11"
-      onClick={onClick}
-    >
-      {label}
-    </Button>
-  );
-}
 
 export function InvalidClinicalAnswer({
   label,
@@ -364,16 +228,6 @@ export function matchingConditionCode(
   );
 }
 
-/** The generated native definition carries the same default coding policy as validation. */
-export function clinicalRequiresCoding(
-  field: FieldComponentProps['field']
-): boolean {
-  return (
-    (field.definition as { _sourceData?: { encounterRequireCoding?: boolean } })
-      ._sourceData?.encounterRequireCoding ?? true
-  );
-}
-
 /** Replacing serialized clinical content must repair incompatible imported selection storage. */
 export function clinicalAnswerResponse(
   response: FieldComponentProps['response'],
@@ -394,46 +248,4 @@ export function useEncounterAssertionDate(field: FieldComponentProps['field']) {
     setDate(hostDate ?? '');
   }, [hostDate]);
   return { date, setDate, valid: isEncounterDate(date) };
-}
-
-export function EncounterAssertionDateInput({
-  date,
-  setDate,
-}: {
-  date: string;
-  setDate: (date: string) => void;
-}) {
-  const m = useEncounterMessages();
-  const id = React.useId();
-  const [display, setDisplay] = React.useState(() => dateToDisplayFormat(date));
-  React.useEffect(() => {
-    setDisplay((current) =>
-      displayFormatToDateString(current) === date
-        ? current
-        : dateToDisplayFormat(date)
-    );
-  }, [date]);
-  return (
-    <div className="flex min-w-0 flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium">
-        {m('Assertion date')}
-      </label>
-      <DateInput
-        id={id}
-        value={display}
-        onChange={(value) => {
-          setDisplay(value);
-          setDate(displayFormatToDateString(value));
-        }}
-        showCalendar
-        width="fixed"
-        className="min-h-11"
-      />
-      {!isEncounterDate(date) && (
-        <span className="text-muted-foreground text-sm">
-          {m('Enter the encounter date before adding or changing a diagnosis.')}
-        </span>
-      )}
-    </div>
-  );
 }

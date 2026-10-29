@@ -9,151 +9,10 @@ import { executeEncounterVisitToolCall, type EncounterVisitTools } from './mcp';
 import { MotionProvider } from '../../motion/MotionProvider';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
-import type { CodeLookupProps } from '../CodeLookup/CodeLookup';
-import type { CodifyResult } from '../CodeLookup/engine';
+import { CodeLookup } from '../CodeLookup';
 
 const PATIENT_CONTEXT =
   '45 yo male with pre-diabetes, back pain and hypertension';
-
-// Story-only selections reuse clinical component examples. The peanut substance
-// is also documented in SNOMED's Allergy Implementation Guide:
-// https://docs.snomed.org/implementation-guides/allergy-implementation-guide/4-information-model-and-terminology-binding/4.3-examples
-// Production hosts inject their actual terminology catalog.
-const SAMPLE_CATALOG: CodifyResult[] = [
-  {
-    fullid: 'FDB244899',
-    label: 'lisinopril 10 mg tablet',
-    codetype: 'FDB',
-    fullcode: '244899',
-    domain: 'med',
-    score: 1,
-    viaAlias: false,
-  },
-  {
-    fullid: 'ICD10|I10',
-    label: 'Essential hypertension',
-    codetype: 'ICD10',
-    fullcode: 'I10',
-    domain: 'condition',
-    score: 1,
-    viaAlias: false,
-  },
-  {
-    fullid: 'LOINC|4548-4',
-    label: 'Hemoglobin A1c',
-    codetype: 'LOINC',
-    fullcode: '4548-4',
-    domain: 'lab',
-    score: 1,
-    viaAlias: false,
-  },
-  {
-    fullid: 'HCPCS|92551',
-    label: 'Pure tone hearing test, air',
-    codetype: 'HCPCS',
-    fullcode: '92551',
-    domain: 'procedure',
-    score: 1,
-    viaAlias: false,
-  },
-  {
-    fullid: 'SNOMED US|762952008',
-    label: 'Peanut substance',
-    codetype: 'SNOMED US',
-    fullcode: '762952008',
-    domain: 'condition',
-    score: 1,
-    viaAlias: false,
-  },
-];
-
-/** Small deterministic Storybook catalog, never imported by the component. */
-function SampleCatalog({
-  domains,
-  searchDomains,
-  searchCodetypes,
-  placeholder,
-  initialQuery,
-  clearOnSelect,
-  onSelect,
-  onFreeText,
-  'aria-label': ariaLabel,
-}: CodeLookupProps): React.JSX.Element {
-  const [query, setQuery] = React.useState(initialQuery ?? '');
-  const [open, setOpen] = React.useState(false);
-  const allowedDomains = searchDomains ?? domains;
-  const matches = query.trim()
-    ? SAMPLE_CATALOG.filter(
-        (result) =>
-          (!allowedDomains ||
-            allowedDomains.some((domain) => domain === result.domain)) &&
-          (!searchCodetypes || searchCodetypes.includes(result.codetype)) &&
-          `${result.label} ${result.fullcode}`
-            .toLowerCase()
-            .includes(query.trim().toLowerCase())
-      )
-    : [];
-  const select = (result: CodifyResult) => {
-    onSelect?.(result);
-    setQuery(clearOnSelect === false ? result.label : '');
-    setOpen(false);
-  };
-  return (
-    <div className="relative min-w-0" data-slot="sample-clinical-catalog">
-      <input
-        type="search"
-        aria-label={
-          ariaLabel ?? placeholder ?? 'Search sample clinical catalog'
-        }
-        placeholder={placeholder}
-        value={query}
-        className="border-input bg-background min-h-11 w-full min-w-0 rounded border px-2 text-base"
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setOpen(true);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && matches[0]) {
-            event.preventDefault();
-            select(matches[0]);
-          }
-        }}
-      />
-      {open && query.trim() && (
-        <div className="bg-card border-border absolute start-0 end-0 top-full z-50 mt-1 space-y-1 rounded-md border p-1 shadow-lg">
-          {matches.map((result) => (
-            <Button
-              key={result.fullid}
-              type="button"
-              variant="secondary"
-              className="min-h-11 w-full justify-start text-start whitespace-normal"
-              aria-label={`Select ${result.label} (${result.codetype} ${result.fullcode})`}
-              onClick={() => select(result)}
-            >
-              {result.label} · {result.codetype} {result.fullcode}
-            </Button>
-          ))}
-          {!matches.length && (
-            <p className="text-muted-foreground p-1 text-xs" role="status">
-              No match in this small Storybook sample catalog.
-            </p>
-          )}
-          {onFreeText && (
-            <Button
-              type="button"
-              onClick={() => {
-                onFreeText(query.trim());
-                setOpen(false);
-              }}
-            >
-              Use uncoded free text
-            </Button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 const meta: Meta<typeof EncounterVisit> = {
   id: 'encounter-orders-encountervisit',
@@ -177,7 +36,7 @@ const meta: Meta<typeof EncounterVisit> = {
 
 A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medications, allergies, coded conditions, assessment and coded plan orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, a plan narrative and follow-up / appointment details are included in the default eleven-section template. Patient identity is not captured.
 
-Inline medication and allergy cards, ProblemList and Assessment supply the healthcare capture controls. New medications, allergens, conditions and plan orders require a selected terminology code. Common findings dock beside each narrative field as a section-specific macro panel that opens while the field has focus and closes when focus leaves; picking a macro inserts its line at the caret and codes the finding, and editing the line away removes its code. Explicit selections append to narrative text without replacing authored content or auto-recording normal findings. The examples use a small, **Storybook-only sample catalog** with representative code selections. Production applications supply their real CodeLookup component and catalog URL through \`codeLookup\` or an enclosing \`CodeLookupProvider\`. Non-drug allergens require SNOMED substance concepts in the host catalog; these are never inferred from names.
+Inline medication and allergy cards, ProblemList and Assessment supply the healthcare capture controls. New medications, allergens, conditions and plan orders require a selected terminology code. Common findings dock beside each narrative field as a section-specific macro panel that opens while the field has focus and closes when focus leaves; picking a macro inserts its line at the caret and codes the finding, and editing the line away removes its code. Explicit selections append to narrative text without replacing authored content or auto-recording normal findings. The examples use the same **demo \`/codify\` index** as the standalone clinical-list stories. Production applications supply their real CodeLookup component and catalog URL through \`codeLookup\` or an enclosing \`CodeLookupProvider\`. Non-drug allergens require SNOMED substance concepts in the host catalog; these are never inferred from names.
 
 The visit mode dropdown at the start of the always-visible narrative toolbar switches one draft between three projections: **eSheet** offers memory aids and coded capture, **RichEdit** uses Kerebron for headings and free Markdown prose with protected data links, and **View** renders the flattened MDY through mieweb/templit for a final report check. View omits uncaptured field prompts and empty section headings, while retaining authored prose and entered values such as zero or a negative choice. Select a linked value in RichEdit to open its eSheet section with related inputs. Changes update every projection of that field. Free prose stays in the document body; it is not automatically promoted to a coded observation.
 
@@ -284,8 +143,8 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
     patientContext: PATIENT_CONTEXT,
     initialResponses: EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
     codeLookup: {
-      component: SampleCatalog,
-      indexUrl: '/storybook-sample-catalog',
+      component: CodeLookup,
+      indexUrl: '/codify',
     },
     onSubmit: async () => {},
   },
