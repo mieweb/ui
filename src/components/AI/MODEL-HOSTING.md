@@ -18,12 +18,12 @@ state and the plan so the cutover was a deliberate, testable step — not a scra
 
 Before the cutover, committed binaries, ~57 MB total:
 
-| Path | Size | What |
-|---|---|---|
-| `.storybook/public/sv-runtime/sherpa-onnx-wasm-main-speaker-diarization.data` | ~40 MB | TitaNet speaker model + sherpa runtime data |
-| `.storybook/public/sv-runtime/sherpa-onnx-wasm-main-speaker-diarization.wasm` | ~11 MB | sherpa-onnx WASM |
-| `.storybook/public/sv-runtime/*.js`, `sv-cohort.json` | small | loader + AS-norm cohort |
-| `.storybook/public/wakeword/*.onnx` | ~6 MB | wake (`hey-ozwell`, `ozwell-i'm-done`), `mel-spectrogram`, `speech-embedding`, `silero-vad` |
+| Path                                                                          | Size   | What                                                                                        |
+| ----------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------- |
+| `.storybook/public/sv-runtime/sherpa-onnx-wasm-main-speaker-diarization.data` | ~40 MB | TitaNet speaker model + sherpa runtime data                                                 |
+| `.storybook/public/sv-runtime/sherpa-onnx-wasm-main-speaker-diarization.wasm` | ~11 MB | sherpa-onnx WASM                                                                            |
+| `.storybook/public/sv-runtime/*.js`, `sv-cohort.json`                         | small  | loader + AS-norm cohort                                                                     |
+| `.storybook/public/wakeword/*.onnx`                                           | ~6 MB  | wake (`hey-ozwell`, `ozwell-i'm-done`), `mel-spectrogram`, `speech-embedding`, `silero-vad` |
 
 Whisper is **already** loaded from a CDN (Transformers.js → HuggingFace), so it
 carries no weight in the repo. The plan below brings the rest in line with that.
@@ -56,12 +56,21 @@ window.__ozwellAssets = 'https://huggingface.co/<user>/<repo>/resolve/main';
 // → wake models from <base>/wakeword/*, sherpa runtime + cohort from <base>/sv-runtime/*
 
 // or per-area, for full control:
-window.__ozwellAssets = { wakeword: 'https://…/wakeword', svRuntime: 'https://…/sv-runtime' };
+window.__ozwellAssets = {
+  wakeword: 'https://…/wakeword',
+  svRuntime: 'https://…/sv-runtime',
+  nemotron: 'https://…/nemotron', // a copy of the pinned revision's files
+  ort: '/ort', // onnxruntime-web 1.30's dist/ files, instead of jsDelivr
+};
 ```
 
 - `WakeWord/useWakeWord.ts` — `resolveAssetBase()` reads the `assetBase` **prop** first, then the
   global, then defaults to `/wakeword`. (Prop lets a host override per-mount.)
 - `SpeakerVerify/lib/speaker-verify.js` — `SV_DIR` reads the same global, defaults to `/sv-runtime`.
+- `modelCache.ts` — `configuredAssetUrl()` reads `nemotron` and `ort` from the object form only; each must
+  be an http(s) URL or a same-origin path. Self-hosting `ort` needs `ort.min.js` (wake word),
+  `ort.webgpu.min.mjs` (Nemotron worker) and the `ort-wasm-simd-threaded.{mjs,wasm}` and
+  `ort-wasm-simd-threaded.asyncify.{mjs,wasm}` files they load.
 
 Set the global **before** the components mount (e.g. in `.storybook/preview` or the host's entry).
 
@@ -91,6 +100,12 @@ Models are cached across app opens so a returning user loads from disk, not the 
   cache (`env.useBrowserCache = true`). `whisperTranscribe.ts` points `env.remoteHost` at the R2 bucket
   (`pub-…r2.dev`, model id `whisper-turbo`, `remotePathTemplate '{model}/'`). Confirmed: loads once cold
   (~85 s), then **~10 s from cache** on later opens. The SW deliberately does NOT touch the Whisper files.
+- **Nemotron 3 Diarization** (int8 ~121 MB or fp32 ~398 MB, experimental) — loaded by the Nemotron worker from
+  `onnx-community/Nemotron-3-Diarization-ONNX` at the pinned `MODEL_REVISION`, and kept in the Cache API
+  (`ozwell-nemotron-<revision>`; older revisions are deleted). `warmNemotron()` downloads and loads the
+  device's default model (`defaultNemotronModel()`) in the background. To serve a copy of that revision's files (same layout), set
+  `window.__ozwellAssets = { nemotron: 'https://…' }`; only the object form moves Nemotron, so an existing
+  string `__ozwellAssets` for the wake and speaker models is unaffected.
 
 **Why R2 and not HuggingFace (the day-long diagnosis):** turbo's weights live on HuggingFace's newer
 **Xet** storage, whose download responses carry **NO `Content-Length`**. transformers.js can't
@@ -102,10 +117,11 @@ exactly like base.en (classic LFS) always did. Audio still never leaves the brow
 model file. (To repoint to a mieweb-owned bucket for the PR: change `R2_HOST` + the bucket path.)
 
 **Honest caveats (for the production architecture conversation with Doug):**
+
 - Caching is **load-dependent**, not perfectly deterministic. On a clean single session it's ~10 s; under
   heavy local contention (several tabs loading 1.3 GB + GPU-compiling at once) a load can stretch to ~60 s.
   Not eviction — just the machine busy. Smooths out in normal single-user use.
-- Browser cache for a **website** is best-effort: under real disk pressure the browser *can* evict the
+- Browser cache for a **website** is best-effort: under real disk pressure the browser _can_ evict the
   cached model, forcing a one-time re-download. `navigator.storage.persist()` is requested but not
   guaranteed for a site (only PWA-install / high engagement reliably persist).
 - A "corrupted" browser profile can also block caching — seen during this session on the dev profile after

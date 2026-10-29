@@ -17,6 +17,7 @@ import { TranscriptPlayer } from './TranscriptPlayer/TranscriptPlayer';
 import {
   MIN_ENROLL_SECONDS,
   useNemotronDiarization,
+  type LiveDiarization,
 } from './useNemotronDiarization';
 
 export interface SpeakerScribeProps {
@@ -34,13 +35,15 @@ function ClipPicker({
   recording,
   onRecordingChange,
   onPick,
+  onRecordingStart,
 }: {
   label: string;
   disabled: boolean;
   /** This picker is recording, so its Stop must stay usable. */
   recording: boolean;
   onRecordingChange: (recording: boolean) => void;
-  onPick: (blob: Blob) => void;
+  onPick: (blob: Blob, recorded: boolean) => void;
+  onRecordingStart?: (stream: MediaStream) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -48,11 +51,14 @@ function ClipPicker({
         size="sm"
         disabled={disabled && !recording}
         aria-label={`Record ${label}`}
-        onRecordingStart={() => onRecordingChange(true)}
+        onRecordingStart={(stream) => {
+          onRecordingChange(true);
+          onRecordingStart?.(stream);
+        }}
         onRecordingError={() => onRecordingChange(false)}
         onRecordingComplete={(blob) => {
           onRecordingChange(false);
-          onPick(blob);
+          onPick(blob, true);
         }}
       />
       <label className="text-muted-foreground flex items-center gap-2">
@@ -65,7 +71,7 @@ function ClipPicker({
           onChange={(e) => {
             const file = e.target.files?.[0];
             e.target.value = '';
-            if (file) onPick(file);
+            if (file) onPick(file, false);
           }}
         />
       </label>
@@ -95,16 +101,33 @@ function ScribeSession({
   const [recording, setRecording] = React.useState<'voice' | 'clip' | null>(
     null
   );
-  const busy = nemo.busy || recording !== null;
+  // The device's model is picked a moment after mount.
+  const busy = nemo.busy || recording !== null || !nemo.model;
   const recordingProps = (picker: 'voice' | 'clip') => ({
     recording: recording === picker,
     onRecordingChange: (on: boolean) => setRecording(on ? picker : null),
   });
 
-  const analyze = async (blob: Blob) => {
+  // Speakers are labelled while the clip records, so the result is ready soon after it stops.
+  const liveRef = React.useRef<LiveDiarization | null>(null);
+  const takeLive = () => {
+    const live = liveRef.current;
+    liveRef.current = null;
+    return live;
+  };
+  React.useEffect(() => () => takeLive()?.cancel(), []);
+  const listen = (stream: MediaStream) => {
+    takeLive()?.cancel();
+    liveRef.current = nemo.listen(stream);
+  };
+
+  const analyze = async (blob: Blob, recorded = false) => {
+    // Live labels only describe a fresh recording; uploads and re-runs analyze the file.
+    const live = takeLive();
+    if (!recorded) live?.cancel();
     setClip(blob);
     try {
-      await nemo.diarize(blob);
+      await nemo.diarize(blob, recorded ? (live ?? undefined) : undefined);
       setResultClip(blob);
     } catch {
       /* surfaced through `nemo.error` */
@@ -228,7 +251,8 @@ function ScribeSession({
             label="a clip to analyze"
             disabled={busy}
             {...recordingProps('clip')}
-            onPick={(blob) => void analyze(blob)}
+            onRecordingStart={listen}
+            onPick={(blob, recorded) => void analyze(blob, recorded)}
           />
           {clip && (
             <Button

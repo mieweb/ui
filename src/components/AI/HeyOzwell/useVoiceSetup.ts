@@ -15,6 +15,8 @@ import { useWakeWord } from './WakeWord/useWakeWord';
 import { warmWhisper } from '../whisperTranscribe';
 import { loadWhatPrints, saveWhatPrints } from '../voiceprintStore';
 import { openRollingRecorder, chime, type RollingRecorder } from './audio';
+import { warmNemotron } from './nemotron/runNemotron';
+import { useNemotronWakeVoices, type WakeClip } from './useNemotronWakeVoices';
 
 export type VoiceSetupPhase =
   | 'intro'
@@ -85,6 +87,9 @@ export function useVoiceSetup(
         : 'you')
   );
   const sv = useSpeakerVerify({ voiceprintNamespace });
+  // The doctor check uses Nemotron voiceprints; TitaNet ones still name speakers in useDiarization.
+  const wakeVoices = useNemotronWakeVoices({ voiceprintNamespace });
+  const [saveError, setSaveError] = React.useState<string | null>(null);
   const expectRef = React.useRef<string | null>(null);
   const resolveRef = React.useRef<((n: string) => void) | null>(null);
   const whatRef = React.useRef<Record<string, Float32Array[]>>({});
@@ -99,7 +104,7 @@ export function useVoiceSetup(
   });
   const wakeRef = React.useRef(wake);
   wakeRef.current = wake;
-  const bothReady = sv.ready && wake.ready;
+  const bothReady = sv.ready && wake.ready && wakeVoices.ready;
 
   const [phase, setPhase] = React.useState<VoiceSetupPhase>('intro');
   const [phrase, setPhrase] = React.useState('hey ozwell');
@@ -111,6 +116,7 @@ export function useVoiceSetup(
   // persisted WHAT templates so "Add another spot" appends across reloads.
   React.useEffect(() => {
     warmWhisper();
+    void warmNemotron().catch(() => {});
     let cancelled = false;
     whatRef.current = {};
     void loadWhatPrints(voiceprintNamespace).then((w) => {
@@ -213,8 +219,10 @@ export function useVoiceSetup(
     for (let i = 0; i < 20 && !recRef.current; i++) await delay(50);
     if (!recRef.current) return;
     abortRef.current = false;
+    setSaveError(null);
     const append = adding;
     let overall = 0;
+    const allClips: WakeClip[] = [];
     for (const ph of PHRASES) {
       const clips: { samples: Float32Array; sampleRate: number }[] = [];
       const embs: Float32Array[] = [];
@@ -249,15 +257,37 @@ export function useVoiceSetup(
       // append keeps prior conditions: WHO adds a new centroid, WHAT concatenates templates (capped).
       // voiceId/label group this enrollment under one voice (the doctor, or an added assistant).
       sv.enroll(ph.key, clips, { append, voiceId: enrollVoiceId, label });
+      allClips.push(...clips);
       const prior = append ? whatRef.current[ph.key] || [] : [];
       const merged = [...prior, ...embs].slice(-VP_CAP);
       whatRef.current[ph.key] = merged;
       wakeRef.current.setVoiceprint(ph.key, merged);
     }
     void saveWhatPrints(whatRef.current, voiceprintNamespace);
+    // A new pass replaces this voice's Nemotron print (one lane per person).
+    try {
+      await wakeVoices.enroll(enrollVoiceId, label ?? enrollVoiceId, allClips);
+    } catch (e) {
+      console.error(
+        '[voice-setup] could not save the doctor-check voiceprint',
+        e
+      );
+      setSaveError(e instanceof Error ? e.message : String(e));
+      setPhase('intro');
+      return;
+    }
     setAdding(false);
     setPhase('done');
-  }, [bothReady, phase, adding, sv, enrollVoiceId, label, voiceprintNamespace]);
+  }, [
+    bothReady,
+    phase,
+    adding,
+    sv,
+    wakeVoices,
+    enrollVoiceId,
+    label,
+    voiceprintNamespace,
+  ]);
 
   const addAnotherSpot = React.useCallback(() => {
     setAdding(true);
@@ -274,7 +304,7 @@ export function useVoiceSetup(
 
   return {
     ready: bothReady,
-    error: sv.error || wake.error,
+    error: sv.error || wake.error || saveError,
     phase,
     phrase,
     step,

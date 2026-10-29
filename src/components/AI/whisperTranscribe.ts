@@ -453,7 +453,7 @@ function downmixToMono(audio: AudioBuffer): Float32Array {
 
 // Linear-resample mono audio to 16 kHz (what Whisper wants). Shared by the blob + raw-samples paths. Always
 // returns a fresh, standalone Float32Array (safe to transfer to the worker).
-function resampleTo16kMono(
+export function resampleTo16kMono(
   src: Float32Array,
   sampleRate: number
 ): Float32Array {

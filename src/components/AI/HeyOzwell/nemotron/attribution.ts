@@ -30,8 +30,7 @@ function laneActivity({
     let start = -1;
     for (let frame = 0; frame <= numFrames; frame++) {
       const active =
-        frame < numFrames &&
-        probabilities[frame * numSpeakers + lane] > ACTIVE;
+        frame < numFrames && probabilities[frame * numSpeakers + lane] > ACTIVE;
       if (active && start < 0) start = frame;
       if (active || start < 0) continue;
       activity.push({
@@ -64,6 +63,20 @@ export function laneNames(
   const names = [...enrolled.slice(0, numSpeakers)];
   unnamed.forEach(({ lane }, i) => (names[lane] = `Speaker ${i + 1}`));
   return names;
+}
+
+/** The lane that talks most (summed active probability), or null when nobody is heard. */
+export function dominantLane({
+  probabilities,
+  numSpeakers,
+}: LaneFrames): number | null {
+  const totals = new Float32Array(numSpeakers);
+  for (let i = 0; i < probabilities.length; i++)
+    if (probabilities[i] > ACTIVE) totals[i % numSpeakers] += probabilities[i];
+  let best = 0;
+  for (let lane = 1; lane < numSpeakers; lane++)
+    if (totals[lane] > totals[best]) best = lane;
+  return totals[best] > 0 ? best : null;
 }
 
 /** Mean probability of each lane over the frames a word spans. */

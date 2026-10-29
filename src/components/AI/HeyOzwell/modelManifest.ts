@@ -11,6 +11,8 @@
  * Sizes are approximate (remote weights, not bundled). Versions are pinned identifiers, not semver.
  */
 
+import { MODEL_REVISION } from './nemotron/modelConfig';
+
 /** Which live load-store (if any) reflects this model's readiness in the UI. */
 export type ModelStatusKey = 'wake' | 'transcription' | 'static';
 
@@ -49,12 +51,23 @@ export const MODEL_MANIFEST: ModelInfo[] = [
   {
     id: 'speaker-titanet',
     role: 'Speaker verify',
-    label: 'TitaNet speaker embedding',
+    label: 'TitaNet speaker embedding (conversation labels)',
     variant: 'nemo_en_titanet_small · sherpa-onnx (WASM)',
     version: 'titanet_small',
     approxSize: '~51 MB',
     source: 'HF: jlocala/ozwell-voice-assets/sv-runtime · Cache API',
     runtime: 'sherpa-onnx WASM',
+    statusKey: 'static',
+  },
+  {
+    id: 'speaker-nemotron',
+    role: 'Speaker verify',
+    label: 'Nemotron 3 Diarization (doctor check)',
+    variant: 'fp32 · WebGPU on desktops, int8 · WASM elsewhere',
+    version: MODEL_REVISION.slice(0, 7),
+    approxSize: '~121–398 MB',
+    source: 'HF: onnx-community/Nemotron-3-Diarization-ONNX · Cache API',
+    runtime: 'onnxruntime-web',
     statusKey: 'static',
   },
   {
