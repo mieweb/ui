@@ -16,7 +16,7 @@ const meta: Meta<typeof SpeakerScribe> = {
       description: {
         component: `### What it's for
 
-**Overlap-aware, on-device speaker labels for a recorded conversation.** Enroll the people you know, record or upload a clip, and \`SpeakerScribe\` shows the result in \`TranscriptPlayer\`: who spoke when on one lane per speaker, with **two people talking at once** and **short interjections** kept instead of merged into a neighbour. **Edit speakers** renames, merges (give two speakers the same name) or moves lines. It is the experimental successor to \`VisitScribe\`, which stays unchanged.
+**Overlap-aware, on-device speaker labels for a recorded conversation.** Enroll the people you know, record or upload a clip, and \`SpeakerScribe\` shows the result in \`TranscriptPlayer\`: who spoke when on one lane per speaker, with **two people talking at once** and **short interjections** kept instead of merged into a neighbour. **Edit speakers** renames, merges (give two speakers the same name) or moves lines. It is the experimental successor to \`VisitScribe\`, which stays unchanged; see the **Before And After** story for the diagram.
 
 How it differs from \`VisitScribe\`:
 
@@ -80,4 +80,15 @@ type Story = StoryObj<typeof SpeakerScribe>;
 /** Enroll voices, analyze a clip, and correct the speakers. */
 export const Scribe: Story = {
   render: () => <SpeakerScribe />,
+};
+
+/** How a recording becomes speaker labels with Visit Scribe and with Speaker Scribe. */
+export const BeforeAndAfter: Story = {
+  render: () => (
+    <iframe
+      src="./diagrams/nemotron-before-after.html"
+      title="Speaker diarization before and after Nemotron"
+      className="h-[1400px] w-full border-0"
+    />
+  ),
 };
