@@ -191,6 +191,7 @@ The visit reads as a continuous report with small outer insets and no nested sec
 ### Don't use it when
 
 - You only need a standalone list or panel — [ProblemList](?path=/docs/clinical-lists-problemlist--docs), [MedicationReconciliation](?path=/docs/clinical-lists-medicationlist--docs), [AllergyList](?path=/docs/clinical-lists-allergylist--docs) or [Assessment](?path=/docs/encounter-orders-assessment--docs) used directly.
+- The guided document is not a clinical visit — letters, support tickets and other templated prose use [RichTextEsheet](?path=/docs/editors-richtextesheet--docs), which shares the narrative foundations without coded capture.
 - You need a scheduling backend, clinical decision support, or a signed medical record workflow. These remain host responsibilities.
 
 ### Example
@@ -242,6 +243,11 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
         '@esheet/builder',
       ],
       relationships: [
+        {
+          type: 'alternative to',
+          target: 'editors-richtextesheet',
+          why: 'RichTextEsheet is the generic esheet-guided document (letters, tickets) without coded clinical capture; EncounterVisit is its clinical configuration.',
+        },
         {
           type: 'composes with',
           target: 'composite-forms-esheet-renderer',

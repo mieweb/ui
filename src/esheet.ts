@@ -15,6 +15,9 @@ export { type FormDefinition } from '@esheet/core';
 // Visit documents and their in-process MCP bridge.
 export * from './components/EncounterVisit';
 
+// Guided rich text documents (letters, tickets) backed by an eSheet.
+export * from './components/RichTextEsheet';
+
 // Builder
 export { EsheetBuilder, type EsheetBuilderProps } from '@esheet/builder';
 
@@ -36,6 +39,28 @@ export {
   registerAllergyListFieldType,
   type AllergyListFieldValue,
 } from './esheet-fields/AllergyListField';
+export {
+  EsheetNarrativeField,
+  narrativeText,
+  registerEsheetNarrativeFieldType,
+  sanitizeNarrativeHtml,
+  type EsheetNarrativeFieldProps,
+} from './esheet-fields/EsheetNarrativeField';
+export {
+  EsheetSectionContext,
+  EsheetSectionField,
+  registerEsheetSectionFieldType,
+} from './esheet-fields/EsheetSectionField';
+export {
+  applyNarrativeFinding,
+  getNarrativeFindings,
+  hasNarrativeFindingText,
+  NARRATIVE_ATTRIBUTES,
+  validNarrativeFindings,
+  type NarrativeAttributeNames,
+  type NarrativeCode,
+  type NarrativeFinding,
+} from './esheet-fields/narrativeFindings';
 
 // Convenience: register every @mieweb/ui custom field type in one call
 export {

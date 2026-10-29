@@ -102,7 +102,10 @@ jobs:
   visual-tests:
     name: Visual Regression Tests
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04 (2026-10), which Playwright 1.58
+    # cannot install browsers on. Unpin after upgrading @playwright/test to
+    # >=1.61 and regenerating the visual baselines its new Chromium shifts.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Checkout code
@@ -206,7 +209,9 @@ jobs:
   accessibility-tests:
     name: Accessibility Tests
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    # Pinned: see visual-tests — Playwright 1.58 cannot install browsers on
+    # the Ubuntu 26.04 image ubuntu-latest now resolves to.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

@@ -19,6 +19,8 @@ import {
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Separator } from '../Separator';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import {
   MacroLibrary,
   type Macro,
@@ -410,6 +412,12 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     // macro panel has focus so insertion lands where the clinician left off.
     const savedRangeRef = React.useRef<Range | null>(null);
     const macroPanelId = React.useId();
+    // The macro panel is an absolute side panel from `md:` up but sits
+    // in-flow below the editor on small screens, where it must animate its
+    // height so the surrounding layout follows instead of holding full size
+    // until the exit finishes and then snapping shut.
+    const macroSidePanel = useMediaQuery('(min-width: 768px)');
+    const prefersReducedMotion = usePrefersReducedMotion();
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
     const hasMacros = Boolean(macros);
@@ -1715,7 +1723,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               {macrosOpen && (
                 <Animated
                   key="macro-panel"
-                  preset="menu"
+                  // In-flow on mobile: `collapse` animates real height so the
+                  // field shrinks with the panel. `collapse` is a plain value
+                  // animation that reduced-motion config does not drop, so
+                  // honor the preference here (the side panel's `menu` nudge
+                  // is covered by the provider).
+                  preset={macroSidePanel ? 'menu' : 'collapse'}
+                  enabled={macroSidePanel || !prefersReducedMotion}
                   mode="presence"
                   // The side the panel occupies, resolved to a physical edge
                   // so the closed nudge retreats toward the editor.
@@ -1725,7 +1739,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
                       : 'right'
                   }
                   fallbackClassName="animate-fade-in"
-                  className="border-border flex max-h-72 flex-col border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:border-s md:border-t-0"
+                  className="border-border flex max-h-72 flex-col overflow-hidden border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:overflow-visible md:border-s md:border-t-0"
                 >
                   <MacroLibrary
                     id={macroPanelId}

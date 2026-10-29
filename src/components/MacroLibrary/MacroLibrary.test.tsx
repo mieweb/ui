@@ -110,6 +110,29 @@ describe('MacroLibrary', () => {
     );
   });
 
+  it('keeps the editor focused on pointer picks (mousedown default cancelled)', () => {
+    // A focus-docked panel must survive multiple picks: if the button took
+    // focus the host editor would blur, closing the panel and (on touch)
+    // dismissing the keyboard.
+    renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={() => {}} />);
+    const row = document.querySelector<HTMLButtonElement>('[data-macro-row]');
+    expect(fireEvent.mouseDown(row!)).toBe(false);
+  });
+
+  it('lets a group heading take focus when roving focus is inside its group', () => {
+    // Collapsing unmounts the focused row; cancelling mousedown here would
+    // strand focus on the body and break keyboard navigation. With focus
+    // elsewhere (e.g. the editor) the heading must not steal it.
+    renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={() => {}} />);
+    const heading = screen.getByRole('button', { name: 'Default library' });
+    expect(fireEvent.mouseDown(heading)).toBe(false);
+    const row = heading
+      .closest('[data-slot="macro-library-group"]')!
+      .querySelector<HTMLButtonElement>('[data-macro-row]');
+    row!.focus();
+    expect(fireEvent.mouseDown(heading)).toBe(true);
+  });
+
   describe('search', () => {
     it('filters by label', () => {
       renderWithTheme(<MacroLibrary groups={GROUPS} onSelect={() => {}} />);
