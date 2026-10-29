@@ -139,6 +139,17 @@ export class StreamingDiarizer {
     return this.config.model.head_config.num_speakers;
   }
 
+  /** A new, empty stream on the same session. Streams share the session, so run them one at a time. */
+  fork(streamingMode: StreamingMode): StreamingDiarizer {
+    return new StreamingDiarizer(
+      this.ort,
+      this.session,
+      this.config,
+      streamingMode,
+      this.featureConfig
+    );
+  }
+
   get frameDurationSeconds(): number {
     return this.featureConfig.hopLength / this.featureConfig.samplingRate;
   }
