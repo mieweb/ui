@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+import { ONNX_RUNTIME_CDN as ORT_BASE } from '../../modelCache';
 import type { Ort } from './diarizer';
 import { StreamingDiarizer, loadDiarizerSource } from './diarizer';
 import {
@@ -10,8 +11,6 @@ import {
 } from './modelConfig';
 import { wrapMatrix } from './tensor';
 
-const ORT_VERSION = '1.30.0';
-const ORT_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 /** Model files never change within a revision, so they are kept across visits under this cache. */
 const CACHE_PREFIX = 'ozwell-nemotron-';
 const CACHE_NAME = `${CACHE_PREFIX}${MODEL_REVISION}`;

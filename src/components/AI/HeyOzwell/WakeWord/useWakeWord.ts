@@ -12,7 +12,11 @@
  * Needs `onnxruntime-web` (pnpm add) and the VAD model at /wakeword/silero-vad.onnx.
  */
 import * as React from 'react';
-import { readAssetGlobal, registerModelServiceWorker } from '../../modelCache';
+import {
+  ONNX_RUNTIME_CDN,
+  readAssetGlobal,
+  registerModelServiceWorker,
+} from '../../modelCache';
 import { getModelBytes } from './lib/opfs.js';
 
 export interface UseWakeWordOpts {
@@ -158,11 +162,9 @@ export function warmWakeModels(assetBase?: string): Promise<void> {
   return warmPromise;
 }
 
-// Load the SAME onnxruntime-web build the working demo uses (1.19.0), as a global `ort`.
-// The detector's onnx.js prefers a global `ort` over the bundled package — matching the demo's
-// pinned version fixes the slow/choppy inference and behavior diffs the newer npm version caused.
-const ORT_URL =
-  'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.0/dist/ort.min.js';
+// Load onnxruntime-web as a global `ort`, which the detector's onnx.js prefers over the bundled package.
+// Same version as Nemotron, so the two share one cached runtime.
+const ORT_URL = `${ONNX_RUNTIME_CDN}ort.min.js`;
 let ortPromise: Promise<void> | null = null;
 function ensureOrt(): Promise<void> {
   if (typeof (window as unknown as { ort?: unknown }).ort !== 'undefined')
@@ -236,7 +238,7 @@ export function useWakeWord(
         // streams + echo-cancellation/AGC conflict). The detector's getUserMedia also triggers the
         // permission prompt on first run, so this isn't needed.
 
-        // load the demo's exact onnxruntime (1.19.0) as a global BEFORE the detector imports onnx.js
+        // load onnxruntime as a global BEFORE the detector imports onnx.js
         await ensureOrt();
         if (cancelled) return;
 
