@@ -1,3 +1,5 @@
+import { resampleTo16kMono } from '../../whisperTranscribe';
+import { openRollingRecorder } from '../audio';
 import type {
   NemotronModel,
   NemotronRequest,
@@ -129,4 +131,66 @@ export async function enrollNemotron(
   onStage?: (stage: string) => void
 ): Promise<Float32Array | null> {
   return (await runNemotron(samples, options, onStage)).embeds;
+}
+
+/** How often recorded audio is handed to the worker while listening. */
+const LIVE_PUSH_MS = 500;
+
+export interface NemotronListener {
+  /** Stops listening and resolves with every frame heard. */
+  stop: () => Promise<NemotronResult>;
+  /** Stops listening and discards the result. */
+  cancel: () => void;
+}
+
+/**
+ * Diarizes a microphone stream while it records, so the result is ready soon after it stops. Reads a
+ * second copy of `stream` (no extra `getUserMedia`) and stops reading once its tracks end.
+ */
+export function listenNemotron(
+  stream: MediaStream,
+  options: NemotronStreamOptions,
+  onStage?: (stage: string) => void
+): NemotronListener {
+  const nemotron = openNemotronStream(options, onStage);
+  const recorder = openRollingRecorder(stream, Infinity);
+  let cursor = 0;
+  let pushed: Promise<void> = Promise.resolve();
+  let open = true;
+
+  const close = () => {
+    if (!open) return;
+    open = false;
+    window.clearInterval(timer);
+    recorder.close();
+  };
+  const drain = () => {
+    if (!open) return;
+    const fresh = recorder.snapshotFrom(cursor);
+    cursor += fresh.length;
+    recorder.discardBefore(cursor);
+    if (fresh.length > 0) {
+      const samples = resampleTo16kMono(fresh, recorder.sampleRate);
+      pushed = pushed.then(() => nemotron.push(samples));
+      // Surfaced by `stop`; this only keeps an early failure from being reported as unhandled.
+      pushed.catch(() => {});
+    }
+    if (stream.getAudioTracks().every((track) => track.readyState === 'ended'))
+      close();
+  };
+  const timer = window.setInterval(drain, LIVE_PUSH_MS);
+
+  return {
+    stop: async () => {
+      drain();
+      close();
+      await pushed;
+      return nemotron.finish();
+    },
+    cancel: () => {
+      close();
+      // Ends the worker's stream so it does not linger.
+      nemotron.finish().catch(() => {});
+    },
+  };
 }
