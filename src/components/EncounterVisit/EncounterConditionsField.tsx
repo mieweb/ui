@@ -17,6 +17,7 @@ import type { EncounterConditionsValue } from './types';
 import {
   InvalidClinicalAnswer,
   clinicalAnswerResponse,
+  matchingConditionCode,
   reorderClinicalEntries,
   repairEncounterConcernReferences,
   useClinicalFormState,
@@ -87,11 +88,16 @@ export function EncounterConditionsField({
       !currentValue.current
     )
       return;
+    // Advance the ref so a second commit in the same event (e.g. the editor
+    // adding an observation and saving an assertion on one Save) builds on
+    // this update instead of the stale render value.
+    const next = update(currentValue.current);
+    currentValue.current = next;
     onResponse(
       clinicalAnswerResponse(
         form.getState().responses[field.definition.id] ??
           currentResponse.current,
-        JSON.stringify(update(currentValue.current))
+        JSON.stringify(next)
       )
     );
   };
@@ -122,17 +128,28 @@ export function EncounterConditionsField({
         };
       return {
         ...next,
-        concerns: next.concerns.map((concern) =>
-          concern.concernId === concernId
-            ? {
-                ...concern,
-                assertions: [
-                  ...concern.assertions,
-                  { ...assertion, supersedes: currentAssertion(concern)?.id },
-                ],
-              }
-            : concern
-        ),
+        concerns: next.concerns.map((concern) => {
+          if (concern.concernId !== concernId) return concern;
+          const prior = currentAssertion(concern);
+          // Revising declares the prior assertion was never true — mark it
+          // refuted so the timeline strikes it through. Refinement and
+          // progression leave the prior status unchanged.
+          const assertions =
+            draft.changeType === 'revision' && prior
+              ? concern.assertions.map((candidate) =>
+                  candidate.id === prior.id
+                    ? { ...candidate, verificationStatus: 'refuted' as const }
+                    : candidate
+                )
+              : concern.assertions;
+          return {
+            ...concern,
+            assertions: [
+              ...assertions,
+              { ...assertion, supersedes: prior?.id },
+            ],
+          };
+        }),
       };
     });
   };
@@ -157,6 +174,15 @@ export function EncounterConditionsField({
         placeholder={m('Search conditions to add')}
         onSelect={(result) => {
           const coded = result.codetype.trim() && result.fullcode.trim();
+          // Picking a code already on the list must not mint a second durable
+          // concern for the same diagnosis (ICD10 / ICD-10-CM aliases match).
+          if (
+            coded &&
+            (currentValue.current ?? value).concerns.some((concern) =>
+              matchingConditionCode(concern, result)
+            )
+          )
+            return;
           saveAssertion(undefined, {
             text: result.label,
             verificationStatus: 'unconfirmed',

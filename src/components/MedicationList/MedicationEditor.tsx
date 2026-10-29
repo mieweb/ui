@@ -1,6 +1,10 @@
 'use client';
 
 import { useMessages } from '../../utils/messages';
+import {
+  dateToDisplayFormat,
+  displayFormatToDateString,
+} from '../../utils/date';
 
 /**
  * MedicationEditor — prescription editor modal for a `Medication`.
@@ -285,6 +289,19 @@ function newId(): string {
   return `med-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+// Medication dates persist as ISO `yyyy-mm-dd`; the editor's date inputs edit
+// MM/DD/YYYY. Convert at the editor boundary, passing through unrecognized
+// values unchanged.
+function isoDateToDisplay(value?: string): string | undefined {
+  return value && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? dateToDisplayFormat(value)
+    : value;
+}
+
+function displayDateToIso(value?: string): string | undefined {
+  return value ? displayFormatToDateString(value) : value;
+}
+
 // =============================================================================
 // MedicationEditor
 // =============================================================================
@@ -305,13 +322,18 @@ export function MedicationEditor({
       ? undefined
       : (codeLookup ?? ambientCodeLookup ?? undefined);
 
-  const [draft, setDraft] = React.useState<Medication>(
-    () =>
-      medication ?? {
-        id: newId(),
-        name: '',
-        status: 'unreconciled',
-      }
+  const [draft, setDraft] = React.useState<Medication>(() =>
+    medication
+      ? {
+          ...medication,
+          startDate: isoDateToDisplay(medication.startDate),
+          endDate: isoDateToDisplay(medication.endDate),
+        }
+      : {
+          id: newId(),
+          name: '',
+          status: 'unreconciled',
+        }
   );
 
   // NOTE: draft state is seeded once per mount — give the editor a `key`
@@ -576,7 +598,12 @@ export function MedicationEditor({
         </Button>
         <Button
           onClick={() => {
-            onSave({ ...draft, name: draft.name.trim() });
+            onSave({
+              ...draft,
+              name: draft.name.trim(),
+              startDate: displayDateToIso(draft.startDate),
+              endDate: displayDateToIso(draft.endDate),
+            });
             onClose();
           }}
           disabled={!canSave}

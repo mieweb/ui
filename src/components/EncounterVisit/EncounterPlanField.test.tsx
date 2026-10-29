@@ -665,7 +665,7 @@ describe('clinical native response metadata', () => {
         selected: { id: 'stale', value: 'Unrelated option' },
         _ai: true,
       };
-      const { form, onResponse } = renderClinicalField(
+      const { form, onResponse, lookupProps } = renderClinicalField(
         component,
         fieldType,
         undefined,
@@ -692,8 +692,13 @@ describe('clinical native response metadata', () => {
           _ai: true,
         })
       );
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Pick coded finding' })
+      // A distinct code — Conditions ignores a pick matching an existing concern.
+      act(() =>
+        lookupProps().onSelect?.({
+          ...pick,
+          fullid: `${pick.codetype}|${pick.fullcode}0`,
+          fullcode: `${pick.fullcode}0`,
+        })
       );
       const edited = onResponse.mock.calls.at(-1)![0] as FieldResponse;
       expect(edited).toMatchObject({

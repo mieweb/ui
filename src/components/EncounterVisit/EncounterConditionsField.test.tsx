@@ -175,15 +175,52 @@ describe('EncounterConditionsField', () => {
     );
   });
 
-  it('appends a new concern for each code pick without deduplicating against existing concerns', () => {
+  it('ignores a code pick that matches an existing concern instead of duplicating it', () => {
+    const { onResponse, lookupProps } = renderConditions({
+      concerns: [hypertensionConcern],
+    });
+    act(() => lookupProps().onSelect?.(conditionPick));
+    // ICD-10-CM aliases normalize to the same system identity as ICD10.
+    act(() =>
+      lookupProps().onSelect?.({ ...conditionPick, codetype: 'ICD-10-CM' })
+    );
+    expect(onResponse).not.toHaveBeenCalled();
+  });
+
+  it('keeps both updates when two commits land in the same event', () => {
+    // The condition editor can add an observation and save an assertion from
+    // one Save click — the second commit must build on the first, not the
+    // stale render value.
+    const { latest, lookupProps } = renderConditions();
+    act(() => {
+      lookupProps().onSelect?.(conditionPick);
+      lookupProps().onSelect?.({
+        ...conditionPick,
+        fullid: 'ICD10|E11.9',
+        fullcode: 'E11.9',
+        label: 'Type 2 diabetes mellitus',
+      });
+    });
+    expect(latest<ConditionsValue>().concerns).toHaveLength(2);
+  });
+
+  it('revising refutes the prior assertion while keeping it on the timeline', () => {
     const { latest } = renderConditions({ concerns: [hypertensionConcern] });
-    fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
-    const concerns = latest<ConditionsValue>().concerns;
-    expect(concerns).toHaveLength(2);
-    expect(concerns[0]).toEqual(hypertensionConcern);
-    expect(concerns[1]).toMatchObject({
-      source: 'manuallyAdded',
-      assertions: [{ coding: [{ system: 'ICD10', code: 'I10' }] }],
+    fireEvent.click(screen.getByRole('button', { name: /revise/i }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.change(dialog.getByLabelText(/Problem name/), {
+      target: { value: 'White coat hypertension' },
+    });
+    fireEvent.click(dialog.getByRole('button', { name: /save/i }));
+    const concern = latest<ConditionsValue>().concerns[0];
+    expect(concern.assertions[0]).toMatchObject({
+      id: 'hypertension-assertion',
+      verificationStatus: 'refuted',
+    });
+    expect(concern.assertions[1]).toMatchObject({
+      changeType: 'revision',
+      supersedes: 'hypertension-assertion',
+      text: 'White coat hypertension',
     });
   });
 
