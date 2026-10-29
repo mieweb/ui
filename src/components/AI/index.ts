@@ -178,6 +178,12 @@ export {
   type WaveformPeaks,
 } from './HeyOzwell/TranscriptPlayer/peaks';
 
+// Nemotron diarization (experimental) — preload the model in the background before it is needed.
+export {
+  warmNemotron,
+  type NemotronModel,
+} from './HeyOzwell/nemotron/runNemotron';
+
 // Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
 export {
   useDiarization,

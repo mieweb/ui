@@ -10,9 +10,11 @@ import {
 import {
   type CheckpointConfig,
   type ExecutionProvider,
+  type Fetcher,
   type ModelVariant,
   type StreamingMode,
   chunkSizesFor,
+  fetchOk,
   loadCheckpointConfig,
   streamingConfigFor,
 } from './modelConfig';
@@ -30,12 +32,12 @@ export type Ort = typeof OrtModule;
 /** Everything needed to build a session: the checkpoint config and the two model payloads. */
 export interface DiarizerSource {
   config: CheckpointConfig;
-  /** URL of the graph. */
-  model: string;
+  /** The graph. */
+  model: Uint8Array;
   /** File name the graph refers to its weights by, e.g. `model_quantized.onnx_data`. */
   externalDataName: string;
-  /** URL of the weights. */
-  externalData: string;
+  /** The weights. */
+  externalData: Uint8Array;
 }
 
 export interface DiarizerSettings {
@@ -43,16 +45,24 @@ export interface DiarizerSettings {
   streamingMode: StreamingMode;
 }
 
-/** Resolves the URLs of a variant served under `baseUrl`, mirroring the checkpoint layout. */
+/** Downloads a variant served under `baseUrl`, mirroring the checkpoint layout, through `fetcher`. */
 export async function loadDiarizerSource(
   baseUrl: string,
-  variant: ModelVariant
+  variant: ModelVariant,
+  fetcher: Fetcher = fetchOk
 ): Promise<DiarizerSource> {
+  const bytes = async (url: string) =>
+    new Uint8Array(await (await fetcher(url)).arrayBuffer());
+  const [config, model, externalData] = await Promise.all([
+    loadCheckpointConfig(baseUrl, fetcher),
+    bytes(`${baseUrl}/onnx/${variant}.onnx`),
+    bytes(`${baseUrl}/onnx/${variant}.onnx_data`),
+  ]);
   return {
-    config: await loadCheckpointConfig(baseUrl),
-    model: `${baseUrl}/onnx/${variant}.onnx`,
+    config,
+    model,
     externalDataName: `${variant}.onnx_data`,
-    externalData: `${baseUrl}/onnx/${variant}.onnx_data`,
+    externalData,
   };
 }
 

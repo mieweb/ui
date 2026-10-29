@@ -23,6 +23,41 @@ const useSyncExternalStoreEsmShim: Plugin = {
   },
 };
 
+// Builds a `?worker&inline` import (Vite's syntax, so Storybook and Vitest agree) into a self-contained
+// module worker started from a blob URL, like the Whisper worker, so hosts need no worker file or loader.
+const INLINE_WORKER = /\?worker&inline$/;
+const inlineWorker: Plugin = {
+  name: 'inline-worker',
+  setup(build) {
+    build.onResolve({ filter: INLINE_WORKER }, (args) => ({
+      path: join(args.resolveDir, args.path.replace(INLINE_WORKER, '')),
+      namespace: 'inline-worker',
+    }));
+    build.onLoad({ filter: /.*/, namespace: 'inline-worker' }, async (args) => {
+      const { outputFiles } = await build.esbuild.build({
+        entryPoints: [args.path],
+        bundle: true,
+        format: 'esm',
+        target: 'es2022',
+        minify: true,
+        write: false,
+      });
+      return {
+        loader: 'js',
+        contents: `const source = ${JSON.stringify(outputFiles[0].text)};
+export default function InlineWorker() {
+  const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+  try {
+    return new Worker(url, { type: 'module' });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}`,
+      };
+    });
+  },
+};
+
 // Declarations are built separately, in batches, by scripts/build-dts.mjs.
 // Bundling every entry's .d.ts in one rollup-plugin-dts pass exhausts an 8 GB
 // heap (#496), while each batch on its own is small. The script re-runs tsup
@@ -91,7 +126,7 @@ export default defineConfig({
   treeshake: true,
   splitting: true,
   minify: false,
-  esbuildPlugins: [useSyncExternalStoreEsmShim],
+  esbuildPlugins: [useSyncExternalStoreEsmShim, inlineWorker],
   esbuildOptions(options) {
     options.jsx = 'automatic';
   },

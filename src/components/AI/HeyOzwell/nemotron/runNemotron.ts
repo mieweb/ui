@@ -1,5 +1,8 @@
+import { readAssetGlobal } from '../../modelCache';
 import { resampleTo16kMono } from '../../whisperTranscribe';
 import { openRollingRecorder } from '../audio';
+import { MODEL_BASE_URL } from './modelConfig';
+import NemotronWorker from './nemotron.worker?worker&inline';
 import type {
   NemotronModel,
   NemotronRequest,
@@ -16,15 +19,32 @@ export type NemotronResult = Omit<
 /** A minute of 16 kHz audio: files are fed to the worker in pieces this size so its memory stays flat. */
 const PIECE_SAMPLES = 60 * 16000;
 
+/**
+ * Where the checkpoint is served from: `window.__ozwellAssets.nemotron` (a copy of the pinned revision's
+ * files, same layout) or Hugging Face. Only an http(s) URL is accepted.
+ */
+function modelBaseUrl(): string {
+  const assets = readAssetGlobal();
+  const configured = typeof assets === 'object' ? assets.nemotron : undefined;
+  if (!configured) return MODEL_BASE_URL;
+  try {
+    const url = new URL(configured, window.location.href);
+    if (url.protocol === 'https:' || url.protocol === 'http:')
+      return url.href.replace(/\/$/, '');
+  } catch {
+    /* reported below */
+  }
+  console.warn('[nemotron] ignoring invalid __ozwellAssets.nemotron URL');
+  return MODEL_BASE_URL;
+}
+
 let worker: Worker | null = null;
 let nextId = 0;
 const listeners = new Map<number, (message: NemotronWorkerMessage) => void>();
 
 function getWorker(): Worker {
   if (worker) return worker;
-  const created = new Worker(new URL('./nemotron.worker.ts', import.meta.url), {
-    type: 'module',
-  });
+  const created = new NemotronWorker();
   created.onmessage = ({ data }: MessageEvent<NemotronWorkerMessage>) =>
     listeners.get(data.id)?.(data);
   // The worker script itself failed (e.g. blocked CDN): fail open streams and start fresh next time.
@@ -88,6 +108,7 @@ export function openNemotronStream(
     ...options,
     kind: 'start',
     id,
+    modelBaseUrl: modelBaseUrl(),
   } satisfies NemotronRequest);
   return {
     push: async (samples) => {
@@ -122,6 +143,21 @@ export async function runNemotron(
   for (let start = 0; start < samples.length; start += PIECE_SAMPLES)
     await stream.push(samples.slice(start, start + PIECE_SAMPLES));
   return stream.finish();
+}
+
+/**
+ * Downloads (first time only) and loads the model in the background, so the first diarization starts
+ * at once. Holds the model in memory afterwards (hundreds of MB), so call it when Nemotron is about to
+ * be used, e.g. once a user who records visits signs in.
+ */
+export async function warmNemotron(
+  model: NemotronModel,
+  onStage?: (stage: string) => void
+): Promise<void> {
+  await openNemotronStream(
+    { ...model, streamingMode: 'offline' },
+    onStage
+  ).finish();
 }
 
 /** Runs a one-speaker sample through Nemotron and returns its voiceprint, or null if no clear voice. */
