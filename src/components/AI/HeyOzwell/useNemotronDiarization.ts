@@ -3,8 +3,7 @@
  *
  * Whisper word timestamps + Nemotron lane activity → a diarized `Transcript` (with overlap), ready for
  * `TranscriptPlayer`. Enrolled people are named by pre-filling Nemotron's speaker cache with their
- * stored voiceprints, so TitaNet is not used. Experimental; the legacy path is `useDiarization`.
- * See nemotron-plan.md.
+ * stored voiceprints, so TitaNet is not used. Experimental; the supported path is `useDiarization`.
  */
 import * as React from 'react';
 import type { Transcript } from '../../TranscriptView/transcript';
