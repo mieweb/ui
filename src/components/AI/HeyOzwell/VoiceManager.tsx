@@ -7,7 +7,8 @@
  * design-system tokens + shared <Button> so it tracks theme + dark mode; the Ozwell accent is the
  * `ozwell` brand token.
  *
- * Voices are keyed by id in the speaker runtime (WHO); removing one revokes that person. The WHAT
+ * Voices are keyed by id in the speaker runtime (WHO, TitaNet) and in the doctor-check store (Nemotron);
+ * removing one revokes that person in both. The WHAT
  * phrase-prints are shared/speaker-independent, so they're left in place on per-voice removal.
  */
 import * as React from 'react';
@@ -16,6 +17,7 @@ import { Button } from '../../Button';
 import { inputVariants } from '../../Input';
 import { AlertDialog } from '../../AlertDialog';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
+import { useNemotronWakeVoices } from './useNemotronWakeVoices';
 import { clearWhatPrints } from '../voiceprintStore';
 import { VoiceSetup } from './VoiceSetup';
 import { OzwellLogo, DEFAULT_LOGO_SRC } from './OzwellLogo';
@@ -52,6 +54,8 @@ export function VoiceManager({
   voiceprintNamespace,
 }: VoiceManagerProps) {
   const sv = useSpeakerVerify({ voiceprintNamespace });
+  // Removing a voice also revokes its doctor-check (Nemotron) voiceprint.
+  const wakeVoices = useNemotronWakeVoices({ voiceprintNamespace });
   const [inSetup, setInSetup] = React.useState<SetupTarget | null>(null);
   const [, setTick] = React.useState(0); // bump to force a re-read of the voice list after enroll/remove/clear
   const [addName, setAddName] = React.useState('');
@@ -93,6 +97,7 @@ export function VoiceManager({
   };
   const remove = (id: string) => {
     sv.removeVoice(id);
+    void wakeVoices.remove(id);
     setTick((t) => t + 1);
   };
   const saveRename = (id: string) => {
@@ -103,6 +108,7 @@ export function VoiceManager({
   };
   const clearAll = () => {
     sv.clear();
+    void wakeVoices.clear();
     void clearWhatPrints(voiceprintNamespace);
     setTick((t) => t + 1);
   };

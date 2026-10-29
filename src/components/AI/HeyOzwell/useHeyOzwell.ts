@@ -33,7 +33,8 @@ import {
   isOzwellConfigured,
   toOzwellMessages,
 } from '../ozwellChat';
-import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
+import { useNemotronWakeVoices } from './useNemotronWakeVoices';
+import { warmNemotron } from './nemotron/runNemotron';
 import { useDiarization, type UseDiarizationOptions } from './useDiarization';
 import { loadWhatPrints } from '../voiceprintStore';
 import { openRollingRecorder, type RollingRecorder } from './audio';
@@ -81,9 +82,10 @@ export interface UseHeyOzwellOptions {
   assetBase?: string;
   /**
    * Doctor-only gate. When true, each wake is verified INVISIBLY against the enrolled voiceprint —
-   * only the enrolled doctor (WHO) actually saying the phrase (WHAT) acts; everyone else is ignored.
-   * If nothing is enrolled yet it stays open (so the chat works before voice setup). Loads the ~50 MB
-   * speaker runtime only when enabled. Enroll via `useVoiceSetup`.
+   * only the enrolled doctor (WHO, Nemotron voiceprints) actually saying the phrase (WHAT) acts;
+   * everyone else is ignored. If nothing is enrolled yet it stays open (so the chat works before voice
+   * setup); voices set up before the Nemotron switch must be set up again to close it.
+   * Loads the Nemotron model (121–398 MB, cached) once a voice is enrolled. Enroll via `useVoiceSetup`.
    */
   requireDoctor?: boolean;
   /** Start listening immediately on mount instead of waiting for a click (e.g. an always-on surface). */
@@ -322,11 +324,14 @@ export function useHeyOzwell(
   // runs below (onWake references startDictation, so the detector can't be created before it).
   const wakeRef = React.useRef<ReturnType<typeof useWakeWord> | null>(null);
 
-  // Doctor-only gate (loads the ~50 MB speaker runtime only when requireDoctor). A rolling recorder is
-  // the 2nd consumer of the shared stream, giving the WHO check the wake-utterance audio.
-  const sv = useSpeakerVerify({ enabled: requireDoctor, voiceprintNamespace });
-  const svRef = React.useRef(sv);
-  svRef.current = sv;
+  // Doctor-only gate (Nemotron voiceprints, only when requireDoctor). A rolling recorder is the 2nd
+  // consumer of the shared stream, giving the WHO check the wake-utterance audio.
+  const wakeVoices = useNemotronWakeVoices({
+    enabled: requireDoctor,
+    voiceprintNamespace,
+  });
+  const wakeVoicesRef = React.useRef(wakeVoices);
+  wakeVoicesRef.current = wakeVoices;
   const rollRef = React.useRef<RollingRecorder | null>(null);
 
   // Conversation mode: diarize the dictation clip on send. Loads the speaker runtime only when on
@@ -341,28 +346,33 @@ export function useHeyOzwell(
 
   // Verify a wake INVISIBLY: WHO (it's the enrolled doctor) AND WHAT (they actually said the phrase —
   // WHAT stops a false fire on the doctor's own non-phrase speech, since WHO can't tell the phrase from
-  // not-the-phrase in the same voice). Open (returns true) when the gate is off or nothing is enrolled;
-  // enrolled-but-can't-capture fails closed. Mirrors the hands-free gate.
+  // not-the-phrase in the same voice). Open (resolves true) when the gate is off or nothing is enrolled;
+  // enrolled-but-can't-check fails closed. Mirrors the hands-free gate.
   const verified = React.useCallback(
-    (name: string): boolean => {
+    async (name: string): Promise<boolean> => {
       if (!requireDoctor) return true;
-      const svh = svRef.current;
+      const voices = wakeVoicesRef.current;
+      const wake = wakeRef.current;
       // Fail closed while the scoped store is still (re)hydrating — e.g. during a namespace switch —
-      // where conditionCount reads 0 and would otherwise be mistaken for "nothing enrolled" (open gate).
-      if (!svh.ready) return false;
-      const enrolled = svh.conditionCount(name) > 0;
-      if (!enrolled) return true;
+      // where an empty store would otherwise be mistaken for "nothing enrolled" (open gate).
+      if (!voices.ready || !wake) return false;
+      if (voices.count === 0) return true;
+      if (voices.usable === 0) {
+        console.warn(
+          '[hey-ozwell] the enrolled voice was set up with another speaker model; set it up again'
+        );
+        return false;
+      }
       const roll = rollRef.current;
-      if (!roll || !wakeRef.current) return false;
-      const who = svh.verify(name, roll.snapshot(), roll.sampleRate);
-      const what = wakeRef.current.phraseCosine(
-        name,
-        wakeRef.current.getLastEmbedding()
-      );
+      if (!roll) return false;
+      // Read both before awaiting: a later wake replaces them.
+      const clip = { samples: roll.snapshot(), sampleRate: roll.sampleRate };
+      const what = wake.phraseCosine(name, wake.getLastEmbedding());
+      const who = await voices.verify(clip).catch(() => false);
       const thr = whatThr(name);
-      const ok = (who?.pass ?? false) && (what == null || what >= thr);
+      const ok = who && (what == null || what >= thr);
       console.log(
-        `[hey-ozwell] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} (≥${thr}) → ${ok ? 'ACT' : 'ignore'}`
+        `[hey-ozwell] ${name}: WHO ${who ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} (≥${thr}) → ${ok ? 'ACT' : 'ignore'}`
       );
       return ok;
     },
@@ -499,9 +509,10 @@ export function useHeyOzwell(
 
   // `viaPhrase` = stopped by the spoken "ozwell i'm done" wake (vs the mic button). Only then do we cut the
   // phrase off the AUDIO before transcribing — Whisper mishears it differently every time, so text-stripping
-  // alone leaks it; a button stop has no phrase, so trimming would clip real speech.
+  // alone leaks it; a button stop has no phrase, so trimming would clip real speech. `lateSeconds` is how
+  // long after the phrase the stop came (the doctor check), so the cut still lands on the phrase.
   const stopDictation = React.useCallback(
-    (viaPhrase = false) => {
+    (viaPhrase = false, lateSeconds = 0) => {
       const rec = recRef.current;
       if (!rec) return;
       stopLive(); // tear down the live-caption loop; the final full-clip transcription follows
@@ -518,7 +529,7 @@ export function useHeyOzwell(
           // original clip on failure.
           if (viaPhrase) {
             const dur = wakeRef.current?.getLastWakeDuration() ?? 0;
-            const hint = dur > 0 ? dur + stopTrimLeadIn() : 0;
+            const hint = dur > 0 ? dur + stopTrimLeadIn() + lateSeconds : 0;
             try {
               blob = await trimTrailingStopPhrase(blob, hint);
             } catch {
@@ -582,11 +593,14 @@ export function useHeyOzwell(
     assetBase,
     onWake: (name) => {
       if (name === 'hey-ozwell' && phaseRef.current === 'listening') {
-        if (!verified('hey-ozwell')) return; // doctor-only gate (no-op when requireDoctor is off)
-        // Always open the chat. Only DROP into dictation when auto-dictate is on; otherwise just
-        // open and wait — the experiment surface for more specific wake-word directions.
-        setChatOpen(true);
-        if (autoDictateOnWake) startDictation();
+        // doctor-only gate (resolves at once when requireDoctor is off)
+        void verified('hey-ozwell').then((ok) => {
+          if (!ok || phaseRef.current !== 'listening') return;
+          // Always open the chat. Only DROP into dictation when auto-dictate is on; otherwise just
+          // open and wait — the experiment surface for more specific wake-word directions.
+          setChatOpen(true);
+          if (autoDictateOnWake) startDictation();
+        });
       } else if (
         name === "ozwell-i'm-done" &&
         phaseRef.current === 'dictating'
@@ -594,8 +608,12 @@ export function useHeyOzwell(
         // Stop immediately on the verified stop-wake. (A transcribe-confirm gate was tried, but Whisper
         // mishears "done" often enough — e.g. "…all was well" — that it rejected real stops and trapped
         // dictation. The WHAT phrase-print check in verified() is the false-stop guard.) `true` = trim the
-        // phrase off the audio before transcribing.
-        if (verified("ozwell-i'm-done")) stopDictation(true);
+        // phrase off the audio before transcribing, allowing for the time the check took.
+        const heardAt = performance.now();
+        void verified("ozwell-i'm-done").then((ok) => {
+          if (ok && phaseRef.current === 'dictating')
+            stopDictation(true, (performance.now() - heardAt) / 1000);
+        });
       }
     },
   });
@@ -635,6 +653,12 @@ export function useHeyOzwell(
     };
   }, [requireDoctor, active, wake.ready, voiceprintNamespace]);
 
+  // Keep the doctor-check model loaded while someone is enrolled, so a wake is checked quickly.
+  const checkingVoices = requireDoctor && active && wakeVoices.usable > 0;
+  React.useEffect(() => {
+    if (checkingVoices) void warmNemotron().catch(() => {});
+  }, [checkingVoices]);
+
   // Header octopus load state, split into two rings so the slow transcription warm-up never makes
   // the octopus look unavailable (primary ring = wake pre-warm; secondary arc = transcription).
   // The primary ring stays up until the octopus can ACTUALLY be talked to — i.e. the mic meter is live and
@@ -673,9 +697,8 @@ export function useHeyOzwell(
       ? 'Wake word…'
       : undefined;
 
-  // Doctor-only and a voiceprint is enrolled → only the enrolled doctor is acted on.
-  const locked =
-    requireDoctor && sv.ready && sv.conditionCount('hey-ozwell') > 0;
+  // Doctor-only and a voice is enrolled → only the enrolled doctor is acted on.
+  const locked = requireDoctor && wakeVoices.ready && wakeVoices.count > 0;
 
   // Live readiness for the "Models & versions" readout in the settings menu.
   const modelStatus: Partial<Record<ModelStatusKey, ModelStatus>> = {

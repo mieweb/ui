@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { laneNames, transcriptFromFrames } from './attribution';
+import { dominantLane, laneNames, transcriptFromFrames } from './attribution';
 
 /** Builds `numFrames x 3` frames of 0.1 s where `active(frame)` lists the lit lanes. */
 function frames(numFrames: number, active: (frame: number) => number[]) {
@@ -26,6 +26,15 @@ describe('laneNames', () => {
       'Speaker 1',
       'Speaker 2',
     ]);
+  });
+});
+
+describe('dominantLane', () => {
+  it('picks the lane heard most and is null in silence', () => {
+    expect(dominantLane(frames(30, (f) => (f < 20 ? [2] : [0])))).toBe(2);
+    expect(dominantLane(conversation)).toBe(0);
+    expect(dominantLane(frames(10, () => []))).toBeNull();
+    expect(dominantLane(frames(0, () => []))).toBeNull();
   });
 });
 

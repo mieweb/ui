@@ -90,7 +90,7 @@ window.__ozwellWhisperHost = config.whisperHost;      // Whisper weights (must s
         {
           type: 'uses',
           target: 'voice-speaker-verify',
-          why: 'requireDoctor gates each wake through useSpeakerVerify against the enrolled voiceprints.',
+          why: 'conversationMode names speakers with TitaNet through useDiarization; requireDoctor now checks Nemotron voiceprints.',
         },
         {
           type: 'uses',
