@@ -127,6 +127,22 @@ function preservePointerFocus(event: React.MouseEvent) {
 }
 
 /**
+ * Group headings preserve editor focus like macro rows, with one exception:
+ * when roving focus is already on a row inside the group, collapsing would
+ * unmount that row and strand focus on the body. Letting the heading take
+ * pointer focus in that case keeps keyboard navigation anchored in the panel.
+ */
+function preserveGroupTogglePointerFocus(
+  event: React.MouseEvent<HTMLButtonElement>
+) {
+  const group = event.currentTarget.closest(
+    '[data-slot="macro-library-group"]'
+  );
+  if (group?.contains(document.activeElement)) return;
+  event.preventDefault();
+}
+
+/**
  * A searchable, grouped macro browser designed to dock inside an editor's
  * chrome. Editor-agnostic: selecting a macro calls `onSelect` and the host
  * performs the insertion. Previous-value groups (`kind: 'previous'`) are
@@ -389,7 +405,7 @@ export const MacroLibrary = React.forwardRef<HTMLDivElement, MacroLibraryProps>(
                         )}
                         aria-expanded={!isCollapsed}
                         disabled={searching}
-                        onMouseDown={preservePointerFocus}
+                        onMouseDown={preserveGroupTogglePointerFocus}
                         onClick={() =>
                           setCollapsed((prev) => ({
                             ...prev,
