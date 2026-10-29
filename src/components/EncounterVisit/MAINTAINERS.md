@@ -80,8 +80,10 @@ Only an explicit no-known-allergies flag exports
 
 Assertion dates are real ISO calendar dates (`YYYY-MM-DD`). The host may provide
 `definition.encounterDate`; without a valid date the Conditions/Assessment
-fields do not create assertions — new entries are ignored rather than dated
-from the device clock. Never infer the clinical date from the device clock.
+fields remove the assertion-creating affordances (add search, add pill,
+observe/refine/revise) and show a short notice — undated actions such as
+resolve, relate, remove and orders stay available. Never infer the clinical
+date from the device clock.
 Dates and codes already on imported records remain
 unchanged until the user explicitly edits them.
 

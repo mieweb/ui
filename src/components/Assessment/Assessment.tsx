@@ -912,9 +912,24 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(
       null
     );
+    /** Draft in the no-search fallback input of the unified add row */
+    const [freeDraft, setFreeDraft] = React.useState('');
     React.useEffect(() => {
       if (addMode !== 'auto') setPendingFreeText(null);
     }, [addMode]);
+    /** Shared free-text routing for the search and the fallback input. */
+    const handleAddFreeText = (text: string) => {
+      if (addMode === 'problem') {
+        onAddAssessment?.({ label: text });
+      } else if (addMode === 'order') {
+        onAddOrder?.(null, {
+          type: 'procedure',
+          display: text,
+        });
+      } else {
+        setPendingFreeText(text); // auto: we have to ask
+      }
+    };
     // clears-then-sets so repeated identical messages re-announce
     const [announcement, setAnnouncement] = useLiveAnnouncement();
 
@@ -1409,10 +1424,11 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
 
           {/* Unified add row: a dx/program pick adds a concern, anything else
               adds an (unlinked) order — auto-detected from the coding system,
-              or forced via the mode dropdown. Free text asks (in auto mode). */}
+              or forced via the mode dropdown. Free text asks (in auto mode).
+              Without a code search, a plain free-text input keeps capture
+              available (matching ProblemList's no-catalog fallback). */}
           {!readOnly &&
             availableAddModes.length > 0 &&
-            effectiveRenderOrderSearch &&
             (onAddAssessment || onAddOrder) && (
               <div
                 role="form"
@@ -1444,74 +1460,100 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   )}
                 </select>
                 <div className="min-w-64 flex-1">
-                  {effectiveRenderOrderSearch({
-                    domains:
-                      addMode === 'problem'
-                        ? ['condition', 'occupational']
-                        : addMode === 'order'
-                          ? ['med', 'lab', 'procedure', 'vaccine']
-                          : undefined, // auto: everything — the pick decides
-                    // auto: concerns rank ahead of orders — surveillance
-                    // programs first (rare, high-value hits like "dot" or
-                    // "hearing"), then diagnoses, then meds/labs/procedures.
-                    // concern mode: programs still lead the diagnoses.
-                    preferDomains:
-                      addMode === 'auto'
-                        ? ['occupational', 'condition']
-                        : addMode === 'problem'
-                          ? ['occupational']
-                          : undefined,
-                    // assessments code in ICD-10: boost it over SNOMED
-                    preferCodetypes:
-                      addMode !== 'order' ? ['ICD10'] : undefined,
-                    billableOnly: addMode !== 'order' && billableOnly,
-                    placeholder: m(
-                      addMode === 'problem'
-                        ? 'Search diagnoses & programs… (try "chf" or "hearing conservation")'
-                        : addMode === 'order'
-                          ? 'Search medications, labs, imaging, procedures…'
-                          : 'Add concern or order… (a diagnosis or surveillance program becomes a concern; meds, labs & imaging become orders)'
-                    ),
-                    onPick: (pick) => {
-                      const asProblem =
-                        addMode === 'problem' ||
-                        (addMode === 'auto' &&
-                          isConditionCodetype(pick.codetype) &&
-                          Boolean(onAddAssessment));
-                      if (asProblem) {
-                        onAddAssessment?.({
-                          label: pick.label,
-                          code: {
-                            fullid: pick.fullid,
-                            codetype: pick.codetype,
-                            fullcode: pick.fullcode,
-                          },
-                        });
-                      } else {
-                        onAddOrder?.(null, {
-                          type: orderTypeForCodetype(pick.codetype),
-                          display: pick.label,
-                          code: {
-                            fullid: pick.fullid,
-                            codetype: pick.codetype,
-                            fullcode: pick.fullcode,
-                          },
-                        });
-                      }
-                    },
-                    onFreeText: (text) => {
-                      if (addMode === 'problem') {
-                        onAddAssessment?.({ label: text });
-                      } else if (addMode === 'order') {
-                        onAddOrder?.(null, {
-                          type: 'procedure',
-                          display: text,
-                        });
-                      } else {
-                        setPendingFreeText(text); // auto: we have to ask
-                      }
-                    },
-                  })}
+                  {effectiveRenderOrderSearch ? (
+                    effectiveRenderOrderSearch({
+                      domains:
+                        addMode === 'problem'
+                          ? ['condition', 'occupational']
+                          : addMode === 'order'
+                            ? ['med', 'lab', 'procedure', 'vaccine']
+                            : undefined, // auto: everything — the pick decides
+                      // auto: concerns rank ahead of orders — surveillance
+                      // programs first (rare, high-value hits like "dot" or
+                      // "hearing"), then diagnoses, then meds/labs/procedures.
+                      // concern mode: programs still lead the diagnoses.
+                      preferDomains:
+                        addMode === 'auto'
+                          ? ['occupational', 'condition']
+                          : addMode === 'problem'
+                            ? ['occupational']
+                            : undefined,
+                      // assessments code in ICD-10: boost it over SNOMED
+                      preferCodetypes:
+                        addMode !== 'order' ? ['ICD10'] : undefined,
+                      billableOnly: addMode !== 'order' && billableOnly,
+                      placeholder: m(
+                        addMode === 'problem'
+                          ? 'Search diagnoses & programs… (try "chf" or "hearing conservation")'
+                          : addMode === 'order'
+                            ? 'Search medications, labs, imaging, procedures…'
+                            : 'Add concern or order… (a diagnosis or surveillance program becomes a concern; meds, labs & imaging become orders)'
+                      ),
+                      onPick: (pick) => {
+                        const asProblem =
+                          addMode === 'problem' ||
+                          (addMode === 'auto' &&
+                            isConditionCodetype(pick.codetype) &&
+                            Boolean(onAddAssessment));
+                        if (asProblem) {
+                          onAddAssessment?.({
+                            label: pick.label,
+                            code: {
+                              fullid: pick.fullid,
+                              codetype: pick.codetype,
+                              fullcode: pick.fullcode,
+                            },
+                          });
+                        } else {
+                          onAddOrder?.(null, {
+                            type: orderTypeForCodetype(pick.codetype),
+                            display: pick.label,
+                            code: {
+                              fullid: pick.fullid,
+                              codetype: pick.codetype,
+                              fullcode: pick.fullcode,
+                            },
+                          });
+                        }
+                      },
+                      onFreeText: handleAddFreeText,
+                    })
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        data-slot="input"
+                        value={freeDraft}
+                        onChange={(e) => setFreeDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && freeDraft.trim()) {
+                            handleAddFreeText(freeDraft.trim());
+                            setFreeDraft('');
+                          }
+                        }}
+                        placeholder={m('Type a name and press Enter…')}
+                        aria-label={m('Add as free text')}
+                        className={cn(
+                          'border-border bg-background text-foreground placeholder:text-muted-foreground',
+                          'h-10 w-full rounded-md border px-2.5 text-sm',
+                          'focus:ring-ring focus:ring-2 focus:outline-none'
+                        )}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          handleAddFreeText(freeDraft.trim());
+                          setFreeDraft('');
+                        }}
+                        disabled={!freeDraft.trim()}
+                        leftIcon={<PlusIcon size={12} />}
+                        className="h-10"
+                      >
+                        {m('Add')}
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Free text in auto mode: ask what it is */}

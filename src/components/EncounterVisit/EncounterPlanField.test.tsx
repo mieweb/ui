@@ -293,8 +293,6 @@ describe('EncounterPlanField', () => {
       { provider: false }
     );
     expect(screen.getByText('Hemoglobin A1c')).toBeInTheDocument();
-    // Without a search provider the unified add row is hidden entirely.
-    expect(screen.queryByLabelText('What to add')).not.toBeInTheDocument();
     expect(onResponse).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     fireEvent.change(screen.getByLabelText('Order detail'), {
@@ -305,6 +303,14 @@ describe('EncounterPlanField', () => {
       detail: 'Imported plan reviewed',
     });
     expect(latest<PlanValue>().orders[0]).not.toHaveProperty('code');
+    // Without a search provider the add row falls back to plain free text.
+    const freeText = screen.getByLabelText('Add as free text');
+    fireEvent.change(freeText, { target: { value: 'Repeat A1c in 3 months' } });
+    fireEvent.keyDown(freeText, { key: 'Enter' });
+    expect(latest<PlanValue>().orders[1]).toMatchObject({
+      display: 'Repeat A1c in 3 months',
+    });
+    expect(latest<PlanValue>().orders[1]).not.toHaveProperty('code');
   });
 
   it('retains malformed original answers and prevents replacing them', () => {
@@ -602,7 +608,27 @@ describe('EncounterAssessmentField coded capture', () => {
     expect(localAssessment.concerns[0]).toEqual(hypertensionConcern);
   });
 
-  it('hides the unified add row without a coding provider but keeps uncoded per-problem orders', () => {
+  it('drops to order-only capture with a notice when the host provides no encounter date', () => {
+    const { lookupProps } = renderClinicalField(
+      EncounterAssessmentField,
+      'encounterAssessment',
+      { concerns: [], items: [], orders: [] },
+      { encounterDate: null }
+    );
+    // New diagnoses would create undated assertions — the affordance is
+    // removed and the add row collapses to orders only.
+    expect(
+      screen.getByText(/No encounter date — new diagnoses are disabled/)
+    ).toBeInTheDocument();
+    const modeSelect = screen.getByLabelText('What to add');
+    expect(within(modeSelect).getAllByRole('option')).toHaveLength(1);
+    expect(
+      within(modeSelect).getByRole('option', { name: 'Add order' })
+    ).toBeInTheDocument();
+    expect(lookupProps().domains).not.toContain('condition');
+  });
+
+  it('falls back to a free-text add row without a coding provider and keeps uncoded per-problem orders', () => {
     const { latest } = renderClinicalField(
       EncounterAssessmentField,
       'encounterAssessment',
@@ -616,22 +642,37 @@ describe('EncounterAssessmentField coded capture', () => {
       { provider: false }
     );
     expect(screen.getByText('Essential hypertension')).toBeInTheDocument();
-    expect(screen.queryByLabelText('What to add')).not.toBeInTheDocument();
-    // The per-problem order form still allows plain-text orders.
-    fireEvent.click(screen.getByRole('button', { name: 'Add order' }));
-    fireEvent.change(screen.getByLabelText('Order description'), {
-      target: { value: 'Lifestyle counseling' },
+    // Without a catalog the unified add row still captures plain free text.
+    const freeText = screen.getByLabelText('Add as free text');
+    fireEvent.change(freeText, {
+      target: { value: 'Smoking cessation referral' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    fireEvent.keyDown(freeText, { key: 'Enter' });
+    // Auto mode asks what the text is; file it as an order.
+    fireEvent.click(
+      within(
+        screen.getByRole('group', { name: /smoking cessation referral/i })
+      ).getByRole('button', { name: 'Order' })
+    );
     expect(
       latest<{ orders: Record<string, unknown>[] }>().orders[0]
+    ).toMatchObject({ display: 'Smoking cessation referral' });
+    expect(
+      latest<{ orders: Record<string, unknown>[] }>().orders[0]
+    ).not.toHaveProperty('code');
+    // The per-problem order form still allows plain-text orders.
+    fireEvent.click(screen.getByRole('button', { name: 'Add order' }));
+    const orderForm = screen.getByRole('form', { name: /add order for/i });
+    fireEvent.change(within(orderForm).getByLabelText('Order description'), {
+      target: { value: 'Lifestyle counseling' },
+    });
+    fireEvent.click(within(orderForm).getByRole('button', { name: 'Add' }));
+    expect(
+      latest<{ orders: Record<string, unknown>[] }>().orders[1]
     ).toMatchObject({
       concernId: 'hypertension',
       display: 'Lifestyle counseling',
     });
-    expect(
-      latest<{ orders: Record<string, unknown>[] }>().orders[0]
-    ).not.toHaveProperty('code');
   });
 });
 

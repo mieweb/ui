@@ -132,62 +132,69 @@ export function EncounterAssessmentField({
         aria-label={definition.question ?? m('Assessment and plan')}
         readOnly={readOnly}
         addFormLabel="Add assessment or order"
-        onAddAssessment={(pick) => {
-          if (!currentDate.current.valid) return;
-          const existingConcern = pick.code
-            ? concerns.find((concern) =>
-                matchingConditionCode(concern, pick.code!)
-              )
-            : undefined;
-          const existingAssertion =
-            existingConcern && currentAssertion(existingConcern);
-          if (existingConcern && existingAssertion) {
-            commit((next) => ({
-              ...next,
-              items: [
-                ...next.items.filter(
-                  (item) => item.concernId !== existingConcern.concernId
-                ),
-                {
-                  concernId: existingConcern.concernId,
-                  assertionId: existingAssertion.id,
-                },
-              ],
-            }));
-            return;
-          }
-          const concernId = globalThis.crypto.randomUUID();
-          const assertionId = globalThis.crypto.randomUUID();
-          commit((next) => ({
-            ...next,
-            concerns: [
-              ...next.concerns,
-              {
-                concernId,
-                clinicalStatus: 'active',
-                source: 'manuallyAdded',
-                assertions: [
-                  {
-                    id: assertionId,
-                    date: currentDate.current.date,
-                    text: pick.label,
-                    verificationStatus: 'unconfirmed',
-                    coding: pick.code
-                      ? [
-                          {
-                            system: pick.code.codetype,
-                            code: pick.code.fullcode,
-                            display: pick.label,
-                          },
-                        ]
-                      : undefined,
-                  },
-                ],
-              },
-            ],
-            items: [...next.items, { concernId, assertionId }],
-          }));
-        }}
+        // New diagnoses create dated assertions — without a valid host
+        // encounter date the affordance is removed (order-only add row)
+        // instead of silently discarding picks.
+        onAddAssessment={
+          !assertionDate.valid
+            ? undefined
+            : (pick) => {
+                if (!currentDate.current.valid) return;
+                const existingConcern = pick.code
+                  ? concerns.find((concern) =>
+                      matchingConditionCode(concern, pick.code!)
+                    )
+                  : undefined;
+                const existingAssertion =
+                  existingConcern && currentAssertion(existingConcern);
+                if (existingConcern && existingAssertion) {
+                  commit((next) => ({
+                    ...next,
+                    items: [
+                      ...next.items.filter(
+                        (item) => item.concernId !== existingConcern.concernId
+                      ),
+                      {
+                        concernId: existingConcern.concernId,
+                        assertionId: existingAssertion.id,
+                      },
+                    ],
+                  }));
+                  return;
+                }
+                const concernId = globalThis.crypto.randomUUID();
+                const assertionId = globalThis.crypto.randomUUID();
+                commit((next) => ({
+                  ...next,
+                  concerns: [
+                    ...next.concerns,
+                    {
+                      concernId,
+                      clinicalStatus: 'active',
+                      source: 'manuallyAdded',
+                      assertions: [
+                        {
+                          id: assertionId,
+                          date: currentDate.current.date,
+                          text: pick.label,
+                          verificationStatus: 'unconfirmed',
+                          coding: pick.code
+                            ? [
+                                {
+                                  system: pick.code.codetype,
+                                  code: pick.code.fullcode,
+                                  display: pick.label,
+                                },
+                              ]
+                            : undefined,
+                        },
+                      ],
+                    },
+                  ],
+                  items: [...next.items, { concernId, assertionId }],
+                }));
+              }
+        }
         onRemoveAssessment={(item) => {
           const wasLocal = currentValue.current.concerns.some(
             (concern) => concern.concernId === item.concernId
@@ -268,6 +275,13 @@ export function EncounterAssessmentField({
           }))
         }
       />
+      {!readOnly && !assertionDate.valid && (
+        <p className="text-muted-foreground text-xs">
+          {m(
+            'No encounter date — new diagnoses are disabled; orders can still be added.'
+          )}
+        </p>
+      )}
     </section>
   );
 }

@@ -301,13 +301,25 @@ describe('EncounterConditionsField', () => {
 });
 
 describe('explicit assertion date and uncoded condition configuration', () => {
-  it('ignores picks and free text when the host provides no encounter date', () => {
-    const { lookupProps, onResponse } = renderConditions(undefined, {
-      encounterDate: null,
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
-    act(() => lookupProps().onFreeText?.('Undated symptom'));
-    expect(onResponse).not.toHaveBeenCalled();
+  it('disables capture and explains itself when the host provides no encounter date', () => {
+    const { Lookup, onResponse } = renderConditions(
+      { concerns: [hypertensionConcern] },
+      { encounterDate: null }
+    );
+    // Assertion-creating affordances are removed, not silently ignored.
+    expect(Lookup).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('button', { name: 'Add' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /revise/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/No encounter date — conditions cannot be added/)
+    ).toBeInTheDocument();
+    // Undated actions (resolve/relate/remove) stay available.
+    fireEvent.click(screen.getByRole('button', { name: /resolve/i }));
+    expect(onResponse).toHaveBeenCalled();
   });
   it('allows an explicit uncoded condition through the proper condition editor', () => {
     const { latest } = renderConditions(undefined, { provider: false });

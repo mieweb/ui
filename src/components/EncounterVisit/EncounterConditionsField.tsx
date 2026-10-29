@@ -162,8 +162,11 @@ export function EncounterConditionsField({
   const editorConcern = editor?.concernId
     ? value.concerns.find(({ concernId }) => concernId === editor.concernId)
     : undefined;
+  // New assertions need a valid host encounter date — without one the
+  // capture affordances are removed instead of silently discarding input.
+  const canAssert = assertionDate.valid;
   const addSearch =
-    codeLookup && !readOnly ? (
+    codeLookup && !readOnly && canAssert ? (
       <codeLookup.component
         indexUrl={codeLookup.indexUrl}
         locale={codeLookup.locale}
@@ -213,7 +216,11 @@ export function EncounterConditionsField({
       <ProblemList
         concerns={value.concerns}
         readOnly={readOnly}
-        actions={['observe', 'refine', 'revise', 'relate', 'resolve', 'remove']}
+        actions={
+          canAssert
+            ? ['observe', 'refine', 'revise', 'relate', 'resolve', 'remove']
+            : ['relate', 'resolve', 'remove']
+        }
         onAction={(concern, action) => {
           if (action === 'remove') {
             setEditor(null);
@@ -250,7 +257,7 @@ export function EncounterConditionsField({
         }}
         addSearch={addSearch}
         onAddProblem={
-          addSearch
+          addSearch || !canAssert
             ? undefined
             : (text) =>
                 saveAssertion(undefined, {
@@ -258,7 +265,7 @@ export function EncounterConditionsField({
                   verificationStatus: 'unconfirmed',
                 })
         }
-        onAdd={() => setEditor({ mode: 'add' })}
+        onAdd={canAssert ? () => setEditor({ mode: 'add' }) : undefined}
         onReorder={(ids) =>
           commit((next) => ({
             ...next,
@@ -330,6 +337,13 @@ export function EncounterConditionsField({
           setEditor(null);
         }}
       />
+      {!readOnly && !canAssert && (
+        <p className="text-muted-foreground mt-2 text-xs">
+          {m(
+            'No encounter date — conditions cannot be added or revised until the visit provides one.'
+          )}
+        </p>
+      )}
     </>
   );
 }
