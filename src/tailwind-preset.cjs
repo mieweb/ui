@@ -92,6 +92,11 @@ module.exports = {
     'text-lg',
     'top-[2.125rem]',
     'underline-offset-2',
+    // RichTextEsheet document shell: party-header spacing, and the editor's
+    // in-flow macro panel that clips its height animation below `md`.
+    'gap-x-1.5',
+    'space-y-0.5',
+    'md:overflow-visible',
     // MediaFeed vertical snapping, bounded captions, fullscreen viewport and
     // SuperChat attachment previews for consumers that do not scan package code.
     'h-[min(48rem,80dvh)]',
