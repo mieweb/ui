@@ -174,4 +174,15 @@ describe('createRichTextEsheetSnapshot', () => {
       'Use \\<input\\> here &amp; stay \\*plain\\*\n\nSecond paragraph'
     );
   });
+
+  it('neutralizes Markdown block openers at line start', () => {
+    const snapshot = createRichTextEsheetSnapshot(definition, {
+      [getRichTextEsheetFieldId('reason')]: {
+        answer: '# Ticket note\n- literal hyphen\n1. Log in\n---',
+      },
+    });
+    expect(snapshot.mdy).toContain(
+      '\\# Ticket note\n\n\\- literal hyphen\n\n1\\. Log in\n\n\\---'
+    );
+  });
 });

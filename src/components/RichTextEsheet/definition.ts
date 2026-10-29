@@ -257,7 +257,12 @@ function markdownHeading(value: string): string {
 function markdownBody(value: string): string {
   return value
     .split(/\r?\n/)
-    .map((line) => markdownText(line.trim()))
+    .map((line) =>
+      markdownText(line.trim())
+        // Neutralize block openers (headings, lists, thematic breaks) at line start.
+        .replace(/^([#+-])/, '\\$1')
+        .replace(/^(\d+)([.)])/, '$1\\$2')
+    )
     .filter(Boolean)
     .join('\n\n');
 }

@@ -79,6 +79,7 @@ The **fill-out side of eSheet**: renders a form definition as live fields and co
 
 - You need to **edit the form definition** — \`ESheet Builder\`.
 - You need a complete clinical visit document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) composes this renderer with narrative and observation sections, repeatable vitals, clinical lists, note review and MCP tools.
+- You want a **guided prose document** — referral letters, support tickets — where each section is a narrative with memory-aid phrases and party macros, exported as portable MDY — [RichTextEsheet](?path=/docs/editors-richtextesheet--docs) wraps this renderer for that.
 - The form is fixed and developer-authored — compose \`Input\`, \`Select\`, \`DateInput\` etc. directly.
 - Users add free key/value extras to an otherwise fixed form — \`AdditionalFields\`.
 - You need a submit button, autosave or server persistence out of the box — the renderer has none; the host calls \`getValidResponse()\` and posts.
@@ -130,6 +131,11 @@ function IntakeForm({ definition, draft }: { definition: FormDefinition; draft?:
           type: 'composes with',
           target: 'encounter-orders-encountervisit',
           why: 'EncounterVisit adds clinical section configuration, coordinated vitals, note review and MCP tools around one native renderer; use Renderer directly for other form workflows.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-richtextesheet',
+          why: 'RichTextEsheet compiles guided prose sections (letters, tickets) to a native FormDefinition for this renderer; use Renderer directly for arbitrary native forms.',
         },
         {
           type: 'composes with',

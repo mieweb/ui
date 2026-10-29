@@ -154,7 +154,7 @@ const meta: Meta<typeof RichTextEsheet> = {
       description: {
         component: `### What it's for
 
-A guided rich text document backed by one **eSheet** response store: letters, support tickets, any templated prose where an eSheet acts as the memory aid. Each section is a narrative field with a focus-docked panel of memory-aid phrases, each labelled with a derived dot-phrase shortcut; picking one inserts its line at the caret. **Parties** — for example a patient and a provider on a letter, or a reporter and a system on a ticket — appear in the header, dock as insertable macros beside every section, and are retained in the exported document's front matter. The portable output is MDY: YAML front matter plus a Markdown body.
+A guided rich text document backed by one **eSheet** response store: letters, support tickets, any templated prose where an eSheet acts as the memory aid. Each section is a narrative field with a focus-docked panel of memory-aid phrases, each labelled with a derived dot-phrase shortcut; picking one appends its line as a new paragraph at the end of the section, and a phrase already present is not added twice. **Parties** — for example a patient and a provider on a letter, or a reporter and a system on a ticket — appear in the header, dock as insertable macros beside every section, and are retained in the exported document's front matter. The portable output is MDY: YAML front matter plus a Markdown body.
 
 ### Use it when
 
@@ -165,6 +165,7 @@ A guided rich text document backed by one **eSheet** response store: letters, su
 
 - You are documenting a clinical visit with coded capture — use [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs).
 - You only need one free-form rich text input — use [TextAreaRich](?path=/docs/editors-textarearich--docs) directly.
+- You are rendering an arbitrary native \`FormDefinition\` (coded fields, matrices, signatures) rather than a guided prose document — use [EsheetRenderer](?path=/docs/composite-forms-esheet-renderer--docs) directly.
 
 ### Example
 
@@ -215,9 +216,9 @@ import { RichTextEsheet } from '@mieweb/ui/esheet';
           why: 'EncounterVisit layers coded clinical sections, terminology policy and MCP tools on the same guided-narrative foundations; RichTextEsheet is the general-purpose document for everyone else.',
         },
         {
-          type: 'uses',
+          type: 'composes with',
           target: 'composite-forms-esheet-renderer',
-          why: 'One eSheet renderer owns every section response; the definition compiles to a native FormDefinition.',
+          why: 'One eSheet renderer owns every section response; the definition compiles to a native FormDefinition. Use Renderer directly for arbitrary native forms.',
         },
         {
           type: 'uses',
