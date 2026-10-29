@@ -59,12 +59,18 @@ window.__ozwellAssets = 'https://huggingface.co/<user>/<repo>/resolve/main';
 window.__ozwellAssets = {
   wakeword: 'https://…/wakeword',
   svRuntime: 'https://…/sv-runtime',
+  nemotron: 'https://…/nemotron', // a copy of the pinned revision's files
+  ort: '/ort', // onnxruntime-web 1.30's dist/ files, instead of jsDelivr
 };
 ```
 
 - `WakeWord/useWakeWord.ts` — `resolveAssetBase()` reads the `assetBase` **prop** first, then the
   global, then defaults to `/wakeword`. (Prop lets a host override per-mount.)
 - `SpeakerVerify/lib/speaker-verify.js` — `SV_DIR` reads the same global, defaults to `/sv-runtime`.
+- `modelCache.ts` — `configuredAssetUrl()` reads `nemotron` and `ort` from the object form only; each must
+  be an http(s) URL or a same-origin path. Self-hosting `ort` needs `ort.min.js` (wake word),
+  `ort.webgpu.min.mjs` (Nemotron worker) and the `ort-wasm-simd-threaded.{mjs,wasm}` and
+  `ort-wasm-simd-threaded.asyncify.{mjs,wasm}` files they load.
 
 Set the global **before** the components mount (e.g. in `.storybook/preview` or the host's entry).
 

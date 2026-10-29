@@ -13,7 +13,7 @@
  */
 import * as React from 'react';
 import {
-  ONNX_RUNTIME_CDN,
+  onnxRuntimeBase,
   readAssetGlobal,
   registerModelServiceWorker,
 } from '../../modelCache';
@@ -164,7 +164,6 @@ export function warmWakeModels(assetBase?: string): Promise<void> {
 
 // Load onnxruntime-web as a global `ort`, which the detector's onnx.js prefers over the bundled package.
 // Same version as Nemotron, so the two share one cached runtime.
-const ORT_URL = `${ONNX_RUNTIME_CDN}ort.min.js`;
 let ortPromise: Promise<void> | null = null;
 function ensureOrt(): Promise<void> {
   if (typeof (window as unknown as { ort?: unknown }).ort !== 'undefined')
@@ -172,7 +171,7 @@ function ensureOrt(): Promise<void> {
   if (ortPromise) return ortPromise; // dedupe: concurrent useWakeWord mounts share one <script> load
   ortPromise = new Promise<void>((resolve) => {
     const s = document.createElement('script');
-    s.src = ORT_URL;
+    s.src = `${onnxRuntimeBase()}ort.min.js`;
     s.onload = () => resolve();
     // Best-effort: if the CDN is blocked (CSP/offline), don't hard-fail — lib/onnx.js falls back to the
     // bundled onnxruntime-web ESM when `window.ort` is undefined.
