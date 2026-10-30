@@ -620,6 +620,71 @@ describe('SuperChat media view', () => {
     ).toHaveFocus();
   });
 
+  it('takes focus in once a host reveals the phone dialog it had hidden', () => {
+    mockNativePlayback();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: query.includes('width < 40rem'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    // A hidden panel can't take focus, as in a browser.
+    const focus = HTMLElement.prototype.focus;
+    vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(function (
+      this: HTMLElement,
+      options?: Parameters<HTMLElement['focus']>[0]
+    ) {
+      if (!this.closest('.hidden-panel')) focus.call(this, options);
+    });
+    const props = {
+      conversation: videoConversation,
+      defaultView: 'media' as const,
+      mediaFeedProps: { layout: 'overlay' as const, autoPlay: false },
+    };
+    const { rerender } = render(
+      <SuperChat {...props} className="hidden-panel" />
+    );
+    expect(document.body).toHaveFocus();
+    rerender(<SuperChat {...props} className="shown-panel" />);
+    expect(
+      within(screen.getByRole('dialog')).getByRole('article', {
+        name: 'First clip',
+      })
+    ).toHaveFocus();
+  });
+
+  it('goes back on Escape whatever widgets the rest of the page has', async () => {
+    mockNativePlayback();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: query.includes('width < 40rem'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    const user = userEvent.setup();
+    render(
+      <>
+        <div role="listbox" aria-label="Transcript words" />
+        <SuperChat
+          conversation={videoConversation}
+          mediaFeedProps={{ layout: 'overlay', autoPlay: false }}
+        />
+      </>
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
   it('keeps a clip floating in picture in picture playing after Back, until its window closes', async () => {
     mockNativePlayback();
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause');

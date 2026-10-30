@@ -86,7 +86,14 @@ export interface SuperChatProps {
     view: SuperChatView,
     meta: { conversation: SuperChatConversation }
   ) => void;
-  /** MediaFeed behavior, labels and action/render slots for explicit attachments. */
+  /**
+   * MediaFeed behavior, labels and action/render slots for explicit
+   * attachments. With `layout: 'overlay'`, mount `useKeyboardInset()` once in
+   * the app shell: on a phone the panel sizes itself from the visible viewport
+   * it publishes, so the iOS keyboard doesn't cover the message box. With its
+   * `native` source, pad the composer by `--mieweb-keyboard-inset` as for any
+   * ChatComposer.
+   */
   mediaFeedProps?: SuperChatMediaFeedProps;
   /** Labels for media launches and returning to the conversation. */
   mediaLabels?: Partial<SuperChatMediaLabels>;
@@ -237,6 +244,30 @@ const PHONE_FULLSCREEN = [
   // rtl-ignore -- safe-area insets are physical screen edges
   '[@media(max-height:30rem)_and_(orientation:landscape)]:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))] [@media(max-height:30rem)_and_(orientation:landscape)]:pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]',
 ].join(' ');
+const isShown = (element: Element | null): element is HTMLElement =>
+  !!element &&
+  ((element as HTMLElement).checkVisibility?.({ visibilityProperty: true }) ??
+    !element.closest('[hidden]'));
+
+/**
+ * Whether a layer of the panel's own is open, which Escape closes first: a
+ * dialog inside it (the feed's viewer), or a popup one of its controls opened
+ * (a composer menu, portaled to the body). Widgets elsewhere on the page don't
+ * count.
+ */
+const POPUP_TRIGGERS = [
+  '[aria-expanded="true"][aria-controls][aria-haspopup]:not([aria-haspopup="false"])',
+  '[aria-expanded="true"][aria-controls][role="combobox"]',
+].join(', ');
+
+function hasOpenLayer(panel: HTMLElement): boolean {
+  if (Array.from(panel.querySelectorAll('[role="dialog"]')).some(isShown))
+    return true;
+  return Array.from(panel.querySelectorAll(POPUP_TRIGGERS)).some((control) =>
+    isShown(document.getElementById(control.getAttribute('aria-controls')!))
+  );
+}
+
 /** The header gives its room to the clip on the same screens. */
 const PHONE_HIDDEN =
   'max-sm:hidden [@media(max-height:30rem)_and_(orientation:landscape)]:hidden';
@@ -440,12 +471,7 @@ export function SuperChat({
       const target = event.target as Node | null;
       if (target !== document.body && !(target && panel.contains(target)))
         return;
-      const layered = Array.from(
-        document.querySelectorAll(
-          '[role="dialog"], [role="menu"], [role="listbox"]'
-        )
-      ).some((layer) => layer !== panel && !layer.closest('[hidden]'));
-      if (!layered) handleBackToConversation();
+      if (!hasOpenLayer(panel)) handleBackToConversation();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -489,9 +515,12 @@ export function SuperChat({
       ) ?? mediaFeedRef.current?.querySelector<HTMLElement>('[role="feed"]');
     if (target) focusMediaOnOpenRef.current = false;
     (target ?? backToConversationRef.current)?.focus({ preventScroll: true });
+    // className too: a host (SuperChatInbox on a phone) can reveal a panel it
+    // had hidden, where focus couldn't land, by changing only that.
   }, [
     activeView,
     covering,
+    className,
     panelRef,
     mediaFeedProps?.loading,
     mediaFeedProps?.error,
