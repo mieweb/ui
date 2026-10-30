@@ -127,10 +127,11 @@ function OverlayDetails({
           <p
             data-slot="author"
             // Host text can be in any language: each line takes its own
-            // direction, so it truncates at its own end.
+            // direction, so it truncates at its own end, and is only as wide
+            // as its text, so it still sits at the page's start edge.
             dir="auto"
             className={cn(
-              'm-0 truncate text-xs font-medium',
+              'm-0 w-fit max-w-full truncate text-xs font-medium',
               classNames.author
             )}
           >
@@ -143,7 +144,7 @@ function OverlayDetails({
             data-slot="title"
             dir="auto"
             className={cn(
-              'm-0 text-sm font-semibold',
+              'm-0 w-fit max-w-full text-sm font-semibold',
               expanded ? 'break-words' : 'truncate',
               classNames.title
             )}
@@ -161,7 +162,7 @@ function OverlayDetails({
             data-slot="caption"
             dir="auto"
             className={cn(
-              'pointer-events-auto m-0 text-xs break-words text-white/90',
+              'pointer-events-auto m-0 w-fit max-w-full text-xs break-words text-white/90',
               expanded
                 ? 'max-h-[40dvh] overflow-y-auto overscroll-contain'
                 : 'line-clamp-2',

@@ -130,6 +130,7 @@ export const miewebUISafelist = [
   // round overlay buttons, pointer-aware sizes and the narrow-player
   // container query and pointer variants (these need Tailwind 4.1).
   '@container',
+  'w-fit',
   'opacity-70',
   'max-h-[40dvh]',
   'via-black/75',
