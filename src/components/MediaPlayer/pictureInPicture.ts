@@ -28,6 +28,26 @@ export function isInPictureInPicture(
   );
 }
 
+/**
+ * Bring `video` back from picture in picture (either API). Resolves once it is
+ * back inline, or straight away when it wasn't floating.
+ */
+export function exitPictureInPicture(
+  video: HTMLMediaElement | null | undefined
+): Promise<void> {
+  if (!video || !isInPictureInPicture(video)) return Promise.resolve();
+  if (document.pictureInPictureElement === video)
+    return document.exitPictureInPicture().catch(() => {});
+  return new Promise((resolve) => {
+    video.addEventListener('webkitpresentationmodechanged', () => resolve(), {
+      once: true,
+    });
+    (video as WebKitVideo).webkitSetPresentationMode?.('inline');
+    // Don't wait on an event that may never come.
+    setTimeout(resolve, 1000);
+  });
+}
+
 /** Whether this browser can float `video` in picture in picture. */
 export function canPictureInPicture(video: WebKitVideo | null): boolean {
   if (!video || typeof document === 'undefined') return false;

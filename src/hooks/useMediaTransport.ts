@@ -197,6 +197,8 @@ export function useMediaTransport(
     // MediaRecorder webm often reports Infinity until the end is known.
     const onDurationChange = () => setDurationMs(toMs(element.duration));
     const onTimeUpdateEvt = () => emitTime();
+    // The speed can change outside these controls (iOS's own full screen player).
+    const onRateChange = () => setPlaybackRateState(element.playbackRate);
     const onPlay = () => setState('playing');
     const onPlaying = () => setState('playing');
     const onPause = () => setState('paused');
@@ -220,6 +222,7 @@ export function useMediaTransport(
     element.addEventListener('loadedmetadata', onLoadedMetadata);
     element.addEventListener('durationchange', onDurationChange);
     element.addEventListener('timeupdate', onTimeUpdateEvt);
+    element.addEventListener('ratechange', onRateChange);
     element.addEventListener('play', onPlay);
     element.addEventListener('playing', onPlaying);
     element.addEventListener('pause', onPause);
@@ -238,6 +241,7 @@ export function useMediaTransport(
       element.removeEventListener('loadedmetadata', onLoadedMetadata);
       element.removeEventListener('durationchange', onDurationChange);
       element.removeEventListener('timeupdate', onTimeUpdateEvt);
+      element.removeEventListener('ratechange', onRateChange);
       element.removeEventListener('play', onPlay);
       element.removeEventListener('playing', onPlaying);
       element.removeEventListener('pause', onPause);

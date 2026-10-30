@@ -50,7 +50,7 @@ import {
   filesToComposerAttachments,
   acceptTokensFor,
 } from './parts';
-import { VirtualThread } from './VirtualThread';
+import { VirtualThread, type VirtualThreadLayout } from './VirtualThread';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -221,8 +221,12 @@ export type SuperChatComposerProps = Omit<
 const PHONE_QUERY =
   '(width < 40rem), (max-height: 30rem) and (orientation: landscape)';
 const PHONE_FULLSCREEN = [
-  'max-sm:fixed max-sm:inset-0 max-sm:z-50',
-  '[@media(max-height:30rem)_and_(orientation:landscape)]:fixed [@media(max-height:30rem)_and_(orientation:landscape)]:inset-0 [@media(max-height:30rem)_and_(orientation:landscape)]:z-50',
+  // The visible viewport, not the layout one: iOS doesn't shrink the page for
+  // the keyboard. These are useKeyboardInset()'s variables; without them (no
+  // hook, or its native source, where the host pads the composer) it's the
+  // full screen.
+  'max-sm:fixed max-sm:inset-x-0 max-sm:z-50 max-sm:h-[var(--mieweb-visual-viewport-height,100dvh)] max-sm:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
+  '[@media(max-height:30rem)_and_(orientation:landscape)]:fixed [@media(max-height:30rem)_and_(orientation:landscape)]:inset-x-0 [@media(max-height:30rem)_and_(orientation:landscape)]:z-50 [@media(max-height:30rem)_and_(orientation:landscape)]:h-[var(--mieweb-visual-viewport-height,100dvh)] [@media(max-height:30rem)_and_(orientation:landscape)]:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
   // Clear the notch and home bar on every side; native shells can override
   // the insets with the --mieweb-safe-area-* variables (Modal's top and
   // bottom ones, plus left and right for a sideways phone).
@@ -471,7 +475,12 @@ export function SuperChat({
   }, [conversation.id, internalView.conversationId]);
 
   React.useEffect(() => {
-    if (activeView !== 'media' || !focusMediaOnOpenRef.current) return;
+    if (activeView !== 'media') return;
+    // A phone panel that turns modal with focus behind it (defaultView
+    // "media", a host's switch) takes focus in, like an inline launch.
+    const focusBehind =
+      covering && !panelRef.current?.contains(document.activeElement);
+    if (!focusMediaOnOpenRef.current && !focusBehind) return;
     // The inline action is unmounted by the view switch. Move its focus to the
     // selected media item, or the Back control while data is unavailable.
     const target =
@@ -482,6 +491,8 @@ export function SuperChat({
     (target ?? backToConversationRef.current)?.focus({ preventScroll: true });
   }, [
     activeView,
+    covering,
+    panelRef,
     mediaFeedProps?.loading,
     mediaFeedProps?.error,
     mediaItems.length,
@@ -569,6 +580,10 @@ export function SuperChat({
       }
     | undefined
   >(undefined);
+  // The virtualized thread's rows, kept while the media view is open.
+  const threadLayoutRef = React.useRef<VirtualThreadLayout | undefined>(
+    undefined
+  );
   const atBottomRef = React.useRef(isAtBottom);
   atBottomRef.current = isAtBottom;
   const pendingMediaOwnSendRef = React.useRef(false);
@@ -1135,6 +1150,7 @@ export function SuperChat({
               renderMessageMedia={renderMessageMedia}
               scrollRef={threadRef}
               contentRef={threadContentRef}
+              layoutRef={threadLayoutRef}
               containerProps={{
                 'data-slot': 'superchat-thread',
                 role: 'log',

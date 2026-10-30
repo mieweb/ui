@@ -447,7 +447,8 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           name={name}
           min={min}
           max={max}
-          step={step}
+          // A keyboard step off the step grid would be rounded on submit.
+          step={keyboardStep && keyboardStep > 0 ? 'any' : step}
           value={clampedValue}
           onChange={handleChange}
           disabled={disabled}

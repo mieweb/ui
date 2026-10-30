@@ -82,13 +82,17 @@ function NativeFeedMedia({
   const attemptId = React.useRef(0);
   const activeRef = React.useRef(active);
   const canSavePosition = React.useRef(false);
+  // The pending attempt autoplay started: that start isn't the viewer asking
+  // for playback. A newer attempt, or one that's called off, isn't it.
+  const autoAttempt = React.useRef<number | null>(null);
   activeRef.current = active;
 
-  const tryPlay = React.useCallback(async () => {
+  const tryPlay = React.useCallback(async (automatic = false) => {
     const element = mediaElementRef.current;
     if (!element || !activeRef.current) return;
     const attempt = ++attemptId.current;
     setBlocked(false);
+    autoAttempt.current = automatic ? attempt : null;
     try {
       // The native promise can reject when browser autoplay policy requires a
       // gesture. Playback state still comes from native events, never intent.
@@ -101,6 +105,8 @@ function NativeFeedMedia({
       if (!activeRef.current || attempt !== attemptId.current) return;
       if (error instanceof Error && error.name === 'AbortError') return;
       setBlocked(true);
+    } finally {
+      if (autoAttempt.current === attempt) autoAttempt.current = null;
     }
   }, []);
 
@@ -140,12 +146,18 @@ function NativeFeedMedia({
         latestPlaybackRequest.current === handledPlaybackRequest.current) &&
       (autoPlay || wantsPlayback.current)
     ) {
-      void tryPlay();
+      void tryPlay(!wantsPlayback.current);
     } else if (!active) {
       attemptId.current++;
-      // Leave a full screen this clip's player entered: an inactive item has
-      // no controls to leave it with.
-      if (element && document.fullscreenElement?.contains(element))
+      // Leave a full screen this clip's own player entered: an inactive item
+      // has no controls to leave it with.
+      const fullscreen = document.fullscreenElement;
+      if (
+        element &&
+        fullscreen &&
+        (fullscreen === element ||
+          fullscreen === element.closest('[data-slot="media-player-box"]'))
+      )
         void document.exitFullscreen?.()?.catch(() => {});
       pauseForOwnership(element);
       setBlocked(false);
@@ -231,11 +243,15 @@ function NativeFeedMedia({
           setState(next);
           if (next === 'playing') {
             ownershipPause.current = false;
-            // However it started (the player's own controls, a tap on the
-            // picture), the viewer wants it playing: it resumes when they come
-            // back to it, and the blocked-autoplay notice can go.
+            // Started by the viewer (the player's own controls, a tap on the
+            // picture), it resumes when they come back to it. Autoplay's own
+            // start leaves that to autoPlay. Either way the blocked-autoplay
+            // notice can go.
             setBlocked(false);
-            if (activeRef.current) {
+            if (
+              activeRef.current &&
+              autoAttempt.current !== attemptId.current
+            ) {
               wantsPlayback.current = true;
               playbackPosition.playRequested = true;
             }
@@ -292,6 +308,7 @@ function NativeFeedMedia({
           state !== 'playing' && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
                 aria-label={labels.play}
@@ -309,6 +326,7 @@ function NativeFeedMedia({
           )
         : state !== 'error' && (
             <Button
+              type="button"
               variant="secondary"
               size="sm"
               leftIcon={
@@ -463,6 +481,7 @@ function YouTubeFeedMedia({
           )}
           {id && !failed ? (
             <Button
+              type="button"
               variant="secondary"
               leftIcon={<Play className="h-4 w-4" aria-hidden="true" />}
               onClick={() => {
