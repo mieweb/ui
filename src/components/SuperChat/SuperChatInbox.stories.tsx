@@ -826,3 +826,42 @@ export const HostMediaCard: Story = {
     />
   ),
 };
+
+export const HostMediaCardNoPosters: Story = {
+  name: 'Host media card, no posters',
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The same host card when attachments have no `poster`: it falls back to the clip's first frame (`preload=\"metadata\"`), still in the clip's own shape. Prefer real thumbnails where the host has them: nothing of the video loads until it's played.",
+      },
+    },
+  },
+  render: () => (
+    <MediaConversationDemo
+      layout="overlay"
+      renderMessageMedia={(props) =>
+        props.attachment.kind === 'video' ? <HostCard {...props} /> : undefined
+      }
+    />
+  ),
+};
+
+export const MediaConversationPhoneRTL: Story = {
+  name: 'Media conversation, phone RTL',
+  globals: {
+    viewport: { value: 'mobile2', isRotated: false },
+    direction: 'rtl',
+  },
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The overlay media view in a right-to-left page: Back sits at the start edge (the right) with its arrow flipped, the details mirror, and the player’s bar stays left to right, as media timelines do.',
+      },
+    },
+  },
+  render: () => <MediaConversationDemo layout="overlay" />,
+};
