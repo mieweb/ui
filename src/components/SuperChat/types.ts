@@ -123,6 +123,12 @@ export interface SuperChatMessageMediaRenderProps {
    * returns to it when the viewer goes back to the conversation.
    */
   launchId: string;
+  /**
+   * The box the card fits in, both ways, as a CSS length (SuperChat's
+   * `mediaMaxSize`): a wide clip up to this wide, an upright one up to this
+   * tall, and never wider than the message. The built-in card is this wide.
+   */
+  maxSize: string;
 }
 
 /**

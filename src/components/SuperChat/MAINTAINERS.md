@@ -98,6 +98,15 @@ return focus. A virtualized thread mounts rows a frame or two late, so the
 focus return retries for up to ten frames before falling back to the thread.
 Keep the slot referentially stable (`useCallback`): rows are memoized.
 
+**One box for attachment cards: `mediaMaxSize`.** A length prop like
+ChatComposer's `maxHeight` (a pixel number or any CSS length, default
+`'18rem'`, which was the built-in card's `w-72` / `max-h-72`). The built-in
+card is that wide with its picture at most that tall, and `renderMessageMedia`
+gets it as `maxSize`, so a host card fits the same box at its clip's own shape.
+Both are `max-w-full`: the same size however long the text, smaller in a narrow
+message. SuperChat places a host's card as it is, so the box is a contract, not
+a wrapper.
+
 ### Overlay media view (`mediaFeedProps.layout: 'overlay'`)
 
 Opt-in; without it the media view is the stacked feed under a labelled Back.
