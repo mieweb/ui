@@ -82,9 +82,9 @@ function NativeFeedMedia({
   const attemptId = React.useRef(0);
   const activeRef = React.useRef(active);
   const canSavePosition = React.useRef(false);
-  // Set while autoplay starts the clip, so that start isn't taken as the
-  // viewer asking for playback.
-  const autoStarting = React.useRef(false);
+  // The pending attempt autoplay started: that start isn't the viewer asking
+  // for playback. A newer attempt, or one that's called off, isn't it.
+  const autoAttempt = React.useRef<number | null>(null);
   activeRef.current = active;
 
   const tryPlay = React.useCallback(async (automatic = false) => {
@@ -92,7 +92,7 @@ function NativeFeedMedia({
     if (!element || !activeRef.current) return;
     const attempt = ++attemptId.current;
     setBlocked(false);
-    autoStarting.current = automatic;
+    autoAttempt.current = automatic ? attempt : null;
     try {
       // The native promise can reject when browser autoplay policy requires a
       // gesture. Playback state still comes from native events, never intent.
@@ -106,7 +106,7 @@ function NativeFeedMedia({
       if (error instanceof Error && error.name === 'AbortError') return;
       setBlocked(true);
     } finally {
-      if (attempt === attemptId.current) autoStarting.current = false;
+      if (autoAttempt.current === attempt) autoAttempt.current = null;
     }
   }, []);
 
@@ -248,7 +248,10 @@ function NativeFeedMedia({
             // start leaves that to autoPlay. Either way the blocked-autoplay
             // notice can go.
             setBlocked(false);
-            if (activeRef.current && !autoStarting.current) {
+            if (
+              activeRef.current &&
+              autoAttempt.current !== attemptId.current
+            ) {
               wantsPlayback.current = true;
               playbackPosition.playRequested = true;
             }

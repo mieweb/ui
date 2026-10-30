@@ -341,6 +341,29 @@ describe('MediaFeed', () => {
     expect(clip.paused).toBe(true);
   });
 
+  it('counts a Play from the bar after a called-off autoplay as the viewer’s', async () => {
+    let reject = (_error: Error) => {};
+    play.mockImplementationOnce(
+      () => new Promise<void>((_resolve, fail) => (reject = fail))
+    );
+    const { container, rerender } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const clip = container.querySelector('video') as HTMLVideoElement;
+    // Autoplay is turned off while its start is still pending, which then
+    // fails.
+    rerender(<MediaFeed items={updates} {...accessors} autoPlay={false} />);
+    await act(async () => {
+      reject(new globalThis.DOMException('Interrupted', 'AbortError'));
+    });
+    // The viewer presses Play on the player's own bar.
+    act(() => void clip.play());
+    expect(clip.paused).toBe(false);
+    feedVisibility(false);
+    await waitFor(() => expect(clip.paused).toBe(true));
+    feedVisibility(true);
+    await waitFor(() => expect(clip.paused).toBe(false));
+  });
+
   it("leaves a full screen the host page entered, not the clip's player", () => {
     const exit = vi.fn(() => Promise.resolve());
     Object.defineProperty(document, 'fullscreenElement', {
