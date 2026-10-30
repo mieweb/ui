@@ -53,6 +53,8 @@ export interface SuperChatInboxProps {
   mediaFeedProps?: SuperChatProps['mediaFeedProps'];
   /** The host's card for a thread attachment (see {@link SuperChatProps.renderMessageMedia}). */
   renderMessageMedia?: SuperChatProps['renderMessageMedia'];
+  /** The box an attachment card fits in (see {@link SuperChatProps.mediaMaxSize}). */
+  mediaMaxSize?: SuperChatProps['mediaMaxSize'];
   /** Labels for the view switch and attachment previews. */
   mediaLabels?: SuperChatProps['mediaLabels'];
   /** Labels for per-message states (see {@link SuperChatProps.messageLabels}). */
@@ -158,6 +160,7 @@ export function SuperChatInbox({
   onViewChange,
   mediaFeedProps,
   renderMessageMedia,
+  mediaMaxSize,
   mediaLabels,
   messageLabels,
   activeConversationId,
@@ -313,6 +316,7 @@ export function SuperChatInbox({
           onViewChange={onViewChange}
           mediaFeedProps={mediaFeedProps}
           renderMessageMedia={renderMessageMedia}
+          mediaMaxSize={mediaMaxSize}
           mediaLabels={mediaLabels}
           messageLabels={messageLabels}
           currentParticipantId={currentParticipantId}

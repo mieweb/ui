@@ -13,8 +13,11 @@ export function MessageMedia({
   errorLabel,
   retryLabel,
   launchId,
+  maxSize,
 }: {
   attachment: SuperChatMediaAttachment;
+  /** The card's box, a CSS length: this wide, its picture at most this tall. */
+  maxSize: string;
   onOpen?: (play?: boolean) => void;
   openLabel: string;
   playLabel: string;
@@ -29,7 +32,9 @@ export function MessageMedia({
   return (
     <div
       data-slot="superchat-message-media"
-      className="mt-3 flex w-72 max-w-full flex-col gap-2"
+      // Never wider than the message.
+      style={{ width: maxSize }}
+      className="mt-3 flex max-w-full flex-col gap-2"
     >
       {attachment.title && (
         <p className="text-sm font-medium">{attachment.title}</p>
@@ -39,13 +44,17 @@ export function MessageMedia({
           src={attachment.src}
           alt={attachment.alt ?? attachment.title ?? ''}
           loading="lazy"
-          className="max-h-72 w-full rounded-lg object-contain"
+          style={{ maxHeight: maxSize }}
+          className="w-full rounded-lg object-contain"
         />
       ) : (attachment.kind === 'video' || attachment.kind === 'audio') &&
         attachment.src ? (
         // An opaque themed surface: the player's semi-transparent states
         // (error, loading) must never compose onto a colored chat bubble.
-        <div className="bg-background overflow-hidden rounded-lg">
+        <div
+          style={{ maxHeight: maxSize }}
+          className="bg-background overflow-hidden rounded-lg"
+        >
           <MediaPlayer
             src={attachment.src}
             kind={attachment.kind}
@@ -54,7 +63,7 @@ export function MessageMedia({
             controls={!onOpen}
             preload="metadata"
             labels={{ error: errorLabel, retry: retryLabel }}
-            className="max-h-72"
+            className="max-h-[inherit]"
           />
         </div>
       ) : attachment.poster ? (
@@ -62,7 +71,8 @@ export function MessageMedia({
           src={attachment.poster}
           alt={attachment.alt ?? attachment.title ?? ''}
           loading="lazy"
-          className="max-h-72 w-full rounded-lg object-contain"
+          style={{ maxHeight: maxSize }}
+          className="w-full rounded-lg object-contain"
         />
       ) : null}
       {attachment.caption && <p className="text-sm">{attachment.caption}</p>}

@@ -671,6 +671,8 @@ interface MessageRowProps {
   scheduledLabel?: string;
   /** The host's card for an attachment, in place of the built-in one. */
   renderMessageMedia?: SuperChatRenderMessageMedia;
+  /** The box an attachment card fits in, a CSS length (SuperChat's `mediaMaxSize`). */
+  mediaMaxSize?: string;
 }
 
 /**
@@ -699,6 +701,7 @@ export const MessageRow = React.memo(function MessageRow({
   mediaRetryLabel,
   scheduledLabel = 'Scheduled',
   renderMessageMedia,
+  mediaMaxSize = '18rem',
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasBody =
@@ -1178,9 +1181,11 @@ export const MessageRow = React.memo(function MessageRow({
                         attachment,
                         open,
                         launchId,
+                        maxSize: mediaMaxSize,
                       }) ?? (
                         <MessageMedia
                           attachment={attachment}
+                          maxSize={mediaMaxSize}
                           openLabel={openMediaLabel}
                           playLabel={playMediaLabel}
                           errorLabel={mediaErrorLabel}

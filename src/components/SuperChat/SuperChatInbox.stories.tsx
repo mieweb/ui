@@ -70,10 +70,16 @@ const meta: Meta<typeof SuperChatInbox> = {
         "Optional media feed labels, actions and playback configuration for the active conversation. `layout: 'overlay'` makes the media view mobile-first: full screen on a phone, upright or sideways. It needs `useKeyboardInset()` mounted in the app shell, so the panel fits above the phone's keyboard.",
       table: { category: 'Slots' },
     },
+    mediaMaxSize: {
+      control: 'text',
+      description:
+        "The box an attachment card in the thread fits in, both ways: a pixel number or any CSS length (default `'18rem'`). The built-in card is this wide; a host card gets it as `maxSize`. Cards keep this size however long the message and shrink to fit a narrower one.",
+      table: { category: 'Appearance' },
+    },
     renderMessageMedia: {
       control: false,
       description:
-        "The host's card for an attachment in the thread, in place of the built-in one. Receives `{ message, attachment, open, launchId }`; put `launchId` on the card's control as `data-media-launch-id`.",
+        "The host's card for an attachment in the thread, in place of the built-in one. Receives `{ message, attachment, open, launchId, maxSize }`; put `launchId` on the card's control as `data-media-launch-id`, and fit the card in `maxSize` both ways at the clip's own shape.",
       table: { category: 'Slots' },
     },
     readOnly: {
@@ -819,12 +825,15 @@ function HostCard({
   attachment,
   open,
   launchId,
+  maxSize,
 }: SuperChatMessageMediaRenderProps) {
   // Width ÷ height, once the thumbnail (or the clip) says.
   const [aspect, setAspect] = React.useState<number>();
   // The host owns this text; localize it like the rest of the app.
   const label = `Play ${attachment.title ?? 'video'}`;
-  const upright = aspect !== undefined && aspect < 1;
+  // SuperChat's box (`maxSize`) at the clip's own shape: a wide clip up to
+  // that wide, an upright one up to that tall, never wider than the message.
+  const width = `min(${maxSize}, calc(${maxSize} * ${aspect ?? 16 / 9}))`;
   const frame = {
     style: { aspectRatio: aspect ?? 16 / 9 },
     className: 'block w-full bg-black object-cover',
@@ -835,7 +844,8 @@ function HostCard({
       data-media-launch-id={launchId}
       aria-label={label}
       onClick={() => open(true)}
-      className={`focus-visible:ring-ring relative mt-2 block max-w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:outline-none ${upright ? 'w-36' : 'w-60'}`}
+      style={{ width }}
+      className="focus-visible:ring-ring relative mt-2 block max-w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:outline-none"
     >
       {attachment.poster ? (
         // The thumbnail: nothing of the video loads until it's played.

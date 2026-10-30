@@ -201,6 +201,26 @@ describe('SuperChat media view', () => {
     ).toHaveFocus();
   });
 
+  it("sizes attachment cards, built-in and the host's, from mediaMaxSize", () => {
+    const host = vi.fn(() => null);
+    const { container } = render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaMaxSize={256}
+        renderMessageMedia={host}
+      />
+    );
+    expect(host).toHaveBeenCalledWith(
+      expect.objectContaining({ maxSize: '256px' })
+    );
+    // The host returned nothing for it, so the built-in card stands in.
+    const card = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-message-media"]'
+    );
+    expect(card?.style.width).toBe('256px');
+    expect(card).toHaveClass('max-w-full');
+  });
+
   it('leaves a text-only conversation on its existing thread surface', () => {
     render(
       <SuperChat

@@ -64,6 +64,8 @@ export interface VirtualThreadProps {
   scheduledLabel?: string;
   /** The host's card for an attachment, forwarded to each row. */
   renderMessageMedia?: SuperChatRenderMessageMedia;
+  /** The attachment cards' box, a CSS length, forwarded to each row. */
+  mediaMaxSize?: string;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -100,6 +102,7 @@ export function VirtualThread({
   mediaRetryLabel,
   scheduledLabel,
   renderMessageMedia,
+  mediaMaxSize,
   scrollRef,
   contentRef,
   layoutRef,
@@ -178,6 +181,7 @@ export function VirtualThread({
                   mediaRetryLabel={mediaRetryLabel}
                   scheduledLabel={scheduledLabel}
                   renderMessageMedia={renderMessageMedia}
+                  mediaMaxSize={mediaMaxSize}
                 />
               </div>
             </div>

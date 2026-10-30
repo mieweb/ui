@@ -101,9 +101,18 @@ export interface SuperChatProps {
   messageLabels?: Partial<SuperChatMessageLabels>;
   /**
    * Renders an attachment in the thread in place of the built-in card, e.g. the
-   * host's own video card. Its `open` opens the media view at that attachment.
+   * host's own video card. Its `open` opens the media view at that attachment,
+   * and its `maxSize` is the box to fit (`mediaMaxSize`).
    */
   renderMessageMedia?: SuperChatRenderMessageMedia;
+  /**
+   * The box an attachment card in the thread fits in, both ways: a pixel number
+   * or any CSS length. The built-in card is this wide, its picture at most this
+   * tall; a host's card gets it as `maxSize`. Cards keep this size however long
+   * the message, and shrink to fit a narrower one.
+   * @default '18rem'
+   */
+  mediaMaxSize?: number | string;
   /** The participant id representing the local user (alignment + compose). */
   currentParticipantId?: string;
   /** Opt-in rich render plugins (code/math/genui/…). */
@@ -285,6 +294,7 @@ export function SuperChat({
   mediaLabels,
   messageLabels,
   renderMessageMedia,
+  mediaMaxSize = '18rem',
   currentParticipantId,
   renderPlugins,
   renderTextContent,
@@ -350,6 +360,8 @@ export function SuperChat({
   const playbackRequestCounter = React.useRef(0);
   const mediaFeedRef = React.useRef<HTMLDivElement>(null);
   const overlay = mediaFeedProps?.layout === 'overlay';
+  const mediaBox =
+    typeof mediaMaxSize === 'number' ? `${mediaMaxSize}px` : mediaMaxSize;
   const isPhone = useMediaQuery(PHONE_QUERY);
   // With the overlay media view open on a phone, the panel covers the
   // screen (media above, message box below), so it acts as a modal there:
@@ -877,6 +889,7 @@ export function SuperChat({
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
       scheduledLabel={scheduledLabel}
       renderMessageMedia={renderMessageMedia}
+      mediaMaxSize={mediaBox}
     />
   );
 
@@ -1177,6 +1190,7 @@ export function SuperChat({
               mediaRetryLabel={mediaFeedProps?.labels?.retry}
               scheduledLabel={scheduledLabel}
               renderMessageMedia={renderMessageMedia}
+              mediaMaxSize={mediaBox}
               scrollRef={threadRef}
               contentRef={threadContentRef}
               layoutRef={threadLayoutRef}

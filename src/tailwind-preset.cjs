@@ -110,6 +110,8 @@ module.exports = {
     'via-black/75',
     'bottom-16',
     'dark:bg-white/30',
+    // SuperChat's built-in attachment card: the player takes its box's height.
+    'max-h-[inherit]',
     // SuperChat's overlay media view: full screen on a phone, upright or
     // sideways, inside the safe areas and the visible viewport; Back over
     // the clip's corner.
