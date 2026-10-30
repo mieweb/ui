@@ -479,6 +479,32 @@ function Dropdown({
   );
   useClickOutside(outsideRefs, handleClose, isOpen);
 
+  // A scroll that moves the trigger closes the menu, as a menu does: kept
+  // open, the menu (fixed to the screen, clamped inside it) would float away
+  // from its trigger over whatever scrolled under. Scrolling inside the menu
+  // or a submenu, and the scroll iOS makes to show the keyboard for the search
+  // field, leave it open; so does scrolling the page itself, which the menu
+  // follows.
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const inMenu = (node: Node | null) =>
+      !!node && outsideRefs.some((ref) => ref.current?.contains(node));
+    const onScroll = (event: Event) => {
+      const target = event.target;
+      const trigger = containerRef.current;
+      if (!(target instanceof Element) || !trigger) return;
+      if (!target.contains(trigger) || inMenu(target)) return;
+      const active = document.activeElement;
+      const typing =
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement;
+      if (typing && inMenu(active)) return;
+      handleClose();
+    };
+    window.addEventListener('scroll', onScroll, true);
+    return () => window.removeEventListener('scroll', onScroll, true);
+  }, [isOpen, outsideRefs, handleClose]);
+
   React.useEffect(() => {
     if (!isOpen) {
       setSearchQuery('');

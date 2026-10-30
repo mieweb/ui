@@ -13,6 +13,22 @@ import {
 } from './Dropdown';
 
 describe('Dropdown', () => {
+  it('closes when a scroll moves its trigger, not for one inside the menu', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <div data-testid="thread" style={{ overflow: 'auto', height: 100 }}>
+        <Dropdown trigger={<Button>Open menu</Button>}>
+          <DropdownItem>Alpha</DropdownItem>
+        </Dropdown>
+      </div>
+    );
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    fireEvent.scroll(screen.getByRole('menu'));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    fireEvent.scroll(screen.getByTestId('thread'));
+    await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+
   it('renders a search input when searchable is enabled', async () => {
     const user = userEvent.setup();
 
