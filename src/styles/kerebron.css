@@ -254,6 +254,16 @@
   line-height: 1;
 }
 
+/* The toolbar collapses extras into its “…” overflow, but that width math
+ * can lag injected buttons and window resizes. It lays out nowrap with
+ * overflow visible, so without a wrap fallback the tail buttons spill out
+ * of the bar and paint (it is z-index 1000) over the editable and the
+ * docked macro panel below. Wrapping lets the bar grow a row instead;
+ * content reflows under it. */
+.kb-custom-menu {
+  flex-wrap: wrap;
+}
+
 /*
  * RTL (#319) — Kerebron's content.css/prosemirror.css use physical-direction
  * properties, so these parts don't mirror under dir="rtl". Restate them as
