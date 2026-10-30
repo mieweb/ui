@@ -25,39 +25,15 @@ type Surface = React.ForwardRefExoticComponent<
  * (`##` + space → heading…), the Notion-style block gutter menu, and
  * `.shortcut` macro expansion when `macros` is provided.
  *
- * The editing engine is Kerebron (ProseMirror) when the optional
- * `@kerebron/*` peers are installed; otherwise it degrades to the legacy
- * `RichTextEditor` engine. The value contract is identical either way:
- * `value`/`onChange` carry **HTML**, not plain text. Need plain text for
- * form posts or native bindings — use `Textarea`. Need the full always-on
- * document toolbar — use `RichEditor`.
+ * This main-bundle export is backed by the legacy `RichTextEditor` engine so
+ * it works with zero optional peers or extra CSS. A Kerebron (ProseMirror)
+ * engine with the same props contract ships from `@mieweb/ui/kerebron` —
+ * install the `@kerebron/*` peers, import `@mieweb/ui/kerebron.css`, and
+ * switch the import path to upgrade deliberately. The value contract is
+ * identical either way: `value`/`onChange` carry **HTML**, not plain text.
+ * Need plain text for form posts or native bindings — use `Textarea`. Need
+ * the full always-on document toolbar — use `RichEditor`.
  */
-const TextAreaRich = React.forwardRef<HTMLDivElement, TextAreaRichProps>(
-  (props, ref) => {
-    // The Kerebron surface loads lazily so `@kerebron/*` stays an optional
-    // peer of the main barrel. Until it lands (or when the peers are absent
-    // and the chunk fails to resolve) the legacy engine renders — fully
-    // functional, same props, same chrome.
-    const [surface, setSurface] = React.useState<Surface | null>(null);
-    React.useEffect(() => {
-      let cancelled = false;
-      import('./TextAreaRichKerebron')
-        .then((module_) => {
-          if (!cancelled) setSurface(() => module_.TextAreaRichKerebron);
-        })
-        .catch(() => {
-          // Peers not installed — stay on the legacy engine.
-        });
-      return () => {
-        cancelled = true;
-      };
-    }, []);
-
-    const Component = surface ?? TextAreaRichLegacy;
-    return <Component ref={ref} {...props} />;
-  }
-);
-
-TextAreaRich.displayName = 'TextAreaRich';
+const TextAreaRich: Surface = TextAreaRichLegacy;
 
 export { TextAreaRich };

@@ -12,6 +12,13 @@ import { getEncounterFieldId } from './definition';
 import type { EncounterVisitDefinition, EncounterVisitSnapshot } from './types';
 import { CodeLookupProvider } from '../CodeLookup/context';
 
+// ProseMirror resists jsdom simulation; narrative fields run on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
+
 const definition: EncounterVisitDefinition = {
   id: 'test-visit',
   title: 'Anonymous exam',

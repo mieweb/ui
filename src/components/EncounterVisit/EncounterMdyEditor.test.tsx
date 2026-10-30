@@ -9,6 +9,13 @@ import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
 import type { EncounterVisitDefinition } from './types';
 
+// ProseMirror resists jsdom simulation; narrative fields run on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
+
 const mock = vi.hoisted(() => ({
   mode: 'initial-failure' as
     | 'initial-failure'

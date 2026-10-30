@@ -18,6 +18,13 @@ import {
 import { EncounterMessagesProvider } from './messages';
 import { getEncounterNarrativeFindings } from './narrativeFindings';
 
+// ProseMirror resists jsdom simulation; field logic runs on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
+
 function props(
   overrides: Partial<FieldComponentProps> = {}
 ): FieldComponentProps {

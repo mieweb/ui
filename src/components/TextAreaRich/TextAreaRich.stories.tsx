@@ -25,6 +25,7 @@ const meta: Meta<typeof TextAreaRich> = {
 
 - The consumer needs **plain text** — form posts, eSheet bindings, anything that treats the value as a string of words — use \`Textarea\`.
 - The writer works in a full document with an always-visible toolbar, merge variables or dictation — use \`RichTextEditor\`.
+- The field should ride the Kerebron (ProseMirror) engine instead of \`document.execCommand\` — same props contract from [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) (\`@mieweb/ui/kerebron\`).
 - An eSheet should guide a whole multi-section document with memory-aid macros — use [RichTextEsheet](?path=/docs/editors-richtextesheet--docs) (\`@mieweb/ui/esheet\`).
 - The stored format is **Markdown** or you need links/tables/code/collaboration — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
 
@@ -65,6 +66,11 @@ The host owns the HTML string and is responsible for sanitising it before storag
           type: 'alternative to',
           target: 'editors-richtexteditor',
           why: 'TextAreaRich is RichTextEditor in chromeless mode — blockMenu, markdownShortcuts, hidden-by-default toolbar — wrapped in Textarea-matched chrome for comment-sized fields; RichTextEditor for full documents with the toolbar on.',
+        },
+        {
+          type: 'alternative to',
+          target: 'editors-textarearich-kerebron',
+          why: 'Same TextAreaRichProps contract on the Kerebron (ProseMirror) engine from @mieweb/ui/kerebron; this main-barrel surface needs zero optional peers or extra CSS.',
         },
         {
           type: 'composes with',

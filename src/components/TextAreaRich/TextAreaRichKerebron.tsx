@@ -38,8 +38,9 @@ import { getSpeechRecognition, type SpeechRecognitionLike } from './speech';
  * macro panel, `.shortcut` expansion and dictation — same `TextAreaRichProps`
  * contract (`value`/`onChange` carry HTML) as the legacy surface.
  *
- * Loaded dynamically by `TextAreaRich` so `@kerebron/*` stays an optional
- * peer; never import this module directly.
+ * Exported as `TextAreaRich` from `@mieweb/ui/kerebron` (NOT the main
+ * bundle) so `@kerebron/*` stays an optional peer: hosts opt in by switching
+ * the import path, installing the peers, and loading `@mieweb/ui/kerebron.css`.
  */
 
 /** Carries our keydown behaviors (macro shortcuts, Ctrl+/) into the editor. */

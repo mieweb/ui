@@ -169,7 +169,7 @@ A guided rich text document backed by one **eSheet** response store: letters, su
 
 ### Example
 
-Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (the shared entry re-exports the builder).
+Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (the shared entry re-exports the builder). Narrative sections ride the Kerebron \`TextAreaRich\` surface, so the Kerebron peers documented at \`@mieweb/ui/kerebron\` are also required: load \`@mieweb/ui/kerebron.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\`.
 
 \`\`\`tsx
 import { RichTextEsheet } from '@mieweb/ui/esheet';

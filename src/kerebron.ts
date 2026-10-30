@@ -16,3 +16,9 @@
  * at that path (see .storybook/main.ts for the Storybook setup).
  */
 export * from './components/RichEditor';
+
+// The Kerebron-backed TextAreaRich surface. Same `TextAreaRichProps`
+// contract as the main-bundle (legacy-engine) `TextAreaRich` — upgrading is
+// an import-path change: `import { TextAreaRich } from '@mieweb/ui/kerebron'`.
+export { TextAreaRichKerebron as TextAreaRich } from './components/TextAreaRich/TextAreaRichKerebron';
+export type { TextAreaRichProps } from './components/TextAreaRich';

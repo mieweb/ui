@@ -77,6 +77,11 @@ const groups: MacroGroup[] = [
           why: 'TextAreaRich forwards its macros prop to the underlying RichTextEditor; the gutter menu’s “Show macro library” docks this panel beside the textarea-like surface.',
         },
         {
+          type: 'composes with',
+          target: 'editors-textarearich-kerebron',
+          why: 'The Kerebron TextAreaRich surface docks the same panel beside its ProseMirror editor via the macros prop and gutter menu.',
+        },
+        {
           type: 'uses',
           target: 'text-inputs-input',
           why: 'The macro search box is an Input with a leading search icon.',

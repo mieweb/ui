@@ -19,7 +19,11 @@ import DOMPurify from 'dompurify';
 import type { FieldComponentProps, FieldResponse } from '@esheet/core';
 import { getFieldComponent, registerCustomFieldTypes } from '@esheet/fields';
 import type { MacroGroup } from '../components/MacroLibrary';
-import { TextAreaRich } from '../components/TextAreaRich';
+// The esheet entry is Kerebron-aware (EncounterVisit's RichEdit mode already
+// requires the peers + `@mieweb/ui/kerebron.css`), so narrative fields ride
+// the Kerebron-backed TextAreaRich surface rather than the legacy engine
+// exported from the main bundle.
+import { TextAreaRichKerebron as TextAreaRich } from '../components/TextAreaRich/TextAreaRichKerebron';
 import { useMessages } from '../utils/messages';
 import {
   applyNarrativeFinding,

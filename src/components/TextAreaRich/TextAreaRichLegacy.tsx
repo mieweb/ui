@@ -4,11 +4,12 @@ import { RichTextEditor } from '../RichTextEditor';
 import type { TextAreaRichProps } from './TextAreaRich';
 
 /**
- * The original `RichTextEditor`-backed TextAreaRich surface. Kept as the
- * fallback engine while the Kerebron surface rolls out: `TextAreaRich`
- * renders this when the optional `@kerebron/*` peers are not installed, and
- * `Textarea` uses it directly (its plain-text resync writes `innerHTML`
- * into the editable region, which would corrupt a ProseMirror view).
+ * The original `RichTextEditor`-backed TextAreaRich surface: the engine
+ * behind the main-bundle `TextAreaRich`, needing no optional peers or extra
+ * CSS. The Kerebron engine ships separately from `@mieweb/ui/kerebron`.
+ * `Textarea` uses this surface directly (its plain-text resync writes
+ * `innerHTML` into the editable region, which would corrupt a ProseMirror
+ * view).
  */
 const TextAreaRichLegacy = React.forwardRef<HTMLDivElement, TextAreaRichProps>(
   (
