@@ -802,6 +802,96 @@ describe('SuperChat', () => {
     expect(screen.getByLabelText('Message')).toBeDisabled();
   });
 
+  describe('composerProps', () => {
+    it('overrides the placeholder and renders a leadingSlot button', () => {
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{
+            placeholder: 'Post an update…',
+            leadingSlot: <button type="button">Pulse video</button>,
+          }}
+        />
+      );
+      expect(screen.getByLabelText('Message')).toHaveAttribute(
+        'placeholder',
+        'Post an update…'
+      );
+      expect(
+        screen.getByRole('button', { name: 'Pulse video' })
+      ).toBeInTheDocument();
+    });
+
+    it('keeps sending through onMessageSent', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const onMessageSent = vi.fn();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageSent={onMessageSent}
+          composerProps={{ placeholder: 'Post an update…' }}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'hi there');
+      await user.click(screen.getByRole('button', { name: 'Send message' }));
+      await waitFor(() =>
+        expect(onMessageSent).toHaveBeenCalledWith(
+          'hi there',
+          expect.objectContaining({ conversation })
+        )
+      );
+    });
+
+    it('passes the chosen send option to onMessageSent', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const onMessageSent = vi.fn();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageSent={onMessageSent}
+          composerProps={{
+            sendOptions: [{ id: 'later', label: 'Send later…' }],
+          }}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'tomorrow');
+      await user.click(
+        screen.getByRole('button', { name: 'More send options' })
+      );
+      await user.click(screen.getByRole('menuitem', { name: 'Send later…' }));
+      await waitFor(() =>
+        expect(onMessageSent).toHaveBeenCalledWith(
+          'tomorrow',
+          expect.objectContaining({ sendOption: 'later' })
+        )
+      );
+    });
+
+    it('turns @mentions off with an empty mentionOptions', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{ mentionOptions: [] }}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'hello @Tri');
+      expect(
+        screen.queryByRole('listbox', { name: 'Mention' })
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('opens an @-mention menu and inserts the chosen participant', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
@@ -1004,6 +1094,36 @@ describe('SuperChat', () => {
       </div>
     );
     expect(screen.getByText('(edited)')).toBeInTheDocument();
+  });
+
+  it('draws a scheduled message as pending with its time', () => {
+    const scheduled: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        { ...conversation.thread[0], scheduledFor: '2026-06-08T09:00:00Z' },
+        conversation.thread[1],
+      ],
+    };
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={scheduled}
+          currentParticipantId="u1"
+          messageLabels={{ scheduled: 'Programado' }}
+        />
+      </div>
+    );
+    const indicators = container.querySelectorAll(
+      '[data-slot="superchat-scheduled-indicator"]'
+    );
+    expect(indicators).toHaveLength(1);
+    expect(indicators[0]).toHaveTextContent(/^Programado · /);
+    expect(
+      container.querySelectorAll('[data-slot="superchat-bubble"][data-pending]')
+    ).toHaveLength(1);
+    expect(
+      screen.getByRole('article', { name: /Programado · / })
+    ).toBeInTheDocument();
   });
 
   it('shows a copy affordance on every content message', () => {
@@ -1597,6 +1717,35 @@ describe('SuperChatConversations', () => {
     await user.click(screen.getByLabelText('New conversation'));
     expect(onNewConversation).toHaveBeenCalled();
   });
+
+  it('renders listFooter after the last conversation, inside the list', () => {
+    const { container } = render(
+      <SuperChatConversations
+        conversations={conversations}
+        listFooter={<span>No older conversations</span>}
+      />
+    );
+    const list = container.querySelector(
+      '[data-slot="superchat-conversation-list"]'
+    ) as HTMLElement;
+    expect(
+      within(list).getByText('No older conversations')
+    ).toBeInTheDocument();
+    expect(list.lastElementChild).toContainElement(
+      screen.getByText('No older conversations')
+    );
+  });
+
+  it('renders no footer element without listFooter', () => {
+    const { container } = render(
+      <SuperChatConversations conversations={conversations} />
+    );
+    expect(
+      container.querySelector(
+        '[data-slot="superchat-conversation-list-footer"]'
+      )
+    ).toBeNull();
+  });
 });
 
 describe('SuperChatInbox', () => {
@@ -1649,6 +1798,286 @@ describe('SuperChatInbox', () => {
     expect(panel).not.toBeNull();
     const thread = within(panel as HTMLElement);
     expect(thread.getByText('first conversation')).toBeInTheDocument();
+  });
+
+  it('starts on the list below sm, or on the chat with defaultMobileView="chat"', () => {
+    const panelHidden = (defaultMobileView?: 'list' | 'chat') => {
+      const { container, unmount } = render(
+        <div style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={conversations}
+            currentParticipantId="u1"
+            defaultActiveConversationId="c1"
+            defaultMobileView={defaultMobileView}
+          />
+        </div>
+      );
+      const hidden = (
+        container.querySelector('[data-slot="superchat"]') as HTMLElement
+      ).classList.contains('hidden');
+      unmount();
+      return hidden;
+    };
+    expect(panelHidden()).toBe(true);
+    expect(panelHidden('chat')).toBe(false);
+  });
+
+  describe('resizable sidebar', () => {
+    const renderInbox = (
+      props: Partial<React.ComponentProps<typeof SuperChatInbox>> = {}
+    ) =>
+      render(
+        <div style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={conversations}
+            currentParticipantId="u1"
+            {...props}
+          />
+        </div>
+      );
+    const sidebarWidth = (container: HTMLElement) =>
+      (
+        container.querySelector('[data-slot="superchat-inbox"]') as HTMLElement
+      ).style.getPropertyValue('--superchat-sidebar-width');
+    // jsdom has no PointerEvent, and fireEvent.pointer* drops clientX; a
+    // MouseEvent of the pointer type carries it.
+    const pointer = (
+      el: HTMLElement,
+      type: 'pointerdown' | 'pointermove' | 'pointerup',
+      clientX = 0
+    ) =>
+      fireEvent(
+        el,
+        new MouseEvent(type, { bubbles: true, button: 0, clientX })
+      );
+
+    it('renders no divider and the default 256px width without resizableSidebar', () => {
+      const { container } = renderInbox();
+      expect(screen.queryByRole('separator')).toBeNull();
+      expect(sidebarWidth(container)).toBe('256px');
+    });
+
+    it('exposes the divider as a labelled vertical separator', () => {
+      renderInbox({ resizableSidebar: true });
+      const handle = screen.getByRole('separator', {
+        name: 'Resize conversation list',
+      });
+      expect(handle).toHaveAttribute('aria-orientation', 'vertical');
+      expect(handle).toHaveAttribute('aria-valuenow', '256');
+      expect(handle).toHaveAttribute('aria-valuemin', '200');
+      expect(handle).toHaveAttribute('aria-valuemax', '480');
+      expect(handle).toHaveAttribute('tabindex', '0');
+      // Hidden below sm, where only one pane shows.
+      expect(handle).toHaveClass('hidden', 'sm:block');
+    });
+
+    it('resizes by dragging, clamped to the min and max', () => {
+      const onSidebarWidthChange = vi.fn();
+      const { container } = renderInbox({
+        resizableSidebar: true,
+        onSidebarWidthChange,
+      });
+      const handle = screen.getByRole('separator');
+      pointer(handle, 'pointerdown', 256);
+      pointer(handle, 'pointermove', 300);
+      expect(sidebarWidth(container)).toBe('300px');
+      // Reported once the drag ends, not on every move.
+      expect(onSidebarWidthChange).not.toHaveBeenCalled();
+      pointer(handle, 'pointermove', 2000);
+      expect(sidebarWidth(container)).toBe('480px');
+      pointer(handle, 'pointermove', 0);
+      expect(sidebarWidth(container)).toBe('200px');
+      pointer(handle, 'pointerup');
+      expect(onSidebarWidthChange).toHaveBeenCalledTimes(1);
+      expect(onSidebarWidthChange).toHaveBeenCalledWith(200);
+      pointer(handle, 'pointermove', 400);
+      expect(sidebarWidth(container)).toBe('200px');
+    });
+
+    it('reports the width right away for a key press', () => {
+      const onSidebarWidthChange = vi.fn();
+      renderInbox({ resizableSidebar: true, onSidebarWidthChange });
+      fireEvent.keyDown(screen.getByRole('separator'), { key: 'ArrowRight' });
+      expect(onSidebarWidthChange).toHaveBeenCalledWith(272);
+    });
+
+    it('reverts a drag to a controlled sidebarWidth the host did not update', () => {
+      const { container } = renderInbox({
+        resizableSidebar: true,
+        sidebarWidth: 360,
+      });
+      const handle = screen.getByRole('separator');
+      pointer(handle, 'pointerdown', 360);
+      pointer(handle, 'pointermove', 400);
+      expect(sidebarWidth(container)).toBe('400px');
+      pointer(handle, 'pointerup');
+      expect(sidebarWidth(container)).toBe('360px');
+    });
+
+    it('resizes with the arrow keys, Home and End', () => {
+      renderInbox({ resizableSidebar: true });
+      const handle = screen.getByRole('separator');
+      fireEvent.keyDown(handle, { key: 'ArrowRight' });
+      expect(handle).toHaveAttribute('aria-valuenow', '272');
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+      expect(handle).toHaveAttribute('aria-valuenow', '240');
+      fireEvent.keyDown(handle, { key: 'End' });
+      expect(handle).toHaveAttribute('aria-valuenow', '480');
+      fireEvent.keyDown(handle, { key: 'Home' });
+      expect(handle).toHaveAttribute('aria-valuenow', '200');
+    });
+
+    it('inverts drag and arrow keys in RTL', () => {
+      const { container } = render(
+        <div dir="rtl" style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={conversations}
+            currentParticipantId="u1"
+            resizableSidebar
+          />
+        </div>
+      );
+      const handle = screen.getByRole('separator');
+      // jsdom doesn't inherit `direction` from `dir`; set it on the handle.
+      handle.style.direction = 'rtl';
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+      expect(handle).toHaveAttribute('aria-valuenow', '272');
+      pointer(handle, 'pointerdown', 500);
+      pointer(handle, 'pointermove', 450);
+      expect(sidebarWidth(container)).toBe('322px');
+    });
+
+    it('restores defaultSidebarWidth on double-click', () => {
+      const onSidebarWidthChange = vi.fn();
+      renderInbox({
+        resizableSidebar: true,
+        sidebarWidth: 400,
+        defaultSidebarWidth: 300,
+        onSidebarWidthChange,
+      });
+      fireEvent.doubleClick(screen.getByRole('separator'));
+      expect(onSidebarWidthChange).toHaveBeenCalledWith(300);
+    });
+
+    it('follows a controlled sidebarWidth', () => {
+      const { container } = renderInbox({
+        resizableSidebar: true,
+        sidebarWidth: 360,
+      });
+      const handle = screen.getByRole('separator');
+      fireEvent.keyDown(handle, { key: 'ArrowRight' });
+      // Controlled: the width stays until the host passes the new one.
+      expect(sidebarWidth(container)).toBe('360px');
+    });
+
+    it('limits the width so the panel keeps 240px, and announces it', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 600 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+        });
+        const handle = screen.getByRole('separator');
+        expect(sidebarWidth(container)).toBe('360px');
+        expect(handle).toHaveAttribute('aria-valuenow', '360');
+        expect(handle).toHaveAttribute('aria-valuemax', '360');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('saves the default on double-click even when a narrow inbox already shows it', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 496 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const onSidebarWidthChange = vi.fn();
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+          onSidebarWidthChange,
+        });
+        expect(sidebarWidth(container)).toBe('256px');
+        fireEvent.doubleClick(screen.getByRole('separator'));
+        expect(onSidebarWidthChange).toHaveBeenCalledWith(256);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('keeps the stored width when a key press leaves the divider where it is', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 600 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const onSidebarWidthChange = vi.fn();
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+          onSidebarWidthChange,
+        });
+        expect(sidebarWidth(container)).toBe('360px');
+        fireEvent.keyDown(screen.getByRole('separator'), { key: 'ArrowRight' });
+        expect(onSidebarWidthChange).not.toHaveBeenCalled();
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('saves the default itself on reset in an inbox too narrow to show it', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 480 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const onSidebarWidthChange = vi.fn();
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+          onSidebarWidthChange,
+        });
+        expect(sidebarWidth(container)).toBe('240px');
+        fireEvent.doubleClick(screen.getByRole('separator'));
+        expect(onSidebarWidthChange).toHaveBeenCalledWith(256);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('renders no divider when the sidebar is hidden', () => {
+      renderInbox({ resizableSidebar: true, showSidebar: false });
+      expect(screen.queryByRole('separator')).toBeNull();
+    });
   });
 
   it('switches the active panel when another conversation is opened', async () => {

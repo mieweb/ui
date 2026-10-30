@@ -67,6 +67,24 @@ export interface ChatComposerMenuItem {
   onSelect?: () => void;
 }
 
+/** An alternative way to send, offered in the menu beside the send button. */
+export interface ChatComposerSendOption {
+  /** Stable id, passed back to `onSend` as `meta.sendOption`. */
+  id: string;
+  /** Display label, e.g. "Send later…" or "Send without notifying". */
+  label: React.ReactNode;
+  /** Optional leading icon. */
+  icon?: React.ReactNode;
+  /** Whether the option is disabled. */
+  disabled?: boolean;
+}
+
+/** Context for a send, beyond the message itself. */
+export interface ChatComposerSendMeta {
+  /** Id of the {@link ChatComposerSendOption} chosen; absent for a plain send. */
+  sendOption?: string;
+}
+
 // An interface (not an alias) so hosts can keep augmenting it via declaration merging.
 /** An agent shown in the composer's agent selector (trigger icon defaults to a bot glyph). */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -99,8 +117,14 @@ export interface ChatComposerError {
 }
 
 export interface ChatComposerProps {
-  /** Called when the user sends a message. */
-  onSend?: (message: NewMessage) => void | Promise<void>;
+  /**
+   * Called when the user sends a message. `meta` is passed only when the
+   * send came from one of `sendOptions`.
+   */
+  onSend?: (
+    message: NewMessage,
+    meta?: ChatComposerSendMeta
+  ) => void | Promise<void>;
   /** Controlled input value. Leave undefined for uncontrolled usage. */
   value?: string;
   /** Called when the input value changes. */
@@ -137,6 +161,16 @@ export interface ChatComposerProps {
    */
   submitOnEnter?: 'desktop' | 'always' | 'never';
   /**
+   * How the input and its controls are arranged.
+   * - `'responsive'`: below `md` the input sits on its own row with the `+`
+   *   and actions underneath; at `md+` everything shares one pill-shaped row.
+   * - `'stacked'`: the input always sits on its own full-width row with the
+   *   controls underneath, at every width — for hosts that put labelled
+   *   buttons in `leadingSlot`, which need the room.
+   * @default 'responsive'
+   */
+  layout?: 'responsive' | 'stacked';
+  /**
    * Maximum height of the auto-growing input: a pixel number or any CSS
    * length. Prefer small-viewport units (e.g. `'30svh'`) over `vh`: on iOS
    * `vh` is the full screen and ignores the on-screen keyboard.
@@ -165,6 +199,13 @@ export interface ChatComposerProps {
   leadingSlot?: React.ReactNode;
   /** Extra entries for the `+` menu, rendered after the built-in items. */
   addMenuItems?: ChatComposerMenuItem[];
+  /**
+   * Other ways to send the draft (e.g. "Send later…"), shown in a menu on a
+   * chevron beside the send button. Choosing one sends exactly like the send
+   * button, with the option's id in `onSend`'s `meta.sendOption`; the host
+   * decides what it means. Enter always does a plain send.
+   */
+  sendOptions?: ChatComposerSendOption[];
   /** Enable file attachments (built-in "Attach files" menu item, paste-to-attach, drag-and-drop, chips). @default true */
   allowAttachments?: boolean;
   /** Accepted file types for the picker/paste validation (native `accept` tokens). */
@@ -265,6 +306,8 @@ export interface ChatComposerProps {
   micLabel?: string;
   /** Accessible label for the send button. @default 'Send message' */
   sendLabel?: string;
+  /** Accessible label for the `sendOptions` menu trigger. @default 'More send options' */
+  sendOptionsLabel?: string;
   /** Accessible label for the stop button. @default 'Stop generating' */
   stopLabel?: string;
   /** Accessible label / empty-state text for the agent selector. @default 'Select agent' */
@@ -355,10 +398,12 @@ export const ChatComposer = React.forwardRef<
     showCharacterCount = false,
     canSendWhenEmpty = false,
     submitOnEnter = 'desktop',
+    layout = 'responsive',
     maxHeight = MAX_INPUT_HEIGHT,
     textareaProps,
     leadingSlot,
     addMenuItems,
+    sendOptions,
     allowAttachments = true,
     acceptedFileTypes,
     maxFileSize,
@@ -390,6 +435,7 @@ export const ChatComposer = React.forwardRef<
     attachFilesLabel = 'Attach files',
     micLabel = 'Start voice input',
     sendLabel = 'Send message',
+    sendOptionsLabel = 'More send options',
     stopLabel = 'Stop generating',
     agentSelectorLabel = 'Select agent',
     mentionListLabel = 'Mention',
@@ -412,6 +458,7 @@ export const ChatComposer = React.forwardRef<
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
+  const [sendMenuOpen, setSendMenuOpen] = React.useState(false);
 
   const isTouchDevice = React.useSyncExternalStore(
     subscribeTouchDevice,
@@ -638,7 +685,7 @@ export const ChatComposer = React.forwardRef<
   // Sending
   // --------------------------------------------------------------------
 
-  const handleSend = () => {
+  const handleSend = (sendOption?: string) => {
     if (!canSend || !onSend) return;
     const message: NewMessage = {
       content: value.trim(),
@@ -659,7 +706,12 @@ export const ChatComposer = React.forwardRef<
     // synchronous throw and a rejected promise surface through onError
     // instead of being swallowed.
     try {
-      Promise.resolve(onSend(message)).catch(() => {
+      // `meta` only for an option send, so plain-send payloads stay unchanged.
+      const sent =
+        sendOption === undefined
+          ? onSend(message)
+          : onSend(message, { sendOption });
+      Promise.resolve(sent).catch(() => {
         onError?.(sendFailedLabel, { reason: 'send-failed' });
       });
     } catch {
@@ -733,17 +785,30 @@ export const ChatComposer = React.forwardRef<
   const showSelectorRow =
     showAgentSelector || showModelSelector || selectorsEndSlot != null;
 
-  // One responsive grid: below `md` the input sits on row 1 spanning all
-  // columns with the `+`/actions on row 2; at `md+` the `+`, input and
-  // actions sit side by side on row 1 as a single pill (actions pin to the
-  // bottom via self-end as the input grows).
+  // One grid: the input sits on row 1 spanning all columns with the `+`/
+  // actions on row 2. In the responsive layout, at `md+` the `+`, input and
+  // actions move side by side onto row 1 as a single pill (actions pin to the
+  // bottom via self-end as the input grows); the stacked layout keeps two rows.
+  const stacked = layout === 'stacked';
   const cells = {
-    input:
-      'col-span-3 col-start-1 row-start-1 px-1 pt-1 md:col-span-1 md:col-start-2 md:self-end md:px-0 md:py-1.5',
-    textarea: 'px-2 pt-2 pb-1 md:py-1.5',
-    add: 'col-start-1 row-start-2 pb-2 ps-2 md:row-start-1 md:self-end md:p-1.5 md:pe-0.5',
-    actions:
-      'col-start-3 row-start-2 flex items-center gap-1 pb-2 pe-2 md:row-start-1 md:self-end md:gap-0.5 md:p-1.5 md:ps-0.5',
+    // pb-3: breathing room below the textarea — otherwise its focus ring sits
+    // flush against (or, with a short gap, still crowds) row 2's buttons.
+    input: cn(
+      'col-span-3 col-start-1 row-start-1 px-1 pt-1 pb-3',
+      !stacked && 'md:col-span-1 md:col-start-2 md:self-end md:px-0 md:py-1.5'
+    ),
+    textarea: cn('px-2 pt-2 pb-1', !stacked && 'md:py-1.5'),
+    // min-w-0 + flex-wrap: a `leadingSlot` with several buttons (e.g. Huddle's
+    // Pulse/Ticket chips) must wrap onto its own lines instead of forcing this
+    // auto-sized grid column — and the whole composer — wider than its container.
+    add: cn(
+      'col-start-1 row-start-2 min-w-0 flex-wrap pb-2 ps-2',
+      !stacked && 'md:row-start-1 md:self-end md:p-1.5 md:pe-0.5'
+    ),
+    actions: cn(
+      'col-start-3 row-start-2 flex items-center gap-1 pb-2 pe-2',
+      !stacked && 'md:row-start-1 md:self-end md:gap-0.5 md:p-1.5 md:ps-0.5'
+    ),
   };
 
   const composerCard = (
@@ -798,7 +863,7 @@ export const ChatComposer = React.forwardRef<
         </div>
       )}
 
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto]">
+      <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]">
         {/* Inset cell: the textarea sits inside the card with a matching
             inner radius so focus outlines / a11y highlights render as a
             clean nested rounded rect instead of stacking on the card's
@@ -885,7 +950,9 @@ export const ChatComposer = React.forwardRef<
             {leadingSlot != null && (
               <div
                 data-slot="chat-composer-leading-slot"
-                className="flex h-8 shrink-0 items-center"
+                // min-w-0 + min-h (not a fixed h/shrink-0) so a crowded slot wraps
+                // onto more lines instead of running under the send button.
+                className="flex min-h-8 min-w-0 flex-wrap items-center"
               >
                 {leadingSlot}
               </div>
@@ -1024,7 +1091,7 @@ export const ChatComposer = React.forwardRef<
               aria-busy={isSending || undefined}
               disabled={!canSend}
               onMouseDown={keepInputFocus}
-              onClick={handleSend}
+              onClick={() => handleSend()}
               className={cn(
                 iconButtonClasses,
                 canSend &&
@@ -1041,6 +1108,42 @@ export const ChatComposer = React.forwardRef<
               )}
             </button>
           )}
+
+          {!(isStreaming && onStop) &&
+            sendOptions &&
+            sendOptions.length > 0 && (
+              <Dropdown
+                placement="top-end"
+                open={sendMenuOpen}
+                onOpenChange={setSendMenuOpen}
+                trigger={
+                  <button
+                    type="button"
+                    data-slot="chat-composer-send-options"
+                    aria-label={sendOptionsLabel}
+                    disabled={!canSend}
+                    onMouseDown={keepInputFocus}
+                    className={cn(iconButtonClasses, 'w-6')}
+                  >
+                    <ChevronUpIcon className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                }
+              >
+                {sendOptions.map((option) => (
+                  <DropdownItem
+                    key={option.id}
+                    icon={option.icon}
+                    disabled={option.disabled}
+                    onClick={() => {
+                      setSendMenuOpen(false);
+                      handleSend(option.id);
+                    }}
+                  >
+                    <span className="min-w-0 truncate">{option.label}</span>
+                  </DropdownItem>
+                ))}
+              </Dropdown>
+            )}
         </div>
       </div>
     </>

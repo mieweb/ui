@@ -123,7 +123,7 @@ Sending: on devices with a mouse or trackpad Enter sends and Shift+Enter inserts
 
 Mobile keyboard: the input uses a 16px font below \`sm\` (no iOS zoom-on-focus), \`dir="auto"\`, sentence autocapitalization and an \`enterKeyHint\` matching \`submitOnEnter\`. Tapping send or stop keeps focus in the input so the keyboard stays open, tapping empty parts of the card focuses the input, and \`autoFocus\` is ignored on touch devices so navigating to a chat does not pop the keyboard. iOS Safari and WKWebView do not resize the page for the keyboard — mount \`useKeyboardInset()\` once in the app shell and size the shell from \`--mieweb-visual-viewport-height\` so the composer sits on top of the keyboard. In Cordova/Capacitor apps use \`useKeyboardInset({ source: 'native' })\` instead and move only the composer dock (see the *Mobile Keyboard Shell* story).
 
-Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. a custom autocomplete overlay's arrow/Enter navigation — host key handling takes priority over the built-in mention menu and Enter-to-send — or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting into the text). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding.
+Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. a custom autocomplete overlay's arrow/Enter navigation — host key handling takes priority over the built-in mention menu and Enter-to-send — or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting into the text). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding. \`sendOptions\` (\`{ id, label, icon?, disabled? }[]\`) adds a chevron beside send with other ways to send the draft ("Send later…", "Send without notifying"): choosing one sends exactly like the send button and calls \`onSend(message, { sendOption: id })\` — the host decides what the option means; Enter and the send button still do a plain send, with no second argument. Label the trigger with \`sendOptionsLabel\`.
 
 ### Use it when
 
@@ -341,6 +341,28 @@ export const WithRecordButton: Story = {
       }
     />
   ),
+};
+
+export const WithSendOptions: Story = {
+  render: () => (
+    <ChatComposerDemo
+      onSend={(message, meta) =>
+        console.log('send', message.content, meta?.sendOption ?? 'now')
+      }
+      sendOptions={[
+        { id: 'later', label: 'Send later…' },
+        { id: 'quiet', label: 'Send without notifying' },
+      ]}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use `sendOptions` for alternative ways to send the draft. The chevron beside send opens them; the chosen id reaches `onSend` as `meta.sendOption`, and the host decides what it means (e.g. open a time picker for "Send later…"). Inside `SuperChat`, a rejected `onMessageSent` puts the draft back, so a cancelled picker can simply reject.',
+      },
+    },
+  },
 };
 
 export const WithLeadingSlot: Story = {

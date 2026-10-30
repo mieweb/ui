@@ -243,6 +243,39 @@
 .dark .kb-editor .ts-constant_builtin {
   color: #4fc1ff;
 }
+/*
+ * The tokens left to upstream in light have the same gap in dark: without
+ * these they keep codecrock's light colours on a dark surface, so a variable
+ * name (#333) all but disappears. Same VS Code palette as above.
+ */
+[data-theme='dark'] .kb-editor .ts-variable,
+[data-theme='dark'] .kb-editor .ts-variable_builtin,
+.dark .kb-editor .ts-variable,
+.dark .kb-editor .ts-variable_builtin {
+  color: #d4d4d4;
+}
+[data-theme='dark'] .kb-editor .ts-property,
+.dark .kb-editor .ts-property {
+  color: #9cdcfe;
+}
+[data-theme='dark'] .kb-editor .ts-function,
+[data-theme='dark'] .kb-editor .ts-function_call,
+.dark .kb-editor .ts-function,
+.dark .kb-editor .ts-function_call {
+  color: #dcdcaa;
+}
+[data-theme='dark'] .kb-editor .ts-type,
+.dark .kb-editor .ts-type {
+  color: #4ec9b0;
+}
+[data-theme='dark'] .kb-editor .ts-namespace,
+.dark .kb-editor .ts-namespace {
+  color: #c8c8c8;
+}
+[data-theme='dark'] .kb-editor .ts-tag,
+.dark .kb-editor .ts-tag {
+  color: #569cd6;
+}
 
 /* Overflow-menu icons declare min sizes that burst their compact buttons. */
 .kb-custom-menu__overflow-menu .kb-icon {

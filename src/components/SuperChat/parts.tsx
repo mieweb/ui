@@ -11,6 +11,7 @@ import { cva } from 'class-variance-authority';
 import {
   Check as CheckIcon,
   Clipboard as ClipboardIcon,
+  Clock as ClockIcon,
   Ellipsis as EllipsisIcon,
   Pencil as PencilIcon,
 } from 'lucide-react';
@@ -40,6 +41,17 @@ import type {
 
 export function formatTime(time: Date | string): string {
   return new Date(time).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+/** "Thu, Oct 1, 9:00 AM" in the user's locale — for times that may not be today. */
+export function formatDateTime(time: Date | string): string {
+  return new Date(time).toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
   });
@@ -654,6 +666,8 @@ interface MessageRowProps {
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
   mediaRetryLabel?: string;
+  /** Prefix of the scheduled indicator, before its time. */
+  scheduledLabel?: string;
 }
 
 /**
@@ -680,6 +694,7 @@ export const MessageRow = React.memo(function MessageRow({
   playMediaLabel = 'Play',
   mediaErrorLabel,
   mediaRetryLabel,
+  scheduledLabel = 'Scheduled',
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasBody =
@@ -820,6 +835,9 @@ export const MessageRow = React.memo(function MessageRow({
   const accent = participant?.color;
   const accentTextColor = accessibleAccentTextColor(accent);
   const authorName = participant?.name ?? 'Unknown';
+  const scheduled = message.scheduledFor
+    ? `${scheduledLabel} · ${formatDateTime(message.scheduledFor)}`
+    : null;
 
   const startEdit = () => {
     const el = bubbleRef.current;
@@ -943,7 +961,7 @@ export const MessageRow = React.memo(function MessageRow({
     <div
       data-slot="superchat-message"
       role="article"
-      aria-label={`${authorName}, ${formatTime(message.time)}`}
+      aria-label={`${authorName}, ${formatTime(message.time)}${scheduled ? `, ${scheduled}` : ''}`}
       className={cn(
         'group flex gap-2',
         isSelf ? 'flex-row-reverse' : 'flex-row'
@@ -1010,6 +1028,15 @@ export const MessageRow = React.memo(function MessageRow({
               (edited)
             </span>
           )}
+          {scheduled && (
+            <span
+              data-slot="superchat-scheduled-indicator"
+              className="inline-flex items-center gap-1 text-[10px] font-medium text-neutral-600 dark:text-neutral-300"
+            >
+              <ClockIcon size={10} aria-hidden="true" />
+              {scheduled}
+            </span>
+          )}
         </div>
 
         {/* w-full keeps this row at thread width even under the column's
@@ -1026,6 +1053,7 @@ export const MessageRow = React.memo(function MessageRow({
             data-slot="superchat-bubble"
             variant={isSelf ? 'user' : 'assistant'}
             hasError={message.status === 'error'}
+            pending={!!message.scheduledFor}
             className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
           >
             {isEditing ? (

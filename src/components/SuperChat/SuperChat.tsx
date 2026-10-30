@@ -20,8 +20,12 @@ import {
   useStreamEndedBelowFold,
 } from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
-import { ChatComposer } from '../ChatComposer/ChatComposer';
-import type { ChatComposerAgentOption } from '../ChatComposer/ChatComposer';
+import {
+  ChatComposer,
+  type ChatComposerAgentOption,
+  type ChatComposerProps,
+  type ChatComposerSendMeta,
+} from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
@@ -52,6 +56,7 @@ import type {
   SuperChatMediaFeedProps,
   SuperChatMediaItem,
   SuperChatMediaLabels,
+  SuperChatMessageLabels,
   SuperChatView,
   SuperChatRef,
   SuperChatRenderPlugin,
@@ -77,6 +82,8 @@ export interface SuperChatProps {
   mediaFeedProps?: SuperChatMediaFeedProps;
   /** Labels for media launches and returning to the conversation. */
   mediaLabels?: Partial<SuperChatMediaLabels>;
+  /** Labels for per-message states, e.g. a scheduled message's indicator. */
+  messageLabels?: Partial<SuperChatMessageLabels>;
   /** The participant id representing the local user (alignment + compose). */
   currentParticipantId?: string;
   /** Opt-in rich render plugins (code/math/genui/…). */
@@ -87,6 +94,13 @@ export interface SuperChatProps {
   trustedContent?: boolean;
   /** Disable the composer. */
   readOnly?: boolean;
+  /**
+   * Props for the message box (`ChatComposer`), applied over SuperChat's own
+   * defaults: e.g. `placeholder`, `leadingSlot` for the host's own buttons
+   * beside `+`, `layout: 'stacked'`, `maxFileSize`, `canSendWhenEmpty`, or
+   * `mentionOptions: []` to turn @mentions off. `className` is merged.
+   */
+  composerProps?: SuperChatComposerProps;
   /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
@@ -143,7 +157,8 @@ export interface SuperChatProps {
    * Fired when the local user sends a message. If the callback returns a
    * promise it is awaited, and a rejected send restores the typed text into
    * the composer (the declared `void` return keeps every previously valid
-   * callback assignable).
+   * callback assignable). `sendOption` is the id of the
+   * `composerProps.sendOptions` entry the user sent with, if any.
    */
   onMessageSent?: (
     text: string,
@@ -151,6 +166,7 @@ export interface SuperChatProps {
       conversation: SuperChatConversation;
       mentions: string[];
       attachments: ComposerAttachment[];
+      sendOption?: string;
     }
   ) => void | Promise<void>;
   /**
@@ -174,6 +190,15 @@ export interface SuperChatProps {
 }
 
 /**
+ * Message box props a host may set through `composerProps`. SuperChat owns the
+ * draft and the send path, so `value`, `onValueChange` and `onSend` stay its.
+ */
+export type SuperChatComposerProps = Omit<
+  ChatComposerProps,
+  'value' | 'onValueChange' | 'onSend'
+>;
+
+/**
  * Single-conversation chat panel. See the module `MAINTAINERS.md` for the
  * participant model and render-plugin architecture.
  */
@@ -184,11 +209,13 @@ export function SuperChat({
   onViewChange,
   mediaFeedProps,
   mediaLabels,
+  messageLabels,
   currentParticipantId,
   renderPlugins,
   renderTextContent,
   trustedContent,
   readOnly,
+  composerProps,
   acceptedFileTypes,
   order = 'asc',
   virtualized = false,
@@ -231,6 +258,7 @@ export function SuperChat({
     unknownAuthor: 'Unknown',
     ...mediaLabels,
   };
+  const scheduledLabel = messageLabels?.scheduled ?? 'Scheduled';
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);
     return order === 'desc' ? items.reverse() : items;
@@ -689,6 +717,7 @@ export function SuperChat({
       playMediaLabel={labels.playMedia}
       mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
+      scheduledLabel={scheduledLabel}
     />
   );
 
@@ -742,7 +771,7 @@ export function SuperChat({
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
   const handleComposerSend = React.useCallback(
-    async (message: NewMessage) => {
+    async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
       const epoch = draftEpochRef.current;
       try {
         const text = message.content;
@@ -754,7 +783,14 @@ export function SuperChat({
         // returned promise (e.g. an async host callback) is awaited so its
         // rejection follows the same restore path as a synchronous throw.
         await Promise.resolve(
-          onMessageSent?.(text, { conversation, mentions, attachments })
+          onMessageSent?.(text, {
+            conversation,
+            mentions,
+            attachments,
+            ...(sendMeta?.sendOption !== undefined
+              ? { sendOption: sendMeta.sendOption }
+              : {}),
+          })
         );
       } catch {
         // Parity with the previous MessageComposer: restore the text when
@@ -918,6 +954,7 @@ export function SuperChat({
               playMediaLabel={labels.playMedia}
               mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
               mediaRetryLabel={mediaFeedProps?.labels?.retry}
+              scheduledLabel={scheduledLabel}
               scrollRef={threadRef}
               contentRef={threadContentRef}
               containerProps={{
@@ -984,13 +1021,7 @@ export function SuperChat({
       )}
 
       <ChatComposer
-        value={draft}
-        onValueChange={handleDraftChange}
-        onSend={handleComposerSend}
         disabled={readOnly}
-        // Matches the thread's p-4 gutter so the composer card lines up with
-        // the messages instead of running flush against the panel edges.
-        className="px-4 pb-4"
         placeholder={
           readOnly
             ? 'Read-only conversation'
@@ -1013,6 +1044,13 @@ export function SuperChat({
         isStreaming={isStreaming}
         onStop={onStop}
         stopLabel={stopLabel}
+        {...composerProps}
+        // Matches the thread's p-4 gutter so the composer card lines up with
+        // the messages instead of running flush against the panel edges.
+        className={cn('px-4 pb-4', composerProps?.className)}
+        value={draft}
+        onValueChange={handleDraftChange}
+        onSend={handleComposerSend}
       />
     </section>
   );
