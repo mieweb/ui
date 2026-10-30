@@ -542,6 +542,12 @@ describe('MediaFeed', () => {
     expect(screen.getByRole('button', { name: 'Next item' })).toBeEnabled();
   });
 
+  it('keeps the position counter in order in an RTL page', () => {
+    renderFeed({ layout: 'overlay', dir: 'rtl' });
+    // Isolated, so its numbers don't take the page's direction.
+    expect(screen.getByText('1 / 3').tagName).toBe('BDI');
+  });
+
   it('names an untitled overlay item for assistive tech only', () => {
     renderFeed({ layout: 'overlay', getTitle: () => '' });
     const first = screen.getByRole('article', { name: 'Media item 1 of 3' });

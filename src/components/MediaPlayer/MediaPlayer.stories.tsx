@@ -218,6 +218,40 @@ function CaptionedSample(
   );
 }
 
+export const OverlayControlsRTL: Story = {
+  name: 'Overlay controls, RTL',
+  args: {
+    controlsStyle: 'overlay',
+    labels: {
+      play: 'تشغيل',
+      pause: 'إيقاف مؤقت',
+      mute: 'كتم الصوت',
+      unmute: 'إلغاء كتم الصوت',
+      seek: 'موضع التشغيل',
+      fullscreen: 'ملء الشاشة',
+      exitFullscreen: 'الخروج من ملء الشاشة',
+      pictureInPicture: 'صورة داخل صورة',
+      exitPictureInPicture: 'الخروج من صورة داخل صورة',
+      time: (current, duration) => `${current} من ${duration}`,
+      speed: (rate) => `سرعة التشغيل ${rate}`,
+    },
+  },
+  globals: { direction: 'rtl' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Translated labels in a right-to-left page. The bar stays left to right on purpose: a media timeline follows the media, not the reading direction, as the browser’s own controls do. The time label keeps its own direction.',
+      },
+    },
+  },
+  render: (args) => (
+    <div dir="rtl" className="aspect-video w-[28rem]">
+      <VideoSample {...args} kind="video" aria-label="تسجيل نموذجي" />
+    </div>
+  ),
+};
+
 export const OverlayControlsWithCaptions: Story = {
   name: 'Overlay controls, with captions',
   args: { controlsStyle: 'overlay' },
