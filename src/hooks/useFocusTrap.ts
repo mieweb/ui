@@ -24,6 +24,17 @@ import { isStorybookDocsMode } from '../utils/environment';
  * }
  * ```
  */
+const CANDIDATES =
+  'button, a[href], area[href], input, select, textarea, [tabindex], [contenteditable="true"]';
+
+/** Whether Tab can land on `element`: enabled, in the tab order, not inert, shown. */
+function isTabbable(element: HTMLElement): boolean {
+  if (element.tabIndex < 0 || element.matches(':disabled')) return false;
+  if (element.closest('[inert]')) return false;
+  // Hidden by CSS (display: none, visibility: hidden) on any ancestor.
+  return element.checkVisibility?.({ visibilityProperty: true }) ?? true;
+}
+
 export function useFocusTrap<T extends HTMLElement>(
   enabled = true,
   options: { initialFocus?: boolean } = {}
@@ -38,8 +49,8 @@ export function useFocusTrap<T extends HTMLElement>(
     const container = containerRef.current;
     // Read on every Tab: content inside the trap can change while it's on.
     const focusables = () =>
-      container.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      Array.from(container.querySelectorAll<HTMLElement>(CANDIDATES)).filter(
+        isTabbable
       );
 
     // Focus the first element when trap is enabled
