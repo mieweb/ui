@@ -6,6 +6,10 @@ import { Avatar } from '../Avatar';
 import { Button } from '../Button';
 import { defaultMediaControlsLabels } from '../MediaPlayer/MediaControls';
 import { overlayButtonClass } from '../MediaPlayer/overlayButton';
+import {
+  exitPictureInPicture,
+  isInPictureInPicture,
+} from '../MediaPlayer/pictureInPicture';
 import { Modal, ModalClose, ModalHeader, ModalTitle } from '../Modal';
 import { FeedMedia } from './FeedMedia';
 import type {
@@ -515,6 +519,7 @@ function MediaFeedInner<T>(
         : undefined;
     const fullscreenButton = allowFullscreen && !immersive && (
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         aria-label={labels.fullscreen}
@@ -526,12 +531,18 @@ function MediaFeedInner<T>(
         }
         onClick={(event) => {
           fullscreenTriggerRef.current = event.currentTarget;
+          const open = () => {
+            select(id);
+            setFullscreen(true);
+          };
           // A clip floating in picture in picture comes back first, so it
           // stops with the inline feed instead of playing alongside the viewer.
-          if (document.pictureInPictureElement)
-            void document.exitPictureInPicture().catch(() => {});
-          select(id);
-          setFullscreen(true);
+          const video = event.currentTarget
+            .closest('[data-slot="item"]')
+            ?.querySelector('video');
+          if (isInPictureInPicture(video))
+            void exitPictureInPicture(video).then(open);
+          else open();
         }}
       >
         <Maximize2 className="h-4 w-4" aria-hidden="true" />
@@ -705,6 +716,7 @@ function MediaFeedInner<T>(
       )}
     >
       <Button
+        type="button"
         variant="ghost"
         size="icon"
         aria-label={labels.previous}
@@ -725,6 +737,7 @@ function MediaFeedInner<T>(
         <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
       </span>
       <Button
+        type="button"
         variant="ghost"
         size="icon"
         aria-label={labels.next}
@@ -745,6 +758,7 @@ function MediaFeedInner<T>(
       )}
     >
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
@@ -764,6 +778,7 @@ function MediaFeedInner<T>(
         <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
       </span>
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
@@ -809,6 +824,7 @@ function MediaFeedInner<T>(
           </p>
           {error && onRetry && (
             <Button
+              type="button"
               variant="outline"
               isLoading={retrying}
               loadingText={labels.loading}
