@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -40,6 +41,30 @@ function HiddenEnds() {
       <button type="button" data-css-hidden="">
         Also hidden
       </button>
+    </div>
+  );
+}
+
+/** A trigger whose menu is portaled to the body, as Dropdown does. */
+function WithPortaledMenu() {
+  const ref = useFocusTrap<HTMLDivElement>(true, { initialFocus: false });
+  return (
+    <div ref={ref}>
+      <button type="button" aria-expanded="true" aria-controls="menu">
+        Attach
+      </button>
+      <button type="button">Send</button>
+      {createPortal(
+        <div id="menu" role="menu">
+          <button type="button" role="menuitem">
+            Photo
+          </button>
+          <button type="button" role="menuitem">
+            File
+          </button>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
@@ -87,5 +112,25 @@ describe('useFocusTrap', () => {
       delete (HTMLElement.prototype as { checkVisibility?: unknown })
         .checkVisibility;
     }
+  });
+
+  it('takes Tab through a portaled menu opened from inside, after its trigger', () => {
+    render(<WithPortaledMenu />);
+    const attach = screen.getByRole('button', { name: 'Attach' });
+    const send = screen.getByRole('button', { name: 'Send' });
+    const photo = screen.getByRole('menuitem', { name: 'Photo' });
+    const file = screen.getByRole('menuitem', { name: 'File' });
+    attach.focus();
+    fireEvent.keyDown(attach, { key: 'Tab' });
+    expect(photo).toHaveFocus();
+    // Between the menu's own items, the browser's order is kept.
+    file.focus();
+    fireEvent.keyDown(file, { key: 'Tab' });
+    expect(send).toHaveFocus();
+    fireEvent.keyDown(send, { key: 'Tab', shiftKey: true });
+    expect(file).toHaveFocus();
+    send.focus();
+    fireEvent.keyDown(send, { key: 'Tab' });
+    expect(attach).toHaveFocus();
   });
 });
