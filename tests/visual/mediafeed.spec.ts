@@ -435,7 +435,7 @@ test.describe('SuperChat - overlay media view', () => {
       // Video frames aren't deterministic; the layout around them is.
       await expect(page).toHaveScreenshot(
         `superchat-overlay-phone-${name}.png`,
-        { animations: 'disabled', mask: [page.locator('video')] }
+        { animations: 'disabled', stylePath: 'tests/visual/hide-video.css' }
       );
     });
   }
