@@ -104,19 +104,31 @@ Opt-in; without it the media view is the stacked feed under a labelled Back.
 
 - **Phones get the whole screen, message box included.** With the overlay
   media view open, `PHONE_FULLSCREEN` makes the whole panel (the `section`)
-  `fixed inset-0 z-50` under 40rem wide, or under 30rem tall and sideways (a
+  `fixed` and `z-50` under 40rem wide, or under 30rem tall and sideways (a
   phone on its side, not a short laptop window), with safe-area padding on
   every side (`--mieweb-safe-area-*`; `Modal` has top and bottom). The header
   hides (`PHONE_HIDDEN`), the media view fills the space, and the composer
   stays at the bottom, so viewers can reply while they watch. The insets are
   physical edges, hence the `rtl-ignore` lines. `PHONE_QUERY` must match these
   classes: `useMediaQuery` reads it for the modal behaviour.
+- **It fits the visible viewport, not the layout one.** iOS doesn't shrink the
+  page for the keyboard, so the panel's height and top come from
+  `useKeyboardInset()`'s `--mieweb-visual-viewport-height` and
+  `--mieweb-visual-viewport-offset-top` (falling back to `100dvh` and `0`).
+  The host mounts that hook; the docs say so. The offset is `top`, not a
+  transform: `Modal` isn't portaled, and a transform would trap its `fixed`
+  children. With the `native` source those variables stay unset, and the host
+  pads the composer by `--mieweb-keyboard-inset`, as ChatComposer's notes
+  describe.
 - **Covering means modal.** While it covers the screen the panel is a
   `role="dialog"` with `aria-modal`, and `useFocusTrap` keeps Tab inside it
   (media and composer) without moving focus, since SuperChat focuses the
-  chosen item. Escape goes back unless another layer is open (any other
-  `dialog`, `menu` or `listbox`, such as the feed's viewer or a host menu):
-  the library's overlays don't cancel Escape, so it checks for them instead.
+  chosen item. Its stops include popups its controls open elsewhere (a
+  composer menu portaled to the body), through `aria-controls`. Escape goes
+  back unless one of the panel's own layers is open: a visible dialog inside
+  it (the feed's viewer) or a popup one of its controls opened. The
+  library's overlays don't cancel Escape, so it checks for them instead;
+  widgets elsewhere on the page don't count.
   `position: fixed` inside a transformed ancestor (a Motion sheet) won't cover
   the screen; hosts that need that should render SuperChat outside it.
 - **Dark by scoping**, like MediaFeed's overlay: `data-theme="dark"`.

@@ -38,7 +38,11 @@ export interface SuperChatInboxProps {
   defaultView?: SuperChatProps['defaultView'];
   /** Fired with the active conversation when its view is changed. */
   onViewChange?: SuperChatProps['onViewChange'];
-  /** MediaFeed behavior and slots; items remain scoped to the active conversation. */
+  /**
+   * MediaFeed behavior and slots; items remain scoped to the active
+   * conversation. With `layout: 'overlay'`, mount `useKeyboardInset()` in the
+   * app shell (see SuperChat's `mediaFeedProps`).
+   */
   mediaFeedProps?: SuperChatProps['mediaFeedProps'];
   /** The host's card for a thread attachment (see {@link SuperChatProps.renderMessageMedia}). */
   renderMessageMedia?: SuperChatProps['renderMessageMedia'];
