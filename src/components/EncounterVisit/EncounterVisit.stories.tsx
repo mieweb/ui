@@ -31,6 +31,13 @@ const meta: Meta<typeof EncounterVisit> = {
   parameters: {
     layout: 'fullscreen',
     docs: {
+      // Each story is a full live visit (eSheet renderer + Kerebron editors);
+      // inlining all of them on one docs page exceeds phone tab memory and
+      // crashes mobile Safari. Lazy iframes load only as they scroll into view.
+      story: {
+        inline: false,
+        iframeHeight: 720,
+      },
       description: {
         component: `### What it's for
 
