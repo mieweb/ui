@@ -32,6 +32,41 @@ function mockTrackRect(track: HTMLElement) {
 }
 
 describe('Slider', () => {
+  it('moves by keyboardStep from the keyboard and by step from the pointer', () => {
+    const onValueChange = vi.fn();
+    render(
+      <Slider
+        aria-label="Seek"
+        min={0}
+        max={1000}
+        step={1}
+        keyboardStep={100}
+        defaultValue={500}
+        onValueChange={onValueChange}
+      />
+    );
+    const slider = screen.getByRole('slider');
+    fireEvent.keyDown(slider, { key: 'ArrowUp' });
+    expect(onValueChange).toHaveBeenLastCalledWith(600);
+    mockTrackRect(slider);
+    // jsdom has no PointerEvent; a MouseEvent keeps clientX intact.
+    fireEvent(
+      slider,
+      new MouseEvent('pointerdown', { clientX: 2, bubbles: true })
+    );
+    // 1% of a 200px track: 10, not rounded to a keyboard step of 100.
+    expect(onValueChange).toHaveBeenLastCalledWith(10);
+  });
+
+  it('reads out the formatted value when formatValue is given', () => {
+    const { rerender } = render(
+      <Slider aria-label="Volume" value={45} formatValue={(v) => `${v}%`} />
+    );
+    expect(screen.getByRole('slider')).toHaveAttribute('aria-valuetext', '45%');
+    rerender(<Slider aria-label="Volume" value={45} />);
+    expect(screen.getByRole('slider')).not.toHaveAttribute('aria-valuetext');
+  });
+
   it('positions the thumb with inset-inline-start', () => {
     const { container } = render(<Slider defaultValue={25} />);
     const thumb = container.querySelector<HTMLElement>(
