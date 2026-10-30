@@ -328,6 +328,42 @@ describe('MediaFeed', () => {
     await waitFor(() => expect(clips[0].paused).toBe(false));
   });
 
+  it('leaves an autoplayed clip to autoPlay when the viewer comes back to it', async () => {
+    const { container, rerender } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const clip = container.querySelector('video') as HTMLVideoElement;
+    await waitFor(() => expect(clip.paused).toBe(false));
+    rerender(<MediaFeed items={updates} {...accessors} autoPlay={false} />);
+    feedVisibility(false);
+    await waitFor(() => expect(clip.paused).toBe(true));
+    feedVisibility(true);
+    await act(async () => {});
+    expect(clip.paused).toBe(true);
+  });
+
+  it("leaves a full screen the host page entered, not the clip's player", () => {
+    const exit = vi.fn(() => Promise.resolve());
+    Object.defineProperty(document, 'fullscreenElement', {
+      configurable: true,
+      value: document.documentElement,
+    });
+    Object.defineProperty(document, 'exitFullscreen', {
+      configurable: true,
+      value: exit,
+    });
+    try {
+      renderFeed();
+      visibility([0.9, 0.1, 0]);
+      visibility([0.1, 0.9, 0]);
+      expect(exit).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: null,
+      });
+    }
+  });
+
   it('pauses the inline player for fullscreen and restores trigger focus on Escape', async () => {
     const { container } = renderFeed();
     visibility([0.9, 0.1, 0]);
@@ -592,13 +628,14 @@ describe('MediaFeed', () => {
     ).toHaveAttribute('data-active', 'true');
   });
 
-  it('brings a floating clip back before opening the viewer', () => {
+  it('brings a floating clip back before opening the viewer', async () => {
     renderFeed();
     visibility([0.9, 0.1, 0]);
+    const card = screen.getByRole('article', { name: 'First update' });
     const exit = vi.fn(() => Promise.resolve());
     Object.defineProperty(document, 'pictureInPictureElement', {
       configurable: true,
-      value: document.createElement('video'),
+      value: card.querySelector('video'),
     });
     Object.defineProperty(document, 'exitPictureInPicture', {
       configurable: true,
@@ -606,18 +643,36 @@ describe('MediaFeed', () => {
     });
     try {
       fireEvent.click(
-        within(screen.getByRole('article', { name: 'First update' })).getByRole(
-          'button',
-          { name: 'Open fullscreen' }
-        )
+        within(card).getByRole('button', { name: 'Open fullscreen' })
       );
       expect(exit).toHaveBeenCalledOnce();
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
     } finally {
       Object.defineProperty(document, 'pictureInPictureElement', {
         configurable: true,
         value: null,
       });
     }
+  });
+
+  it("brings back a clip floating in Safari's own picture in picture", async () => {
+    renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const card = screen.getByRole('article', { name: 'First update' });
+    const video = card.querySelector('video') as HTMLVideoElement & {
+      webkitPresentationMode?: string;
+      webkitSetPresentationMode?: (mode: string) => void;
+    };
+    video.webkitPresentationMode = 'picture-in-picture';
+    video.webkitSetPresentationMode = vi.fn((mode: string) => {
+      video.webkitPresentationMode = mode;
+      video.dispatchEvent(new Event('webkitpresentationmodechanged'));
+    });
+    fireEvent.click(
+      within(card).getByRole('button', { name: 'Open fullscreen' })
+    );
+    expect(video.webkitSetPresentationMode).toHaveBeenCalledWith('inline');
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
   it('can leave out the full-screen viewer', () => {

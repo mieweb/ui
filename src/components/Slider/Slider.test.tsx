@@ -58,6 +58,29 @@ describe('Slider', () => {
     expect(onValueChange).toHaveBeenLastCalledWith(10);
   });
 
+  it('submits a keyboard step that is off the step grid as is', () => {
+    render(
+      <form data-testid="form">
+        <Slider
+          aria-label="Level"
+          name="level"
+          step={10}
+          keyboardStep={15}
+          defaultValue={0}
+        />
+      </form>
+    );
+    fireEvent.keyDown(screen.getByRole('slider'), { key: 'ArrowUp' });
+    const form = screen.getByTestId('form') as HTMLFormElement;
+    expect(new FormData(form).get('level')).toBe('15');
+    // Browsers snap a range input to its step grid; jsdom doesn't, so check
+    // the input is off the grid too.
+    expect(form.querySelector('input[name="level"]')).toHaveAttribute(
+      'step',
+      'any'
+    );
+  });
+
   it('reads out the formatted value when formatValue is given', () => {
     const { rerender } = render(
       <Slider aria-label="Volume" value={45} formatValue={(v) => `${v}%`} />

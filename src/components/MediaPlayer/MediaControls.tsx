@@ -22,6 +22,7 @@ import {
 } from './overlayButton';
 import {
   canPictureInPicture,
+  exitPictureInPicture,
   isInPictureInPicture,
   PIP_EVENTS,
   type WebKitVideo,
@@ -219,13 +220,19 @@ export const MediaControls = React.forwardRef<
   const inPip = useInPictureInPicture(video);
   const captions = useCaptionTracks(video);
   // What this browser can do is read once mounted: the server can't know it,
-  // and markup that differs from the server's breaks hydration.
+  // and markup that differs from the server's breaks hydration. Safari only
+  // says a video can float once its metadata is in, so read again then (and
+  // on each new source).
   const [support, setSupport] = React.useState({ box: false, pip: false });
   React.useEffect(() => {
-    setSupport({
-      box: document.fullscreenEnabled && !!fullscreenTarget,
-      pip: canPictureInPicture(video),
-    });
+    const read = () =>
+      setSupport({
+        box: document.fullscreenEnabled && !!fullscreenTarget,
+        pip: canPictureInPicture(video),
+      });
+    read();
+    video?.addEventListener('loadedmetadata', read);
+    return () => video?.removeEventListener('loadedmetadata', read);
   }, [video, fullscreenTarget]);
   const playing = transport.isPlaying;
   const durationMs = transport.durationMs;
@@ -269,9 +276,7 @@ export const MediaControls = React.forwardRef<
   const togglePictureInPicture = () => {
     if (!video) return;
     if (isInPictureInPicture(video)) {
-      if (document.pictureInPictureElement)
-        void document.exitPictureInPicture().catch(() => {});
-      else video.webkitSetPresentationMode?.('inline');
+      void exitPictureInPicture(video);
     } else if (document.pictureInPictureEnabled) {
       void video.requestPictureInPicture().catch(() => {});
     } else {
@@ -286,6 +291,7 @@ export const MediaControls = React.forwardRef<
     pressed?: boolean
   ) => (
     <Button
+      type="button"
       variant="ghost"
       size="icon"
       aria-label={label}
