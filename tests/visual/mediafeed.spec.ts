@@ -321,7 +321,7 @@ test.describe('MediaPlayer - overlay controls', () => {
       // Video frames aren't deterministic; the controls around them are.
       await expect(page).toHaveScreenshot(`mediaplayer-overlay-${name}.png`, {
         animations: 'disabled',
-        mask: [page.locator('video')],
+        stylePath: 'tests/visual/hide-video.css',
       });
     });
   }

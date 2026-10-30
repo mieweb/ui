@@ -1,0 +1,5 @@
+/* Video frames vary from run to run; hide them so a screenshot compares the
+   controls and layout around them. (A mask would paint over the controls.) */
+video {
+  visibility: hidden !important;
+}
