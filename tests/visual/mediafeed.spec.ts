@@ -346,6 +346,7 @@ test.describe('MediaPlayer - overlay controls', () => {
         .evaluate((bar) => getComputedStyle(bar).direction)
     ).toBe('ltr');
   });
+});
 
 test.describe('SuperChat - overlay media view', () => {
   async function openCloseUp(page: Page, story: string) {
@@ -386,14 +387,46 @@ test.describe('SuperChat - overlay media view', () => {
     ).toBeFocused();
   });
 
+  test('keeps Tab and Shift+Tab inside the phone dialog, on shown controls', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openCloseUp(
+      page,
+      'superchat-inbox--media-conversation-phone-portrait'
+    );
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const focusIsOnAShownControlInside = () =>
+      dialog.evaluate((panel) => {
+        const active = document.activeElement as HTMLElement | null;
+        return (
+          !!active &&
+          panel.contains(active) &&
+          active.checkVisibility({ visibilityProperty: true })
+        );
+      });
+    // Enough presses to pass both ends of the dialog more than once.
+    for (const key of ['Shift+Tab', 'Tab']) {
+      for (let press = 0; press < 30; press++) {
+        await page.keyboard.press(key);
+        expect(await focusIsOnAShownControlInside()).toBe(true);
+      }
+    }
+  });
+
   test('Back sits at the start edge in RTL, its arrow flipped', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await gotoStory(page, 'superchat-inbox--media-conversation-phone-portrait', {
-      globals: 'direction:rtl',
-    });
+    await gotoStory(
+      page,
+      'superchat-inbox--media-conversation-phone-portrait',
+      {
+        globals: 'direction:rtl',
+      }
+    );
     const teamUpdates = page.getByRole('button', { name: /Team updates/ });
     if (await teamUpdates.isVisible()) await teamUpdates.click();
     const attachment = page
@@ -409,9 +442,7 @@ test.describe('SuperChat - overlay media view', () => {
     const box = (await back.boundingBox())!;
     expect(box.x + box.width).toBeGreaterThan(390 - 60);
     expect(
-      await back
-        .locator('svg')
-        .evaluate((icon) => getComputedStyle(icon).scale)
+      await back.locator('svg').evaluate((icon) => getComputedStyle(icon).scale)
     ).toBe('-1 1');
   });
 
