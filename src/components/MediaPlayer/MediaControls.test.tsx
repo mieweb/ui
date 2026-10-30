@@ -229,6 +229,24 @@ describe('MediaPlayer overlay controls', () => {
       expect(setMode).toHaveBeenCalledWith('picture-in-picture');
       delete proto.webkitSetPresentationMode;
     });
+
+    it("offers the button once Safari's metadata says the video can float", () => {
+      setPipSupport(false);
+      const proto = HTMLVideoElement.prototype as HTMLVideoElement & {
+        webkitSupportsPresentationMode?: (mode: string) => boolean;
+      };
+      let loaded = false;
+      proto.webkitSupportsPresentationMode = () => loaded;
+      const { video } = renderOverlay();
+      expect(
+        screen.queryByRole('button', { name: 'Picture in picture' })
+      ).toBeNull();
+      loaded = true;
+      loadMetadata(video, 10);
+      expect(
+        screen.getByRole('button', { name: 'Picture in picture' })
+      ).toBeInTheDocument();
+    });
   });
 
   it('enters full screen even when the page around it is already full screen', () => {
@@ -320,6 +338,29 @@ describe('MediaPlayer overlay controls', () => {
     expect(video.playbackRate).toBe(2);
     fireEvent.click(speed());
     expect(video.playbackRate).toBe(1);
+  });
+
+  it('shows a speed set outside the bar, such as in the system player', () => {
+    const { video } = renderOverlay();
+    act(() => {
+      video.playbackRate = 2;
+      video.dispatchEvent(new Event('ratechange'));
+    });
+    expect(
+      screen.getByRole('button', { name: /^Playback speed / })
+    ).toHaveAccessibleName('Playback speed 2×');
+  });
+
+  it('keeps its buttons from submitting a form around the player', () => {
+    const submit = vi.fn((event: Event) => event.preventDefault());
+    const { container } = render(
+      <form onSubmit={(event) => submit(event.nativeEvent)}>
+        <MediaPlayer src="clip.mp4" controlsStyle="overlay" aria-label="Clip" />
+      </form>
+    );
+    for (const button of container.querySelectorAll('button'))
+      fireEvent.click(button);
+    expect(submit).not.toHaveBeenCalled();
   });
 
   it('offers captions only when the video has a caption or subtitle track', () => {
