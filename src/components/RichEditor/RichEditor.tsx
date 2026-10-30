@@ -67,6 +67,12 @@ export interface RichEditorProps {
   /** Read-only surface: no typing, and the content dims. */
   disabled?: boolean;
   /**
+   * Lock edits while keeping the surface focusable and selectable, without
+   * the dimmed `disabled` styling. Applied from creation, so the document
+   * cannot be edited even while the initial load is still in flight.
+   */
+  readOnly?: boolean;
+  /**
    * Id for the editor host element — an `aria-labelledby`/`aria-describedby`
    * anchor. The host is a `div`, not a labelable control, so a
    * `<label htmlFor>` will not associate; name the editor with `aria-label`
@@ -148,6 +154,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       showPreview = false,
       collab,
       disabled = false,
+      readOnly = false,
       id,
       className,
       'aria-label': ariaLabel,
@@ -179,6 +186,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     // Running the Markdown converter alone can normalize whitespace or links.
     const loadedDocRef = useRef<unknown>(null);
     const disabledRef = useRef(disabled);
+    const readOnlyRef = useRef(readOnly);
 
     const [md, setMd] = useState<string>('');
     // Serializing the document is the expensive part of a transaction, so the
@@ -194,10 +202,11 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
 
     useEffect(() => {
       disabledRef.current = disabled;
+      readOnlyRef.current = readOnly;
       editorInstance.current?.view.setProps({
-        editable: () => !disabledRef.current,
+        editable: () => !disabledRef.current && !readOnlyRef.current,
       });
-    }, [disabled]);
+    }, [disabled, readOnly]);
 
     useEffect(() => {
       // In collab mode the CRDT owns the content; reloading would fight it.
@@ -344,7 +353,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           uri: 'file:///untitled.md',
           assetLoad: assetLoad ?? createAssetLoad('/kerebron-wasm'),
           editorKits: [...editorKits, ...(additionalEditorKits ?? [])],
-          readOnly: disabledRef.current,
+          readOnly: disabledRef.current || readOnlyRef.current,
         });
 
         editorInstance.current = editor;
@@ -362,7 +371,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
               }
             : null;
         editor.view.setProps({
-          editable: () => !disabledRef.current,
+          editable: () => !disabledRef.current && !readOnlyRef.current,
           ...(surfaceAttributes ? { attributes: surfaceAttributes } : {}),
         });
         editor.addEventListener('transaction', onTransaction);
@@ -519,6 +528,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             aria-label={ariaLabel}
             aria-labelledby={ariaLabelledBy}
             aria-disabled={disabled || undefined}
+            aria-readonly={readOnly || undefined}
             style={{
               isolation: 'isolate',
               opacity: disabled ? 0.65 : undefined,

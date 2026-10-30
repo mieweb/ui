@@ -67,16 +67,56 @@ class TextAreaRichExtension extends Extension {
  */
 const viewOf = (editor: CoreEditor) => editor.view as EditorView;
 
-/** CSS properties whose numeric values are valid without a `px` unit. */
+/**
+ * CSS properties whose numeric values are valid without a `px` unit —
+ * React's full unitless list, so `editorStyle` keeps the React.CSSProperties
+ * contract (`{ flex: 1 }` must not become `flex: 1px`).
+ */
 const UNITLESS_STYLE_PROPS = new Set([
-  'opacity',
-  'zIndex',
-  'fontWeight',
-  'lineHeight',
+  'animationIterationCount',
+  'aspectRatio',
+  'borderImageOutset',
+  'borderImageSlice',
+  'borderImageWidth',
+  'boxFlex',
+  'boxFlexGroup',
+  'boxOrdinalGroup',
+  'columnCount',
+  'columns',
+  'flex',
   'flexGrow',
+  'flexPositive',
   'flexShrink',
+  'flexNegative',
+  'flexOrder',
+  'fontWeight',
+  'gridArea',
+  'gridRow',
+  'gridRowEnd',
+  'gridRowSpan',
+  'gridRowStart',
+  'gridColumn',
+  'gridColumnEnd',
+  'gridColumnSpan',
+  'gridColumnStart',
+  'lineClamp',
+  'lineHeight',
+  'opacity',
   'order',
+  'orphans',
+  'tabSize',
+  'widows',
+  'zIndex',
   'zoom',
+  // SVG-related
+  'fillOpacity',
+  'floodOpacity',
+  'stopOpacity',
+  'strokeDasharray',
+  'strokeDashoffset',
+  'strokeMiterlimit',
+  'strokeOpacity',
+  'strokeWidth',
 ]);
 
 /**
@@ -267,7 +307,11 @@ const TextAreaRichKerebron = React.forwardRef<
     // published value — so a token-removal edit must reach `onChange` before
     // the hook runs. These waiters bridge that gap.
     const changeWaitersRef = React.useRef<(() => void)[]>([]);
+    // The doc as of the last `onChange` emission — when the live doc is ahead
+    // of this, a publish is still in flight.
+    const publishedDocRef = React.useRef<unknown>(null);
     const handleChange = (next: string) => {
+      publishedDocRef.current = currentView()?.state.doc ?? null;
       onChangeRef.current?.(next);
       const waiters = changeWaitersRef.current;
       changeWaitersRef.current = [];
@@ -287,11 +331,28 @@ const TextAreaRichKerebron = React.forwardRef<
 
     const insertMacro = (macro: Macro) => {
       if (inertRef.current) return;
-      if (onMacroInsertRef.current?.(macro) === true) return;
+      if (!onMacroInsertRef.current) {
+        const view = currentView();
+        if (!view) return;
+        view.focus();
+        insertPlainText(view, macro.content);
+        return;
+      }
+      // A host hook composes from the last *published* value — let any
+      // in-flight publish land first, so a pick right after typing doesn't
+      // overwrite the unpublished keystrokes.
       const view = currentView();
-      if (!view) return;
-      view.focus();
-      insertPlainText(view, macro.content);
+      const pending = view && view.state.doc !== publishedDocRef.current;
+      const invoke = () => {
+        if (inertRef.current) return; // went inert (or unmounted) waiting
+        const liveView = currentView();
+        if (!liveView) return;
+        if (onMacroInsertRef.current?.(macro) === true) return;
+        liveView.focus();
+        insertPlainText(liveView, macro.content);
+      };
+      if (pending) void afterNextChange().then(invoke);
+      else invoke();
     };
 
     /** Typed `.shortcut` + space → macro expansion (space consumed). */
@@ -735,6 +796,8 @@ const TextAreaRichKerebron = React.forwardRef<
 
     const handleReady = (editor: CoreEditor) => {
       editorRef.current = editor;
+      // The initial load publishes nothing; the loaded doc is the baseline.
+      publishedDocRef.current = viewOf(editor).state.doc;
       setIsEmpty(docIsEmpty(viewOf(editor)));
       editor.addEventListener('transaction', () => {
         if (editorRef.current !== editor) return;
@@ -788,13 +851,9 @@ const TextAreaRichKerebron = React.forwardRef<
       editorClassName,
     ]);
 
-    // Read-only keeps the region focusable/selectable but blocks edits.
-    // Runs after RichEditor's own editable setup (parent effects run last).
-    React.useEffect(() => {
-      const view = currentView();
-      if (!view || !ready) return;
-      view.setProps({ editable: () => !inertRef.current });
-    }, [ready, disabled, readOnly]);
+    // Read-only keeps the region focusable/selectable but blocks edits —
+    // enforced by RichEditor's own `readOnly` prop from creation (so the
+    // surface is locked even while the initial document load is in flight).
 
     const appliedEditorStyle = React.useRef<string[]>([]);
     React.useEffect(() => {
@@ -1054,6 +1113,7 @@ const TextAreaRichKerebron = React.forwardRef<
               editorKits={menuAddon.kits}
               onReady={handleReady}
               disabled={disabled}
+              readOnly={readOnly}
             />
           </div>
 
