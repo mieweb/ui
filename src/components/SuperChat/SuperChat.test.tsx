@@ -1061,13 +1061,21 @@ describe('SuperChat', () => {
     const user = userEvent.setup();
     // The message measured wider than the bubble will have room for once it
     // edits (a host card on thinner padding, say).
+    // At its widest (997px), on a host's thinner frame (6px) until the
+    // editor shows, then the usual 16px.
     vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(997);
     const computed = window.getComputedStyle;
     vi.spyOn(window, 'getComputedStyle').mockImplementation((el, pseudo) => {
       const style = computed(el, pseudo);
-      if ((el as HTMLElement).dataset?.slot === 'superchat-bubble') {
-        Object.defineProperty(style, 'paddingLeft', { value: '16px' });
-        Object.defineProperty(style, 'paddingRight', { value: '16px' });
+      const bubble = el as HTMLElement;
+      if (bubble.dataset?.slot === 'superchat-bubble') {
+        const pad = bubble.querySelector(
+          '[data-slot="superchat-message-editor"]'
+        )
+          ? '16px'
+          : '6px';
+        Object.defineProperty(style, 'paddingLeft', { value: pad });
+        Object.defineProperty(style, 'paddingRight', { value: pad });
       }
       return style;
     });
@@ -1084,8 +1092,8 @@ describe('SuperChat', () => {
     const editor = screen
       .getByRole('textbox', { name: 'Edit message' })
       .closest<HTMLElement>('[data-slot="superchat-message-editor"]')!;
-    expect(editor.style.getPropertyValue('--edit-min-w')).toBe('965px');
-    expect(editor).toHaveClass('min-w-[min(var(--edit-min-w,0px),100%)]');
+    // Measured at 985px (997 - 2 × 6), kept to the 965px it has room for now.
+    expect(editor.style.minWidth).toBe('965px');
   });
 
   it('cancels an edit without firing onMessageEdited', async () => {

@@ -715,6 +715,18 @@ export const MessageRow = React.memo(function MessageRow({
   // (w-80 stays the floor for short messages, max-w-full the cap).
   const [editMinWidth, setEditMinWidth] = React.useState<number>();
   const editRef = React.useRef<HTMLTextAreaElement>(null);
+  // The width was measured with the content's own padding, which a host can
+  // change once the editor shows (Huddle's thinner frame around a video
+  // card). A min-width beats max-w-full, so before the editor paints, keep it
+  // to the room the bubble has now, or the field and Cancel / Save overflow it.
+  React.useLayoutEffect(() => {
+    const el = bubbleRef.current;
+    if (!isEditing || !el || !editMinWidth) return;
+    const cs = getComputedStyle(el);
+    const room =
+      el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (room > 0 && editMinWidth > room) setEditMinWidth(room);
+  }, [isEditing, editMinWidth]);
   // The rendered bubble content, read at copy time for the rich-text payload.
   const bubbleRef = React.useRef<HTMLDivElement>(null);
   // Grow the editor to fit its content (accounts for wrapped lines, not just
@@ -1066,17 +1078,8 @@ export const MessageRow = React.memo(function MessageRow({
             {isEditing ? (
               <div
                 data-slot="superchat-message-editor"
-                className="flex w-80 max-w-full min-w-[min(var(--edit-min-w,0px),100%)] flex-col gap-2"
-                // Never wider than the bubble has room for now: the content it
-                // was measured from (a host's card, with its own padding) may
-                // have had more, and a min-width beats max-w-full.
-                style={
-                  editMinWidth
-                    ? ({
-                        '--edit-min-w': `${editMinWidth}px`,
-                      } as React.CSSProperties)
-                    : undefined
-                }
+                className="flex w-80 max-w-full flex-col gap-2"
+                style={editMinWidth ? { minWidth: editMinWidth } : undefined}
               >
                 <textarea
                   value={draft}
