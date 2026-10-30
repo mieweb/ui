@@ -262,7 +262,8 @@ export function useMediaTransport(
   const togglePlay = useCallback(() => {
     const el = elementRef.current;
     if (!el) return;
-    if (el.paused) void el.play();
+    // A refused start (autoplay policy) leaves it paused; nothing to report.
+    if (el.paused) void el.play()?.catch(() => {});
     else el.pause();
   }, []);
 

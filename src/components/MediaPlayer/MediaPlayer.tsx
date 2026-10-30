@@ -3,6 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { Button } from '../Button';
 import { useMediaTransport } from '../../hooks/useMediaTransport';
+import { MediaControls, type MediaControlsLabels } from './MediaControls';
 
 // ============================================================================
 // Types & Interfaces
@@ -48,9 +49,16 @@ export interface MediaPlayerProps extends VariantProps<
   src: string;
   /** Force the media kind; when omitted it is inferred from the src extension. */
   kind?: MediaKind;
-  /** Whether to show native controls (default `true`). */
+  /** Whether to show controls (default `true`). */
   controls?: boolean;
-  /** Begin muted; native controls can still change the volume. */
+  /**
+   * Which controls a video gets (default `'native'`, the browser's own).
+   * `'overlay'` lays touch-first controls over it ({@link MediaControls}),
+   * the same in every browser and in a mobile app's web view. Audio always uses
+   * the browser's.
+   */
+  controlsStyle?: 'native' | 'overlay';
+  /** Begin muted; the controls can still unmute it. */
   muted?: boolean;
   /** Repeat playback when the media ends. */
   loop?: boolean;
@@ -61,8 +69,8 @@ export interface MediaPlayerProps extends VariantProps<
   /** Caption/subtitle `<track>` elements. The `src` attribute is always set
    * on the media element, so alternative `<source>` children are ignored. */
   children?: React.ReactNode;
-  /** Localized load-error and retry text. */
-  labels?: { error?: string; retry?: string };
+  /** Localized load-error and retry text, and the overlay controls' labels. */
+  labels?: { error?: string; retry?: string } & Partial<MediaControlsLabels>;
   /** Callback when playback state changes. */
   onStateChange?: (state: MediaPlayerState) => void;
   /** Callback when playback ends. */
@@ -137,6 +145,7 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
       src,
       kind,
       controls = true,
+      controlsStyle = 'native',
       muted,
       loop,
       poster,
@@ -215,14 +224,35 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
       onRetry?.();
     }, [mediaElement, onRetry]);
 
+    const overlay = controlsStyle === 'overlay' && resolvedKind === 'video';
+    const boxRef = React.useRef<HTMLDivElement>(null);
     const sharedMediaProps = {
       src,
-      controls,
+      controls: controls && !overlay,
       muted,
       loop,
       preload,
       'aria-label': ariaLabel,
     };
+
+    // Tracks belong to the caller's media resource and can be supplied as
+    // children. The feed also supports a custom renderer for captions.
+    const video = (
+      // eslint-disable-next-line jsx-a11y/media-has-caption
+      <video
+        ref={setElement as React.Ref<HTMLVideoElement>}
+        playsInline
+        poster={poster}
+        className={
+          overlay
+            ? 'h-full w-full object-contain'
+            : 'h-auto max-h-full w-auto max-w-full object-contain'
+        }
+        {...sharedMediaProps}
+      >
+        {children}
+      </video>
+    );
 
     if (error) {
       return (
@@ -253,19 +283,28 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
 
     return (
       <div className={mediaPlayerVariants({ variant, className })}>
-        {resolvedKind === 'video' ? (
-          // Tracks belong to the caller's media resource and can be supplied as
-          // children. The feed also supports a custom renderer for captions.
-          // eslint-disable-next-line jsx-a11y/media-has-caption
-          <video
-            ref={setElement as React.Ref<HTMLVideoElement>}
-            playsInline
-            poster={poster}
-            className="h-auto max-h-full w-auto max-w-full object-contain"
-            {...sharedMediaProps}
+        {resolvedKind === 'video' && overlay ? (
+          // The controls cover the player's box, so the video fills it at its
+          // own shape and the bar spans the box. The box is a dark surface in
+          // every theme (black letterboxing, as on VideoCard), so library
+          // controls inside it take their dark-theme colours.
+          <div
+            ref={boxRef}
+            data-slot="media-player-box"
+            data-theme="dark"
+            className="relative h-full w-full bg-black"
           >
-            {children}
-          </video>
+            {video}
+            {controls && (
+              <MediaControls
+                transport={transport}
+                fullscreenTarget={boxRef}
+                labels={labels}
+              />
+            )}
+          </div>
+        ) : resolvedKind === 'video' ? (
+          video
         ) : (
           // eslint-disable-next-line jsx-a11y/media-has-caption
           <audio

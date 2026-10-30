@@ -51,6 +51,8 @@ export type {
   SuperChatMediaFeedProps,
   SuperChatMediaLabels,
   SuperChatMessageLabels,
+  SuperChatMessageMediaRenderProps,
+  SuperChatRenderMessageMedia,
   SuperChatView,
   SuperChatItemType,
   SuperChatChannel,

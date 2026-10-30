@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DateTime } from 'luxon';
+import { Play } from 'lucide-react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChatInbox, createMarkdownRenderer } from './index';
 import { fullHeightChat } from '../../../.storybook/full-height';
@@ -20,7 +21,12 @@ import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { getSampleVideo } from '../AudioPlayer/sampleVideo';
 import { createMediaConversations } from './mediaStoryData';
-import type { SuperChatMediaAttachment, SuperChatView } from './types';
+import type {
+  SuperChatMediaAttachment,
+  SuperChatMessageMediaRenderProps,
+  SuperChatRenderMessageMedia,
+  SuperChatView,
+} from './types';
 import 'katex/dist/katex.min.css';
 
 // ============================================================================
@@ -60,7 +66,13 @@ const meta: Meta<typeof SuperChatInbox> = {
     mediaFeedProps: {
       control: false,
       description:
-        'Optional media feed labels, actions and playback configuration for the active conversation.',
+        "Optional media feed labels, actions and playback configuration for the active conversation. `layout: 'overlay'` makes the media view mobile-first: full screen on a phone, upright or sideways.",
+      table: { category: 'Slots' },
+    },
+    renderMessageMedia: {
+      control: false,
+      description:
+        "The host's card for an attachment in the thread, in place of the built-in one. Receives `{ message, attachment, open, launchId }`; put `launchId` on the card's control as `data-media-launch-id`.",
       table: { category: 'Slots' },
     },
     readOnly: {
@@ -127,7 +139,7 @@ const meta: Meta<typeof SuperChatInbox> = {
 
 **The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
 
-Messages can also carry explicit \`media: SuperChatMediaAttachment[]\` records (stable attachment ID, kind and source, with optional title/caption/poster). The thread opens by default. Press **Play** on an attachment to open that clip in the media feed; **Back to conversation** returns to the same reading position and draft. There is no header view toggle. \`view\` / \`onViewChange\` let the host control this navigation, and \`defaultView\` supplies the initial choice. The media view composes [MediaFeed](?path=/docs/media-mediafeed--docs), derives items through \`getConversationMediaItems\`, and retains the conversation header and composer. Both views address the same messages and participants. \`mediaFeedProps\` supplies feed playback configuration, labels, custom media and action slots; \`mediaLabels\` localizes the return control and attachment actions. Attachment upload and persistence still belong to the host. Open the **Media Conversation** story for a local video/image example.
+Messages can also carry explicit \`media: SuperChatMediaAttachment[]\` records (stable attachment ID, kind and source, with optional title/caption/poster). The thread opens by default. Press **Play** on an attachment to open that clip in the media feed; **Back to conversation** returns to the same reading position and draft. There is no header view toggle. \`view\` / \`onViewChange\` let the host control this navigation, and \`defaultView\` supplies the initial choice. The media view composes [MediaFeed](?path=/docs/media-mediafeed--docs), derives items through \`getConversationMediaItems\`, and keeps the conversation header and composer mounted (the header hides on a phone in the overlay layout). Both views address the same messages and participants. \`mediaFeedProps\` supplies feed playback configuration, labels, custom media and action slots; \`mediaLabels\` localizes the return control and attachment actions. Attachment upload and persistence still belong to the host. With \`mediaFeedProps.layout: 'overlay'\` the media view is mobile-first: each clip fills it edge to edge under touch-first controls, and on a phone, upright or sideways, it fills the screen above the message box, as a dialog (Escape goes back). \`renderMessageMedia\` lets the host draw its own card for an attachment in the thread. Open the **Media Conversation** stories for local examples.
 
 ### Use it when
 
@@ -175,6 +187,7 @@ useEffect(() => { api.listConversations().then(setConversations); }, []); // hos
 - **Accessibility as implemented:** the root \`role="group"\` is named after the active conversation; inner semantics come from the two children (\`aside\` "Conversations", \`section\` panel, \`role="log"\` thread, \`article\` messages). On small screens hidden panes are removed with \`hidden sm:flex\`, so they are not in the tab order; switching pane does **not** move focus to the newly shown pane. With no conversations it shows an unlabelled "No conversation selected" section.
 - **Host owns everything mutable:** unread counts, appending sent messages, agent replies, edits (\`editedAt\`), and attachment upload (delivered as base64 \`dataUrl\`s). Nothing here talks to a network.
 - **Selection fallback:** if the active id is missing from \`conversations\` the first conversation is shown; the list highlight always follows the panel.
+- **Overlay media view** (\`mediaFeedProps.layout: 'overlay'\`): on a screen under 40rem wide, or under 30rem tall and sideways, the whole panel is \`position: fixed\` over the screen, inside the safe areas (\`--mieweb-safe-area-top/right/bottom/left\` override \`env()\` for native shells): the header hides, the media fills the space and the message box stays at the bottom. There it is a \`role="dialog"\` with \`aria-modal\`, labelled by the conversation title; Tab stays inside, and Escape goes back unless another dialog or menu is open. The media view is dark in every theme (\`data-theme="dark"\`), so host actions should use library components or theme tokens. Inside a transformed ancestor (a Motion sheet) \`fixed\` can't cover the screen; render SuperChat outside it. In both layouts, a clip floating in picture in picture keeps the media view mounted but hidden after Back, until its window closes.
 - Needs a bounded height (\`h-full\` root) and a flex-capable parent. The sidebar is \`w-64\` on \`sm\`+ and full-width below. RTL: the list divider (\`border-e\`) and message accents (\`borderInlineStart\`) are logical and flip with \`dir\`.
 - i18n: "Conversations", "New conversation", "No conversation selected", "Chat: …" and the panel's strings are English. Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core) plus per-plugin optional peers; import from \`@mieweb/ui/components/SuperChat\`.`,
       },
@@ -553,7 +566,14 @@ export const SourcesAndGuards: Story = {
   render: () => <SourcesAndGuardsDemo />,
 };
 
-function MediaConversationDemo() {
+function MediaConversationDemo({
+  layout,
+  renderMessageMedia,
+}: {
+  /** MediaFeed layout for the media view; `overlay` opts into mobile-first. */
+  layout?: 'stacked' | 'overlay';
+  renderMessageMedia?: SuperChatRenderMessageMedia;
+}) {
   const [conversations, setConversations] = React.useState(() =>
     createMediaConversations('')
   );
@@ -564,8 +584,13 @@ function MediaConversationDemo() {
 
   React.useEffect(() => {
     let mounted = true;
-    void getSampleVideo().then(
-      (url) => {
+    // The overlay stories make "A closer look" an upright phone recording,
+    // to show each clip at its own shape.
+    void Promise.all([
+      getSampleVideo(),
+      getSampleVideo(layout === 'overlay' ? 'portrait' : 'landscape'),
+    ]).then(
+      ([url, closeUp]) => {
         if (!mounted) return;
         setConversations((all) =>
           all.map((conversation) => ({
@@ -574,7 +599,10 @@ function MediaConversationDemo() {
               ...message,
               media: message.media?.map((attachment) =>
                 attachment.kind === 'video' && !attachment.src
-                  ? { ...attachment, src: url }
+                  ? {
+                      ...attachment,
+                      src: attachment.id === 'detail' ? closeUp : url,
+                    }
                   : attachment
               ),
             })),
@@ -591,11 +619,12 @@ function MediaConversationDemo() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [layout]);
 
   return (
     <SuperChatInbox
       conversations={conversations}
+      renderMessageMedia={renderMessageMedia}
       currentParticipantId="me"
       view={view}
       onViewChange={setView}
@@ -646,6 +675,7 @@ function MediaConversationDemo() {
         );
       }}
       mediaFeedProps={{
+        layout,
         loading,
         error,
         renderActions: (item) => {
@@ -697,4 +727,100 @@ export const MediaConversation: Story = {
     },
   },
   render: () => <MediaConversationDemo />,
+};
+
+export const MediaConversationOverlay: Story = {
+  name: 'Media conversation, overlay',
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The media view with `mediaFeedProps.layout: 'overlay'`: each clip edge to edge under touch-first controls, with Back over its top corner.",
+      },
+    },
+  },
+  render: () => <MediaConversationDemo layout="overlay" />,
+};
+
+export const MediaConversationPhonePortrait: Story = {
+  name: 'Media conversation, phone portrait',
+  globals: { viewport: { value: 'mobile2', isRotated: false } },
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'On a phone held upright, the overlay media view fills the screen above the message box, as a dialog: focus stays inside and Escape goes back.',
+      },
+    },
+  },
+  render: () => <MediaConversationDemo layout="overlay" />,
+};
+
+export const MediaConversationPhoneLandscape: Story = {
+  name: 'Media conversation, phone landscape',
+  globals: { viewport: { value: 'mobile2', isRotated: true } },
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story: 'The same phone turned sideways: a wide clip fills the screen.',
+      },
+    },
+  },
+  render: () => <MediaConversationDemo layout="overlay" />,
+};
+
+/** A host's own card for a thread attachment: a poster frame and a Play. */
+function HostCard({
+  attachment,
+  open,
+  launchId,
+}: SuperChatMessageMediaRenderProps) {
+  // The host owns this text; localize it like the rest of the app.
+  const label = `Play ${attachment.title ?? 'video'}`;
+  return (
+    <button
+      type="button"
+      data-media-launch-id={launchId}
+      aria-label={label}
+      onClick={() => open(true)}
+      className="focus-visible:ring-ring relative mt-2 block w-40 max-w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+    >
+      <video
+        src={attachment.src}
+        muted
+        playsInline
+        preload="metadata"
+        className="block aspect-video w-full bg-black object-cover"
+      />
+      <span className="absolute inset-0 flex items-center justify-center">
+        <span className="flex size-10 items-center justify-center rounded-full bg-black/60 text-white">
+          <Play className="size-5 fill-current" aria-hidden="true" />
+        </span>
+      </span>
+    </button>
+  );
+}
+
+export const HostMediaCard: Story = {
+  name: 'Host media card',
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view. The card sits at the start of the bubble, under the text, however wide the message makes it.",
+      },
+    },
+  },
+  render: () => (
+    <MediaConversationDemo
+      layout="overlay"
+      renderMessageMedia={(props) =>
+        props.attachment.kind === 'video' ? <HostCard {...props} /> : undefined
+      }
+    />
+  ),
 };

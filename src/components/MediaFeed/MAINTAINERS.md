@@ -37,6 +37,43 @@ release. Published `@mieweb/news-widget@1.0.0` is unchanged.
   the public contract. Keep theme tokens and container layout; do not restore
   the standalone app's body reset, fixed feed registry, or viewport-wide CSS.
 
+## Layouts
+
+`layout="stacked"` (the default) and `layout="overlay"` share one `renderCard`;
+only the item's markup, the Previous/Next controls and the player's
+`controlsStyle` differ. Keep the stacked markup unchanged unless you mean to
+change it for every consumer: its visual baselines are the regression check.
+
+- **Overlay is dark by scoping, not by colour.** The root and the full-screen
+  viewer set `data-theme="dark"`, so tokens, library components and the host's
+  `renderActions` resolve to their dark-theme values. Raw `black` is only for
+  the letterbox behind the clip and the scrims over it (`bg-black/xx`), which
+  must read over any frame. The library's own text over the scrim (author,
+  title, caption) is white on purpose; host content (`renderActions`) gets
+  its colours from the tokens, so it needs no overrides.
+- **The viewer is opt-in in the overlay.** `allowFullscreen` defaults to
+  `layout !== 'overlay'`: the overlay already fills its space and the player
+  has its own full screen. Opening the viewer brings a floating clip back
+  from picture in picture first, so the two never play at once.
+- **Condensed mode leaves the overlay alone.** The root carries
+  `data-layout`, and `condensed-view.css` scopes its padding, gap and radius
+  rules to the stacked layout.
+- **Details come before the media in the DOM.** Focus then visits the title,
+  caption and actions before the player's bar, matching the screen. The
+  absolute positioning, not the DOM order, places them.
+- **Taps go through the details.** The details layer is `pointer-events-none`
+  with its controls opted back in, so a tap on the picture still reaches the
+  player's tap-to-play surface.
+- **Caption rules live in `OverlayDetails`:** empty or repeats-the-title
+  captions are dropped. The title shows one line and the caption two; when
+  either is cut off (measured, and re-measured on resize), a **Show more**
+  toggle (`labels.showMore`/`showLess`) opens both in full, the caption
+  scrolling within `40dvh`. The toggle is separate from the text, so rich
+  captions keep working links. `ClampedText` isn't used: it decides by
+  character count, where this needs measured overflow over the video.
+- The overlay's icon buttons share `overlayButtonClass`
+  (`../MediaPlayer/overlayButton.ts`) with `MediaControls`; change it there.
+
 ## Shared conversation media
 
 `MediaFeedMedia` describes the presentation source shared with SuperChat.
@@ -57,7 +94,10 @@ Native video/audio playback composes `MediaPlayer`; images use their source and
 alt text, and YouTube uses an external embed with a source-link fallback. Custom
 `renderMedia` receives item context and the active/autoplay/mute/loop intent. An
 inactive or background feed must pause media, and opening fullscreen must stop
-the inline copy before the modal starts another player.
+the inline copy before the modal starts another player. One exception: a clip
+floating in picture in picture keeps playing when its item stops being active
+(`pauseForOwnership` checks `isInPictureInPicture`), and pauses when it comes
+back to an inactive item, which has no controls.
 Native media position is retained per item ID and source URL, and restored when
 metadata is ready, so inline/fullscreen switches continue from the same time.
 Provider iframe playback has no time-capture API here and restarts when its
@@ -82,7 +122,8 @@ playing. Do not silently substitute another video when a source fails.
 
 Verify collection states, controlled selection, keyboard/control isolation,
 media activation, fullscreen focus/close behavior, localized labels, and custom
-slots. When changing the shared media model, run the MediaFeed, MediaPlayer, and
+slots, in both layouts. For `overlay`, also check the player's overlay controls
+and the phone portrait and landscape stories. When changing the shared media model, run the MediaFeed, MediaPlayer, and
 SuperChat tests together and inspect both conversation views. Browser playback
 and external YouTube availability also need verification in Storybook; unit
 tests alone cannot establish them.

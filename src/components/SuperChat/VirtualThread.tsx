@@ -22,6 +22,7 @@ import type {
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
+  SuperChatRenderMessageMedia,
 } from './types';
 
 export interface VirtualThreadProps {
@@ -55,6 +56,8 @@ export interface VirtualThreadProps {
   mediaRetryLabel?: string;
   /** Prefix of a scheduled message's indicator, forwarded to each row. */
   scheduledLabel?: string;
+  /** The host's card for an attachment, forwarded to each row. */
+  renderMessageMedia?: SuperChatRenderMessageMedia;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -84,6 +87,7 @@ export function VirtualThread({
   mediaErrorLabel,
   mediaRetryLabel,
   scheduledLabel,
+  renderMessageMedia,
   scrollRef,
   contentRef,
   containerProps,
@@ -147,6 +151,7 @@ export function VirtualThread({
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
                   scheduledLabel={scheduledLabel}
+                  renderMessageMedia={renderMessageMedia}
                 />
               </div>
             </div>

@@ -97,6 +97,12 @@ export interface SliderProps
   max?: number;
   /** Step increment */
   step?: number;
+  /**
+   * How far an arrow key moves the value (default `step`). Use it when the
+   * pointer needs fine steps but the keyboard should move in bigger ones,
+   * e.g. a media seek bar.
+   */
+  keyboardStep?: number;
   /** Callback when value changes */
   onValueChange?: (value: number) => void;
   /** Callback when interaction ends (mouseup / touchend) */
@@ -160,6 +166,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
       min = 0,
       max = 100,
       step = 1,
+      keyboardStep,
       onValueChange,
       onValueCommit,
       disabled = false,
@@ -209,6 +216,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     latestValueRef.current = clampedValue;
 
     const safeStep = step > 0 ? step : 1;
+    const keyStep = keyboardStep && keyboardStep > 0 ? keyboardStep : safeStep;
 
     const computeValueFromPointer = React.useCallback(
       (clientX: number) => {
@@ -295,15 +303,15 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           case 'ArrowLeft': {
             const increase = (e.key === 'ArrowRight') !== rtl;
             newValue = increase
-              ? Math.min(clampedValue + safeStep, max)
-              : Math.max(clampedValue - safeStep, min);
+              ? Math.min(clampedValue + keyStep, max)
+              : Math.max(clampedValue - keyStep, min);
             break;
           }
           case 'ArrowUp':
-            newValue = Math.min(clampedValue + safeStep, max);
+            newValue = Math.min(clampedValue + keyStep, max);
             break;
           case 'ArrowDown':
-            newValue = Math.max(clampedValue - safeStep, min);
+            newValue = Math.max(clampedValue - keyStep, min);
             break;
           case 'Home':
             newValue = min;
@@ -318,7 +326,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         setValue(newValue);
         onValueCommit?.(newValue);
       },
-      [disabled, clampedValue, safeStep, min, max, setValue, onValueCommit]
+      [disabled, clampedValue, keyStep, min, max, setValue, onValueCommit]
     );
 
     const displayValue = formatValue
@@ -394,6 +402,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={clampedValue}
+          aria-valuetext={formatValue ? formatValue(clampedValue) : undefined}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           aria-describedby={ariaDescribedBy}

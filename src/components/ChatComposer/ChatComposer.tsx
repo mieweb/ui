@@ -26,6 +26,7 @@ import {
   AlertTriangleIcon,
   ArrowUpIcon,
   BotIcon,
+  ChevronUpIcon,
   LoaderIcon,
   MicIcon,
   PaperclipIcon,

@@ -44,6 +44,24 @@ export interface MediaFeedLabels {
   next: string;
   play: string;
   pause: string;
+  /** The player's own controls in the `overlay` layout. */
+  mute: string;
+  unmute: string;
+  seek: string;
+  playerFullscreen: string;
+  exitPlayerFullscreen: string;
+  pictureInPicture: string;
+  exitPictureInPicture: string;
+  /** The player's elapsed and total time, already formatted. */
+  time: (current: string, duration: string) => string;
+  /** The player's speed button: its text for a rate, and its name. */
+  playerRate: (rate: number) => string;
+  playerSpeed: (rate: string) => string;
+  showCaptions: string;
+  hideCaptions: string;
+  /** The overlay's toggle for a title or caption that doesn't fit. */
+  showMore: string;
+  showLess: string;
   blockedAutoplay: string;
   mediaError: string;
   openSource: string;
@@ -82,6 +100,20 @@ export interface MediaFeedProps<T> extends Omit<
   getAuthor?: (item: T) => MediaFeedAuthor;
   /** Host-owned actions, such as reactions or opening a conversation. */
   renderActions?: (item: T) => React.ReactNode;
+  /**
+   * `stacked` (default): each item is a card, its details under the media.
+   * `overlay`: the media fills each item edge to edge on a dark stage, with
+   * the details over its top, Previous/Next on the end edge, and the player's
+   * touch-first overlay controls. Suits a phone or a full-height pane, upright
+   * or sideways.
+   */
+  layout?: 'stacked' | 'overlay';
+  /**
+   * Offer the full-screen viewer, an expand button on each item. Defaults to
+   * `true` for `stacked` and `false` for `overlay`, where the feed already
+   * fills its space and the player has its own full screen.
+   */
+  allowFullscreen?: boolean;
   /** Replace the built-in player, respecting its active playback boundary. */
   renderMedia?: (
     media: MediaFeedMedia,
