@@ -6,6 +6,9 @@ import { isStorybookDocsMode } from '../utils/environment';
  * Essential for accessibility in modals and dialogs.
  *
  * @param enabled - Whether focus trapping is active
+ * @param options - `initialFocus`: focus the first focusable element when the
+ *   trap turns on (default `true`). Pass `false` when the caller moves focus
+ *   itself, e.g. to a selected item.
  * @returns ref to attach to the container element
  *
  * @example
@@ -22,8 +25,10 @@ import { isStorybookDocsMode } from '../utils/environment';
  * ```
  */
 export function useFocusTrap<T extends HTMLElement>(
-  enabled = true
+  enabled = true,
+  options: { initialFocus?: boolean } = {}
 ): RefObject<T | null> {
+  const { initialFocus = true } = options;
   const containerRef = useRef<T>(null);
 
   useEffect(() => {
@@ -31,20 +36,21 @@ export function useFocusTrap<T extends HTMLElement>(
     if (!enabled || !containerRef.current || isStorybookDocsMode()) return;
 
     const container = containerRef.current;
-    const focusableElements = container.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    );
-
-    if (focusableElements.length === 0) return;
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
+    // Read on every Tab: content inside the trap can change while it's on.
+    const focusables = () =>
+      container.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
 
     // Focus the first element when trap is enabled
-    firstElement.focus();
+    if (initialFocus) focusables()[0]?.focus();
 
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Tab') return;
+      const focusableElements = focusables();
+      if (focusableElements.length === 0) return;
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
 
       if (event.shiftKey) {
         // Shift + Tab
@@ -63,7 +69,7 @@ export function useFocusTrap<T extends HTMLElement>(
 
     container.addEventListener('keydown', handleKeyDown);
     return () => container.removeEventListener('keydown', handleKeyDown);
-  }, [enabled]);
+  }, [enabled, initialFocus]);
 
   return containerRef;
 }
