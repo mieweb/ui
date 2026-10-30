@@ -106,7 +106,8 @@ describe('EncounterNarrativeField', () => {
       'Back pain<br>&lt;unknown&gt; &amp; improving'
     );
     expect(editor.querySelector('unknown')).toBeNull();
-    expect(editor).toHaveAttribute('aria-readonly', 'false');
+    // Editable: aria-readonly is simply absent (the ARIA default).
+    expect(editor).not.toHaveAttribute('aria-readonly');
     expect(editor).toHaveAttribute('dir', 'auto');
   });
 

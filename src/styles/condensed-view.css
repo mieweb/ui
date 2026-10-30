@@ -1633,6 +1633,38 @@ body.condensed
   padding-right: 0 !important;
 }
 
+/* ── TextAreaRich (Kerebron surface) ── */
+/* Same density contract as the rich-text-editor rules above, retargeted at
+   the Kerebron editable (.kb-editor) and its placeholder overlay. */
+
+/* Editable region and its placeholder: condensed Input padding and text. */
+body.condensed [data-slot='textarea-rich'] .kb-editor,
+body.condensed [data-slot='textarea-rich-body'] > div[aria-hidden='true'] {
+  padding-top: 0.0625rem !important;
+  padding-bottom: 0.0625rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Start at the condensed Input height — but only while the macro panel is
+   closed: open, the editable must keep its md:min-h working space
+   (data-macros-open is set by TextAreaRichKerebron on the field root). The
+   border sits on the wrapper, so the inner minimum subtracts it. */
+body.condensed [data-slot='textarea-rich']:not([data-macros-open]) .kb-editor,
+body.condensed
+  [data-slot='textarea-rich']:not([data-macros-open])
+  [data-slot='textarea-rich-body']
+  > div[aria-hidden='true'] {
+  min-height: calc(1.75rem - 2px) !important;
+}
+
+/* Block gutter trigger: compact square (see rich-text-editor rule above). */
+body.condensed [data-slot='textarea-rich-block-gutter'] [data-slot='button'] {
+  height: 1.25rem !important;
+  width: 1.25rem !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 /* ── Select ── */
 
 /* Wrapper: tighter gap between label/trigger/error */

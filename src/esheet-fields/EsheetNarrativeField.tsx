@@ -249,14 +249,11 @@ export function EsheetNarrativeField({
   };
 
   React.useEffect(() => {
+    // `dir` is inherited, so localizing the wrapper localizes the editable
+    // region too; the ARIA wiring travels as props so each editor surface
+    // can place it on its own textbox element.
     editorRef.current?.setAttribute('dir', 'auto');
-    editorRef.current?.setAttribute('aria-readonly', String(readOnly));
-    editorRef.current?.setAttribute('aria-labelledby', labelId);
-    editorRef.current?.setAttribute(
-      'aria-required',
-      String(isRequired || isSoftRequired)
-    );
-  }, [isRequired, isSoftRequired, labelId, readOnly]);
+  }, []);
 
   return (
     <div data-slot={slot} className="min-w-0">
@@ -308,7 +305,11 @@ export function EsheetNarrativeField({
           return true;
         }}
         aria-label={question}
-        disabled={readOnly}
+        aria-labelledby={labelId}
+        aria-required={isRequired || isSoftRequired}
+        // Read-only (not disabled): a previewed narrative stays selectable
+        // and announces aria-readonly, matching the native textarea field.
+        readOnly={readOnly}
         enableDictation={false}
         macros={readOnly ? undefined : macros}
         // The field rests as a plain one-line input; the findings panel

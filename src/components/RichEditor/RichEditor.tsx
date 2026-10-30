@@ -405,7 +405,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
               if (current) return; // somebody's content arrived — done
               if (attempt >= 2) {
                 await editorInstance.current.loadDocumentText(
-                  MARKDOWN_TYPE,
+                  valueTypeRef.current,
                   seed
                 );
                 return;

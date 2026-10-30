@@ -1112,6 +1112,13 @@ module.exports = {
     // RichTextEditor block gutter menu — hover-revealed `+` button
     'group/rte-body',
     'group-hover/rte-body:opacity-100',
+    // TextAreaRich (Kerebron) — gutter reveal and sliding start-indent
+    'group/tar-body',
+    'group-hover/tar-body:opacity-100',
+    'group-hover/tar-body:ps-10',
+    'group-focus-within/tar-body:ps-10',
+    'transition-[padding]',
+    'md:bottom-0',
     // RichTextEditor editable region — baseline block styles (preflight strips
     // heading/list/quote styling; `prose` needs @tailwindcss/typography)
     '[&_h1]:my-3',

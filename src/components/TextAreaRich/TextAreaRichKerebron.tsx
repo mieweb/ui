@@ -65,6 +65,18 @@ class TextAreaRichExtension extends Extension {
  */
 const viewOf = (editor: CoreEditor) => editor.view as EditorView;
 
+/** CSS properties whose numeric values are valid without a `px` unit. */
+const UNITLESS_STYLE_PROPS = new Set([
+  'opacity',
+  'zIndex',
+  'fontWeight',
+  'lineHeight',
+  'flexGrow',
+  'flexShrink',
+  'order',
+  'zoom',
+]);
+
 /**
  * Replace `[from, to]` (defaults: the current selection) with plain text,
  * mapping `\n` to hard breaks, and put the caret after the insertion.
@@ -160,11 +172,21 @@ const TextAreaRichKerebron = React.forwardRef<
     const inert = disabled || readOnly;
 
     const wrapperRef = React.useRef<HTMLDivElement>(null);
-    React.useImperativeHandle(ref, () => wrapperRef.current!);
     const gutterWrapperRef = React.useRef<HTMLDivElement>(null);
     const editorHandleRef = React.useRef<RichEditorHandle>(null);
     const editorRef = React.useRef<CoreEditor | null>(null);
     const [ready, setReady] = React.useState(false);
+    // Hosts reach the editable region through the ref (focus, `dir`,
+    // ARIA attributes), as with the legacy surface's contenteditable; the
+    // wrapper only stands in until the editor mounts.
+    React.useImperativeHandle(
+      ref,
+      () =>
+        ready && editorRef.current
+          ? (viewOf(editorRef.current).dom as HTMLDivElement)
+          : wrapperRef.current!,
+      [ready]
+    );
 
     const [macrosOpen, setMacrosOpen] = React.useState(
       defaultMacrosOpen && !macrosOnFocus
@@ -183,6 +205,8 @@ const TextAreaRichKerebron = React.forwardRef<
     const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
     const isListeningRef = React.useRef(false);
     const shouldRestartRef = React.useRef(false);
+    // Invalidates dictation starts still awaiting microphone permission.
+    const dictationSessionRef = React.useRef(0);
     const hoverBlockRef = React.useRef<HTMLElement | null>(null);
     const blockTargetPosRef = React.useRef<number | null>(null);
     const firstBlockItemRef = React.useRef<HTMLButtonElement>(null);
@@ -419,6 +443,7 @@ const TextAreaRichKerebron = React.forwardRef<
         return;
       }
 
+      const session = ++dictationSessionRef.current;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
@@ -432,8 +457,10 @@ const TextAreaRichKerebron = React.forwardRef<
       }
 
       // The toolbar (and its Stop control) may have been hidden — or the
-      // editor made disabled/readOnly — while awaiting microphone
-      // permission; do not start an unstoppable or read-only session.
+      // editor made disabled/readOnly or unmounted — while awaiting
+      // microphone permission; do not start an unstoppable, read-only or
+      // orphaned session.
+      if (session !== dictationSessionRef.current) return;
       if (!toolbarVisibleRef.current || inertRef.current) return;
 
       const recognition = new SpeechRecognition();
@@ -514,6 +541,8 @@ const TextAreaRichKerebron = React.forwardRef<
     }).current;
 
     const stopDictation = React.useCallback(() => {
+      // Also cancels a start still awaiting microphone permission.
+      dictationSessionRef.current += 1;
       if (!isListeningRef.current) return;
       shouldRestartRef.current = false;
       isListeningRef.current = false;
@@ -606,6 +635,14 @@ const TextAreaRichKerebron = React.forwardRef<
     React.useEffect(() => {
       const root = wrapperRef.current;
       if (!root || !ready) return;
+      // Disabled/readOnly must neutralize the stock toolbar too — its
+      // buttons dispatch regardless of the view's `editable` prop. `inert`
+      // blocks both pointer and keyboard access.
+      for (const toolbar of root.querySelectorAll<HTMLElement>(
+        '.kb-custom-menu, .kb-custom-menu__overflow-menu'
+      )) {
+        toolbar.inert = inert;
+      }
       const macrosButton = root.querySelector<HTMLElement>('.tar-menu-macros');
       if (macrosButton) {
         macrosButton.style.display = hasMacros ? '' : 'none';
@@ -632,6 +669,7 @@ const TextAreaRichKerebron = React.forwardRef<
       }
     }, [
       ready,
+      inert,
       hasMacros,
       macrosOpen,
       macroLabels,
@@ -670,9 +708,15 @@ const TextAreaRichKerebron = React.forwardRef<
           ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
           ...(ariaDescribedBy ? { 'aria-describedby': ariaDescribedBy } : {}),
           ...(ariaInvalid ? { 'aria-invalid': String(ariaInvalid) } : {}),
-          ...(ariaRequired ? { 'aria-required': 'true' } : {}),
+          // Booleanish: the string "false" must not read as required.
+          ...(ariaRequired !== undefined
+            ? { 'aria-required': String(ariaRequired) }
+            : {}),
           ...(readOnly ? { 'aria-readonly': 'true' } : {}),
           ...(disabled ? { 'aria-disabled': 'true' } : {}),
+          // Read-only keeps keyboard focus and text selection available;
+          // ProseMirror drops natural tabbability once `editable` is false.
+          tabindex: disabled ? '-1' : '0',
           // setProps replaces the create-time attributes, so the base
           // kb-editor class must be restated alongside any custom class.
           class: editorClassName ? `kb-editor ${editorClassName}` : 'kb-editor',
@@ -700,10 +744,30 @@ const TextAreaRichKerebron = React.forwardRef<
       view.setProps({ editable: () => !inertRef.current });
     }, [ready, disabled, readOnly]);
 
+    const appliedEditorStyle = React.useRef<string[]>([]);
     React.useEffect(() => {
       const view = currentView();
-      if (!view || !ready || !editorStyle) return;
-      Object.assign(view.dom.style, editorStyle);
+      if (!view || !ready) return;
+      // React style contract: camelCase keys, numbers in px (unless the
+      // property is unitless), and removed keys actually un-apply.
+      const style = (view.dom as HTMLElement).style;
+      for (const property of appliedEditorStyle.current) {
+        style.removeProperty(property);
+      }
+      appliedEditorStyle.current = [];
+      if (!editorStyle) return;
+      for (const [key, raw] of Object.entries(editorStyle)) {
+        if (raw === null || raw === undefined) continue;
+        const property = key.startsWith('--')
+          ? key
+          : key.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+        const value =
+          typeof raw === 'number' && !UNITLESS_STYLE_PROPS.has(key)
+            ? `${raw}px`
+            : String(raw);
+        style.setProperty(property, value);
+        appliedEditorStyle.current.push(property);
+      }
     }, [ready, editorStyle]);
 
     // The editable sits below the (optional) toolbar inside the gutter
@@ -722,7 +786,12 @@ const TextAreaRichKerebron = React.forwardRef<
           0
         );
         setEditorTop((current) => (current === top ? current : top));
-        if (!hoverBlockRef.current) setGutterTop(top + 4);
+        // A hovered block may have been deleted since; a detached node must
+        // not pin the gutter button to its old offset.
+        if (!hoverBlockRef.current?.isConnected) {
+          hoverBlockRef.current = null;
+          setGutterTop(top + 4);
+        }
       };
       measure();
       // Re-measure when the toolbar wraps to more/fewer rows.
@@ -736,6 +805,7 @@ const TextAreaRichKerebron = React.forwardRef<
         ref={wrapperRef}
         data-slot="textarea-rich"
         data-toolbar={toolbarVisible ? 'visible' : 'hidden'}
+        data-inert={inert ? '' : undefined}
         data-macros-open={hasMacros && macrosOpen ? '' : undefined}
         data-compact-macros={compactMacros ? '' : undefined}
         data-gutter={gutterActive ? '' : undefined}
@@ -754,13 +824,24 @@ const TextAreaRichKerebron = React.forwardRef<
         onBlur={
           hasMacros && macrosOnFocus
             ? (event) => {
-                if (
-                  !event.currentTarget.contains(
-                    event.relatedTarget as globalThis.Node | null
-                  )
-                ) {
-                  setMacrosOpen(false);
+                const related = event.relatedTarget as HTMLElement | null;
+                if (related && event.currentTarget.contains(related)) return;
+                // The block gutter's dropdown — and its "Insert macro"
+                // submenu — mount in portals under document.body (outside
+                // this frame); focus moving into our own menu tree is an
+                // internal move, not leaving the field. Walk each menu back
+                // to its trigger (a submenu's trigger sits in the parent
+                // menu's portal) until one lands inside this frame.
+                let menu = related?.closest<HTMLElement>('[role="menu"]');
+                while (menu && menu.id) {
+                  const trigger = document.querySelector(
+                    `[aria-controls="${globalThis.CSS.escape(menu.id)}"]`
+                  );
+                  if (!trigger) break;
+                  if (event.currentTarget.contains(trigger)) return;
+                  menu = trigger.closest<HTMLElement>('[role="menu"]');
                 }
+                setMacrosOpen(false);
               }
             : undefined
         }

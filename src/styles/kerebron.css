@@ -346,6 +346,12 @@
   display: none;
 }
 
+/* Disabled/readOnly: the toolbar is made `inert` (see TextAreaRichKerebron);
+ * dim it so it also reads as unavailable. */
+[data-slot='textarea-rich'][data-inert] .kb-custom-menu {
+  opacity: 0.5;
+}
+
 /* Working space while the docked macro panel is open. The panel docks
  * below the toolbar (which keeps its full width), so only the editable
  * sidesteps it; tall enough for search plus a few rows, far less when the
