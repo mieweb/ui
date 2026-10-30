@@ -40,6 +40,8 @@ export interface SuperChatInboxProps {
   onViewChange?: SuperChatProps['onViewChange'];
   /** MediaFeed behavior and slots; items remain scoped to the active conversation. */
   mediaFeedProps?: SuperChatProps['mediaFeedProps'];
+  /** The host's card for a thread attachment (see {@link SuperChatProps.renderMessageMedia}). */
+  renderMessageMedia?: SuperChatProps['renderMessageMedia'];
   /** Labels for the view switch and attachment previews. */
   mediaLabels?: SuperChatProps['mediaLabels'];
   /** Controlled active conversation id. */
@@ -112,6 +114,7 @@ export function SuperChatInbox({
   defaultView,
   onViewChange,
   mediaFeedProps,
+  renderMessageMedia,
   mediaLabels,
   activeConversationId,
   defaultActiveConversationId,
@@ -185,6 +188,7 @@ export function SuperChatInbox({
           defaultView={defaultView}
           onViewChange={onViewChange}
           mediaFeedProps={mediaFeedProps}
+          renderMessageMedia={renderMessageMedia}
           mediaLabels={mediaLabels}
           currentParticipantId={currentParticipantId}
           renderPlugins={renderPlugins}

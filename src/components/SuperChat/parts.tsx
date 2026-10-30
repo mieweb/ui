@@ -32,6 +32,7 @@ import type {
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
+  SuperChatRenderMessageMedia,
 } from './types';
 
 // ============================================================================
@@ -654,6 +655,8 @@ interface MessageRowProps {
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
   mediaRetryLabel?: string;
+  /** The host's card for an attachment, in place of the built-in one. */
+  renderMessageMedia?: SuperChatRenderMessageMedia;
 }
 
 /**
@@ -680,6 +683,7 @@ export const MessageRow = React.memo(function MessageRow({
   playMediaLabel = 'Play',
   mediaErrorLabel,
   mediaRetryLabel,
+  renderMessageMedia,
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasBody =
@@ -1135,22 +1139,31 @@ export const MessageRow = React.memo(function MessageRow({
                   </div>
                 )}
 
-                {message.media?.map((attachment) => (
-                  <MessageMedia
-                    key={attachment.id}
-                    attachment={attachment}
-                    openLabel={openMediaLabel}
-                    playLabel={playMediaLabel}
-                    errorLabel={mediaErrorLabel}
-                    retryLabel={mediaRetryLabel}
-                    launchId={JSON.stringify([message.id, attachment.id])}
-                    onOpen={
-                      onOpenMedia
-                        ? (play) => onOpenMedia(message.id, attachment.id, play)
-                        : undefined
-                    }
-                  />
-                ))}
+                {message.media?.map((attachment) => {
+                  const launchId = JSON.stringify([message.id, attachment.id]);
+                  const open = (play?: boolean) =>
+                    onOpenMedia?.(message.id, attachment.id, play);
+                  return (
+                    <React.Fragment key={attachment.id}>
+                      {renderMessageMedia?.({
+                        message,
+                        attachment,
+                        open,
+                        launchId,
+                      }) ?? (
+                        <MessageMedia
+                          attachment={attachment}
+                          openLabel={openMediaLabel}
+                          playLabel={playMediaLabel}
+                          errorLabel={mediaErrorLabel}
+                          retryLabel={mediaRetryLabel}
+                          launchId={launchId}
+                          onOpen={onOpenMedia ? open : undefined}
+                        />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
 
                 {/* Animated typing indicator while a reply streams in with no
                     body yet — matches the AI chat's streaming affordance. */}
