@@ -34,6 +34,34 @@ describe('InlineEdit', () => {
     expect(display).toHaveFocus();
   });
 
+  it('lets a host open it, starting from the saved value, and says when it closes', async () => {
+    const onEditingChange = vi.fn();
+    const { rerender } = render(
+      <InlineEdit
+        label="Name"
+        value="Acme"
+        onSave={() => {}}
+        editing={false}
+        onEditingChange={onEditingChange}
+      />
+    );
+    expect(screen.queryByRole('textbox')).toBeNull();
+    rerender(
+      <InlineEdit
+        label="Name"
+        value="Acme"
+        onSave={() => {}}
+        editing
+        onEditingChange={onEditingChange}
+      />
+    );
+    const input = screen.getByRole('textbox', { name: 'Name' });
+    expect(input).toHaveValue('Acme');
+    expect(input).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+    expect(onEditingChange).toHaveBeenLastCalledWith(false);
+  });
+
   it('cancels on Escape without saving', async () => {
     const onSave = vi.fn();
     render(<InlineEdit label="Name" value="Acme" onSave={onSave} />);
