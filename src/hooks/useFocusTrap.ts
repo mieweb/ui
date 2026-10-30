@@ -18,22 +18,47 @@ function tabbablesIn(root: Element): HTMLElement[] {
   );
 }
 
+/** The traps that are on, so a portaled key goes to the innermost owner. */
+const activeTraps = new Set<HTMLElement>();
+
+/**
+ * All of a portaled popup: its top-level wrapper under the body, so a search
+ * field beside a menu comes with it. A popup rendered in the page itself is
+ * just itself.
+ */
+function popupRoot(popup: HTMLElement): HTMLElement {
+  let root = popup;
+  while (root.parentElement && root.parentElement !== document.body)
+    root = root.parentElement;
+  return root.parentElement === document.body ? root : popup;
+}
+
 /**
  * The trap's stops in Tab order. A popup that a control inside opened
  * elsewhere on the page (a `Dropdown` portals its menu to the body) comes
- * right after that control, found through its `aria-controls`.
+ * right after that control, found through its `aria-expanded` and
+ * `aria-controls`; so do popups opened from that popup (a submenu).
  */
 function tabStops(container: HTMLElement): HTMLElement[] {
-  const stops: HTMLElement[] = [];
-  for (const element of tabbablesIn(container)) {
-    stops.push(element);
-    const popupId =
-      element.getAttribute('aria-expanded') === 'true' &&
-      element.getAttribute('aria-controls');
-    const popup = popupId ? document.getElementById(popupId) : null;
-    if (popup && !container.contains(popup)) stops.push(...tabbablesIn(popup));
-  }
-  return stops;
+  const stops = new Set<HTMLElement>();
+  const visited = new Set<HTMLElement>([container]);
+  const visit = (root: HTMLElement) => {
+    for (const element of tabbablesIn(root)) {
+      stops.add(element);
+      const popupId =
+        element.getAttribute('aria-expanded') === 'true' &&
+        element.getAttribute('aria-controls');
+      const popup = popupId ? document.getElementById(popupId) : null;
+      if (!popup || container.contains(popup)) continue;
+      const popupWrapper = popupRoot(popup);
+      if (visited.has(popupWrapper) || popupWrapper.contains(container))
+        continue;
+      visited.add(popupWrapper);
+      visit(popupWrapper);
+    }
+  };
+  visit(container);
+  return Array.from(stops);
 }
 
 /**
@@ -96,14 +121,28 @@ export function useFocusTrap<T extends HTMLElement>(
       event.preventDefault();
       target.focus();
     };
-    // Keys in a portaled popup don't pass through the container.
+    // Keys in a portaled popup don't pass through the container. When traps
+    // nest (a dialog inside the panel), the innermost one that owns the popup
+    // takes them, as it does for keys inside it.
     const handleOutsideKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (!container.contains(event.target as Node)) handleKeyDown(event);
+      if (container.contains(event.target as Node)) return;
+      const active = document.activeElement as HTMLElement | null;
+      for (const inner of activeTraps)
+        if (
+          inner !== container &&
+          container.contains(inner) &&
+          active &&
+          tabStops(inner).includes(active)
+        )
+          return;
+      handleKeyDown(event);
     };
 
+    activeTraps.add(container);
     container.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keydown', handleOutsideKeyDown);
     return () => {
+      activeTraps.delete(container);
       container.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keydown', handleOutsideKeyDown);
     };
