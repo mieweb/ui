@@ -86,6 +86,13 @@ export interface InlineEditProps
   disabled?: boolean;
   /** Save when focus leaves the editor (default). When false, blur cancels. */
   saveOnBlur?: boolean;
+  /**
+   * Whether the editor is open, for a host that opens it itself (a menu's
+   * Rename). Leave it out and the display button opens it.
+   */
+  editing?: boolean;
+  /** The editor opened or closed: from the display button, Save, Cancel, Enter, Escape or blur. */
+  onEditingChange?: (editing: boolean) => void;
   /** Translatable strings. */
   labels?: Partial<InlineEditLabels>;
 }
@@ -123,6 +130,8 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
       readOnly,
       disabled,
       saveOnBlur = true,
+      editing: editingProp,
+      onEditingChange,
       size,
       labels: labelOverrides,
       className,
@@ -132,10 +141,24 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
     ref
   ) {
     const labels = { ...defaultInlineEditLabels, ...labelOverrides };
-    const [editing, setEditing] = React.useState(false);
+    const [editingState, setEditingState] = React.useState(false);
+    const editing = editingProp ?? editingState;
+    const setEditing = (next: boolean) => {
+      if (editingProp === undefined) setEditingState(next);
+      onEditingChange?.(next);
+    };
     const [draft, setDraft] = React.useState(value);
     const [pendingValue, setPendingValue] = React.useState<string | null>(null);
     const [error, setError] = React.useState<string | null>(null);
+    // Each opening starts from the saved value, however it was opened.
+    const [wasEditing, setWasEditing] = React.useState(editing);
+    if (editing !== wasEditing) {
+      setWasEditing(editing);
+      if (editing) {
+        setDraft(value);
+        setError(null);
+      }
+    }
     const containerRef = React.useRef<HTMLDivElement>(null);
     const displayRef = React.useRef<HTMLButtonElement>(null);
     const fieldRef = React.useRef<
@@ -158,8 +181,6 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
 
     const startEditing = () => {
       if (disabled || readOnly || pendingValue !== null) return;
-      setDraft(value);
-      setError(null);
       setEditing(true);
     };
 

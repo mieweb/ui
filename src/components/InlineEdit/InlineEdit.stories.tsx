@@ -123,6 +123,16 @@ The caller owns \`value\`; \`onSave\` may return a promise. While it is pending 
     readOnly: { description: 'Plain text, no edit affordance.' },
     disabled: { description: 'Disable editing.' },
     saveOnBlur: { description: 'Save (default) or cancel when focus leaves.' },
+    editing: {
+      description:
+        "Whether the editor is open, for a host that opens it itself (a menu's Rename). Leave it out and the display button opens it.",
+      control: false,
+    },
+    onEditingChange: {
+      description:
+        'The editor opened or closed: from the display button, Save, Cancel, Enter, Escape or blur.',
+      control: false,
+    },
     size: {
       description: 'Display and control size.',
       control: 'radio',
@@ -187,6 +197,43 @@ export const Types: Story = {
       </dd>
     </dl>
   ),
+};
+
+/** Opened by the host, e.g. from a menu's Rename, rather than by its own display button. */
+function OpenedFromAMenu() {
+  const [value, setValue] = React.useState('Morning standup');
+  const [editing, setEditing] = React.useState(false);
+  return (
+    <div className="flex max-w-xs flex-col gap-2">
+      <button
+        type="button"
+        className="self-start text-sm underline"
+        onClick={() => setEditing(true)}
+      >
+        Rename
+      </button>
+      <InlineEdit
+        label="Video name"
+        size="sm"
+        value={value}
+        onSave={setValue}
+        editing={editing}
+        onEditingChange={setEditing}
+      />
+    </div>
+  );
+}
+
+export const OpenedByTheHost: Story = {
+  render: () => <OpenedFromAMenu />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `editing` and `onEditingChange`, a host opens the editor itself, here from a Rename button standing in for a menu item. Enter, Escape, ✓, ✕ and blur close it the same way.',
+      },
+    },
+  },
 };
 
 export const SaveFails: Story = {
