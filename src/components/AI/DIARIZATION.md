@@ -7,6 +7,7 @@ handle a **variable, unknown number of speakers**, name the ones we know, and st
 never leaves the browser).
 
 ## Status — what shipped (Phases 1–2 done)
+
 - **`diarize.ts`** — pure clustering + attribution core (agglomerative, average-linkage, cosine), unit-tested.
 - **`useDiarization`** — batch hook wiring Whisper-timestamps → TitaNet embed → cluster → anchor → attribute,
   with optional LLM role inference. Tunable: `threshold` (default **0.65**), `maxSpeakers`,
@@ -18,19 +19,21 @@ never leaves the browser).
   speaker-labeled transcript to the assistant instead of a flat blob.
 - **Defaults tuned for over-splitting:** the merge threshold moved 0.5 → **0.65** and a **1.0s minimum
   segment** was added, because short/varied segments were splitting one person into several speakers.
-- **Still pending:** Phase 3 (overlap-aware pyannote WASM), and moving model hosting off personal accounts.
+- **Still pending:** moving model hosting off personal accounts. Phase 3 (pyannote WASM) is superseded by
+  Nemotron 3 Diarization in the experimental `SpeakerScribe` (mieweb/ui#492).
 
 ## We already have the hard parts
+
 Diarization = segment → embed → cluster → (optionally) identify → align to a transcript. We ship every
 piece except the clustering/attribution glue:
 
-| Need | Have it? |
-|---|---|
-| VAD / speech segments | ✅ Silero (in the wake stack) |
-| Speaker embeddings (text-independent) | ✅ **TitaNet** in the sherpa-onnx WASM (`SpeakerVerify`) |
+| Need                                        | Have it?                                                         |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| VAD / speech segments                       | ✅ Silero (in the wake stack)                                    |
+| Speaker embeddings (text-independent)       | ✅ **TitaNet** in the sherpa-onnx WASM (`SpeakerVerify`)         |
 | Enrolled voiceprints (to name known people) | ✅ per-voice centroids (`useSpeakerVerify`, Phase-2 multi-voice) |
-| On-device transcription + timestamps | ✅ Whisper via transformers.js |
-| Clustering + transcript attribution | ➕ this work (`diarize.ts`) |
+| On-device transcription + timestamps        | ✅ Whisper via transformers.js                                   |
+| Clustering + transcript attribution         | ➕ this work (`diarize.ts`)                                      |
 
 So the MVP needs **no new WASM build** — Whisper gives the segments (its own timestamps), TitaNet embeds
 each segment, we cluster in JS, and the existing voiceprints anchor identities.
@@ -50,7 +53,9 @@ Output: `DiarizedSegment[] = { start, end, text, cluster, speaker }` where `spea
 ("Dr. Smith", "MA Sarah") or a generic label ("Speaker 2").
 
 ## Naming the unknowns (patient vs. parent vs. nurse)
+
 You can't voiceprint a patient you've never met, so combine:
+
 1. **Voiceprint anchor (known people).** Match each cluster to enrolled voices via TitaNet cosine — the
    doctor and any enrolled care-team get their real name; everyone else is `Speaker N`. (Reuses the
    multi-voice enrollment already shipped.)
@@ -63,6 +68,7 @@ You can't voiceprint a patient you've never met, so combine:
 Combination: **anchor the known → LLM-guess the unknown roles → let the doctor correct.**
 
 ## Design decisions
+
 - **Batch for the labels, live for feedback.** Speaker attribution is computed at visit end (batch is far
   more accurate). A separate live rough transcript can stream while recording, but it's unlabeled — labels
   need the whole clip.
@@ -77,17 +83,20 @@ Combination: **anchor the known → LLM-guess the unknown roles → let the doct
   messy. A dedicated pyannote-segmentation WASM (Phase 3) improves this.
 
 ## Phasing
+
 1. ✅ **MVP (no new WASM):** Whisper segments → TitaNet per-segment embed → JS cluster → anchor to enrolled
    voices → attributed transcript. Doctor (and enrolled staff) named; others `Speaker N`. Surfaced in
    `<VisitScribe>` + conversation mode.
 2. ✅ **LLM role inference** for the unknown speakers (manual relabel via VoiceManager rename).
-3. **Accuracy upgrade:** build the sherpa-onnx *speaker-diarization* WASM (same recipe as the speaker-verify
-   build, on the os.mieweb.org container) — pyannote segmentation for better boundaries + overlap handling —
-   and swap it in behind the same `diarize()` interface.
+3. ~~**Accuracy upgrade:** build the sherpa-onnx _speaker-diarization_ WASM (pyannote segmentation) and swap
+   it in behind the same `diarize()` interface.~~ Superseded by Nemotron 3 Diarization, which handles overlap
+   natively and runs on ONNX Runtime Web without a custom WASM build: see the experimental `SpeakerScribe`.
 
 ## What needs the Linux container (not buildable on the Mac)
+
 Only Phase 3 (the pyannote-segmentation WASM). The MVP runs entirely on assets we already ship.
 
 ## De-risk / validate
+
 Run the MVP on a recorded **multi-speaker** clip in-browser and measure **DER** (diarization error rate)
 and how reliably the doctor-anchor picks the right cluster, before investing in Phase 3.
