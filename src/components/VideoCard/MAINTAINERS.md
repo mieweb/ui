@@ -27,8 +27,8 @@
 - **Preview is always muted and looping** (`mute: 1`, playlist loop). Sound is
   the click-through's job, never the preview's.
 - **PlayButton's conic ring is plain CSS** (`[background:conic-gradient(...)]`
-  + `mie-spin`), no JS animation — it must render finished-looking with
-  animations disabled.
+  - `mie-spin`), no JS animation — it must render finished-looking with
+    animations disabled.
 
 ## Gotchas
 
