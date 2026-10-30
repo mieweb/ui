@@ -719,7 +719,9 @@ function MediaFeedInner<T>(
         aria-live="polite"
         className="rounded-full bg-black/45 px-1.5 py-0.5 text-xs whitespace-nowrap text-white tabular-nums backdrop-blur-sm"
       >
-        {labels.position(activeIndex + 1, items.length)}
+        {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
+            translated "2 من 3" still reads right to left. */}
+        <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
       </span>
       <Button
         variant="ghost"
@@ -756,7 +758,9 @@ function MediaFeedInner<T>(
         aria-live="polite"
         className="text-muted-foreground shrink-0 text-sm whitespace-nowrap"
       >
-        {labels.position(activeIndex + 1, items.length)}
+        {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
+            translated "2 من 3" still reads right to left. */}
+        <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
       </span>
       <Button
         variant="ghost"
