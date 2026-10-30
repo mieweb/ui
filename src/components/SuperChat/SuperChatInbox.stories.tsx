@@ -711,28 +711,39 @@ export const MediaConversationPhoneLandscape: Story = {
   render: () => <MediaConversationDemo layout="overlay" />,
 };
 
-/** A host's own card for a thread attachment: a poster frame and a Play. */
+/**
+ * A host's own card for a thread attachment: the clip's first frame and a
+ * Play, in the clip's own shape, upright or wide.
+ */
 function HostCard({
   attachment,
   open,
   launchId,
 }: SuperChatMessageMediaRenderProps) {
+  // Width ÷ height, once the clip's metadata says.
+  const [aspect, setAspect] = React.useState<number>();
   // The host owns this text; localize it like the rest of the app.
   const label = `Play ${attachment.title ?? 'video'}`;
+  const upright = aspect !== undefined && aspect < 1;
   return (
     <button
       type="button"
       data-media-launch-id={launchId}
       aria-label={label}
       onClick={() => open(true)}
-      className="focus-visible:ring-ring relative mt-2 block w-40 max-w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+      className={`focus-visible:ring-ring relative mt-2 block max-w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:outline-none ${upright ? 'w-36' : 'w-60'}`}
     >
       <video
         src={attachment.src}
         muted
         playsInline
         preload="metadata"
-        className="block aspect-video w-full bg-black object-cover"
+        onLoadedMetadata={(event) => {
+          const { videoWidth, videoHeight } = event.currentTarget;
+          if (videoWidth && videoHeight) setAspect(videoWidth / videoHeight);
+        }}
+        style={{ aspectRatio: aspect ?? 16 / 9 }}
+        className="block w-full bg-black object-cover"
       />
       <span className="absolute inset-0 flex items-center justify-center">
         <span className="flex size-10 items-center justify-center rounded-full bg-black/60 text-white">
@@ -750,7 +761,7 @@ export const HostMediaCard: Story = {
     docs: {
       description: {
         story:
-          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view. The card sits at the start of the bubble, under the text, however wide the message makes it.",
+          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view. The card takes the clip's shape, upright or wide, and sits at the start of the bubble, under the text, however wide the message makes it.",
       },
     },
   },
