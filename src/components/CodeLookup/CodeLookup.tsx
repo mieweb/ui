@@ -728,7 +728,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       <div data-slot="code-lookup-search" className="relative" ref={anchorRef}>
         <SearchIcon
           size={16}
-          className="text-muted-foreground absolute start-3 top-5 -translate-y-1/2"
+          className="text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2"
         />
         <input
           type="text"

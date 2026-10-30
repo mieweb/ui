@@ -2,20 +2,17 @@ import * as React from 'react';
 import type { FieldComponentProps } from '@esheet/core';
 import { Assessment } from '../Assessment';
 import { currentAssertion, type ConditionConcern } from '../ProblemList';
-import { useCodeLookupConfig } from '../CodeLookup/context';
 import type { EncounterAssessmentValue } from './types';
 import { validateEncounterAssessment } from './model';
 import { useEncounterMessages } from './messages';
 import {
-  codedOrderSearch,
   clinicalAnswerResponse,
-  clinicalRequiresCoding,
-  EncounterAssertionDateInput,
-  useEncounterAssertionDate,
   getExternalEncounterConditions,
+  InvalidClinicalAnswer,
   matchingConditionCode,
   repairEncounterConcernReferences,
   useClinicalFormState,
+  useEncounterAssertionDate,
 } from './clinicalFieldAdapters';
 
 function readAssessment(
@@ -38,8 +35,7 @@ function readAssessment(
   } catch {
     return {
       value: { concerns: [], items: [], orders: [] },
-      error:
-        'The saved assessment answer could not be read. The original answer is retained below; correct it through the visit data before editing.',
+      error: 'unreadable',
     };
   }
 }
@@ -67,11 +63,9 @@ export function EncounterAssessmentField({
   onResponse,
 }: FieldComponentProps): React.JSX.Element {
   const m = useEncounterMessages();
-  const requireCoding = clinicalRequiresCoding(field);
   const assertionDate = useEncounterAssertionDate(field);
   const currentDate = React.useRef(assertionDate);
   currentDate.current = assertionDate;
-  const codeLookup = useCodeLookupConfig();
   const state = useClinicalFormState(form);
   const externalConcerns = React.useMemo(
     () => getExternalEncounterConditions(state),
@@ -102,13 +96,6 @@ export function EncounterAssessmentField({
   currentValue.current = value;
   const canEdit = React.useRef(!readOnly);
   canEdit.current = !readOnly;
-  const renderSearch = React.useMemo(
-    () =>
-      codeLookup || !requireCoding
-        ? codedOrderSearch(codeLookup, requireCoding, m)
-        : undefined,
-    [codeLookup, requireCoding, m]
-  );
   const definition = field.definition as { question?: string };
   const commit = (
     update: (next: EncounterAssessmentValue) => EncounterAssessmentValue
@@ -133,25 +120,7 @@ export function EncounterAssessmentField({
   };
   if (error) {
     return (
-      <section
-        aria-label={definition.question ?? m('Assessment and plan')}
-        className="space-y-3"
-      >
-        <div
-          role="alert"
-          className="border-destructive text-destructive rounded-lg border p-3"
-        >
-          <p>{m(error)}</p>
-          <pre
-            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable original data needs keyboard focus
-            tabIndex={0}
-            aria-label={m('Original assessment answer')}
-            className="mt-2 max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap"
-          >
-            {response?.answer}
-          </pre>
-        </div>
-      </section>
+      <InvalidClinicalAnswer label="assessment" answer={response?.answer} />
     );
   }
   return (
@@ -160,21 +129,17 @@ export function EncounterAssessmentField({
         concerns={concerns}
         items={value.items}
         orders={value.orders}
-        title={null}
-        addFormStart={
-          !readOnly && <EncounterAssertionDateInput {...assertionDate} />
-        }
         aria-label={definition.question ?? m('Assessment and plan')}
-        className="rounded-none border-0 bg-transparent shadow-none [&_.border-dashed]:rounded-none [&_.border-dashed]:border-0 [&_.border-dashed]:bg-transparent [&_.border-dashed]:p-0 [&_.min-w-64]:min-w-0 [&_[data-slot=assessment-problem]]:rounded-none [&_[data-slot=assessment-problem]]:border-0 [&_[data-slot=assessment-problem]]:px-0 [&_[data-slot=assessment-problem]>ul]:ms-0 [&_[data-slot=assessment-problem]>ul]:border-0 [&_[data-slot=assessment-problem]>ul]:ps-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11 [&_select]:min-h-11 [&>[data-slot=card-content]]:p-0 [&>[data-slot=card-content]>section]:border-0 [&>[data-slot=card-content]>section]:bg-transparent [&>[data-slot=card-content]>section]:px-0"
         readOnly={readOnly}
-        defaultAddMode="problem"
         addFormLabel="Add assessment or order"
-        renderOrderSearch={renderSearch}
+        // New diagnoses create dated assertions — without a valid host
+        // encounter date the affordance is removed (order-only add row)
+        // instead of silently discarding picks.
         onAddAssessment={
-          (codeLookup || !requireCoding) && assertionDate.valid
-            ? (pick) => {
-                if (!currentDate.current.valid || (requireCoding && !pick.code))
-                  return;
+          !assertionDate.valid
+            ? undefined
+            : (pick) => {
+                if (!currentDate.current.valid) return;
                 const existingConcern = pick.code
                   ? concerns.find((concern) =>
                       matchingConditionCode(concern, pick.code!)
@@ -229,7 +194,6 @@ export function EncounterAssessmentField({
                   items: [...next.items, { concernId, assertionId }],
                 }));
               }
-            : undefined
         }
         onRemoveAssessment={(item) => {
           const wasLocal = currentValue.current.concerns.some(
@@ -257,23 +221,18 @@ export function EncounterAssessmentField({
           if (wasLocal && canEdit.current)
             repairEncounterConcernReferences(form.getState(), item.concernId);
         }}
-        onAddOrder={
-          codeLookup || !requireCoding
-            ? (item, order) => {
-                if (requireCoding && !order.code) return;
-                commit((next) => ({
-                  ...next,
-                  orders: [
-                    ...next.orders,
-                    {
-                      ...order,
-                      orderId: globalThis.crypto.randomUUID(),
-                      concernId: item?.concernId,
-                    },
-                  ],
-                }));
-              }
-            : undefined
+        onAddOrder={(item, order) =>
+          commit((next) => ({
+            ...next,
+            orders: [
+              ...next.orders,
+              {
+                ...order,
+                orderId: globalThis.crypto.randomUUID(),
+                concernId: item?.concernId,
+              },
+            ],
+          }))
         }
         onEditOrder={(order, changes) =>
           commit((next) => ({
@@ -316,6 +275,13 @@ export function EncounterAssessmentField({
           }))
         }
       />
+      {!readOnly && !assertionDate.valid && (
+        <p className="text-muted-foreground text-xs">
+          {m(
+            'No encounter date — new diagnoses are disabled; orders can still be added.'
+          )}
+        </p>
+      )}
     </section>
   );
 }

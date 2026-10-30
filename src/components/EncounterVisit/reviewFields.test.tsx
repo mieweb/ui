@@ -106,7 +106,7 @@ describe('encounter review regressions', () => {
       <EncounterMessagesProvider
         messages={{
           labels: {
-            'Other…': 'Otro…',
+            Add: 'Agregar',
             'Add Medication': 'Agregar medicamento',
             Medication: 'Medicamento',
             Save: 'Guardar',
@@ -124,7 +124,7 @@ describe('encounter review regressions', () => {
     );
     expect(screen.getByText('Actual drug name')).toBeInTheDocument();
     expect(screen.getByText('Sin revisar')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Otro…' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
     expect(screen.getByRole('dialog')).toHaveTextContent('Agregar medicamento');
     expect(screen.getByRole('button', { name: 'Guardar' })).toBeDisabled();
     expect(

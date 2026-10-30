@@ -139,6 +139,22 @@
   z-index: 1001;
 }
 
+/* Field editor dialogs render in place at z-50, below the pinned chrome
+   (menubar 1000, switcher 1001) — lift them so the backdrop dims the toolbar
+   instead of the toolbar painting over the dialog. Portaled panels (selects,
+   lookups) live on body at z-index 9999, so they stay above. */
+.encounter-visit [data-slot='modal-root'] {
+  z-index: 1002;
+}
+
+/* eSheet touch mode forces `padding: 0.75rem !important` on every input,
+   which clobbers the logical start padding (`ps-9`) that reserves space for
+   lookup search icons — the placeholder then sits under the icon. Restore it
+   at higher specificity. */
+.esheet-renderer-root.esheet-touch-active input.ps-9[data-slot='input'] {
+  padding-inline-start: 2.25rem !important;
+}
+
 /* The switcher's lane shares the toolbar surface so the pinned row reads as
    one continuous bar in every mode. */
 .encounter-visit .encounter-view-switch::before {

@@ -38,7 +38,7 @@ The **presenting-medications list with medication reconciliation**: review a pat
 
 ### Don't use it when
 
-- You need a complete encounter document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) captures coded medications through inline prescription cards in one eSheet response store, without reconciliation statuses. Use MedicationReconciliation directly when every row must end up Taking / Not taking / Unknown.
+- You need a complete encounter document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) embeds this folder's \`MedicationReconciliation\` over its own eSheet response store. Use \`MedicationReconciliation\` directly when the host owns the chart-scope medication list.
 - You need the **allergy** list — [AllergyList](?path=/docs/clinical-lists-allergylist--docs); same three-layer pattern, different model (NKA tri-state, allergy vs intolerance).
 - You are placing a **new medication order** inside the visit's plan — [Assessment](?path=/docs/encounter-orders-assessment--docs) with [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs), which morphs into this folder's \`MedicationEditor\` for \`type: 'medication'\` orders.
 - You just need a read-only medication summary in a banner — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)'s \`showMedicationBanner\` renders name / dose pills; use \`MedicationList readOnly\` only when the grouped status view matters.
@@ -86,7 +86,7 @@ const [meds, setMeds] = useState<Medication[]>(encounter.presentingMedications);
         {
           type: 'composes with',
           target: 'encounter-orders-encountervisit',
-          why: "EncounterVisit's medication section captures the same coded Medication records through inline cards without reconciliation statuses; use MedicationReconciliation when rows must be reconciled.",
+          why: 'EncounterVisit embeds MedicationReconciliation over its eSheet-native records; use MedicationReconciliation directly for a host-controlled chart list.',
         },
         {
           type: 'composes with',
@@ -189,7 +189,7 @@ export const Interactive: Story = {
 Everything works without writing any handler code:
 
 - **Status buttons** (👍 🤘 👎 ?) move the row to the matching group
-- **Correct** and **Other…** open the NCPDP \`MedicationEditor\`; the drug
+- **Correct** and the **Add** pill open the NCPDP \`MedicationEditor\`; the drug
   search codes against RxNorm/FDB offline (try typing "lisinopril 20") and
   auto-fills strength, dose form, and quantity unit
 - **Notes / Add Task** open small dialogs; their text appears under the row
@@ -432,7 +432,7 @@ quick-add pills would *lead the patient*, so this variant omits
   one. Free text (Enter) works for anything not found
 - Then record *how they're taking it*: hover/tap the new row and hit
   👍 / 🤘 / 👎 / ? — two interactions per medication total
-- "Other…" is still there for entries needing full prescription detail
+- The **Add** pill is still there for entries needing full prescription detail
 
 For clinician-facing quick picks, add \`quickAddOptions\` back — see
 **Interactive**.

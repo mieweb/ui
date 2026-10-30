@@ -148,7 +148,7 @@ export interface MedicationListProps extends Omit<
   quickAddOptions?: string[];
   /** Called when a quick-add option is clicked */
   onQuickAdd?: (name: string) => void;
-  /** Called when "Other…" is clicked in the quick-add list */
+  /** Called when the "Add" editor pill is clicked in the quick-add list */
   onAddOther?: () => void;
   /** Hide all action buttons (display only) */
   readOnly?: boolean;
@@ -586,7 +586,7 @@ export const MedicationList = React.forwardRef<
                         leftIcon={<PlusIcon size={12} />}
                         className="h-auto rounded-full px-2.5 py-1 text-xs"
                       >
-                        {m('Other…')}
+                        {m('Add')}
                       </Button>
                     )}
                   </div>

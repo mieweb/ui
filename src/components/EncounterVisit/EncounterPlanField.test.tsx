@@ -52,7 +52,8 @@ describe('EncounterPlanField', () => {
       domains: ['med', 'lab', 'procedure', 'vaccine'],
       clearOnSelect: true,
     });
-    expect(lookupProps().onFreeText).toBeUndefined();
+    // Stock Assessment supports free-text orders alongside coded picks.
+    expect(lookupProps().onFreeText).toBeTypeOf('function');
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(latest<PlanValue>().orders).toEqual([
       {
@@ -276,23 +277,22 @@ describe('EncounterPlanField', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  it('rejects missing codes and diagnosis picks from the order search', () => {
-    const { lookupProps, onResponse } = renderPlan();
-    act(() => lookupProps().onSelect?.({ ...labPick, fullcode: '' }));
+  it('infers the order type from the coding system for any catalog pick', () => {
+    const { latest, lookupProps } = renderPlan();
     act(() => lookupProps().onSelect?.(conditionPick));
-    expect(onResponse).not.toHaveBeenCalled();
+    expect(latest<PlanValue>().orders[0]).toMatchObject({
+      type: 'procedure',
+      display: 'Essential hypertension',
+      code: { codetype: 'ICD10', fullcode: 'I10' },
+    });
   });
 
-  it('keeps imported uncoded plan entries readable and editable without an uncoded Add fallback', () => {
+  it('keeps imported uncoded plan entries readable and editable without a catalog', () => {
     const { latest, onResponse } = renderPlan(
       { orders: [{ ...codedOrder, code: undefined }] },
       { provider: false }
     );
     expect(screen.getByText('Hemoglobin A1c')).toBeInTheDocument();
-    expect(
-      screen.getByText(/coded order search is unavailable/i)
-    ).toBeInTheDocument();
-    expect(screen.queryByLabelText('What to add')).not.toBeInTheDocument();
     expect(onResponse).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     fireEvent.change(screen.getByLabelText('Order detail'), {
@@ -303,6 +303,14 @@ describe('EncounterPlanField', () => {
       detail: 'Imported plan reviewed',
     });
     expect(latest<PlanValue>().orders[0]).not.toHaveProperty('code');
+    // Without a search provider the add row falls back to plain free text.
+    const freeText = screen.getByLabelText('Add as free text');
+    fireEvent.change(freeText, { target: { value: 'Repeat A1c in 3 months' } });
+    fireEvent.keyDown(freeText, { key: 'Enter' });
+    expect(latest<PlanValue>().orders[1]).toMatchObject({
+      display: 'Repeat A1c in 3 months',
+    });
+    expect(latest<PlanValue>().orders[1]).not.toHaveProperty('code');
   });
 
   it('retains malformed original answers and prevents replacing them', () => {
@@ -316,7 +324,7 @@ describe('EncounterPlanField', () => {
 });
 
 describe('EncounterAssessmentField coded capture', () => {
-  it('captures diagnosis codes through the healthcare component without a free-text fallback', () => {
+  it('captures diagnosis codes through the shared Assessment add row', () => {
     const { latest, lookupProps } = renderClinicalField(
       EncounterAssessmentField,
       'encounterAssessment'
@@ -324,7 +332,8 @@ describe('EncounterAssessmentField coded capture', () => {
     expect(
       screen.getByRole('form', { name: 'Add assessment or order' })
     ).toBeInTheDocument();
-    expect(lookupProps().onFreeText).toBeUndefined();
+    // Stock Assessment supports free-text concerns alongside coded picks.
+    expect(lookupProps().onFreeText).toBeTypeOf('function');
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     expect(
       latest<{ concerns: (typeof hypertensionConcern)[] }>().concerns[0]
@@ -599,8 +608,28 @@ describe('EncounterAssessmentField coded capture', () => {
     expect(localAssessment.concerns[0]).toEqual(hypertensionConcern);
   });
 
-  it('hides new assessment and order capture when no coding provider is configured', () => {
-    renderClinicalField(
+  it('drops to order-only capture with a notice when the host provides no encounter date', () => {
+    const { lookupProps } = renderClinicalField(
+      EncounterAssessmentField,
+      'encounterAssessment',
+      { concerns: [], items: [], orders: [] },
+      { encounterDate: null }
+    );
+    // New diagnoses would create undated assertions — the affordance is
+    // removed and the add row collapses to orders only.
+    expect(
+      screen.getByText(/No encounter date — new diagnoses are disabled/)
+    ).toBeInTheDocument();
+    const modeSelect = screen.getByLabelText('What to add');
+    expect(within(modeSelect).getAllByRole('option')).toHaveLength(1);
+    expect(
+      within(modeSelect).getByRole('option', { name: 'Add order' })
+    ).toBeInTheDocument();
+    expect(lookupProps().domains).not.toContain('condition');
+  });
+
+  it('falls back to a free-text add row without a coding provider and keeps uncoded per-problem orders', () => {
+    const { latest } = renderClinicalField(
       EncounterAssessmentField,
       'encounterAssessment',
       {
@@ -613,13 +642,37 @@ describe('EncounterAssessmentField coded capture', () => {
       { provider: false }
     );
     expect(screen.getByText('Essential hypertension')).toBeInTheDocument();
+    // Without a catalog the unified add row still captures plain free text.
+    const freeText = screen.getByLabelText('Add as free text');
+    fireEvent.change(freeText, {
+      target: { value: 'Smoking cessation referral' },
+    });
+    fireEvent.keyDown(freeText, { key: 'Enter' });
+    // Auto mode asks what the text is; file it as an order.
+    fireEvent.click(
+      within(
+        screen.getByRole('group', { name: /smoking cessation referral/i })
+      ).getByRole('button', { name: 'Order' })
+    );
     expect(
-      screen.queryByRole('button', { name: 'Add order' })
-    ).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('What to add')).not.toBeInTheDocument();
+      latest<{ orders: Record<string, unknown>[] }>().orders[0]
+    ).toMatchObject({ display: 'Smoking cessation referral' });
     expect(
-      screen.queryByRole('textbox', { name: 'Clinical entry' })
-    ).not.toBeInTheDocument();
+      latest<{ orders: Record<string, unknown>[] }>().orders[0]
+    ).not.toHaveProperty('code');
+    // The per-problem order form still allows plain-text orders.
+    fireEvent.click(screen.getByRole('button', { name: 'Add order' }));
+    const orderForm = screen.getByRole('form', { name: /add order for/i });
+    fireEvent.change(within(orderForm).getByLabelText('Order description'), {
+      target: { value: 'Lifestyle counseling' },
+    });
+    fireEvent.click(within(orderForm).getByRole('button', { name: 'Add' }));
+    expect(
+      latest<{ orders: Record<string, unknown>[] }>().orders[1]
+    ).toMatchObject({
+      concernId: 'hypertension',
+      display: 'Lifestyle counseling',
+    });
   });
 });
 
@@ -653,15 +706,12 @@ describe('clinical native response metadata', () => {
         selected: { id: 'stale', value: 'Unrelated option' },
         _ai: true,
       };
-      const { form, onResponse } = renderClinicalField(
+      const { form, onResponse, lookupProps } = renderClinicalField(
         component,
         fieldType,
         undefined,
         { initialResponse: original, pick }
       );
-      if (fieldType === 'encounterConditions') {
-        fireEvent.click(screen.getByRole('button', { name: 'Add condition' }));
-      }
       fireEvent.click(
         screen.getByRole('button', { name: 'Pick coded finding' })
       );
@@ -683,8 +733,13 @@ describe('clinical native response metadata', () => {
           _ai: true,
         })
       );
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Pick coded finding' })
+      // A distinct code — Conditions ignores a pick matching an existing concern.
+      act(() =>
+        lookupProps().onSelect?.({
+          ...pick,
+          fullid: `${pick.codetype}|${pick.fullcode}0`,
+          fullcode: `${pick.fullcode}0`,
+        })
       );
       const edited = onResponse.mock.calls.at(-1)![0] as FieldResponse;
       expect(edited).toMatchObject({
@@ -703,38 +758,33 @@ describe('clinical native response metadata', () => {
   );
 });
 
-describe('explicit uncoded clinical configuration', () => {
-  it.each([
-    {
-      component: EncounterPlanField,
-      fieldType: 'encounterPlan',
-      expectedKey: 'orders',
-    },
-    {
-      component: EncounterAssessmentField,
-      fieldType: 'encounterAssessment',
-      expectedKey: 'concerns',
-    },
-  ])(
-    'allows uncoded $fieldType capture without a catalog only when configured',
-    ({ component, fieldType, expectedKey }) => {
-      const { latest } = renderClinicalField(component, fieldType, undefined, {
-        provider: false,
-        requireCoding: false,
-      });
-      fireEvent.change(
-        screen.getByRole('textbox', { name: 'Clinical entry' }),
-        { target: { value: 'Explicitly entered clinical text' } }
-      );
-      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
-      const value = latest<Record<string, unknown[]>>();
-      expect(value[expectedKey]).toHaveLength(1);
-      expect(JSON.stringify(value)).toContain(
-        'Explicitly entered clinical text'
-      );
-      expect(JSON.stringify(value)).not.toContain('coding');
-    }
-  );
+describe('free-text clinical capture through the shared add row', () => {
+  it('captures a free-text plan order as an uncoded procedure', () => {
+    const { latest, lookupProps } = renderClinicalField(
+      EncounterPlanField,
+      'encounterPlan'
+    );
+    act(() => lookupProps().onFreeText?.('Explicitly entered clinical text'));
+    const value = latest<{ orders: Record<string, unknown>[] }>();
+    expect(value.orders[0]).toMatchObject({
+      type: 'procedure',
+      display: 'Explicitly entered clinical text',
+    });
+    expect(JSON.stringify(value)).not.toContain('coding');
+  });
+
+  it('asks what free text is in the assessment auto mode and records a concern', () => {
+    const { latest, lookupProps } = renderClinicalField(
+      EncounterAssessmentField,
+      'encounterAssessment'
+    );
+    act(() => lookupProps().onFreeText?.('Explicitly entered clinical text'));
+    fireEvent.click(screen.getByRole('button', { name: 'Concern' }));
+    const value = latest<{ concerns: Record<string, unknown>[] }>();
+    expect(value.concerns).toHaveLength(1);
+    expect(JSON.stringify(value)).toContain('Explicitly entered clinical text');
+    expect(JSON.stringify(value)).not.toContain('coding');
+  });
 });
 
 describe('clinical translation ownership', () => {
@@ -743,44 +793,26 @@ describe('clinical translation ownership', () => {
       component: EncounterPlanField,
       fieldType: 'encounterPlan',
       label: 'Add plan order',
-      provider: true,
     },
     {
       component: EncounterAssessmentField,
       fieldType: 'encounterAssessment',
       label: 'Add assessment or order',
-      provider: true,
-    },
-    {
-      component: EncounterPlanField,
-      fieldType: 'encounterPlan',
-      label: 'Add plan order',
-      provider: false,
-    },
-    {
-      component: EncounterAssessmentField,
-      fieldType: 'encounterAssessment',
-      label: 'Add assessment or order',
-      provider: false,
     },
   ])(
-    'translates $fieldType labels and provider=$provider search prompts exactly once',
-    ({ component, fieldType, label, provider }) => {
+    'translates $fieldType labels and search prompts exactly once',
+    ({ component, fieldType, label }) => {
       const translate = vi.fn((message: string) => `localized ${message}`);
       const { lookupProps } = renderClinicalField(
         component,
         fieldType,
         undefined,
-        { provider, requireCoding: false, messages: { translate } }
+        { messages: { translate } }
       );
       expect(
         screen.getByRole('form', { name: `localized ${label}` })
       ).toBeInTheDocument();
-      const placeholder = provider
-        ? lookupProps().placeholder
-        : screen
-            .getByRole('textbox', { name: 'localized Clinical entry' })
-            .getAttribute('placeholder');
+      const placeholder = lookupProps().placeholder;
       expect(placeholder).toMatch(/^localized /);
       expect(placeholder).not.toMatch(/^localized localized /);
       expect(
@@ -788,10 +820,6 @@ describe('clinical translation ownership', () => {
           message.startsWith('localized ')
         )
       ).toBe(false);
-      if (!provider)
-        expect(
-          screen.getByRole('button', { name: 'localized Add' })
-        ).toBeInTheDocument();
     }
   );
 });

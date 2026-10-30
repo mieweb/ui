@@ -1469,10 +1469,21 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             }
           >
             {blockMenu && !inert && !macrosResting && (
+              // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mousedown here only guards editor focus (preventDefault); the real controls inside are native buttons.
               <div
                 data-slot="rich-text-editor-block-gutter"
                 className="absolute start-1 z-10"
                 style={{ top: gutterTop }}
+                // Keep the editor focused through gutter interaction. iOS
+                // taps never focus buttons, so tapping the trigger or a menu
+                // item would first blur the editor with a null relatedTarget,
+                // collapsing focus-driven hosts and unmounting this gutter —
+                // and its menu — before the click can land. Preventing
+                // mousedown's focus default leaves the caret and virtual
+                // keyboard in place; clicks still fire. The dropdown portals
+                // under document.body, but React portal events bubble through
+                // the React tree, so this one handler covers the menu too.
+                onMouseDown={(event) => event.preventDefault()}
               >
                 <Dropdown
                   open={blockMenuOpen}

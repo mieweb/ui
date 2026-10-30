@@ -147,62 +147,33 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   const navigation = page.getByRole('combobox', { name: 'Go to section' });
   await expect(navigation.locator('option')).toHaveCount(11);
 
+  // Every clinical section shares the stock CodeLookup search wired to the
+  // demo /codify index; its results listbox portals to the document body.
+  async function pickCode(scope: Locator, query: string, option: string) {
+    await scope
+      .getByRole('combobox', { name: 'Search medical codes' })
+      .fill(query);
+    await page.getByRole('option', { name: option, exact: true }).click();
+  }
+
   await navigation.selectOption('medications');
   const medications = page.locator('[data-field-type=encounterMedications]');
-  await medications
-    .getByRole('button', { name: 'Add medication', exact: true })
-    .click();
-  await medications
-    .locator('[data-slot=sample-clinical-catalog] input')
-    .fill('lisinopril');
-  await medications
-    .getByRole('button', {
-      name: 'Select lisinopril 10 mg tablet (FDB 244899)',
-      exact: true,
-    })
-    .click();
-  // The picked name lives in the card's search input; the hint line
-  // carries the coding as text.
-  await expect(medications).toContainText('Coded: FDB 244899');
+  await pickCode(medications, 'lisinopril', 'lisinopril FDB MEDNAME 6620');
+  await expect(medications).toContainText('FDB MEDNAME 6620');
 
   await navigation.selectOption('allergies');
   const allergies = page.locator('[data-field-type=encounterAllergies]');
-  await allergies
-    .getByRole('button', { name: 'Add allergy', exact: true })
-    .click();
-  await allergies
-    .getByRole('combobox', { name: 'Type', exact: true })
-    .click();
-  await page.getByRole('option', { name: 'Food', exact: true }).click();
-  await allergies
-    .locator('[data-slot=sample-clinical-catalog] input')
-    .fill('Peanut');
-  await allergies
-    .getByRole('button', {
-      name: 'Select Peanut substance (SNOMED US 762952008)',
-      exact: true,
-    })
-    .click();
-  await allergies.getByLabel('Reaction', { exact: true }).fill('Hives');
-  // The picked allergen lives in the card's search input; the hint line
-  // carries the coding as text.
-  await expect(allergies).toContainText('Coded: SNOMED US 762952008');
+  await pickCode(allergies, 'penicillin v', 'penicillin V RxNORM 7984');
+  await expect(allergies).toContainText('RxNORM 7984');
 
   await navigation.selectOption('conditions');
   const conditions = page.locator('[data-field-type=encounterConditions]');
-  await conditions
-    .getByRole('button', { name: 'Add condition', exact: true })
-    .click();
-  await conditions
-    .getByRole('searchbox', { name: 'Add condition', exact: true })
-    .fill('hypertension');
-  await conditions
-    .getByRole('button', {
-      name: 'Select Essential hypertension (ICD10 I10)',
-      exact: true,
-    })
-    .click();
-  await expect(conditions).toContainText('I10');
+  await pickCode(
+    conditions,
+    'hypertension',
+    'Essential (primary) hypertension ICD10 I10'
+  );
+  await expect(conditions).toContainText('(I10)');
 
   await navigation.selectOption('plan');
   const plan = page.locator('[data-field-type=encounterPlan]');
@@ -210,44 +181,32 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   // the sticky footer and hover it so the toolbar accepts pointer events.
   const hypertensionRow = plan
     .locator('[data-slot=assessment-problem]')
-    .filter({ hasText: 'Essential hypertension' });
+    .filter({ hasText: 'Essential (primary) hypertension' });
   await hypertensionRow.evaluate((el) =>
     el.scrollIntoView({ block: 'center' })
   );
   await hypertensionRow.hover();
   await plan
     .getByRole('toolbar', {
-      name: 'Actions for Essential hypertension',
+      name: 'Actions for Essential (primary) hypertension',
       exact: true,
     })
     .getByRole('button', { name: 'Add order', exact: true })
     .click();
   const indicatedOrder = plan.getByRole('form', {
-    name: 'Add order for Essential hypertension',
+    name: 'Add order for Essential (primary) hypertension',
     exact: true,
   });
-  await indicatedOrder
-    .locator('[data-slot=sample-clinical-catalog] input')
-    .fill('Hemoglobin');
-  await indicatedOrder
-    .getByRole('button', {
-      name: 'Select Hemoglobin A1c (LOINC 4548-4)',
-      exact: true,
-    })
-    .click();
+  await pickCode(
+    indicatedOrder,
+    'hemoglobin a1c',
+    'Hemoglobin A1c LabCorp Order 001453'
+  );
   const generalOrder = plan.getByRole('form', {
     name: 'Add plan order',
     exact: true,
   });
-  await generalOrder
-    .locator('[data-slot=sample-clinical-catalog] input')
-    .fill('hearing');
-  await generalOrder
-    .getByRole('button', {
-      name: 'Select Pure tone hearing test, air (HCPCS 92551)',
-      exact: true,
-    })
-    .click();
+  await pickCode(generalOrder, 'chest x', 'CHEST X-RAY HCPCS 71010');
   const prose = 'Discussed the recorded plan with the patient.';
   await page
     .getByRole('textbox', { name: 'Plan narrative', exact: true })
@@ -255,12 +214,10 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
 
   const before = await readVisit(page);
   expect(nativeAnswer(before, 'medications')).toMatchObject({
-    medications: [{ code: { system: 'FDB', code: '244899' } }],
+    medications: [{ code: { system: 'FDB MEDNAME', code: '6620' } }],
   });
   expect(nativeAnswer(before, 'allergies')).toMatchObject({
-    allergies: [
-      { code: { system: 'SNOMED US', code: '762952008' }, reaction: 'Hives' },
-    ],
+    allergies: [{ code: { system: 'RxNORM', code: '7984' } }],
   });
   expect(nativeAnswer(before, 'conditions')).toMatchObject({
     concerns: [
@@ -271,8 +228,8 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
     orders: ({ orderId: string } & Record<string, unknown>)[];
   }>(before, 'plan');
   expect(beforePlan.orders).toMatchObject([
-    { type: 'lab', code: { codetype: 'LOINC', fullcode: '4548-4' } },
-    { type: 'procedure', code: { codetype: 'HCPCS', fullcode: '92551' } },
+    { type: 'lab', code: { codetype: 'LabCorp Order', fullcode: '001453' } },
+    { type: 'procedure', code: { codetype: 'HCPCS', fullcode: '71010' } },
   ]);
   const nativeRecordIds = [
     ...nativeAnswer<{ medications: { id: string }[] }>(
@@ -295,11 +252,11 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   await selectVisitMode(page, 'RichEdit');
   const editor = page.getByRole('textbox', { name: 'Encounter narrative' });
   for (const text of [
-    'lisinopril 10 mg tablet',
-    'Peanut substance',
-    'Essential hypertension',
+    'lisinopril',
+    'penicillin V',
+    'Essential (primary) hypertension',
     'Hemoglobin A1c',
-    'Pure tone hearing test, air',
+    'CHEST X-RAY',
     prose,
   ]) {
     await expect(editor).toContainText(text, { timeout: 30000 });
@@ -307,11 +264,11 @@ test('coded healthcare capture survives mode changes, MCP edits and portable MDY
   for (const id of nativeRecordIds) await expect(editor).not.toContainText(id);
   let preview = await showView(page);
   for (const text of [
-    'lisinopril 10 mg tablet',
-    'Peanut substance',
-    'Essential hypertension',
+    'lisinopril',
+    'penicillin V',
+    'Essential (primary) hypertension',
     'Hemoglobin A1c',
-    'Pure tone hearing test, air',
+    'CHEST X-RAY',
     prose,
   ]) {
     await expect(preview).toContainText(text);

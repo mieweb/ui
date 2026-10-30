@@ -418,7 +418,8 @@ describe('EncounterAssessmentField', () => {
       }
     );
     expect(screen.getByText('Hypertension')).toBeInTheDocument();
-    expect(lookupProps().onFreeText).toBeUndefined();
+    // Stock Assessment supports free-text concerns alongside coded picks.
+    expect(lookupProps().onFreeText).toBeTypeOf('function');
     fireEvent.click(screen.getByRole('button', { name: 'Pick coded finding' }));
     const value = latest<EncounterAssessmentValue>();
     expect(value.orders).toEqual(initial.orders);

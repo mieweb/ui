@@ -41,7 +41,7 @@ import { MedicationList } from '@mieweb/ui';
   actions={['correct', 'remove']}          // limit the toolbar (default: all)
   quickAddOptions={['aspirin 81 mg tablet']}
   onQuickAdd={(name) => …}
-  onAddOther={() => …}                     // "Other…" button
+  onAddOther={() => …}                     // "Add" editor button
   readOnly                                 // display-only
 />
 ```

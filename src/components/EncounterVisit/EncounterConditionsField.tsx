@@ -1,28 +1,27 @@
 import * as React from 'react';
 import type { FieldComponentProps } from '@esheet/core';
-import { X } from 'lucide-react';
-import { ProblemList, currentAssertion } from '../ProblemList';
+import {
+  ProblemList,
+  currentAssertion,
+  type ConditionAssertion,
+} from '../ProblemList';
 import {
   ConditionEditor,
   type ConditionAssertionDraft,
+  type ConditionEditorMode,
 } from '../ConditionEditor';
-import { useEncounterMessages } from './messages';
-import { Button } from '../Button';
-import { useCodeLookupConfig } from '../CodeLookup/context';
 import { validateEncounterConditions } from './model';
+import { useEncounterMessages } from './messages';
+import { useCodeLookupConfig } from '../CodeLookup/context';
 import type { EncounterConditionsValue } from './types';
 import {
   InvalidClinicalAnswer,
   clinicalAnswerResponse,
-  clinicalRequiresCoding,
-  ClinicalAddButton,
-  clinicalEntryCardClasses,
-  EncounterAssertionDateInput,
-  useEncounterAssertionDate,
   matchingConditionCode,
   reorderClinicalEntries,
   repairEncounterConcernReferences,
   useClinicalFormState,
+  useEncounterAssertionDate,
 } from './clinicalFieldAdapters';
 
 function readConditions(answer?: string): EncounterConditionsValue | undefined {
@@ -58,14 +57,11 @@ export function EncounterConditionsField({
     [response?.answer]
   );
   const m = useEncounterMessages();
-  const requireCoding = clinicalRequiresCoding(field);
+  const codeLookup = useCodeLookupConfig();
   const assertionDate = useEncounterAssertionDate(field);
   const currentDate = React.useRef(assertionDate);
   currentDate.current = assertionDate;
-  const [adding, setAdding] = React.useState(false);
-  const [manualEditing, setManualEditing] = React.useState(false);
   const state = useClinicalFormState(form);
-  const codeLookup = useCodeLookupConfig();
   const readOnly =
     !(isPreview && isEnabled) ||
     Boolean(isReadOnly) ||
@@ -78,11 +74,10 @@ export function EncounterConditionsField({
   const canEdit = React.useRef(!readOnly);
   currentValue.current = value;
   canEdit.current = !readOnly;
-  const [editing, setEditing] = React.useState<{ concernId: string } | null>(
-    null
-  );
-  const definition = field.definition as { question?: string };
-  const label = definition.question ?? m('Conditions');
+  const [editor, setEditor] = React.useState<{
+    mode: ConditionEditorMode;
+    concernId?: string;
+  } | null>(null);
   const commit = (
     update: (next: EncounterConditionsValue) => EncounterConditionsValue
   ) => {
@@ -93,250 +88,262 @@ export function EncounterConditionsField({
       !currentValue.current
     )
       return;
+    // Advance the ref so a second commit in the same event (e.g. the editor
+    // adding an observation and saving an assertion on one Save) builds on
+    // this update instead of the stale render value.
+    const next = update(currentValue.current);
+    currentValue.current = next;
     onResponse(
       clinicalAnswerResponse(
         form.getState().responses[field.definition.id] ??
           currentResponse.current,
-        JSON.stringify(update(currentValue.current))
+        JSON.stringify(next)
       )
     );
   };
 
-  const recordAssertion = (
-    draft: ConditionAssertionDraft,
-    pick?: { codetype: string; fullcode: string }
+  const saveAssertion = (
+    concernId: string | undefined,
+    draft: ConditionAssertionDraft
   ) => {
-    if (!currentDate.current.valid || (requireCoding && !draft.coding?.length))
-      return;
+    if (!currentDate.current.valid) return;
+    const assertion: ConditionAssertion = {
+      ...draft,
+      id: globalThis.crypto.randomUUID(),
+      date: currentDate.current.date,
+    };
     commit((next) => {
-      const assertion = {
-        ...draft,
-        id: globalThis.crypto.randomUUID(),
-        date: currentDate.current.date,
-      };
-      if (editing)
+      if (!concernId)
         return {
           ...next,
-          concerns: next.concerns.map((concern) =>
-            concern.concernId === editing.concernId
-              ? {
-                  ...concern,
-                  assertions: [
-                    ...concern.assertions,
-                    {
-                      ...assertion,
-                      changeType: draft.changeType ?? ('refinement' as const),
-                      supersedes: currentAssertion(concern)?.id,
-                    },
-                  ],
-                }
-              : concern
-          ),
+          concerns: [
+            ...next.concerns,
+            {
+              concernId: globalThis.crypto.randomUUID(),
+              clinicalStatus: 'active',
+              source: 'manuallyAdded',
+              assertions: [assertion],
+            },
+          ],
         };
-      if (
-        pick &&
-        next.concerns.some((concern) => matchingConditionCode(concern, pick))
-      )
-        return next;
       return {
         ...next,
-        concerns: [
-          ...next.concerns,
-          {
-            concernId: globalThis.crypto.randomUUID(),
-            clinicalStatus: 'active',
-            source: 'manuallyAdded',
-            assertions: [assertion],
-          },
-        ],
+        concerns: next.concerns.map((concern) => {
+          if (concern.concernId !== concernId) return concern;
+          const prior = currentAssertion(concern);
+          // Revising declares the prior assertion was never true — mark it
+          // refuted so the timeline strikes it through. Refinement and
+          // progression leave the prior status unchanged.
+          const assertions =
+            draft.changeType === 'revision' && prior
+              ? concern.assertions.map((candidate) =>
+                  candidate.id === prior.id
+                    ? { ...candidate, verificationStatus: 'refuted' as const }
+                    : candidate
+                )
+              : concern.assertions;
+          return {
+            ...concern,
+            assertions: [
+              ...assertions,
+              { ...assertion, supersedes: prior?.id },
+            ],
+          };
+        }),
       };
     });
-    if (canEdit.current) {
-      setEditing(null);
-      setManualEditing(false);
-    }
   };
 
   if (!value)
-    return <InvalidClinicalAnswer label={label} answer={response?.answer} />;
+    return (
+      <InvalidClinicalAnswer label="condition" answer={response?.answer} />
+    );
 
-  const editingConcern = editing
-    ? value.concerns.find(({ concernId }) => concernId === editing.concernId)
+  const editorConcern = editor?.concernId
+    ? value.concerns.find(({ concernId }) => concernId === editor.concernId)
     : undefined;
-  const Lookup = codeLookup?.component;
-  const problemList = (
-    <ProblemList
-      concerns={value.concerns}
-      title={null}
-      readOnly={readOnly}
-      actions={[
-        ...(assertionDate.valid && (codeLookup || !requireCoding)
-          ? (['refine'] as const)
-          : []),
-        'remove',
-      ]}
-      inlineActions
-      className="rounded-none border-0 bg-transparent shadow-none [&_[data-slot=clinical-list-heading]]:hidden [&_button]:min-h-11 [&_button]:min-w-11 [&>[data-slot=card-content]]:space-y-2 [&>[data-slot=card-content]]:p-0"
-      onAction={(concern, action) => {
-        if (readOnly) return;
-        if (action === 'remove') {
-          setEditing((current) =>
-            current?.concernId === concern.concernId ? null : current
-          );
+  // New assertions need a valid host encounter date — without one the
+  // capture affordances are removed instead of silently discarding input.
+  const canAssert = assertionDate.valid;
+  const addSearch =
+    codeLookup && !readOnly && canAssert ? (
+      <codeLookup.component
+        indexUrl={codeLookup.indexUrl}
+        locale={codeLookup.locale}
+        domains={['condition']}
+        preferCodetypes={['ICD10']}
+        bare
+        clearOnSelect
+        placeholder={m('Search conditions to add')}
+        onSelect={(result) => {
+          const coded = result.codetype.trim() && result.fullcode.trim();
+          // Picking a code already on the list must not mint a second durable
+          // concern for the same diagnosis (ICD10 / ICD-10-CM aliases match).
+          if (
+            coded &&
+            (currentValue.current ?? value).concerns.some((concern) =>
+              matchingConditionCode(concern, result)
+            )
+          )
+            return;
+          saveAssertion(undefined, {
+            text: result.label,
+            verificationStatus: 'unconfirmed',
+            ...(coded
+              ? {
+                  coding: [
+                    {
+                      system: result.codetype,
+                      code: result.fullcode,
+                      display: result.label,
+                      primary: true,
+                    },
+                  ],
+                }
+              : {}),
+          });
+        }}
+        onFreeText={(text) =>
+          saveAssertion(undefined, {
+            text,
+            verificationStatus: 'unconfirmed',
+          })
+        }
+      />
+    ) : undefined;
+  return (
+    <>
+      <ProblemList
+        concerns={value.concerns}
+        readOnly={readOnly}
+        actions={
+          canAssert
+            ? ['observe', 'refine', 'revise', 'relate', 'resolve', 'remove']
+            : ['relate', 'resolve', 'remove']
+        }
+        onAction={(concern, action) => {
+          if (action === 'remove') {
+            setEditor(null);
+            commit((next) => ({
+              ...next,
+              concerns: next.concerns.filter(
+                (candidate) => candidate.concernId !== concern.concernId
+              ),
+            }));
+            // Auto-repair assessment rows that referenced the deleted concern
+            // so the visit never holds a dangling reference blocking Save.
+            if (canEdit.current)
+              repairEncounterConcernReferences(
+                form.getState(),
+                concern.concernId
+              );
+          } else if (action === 'resolve') {
+            commit((next) => ({
+              ...next,
+              concerns: next.concerns.map((candidate) =>
+                candidate.concernId === concern.concernId
+                  ? { ...candidate, clinicalStatus: 'resolved' as const }
+                  : candidate
+              ),
+            }));
+          } else if (
+            action === 'observe' ||
+            action === 'refine' ||
+            action === 'revise' ||
+            action === 'relate'
+          ) {
+            setEditor({ mode: action, concernId: concern.concernId });
+          }
+        }}
+        addSearch={addSearch}
+        onAddProblem={
+          addSearch || !canAssert
+            ? undefined
+            : (text) =>
+                saveAssertion(undefined, {
+                  text,
+                  verificationStatus: 'unconfirmed',
+                })
+        }
+        onAdd={canAssert ? () => setEditor({ mode: 'add' }) : undefined}
+        onReorder={(ids) =>
           commit((next) => ({
             ...next,
-            concerns: next.concerns.filter(
-              (candidate) => candidate.concernId !== concern.concernId
+            concerns: reorderClinicalEntries(
+              next.concerns,
+              ids,
+              ({ concernId }) => concernId
             ),
-          }));
-          // Auto-repair assessment rows that referenced the deleted concern
-          // so the visit never holds a dangling reference blocking Save.
-          if (canEdit.current)
-            repairEncounterConcernReferences(
-              form.getState(),
-              concern.concernId
-            );
-        } else if (action === 'refine') {
-          setEditing({ concernId: concern.concernId });
-          if (!codeLookup) setManualEditing(true);
+          }))
         }
-      }}
-      onReorder={(ids) =>
-        commit((next) => ({
-          ...next,
-          concerns: reorderClinicalEntries(
-            next.concerns,
-            ids,
-            ({ concernId }) => concernId
-          ),
-        }))
-      }
-    />
-  );
-  return (
-    <section aria-label={label} className="min-w-0 space-y-2">
-      {!readOnly && (adding || editingConcern || value.concerns.length > 0) && (
-        <div className={clinicalEntryCardClasses}>
-          <div className="flex items-center justify-between gap-2">
-            <h4 className="min-w-0 font-semibold break-words">
-              {editingConcern ? (
-                <>
-                  {m('Refine')} {currentAssertion(editingConcern)?.text}
-                </>
-              ) : (
-                m('Add condition')
-              )}
-            </h4>
-            {(editingConcern || value.concerns.length === 0) && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="shrink-0"
-                aria-label={m('Cancel')}
-                onClick={() => {
-                  setEditing(null);
-                  setAdding(false);
-                  setManualEditing(false);
-                }}
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            )}
-          </div>
-          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-            <EncounterAssertionDateInput {...assertionDate} />
-            {assertionDate.valid && Lookup && codeLookup && (
-              <div className="min-w-0 flex-1 sm:basis-56">
-                <Lookup
-                  key={editing ? editing.concernId : 'add'}
-                  indexUrl={codeLookup.indexUrl}
-                  locale={codeLookup.locale}
-                  domains={['condition']}
-                  preferCodetypes={['ICD10']}
-                  bare
-                  clearOnSelect
-                  initialQuery={
-                    editingConcern ? currentAssertion(editingConcern)?.text : ''
-                  }
-                  aria-label={
-                    editingConcern ? m('Recode condition') : m('Add condition')
-                  }
-                  placeholder={
-                    editingConcern
-                      ? m('Search replacement diagnosis…')
-                      : m('Search conditions…')
-                  }
-                  onSelect={(pick) => {
-                    if (
-                      !pick.fullid?.trim() ||
-                      !pick.codetype?.trim() ||
-                      !pick.fullcode?.trim() ||
-                      !pick.label?.trim() ||
-                      pick.domain !== 'condition'
-                    )
-                      return;
-                    recordAssertion(
-                      {
-                        text: pick.label,
-                        verificationStatus: 'unconfirmed',
-                        coding: [
-                          {
-                            system: pick.codetype,
-                            code: pick.fullcode,
-                            display: pick.label,
-                            primary: true,
-                          },
-                        ],
-                      },
-                      pick
-                    );
-                  }}
-                />
-              </div>
-            )}
-          </div>
-          {assertionDate.valid && !requireCoding && (
-            <>
-              <Button
-                type="button"
-                onClick={() => {
-                  // Keep `editing` so an in-progress refine stays a refinement
-                  // of the selected concern instead of adding a new one.
-                  setManualEditing(true);
-                }}
-              >
-                {m('Other…')}
-              </Button>
-              <ConditionEditor
-                mode={editing ? 'refine' : 'add'}
-                open={manualEditing}
-                onOpenChange={setManualEditing}
-                concern={editingConcern}
-                renderCodeSearch={false}
-                onSave={(draft) => recordAssertion(draft)}
-              />
-            </>
-          )}
-          {value.concerns.length > 0 && problemList}
-        </div>
-      )}
-      {!readOnly &&
-        !adding &&
-        !editingConcern &&
-        value.concerns.length === 0 &&
-        (codeLookup || !requireCoding) && (
-          <ClinicalAddButton
-            label={m('Add condition')}
-            onClick={() => setAdding(true)}
-          />
+      />
+      <ConditionEditor
+        mode={editor?.mode ?? 'add'}
+        open={editor !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditor(null);
+        }}
+        concern={editor?.mode === 'add' ? undefined : editorConcern}
+        relatableConcerns={value.concerns.filter(
+          ({ concernId }) => concernId !== editor?.concernId
         )}
-      {!readOnly && requireCoding && !codeLookup && (
-        <p className="text-muted-foreground text-sm">
-          {m('Coded condition search is unavailable.')}
+        onSave={(draft) => {
+          saveAssertion(
+            editor?.mode === 'add' ? undefined : editor?.concernId,
+            draft
+          );
+          setEditor(null);
+        }}
+        onRelate={(relationship) => {
+          const target = editor?.concernId;
+          if (target)
+            commit((next) => ({
+              ...next,
+              concerns: next.concerns.map((concern) =>
+                concern.concernId === target
+                  ? {
+                      ...concern,
+                      relationships: [
+                        ...(concern.relationships ?? []),
+                        relationship,
+                      ],
+                    }
+                  : concern
+              ),
+            }));
+          setEditor(null);
+        }}
+        onAddObservation={(text) => {
+          const target = editor?.concernId;
+          if (target && currentDate.current.valid)
+            commit((next) => ({
+              ...next,
+              concerns: next.concerns.map((concern) =>
+                concern.concernId === target
+                  ? {
+                      ...concern,
+                      observations: [
+                        ...(concern.observations ?? []),
+                        {
+                          id: globalThis.crypto.randomUUID(),
+                          date: currentDate.current.date,
+                          text,
+                        },
+                      ],
+                    }
+                  : concern
+              ),
+            }));
+          setEditor(null);
+        }}
+      />
+      {!readOnly && !canAssert && (
+        <p className="text-muted-foreground mt-2 text-xs">
+          {m(
+            'No encounter date — conditions cannot be added or revised until the visit provides one.'
+          )}
         </p>
       )}
-      {readOnly && problemList}
-    </section>
+    </>
   );
 }

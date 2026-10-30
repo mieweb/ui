@@ -186,6 +186,10 @@ export interface ProblemListProps extends Omit<
   onAction?: (concern: ConditionConcern, action: ProblemListAction) => void;
   /** Called when a new problem is added via the capture-first input */
   onAddProblem?: (text: string) => void;
+  /** Inline coded add search (e.g. a CodeLookup) rendered in the add section */
+  addSearch?: React.ReactNode;
+  /** Called when the "Add" pill is clicked (omit to hide; opens the host's detailed editor) */
+  onAdd?: () => void;
   /**
    * Called with the full ordered list of concernIds after a move — via drag
    * and drop, the move buttons, or Alt+Arrow keys. Enables reordering. The
@@ -732,6 +736,8 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
       title = 'Problem list',
       onAction,
       onAddProblem,
+      addSearch,
+      onAdd,
       onReorder,
       actions = DEFAULT_ACTIONS,
       inlineActions = false,
@@ -887,34 +893,53 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
             </section>
           ))}
 
-          {!readOnly && onAddProblem && (
-            <div className="flex items-center gap-1.5">
-              <input
-                type="text"
-                data-slot="input"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') submitDraft();
-                }}
-                placeholder={m('Add problem (name is enough)…')}
-                aria-label={m('Add problem')}
-                className={cn(
-                  'border-border bg-background text-foreground placeholder:text-muted-foreground',
-                  'h-8 flex-1 rounded-md border px-2.5 text-sm',
-                  'focus:ring-ring focus:ring-2 focus:outline-none'
-                )}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={submitDraft}
-                disabled={!draft.trim()}
-                leftIcon={<PlusIcon size={12} />}
-                className="h-8"
-              >
-                {m('Add')}
-              </Button>
+          {!readOnly && (addSearch || onAddProblem || onAdd) && (
+            <div className="space-y-2">
+              <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                {m('Add problem')}
+              </span>
+              {addSearch}
+              {onAddProblem && (
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    data-slot="input"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') submitDraft();
+                    }}
+                    placeholder={m('Add problem (name is enough)…')}
+                    aria-label={m('Add problem')}
+                    className={cn(
+                      'border-border bg-background text-foreground placeholder:text-muted-foreground',
+                      'h-8 flex-1 rounded-md border px-2.5 text-sm',
+                      'focus:ring-ring focus:ring-2 focus:outline-none'
+                    )}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={submitDraft}
+                    disabled={!draft.trim()}
+                    leftIcon={<PlusIcon size={12} />}
+                    className="h-8"
+                  >
+                    {m('Add')}
+                  </Button>
+                </div>
+              )}
+              {onAdd && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onAdd}
+                  leftIcon={<PlusIcon size={12} />}
+                  className="h-auto rounded-full px-2.5 py-1 text-xs"
+                >
+                  {m('Add')}
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
