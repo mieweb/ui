@@ -295,3 +295,75 @@
 .kb-editor .codecrock-root {
   direction: ltr;
 }
+
+/*
+ * TextAreaRich (Kerebron surface) — the component wrapper supplies the
+ * Textarea chrome (border, radius, focus ring), so the stock kb-component
+ * frame is neutralized and the editable is resized to Textarea metrics:
+ * one Input row tall (24px line + 7px padding + the wrapper's 1px borders
+ * = h-10), auto-growing with content.
+ */
+[data-slot='textarea-rich'] .kb-component {
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding: 0;
+}
+
+[data-slot='textarea-rich'] .kb-editor {
+  min-height: 38px;
+  padding: 7px 12px;
+  font-size: 1rem;
+  overflow-y: auto;
+  transition:
+    min-height 0.2s ease-out,
+    padding 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='textarea-rich'] .kb-editor {
+    transition: none;
+  }
+}
+
+/* Indent past the block gutter's floating + trigger only while the writer
+ * is engaged (hovering, focused, or using the + menu) — at rest the text
+ * slides back flush with the Textarea padding. */
+[data-slot='textarea-rich'][data-gutter]
+  [data-slot='textarea-rich-body']:hover
+  .kb-editor,
+[data-slot='textarea-rich'][data-gutter]:focus-within .kb-editor,
+[data-slot='textarea-rich'][data-gutter][data-block-menu] .kb-editor {
+  padding-inline-start: 2.5rem;
+}
+
+/* The toolbar stays mounted (its buttons carry live editor state) but is
+ * chrome the field reveals on demand. Only the menu bar itself is hidden —
+ * its wrapper also contains the editable surface. */
+[data-slot='textarea-rich'][data-toolbar='hidden'] .kb-custom-menu,
+[data-slot='textarea-rich'][data-toolbar='hidden']
+  .kb-custom-menu__overflow-menu {
+  display: none;
+}
+
+/* Working space while the docked macro panel is open. The panel docks
+ * below the toolbar (which keeps its full width), so only the editable
+ * sidesteps it; tall enough for search plus a few rows, far less when the
+ * compact panel is just rows. */
+@media (min-width: 768px) {
+  [data-slot='textarea-rich'][data-macros-open] .kb-editor {
+    min-height: 250px;
+    margin-inline-end: 18rem;
+  }
+  [data-slot='textarea-rich'][data-macros-open][data-compact-macros]
+    .kb-editor {
+    min-height: 140px;
+  }
+}
+
+/* Our injected toolbar buttons (Macros, Dictate) are text labels. */
+[data-slot='textarea-rich'] .tar-menu-macros,
+[data-slot='textarea-rich'] .tar-menu-dictate {
+  padding-inline: 8px;
+  font-size: 12px;
+}

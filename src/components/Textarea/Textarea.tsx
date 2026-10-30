@@ -1,7 +1,10 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { RequiredMark } from '../Input';
-import { TextAreaRich } from '../TextAreaRich';
+// Pinned to the legacy engine: Textarea's plain-text resync writes
+// `innerHTML` straight into the editable region, which would corrupt a
+// ProseMirror view — so it must not ride TextAreaRich's Kerebron surface.
+import { TextAreaRichLegacy } from '../TextAreaRich/TextAreaRichLegacy';
 import { TextAreaPlain } from '../TextAreaPlain';
 import type { TextAreaPlainProps } from '../TextAreaPlain';
 
@@ -489,7 +492,7 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
               onKeyUp(retargetEvent(event) as unknown as MirrorKeyboardEvent))
           }
         >
-          <TextAreaRich
+          <TextAreaRichLegacy
             value={state.html}
             onChange={handleHtmlChange}
             placeholder={placeholder}

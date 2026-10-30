@@ -17,9 +17,15 @@ import {
   createEditorKits,
   type CollabConfig,
   type MediaUploadOptions,
+  type ModifyMenu,
 } from './editorKits';
 
-export type { CollabConfig, MediaUploadOptions } from './editorKits';
+export type {
+  CollabConfig,
+  MediaUploadOptions,
+  MenuElement,
+  ModifyMenu,
+} from './editorKits';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 
@@ -99,6 +105,19 @@ export interface RichEditorProps {
   mediaUpload?: MediaUploadOptions;
   /** Additional editor kits, installed once when the editor mounts. */
   editorKits?: EditorKit[];
+  /**
+   * Reshape the stock toolbar before it renders: receives the menu's item
+   * groups and returns the groups to render — append custom controls (a
+   * macros toggle, dictation) or drop stock ones. Read once, when the editor
+   * mounts — like {@link collab}, remount via `key` to change it.
+   */
+  modifyMenu?: ModifyMenu;
+  /**
+   * MIME type of the `value`/`onChange` contract (`'text/x-markdown'` by
+   * default; pass `'text/html'` for an HTML-valued surface). Governs both
+   * how `value` is parsed and what `onChange`/`getContent()` emit.
+   */
+  valueType?: string;
 }
 
 export interface RichEditorHandle {
@@ -136,6 +155,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       assetLoad,
       mediaUpload,
       editorKits: additionalEditorKits,
+      modifyMenu,
+      valueType = MARKDOWN_TYPE,
     },
     ref
   ) {
@@ -165,9 +186,11 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     // did not change it. ProseMirror documents are immutable, so identity is an
     // exact test.
     const lastSerializedDoc = useRef<unknown>(null);
-    // Read inside the transaction handler, which is created once on mount.
+    // Read inside effects created once on mount.
     const showPreviewRef = useRef(showPreview);
     showPreviewRef.current = showPreview;
+    const valueTypeRef = useRef(valueType);
+    valueTypeRef.current = valueType;
 
     useEffect(() => {
       disabledRef.current = disabled;
@@ -192,7 +215,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         .catch(() => undefined)
         .then(async () => {
           if (editorInstance.current !== editor) return;
-          await editor.loadDocumentText(MARKDOWN_TYPE, value);
+          await editor.loadDocumentText(valueTypeRef.current, value);
           if (editorInstance.current !== editor) return;
           loadedDocRef.current = editor.view.state.doc;
           lastSerializedDoc.current = editor.view.state.doc;
@@ -271,8 +294,9 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         const loadVersion = loadVersionRef.current;
 
         try {
-          const buffer =
-            await editorInstance.current.saveDocument(MARKDOWN_TYPE);
+          const buffer = await editorInstance.current.saveDocument(
+            valueTypeRef.current
+          );
           const markdown = new globalThis.TextDecoder().decode(buffer);
           if (
             disposed ||
@@ -310,7 +334,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         // so there is no room to join below.
         const { kits: editorKits, collaborative } = await createEditorKits(
           collab,
-          mediaUpload
+          mediaUpload,
+          modifyMenu
         );
         if (disposed) return;
 
@@ -395,7 +420,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
 
         if (valueRef.current) {
           await queueInitialLoad(() =>
-            editor!.loadDocumentText(MARKDOWN_TYPE, valueRef.current)
+            editor!.loadDocumentText(valueTypeRef.current, valueRef.current)
           );
         }
         if (disposed) return;
@@ -443,7 +468,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             const doc = editor.view.state.doc;
             const loadVersion = loadVersionRef.current;
             if (doc === loadedDocRef.current) return valueRef.current;
-            const buffer = await editor.saveDocument(MARKDOWN_TYPE);
+            const buffer = await editor.saveDocument(valueTypeRef.current);
             if (
               editorInstance.current !== editor ||
               loadVersion !== loadVersionRef.current ||

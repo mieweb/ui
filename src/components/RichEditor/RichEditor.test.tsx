@@ -81,6 +81,20 @@ const { extensionMediaUpload } = vi.hoisted(() => ({
 vi.mock('@kerebron/extension-basic-editor/ExtensionMediaUpload', () => ({
   ExtensionMediaUpload: extensionMediaUpload,
 }));
+// Imported statically by editorKits.ts for `modifyMenu` support.
+const { extensionCustomMenu } = vi.hoisted(() => ({
+  extensionCustomMenu: vi.fn(function (
+    this: Record<string, unknown>,
+    config: unknown
+  ) {
+    this.name = 'customMenu';
+    this.config = config;
+  }),
+}));
+vi.mock('@kerebron/extension-menu', () => ({
+  ExtensionCustomMenu: extensionCustomMenu,
+  MenuItem: vi.fn(),
+}));
 vi.mock('@kerebron/wasm/web', () => ({
   createAssetLoad: vi.fn(() => vi.fn()),
 }));
