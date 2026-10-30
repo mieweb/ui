@@ -69,6 +69,69 @@ function WithPortaledMenu() {
   );
 }
 
+/** Dropdown's shape: a search field beside the menu, and a submenu. */
+function WithSearchAndSubmenu() {
+  const ref = useFocusTrap<HTMLDivElement>(true, { initialFocus: false });
+  return (
+    <div ref={ref}>
+      <button type="button" aria-expanded="true" aria-controls="people">
+        Mention
+      </button>
+      <button type="button">Send</button>
+      {createPortal(
+        <div>
+          <input aria-label="Filter" />
+          <div id="people" role="menu">
+            <button
+              type="button"
+              role="menuitem"
+              aria-haspopup="menu"
+              aria-expanded="true"
+              aria-controls="teams"
+            >
+              Teams
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+      {createPortal(
+        <div id="teams" role="menu">
+          <button type="button" role="menuitem">
+            Design
+          </button>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+/** A dialog's trap inside a panel's trap, its last control opening a menu. */
+function NestedTraps() {
+  const outer = useFocusTrap<HTMLDivElement>(true, { initialFocus: false });
+  const inner = useFocusTrap<HTMLDivElement>(true, { initialFocus: false });
+  return (
+    <div ref={outer}>
+      <button type="button">Panel</button>
+      <div ref={inner}>
+        <button type="button">Dialog first</button>
+        <button type="button" aria-expanded="true" aria-controls="options">
+          Options
+        </button>
+      </div>
+      {createPortal(
+        <div id="options" role="menu">
+          <button type="button" role="menuitem">
+            Option
+          </button>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
 describe('useFocusTrap', () => {
   it('focuses the first element when it turns on', () => {
     render(<Trap />);
@@ -132,5 +195,32 @@ describe('useFocusTrap', () => {
     send.focus();
     fireEvent.keyDown(send, { key: 'Tab' });
     expect(attach).toHaveFocus();
+  });
+
+  it('follows the whole popup: a search field beside the menu, and a submenu', () => {
+    render(<WithSearchAndSubmenu />);
+    const mention = screen.getByRole('button', { name: 'Mention' });
+    const filter = screen.getByRole('textbox', { name: 'Filter' });
+    const teams = screen.getByRole('menuitem', { name: 'Teams' });
+    const design = screen.getByRole('menuitem', { name: 'Design' });
+    mention.focus();
+    fireEvent.keyDown(mention, { key: 'Tab' });
+    expect(filter).toHaveFocus();
+    teams.focus();
+    fireEvent.keyDown(teams, { key: 'Tab', shiftKey: true });
+    expect(filter).toHaveFocus();
+    teams.focus();
+    fireEvent.keyDown(teams, { key: 'Tab' });
+    expect(design).toHaveFocus();
+    fireEvent.keyDown(design, { key: 'Tab' });
+    expect(screen.getByRole('button', { name: 'Send' })).toHaveFocus();
+  });
+
+  it('lets the innermost trap take a menu opened inside it', () => {
+    render(<NestedTraps />);
+    const option = screen.getByRole('menuitem', { name: 'Option' });
+    option.focus();
+    fireEvent.keyDown(option, { key: 'Tab' });
+    expect(screen.getByRole('button', { name: 'Dialog first' })).toHaveFocus();
   });
 });
