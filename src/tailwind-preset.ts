@@ -137,17 +137,23 @@ export const miewebUISafelist = [
   'bottom-16',
   'dark:bg-white/30',
   // SuperChat's overlay media view: full screen on a phone, upright or
-  // sideways, inside the safe areas; Back over the clip's corner.
+  // sideways, inside the safe areas and the visible viewport; Back over
+  // the clip's corner.
   'max-sm:hidden',
   '[@media(max-height:30rem)_and_(orientation:landscape)]:hidden',
   '[@media(max-height:30rem)_and_(orientation:landscape)]:fixed',
-  '[@media(max-height:30rem)_and_(orientation:landscape)]:inset-0',
+  '[@media(max-height:30rem)_and_(orientation:landscape)]:inset-x-0',
+  '[@media(max-height:30rem)_and_(orientation:landscape)]:h-[var(--mieweb-visual-viewport-height,100dvh)]',
+  '[@media(max-height:30rem)_and_(orientation:landscape)]:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
   '[@media(max-height:30rem)_and_(orientation:landscape)]:pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
   '[@media(max-height:30rem)_and_(orientation:landscape)]:pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]',
   '[@media(max-height:30rem)_and_(orientation:landscape)]:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))]',
   '[@media(max-height:30rem)_and_(orientation:landscape)]:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))]',
   '[@media(max-height:30rem)_and_(orientation:landscape)]:z-50',
   'max-sm:fixed',
+  'max-sm:inset-x-0',
+  'max-sm:h-[var(--mieweb-visual-viewport-height,100dvh)]',
+  'max-sm:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
   'max-sm:pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
   'max-sm:pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]',
   'max-sm:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))]',
