@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DateTime } from 'luxon';
-import { Play } from 'lucide-react';
+import { Heart, Play, Reply } from 'lucide-react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChatInbox, createMarkdownRenderer } from './index';
 import { fullHeightChat } from '../../../.storybook/full-height';
@@ -662,6 +662,7 @@ function MediaConversationDemo({
                 variant="ghost"
                 size="sm"
                 aria-pressed={liked}
+                leftIcon={<Heart className="size-4" aria-hidden="true" />}
                 onClick={() =>
                   setLikedMessages((all) =>
                     liked
@@ -675,6 +676,7 @@ function MediaConversationDemo({
               <Button
                 variant="ghost"
                 size="sm"
+                leftIcon={<Reply className="size-4" aria-hidden="true" />}
                 onClick={() => setView('thread')}
               >
                 Reply
