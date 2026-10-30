@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Plugin, TextSelection } from 'prosemirror-state';
+import type { Transaction } from 'prosemirror-state';
 import type { Node as PMNode } from 'prosemirror-model';
 import type { EditorView } from 'prosemirror-view';
 import { Extension, type CoreEditor, type EditorKit } from '@kerebron/editor';
@@ -315,16 +316,40 @@ const TextAreaRichKerebron = React.forwardRef<
       if (!macro) return false;
 
       const from = $from.pos - match[1].length;
-      // Remove the typed token, then wait for that edit to publish through
-      // `onChange` before consulting the host hook, so a host that takes
-      // over computes from a token-free value.
+      // Without a host hook the whole expansion is one synchronous
+      // transaction (token replaced by content — one undo step, no race).
+      if (!onMacroInsertRef.current) {
+        insertPlainText(view, macro.content, from, $from.pos);
+        return true;
+      }
+      // A host hook composes from the last *published* value, so the token
+      // removal must reach `onChange` first. While that publish is pending,
+      // further edits (or a moved caret) must not misplace the insertion:
+      // map the deletion point through every transaction and give up if it
+      // is deleted out from under us.
+      const editor = editorRef.current;
       view.dispatch(view.state.tr.delete(from, $from.pos));
+      if (!editor) return true;
+      let insertAt = from;
+      let targetValid = true;
+      const trackInsertionPoint = (event: Event) => {
+        const tr = (
+          event as globalThis.CustomEvent<{ transaction?: Transaction }>
+        ).detail?.transaction;
+        if (!tr) return;
+        const mapped = tr.mapping.mapResult(insertAt);
+        if (mapped.deleted) targetValid = false;
+        insertAt = mapped.pos;
+      };
+      editor.addEventListener('transaction', trackInsertionPoint);
       void afterNextChange().then(() => {
+        editor.removeEventListener('transaction', trackInsertionPoint);
         if (onMacroInsertRef.current?.(macro) === true) return;
-        const liveView = currentView();
-        if (!liveView) return;
+        if (editorRef.current !== editor || !targetValid) return;
+        const liveView = viewOf(editor);
         liveView.focus();
-        insertPlainText(liveView, macro.content);
+        const at = Math.min(insertAt, liveView.state.doc.content.size);
+        insertPlainText(liveView, macro.content, at, at);
       });
       return true;
     };
@@ -436,11 +461,10 @@ const TextAreaRichKerebron = React.forwardRef<
       const SpeechRecognition = getSpeechRecognition();
       if (!SpeechRecognition) return;
 
-      if (isListeningRef.current && recognitionRef.current) {
-        shouldRestartRef.current = false;
-        isListeningRef.current = false;
-        recognitionRef.current.stop();
-        setIsListening(false);
+      // Stop anything live — or still pending between `start()` and
+      // `onstart`, when nothing is listening yet.
+      if (isListeningRef.current || recognitionRef.current) {
+        stopDictation();
         return;
       }
 
@@ -471,6 +495,16 @@ const TextAreaRichKerebron = React.forwardRef<
       recognition.maxAlternatives = 1;
 
       recognition.onstart = () => {
+        // A stop issued between `start()` and this callback already tore the
+        // session down — do not arm an unstoppable restart loop.
+        if (session !== dictationSessionRef.current) {
+          try {
+            recognition.stop();
+          } catch {
+            // Already stopped.
+          }
+          return;
+        }
         setIsListening(true);
         isListeningRef.current = true;
         shouldRestartRef.current = true;
@@ -524,11 +558,17 @@ const TextAreaRichKerebron = React.forwardRef<
               } catch {
                 shouldRestartRef.current = false;
                 isListeningRef.current = false;
+                if (recognitionRef.current === recognition)
+                  recognitionRef.current = null;
                 setIsListening(false);
               }
             }
           }, 100);
         } else {
+          // Ended for good — release the ref so the next toggle starts a
+          // fresh session instead of "stopping" a dead one.
+          if (recognitionRef.current === recognition)
+            recognitionRef.current = null;
           setIsListening(false);
         }
       };
@@ -537,17 +577,28 @@ const TextAreaRichKerebron = React.forwardRef<
       try {
         recognition.start();
       } catch {
+        recognitionRef.current = null;
         reportError('Failed to start speech recognition. Please try again.');
       }
     }).current;
 
     const stopDictation = React.useCallback(() => {
-      // Also cancels a start still awaiting microphone permission.
+      // Invalidate any start still awaiting microphone permission — or a
+      // recognition whose `onstart` hasn't fired yet — and tear down
+      // unconditionally: `isListeningRef` is false in that pending window,
+      // so an early-return would leave the recognition to arm itself with
+      // no Stop control visible.
       dictationSessionRef.current += 1;
-      if (!isListeningRef.current) return;
       shouldRestartRef.current = false;
       isListeningRef.current = false;
-      recognitionRef.current?.stop();
+      const recognition = recognitionRef.current;
+      recognitionRef.current = null;
+      try {
+        recognition?.stop();
+      } catch {
+        // Stopping before `onstart` can throw; the session bump above
+        // already keeps it from arming.
+      }
       setIsListening(false);
     }, []);
 
