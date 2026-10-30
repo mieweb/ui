@@ -95,20 +95,24 @@ export function useNemotronDiarization({
   printsRef.current = prints;
   const nsRef = React.useRef(voiceprintNamespace);
   nsRef.current = voiceprintNamespace;
+  /** The current namespace's stored voices; every task waits for it before reading `printsRef`. */
+  const loadRef = React.useRef<Promise<void> | null>(null);
 
   // Another user's voices and transcript must not linger after a namespace switch.
   React.useEffect(() => {
     let cancelled = false;
+    printsRef.current = [];
     setPrints([]);
     setResult(null);
-    loadNemotronVoiceprints(voiceprintNamespace).then(
-      (loaded) => {
-        if (!cancelled) setPrints(loaded);
-      },
-      (e: unknown) => {
-        if (!cancelled) setError(messageOf(e));
-      }
-    );
+    const load = loadNemotronVoiceprints(voiceprintNamespace).then((loaded) => {
+      if (cancelled) return;
+      printsRef.current = loaded;
+      setPrints(loaded);
+    });
+    loadRef.current = load;
+    load.catch((e: unknown) => {
+      if (!cancelled) setError(messageOf(e));
+    });
     return () => {
       cancelled = true;
     };
@@ -124,6 +128,9 @@ export function useNemotronDiarization({
       setBusy(true);
       setError(null);
       try {
+        // A save before the stored voices load would overwrite them; diarize would omit them.
+        await loadRef.current;
+        assertNamespace();
         return await task(assertNamespace);
       } catch (e) {
         setError(messageOf(e));

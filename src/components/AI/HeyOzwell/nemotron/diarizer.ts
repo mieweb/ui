@@ -20,6 +20,7 @@ import { SpeakerCache } from './speakerCache';
 import {
   type Matrix,
   concatRows,
+  copyRowsInto,
   createMatrix,
   sliceRows,
   wrapMatrix,
@@ -358,11 +359,19 @@ export class StreamingDiarizer {
         numSpeakers: this.numSpeakers,
       };
 
-    const merged = steps.reduce((left, right) => concatRows(left, right));
+    // One allocation for the whole result; folding with concatRows would copy it per chunk.
+    const numSpeakers = steps[0].cols;
+    const numFrames = steps.reduce((rows, step) => rows + step.rows, 0);
+    const merged = createMatrix(numFrames, numSpeakers);
+    let row = 0;
+    for (const step of steps) {
+      copyRowsInto(merged, step, row);
+      row += step.rows;
+    }
     return {
       probabilities: merged.data,
-      numFrames: merged.rows,
-      numSpeakers: merged.cols,
+      numFrames,
+      numSpeakers,
     };
   }
 }

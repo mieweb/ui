@@ -49,6 +49,8 @@ Built on \`useNemotronDiarization\` (\`enroll\`, \`removeVoice\`, \`diarize\`, \
 ### Limitations
 
 - **Experimental and unexported.** The API and stored voiceprint format may change.
+- **Labels after Stop.** The clip is analysed once recording ends; there are no live speaker labels yet.
+- **No save callback.** The recording, result and speaker edits stay inside \`SpeakerScribe\`, so a host cannot save a reviewed transcript. To persist one, call \`useNemotronDiarization\` directly, own the review and correction UI (the exported \`TranscriptPlayer\` for review), and save its \`Transcript\` yourself. \`SpeakerScribe\` and \`useNemotronDiarization\` are experimental and not package exports, so this only works inside this repository for now.
 - **Voiceprints** are tied to the model and pinned revision; voices from another model show "re-enroll". At most 7 voices; one lane stays free for unenrolled people. Stored in IndexedDB per \`voiceprintNamespace\`, separately from TitaNet voiceprints.
 - **Identity has no confidence threshold.** A similar-sounding stranger can be named as an enrolled person.
 - **Words no lane claims** go to the most active lane; there is no separate "uncertain" marker.

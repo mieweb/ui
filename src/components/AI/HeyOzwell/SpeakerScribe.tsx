@@ -47,7 +47,7 @@ function ClipPicker({
       <RecordButton
         size="sm"
         disabled={disabled && !recording}
-        aria-label={`Record ${label}`}
+        aria-label={recording ? `Stop recording ${label}` : `Record ${label}`}
         onRecordingStart={() => onRecordingChange(true)}
         onRecordingError={() => onRecordingChange(false)}
         onRecordingComplete={(blob) => {
@@ -65,7 +65,8 @@ function ClipPicker({
           onChange={(e) => {
             const file = e.target.files?.[0];
             e.target.value = '';
-            if (file) onPick(file);
+            // A plain Blob, like a recording: only the audio is used, never the file name.
+            if (file) onPick(new Blob([file], { type: file.type }));
           }}
         />
       </label>

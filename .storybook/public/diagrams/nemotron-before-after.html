@@ -332,7 +332,7 @@
             </li>
           </ol>
 
-          <h3>Each recording</h3>
+          <h3>Each recording (after Stop)</h3>
           <ol class="flow" aria-label="New recording flow">
             <li class="new">
               <span class="title">Pre-fill Nemotron's speaker memory</span>
@@ -368,7 +368,7 @@ lane 2 Speaker 3 ░░░░░░░░░░░░░░░░█████
           <ul class="issues" aria-label="What changes">
             <li><strong>Overlap</strong> is represented natively (two lanes lit at once).</li>
             <li><strong>Short interjections</strong> get their own lane; no 1 s minimum.</li>
-            <li><strong>No per-segment TitaNet or clustering;</strong> labels can be worked out while recording.</li>
+            <li><strong>No per-segment TitaNet or clustering.</strong> The runtime can stream, but Speaker Scribe still labels after Stop; live labels are not built yet.</li>
           </ul>
         </section>
       </div>

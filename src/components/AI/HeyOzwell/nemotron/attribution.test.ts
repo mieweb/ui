@@ -92,6 +92,20 @@ describe('transcriptFromFrames', () => {
     );
   });
 
+  it('flags overlap from a short interjection inside a longer word', () => {
+    // Lane 0 talks throughout; lane 1 says "mm" for one 0.1 s frame inside a 0.5 s word.
+    const lanes = frames(10, (f) => (f === 2 ? [0, 1] : [0]));
+    const transcript = transcriptFromFrames(
+      [word('well', 0, 0.5)],
+      lanes,
+      names,
+      1
+    );
+    expect(transcript.segments).toMatchObject([
+      { text: 'well', speakerId: 'lane-0', overlapSpeakerIds: ['lane-1'] },
+    ]);
+  });
+
   it('splits at long pauses and wherever the other speakers heard change', () => {
     // Lane 0 talks for 10 s; lane 1 joins at 1–2 s, lane 2 at 3–4 s.
     const lanes = frames(100, (f) => [
