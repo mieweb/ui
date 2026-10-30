@@ -353,7 +353,7 @@ describe('MediaFeed', () => {
     // fails.
     rerender(<MediaFeed items={updates} {...accessors} autoPlay={false} />);
     await act(async () => {
-      reject(new DOMException('Interrupted', 'AbortError'));
+      reject(new globalThis.DOMException('Interrupted', 'AbortError'));
     });
     // The viewer presses Play on the player's own bar.
     act(() => void clip.play());
