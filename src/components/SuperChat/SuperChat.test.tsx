@@ -966,6 +966,38 @@ describe('SuperChat', () => {
     expect(savedText).toMatch(/!\[edited\.png\]\(data:image\/png/);
   });
 
+  it('keeps the editor inside its bubble, however wide its content was', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    // The message measured wider than the bubble will have room for once it
+    // edits (a host card on thinner padding, say).
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(997);
+    const computed = window.getComputedStyle;
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((el, pseudo) => {
+      const style = computed(el, pseudo);
+      if ((el as HTMLElement).dataset?.slot === 'superchat-bubble') {
+        Object.defineProperty(style, 'paddingLeft', { value: '16px' });
+        Object.defineProperty(style, 'paddingRight', { value: '16px' });
+      }
+      return style;
+    });
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={() => {}}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen
+      .getByRole('textbox', { name: 'Edit message' })
+      .closest<HTMLElement>('[data-slot="superchat-message-editor"]')!;
+    expect(editor.style.getPropertyValue('--edit-min-w')).toBe('965px');
+    expect(editor).toHaveClass('min-w-[min(var(--edit-min-w,0px),100%)]');
+  });
+
   it('cancels an edit without firing onMessageEdited', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();

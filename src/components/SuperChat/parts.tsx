@@ -1038,8 +1038,17 @@ export const MessageRow = React.memo(function MessageRow({
             {isEditing ? (
               <div
                 data-slot="superchat-message-editor"
-                className="flex w-80 max-w-full flex-col gap-2"
-                style={editMinWidth ? { minWidth: editMinWidth } : undefined}
+                className="flex w-80 max-w-full min-w-[min(var(--edit-min-w,0px),100%)] flex-col gap-2"
+                // Never wider than the bubble has room for now: the content it
+                // was measured from (a host's card, with its own padding) may
+                // have had more, and a min-width beats max-w-full.
+                style={
+                  editMinWidth
+                    ? ({
+                        '--edit-min-w': `${editMinWidth}px`,
+                      } as React.CSSProperties)
+                    : undefined
+                }
               >
                 <textarea
                   value={draft}
