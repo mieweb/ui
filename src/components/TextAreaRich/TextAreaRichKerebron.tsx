@@ -195,9 +195,9 @@ const TextAreaRichKerebron = React.forwardRef<
     const hasMacroEntries = Boolean(
       macros?.some((group) => group.macros.length > 0)
     );
-    // Focus mode at rest: a bare one-line field — no gutter, no indent.
-    const macrosResting = hasMacros && macrosOnFocus && !macrosOpen;
-    const gutterActive = !inert && !macrosResting;
+    // The gutter `+` stays discoverable on hover even while a focus-docked
+    // field rests as a one-line input.
+    const gutterActive = !inert;
 
     // Mount-time closures (the toolbar and keydown plugin are built once)
     // read the latest props/state through refs.
@@ -207,6 +207,8 @@ const TextAreaRichKerebron = React.forwardRef<
     hasMacrosRef.current = hasMacros;
     const onMacroInsertRef = React.useRef(onMacroInsert);
     onMacroInsertRef.current = onMacroInsert;
+    const onChangeRef = React.useRef(onChange);
+    onChangeRef.current = onChange;
     const inertRef = React.useRef(inert);
     inertRef.current = inert;
     const macrosOpenRef = React.useRef(macrosOpen);
@@ -233,6 +235,27 @@ const TextAreaRichKerebron = React.forwardRef<
     /** The live ProseMirror view, once the editor is mounted. */
     const currentView = () =>
       editorRef.current ? viewOf(editorRef.current) : null;
+
+    // RichEditor publishes edits asynchronously, but a host that takes over
+    // macro insertion (`onMacroInsert` returning true) composes from its last
+    // published value — so a token-removal edit must reach `onChange` before
+    // the hook runs. These waiters bridge that gap.
+    const changeWaitersRef = React.useRef<(() => void)[]>([]);
+    const handleChange = (next: string) => {
+      onChangeRef.current?.(next);
+      const waiters = changeWaitersRef.current;
+      changeWaitersRef.current = [];
+      for (const resolve of waiters) resolve();
+    };
+    /** Resolves after the next `onChange` emission (or a short fallback). */
+    const afterNextChange = () =>
+      new Promise<void>((resolve) => {
+        const timer = setTimeout(resolve, 250);
+        changeWaitersRef.current.push(() => {
+          clearTimeout(timer);
+          resolve();
+        });
+      });
 
     // --- Macro insertion ---
 
@@ -267,11 +290,17 @@ const TextAreaRichKerebron = React.forwardRef<
       if (!macro) return false;
 
       const from = $from.pos - match[1].length;
-      // Remove the typed token (publishing that edit) before consulting the
-      // host hook, so a host that takes over computes from a token-free value.
+      // Remove the typed token, then wait for that edit to publish through
+      // `onChange` before consulting the host hook, so a host that takes
+      // over computes from a token-free value.
       view.dispatch(view.state.tr.delete(from, $from.pos));
-      if (onMacroInsertRef.current?.(macro) === true) return true;
-      insertPlainText(view, macro.content);
+      void afterNextChange().then(() => {
+        if (onMacroInsertRef.current?.(macro) === true) return;
+        const liveView = currentView();
+        if (!liveView) return;
+        liveView.focus();
+        insertPlainText(liveView, macro.content);
+      });
       return true;
     };
 
@@ -886,7 +915,7 @@ const TextAreaRichKerebron = React.forwardRef<
             <RichEditor
               ref={editorHandleRef}
               value={value}
-              onChange={onChange}
+              onChange={handleChange}
               valueType="text/html"
               modifyMenu={menuAddon.modifyMenu}
               editorKits={menuAddon.kits}
