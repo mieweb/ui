@@ -505,13 +505,38 @@ export const SourcesAndGuards: Story = {
   render: () => <SourcesAndGuardsDemo />,
 };
 
+/**
+ * A thumbnail for a sample clip, in its shape, as a host's media service
+ * would supply: the clip's colour with its title.
+ */
+function samplePoster(shape: 'landscape' | 'portrait', title: string) {
+  const canvas = document.createElement('canvas');
+  canvas.width = shape === 'portrait' ? 360 : 640;
+  canvas.height = shape === 'portrait' ? 640 : 360;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return undefined;
+  const fill = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  fill.addColorStop(0, '#1e3a5f');
+  fill.addColorStop(1, '#0f766e');
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.font = '600 32px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(title, canvas.width / 2, canvas.height - 48);
+  return canvas.toDataURL('image/png');
+}
+
 function MediaConversationDemo({
   layout,
   renderMessageMedia,
+  posters = false,
 }: {
   /** MediaFeed layout for the media view; `overlay` opts into mobile-first. */
   layout?: 'stacked' | 'overlay';
   renderMessageMedia?: SuperChatRenderMessageMedia;
+  /** Give each video a thumbnail, as a host's media service would. */
+  posters?: boolean;
 }) {
   const [conversations, setConversations] = React.useState(() =>
     createMediaConversations('')
@@ -541,6 +566,14 @@ function MediaConversationDemo({
                   ? {
                       ...attachment,
                       src: attachment.id === 'detail' ? closeUp : url,
+                      poster: posters
+                        ? samplePoster(
+                            attachment.id === 'detail' && layout === 'overlay'
+                              ? 'portrait'
+                              : 'landscape',
+                            attachment.title ?? ''
+                          )
+                        : attachment.poster,
                     }
                   : attachment
               ),
@@ -558,7 +591,7 @@ function MediaConversationDemo({
     return () => {
       mounted = false;
     };
-  }, [layout]);
+  }, [layout, posters]);
 
   return (
     <SuperChatInbox
@@ -720,11 +753,15 @@ function HostCard({
   open,
   launchId,
 }: SuperChatMessageMediaRenderProps) {
-  // Width ÷ height, once the clip's metadata says.
+  // Width ÷ height, once the thumbnail (or the clip) says.
   const [aspect, setAspect] = React.useState<number>();
   // The host owns this text; localize it like the rest of the app.
   const label = `Play ${attachment.title ?? 'video'}`;
   const upright = aspect !== undefined && aspect < 1;
+  const frame = {
+    style: { aspectRatio: aspect ?? 16 / 9 },
+    className: 'block w-full bg-black object-cover',
+  };
   return (
     <button
       type="button"
@@ -733,18 +770,32 @@ function HostCard({
       onClick={() => open(true)}
       className={`focus-visible:ring-ring relative mt-2 block max-w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:outline-none ${upright ? 'w-36' : 'w-60'}`}
     >
-      <video
-        src={attachment.src}
-        muted
-        playsInline
-        preload="metadata"
-        onLoadedMetadata={(event) => {
-          const { videoWidth, videoHeight } = event.currentTarget;
-          if (videoWidth && videoHeight) setAspect(videoWidth / videoHeight);
-        }}
-        style={{ aspectRatio: aspect ?? 16 / 9 }}
-        className="block w-full bg-black object-cover"
-      />
+      {attachment.poster ? (
+        // The thumbnail: nothing of the video loads until it's played.
+        <img
+          src={attachment.poster}
+          alt=""
+          onLoad={(event) => {
+            const { naturalWidth, naturalHeight } = event.currentTarget;
+            if (naturalWidth && naturalHeight)
+              setAspect(naturalWidth / naturalHeight);
+          }}
+          {...frame}
+        />
+      ) : (
+        // No thumbnail: the clip's first frame stands in for one.
+        <video
+          src={attachment.src}
+          muted
+          playsInline
+          preload="metadata"
+          onLoadedMetadata={(event) => {
+            const { videoWidth, videoHeight } = event.currentTarget;
+            if (videoWidth && videoHeight) setAspect(videoWidth / videoHeight);
+          }}
+          {...frame}
+        />
+      )}
       <span className="absolute inset-0 flex items-center justify-center">
         <span className="flex size-10 items-center justify-center rounded-full bg-black/60 text-white">
           <Play className="size-5 fill-current" aria-hidden="true" />
@@ -761,13 +812,14 @@ export const HostMediaCard: Story = {
     docs: {
       description: {
         story:
-          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view. The card takes the clip's shape, upright or wide, and sits at the start of the bubble, under the text, however wide the message makes it.",
+          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view. The card shows the attachment's `poster` (a thumbnail, so nothing of the video loads until it's played) in the clip's shape, upright or wide, and sits at the start of the bubble, under the text, however wide the message makes it.",
       },
     },
   },
   render: () => (
     <MediaConversationDemo
       layout="overlay"
+      posters
       renderMessageMedia={(props) =>
         props.attachment.kind === 'video' ? <HostCard {...props} /> : undefined
       }
