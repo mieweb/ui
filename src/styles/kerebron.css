@@ -92,15 +92,25 @@
   color: var(--kb-color-icon);
 }
 
+/* The "…" overflow popup is deliberately NOT in the dropdown group below:
+ * it holds the same buttons that didn't fit in the bar, so it keeps the
+ * toolbar's own surface (stock Kerebron already paints both with
+ * --kb-color-surface-elevated) instead of the floating-menu card color.
+ * Stock also flips it to the dropdown color under an OS-level
+ * `prefers-color-scheme: dark` — but our themes are class-driven, so on a
+ * dark OS with a light app theme that turned the popup card-white.
+ * Re-assert the toolbar surface unconditionally (same specificity, later
+ * in the cascade, and media queries add none). */
+.kb-custom-menu__overflow-menu {
+  background: var(--kb-color-surface-elevated);
+}
+
 [data-theme='light'] .kb-dropdown__menu,
 [data-theme='light'] .kb-submenu__content,
-[data-theme='light'] .kb-custom-menu__overflow-menu,
 [data-theme='dark'] .kb-dropdown__menu,
 [data-theme='dark'] .kb-submenu__content,
-[data-theme='dark'] .kb-custom-menu__overflow-menu,
 .dark .kb-dropdown__menu,
-.dark .kb-submenu__content,
-.dark .kb-custom-menu__overflow-menu {
+.dark .kb-submenu__content {
   background: var(--kb-menu-dropdown-bg) !important;
   border-color: var(--kb-menu-dropdown-border) !important;
   color: var(--kb-menu-dropdown-text) !important;
@@ -108,13 +118,10 @@
 
 [data-theme='light'] .kb-custom-menu .kb-dropdown__item .kb-menu__button:hover,
 [data-theme='light'] .kb-custom-menu .kb-submenu__label:hover,
-[data-theme='light'] .kb-custom-menu__overflow-item:hover,
 [data-theme='dark'] .kb-custom-menu .kb-dropdown__item .kb-menu__button:hover,
 [data-theme='dark'] .kb-custom-menu .kb-submenu__label:hover,
-[data-theme='dark'] .kb-custom-menu__overflow-item:hover,
 .dark .kb-custom-menu .kb-dropdown__item .kb-menu__button:hover,
-.dark .kb-custom-menu .kb-submenu__label:hover,
-.dark .kb-custom-menu__overflow-item:hover {
+.dark .kb-custom-menu .kb-submenu__label:hover {
   background: var(--kb-menu-dropdown-hover) !important;
   color: var(--kb-menu-dropdown-text) !important;
 }
@@ -377,9 +384,23 @@
   }
 }
 
-/* Our injected toolbar buttons (Macros, Dictate) are text labels. */
-[data-slot='textarea-rich'] .tar-menu-macros,
-[data-slot='textarea-rich'] .tar-menu-dictate {
-  padding-inline: 8px;
-  font-size: 12px;
+/* RichEditor isolates `.kb-component` (inline style) so the toolbar's
+ * z-index:1000 can't escape into the page — but the docked macro panel is
+ * a later sibling OUTSIDE that boundary, so it painted over the toolbar's
+ * dropdowns and its "…" overflow popup. Move the isolation boundary up to
+ * the field root: the toolbar and its popups now rise above the docked
+ * panel (and the panel stays above the editable by DOM order), while
+ * their z-index still can't leak past the field. */
+[data-slot='textarea-rich'] {
+  isolation: isolate;
+}
+[data-slot='textarea-rich'] .kb-component {
+  isolation: auto !important;
+}
+
+/* Kerebron caps the "…" overflow popup at 320px, which wraps the grid onto
+ * a second row once our Macros/Dictate items join it. Let it grow with its
+ * content, up to the field's width (minus its inset on both sides). */
+[data-slot='textarea-rich'] .kb-custom-menu__overflow-menu {
+  max-width: calc(100% - 2 * var(--kb-space-xs, 4px));
 }
