@@ -139,6 +139,9 @@ module.exports = {
     'pointer-coarse:hidden',
     'snap-x',
     'basis-full',
+    // A message's actions, in the avatar's column beside its bubble.
+    '-end-8',
+    '-start-8',
     'ps-14',
     'size-5',
     'top-2',

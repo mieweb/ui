@@ -1170,18 +1170,22 @@ export const MessageRow = React.memo(function MessageRow({
         {showBubble && (
           <div
             className={cn(
-              'flex w-full items-center gap-1',
+              'relative flex w-full items-center gap-1',
               isSelf ? 'flex-row-reverse' : 'flex-row'
             )}
           >
-            {/* Edit and Copy belong to the text, so they sit beside its bubble
-                on the outer side, by the avatar (first in the row, which runs
-                the author's way), revealed on hover or focus; on a long
-                message the ⋯ sticks to the bottom of the view. */}
+            {/* Edit and Copy belong to the text: beside its bubble, in the
+                avatar's column on the outer side, level with the bubble and
+                out of the row's flow, so the bubble keeps its edge in line
+                with the attachments under it. Revealed on hover or focus; on a
+                long message the ⋯ sticks to the bottom of the view. */}
             {hasActions && (
               <div
                 data-slot="superchat-message-actions-slot"
-                className="flex shrink-0 flex-col items-center justify-end gap-0.5 self-stretch"
+                className={cn(
+                  'absolute inset-y-0 flex w-6 flex-col items-center justify-end gap-0.5',
+                  isSelf ? '-end-8' : '-start-8'
+                )}
               >
                 <MessageOverflowMenu
                   isSelf={isSelf}
