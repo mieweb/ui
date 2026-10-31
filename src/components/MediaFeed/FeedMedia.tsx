@@ -1,7 +1,17 @@
 import * as React from 'react';
 import { Pause, Play } from 'lucide-react';
+import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { MediaPlayer, type MediaPlayerState } from '../MediaPlayer';
+import {
+  overlayButtonClass,
+  playBadgeClass,
+  playBadgeIconClass,
+} from '../MediaPlayer/overlayButton';
+import {
+  isInPictureInPicture,
+  PIP_EVENTS,
+} from '../MediaPlayer/pictureInPicture';
 import type { MediaFeedLabels, MediaFeedMedia } from './types';
 
 interface FeedMediaProps {
@@ -15,6 +25,8 @@ interface FeedMediaProps {
   onActivate: () => void;
   playbackPosition: { timeMs: number; playRequested?: boolean };
   playbackRequestId?: string | number;
+  /** The feed's `overlay` layout: the player's overlay controls, no button row. */
+  overlay: boolean;
 }
 
 /** Only ordinary web URLs become links; media resources may use other schemes. */
@@ -52,6 +64,7 @@ function NativeFeedMedia({
   onActivate,
   playbackPosition,
   playbackRequestId,
+  overlay,
 }: FeedMediaProps) {
   const mediaElementRef = React.useRef<
     HTMLVideoElement | HTMLAudioElement | null
@@ -69,13 +82,17 @@ function NativeFeedMedia({
   const attemptId = React.useRef(0);
   const activeRef = React.useRef(active);
   const canSavePosition = React.useRef(false);
+  // The pending attempt autoplay started: that start isn't the viewer asking
+  // for playback. A newer attempt, or one that's called off, isn't it.
+  const autoAttempt = React.useRef<number | null>(null);
   activeRef.current = active;
 
-  const tryPlay = React.useCallback(async () => {
+  const tryPlay = React.useCallback(async (automatic = false) => {
     const element = mediaElementRef.current;
     if (!element || !activeRef.current) return;
     const attempt = ++attemptId.current;
     setBlocked(false);
+    autoAttempt.current = automatic ? attempt : null;
     try {
       // The native promise can reject when browser autoplay policy requires a
       // gesture. Playback state still comes from native events, never intent.
@@ -88,11 +105,17 @@ function NativeFeedMedia({
       if (!activeRef.current || attempt !== attemptId.current) return;
       if (error instanceof Error && error.name === 'AbortError') return;
       setBlocked(true);
+    } finally {
+      if (autoAttempt.current === attempt) autoAttempt.current = null;
     }
   }, []);
 
+  // A clip floating in picture in picture plays on when its item stops being
+  // the one on screen (the feed scrolls on, or its host hides it): the viewer
+  // floated it to keep watching.
   const pauseForOwnership = React.useCallback(
     (element: HTMLMediaElement | null) => {
+      if (isInPictureInPicture(element)) return;
       if (element && element === mediaElementRef.current && !element.paused)
         ownershipPause.current = true;
       element?.pause();
@@ -123,9 +146,19 @@ function NativeFeedMedia({
         latestPlaybackRequest.current === handledPlaybackRequest.current) &&
       (autoPlay || wantsPlayback.current)
     ) {
-      void tryPlay();
+      void tryPlay(!wantsPlayback.current);
     } else if (!active) {
       attemptId.current++;
+      // Leave a full screen this clip's own player entered: an inactive item
+      // has no controls to leave it with.
+      const fullscreen = document.fullscreenElement;
+      if (
+        element &&
+        fullscreen &&
+        (fullscreen === element ||
+          fullscreen === element.closest('[data-slot="media-player-box"]'))
+      )
+        void document.exitFullscreen?.()?.catch(() => {});
       pauseForOwnership(element);
       setBlocked(false);
     }
@@ -144,6 +177,21 @@ function NativeFeedMedia({
     retryVersion,
     tryPlay,
   ]);
+
+  // A clip left playing in picture in picture when its item stopped being the
+  // one on screen comes back with no controls (only the active item has
+  // them): pause it when its floating window closes.
+  React.useEffect(() => {
+    const element = mediaElementRef.current;
+    if (!element) return;
+    const landed = () => {
+      if (!activeRef.current && !isInPictureInPicture(element)) element.pause();
+    };
+    for (const name of PIP_EVENTS) element.addEventListener(name, landed);
+    return () => {
+      for (const name of PIP_EVENTS) element.removeEventListener(name, landed);
+    };
+  }, [retryVersion]);
 
   React.useEffect(() => {
     if (
@@ -171,8 +219,15 @@ function NativeFeedMedia({
     }
   };
 
+  // In the overlay layout the clip fills the stage at its own shape, upright
+  // or sideways, under the player's own controls.
   return (
-    <div className="flex h-full min-h-0 w-full flex-col items-center justify-center gap-3">
+    <div
+      className={cn(
+        'flex h-full min-h-0 w-full flex-col items-center justify-center',
+        overlay ? 'relative' : 'gap-3'
+      )}
+    >
       <MediaPlayer
         src={media.src}
         kind={media.kind === 'audio' ? 'audio' : 'video'}
@@ -182,12 +237,33 @@ function NativeFeedMedia({
         poster={media.poster}
         preload={active ? 'metadata' : 'none'}
         controls={active}
+        controlsStyle={overlay ? 'overlay' : 'native'}
         aria-label={title}
         onStateChange={(next) => {
           setState(next);
-          if (next === 'playing') ownershipPause.current = false;
+          if (next === 'playing') {
+            ownershipPause.current = false;
+            // Started by the viewer (the player's own controls, a tap on the
+            // picture), it resumes when they come back to it. Autoplay's own
+            // start leaves that to autoPlay. Either way the blocked-autoplay
+            // notice can go.
+            setBlocked(false);
+            if (
+              activeRef.current &&
+              autoAttempt.current !== attemptId.current
+            ) {
+              wantsPlayback.current = true;
+              playbackPosition.playRequested = true;
+            }
+          }
           if (next === 'paused') {
-            if (activeRef.current && !ownershipPause.current) {
+            // A pause on the active item, or in the floating window, is the
+            // viewer's: don't resume it later.
+            if (
+              (activeRef.current ||
+                isInPictureInPicture(mediaElementRef.current)) &&
+              !ownershipPause.current
+            ) {
               wantsPlayback.current = false;
               playbackPosition.playRequested = false;
             }
@@ -204,31 +280,85 @@ function NativeFeedMedia({
           setBlocked(false);
           setRetryVersion((version) => version + 1);
         }}
-        labels={{ error: labels.mediaError, retry: labels.retry }}
+        labels={{
+          error: labels.mediaError,
+          retry: labels.retry,
+          play: labels.play,
+          pause: labels.pause,
+          mute: labels.mute,
+          unmute: labels.unmute,
+          seek: labels.seek,
+          fullscreen: labels.playerFullscreen,
+          exitFullscreen: labels.exitPlayerFullscreen,
+          pictureInPicture: labels.pictureInPicture,
+          exitPictureInPicture: labels.exitPictureInPicture,
+          time: labels.time,
+          rate: labels.playerRate,
+          speed: labels.playerSpeed,
+          showCaptions: labels.showCaptions,
+          hideCaptions: labels.hideCaptions,
+        }}
         className="min-h-0 flex-1 [&_video]:h-full [&_video]:w-full"
       />
-      {state !== 'error' && (
-        <Button
-          variant="secondary"
-          size="sm"
-          leftIcon={
-            state === 'playing' ? (
-              <Pause className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Play className="h-4 w-4" aria-hidden="true" />
-            )
-          }
-          onClick={togglePlayback}
-        >
-          {state === 'playing' ? labels.pause : labels.play}
-        </Button>
-      )}
-      {blocked && (
+      {overlay
+        ? // An item that isn't the active one has no controls yet: its ▶
+          // selects it and starts it.
+          !active &&
+          state !== 'error' &&
+          state !== 'playing' && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={labels.play}
+                title={labels.play}
+                className={cn(
+                  overlayButtonClass,
+                  playBadgeClass,
+                  'pointer-events-auto pointer-fine:h-14 pointer-fine:w-14'
+                )}
+                onClick={togglePlayback}
+              >
+                <Play className={playBadgeIconClass} aria-hidden="true" />
+              </Button>
+            </div>
+          )
+        : state !== 'error' && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              leftIcon={
+                state === 'playing' ? (
+                  <Pause className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Play className="h-4 w-4" aria-hidden="true" />
+                )
+              }
+              onClick={togglePlayback}
+            >
+              {state === 'playing' ? labels.pause : labels.play}
+            </Button>
+          )}
+      {blocked && state !== 'playing' && (
         <p
           role="status"
-          className="text-muted-foreground m-0 text-center text-sm"
+          className={cn(
+            'm-0 text-center text-sm',
+            overlay
+              ? // Above the player's bar, clear of the details along the top.
+                'pointer-events-none absolute inset-x-0 bottom-16 flex justify-center px-4'
+              : 'text-muted-foreground'
+          )}
         >
-          {labels.blockedAutoplay}
+          {overlay ? (
+            <span className="rounded bg-black/60 px-2 py-1 text-white">
+              {labels.blockedAutoplay}
+            </span>
+          ) : (
+            labels.blockedAutoplay
+          )}
         </p>
       )}
       {state === 'error' && <SourceLink src={media.src} labels={labels} />}
@@ -351,6 +481,7 @@ function YouTubeFeedMedia({
           )}
           {id && !failed ? (
             <Button
+              type="button"
               variant="secondary"
               leftIcon={<Play className="h-4 w-4" aria-hidden="true" />}
               onClick={() => {

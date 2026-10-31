@@ -7,7 +7,7 @@ description: Component inventory and selection guidance for the @mieweb/ui desig
 
 # @mieweb/ui component catalog
 
-271 cataloged components. Full docs: https://ui.mieweb.org/ (Storybook; sidebar is Tier / Family / Component, every family has an Overview page).
+272 cataloged components. Full docs: https://ui.mieweb.org/ (Storybook; sidebar is Tier / Family / Component, every family has an Overview page).
 
 For per-component "Which one?" comparison tables, read [selection-guidance.md](./selection-guidance.md) in this skill and jump to the family's section.
 
@@ -73,7 +73,7 @@ Components by tier and family. Annotations: maturity when not stable, and the im
 
 - **Chat:** AIChat, AIChat (Voice), AIMessage, ChatComposer _(beta)_, Composer Action Ribbon (POC) _(experimental)_, ComposerModelSelector, MCPToolCall, Messaging, OzwellChat, ReconciliationPanel
 - **Dashboards:** CustomizableDashboard, Dashboard (Demo) _(experimental)_, Dashboard Widgets (Demo) _(experimental)_, DashboardCustomizePanel, DashboardWidget, QuickLinksCard, ReportDashboard
-- **Editors:** EmailEditor _(experimental)_, MacroLibrary _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor, TextAreaRich _(experimental)_
+- **Editors:** EmailEditor _(experimental)_, MacroLibrary _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor, RichTextEsheet _(experimental, `/esheet`)_, TextAreaRich _(experimental)_
 - **Files:** DocumentScanner, DropzoneOverlay, FileManager
 - **Media:** AudioPlayer, AudioRecorder, DictationButton _(experimental)_, MediaEditor, MediaEditor Live Demo, MediaFeed _(experimental, `/components/MediaFeed`)_, MediaPlayer, RecordButton, TranscriptView, VideoCard _(experimental)_
 - **Presentations:** Deck _(experimental, `/deck`)_, PointMap _(experimental, `/maps`)_
@@ -198,7 +198,9 @@ The one-line rule that governs each family. When a task touches a family, read i
 
 > **What is the stored format, and who edits it?** Markdown that people write (and maybe
 > co-write) → `RichEditor`. HTML for templated letters with merge fields and dictation →
-> `RichTextEditor`. HTML in a surface that should look like a plain textarea until asked →
+> `RichTextEditor`. A **multi-section guided document** — referral letters, support tickets —
+> where an eSheet definition supplies the sections and memory aids → `RichTextEsheet`.
+> HTML in a surface that should look like a plain textarea until asked →
 > `TextAreaRich`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
 > Markdown that is only **read** → `MarkdownRenderer`. A structured agent
 > configuration with a YAML/JSON pane → `Q`. Plain text storage with rich composing →

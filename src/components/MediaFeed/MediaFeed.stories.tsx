@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heart, MessageCircle } from 'lucide-react';
 import { MediaFeed, type MediaFeedProps, type MediaFeedMedia } from './index';
 import { Button } from '../Button';
-import { getSampleVideo } from '../AudioPlayer/sampleVideo';
+import {
+  getSampleVideo,
+  type SampleVideoShape,
+} from '../AudioPlayer/sampleVideo';
 
 interface Update {
   id: string;
@@ -11,6 +14,8 @@ interface Update {
   caption: string;
   author: string;
   media: MediaFeedMedia;
+  /** The sample clip's shape; wide unless set. */
+  shape?: SampleVideoShape;
 }
 
 const image = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="540" height="720" viewBox="0 0 540 720"><rect width="540" height="720" fill="#163b4a"/><circle cx="330" cy="270" r="170" fill="#56c2b3"/><path d="M0 620 210 320 540 720H0" fill="#edf8e3"/><circle cx="120" cy="120" r="45" fill="#fbd38d"/></svg>')}`;
@@ -46,43 +51,70 @@ const updates: Update[] = [
   },
 ];
 
-function InteractiveFeed(props: MediaFeedProps<Update>) {
-  const [video, setVideo] = React.useState('');
+/** A phone recording, upright, then the wide clips: the overlay layout shows
+ * each at its own shape. */
+const mixedShapeUpdates: Update[] = [
+  {
+    ...updates[0],
+    title: 'Filmed upright on a phone',
+    shape: 'portrait',
+  },
+  ...updates.slice(1),
+];
+
+function InteractiveFeed({
+  frameClassName = 'mx-auto flex h-[42rem] max-w-lg flex-col gap-2 p-4',
+  ...props
+}: MediaFeedProps<Update> & { frameClassName?: string }) {
+  const [videos, setVideos] = React.useState<
+    Partial<Record<SampleVideoShape, string>>
+  >({});
   const [failure, setFailure] = React.useState<string>();
   const [liked, setLiked] = React.useState<string[]>([]);
   const [discussion, setDiscussion] = React.useState<string>();
+  const shapes = [
+    ...new Set(props.items.map((item) => item.shape ?? 'landscape')),
+  ];
+  const shapesKey = shapes.join();
   React.useEffect(() => {
     let mounted = true;
-    void getSampleVideo().then(
-      (url) => {
-        if (mounted) setVideo(url);
-      },
-      () => {
-        if (mounted)
-          setFailure('The browser could not generate the local sample video.');
-      }
-    );
+    for (const shape of shapesKey.split(',') as SampleVideoShape[]) {
+      void getSampleVideo(shape).then(
+        (url) => {
+          if (mounted) setVideos((all) => ({ ...all, [shape]: url }));
+        },
+        () => {
+          if (mounted)
+            setFailure(
+              'The browser could not generate the local sample video.'
+            );
+        }
+      );
+    }
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [shapesKey]);
+  const pending = (item: Update) =>
+    item.media.kind === 'video' &&
+    !item.media.src &&
+    !videos[item.shape ?? 'landscape'];
   return (
-    <div className="mx-auto flex h-[42rem] max-w-lg flex-col gap-2 p-4">
+    <div className={frameClassName}>
       <MediaFeed
         {...props}
         items={props.items.map((item) =>
           item.media.kind === 'video' && !item.media.src
-            ? { ...item, media: { ...item.media, src: video } }
+            ? {
+                ...item,
+                media: {
+                  ...item.media,
+                  src: videos[item.shape ?? 'landscape'] ?? '',
+                },
+              }
             : item
         )}
-        loading={
-          props.loading ||
-          (!video &&
-            !failure &&
-            props.items.some(
-              (item) => item.media.kind === 'video' && !item.media.src
-            ))
-        }
+        loading={props.loading || (!failure && props.items.some(pending))}
         error={props.error ?? failure}
         renderActions={(item) => (
           <>
@@ -154,13 +186,14 @@ const meta: Meta<MediaFeedProps<Update>> = {
       description: {
         component: `### What it's for
 
-A vertical media feed for a collection owned by the host. \`MediaFeed<T>\` uses item accessors so a news post, an update, or a conversation attachment can share scrolling, active-item playback and an immersive viewer. Images and native audio/video work directly; provider media can use \`renderMedia\`. No RSS, authentication, router, persistence or comment service is included.
+A vertical media feed for a collection owned by the host. \`MediaFeed<T>\` uses item accessors so a news post, an update, or a conversation attachment can share scrolling, active-item playback and an immersive viewer. Images and native audio/video work directly; provider media can use \`renderMedia\`. Two layouts: \`stacked\` cards (the default) and \`overlay\`, where the media fills each item edge to edge, upright or sideways, with the details over its top and touch-first player controls. No RSS, authentication, router, persistence or comment service is included.
 
 ### Use it when
 
 - People browse media updates one at a time by touch scrolling or the feed’s keyboard navigation.
 - A conversation should offer an Instagram-like media view alongside its thread. \`SuperChatInbox\` maps explicit message attachments into the same feed.
 - The host supplies captions, participants and actions, while the library coordinates the active player.
+- The feed fills a phone screen or a full-height pane and the media should get all of it: use \`layout="overlay"\`.
 
 ### Don't use it when
 
@@ -193,6 +226,8 @@ Import \`@mieweb/ui/styles.css\` once. Tailwind 4 consumers who generate their o
 - Native autoplay starts muted, depends on browser policy, and is suppressed for reduced motion. Playback controls remain available; provider embedding can still be blocked or unavailable.
 - The immersive viewer uses \`Modal\` for focus trapping, Escape and scroll lock. Feed arrow navigation is scoped to its own surface and leaves inputs and media controls alone.
 - All feed copy is overridable through \`labels\`; host-rendered captions and actions require the host’s localization. Layout uses theme tokens and logical direction.
+- The \`overlay\` layout is dark in every theme, as video players are. It sets \`data-theme="dark"\` on the feed, so library components inside it, including the host's \`renderActions\`, take their dark-theme colours; host markup should use theme tokens too. The title shows one line and the caption two; when either is cut off, **Show more** opens both in full (a long caption scrolls within 40% of the screen). A caption that is empty or repeats the title is left out, and an untitled item shows no title. Previous/Next are icon buttons on the end edge. The author, title and caption each take their own direction (\`dir="auto"\`), so mixed-language text reads and truncates correctly in either direction. The full-screen viewer is off unless \`allowFullscreen\` is set, since the player has its own full screen.
+- In both layouts, a clip floated into picture in picture keeps playing when the feed moves on, and pauses when its window closes over an inactive item. A clip the viewer started (with the feed's Play or the player's own controls) resumes when they come back to it.
 - The stories generate a local synthetic video, so the primary demonstration does not depend on YouTube or a remote media server. Live provider behavior still needs a manual integration check.
 - This port replaces the reusable presentation from \`mieweb/news-widget\`. Existing RSS/Discourse consumers must adapt their data and callbacks; this is not a drop-in replacement for \`<NewsWidget />\`.`,
       },
@@ -293,6 +328,22 @@ Import \`@mieweb/ui/styles.css\` once. Tailwind 4 consumers who generate their o
       description: 'Per-slot style overrides.',
       table: { category: 'Slots' },
     },
+    layout: {
+      control: 'inline-radio',
+      options: ['stacked', 'overlay'],
+      description:
+        '`stacked` cards (default), or `overlay`: the media edge to edge, details over it, touch-first player controls.',
+      table: { category: 'Behavior', defaultValue: { summary: 'stacked' } },
+    },
+    allowFullscreen: {
+      control: 'boolean',
+      description:
+        'Offer the full-screen viewer. On by default for `stacked`, off for `overlay` (the player has its own full screen).',
+      table: {
+        category: 'Behavior',
+        defaultValue: { summary: "layout !== 'overlay'" },
+      },
+    },
     autoPlay: {
       control: 'boolean',
       description: 'Request muted playback for the active item.',
@@ -333,25 +384,84 @@ export const UnavailableMedia: Story = {
     ],
   },
 };
+const arabicLabels: MediaFeedProps<Update>['labels'] = {
+  feed: 'الوسائط المشتركة في المحادثة',
+  fullscreen: 'فتح الوسائط في عارض ملء الشاشة',
+  close: 'إغلاق عارض الوسائط',
+  previous: 'الانتقال إلى الوسائط السابقة',
+  next: 'الانتقال إلى الوسائط التالية',
+  play: 'تشغيل الوسائط',
+  pause: 'إيقاف التشغيل مؤقتًا',
+  mute: 'كتم الصوت',
+  unmute: 'إلغاء كتم الصوت',
+  seek: 'موضع التشغيل',
+  playerFullscreen: 'ملء الشاشة',
+  exitPlayerFullscreen: 'الخروج من ملء الشاشة',
+  pictureInPicture: 'صورة داخل صورة',
+  exitPictureInPicture: 'الخروج من صورة داخل صورة',
+  time: (current, duration) => `${current} من ${duration}`,
+  playerRate: (rate) => `${rate}×`,
+  playerSpeed: (rate) => `سرعة التشغيل ${rate}`,
+  showCaptions: 'إظهار الترجمة',
+  hideCaptions: 'إخفاء الترجمة',
+  showMore: 'عرض المزيد',
+  showLess: 'عرض أقل',
+  loading: 'جارٍ تحميل الوسائط المشتركة',
+  empty: 'لا توجد وسائط مشتركة في هذه المحادثة',
+  retry: 'إعادة محاولة تحميل الوسائط',
+  mediaError: 'تعذر تشغيل الوسائط المطلوبة',
+  blockedAutoplay: 'اضغط على تشغيل لبدء عرض الوسائط',
+  openSource: 'فتح المصدر الأصلي للوسائط',
+  item: (position, total) => `الوسائط ${position} من ${total}`,
+  position: (position, total) => `${position} من ${total}`,
+};
+
 export const TranslatedRTL: Story = {
+  args: { dir: 'rtl', labels: arabicLabels },
+};
+
+/** The media edge to edge: a portrait clip, then wide ones, each at its own
+ * shape under the player's touch-first controls. */
+export const Overlay: Story = {
+  args: { layout: 'overlay', items: mixedShapeUpdates },
+};
+
+/** A phone held upright: the feed is the whole screen. */
+export const OverlayPhonePortrait: Story = {
+  globals: { viewport: { value: 'mobile2', isRotated: false } },
   args: {
+    layout: 'overlay',
+    items: mixedShapeUpdates,
+    allowFullscreen: false,
+    // Fill the phone screen instead of the feed's default bounded height.
+    className: 'h-full',
+  },
+  render: (args) => (
+    <InteractiveFeed {...args} frameClassName="flex h-dvh flex-col" />
+  ),
+};
+
+/** The same phone turned sideways: a wide clip fills the screen, an upright
+ * one sits at its own shape between dark bars. */
+export const OverlayPhoneLandscape: Story = {
+  globals: { viewport: { value: 'mobile2', isRotated: true } },
+  args: {
+    layout: 'overlay',
+    items: mixedShapeUpdates,
+    allowFullscreen: false,
+    // Fill the phone screen instead of the feed's default bounded height.
+    className: 'h-full',
+  },
+  render: (args) => (
+    <InteractiveFeed {...args} frameClassName="flex h-dvh flex-col" />
+  ),
+};
+
+export const OverlayTranslatedRTL: Story = {
+  args: {
+    layout: 'overlay',
+    items: mixedShapeUpdates,
     dir: 'rtl',
-    labels: {
-      feed: 'الوسائط المشتركة في المحادثة',
-      fullscreen: 'فتح الوسائط في عارض ملء الشاشة',
-      close: 'إغلاق عارض الوسائط',
-      previous: 'الانتقال إلى الوسائط السابقة',
-      next: 'الانتقال إلى الوسائط التالية',
-      play: 'تشغيل الوسائط',
-      pause: 'إيقاف التشغيل مؤقتًا',
-      loading: 'جارٍ تحميل الوسائط المشتركة',
-      empty: 'لا توجد وسائط مشتركة في هذه المحادثة',
-      retry: 'إعادة محاولة تحميل الوسائط',
-      mediaError: 'تعذر تشغيل الوسائط المطلوبة',
-      blockedAutoplay: 'اضغط على تشغيل لبدء عرض الوسائط',
-      openSource: 'فتح المصدر الأصلي للوسائط',
-      item: (position, total) => `الوسائط ${position} من ${total}`,
-      position: (position, total) => `${position} من ${total}`,
-    },
+    labels: arabicLabels,
   },
 };

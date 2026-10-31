@@ -7,3 +7,8 @@ export {
   type MediaPlayerState,
   type MediaKind,
 } from './MediaPlayer';
+export {
+  MediaControls,
+  type MediaControlsLabels,
+  type MediaControlsProps,
+} from './MediaControls';

@@ -4,9 +4,20 @@ import { cn } from '../../utils/cn';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { Avatar } from '../Avatar';
 import { Button } from '../Button';
+import { defaultMediaControlsLabels } from '../MediaPlayer/MediaControls';
+import { overlayButtonClass } from '../MediaPlayer/overlayButton';
+import {
+  exitPictureInPicture,
+  isInPictureInPicture,
+} from '../MediaPlayer/pictureInPicture';
 import { Modal, ModalClose, ModalHeader, ModalTitle } from '../Modal';
 import { FeedMedia } from './FeedMedia';
-import type { MediaFeedLabels, MediaFeedProps } from './types';
+import type {
+  MediaFeedAuthor,
+  MediaFeedClassNames,
+  MediaFeedLabels,
+  MediaFeedProps,
+} from './types';
 
 const defaultLabels: MediaFeedLabels = {
   feed: 'Media feed',
@@ -20,6 +31,21 @@ const defaultLabels: MediaFeedLabels = {
   next: 'Next item',
   play: 'Play',
   pause: 'Pause',
+  // The player's own controls, in the overlay layout.
+  mute: defaultMediaControlsLabels.mute,
+  unmute: defaultMediaControlsLabels.unmute,
+  seek: defaultMediaControlsLabels.seek,
+  playerFullscreen: defaultMediaControlsLabels.fullscreen,
+  exitPlayerFullscreen: defaultMediaControlsLabels.exitFullscreen,
+  pictureInPicture: defaultMediaControlsLabels.pictureInPicture,
+  exitPictureInPicture: defaultMediaControlsLabels.exitPictureInPicture,
+  time: defaultMediaControlsLabels.time,
+  playerRate: defaultMediaControlsLabels.rate,
+  playerSpeed: defaultMediaControlsLabels.speed,
+  showCaptions: defaultMediaControlsLabels.showCaptions,
+  hideCaptions: defaultMediaControlsLabels.hideCaptions,
+  showMore: 'Show more',
+  showLess: 'Show less',
   blockedAutoplay: 'Playback did not start. Press Play to try again.',
   mediaError: 'This media is unavailable.',
   openSource: 'Open source',
@@ -27,6 +53,161 @@ const defaultLabels: MediaFeedLabels = {
   item: (position, total) => `Media item ${position} of ${total}`,
   position: (position, total) => `${position} / ${total}`,
 };
+
+/**
+ * The `overlay` layout's details: who posted it, its title and caption, over
+ * the top of the clip on a gradient. Only its own controls take a tap; the
+ * rest of a tap reaches the player beneath (play/pause). An untitled item
+ * shows no title: the position counter already names it on screen, and the
+ * item's `aria-label` names it for assistive tech.
+ */
+function OverlayDetails({
+  author,
+  title,
+  caption,
+  actions,
+  fullscreenButton,
+  labels,
+  classNames,
+}: {
+  author?: MediaFeedAuthor;
+  title?: string;
+  caption?: React.ReactNode;
+  actions?: React.ReactNode;
+  fullscreenButton: React.ReactNode;
+  labels: MediaFeedLabels;
+  classNames: MediaFeedClassNames;
+}) {
+  // Only words that add something: not empty, not the title over again.
+  const showCaption =
+    caption != null &&
+    caption !== '' &&
+    !(typeof caption === 'string' && caption.trim() === (title ?? '').trim());
+  const textId = React.useId();
+  const titleRef = React.useRef<HTMLHeadingElement>(null);
+  const captionRef = React.useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = React.useState(false);
+  const [clipped, setClipped] = React.useState(false);
+  // Is the one-line title or the two-line caption cut off? Measured again
+  // whenever their boxes change (a phone turned, the window resized, fonts
+  // arriving), since that decides whether Show more is needed.
+  React.useLayoutEffect(() => {
+    if (expanded) return;
+    const titleEl = titleRef.current;
+    const captionEl = captionRef.current;
+    const measure = () =>
+      setClipped(
+        (!!titleEl && titleEl.scrollWidth > titleEl.clientWidth + 1) ||
+          (!!captionEl && captionEl.scrollHeight > captionEl.clientHeight + 1)
+      );
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    for (const el of [titleEl, captionEl]) if (el) observer.observe(el);
+    return () => observer.disconnect();
+  }, [title, caption, expanded]);
+  return (
+    <div
+      data-slot="details"
+      data-expanded={expanded || undefined}
+      className={cn(
+        'pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start gap-2 bg-gradient-to-b from-black/80 via-black/60 to-transparent px-3 pt-2 pb-10 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]',
+        // A darker scrim behind the full text, which can run over a bright frame.
+        expanded && 'via-black/75',
+        classNames.details
+      )}
+    >
+      {author && (
+        <Avatar
+          name={author.name}
+          src={author.avatar}
+          alt=""
+          size="xs"
+          className="mt-0.5 shrink-0"
+        />
+      )}
+      <div id={textId} className="min-w-0 flex-1 leading-5">
+        {author && (
+          <p
+            data-slot="author"
+            // Host text can be in any language: each line takes its own
+            // direction, so it truncates at its own end, and is only as wide
+            // as its text, so it still sits at the page's start edge.
+            dir="auto"
+            className={cn(
+              'm-0 w-fit max-w-full truncate text-xs font-medium',
+              classNames.author
+            )}
+          >
+            {author.name}
+          </p>
+        )}
+        {title && (
+          <h3
+            ref={titleRef}
+            data-slot="title"
+            dir="auto"
+            className={cn(
+              'm-0 w-fit max-w-full text-sm font-semibold',
+              expanded ? 'break-words' : 'truncate',
+              classNames.title
+            )}
+          >
+            {title}
+          </h3>
+        )}
+        {showCaption && (
+          // A div, not a p: a host caption can hold block content, and its
+          // links stay tappable through the details layer. Expanded, it
+          // scrolls within 40% of the screen, so a short landscape phone
+          // still shows the clip.
+          <div
+            ref={captionRef}
+            data-slot="caption"
+            dir="auto"
+            className={cn(
+              'pointer-events-auto m-0 w-fit max-w-full text-xs break-words text-white/90',
+              expanded
+                ? 'max-h-[40dvh] overflow-y-auto overscroll-contain'
+                : 'line-clamp-2',
+              classNames.caption
+            )}
+          >
+            {caption}
+          </div>
+        )}
+        {(clipped || expanded) && (
+          <button
+            type="button"
+            data-slot="details-toggle"
+            aria-expanded={expanded}
+            aria-controls={textId}
+            onClick={() => setExpanded((open) => !open)}
+            className="pointer-events-auto mt-0.5 rounded-sm text-xs font-semibold text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-white/70"
+          >
+            {expanded ? labels.showLess : labels.showMore}
+          </button>
+        )}
+      </div>
+      {(actions || fullscreenButton) && (
+        <div className="pointer-events-auto -me-1 -mt-1 flex shrink-0 items-center gap-1">
+          {actions && (
+            <div
+              data-slot="actions"
+              className={cn(
+                'flex flex-wrap items-center justify-end gap-2',
+                classNames.actions
+              )}
+            >
+              {actions}
+            </div>
+          )}
+          {fullscreenButton}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /**
  * A vertical, caller-owned media collection with one active playback surface.
@@ -43,6 +224,8 @@ function MediaFeedInner<T>(
     getAuthor,
     renderActions,
     renderMedia,
+    layout = 'stacked',
+    allowFullscreen: allowFullscreenProp,
     activeItemId,
     defaultActiveItemId,
     onActiveItemChange,
@@ -61,6 +244,10 @@ function MediaFeedInner<T>(
   forwardedRef: React.ForwardedRef<HTMLDivElement>
 ) {
   const labels = { ...defaultLabels, ...labelOverrides };
+  const overlay = layout === 'overlay';
+  // The overlay already fills its space and the player has its own full
+  // screen, so the viewer is opt-in there.
+  const allowFullscreen = allowFullscreenProp ?? !overlay;
   const prefersReducedMotion = usePrefersReducedMotion();
   const allowAutoPlay = autoPlay && !prefersReducedMotion;
   const ids = items.map(getId);
@@ -200,8 +387,8 @@ function MediaFeedInner<T>(
   }, [activeId, idsKey, hasObserver, loading, error]);
 
   React.useEffect(() => {
-    if (!items.length) setFullscreen(false);
-  }, [items.length]);
+    if (!items.length || !allowFullscreen) setFullscreen(false);
+  }, [items.length, allowFullscreen]);
 
   // The gesture targets an already selected, visible surface. Consume it once
   // per feed so a later source/fullscreen remount cannot resurrect a paused clip.
@@ -310,7 +497,8 @@ function MediaFeedInner<T>(
       playbackPosition = { src: media.src, timeMs: 0 };
       playbackPositions.current.set(id, playbackPosition);
     }
-    const title = getTitle?.(item) || labels.item(index + 1, items.length);
+    const ownTitle = getTitle?.(item);
+    const title = ownTitle || labels.item(index + 1, items.length);
     const author = getAuthor?.(item);
     const caption = getCaption?.(item);
     const active =
@@ -329,6 +517,75 @@ function MediaFeedInner<T>(
       consumedPlaybackRequests.current.get(id) !== playbackRequest.requestId
         ? playbackRequest.requestId
         : undefined;
+    const fullscreenButton = allowFullscreen && !immersive && (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        aria-label={labels.fullscreen}
+        title={labels.fullscreen}
+        className={
+          overlay
+            ? cn(overlayButtonClass, 'shrink-0 bg-transparent')
+            : undefined
+        }
+        onClick={(event) => {
+          fullscreenTriggerRef.current = event.currentTarget;
+          const open = () => {
+            select(id);
+            setFullscreen(true);
+          };
+          // A clip floating in picture in picture comes back first, so it
+          // stops with the inline feed instead of playing alongside the viewer.
+          const video = event.currentTarget
+            .closest('[data-slot="item"]')
+            ?.querySelector('video');
+          if (isInPictureInPicture(video))
+            void exitPictureInPicture(video).then(open);
+          else open();
+        }}
+      >
+        <Maximize2 className="h-4 w-4" aria-hidden="true" />
+      </Button>
+    );
+    const mediaSlot = (
+      <div
+        data-slot="media"
+        className={cn(
+          overlay
+            ? // Black letterboxing around the clip, as on VideoCard.
+              'absolute inset-0 flex items-center justify-center bg-black'
+            : 'bg-muted flex min-h-0 flex-1 items-center justify-center p-3',
+          classNames.media
+        )}
+      >
+        {renderMedia ? (
+          renderMedia(media, {
+            item,
+            active,
+            autoPlay: allowAutoPlay,
+            muted,
+            loop,
+            playbackRequestId,
+          })
+        ) : (
+          <FeedMedia
+            key={`${id}:${media.kind}:${media.src}:${immersive}`}
+            media={media}
+            title={title}
+            active={active}
+            autoPlay={allowAutoPlay}
+            muted={muted}
+            loop={loop}
+            labels={labels}
+            onActivate={() => select(id)}
+            playbackPosition={playbackPosition}
+            playbackRequestId={playbackRequestId}
+            overlay={overlay}
+          />
+        )}
+      </div>
+    );
     return (
       <article
         key={id}
@@ -348,122 +605,151 @@ function MediaFeedInner<T>(
         aria-setsize={items.length}
         tabIndex={id === activeId ? 0 : -1}
         className={cn(
-          'border-border bg-card text-card-foreground focus-visible:ring-ring flex min-h-0 w-full snap-start flex-col overflow-hidden border focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset',
-          immersive ? 'h-full flex-1 border-0' : 'h-full shrink-0 rounded-xl',
+          overlay
+            ? 'relative h-full min-h-0 w-full snap-start snap-always overflow-hidden bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white/70'
+            : 'border-border bg-card text-card-foreground focus-visible:ring-ring flex min-h-0 w-full snap-start flex-col overflow-hidden border focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset',
+          overlay
+            ? immersive
+              ? 'flex-1'
+              : 'shrink-0'
+            : immersive
+              ? 'h-full flex-1 border-0'
+              : 'h-full shrink-0 rounded-xl',
           classNames.item
         )}
       >
-        <div
-          data-slot="media"
-          className={cn(
-            'bg-muted flex min-h-0 flex-1 items-center justify-center p-3',
-            classNames.media
-          )}
-        >
-          {renderMedia ? (
-            renderMedia(media, {
-              item,
-              active,
-              autoPlay: allowAutoPlay,
-              muted,
-              loop,
-              playbackRequestId,
-            })
-          ) : (
-            <FeedMedia
-              key={`${id}:${media.kind}:${media.src}:${immersive}`}
-              media={media}
-              title={title}
-              active={active}
-              autoPlay={allowAutoPlay}
-              muted={muted}
-              loop={loop}
+        {overlay ? (
+          <>
+            {/* The details come first in the DOM so focus visits them before
+                the player's bar, matching what's on screen. */}
+            <OverlayDetails
+              author={author}
+              title={ownTitle}
+              caption={caption}
+              actions={renderActions?.(item)}
+              fullscreenButton={fullscreenButton}
               labels={labels}
-              onActivate={() => select(id)}
-              playbackPosition={playbackPosition}
-              playbackRequestId={playbackRequestId}
+              classNames={classNames}
             />
-          )}
-        </div>
-        <div
-          data-slot="details"
-          className={cn(
-            'flex max-h-[40%] shrink-0 flex-col gap-2 overflow-y-auto p-4',
-            classNames.details
-          )}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              {author && (
+            {mediaSlot}
+          </>
+        ) : (
+          <>
+            {mediaSlot}
+            <div
+              data-slot="details"
+              className={cn(
+                'flex max-h-[40%] shrink-0 flex-col gap-2 overflow-y-auto p-4',
+                classNames.details
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  {author && (
+                    <div
+                      data-slot="author"
+                      className={cn(
+                        'mb-2 flex items-center gap-2',
+                        classNames.author
+                      )}
+                    >
+                      <Avatar
+                        name={author.name}
+                        src={author.avatar}
+                        alt=""
+                        size="sm"
+                      />
+                      <span className="truncate text-sm font-medium">
+                        {author.name}
+                      </span>
+                    </div>
+                  )}
+                  <h3
+                    data-slot="title"
+                    className={cn(
+                      'm-0 text-base font-semibold',
+                      classNames.title
+                    )}
+                  >
+                    {title}
+                  </h3>
+                </div>
+                {fullscreenButton}
+              </div>
+              {caption != null && (
                 <div
-                  data-slot="author"
+                  data-slot="caption"
                   className={cn(
-                    'mb-2 flex items-center gap-2',
-                    classNames.author
+                    'text-muted-foreground text-sm',
+                    classNames.caption
                   )}
                 >
-                  <Avatar
-                    name={author.name}
-                    src={author.avatar}
-                    alt=""
-                    size="sm"
-                  />
-                  <span className="truncate text-sm font-medium">
-                    {author.name}
-                  </span>
+                  {caption}
                 </div>
               )}
-              <h3
-                data-slot="title"
-                className={cn('m-0 text-base font-semibold', classNames.title)}
-              >
-                {title}
-              </h3>
-            </div>
-            {!immersive && (
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={labels.fullscreen}
-                title={labels.fullscreen}
-                onClick={(event) => {
-                  fullscreenTriggerRef.current = event.currentTarget;
-                  select(id);
-                  setFullscreen(true);
-                }}
-              >
-                <Maximize2 className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            )}
-          </div>
-          {caption != null && (
-            <div
-              data-slot="caption"
-              className={cn(
-                'text-muted-foreground text-sm',
-                classNames.caption
+              {renderActions && (
+                <div
+                  data-slot="actions"
+                  className={cn(
+                    'flex flex-wrap items-center gap-2',
+                    classNames.actions
+                  )}
+                >
+                  {renderActions(item)}
+                </div>
               )}
-            >
-              {caption}
             </div>
-          )}
-          {renderActions && (
-            <div
-              data-slot="actions"
-              className={cn(
-                'flex flex-wrap items-center gap-2',
-                classNames.actions
-              )}
-            >
-              {renderActions(item)}
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </article>
     );
   };
 
-  const controls = (
+  const controls = overlay ? (
+    // Over the feed's end edge, stacked the way the feed scrolls, clear of the
+    // details along the top and the player's bar along the bottom.
+    <div
+      data-slot="controls"
+      className={cn(
+        'pointer-events-none absolute end-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1.5',
+        classNames.controls
+      )}
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={labels.previous}
+        title={labels.previous}
+        className={cn(overlayButtonClass, 'pointer-events-auto')}
+        disabled={activeIndex <= 0}
+        onClick={() => navigate(activeIndex - 1)}
+      >
+        <ChevronUp className="h-5 w-5" aria-hidden="true" />
+      </Button>
+      <span
+        role="status"
+        aria-live="polite"
+        className="rounded-full bg-black/45 px-1.5 py-0.5 text-xs whitespace-nowrap text-white tabular-nums backdrop-blur-sm"
+      >
+        {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
+            translated "2 من 3" still reads right to left. */}
+        <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
+      </span>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={labels.next}
+        title={labels.next}
+        className={cn(overlayButtonClass, 'pointer-events-auto')}
+        disabled={activeIndex >= items.length - 1}
+        onClick={() => navigate(activeIndex + 1)}
+      >
+        <ChevronDown className="h-5 w-5" aria-hidden="true" />
+      </Button>
+    </div>
+  ) : (
     <div
       data-slot="controls"
       className={cn(
@@ -472,6 +758,7 @@ function MediaFeedInner<T>(
       )}
     >
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
@@ -486,9 +773,12 @@ function MediaFeedInner<T>(
         aria-live="polite"
         className="text-muted-foreground shrink-0 text-sm whitespace-nowrap"
       >
-        {labels.position(activeIndex + 1, items.length)}
+        {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
+            translated "2 من 3" still reads right to left. */}
+        <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
       </span>
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
@@ -506,8 +796,14 @@ function MediaFeedInner<T>(
       ref={setRoot}
       data-slot="root"
       data-component="media-feed"
+      data-layout={layout}
+      // The overlay layout is a dark surface in every theme, as video players
+      // are; scoping the dark theme keeps library and host content inside it
+      // (actions, errors, Retry) on their dark-theme colours.
+      data-theme={overlay ? 'dark' : undefined}
       className={cn(
         'bg-background text-foreground flex h-[min(48rem,80dvh)] min-h-0 w-full flex-col',
+        overlay && 'relative',
         classNames.root,
         className
       )}
@@ -528,6 +824,7 @@ function MediaFeedInner<T>(
           </p>
           {error && onRetry && (
             <Button
+              type="button"
               variant="outline"
               isLoading={retrying}
               loadingText={labels.loading}
@@ -557,7 +854,8 @@ function MediaFeedInner<T>(
             tabIndex={0}
             onKeyDown={handleKeyDown}
             className={cn(
-              'focus-visible:ring-ring relative flex min-h-0 flex-1 snap-y snap-mandatory flex-col gap-4 overflow-y-auto overscroll-contain focus-visible:ring-2 focus-visible:outline-none',
+              'focus-visible:ring-ring relative flex min-h-0 flex-1 snap-y snap-mandatory flex-col overflow-y-auto overscroll-contain focus-visible:ring-2 focus-visible:outline-none',
+              !overlay && 'gap-4',
               classNames.viewport
             )}
           >
@@ -568,7 +866,9 @@ function MediaFeedInner<T>(
         </>
       )}
       <Modal
-        open={fullscreen && !loading && !error && !!items.length}
+        open={
+          allowFullscreen && fullscreen && !loading && !error && !!items.length
+        }
         onOpenChange={setFullscreen}
         size="full"
         className="h-dvh min-h-0 sm:h-[calc(100dvh-2rem)]"
@@ -582,12 +882,17 @@ function MediaFeedInner<T>(
         <div
           data-slot="fullscreen"
           data-component="media-feed"
+          data-layout={layout}
+          // Set again here in case Modal ever portals its content out of the
+          // feed's dark scope.
+          data-theme={overlay ? 'dark' : undefined}
           role="feed"
           aria-label={labels.feed}
           tabIndex={0}
           onKeyDown={handleKeyDown}
           className={cn(
             'flex min-h-0 flex-1 flex-col px-2 pb-2 sm:px-4',
+            overlay && 'relative',
             classNames.fullscreen
           )}
         >
