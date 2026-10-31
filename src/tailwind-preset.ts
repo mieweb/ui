@@ -164,6 +164,8 @@ export const miewebUISafelist = [
   'cursor-zoom-out',
   'pointer-coarse:hidden',
   'snap-x',
+  '[scrollbar-width:none]',
+  '[&::-webkit-scrollbar]:hidden',
   'basis-full',
   // A message's actions, in the avatar's column beside its bubble.
   '-end-8',

@@ -955,7 +955,7 @@ function MediaFeedInner<T>(
             className={cn(
               'focus-visible:ring-ring relative flex min-h-0 flex-1 snap-mandatory overscroll-contain focus-visible:ring-2 focus-visible:outline-none',
               horizontal
-                ? 'snap-x flex-row overflow-x-auto overflow-y-hidden'
+                ? 'snap-x flex-row overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
                 : 'snap-y flex-col overflow-y-auto',
               !overlay && 'gap-4',
               classNames.viewport
