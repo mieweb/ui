@@ -282,17 +282,18 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 
 ### Message parts
 
-| Term                | `data-slot`                 | Element / role                         | Purpose                                                                                           |
-| ------------------- | --------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Message**         | `superchat-message`         | `div` · `article` (`"{name}, {time}"`) | One thread item from a participant.                                                               |
-| **Message gutter**  | `superchat-message-gutter`  | `div`                                  | Avatar column beside the bubble; hosts the overflow (⋯) and the actions bar under the avatar.     |
-| **Message meta**    | `superchat-message-meta`    | `div`                                  | Author name, role label, and timestamp.                                                           |
-| **Bubble**          | `superchat-bubble`          | `div`                                  | The styled container holding rendered Markdown / rich blocks.                                     |
-| **Message actions** | `superchat-message-actions` | `div`                                  | Hover-revealed icon stack at the end of the gutter; buttons expose `superchat-action-{id}` slots. |
-| **Overflow (⋯)**    | `superchat-overflow-button` | `button` (`Message actions`)           | Sticky control that follows long messages, then hands off to the actions bar once it scrolls in.  |
-| **System message**  | `superchat-system-message`  | `div` · `status`                       | Centered system notice (joins, etc.).                                                             |
-| **Reference chip**  | `superchat-reference`       | `div` → `a`/`button`                   | A `ref` thread item (doc / rx / appt), linked via `linkBuilder`.                                  |
-| **Avatar**          | —                           | `img` or initials                      | Per-participant cue; color/avatar disambiguates concurrent agents.                                |
+| Term                | `data-slot`                      | Element / role                         | Purpose                                                                                           |
+| ------------------- | -------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Message**         | `superchat-message`              | `div` · `article` (`"{name}, {time}"`) | One thread item from a participant.                                                               |
+| **Message gutter**  | `superchat-message-gutter`       | `div`                                  | Avatar column beside the bubble.                                                                  |
+| **Message actions** | `superchat-message-actions-slot` | `div`                                  | Beside the text bubble, on its inner side: the overflow (⋯) and the actions bar.                  |
+| **Message meta**    | `superchat-message-meta`         | `div`                                  | Author name, role label, and timestamp.                                                           |
+| **Bubble**          | `superchat-bubble`               | `div`                                  | The styled container holding rendered Markdown / rich blocks.                                     |
+| **Message actions** | `superchat-message-actions`      | `div`                                  | Hover-revealed icon stack at the end of the gutter; buttons expose `superchat-action-{id}` slots. |
+| **Overflow (⋯)**    | `superchat-overflow-button`      | `button` (`Message actions`)           | Sticky control that follows long messages, then hands off to the actions bar once it scrolls in.  |
+| **System message**  | `superchat-system-message`       | `div` · `status`                       | Centered system notice (joins, etc.).                                                             |
+| **Reference chip**  | `superchat-reference`            | `div` → `a`/`button`                   | A `ref` thread item (doc / rx / appt), linked via `linkBuilder`.                                  |
+| **Avatar**          | —                                | `img` or initials                      | Per-participant cue; color/avatar disambiguates concurrent agents.                                |
 
 ### Composer parts
 
@@ -423,7 +424,7 @@ The conversation switcher. Supports controlled or uncontrolled selection.
 `SuperChat`/`SuperChatInbox` are controlled — the host owns `thread` state — so
 editing is opt-in: provide `onMessageEdited` and the local user's own plain-text
 messages (matched by `currentParticipantId`) offer **Edit message** from the
-⋯ menu in the avatar gutter (editable messages also offer Copy, so the two
+⋯ menu beside the message (editable messages also offer Copy, so the two
 collapse into that menu — see [Copying messages](#copying-messages)). Saving
 calls back with the message id and new text;
 apply it to your state and stamp `editedAt` to surface the "(edited)" indicator.
@@ -457,11 +458,11 @@ Notes:
 
 ## Copying messages
 
-Every content message exposes a **Copy** affordance in the avatar gutter — under
-the sender's avatar, beside the bubble — that appears on hover/focus. When Copy
+Every content message exposes a **Copy** affordance beside its bubble, on the
+inner side (toward the thread), that appears on hover/focus. When Copy
 is the message's only action it shows as a clipboard icon that opens a small menu
 of formats (⌘/Ctrl-click skips the menu and copies in the default format); when
-the message also offers Edit, both collapse into the gutter's ⋯ menu, where the
+the message also offers Edit, both collapse into its ⋯ menu, where the
 **Copy as** submenu holds the same choices. On long messages the ⋯ sticks to the
 bottom of the view so the actions stay reachable while you scroll.
 

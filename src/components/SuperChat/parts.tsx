@@ -555,8 +555,8 @@ function FooterActionButton({
 }
 
 /**
- * The hover-revealed action icon button in the avatar gutter, at the end of a
- * message. Rendered only when a message has a single action — multiple actions
+ * The hover-revealed action icon button beside a message's bubble, at its
+ * end. Rendered only when a message has a single action — multiple actions
  * collapse into the sticky overflow menu ({@link MessageOverflowMenu}), which
  * also hosts each action's explicit variants.
  */
@@ -608,7 +608,7 @@ function MessageOverflowMenu({
 
   return (
     <div
-      // Push to the bottom of the (possibly tall) avatar gutter and stick to
+      // Push to the bottom of the (possibly tall) bubble's side and stick to
       // the viewport bottom: on long messages the control follows the scroll
       // and settles at the message's end once it is fully in view. Raise the
       // whole (sticky) stacking context above the sibling bubble while open so
@@ -698,15 +698,6 @@ interface MessageRowProps {
   mediaMaxSize?: string;
 }
 
-/**
- * A single thread row (message / system notice / reference chip).
- *
- * Wrapped in {@link React.memo}: in long threads the parent re-renders on every
- * new message, but each existing row's props are stable (the host owns the
- * message objects), so memoization skips re-rendering — and, crucially,
- * re-running the Markdown pipeline — for the hundreds of rows that did not
- * change. Keep the props referentially stable from the host for this to help.
- */
 /** English defaults for {@link SuperChatAttachmentLabels}. */
 export const DEFAULT_ATTACHMENT_LABELS: SuperChatAttachmentLabels = {
   moreMedia: (count) => `${count} more`,
@@ -740,6 +731,15 @@ function AttachmentTile({
   );
 }
 
+/**
+ * A single thread row (message / system notice / reference chip).
+ *
+ * Wrapped in {@link React.memo}: in long threads the parent re-renders on every
+ * new message, but each existing row's props are stable (the host owns the
+ * message objects), so memoization skips re-rendering — and, crucially,
+ * re-running the Markdown pipeline — for the hundreds of rows that did not
+ * change. Keep the props referentially stable from the host for this to help.
+ */
 export const MessageRow = React.memo(function MessageRow({
   message,
   participant,
@@ -1078,30 +1078,12 @@ export const MessageRow = React.memo(function MessageRow({
         isSelf ? 'flex-row-reverse' : 'flex-row'
       )}
     >
-      {/* Avatar gutter: the sticky overflow (⋯) and the end-of-message action
-          bar live under the avatar so the bubble aligns with the author name
-          instead of being indented by an action slot. */}
+      {/* The avatar's column; the message's actions sit beside its bubble. */}
       <div
         data-slot="superchat-message-gutter"
         className="flex shrink-0 flex-col items-center gap-1"
       >
         <ParticipantAvatar participant={participant} />
-        {hasActions && (
-          <>
-            <MessageOverflowMenu
-              isSelf={isSelf}
-              actions={actions}
-              footerVisible={collapseToMenu ? false : footerVisible}
-            />
-            {!collapseToMenu && (
-              <MessageActionsBar
-                ref={actionsBarRef}
-                actions={actions}
-                isSelf={isSelf}
-              />
-            )}
-          </>
-        )}
       </div>
       {/* flex-1 makes the column span the remaining row width so the bubble's
           max-w-[85%] resolves against the thread, not a shrink-wrapped column
@@ -1285,6 +1267,29 @@ export const MessageRow = React.memo(function MessageRow({
                 </>
               )}
             </ChatBubble>
+            {/* Edit and Copy belong to the text, so they sit beside its bubble
+                (on the inner side, toward the thread), revealed on hover or
+                focus; on a long message the ⋯ sticks to the bottom of the
+                view. */}
+            {hasActions && (
+              <div
+                data-slot="superchat-message-actions-slot"
+                className="flex shrink-0 flex-col items-center justify-end gap-0.5 self-stretch"
+              >
+                <MessageOverflowMenu
+                  isSelf={isSelf}
+                  actions={actions}
+                  footerVisible={collapseToMenu ? false : footerVisible}
+                />
+                {!collapseToMenu && (
+                  <MessageActionsBar
+                    ref={actionsBarRef}
+                    actions={actions}
+                    isSelf={isSelf}
+                  />
+                )}
+              </div>
+            )}
           </div>
         )}
 

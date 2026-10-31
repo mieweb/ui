@@ -743,6 +743,29 @@ describe('SuperChat', () => {
     );
   });
 
+  it("puts a message's actions beside its bubble, not under the avatar", () => {
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageEdited={() => {}}
+      />
+    );
+    const gutter = container.querySelector(
+      '[data-slot="superchat-message-gutter"]'
+    )!;
+    expect(gutter.querySelector('button')).toBeNull();
+    const slot = container.querySelector(
+      '[data-slot="superchat-message-actions-slot"]'
+    )!;
+    expect(
+      slot.parentElement?.querySelector('[data-slot="superchat-bubble"]')
+    ).toBeTruthy();
+    expect(
+      within(slot as HTMLElement).getAllByRole('button').length
+    ).toBeGreaterThan(0);
+  });
+
   it('restricts the file picker to acceptedFileTypes', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
