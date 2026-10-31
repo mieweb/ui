@@ -286,7 +286,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | ------------------- | -------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | **Message**         | `superchat-message`              | `div` · `article` (`"{name}, {time}"`) | One thread item from a participant.                                                               |
 | **Message gutter**  | `superchat-message-gutter`       | `div`                                  | Avatar column beside the bubble.                                                                  |
-| **Message actions** | `superchat-message-actions-slot` | `div`                                  | Beside the text bubble, on its inner side: the overflow (⋯) and the actions bar.                  |
+| **Message actions** | `superchat-message-actions-slot` | `div`                                  | Beside the text bubble, on its outer side by the avatar: the overflow (⋯) and the actions bar.    |
 | **Message meta**    | `superchat-message-meta`         | `div`                                  | Author name, role label, and timestamp.                                                           |
 | **Bubble**          | `superchat-bubble`               | `div`                                  | The styled container holding rendered Markdown / rich blocks.                                     |
 | **Message actions** | `superchat-message-actions`      | `div`                                  | Hover-revealed icon stack at the end of the gutter; buttons expose `superchat-action-{id}` slots. |
@@ -453,7 +453,7 @@ Notes:
 ## Copying messages
 
 Every content message exposes a **Copy** affordance beside its bubble, on the
-inner side (toward the thread), that appears on hover/focus. When Copy
+outer side (by the avatar), that appears on hover/focus. When Copy
 is the message's only action it shows as a clipboard icon that opens a small menu
 of formats (⌘/Ctrl-click skips the menu and copies in the default format); when
 the message also offers Edit, both collapse into its ⋯ menu, where the
