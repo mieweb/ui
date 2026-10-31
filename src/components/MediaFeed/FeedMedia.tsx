@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Pause, Play } from 'lucide-react';
+import { Pause, Play, ZoomIn, ZoomOut } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { MediaPlayer, type MediaPlayerState } from '../MediaPlayer';
@@ -366,21 +366,108 @@ function NativeFeedMedia({
   );
 }
 
-function ImageFeedMedia({ media, title, labels }: FeedMediaProps) {
+/** How far a zoomed image grows: its width, as a multiple of the stage's. */
+const ZOOM_WIDTH = 'w-[250%]';
+
+function ImageFeedMedia({
+  media,
+  title,
+  labels,
+  active,
+  overlay,
+}: FeedMediaProps) {
   const [failed, setFailed] = React.useState(false);
-  return failed ? (
-    <div role="alert" className="flex flex-col gap-3 p-6 text-center">
-      <p className="text-muted-foreground m-0">{labels.mediaError}</p>
-      <SourceLink src={media.src} labels={labels} />
-    </div>
-  ) : (
+  // The overlay's full stage zooms: a double tap (or the button) shows the
+  // image larger, dragged or scrolled around within its stage, and leaving
+  // the item zooms back out.
+  const [zoomed, setZoomed] = React.useState(false);
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!active) setZoomed(false);
+  }, [active]);
+  if (failed) {
+    return (
+      <div role="alert" className="flex flex-col gap-3 p-6 text-center">
+        <p className="text-muted-foreground m-0">{labels.mediaError}</p>
+        <SourceLink src={media.src} labels={labels} />
+      </div>
+    );
+  }
+  const image = (
     <img
       src={media.src}
       alt={media.alt ?? title}
       loading="lazy"
-      className="h-full max-h-full w-full object-contain"
+      className={
+        zoomed
+          ? cn(ZOOM_WIDTH, 'h-auto max-w-none cursor-zoom-out')
+          : cn(
+              'h-full max-h-full w-full object-contain',
+              overlay && 'cursor-zoom-in'
+            )
+      }
       onError={() => setFailed(true)}
+      onDoubleClick={
+        overlay
+          ? (event) => {
+              // Zoom in toward where it was tapped.
+              const box = event.currentTarget.getBoundingClientRect();
+              const x = box.width
+                ? (event.clientX - box.left) / box.width
+                : 0.5;
+              const y = box.height
+                ? (event.clientY - box.top) / box.height
+                : 0.5;
+              const zooming = !zoomed;
+              setZoomed(zooming);
+              if (zooming) {
+                requestAnimationFrame(() => {
+                  const stage = stageRef.current;
+                  if (!stage) return;
+                  stage.scrollLeft =
+                    x * stage.scrollWidth - stage.clientWidth / 2;
+                  stage.scrollTop =
+                    y * stage.scrollHeight - stage.clientHeight / 2;
+                });
+              }
+            }
+          : undefined
+      }
     />
+  );
+  if (!overlay) return image;
+  return (
+    <div className="relative h-full w-full">
+      <div
+        ref={stageRef}
+        data-slot="image-stage"
+        data-zoomed={zoomed || undefined}
+        // Zoomed, its own scroll pans the image and stops at the edges rather
+        // than swiping the feed on to the next item.
+        className={cn(
+          'h-full w-full',
+          zoomed ? 'overflow-auto overscroll-contain' : 'overflow-hidden'
+        )}
+      >
+        {image}
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={zoomed ? labels.zoomOut : labels.zoomIn}
+        aria-pressed={zoomed}
+        title={zoomed ? labels.zoomOut : labels.zoomIn}
+        onClick={() => setZoomed((value) => !value)}
+        className={cn(overlayButtonClass, 'absolute end-3 bottom-3')}
+      >
+        {zoomed ? (
+          <ZoomOut className="h-5 w-5" aria-hidden="true" />
+        ) : (
+          <ZoomIn className="h-5 w-5" aria-hidden="true" />
+        )}
+      </Button>
+    </div>
   );
 }
 

@@ -302,6 +302,72 @@ describe('MediaFeed', () => {
     ).toHaveAttribute('tabindex', '0');
   });
 
+  it('swipes sideways with the left and right arrows, mirrored right to left', () => {
+    const onActiveItemChange = vi.fn();
+    const { rerender } = render(
+      <MediaFeed
+        items={updates}
+        {...accessors}
+        renderMedia={provider}
+        layout="overlay"
+        orientation="horizontal"
+        onActiveItemChange={onActiveItemChange}
+      />
+    );
+    const feed = screen.getByRole('feed');
+    expect(feed).toHaveClass('snap-x', 'flex-row');
+    feed.focus();
+    fireEvent.keyDown(feed, { key: 'ArrowDown' });
+    expect(onActiveItemChange).not.toHaveBeenCalled();
+    fireEvent.keyDown(feed, { key: 'ArrowRight' });
+    expect(onActiveItemChange).toHaveBeenLastCalledWith(updates[1]);
+    fireEvent.keyDown(feed, { key: 'ArrowLeft' });
+    expect(onActiveItemChange).toHaveBeenLastCalledWith(updates[0]);
+    // The position is announced; the host shows its own.
+    expect(screen.getByRole('status')).toHaveClass('sr-only');
+
+    rerender(
+      <div dir="rtl" style={{ direction: 'rtl' }}>
+        <MediaFeed
+          items={updates}
+          {...accessors}
+          renderMedia={provider}
+          layout="overlay"
+          orientation="horizontal"
+          onActiveItemChange={onActiveItemChange}
+        />
+      </div>
+    );
+    fireEvent.keyDown(screen.getByRole('feed'), { key: 'ArrowLeft' });
+    expect(onActiveItemChange).toHaveBeenLastCalledWith(updates[1]);
+  });
+
+  it('zooms an image in the overlay, from its button or a double tap', () => {
+    render(
+      <MediaFeed
+        items={[
+          {
+            id: 'photo',
+            title: 'Whiteboard',
+            media: { kind: 'image', src: 'board.png', alt: 'The whiteboard' },
+          },
+        ]}
+        {...accessors}
+        layout="overlay"
+      />
+    );
+    const stage = document.querySelector('[data-slot="image-stage"]')!;
+    const zoom = screen.getByRole('button', { name: 'Zoom in' });
+    fireEvent.click(zoom);
+    expect(stage).toHaveAttribute('data-zoomed', 'true');
+    expect(screen.getByRole('button', { name: 'Zoom out' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    fireEvent.doubleClick(screen.getByRole('img', { name: 'The whiteboard' }));
+    expect(stage).not.toHaveAttribute('data-zoomed');
+  });
+
   it('pauses native media when the document is hidden and resumes when visible', async () => {
     const { container } = renderFeed();
     visibility([0.9, 0.1, 0]);

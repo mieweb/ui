@@ -144,55 +144,46 @@ CSV files.
 (markdown stripped) or, with no text, by what it carries
 (`mediaLabels.attachmentsPreview`: "Photo", "2 photos", a file's name).
 
-### Overlay media view (`mediaFeedProps.layout: 'overlay'`)
+### The media view: a dialog over the window
 
-Opt-in; without it the media view is the stacked feed under a labelled Back.
+As in iMessage, WhatsApp and Telegram, opening a picture or clip shows it over
+everything, and Back (or Escape) returns to the conversation exactly as it
+was: the thread stays mounted under it, so its scroll position and players
+need no restoring.
 
-- **Phones get the whole screen, message box included.** With the overlay
-  media view open, `PHONE_FULLSCREEN` makes the whole panel (the `section`)
-  `fixed` and `z-50` under 40rem wide, or under 30rem tall and sideways (a
-  phone on its side, not a short laptop window), with safe-area padding on
-  every side (`--mieweb-safe-area-*`; `Modal` has top and bottom). The header
-  hides (`PHONE_HIDDEN`), the media view fills the space, and the composer
-  stays at the bottom, so viewers can reply while they watch. The insets are
-  physical edges, hence the `rtl-ignore` lines. `PHONE_QUERY` must match these
-  classes: `useMediaQuery` reads it for the modal behaviour.
+- **Portaled to the body, fixed over the window**, `role="dialog"` with
+  `aria-modal`, a name (`mediaLabels.mediaViewer`), and `useFocusTrap`
+  keeping Tab inside without moving focus, since SuperChat focuses the chosen
+  item. It is dark by scoping (`data-theme="dark"`), as MediaFeed's overlay is.
+- **No message box.** It would cover the media and bring up the keyboard over
+  it. **Reply** (`mediaLabels.reply`) goes back to the conversation and puts
+  focus in the message box instead.
 - **It fits the visible viewport, not the layout one.** iOS doesn't shrink the
-  page for the keyboard, so the panel's height and top come from
-  `useKeyboardInset()`'s `--mieweb-visual-viewport-height` and
-  `--mieweb-visual-viewport-offset-top` (falling back to `100dvh` and `0`).
-  The host mounts that hook; the docs say so. The offset is `top`, not a
-  transform: `Modal` isn't portaled, and a transform would trap its `fixed`
-  children. With the `native` source those variables stay unset, and the host
-  pads the composer by `--mieweb-keyboard-inset`, as ChatComposer's notes
-  describe.
-- **Covering means modal.** While it covers the screen the panel is a
-  `role="dialog"` with `aria-modal`, and `useFocusTrap` keeps Tab inside it
-  (media and composer) without moving focus, since SuperChat focuses the
-  chosen item. Its stops include popups its controls open elsewhere (a
-  composer menu portaled to the body), through `aria-controls`. Escape goes
-  back (in every layout and on every screen, whenever the media view is open)
-  unless one of the panel's own layers is open: a visible dialog inside
-  it (the feed's viewer) or a popup one of its controls opened. The
-  library's overlays don't cancel Escape, so it checks for them instead;
-  widgets elsewhere on the page don't count.
-  `position: fixed` inside a transformed ancestor (a Motion sheet) won't cover
-  the screen; hosts that need that should render SuperChat outside it.
-- **Dark by scoping**, like MediaFeed's overlay: `data-theme="dark"`.
-- **Back sits over the clip's corner**, and the feed's details get `ps-14` to
-  clear it. The immersive viewer is off unless the host sets
-  `allowFullscreen`; the player's own full screen covers that need.
-- **One tree for both layouts.** The feed sits in the same place whether or
-  not the overlay is on, so a host that switches `layout` (by screen size, say)
-  keeps the feed and its selection. The player itself re-creates its `<video>`
-  for the other controls style; the feed restores the position.
+  page for the keyboard, so its height and top come from `useKeyboardInset()`'s
+  `--mieweb-visual-viewport-height` and `--mieweb-visual-viewport-offset-top`
+  (falling back to `100dvh` and `0`), with safe-area padding on every side
+  (`--mieweb-safe-area-*`). The insets are physical edges, hence the
+  `rtl-ignore` lines.
+- **The feed swipes sideways.** MediaFeed always runs in its `overlay` layout
+  with `orientation: 'horizontal'`, through the whole conversation's media in
+  order. Back sits over the clip's corner (the details get `ps-14` to clear
+  it); the feed's own full-screen viewer is off unless the host sets
+  `allowFullscreen`, since the view already fills the window.
+- **Where an item is in its message.** Under the media, the viewed item's
+  message's other attachments sit in a strip (`mediaLabels.inThisMessage`),
+  each a tap away, with "2 of 3" (`mediaLabels.itemOfMessage`): a gallery stays
+  a group while the feed goes on across messages. Download
+  (`mediaLabels.download`) links to the item's source.
+- **Escape goes back** unless one of its own layers is open: a visible dialog
+  inside it (the feed's viewer) or a popup one of its controls opened (a host
+  menu, portaled to the body), through `aria-controls`. The library's overlays
+  don't cancel Escape, so it checks for them; widgets elsewhere don't count.
 
-### Picture in picture (both layouts)
+### Picture in picture
 
 While a video from the media view is in picture in picture, the view stays
 mounted but `hidden` after Back, because the browser closes the window when its
-video leaves the page. The browser's own controls can float a clip too, so this
-applies to the stacked layout as well. `checkFloating` asks the browser on
+video leaves the page. `checkFloating` asks the browser on
 every PiP event and render, rather than trusting event order, so a removed
 message or conversation change lets the view go.
 

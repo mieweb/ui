@@ -6,6 +6,12 @@ export interface MediaFeedMedia {
   src: string;
   poster?: string;
   alt?: string;
+  /**
+   * Its size in pixels (or any width and height in proportion), when the host
+   * knows it, so a thread's tile keeps its space before the picture loads.
+   */
+  width?: number;
+  height?: number;
 }
 
 export interface MediaFeedAuthor {
@@ -42,6 +48,9 @@ export interface MediaFeedLabels {
   close: string;
   previous: string;
   next: string;
+  /** An image's zoom button in the overlay layout (a double tap zooms too). */
+  zoomIn: string;
+  zoomOut: string;
   play: string;
   pause: string;
   /** The player's own controls in the `overlay` layout. */
@@ -108,6 +117,14 @@ export interface MediaFeedProps<T> extends Omit<
    * or sideways.
    */
   layout?: 'stacked' | 'overlay';
+  /**
+   * Which way the feed moves between items. `vertical` (default) scrolls up
+   * and down, like a reel. `horizontal` swipes side to side (left and right
+   * arrows, mirrored in a right-to-left page), as a chat app's photo viewer
+   * does; its Previous/Next sit on the side edges, hidden on touch screens,
+   * and its position is announced but not shown, for the host to show its own.
+   */
+  orientation?: 'vertical' | 'horizontal';
   /**
    * Offer the full-screen viewer, an expand button on each item. Defaults to
    * `true` for `stacked` and `false` for `overlay`, where the feed already
