@@ -309,7 +309,9 @@ describe('SuperChat media view', () => {
     rerender(<SuperChat conversation={withPictures(6)} />);
     const cells = within(gallery()).getAllByRole('button');
     expect(cells).toHaveLength(4);
-    expect(cells[3]).toHaveAccessibleName('Open in media feed, Photo 4, 2 more');
+    expect(cells[3]).toHaveAccessibleName(
+      'Open in media feed, Photo 4, 2 more'
+    );
     expect(cells[3]).toHaveTextContent('+2');
 
     // A cell opens the media view at its own picture.
@@ -357,6 +359,154 @@ describe('SuperChat media view', () => {
     expect(links[1]).toHaveTextContent('XLSX');
     // Documents aren't media: no media view for them.
     expect(screen.queryByRole('button', { name: 'Media' })).toBeNull();
+  });
+
+  it("keeps a host's card out of the gallery, with its own controls", () => {
+    const withClipAndPhotos: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          media: [
+            videoConversation.thread[0].media![0],
+            ...conversation.thread[0].media!,
+          ],
+        },
+      ],
+    };
+    render(
+      <SuperChat
+        conversation={withClipAndPhotos}
+        renderMessageMedia={({ attachment }) =>
+          attachment.kind === 'video' ? (
+            <span>Host card {attachment.title}</span>
+          ) : null
+        }
+      />
+    );
+    expect(screen.getByText('Host card First clip')).toBeTruthy();
+    const gallery = document.querySelector<HTMLElement>(
+      '[data-slot="superchat-message-gallery"]'
+    )!;
+    // The two photos the host doesn't draw still share a gallery.
+    expect(within(gallery).getAllByRole('button')).toHaveLength(2);
+    expect(within(gallery).queryByText(/Host card/)).toBeNull();
+  });
+
+  it('plays audio where it is, with no trip to the media view', () => {
+    const { container } = render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              media: [
+                {
+                  id: 'note',
+                  kind: 'audio',
+                  src: '/note.m4a',
+                  title: 'Voice note',
+                },
+              ],
+            },
+          ],
+        }}
+      />
+    );
+    expect(container.querySelector('audio')?.hasAttribute('controls')).toBe(
+      true
+    );
+    expect(
+      screen.queryByRole('button', { name: /Play Voice note/ })
+    ).toBeNull();
+  });
+
+  it("says a picture couldn't load, and crops a long screenshot", () => {
+    const { container } = render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              media: [conversation.thread[0].media![0]],
+            },
+          ],
+        }}
+      />
+    );
+    const tile = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-message-media"]'
+    )!;
+    const img = tile.querySelector('img')!;
+    Object.defineProperty(img, 'naturalWidth', { value: 400 });
+    Object.defineProperty(img, 'naturalHeight', { value: 4000 });
+    fireEvent.load(img);
+    // 1:10 would be a sliver; the tile stops at 0.6.
+    expect(tile.style.aspectRatio).toBe('0.6');
+    fireEvent.error(tile.querySelector('img')!);
+    expect(tile).toHaveTextContent("Couldn't load");
+  });
+
+  it("dims a sending message's attachments and says how far it has got", () => {
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            { ...conversation.thread[0], status: 'pending', progress: 0.452 },
+          ],
+        }}
+      />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('Sending… 45%');
+    expect(
+      document.querySelector('[data-slot="superchat-message-attachment"]')
+    ).toHaveClass('opacity-60');
+  });
+
+  it('previews a last message with no text by what it carries, and markdown as plain text', () => {
+    render(
+      <SuperChatInbox
+        conversations={[
+          {
+            ...conversation,
+            thread: [{ ...conversation.thread[0], text: undefined }],
+          },
+          {
+            ...conversation,
+            id: 'c2',
+            title: 'Second',
+            thread: [
+              {
+                ...conversation.thread[0],
+                id: 'm2',
+                media: undefined,
+                text: 'Shipped **the fix** · *Plan · [TH-7: Login](/app/tickets/7)*',
+              },
+            ],
+          },
+        ]}
+      />
+    );
+    const list = screen.getByRole('list');
+    expect(list).toHaveTextContent('2 photos');
+    expect(list).toHaveTextContent('Shipped the fix · Plan · TH-7: Login');
+  });
+
+  it('goes back from the media view on Escape in every layout', async () => {
+    mockNativePlayback();
+    const user = userEvent.setup();
+    render(<SuperChat conversation={conversation} />);
+    await user.click(
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[0]
+    );
+    expect(
+      screen.getByRole('button', { name: 'Back to conversation' })
+    ).toBeTruthy();
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
   });
 
   it('leaves a text-only conversation on its existing thread surface', () => {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { MediaPlayer } from '../MediaPlayer';
-import { Play } from 'lucide-react';
+import { ImageOff, Play } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { SuperChatMediaAttachment } from './types';
 
@@ -43,22 +43,35 @@ function actionName(
 
 /**
  * A still of the attachment filling its box: the image, a video's poster, or
- * with no poster the video's first frame (nothing more of it loads). Reports
- * its width ÷ height once known.
+ * with no poster the video's first frame (nothing more of it loads; `#t=0.1`
+ * makes iPhones paint that frame instead of black). Reports its width ÷
+ * height once known. One that doesn't load says so instead of a black box.
  */
 function MediaStill({
   attachment,
   onAspect,
+  unavailableLabel,
 }: {
   attachment: SuperChatMediaAttachment;
   onAspect?: (aspect: number) => void;
+  /** Shown when the picture or clip can't be loaded. */
+  unavailableLabel: string;
 }) {
+  const [failed, setFailed] = React.useState(false);
   const report = (width: number, height: number) => {
     if (width && height) onAspect?.(width / height);
   };
   const still =
     attachment.kind === 'image' ? attachment.src : attachment.poster;
   const className = 'block size-full object-cover';
+  if (failed) {
+    return (
+      <span className="flex size-full flex-col items-center justify-center gap-1 bg-neutral-800 p-2 text-center text-xs text-neutral-300">
+        <ImageOff className="size-5" aria-hidden="true" />
+        {unavailableLabel}
+      </span>
+    );
+  }
   return still ? (
     <img
       src={still}
@@ -70,11 +83,16 @@ function MediaStill({
           event.currentTarget.naturalHeight
         )
       }
+      onError={() => setFailed(true)}
       className={className}
     />
   ) : (
     <video
-      src={attachment.src}
+      src={
+        attachment.src.includes('#')
+          ? attachment.src
+          : `${attachment.src}#t=0.1`
+      }
       muted
       playsInline
       preload="metadata"
@@ -82,10 +100,17 @@ function MediaStill({
       onLoadedMetadata={(event) =>
         report(event.currentTarget.videoWidth, event.currentTarget.videoHeight)
       }
+      onError={() => setFailed(true)}
       className={className}
     />
   );
 }
+
+/**
+ * The narrowest and widest shape a lone tile takes (width ÷ height): a long
+ * screenshot or a panorama is cropped to fit rather than shown as a sliver.
+ */
+const TILE_SHAPE = { min: 0.6, max: 1.9 };
 
 /** ▶ over a video's still. */
 function PlayBadge({ small = false }: { small?: boolean }) {
@@ -122,6 +147,7 @@ export function MessageGallery({
   openLabel,
   playLabel,
   moreLabel,
+  unavailableLabel,
 }: {
   entries: MessageMediaEntry[];
   /** The tile's width, a CSS length (`mediaMaxSize`). */
@@ -130,6 +156,8 @@ export function MessageGallery({
   playLabel: string;
   /** The hidden count's name on the last cell, e.g. "3 more". */
   moreLabel: (count: number) => string;
+  /** On a cell whose picture didn't load. */
+  unavailableLabel: string;
 }) {
   const shown = entries.slice(0, 4);
   const more = entries.length - shown.length;
@@ -159,7 +187,10 @@ export function MessageGallery({
               shown.length === 3 && index === 0 && 'row-span-2'
             )}
           >
-            <MediaStill attachment={attachment} />
+            <MediaStill
+              attachment={attachment}
+              unavailableLabel={unavailableLabel}
+            />
             {last ? (
               <span
                 aria-hidden="true"
@@ -185,6 +216,7 @@ export function MessageMedia({
   playLabel,
   errorLabel,
   retryLabel,
+  unavailableLabel,
   launchId,
   maxSize,
 }: {
@@ -198,6 +230,8 @@ export function MessageMedia({
   errorLabel?: string;
   /** Localized retry text; the player's default applies when omitted. */
   retryLabel?: string;
+  /** On a tile whose picture or clip didn't load. */
+  unavailableLabel: string;
   launchId: string;
 }) {
   const playable = attachment.kind !== 'image';
@@ -207,7 +241,10 @@ export function MessageMedia({
   if (onOpen && isVisualMedia(attachment)) {
     // A picture alone: the still in its own shape inside the box (a wide one
     // up to that wide, an upright one up to that tall), a tap to open it.
-    const shape = aspect ?? 16 / 9;
+    const shape = Math.min(
+      TILE_SHAPE.max,
+      Math.max(TILE_SHAPE.min, aspect ?? 16 / 9)
+    );
     return (
       <button
         type="button"
@@ -221,7 +258,11 @@ export function MessageMedia({
         }}
         className={cn(stillButton, 'max-w-full')}
       >
-        <MediaStill attachment={attachment} onAspect={setAspect} />
+        <MediaStill
+          attachment={attachment}
+          onAspect={setAspect}
+          unavailableLabel={unavailableLabel}
+        />
         {playable && <PlayBadge />}
       </button>
     );
@@ -258,7 +299,9 @@ export function MessageMedia({
             kind={attachment.kind}
             poster={attachment.poster}
             aria-label={attachment.alt ?? attachment.title ?? openLabel}
-            controls={!onOpen}
+            // Audio plays where it is, as a voice note does; a clip here
+            // (no media view to open) does too.
+            controls={attachment.kind === 'audio' || !onOpen}
             preload="metadata"
             labels={{ error: errorLabel, retry: retryLabel }}
             className="max-h-[inherit]"
@@ -276,7 +319,7 @@ export function MessageMedia({
       {attachment.caption && (
         <p className="px-1 text-sm">{attachment.caption}</p>
       )}
-      {onOpen && (
+      {onOpen && attachment.kind !== 'audio' && (
         <ButtonGroup>
           <Button
             data-media-launch-id={launchId}

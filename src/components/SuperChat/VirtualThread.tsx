@@ -23,6 +23,7 @@ import type {
   SuperChatMessage,
   SuperChatRef,
   SuperChatRenderMessageMedia,
+  SuperChatAttachmentLabels,
 } from './types';
 
 /** What a remounted thread needs to come back on the same rows. */
@@ -57,7 +58,7 @@ export interface VirtualThreadProps {
   ) => void;
   openMediaLabel?: string;
   playMediaLabel?: string;
-  moreMediaLabel?: (count: number) => string;
+  attachmentLabels?: SuperChatAttachmentLabels;
   /** Localized preview load-error/retry text, forwarded to each row. */
   mediaErrorLabel?: string;
   mediaRetryLabel?: string;
@@ -97,7 +98,7 @@ export function VirtualThread({
   onOpenMedia,
   openMediaLabel,
   playMediaLabel,
-  moreMediaLabel,
+  attachmentLabels,
   mediaErrorLabel,
   mediaRetryLabel,
   renderMessageMedia,
@@ -176,7 +177,7 @@ export function VirtualThread({
                   onOpenMedia={onOpenMedia}
                   openMediaLabel={openMediaLabel}
                   playMediaLabel={playMediaLabel}
-                  moreMediaLabel={moreMediaLabel}
+                  attachmentLabels={attachmentLabels}
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
                   renderMessageMedia={renderMessageMedia}
