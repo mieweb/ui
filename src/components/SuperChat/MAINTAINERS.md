@@ -115,16 +115,34 @@ has the bubble's corners; the built-in audio card and the documents list sit on 
 not the author's color. Editing touches only the text bubble.
 
 **Pictures group; documents list.** Two or more pictures in one message
-(images, GIFs, video stills: `isVisualMedia`) share one gallery tile
-(`MessageGallery`): two side by side, three as one large and two small, four or
-more in a 2×2 grid whose last cell names how many more (`mediaLabels.moreMedia`).
-Each cell opens the media view at its own picture, so the gallery is the
-library's even when the host has `renderMessageMedia`: that slot draws a lone
-attachment, and the cells use each attachment's `poster` (or the clip's first
-frame, or the image). A lone picture is a bare tile in its own shape.
-Documents are `message.files`, not media: one list tile (`MessageFiles`) after
-the media, a row per file with its type's icon (from the extension), name, type
-and size, opening in a new tab, and never in the media view.
+(images, GIFs, video stills: `isVisualMedia`) that the host doesn't draw share
+one gallery tile (`MessageGallery`): two side by side, three as one large and
+two small, four or more in a 2×2 grid whose last cell names how many more
+(`mediaLabels.moreMedia`). It stands where its first picture was. Each cell
+opens the media view at its own picture, using the attachment's `poster` (or
+the image, or the clip's first frame). An attachment `renderMessageMedia`
+draws is always its own tile, so a host's card keeps its own controls. A lone
+picture is a bare tile in its own shape, clamped to 0.6–1.9 (width ÷ height)
+and cropped beyond that; one that fails to load says so
+(`mediaLabels.mediaUnavailable`). Audio always plays in its tile. Documents are
+`message.files`, not media: one list tile (`MessageFiles`) after the media, a
+row per file with its type's icon (from the extension), name, type and size,
+opening in a new tab, and never in the media view.
+
+**Sending.** An awaited `onMessageSent` keeps the send button busy; if it
+rejects, the text and the files go back into the composer to try again. A
+host that shows the message while it uploads gives it `status: 'pending'` and
+`progress` (0–1): its tiles dim and "Sending… 45%" shows under them
+(`mediaLabels.sending`). The composer refuses a file over `maxFileSize`
+(25 MB by default), a type outside `acceptedFileTypes`, or an 11th file, and
+tells the host through `onComposerError`. `image` accepts the formats every
+browser shows (JPEG, PNG, GIF, WebP, AVIF), so a HEIC photo is refused, and an
+iPhone's picker converts one to JPEG; `document` adds Word, Excel, text and
+CSV files.
+
+**Previews.** The conversation list previews the last message as plain text
+(markdown stripped) or, with no text, by what it carries
+(`mediaLabels.attachmentsPreview`: "Photo", "2 photos", a file's name).
 
 ### Overlay media view (`mediaFeedProps.layout: 'overlay'`)
 
@@ -153,7 +171,8 @@ Opt-in; without it the media view is the stacked feed under a labelled Back.
   (media and composer) without moving focus, since SuperChat focuses the
   chosen item. Its stops include popups its controls open elsewhere (a
   composer menu portaled to the body), through `aria-controls`. Escape goes
-  back unless one of the panel's own layers is open: a visible dialog inside
+  back (in every layout and on every screen, whenever the media view is open)
+  unless one of the panel's own layers is open: a visible dialog inside
   it (the feed's viewer) or a popup one of its controls opened. The
   library's overlays don't cancel Escape, so it checks for them instead;
   widgets elsewhere on the page don't count.

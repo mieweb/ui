@@ -81,6 +81,10 @@ export interface SuperChatInboxProps {
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
+  /** See {@link SuperChatProps.maxFileSize}. */
+  maxFileSize?: SuperChatProps['maxFileSize'];
+  /** See {@link SuperChatProps.onComposerError}. */
+  onComposerError?: SuperChatProps['onComposerError'];
   /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
   order?: 'asc' | 'desc';
   /** Virtualize the message thread (windowed rendering) for long histories. */
@@ -172,6 +176,8 @@ export function SuperChatInbox({
   readOnly,
   composerProps,
   acceptedFileTypes,
+  maxFileSize,
+  onComposerError,
   order,
   virtualized,
   showSidebar = true,
@@ -289,6 +295,7 @@ export function SuperChatInbox({
           onConversationOpened={handleOpen}
           onNewConversation={onNewConversation}
           listFooter={listFooter}
+          mediaLabels={mediaLabels}
           className={cn(
             'w-full sm:w-(--superchat-sidebar-width)',
             mobileView === 'chat' && 'hidden sm:flex'
@@ -326,6 +333,8 @@ export function SuperChatInbox({
           readOnly={readOnly}
           composerProps={composerProps}
           acceptedFileTypes={acceptedFileTypes}
+          maxFileSize={maxFileSize}
+          onComposerError={onComposerError}
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}

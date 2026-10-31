@@ -27,6 +27,8 @@ import {
   type ChatComposerAgentOption,
   type ChatComposerProps,
   type ChatComposerSendMeta,
+  type ChatComposerError,
+  type ChatComposerHandle,
 } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
@@ -39,7 +41,7 @@ import {
   isInPictureInPicture,
   PIP_EVENTS,
 } from '../MediaPlayer/pictureInPicture';
-import { getConversationMediaItems } from './media';
+import { getConversationMediaItems, previewOfAttachments } from './media';
 import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
@@ -49,6 +51,7 @@ import {
   detectMentions,
   filesToComposerAttachments,
   acceptTokensFor,
+  DEFAULT_ATTACHMENT_LABELS,
 } from './parts';
 import { VirtualThread, type VirtualThreadLayout } from './VirtualThread';
 import type {
@@ -137,6 +140,18 @@ export interface SuperChatProps {
    */
   acceptedFileTypes?: AttachmentKind[];
   /**
+   * Largest file the composer takes, in bytes; a larger one is refused
+   * (reported through `onComposerError`).
+   * @default 26214400 (25 MB)
+   */
+  maxFileSize?: number;
+  /**
+   * Called when the composer refuses a file (too large, a type not accepted,
+   * over the attachment limit) or a send fails, so the host can say why.
+   * `message` is English; `context.reason` lets hosts word it themselves.
+   */
+  onComposerError?: (message: string, context?: ChatComposerError) => void;
+  /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
    *   classic messenger (auto-scrolls to the newest message).
@@ -184,9 +199,10 @@ export interface SuperChatProps {
   // --- callbacks (chat-component-compatible) ---
   /**
    * Fired when the local user sends a message. If the callback returns a
-   * promise it is awaited, and a rejected send restores the typed text into
-   * the composer (the declared `void` return keeps every previously valid
-   * callback assignable). `sendOption` is the id of the
+   * promise it is awaited, the send button shows it's sending meanwhile, and
+   * a rejected send puts the typed text and the attachments back in the
+   * composer to try again (the declared `void` return keeps every previously
+   * valid callback assignable). `sendOption` is the id of the
    * `composerProps.sendOptions` entry the user sent with, if any.
    */
   onMessageSent?: (
@@ -302,6 +318,8 @@ export function SuperChat({
   readOnly,
   composerProps,
   acceptedFileTypes,
+  maxFileSize = 25 * 1024 * 1024,
+  onComposerError,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -340,7 +358,8 @@ export function SuperChat({
     backToConversation: 'Back to conversation',
     openMedia: 'Open in media feed',
     playMedia: 'Play',
-    moreMedia: (count) => `${count} more`,
+    ...DEFAULT_ATTACHMENT_LABELS,
+    attachmentsPreview: previewOfAttachments,
     unknownAuthor: 'Unknown',
     ...mediaLabels,
   };
@@ -474,11 +493,12 @@ export function SuperChat({
     setManualPlaybackRequest(undefined);
     setView('thread');
   }, [setView]);
-  // While it covers the screen, Escape goes back unless another layer (the
-  // feed's viewer, a host menu) is open.
+  // While the media view is open, Escape goes back to the conversation
+  // unless another layer (the feed's viewer, a host menu) is open.
+  const mediaViewOpen = activeView === 'media';
   React.useEffect(() => {
     const panel = panelRef.current;
-    if (!covering || !panel) return;
+    if (!mediaViewOpen || !panel) return;
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       const target = event.target as Node | null;
@@ -488,7 +508,7 @@ export function SuperChat({
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [covering, handleBackToConversation, panelRef]);
+  }, [mediaViewOpen, handleBackToConversation, panelRef]);
 
   // A fresh host playback request supersedes a consumed inline Play launch, so
   // `mediaFeedProps.playbackRequest` keeps working while the media view is open.
@@ -886,7 +906,7 @@ export function SuperChat({
       onOpenMedia={handleOpenMedia}
       openMediaLabel={labels.openMedia}
       playMediaLabel={labels.playMedia}
-      moreMediaLabel={labels.moreMedia}
+      attachmentLabels={labels}
       mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
       scheduledLabel={scheduledLabel}
@@ -944,9 +964,12 @@ export function SuperChat({
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
+  const composerRef = React.useRef<ChatComposerHandle>(null);
+  const [sending, setSending] = React.useState(false);
   const handleComposerSend = React.useCallback(
     async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
       const epoch = draftEpochRef.current;
+      setSending(true);
       try {
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
@@ -967,13 +990,15 @@ export function SuperChat({
           })
         );
       } catch {
-        // Parity with the previous MessageComposer: restore the text when
-        // file conversion or the host callback fails (attachments are not
-        // restaged, matching the old behavior) — unless the user has typed
-        // a newer draft while this send was pending.
+        // Put the message back to try again, text and files, when file
+        // conversion or the host callback fails — the text unless the user
+        // has typed a newer draft while this send was pending.
         if (draftEpochRef.current === epoch) {
           setDraft(message.content);
         }
+        composerRef.current?.addFiles(message.attachments ?? []);
+      } finally {
+        setSending(false);
       }
     },
     [conversation, onMessageSent]
@@ -1188,7 +1213,7 @@ export function SuperChat({
               onOpenMedia={handleOpenMedia}
               openMediaLabel={labels.openMedia}
               playMediaLabel={labels.playMedia}
-              moreMediaLabel={labels.moreMedia}
+              attachmentLabels={labels}
               mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
               mediaRetryLabel={mediaFeedProps?.labels?.retry}
               scheduledLabel={scheduledLabel}
@@ -1261,6 +1286,9 @@ export function SuperChat({
       )}
 
       <ChatComposer
+        ref={composerRef}
+        isSending={sending}
+        onError={onComposerError}
         disabled={readOnly}
         placeholder={
           readOnly
@@ -1270,8 +1298,7 @@ export function SuperChat({
         mentionOptions={mentionOptions}
         allowAttachments={!readOnly && (allowAttachments ?? true)}
         acceptedFileTypes={composerAccept}
-        // Same cap MessageComposer applied by default.
-        maxFileSize={25 * 1024 * 1024}
+        maxFileSize={maxFileSize}
         maxLength={100000}
         inputLabel="Message"
         showAgentSelector={!!agents?.length}

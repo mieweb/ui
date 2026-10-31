@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -757,11 +758,82 @@ describe('SuperChat', () => {
     const fileInput = container.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
-    expect(fileInput.accept).toBe('image/*');
+    expect(fileInput.accept).toBe(
+      'image/jpeg,image/png,image/gif,image/webp,image/avif'
+    );
     // A disallowed type (audio) is ignored — no preview chip appears.
     const file = new File(['id3'], 'song.mp3', { type: 'audio/mpeg' });
     await user.upload(fileInput, file);
     expect(screen.queryByLabelText('Remove song.mp3')).toBeNull();
+  });
+
+  it('refuses a HEIC photo and a file over maxFileSize, and says why', async () => {
+    const onComposerError = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    // Past the picker's own filter, as a drop or a paste would be.
+    const user = userEvent.setup({ applyAccept: false });
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        acceptedFileTypes={['image', 'document']}
+        maxFileSize={1000}
+        onComposerError={onComposerError}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    expect(fileInput.accept).toContain('.docx');
+    await user.upload(fileInput, [
+      new File(['x'], 'IMG_0001.HEIC', { type: 'image/heic' }),
+      new File(['x'.repeat(2000)], 'big.png', { type: 'image/png' }),
+      new File(['x'], 'notes.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+    ]);
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('IMG_0001.HEIC'),
+      expect.objectContaining({ reason: 'file-type' })
+    );
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('big.png'),
+      expect.objectContaining({ reason: 'file-size' })
+    );
+    expect(screen.getByLabelText('Remove notes.docx')).toBeTruthy();
+  });
+
+  it('shows the send in progress, and a failed send puts the files back', async () => {
+    let fail: (error: Error) => void = () => {};
+    const onMessageSent = vi.fn(
+      () => new Promise<void>((_, reject) => (fail = reject))
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File(['png'], 'shot.png', { type: 'image/png' })
+    );
+    await user.type(screen.getByLabelText('Message'), 'See this');
+    await user.click(screen.getByRole('button', { name: 'Send message' }));
+    await waitFor(() => expect(onMessageSent).toHaveBeenCalled());
+    expect(
+      screen.getByRole('button', { name: 'Sending message…' })
+    ).toBeTruthy();
+    expect(screen.queryByLabelText('Remove shot.png')).toBeNull();
+    await act(async () => fail(new Error('offline')));
+    expect(await screen.findByLabelText('Remove shot.png')).toBeTruthy();
+    expect(screen.getByLabelText('Message')).toHaveValue('See this');
   });
 
   it('does not detect mentions for system participants', async () => {
