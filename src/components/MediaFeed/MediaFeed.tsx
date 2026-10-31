@@ -255,16 +255,19 @@ function MediaFeedInner<T>(
   const labels = { ...defaultLabels, ...labelOverrides };
   const overlay = layout === 'overlay';
   const horizontal = orientation === 'horizontal';
-  // Within the feed only, never moving the page around it. Sideways by the
-  // card's on-screen offset, which holds in a right-to-left page too.
+  // Within the feed only, never moving the page around it. Sideways, the
+  // browser places the card itself (which holds right to left): a relative
+  // scrollBy in a snapping row reads as "one step that way" and stops at the
+  // next card, not the chosen one.
   const scrollToCard = (card: HTMLElement) => {
     const viewport = viewportRef.current;
     if (!viewport) return;
     if (horizontal) {
-      const offset =
-        card.getBoundingClientRect().left -
-        viewport.getBoundingClientRect().left;
-      viewport.scrollBy?.({ left: offset, behavior: 'auto' });
+      card.scrollIntoView?.({
+        behavior: 'instant',
+        block: 'nearest',
+        inline: 'start',
+      });
     } else {
       viewport.scrollTo?.({ top: card.offsetTop, behavior: 'auto' });
     }
