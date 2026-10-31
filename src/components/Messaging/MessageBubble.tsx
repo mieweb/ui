@@ -7,6 +7,7 @@ import type {
   MessageAttachment,
   ReadReceipt,
 } from './types';
+import { formatFileSize } from '../../utils/fileSize';
 
 // ============================================================================
 // Message Status Icon Component
@@ -346,15 +347,6 @@ function AttachmentPreview({
       </div>
     </button>
   );
-}
-
-/**
- * Format file size in human-readable format.
- */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ============================================================================

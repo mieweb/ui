@@ -111,8 +111,20 @@ message's text is in the bubble and its attachments follow, each its own tile
 on the author's side (`superchat-message-attachment`, capped at the bubble's
 85%). A message that is only attachments has no bubble. The
 tile clips to the bubble's `rounded-2xl`, so every card, the host's included,
-has the bubble's corners; the built-in card sits on the neutral surface, not the
-author's color. Editing touches only the text bubble.
+has the bubble's corners; the built-in audio card and the documents list sit on the neutral surface,
+not the author's color. Editing touches only the text bubble.
+
+**Pictures group; documents list.** Two or more pictures in one message
+(images, GIFs, video stills: `isVisualMedia`) share one gallery tile
+(`MessageGallery`): two side by side, three as one large and two small, four or
+more in a 2×2 grid whose last cell names how many more (`mediaLabels.moreMedia`).
+Each cell opens the media view at its own picture, so the gallery is the
+library's even when the host has `renderMessageMedia`: that slot draws a lone
+attachment, and the cells use each attachment's `poster` (or the clip's first
+frame, or the image). A lone picture is a bare tile in its own shape.
+Documents are `message.files`, not media: one list tile (`MessageFiles`) after
+the media, a row per file with its type's icon (from the extension), name, type
+and size, opening in a new tab, and never in the media view.
 
 ### Overlay media view (`mediaFeedProps.layout: 'overlay'`)
 

@@ -138,6 +138,15 @@ export const miewebUISafelist = [
   'dark:bg-white/30',
   // SuperChat's built-in attachment card: the player takes its box's height.
   'max-h-[inherit]',
+  // SuperChat's attachment gallery (2, 3, 4+ cells) and documents list.
+  'aspect-[4/3]',
+  'grid-rows-2',
+  'row-span-2',
+  'size-11',
+  'divide-neutral-200',
+  'dark:divide-neutral-700',
+  'hover:bg-neutral-200/60',
+  'dark:hover:bg-neutral-700/60',
   // SuperChat's overlay media view: full screen on a phone, upright or
   // sideways, inside the safe areas and the visible viewport; Back over
   // the clip's corner.

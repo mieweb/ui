@@ -943,3 +943,147 @@ export const MediaConversationPhoneRTL: Story = {
   },
   render: () => <MediaConversationDemo layout="overlay" />,
 };
+
+/** A sample photo for the gallery story: a colour field with its caption. */
+function samplePhoto(hue: number, label: string, upright = false) {
+  const canvas = document.createElement('canvas');
+  canvas.width = upright ? 480 : 640;
+  canvas.height = upright ? 640 : 480;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
+  const fill = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  fill.addColorStop(0, `hsl(${hue} 70% 55%)`);
+  fill.addColorStop(1, `hsl(${(hue + 60) % 360} 70% 35%)`);
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.font = '600 40px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, canvas.width / 2, canvas.height / 2);
+  return canvas.toDataURL('image/png');
+}
+
+function AttachmentGroupsDemo() {
+  const [videoUrl, setVideoUrl] = React.useState<string>();
+  React.useEffect(() => {
+    let mounted = true;
+    void getSampleVideo().then((url) => mounted && setVideoUrl(url));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  const conversations = React.useMemo<SuperChatConversation[]>(() => {
+    const photo = (id: string, hue: number, upright = false) => ({
+      id,
+      kind: 'image' as const,
+      src: samplePhoto(hue, id, upright),
+      title: id,
+      alt: `Sample photo ${id}`,
+    });
+    return [
+      {
+        id: 'offsite',
+        title: 'Offsite',
+        participants: [
+          { id: 'me', kind: 'human', name: 'Maya Chen' },
+          { id: 'luis', kind: 'human', name: 'Luis Rivera' },
+        ],
+        thread: [
+          {
+            id: 'five',
+            participantId: 'luis',
+            time: '2026-10-03T09:00:00Z',
+            text: 'Photos from the offsite. Five of them, so the last cell says how many more.',
+            media: [10, 50, 130, 200, 280].map((hue, i) =>
+              photo(`Photo ${i + 1}`, hue, i === 1)
+            ),
+          },
+          {
+            id: 'two',
+            participantId: 'me',
+            time: '2026-10-03T09:02:00Z',
+            text: 'Two from my side.',
+            media: [photo('Left', 320), photo('Right', 170)],
+          },
+          {
+            id: 'three',
+            participantId: 'luis',
+            time: '2026-10-03T09:04:00Z',
+            text: 'A clip and two stills: one large, two small.',
+            media: [
+              {
+                id: 'walkthrough',
+                kind: 'video',
+                src: videoUrl ?? '',
+                title: 'Walkthrough',
+              },
+              photo('Stage', 30),
+              photo('Crowd', 230),
+            ],
+          },
+          {
+            id: 'one',
+            participantId: 'me',
+            time: '2026-10-03T09:05:00Z',
+            media: [photo('Group photo', 90, true)],
+          },
+          {
+            id: 'docs',
+            participantId: 'me',
+            time: '2026-10-03T09:06:00Z',
+            text: 'The agenda and the budget, for review before Friday.',
+            files: [
+              {
+                id: 'agenda',
+                name: 'Offsite agenda.pdf',
+                url: '#agenda',
+                size: 482_000,
+              },
+              {
+                id: 'budget',
+                name: 'Budget 2026.xlsx',
+                url: '#budget',
+                size: 58_300,
+              },
+              { id: 'notes', name: 'Notes.docx', url: '#notes' },
+            ],
+          },
+          {
+            id: 'archive',
+            participantId: 'luis',
+            time: '2026-10-03T09:07:00Z',
+            files: [
+              {
+                id: 'raw',
+                name: 'raw-photos.zip',
+                url: '#raw',
+                size: 1_380_000_000,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+  }, [videoUrl]);
+  return (
+    <SuperChatInbox
+      conversations={conversations}
+      currentParticipantId="me"
+      mediaFeedProps={{ layout: 'overlay' }}
+    />
+  );
+}
+
+export const AttachmentGroups: Story = {
+  name: 'Attachment groups',
+  decorators: [fullHeightChat],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A message's attachments follow its text, on the author's side, as in iMessage, WhatsApp or Telegram. Two or more pictures (images, GIFs, video stills) share one gallery tile: two side by side, three as one large and two small, four or more in a 2×2 grid whose last cell says how many more. A cell opens the media view at its own picture. A lone picture is a tile in its own shape. Documents (`message.files`) share one list tile, each row with its type's icon, name, type and size, opening in a new tab; they never join the media view.",
+      },
+    },
+  },
+  render: () => <AttachmentGroupsDemo />,
+};

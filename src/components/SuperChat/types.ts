@@ -102,6 +102,22 @@ export interface SuperChatMediaAttachment extends MediaFeedMedia {
   caption?: string;
 }
 
+/**
+ * A document attached to a message (a PDF, a spreadsheet, any file that isn't
+ * a picture or a clip). Drawn in the thread as a row in the message's files
+ * tile, opened at `url`; never part of the media view.
+ */
+export interface SuperChatFileAttachment {
+  /** Stable id, unique within the message. */
+  id: string;
+  /** File name as shown, extension included (its type is read from it). */
+  name: string;
+  /** Where it opens (a new tab). */
+  url: string;
+  /** Size in bytes, shown beside its type when known. */
+  size?: number;
+}
+
 /** A conversation media item retains the original message and author identity. */
 export interface SuperChatMediaItem {
   /** Collision-safe identity derived from conversation, message and attachment ids. */
@@ -154,6 +170,8 @@ export interface SuperChatMediaLabels {
   backToConversation: string;
   openMedia: string;
   playMedia: string;
+  /** The last gallery cell's name for the attachments it hides, e.g. "3 more". */
+  moreMedia: (count: number) => string;
   unknownAuthor: string;
 }
 
@@ -185,6 +203,8 @@ export interface SuperChatMessage {
   content?: AIMessageContent[];
   /** Explicit persisted image/video/audio/YouTube attachments for thread and feed views. */
   media?: SuperChatMediaAttachment[];
+  /** Documents attached to the message, shown after its media. */
+  files?: SuperChatFileAttachment[];
   /** Timestamp; the thread is append-only and ordered by `time`. */
   time: Date | string;
   /**

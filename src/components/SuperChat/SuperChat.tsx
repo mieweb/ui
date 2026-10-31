@@ -340,6 +340,7 @@ export function SuperChat({
     backToConversation: 'Back to conversation',
     openMedia: 'Open in media feed',
     playMedia: 'Play',
+    moreMedia: (count) => `${count} more`,
     unknownAuthor: 'Unknown',
     ...mediaLabels,
   };
@@ -885,6 +886,7 @@ export function SuperChat({
       onOpenMedia={handleOpenMedia}
       openMediaLabel={labels.openMedia}
       playMediaLabel={labels.playMedia}
+      moreMediaLabel={labels.moreMedia}
       mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
       scheduledLabel={scheduledLabel}
@@ -1186,6 +1188,7 @@ export function SuperChat({
               onOpenMedia={handleOpenMedia}
               openMediaLabel={labels.openMedia}
               playMediaLabel={labels.playMedia}
+              moreMediaLabel={labels.moreMedia}
               mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
               mediaRetryLabel={mediaFeedProps?.labels?.retry}
               scheduledLabel={scheduledLabel}
