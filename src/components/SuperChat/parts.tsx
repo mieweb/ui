@@ -1174,6 +1174,29 @@ export const MessageRow = React.memo(function MessageRow({
               isSelf ? 'flex-row-reverse' : 'flex-row'
             )}
           >
+            {/* Edit and Copy belong to the text, so they sit beside its bubble
+                on the outer side, by the avatar (first in the row, which runs
+                the author's way), revealed on hover or focus; on a long
+                message the ⋯ sticks to the bottom of the view. */}
+            {hasActions && (
+              <div
+                data-slot="superchat-message-actions-slot"
+                className="flex shrink-0 flex-col items-center justify-end gap-0.5 self-stretch"
+              >
+                <MessageOverflowMenu
+                  isSelf={isSelf}
+                  actions={actions}
+                  footerVisible={collapseToMenu ? false : footerVisible}
+                />
+                {!collapseToMenu && (
+                  <MessageActionsBar
+                    ref={actionsBarRef}
+                    actions={actions}
+                    isSelf={isSelf}
+                  />
+                )}
+              </div>
+            )}
             <ChatBubble
               ref={bubbleRef}
               data-slot="superchat-bubble"
@@ -1350,29 +1373,6 @@ export const MessageRow = React.memo(function MessageRow({
                 </>
               )}
             </ChatBubble>
-            {/* Edit and Copy belong to the text, so they sit beside its bubble
-                (on the inner side, toward the thread), revealed on hover or
-                focus; on a long message the ⋯ sticks to the bottom of the
-                view. */}
-            {hasActions && (
-              <div
-                data-slot="superchat-message-actions-slot"
-                className="flex shrink-0 flex-col items-center justify-end gap-0.5 self-stretch"
-              >
-                <MessageOverflowMenu
-                  isSelf={isSelf}
-                  actions={actions}
-                  footerVisible={collapseToMenu ? false : footerVisible}
-                />
-                {!collapseToMenu && (
-                  <MessageActionsBar
-                    ref={actionsBarRef}
-                    actions={actions}
-                    isSelf={isSelf}
-                  />
-                )}
-              </div>
-            )}
           </div>
         )}
 
