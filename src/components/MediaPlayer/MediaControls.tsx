@@ -84,6 +84,9 @@ export interface MediaControlsProps extends React.HTMLAttributes<HTMLDivElement>
 
 const defaultPlaybackRates = [1, 1.5, 2] as const;
 
+/** Controls a small player (under 20rem wide) leaves out: speed and picture in picture. */
+const SMALL_PLAYER_HIDDEN = '@max-xs:hidden';
+
 const formatMs = (ms: number) => formatTime(ms / 1000);
 
 /** Whether `video` is in picture in picture, following every change. */
@@ -288,7 +291,8 @@ export const MediaControls = React.forwardRef<
     label: string,
     onClick: () => void,
     icon: React.ReactElement,
-    pressed?: boolean
+    pressed?: boolean,
+    className?: string
   ) => (
     <Button
       type="button"
@@ -298,7 +302,7 @@ export const MediaControls = React.forwardRef<
       aria-pressed={pressed}
       title={label}
       onClick={onClick}
-      className={cn(overlayButtonClass, 'shrink-0 bg-transparent')}
+      className={cn(overlayButtonClass, 'shrink-0 bg-transparent', className)}
     >
       {icon}
     </Button>
@@ -336,7 +340,11 @@ export const MediaControls = React.forwardRef<
       <div
         data-slot="media-controls-bar"
         dir="ltr"
-        className="pointer-events-auto relative flex flex-wrap items-center gap-x-1 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-1 pt-6 pb-1 text-white sm:px-2"
+        // A small player (a card in a chat, under 20rem wide) keeps play,
+        // time, seek, mute and full screen on two short rows and leaves speed
+        // and picture in picture to the larger view, as in-chat players do;
+        // its gradient starts lower so the picture stays visible.
+        className="pointer-events-auto relative flex flex-wrap items-center gap-x-1 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-1 pt-6 pb-1 text-white sm:px-2 @max-xs:pt-2"
       >
         {barButton(
           playing ? labels.pause : labels.play,
@@ -385,7 +393,9 @@ export const MediaControls = React.forwardRef<
             cycleSpeed,
             <span className="text-xs font-semibold tabular-nums">
               {labels.rate(rate)}
-            </span>
+            </span>,
+            undefined,
+            SMALL_PLAYER_HIDDEN
           )}
         {captions.tracks.length > 0 &&
           barButton(
@@ -410,7 +420,9 @@ export const MediaControls = React.forwardRef<
           barButton(
             inPip ? labels.exitPictureInPicture : labels.pictureInPicture,
             togglePictureInPicture,
-            <PictureInPicture2 className="h-5 w-5" aria-hidden="true" />
+            <PictureInPicture2 className="h-5 w-5" aria-hidden="true" />,
+            undefined,
+            SMALL_PLAYER_HIDDEN
           )}
         {canFullscreen &&
           barButton(

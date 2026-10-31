@@ -98,6 +98,19 @@ describe('MediaPlayer overlay controls', () => {
     expect(seek).toHaveAttribute('aria-valuetext', '1:23');
   });
 
+  it('leaves speed to a larger player when it is small, keeping play and mute', () => {
+    renderOverlay();
+    // Under 20rem wide (a card in a chat): a container query hides it.
+    expect(
+      screen.getByRole('button', { name: /^Playback speed/ }).className
+    ).toContain('@max-xs:hidden');
+    for (const name of ['Play', 'Mute']) {
+      expect(screen.getByRole('button', { name }).className).not.toContain(
+        '@max-xs:hidden'
+      );
+    }
+  });
+
   it('mutes and unmutes', () => {
     const { video } = renderOverlay();
     fireEvent.click(screen.getByRole('button', { name: 'Mute' }));
