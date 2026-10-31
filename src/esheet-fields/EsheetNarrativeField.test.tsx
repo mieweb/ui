@@ -12,6 +12,13 @@ import { renderWithTheme } from '../test/test-utils';
 import { EsheetNarrativeField } from './EsheetNarrativeField';
 import { getNarrativeFindings } from './narrativeFindings';
 
+// ProseMirror resists jsdom simulation; field logic runs on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../test/textAreaRichKerebronStub')
+);
+
 const finding = {
   id: 'no-fever',
   label: 'No fever',

@@ -164,12 +164,12 @@ A guided rich text document backed by one **eSheet** response store: letters, su
 ### Don't use it when
 
 - You are documenting a clinical visit with coded capture — use [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs).
-- You only need one free-form rich text input — use [TextAreaRich](?path=/docs/editors-textarearich--docs) directly.
+- You only need one free-form rich text input — use [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) directly.
 - You are rendering an arbitrary native \`FormDefinition\` (coded fields, matrices, signatures) rather than a guided prose document — use [EsheetRenderer](?path=/docs/composite-forms-esheet-renderer--docs) directly.
 
 ### Example
 
-Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (the shared entry re-exports the builder).
+Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (the shared entry re-exports the builder). Narrative sections ride the Kerebron \`TextAreaRich\` surface, so the Kerebron peers documented at \`@mieweb/ui/kerebron\` are also required: load \`@mieweb/ui/kerebron.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\`.
 
 \`\`\`tsx
 import { RichTextEsheet } from '@mieweb/ui/esheet';
@@ -222,8 +222,8 @@ import { RichTextEsheet } from '@mieweb/ui/esheet';
         },
         {
           type: 'uses',
-          target: 'editors-textarearich',
-          why: 'Each narrative section is a TextAreaRich with focus-docked finding and party macros.',
+          target: 'editors-textarearich-kerebron',
+          why: 'Each narrative section is a Kerebron TextAreaRich with focus-docked finding and party macros.',
         },
       ],
     },

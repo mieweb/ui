@@ -330,6 +330,7 @@
     "@kerebron/editor": ">=0.8.12",
     "@kerebron/editor-kits": ">=0.8.12",
     "@kerebron/extension-basic-editor": ">=0.8.12",
+    "@kerebron/extension-menu": ">=0.8.12",
     "@kerebron/extension-yjs": ">=0.8.12",
     "@kerebron/wasm": ">=0.8.12",
     "@mieweb/q": "1.0.0",
@@ -388,19 +389,7 @@
     "motion": {
       "optional": true
     },
-    "@kerebron/editor": {
-      "optional": true
-    },
-    "@kerebron/editor-kits": {
-      "optional": true
-    },
-    "@kerebron/extension-basic-editor": {
-      "optional": true
-    },
     "@kerebron/extension-yjs": {
-      "optional": true
-    },
-    "@kerebron/wasm": {
       "optional": true
     },
     "y-protocols": {
@@ -496,6 +485,7 @@
     "@kerebron/editor": "^0.8.12",
     "@kerebron/editor-kits": "^0.8.12",
     "@kerebron/extension-basic-editor": "^0.8.12",
+    "@kerebron/extension-menu": "^0.8.12",
     "@kerebron/extension-yjs": "^0.8.12",
     "@kerebron/wasm": "^0.8.12",
     "@mieweb/datavis": "link:./packages/datavis",

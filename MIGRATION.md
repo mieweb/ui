@@ -72,13 +72,35 @@ the same `js-yaml: ">=4.3.2"` override/resolution shown above for
 
 ## Textarea is rich text underneath (0.12.0)
 
-**`Textarea` now renders `TextAreaRich`** (hidden toolbar, markdown block
-shortcuts, Notion-style block gutter menu) while keeping its plain-text
-contract: `value`, `defaultValue` and `onChange`'s `event.target.value` are
-still plain strings, `name` still posts plain text through a hidden mirror
-`<textarea>`, and `ref.current.value` / `ref.current.focus()` keep working.
-Formatting is visible while composing but flattened to lines when reported —
-hosts that persist the value store the same plain text as before.
+**`Textarea` now renders `TextAreaRich`** — the Kerebron (ProseMirror)
+surface: hidden toolbar, markdown block shortcuts, Notion-style block gutter
+menu — while keeping its plain-text contract: `value`, `defaultValue` and
+`onChange`'s `event.target.value` are still plain strings, `name` still posts
+plain text through a hidden mirror `<textarea>`, and `ref.current.value` /
+`ref.current.focus()` keep working. Formatting is visible while composing but
+flattened to lines when reported — hosts that persist the value store the
+same plain text as before.
+
+**New install requirements (0.12.0).** Because the main bundle's `Textarea`
+now rides the Kerebron engine, the `@kerebron/*` packages are **required
+peers** (only the Yjs collaboration peers — `@kerebron/extension-yjs`,
+`yjs`, `y-protocols` — remain optional):
+
+```sh
+npm install @kerebron/editor @kerebron/editor-kits \
+  @kerebron/extension-basic-editor @kerebron/extension-menu @kerebron/wasm
+```
+
+```ts
+import '@mieweb/ui/kerebron.css'; // editor styles — alongside styles.css
+```
+
+The editor loads tree-sitter WASM grammars on demand from `/kerebron-wasm`;
+serve `@kerebron/wasm`'s `assets/` directory at that path (or pass your own
+`assetLoad`) if you render Markdown-valued editors (`RichEditor`,
+`CodeEditor`). Hosts that don't want any of this per field can opt out with
+`<Textarea richText={false}>` or `TextAreaPlain` — but the peers must be
+installable for the package to resolve.
 
 Related renames (also 0.12.0): **`RichTextArea` → `TextAreaRich`**
 (deprecated aliases `RichTextArea` / `RichTextAreaProps` still exported), and
@@ -104,9 +126,10 @@ the previous native implementation is now **`TextAreaPlain`**
 - **Native validation, autofill and IME/browser integrations** tied to a
   visible `<textarea>` element no longer apply.
 - **DOM shape changed.** There is no visible `<textarea>`; the surface is a
-  `contenteditable` region inside `[data-slot="rich-text-editor"]`, plus a
-  hidden mirror `[data-slot="textarea-mirror"]` carrying `name`/`value`. CSS
-  selectors like `textarea { … }` no longer match — target the existing
+  ProseMirror `contenteditable` region (`role="textbox"`, class `kb-editor`)
+  inside the editor chrome, plus a hidden mirror
+  `[data-slot="textarea-mirror"]` carrying `name`/`value`. CSS selectors like
+  `textarea { … }` no longer match — target the existing
   `[data-slot="textarea-*"]` hooks instead. Tests using
   `getByRole('textbox')` keep working.
 - **Controlled transforms reset formatting.** Echoing `event.target.value`
@@ -117,7 +140,9 @@ the previous native implementation is now **`TextAreaPlain`**
   `event.target.value` reads plain text), and external
   `<label htmlFor={id}>` pairs (bridged via `aria-labelledby` plus
   click-to-focus). `\r\n` in values is normalized to `\n`, and pasted or
-  dropped rich content is flattened to plain text before it enters the field.
+  dropped rich content is filtered through the editor's ProseMirror schema —
+  whatever formatting survives is display-only; the reported value is still
+  plain text.
 
 ## Chat composer
 

@@ -16,8 +16,20 @@ import {
   ExtensionMediaUpload,
   type MediaUploadOptions,
 } from '@kerebron/extension-basic-editor/ExtensionMediaUpload';
+import {
+  ExtensionCustomMenu,
+  type MenuElement,
+} from '@kerebron/extension-menu';
 
 export type { MediaUploadOptions };
+export type { MenuElement };
+
+/**
+ * Reshape the toolbar menu before it renders: receives the stock menu's
+ * item groups and returns the groups to render. Append custom
+ * {@link MenuElement}s (e.g. a Macros toggle) or drop stock groups.
+ */
+export type ModifyMenu = (menus: MenuElement[][]) => MenuElement[][];
 
 export interface CollabConfig {
   /** Room id — one shared document per room (e.g. a post id). */
@@ -95,19 +107,23 @@ const unsafeExtensions = ['autocomplete', 'hover'] as const;
  *
  * `AdvancedEditorKit` constructs `ExtensionMediaUpload` with no options, and an
  * extension's options are fixed at construction — so the only way to configure
- * it is to drop that instance and append one of our own.
+ * it is to drop that instance and append one of our own. `modifyMenu` works
+ * the same way: the stock `ExtensionCustomMenu` is constructed with no config,
+ * so customizing the toolbar means replacing it with a configured instance.
  */
 class SafeAdvancedEditorKit implements EditorKit {
   name = 'advanced-editor';
   constructor(
     private readonly forCollab: boolean,
-    private readonly mediaUpload?: MediaUploadOptions
+    private readonly mediaUpload?: MediaUploadOptions,
+    private readonly modifyMenu?: ModifyMenu
   ) {}
 
   getExtensions() {
     const dropped: string[] = [...unsafeExtensions];
     if (this.forCollab) dropped.push('history');
     if (this.mediaUpload) dropped.push('mediaUpload');
+    if (this.modifyMenu) dropped.push('customMenu');
 
     const extensions = new AdvancedEditorKit()
       .getExtensions()
@@ -116,6 +132,9 @@ class SafeAdvancedEditorKit implements EditorKit {
           !('name' in extension && dropped.includes(extension.name))
       );
 
+    if (this.modifyMenu) {
+      extensions.push(new ExtensionCustomMenu({ modifyMenu: this.modifyMenu }));
+    }
     if (this.mediaUpload) {
       extensions.push(new ExtensionMediaUpload(this.mediaUpload));
     }
@@ -145,11 +164,12 @@ class SafeAdvancedEditorKit implements EditorKit {
  */
 export async function createEditorKits(
   config?: CollabConfig,
-  mediaUpload?: MediaUploadOptions
+  mediaUpload?: MediaUploadOptions,
+  modifyMenu?: ModifyMenu
 ): Promise<EditorKits> {
   if (!config) {
     return {
-      kits: [new SafeAdvancedEditorKit(false, mediaUpload)],
+      kits: [new SafeAdvancedEditorKit(false, mediaUpload, modifyMenu)],
       collaborative: false,
     };
   }
@@ -159,7 +179,7 @@ export async function createEditorKits(
     const url = config.wsUrl ?? defaultWsUrl();
     return {
       kits: [
-        new SafeAdvancedEditorKit(true, mediaUpload),
+        new SafeAdvancedEditorKit(true, mediaUpload, modifyMenu),
         new HuddleYjsKit(
           url,
           config.params ?? {},
@@ -178,7 +198,7 @@ export async function createEditorKits(
     // Degrading to a local editor must not also drop `mediaUpload`: without it
     // the stock extension comes back and pasted files are embedded as base64.
     return {
-      kits: [new SafeAdvancedEditorKit(false, mediaUpload)],
+      kits: [new SafeAdvancedEditorKit(false, mediaUpload, modifyMenu)],
       collaborative: false,
     };
   }

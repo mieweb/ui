@@ -81,6 +81,20 @@ const { extensionMediaUpload } = vi.hoisted(() => ({
 vi.mock('@kerebron/extension-basic-editor/ExtensionMediaUpload', () => ({
   ExtensionMediaUpload: extensionMediaUpload,
 }));
+// Imported statically by editorKits.ts for `modifyMenu` support.
+const { extensionCustomMenu } = vi.hoisted(() => ({
+  extensionCustomMenu: vi.fn(function (
+    this: Record<string, unknown>,
+    config: unknown
+  ) {
+    this.name = 'customMenu';
+    this.config = config;
+  }),
+}));
+vi.mock('@kerebron/extension-menu', () => ({
+  ExtensionCustomMenu: extensionCustomMenu,
+  MenuItem: vi.fn(),
+}));
 vi.mock('@kerebron/wasm/web', () => ({
   createAssetLoad: vi.fn(() => vi.fn()),
 }));
@@ -665,6 +679,34 @@ describe('RichEditor', () => {
     expect(
       (coreEditorCreate.mock.calls[0][0] as { readOnly?: boolean }).readOnly
     ).toBe(true);
+    const editable = setProps.mock.calls
+      .map(([props]) => (props as { editable?: () => boolean }).editable)
+      .filter(Boolean)
+      .pop();
+    expect(editable?.()).toBe(false);
+  });
+
+  it('readOnly announces aria-readonly on the textbox surface, not the host', async () => {
+    const { container } = renderWithTheme(
+      <RichEditor readOnly id="note-body" aria-label="Note body" />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    // `aria-readonly` is only valid alongside a role that supports it; the
+    // host div is roleless, so it belongs on the textbox surface instead.
+    expect(container.querySelector('#note-body')).not.toHaveAttribute(
+      'aria-readonly'
+    );
+    const attributes = setProps.mock.calls
+      .map(
+        ([props]) =>
+          (props as { attributes?: Record<string, string> }).attributes
+      )
+      .filter(Boolean)
+      .pop();
+    expect(attributes).toMatchObject({
+      role: 'textbox',
+      'aria-readonly': 'true',
+    });
     const editable = setProps.mock.calls
       .map(([props]) => (props as { editable?: () => boolean }).editable)
       .filter(Boolean)

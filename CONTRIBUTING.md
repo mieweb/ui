@@ -424,9 +424,15 @@ If a submodule-backed component fails to resolve, run
 
 ## Optional peer dependencies
 
-`react` / `react-dom` are required peers. Everything else heavy is **optional**:
+`react` / `react-dom` are required peers. Since 0.12 the `@kerebron/*` runtime
+packages (`editor`, `editor-kits`, `extension-basic-editor`, `extension-menu`,
+`wasm`) are required too: the main-barrel `Textarea` rides the Kerebron engine,
+and bundling it instead would duplicate `prosemirror-state` in consumer apps
+(ProseMirror breaks when two copies meet). Only the collab stack
+(`@kerebron/extension-yjs`, `yjs`, `y-protocols`) stays optional. Everything
+else heavy is **optional**:
 `datavis-ace`, `@mieweb/datavis`, `@esheet/core`, `@esheet/fields`, `@esheet/builder`, `@esheet/renderer`,
-`@kerebron/*`, `@mieweb/q`, `wavesurfer.js`, `@xyflow/react`, `elkjs`. Components that need them must live behind a
+`@mieweb/q`, `wavesurfer.js`, `@xyflow/react`, `elkjs`. Components that need optional peers must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
 

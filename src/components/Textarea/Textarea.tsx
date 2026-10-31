@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { RequiredMark } from '../Input';
-import { TextAreaRich } from '../TextAreaRich';
+import { TextAreaRichKerebron } from '../TextAreaRich/TextAreaRichKerebron';
 import { TextAreaPlain } from '../TextAreaPlain';
 import type { TextAreaPlainProps } from '../TextAreaPlain';
 
@@ -288,25 +288,40 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
     const hiddenRef = React.useRef<HTMLTextAreaElement>(null);
     const editorWrapperRef = React.useRef<HTMLDivElement>(null);
 
-    // Rejected-edit resync. When a controlled parent refuses an edit, the
-    // committed value never changes — the optimistic state above is reverted
-    // during the same render — so the editor's [value]-gated sync never
-    // fires and its DOM would keep the rejected text. Compare *plain* text
-    // (not HTML) so accepted edits keep the user's rich formatting.
-    React.useEffect(() => {
-      const editable =
-        editorWrapperRef.current?.querySelector<HTMLElement>(
-          '[role="textbox"]'
-        );
-      if (editable && htmlToPlain(editable.innerHTML) !== state.plain) {
-        editable.innerHTML = state.html;
-      }
-    });
+    // Rejected edits need no DOM poking here: the Kerebron surface is
+    // strictly controlled (it converges to `value` on every render — see
+    // RichEditor's `strictValue`), so when a controlled parent refuses an
+    // edit and the optimistic state above is reverted during the same
+    // render, the editor reloads the committed HTML transaction-safely.
 
+    // The ProseMirror surface mounts asynchronously, so a mount-time
+    // `ref.current.focus()` (the autoFocus-era idiom) can run before
+    // `[role="textbox"]` exists. The request is retained and honored when
+    // the editable appears — unless focus has moved on to another control
+    // in the meantime, which must not have its focus stolen.
+    const pendingFocusRef = React.useRef<MutationObserver | null>(null);
+    React.useEffect(() => () => pendingFocusRef.current?.disconnect(), []);
     const focusEditor = React.useCallback(() => {
-      editorWrapperRef.current
-        ?.querySelector<HTMLElement>('[role="textbox"]')
-        ?.focus();
+      const wrapper = editorWrapperRef.current;
+      if (!wrapper) return;
+      const editable = wrapper.querySelector<HTMLElement>('[role="textbox"]');
+      if (editable) {
+        editable.focus();
+        return;
+      }
+      pendingFocusRef.current?.disconnect();
+      const observer = new MutationObserver(() => {
+        const target = wrapper.querySelector<HTMLElement>('[role="textbox"]');
+        if (!target) return;
+        observer.disconnect();
+        pendingFocusRef.current = null;
+        const active = document.activeElement;
+        if (!active || active === document.body || wrapper.contains(active)) {
+          target.focus();
+        }
+      });
+      observer.observe(wrapper, { childList: true, subtree: true });
+      pendingFocusRef.current = observer;
     }, []);
 
     // The forwarded ref is the hidden mirror <textarea> — `ref.current.value`
@@ -431,14 +446,37 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
 
     const characterCount = state.plain.length;
 
-    // The editable's own metrics (RichTextEditor pins `text-base` and a
-    // one-row min-height): `size` restyles the font, `rows` restores the
-    // size-aware growth floor a native textarea got for free.
+    // The editable's own metrics: `size` restyles the font, `rows` restores
+    // the size-aware growth floor a native textarea got for free. Text
+    // utilities cannot size the editable — unlayered package CSS
+    // (kerebron.css's `[data-slot='textarea-rich'] .kb-editor` rule and
+    // Kerebron's own base.css) outranks them on both font-size and
+    // line-height — so the sm/lg metrics ride CSS variables that those
+    // rules read. The defaults (16px/24px) are the md pair, keeping
+    // `lineHeightPx` and the 40px rest-height match with Input honest.
     const lineHeightPx = size === 'sm' ? 20 : size === 'lg' ? 28 : 24;
-    const editorStyle = rows
-      ? // 7px block padding each side, matching the editable's py-[7px].
-        { minHeight: `${rows * lineHeightPx + 14}px` }
-      : undefined;
+    const sizeVars =
+      size === 'sm'
+        ? {
+            '--textarea-rich-font-size': '0.875rem',
+            '--textarea-rich-line-height': '1.25rem',
+          }
+        : size === 'lg'
+          ? {
+              '--textarea-rich-font-size': '1.125rem',
+              '--textarea-rich-line-height': '1.75rem',
+            }
+          : null;
+    const editorStyle =
+      rows || sizeVars
+        ? ({
+            ...(rows
+              ? // 7px block padding each side, matching the editable's py-[7px].
+                { minHeight: `${rows * lineHeightPx + 14}px` }
+              : null),
+            ...sizeVars,
+          } as React.CSSProperties)
+        : undefined;
 
     return (
       <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
@@ -489,13 +527,17 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
               onKeyUp(retargetEvent(event) as unknown as MirrorKeyboardEvent))
           }
         >
-          <TextAreaRich
+          <TextAreaRichKerebron
             value={state.html}
             onChange={handleHtmlChange}
             placeholder={placeholder}
             disabled={disabled}
             readOnly={readOnly}
             id={id}
+            // Paste flattening: honored by the legacy engine (which the unit
+            // tests stub in — see src/test/textAreaRichKerebronStub); the
+            // Kerebron engine instead filters pastes through its ProseMirror
+            // schema, so markup never reaches the live document raw.
             sanitizeHtml={sanitizePastedHtml}
             aria-label={ariaLabel ?? label}
             aria-labelledby={ariaLabelledBy ?? externalLabelId}
@@ -505,9 +547,9 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
             editorClassName={cn(
               // A native textarea renders repeated spaces and tabs
               // faithfully; normal HTML layout would collapse them.
-              'whitespace-pre-wrap',
-              size === 'sm' && 'text-sm',
-              size === 'lg' && 'text-lg'
+              // (Font metrics ride editorStyle's CSS variables — text-sm/
+              // text-lg utilities lose to unlayered package CSS here.)
+              'whitespace-pre-wrap'
             )}
             editorStyle={editorStyle}
             className={cn(
