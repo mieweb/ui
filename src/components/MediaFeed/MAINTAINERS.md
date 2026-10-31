@@ -51,6 +51,17 @@ change it for every consumer: its visual baselines are the regression check.
   must read over any frame. The library's own text over the scrim (author,
   title, caption) is white on purpose; host content (`renderActions`) gets
   its colours from the tokens, so it needs no overrides.
+- **Two orientations.** `vertical` (default) scrolls up and down like a reel;
+  `horizontal` swipes side to side like a chat app's photo viewer (SuperChat's
+  media view uses it). Sideways, the left and right arrows move (mirrored when
+  the nearest `dir` is `rtl`), a card scrolls into place by its on-screen
+  offset (which holds right to left), Previous/Next sit on the side edges and
+  hide on touch screens, and the position is announced (`sr-only`) for the host
+  to show its own.
+- **Images zoom in the overlay.** A double tap (or the zoom button) widens the
+  image to 250% inside its own scrolling stage, toward where it was tapped;
+  that stage is `overscroll-contain`, so panning to an edge doesn't swipe the
+  feed on, and leaving the item zooms back out.
 - **The viewer is opt-in in the overlay.** `allowFullscreen` defaults to
   `layout !== 'overlay'`: the overlay already fills its space and the player
   has its own full screen. Opening the viewer brings a floating clip back

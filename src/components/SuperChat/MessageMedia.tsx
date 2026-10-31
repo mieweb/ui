@@ -47,15 +47,18 @@ function actionName(
  * makes iPhones paint that frame instead of black). Reports its width ÷
  * height once known. One that doesn't load says so instead of a black box.
  */
-function MediaStill({
+export function MediaStill({
   attachment,
   onAspect,
   unavailableLabel,
+  decorative = false,
 }: {
   attachment: SuperChatMediaAttachment;
   onAspect?: (aspect: number) => void;
   /** Shown when the picture or clip can't be loaded. */
   unavailableLabel: string;
+  /** Inside a control that names it already: no alt text of its own. */
+  decorative?: boolean;
 }) {
   const [failed, setFailed] = React.useState(false);
   const report = (width: number, height: number) => {
@@ -75,7 +78,7 @@ function MediaStill({
   return still ? (
     <img
       src={still}
-      alt={attachment.alt ?? ''}
+      alt={decorative ? '' : (attachment.alt ?? '')}
       loading="lazy"
       onLoad={(event) =>
         report(
@@ -104,6 +107,27 @@ function MediaStill({
       className={className}
     />
   );
+}
+
+/**
+ * Shapes (width ÷ height) already seen, by still: a tile that mounts again (a
+ * virtualized row scrolled back into view) starts at its shape, not 16:9.
+ */
+const knownShapes = new Map<string, number>();
+
+/** The attachment's shape, as far as it's known before its still loads. */
+function shapeOf(attachment: SuperChatMediaAttachment): number | undefined {
+  if (attachment.width && attachment.height) {
+    return attachment.width / attachment.height;
+  }
+  return knownShapes.get(stillOf(attachment));
+}
+
+/** What a tile shows of the attachment: the image, else its poster or clip. */
+function stillOf(attachment: SuperChatMediaAttachment): string {
+  return attachment.kind === 'image'
+    ? attachment.src
+    : (attachment.poster ?? attachment.src);
 }
 
 /**
@@ -236,8 +260,12 @@ export function MessageMedia({
 }) {
   const playable = attachment.kind !== 'image';
   const actionLabel = playable ? playLabel : openLabel;
-  // Width ÷ height, once the still says.
-  const [aspect, setAspect] = React.useState<number>();
+  // Width ÷ height: the host's size or one seen before, then the still's own.
+  const [aspect, setAspect] = React.useState(() => shapeOf(attachment));
+  const learnShape = (shape: number) => {
+    knownShapes.set(stillOf(attachment), shape);
+    setAspect(shape);
+  };
   if (onOpen && isVisualMedia(attachment)) {
     // A picture alone: the still in its own shape inside the box (a wide one
     // up to that wide, an upright one up to that tall), a tap to open it.
@@ -260,7 +288,7 @@ export function MessageMedia({
       >
         <MediaStill
           attachment={attachment}
-          onAspect={setAspect}
+          onAspect={learnShape}
           unavailableLabel={unavailableLabel}
         />
         {playable && <PlayBadge />}

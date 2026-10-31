@@ -11,12 +11,12 @@
  */
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download, Reply } from 'lucide-react';
 import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useMediaQuery } from '../../hooks/useMediaQuery';
 import {
   useStickToBottom,
   useStreamEndedBelowFold,
@@ -32,7 +32,6 @@ import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
 import { Button } from '../Button';
-import { ButtonGroup } from '../ButtonGroup';
 import { MediaFeed } from '../MediaFeed';
 import { overlayButtonClass } from '../MediaPlayer/overlayButton';
 import {
@@ -40,6 +39,7 @@ import {
   PIP_EVENTS,
 } from '../MediaPlayer/pictureInPicture';
 import { getConversationMediaItems, previewOfAttachments } from './media';
+import { MediaStill } from './MessageMedia';
 import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
@@ -87,12 +87,10 @@ export interface SuperChatProps {
     meta: { conversation: SuperChatConversation }
   ) => void;
   /**
-   * MediaFeed behavior, labels and action/render slots for explicit
-   * attachments. With `layout: 'overlay'`, mount `useKeyboardInset()` once in
-   * the app shell: on a phone the panel sizes itself from the visible viewport
-   * it publishes, so the iOS keyboard doesn't cover the message box. With its
-   * `native` source, pad the composer by `--mieweb-keyboard-inset` as for any
-   * ChatComposer.
+   * The media view's MediaFeed: behavior, labels and action/render slots for
+   * explicit attachments. The media view is a dialog over the whole window,
+   * the conversation under it: the feed always uses its `overlay` layout,
+   * swiping sideways (`orientation: 'horizontal'`).
    */
   mediaFeedProps?: SuperChatMediaFeedProps;
   /** Labels for media launches and returning to the conversation. */
@@ -220,32 +218,6 @@ export interface SuperChatProps {
   onBack?: () => void;
 }
 
-/**
- * Phone-sized screens, upright (under 40rem wide) or sideways (under 30rem
- * tall): with the `overlay` media view open, the panel covers the screen
- * there, the media above the message box.
- * The query matches the classes below; `useMediaQuery` reads it for the modal
- * behaviour.
- */
-const PHONE_QUERY =
-  '(width < 40rem), (max-height: 30rem) and (orientation: landscape)';
-const PHONE_FULLSCREEN = [
-  // The visible viewport, not the layout one: iOS doesn't shrink the page for
-  // the keyboard. These are useKeyboardInset()'s variables; without them (no
-  // hook, or its native source, where the host pads the composer) it's the
-  // full screen.
-  'max-sm:fixed max-sm:inset-x-0 max-sm:z-50 max-sm:h-[var(--mieweb-visual-viewport-height,100dvh)] max-sm:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
-  '[@media(max-height:30rem)_and_(orientation:landscape)]:fixed [@media(max-height:30rem)_and_(orientation:landscape)]:inset-x-0 [@media(max-height:30rem)_and_(orientation:landscape)]:z-50 [@media(max-height:30rem)_and_(orientation:landscape)]:h-[var(--mieweb-visual-viewport-height,100dvh)] [@media(max-height:30rem)_and_(orientation:landscape)]:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
-  // Clear the notch and home bar on every side; native shells can override
-  // the insets with the --mieweb-safe-area-* variables (Modal's top and
-  // bottom ones, plus left and right for a sideways phone).
-  'max-sm:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))] max-sm:pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
-  // rtl-ignore -- safe-area insets are physical screen edges
-  'max-sm:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))] max-sm:pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]',
-  '[@media(max-height:30rem)_and_(orientation:landscape)]:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))] [@media(max-height:30rem)_and_(orientation:landscape)]:pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
-  // rtl-ignore -- safe-area insets are physical screen edges
-  '[@media(max-height:30rem)_and_(orientation:landscape)]:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))] [@media(max-height:30rem)_and_(orientation:landscape)]:pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]',
-].join(' ');
 const isShown = (element: Element | null): element is HTMLElement =>
   !!element &&
   ((element as HTMLElement).checkVisibility?.({ visibilityProperty: true }) ??
@@ -269,10 +241,6 @@ function hasOpenLayer(panel: HTMLElement): boolean {
     isShown(document.getElementById(control.getAttribute('aria-controls')!))
   );
 }
-
-/** The header gives its room to the clip on the same screens. */
-const PHONE_HIDDEN =
-  'max-sm:hidden [@media(max-height:30rem)_and_(orientation:landscape)]:hidden';
 
 /**
  * Single-conversation chat panel. See the module `MAINTAINERS.md` for the
@@ -333,6 +301,11 @@ export function SuperChat({
     backToConversation: 'Back to conversation',
     openMedia: 'Open in media feed',
     playMedia: 'Play',
+    mediaViewer: 'Media',
+    inThisMessage: 'In this message',
+    itemOfMessage: (position, total) => `${position} of ${total}`,
+    download: 'Download',
+    reply: 'Reply',
     ...DEFAULT_ATTACHMENT_LABELS,
     attachmentsPreview: previewOfAttachments,
     unknownAuthor: 'Unknown',
@@ -353,20 +326,14 @@ export function SuperChat({
   }>();
   const playbackRequestCounter = React.useRef(0);
   const mediaFeedRef = React.useRef<HTMLDivElement>(null);
-  const overlay = mediaFeedProps?.layout === 'overlay';
   const mediaBox =
     typeof mediaMaxSize === 'number' ? `${mediaMaxSize}px` : mediaMaxSize;
-  const isPhone = useMediaQuery(PHONE_QUERY);
-  // With the overlay media view open on a phone, the panel covers the
-  // screen (media above, message box below), so it acts as a modal there:
-  // focus stays inside and Escape goes back. SuperChat focuses the chosen
-  // item itself, so the trap doesn't.
-  const mediaOpen = overlay && activeView === 'media';
-  const covering = mediaOpen && isPhone;
-  const panelRef = useFocusTrap<HTMLElement>(covering, {
+  // The media view: a dialog over the whole window, the conversation left as
+  // it was under it. Focus stays inside; SuperChat focuses the chosen item.
+  const viewerOpen = activeView === 'media';
+  const mediaViewRef = useFocusTrap<HTMLDivElement>(viewerOpen, {
     initialFocus: false,
   });
-  const mediaViewRef = React.useRef<HTMLDivElement>(null);
   // A clip floating in picture in picture: the media view stays mounted
   // (hidden) after Back, since a browser closes the floating window when its
   // video leaves the page, and the viewer floated it to keep watching while
@@ -397,6 +364,9 @@ export function SuperChat({
     if (floating) checkFloating();
   });
   const backToConversationRef = React.useRef<HTMLButtonElement>(null);
+  const composerRef = React.useRef<ChatComposerHandle>(null);
+  // Reply from the media view: back to the conversation, into the message box.
+  const replyOnBackRef = React.useRef(false);
   const focusMediaOnOpenRef = React.useRef(false);
   const focusThreadOnBackRef = React.useRef(false);
   const mediaReturnTargetRef = React.useRef<
@@ -469,10 +439,9 @@ export function SuperChat({
   }, [setView]);
   // While the media view is open, Escape goes back to the conversation
   // unless another layer (the feed's viewer, a host menu) is open.
-  const mediaViewOpen = activeView === 'media';
   React.useEffect(() => {
-    const panel = panelRef.current;
-    if (!mediaViewOpen || !panel) return;
+    const panel = mediaViewRef.current;
+    if (!viewerOpen || !panel) return;
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       const target = event.target as Node | null;
@@ -482,7 +451,7 @@ export function SuperChat({
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [mediaViewOpen, handleBackToConversation, panelRef]);
+  }, [viewerOpen, handleBackToConversation, mediaViewRef]);
 
   // A fresh host playback request supersedes a consumed inline Play launch, so
   // `mediaFeedProps.playbackRequest` keeps working while the media view is open.
@@ -509,10 +478,9 @@ export function SuperChat({
 
   React.useEffect(() => {
     if (activeView !== 'media') return;
-    // A phone panel that turns modal with focus behind it (defaultView
-    // "media", a host's switch) takes focus in, like an inline launch.
-    const focusBehind =
-      covering && !panelRef.current?.contains(document.activeElement);
+    // Opened with focus behind it (defaultView "media", a host's switch), the
+    // dialog takes focus in, like an inline launch.
+    const focusBehind = !mediaViewRef.current?.contains(document.activeElement);
     if (!focusMediaOnOpenRef.current && !focusBehind) return;
     // The inline action is unmounted by the view switch. Move its focus to the
     // selected media item, or the Back control while data is unavailable.
@@ -526,9 +494,7 @@ export function SuperChat({
     // had hidden, where focus couldn't land, by changing only that.
   }, [
     activeView,
-    covering,
-    className,
-    panelRef,
+    mediaViewRef,
     mediaFeedProps?.loading,
     mediaFeedProps?.error,
     mediaItems.length,
@@ -571,6 +537,11 @@ export function SuperChat({
     setManualPlaybackRequest(undefined);
     if (!focusThreadOnBackRef.current) return;
     focusThreadOnBackRef.current = false;
+    if (replyOnBackRef.current) {
+      replyOnBackRef.current = false;
+      composerRef.current?.focus();
+      return;
+    }
     const source = mediaReturnTargetRef.current;
     const launchId = source
       ? JSON.stringify([source.messageId, source.attachmentId])
@@ -937,7 +908,6 @@ export function SuperChat({
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
-  const composerRef = React.useRef<ChatComposerHandle>(null);
   const [sending, setSending] = React.useState(false);
   const handleComposerSend = React.useCallback(
     async (message: NewMessage) => {
@@ -970,29 +940,206 @@ export function SuperChat({
     [conversation, onMessageSent]
   );
 
+  // The media view: over the whole window, the conversation left as it was
+  // under it, no message box (Reply goes back to it). A clip floating in
+  // picture in picture keeps it mounted, hidden, after Back.
+  const selectedMediaId =
+    mediaFeedProps?.activeItemId ??
+    (mediaSelection?.conversationId === conversation.id
+      ? mediaSelection.itemId
+      : undefined);
+  const viewedItem =
+    mediaItems.find((item) => item.id === selectedMediaId) ?? mediaItems[0];
+  // Its message's other attachments: where it is among them, a tap away.
+  const viewedGroup = viewedItem
+    ? mediaItems.filter((item) => item.message.id === viewedItem.message.id)
+    : [];
+  const viewedSrc =
+    viewedItem && viewedItem.attachment.kind !== 'youtube'
+      ? viewedItem.attachment.src
+      : undefined;
+  const handleReplyFromMedia = () => {
+    replyOnBackRef.current = true;
+    handleBackToConversation();
+  };
+  const mediaViewer =
+    (viewerOpen || floating) && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            ref={mediaViewRef}
+            data-slot="superchat-media-view"
+            role="dialog"
+            aria-modal="true"
+            aria-label={labels.mediaViewer}
+            data-theme="dark"
+            hidden={!viewerOpen}
+            className={cn(
+              // The visible viewport, not the layout one: iOS doesn't shrink
+              // the page for the keyboard (useKeyboardInset()'s variables;
+              // without them, the full screen).
+              'fixed inset-x-0 top-[var(--mieweb-visual-viewport-offset-top,0px)] z-50 flex h-[var(--mieweb-visual-viewport-height,100dvh)] flex-col bg-black text-white',
+              // Clear the notch and home bar on every side; native shells can
+              // set the --mieweb-safe-area-* variables (Modal's top and bottom
+              // ones, plus left and right for a sideways phone).
+              'pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))] pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
+              // rtl-ignore -- safe-area insets are physical screen edges
+              'pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))] pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]'
+            )}
+          >
+            <div
+              data-slot="superchat-media-stage"
+              className="relative flex min-h-0 flex-1 flex-col"
+            >
+              {/* Over the clip's top corner, so the clip keeps the view. */}
+              <Button
+                ref={backToConversationRef}
+                variant="ghost"
+                size="icon"
+                aria-label={labels.backToConversation}
+                title={labels.backToConversation}
+                className={cn(
+                  overlayButtonClass,
+                  'absolute start-2 top-2 z-20'
+                )}
+                onClick={handleBackToConversation}
+              >
+                <ArrowLeft
+                  className="size-5 rtl:-scale-x-100"
+                  aria-hidden="true"
+                />
+              </Button>
+              <MediaFeed
+                {...mediaFeedProps}
+                layout="overlay"
+                orientation="horizontal"
+                // The view already fills the window, and a clip's player has
+                // its own full screen: no viewer on top unless the host asks.
+                allowFullscreen={mediaFeedProps?.allowFullscreen ?? false}
+                classNames={{
+                  ...mediaFeedProps?.classNames,
+                  // Clear the Back button over the top corner.
+                  details: cn('ps-14', mediaFeedProps?.classNames?.details),
+                }}
+                ref={mediaFeedRef}
+                key={conversation.id}
+                items={mediaItems}
+                getId={(item) => item.id}
+                getMedia={(item) => item.attachment}
+                getTitle={(item) => item.attachment.title ?? ''}
+                getCaption={(item) =>
+                  item.attachment.caption ?? item.message.text
+                }
+                getAuthor={(item) => ({
+                  name: item.participant?.name ?? labels.unknownAuthor,
+                  avatar: item.participant?.avatar,
+                })}
+                activeItemId={selectedMediaId}
+                onActiveItemChange={handleMediaSelection}
+                playbackRequest={
+                  manualPlaybackRequest?.conversationId === conversation.id
+                    ? manualPlaybackRequest
+                    : mediaFeedProps?.playbackRequest
+                }
+                className={cn('min-h-0 flex-1', mediaFeedProps?.className)}
+              />
+            </div>
+            <div
+              data-slot="superchat-media-footer"
+              className="flex min-h-14 shrink-0 items-center gap-2 px-3 py-2"
+            >
+              {viewedGroup.length > 1 && (
+                <div
+                  data-slot="superchat-media-group"
+                  role="group"
+                  aria-label={labels.inThisMessage}
+                  className="flex min-w-0 items-center gap-1.5"
+                >
+                  <div className="flex min-w-0 gap-1.5 overflow-x-auto">
+                    {viewedGroup.map((item, index) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        aria-label={labels.itemOfMessage(
+                          index + 1,
+                          viewedGroup.length
+                        )}
+                        aria-current={item.id === viewedItem?.id || undefined}
+                        onClick={() => handleMediaSelection(item)}
+                        className="focus-visible:ring-ring size-11 shrink-0 overflow-hidden rounded-md opacity-60 ring-2 ring-transparent focus-visible:ring-2 focus-visible:outline-none aria-[current=true]:opacity-100 aria-[current=true]:ring-white"
+                      >
+                        <MediaStill
+                          attachment={item.attachment}
+                          unavailableLabel={labels.mediaUnavailable}
+                          decorative
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="shrink-0 text-xs text-white/80 tabular-nums">
+                    <bdi>
+                      {labels.itemOfMessage(
+                        viewedGroup.findIndex(
+                          (item) => item.id === viewedItem?.id
+                        ) + 1,
+                        viewedGroup.length
+                      )}
+                    </bdi>
+                  </span>
+                </div>
+              )}
+              <div className="ms-auto flex shrink-0 items-center gap-1.5">
+                {viewedSrc && (
+                  <a
+                    href={viewedSrc}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={labels.download}
+                    title={labels.download}
+                    className={cn(
+                      overlayButtonClass,
+                      'inline-flex size-10 items-center justify-center'
+                    )}
+                  >
+                    <Download className="size-5" aria-hidden="true" />
+                  </a>
+                )}
+                {!readOnly && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    leftIcon={
+                      <Reply
+                        className="size-4 rtl:-scale-x-100"
+                        aria-hidden="true"
+                      />
+                    }
+                    onClick={handleReplyFromMedia}
+                  >
+                    {labels.reply}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      : null;
+
   return (
     <section
-      ref={panelRef}
       data-slot="superchat"
-      role={covering ? 'dialog' : 'group'}
-      aria-modal={covering || undefined}
+      role="group"
       aria-labelledby={headingId}
       className={cn(
         'flex min-w-0 flex-1 flex-col bg-white dark:bg-neutral-900',
-        // Mobile first: on a phone, upright or sideways, the overlay media
-        // view takes the whole screen above the message box.
-        mediaOpen && PHONE_FULLSCREEN,
         className
       )}
     >
       {showHeader ? (
         <header
           data-slot="superchat-header"
-          className={cn(
-            'flex items-center justify-between gap-2 border-b border-neutral-200 p-3 dark:border-neutral-700',
-            // Its room goes to the clip; Back sits over the clip's corner.
-            mediaOpen && PHONE_HIDDEN
-          )}
+          className="flex items-center justify-between gap-2 border-b border-neutral-200 p-3 dark:border-neutral-700"
         >
           <div className="flex min-w-0 items-center gap-2">
             {onBack && (
@@ -1056,199 +1203,94 @@ export function SuperChat({
         </h2>
       )}
 
-      {(activeView === 'media' || floating) && (
-        <div
-          ref={mediaViewRef}
-          data-slot="superchat-media-view"
-          data-theme={overlay ? 'dark' : undefined}
-          className={cn(
-            'flex min-h-0 flex-1 flex-col',
-            overlay && 'bg-background relative',
-            // A clip floating in picture in picture keeps the view mounted
-            // after Back (its window closes if its video leaves the page).
-            activeView !== 'media' && 'hidden'
-          )}
-        >
-          {!overlay && (
-            <div className="px-4 pt-2">
-              <ButtonGroup className="justify-start">
-                <Button
-                  ref={backToConversationRef}
-                  variant="ghost"
-                  size="sm"
-                  leftIcon={
-                    <ArrowLeft
-                      className="size-4 rtl:-scale-x-100"
-                      aria-hidden="true"
-                    />
-                  }
-                  onClick={handleBackToConversation}
-                >
-                  {labels.backToConversation}
-                </Button>
-              </ButtonGroup>
-            </div>
-          )}
-          {/* One tree for both layouts, so switching keeps the feed (and its
-              playback) mounted. In the overlay it sits inside the safe-area
-              padding, so Back clears the notch. */}
-          <div
-            data-slot="superchat-media-stage"
-            className="relative flex min-h-0 flex-1 flex-col"
-          >
-            {overlay && (
-              // Over the clip's top corner, so the clip keeps the whole view.
-              <Button
-                ref={backToConversationRef}
-                variant="ghost"
-                size="icon"
-                aria-label={labels.backToConversation}
-                title={labels.backToConversation}
-                className={cn(
-                  overlayButtonClass,
-                  'absolute start-2 top-2 z-20'
-                )}
-                onClick={handleBackToConversation}
-              >
-                <ArrowLeft
-                  className="size-5 rtl:-scale-x-100"
-                  aria-hidden="true"
-                />
-              </Button>
-            )}
-            <MediaFeed
-              {...mediaFeedProps}
-              // In the overlay layout the media view is already the full view
-              // (the whole screen on a phone), and the player's own controls
-              // go full screen: no viewer on top unless the host asks.
-              allowFullscreen={mediaFeedProps?.allowFullscreen ?? !overlay}
-              classNames={{
-                ...mediaFeedProps?.classNames,
-                // Clear the Back button over the top corner.
-                details: cn(
-                  overlay && 'ps-14',
-                  mediaFeedProps?.classNames?.details
-                ),
-              }}
-              ref={mediaFeedRef}
-              key={conversation.id}
-              items={mediaItems}
-              getId={(item) => item.id}
-              getMedia={(item) => item.attachment}
-              getTitle={(item) => item.attachment.title ?? ''}
-              getCaption={(item) =>
-                item.attachment.caption ?? item.message.text
-              }
-              getAuthor={(item) => ({
-                name: item.participant?.name ?? labels.unknownAuthor,
-                avatar: item.participant?.avatar,
-              })}
-              activeItemId={
-                mediaFeedProps?.activeItemId ??
-                (mediaSelection?.conversationId === conversation.id
-                  ? mediaSelection.itemId
-                  : undefined)
-              }
-              onActiveItemChange={handleMediaSelection}
-              playbackRequest={
-                manualPlaybackRequest?.conversationId === conversation.id
-                  ? manualPlaybackRequest
-                  : mediaFeedProps?.playbackRequest
-              }
-              className={cn('min-h-0 flex-1', mediaFeedProps?.className)}
-            />
-          </div>
-        </div>
-      )}
-      {activeView !== 'media' && (
-        <div
-          data-slot="superchat-thread-viewport"
-          className="relative flex min-h-0 flex-1 flex-col"
-        >
-          {virtualized ? (
-            <VirtualThread
-              items={orderedThread}
-              participantById={participantById}
-              currentParticipantId={currentParticipantId}
-              renderText={renderText}
-              linkBuilder={linkBuilder}
-              onReferenceClick={onReferenceClick}
-              editable={editable}
-              onMessageEdited={handleMessageEdited}
-              defaultCopyFormat={defaultCopyFormat}
-              onOpenMedia={handleOpenMedia}
-              openMediaLabel={labels.openMedia}
-              playMediaLabel={labels.playMedia}
-              attachmentLabels={labels}
-              mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
-              mediaRetryLabel={mediaFeedProps?.labels?.retry}
-              renderMessageMedia={renderMessageMedia}
-              mediaMaxSize={mediaBox}
-              scrollRef={threadRef}
-              contentRef={threadContentRef}
-              layoutRef={threadLayoutRef}
-              containerProps={{
-                'data-slot': 'superchat-thread',
-                role: 'log',
-                'aria-label': 'Messages',
-                'aria-live': 'polite',
-                // Focusable so keyboard-only users can scroll the message history.
-                tabIndex: 0,
-                className: 'flex-1 overflow-y-auto p-4',
-              }}
-            />
-          ) : (
-            <div
-              data-slot="superchat-thread"
-              ref={threadRef}
-              role="log"
-              aria-label="Messages"
-              aria-live="polite"
+      {mediaViewer}
+      <div
+        data-slot="superchat-thread-viewport"
+        className="relative flex min-h-0 flex-1 flex-col"
+      >
+        {virtualized ? (
+          <VirtualThread
+            items={orderedThread}
+            participantById={participantById}
+            currentParticipantId={currentParticipantId}
+            renderText={renderText}
+            linkBuilder={linkBuilder}
+            onReferenceClick={onReferenceClick}
+            editable={editable}
+            onMessageEdited={handleMessageEdited}
+            defaultCopyFormat={defaultCopyFormat}
+            onOpenMedia={handleOpenMedia}
+            openMediaLabel={labels.openMedia}
+            playMediaLabel={labels.playMedia}
+            attachmentLabels={labels}
+            mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
+            mediaRetryLabel={mediaFeedProps?.labels?.retry}
+            renderMessageMedia={renderMessageMedia}
+            mediaMaxSize={mediaBox}
+            scrollRef={threadRef}
+            contentRef={threadContentRef}
+            layoutRef={threadLayoutRef}
+            containerProps={{
+              'data-slot': 'superchat-thread',
+              role: 'log',
+              'aria-label': 'Messages',
+              'aria-live': 'polite',
               // Focusable so keyboard-only users can scroll the message history.
-              // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-              tabIndex={0}
-              className="flex-1 overflow-y-auto p-4"
-            >
-              <div ref={threadContentRef} className="space-y-4">
-                {(turnIndex === -1
-                  ? orderedThread
-                  : orderedThread.slice(0, turnIndex)
-                ).map(renderMessageRow)}
-                {turnIndex !== -1 && (
-                  <div
-                    data-slot="superchat-turn"
-                    className="space-y-4"
-                    style={{ minHeight: turnMinHeight }}
-                  >
-                    {orderedThread.slice(turnIndex).map(renderMessageRow)}
-                  </div>
-                )}
-              </div>
+              tabIndex: 0,
+              className: 'flex-1 overflow-y-auto p-4',
+            }}
+          />
+        ) : (
+          <div
+            data-slot="superchat-thread"
+            ref={threadRef}
+            role="log"
+            aria-label="Messages"
+            aria-live="polite"
+            // Focusable so keyboard-only users can scroll the message history.
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={0}
+            className="flex-1 overflow-y-auto p-4"
+          >
+            <div ref={threadContentRef} className="space-y-4">
+              {(turnIndex === -1
+                ? orderedThread
+                : orderedThread.slice(0, turnIndex)
+              ).map(renderMessageRow)}
+              {turnIndex !== -1 && (
+                <div
+                  data-slot="superchat-turn"
+                  className="space-y-4"
+                  style={{ minHeight: turnMinHeight }}
+                >
+                  {orderedThread.slice(turnIndex).map(renderMessageRow)}
+                </div>
+              )}
             </div>
+          </div>
+        )}
+        {/* The wrapper is a zero-height strip pinned to the viewport bottom:
+          the button keeps its own absolute placement (now relative to the
+          strip, which lands it in the same spot) and the strip carries the
+          fade, so the button's `-translate-x-1/2` never meets a motion
+          transform. */}
+        <AnimatedPresence>
+          {order !== 'desc' && !isAtBottom && (
+            <Animated
+              key="jump-to-bottom"
+              preset="fade"
+              mode="presence"
+              className="absolute inset-x-0 bottom-0 z-20"
+            >
+              <JumpToBottomButton
+                dataSlot="superchat-jump-to-bottom"
+                hasNewMessages={hasNewBelow}
+                onClick={handleJumpToBottom}
+              />
+            </Animated>
           )}
-          {/* The wrapper is a zero-height strip pinned to the viewport bottom:
-            the button keeps its own absolute placement (now relative to the
-            strip, which lands it in the same spot) and the strip carries the
-            fade, so the button's `-translate-x-1/2` never meets a motion
-            transform. */}
-          <AnimatedPresence>
-            {order !== 'desc' && !isAtBottom && (
-              <Animated
-                key="jump-to-bottom"
-                preset="fade"
-                mode="presence"
-                className="absolute inset-x-0 bottom-0 z-20"
-              >
-                <JumpToBottomButton
-                  dataSlot="superchat-jump-to-bottom"
-                  hasNewMessages={hasNewBelow}
-                  onClick={handleJumpToBottom}
-                />
-              </Animated>
-            )}
-          </AnimatedPresence>
-        </div>
-      )}
+        </AnimatedPresence>
+      </div>
 
       <ChatComposer
         ref={composerRef}

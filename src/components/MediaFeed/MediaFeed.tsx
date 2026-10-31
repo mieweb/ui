@@ -1,5 +1,11 @@
 import * as React from 'react';
-import { ChevronDown, ChevronUp, Maximize2 } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Maximize2,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { Avatar } from '../Avatar';
@@ -29,6 +35,8 @@ const defaultLabels: MediaFeedLabels = {
   close: 'Close fullscreen',
   previous: 'Previous item',
   next: 'Next item',
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
   play: 'Play',
   pause: 'Pause',
   // The player's own controls, in the overlay layout.
@@ -225,6 +233,7 @@ function MediaFeedInner<T>(
     renderActions,
     renderMedia,
     layout = 'stacked',
+    orientation = 'vertical',
     allowFullscreen: allowFullscreenProp,
     activeItemId,
     defaultActiveItemId,
@@ -245,6 +254,21 @@ function MediaFeedInner<T>(
 ) {
   const labels = { ...defaultLabels, ...labelOverrides };
   const overlay = layout === 'overlay';
+  const horizontal = orientation === 'horizontal';
+  // Within the feed only, never moving the page around it. Sideways by the
+  // card's on-screen offset, which holds in a right-to-left page too.
+  const scrollToCard = (card: HTMLElement) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    if (horizontal) {
+      const offset =
+        card.getBoundingClientRect().left -
+        viewport.getBoundingClientRect().left;
+      viewport.scrollBy?.({ left: offset, behavior: 'auto' });
+    } else {
+      viewport.scrollTo?.({ top: card.offsetTop, behavior: 'auto' });
+    }
+  };
   // The overlay already fills its space and the player has its own full
   // screen, so the viewer is opt-in there.
   const allowFullscreen = allowFullscreenProp ?? !overlay;
@@ -381,9 +405,8 @@ function MediaFeedInner<T>(
     }
     if (visibleIdRef.current === activeId && hasObserver) return;
     const card = cardRefs.current.get(activeId);
-    if (card && viewportRef.current) {
-      viewportRef.current.scrollTo?.({ top: card.offsetTop, behavior: 'auto' });
-    }
+    if (card) scrollToCard(card);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scrollToCard reads refs only
   }, [activeId, idsKey, hasObserver, loading, error]);
 
   React.useEffect(() => {
@@ -442,8 +465,8 @@ function MediaFeedInner<T>(
     if (id === undefined) return;
     select(id);
     const card = cardRefs.current.get(id);
-    if (card && viewportRef.current) {
-      viewportRef.current.scrollTo?.({ top: card.offsetTop, behavior: 'auto' });
+    if (card) {
+      scrollToCard(card);
       if (focus) card.focus({ preventScroll: true });
     }
   };
@@ -453,13 +476,27 @@ function MediaFeedInner<T>(
     const target = event.target as HTMLElement;
     if (event.target !== event.currentTarget && target.dataset?.slot !== 'item')
       return;
+    // Sideways, the arrow toward the next item: right, or left in a
+    // right-to-left page.
+    const dir = event.currentTarget.closest('[dir]')?.getAttribute('dir');
+    const rtl =
+      horizontal &&
+      (dir
+        ? dir === 'rtl'
+        : getComputedStyle(event.currentTarget).direction === 'rtl');
+    const forward = horizontal
+      ? rtl
+        ? 'ArrowLeft'
+        : 'ArrowRight'
+      : 'ArrowDown';
+    const back = horizontal ? (rtl ? 'ArrowRight' : 'ArrowLeft') : 'ArrowUp';
     let next: number;
     switch (event.key) {
-      case 'ArrowDown':
+      case forward:
       case 'PageDown':
         next = activeIndex + 1;
         break;
-      case 'ArrowUp':
+      case back:
       case 'PageUp':
         next = activeIndex - 1;
         break;
@@ -609,9 +646,11 @@ function MediaFeedInner<T>(
             ? 'relative h-full min-h-0 w-full snap-start snap-always overflow-hidden bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white/70'
             : 'border-border bg-card text-card-foreground focus-visible:ring-ring flex min-h-0 w-full snap-start flex-col overflow-hidden border focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset',
           overlay
-            ? immersive
-              ? 'flex-1'
-              : 'shrink-0'
+            ? horizontal
+              ? 'shrink-0 basis-full'
+              : immersive
+                ? 'flex-1'
+                : 'shrink-0'
             : immersive
               ? 'h-full flex-1 border-0'
               : 'h-full shrink-0 rounded-xl',
@@ -705,91 +744,148 @@ function MediaFeedInner<T>(
     );
   };
 
-  const controls = overlay ? (
-    // Over the feed's end edge, stacked the way the feed scrolls, clear of the
-    // details along the top and the player's bar along the bottom.
-    <div
-      data-slot="controls"
-      className={cn(
-        'pointer-events-none absolute end-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1.5',
-        classNames.controls
-      )}
-    >
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={labels.previous}
-        title={labels.previous}
-        className={cn(overlayButtonClass, 'pointer-events-auto')}
-        disabled={activeIndex <= 0}
-        onClick={() => navigate(activeIndex - 1)}
-      >
-        <ChevronUp className="h-5 w-5" aria-hidden="true" />
-      </Button>
-      <span
-        role="status"
-        aria-live="polite"
-        className="rounded-full bg-black/45 px-1.5 py-0.5 text-xs whitespace-nowrap text-white tabular-nums backdrop-blur-sm"
-      >
-        {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
-            translated "2 من 3" still reads right to left. */}
-        <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
-      </span>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={labels.next}
-        title={labels.next}
-        className={cn(overlayButtonClass, 'pointer-events-auto')}
-        disabled={activeIndex >= items.length - 1}
-        onClick={() => navigate(activeIndex + 1)}
-      >
-        <ChevronDown className="h-5 w-5" aria-hidden="true" />
-      </Button>
-    </div>
-  ) : (
-    <div
-      data-slot="controls"
-      className={cn(
-        'flex shrink-0 items-center justify-between gap-3 py-2',
-        classNames.controls
-      )}
-    >
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
-        disabled={activeIndex <= 0}
-        onClick={() => navigate(activeIndex - 1)}
-        leftIcon={<ChevronUp className="h-4 w-4" aria-hidden="true" />}
-      >
-        {labels.previous}
-      </Button>
-      <span
-        role="status"
-        aria-live="polite"
-        className="text-muted-foreground shrink-0 text-sm whitespace-nowrap"
-      >
-        {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
-            translated "2 من 3" still reads right to left. */}
-        <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
-      </span>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
-        disabled={activeIndex >= items.length - 1}
-        onClick={() => navigate(activeIndex + 1)}
-        rightIcon={<ChevronDown className="h-4 w-4" aria-hidden="true" />}
-      >
-        {labels.next}
-      </Button>
-    </div>
+  const position = (
+    // Its own direction: "2 / 3" stays in order in an RTL page, and a
+    // translated "2 من 3" still reads right to left.
+    <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
   );
+  const controls =
+    overlay && horizontal ? (
+      // Previous and Next on the side edges, mid-height, as in a photo viewer;
+      // a touch screen swipes instead. The position is announced only: the
+      // host shows its own (a chat shows where an item is in its message).
+      <div
+        data-slot="controls"
+        className={cn(
+          'pointer-events-none absolute inset-x-2 top-1/2 z-10 flex -translate-y-1/2 items-center justify-between',
+          classNames.controls
+        )}
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={labels.previous}
+          title={labels.previous}
+          className={cn(
+            overlayButtonClass,
+            'pointer-events-auto pointer-coarse:hidden'
+          )}
+          disabled={activeIndex <= 0}
+          onClick={() => navigate(activeIndex - 1)}
+        >
+          <ChevronLeft
+            className="h-5 w-5 rtl:-scale-x-100"
+            aria-hidden="true"
+          />
+        </Button>
+        <span role="status" aria-live="polite" className="sr-only">
+          {position}
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={labels.next}
+          title={labels.next}
+          className={cn(
+            overlayButtonClass,
+            'pointer-events-auto pointer-coarse:hidden'
+          )}
+          disabled={activeIndex >= items.length - 1}
+          onClick={() => navigate(activeIndex + 1)}
+        >
+          <ChevronRight
+            className="h-5 w-5 rtl:-scale-x-100"
+            aria-hidden="true"
+          />
+        </Button>
+      </div>
+    ) : overlay ? (
+      // Over the feed's end edge, stacked the way the feed scrolls, clear of the
+      // details along the top and the player's bar along the bottom.
+      <div
+        data-slot="controls"
+        className={cn(
+          'pointer-events-none absolute end-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1.5',
+          classNames.controls
+        )}
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={labels.previous}
+          title={labels.previous}
+          className={cn(overlayButtonClass, 'pointer-events-auto')}
+          disabled={activeIndex <= 0}
+          onClick={() => navigate(activeIndex - 1)}
+        >
+          <ChevronUp className="h-5 w-5" aria-hidden="true" />
+        </Button>
+        <span
+          role="status"
+          aria-live="polite"
+          className="rounded-full bg-black/45 px-1.5 py-0.5 text-xs whitespace-nowrap text-white tabular-nums backdrop-blur-sm"
+        >
+          {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
+            translated "2 من 3" still reads right to left. */}
+          <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={labels.next}
+          title={labels.next}
+          className={cn(overlayButtonClass, 'pointer-events-auto')}
+          disabled={activeIndex >= items.length - 1}
+          onClick={() => navigate(activeIndex + 1)}
+        >
+          <ChevronDown className="h-5 w-5" aria-hidden="true" />
+        </Button>
+      </div>
+    ) : (
+      <div
+        data-slot="controls"
+        className={cn(
+          'flex shrink-0 items-center justify-between gap-3 py-2',
+          classNames.controls
+        )}
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
+          disabled={activeIndex <= 0}
+          onClick={() => navigate(activeIndex - 1)}
+          leftIcon={<ChevronUp className="h-4 w-4" aria-hidden="true" />}
+        >
+          {labels.previous}
+        </Button>
+        <span
+          role="status"
+          aria-live="polite"
+          className="text-muted-foreground shrink-0 text-sm whitespace-nowrap"
+        >
+          {/* Its own direction: "2 / 3" stays in order in an RTL page, and a
+            translated "2 من 3" still reads right to left. */}
+          <bdi>{labels.position(activeIndex + 1, items.length)}</bdi>
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-auto min-h-8 flex-1 py-2 [&_[data-slot=button-label]]:whitespace-normal"
+          disabled={activeIndex >= items.length - 1}
+          onClick={() => navigate(activeIndex + 1)}
+          rightIcon={<ChevronDown className="h-4 w-4" aria-hidden="true" />}
+        >
+          {labels.next}
+        </Button>
+      </div>
+    );
 
   return (
     <div
@@ -854,7 +950,10 @@ function MediaFeedInner<T>(
             tabIndex={0}
             onKeyDown={handleKeyDown}
             className={cn(
-              'focus-visible:ring-ring relative flex min-h-0 flex-1 snap-y snap-mandatory flex-col overflow-y-auto overscroll-contain focus-visible:ring-2 focus-visible:outline-none',
+              'focus-visible:ring-ring relative flex min-h-0 flex-1 snap-mandatory overscroll-contain focus-visible:ring-2 focus-visible:outline-none',
+              horizontal
+                ? 'snap-x flex-row overflow-x-auto overflow-y-hidden'
+                : 'snap-y flex-col overflow-y-auto',
               !overlay && 'gap-4',
               classNames.viewport
             )}

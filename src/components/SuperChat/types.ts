@@ -170,6 +170,16 @@ export interface SuperChatMediaLabels {
   backToConversation: string;
   openMedia: string;
   playMedia: string;
+  /** The media view's name (it's a dialog over the window). */
+  mediaViewer: string;
+  /** The strip of the viewed attachment's message's other attachments. */
+  inThisMessage: string;
+  /** Where an attachment is in its message, e.g. "2 of 3". */
+  itemOfMessage: (position: number, total: number) => string;
+  /** The media view's download button. */
+  download: string;
+  /** The media view's Reply: back to the conversation, into the message box. */
+  reply: string;
   /** The last gallery cell's name for the attachments it hides, e.g. "3 more". */
   moreMedia: (count: number) => string;
   /** Under a `pending` message's attachments; `percent` when its `progress` is known. */
