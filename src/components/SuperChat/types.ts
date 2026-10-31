@@ -199,6 +199,14 @@ export interface SuperChatMediaLabels {
   unknownAuthor: string;
 }
 
+/** What an edit changed besides the text: attachments the author removed. */
+export interface SuperChatMessageEdits {
+  /** Ids of `media` attachments to take off the message. */
+  removedMedia: string[];
+  /** Ids of `files` to take off the message. */
+  removedFiles: string[];
+}
+
 /** The media labels a thread's attachment tiles use. */
 export type SuperChatAttachmentLabels = Pick<
   SuperChatMediaLabels,
@@ -229,6 +237,12 @@ export interface SuperChatMessage {
   media?: SuperChatMediaAttachment[];
   /** Documents attached to the message, shown after its media. */
   files?: SuperChatFileAttachment[];
+  /**
+   * A line about the message (its team, a plan, a ticket), Markdown, shown
+   * small under it. Not part of its text: editing, copying and the
+   * conversation list's preview leave it out.
+   */
+  label?: string;
   /** Timestamp; the thread is append-only and ordered by `time`. */
   time: Date | string;
   /**

@@ -68,6 +68,7 @@ import type {
   SuperChatView,
   SuperChatRef,
   SuperChatRenderPlugin,
+  SuperChatMessageEdits,
 } from './types';
 
 // ============================================================================
@@ -202,12 +203,13 @@ export interface SuperChatProps {
    * Fired when the local user saves an edit to one of their own messages.
    * Providing this enables the inline "Edit" affordance on self-authored
    * messages (the host owns state, so apply the new `text` to the message and
-   * typically stamp `editedAt`).
+   * typically stamp `editedAt`). The editor lists the message's attachments
+   * too: `removedMedia` / `removedFiles` are the ones the author took off.
    */
   onMessageEdited?: (
     messageId: string,
     text: string,
-    meta: { conversation: SuperChatConversation }
+    meta: { conversation: SuperChatConversation } & SuperChatMessageEdits
   ) => void;
   onConversationClosed?: (conversation: SuperChatConversation) => void;
   onReferenceClick?: (ref: SuperChatRef) => void;
@@ -866,9 +868,10 @@ export function SuperChat({
   const conversationRef = React.useRef(conversation);
   conversationRef.current = conversation;
   const handleMessageEdited = React.useCallback(
-    (messageId: string, text: string) => {
+    (messageId: string, text: string, edits: SuperChatMessageEdits) => {
       onMessageEditedRef.current?.(messageId, text, {
         conversation: conversationRef.current,
+        ...edits,
       });
     },
     []
