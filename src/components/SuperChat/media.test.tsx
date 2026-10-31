@@ -221,6 +221,46 @@ describe('SuperChat media view', () => {
     expect(card).toHaveClass('max-w-full');
   });
 
+  it("gives attachments their own tiles before the text, on the author's side", () => {
+    const { container, rerender } = render(
+      <SuperChat conversation={conversation} currentParticipantId="alex" />
+    );
+    const bubble = container.querySelector('[data-slot="superchat-bubble"]');
+    const tiles = container.querySelectorAll(
+      '[data-slot="superchat-message-attachment"]'
+    );
+    expect(tiles).toHaveLength(2);
+    // Not inside the text bubble, and ahead of it.
+    expect(
+      bubble?.querySelector('[data-slot="superchat-message-media"]')
+    ).toBeNull();
+    expect(
+      tiles[1].compareDocumentPosition(bubble!) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      container.querySelector('[data-slot="superchat-message-attachments"]')
+    ).toHaveClass('items-end');
+    expect(tiles[0]).toHaveClass('rounded-2xl', 'overflow-hidden');
+
+    // Only attachments: no empty bubble.
+    rerender(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [{ ...conversation.thread[0], text: undefined }],
+        }}
+        currentParticipantId="alex"
+      />
+    );
+    expect(
+      container.querySelector('[data-slot="superchat-bubble"]')
+    ).toBeNull();
+    expect(
+      container.querySelectorAll('[data-slot="superchat-message-attachment"]')
+    ).toHaveLength(2);
+  });
+
   it('leaves a text-only conversation on its existing thread surface', () => {
     render(
       <SuperChat

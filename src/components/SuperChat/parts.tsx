@@ -689,12 +689,17 @@ export const MessageRow = React.memo(function MessageRow({
   mediaMaxSize = '18rem',
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
+  const hasMedia = (message.media?.length ?? 0) > 0;
   const hasBody =
-    !!message.text ||
-    (message.content?.length ?? 0) > 0 ||
-    (message.media?.length ?? 0) > 0;
+    !!message.text || (message.content?.length ?? 0) > 0 || hasMedia;
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
+  // The bubble holds the text; a message that is only attachments has none.
+  const showBubble =
+    isEditing ||
+    !!message.text ||
+    (message.content?.length ?? 0) > 0 ||
+    (streaming && !hasBody);
   // Keeps the bubble from shrinking when it flips into edit mode: the rendered
   // content width, captured on edit start, becomes the editor's min-width
   // (w-80 stays the floor for short messages, max-w-full the cap).
@@ -1031,168 +1036,192 @@ export const MessageRow = React.memo(function MessageRow({
           )}
         </div>
 
+        {/* Attachments come before the text, each its own tile on the
+            author's side, as in iMessage, WhatsApp or Telegram: a picture is
+            never framed by the text bubble, and the tile takes the bubble's
+            corners whatever the host draws in it. */}
+        {hasMedia && (
+          <div
+            data-slot="superchat-message-attachments"
+            className={cn(
+              'flex w-full flex-col gap-1',
+              isSelf ? 'items-end' : 'items-start'
+            )}
+          >
+            {message.media?.map((attachment) => {
+              const launchId = JSON.stringify([message.id, attachment.id]);
+              const open = (play?: boolean) =>
+                onOpenMedia?.(message.id, attachment.id, play);
+              return (
+                <div
+                  key={attachment.id}
+                  data-slot="superchat-message-attachment"
+                  className={cn(
+                    'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
+                    message.status === 'error' &&
+                      'border border-red-300 dark:border-red-700'
+                  )}
+                >
+                  {renderMessageMedia?.({
+                    message,
+                    attachment,
+                    open,
+                    launchId,
+                    maxSize: mediaMaxSize,
+                  }) ?? (
+                    <MessageMedia
+                      attachment={attachment}
+                      maxSize={mediaMaxSize}
+                      openLabel={openMediaLabel}
+                      playLabel={playMediaLabel}
+                      errorLabel={mediaErrorLabel}
+                      retryLabel={mediaRetryLabel}
+                      launchId={launchId}
+                      onOpen={onOpenMedia ? open : undefined}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* w-full keeps this row at thread width even under the column's
             items-end (self messages), preserving the 85% cap's meaning; the
             row direction places the bubble on the correct side. */}
-        <div
-          className={cn(
-            'flex w-full items-center gap-1',
-            isSelf ? 'flex-row-reverse' : 'flex-row'
-          )}
-        >
-          <ChatBubble
-            ref={bubbleRef}
-            data-slot="superchat-bubble"
-            variant={isSelf ? 'user' : 'assistant'}
-            hasError={message.status === 'error'}
-            className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
-          >
-            {isEditing ? (
-              <div
-                data-slot="superchat-message-editor"
-                className="flex w-80 max-w-full flex-col gap-2"
-                style={editMinWidth ? { minWidth: editMinWidth } : undefined}
-              >
-                <textarea
-                  value={draft}
-                  ref={editRef}
-                  rows={2}
-                  onChange={(e) => {
-                    setDraft(e.target.value);
-                    autosize();
-                  }}
-                  onPaste={handleEditPaste}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      saveEdit();
-                    } else if (e.key === 'Escape') {
-                      e.preventDefault();
-                      cancelEdit();
-                    }
-                  }}
-                  aria-label="Edit message"
-                  className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={saveEdit}
-                    disabled={!draft.trim() || draft.trim() === message.text}
-                    className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
-                {message.content?.map((block, i) => {
-                  if (block.type === 'tool_use' && block.toolCall) {
-                    return (
-                      <MCPToolCallDisplay key={i} toolCall={block.toolCall} />
-                    );
-                  }
-                  if (
-                    (block.type === 'text' || block.type === 'thinking') &&
-                    block.text
-                  ) {
-                    return (
-                      <div
-                        key={i}
-                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                      >
-                        {renderText(block.text, {
-                          messageId: message.id,
-                          streaming,
-                          role:
-                            participant?.kind === 'human'
-                              ? 'user'
-                              : 'assistant',
-                        })}
-                      </div>
-                    );
-                  }
-                  if (block.type === 'code' && block.text) {
-                    const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
-                    return (
-                      <div
-                        key={i}
-                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                      >
-                        {renderText(fenced, {
-                          messageId: message.id,
-                          streaming,
-                          role:
-                            participant?.kind === 'human'
-                              ? 'user'
-                              : 'assistant',
-                        })}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-
-                {/* Plain `text` body (the common case). */}
-                {message.text && (
-                  <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
-                    {renderText(message.text, {
-                      messageId: message.id,
-                      streaming,
-                      role:
-                        participant?.kind === 'human' ? 'user' : 'assistant',
-                    })}
-                  </div>
-                )}
-
-                {message.media?.map((attachment) => {
-                  const launchId = JSON.stringify([message.id, attachment.id]);
-                  const open = (play?: boolean) =>
-                    onOpenMedia?.(message.id, attachment.id, play);
-                  return (
-                    <React.Fragment key={attachment.id}>
-                      {renderMessageMedia?.({
-                        message,
-                        attachment,
-                        open,
-                        launchId,
-                        maxSize: mediaMaxSize,
-                      }) ?? (
-                        <MessageMedia
-                          attachment={attachment}
-                          maxSize={mediaMaxSize}
-                          openLabel={openMediaLabel}
-                          playLabel={playMediaLabel}
-                          errorLabel={mediaErrorLabel}
-                          retryLabel={mediaRetryLabel}
-                          launchId={launchId}
-                          onOpen={onOpenMedia ? open : undefined}
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-
-                {/* Animated typing indicator while a reply streams in with no
-                    body yet — matches the AI chat's streaming affordance. */}
-                {streaming && !hasBody && (
-                  <div className="flex items-center justify-center">
-                    <AITypingIndicator />
-                  </div>
-                )}
-              </>
+        {showBubble && (
+          <div
+            className={cn(
+              'flex w-full items-center gap-1',
+              isSelf ? 'flex-row-reverse' : 'flex-row'
             )}
-          </ChatBubble>
-        </div>
+          >
+            <ChatBubble
+              ref={bubbleRef}
+              data-slot="superchat-bubble"
+              variant={isSelf ? 'user' : 'assistant'}
+              hasError={message.status === 'error'}
+              className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
+            >
+              {isEditing ? (
+                <div
+                  data-slot="superchat-message-editor"
+                  className="flex w-80 max-w-full flex-col gap-2"
+                  style={editMinWidth ? { minWidth: editMinWidth } : undefined}
+                >
+                  <textarea
+                    value={draft}
+                    ref={editRef}
+                    rows={2}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      autosize();
+                    }}
+                    onPaste={handleEditPaste}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        saveEdit();
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelEdit();
+                      }
+                    }}
+                    aria-label="Edit message"
+                    className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={saveEdit}
+                      disabled={!draft.trim() || draft.trim() === message.text}
+                      className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
+                  {message.content?.map((block, i) => {
+                    if (block.type === 'tool_use' && block.toolCall) {
+                      return (
+                        <MCPToolCallDisplay key={i} toolCall={block.toolCall} />
+                      );
+                    }
+                    if (
+                      (block.type === 'text' || block.type === 'thinking') &&
+                      block.text
+                    ) {
+                      return (
+                        <div
+                          key={i}
+                          className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                        >
+                          {renderText(block.text, {
+                            messageId: message.id,
+                            streaming,
+                            role:
+                              participant?.kind === 'human'
+                                ? 'user'
+                                : 'assistant',
+                          })}
+                        </div>
+                      );
+                    }
+                    if (block.type === 'code' && block.text) {
+                      const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+                      return (
+                        <div
+                          key={i}
+                          className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                        >
+                          {renderText(fenced, {
+                            messageId: message.id,
+                            streaming,
+                            role:
+                              participant?.kind === 'human'
+                                ? 'user'
+                                : 'assistant',
+                          })}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  {/* Plain `text` body (the common case). */}
+                  {message.text && (
+                    <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
+                      {renderText(message.text, {
+                        messageId: message.id,
+                        streaming,
+                        role:
+                          participant?.kind === 'human' ? 'user' : 'assistant',
+                      })}
+                    </div>
+                  )}
+
+                  {/* Animated typing indicator while a reply streams in with no
+                    body yet — matches the AI chat's streaming affordance. */}
+                  {streaming && !hasBody && (
+                    <div className="flex items-center justify-center">
+                      <AITypingIndicator />
+                    </div>
+                  )}
+                </>
+              )}
+            </ChatBubble>
+          </div>
+        )}
       </div>
     </div>
   );
