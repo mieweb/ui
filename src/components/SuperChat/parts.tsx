@@ -21,7 +21,13 @@ import { Dropdown, DropdownItem, DropdownSubmenu } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
 import { SparklesIcon } from '../AI/icons';
-import { MessageMedia } from './MessageMedia';
+import { MessageFiles } from './MessageFiles';
+import {
+  MessageGallery,
+  MessageMedia,
+  isVisualMedia,
+  type MessageMediaEntry,
+} from './MessageMedia';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -651,6 +657,8 @@ interface MessageRowProps {
   ) => void;
   openMediaLabel?: string;
   playMediaLabel?: string;
+  /** The last gallery cell's name for what it hides ("3 more"). */
+  moreMediaLabel?: (count: number) => string;
   /** Localized preview load-error text (falls back to the player default). */
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
@@ -670,6 +678,27 @@ interface MessageRowProps {
  * re-running the Markdown pipeline — for the hundreds of rows that did not
  * change. Keep the props referentially stable from the host for this to help.
  */
+/** One attachment tile beside a message: the bubble's cap and corners. */
+function AttachmentTile({
+  failed,
+  children,
+}: {
+  failed: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      data-slot="superchat-message-attachment"
+      className={cn(
+        'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
+        failed && 'border border-red-300 dark:border-red-700'
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 export const MessageRow = React.memo(function MessageRow({
   message,
   participant,
@@ -683,6 +712,7 @@ export const MessageRow = React.memo(function MessageRow({
   onOpenMedia,
   openMediaLabel = 'Open in media feed',
   playMediaLabel = 'Play',
+  moreMediaLabel = (count) => `${count} more`,
   mediaErrorLabel,
   mediaRetryLabel,
   renderMessageMedia,
@@ -690,8 +720,27 @@ export const MessageRow = React.memo(function MessageRow({
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasMedia = (message.media?.length ?? 0) > 0;
+  const hasFiles = (message.files?.length ?? 0) > 0;
   const hasBody =
-    !!message.text || (message.content?.length ?? 0) > 0 || hasMedia;
+    !!message.text ||
+    (message.content?.length ?? 0) > 0 ||
+    hasMedia ||
+    hasFiles;
+  const failed = message.status === 'error';
+  // Each attachment with its open action; two or more pictures share one
+  // gallery (which opens the media view), anything else is its own tile.
+  const entries: MessageMediaEntry[] = (message.media ?? []).map(
+    (attachment) => ({
+      attachment,
+      launchId: JSON.stringify([message.id, attachment.id]),
+      open: (play?: boolean) => onOpenMedia?.(message.id, attachment.id, play),
+    })
+  );
+  const pictures = onOpenMedia
+    ? entries.filter((entry) => isVisualMedia(entry.attachment))
+    : [];
+  const gallery = pictures.length > 1 ? pictures : [];
+  const single = entries.filter((entry) => !gallery.includes(entry));
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
   // The bubble holds the text; a message that is only attachments has none.
@@ -1175,9 +1224,10 @@ export const MessageRow = React.memo(function MessageRow({
 
         {/* Attachments follow the text, each its own tile on the author's
             side, as in a messaging app: a picture is never framed by the text
-            bubble, and the tile takes the bubble's corners whatever the host
-            draws in it. */}
-        {hasMedia && (
+            bubble, two or more pictures share one gallery, documents share
+            one list, and every tile takes the bubble's corners whatever the
+            host draws in it. */}
+        {(hasMedia || hasFiles) && (
           <div
             data-slot="superchat-message-attachments"
             className={cn(
@@ -1185,41 +1235,44 @@ export const MessageRow = React.memo(function MessageRow({
               isSelf ? 'items-end' : 'items-start'
             )}
           >
-            {message.media?.map((attachment) => {
-              const launchId = JSON.stringify([message.id, attachment.id]);
-              const open = (play?: boolean) =>
-                onOpenMedia?.(message.id, attachment.id, play);
-              return (
-                <div
-                  key={attachment.id}
-                  data-slot="superchat-message-attachment"
-                  className={cn(
-                    'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
-                    message.status === 'error' &&
-                      'border border-red-300 dark:border-red-700'
-                  )}
-                >
-                  {renderMessageMedia?.({
-                    message,
-                    attachment,
-                    open,
-                    launchId,
-                    maxSize: mediaMaxSize,
-                  }) ?? (
-                    <MessageMedia
-                      attachment={attachment}
-                      maxSize={mediaMaxSize}
-                      openLabel={openMediaLabel}
-                      playLabel={playMediaLabel}
-                      errorLabel={mediaErrorLabel}
-                      retryLabel={mediaRetryLabel}
-                      launchId={launchId}
-                      onOpen={onOpenMedia ? open : undefined}
-                    />
-                  )}
-                </div>
-              );
-            })}
+            {gallery.length > 1 && (
+              <AttachmentTile failed={failed}>
+                <MessageGallery
+                  entries={gallery}
+                  maxSize={mediaMaxSize}
+                  openLabel={openMediaLabel}
+                  playLabel={playMediaLabel}
+                  moreLabel={moreMediaLabel}
+                />
+              </AttachmentTile>
+            )}
+            {single.map(({ attachment, launchId, open }) => (
+              <AttachmentTile key={attachment.id} failed={failed}>
+                {renderMessageMedia?.({
+                  message,
+                  attachment,
+                  open,
+                  launchId,
+                  maxSize: mediaMaxSize,
+                }) ?? (
+                  <MessageMedia
+                    attachment={attachment}
+                    maxSize={mediaMaxSize}
+                    openLabel={openMediaLabel}
+                    playLabel={playMediaLabel}
+                    errorLabel={mediaErrorLabel}
+                    retryLabel={mediaRetryLabel}
+                    launchId={launchId}
+                    onOpen={onOpenMedia ? open : undefined}
+                  />
+                )}
+              </AttachmentTile>
+            ))}
+            {hasFiles && (
+              <AttachmentTile failed={failed}>
+                <MessageFiles files={message.files!} maxSize={mediaMaxSize} />
+              </AttachmentTile>
+            )}
           </div>
         )}
       </div>

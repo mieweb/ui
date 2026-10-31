@@ -57,6 +57,7 @@ export interface VirtualThreadProps {
   ) => void;
   openMediaLabel?: string;
   playMediaLabel?: string;
+  moreMediaLabel?: (count: number) => string;
   /** Localized preview load-error/retry text, forwarded to each row. */
   mediaErrorLabel?: string;
   mediaRetryLabel?: string;
@@ -96,6 +97,7 @@ export function VirtualThread({
   onOpenMedia,
   openMediaLabel,
   playMediaLabel,
+  moreMediaLabel,
   mediaErrorLabel,
   mediaRetryLabel,
   renderMessageMedia,
@@ -174,6 +176,7 @@ export function VirtualThread({
                   onOpenMedia={onOpenMedia}
                   openMediaLabel={openMediaLabel}
                   playMediaLabel={playMediaLabel}
+                  moreMediaLabel={moreMediaLabel}
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
                   renderMessageMedia={renderMessageMedia}

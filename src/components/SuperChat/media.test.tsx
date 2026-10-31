@@ -68,6 +68,17 @@ const videoConversation: SuperChatConversation = {
   ],
 };
 
+/** The same two clips, one per message: each a lone tile, so a host card draws it. */
+const oneClipPerMessage: SuperChatConversation = {
+  ...videoConversation,
+  thread: videoConversation.thread[0].media!.map((clip, index) => ({
+    ...videoConversation.thread[0],
+    id: `m${index + 1}`,
+    time: new Date(Date.UTC(2026, 9, 3, 9, index)).toISOString(),
+    media: [clip],
+  })),
+};
+
 function mockNativePlayback() {
   vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
     matches: query === '(prefers-reduced-motion: reduce)',
@@ -176,7 +187,7 @@ describe('SuperChat media view', () => {
       '/second.png'
     );
     await user.click(
-      screen.getAllByRole('button', { name: 'Open in media feed' })[1]
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[1]
     );
     expect(screen.queryByRole('log', { name: 'Messages' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Media' })).toBeNull();
@@ -197,7 +208,7 @@ describe('SuperChat media view', () => {
     );
     expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
     expect(
-      screen.getAllByRole('button', { name: 'Open in media feed' })[1]
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[1]
     ).toHaveFocus();
   });
 
@@ -205,7 +216,7 @@ describe('SuperChat media view', () => {
     const host = vi.fn(() => null);
     const { container } = render(
       <SuperChat
-        conversation={videoConversation}
+        conversation={oneClipPerMessage}
         mediaMaxSize={256}
         renderMessageMedia={host}
       />
@@ -214,10 +225,11 @@ describe('SuperChat media view', () => {
       expect.objectContaining({ maxSize: '256px' })
     );
     // The host returned nothing for it, so the built-in card stands in.
+    // A clip with no poster yet: 16:9 until its first frame says otherwise.
     const card = container.querySelector<HTMLElement>(
       '[data-slot="superchat-message-media"]'
     );
-    expect(card?.style.width).toBe('256px');
+    expect(card?.getAttribute('style')).toContain('256px');
     expect(card).toHaveClass('max-w-full');
   });
 
@@ -229,10 +241,13 @@ describe('SuperChat media view', () => {
     const tiles = container.querySelectorAll(
       '[data-slot="superchat-message-attachment"]'
     );
-    expect(tiles).toHaveLength(2);
-    // Not inside the text bubble, and after it.
+    // Two pictures share one gallery tile, after the text and outside it.
+    expect(tiles).toHaveLength(1);
     expect(
-      bubble?.querySelector('[data-slot="superchat-message-media"]')
+      tiles[0].querySelector('[data-slot="superchat-message-gallery"]')
+    ).toBeTruthy();
+    expect(
+      bubble?.querySelector('[data-slot="superchat-message-gallery"]')
     ).toBeNull();
     expect(
       bubble!.compareDocumentPosition(tiles[0]) &
@@ -258,7 +273,90 @@ describe('SuperChat media view', () => {
     ).toBeNull();
     expect(
       container.querySelectorAll('[data-slot="superchat-message-attachment"]')
-    ).toHaveLength(2);
+    ).toHaveLength(1);
+  });
+
+  it('lays out a gallery by count, and its last cell says how many more', async () => {
+    const user = userEvent.setup();
+    const image = (n: number) => ({
+      id: `p${n}`,
+      kind: 'image' as const,
+      src: `/p${n}.png`,
+      title: `Photo ${n}`,
+    });
+    const withPictures = (count: number): SuperChatConversation => ({
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          media: Array.from({ length: count }, (_, i) => image(i + 1)),
+        },
+      ],
+    });
+    const gallery = () =>
+      document.querySelector<HTMLElement>(
+        '[data-slot="superchat-message-gallery"]'
+      )!;
+    const { rerender } = render(<SuperChat conversation={withPictures(2)} />);
+    expect(gallery()).toHaveClass('aspect-[4/3]');
+    expect(within(gallery()).getAllByRole('button')).toHaveLength(2);
+
+    rerender(<SuperChat conversation={withPictures(3)} />);
+    expect(within(gallery()).getAllByRole('button')[0]).toHaveClass(
+      'row-span-2'
+    );
+
+    rerender(<SuperChat conversation={withPictures(6)} />);
+    const cells = within(gallery()).getAllByRole('button');
+    expect(cells).toHaveLength(4);
+    expect(cells[3]).toHaveAccessibleName('Open in media feed, Photo 4, 2 more');
+    expect(cells[3]).toHaveTextContent('+2');
+
+    // A cell opens the media view at its own picture.
+    await user.click(cells[1]);
+    expect(
+      screen.getByRole('button', { name: 'Back to conversation' })
+    ).toBeTruthy();
+  });
+
+  it("lists a message's documents in one tile, each opening in a new tab", () => {
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              media: undefined,
+              files: [
+                {
+                  id: 'f1',
+                  name: 'Q3 report.pdf',
+                  url: '/q3.pdf',
+                  size: 2_200_000,
+                },
+                { id: 'f2', name: 'budget.xlsx', url: '/budget.xlsx' },
+              ],
+            },
+          ],
+        }}
+      />
+    );
+    const files = document.querySelector(
+      '[data-slot="superchat-message-files"]'
+    )!;
+    expect(
+      files.closest('[data-slot="superchat-message-attachment"]')
+    ).toBeTruthy();
+    const links = within(files as HTMLElement).getAllByRole('link');
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute('href', '/q3.pdf');
+    expect(links[0]).toHaveAttribute('target', '_blank');
+    expect(links[0]).toHaveTextContent('Q3 report.pdf');
+    expect(links[0]).toHaveTextContent('PDF · 2.1 MB');
+    expect(links[1]).toHaveTextContent('XLSX');
+    // Documents aren't media: no media view for them.
+    expect(screen.queryByRole('button', { name: 'Media' })).toBeNull();
   });
 
   it('leaves a text-only conversation on its existing thread surface', () => {
@@ -287,7 +385,7 @@ describe('SuperChat media view', () => {
       />
     );
     await user.click(
-      screen.getAllByRole('button', { name: 'Open in media feed' })[0]
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[0]
     );
     expect(onViewChange).toHaveBeenCalledWith('media', { conversation });
     expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
@@ -312,7 +410,7 @@ describe('SuperChat media view', () => {
       />
     );
     expect(
-      screen.getAllByRole('button', { name: 'Open in media feed' })[0]
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[0]
     ).toHaveFocus();
   });
 
@@ -329,7 +427,7 @@ describe('SuperChat media view', () => {
     expect(Array.from(previews).every((video) => !video.controls)).toBe(true);
     expect(play).not.toHaveBeenCalled();
     expect(
-      screen.queryByRole('button', { name: 'Open in media feed' })
+      screen.queryByRole('button', { name: /^Open in media feed/ })
     ).toBeNull();
     expect(screen.queryByRole('button', { name: 'Media' })).toBeNull();
     await user.type(screen.getByLabelText('Message'), 'Keep my reply');
@@ -359,7 +457,7 @@ describe('SuperChat media view', () => {
     const user = userEvent.setup();
     const { container } = render(
       <SuperChat
-        conversation={videoConversation}
+        conversation={oneClipPerMessage}
         mediaFeedProps={{ autoPlay: false }}
         renderMessageMedia={({ attachment, open, launchId }) =>
           attachment.id === 'video-2' ? (
@@ -407,7 +505,7 @@ describe('SuperChat media view', () => {
     const user = userEvent.setup();
     render(
       <SuperChat
-        conversation={videoConversation}
+        conversation={oneClipPerMessage}
         mediaFeedProps={{ autoPlay: false }}
         virtualized
         renderMessageMedia={({ attachment, open, launchId }) => (
@@ -877,7 +975,7 @@ describe('SuperChat media view', () => {
       />
     );
     await user.click(
-      screen.getAllByRole('button', { name: 'Open in media feed' })[1]
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[1]
     );
     expect(
       screen.getByRole('button', { name: 'Back to conversation' })
