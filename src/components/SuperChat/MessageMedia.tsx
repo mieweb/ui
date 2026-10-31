@@ -32,12 +32,13 @@ export function MessageMedia({
   return (
     <div
       data-slot="superchat-message-media"
-      // Never wider than the message.
+      // Never wider than the message. Its own tile beside the text bubble, on
+      // the thread's neutral surface rather than the author's color.
       style={{ width: maxSize }}
-      className="mt-3 flex max-w-full flex-col gap-2"
+      className="flex max-w-full flex-col gap-2 bg-neutral-100 p-2 text-neutral-900 dark:bg-neutral-800 dark:text-white"
     >
       {attachment.title && (
-        <p className="text-sm font-medium">{attachment.title}</p>
+        <p className="px-1 text-sm font-medium">{attachment.title}</p>
       )}
       {attachment.kind === 'image' && attachment.src ? (
         <img
@@ -75,7 +76,9 @@ export function MessageMedia({
           className="w-full rounded-lg object-contain"
         />
       ) : null}
-      {attachment.caption && <p className="text-sm">{attachment.caption}</p>}
+      {attachment.caption && (
+        <p className="px-1 text-sm">{attachment.caption}</p>
+      )}
       {onOpen && (
         <ButtonGroup>
           <Button

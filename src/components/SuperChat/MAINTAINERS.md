@@ -103,9 +103,16 @@ ChatComposer's `maxHeight` (a pixel number or any CSS length, default
 `'18rem'`, which was the built-in card's `w-72` / `max-h-72`). The built-in
 card is that wide with its picture at most that tall, and `renderMessageMedia`
 gets it as `maxSize`, so a host card fits the same box at its clip's own shape.
-Both are `max-w-full`: the same size however long the text, smaller in a narrow
-message. SuperChat places a host's card as it is, so the box is a contract, not
-a wrapper.
+Both are `max-w-full`: the same size however long the text, smaller on a narrow
+screen. The box is a contract: SuperChat doesn't resize a host's card.
+
+**Attachments are tiles, not bubble content.** As in iMessage, WhatsApp and
+Telegram, a message's attachments come first, each its own tile on the author's
+side (`superchat-message-attachment`, capped at the bubble's 85%), and its text
+follows in the bubble. A message that is only attachments has no bubble. The
+tile clips to the bubble's `rounded-2xl`, so every card, the host's included,
+has the bubble's corners; the built-in card sits on the neutral surface, not the
+author's color. Editing touches only the text bubble.
 
 ### Overlay media view (`mediaFeedProps.layout: 'overlay'`)
 
