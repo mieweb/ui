@@ -54,8 +54,8 @@ change it for every consumer: its visual baselines are the regression check.
 - **Two orientations.** `vertical` (default) scrolls up and down like a reel;
   `horizontal` swipes side to side like a chat app's photo viewer (SuperChat's
   media view uses it). Sideways, the left and right arrows move (mirrored when
-  the nearest `dir` is `rtl`), a card scrolls into place by its on-screen
-  offset (which holds right to left), Previous/Next sit on the side edges and
+  the nearest `dir` is `rtl`), a card scrolls into place with
+  `scrollIntoView` (a `scrollBy` in a snapping row stops at the next card), Previous/Next sit on the side edges and
   hide on touch screens, and the position is announced (`sr-only`) for the host
   to show its own.
 - **Images zoom in the overlay.** A double tap (or the zoom button) widens the
