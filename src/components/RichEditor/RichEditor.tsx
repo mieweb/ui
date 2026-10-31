@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useReducer,
   useRef,
   useState,
 } from 'react';
@@ -200,6 +201,18 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     const readOnlyRef = useRef(readOnly);
 
     const [md, setMd] = useState<string>('');
+    // A strict surface reconciles in an after-render effect, but publishing
+    // an edit only mutates refs — a host whose `onChange` ignores the edit
+    // (rejection) triggers no render, so the stale document would stay
+    // visible. Each publication schedules one render; an accepted update
+    // from the host batches into the same pass, so the effect compares the
+    // freshest prop either way.
+    const [, scheduleStrictReconcile] = useReducer(
+      (tick: number) => tick + 1,
+      0
+    );
+    const strictValueRef = useRef(strictValue);
+    strictValueRef.current = strictValue;
     // Serializing the document is the expensive part of a transaction, so the
     // last doc that was serialized is kept to recognise the transactions that
     // did not change it. ProseMirror documents are immutable, so identity is an
@@ -376,6 +389,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           // re-renders the editor on every keystroke for nothing.
           if (showPreviewRef.current) setMd(markdown);
           onChangeRef.current?.(markdown);
+          if (strictValueRef.current) scheduleStrictReconcile();
           // This source is now published. Future clinical-only projections
           // preserve it without starting another authored-prose write.
           loadedDocRef.current = doc;

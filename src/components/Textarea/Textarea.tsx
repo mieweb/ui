@@ -294,10 +294,34 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
     // edit and the optimistic state above is reverted during the same
     // render, the editor reloads the committed HTML transaction-safely.
 
+    // The ProseMirror surface mounts asynchronously, so a mount-time
+    // `ref.current.focus()` (the autoFocus-era idiom) can run before
+    // `[role="textbox"]` exists. The request is retained and honored when
+    // the editable appears — unless focus has moved on to another control
+    // in the meantime, which must not have its focus stolen.
+    const pendingFocusRef = React.useRef<MutationObserver | null>(null);
+    React.useEffect(() => () => pendingFocusRef.current?.disconnect(), []);
     const focusEditor = React.useCallback(() => {
-      editorWrapperRef.current
-        ?.querySelector<HTMLElement>('[role="textbox"]')
-        ?.focus();
+      const wrapper = editorWrapperRef.current;
+      if (!wrapper) return;
+      const editable = wrapper.querySelector<HTMLElement>('[role="textbox"]');
+      if (editable) {
+        editable.focus();
+        return;
+      }
+      pendingFocusRef.current?.disconnect();
+      const observer = new MutationObserver(() => {
+        const target = wrapper.querySelector<HTMLElement>('[role="textbox"]');
+        if (!target) return;
+        observer.disconnect();
+        pendingFocusRef.current = null;
+        const active = document.activeElement;
+        if (!active || active === document.body || wrapper.contains(active)) {
+          target.focus();
+        }
+      });
+      observer.observe(wrapper, { childList: true, subtree: true });
+      pendingFocusRef.current = observer;
     }, []);
 
     // The forwarded ref is the hidden mirror <textarea> — `ref.current.value`
@@ -422,14 +446,37 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
 
     const characterCount = state.plain.length;
 
-    // The editable's own metrics (RichTextEditor pins `text-base` and a
-    // one-row min-height): `size` restyles the font, `rows` restores the
-    // size-aware growth floor a native textarea got for free.
+    // The editable's own metrics: `size` restyles the font, `rows` restores
+    // the size-aware growth floor a native textarea got for free. Text
+    // utilities cannot size the editable — unlayered package CSS
+    // (kerebron.css's `[data-slot='textarea-rich'] .kb-editor` rule and
+    // Kerebron's own base.css) outranks them on both font-size and
+    // line-height — so the sm/lg metrics ride CSS variables that those
+    // rules read. The defaults (16px/24px) are the md pair, keeping
+    // `lineHeightPx` and the 40px rest-height match with Input honest.
     const lineHeightPx = size === 'sm' ? 20 : size === 'lg' ? 28 : 24;
-    const editorStyle = rows
-      ? // 7px block padding each side, matching the editable's py-[7px].
-        { minHeight: `${rows * lineHeightPx + 14}px` }
-      : undefined;
+    const sizeVars =
+      size === 'sm'
+        ? {
+            '--textarea-rich-font-size': '0.875rem',
+            '--textarea-rich-line-height': '1.25rem',
+          }
+        : size === 'lg'
+          ? {
+              '--textarea-rich-font-size': '1.125rem',
+              '--textarea-rich-line-height': '1.75rem',
+            }
+          : null;
+    const editorStyle =
+      rows || sizeVars
+        ? ({
+            ...(rows
+              ? // 7px block padding each side, matching the editable's py-[7px].
+                { minHeight: `${rows * lineHeightPx + 14}px` }
+              : null),
+            ...sizeVars,
+          } as React.CSSProperties)
+        : undefined;
 
     return (
       <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
@@ -500,9 +547,9 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
             editorClassName={cn(
               // A native textarea renders repeated spaces and tabs
               // faithfully; normal HTML layout would collapse them.
-              'whitespace-pre-wrap',
-              size === 'sm' && 'text-sm',
-              size === 'lg' && 'text-lg'
+              // (Font metrics ride editorStyle's CSS variables — text-sm/
+              // text-lg utilities lose to unlayered package CSS here.)
+              'whitespace-pre-wrap'
             )}
             editorStyle={editorStyle}
             className={cn(

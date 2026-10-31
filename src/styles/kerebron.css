@@ -330,7 +330,12 @@
 [data-slot='textarea-rich'] .kb-editor {
   min-height: 38px;
   padding: 7px 12px;
-  font-size: 1rem;
+  /* Unlayered package CSS (this rule, Kerebron's base.css) outranks
+     Tailwind utilities on the editable, so sized hosts (Textarea `size`)
+     override through the variables instead. The 1rem/1.5rem defaults make
+     a one-line editable 24px + 14px padding = the 38px md Input row. */
+  font-size: var(--textarea-rich-font-size, 1rem);
+  line-height: var(--textarea-rich-line-height, 1.5rem);
   overflow-y: auto;
   transition:
     min-height 0.2s ease-out,
