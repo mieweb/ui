@@ -54,8 +54,11 @@
 
 ## Gotchas
 
-- The narrow-player layout is a container query (`@container`, `@max-md:`),
-  and the touch sizing uses `pointer-coarse:`/`pointer-fine:`. Both need
+- The narrow-player layout is a container query (`@container`, `@max-md:`):
+  under 28rem the seek bar takes its own row, and under 20rem (`@max-xs:`, a
+  card in a chat) speed and picture in picture drop out, leaving play, time,
+  seek, mute and full screen on two short rows. The touch sizing uses
+  `pointer-coarse:`/`pointer-fine:`. Both need
   Tailwind 4.1 or the prebuilt `styles.css`; Tailwind 3 preset consumers get
   the wide layout and the default button sizes.
 - The seek bar's pointer step is 0.1s, so a tap or drag lands where it's put;
