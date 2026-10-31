@@ -54,6 +54,7 @@ A video thumbnail card: poster image, the branded \`PlayButton\` (white disc, br
 ### Don't use it when
 
 - The user should watch **here**: full inline playback with controls — \`MediaPlayer\`.
+- A chat attachment opens SuperChat's media view — a card from \`renderMessageMedia\`, which keeps the clip's own shape and returns focus on Back (see the SuperChat Inbox [Host media card](?path=/story/superchat-inbox--host-media-card) story).
 - The media is audio — \`AudioPlayer\`.
 - There's no video — a \`Card\` with an image slot.
 

@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  act,
   cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SuperChat } from './SuperChat';
@@ -199,6 +201,66 @@ describe('SuperChat media view', () => {
     ).toHaveFocus();
   });
 
+  it("sizes attachment cards, built-in and the host's, from mediaMaxSize", () => {
+    const host = vi.fn(() => null);
+    const { container } = render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaMaxSize={256}
+        renderMessageMedia={host}
+      />
+    );
+    expect(host).toHaveBeenCalledWith(
+      expect.objectContaining({ maxSize: '256px' })
+    );
+    // The host returned nothing for it, so the built-in card stands in.
+    const card = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-message-media"]'
+    );
+    expect(card?.style.width).toBe('256px');
+    expect(card).toHaveClass('max-w-full');
+  });
+
+  it("gives attachments their own tiles after the text, on the author's side", () => {
+    const { container, rerender } = render(
+      <SuperChat conversation={conversation} currentParticipantId="alex" />
+    );
+    const bubble = container.querySelector('[data-slot="superchat-bubble"]');
+    const tiles = container.querySelectorAll(
+      '[data-slot="superchat-message-attachment"]'
+    );
+    expect(tiles).toHaveLength(2);
+    // Not inside the text bubble, and after it.
+    expect(
+      bubble?.querySelector('[data-slot="superchat-message-media"]')
+    ).toBeNull();
+    expect(
+      bubble!.compareDocumentPosition(tiles[0]) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      container.querySelector('[data-slot="superchat-message-attachments"]')
+    ).toHaveClass('items-end');
+    expect(tiles[0]).toHaveClass('rounded-2xl', 'overflow-hidden');
+
+    // Only attachments: no empty bubble.
+    rerender(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [{ ...conversation.thread[0], text: undefined }],
+        }}
+        currentParticipantId="alex"
+      />
+    );
+    expect(
+      container.querySelector('[data-slot="superchat-bubble"]')
+    ).toBeNull();
+    expect(
+      container.querySelectorAll('[data-slot="superchat-message-attachment"]')
+    ).toHaveLength(2);
+  });
+
   it('leaves a text-only conversation on its existing thread surface', () => {
     render(
       <SuperChat
@@ -290,6 +352,487 @@ describe('SuperChat media view', () => {
     expect(
       (play.mock.contexts[1] as HTMLMediaElement).getAttribute('src')
     ).toBe('/clip-two.webm');
+  });
+
+  it("renders the host's card for an attachment, whose open plays it in the media view and gets focus back", async () => {
+    const play = mockNativePlayback();
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{ autoPlay: false }}
+        renderMessageMedia={({ attachment, open, launchId }) =>
+          attachment.id === 'video-2' ? (
+            <button
+              type="button"
+              data-media-launch-id={launchId}
+              onClick={() => open(true)}
+            >
+              {`Host card ${attachment.title}`}
+            </button>
+          ) : null
+        }
+      />
+    );
+    // The host's card replaces the built-in one; `null` keeps the built-in card.
+    expect(
+      screen.getByRole('button', { name: 'Play First clip' })
+    ).toBeTruthy();
+    expect(
+      screen.queryByRole('button', { name: 'Play Second clip' })
+    ).toBeNull();
+    expect(container.querySelectorAll('video')).toHaveLength(1);
+    await user.click(
+      screen.getByRole('button', { name: 'Host card Second clip' })
+    );
+    await waitFor(() => expect(play).toHaveBeenCalledTimes(1));
+    expect(
+      (play.mock.contexts[0] as HTMLMediaElement).getAttribute('src')
+    ).toBe('/clip-two.webm');
+    await user.click(
+      screen.getByRole('button', { name: 'Back to conversation' })
+    );
+    expect(
+      screen.getByRole('button', { name: 'Host card Second clip' })
+    ).toHaveFocus();
+  });
+
+  it('renders the host card in a virtualized thread, and Back returns focus to it', async () => {
+    mockNativePlayback();
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+      new window.DOMRect(0, 0, 600, 400)
+    );
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(400);
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(400);
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{ autoPlay: false }}
+        virtualized
+        renderMessageMedia={({ attachment, open, launchId }) => (
+          <button
+            type="button"
+            data-media-launch-id={launchId}
+            onClick={() => open(true)}
+          >
+            {`Host card ${attachment.title}`}
+          </button>
+        )}
+      />
+    );
+    const card = await screen.findByRole('button', {
+      name: 'Host card Second clip',
+    });
+    await user.click(card);
+    await user.click(
+      screen.getByRole('button', { name: 'Back to conversation' })
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Host card Second clip' })
+      ).toHaveFocus()
+    );
+  });
+
+  it('returns focus to a host card far down a long virtualized thread of tall rows', async () => {
+    mockNativePlayback();
+    // Rows measure 300px, well over the virtualizer's first guess.
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+      new window.DOMRect(0, 0, 600, 300)
+    );
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(400);
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(400);
+    // Tall enough that the reader isn't at the bottom.
+    vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(
+      80 * 300
+    );
+    const thread = Array.from({ length: 80 }, (_, index) => ({
+      id: `m${index}`,
+      participantId: 'alex',
+      time: new Date(Date.UTC(2026, 9, 1, 9, index)).toISOString(),
+      text: `Message ${index}`,
+      ...(index === 60
+        ? {
+            media: [
+              {
+                id: 'clip',
+                kind: 'video' as const,
+                src: '/clip.webm',
+                title: 'Far clip',
+              },
+            ],
+          }
+        : {}),
+    }));
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={{ ...conversation, thread }}
+        mediaFeedProps={{ autoPlay: false }}
+        virtualized
+        renderMessageMedia={({ attachment, open, launchId }) => (
+          <button
+            type="button"
+            data-media-launch-id={launchId}
+            onClick={() => open()}
+          >
+            {`Host card ${attachment.title}`}
+          </button>
+        )}
+      />
+    );
+    const log = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-thread"]'
+    )!;
+    const card = () =>
+      screen.queryByRole('button', { name: 'Host card Far clip' });
+    // Scroll down until the card's row is rendered (and every row above it
+    // has been measured on the way).
+    for (let top = 0; !card() && top < 40000; top += 300) {
+      log.scrollTop = top;
+      fireEvent.scroll(log);
+      await act(async () => {});
+    }
+    await user.click(card()!);
+    await user.click(
+      screen.getByRole('button', { name: 'Back to conversation' })
+    );
+    await waitFor(() => expect(card()).toHaveFocus());
+  });
+
+  it('keeps the feed mounted when the host switches layout', async () => {
+    mockNativePlayback();
+    const user = userEvent.setup();
+    const { container, rerender } = render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{ autoPlay: false }}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    const feed = container.querySelector('[data-component="media-feed"]');
+    rerender(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{ autoPlay: false, layout: 'overlay' }}
+      />
+    );
+    // Same feed, so its selection and saved positions carry over.
+    expect(container.querySelector('[data-component="media-feed"]')).toBe(feed);
+    expect(
+      screen.getByRole('article', { name: 'Second clip' })
+    ).toHaveAttribute('data-active', 'true');
+  });
+
+  it('offers no immersive viewer in the overlay media view unless the host asks, and shows actions beside the title', async () => {
+    mockNativePlayback();
+    const user = userEvent.setup();
+    const { unmount } = render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{
+          layout: 'overlay',
+          autoPlay: false,
+          renderActions: (item) => (
+            <button type="button">{`Menu ${item.attachment.title}`}</button>
+          ),
+        }}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    expect(
+      screen.queryByRole('button', { name: 'Open fullscreen' })
+    ).toBeNull();
+    const item = screen.getByRole('article', { name: 'Second clip' });
+    const title = within(item).getByRole('heading', { name: 'Second clip' });
+    const actions = within(item).getByRole('button', {
+      name: 'Menu Second clip',
+    });
+    // The same row as the title, not a row of its own under the caption.
+    expect(title.parentElement?.parentElement).toBe(
+      actions.closest('[data-slot="actions"]')?.parentElement?.parentElement
+    );
+    unmount();
+
+    render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{
+          layout: 'overlay',
+          autoPlay: false,
+          allowFullscreen: true,
+        }}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    expect(
+      screen.getAllByRole('button', { name: 'Open fullscreen' }).length
+    ).toBeGreaterThan(0);
+  });
+
+  it('keeps the stacked media view by default: a labelled Back above the feed', async () => {
+    mockNativePlayback();
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{ autoPlay: false }}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    const view = document.querySelector('[data-slot="superchat-media-view"]');
+    expect(view).not.toHaveAttribute('data-theme');
+    expect(view).not.toHaveAttribute('role');
+    expect(
+      screen.getByRole('button', { name: 'Back to conversation' })
+    ).toHaveTextContent('Back to conversation');
+    expect(
+      screen.getAllByRole('button', { name: 'Open fullscreen' }).length
+    ).toBeGreaterThan(0);
+  });
+
+  it('covers a phone screen as a dialog with the overlay layout; Escape goes back', async () => {
+    mockNativePlayback();
+    const matchMedia = vi
+      .spyOn(window, 'matchMedia')
+      .mockImplementation((query) => ({
+        matches: query.includes('width < 40rem'),
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }));
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{
+          layout: 'overlay',
+          autoPlay: false,
+          allowFullscreen: true,
+        }}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    // The whole panel: the dark media view, and the message box below it.
+    expect(dialog).toHaveAttribute('data-slot', 'superchat');
+    expect(
+      dialog.querySelector('[data-slot="superchat-media-view"]')
+    ).toHaveAttribute('data-theme', 'dark');
+    expect(within(dialog).getByRole('textbox')).toBeEnabled();
+    expect(
+      within(dialog).getByRole('article', { name: 'Second clip' })
+    ).toHaveFocus();
+    // Escape with the feed's own viewer open closes that, not the media view.
+    await user.click(
+      within(dialog).getAllByRole('button', { name: 'Open fullscreen' })[0]
+    );
+    expect(screen.getAllByRole('dialog')).toHaveLength(2);
+    await user.keyboard('{Escape}');
+    expect(screen.getAllByRole('dialog')).toHaveLength(1);
+    expect(screen.getByRole('dialog')).toBe(dialog);
+    // An Escape something on top already handled leaves the view open.
+    const handled = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    handled.preventDefault();
+    dialog.dispatchEvent(handled);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'Play Second clip' })
+    ).toHaveFocus();
+    matchMedia.mockRestore();
+  });
+
+  it('takes focus into the phone dialog when it opens on media', () => {
+    mockNativePlayback();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: query.includes('width < 40rem'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    render(
+      <SuperChat
+        conversation={videoConversation}
+        defaultView="media"
+        mediaFeedProps={{ layout: 'overlay', autoPlay: false }}
+      />
+    );
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    expect(
+      within(dialog).getByRole('article', { name: 'First clip' })
+    ).toHaveFocus();
+  });
+
+  it('takes focus in once a host reveals the phone dialog it had hidden', () => {
+    mockNativePlayback();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: query.includes('width < 40rem'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    // A hidden panel can't take focus, as in a browser.
+    const focus = HTMLElement.prototype.focus;
+    vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(function (
+      this: HTMLElement,
+      options?: Parameters<HTMLElement['focus']>[0]
+    ) {
+      if (!this.closest('.hidden-panel')) focus.call(this, options);
+    });
+    const props = {
+      conversation: videoConversation,
+      defaultView: 'media' as const,
+      mediaFeedProps: { layout: 'overlay' as const, autoPlay: false },
+    };
+    const { rerender } = render(
+      <SuperChat {...props} className="hidden-panel" />
+    );
+    expect(document.body).toHaveFocus();
+    rerender(<SuperChat {...props} className="shown-panel" />);
+    expect(
+      within(screen.getByRole('dialog')).getByRole('article', {
+        name: 'First clip',
+      })
+    ).toHaveFocus();
+  });
+
+  it('goes back on Escape whatever widgets the rest of the page has', async () => {
+    mockNativePlayback();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: query.includes('width < 40rem'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    const user = userEvent.setup();
+    render(
+      <>
+        <div role="listbox" aria-label="Transcript words" />
+        <SuperChat
+          conversation={videoConversation}
+          mediaFeedProps={{ layout: 'overlay', autoPlay: false }}
+        />
+      </>
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('keeps a clip floating in picture in picture playing after Back, until its window closes', async () => {
+    mockNativePlayback();
+    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{ autoPlay: false }}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    const view = () =>
+      container.querySelector('[data-slot="superchat-media-view"]');
+    const floated = view()!.querySelector<HTMLVideoElement>(
+      'video[src="/clip-two.webm"]'
+    )!;
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: floated,
+    });
+    act(() => {
+      floated.dispatchEvent(new Event('enterpictureinpicture'));
+    });
+    pause.mockClear();
+    await user.click(
+      screen.getByRole('button', { name: 'Back to conversation' })
+    );
+    // The thread is back, the media view kept (hidden), the clip not paused.
+    expect(
+      screen.getByRole('button', { name: 'Play Second clip' })
+    ).toBeTruthy();
+    expect(view()).toHaveClass('hidden');
+    expect(floated.isConnected).toBe(true);
+    expect(pause.mock.contexts).not.toContain(floated);
+
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: null,
+    });
+    act(() => {
+      floated.dispatchEvent(new Event('leavepictureinpicture'));
+    });
+    expect(view()).toBeNull();
+    pause.mockRestore();
+  });
+
+  it('lets the media view go once its floating clip has left with its conversation', async () => {
+    mockNativePlayback();
+    const user = userEvent.setup();
+    const { container, rerender } = render(
+      <SuperChat
+        conversation={videoConversation}
+        mediaFeedProps={{ autoPlay: false }}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Play Second clip' }));
+    const view = () =>
+      container.querySelector('[data-slot="superchat-media-view"]');
+    const floated = view()!.querySelector<HTMLVideoElement>(
+      'video[src="/clip-two.webm"]'
+    )!;
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: floated,
+    });
+    try {
+      act(() => {
+        floated.dispatchEvent(new Event('enterpictureinpicture'));
+      });
+      await user.click(
+        screen.getByRole('button', { name: 'Back to conversation' })
+      );
+      expect(view()).toHaveClass('hidden');
+      // Another conversation: its feed replaces the one the clip floated from,
+      // and the browser closed that window with it.
+      rerender(
+        <SuperChat
+          conversation={{ ...videoConversation, id: 'c2' }}
+          mediaFeedProps={{ autoPlay: false }}
+        />
+      );
+      await waitFor(() => expect(view()).toBeNull());
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
   });
 
   it('changing an uncontrolled conversation returns to its thread without playing a new feed', async () => {

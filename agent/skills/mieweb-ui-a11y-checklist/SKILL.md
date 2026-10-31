@@ -22,7 +22,7 @@ Work through the five categories in order; for each finding record file, line, i
 | Export (root entry) | Use for | Caveats |
 | --- | --- | --- |
 | `VisuallyHidden` | Screen-reader-only text (icon buttons, headings) | — |
-| `useFocusTrap(enabled)` | Trap Tab/Shift+Tab in dialogs; focuses first focusable on enable | Queries focusables **once** when enabled — re-enable after content changes; no focus-return on close (do it yourself) |
+| `useFocusTrap(enabled, { initialFocus })` | Trap Tab/Shift+Tab in dialogs; focuses the first focusable on enable unless `initialFocus: false` | Reads focusables on every Tab, so changing content is fine; no focus-return on close (do it yourself) |
 | `useLiveAnnouncement()` | `[message, announce]` for an `aria-live` region; re-announces identical consecutive messages | You render the region yourself (pattern below) |
 | `useEscapeKey`, `useClickOutside` | Dismissal plumbing for menus/popovers | — |
 | `useDragReorder` | Pointer reordering, plus keyboard and announcements | Keyboard is **opt-in**: pass `keyboard: true` and spread `rowProps(id)` on rows (Alt+↑/↓), and/or render `moveButtonProps` buttons; announcements are built in — render the returned `announcement` in an `sr-only` live region |

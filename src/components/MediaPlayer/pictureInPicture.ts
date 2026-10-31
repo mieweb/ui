@@ -1,5 +1,5 @@
-// Internal to the media components (MediaControls, MediaFeed); not part of
-// the public API.
+// Internal to the media components (MediaControls, MediaFeed, SuperChat's
+// media view); not part of the public API.
 
 /** Safari's own full screen and picture in picture, beside the standard APIs. */
 export type WebKitVideo = HTMLVideoElement & {

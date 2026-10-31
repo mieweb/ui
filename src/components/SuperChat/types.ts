@@ -112,6 +112,35 @@ export interface SuperChatMediaItem {
   participant?: Participant;
 }
 
+/** One attachment in the thread, as {@link SuperChatRenderMessageMedia} gets it. */
+export interface SuperChatMessageMediaRenderProps {
+  message: SuperChatMessage;
+  attachment: SuperChatMediaAttachment;
+  /** Opens this attachment in the conversation's media view; `play` starts it there. */
+  open: (play?: boolean) => void;
+  /**
+   * Set as `data-media-launch-id` on the control that calls `open`, so focus
+   * returns to it when the viewer goes back to the conversation.
+   */
+  launchId: string;
+  /**
+   * The box the card fits in, both ways, as a CSS length (SuperChat's
+   * `mediaMaxSize`): a wide clip up to this wide, an upright one up to this
+   * tall, and never wider than the message. The built-in card is this wide.
+   */
+  maxSize: string;
+}
+
+/**
+ * Renders one attachment in the thread in place of the built-in card, e.g. a
+ * host's own video card. Returning `null` or `undefined` keeps the built-in
+ * card for that attachment. Keep it referentially stable: message rows are
+ * memoized.
+ */
+export type SuperChatRenderMessageMedia = (
+  props: SuperChatMessageMediaRenderProps
+) => React.ReactNode;
+
 export type SuperChatView = 'thread' | 'media';
 
 /** Feed behavior and extension slots; conversation data/accessors are fixed. */

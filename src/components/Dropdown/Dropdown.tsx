@@ -479,6 +479,40 @@ function Dropdown({
   );
   useClickOutside(outsideRefs, handleClose, isOpen);
 
+  // A scroll that takes the trigger out of view closes the menu: kept open,
+  // the menu (fixed to the screen, clamped inside it) would float on with no
+  // trigger, over whatever scrolled under. While the trigger still shows, the
+  // menu follows it (useAnchoredPosition), so a nudge (reaching a lower item,
+  // a test scrolling one into view) leaves it open. Scrolling inside the menu
+  // or a submenu, and the scroll iOS makes to show the keyboard for the search
+  // field, leave it open; so does scrolling the page itself.
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const inMenu = (node: Node | null) =>
+      !!node && outsideRefs.some((ref) => ref.current?.contains(node));
+    const onScroll = (event: Event) => {
+      const target = event.target;
+      const trigger = containerRef.current;
+      if (!(target instanceof Element) || !trigger) return;
+      if (!target.contains(trigger) || inMenu(target)) return;
+      const active = document.activeElement;
+      const typing =
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement;
+      if (typing && inMenu(active)) return;
+      const shown = trigger.getBoundingClientRect();
+      const area = target.getBoundingClientRect();
+      const outOfView =
+        shown.bottom <= area.top ||
+        shown.top >= area.bottom ||
+        shown.right <= area.left ||
+        shown.left >= area.right;
+      if (outOfView) handleClose();
+    };
+    window.addEventListener('scroll', onScroll, true);
+    return () => window.removeEventListener('scroll', onScroll, true);
+  }, [isOpen, outsideRefs, handleClose]);
+
   React.useEffect(() => {
     if (!isOpen) {
       setSearchQuery('');

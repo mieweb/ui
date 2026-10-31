@@ -13,6 +13,45 @@ import {
 } from './Dropdown';
 
 describe('Dropdown', () => {
+  it('closes once a scroll takes its trigger out of view, not for a nudge or one inside the menu', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <div data-testid="thread" style={{ overflow: 'auto', height: 100 }}>
+        <Dropdown trigger={<Button>Open menu</Button>}>
+          <DropdownItem>Alpha</DropdownItem>
+        </Dropdown>
+      </div>
+    );
+    const thread = screen.getByTestId('thread');
+    const trigger = screen.getByRole('button', { name: 'Open menu' });
+    // The Dropdown's own wrapper around the trigger is what it measures.
+    const anchor = trigger.parentElement!;
+    const box = (top: number, bottom: number) =>
+      ({
+        top,
+        bottom,
+        left: 0,
+        right: 200,
+        width: 200,
+        height: bottom - top,
+      }) as ReturnType<HTMLElement['getBoundingClientRect']>;
+    vi.spyOn(thread, 'getBoundingClientRect').mockReturnValue(box(0, 100));
+    const at = vi
+      .spyOn(anchor, 'getBoundingClientRect')
+      .mockReturnValue(box(10, 42));
+    await user.click(trigger);
+    fireEvent.scroll(screen.getByRole('menu'));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    // Moved, still showing: the menu follows it.
+    at.mockReturnValue(box(40, 72));
+    fireEvent.scroll(thread);
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    // Scrolled away: the menu goes too.
+    at.mockReturnValue(box(-60, -28));
+    fireEvent.scroll(thread);
+    await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+
   it('renders a search input when searchable is enabled', async () => {
     const user = userEvent.setup();
 

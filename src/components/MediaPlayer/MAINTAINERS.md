@@ -12,8 +12,8 @@
 - [MediaControls.tsx](MediaControls.tsx) — the overlay controls
   (`controlsStyle="overlay"`). Public, for hosts that build their own box.
 - [pictureInPicture.ts](pictureInPicture.ts) and
-  [overlayButton.ts](overlayButton.ts) — internal, shared with `MediaFeed`.
-  Not exported from the package; keep it that way.
+  [overlayButton.ts](overlayButton.ts) — internal, shared with `MediaFeed` and
+  `SuperChat`. Not exported from the package; keep it that way.
 
 ## Design contract (don't break these)
 
@@ -48,8 +48,9 @@
   black on purpose: they sit over arbitrary video frames.
 - **Floating clips and their hosts.** A browser closes the picture-in-picture
   window when its video leaves the DOM. `MediaFeed` keeps a floating clip
-  playing when its item stops being active; changes to how it pauses or
-  unmounts media must keep that.
+  playing when its item stops being active, and `SuperChat` keeps its media
+  view mounted while one floats; changes to how they pause or unmount media
+  must keep that.
 
 ## Gotchas
 

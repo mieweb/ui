@@ -73,10 +73,11 @@ uncontrolled panel in either `thread` or `media`. The media view composes
 `MediaFeed`; `mediaFeedProps` exposes its behavior, labels and render slots while
 reserving the conversation's items and accessors. `mediaLabels` localizes the
 return control and inline attachment actions. The header and composer remain
-mounted in both views, and the composer keeps its existing send/restore contract.
+mounted in both views (covered on a phone in the overlay layout), and the composer keeps its existing send/restore contract.
 
 Playing an inline attachment opens the same attachment in the feed. The thread
-has no header view toggle; a control above the feed provides Back to conversation.
+has no header view toggle; a Back to conversation control sits above the feed
+(over its corner in the overlay layout).
 Returning restores focus to the attachment that opened the feed when it is
 still mounted. Switching conversation remounts the feed so
 uncontrolled selection and fullscreen state cannot leak to another conversation.
@@ -89,6 +90,80 @@ incoming messages follow a previously pinned reader. An own send received while
 viewing media waits to anchor its turn until the ordinary thread remounts, or
 pins the newest message in a virtualized thread. Conversation/order changes
 discard this snapshot and use their normal bottom/top anchor.
+
+`renderMessageMedia` replaces the built-in attachment card in the thread. The
+host gets `{ message, attachment, open, launchId }`; it must put `launchId` on
+its focusable control as `data-media-launch-id`, since Back looks that up to
+return focus. A virtualized thread mounts rows a frame or two late, so the
+focus return retries for up to ten frames before falling back to the thread.
+Keep the slot referentially stable (`useCallback`): rows are memoized.
+
+**One box for attachment cards: `mediaMaxSize`.** A length prop like
+ChatComposer's `maxHeight` (a pixel number or any CSS length, default
+`'18rem'`, which was the built-in card's `w-72` / `max-h-72`). The built-in
+card is that wide with its picture at most that tall, and `renderMessageMedia`
+gets it as `maxSize`, so a host card fits the same box at its clip's own shape.
+Both are `max-w-full`: the same size however long the text, smaller on a narrow
+screen. The box is a contract: SuperChat doesn't resize a host's card.
+
+**Attachments are tiles, not bubble content.** As in a messaging app, a
+message's text is in the bubble and its attachments follow, each its own tile
+on the author's side (`superchat-message-attachment`, capped at the bubble's
+85%). A message that is only attachments has no bubble. The
+tile clips to the bubble's `rounded-2xl`, so every card, the host's included,
+has the bubble's corners; the built-in card sits on the neutral surface, not the
+author's color. Editing touches only the text bubble.
+
+### Overlay media view (`mediaFeedProps.layout: 'overlay'`)
+
+Opt-in; without it the media view is the stacked feed under a labelled Back.
+
+- **Phones get the whole screen, message box included.** With the overlay
+  media view open, `PHONE_FULLSCREEN` makes the whole panel (the `section`)
+  `fixed` and `z-50` under 40rem wide, or under 30rem tall and sideways (a
+  phone on its side, not a short laptop window), with safe-area padding on
+  every side (`--mieweb-safe-area-*`; `Modal` has top and bottom). The header
+  hides (`PHONE_HIDDEN`), the media view fills the space, and the composer
+  stays at the bottom, so viewers can reply while they watch. The insets are
+  physical edges, hence the `rtl-ignore` lines. `PHONE_QUERY` must match these
+  classes: `useMediaQuery` reads it for the modal behaviour.
+- **It fits the visible viewport, not the layout one.** iOS doesn't shrink the
+  page for the keyboard, so the panel's height and top come from
+  `useKeyboardInset()`'s `--mieweb-visual-viewport-height` and
+  `--mieweb-visual-viewport-offset-top` (falling back to `100dvh` and `0`).
+  The host mounts that hook; the docs say so. The offset is `top`, not a
+  transform: `Modal` isn't portaled, and a transform would trap its `fixed`
+  children. With the `native` source those variables stay unset, and the host
+  pads the composer by `--mieweb-keyboard-inset`, as ChatComposer's notes
+  describe.
+- **Covering means modal.** While it covers the screen the panel is a
+  `role="dialog"` with `aria-modal`, and `useFocusTrap` keeps Tab inside it
+  (media and composer) without moving focus, since SuperChat focuses the
+  chosen item. Its stops include popups its controls open elsewhere (a
+  composer menu portaled to the body), through `aria-controls`. Escape goes
+  back unless one of the panel's own layers is open: a visible dialog inside
+  it (the feed's viewer) or a popup one of its controls opened. The
+  library's overlays don't cancel Escape, so it checks for them instead;
+  widgets elsewhere on the page don't count.
+  `position: fixed` inside a transformed ancestor (a Motion sheet) won't cover
+  the screen; hosts that need that should render SuperChat outside it.
+- **Dark by scoping**, like MediaFeed's overlay: `data-theme="dark"`.
+- **Back sits over the clip's corner**, and the feed's details get `ps-14` to
+  clear it. The immersive viewer is off unless the host sets
+  `allowFullscreen`; the player's own full screen covers that need.
+- **One tree for both layouts.** The feed sits in the same place whether or
+  not the overlay is on, so a host that switches `layout` (by screen size, say)
+  keeps the feed and its selection. The player itself re-creates its `<video>`
+  for the other controls style; the feed restores the position.
+
+### Picture in picture (both layouts)
+
+While a video from the media view is in picture in picture, the view stays
+mounted but `hidden` after Back, because the browser closes the window when its
+video leaves the page. The browser's own controls can float a clip too, so this
+applies to the stacked layout as well. `checkFloating` asks the browser on
+every PiP event and render, rather than trusting event order, so a removed
+message or conversation change lets the view go.
 
 ## Render plugin contract (read before adding a plugin)
 
