@@ -152,6 +152,8 @@ module.exports = {
     '@max-md:me-auto',
     '@max-md:mx-2',
     '@max-md:order-first',
+    '@max-xs:hidden',
+    '@max-xs:pt-2',
     '[text-shadow:0_1px_2px_rgb(0_0_0/0.6)]',
     'active:bg-black/75',
     'backdrop-blur-sm',
