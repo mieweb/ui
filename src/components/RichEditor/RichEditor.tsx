@@ -2,6 +2,7 @@
 
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -200,13 +201,50 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     const valueTypeRef = useRef(valueType);
     valueTypeRef.current = valueType;
 
+    // The contenteditable surface has no implicit ARIA role, so labeling
+    // attributes are only permitted alongside an explicit textbox role — and
+    // `aria-readonly` is only valid on such a role, not on the host div.
+    const surfaceAttributes = useCallback(
+      () =>
+        ariaLabel || ariaLabelledBy
+          ? {
+              role: 'textbox',
+              'aria-multiline': 'true',
+              ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+              ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
+              ...(readOnlyRef.current ? { 'aria-readonly': 'true' } : {}),
+            }
+          : null,
+      [ariaLabel, ariaLabelledBy]
+    );
+
+    // Applies the read state everywhere it matters: the view's `editable`
+    // prop, the surface's ARIA attributes, and the stock toolbar — whose
+    // buttons dispatch commands regardless of `editable`, so disabled and
+    // readOnly must neutralize it with `inert` (blocks pointer and keyboard
+    // access while the document's text stays selectable).
+    const syncReadState = useCallback(() => {
+      const editor = editorInstance.current;
+      if (editor) {
+        const attributes = surfaceAttributes();
+        editor.view.setProps({
+          editable: () => !disabledRef.current && !readOnlyRef.current,
+          ...(attributes ? { attributes } : {}),
+        });
+      }
+      const inert = disabledRef.current || readOnlyRef.current;
+      for (const toolbar of hostRef.current?.querySelectorAll<HTMLElement>(
+        '.kb-custom-menu, .kb-custom-menu__overflow-menu'
+      ) ?? []) {
+        toolbar.inert = inert;
+      }
+    }, [surfaceAttributes]);
+
     useEffect(() => {
       disabledRef.current = disabled;
       readOnlyRef.current = readOnly;
-      editorInstance.current?.view.setProps({
-        editable: () => !disabledRef.current && !readOnlyRef.current,
-      });
-    }, [disabled, readOnly]);
+      syncReadState();
+    }, [disabled, readOnly, syncReadState]);
 
     useEffect(() => {
       // In collab mode the CRDT owns the content; reloading would fight it.
@@ -357,23 +395,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         });
 
         editorInstance.current = editor;
-        // The contenteditable surface has no implicit ARIA role, so labeling
-        // attributes are only permitted alongside an explicit textbox role.
-        const surfaceAttributes =
-          ariaLabel || ariaLabelledBy
-            ? {
-                role: 'textbox',
-                'aria-multiline': 'true',
-                ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
-                ...(ariaLabelledBy
-                  ? { 'aria-labelledby': ariaLabelledBy }
-                  : {}),
-              }
-            : null;
-        editor.view.setProps({
-          editable: () => !disabledRef.current && !readOnlyRef.current,
-          ...(surfaceAttributes ? { attributes: surfaceAttributes } : {}),
-        });
+        syncReadState();
         editor.addEventListener('transaction', onTransaction);
 
         // Seed initial content, then populate the preview once on mount.
@@ -528,7 +550,6 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             aria-label={ariaLabel}
             aria-labelledby={ariaLabelledBy}
             aria-disabled={disabled || undefined}
-            aria-readonly={readOnly || undefined}
             style={{
               isolation: 'isolate',
               opacity: disabled ? 0.65 : undefined,
