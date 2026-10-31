@@ -1036,56 +1036,6 @@ export const MessageRow = React.memo(function MessageRow({
           )}
         </div>
 
-        {/* Attachments come before the text, each its own tile on the
-            author's side, as in iMessage, WhatsApp or Telegram: a picture is
-            never framed by the text bubble, and the tile takes the bubble's
-            corners whatever the host draws in it. */}
-        {hasMedia && (
-          <div
-            data-slot="superchat-message-attachments"
-            className={cn(
-              'flex w-full flex-col gap-1',
-              isSelf ? 'items-end' : 'items-start'
-            )}
-          >
-            {message.media?.map((attachment) => {
-              const launchId = JSON.stringify([message.id, attachment.id]);
-              const open = (play?: boolean) =>
-                onOpenMedia?.(message.id, attachment.id, play);
-              return (
-                <div
-                  key={attachment.id}
-                  data-slot="superchat-message-attachment"
-                  className={cn(
-                    'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
-                    message.status === 'error' &&
-                      'border border-red-300 dark:border-red-700'
-                  )}
-                >
-                  {renderMessageMedia?.({
-                    message,
-                    attachment,
-                    open,
-                    launchId,
-                    maxSize: mediaMaxSize,
-                  }) ?? (
-                    <MessageMedia
-                      attachment={attachment}
-                      maxSize={mediaMaxSize}
-                      openLabel={openMediaLabel}
-                      playLabel={playMediaLabel}
-                      errorLabel={mediaErrorLabel}
-                      retryLabel={mediaRetryLabel}
-                      launchId={launchId}
-                      onOpen={onOpenMedia ? open : undefined}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
         {/* w-full keeps this row at thread width even under the column's
             items-end (self messages), preserving the 85% cap's meaning; the
             row direction places the bubble on the correct side. */}
@@ -1220,6 +1170,56 @@ export const MessageRow = React.memo(function MessageRow({
                 </>
               )}
             </ChatBubble>
+          </div>
+        )}
+
+        {/* Attachments follow the text, each its own tile on the author's
+            side, as in a messaging app: a picture is never framed by the text
+            bubble, and the tile takes the bubble's corners whatever the host
+            draws in it. */}
+        {hasMedia && (
+          <div
+            data-slot="superchat-message-attachments"
+            className={cn(
+              'flex w-full flex-col gap-1',
+              isSelf ? 'items-end' : 'items-start'
+            )}
+          >
+            {message.media?.map((attachment) => {
+              const launchId = JSON.stringify([message.id, attachment.id]);
+              const open = (play?: boolean) =>
+                onOpenMedia?.(message.id, attachment.id, play);
+              return (
+                <div
+                  key={attachment.id}
+                  data-slot="superchat-message-attachment"
+                  className={cn(
+                    'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
+                    message.status === 'error' &&
+                      'border border-red-300 dark:border-red-700'
+                  )}
+                >
+                  {renderMessageMedia?.({
+                    message,
+                    attachment,
+                    open,
+                    launchId,
+                    maxSize: mediaMaxSize,
+                  }) ?? (
+                    <MessageMedia
+                      attachment={attachment}
+                      maxSize={mediaMaxSize}
+                      openLabel={openMediaLabel}
+                      playLabel={playMediaLabel}
+                      errorLabel={mediaErrorLabel}
+                      retryLabel={mediaRetryLabel}
+                      launchId={launchId}
+                      onOpen={onOpenMedia ? open : undefined}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

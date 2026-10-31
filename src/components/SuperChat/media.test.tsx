@@ -221,7 +221,7 @@ describe('SuperChat media view', () => {
     expect(card).toHaveClass('max-w-full');
   });
 
-  it("gives attachments their own tiles before the text, on the author's side", () => {
+  it("gives attachments their own tiles after the text, on the author's side", () => {
     const { container, rerender } = render(
       <SuperChat conversation={conversation} currentParticipantId="alex" />
     );
@@ -230,12 +230,12 @@ describe('SuperChat media view', () => {
       '[data-slot="superchat-message-attachment"]'
     );
     expect(tiles).toHaveLength(2);
-    // Not inside the text bubble, and ahead of it.
+    // Not inside the text bubble, and after it.
     expect(
       bubble?.querySelector('[data-slot="superchat-message-media"]')
     ).toBeNull();
     expect(
-      tiles[1].compareDocumentPosition(bubble!) &
+      bubble!.compareDocumentPosition(tiles[0]) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
