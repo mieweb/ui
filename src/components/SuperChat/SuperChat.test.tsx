@@ -1114,6 +1114,8 @@ describe('SuperChat', () => {
 
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     expect(onMessageEdited).toHaveBeenCalledWith('m1', 'edited body', {
+      removedMedia: [],
+      removedFiles: [],
       conversation,
     });
   });

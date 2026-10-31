@@ -15,6 +15,7 @@ import {
   Ellipsis as EllipsisIcon,
   Loader2,
   Pencil as PencilIcon,
+  X as XIcon,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Avatar } from '../Avatar';
@@ -40,6 +41,7 @@ import type {
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatAttachmentLabels,
+  SuperChatMessageEdits,
   SuperChatRef,
   SuperChatRenderMessageMedia,
 } from './types';
@@ -672,7 +674,11 @@ interface MessageRowProps {
   /** Whether self-authored text messages expose an inline "Edit" affordance. */
   editable?: boolean;
   /** Save handler for an inline message edit (bound to this message's id). */
-  onMessageEdited?: (messageId: string, text: string) => void;
+  onMessageEdited?: (
+    messageId: string,
+    text: string,
+    edits: SuperChatMessageEdits
+  ) => void;
   /** Format for the default copy action — Ctrl/Cmd-click on the footer copy
    * button (defaults to `'rich'`). */
   defaultCopyFormat?: SuperChatCopyFormat;
@@ -768,13 +774,31 @@ export const MessageRow = React.memo(function MessageRow({
     (message.content?.length ?? 0) > 0 ||
     hasMedia ||
     hasFiles;
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(message.text ?? '');
+  // Attachments the author takes off while editing (media and file ids).
+  const [removed, setRemoved] = React.useState<SuperChatMessageEdits>({
+    removedMedia: [],
+    removedFiles: [],
+  });
+  // While editing, what the author has taken off is gone from the message.
+  const shownMedia = isEditing
+    ? (message.media ?? []).filter(
+        (attachment) => !removed.removedMedia.includes(attachment.id)
+      )
+    : (message.media ?? []);
+  const shownFiles = isEditing
+    ? (message.files ?? []).filter(
+        (file) => !removed.removedFiles.includes(file.id)
+      )
+    : (message.files ?? []);
   const failed = message.status === 'error';
   const sending = message.status === 'pending';
   // Each attachment with its open action and the host's card for it, if the
   // host draws one. Two or more pictures the host doesn't draw share one
   // gallery (which opens the media view); anything else is its own tile, so
   // a host's card keeps its own controls.
-  const entries = (message.media ?? []).map((attachment) => {
+  const entries = shownMedia.map((attachment) => {
     const launchId = JSON.stringify([message.id, attachment.id]);
     const open = (play?: boolean) =>
       onOpenMedia?.(message.id, attachment.id, play);
@@ -794,8 +818,6 @@ export const MessageRow = React.memo(function MessageRow({
       )
     : [];
   const gallery: MessageMediaEntry[] = pictures.length > 1 ? pictures : [];
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [draft, setDraft] = React.useState(message.text ?? '');
   // The bubble holds the text; a message that is only attachments has none.
   const showBubble =
     isEditing ||
@@ -961,12 +983,22 @@ export const MessageRow = React.memo(function MessageRow({
       setEditMinWidth(contentWidth > 0 ? contentWidth : undefined);
     }
     setDraft(message.text ?? '');
+    setRemoved({ removedMedia: [], removedFiles: [] });
     setIsEditing(true);
   };
   const cancelEdit = () => setIsEditing(false);
+  const removedAny =
+    removed.removedMedia.length > 0 || removed.removedFiles.length > 0;
+  const editChanged =
+    removedAny || (!!draft.trim() && draft.trim() !== message.text);
   const saveEdit = () => {
-    const next = draft.trim();
-    if (next && next !== message.text) onMessageEdited?.(message.id, next);
+    if (editChanged) {
+      onMessageEdited?.(
+        message.id,
+        draft.trim() || message.text || '',
+        removed
+      );
+    }
     setIsEditing(false);
   };
 
@@ -1177,6 +1209,57 @@ export const MessageRow = React.memo(function MessageRow({
                     aria-label="Edit message"
                     className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
                   />
+                  {shownMedia.length + shownFiles.length > 0 && (
+                    // The message's attachments, each one the author can take
+                    // off; Cancel puts them all back.
+                    <ul
+                      data-slot="superchat-message-editor-attachments"
+                      aria-label="Attachments"
+                      className="flex flex-wrap gap-1.5"
+                    >
+                      {[
+                        ...shownMedia.map((attachment) => ({
+                          id: attachment.id,
+                          name:
+                            attachment.title ??
+                            attachment.alt ??
+                            attachment.kind,
+                          remove: () =>
+                            setRemoved((was) => ({
+                              ...was,
+                              removedMedia: [
+                                ...was.removedMedia,
+                                attachment.id,
+                              ],
+                            })),
+                        })),
+                        ...shownFiles.map((file) => ({
+                          id: file.id,
+                          name: file.name,
+                          remove: () =>
+                            setRemoved((was) => ({
+                              ...was,
+                              removedFiles: [...was.removedFiles, file.id],
+                            })),
+                        })),
+                      ].map((item) => (
+                        <li
+                          key={item.id}
+                          className="flex max-w-full items-center gap-1 rounded-full bg-white/15 py-0.5 ps-2.5 pe-1 text-xs"
+                        >
+                          <span className="truncate">{item.name}</span>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${item.name}`}
+                            onClick={item.remove}
+                            className="rounded-full p-0.5 hover:bg-white/20"
+                          >
+                            <XIcon size={12} aria-hidden="true" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
@@ -1188,7 +1271,7 @@ export const MessageRow = React.memo(function MessageRow({
                     <button
                       type="button"
                       onClick={saveEdit}
-                      disabled={!draft.trim() || draft.trim() === message.text}
+                      disabled={!editChanged}
                       className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
                     >
                       Save
@@ -1298,7 +1381,7 @@ export const MessageRow = React.memo(function MessageRow({
             bubble, two or more pictures share one gallery, documents share
             one list, and every tile takes the bubble's corners whatever the
             host draws in it. */}
-        {(hasMedia || hasFiles) && (
+        {(shownMedia.length > 0 || shownFiles.length > 0) && (
           <div
             data-slot="superchat-message-attachments"
             className={cn(
@@ -1349,9 +1432,9 @@ export const MessageRow = React.memo(function MessageRow({
                 </AttachmentTile>
               );
             })}
-            {hasFiles && (
+            {shownFiles.length > 0 && (
               <AttachmentTile failed={failed} sending={sending}>
-                <MessageFiles files={message.files!} maxSize={mediaMaxSize} />
+                <MessageFiles files={shownFiles} maxSize={mediaMaxSize} />
               </AttachmentTile>
             )}
             {sending && (
@@ -1370,6 +1453,20 @@ export const MessageRow = React.memo(function MessageRow({
                 )}
               </p>
             )}
+          </div>
+        )}
+        {/* What the host says about the message (its team, a plan), small
+            under it: not its text, so not edited, copied or previewed. */}
+        {message.label && (
+          <div
+            data-slot="superchat-message-label"
+            className="max-w-[85%] text-xs text-neutral-500 dark:text-neutral-400 [&_a]:underline [&_p]:m-0"
+          >
+            {renderText(message.label, {
+              messageId: `${message.id}:label`,
+              streaming: false,
+              role: participant?.kind === 'human' ? 'user' : 'assistant',
+            })}
           </div>
         )}
       </div>

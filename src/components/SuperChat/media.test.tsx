@@ -585,6 +585,68 @@ describe('SuperChat media view', () => {
     ).toBe('0.75');
   });
 
+  it("shows a message's label under it, out of its text, its editor and its preview", async () => {
+    const user = userEvent.setup();
+    const labelled: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          media: undefined,
+          label: 'Plan · *Personal*',
+        },
+      ],
+    };
+    render(
+      <SuperChatInbox
+        conversations={[labelled]}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+      />
+    );
+    const label = document.querySelector(
+      '[data-slot="superchat-message-label"]'
+    );
+    expect(label).toHaveTextContent('Plan · Personal');
+    expect(
+      document.querySelector('[data-slot="superchat-bubble"]')
+    ).not.toHaveTextContent('Personal');
+    expect(screen.getByRole('list')).not.toHaveTextContent('Personal');
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
+      'First caption'
+    );
+  });
+
+  it('lets the author take an attachment off while editing', async () => {
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="alex"
+        onMessageEdited={onMessageEdited}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    const list = screen.getByRole('list', { name: 'Attachments' });
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+    // Save waits for a change; taking one off is one.
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    await user.click(
+      within(list).getByRole('button', { name: 'Remove Second image' })
+    );
+    expect(within(list).getAllByRole('listitem')).toHaveLength(1);
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onMessageEdited).toHaveBeenCalledWith(
+      'm1',
+      'First caption',
+      expect.objectContaining({ removedMedia: ['a2'], removedFiles: [] })
+    );
+  });
+
   it('leaves a text-only conversation on its existing thread surface', () => {
     render(
       <SuperChat

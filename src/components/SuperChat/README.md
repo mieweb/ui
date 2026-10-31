@@ -428,6 +428,12 @@ messages (matched by `currentParticipantId`) offer **Edit message** from the
 collapse into that menu — see [Copying messages](#copying-messages)). Saving
 calls back with the message id and new text;
 apply it to your state and stamp `editedAt` to surface the "(edited)" indicator.
+The editor also lists the message's attachments, each with a remove button: the
+callback's `removedMedia` / `removedFiles` are the ids the author took off.
+
+A message's `label` (Markdown, such as its team or plan) shows small under it.
+It isn't part of the text, so editing, copying and the conversation list's
+preview leave it out.
 
 ```tsx
 <SuperChat
