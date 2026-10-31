@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { RequiredMark } from '../Input';
-// Pinned to the legacy engine: Textarea's plain-text resync writes
-// `innerHTML` straight into the editable region, which would corrupt a
-// ProseMirror view — so it must not ride TextAreaRich's Kerebron surface.
-import { TextAreaRichLegacy } from '../TextAreaRich/TextAreaRichLegacy';
+import { TextAreaRichKerebron } from '../TextAreaRich/TextAreaRichKerebron';
 import { TextAreaPlain } from '../TextAreaPlain';
 import type { TextAreaPlainProps } from '../TextAreaPlain';
 
@@ -291,20 +288,11 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
     const hiddenRef = React.useRef<HTMLTextAreaElement>(null);
     const editorWrapperRef = React.useRef<HTMLDivElement>(null);
 
-    // Rejected-edit resync. When a controlled parent refuses an edit, the
-    // committed value never changes — the optimistic state above is reverted
-    // during the same render — so the editor's [value]-gated sync never
-    // fires and its DOM would keep the rejected text. Compare *plain* text
-    // (not HTML) so accepted edits keep the user's rich formatting.
-    React.useEffect(() => {
-      const editable =
-        editorWrapperRef.current?.querySelector<HTMLElement>(
-          '[role="textbox"]'
-        );
-      if (editable && htmlToPlain(editable.innerHTML) !== state.plain) {
-        editable.innerHTML = state.html;
-      }
-    });
+    // Rejected edits need no DOM poking here: the Kerebron surface is
+    // strictly controlled (it converges to `value` on every render — see
+    // RichEditor's `strictValue`), so when a controlled parent refuses an
+    // edit and the optimistic state above is reverted during the same
+    // render, the editor reloads the committed HTML transaction-safely.
 
     const focusEditor = React.useCallback(() => {
       editorWrapperRef.current
@@ -492,13 +480,17 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
               onKeyUp(retargetEvent(event) as unknown as MirrorKeyboardEvent))
           }
         >
-          <TextAreaRichLegacy
+          <TextAreaRichKerebron
             value={state.html}
             onChange={handleHtmlChange}
             placeholder={placeholder}
             disabled={disabled}
             readOnly={readOnly}
             id={id}
+            // Paste flattening: honored by the legacy engine (which the unit
+            // tests stub in — see src/test/textAreaRichKerebronStub); the
+            // Kerebron engine instead filters pastes through its ProseMirror
+            // schema, so markup never reaches the live document raw.
             sanitizeHtml={sanitizePastedHtml}
             aria-label={ariaLabel ?? label}
             aria-labelledby={ariaLabelledBy ?? externalLabelId}

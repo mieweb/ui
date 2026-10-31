@@ -125,6 +125,15 @@ export interface RichEditorProps {
    * how `value` is parsed and what `onChange`/`getContent()` emit.
    */
   valueType?: string;
+  /**
+   * Converge the document to `value` on every render, not only when the
+   * prop changes — native controlled-input semantics: when a host's
+   * `onChange` does not echo an edit back into `value`, the edit reverts.
+   * A rejected edit leaves the prop identity unchanged while the document
+   * moved on, which a change-gated reload can never see. Off by default,
+   * which tolerates read-once hosts that call `getContent()` on submit.
+   */
+  strictValue?: boolean;
 }
 
 export interface RichEditorHandle {
@@ -165,6 +174,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       editorKits: additionalEditorKits,
       modifyMenu,
       valueType = MARKDOWN_TYPE,
+      strictValue = false,
     },
     ref
   ) {
@@ -246,9 +256,19 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       syncReadState();
     }, [disabled, readOnly, syncReadState]);
 
+    // Runs after every render (no dependency array): a `strictValue` surface
+    // must converge even when the prop identity never changed — a rejected
+    // edit keeps `value` as-is while the document moved on. The
+    // `value === valueRef` guard keeps the common case free; non-strict
+    // hosts additionally require the prop itself to have changed (tracked
+    // manually below), preserving tolerance for read-once hosts.
+    const lastValuePropRef = useRef(value);
     useEffect(() => {
+      const propChanged = lastValuePropRef.current !== value;
+      lastValuePropRef.current = value;
       // In collab mode the CRDT owns the content; reloading would fight it.
       if (collab || value === valueRef.current) return;
+      if (!strictValue && !propChanged) return;
       valueRef.current = value;
       const editor = editorInstance.current;
       if (!editor) return;
@@ -282,9 +302,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         console.error('Failed to load markdown:', error);
         onErrorRef.current?.(error);
       });
-      // `collab` is fixed for the lifetime of the instance.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value]);
+    });
 
     useEffect(() => {
       if (!hostRef.current) return;

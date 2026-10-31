@@ -2126,7 +2126,7 @@ test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
 });
 
 test.describe('Visual Regression Tests - TextAreaRich', () => {
-  const story = 'editors-textarearich--basic';
+  const story = 'deprecated-textarearich--basic';
   const wrapperSel = '[data-slot="rich-text-editor"][data-chromeless]';
   const editorSel = '[contenteditable="true"]';
 
@@ -2288,7 +2288,7 @@ test.describe('Visual Regression Tests - TextAreaRich', () => {
   }) => {
     // The compact condensed minimum must release when the macro panel —
     // absolutely stretched over the editor body — needs md working space.
-    await gotoStory(page, 'editors-textarearich--with-macros', {
+    await gotoStory(page, 'deprecated-textarearich--with-macros', {
       globals: 'density:condensed',
     });
     const editor = page.locator(editorSel);

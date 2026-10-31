@@ -389,22 +389,7 @@
     "motion": {
       "optional": true
     },
-    "@kerebron/editor": {
-      "optional": true
-    },
-    "@kerebron/editor-kits": {
-      "optional": true
-    },
-    "@kerebron/extension-basic-editor": {
-      "optional": true
-    },
-    "@kerebron/extension-menu": {
-      "optional": true
-    },
     "@kerebron/extension-yjs": {
-      "optional": true
-    },
-    "@kerebron/wasm": {
       "optional": true
     },
     "y-protocols": {

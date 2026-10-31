@@ -12,16 +12,16 @@ const meta: Meta<typeof TextAreaRich> = {
       description: {
         component: `### What it's for
 
-**The Kerebron-engined \`TextAreaRich\`.** Same textarea-like surface and the same \`TextAreaRichProps\` contract as [TextAreaRich](?path=/docs/editors-textarearich--docs) — bordered, one Input row tall, auto-growing, toolbar hidden until requested, block gutter menu, \`.shortcut\` macros, \`value\`/\`onChange\` carrying HTML — but the editor underneath is Kerebron's \`CoreEditor\` (ProseMirror) instead of the legacy \`document.execCommand\` engine. That buys a real document model: reliable undo, deterministic markdown block shortcuts, the stock Kerebron toolbar when revealed, and dictation inserted through transactions.
+**The Kerebron-engined \`TextAreaRich\`.** Same textarea-like surface and the same \`TextAreaRichProps\` contract as the deprecated [legacy TextAreaRich](?path=/docs/deprecated-textarearich--docs) — bordered, one Input row tall, auto-growing, toolbar hidden until requested, block gutter menu, \`.shortcut\` macros, \`value\`/\`onChange\` carrying HTML — but the editor underneath is Kerebron's \`CoreEditor\` (ProseMirror) instead of the legacy \`document.execCommand\` engine. That buys a real document model: reliable undo, deterministic markdown block shortcuts, the stock Kerebron toolbar when revealed, and dictation inserted through transactions.
 
-Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel — upgrading is an import-path change:
+Ships from the **\`@mieweb/ui/kerebron\`** entry — upgrading from the legacy surface is an import-path change:
 
 \`\`\`tsx
 import { TextAreaRich } from '@mieweb/ui/kerebron';
 import '@mieweb/ui/kerebron.css';
 \`\`\`
 
-Install the \`@kerebron/*\` peers and serve the WASM assets exactly as for [RichEditor](?path=/docs/editors-richeditor--docs) (same entry, same setup, including the \`patches/@kerebron__*\` fixes).
+Since 0.12 this engine also powers the main barrel's [Textarea](?path=/docs/text-inputs-textarea--docs), so the \`@kerebron/*\` runtime packages are **required peers** of \`@mieweb/ui\` (only the Yjs collab peers stay optional). Serve the WASM assets exactly as for [RichEditor](?path=/docs/editors-richeditor--docs) (same setup, including the \`patches/@kerebron__*\` fixes).
 
 ### Use it when
 
@@ -29,14 +29,14 @@ Install the \`@kerebron/*\` peers and serve the WASM assets exactly as for [Rich
 
 ### Don't use it when
 
-- The host cannot add the Kerebron peers, WASM assets, or \`kerebron.css\` — use the main-barrel [TextAreaRich](?path=/docs/editors-textarearich--docs), which needs none of them.
-- The consumer needs **plain text** — \`Textarea\`.
+- The consumer needs **plain text** — \`Textarea\` (same engine, plain-text contract).
 - The writer works in a full Markdown document with an always-on toolbar — \`RichEditor\`.
 
 ### Behavior deltas from the legacy engine
 
+- **Strictly controlled**, like a native input: an edit that \`onChange\` does not echo back into \`value\` reverts. (The legacy engine only applied \`value\` when the prop changed.)
 - The block gutter \`+\` button rests beside the field and docks inward on hover/focus (the legacy engine reserves the start padding permanently).
-- \`sanitizeHtml\`, \`variableGroups\` and \`markdownShortcuts\` from \`RichTextEditorProps\` are not yet honored — hosts relying on them should stay on the main-barrel surface.
+- \`sanitizeHtml\`, \`variableGroups\` and \`markdownShortcuts\` from \`RichTextEditorProps\` are not honored — pastes are filtered through the ProseMirror schema (instead of \`sanitizeHtml\`), markdown block shortcuts are always on, and \`{{variables}}\` need \`RichTextEditor\`.
 - Output HTML is ProseMirror-normalized (e.g. no \`style\` attributes from \`execCommand\`).`,
       },
     },
@@ -44,9 +44,14 @@ Install the \`@kerebron/*\` peers and serve the WASM assets exactly as for [Rich
       entry: '@mieweb/ui/kerebron',
       relationships: [
         {
+          type: 'supersedes',
+          target: 'deprecated-textarearich',
+          why: 'The legacy document.execCommand surface is deprecated; this one keeps the TextAreaRichProps contract on the ProseMirror document model, trading the @kerebron/* peers + kerebron.css for reliable undo and normalized HTML.',
+        },
+        {
           type: 'alternative to',
-          target: 'editors-textarearich',
-          why: 'Same TextAreaRichProps contract on the legacy engine with zero optional peers; this one trades peers + kerebron.css for the ProseMirror document model.',
+          target: 'text-inputs-textarea',
+          why: 'Textarea renders this same surface but flattens the value to plain text for forms and bindings; TextAreaRich hands the host the HTML to persist.',
         },
         {
           type: 'composes with',

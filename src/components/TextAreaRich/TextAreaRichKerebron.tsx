@@ -37,11 +37,14 @@ import { getSpeechRecognition, type SpeechRecognitionLike } from './speech';
  * Kerebron-backed TextAreaRich surface: ProseMirror underneath, the stock
  * Kerebron toolbar (hidden until requested), the block gutter menu, docked
  * macro panel, `.shortcut` expansion and dictation — same `TextAreaRichProps`
- * contract (`value`/`onChange` carry HTML) as the legacy surface.
+ * contract (`value`/`onChange` carry HTML) as the legacy surface, but
+ * strictly controlled like a native input: an edit that `onChange` does not
+ * echo back into `value` reverts (see {@link RichEditorProps.strictValue}).
  *
- * Exported as `TextAreaRich` from `@mieweb/ui/kerebron` (NOT the main
- * bundle) so `@kerebron/*` stays an optional peer: hosts opt in by switching
- * the import path, installing the peers, and loading `@mieweb/ui/kerebron.css`.
+ * Exported as `TextAreaRich` from `@mieweb/ui/kerebron`, and the engine
+ * behind the main bundle's `Textarea` — which is why the `@kerebron/*`
+ * runtime peers are required: hosts install them and load
+ * `@mieweb/ui/kerebron.css`. (Only the Yjs collab peers remain optional.)
  */
 
 /** Carries our keydown behaviors (macro shortcuts, Ctrl+/) into the editor. */
@@ -1120,6 +1123,7 @@ const TextAreaRichKerebron = React.forwardRef<
               value={value}
               onChange={handleChange}
               valueType="text/html"
+              strictValue
               modifyMenu={menuAddon.modifyMenu}
               editorKits={menuAddon.kits}
               onReady={handleReady}

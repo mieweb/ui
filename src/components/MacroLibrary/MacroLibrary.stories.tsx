@@ -73,7 +73,7 @@ const groups: MacroGroup[] = [
         },
         {
           type: 'composes with',
-          target: 'editors-textarearich',
+          target: 'deprecated-textarearich',
           why: 'TextAreaRich forwards its macros prop to the underlying RichTextEditor; the gutter menu’s “Show macro library” docks this panel beside the textarea-like surface.',
         },
         {
