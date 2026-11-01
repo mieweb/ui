@@ -249,6 +249,8 @@ export function MessageGallery({
             {last ? (
               <span
                 aria-hidden="true"
+                // "+3" in an RTL page too, not "3+".
+                dir="ltr"
                 className="absolute inset-0 flex items-center justify-center bg-black/55 text-2xl font-semibold text-white"
               >
                 +{more}

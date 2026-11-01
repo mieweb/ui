@@ -717,7 +717,8 @@ function AttachmentTile({
   children,
 }: {
   failed: boolean;
-  /** Still uploading: dimmed until it's sent. */
+  /** Still uploading: its pictures dimmed until it's sent (not its text,
+   * which has to stay readable). */
   sending: boolean;
   children: React.ReactNode;
 }) {
@@ -727,7 +728,7 @@ function AttachmentTile({
       className={cn(
         'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
         failed && 'border border-red-300 dark:border-red-700',
-        sending && 'opacity-60'
+        sending && '[&_img]:opacity-60 [&_video]:opacity-60'
       )}
     >
       {children}
@@ -866,12 +867,15 @@ export const MessageRow = React.memo(function MessageRow({
   // (system/ref rows simply never render the action surfaces).
 
   // Inline editing applies only to the local user's own plain-text messages
-  // (rich content blocks / streaming messages are not inline-editable).
+  // (rich content blocks / streaming messages are not inline-editable), and
+  // to one that is only attachments, with or without an empty `text`, so its
+  // attachments can be taken off.
   const canEdit =
     !!editable &&
     isSelf &&
     !streaming &&
-    typeof message.text === 'string' &&
+    (typeof message.text === 'string' ||
+      (message.text === undefined && (hasMedia || hasFiles))) &&
     !message.content?.length;
 
   // The Markdown source for copying: prefer the raw `text`, otherwise assemble

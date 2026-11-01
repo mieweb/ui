@@ -202,6 +202,8 @@ export const miewebUISafelist = [
   'dark:text-blue-300',
   'dark:text-violet-300',
   'dark:text-neutral-200',
+  '[&_img]:opacity-60',
+  '[&_video]:opacity-60',
   'size-5',
   '-me-1',
   '@max-md:basis-full',

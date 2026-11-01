@@ -360,6 +360,8 @@ describe('SuperChat media view', () => {
       'Open in media feed, Photo 4, 2 more'
     );
     expect(cells[3]).toHaveTextContent('+2');
+    // "+2" in an RTL page too, not "2+".
+    expect(screen.getByText('+2')).toHaveAttribute('dir', 'ltr');
 
     // A cell opens the media view at its own picture.
     await user.click(cells[1]);
@@ -517,9 +519,13 @@ describe('SuperChat media view', () => {
     expect(line).not.toHaveAttribute('role');
     expect(line).toHaveTextContent('Sending…45%');
     expect(status.contains(screen.getByText('45%'))).toBe(false);
-    expect(
-      document.querySelector('[data-slot="superchat-message-attachment"]')
-    ).toHaveClass('opacity-60');
+    // Its pictures dim; text on a tile (a file's name and size) stays
+    // readable.
+    const tile = document.querySelector(
+      '[data-slot="superchat-message-attachment"]'
+    );
+    expect(tile).toHaveClass('[&_img]:opacity-60', '[&_video]:opacity-60');
+    expect(tile).not.toHaveClass('opacity-60');
   });
 
   it('previews a last message with no text by what it carries, and markdown as plain text', () => {
@@ -732,37 +738,43 @@ describe('SuperChat media view', () => {
     expect(screen.getByRole('textbox', { name: 'Edit message' })).toBeVisible();
   });
 
-  it('offers Edit on a message that is only attachments', async () => {
-    const user = userEvent.setup();
-    const { container } = render(
-      <SuperChat
-        conversation={{
-          ...conversation,
-          thread: [{ ...conversation.thread[0], text: '' }],
-        }}
-        currentParticipantId="alex"
-        onMessageEdited={() => {}}
-      />
-    );
-    expect(
-      container.querySelector('[data-slot="superchat-bubble"]')
-    ).toBeNull();
-    // Beside the attachments, as it would be beside a bubble. Nothing to
-    // copy, so Edit is its only action.
-    const slot = container.querySelector<HTMLElement>(
-      '[data-slot="superchat-message-attachments"] > [data-slot="superchat-message-actions-slot"]'
-    )!;
-    expect(slot).toBeTruthy();
-    expect(
-      within(slot).queryByRole('button', { name: 'Copy message' })
-    ).toBeNull();
-    await user.click(
-      within(slot).getByRole('button', { name: 'Edit message' })
-    );
-    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
-      ''
-    );
-  });
+  it.each([
+    ['an empty text', ''],
+    ['no text at all', undefined],
+  ])(
+    'offers Edit on a message that is only attachments, with %s',
+    async (_, text) => {
+      const user = userEvent.setup();
+      const { container } = render(
+        <SuperChat
+          conversation={{
+            ...conversation,
+            thread: [{ ...conversation.thread[0], text }],
+          }}
+          currentParticipantId="alex"
+          onMessageEdited={() => {}}
+        />
+      );
+      expect(
+        container.querySelector('[data-slot="superchat-bubble"]')
+      ).toBeNull();
+      // Beside the attachments, as it would be beside a bubble. Nothing to
+      // copy, so Edit is its only action.
+      const slot = container.querySelector<HTMLElement>(
+        '[data-slot="superchat-message-attachments"] > [data-slot="superchat-message-actions-slot"]'
+      )!;
+      expect(slot).toBeTruthy();
+      expect(
+        within(slot).queryByRole('button', { name: 'Copy message' })
+      ).toBeNull();
+      await user.click(
+        within(slot).getByRole('button', { name: 'Edit message' })
+      );
+      expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
+        ''
+      );
+    }
+  );
 
   it('will not save an edit that takes off everything a message had', async () => {
     const user = userEvent.setup();
