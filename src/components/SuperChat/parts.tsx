@@ -690,7 +690,10 @@ interface MessageRowProps {
   ) => void;
   openMediaLabel?: string;
   playMediaLabel?: string;
-  /** Words on attachment tiles: a gallery's "3 more", "Sending…", "Couldn't load". */
+  /**
+   * Words on attachment tiles and in the editor: a gallery's "3 more",
+   * "Sending…", "Couldn't load", "Remove Whiteboard".
+   */
   attachmentLabels?: SuperChatAttachmentLabels;
   /** Localized preview load-error text (falls back to the player default). */
   mediaErrorLabel?: string;
@@ -706,10 +709,19 @@ interface MessageRowProps {
 
 /** English defaults for {@link SuperChatAttachmentLabels}. */
 export const DEFAULT_ATTACHMENT_LABELS: SuperChatAttachmentLabels = {
-  moreMedia: (count) => `${count} more`,
-  sending: (percent) =>
-    percent === undefined ? 'Sending…' : `Sending… ${percent}%`,
+  openMediaNamed: (name) => `Open in media feed, ${name}`,
+  playMediaNamed: (title) => `Play ${title}`,
+  moreMedia: (count, name) => `${name}, ${count} more`,
+  gallery: (count) => `Gallery, ${count} items`,
+  sending: 'Sending…',
+  sendingProgress: (percent) => `${percent}%`,
   mediaUnavailable: "Couldn't load",
+  editAttachments: 'Attachments',
+  removeAttachment: (name) => `Remove ${name}`,
+  attachmentName: (kind) =>
+    ({ image: 'Photo', video: 'Video', audio: 'Audio', youtube: 'Video' })[
+      kind
+    ],
 };
 
 /** One attachment tile beside a message: the bubble's cap and corners. */
@@ -719,7 +731,8 @@ function AttachmentTile({
   children,
 }: {
   failed: boolean;
-  /** Still uploading: dimmed until it's sent. */
+  /** Still uploading: its pictures dimmed until it's sent (not its text,
+   * which has to stay readable). */
   sending: boolean;
   children: React.ReactNode;
 }) {
@@ -729,7 +742,7 @@ function AttachmentTile({
       className={cn(
         'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
         failed && 'border border-red-300 dark:border-red-700',
-        sending && 'opacity-60'
+        sending && '[&_img]:opacity-60 [&_video]:opacity-60'
       )}
     >
       {children}
@@ -797,11 +810,14 @@ export const MessageRow = React.memo(function MessageRow({
   // Each attachment with its open action and the host's card for it, if the
   // host draws one. Two or more pictures the host doesn't draw share one
   // gallery (which opens the media view); anything else is its own tile, so
-  // a host's card keeps its own controls.
+  // a host's card keeps its own controls. None opens while the message is
+  // being edited: the media view would unmount this row and its draft.
   const entries = shownMedia.map((attachment) => {
     const launchId = JSON.stringify([message.id, attachment.id]);
-    const open = (play?: boolean) =>
-      onOpenMedia?.(message.id, attachment.id, play);
+    const open =
+      onOpenMedia && !isEditing
+        ? (play?: boolean) => onOpenMedia(message.id, attachment.id, play)
+        : undefined;
     const card =
       renderMessageMedia?.({
         message,
@@ -866,12 +882,15 @@ export const MessageRow = React.memo(function MessageRow({
   // (system/ref rows simply never render the action surfaces).
 
   // Inline editing applies only to the local user's own plain-text messages
-  // (rich content blocks / streaming messages are not inline-editable).
+  // (rich content blocks / streaming messages are not inline-editable), and
+  // to one that is only attachments, with or without an empty `text`, so its
+  // attachments can be taken off.
   const canEdit =
     !!editable &&
     isSelf &&
     !streaming &&
-    typeof message.text === 'string' &&
+    (typeof message.text === 'string' ||
+      (message.text === undefined && (hasMedia || hasFiles))) &&
     !message.content?.length;
 
   // The Markdown source for copying: prefer the raw `text`, otherwise assemble
@@ -991,8 +1010,13 @@ export const MessageRow = React.memo(function MessageRow({
     removed.removedMedia.length > 0 || removed.removedFiles.length > 0;
   const editChanged =
     removedAny || (!!draft.trim() && draft.trim() !== message.text);
+  // Taking every attachment off a message with no text would leave nothing.
+  const leavesSomething =
+    !!(draft.trim() || message.text) ||
+    shownMedia.length + shownFiles.length > 0;
+  const canSave = editChanged && leavesSomething;
   const saveEdit = () => {
-    if (editChanged) {
+    if (canSave) {
       onMessageEdited?.(
         message.id,
         draft.trim() || message.text || '',
@@ -1100,6 +1124,35 @@ export const MessageRow = React.memo(function MessageRow({
       : []),
   ];
 
+  // Edit and Copy sit beside the message's bubble, in the avatar's column on
+  // the outer side, level with the bubble and out of the row's flow, so the
+  // bubble keeps its edge in line with the attachments under it. A message
+  // that is only attachments has no bubble: they sit beside those instead,
+  // so it can still be edited. Revealed on hover or focus; on a long message
+  // the ⋯ sticks to the bottom of the view.
+  const actionsSlot = hasActions && (
+    <div
+      data-slot="superchat-message-actions-slot"
+      className={cn(
+        'absolute inset-y-0 flex w-6 flex-col items-center justify-end gap-0.5',
+        isSelf ? '-end-8' : '-start-8'
+      )}
+    >
+      <MessageOverflowMenu
+        isSelf={isSelf}
+        actions={actions}
+        footerVisible={collapseToMenu ? false : footerVisible}
+      />
+      {!collapseToMenu && (
+        <MessageActionsBar
+          ref={actionsBarRef}
+          actions={actions}
+          isSelf={isSelf}
+        />
+      )}
+    </div>
+  );
+
   return (
     <div
       data-slot="superchat-message"
@@ -1174,33 +1227,7 @@ export const MessageRow = React.memo(function MessageRow({
               isSelf ? 'flex-row-reverse' : 'flex-row'
             )}
           >
-            {/* Edit and Copy belong to the text: beside its bubble, in the
-                avatar's column on the outer side, level with the bubble and
-                out of the row's flow, so the bubble keeps its edge in line
-                with the attachments under it. Revealed on hover or focus; on a
-                long message the ⋯ sticks to the bottom of the view. */}
-            {hasActions && (
-              <div
-                data-slot="superchat-message-actions-slot"
-                className={cn(
-                  'absolute inset-y-0 flex w-6 flex-col items-center justify-end gap-0.5',
-                  isSelf ? '-end-8' : '-start-8'
-                )}
-              >
-                <MessageOverflowMenu
-                  isSelf={isSelf}
-                  actions={actions}
-                  footerVisible={collapseToMenu ? false : footerVisible}
-                />
-                {!collapseToMenu && (
-                  <MessageActionsBar
-                    ref={actionsBarRef}
-                    actions={actions}
-                    isSelf={isSelf}
-                  />
-                )}
-              </div>
-            )}
+            {showBubble && actionsSlot}
             <ChatBubble
               ref={bubbleRef}
               data-slot="superchat-bubble"
@@ -1241,7 +1268,7 @@ export const MessageRow = React.memo(function MessageRow({
                     // off; Cancel puts them all back.
                     <ul
                       data-slot="superchat-message-editor-attachments"
-                      aria-label="Attachments"
+                      aria-label={attachmentLabels.editAttachments}
                       className="flex flex-wrap gap-1.5"
                     >
                       {[
@@ -1250,7 +1277,7 @@ export const MessageRow = React.memo(function MessageRow({
                           name:
                             attachment.title ??
                             attachment.alt ??
-                            attachment.kind,
+                            attachmentLabels.attachmentName(attachment.kind),
                           remove: () =>
                             setRemoved((was) => ({
                               ...was,
@@ -1277,7 +1304,9 @@ export const MessageRow = React.memo(function MessageRow({
                           <span className="truncate">{item.name}</span>
                           <button
                             type="button"
-                            aria-label={`Remove ${item.name}`}
+                            aria-label={attachmentLabels.removeAttachment(
+                              item.name
+                            )}
                             onClick={item.remove}
                             className="rounded-full p-0.5 hover:bg-white/20"
                           >
@@ -1298,7 +1327,7 @@ export const MessageRow = React.memo(function MessageRow({
                     <button
                       type="button"
                       onClick={saveEdit}
-                      disabled={!editChanged}
+                      disabled={!canSave}
                       className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
                     >
                       Save
@@ -1389,10 +1418,11 @@ export const MessageRow = React.memo(function MessageRow({
           <div
             data-slot="superchat-message-attachments"
             className={cn(
-              'flex w-full flex-col gap-1',
+              'relative flex w-full flex-col gap-1',
               isSelf ? 'items-end' : 'items-start'
             )}
           >
+            {!showBubble && actionsSlot}
             {entries.map((entry) => {
               if (gallery.includes(entry)) {
                 // The gallery stands where its first picture was.
@@ -1407,8 +1437,7 @@ export const MessageRow = React.memo(function MessageRow({
                       maxSize={mediaMaxSize}
                       openLabel={openMediaLabel}
                       playLabel={playMediaLabel}
-                      moreLabel={attachmentLabels.moreMedia}
-                      unavailableLabel={attachmentLabels.mediaUnavailable}
+                      labels={attachmentLabels}
                     />
                   </AttachmentTile>
                 ) : null;
@@ -1426,11 +1455,12 @@ export const MessageRow = React.memo(function MessageRow({
                       maxSize={mediaMaxSize}
                       openLabel={openMediaLabel}
                       playLabel={playMediaLabel}
+                      labels={attachmentLabels}
                       errorLabel={mediaErrorLabel}
                       retryLabel={mediaRetryLabel}
-                      unavailableLabel={attachmentLabels.mediaUnavailable}
                       launchId={launchId}
-                      onOpen={onOpenMedia ? open : undefined}
+                      mediaView={!!onOpenMedia}
+                      onOpen={open}
                     />
                   )}
                 </AttachmentTile>
@@ -1442,18 +1472,22 @@ export const MessageRow = React.memo(function MessageRow({
               </AttachmentTile>
             )}
             {sending && (
+              // "Sending…" is announced once; the percent beside it changes
+              // with every tick, so it is shown but not announced.
               <p
                 data-slot="superchat-message-sending"
-                role="status"
                 className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
               >
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                {attachmentLabels.sending(
-                  message.progress === undefined
-                    ? undefined
-                    : Math.round(
+                <span role="status">{attachmentLabels.sending}</span>
+                {message.progress !== undefined && (
+                  <span>
+                    {attachmentLabels.sendingProgress(
+                      Math.round(
                         Math.min(1, Math.max(0, message.progress)) * 100
                       )
+                    )}
+                  </span>
                 )}
               </p>
             )}

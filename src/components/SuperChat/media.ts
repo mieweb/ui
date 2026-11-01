@@ -56,13 +56,17 @@ export function previewOfAttachments(attachments: {
     .join(', ');
 }
 
-/** Markdown as one line of plain text: what a preview shows of a message. */
+/**
+ * Markdown as one line of plain text: what a preview shows of a message.
+ * Emphasis counts only between word boundaries, so the underscores in a file
+ * name or a link (`file_name_v2.pdf`, `/a_b_c`) stay as they are.
+ */
 function plainText(markdown: string): string {
   return markdown
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+\.)\s+/gm, '')
-    .replace(/(\*\*|__|~~|\*|_|`)(\S(?:.*?\S)?)\1/g, '$2')
+    .replace(/(?<![\w*_])(\*\*|__|~~|\*|_|`)(\S(?:.*?\S)?)\1(?![\w*_])/g, '$2')
     .replace(/\s+/g, ' ')
     .trim();
 }

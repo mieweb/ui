@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Button } from '../Button';
@@ -12,33 +12,43 @@ import {
   DropdownSubmenu,
 } from './Dropdown';
 
+const box = (top: number, bottom: number) =>
+  ({
+    top,
+    bottom,
+    left: 0,
+    right: 200,
+    width: 200,
+    height: bottom - top,
+  }) as ReturnType<HTMLElement['getBoundingClientRect']>;
+
+/**
+ * A Dropdown inside a 100px scroller, with the trigger shown 10-42px down.
+ * jsdom lays nothing out, so moving `at` is what "scrolling" the trigger does.
+ */
+function renderInScroller(searchable = false) {
+  renderWithTheme(
+    <div data-testid="thread" style={{ overflow: 'auto', height: 100 }}>
+      <Dropdown searchable={searchable} trigger={<Button>Open menu</Button>}>
+        <DropdownItem>Alpha</DropdownItem>
+      </Dropdown>
+    </div>
+  );
+  const thread = screen.getByTestId('thread');
+  const trigger = screen.getByRole('button', { name: 'Open menu' });
+  // The Dropdown's own wrapper around the trigger is what it measures.
+  const anchor = trigger.parentElement!;
+  vi.spyOn(thread, 'getBoundingClientRect').mockReturnValue(box(0, 100));
+  const at = vi
+    .spyOn(anchor, 'getBoundingClientRect')
+    .mockReturnValue(box(10, 42));
+  return { thread, trigger, at };
+}
+
 describe('Dropdown', () => {
   it('closes once a scroll takes its trigger out of view, not for a nudge or one inside the menu', async () => {
     const user = userEvent.setup();
-    renderWithTheme(
-      <div data-testid="thread" style={{ overflow: 'auto', height: 100 }}>
-        <Dropdown trigger={<Button>Open menu</Button>}>
-          <DropdownItem>Alpha</DropdownItem>
-        </Dropdown>
-      </div>
-    );
-    const thread = screen.getByTestId('thread');
-    const trigger = screen.getByRole('button', { name: 'Open menu' });
-    // The Dropdown's own wrapper around the trigger is what it measures.
-    const anchor = trigger.parentElement!;
-    const box = (top: number, bottom: number) =>
-      ({
-        top,
-        bottom,
-        left: 0,
-        right: 200,
-        width: 200,
-        height: bottom - top,
-      }) as ReturnType<HTMLElement['getBoundingClientRect']>;
-    vi.spyOn(thread, 'getBoundingClientRect').mockReturnValue(box(0, 100));
-    const at = vi
-      .spyOn(anchor, 'getBoundingClientRect')
-      .mockReturnValue(box(10, 42));
+    const { thread, trigger, at } = renderInScroller();
     await user.click(trigger);
     fireEvent.scroll(screen.getByRole('menu'));
     expect(screen.getByRole('menu')).toBeInTheDocument();
@@ -50,6 +60,41 @@ describe('Dropdown', () => {
     at.mockReturnValue(box(-60, -28));
     fireEvent.scroll(thread);
     await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+
+  it('closes on a scroll that hides the trigger while the search field has focus', async () => {
+    const user = userEvent.setup();
+    const { thread, trigger, at } = renderInScroller(true);
+    await user.click(trigger);
+    const search = screen.getByRole('searchbox', {
+      name: 'Search dropdown items',
+    });
+    await waitFor(() => expect(search).toHaveFocus());
+    at.mockReturnValue(box(-60, -28));
+    fireEvent.scroll(thread);
+    await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+
+  it('stays open for the scroll the on-screen keyboard makes as it opens', async () => {
+    // jsdom has no visualViewport; an EventTarget stands in for it.
+    const viewport = new window.EventTarget();
+    vi.stubGlobal('visualViewport', viewport);
+    try {
+      const user = userEvent.setup();
+      const { thread, trigger, at } = renderInScroller(true);
+      await user.click(trigger);
+      await waitFor(() =>
+        expect(
+          screen.getByRole('searchbox', { name: 'Search dropdown items' })
+        ).toHaveFocus()
+      );
+      viewport.dispatchEvent(new Event('resize'));
+      at.mockReturnValue(box(-60, -28));
+      fireEvent.scroll(thread);
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('renders a search input when searchable is enabled', async () => {

@@ -100,7 +100,9 @@ describe('MediaPlayer overlay controls', () => {
 
   it('leaves speed to a larger player when it is small, keeping play and mute', () => {
     renderOverlay();
-    // Under 20rem wide (a card in a chat): a container query hides it.
+    // Under 20rem wide (a card in a chat): a container query hides it. jsdom
+    // can't evaluate container queries, so this checks the class; the
+    // "small" visual test checks the result in a browser.
     expect(
       screen.getByRole('button', { name: /^Playback speed/ }).className
     ).toContain('@max-xs:hidden');
@@ -286,6 +288,7 @@ describe('MediaPlayer overlay controls', () => {
       expect(exit).not.toHaveBeenCalled();
     } finally {
       HTMLElement.prototype.requestFullscreen = original;
+      delete (document as { exitFullscreen?: unknown }).exitFullscreen;
       Object.defineProperty(document, 'fullscreenElement', {
         configurable: true,
         value: null,
@@ -398,13 +401,15 @@ describe('MediaPlayer overlay controls', () => {
     try {
       renderOverlay();
       const toggle = screen.getByRole('button', { name: 'Show captions' });
-      expect(toggle).toHaveAttribute('aria-pressed', 'false');
+      // The label carries the state; aria-pressed as well would read
+      // "Hide captions, pressed".
+      expect(toggle).not.toHaveAttribute('aria-pressed');
       fireEvent.click(toggle);
       expect(track.mode).toBe('showing');
       act(() => listeners.get('change')?.());
       expect(
         screen.getByRole('button', { name: 'Hide captions' })
-      ).toHaveAttribute('aria-pressed', 'true');
+      ).not.toHaveAttribute('aria-pressed');
       fireEvent.click(screen.getByRole('button', { name: 'Hide captions' }));
       expect(track.mode).toBe('disabled');
     } finally {
@@ -446,6 +451,76 @@ describe('MediaPlayer overlay controls', () => {
     } finally {
       spy.mockRestore();
     }
+  });
+
+  it("lifts captions clear of the bar's controls, however small the player", () => {
+    const cues = [{ line: 'auto' }, { line: 2 }];
+    let onCueChange: ((event: Event) => void) | undefined;
+    const track = {
+      kind: 'captions',
+      mode: 'showing',
+      cues,
+      activeCues: [],
+      removeCue: vi.fn(),
+      addCue: vi.fn(),
+      addEventListener: (name: string, fn: (event: Event) => void) => {
+        if (name === 'cuechange') onCueChange = fn;
+      },
+      removeEventListener: () => {},
+    };
+    const list = Object.assign([track], {
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    });
+    vi.spyOn(HTMLMediaElement.prototype, 'textTracks', 'get').mockReturnValue(
+      list as unknown as globalThis.TextTrackList
+    );
+    // jsdom has no layout: a 170px-tall card whose bar is 80px, 8px of it the
+    // scrim's transparent top.
+    let videoHeight = 170;
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const height =
+          this.tagName === 'VIDEO'
+            ? videoHeight
+            : this.getAttribute('data-slot') === 'media-controls-bar'
+              ? 80
+              : 0;
+        return { height } as globalThis.DOMRect;
+      }
+    );
+    const { container } = renderOverlay();
+    const bar = container.querySelector<HTMLElement>(
+      '[data-slot="media-controls-bar"]'
+    )!;
+    bar.style.paddingTop = '8px';
+    act(() => onCueChange?.({ target: track } as unknown as Event));
+    // A line is 5% of 170px (8.5px): 72px of controls take 9 lines, so the cue
+    // sits on the 10th from the bottom. A fixed -4 would be under the bar.
+    expect(cues.map((cue) => cue.line)).toEqual([-10, 2]);
+    // The player grows (full screen): the lifted cue moves, the placed one stays.
+    videoHeight = 340;
+    act(() => onCueChange?.({ target: track } as unknown as Event));
+    expect(cues.map((cue) => cue.line)).toEqual([-6, 2]);
+  });
+
+  it('cycles the speeds a host chooses', () => {
+    const { container } = render(
+      <MediaPlayer
+        src="clip.mp4"
+        controlsStyle="overlay"
+        playbackRates={[0.5, 1]}
+        aria-label="Clip"
+      />
+    );
+    const video = container.querySelector('video') as HTMLVideoElement;
+    const speed = () =>
+      screen.getByRole('button', { name: /^Playback speed / });
+    expect(speed()).toHaveAccessibleName('Playback speed 1×');
+    fireEvent.click(speed());
+    expect(video.playbackRate).toBe(0.5);
+    fireEvent.click(speed());
+    expect(video.playbackRate).toBe(1);
   });
 
   it('localizes every label', () => {

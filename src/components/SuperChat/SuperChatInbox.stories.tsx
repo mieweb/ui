@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DateTime } from 'luxon';
 import { Heart, Play, Reply } from 'lucide-react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { SuperChatInbox, createMarkdownRenderer } from './index';
 import { fullHeightChat } from '../../../.storybook/full-height';
 import {
@@ -24,6 +25,7 @@ import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { createMediaConversations } from './mediaStoryData';
 import type {
   SuperChatMediaAttachment,
+  SuperChatMessageEdits,
   SuperChatMessageMediaRenderProps,
   SuperChatRenderMessageMedia,
   SuperChatView,
@@ -61,7 +63,7 @@ const meta: Meta<typeof SuperChatInbox> = {
     mediaLabels: {
       control: false,
       description:
-        'Localized return control, attachment actions and unknown author labels.',
+        'Localized media wording, for the panel and the list: Back, open/play and their named forms (`openMediaNamed`, `playMediaNamed`), the gallery and its "+N" cell (`gallery`, `moreMedia`), "Sending…" (`sending`, `sendingProgress`), a tile that didn\'t load (`mediaUnavailable`), the editor\'s attachments (`editAttachments`, `removeAttachment`, `attachmentName`), the list\'s preview of an attachment-only message (`attachmentsPreview`) and `unknownAuthor`. English by default.',
       table: { category: 'Rendering' },
     },
     mediaFeedProps: {
@@ -81,6 +83,24 @@ const meta: Meta<typeof SuperChatInbox> = {
       description:
         "The host's card for an attachment in the thread, in place of the built-in one. Receives `{ message, attachment, open, launchId, maxSize }`; put `launchId` on the card's control as `data-media-launch-id`, and fit the card in `maxSize` both ways at the clip's own shape.",
       table: { category: 'Slots' },
+    },
+    acceptedFileTypes: {
+      control: false,
+      description:
+        "Kinds of file the composer takes (`image`, `video`, `audio`, `pdf`, `document`); default `['image', 'video', 'audio', 'pdf']`.",
+      table: { category: 'Behavior' },
+    },
+    maxFileSize: {
+      control: 'number',
+      description:
+        'Largest file the composer takes, in bytes (default 25 MB); a larger one is refused through `onComposerError`.',
+      table: { category: 'Behavior' },
+    },
+    onComposerError: {
+      control: false,
+      description:
+        "Fired with `(message, context?)` when the composer refuses a file (too large, a type not accepted, over the attachment limit) or a send fails. `message` is English; word it yourself from `context.reason` (e.g. `'send-failed'`).",
+      table: { category: 'Callbacks' },
     },
     readOnly: {
       control: 'boolean',
@@ -131,7 +151,18 @@ const meta: Meta<typeof SuperChatInbox> = {
     linkBuilder: { control: false, table: { category: 'Rendering' } },
     listFooter: { control: false, table: { category: 'Behavior' } },
     className: { control: false },
-    onMessageSent: { control: false, table: { category: 'Callbacks' } },
+    onMessageSent: {
+      control: false,
+      description:
+        "Fired with `(text, { conversation, mentions, attachments })` on send. Return a promise to keep the send button busy (`isSending`, per conversation) until it settles; if it rejects, the text and files go back into the composer and `onComposerError` hears `'send-failed'`.",
+      table: { category: 'Callbacks' },
+    },
+    onMessageEdited: {
+      control: false,
+      description:
+        'Enables Edit on your own text messages. Fired with `(messageId, text, { conversation, removedMedia, removedFiles })`: the new text and the ids of the attachments the author removed in the editor.',
+      table: { category: 'Callbacks' },
+    },
     composerProps: { control: false, table: { category: 'Composer' } },
     onConversationOpened: { control: false, table: { category: 'Callbacks' } },
     onConversationClosed: { control: false, table: { category: 'Callbacks' } },
@@ -144,9 +175,9 @@ const meta: Meta<typeof SuperChatInbox> = {
       description: {
         component: `### What it's for
 
-**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
+**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`maxFileSize\`, \`onComposerError\`, \`mediaMaxSize\`, \`renderMessageMedia\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
 
-Messages can also carry explicit \`media: SuperChatMediaAttachment[]\` records (stable attachment ID, kind and source, with optional title/caption/poster). The thread opens by default. Press **Play** on an attachment to open that clip in the media feed; **Back to conversation** returns to the same reading position and draft. There is no header view toggle. \`view\` / \`onViewChange\` let the host control this navigation, and \`defaultView\` supplies the initial choice. The media view composes [MediaFeed](?path=/docs/media-mediafeed--docs), derives items through \`getConversationMediaItems\`, and keeps the conversation header and composer mounted (the header hides on a phone in the overlay layout). Both views address the same messages and participants. \`mediaFeedProps\` supplies feed playback configuration, labels, custom media and action slots; \`mediaLabels\` localizes the return control and attachment actions. Attachment upload and persistence still belong to the host. With \`mediaFeedProps.layout: 'overlay'\` the media view is mobile-first: each clip fills it edge to edge under touch-first controls, and on a phone, upright or sideways, it fills the screen above the message box, as a dialog (Escape goes back). Mount \`useKeyboardInset()\` once in the app shell for it: the panel sizes itself from the visible viewport that hook publishes, so the iOS keyboard doesn't cover the message box (with its \`native\` source, pad the composer by \`--mieweb-keyboard-inset\` as for any ChatComposer). \`renderMessageMedia\` lets the host draw its own card for an attachment in the thread. Open the **Media Conversation** stories for local examples.
+Messages can also carry explicit \`media: SuperChatMediaAttachment[]\` records (stable attachment ID, kind and source, with optional title/caption/poster). The thread opens by default. Press **Play** on an attachment to open that clip in the media feed; **Back to conversation** returns to the same reading position and draft. There is no header view toggle. \`view\` / \`onViewChange\` let the host control this navigation, and \`defaultView\` supplies the initial choice. The media view composes [MediaFeed](?path=/docs/media-mediafeed--docs), derives items through \`getConversationMediaItems\`, and keeps the conversation header and composer mounted (the header hides on a phone in the overlay layout). Both views address the same messages and participants. \`mediaFeedProps\` supplies feed playback configuration, labels, custom media and action slots; \`mediaLabels\` localizes the return control and attachment actions. Attachment upload and persistence still belong to the host. With \`mediaFeedProps.layout: 'overlay'\` the media view is mobile-first: each clip fills it edge to edge under touch-first controls, and on a phone, upright or sideways, it fills the screen above the message box, as a dialog (Escape goes back). Mount \`useKeyboardInset()\` once in the app shell for it: the panel sizes itself from the visible viewport that hook publishes, so the iOS keyboard doesn't cover the message box (with its \`native\` source, pad the composer by \`--mieweb-keyboard-inset\` as for any ChatComposer). \`renderMessageMedia\` lets the host draw its own card for an attachment in the thread. Open the **Media Conversation** stories for local examples, and **Attachment groups**, **Attachments sending** and **Editing attachments** for the thread's tiles: galleries, documents, labels, a message mid-send and taking attachments off in an edit.
 
 ### Use it when
 
@@ -767,7 +798,7 @@ export const MediaConversation: Story = {
     docs: {
       description: {
         story:
-          'Start in the conversation and press Play on a video to open that clip in an Instagram-style MediaFeed. Back to conversation restores the thread, its reading position and the draft. Both views use the same explicit message.media attachments, participants and source message ids. Reactions apply to the original message, and the shared composer still sends through host-owned conversation state. Videos are generated locally; select Planning to see a conversation without media.',
+          'Start in the conversation and press Play on a video to open that clip in an Instagram-style MediaFeed. Back to conversation restores the thread, its reading position and the draft. Both views use the same explicit message.media attachments, participants and source message ids. Reactions apply to the original message, and the shared composer still sends through host-owned conversation state. Captions come from `attachment.caption` (else the message text), with their links tappable: the one on the follow-up recording has a bare address, a Markdown link and a Wikipedia address with parentheses, and the one on Launch overview is long enough that the overlay layout cuts it at two lines with Show more. Videos are generated locally; select Planning to see a conversation without media.',
       },
     },
   },
@@ -843,10 +874,13 @@ function HostCard({
       type="button"
       data-media-launch-id={launchId}
       aria-label={label}
-      onClick={() => open(true)}
+      // No `open` while the message is being edited: the card stays put.
+      disabled={!open}
+      onClick={() => open?.(true)}
       style={{ width }}
-      // Inset ring: SuperChat's tile clips to the bubble's corners.
-      className="focus-visible:ring-ring relative block max-w-full focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+      // An inset outline, not a ring: SuperChat's tile clips to the bubble's
+      // corners, and a ring's shadow would sit under the full-width frame.
+      className="focus-visible:outline-ring relative block max-w-full focus-visible:outline-2 focus-visible:-outline-offset-2"
     >
       {attachment.poster ? (
         // The thumbnail: nothing of the video loads until it's played.
@@ -890,7 +924,7 @@ export const HostMediaCard: Story = {
     docs: {
       description: {
         story:
-          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view. The card shows the attachment's `poster` (a thumbnail, so nothing of the video loads until it's played) in the clip's shape, upright or wide, and sits in its own tile below the message's text, on the author's side, with the bubble's corners. Why not [VideoCard](?path=/docs/media-videocard--docs)? It is a 16:9 thumbnail that links out or runs a click; this card keeps the clip's own shape (an upright clip stays upright), falls back to the video's first frame with no poster, and carries `data-media-launch-id`. Use VideoCard for a video library or a YouTube link; draw a card like this one for attachments that open the media view.",
+          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view, and is left out while the message is being edited (leaving would lose the draft), so draw the control disabled then. The card shows the attachment's `poster` (a thumbnail, so nothing of the video loads until it's played) in the clip's shape, upright or wide, and sits in its own tile below the message's text, on the author's side, with the bubble's corners. Why not [VideoCard](?path=/docs/media-videocard--docs)? It is a 16:9 thumbnail that links out or runs a click; this card keeps the clip's own shape (an upright clip stays upright), falls back to the video's first frame with no poster, and carries `data-media-launch-id`. Use VideoCard for a video library or a YouTube link; draw a card like this one for attachments that open the media view.",
       },
     },
   },
@@ -944,7 +978,7 @@ export const MediaConversationPhoneRTL: Story = {
   render: () => <MediaConversationDemo layout="overlay" />,
 };
 
-/** A sample photo for the gallery story: a colour field with its caption. */
+/** A sample photo for the attachment stories: a colour field with its name. */
 function samplePhoto(hue: number, label: string, upright = false) {
   const canvas = document.createElement('canvas');
   canvas.width = upright ? 480 : 640;
@@ -963,7 +997,114 @@ function samplePhoto(hue: number, label: string, upright = false) {
   return canvas.toDataURL('image/png');
 }
 
-function AttachmentGroupsDemo() {
+/**
+ * A photo attachment named `id`. `sized` gives it its pixel size, as a host
+ * that stored it would: the tile takes its shape before the picture loads.
+ */
+function photo(
+  id: string,
+  hue: number,
+  { upright = false, sized = false } = {}
+): SuperChatMediaAttachment {
+  return {
+    id,
+    kind: 'image',
+    src: samplePhoto(hue, id, upright),
+    title: id,
+    alt: `Sample photo ${id}`,
+    ...(sized && { width: upright ? 480 : 640, height: upright ? 640 : 480 }),
+  };
+}
+
+const offsiteParticipants: SuperChatConversation['participants'] = [
+  { id: 'me', kind: 'human', name: 'Maya Chen' },
+  { id: 'luis', kind: 'human', name: 'Luis Rivera' },
+];
+
+/** The props the attachment stories take as args. */
+type AttachmentStoryArgs = Pick<
+  React.ComponentProps<typeof SuperChatInbox>,
+  'mediaMaxSize' | 'onMessageEdited'
+>;
+
+/** A saved edit, as the host keeps it: the new text and what came off. */
+type SavedEdit = SuperChatMessageEdits & { text: string; editedAt: string };
+
+/** The thread with the host's saved edits applied. */
+function withEdits(
+  conversations: SuperChatConversation[],
+  edits: Record<string, SavedEdit>
+): SuperChatConversation[] {
+  return conversations.map((conversation) => ({
+    ...conversation,
+    thread: conversation.thread.map((message) => {
+      const edit = edits[message.id];
+      return edit
+        ? {
+            ...message,
+            text: edit.text,
+            editedAt: edit.editedAt,
+            media: message.media?.filter(
+              (item) => !edit.removedMedia.includes(item.id)
+            ),
+            files: message.files?.filter(
+              (file) => !edit.removedFiles.includes(file.id)
+            ),
+          }
+        : message;
+    }),
+  }));
+}
+
+/**
+ * The host's side of attachments: it owns the thread, so a saved edit
+ * applies the new text and drops the attachments the author removed. The
+ * story's `onMessageEdited` action logs each edit in the Actions panel.
+ */
+function AttachmentsInbox({
+  conversations,
+  mediaMaxSize,
+  onMessageEdited,
+}: AttachmentStoryArgs & { conversations: SuperChatConversation[] }) {
+  const [edits, setEdits] = React.useState<Record<string, SavedEdit>>({});
+  const edited = React.useMemo(
+    () => withEdits(conversations, edits),
+    [conversations, edits]
+  );
+  return (
+    <SuperChatInbox
+      conversations={edited}
+      className="w-full"
+      currentParticipantId="me"
+      mediaMaxSize={mediaMaxSize}
+      mediaFeedProps={{ layout: 'overlay' }}
+      onMessageEdited={(messageId, text, meta) => {
+        onMessageEdited?.(messageId, text, meta);
+        setEdits((all) => {
+          const before = all[messageId];
+          return {
+            ...all,
+            [messageId]: {
+              text,
+              editedAt: new Date().toISOString(),
+              removedMedia: [
+                ...(before?.removedMedia ?? []),
+                ...meta.removedMedia,
+              ],
+              removedFiles: [
+                ...(before?.removedFiles ?? []),
+                ...meta.removedFiles,
+              ],
+            },
+          };
+        });
+      }}
+    />
+  );
+}
+
+/** Every kind of attachment tile, in one conversation. */
+function AttachmentGroupsDemo(args: AttachmentStoryArgs) {
   const [videoUrl, setVideoUrl] = React.useState<string>();
   React.useEffect(() => {
     let mounted = true;
@@ -972,37 +1113,41 @@ function AttachmentGroupsDemo() {
       mounted = false;
     };
   }, []);
-  const conversations = React.useMemo<SuperChatConversation[]>(() => {
-    const photo = (id: string, hue: number, upright = false) => ({
-      id,
-      kind: 'image' as const,
-      src: samplePhoto(hue, id, upright),
-      title: id,
-      alt: `Sample photo ${id}`,
-    });
-    return [
+  const conversations = React.useMemo<SuperChatConversation[]>(
+    () => [
       {
         id: 'offsite',
         title: 'Offsite',
-        participants: [
-          { id: 'me', kind: 'human', name: 'Maya Chen' },
-          { id: 'luis', kind: 'human', name: 'Luis Rivera' },
-        ],
+        participants: offsiteParticipants,
         thread: [
           {
             id: 'five',
             participantId: 'luis',
             time: '2026-10-03T09:00:00Z',
             text: 'Photos from the offsite. Five of them, so the last cell says how many more.',
+            label:
+              'Team **Design** · [Offsite plan](https://example.org/offsite)',
             media: [10, 50, 130, 200, 280].map((hue, i) =>
-              photo(`Photo ${i + 1}`, hue, i === 1)
+              photo(`Photo ${i + 1}`, hue, { upright: i === 1 })
             ),
+          },
+          {
+            id: 'four',
+            participantId: 'me',
+            time: '2026-10-03T09:01:00Z',
+            text: 'Four of mine fill the grid exactly.',
+            media: [
+              photo('Lobby', 190),
+              photo('Lunch', 40),
+              photo('Panel', 260),
+              photo('Sunset', 15),
+            ],
           },
           {
             id: 'two',
             participantId: 'me',
             time: '2026-10-03T09:02:00Z',
-            text: 'Two from my side.',
+            text: 'Two side by side.',
             media: [photo('Left', 320), photo('Right', 170)],
           },
           {
@@ -1025,13 +1170,39 @@ function AttachmentGroupsDemo() {
             id: 'one',
             participantId: 'me',
             time: '2026-10-03T09:05:00Z',
-            media: [photo('Group photo', 90, true)],
+            // Sized: the upright tile keeps its shape before the photo loads.
+            media: [photo('Group photo', 90, { upright: true, sized: true })],
+          },
+          {
+            id: 'unsized',
+            participantId: 'luis',
+            time: '2026-10-03T09:05:30Z',
+            // Not sized: the tile starts at 16:9 and takes the photo's shape
+            // once it loads.
+            media: [photo('Venue', 150)],
+          },
+          {
+            id: 'failed',
+            participantId: 'luis',
+            time: '2026-10-03T09:05:45Z',
+            text: 'This one never uploaded properly.',
+            media: [
+              {
+                id: 'broken',
+                kind: 'image',
+                // A source that can't be decoded: the tile says so.
+                src: 'data:image/png;base64,AAAA',
+                title: 'Whiteboard',
+                alt: 'The whiteboard after the planning session',
+              },
+            ],
           },
           {
             id: 'docs',
             participantId: 'me',
             time: '2026-10-03T09:06:00Z',
             text: 'The agenda and the budget, for review before Friday.',
+            label: 'Ticket [OPS-142](https://example.org/tickets/OPS-142)',
             files: [
               {
                 id: 'agenda',
@@ -1063,27 +1234,145 @@ function AttachmentGroupsDemo() {
           },
         ],
       },
-    ];
-  }, [videoUrl]);
-  return (
-    <SuperChatInbox
-      conversations={conversations}
-      currentParticipantId="me"
-      mediaFeedProps={{ layout: 'overlay' }}
-    />
+    ],
+    [videoUrl]
   );
+  return <AttachmentsInbox {...args} conversations={conversations} />;
 }
 
 export const AttachmentGroups: Story = {
   name: 'Attachment groups',
   decorators: [fullHeightChat],
+  args: { mediaMaxSize: '18rem', onMessageEdited: fn() },
   parameters: {
     docs: {
       description: {
         story:
-          "A message's attachments follow its text, on the author's side, as in iMessage, WhatsApp or Telegram. Two or more pictures (images, GIFs, video stills) share one gallery tile: two side by side, three as one large and two small, four or more in a 2×2 grid whose last cell says how many more. A cell opens the media view at its own picture. A lone picture is a tile in its own shape. Documents (`message.files`) share one list tile, each row with its type's icon, name, type and size, opening in a new tab; they never join the media view.",
+          "A message's attachments follow its text, on the author's side, as in iMessage, WhatsApp or Telegram. Two or more pictures (images, GIFs, video stills) share one gallery tile: two side by side, three as one large and two small, four in a 2×2 grid, five or more in the same grid with its last cell saying how many more. A cell opens the media view at its own picture. A lone picture is a tile in its own shape: one with `width` and `height` (Group photo) has that shape before it loads, one without (Venue) starts at 16:9 and takes its shape once loaded, and one that can't load (Whiteboard) says so. Documents (`message.files`) share one list tile, each row with its type's icon, name, type and size, opening in a new tab; they never join the media view. A message's `label` (Markdown) sits small under it. Change `mediaMaxSize` to resize every card, and edit one of Maya's messages to see `onMessageEdited` in the Actions panel, with the ids of any attachments removed.",
       },
     },
   },
-  render: () => <AttachmentGroupsDemo />,
+  render: (args) => <AttachmentGroupsDemo {...args} />,
+};
+
+/** Messages mid-send: the host shows them as `pending` while it uploads. */
+function AttachmentsSendingDemo(args: AttachmentStoryArgs) {
+  const conversations = React.useMemo<SuperChatConversation[]>(
+    () => [
+      {
+        id: 'offsite',
+        title: 'Offsite',
+        participants: offsiteParticipants,
+        thread: [
+          {
+            id: 'sent',
+            participantId: 'luis',
+            time: '2026-10-03T09:00:00Z',
+            text: 'Send me your photos when you can.',
+          },
+          {
+            id: 'uploading',
+            participantId: 'me',
+            time: '2026-10-03T09:02:00Z',
+            text: 'Uploading the ones from the stage.',
+            status: 'pending',
+            progress: 0.45,
+            media: [photo('Stage', 30), photo('Crowd', 230)],
+            files: [
+              {
+                id: 'setlist',
+                name: 'Setlist.pdf',
+                url: '#setlist',
+                size: 96_000,
+              },
+            ],
+          },
+          {
+            id: 'starting',
+            participantId: 'me',
+            time: '2026-10-03T09:03:00Z',
+            status: 'pending',
+            media: [photo('Group photo', 90, { upright: true, sized: true })],
+          },
+        ],
+      },
+    ],
+    []
+  );
+  return <AttachmentsInbox {...args} conversations={conversations} />;
+}
+
+export const AttachmentsSending: Story = {
+  name: 'Attachments sending',
+  decorators: [fullHeightChat],
+  args: { mediaMaxSize: '18rem' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'To show a message while its attachments upload, the host gives it `status: \'pending\'`: its tiles dim and "Sending…" shows under them, announced once (`role="status"`). With `progress` (0–1) the percent shows beside it ("45%"), updated as the host sets it but not re-announced; without it, as on the photo below, only "Sending…". Both words come from `mediaLabels.sending` and `sendingProgress`. An awaited `onMessageSent` keeps the send button busy meanwhile.',
+      },
+    },
+  },
+  render: (args) => <AttachmentsSendingDemo {...args} />,
+};
+
+/** Maya's own messages, each with attachments to take off in the editor. */
+function EditingAttachmentsDemo(args: AttachmentStoryArgs) {
+  const conversations = React.useMemo<SuperChatConversation[]>(
+    () => [
+      {
+        id: 'offsite',
+        title: 'Offsite',
+        participants: offsiteParticipants,
+        thread: [
+          {
+            id: 'mixed',
+            participantId: 'me',
+            time: '2026-10-03T09:00:00Z',
+            text: 'Three photos and the agenda. Open ⋯, then Edit message, to take any of them off.',
+            media: [
+              photo('Lobby', 190),
+              photo('Lunch', 40),
+              photo('Panel', 260),
+            ],
+            files: [
+              {
+                id: 'agenda',
+                name: 'Offsite agenda.pdf',
+                url: '#agenda',
+                size: 482_000,
+              },
+            ],
+          },
+          {
+            id: 'only-photo',
+            participantId: 'me',
+            time: '2026-10-03T09:02:00Z',
+            // Sent with no text: removing its photo would leave nothing, so
+            // Save stays disabled then.
+            text: '',
+            media: [photo('Group photo', 90, { upright: true, sized: true })],
+          },
+        ],
+      },
+    ],
+    []
+  );
+  return <AttachmentsInbox {...args} conversations={conversations} />;
+}
+
+export const EditingAttachments: Story = {
+  name: 'Editing attachments',
+  decorators: [fullHeightChat],
+  args: { mediaMaxSize: '18rem', onMessageEdited: fn() },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Choose **Edit message** beside one of Maya's messages (from its ⋯ menu when it has text): the editor lists the message's attachments, each with a Remove button (\"Remove Lobby\"; `mediaLabels.removeAttachment`). A removed one leaves the tiles at once and Cancel brings it back. While editing, the tiles don't open the media view, which would lose the draft. A removal alone can be saved, and Save reports it through `onMessageEdited` (see the Actions panel) as `removedMedia` / `removedFiles` ids for the host to drop; the demo drops them. Save stays disabled while the edit would leave nothing: remove the photo from the message sent without text to see it.",
+      },
+    },
+  },
+  render: (args) => <EditingAttachmentsDemo {...args} />,
 };

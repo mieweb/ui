@@ -26,6 +26,7 @@ together, so anything the inbox does you can rebuild from the two parts.
 - [Visual layout & anatomy](#visual-layout--anatomy)
 - [Vocabulary](#vocabulary)
 - [Props](#props)
+- [Conversation media](#conversation-media)
 - [Rich Markdown plugins](#rich-markdown-plugins)
 - [Accessibility](#accessibility)
 - [Related chat surfaces](#related-chat-surfaces) — how SuperChat compares to the AI, Messaging, and standalone chat modules
@@ -279,21 +280,32 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | **Active turn**              | `superchat-turn`              | `div`                         | —                             | `SuperChat`              | Wraps the freshly sent message and everything after it; reserves a viewport of space so the send anchors to the top (plain thread only).                    |
 | **Jump to bottom**           | `superchat-jump-to-bottom`    | `button`                      | `Scroll to bottom`            | `SuperChat`              | Floating ↓ shown while scrolled up; returns to the newest message (label gains a “New messages” hint — see [Scrolling & streaming](#scrolling--streaming)). |
 | **Composer**                 | `chat-composer`               | `div`                         | —                             | `SuperChat`              | The shared `ChatComposer`: `+` menu, mention-aware textarea, send button (sub-parts expose `chat-composer-*` slots).                                        |
+| **Media view**               | `superchat-media-view`        | `div`                         | —                             | `SuperChat`              | Takes the thread's place in the panel while the conversation's media is open, the composer below it. See [Conversation media](#conversation-media).         |
+| **Media Back**               | `superchat-media-back`        | `div`                         | —                             | `SuperChat`              | Holds the labelled **Back to conversation** button above the feed (stacked layout).                                                                         |
+| **Media stage**              | `superchat-media-stage`       | `div`                         | —                             | `SuperChat`              | Holds the `MediaFeed`; in the overlay layout, Back sits over the clip's top corner here.                                                                    |
 
 ### Message parts
 
-| Term                | `data-slot`                      | Element / role                         | Purpose                                                                                           |
-| ------------------- | -------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Message**         | `superchat-message`              | `div` · `article` (`"{name}, {time}"`) | One thread item from a participant.                                                               |
-| **Message gutter**  | `superchat-message-gutter`       | `div`                                  | Avatar column beside the bubble.                                                                  |
-| **Message actions** | `superchat-message-actions-slot` | `div`                                  | Beside the text bubble, on its outer side by the avatar: the overflow (⋯) and the actions bar.    |
-| **Message meta**    | `superchat-message-meta`         | `div`                                  | Author name, role label, and timestamp.                                                           |
-| **Bubble**          | `superchat-bubble`               | `div`                                  | The styled container holding rendered Markdown / rich blocks.                                     |
-| **Message actions** | `superchat-message-actions`      | `div`                                  | Hover-revealed icon stack at the end of the gutter; buttons expose `superchat-action-{id}` slots. |
-| **Overflow (⋯)**    | `superchat-overflow-button`      | `button` (`Message actions`)           | Sticky control that follows long messages, then hands off to the actions bar once it scrolls in.  |
-| **System message**  | `superchat-system-message`       | `div` · `status`                       | Centered system notice (joins, etc.).                                                             |
-| **Reference chip**  | `superchat-reference`            | `div` → `a`/`button`                   | A `ref` thread item (doc / rx / appt), linked via `linkBuilder`.                                  |
-| **Avatar**          | —                                | `img` or initials                      | Per-participant cue; color/avatar disambiguates concurrent agents.                                |
+| Term                     | `data-slot`                            | Element / role                         | Purpose                                                                                                                                    |
+| ------------------------ | -------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Message**              | `superchat-message`                    | `div` · `article` (`"{name}, {time}"`) | One thread item from a participant.                                                                                                        |
+| **Message gutter**       | `superchat-message-gutter`             | `div`                                  | Avatar column beside the bubble.                                                                                                           |
+| **Message actions slot** | `superchat-message-actions-slot`       | `div`                                  | Beside the text bubble, on its outer side by the avatar: the overflow (⋯) and the actions bar.                                             |
+| **Message meta**         | `superchat-message-meta`               | `div`                                  | Author name, role label, and timestamp.                                                                                                    |
+| **Bubble**               | `superchat-bubble`                     | `div`                                  | The styled container holding rendered Markdown / rich blocks.                                                                              |
+| **Message actions**      | `superchat-message-actions`            | `div`                                  | Hover-revealed icon stack in the actions slot, in the avatar's column level with the bubble; buttons expose `superchat-action-{id}` slots. |
+| **Overflow (⋯)**         | `superchat-overflow-button`            | `button` (`Message actions`)           | Sticky control that follows long messages, then hands off to the actions bar once it scrolls in.                                           |
+| **Editor attachments**   | `superchat-message-editor-attachments` | `ul` (`Attachments`)                   | While editing, the message's attachments, each with a remove button.                                                                       |
+| **Attachments**          | `superchat-message-attachments`        | `div`                                  | The tiles under the bubble, on the author's side.                                                                                          |
+| **Attachment tile**      | `superchat-message-attachment`         | `div`                                  | One tile: a picture, a clip, a gallery or the files list, with the bubble's corners.                                                       |
+| **Media card**           | `superchat-message-media`              | `div`                                  | The built-in card for one picture, clip or recording (`renderMessageMedia` replaces it).                                                   |
+| **Gallery**              | `superchat-message-gallery`            | `div`                                  | Two or more pictures sharing one tile; the last cell of four or more says how many more ("+N").                                            |
+| **Files**                | `superchat-message-files`              | `ul`                                   | `message.files` as a list, a row per document.                                                                                             |
+| **Sending**              | `superchat-message-sending`            | `p` · `status`                         | "Sending… N%" under a `pending` message's attachments.                                                                                     |
+| **Message label**        | `superchat-message-label`              | `div`                                  | `message.label`, small under the message.                                                                                                  |
+| **System message**       | `superchat-system-message`             | `div` · `status`                       | Centered system notice (joins, etc.).                                                                                                      |
+| **Reference chip**       | `superchat-reference`                  | `div` → `a`/`button`                   | A `ref` thread item (doc / rx / appt), linked via `linkBuilder`.                                                                           |
+| **Avatar**               | —                                      | `img` or initials                      | Per-participant cue; color/avatar disambiguates concurrent agents.                                                                         |
 
 ### Composer parts
 
@@ -307,16 +319,18 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 
 ### Data model
 
-| Term              | Type                                | Meaning                                                                                                                      |
-| ----------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Participant**   | [`Participant`](types.ts)           | An actor: `kind` is `human` \| `agent` \| `system`; carries `name`, optional `color`, `avatar`, `role`, `status`.            |
-| **Conversation**  | [`SuperChatConversation`](types.ts) | `participants` + an ordered `thread`, plus `title`, `unread`, `lastActivity`.                                                |
-| **Thread**        | `SuperChatMessage[]`                | Append-only list, **ordered by `time`**; concurrent agent replies interleave.                                                |
-| **Message**       | [`SuperChatMessage`](types.ts)      | A thread item: `participantId`, `text` and/or rich `content` blocks, `time`, `status`, optional `editedAt`/`ref`/`mentions`. |
-| **Reference**     | [`SuperChatRef`](types.ts)          | A linked entity (`doc`/`rx`/`appt`) rendered as a chip.                                                                      |
-| **Link builder**  | [`SuperChatLinkBuilder`](types.ts)  | `(ref) => href` for deep-linking reference chips.                                                                            |
-| **Render plugin** | [`SuperChatRenderPlugin`](types.ts) | Contributes remark/rehype plugins, node components, GenUI widgets, and a sanitize-schema fragment.                           |
-| **GenUI widget**  | [`GenUIWidgetEntry`](types.ts)      | A host-registered interactive widget rendered from a fenced ` ```genui ` block.                                              |
+| Term                 | Type                                   | Meaning                                                                                                                                                         |
+| -------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Participant**      | [`Participant`](types.ts)              | An actor: `kind` is `human` \| `agent` \| `system`; carries `name`, optional `color`, `avatar`, `role`, `status`.                                               |
+| **Conversation**     | [`SuperChatConversation`](types.ts)    | `participants` + an ordered `thread`, plus `title`, `unread`, `lastActivity`.                                                                                   |
+| **Thread**           | `SuperChatMessage[]`                   | Append-only list, **ordered by `time`**; concurrent agent replies interleave.                                                                                   |
+| **Message**          | [`SuperChatMessage`](types.ts)         | A thread item: `participantId`, `text` and/or rich `content` blocks, `time`, `status`, optional `editedAt`/`ref`/`mentions`/`media`/`files`/`label`/`progress`. |
+| **Media attachment** | [`SuperChatMediaAttachment`](types.ts) | A picture, clip or recording on a message (`MediaFeedMedia` plus an `id`, `title`, `caption`); shown as a tile and in the media view.                           |
+| **File attachment**  | [`SuperChatFileAttachment`](types.ts)  | A document on a message: `id`, `name`, `url`, optional `size`; listed under the message, opened in a new tab.                                                   |
+| **Reference**        | [`SuperChatRef`](types.ts)             | A linked entity (`doc`/`rx`/`appt`) rendered as a chip.                                                                                                         |
+| **Link builder**     | [`SuperChatLinkBuilder`](types.ts)     | `(ref) => href` for deep-linking reference chips.                                                                                                               |
+| **Render plugin**    | [`SuperChatRenderPlugin`](types.ts)    | Contributes remark/rehype plugins, node components, GenUI widgets, and a sanitize-schema fragment.                                                              |
+| **GenUI widget**     | [`GenUIWidgetEntry`](types.ts)         | A host-registered interactive widget rendered from a fenced ` ```genui ` block.                                                                                 |
 
 ---
 
@@ -327,70 +341,85 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 The combined surface. Owns active-conversation selection (controlled or
 uncontrolled).
 
-| Prop                          | Type                                          | Default            | Description                                                                                                                                                        |
-| ----------------------------- | --------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `conversations`               | `SuperChatConversation[]`                     | —                  | **Required.** All conversations (host-owned).                                                                                                                      |
-| `activeConversationId`        | `string`                                      | —                  | Controlled active conversation id.                                                                                                                                 |
-| `defaultActiveConversationId` | `string`                                      | first conversation | Uncontrolled initial active id.                                                                                                                                    |
-| `currentParticipantId`        | `string`                                      | —                  | The local user's id (drives alignment + compose identity).                                                                                                         |
-| `renderPlugins`               | `SuperChatRenderPlugin[]`                     | —                  | Opt-in rich Markdown plugins.                                                                                                                                      |
-| `renderTextContent`           | `AIRenderTextContent`                         | Markdown core      | Replace the entire text renderer (advanced).                                                                                                                       |
-| `trustedContent`              | `boolean`                                     | `false`            | Skip sanitization — **only** for host-authored content.                                                                                                            |
-| `readOnly`                    | `boolean`                                     | `false`            | Disable the composer.                                                                                                                                              |
-| `composerProps`               | `SuperChatComposerProps`                      | —                  | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`. |
-| `order`                       | `'asc' \| 'desc'`                             | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                     |
-| `virtualized`                 | `boolean`                                     | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                          |
-| `showSidebar`                 | `boolean`                                     | `true`             | Show the conversation list.                                                                                                                                        |
-| `listFooter`                  | `ReactNode`                                   | —                  | Content after the last conversation in the list (e.g. a "load older" control).                                                                                     |
-| `defaultMobileView`           | `'list' \| 'chat'`                            | `'list'`           | Pane shown first below the `sm` breakpoint; `'chat'` opens the active conversation.                                                                                |
-| `resizableSidebar`            | `boolean`                                     | `false`            | Show a divider (from `sm` up) the user can drag, or move with the arrow keys, Home and End, to resize the list. Double-click restores `defaultSidebarWidth`.       |
-| `sidebarWidth`                | `number`                                      | —                  | Controlled list width in px (from `sm` up).                                                                                                                        |
-| `defaultSidebarWidth`         | `number`                                      | `256`              | Uncontrolled starting width, and the width a double-click restores.                                                                                                |
-| `minSidebarWidth`             | `number`                                      | `200`              | Narrowest the divider can make the list.                                                                                                                           |
-| `maxSidebarWidth`             | `number`                                      | `480`              | Widest the divider can make the list; a narrow inbox lowers it so the panel keeps 240px.                                                                           |
-| `onSidebarWidthChange`        | `(width) => void`                             | —                  | Fired with the clamped width when a drag ends, or at once for a key press or double-click; persist it here.                                                        |
-| `sidebarResizeLabel`          | `string`                                      | —                  | Accessible name of the divider; defaults to "Resize conversation list".                                                                                            |
-| `linkBuilder`                 | `SuperChatLinkBuilder`                        | —                  | Build hrefs for `ref` thread items.                                                                                                                                |
-| `className`                   | `string`                                      | —                  | Extra classes on the root.                                                                                                                                         |
-| `onMessageSent`               | `(text, { conversation, mentions }) => void`  | —                  | Fired on send; `mentions` are the addressed participant ids.                                                                                                       |
-| `onMessageEdited`             | `(messageId, text, { conversation }) => void` | —                  | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                                                |
-| `onConversationOpened`        | `(conversation) => void`                      | —                  | Fired when a conversation is selected.                                                                                                                             |
-| `onConversationClosed`        | `(conversation) => void`                      | —                  | Shows a close button when provided.                                                                                                                                |
-| `onNewConversation`           | `() => void`                                  | —                  | Shows a "+" button in the list when provided.                                                                                                                      |
-| `onReferenceClick`            | `(ref) => void`                               | —                  | Fired when a reference chip is activated.                                                                                                                          |
+| Prop                          | Type                                                                      | Default            | Description                                                                                                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `conversations`               | `SuperChatConversation[]`                                                 | —                  | **Required.** All conversations (host-owned).                                                                                                                      |
+| `activeConversationId`        | `string`                                                                  | —                  | Controlled active conversation id.                                                                                                                                 |
+| `defaultActiveConversationId` | `string`                                                                  | first conversation | Uncontrolled initial active id.                                                                                                                                    |
+| `currentParticipantId`        | `string`                                                                  | —                  | The local user's id (drives alignment + compose identity).                                                                                                         |
+| `renderPlugins`               | `SuperChatRenderPlugin[]`                                                 | —                  | Opt-in rich Markdown plugins.                                                                                                                                      |
+| `renderTextContent`           | `AIRenderTextContent`                                                     | Markdown core      | Replace the entire text renderer (advanced).                                                                                                                       |
+| `trustedContent`              | `boolean`                                                                 | `false`            | Skip sanitization — **only** for host-authored content.                                                                                                            |
+| `readOnly`                    | `boolean`                                                                 | `false`            | Disable the composer.                                                                                                                                              |
+| `composerProps`               | `SuperChatComposerProps`                                                  | —                  | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`. |
+| `order`                       | `'asc' \| 'desc'`                                                         | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                     |
+| `virtualized`                 | `boolean`                                                                 | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                          |
+| `showSidebar`                 | `boolean`                                                                 | `true`             | Show the conversation list.                                                                                                                                        |
+| `listFooter`                  | `ReactNode`                                                               | —                  | Content after the last conversation in the list (e.g. a "load older" control).                                                                                     |
+| `defaultMobileView`           | `'list' \| 'chat'`                                                        | `'list'`           | Pane shown first below the `sm` breakpoint; `'chat'` opens the active conversation.                                                                                |
+| `resizableSidebar`            | `boolean`                                                                 | `false`            | Show a divider (from `sm` up) the user can drag, or move with the arrow keys, Home and End, to resize the list. Double-click restores `defaultSidebarWidth`.       |
+| `sidebarWidth`                | `number`                                                                  | —                  | Controlled list width in px (from `sm` up).                                                                                                                        |
+| `defaultSidebarWidth`         | `number`                                                                  | `256`              | Uncontrolled starting width, and the width a double-click restores.                                                                                                |
+| `minSidebarWidth`             | `number`                                                                  | `200`              | Narrowest the divider can make the list.                                                                                                                           |
+| `maxSidebarWidth`             | `number`                                                                  | `480`              | Widest the divider can make the list; a narrow inbox lowers it so the panel keeps 240px.                                                                           |
+| `onSidebarWidthChange`        | `(width) => void`                                                         | —                  | Fired with the clamped width when a drag ends, or at once for a key press or double-click; persist it here.                                                        |
+| `sidebarResizeLabel`          | `string`                                                                  | —                  | Accessible name of the divider; defaults to "Resize conversation list".                                                                                            |
+| `linkBuilder`                 | `SuperChatLinkBuilder`                                                    | —                  | Build hrefs for `ref` thread items.                                                                                                                                |
+| `className`                   | `string`                                                                  | —                  | Extra classes on the root.                                                                                                                                         |
+| `onMessageSent`               | `(text, { conversation, mentions }) => void`                              | —                  | Fired on send; `mentions` are the addressed participant ids.                                                                                                       |
+| `onMessageEdited`             | `(messageId, text, { conversation, removedMedia, removedFiles }) => void` | —                  | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                                                |
+| `onConversationOpened`        | `(conversation) => void`                                                  | —                  | Fired when a conversation is selected.                                                                                                                             |
+| `onConversationClosed`        | `(conversation) => void`                                                  | —                  | Shows a close button when provided.                                                                                                                                |
+| `onNewConversation`           | `() => void`                                                              | —                  | Shows a "+" button in the list when provided.                                                                                                                      |
+| `onReferenceClick`            | `(ref) => void`                                                           | —                  | Fired when a reference chip is activated.                                                                                                                          |
+
+It also passes `view`, `defaultView`, `onViewChange`, `mediaFeedProps`,
+`mediaLabels`, `renderMessageMedia`, `mediaMaxSize`, `acceptedFileTypes`,
+`maxFileSize` and `onComposerError` to the panel; see
+[`SuperChat`](#superchat-panel).
 
 ### `SuperChat` (panel)
 
 Renders exactly one conversation.
 
-| Prop                   | Type                                          | Default             | Description                                                                                                                                                        |
-| ---------------------- | --------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `conversation`         | `SuperChatConversation`                       | —                   | **Required.** The conversation to display.                                                                                                                         |
-| `currentParticipantId` | `string`                                      | —                   | The local user's id (drives alignment + compose identity).                                                                                                         |
-| `renderPlugins`        | `SuperChatRenderPlugin[]`                     | —                   | Opt-in rich Markdown plugins.                                                                                                                                      |
-| `renderTextContent`    | `AIRenderTextContent`                         | Markdown core       | Replace the entire text renderer (advanced).                                                                                                                       |
-| `trustedContent`       | `boolean`                                     | `false`             | Skip sanitization — **only** for host-authored content.                                                                                                            |
-| `readOnly`             | `boolean`                                     | `false`             | Disable the composer.                                                                                                                                              |
-| `composerProps`        | `SuperChatComposerProps`                      | —                   | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`. |
-| `order`                | `'asc' \| 'desc'`                             | `'asc'`             | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                     |
-| `virtualized`          | `boolean`                                     | `false`             | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                          |
-| `linkBuilder`          | `SuperChatLinkBuilder`                        | —                   | Build hrefs for `ref` thread items.                                                                                                                                |
-| `className`            | `string`                                      | —                   | Extra classes on the root.                                                                                                                                         |
-| `showHeader`           | `boolean`                                     | `true`              | Show the title/participants header. When `false`, the title stays as a visually hidden heading so the panel keeps its accessible name.                             |
-| `placeholder`          | `string`                                      | —                   | Composer placeholder (ignored when `readOnly`).                                                                                                                    |
-| `allowAttachments`     | `boolean`                                     | `true`              | Enable composer attachments without making the panel read-only.                                                                                                    |
-| `agents`               | `ChatComposerAgentOption[]`                   | —                   | Agents for the composer agent selector; the selector renders when non-empty.                                                                                       |
-| `selectedAgent`        | `string \| null`                              | —                   | Controlled selected agent id. The host owns agent state.                                                                                                           |
-| `onAgentChange`        | `(agentId) => void`                           | —                   | Fired when the user picks an agent.                                                                                                                                |
-| `modelSelectorProps`   | `ComposerModelSelectorProps`                  | —                   | Renders the composer model selector (controlled `models`/`value`/`onChange`). Omit to hide it, e.g. when only one model is allowed.                                |
-| `isStreaming`          | `boolean`                                     | `false`             | While true the send button becomes a stop button (requires `onStop`).                                                                                              |
-| `agentSelectorLabel`   | `string`                                      | `'Select agent'`    | Localized accessible label / empty-state text for the agent selector.                                                                                              |
-| `stopLabel`            | `string`                                      | `'Stop generating'` | Localized accessible label for the icon-only stop button.                                                                                                          |
-| `onStop`               | `() => void`                                  | —                   | Called when the user stops a streaming reply.                                                                                                                      |
-| `onMessageSent`        | `(text, { conversation, mentions }) => void`  | —                   | Fired on send; `mentions` are the addressed participant ids.                                                                                                       |
-| `onMessageEdited`      | `(messageId, text, { conversation }) => void` | —                   | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                                                |
-| `onConversationClosed` | `(conversation) => void`                      | —                   | Shows a close button when provided.                                                                                                                                |
-| `onReferenceClick`     | `(ref) => void`                               | —                   | Fired when a reference chip is activated.                                                                                                                          |
+| Prop                   | Type                                                                      | Default                              | Description                                                                                                                                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `conversation`         | `SuperChatConversation`                                                   | —                                    | **Required.** The conversation to display.                                                                                                                                                                                                                                       |
+| `currentParticipantId` | `string`                                                                  | —                                    | The local user's id (drives alignment + compose identity).                                                                                                                                                                                                                       |
+| `renderPlugins`        | `SuperChatRenderPlugin[]`                                                 | —                                    | Opt-in rich Markdown plugins.                                                                                                                                                                                                                                                    |
+| `renderTextContent`    | `AIRenderTextContent`                                                     | Markdown core                        | Replace the entire text renderer (advanced).                                                                                                                                                                                                                                     |
+| `trustedContent`       | `boolean`                                                                 | `false`                              | Skip sanitization — **only** for host-authored content.                                                                                                                                                                                                                          |
+| `readOnly`             | `boolean`                                                                 | `false`                              | Disable the composer.                                                                                                                                                                                                                                                            |
+| `composerProps`        | `SuperChatComposerProps`                                                  | —                                    | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`.                                                                                                               |
+| `order`                | `'asc' \| 'desc'`                                                         | `'asc'`                              | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                                                                                                                                   |
+| `virtualized`          | `boolean`                                                                 | `false`                              | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                                                                                                                                        |
+| `linkBuilder`          | `SuperChatLinkBuilder`                                                    | —                                    | Build hrefs for `ref` thread items.                                                                                                                                                                                                                                              |
+| `className`            | `string`                                                                  | —                                    | Extra classes on the root.                                                                                                                                                                                                                                                       |
+| `showHeader`           | `boolean`                                                                 | `true`                               | Show the title/participants header. When `false`, the title stays as a visually hidden heading so the panel keeps its accessible name.                                                                                                                                           |
+| `placeholder`          | `string`                                                                  | —                                    | Composer placeholder (ignored when `readOnly`).                                                                                                                                                                                                                                  |
+| `allowAttachments`     | `boolean`                                                                 | `true`                               | Enable composer attachments without making the panel read-only.                                                                                                                                                                                                                  |
+| `agents`               | `ChatComposerAgentOption[]`                                               | —                                    | Agents for the composer agent selector; the selector renders when non-empty.                                                                                                                                                                                                     |
+| `selectedAgent`        | `string \| null`                                                          | —                                    | Controlled selected agent id. The host owns agent state.                                                                                                                                                                                                                         |
+| `onAgentChange`        | `(agentId) => void`                                                       | —                                    | Fired when the user picks an agent.                                                                                                                                                                                                                                              |
+| `modelSelectorProps`   | `ComposerModelSelectorProps`                                              | —                                    | Renders the composer model selector (controlled `models`/`value`/`onChange`). Omit to hide it, e.g. when only one model is allowed.                                                                                                                                              |
+| `isStreaming`          | `boolean`                                                                 | `false`                              | While true the send button becomes a stop button (requires `onStop`).                                                                                                                                                                                                            |
+| `agentSelectorLabel`   | `string`                                                                  | `'Select agent'`                     | Localized accessible label / empty-state text for the agent selector.                                                                                                                                                                                                            |
+| `stopLabel`            | `string`                                                                  | `'Stop generating'`                  | Localized accessible label for the icon-only stop button.                                                                                                                                                                                                                        |
+| `onStop`               | `() => void`                                                              | —                                    | Called when the user stops a streaming reply.                                                                                                                                                                                                                                    |
+| `onMessageSent`        | `(text, { conversation, mentions }) => void`                              | —                                    | Fired on send; `mentions` are the addressed participant ids.                                                                                                                                                                                                                     |
+| `onMessageEdited`      | `(messageId, text, { conversation, removedMedia, removedFiles }) => void` | —                                    | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                                                                                                                                                              |
+| `onConversationClosed` | `(conversation) => void`                                                  | —                                    | Shows a close button when provided.                                                                                                                                                                                                                                              |
+| `onReferenceClick`     | `(ref) => void`                                                           | —                                    | Fired when a reference chip is activated.                                                                                                                                                                                                                                        |
+| `view`                 | `'thread' \| 'media'`                                                     | —                                    | Controlled view: the message thread, or the conversation's media.                                                                                                                                                                                                                |
+| `defaultView`          | `'thread' \| 'media'`                                                     | `'thread'`                           | Uncontrolled initial view.                                                                                                                                                                                                                                                       |
+| `onViewChange`         | `(view, { conversation }) => void`                                        | —                                    | Fired when the user opens the media view or goes back.                                                                                                                                                                                                                           |
+| `mediaFeedProps`       | `SuperChatMediaFeedProps`                                                 | —                                    | The media view's `MediaFeed` behaviour, labels and slots (e.g. `layout: 'overlay'`); the conversation supplies its items.                                                                                                                                                        |
+| `mediaLabels`          | `Partial<SuperChatMediaLabels>`                                           | English                              | Back, open/play (`openMediaNamed`, `playMediaNamed`), "+N" (`moreMedia`), `gallery`, "Sending…" (`sending`, `sendingProgress`), unavailable media, the editor's attachments (`editAttachments`, `removeAttachment`, `attachmentName`) and the list preview's attachment wording. |
+| `renderMessageMedia`   | `SuperChatRenderMessageMedia`                                             | —                                    | Draws an attachment in the thread in place of the built-in card. Keep it stable (`useCallback`).                                                                                                                                                                                 |
+| `mediaMaxSize`         | `number \| string`                                                        | `'18rem'`                            | The box an attachment card fits in, both ways.                                                                                                                                                                                                                                   |
+| `acceptedFileTypes`    | `AttachmentKind[]`                                                        | `['image', 'video', 'audio', 'pdf']` | File types the composer takes; see [Attaching files](#attaching-files).                                                                                                                                                                                                          |
+| `maxFileSize`          | `number` (bytes)                                                          | 25 MB                                | Largest file the composer takes.                                                                                                                                                                                                                                                 |
+| `onComposerError`      | `(message, context?) => void`                                             | —                                    | Fired when the composer refuses a file or a send fails; `context.reason` says why.                                                                                                                                                                                               |
 
 #### Composer agent & model selectors
 
@@ -419,6 +448,41 @@ The conversation switcher. Supports controlled or uncontrolled selection.
 
 ---
 
+## Conversation media
+
+A message's pictures, clips and recordings are `media` records
+(`SuperChatMediaAttachment`) and its documents are `files`
+(`SuperChatFileAttachment`). You upload what the composer hands you and write
+these records; SuperChat never turns Markdown links into attachments.
+
+**In the thread.** The text sits in the bubble and the attachments follow as
+tiles on the author's side, as in a messaging app; a message that is only
+attachments has no bubble. Two or more pictures share one gallery tile (four or
+more fill a 2×2 grid whose last cell shows how many more, "+N"), a lone picture
+keeps its own shape, and audio plays in its tile. `files` are one list under
+the media, each row opening its document in a new tab. Every card fits
+`mediaMaxSize`; `renderMessageMedia` draws your own card for an attachment.
+
+**Sending.** Await the upload in `onMessageSent`: the send button stays busy,
+and if the promise rejects the text and files go back into the composer. To
+show the message while it uploads, give it `status: 'pending'` and `progress`
+(0–1): its tiles dim and "Sending… 45%" shows under them.
+
+**The media view.** Opening an attachment replaces the thread with the
+conversation's media, every picture and clip in time order, starting at the
+one chosen. The header stays above it and the message box below, so people can
+reply while they watch; **Back to conversation** (or Escape) returns them to
+where they were reading. Links in a caption are tappable, as in the thread.
+Documents never appear there. Use `view` / `onViewChange` to drive it from your
+own navigation.
+
+`mediaFeedProps={{ layout: 'overlay' }}` makes the view dark and immersive,
+with Back over the clip's corner. On a phone the panel then covers the whole
+screen above the message box. Mount `useKeyboardInset()` (from `@mieweb/ui`)
+once in your app shell so the panel fits above the iOS keyboard.
+
+---
+
 ## Editing messages
 
 `SuperChat`/`SuperChatInbox` are controlled — the host owns `thread` state — so
@@ -428,8 +492,10 @@ messages (matched by `currentParticipantId`) offer **Edit message** from the
 collapse into that menu — see [Copying messages](#copying-messages)). Saving
 calls back with the message id and new text;
 apply it to your state and stamp `editedAt` to surface the "(edited)" indicator.
-The editor also lists the message's attachments, each with a remove button: the
-callback's `removedMedia` / `removedFiles` are the ids the author took off.
+The editor also lists the message's attachments, each with a **Remove** button.
+A removed one leaves the tiles while editing and Cancel brings it back; on save
+the callback's `removedMedia` / `removedFiles` are the ids the author took off,
+for you to drop from `media` / `files` (a removal alone can be saved).
 
 A message's `label` (Markdown, such as its team or plan) shows small under it.
 It isn't part of the text, so editing, copying and the conversation list's
@@ -496,7 +562,9 @@ or drag it onto the composer card, and it appears as a removable chip above the
 input. You can also open the **+** menu ("Add to message") and choose **Attach
 files** to pick files from disk (multiple selection supported). Images show a
 thumbnail; other files show a type icon with the file name. A draft can be sent
-with attachments only (no text required). Files over 25 MiB are rejected.
+with attachments only (no text required). The composer refuses a file over
+`maxFileSize` (25 MB by default), a type it doesn't accept, or more than 10
+files, and reports each through `onComposerError` so you can say why.
 
 ### Supported types
 
@@ -511,19 +579,24 @@ the allowed categories with `acceptedFileTypes` (on `SuperChat` or `SuperChatInb
 <SuperChat acceptedFileTypes={['image', 'pdf']} ... />
 ```
 
-| `AttachmentKind` | `<input accept>`  | Matches           |
-| ---------------- | ----------------- | ----------------- |
-| `image`          | `image/*`         | `image/*`         |
-| `video`          | `video/*`         | `video/*`         |
-| `audio`          | `audio/*`         | `audio/*`         |
-| `pdf`            | `application/pdf` | `application/pdf` |
+| `AttachmentKind` | Accepts                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| `image`          | JPEG, PNG, GIF, WebP and AVIF: the formats every browser shows |
+| `video`          | `video/*`                                                      |
+| `audio`          | `audio/*`                                                      |
+| `pdf`            | `application/pdf`                                              |
+| `document`       | Word, Excel, plain text and CSV (not on by default)            |
 
 The chosen types drive the file picker's `accept` filter and which pasted or
-dragged-and-dropped files are accepted; anything else is ignored.
+dragged-and-dropped files are accepted; anything else is refused. A HEIC photo
+is refused, and an iPhone's picker converts one to JPEG first.
 
 Because SuperChat is **controlled**, the component never mutates the thread itself —
 attached files are surfaced to the host through `onMessageSent` so it can embed,
-upload, or persist them however it likes:
+upload, or persist them however it likes. To show them as tiles and in the
+media view, upload them and write `media` / `files` records (see
+[Conversation media](#conversation-media)); the example below embeds them in
+the text instead:
 
 ```tsx
 onMessageSent={(text, { conversation, mentions, attachments }) => {
@@ -747,6 +820,9 @@ window the thread: only the rows near the viewport are mounted (with dynamic
 height measurement), so first render, memory, and Markdown parse cost are bounded
 by what's on screen rather than by the total history length. Scroll anchoring
 works the same in both modes — see [Scrolling & streaming](#scrolling--streaming).
+A freshly opened virtualized thread is held at its end for a moment while its
+rows are measured (pictures and clips come out taller than estimated); any
+input from the reader, or a jump up such as to a linked post, lets go sooner.
 
 ```tsx
 <SuperChat conversation={conversation} virtualized order="asc" />

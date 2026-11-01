@@ -384,6 +384,35 @@ describe('MediaFeed', () => {
         configurable: true,
         value: null,
       });
+      delete (document as { exitFullscreen?: unknown }).exitFullscreen;
+    }
+  });
+
+  it("leaves the clip's own full screen when its item stops being active", () => {
+    const exit = vi.fn(() => Promise.resolve());
+    Object.defineProperty(document, 'exitFullscreen', {
+      configurable: true,
+      value: exit,
+    });
+    try {
+      renderFeed({ layout: 'overlay' });
+      visibility([0.9, 0.1, 0]);
+      const box = screen
+        .getByRole('article', { name: 'First update' })
+        .querySelector('[data-slot="media-player-box"]');
+      expect(box).not.toBeNull();
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: box,
+      });
+      visibility([0.1, 0.9, 0]);
+      expect(exit).toHaveBeenCalledOnce();
+    } finally {
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: null,
+      });
+      delete (document as { exitFullscreen?: unknown }).exitFullscreen;
     }
   });
 
@@ -601,22 +630,76 @@ describe('MediaFeed', () => {
     expect(screen.getByRole('button', { name: 'Next item' })).toBeEnabled();
   });
 
-  it('places the overlay details as short-video apps do: at the foot, above the bar, actions in a column', () => {
+  it("sets the overlay details on the active player's bar, not over it", async () => {
+    // jsdom has no layout: the player's bar is 48px tall.
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const bar = this.getAttribute('data-slot') === 'media-controls-bar';
+        return { height: bar ? 48 : 0 } as globalThis.DOMRect;
+      }
+    );
     renderFeed({
       layout: 'overlay',
       renderActions: () => <button type="button">Share</button>,
     });
+    const details = (name: string) =>
+      screen
+        .getByRole('article', { name })
+        .querySelector<HTMLElement>('[data-slot="details"]')!;
+    visibility([0.9, 0.1, 0]);
+    await waitFor(() =>
+      expect(details('First update').style.bottom).toBe('48px')
+    );
+    // An inactive item has no bar: its details sit at the very foot.
+    expect(details('Second update').style.bottom).toBe('0px');
+    visibility([0.1, 0.9, 0]);
+    await waitFor(() =>
+      expect(details('Second update').style.bottom).toBe('48px')
+    );
+    expect(details('First update').style.bottom).toBe('0px');
+    // The host's actions sit in the details, beside the text.
+    expect(
+      within(
+        details('First update').querySelector<HTMLElement>(
+          '[data-slot="actions"]'
+        )!
+      ).getByRole('button', { name: 'Share' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps opened details within the item above the bar, scrolling the text', async () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const bar = this.getAttribute('data-slot') === 'media-controls-bar';
+        return { height: bar ? 48 : 0 } as globalThis.DOMRect;
+      }
+    );
+    // A title too long for its line, so Show more is offered.
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(400);
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(200);
+    renderFeed({ layout: 'overlay', getCaption: () => 'A long caption' });
+    visibility([0.9, 0.1, 0]);
     const first = screen.getByRole('article', { name: 'First update' });
     const details = first.querySelector<HTMLElement>('[data-slot="details"]')!;
-    expect(details.className).not.toContain('top-0');
-    expect(details.className).toContain('bg-gradient-to-t');
-    // On the player's bar, not over it: its controls stay undimmed.
-    expect(details.style.bottom).toMatch(/px$/);
-    const actions = first.querySelector('[data-slot="actions"]')!;
-    expect(actions.className).toContain('flex-col');
-    expect(
-      within(actions as HTMLElement).getByRole('button', { name: 'Share' })
-    ).toBeInTheDocument();
+    await waitFor(() => expect(details.style.bottom).toBe('48px'));
+    // Capped at the item's height above the bar, so it can't run off its top.
+    expect(details.style.maxHeight).toBe('calc(100% - 48px)');
+    const more = within(first).getByRole('button', { name: 'Show more' });
+    const text = document.getElementById(more.getAttribute('aria-controls')!);
+    expect(text).not.toHaveClass('overflow-y-auto');
+    fireEvent.click(more);
+    // jsdom can't lay it out: check that the text column, not the caption
+    // alone, is what fills the cap and scrolls, and that it takes the
+    // scroll gesture (the details layer lets taps through to the player).
+    expect(text).toHaveClass(
+      'self-stretch',
+      'min-h-0',
+      'overflow-y-auto',
+      'pointer-events-auto'
+    );
+    expect(first.querySelector('[data-slot="caption"]')).not.toHaveClass(
+      'overflow-y-auto'
+    );
   });
 
   it('keeps the position counter in order in an RTL page', () => {

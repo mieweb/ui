@@ -63,6 +63,13 @@ export interface DropdownProps {
 const placementOffset = 8; // matches the previous mt-2/mb-2 gap
 
 /**
+ * How long (ms) after the visual viewport resizes a scroll still counts as the
+ * on-screen keyboard's: iOS scrolls to keep the focused search field in view
+ * as the keyboard opens, and that must not close the menu.
+ */
+const keyboardScrollWindow = 300;
+
+/**
  * Scale origin per resolved side, so the menu grows out of its trigger rather
  * than out of its own middle. Written as whole literal class names because
  * Tailwind's scanner only matches complete strings.
@@ -484,22 +491,25 @@ function Dropdown({
   // trigger, over whatever scrolled under. While the trigger still shows, the
   // menu follows it (useAnchoredPosition), so a nudge (reaching a lower item,
   // a test scrolling one into view) leaves it open. Scrolling inside the menu
-  // or a submenu, and the scroll iOS makes to show the keyboard for the search
-  // field, leave it open; so does scrolling the page itself.
+  // or a submenu, and the scroll iOS makes as the keyboard opens for the
+  // search field, leave it open; so does scrolling the page itself. The
+  // keyboard is told apart by the visual viewport resizing just before, not
+  // by the search field having focus: a searchable menu focuses it on open,
+  // so that alone would keep every scroll from closing it.
   React.useEffect(() => {
     if (!isOpen) return;
     const inMenu = (node: Node | null) =>
       !!node && outsideRefs.some((ref) => ref.current?.contains(node));
+    let viewportResizedAt = -Infinity;
+    const onViewportResize = () => {
+      viewportResizedAt = Date.now();
+    };
     const onScroll = (event: Event) => {
       const target = event.target;
       const trigger = containerRef.current;
       if (!(target instanceof Element) || !trigger) return;
       if (!target.contains(trigger) || inMenu(target)) return;
-      const active = document.activeElement;
-      const typing =
-        active instanceof HTMLInputElement ||
-        active instanceof HTMLTextAreaElement;
-      if (typing && inMenu(active)) return;
+      if (Date.now() - viewportResizedAt < keyboardScrollWindow) return;
       const shown = trigger.getBoundingClientRect();
       const area = target.getBoundingClientRect();
       const outOfView =
@@ -509,8 +519,13 @@ function Dropdown({
         shown.left >= area.right;
       if (outOfView) handleClose();
     };
+    const viewport = window.visualViewport;
+    viewport?.addEventListener('resize', onViewportResize);
     window.addEventListener('scroll', onScroll, true);
-    return () => window.removeEventListener('scroll', onScroll, true);
+    return () => {
+      viewport?.removeEventListener('resize', onViewportResize);
+      window.removeEventListener('scroll', onScroll, true);
+    };
   }, [isOpen, outsideRefs, handleClose]);
 
   React.useEffect(() => {

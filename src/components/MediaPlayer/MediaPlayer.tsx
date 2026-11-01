@@ -69,6 +69,8 @@ export interface MediaPlayerProps extends VariantProps<
   /** Caption/subtitle `<track>` elements. The `src` attribute is always set
    * on the media element, so alternative `<source>` children are ignored. */
   children?: React.ReactNode;
+  /** The speeds the overlay controls' speed button cycles through (default `[1, 1.5, 2]`). */
+  playbackRates?: readonly number[];
   /** Localized load-error and retry text, and the overlay controls' labels. */
   labels?: { error?: string; retry?: string } & Partial<MediaControlsLabels>;
   /** Callback when playback state changes. */
@@ -151,6 +153,7 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
       poster,
       preload,
       children,
+      playbackRates,
       labels,
       variant,
       onStateChange,
@@ -300,6 +303,7 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
                 transport={transport}
                 fullscreenTarget={boxRef}
                 labels={labels}
+                playbackRates={playbackRates}
               />
             )}
           </div>

@@ -9,16 +9,18 @@
 
 ## What's in here
 
-| Surface                                                     | File                                                                   | Role                                                                                                                                                                                            |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SuperChatInbox`                                            | [SuperChatInbox.tsx](SuperChatInbox.tsx)                               | Combined surface: composes the list + panel; owns active-conversation selection (drop-in for the original monolithic component)                                                                 |
-| `SuperChat`                                                 | [SuperChat.tsx](SuperChat.tsx)                                         | Single-conversation **panel**: header + thread + composer (takes one `conversation`)                                                                                                            |
-| `SuperChatConversations`                                    | [SuperChatConversations.tsx](SuperChatConversations.tsx)               | Conversation **list** (sidebar); controlled/uncontrolled selection                                                                                                                              |
-| shared internals                                            | [parts.tsx](parts.tsx)                                                 | Internal-only helpers + presentational pieces (`ParticipantAvatar`, `ReferenceChip`, `MessageRow`, `Composer`, `sidebarItem`) shared by all three components — **not** exported from `index.ts` |
-| `createMarkdownRenderer`                                    | [render/createMarkdownRenderer.tsx](render/createMarkdownRenderer.tsx) | Composes render plugins → one `renderTextContent` (Markdown core)                                                                                                                               |
-| render context                                              | [render/renderContext.ts](render/renderContext.ts)                     | Threads `messageId`/`streaming` into custom nodes (GenUI)                                                                                                                                       |
-| code / math / genui / mermaid / image / nitro-table plugins | [plugins/](plugins)                                                    | Opt-in rich plugins (subpath entry)                                                                                                                                                             |
-| types                                                       | [types.ts](types.ts)                                                   | Participant model + chat-component-compatible data model + plugin/GenUI contracts                                                                                                               |
+| Surface                                                     | File                                                                       | Role                                                                                                                                                                                            |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SuperChatInbox`                                            | [SuperChatInbox.tsx](SuperChatInbox.tsx)                                   | Combined surface: composes the list + panel; owns active-conversation selection (drop-in for the original monolithic component)                                                                 |
+| `SuperChat`                                                 | [SuperChat.tsx](SuperChat.tsx)                                             | Single-conversation **panel**: header + thread + composer (takes one `conversation`)                                                                                                            |
+| `SuperChatConversations`                                    | [SuperChatConversations.tsx](SuperChatConversations.tsx)                   | Conversation **list** (sidebar); controlled/uncontrolled selection                                                                                                                              |
+| shared internals                                            | [parts.tsx](parts.tsx)                                                     | Internal-only helpers + presentational pieces (`ParticipantAvatar`, `ReferenceChip`, `MessageRow`, `Composer`, `sidebarItem`) shared by all three components — **not** exported from `index.ts` |
+| attachment tiles                                            | [MessageMedia.tsx](MessageMedia.tsx), [MessageFiles.tsx](MessageFiles.tsx) | The built-in media card and gallery, and the documents list, drawn under a message — see [Conversation media](#conversation-media)                                                              |
+| conversation media                                          | [media.ts](media.ts), [captionLinks.tsx](captionLinks.tsx)                 | Flattens a conversation's attachments into the media view's items; makes caption links tappable                                                                                                 |
+| `createMarkdownRenderer`                                    | [render/createMarkdownRenderer.tsx](render/createMarkdownRenderer.tsx)     | Composes render plugins → one `renderTextContent` (Markdown core)                                                                                                                               |
+| render context                                              | [render/renderContext.ts](render/renderContext.ts)                         | Threads `messageId`/`streaming` into custom nodes (GenUI)                                                                                                                                       |
+| code / math / genui / mermaid / image / nitro-table plugins | [plugins/](plugins)                                                        | Opt-in rich plugins (subpath entry)                                                                                                                                                             |
+| types                                                       | [types.ts](types.ts)                                                       | Participant model + chat-component-compatible data model + plugin/GenUI contracts                                                                                                               |
 
 > **Component split.** The three components share one folder and one import path
 > (`@mieweb/ui/components/SuperChat`) and one tsup entry. `SuperChat` owns the
@@ -64,25 +66,34 @@ records; Markdown links and arbitrary metadata are never inferred as media.
 `getConversationMediaItems` sorts messages chronologically and flattens their
 attachments while retaining the original message, attachment and participant
 objects. A JSON-encoded tuple of conversation, message and attachment ids is
-the feed id. Keep this identity when adding actions: reactions and replies
-target the original conversation message, rather than a second media store.
+the feed id. Keep this identity when adding actions: one taken on a media item
+targets the original conversation message, rather than a second media store.
 
 `SuperChat` and `SuperChatInbox` keep the ordinary thread as the default view.
 `view`/`onViewChange` support host-controlled navigation; `defaultView` starts an
 uncontrolled panel in either `thread` or `media`. The media view composes
 `MediaFeed`; `mediaFeedProps` exposes its behavior, labels and render slots while
 reserving the conversation's items and accessors. `mediaLabels` localizes the
-return control and inline attachment actions. The header and composer remain
-mounted in both views (covered on a phone in the overlay layout), and the composer keeps its existing send/restore contract.
+return control and inline attachment actions. The media view takes the
+thread's place in the panel (the thread unmounts). The header and composer
+remain mounted in both views, the composer below the media (the header hides
+on a phone in the overlay layout), and the composer keeps its existing
+send/restore contract.
 
 Playing an inline attachment opens the same attachment in the feed. The thread
 has no header view toggle; a Back to conversation control sits above the feed
-(over its corner in the overlay layout).
+(`superchat-media-back`), or over its corner in the overlay layout.
 Returning restores focus to the attachment that opened the feed when it is
 still mounted. Switching conversation remounts the feed so
 uncontrolled selection and fullscreen state cannot leak to another conversation.
 The virtualized thread forwards the same attachment action as ordinary rows.
 Custom feed players must obey `renderMedia`'s `active` playback boundary.
+
+A media item's caption (its attachment's `caption`, else the message's text)
+goes through `linkifyCaption`, so its links are tappable as in the thread.
+Markdown links and bare http(s) addresses become links and the rest stays as
+written: the feed clamps the caption to two lines, which block Markdown would
+break. A bare address leaves closing punctuation and an unbalanced `)` out.
 
 Leaving the thread captures its reading position before unmounting its players.
 Returning restores a scrolled-up reader and keeps the unseen-message hint;
@@ -91,10 +102,21 @@ viewing media waits to anchor its turn until the ordinary thread remounts, or
 pins the newest message in a virtualized thread. Conversation/order changes
 discard this snapshot and use their normal bottom/top anchor.
 
+**A freshly opened virtualized thread settles at its end.** Its rows start at
+estimated heights and are measured as they mount; a day of photos and videos
+comes out far taller than guessed, and the virtualizer's corrections can stop
+short of the end and look like the reader scrolling away. So for `SETTLE_MS`
+(1.5 s) after opening, a `ResizeObserver` on the content re-pins to the bottom
+as it grows. Any wheel, touch, key or pointer input, a jump up by more than
+`READER_JUMP_SHARE` of the viewport (to a linked post, say), or a streaming
+newest message ends it early.
+
 `renderMessageMedia` replaces the built-in attachment card in the thread. The
-host gets `{ message, attachment, open, launchId }`; it must put `launchId` on
-its focusable control as `data-media-launch-id`, since Back looks that up to
-return focus. A virtualized thread mounts rows a frame or two late, so the
+host gets `{ message, attachment, open, launchId, maxSize }`; it must put
+`launchId` on its focusable control as `data-media-launch-id`, since Back looks
+that up to return focus. `open` is undefined while the message is being edited
+(opening the media view would unmount the row and lose the draft), so the card
+should show itself as unavailable then. A virtualized thread mounts rows a frame or two late, so the
 focus return retries for up to ten frames before falling back to the thread.
 Keep the slot referentially stable (`useCallback`): rows are memoized.
 
@@ -112,7 +134,8 @@ on the author's side (`superchat-message-attachment`, capped at the bubble's
 85%). A message that is only attachments has no bubble. The
 tile clips to the bubble's `rounded-2xl`, so every card, the host's included,
 has the bubble's corners; the built-in audio card and the documents list sit on the neutral surface,
-not the author's color. Editing touches only the text bubble.
+not the author's color. An edit can take tiles off (see **Labels and edits**
+below).
 
 **Pictures group; documents list.** Two or more pictures in one message
 (images, GIFs, video stills: `isVisualMedia`) that the host doesn't draw share
@@ -130,10 +153,14 @@ row per file with its type's icon (from the extension), name, type and size,
 opening in a new tab, and never in the media view.
 
 **Sending.** An awaited `onMessageSent` keeps the send button busy; if it
-rejects, the text and the files go back into the composer to try again. A
+rejects, the text and the files go back into the composer to try again, as
+long as that conversation is still the one shown (SuperChatInbox reuses the
+panel), and the error is rethrown so `onComposerError` hears
+`reason: 'send-failed'`. `isSending` is kept per conversation. A
 host that shows the message while it uploads gives it `status: 'pending'` and
 `progress` (0–1): its tiles dim and "Sending… 45%" shows under them
-(`mediaLabels.sending`). The composer refuses a file over `maxFileSize`
+(`mediaLabels.sending` and `sendingProgress(percent)`; only "Sending…" is a
+live region, so the percent doesn't re-announce on every step). The composer refuses a file over `maxFileSize`
 (25 MB by default), a type outside `acceptedFileTypes`, or an 11th file, and
 tells the host through `onComposerError`. `image` accepts the formats every
 browser shows (JPEG, PNG, GIF, WebP, AVIF), so a HEIC photo is refused, and an
@@ -143,10 +170,11 @@ CSV files.
 **Labels and edits.** `message.label` is the host's line about a message (a
 team, a plan, a ticket link), rendered small under it, after its attachments,
 through the same Markdown renderer; it never enters the edit draft, the copy
-text or the preview. Editing lists the message's attachments with remove
-buttons; removed ones leave the tiles while editing, Cancel restores them, and
+text or the preview. Editing lists the message's attachments
+(`superchat-message-editor-attachments`) with a Remove button each; removed
+ones leave the tiles while editing, Cancel restores them, and
 `onMessageEdited` gets `removedMedia` / `removedFiles` (Save is enabled by a
-removal alone).
+removal alone). The host drops those ids from `media` / `files`.
 
 **Previews.** The conversation list previews the last message as plain text
 (markdown stripped) or, with no text, by what it carries
