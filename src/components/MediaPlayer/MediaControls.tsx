@@ -162,7 +162,8 @@ function useCaptionTracks(
     // host left on the default line to just above it. A fixed line count
     // isn't enough, since lines scale with the video and the bar doesn't (it
     // takes two rows in a small card). Cues load lazily, and the player can
-    // change size, so this runs again as cues become active. `lifted` keeps
+    // change size, so this runs again as cues become active and as the video
+    // or bar is resized. `lifted` keeps
     // the line each cue was lifted to: a cue still on it is ours to move, and
     // goes back to the default line when these controls unmount (the video
     // may stay, with no bar to clear). One the host has moved since is theirs.
@@ -179,8 +180,7 @@ function useCaptionTracks(
         track.addCue(cue);
       }
     };
-    const lift = (event: Event) => {
-      const track = event.target as globalThis.TextTrack;
+    const liftCues = (track: globalThis.TextTrack) => {
       const line = video
         ? cueLineAboveBar(video, barRef.current)
         : DEFAULT_CUE_LINE;
@@ -193,6 +193,8 @@ function useCaptionTracks(
         place(track, cue, line);
       }
     };
+    const lift = (event: Event) =>
+      liftCues(event.target as globalThis.TextTrack);
     let watched: globalThis.TextTrack[] = [];
     const update = () => {
       const captions = Array.from(list).filter(
@@ -208,7 +210,16 @@ function useCaptionTracks(
     update();
     const events = ['addtrack', 'removetrack', 'change'];
     for (const name of events) list.addEventListener?.(name, update);
+    // A new size (a phone turned, full screen left) needs a new line but
+    // brings no cuechange, so the cues move then too, paused or playing.
+    const resize =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => watched.forEach(liftCues));
+    for (const element of [video, barRef.current])
+      if (element) resize?.observe(element);
     return () => {
+      resize?.disconnect();
       for (const name of events) list.removeEventListener?.(name, update);
       for (const track of watched)
         track.removeEventListener?.('cuechange', lift);

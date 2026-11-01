@@ -56,6 +56,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('MediaPlayer overlay controls', () => {
@@ -538,7 +539,7 @@ describe('MediaPlayer overlay controls', () => {
       kind: 'captions',
       mode: 'showing',
       cues,
-      activeCues: [],
+      activeCues: [] as unknown[],
       removeCue: vi.fn(),
       addCue: vi.fn(),
       addEventListener: (name: string, fn: (event: Event) => void) => {
@@ -566,7 +567,7 @@ describe('MediaPlayer overlay controls', () => {
     );
     const cueChange = () =>
       act(() => onCueChange?.({ target: track } as unknown as Event));
-    return { size, cueChange };
+    return { track, size, cueChange };
   }
 
   it('gives lifted captions back when the controls go, and lifts them again when they return', () => {
@@ -592,6 +593,34 @@ describe('MediaPlayer overlay controls', () => {
     size.video = 400;
     cueChange();
     expect(cues.map((cue) => cue.line)).toEqual([-3, 3]);
+  });
+
+  it('moves a caption on screen when the player changes size, even paused', () => {
+    // The test resizes the player: jsdom has no layout to observe.
+    const resized: (() => void)[] = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resized.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      }
+    );
+    const cues: { line: number | string }[] = [{ line: 'auto' }];
+    const { track, size, cueChange } = captionsWithLayout(cues);
+    render(<MediaPlayer src="clip.mp4" controlsStyle="overlay" />);
+    track.activeCues = [cues[0]];
+    cueChange();
+    expect(cues[0].line).toBe(-5);
+    track.removeCue.mockClear();
+    // The phone turns: the video is twice as tall, the bar isn't, and no
+    // other cue comes along to move this one.
+    size.video = 400;
+    act(() => resized.forEach((callback) => callback()));
+    expect(cues[0].line).toBe(-3);
+    expect(track.removeCue).toHaveBeenCalledWith(cues[0]);
   });
 
   it('cycles the speeds a host chooses', () => {
