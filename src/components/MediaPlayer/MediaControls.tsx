@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   Captions,
+  CaptionsOff,
   Maximize,
   Minimize,
   Pause,
@@ -451,10 +452,12 @@ export const MediaControls = React.forwardRef<
           barButton(
             captions.showing ? labels.hideCaptions : labels.showCaptions,
             toggleCaptions,
-            <Captions
-              className={cn('h-5 w-5', !captions.showing && 'opacity-70')}
-              aria-hidden="true"
-            />
+            // The icon shows the state, as mute's does.
+            captions.showing ? (
+              <Captions className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <CaptionsOff className="h-5 w-5" aria-hidden="true" />
+            )
           )}
         {barButton(
           muted ? labels.unmute : labels.mute,

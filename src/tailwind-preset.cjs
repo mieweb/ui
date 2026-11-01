@@ -105,7 +105,6 @@ module.exports = {
     // container query and pointer variants (these need Tailwind 4.1).
     '@container',
     'w-fit',
-    'opacity-70',
     'via-black/30',
     'pb-3',
     'max-w-xl',
