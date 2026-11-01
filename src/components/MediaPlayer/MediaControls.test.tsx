@@ -448,6 +448,25 @@ describe('MediaPlayer overlay controls', () => {
     }
   });
 
+  it('cycles the speeds a host chooses', () => {
+    const { container } = render(
+      <MediaPlayer
+        src="clip.mp4"
+        controlsStyle="overlay"
+        playbackRates={[0.5, 1]}
+        aria-label="Clip"
+      />
+    );
+    const video = container.querySelector('video') as HTMLVideoElement;
+    const speed = () =>
+      screen.getByRole('button', { name: /^Playback speed / });
+    expect(speed()).toHaveAccessibleName('Playback speed 1×');
+    fireEvent.click(speed());
+    expect(video.playbackRate).toBe(0.5);
+    fireEvent.click(speed());
+    expect(video.playbackRate).toBe(1);
+  });
+
   it('localizes every label', () => {
     render(
       <MediaPlayer
