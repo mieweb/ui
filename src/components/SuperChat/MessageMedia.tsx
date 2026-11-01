@@ -47,18 +47,15 @@ function actionName(
  * makes iPhones paint that frame instead of black). Reports its width ÷
  * height once known. One that doesn't load says so instead of a black box.
  */
-export function MediaStill({
+function MediaStill({
   attachment,
   onAspect,
   unavailableLabel,
-  decorative = false,
 }: {
   attachment: SuperChatMediaAttachment;
   onAspect?: (aspect: number) => void;
   /** Shown when the picture or clip can't be loaded. */
   unavailableLabel: string;
-  /** Inside a control that names it already: no alt text of its own. */
-  decorative?: boolean;
 }) {
   const [failed, setFailed] = React.useState(false);
   const report = (width: number, height: number) => {
@@ -78,7 +75,7 @@ export function MediaStill({
   return still ? (
     <img
       src={still}
-      alt={decorative ? '' : (attachment.alt ?? '')}
+      alt={attachment.alt ?? ''}
       loading="lazy"
       onLoad={(event) =>
         report(
