@@ -1080,6 +1080,31 @@ describe('SuperChat media view', () => {
       ).toBeInTheDocument();
     });
 
+    it('returns a reader who was at the bottom to the bottom, not a stale offset', () => {
+      mockThreadLayout();
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="alex"
+          view="thread"
+        />
+      );
+      thread(container).scrollTop = 600; // at the bottom
+      fireEvent.scroll(thread(container));
+      for (const view of ['media', 'thread'] as const) {
+        rerender(
+          <SuperChat
+            conversation={conversation}
+            currentParticipantId="alex"
+            view={view}
+          />
+        );
+      }
+      // A remounted virtualized thread may not be as tall yet as when it was
+      // left, so it scrolls to its end rather than to the old pixel offset.
+      expect(thread(container).scrollTop).toBe(thread(container).scrollHeight);
+    });
+
     it('anchors an own send after returning from media instead of losing its pending turn', () => {
       mockThreadLayout();
       const { container, rerender } = render(
