@@ -72,6 +72,12 @@ function InteractiveFeed({
   const [failure, setFailure] = React.useState<string>();
   const [liked, setLiked] = React.useState<string[]>([]);
   const [discussion, setDiscussion] = React.useState<string>();
+  // Over the video, the actions need the player's white, not the dark theme's
+  // muted ghost text, to read over a bright frame.
+  const actionClassName =
+    props.layout === 'overlay'
+      ? 'text-white dark:text-white hover:bg-white/15 dark:hover:bg-white/15'
+      : undefined;
   const shapes = [
     ...new Set(props.items.map((item) => item.shape ?? 'landscape')),
   ];
@@ -121,6 +127,7 @@ function InteractiveFeed({
             <Button
               variant="ghost"
               size="sm"
+              className={actionClassName}
               aria-label={`Like ${item.title}`}
               aria-pressed={liked.includes(item.id)}
               leftIcon={<Heart className="size-4" />}
@@ -138,6 +145,7 @@ function InteractiveFeed({
               variant="ghost"
               size="sm"
               leftIcon={<MessageCircle className="size-4" />}
+              className={actionClassName}
               onClick={() => setDiscussion(item.title)}
             >
               Discuss
