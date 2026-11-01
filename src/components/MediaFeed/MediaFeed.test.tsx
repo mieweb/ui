@@ -619,6 +619,41 @@ describe('MediaFeed', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps opened details within the item above the bar, scrolling the text', async () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const bar = this.getAttribute('data-slot') === 'media-controls-bar';
+        return { height: bar ? 48 : 0 } as globalThis.DOMRect;
+      }
+    );
+    // A title too long for its line, so Show more is offered.
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(400);
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(200);
+    renderFeed({ layout: 'overlay', getCaption: () => 'A long caption' });
+    visibility([0.9, 0.1, 0]);
+    const first = screen.getByRole('article', { name: 'First update' });
+    const details = first.querySelector<HTMLElement>('[data-slot="details"]')!;
+    await waitFor(() => expect(details.style.bottom).toBe('48px'));
+    // Capped at the item's height above the bar, so it can't run off its top.
+    expect(details.style.maxHeight).toBe('calc(100% - 48px)');
+    const more = within(first).getByRole('button', { name: 'Show more' });
+    const text = document.getElementById(more.getAttribute('aria-controls')!);
+    expect(text).not.toHaveClass('overflow-y-auto');
+    fireEvent.click(more);
+    // jsdom can't lay it out: check that the text column, not the caption
+    // alone, is what fills the cap and scrolls, and that it takes the
+    // scroll gesture (the details layer lets taps through to the player).
+    expect(text).toHaveClass(
+      'self-stretch',
+      'min-h-0',
+      'overflow-y-auto',
+      'pointer-events-auto'
+    );
+    expect(first.querySelector('[data-slot="caption"]')).not.toHaveClass(
+      'overflow-y-auto'
+    );
+  });
+
   it('keeps the position counter in order in an RTL page', () => {
     renderFeed({ layout: 'overlay', dir: 'rtl' });
     // Isolated, so its numbers don't take the page's direction.

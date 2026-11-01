@@ -164,8 +164,9 @@ function OverlayDetails({
       data-expanded={expanded || undefined}
       // On the bar's top edge, not over it (that would dim its controls): its
       // gradient starts at the bar's own scrim (OVERLAY_BAR_SCRIM), so the
-      // two read as one.
-      style={{ bottom: barHeight }}
+      // two read as one. Never taller than the item above the bar, so text
+      // opened in full scrolls instead of running off the top.
+      style={{ bottom: barHeight, maxHeight: `calc(100% - ${barHeight}px)` }}
       className={cn(
         'pointer-events-none absolute inset-x-0 z-10 flex items-end justify-between gap-3 bg-gradient-to-t from-black/55 via-black/30 to-transparent ps-3 pe-2 pt-16 pb-3 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]',
         // A darker scrim behind the full text, which can run over a bright frame.
@@ -173,80 +174,88 @@ function OverlayDetails({
         classNames.details
       )}
     >
-      {/* A readable measure on a wide screen, as short-video apps keep. */}
-      <div id={textId} className="max-w-xl min-w-0 flex-1 leading-5">
-        {author && (
-          <div
-            data-slot="author"
-            className={cn(
-              'mb-1 flex min-w-0 items-center gap-2',
-              classNames.author
-            )}
-          >
-            <Avatar
-              name={author.name}
-              src={author.avatar}
-              alt=""
-              size="sm"
-              className="shrink-0 ring-1 ring-white/70"
-            />
-            {/* Host text can be in any language: each line takes its own
+      {/* A readable measure on a wide screen, as short-video apps keep.
+          Opened in full, the column takes the details' height and scrolls
+          (a long title on a landscape phone), its text still at the foot
+          when it fits. */}
+      <div
+        id={textId}
+        className={cn(
+          'flex max-w-xl min-w-0 flex-1 flex-col leading-5',
+          expanded &&
+            'pointer-events-auto min-h-0 self-stretch overflow-y-auto overscroll-contain'
+        )}
+      >
+        <div className="mt-auto">
+          {author && (
+            <div
+              data-slot="author"
+              className={cn(
+                'mb-1 flex min-w-0 items-center gap-2',
+                classNames.author
+              )}
+            >
+              <Avatar
+                name={author.name}
+                src={author.avatar}
+                alt=""
+                size="sm"
+                className="shrink-0 ring-1 ring-white/70"
+              />
+              {/* Host text can be in any language: each line takes its own
                 direction, so it truncates at its own end, and is only as wide
                 as its text, so it still sits at the page's start edge. */}
-            <p
+              <p
+                dir="auto"
+                className="m-0 w-fit max-w-full truncate text-sm font-semibold"
+              >
+                {author.name}
+              </p>
+            </div>
+          )}
+          {title && (
+            <h3
+              ref={titleRef}
+              data-slot="title"
               dir="auto"
-              className="m-0 w-fit max-w-full truncate text-sm font-semibold"
+              className={cn(
+                'm-0 w-fit max-w-full text-sm font-semibold',
+                expanded ? 'break-words' : 'truncate',
+                classNames.title
+              )}
             >
-              {author.name}
-            </p>
-          </div>
-        )}
-        {title && (
-          <h3
-            ref={titleRef}
-            data-slot="title"
-            dir="auto"
-            className={cn(
-              'm-0 w-fit max-w-full text-sm font-semibold',
-              expanded ? 'break-words' : 'truncate',
-              classNames.title
-            )}
-          >
-            {title}
-          </h3>
-        )}
-        {showCaption && (
-          // A div, not a p: a host caption can hold block content, and its
-          // links stay tappable through the details layer. Expanded, it
-          // scrolls within 40% of the screen, so a short landscape phone
-          // still shows the clip.
-          <div
-            ref={captionRef}
-            data-slot="caption"
-            dir="auto"
-            className={cn(
-              'pointer-events-auto m-0 w-fit max-w-full text-sm break-words text-white/90',
-              expanded
-                ? 'max-h-[40dvh] overflow-y-auto overscroll-contain'
-                : 'line-clamp-2',
-              classNames.caption
-            )}
-          >
-            {caption}
-          </div>
-        )}
-        {(clipped || expanded) && (
-          <button
-            type="button"
-            data-slot="details-toggle"
-            aria-expanded={expanded}
-            aria-controls={textId}
-            onClick={() => setExpanded((open) => !open)}
-            className="pointer-events-auto mt-0.5 rounded-sm text-sm font-semibold text-white/80 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-white/70"
-          >
-            {expanded ? labels.showLess : labels.showMore}
-          </button>
-        )}
+              {title}
+            </h3>
+          )}
+          {showCaption && (
+            // A div, not a p: a host caption can hold block content, and its
+            // links stay tappable through the details layer.
+            <div
+              ref={captionRef}
+              data-slot="caption"
+              dir="auto"
+              className={cn(
+                'pointer-events-auto m-0 w-fit max-w-full text-sm break-words text-white/90',
+                !expanded && 'line-clamp-2',
+                classNames.caption
+              )}
+            >
+              {caption}
+            </div>
+          )}
+          {(clipped || expanded) && (
+            <button
+              type="button"
+              data-slot="details-toggle"
+              aria-expanded={expanded}
+              aria-controls={textId}
+              onClick={() => setExpanded((open) => !open)}
+              className="pointer-events-auto mt-0.5 rounded-sm text-sm font-semibold text-white/80 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-white/70"
+            >
+              {expanded ? labels.showLess : labels.showMore}
+            </button>
+          )}
+        </div>
       </div>
       {(actions || fullscreenButton) && (
         // The action column, at the bottom end beside the text.

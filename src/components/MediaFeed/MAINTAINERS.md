@@ -74,8 +74,10 @@ change it for every consumer: its visual baselines are the regression check.
 - **Caption rules live in `OverlayDetails`:** empty or repeats-the-title
   captions are dropped. The title shows one line and the caption two; when
   either is cut off (measured, and re-measured on resize), a **Show more**
-  toggle (`labels.showMore`/`showLess`) opens both in full, the caption
-  scrolling within `40dvh`. The toggle is separate from the text, so rich
+  toggle (`labels.showMore`/`showLess`) opens both in full. The details are
+  capped at the item's height above the bar, and the opened text scrolls
+  within them, so a long title on a landscape phone can't push its start out
+  of the item. The toggle is separate from the text, so rich
   captions keep working links. `ClampedText` isn't used: it decides by
   character count, where this needs measured overflow over the video.
 - The overlay's icon buttons share `overlayButtonClass`

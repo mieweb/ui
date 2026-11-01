@@ -226,7 +226,7 @@ Import \`@mieweb/ui/styles.css\` once. Tailwind 4 consumers who generate their o
 - Native autoplay starts muted, depends on browser policy, and is suppressed for reduced motion. Playback controls remain available; provider embedding can still be blocked or unavailable.
 - The immersive viewer uses \`Modal\` for focus trapping, Escape and scroll lock. Feed arrow navigation is scoped to its own surface and leaves inputs and media controls alone.
 - All feed copy is overridable through \`labels\`; host-rendered captions and actions require the host’s localization. Layout uses theme tokens and logical direction.
-- The \`overlay\` layout is dark in every theme, as video players are. It sets \`data-theme="dark"\` on the feed, so library components inside it, including the host's \`renderActions\`, take their dark-theme colours; host markup should use theme tokens too. The title shows one line and the caption two; when either is cut off, **Show more** opens both in full (a long caption scrolls within 40% of the screen). A caption that is empty or repeats the title is left out, and an untitled item shows no title. Previous/Next are icon buttons on the end edge. The author, title and caption each take their own direction (\`dir="auto"\`), so mixed-language text reads and truncates correctly in either direction. The full-screen viewer is off unless \`allowFullscreen\` is set, since the player has its own full screen.
+- The \`overlay\` layout is dark in every theme, as video players are. It sets \`data-theme="dark"\` on the feed, so library components inside it, including the host's \`renderActions\`, take their dark-theme colours; host markup should use theme tokens too. The title shows one line and the caption two; when either is cut off, **Show more** opens both in full (text taller than the space above the player's bar scrolls). A caption that is empty or repeats the title is left out, and an untitled item shows no title. Previous/Next are icon buttons on the end edge. The author, title and caption each take their own direction (\`dir="auto"\`), so mixed-language text reads and truncates correctly in either direction. The full-screen viewer is off unless \`allowFullscreen\` is set, since the player has its own full screen.
 - In both layouts, a clip floated into picture in picture keeps playing when the feed moves on, and pauses when its window closes over an inactive item. A clip the viewer started (with the feed's Play or the player's own controls) resumes when they come back to it.
 - The stories generate a local synthetic video, so the primary demonstration does not depend on YouTube or a remote media server. Live provider behavior still needs a manual integration check.
 - This port replaces the reusable presentation from \`mieweb/news-widget\`. Existing RSS/Discourse consumers must adapt their data and callbacks; this is not a drop-in replacement for \`<NewsWidget />\`.`,
@@ -332,7 +332,7 @@ Import \`@mieweb/ui/styles.css\` once. Tailwind 4 consumers who generate their o
       control: 'inline-radio',
       options: ['stacked', 'overlay'],
       description:
-        '`stacked` cards (default), or `overlay`: the media edge to edge, details over it, touch-first player controls.',
+        '`stacked` cards (default), or `overlay`: the media edge to edge, details at the foot (author, title and caption at the bottom start, actions in a column at the bottom end), touch-first player controls.',
       table: { category: 'Behavior', defaultValue: { summary: 'stacked' } },
     },
     allowFullscreen: {
