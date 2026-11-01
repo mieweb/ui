@@ -1309,7 +1309,7 @@ export const EditingAttachments: Story = {
     docs: {
       description: {
         story:
-          "Open ⋯ beside one of Maya's messages and choose **Edit message**: the editor lists the message's attachments, each with a Remove button (\"Remove Lobby\"; `mediaLabels.removeAttachment`). A removed one leaves the tiles at once and Cancel brings it back. While editing, the tiles don't open the media view, which would lose the draft. A removal alone can be saved, and Save reports it through `onMessageEdited` (see the Actions panel) as `removedMedia` / `removedFiles` ids for the host to drop; the demo drops them. Save stays disabled while the edit would leave nothing: remove the photo from the message sent without text to see it.",
+          "Choose **Edit message** beside one of Maya's messages (from its ⋯ menu when it has text): the editor lists the message's attachments, each with a Remove button (\"Remove Lobby\"; `mediaLabels.removeAttachment`). A removed one leaves the tiles at once and Cancel brings it back. While editing, the tiles don't open the media view, which would lose the draft. A removal alone can be saved, and Save reports it through `onMessageEdited` (see the Actions panel) as `removedMedia` / `removedFiles` ids for the host to drop; the demo drops them. Save stays disabled while the edit would leave nothing: remove the photo from the message sent without text to see it.",
       },
     },
   },
