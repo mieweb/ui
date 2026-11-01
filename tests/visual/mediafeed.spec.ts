@@ -290,6 +290,24 @@ test.describe('MediaFeed - overlay layout', () => {
     const box = await next.boundingBox();
     expect(box!.x).toBeLessThan(48);
   });
+
+  test('on a phone held sideways, navigation keeps clear of the actions', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 844, height: 390 });
+    await gotoStory(page, 'media-mediafeed--overlay-phone-landscape');
+    const clip = page.getByRole('article', {
+      name: 'Filmed upright on a phone',
+    });
+    const like = clip.getByRole('button', { name: /^Like / });
+    await expect(like).toBeVisible({ timeout: 15000 });
+    const next = await page
+      .getByRole('button', { name: 'Next item', exact: true })
+      .boundingBox();
+    const action = await like.boundingBox();
+    expect(next!.y + next!.height).toBeLessThanOrEqual(action!.y);
+  });
 });
 
 test.describe('MediaPlayer - overlay controls', () => {

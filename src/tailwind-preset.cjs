@@ -746,6 +746,8 @@ module.exports = {
     'group-hover/portlet:opacity-100',
     'focus-visible:opacity-100',
     '[@media(hover:none)]:opacity-100',
+  '[@media(max-height:30rem)]:top-2',
+  '[@media(max-height:30rem)]:translate-y-0',
     'group/portlet',
     '[&>:nth-child(2)]:ms-auto',
     'flex-nowrap',

@@ -779,11 +779,14 @@ function MediaFeedInner<T>(
 
   const controls = overlay ? (
     // Over the middle of the feed's end edge, stacked the way the feed
-    // scrolls, above the actions and the player's bar at the bottom.
+    // scrolls, above the actions and the player's bar at the bottom. On a
+    // short screen (a phone held sideways, as SuperChat reckons it) the middle
+    // runs into the actions, so they move to the top end, clear of a host's
+    // Back at the top start.
     <div
       data-slot="controls"
       className={cn(
-        'pointer-events-none absolute end-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1.5',
+        'pointer-events-none absolute end-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1.5 [@media(max-height:30rem)]:top-2 [@media(max-height:30rem)]:translate-y-0',
         classNames.controls
       )}
     >

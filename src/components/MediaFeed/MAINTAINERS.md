@@ -62,7 +62,9 @@ change it for every consumer: its visual baselines are the regression check.
   author, title and caption at the bottom start, just above the player's bar,
   on a gradient rising from the foot; the host's actions (and the viewer's
   expand button) in a column at the bottom end. The top is left free for a
-  host's Back button, and Previous/Next stay mid-way down the end edge.
+  host's Back button, and Previous/Next stay mid-way down the end edge. On
+  a screen under 30rem tall (a phone held sideways) the middle runs into the
+  actions column, so they move to the top end instead.
   `useControlsBarHeight` measures the active item's bar (it wraps onto two
   rows in a narrow player) so the text clears it.
 - **Details come before the media in the DOM.** Focus then visits the title,
