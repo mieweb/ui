@@ -175,7 +175,9 @@ text or the preview. Editing lists the message's attachments
 (`superchat-message-editor-attachments`) with a Remove button each; removed
 ones leave the tiles while editing, Cancel restores them, and
 `onMessageEdited` gets `removedMedia` / `removedFiles` (Save is enabled by a
-removal alone). The host drops those ids from `media` / `files`.
+removal alone). The host drops those ids from `media` / `files`. The text
+saved is the trimmed draft, so clearing it is an edit while attachments stay;
+Save is disabled when the edit would leave neither text nor an attachment.
 
 **Previews.** The conversation list previews the last message as plain text
 (markdown stripped) or, with no text, by what it carries

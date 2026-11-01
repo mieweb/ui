@@ -483,7 +483,9 @@ apply it to your state and stamp `editedAt` to surface the "(edited)" indicator.
 The editor also lists the message's attachments, each with a **Remove** button.
 A removed one leaves the tiles while editing and Cancel brings it back; on save
 the callback's `removedMedia` / `removedFiles` are the ids the author took off,
-for you to drop from `media` / `files` (a removal alone can be saved).
+for you to drop from `media` / `files` (a removal alone can be saved). The
+text can be cleared while attachments stay (the callback gets `''`); an edit
+that would leave nothing can't be saved.
 
 A message's `label` (Markdown, such as its team or plan) shows small under it.
 It isn't part of the text, so editing, copying and the conversation list's

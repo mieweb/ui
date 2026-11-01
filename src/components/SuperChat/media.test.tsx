@@ -776,6 +776,32 @@ describe('SuperChat media view', () => {
     }
   );
 
+  it('saves an edit that clears the text while attachments stay', async () => {
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="alex"
+        onMessageEdited={onMessageEdited}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    await user.clear(screen.getByRole('textbox', { name: 'Edit message' }));
+    // Clearing the text is a change: the pictures are still a message.
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    await user.click(
+      screen.getByRole('button', { name: 'Remove Second image' })
+    );
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onMessageEdited).toHaveBeenCalledWith(
+      'm1',
+      '',
+      expect.objectContaining({ removedMedia: ['a2'], removedFiles: [] })
+    );
+  });
+
   it('will not save an edit that takes off everything a message had', async () => {
     const user = userEvent.setup();
     const onMessageEdited = vi.fn();
