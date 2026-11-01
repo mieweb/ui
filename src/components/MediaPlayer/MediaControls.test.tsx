@@ -75,6 +75,30 @@ describe('MediaPlayer overlay controls', () => {
     expect(container.querySelector('[data-slot="media-controls"]')).toBeNull();
   });
 
+  it('keeps the same video, playing, when the controls style changes', () => {
+    const { container, rerender } = render(
+      <MediaPlayer src="clip.mp4" aria-label="Clip" />
+    );
+    const video = container.querySelector('video')!;
+    void video.play();
+    rerender(
+      <MediaPlayer src="clip.mp4" controlsStyle="overlay" aria-label="Clip" />
+    );
+    expect(container.querySelector('video')).toBe(video);
+    expect(video.paused).toBe(false);
+    expect(video.controls).toBe(false);
+    expect(
+      container.querySelector('[data-slot="media-controls"]')
+    ).not.toBeNull();
+    rerender(<MediaPlayer src="clip.mp4" aria-label="Clip" />);
+    expect(container.querySelector('video')).toBe(video);
+    expect(video.controls).toBe(true);
+    // The native layout has no box of its own around the video.
+    expect(
+      container.querySelector('[data-slot="media-player-box"]')
+    ).toBeNull();
+  });
+
   it('plays and pauses from the bar or a tap on the picture', () => {
     const { video, container } = renderOverlay();
     fireEvent.click(screen.getByRole('button', { name: 'Play' }));

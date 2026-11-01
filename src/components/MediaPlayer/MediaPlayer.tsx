@@ -286,19 +286,22 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
 
     return (
       <div className={mediaPlayerVariants({ variant, className })}>
-        {resolvedKind === 'video' && overlay ? (
+        {resolvedKind === 'video' ? (
           // The controls cover the player's box, so the video fills it at its
           // own shape and the bar spans the box. The box is a dark surface in
           // every theme (black letterboxing, as on VideoCard), so library
-          // controls inside it take their dark-theme colours.
+          // controls inside it take their dark-theme colours. With the
+          // browser's controls the box is `contents`, leaving the video laid
+          // out as before; it stays in the tree either way, so changing
+          // `controlsStyle` keeps the same video, its time and playback.
           <div
             ref={boxRef}
-            data-slot="media-player-box"
-            data-theme="dark"
-            className="relative h-full w-full bg-black"
+            data-slot={overlay ? 'media-player-box' : undefined}
+            data-theme={overlay ? 'dark' : undefined}
+            className={overlay ? 'relative h-full w-full bg-black' : 'contents'}
           >
             {video}
-            {controls && (
+            {overlay && controls && (
               <MediaControls
                 transport={transport}
                 fullscreenTarget={boxRef}
@@ -307,8 +310,6 @@ export const MediaPlayer = React.forwardRef<MediaPlayerRef, MediaPlayerProps>(
               />
             )}
           </div>
-        ) : resolvedKind === 'video' ? (
-          video
         ) : (
           // eslint-disable-next-line jsx-a11y/media-has-caption
           <audio

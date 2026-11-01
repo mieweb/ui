@@ -48,6 +48,12 @@
   timeline follow the media, not the reading direction, so they don't mirror
   (Material's bidirectionality guidance). The labels inside still render in
   their own direction. Don't remove it to "fix" RTL.
+- **One video element across both styles.** A video always sits in the
+  same box; with `native` controls the box is `display: contents` (no
+  `data-slot` or theme), so the native layout is as if it weren't there.
+  Switching `controlsStyle` then keeps the element, so its time, playback
+  and any picture-in-picture window survive. Don't render the video in
+  different places per style.
 - **The box is a dark surface** (`data-theme="dark"`). The scrims are raw
   black on purpose: they sit over arbitrary video frames.
 - **Floating clips and their hosts.** A browser closes the picture-in-picture

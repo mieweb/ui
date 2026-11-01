@@ -181,6 +181,9 @@ export const miewebUISafelist = [
   'pt-16',
   'ring-white/70',
   'self-stretch',
+  // MediaPlayer's box with the browser's controls: the video lays out as
+  // if it weren't there.
+  'contents',
   'h-dvh',
   'sm:h-[calc(100dvh-2rem)]',
   'max-h-[40%]',
