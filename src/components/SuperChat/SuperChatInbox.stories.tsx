@@ -61,7 +61,7 @@ const meta: Meta<typeof SuperChatInbox> = {
     mediaLabels: {
       control: false,
       description:
-        'Localized return control, attachment actions and unknown author labels.',
+        'Localized media wording, for the panel and the list: Back, open/play and their named forms (`openMediaNamed`, `playMediaNamed`), the gallery and its "+N" cell (`gallery`, `moreMedia`), "Sending…" (`sending`, `sendingProgress`), a tile that didn\'t load (`mediaUnavailable`), the editor\'s attachments (`editAttachments`, `removeAttachment`, `attachmentName`), the list\'s preview of an attachment-only message (`attachmentsPreview`) and `unknownAuthor`. English by default.',
       table: { category: 'Rendering' },
     },
     mediaFeedProps: {
@@ -81,6 +81,24 @@ const meta: Meta<typeof SuperChatInbox> = {
       description:
         "The host's card for an attachment in the thread, in place of the built-in one. Receives `{ message, attachment, open, launchId, maxSize }`; put `launchId` on the card's control as `data-media-launch-id`, and fit the card in `maxSize` both ways at the clip's own shape.",
       table: { category: 'Slots' },
+    },
+    acceptedFileTypes: {
+      control: false,
+      description:
+        "Kinds of file the composer takes (`image`, `video`, `audio`, `pdf`, `document`); default `['image', 'video', 'audio', 'pdf']`.",
+      table: { category: 'Behavior' },
+    },
+    maxFileSize: {
+      control: 'number',
+      description:
+        'Largest file the composer takes, in bytes (default 25 MB); a larger one is refused through `onComposerError`.',
+      table: { category: 'Behavior' },
+    },
+    onComposerError: {
+      control: false,
+      description:
+        "Fired with `(message, context?)` when the composer refuses a file (too large, a type not accepted, over the attachment limit) or a send fails. `message` is English; word it yourself from `context.reason` (e.g. `'send-failed'`).",
+      table: { category: 'Callbacks' },
     },
     readOnly: {
       control: 'boolean',
@@ -116,7 +134,18 @@ const meta: Meta<typeof SuperChatInbox> = {
     renderTextContent: { control: false, table: { category: 'Rendering' } },
     linkBuilder: { control: false, table: { category: 'Rendering' } },
     className: { control: false },
-    onMessageSent: { control: false, table: { category: 'Callbacks' } },
+    onMessageSent: {
+      control: false,
+      description:
+        "Fired with `(text, { conversation, mentions, attachments })` on send. Return a promise to keep the send button busy (`isSending`, per conversation) until it settles; if it rejects, the text and files go back into the composer and `onComposerError` hears `'send-failed'`.",
+      table: { category: 'Callbacks' },
+    },
+    onMessageEdited: {
+      control: false,
+      description:
+        'Enables Edit on your own text messages. Fired with `(messageId, text, { conversation, removedMedia, removedFiles })`: the new text and the ids of the attachments the author removed in the editor.',
+      table: { category: 'Callbacks' },
+    },
     onConversationOpened: { control: false, table: { category: 'Callbacks' } },
     onConversationClosed: { control: false, table: { category: 'Callbacks' } },
     onNewConversation: { control: false, table: { category: 'Callbacks' } },
@@ -128,7 +157,7 @@ const meta: Meta<typeof SuperChatInbox> = {
       description: {
         component: `### What it's for
 
-**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
+**The complete multi-participant inbox: \`SuperChatConversations\` on the left, the active \`SuperChat\` panel on the right, with selection and the small-screen master/detail switch handled for you.** \`SuperChatInbox\` takes the full \`conversations: SuperChatConversation[]\`, resolves the active one from \`activeConversationId\` (controlled) or \`defaultActiveConversationId\` (uncontrolled; first conversation by default), and forwards every panel prop — \`currentParticipantId\`, \`renderPlugins\`, \`renderTextContent\`, \`trustedContent\`, \`readOnly\`, \`acceptedFileTypes\`, \`maxFileSize\`, \`onComposerError\`, \`mediaMaxSize\`, \`renderMessageMedia\`, \`order\`, \`virtualized\`, \`linkBuilder\`, \`onMessageSent\`, \`onMessageEdited\`, \`onConversationClosed\`, \`onReferenceClick\` — plus the list's \`onConversationOpened\` and \`onNewConversation\`. \`showSidebar={false}\` hides the list. Below the \`sm\` breakpoint only one pane is visible: opening a conversation shows the panel, whose Back button (\`onBack\`) returns to the list. Root is \`div role="group" aria-label="Chat: <title>"\` (\`data-slot="superchat-inbox"\`), rounded and bordered, filling its container's height. It is the drop-in for the standalone \`mieweb/chat-component\` (same conversation/thread/\`linkBuilder\`/callback shape; \`senderId\` → \`participantId\`).
 
 Messages can also carry explicit \`media: SuperChatMediaAttachment[]\` records (stable attachment ID, kind and source, with optional title/caption/poster). The thread opens by default. Press **Play** on an attachment to open that clip in the media feed; **Back to conversation** returns to the same reading position and draft. There is no header view toggle. \`view\` / \`onViewChange\` let the host control this navigation, and \`defaultView\` supplies the initial choice. The media view composes [MediaFeed](?path=/docs/media-mediafeed--docs), derives items through \`getConversationMediaItems\`, and keeps the conversation header and composer mounted (the header hides on a phone in the overlay layout). Both views address the same messages and participants. \`mediaFeedProps\` supplies feed playback configuration, labels, custom media and action slots; \`mediaLabels\` localizes the return control and attachment actions. Attachment upload and persistence still belong to the host. With \`mediaFeedProps.layout: 'overlay'\` the media view is mobile-first: each clip fills it edge to edge under touch-first controls, and on a phone, upright or sideways, it fills the screen above the message box, as a dialog (Escape goes back). Mount \`useKeyboardInset()\` once in the app shell for it: the panel sizes itself from the visible viewport that hook publishes, so the iOS keyboard doesn't cover the message box (with its \`native\` source, pad the composer by \`--mieweb-keyboard-inset\` as for any ChatComposer). \`renderMessageMedia\` lets the host draw its own card for an attachment in the thread. Open the **Media Conversation** stories for local examples.
 
