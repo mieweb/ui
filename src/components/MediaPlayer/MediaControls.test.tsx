@@ -81,7 +81,7 @@ describe('MediaPlayer overlay controls', () => {
       <MediaPlayer src="clip.mp4" aria-label="Clip" />
     );
     const video = container.querySelector('video')!;
-    void video.play();
+    act(() => void video.play());
     rerender(
       <MediaPlayer src="clip.mp4" controlsStyle="overlay" aria-label="Clip" />
     );
