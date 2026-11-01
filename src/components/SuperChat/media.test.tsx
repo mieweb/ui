@@ -1226,10 +1226,11 @@ describe('SuperChat media view', () => {
     const actions = within(item).getByRole('button', {
       name: 'Menu Second clip',
     });
-    // The same row as the title, not a row of its own under the caption.
-    expect(title.parentElement?.parentElement).toBe(
-      actions.closest('[data-slot="actions"]')?.parentElement?.parentElement
-    );
+    // Beside the title in the item's details, not a row of its own under
+    // the caption.
+    const details = title.closest('[data-slot="details"]');
+    expect(details).not.toBeNull();
+    expect(actions.closest('[data-slot="details"]')).toBe(details);
     unmount();
 
     render(
