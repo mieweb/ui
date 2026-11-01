@@ -131,6 +131,9 @@ export const miewebUISafelist = [
   // container query and pointer variants (these need Tailwind 4.1).
   '@container',
   'w-fit',
+  // Previous/Next at the top end on a short screen (a phone held sideways).
+  '[@media(max-height:30rem)]:top-2',
+  '[@media(max-height:30rem)]:translate-y-0',
   'via-black/30',
   'pb-3',
   'max-w-xl',
@@ -1183,8 +1186,6 @@ export const miewebUISafelist = [
   'group-hover/portlet:opacity-100',
   'focus-visible:opacity-100',
   '[@media(hover:none)]:opacity-100',
-  '[@media(max-height:30rem)]:top-2',
-  '[@media(max-height:30rem)]:translate-y-0',
   'group/portlet',
   '[&>:nth-child(2)]:ms-auto',
   'flex-nowrap',
