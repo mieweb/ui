@@ -4,15 +4,21 @@ import { ButtonGroup } from '../ButtonGroup';
 import { MediaPlayer } from '../MediaPlayer';
 import { ImageOff, Play } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import type { SuperChatMediaAttachment } from './types';
+import type {
+  SuperChatAttachmentLabels,
+  SuperChatMediaAttachment,
+} from './types';
 
 /** One attachment as a gallery or tile gets it: what to show and how to open it. */
 export interface MessageMediaEntry {
   attachment: SuperChatMediaAttachment;
   /** `data-media-launch-id`, so Back returns focus to its control. */
   launchId: string;
-  /** Opens it in the media view; `play` starts it there. */
-  open: (play?: boolean) => void;
+  /**
+   * Opens it in the media view; `play` starts it there. Left out while its
+   * message is being edited: the cell shows but doesn't open.
+   */
+  open?: (play?: boolean) => void;
 }
 
 /** Drawn as a picture in the thread (a tile, a gallery cell), not a player. */
@@ -32,13 +38,16 @@ export function isVisualMedia(attachment: SuperChatMediaAttachment): boolean {
 function actionName(
   attachment: SuperChatMediaAttachment,
   openLabel: string,
-  playLabel: string
+  playLabel: string,
+  labels: SuperChatAttachmentLabels
 ): string {
   if (attachment.kind !== 'image') {
-    return attachment.title ? `${playLabel} ${attachment.title}` : playLabel;
+    return attachment.title
+      ? labels.playMediaNamed(attachment.title)
+      : playLabel;
   }
   const name = attachment.title ?? attachment.alt;
-  return name ? `${openLabel}, ${name}` : openLabel;
+  return name ? labels.openMediaNamed(name) : openLabel;
 }
 
 /**
@@ -57,14 +66,18 @@ function MediaStill({
   /** Shown when the picture or clip can't be loaded. */
   unavailableLabel: string;
 }) {
-  const [failed, setFailed] = React.useState(false);
+  const still =
+    attachment.kind === 'image' ? attachment.src : attachment.poster;
+  // Which source failed, not just whether one did: a host that swaps in a
+  // new src or poster gets it tried, not the old failure.
+  const source = still ?? attachment.src;
+  const [failedSource, setFailedSource] = React.useState<string>();
+  const fail = () => setFailedSource(source);
   const report = (width: number, height: number) => {
     if (width && height) onAspect?.(width / height);
   };
-  const still =
-    attachment.kind === 'image' ? attachment.src : attachment.poster;
   const className = 'block size-full object-cover';
-  if (failed) {
+  if (failedSource === source) {
     return (
       <span className="flex size-full flex-col items-center justify-center gap-1 bg-neutral-800 p-2 text-center text-xs text-neutral-300">
         <ImageOff className="size-5" aria-hidden="true" />
@@ -83,7 +96,7 @@ function MediaStill({
           event.currentTarget.naturalHeight
         )
       }
-      onError={() => setFailed(true)}
+      onError={fail}
       className={className}
     />
   ) : (
@@ -100,7 +113,7 @@ function MediaStill({
       onLoadedMetadata={(event) =>
         report(event.currentTarget.videoWidth, event.currentTarget.videoHeight)
       }
-      onError={() => setFailed(true)}
+      onError={fail}
       className={className}
     />
   );
@@ -109,8 +122,26 @@ function MediaStill({
 /**
  * Shapes (width ÷ height) already seen, by still: a tile that mounts again (a
  * virtualized row scrolled back into view) starts at its shape, not 16:9.
+ * A still that loads again moves to the end (a Map keeps insertion order),
+ * so once it holds {@link KNOWN_SHAPES_LIMIT} the least recently seen goes.
  */
-const knownShapes = new Map<string, number>();
+export const knownShapes = new Map<string, number>();
+
+/** How many shapes {@link knownShapes} keeps: a long thread's worth. */
+export const KNOWN_SHAPES_LIMIT = 200;
+
+/**
+ * Remembers a still's shape. A `data:` URL is left out: it can be megabytes,
+ * too much to keep as a key.
+ */
+export function rememberShape(still: string, shape: number): void {
+  if (still.startsWith('data:')) return;
+  knownShapes.delete(still);
+  knownShapes.set(still, shape);
+  if (knownShapes.size > KNOWN_SHAPES_LIMIT) {
+    knownShapes.delete(knownShapes.keys().next().value!);
+  }
+}
 
 /** The attachment's shape, as far as it's known before its still loads. */
 function shapeOf(attachment: SuperChatMediaAttachment): number | undefined {
@@ -152,9 +183,13 @@ function PlayBadge({ small = false }: { small?: boolean }) {
   );
 }
 
-/** Shared by a tile and a gallery cell: a button over the still, ring inset (the tile clips). */
+/**
+ * Shared by a tile and a gallery cell: a button over the still. Its focus
+ * outline is inset, as the tile clips, and an outline, not a ring: a ring's
+ * shadow would sit under the still that fills the button.
+ */
 const stillButton =
-  'focus-visible:ring-ring relative block overflow-hidden bg-neutral-900 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset';
+  'focus-visible:outline-ring relative block overflow-hidden bg-neutral-900 focus-visible:-outline-offset-2 focus-visible:outline-2';
 
 /**
  * Two or more pictures in one message, as one tile (iMessage, WhatsApp,
@@ -167,18 +202,15 @@ export function MessageGallery({
   maxSize,
   openLabel,
   playLabel,
-  moreLabel,
-  unavailableLabel,
+  labels,
 }: {
   entries: MessageMediaEntry[];
   /** The tile's width, a CSS length (`mediaMaxSize`). */
   maxSize: string;
   openLabel: string;
   playLabel: string;
-  /** The hidden count's name on the last cell, e.g. "3 more". */
-  moreLabel: (count: number) => string;
-  /** On a cell whose picture didn't load. */
-  unavailableLabel: string;
+  /** The gallery's name, its cells' names and a cell that didn't load. */
+  labels: SuperChatAttachmentLabels;
 }) {
   const shown = entries.slice(0, 4);
   const more = entries.length - shown.length;
@@ -186,6 +218,7 @@ export function MessageGallery({
     <div
       data-slot="superchat-message-gallery"
       role="group"
+      aria-label={labels.gallery(entries.length)}
       style={{ width: maxSize }}
       className={cn(
         'grid max-w-full grid-cols-2 gap-0.5',
@@ -195,14 +228,15 @@ export function MessageGallery({
       {shown.map(({ attachment, launchId, open }, index) => {
         const playable = attachment.kind !== 'image';
         const last = more > 0 && index === shown.length - 1;
-        const name = actionName(attachment, openLabel, playLabel);
+        const name = actionName(attachment, openLabel, playLabel, labels);
         return (
           <button
             key={attachment.id}
             type="button"
             data-media-launch-id={launchId}
-            aria-label={last ? `${name}, ${moreLabel(more)}` : name}
-            onClick={() => open(playable)}
+            aria-label={last ? labels.moreMedia(more, name) : name}
+            disabled={!open}
+            onClick={() => open?.(playable)}
             className={cn(
               stillButton,
               shown.length === 3 && index === 0 && 'row-span-2'
@@ -210,7 +244,7 @@ export function MessageGallery({
           >
             <MediaStill
               attachment={attachment}
-              unavailableLabel={unavailableLabel}
+              unavailableLabel={labels.mediaUnavailable}
             />
             {last ? (
               <span
@@ -232,27 +266,37 @@ export function MessageGallery({
 /** Thread previews reuse the same native transport as the full media feed. */
 export function MessageMedia({
   attachment,
+  mediaView,
   onOpen,
   openLabel,
   playLabel,
+  labels,
   errorLabel,
   retryLabel,
-  unavailableLabel,
   launchId,
   maxSize,
 }: {
   attachment: SuperChatMediaAttachment;
   /** The card's box, a CSS length: this wide, its picture at most this tall. */
   maxSize: string;
+  /**
+   * Whether the conversation has a media view: the attachment is drawn to
+   * open there, else it plays where it is.
+   */
+  mediaView: boolean;
+  /**
+   * Opens it in the media view. Left out while its message is being edited:
+   * it shows as usual but doesn't open (leaving would lose the draft).
+   */
   onOpen?: (play?: boolean) => void;
   openLabel: string;
   playLabel: string;
+  /** Its control's name and a tile that didn't load. */
+  labels: SuperChatAttachmentLabels;
   /** Localized load-error text; the player's default applies when omitted. */
   errorLabel?: string;
   /** Localized retry text; the player's default applies when omitted. */
   retryLabel?: string;
-  /** On a tile whose picture or clip didn't load. */
-  unavailableLabel: string;
   launchId: string;
 }) {
   const playable = attachment.kind !== 'image';
@@ -260,10 +304,10 @@ export function MessageMedia({
   // Width ÷ height: the host's size or one seen before, then the still's own.
   const [aspect, setAspect] = React.useState(() => shapeOf(attachment));
   const learnShape = (shape: number) => {
-    knownShapes.set(stillOf(attachment), shape);
+    rememberShape(stillOf(attachment), shape);
     setAspect(shape);
   };
-  if (onOpen && isVisualMedia(attachment)) {
+  if (mediaView && isVisualMedia(attachment)) {
     // A picture alone: the still in its own shape inside the box (a wide one
     // up to that wide, an upright one up to that tall), a tap to open it.
     const shape = Math.min(
@@ -275,8 +319,9 @@ export function MessageMedia({
         type="button"
         data-slot="superchat-message-media"
         data-media-launch-id={launchId}
-        aria-label={actionName(attachment, openLabel, playLabel)}
-        onClick={() => onOpen(playable)}
+        aria-label={actionName(attachment, openLabel, playLabel, labels)}
+        disabled={!onOpen}
+        onClick={() => onOpen?.(playable)}
         style={{
           width: `min(${maxSize}, calc(${maxSize} * ${shape}))`,
           aspectRatio: shape,
@@ -286,7 +331,7 @@ export function MessageMedia({
         <MediaStill
           attachment={attachment}
           onAspect={learnShape}
-          unavailableLabel={unavailableLabel}
+          unavailableLabel={labels.mediaUnavailable}
         />
         {playable && <PlayBadge />}
       </button>
@@ -326,7 +371,7 @@ export function MessageMedia({
             aria-label={attachment.alt ?? attachment.title ?? openLabel}
             // Audio plays where it is, as a voice note does; a clip here
             // (no media view to open) does too.
-            controls={attachment.kind === 'audio' || !onOpen}
+            controls={attachment.kind === 'audio' || !mediaView}
             preload="metadata"
             labels={{ error: errorLabel, retry: retryLabel }}
             className="max-h-[inherit]"
@@ -344,7 +389,7 @@ export function MessageMedia({
       {attachment.caption && (
         <p className="px-1 text-sm">{attachment.caption}</p>
       )}
-      {onOpen && attachment.kind !== 'audio' && (
+      {mediaView && attachment.kind !== 'audio' && (
         <ButtonGroup>
           <Button
             data-media-launch-id={launchId}
@@ -357,10 +402,11 @@ export function MessageMedia({
             }
             aria-label={
               playable && attachment.title
-                ? `${playLabel} ${attachment.title}`
+                ? labels.playMediaNamed(attachment.title)
                 : actionLabel
             }
-            onClick={() => onOpen(playable)}
+            disabled={!onOpen}
+            onClick={() => onOpen?.(playable)}
           >
             {actionLabel}
           </Button>

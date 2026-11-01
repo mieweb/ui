@@ -782,10 +782,13 @@ function HostCard({
       type="button"
       data-media-launch-id={launchId}
       aria-label={label}
-      onClick={() => open(true)}
+      // No `open` while the message is being edited: the card stays put.
+      disabled={!open}
+      onClick={() => open?.(true)}
       style={{ width }}
-      // Inset ring: SuperChat's tile clips to the bubble's corners.
-      className="focus-visible:ring-ring relative block max-w-full focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+      // An inset outline, not a ring: SuperChat's tile clips to the bubble's
+      // corners, and a ring's shadow would sit under the full-width frame.
+      className="focus-visible:outline-ring relative block max-w-full focus-visible:outline-2 focus-visible:-outline-offset-2"
     >
       {attachment.poster ? (
         // The thumbnail: nothing of the video loads until it's played.
@@ -829,7 +832,7 @@ export const HostMediaCard: Story = {
     docs: {
       description: {
         story:
-          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view. The card shows the attachment's `poster` (a thumbnail, so nothing of the video loads until it's played) in the clip's shape, upright or wide, and sits in its own tile below the message's text, on the author's side, with the bubble's corners. Why not [VideoCard](?path=/docs/media-videocard--docs)? It is a 16:9 thumbnail that links out or runs a click; this card keeps the clip's own shape (an upright clip stays upright), falls back to the video's first frame with no poster, and carries `data-media-launch-id`. Use VideoCard for a video library or a YouTube link; draw a card like this one for attachments that open the media view.",
+          "`renderMessageMedia` draws the host's own card for an attachment. Put `launchId` on its control as `data-media-launch-id`, so Back returns focus there; `open(true)` plays it in the media view, and is left out while the message is being edited (leaving would lose the draft), so draw the control disabled then. The card shows the attachment's `poster` (a thumbnail, so nothing of the video loads until it's played) in the clip's shape, upright or wide, and sits in its own tile below the message's text, on the author's side, with the bubble's corners. Why not [VideoCard](?path=/docs/media-videocard--docs)? It is a 16:9 thumbnail that links out or runs a click; this card keeps the clip's own shape (an upright clip stays upright), falls back to the video's first frame with no poster, and carries `data-media-launch-id`. Use VideoCard for a video library or a YouTube link; draw a card like this one for attachments that open the media view.",
       },
     },
   },

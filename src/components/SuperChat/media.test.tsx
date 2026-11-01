@@ -12,7 +12,12 @@ import {
 import userEvent from '@testing-library/user-event';
 import { SuperChat } from './SuperChat';
 import { SuperChatInbox } from './SuperChatInbox';
-import { getConversationMediaItems } from './media';
+import {
+  getConversationMediaItems,
+  messagePreview,
+  previewOfAttachments,
+} from './media';
+import { KNOWN_SHAPES_LIMIT, knownShapes, rememberShape } from './MessageMedia';
 import type { SuperChatConversation } from './types';
 
 const conversation: SuperChatConversation = {
@@ -168,6 +173,48 @@ describe('getConversationMediaItems', () => {
     expect(items).toHaveLength(2);
     expect(items[0].participant).toBeUndefined();
     expect(items[0].message.participantId).toBe('unknown');
+  });
+});
+
+describe('messagePreview', () => {
+  const preview = (text: string) =>
+    messagePreview(
+      { id: 'm', participantId: 'alex', time: '2026-10-03T09:00:00Z', text },
+      previewOfAttachments
+    );
+
+  it('leaves the underscores in a file name or a link alone', () => {
+    expect(preview('see file_name_v2.pdf')).toBe('see file_name_v2.pdf');
+    expect(preview('https://x.dev/a_b_c')).toBe('https://x.dev/a_b_c');
+    expect(preview('rename my_file_v2 to v3')).toBe('rename my_file_v2 to v3');
+  });
+
+  it('still strips real emphasis and code', () => {
+    expect(
+      preview('**bold**, _italic_, *also*, __strong__, `code` and ~~gone~~')
+    ).toBe('bold, italic, also, strong, code and gone');
+  });
+});
+
+describe('knownShapes', () => {
+  afterEach(() => knownShapes.clear());
+
+  it('keeps the most recently seen shapes, up to its limit', () => {
+    for (let i = 0; i <= KNOWN_SHAPES_LIMIT; i++) {
+      rememberShape(`/still-${i}.png`, 1);
+    }
+    expect(knownShapes.size).toBe(KNOWN_SHAPES_LIMIT);
+    expect(knownShapes.has('/still-0.png')).toBe(false);
+    // Seen again, the oldest left is the newest, and outlives the next one.
+    rememberShape('/still-1.png', 2);
+    rememberShape('/still-new.png', 1);
+    expect(knownShapes.get('/still-1.png')).toBe(2);
+    expect(knownShapes.has('/still-2.png')).toBe(false);
+  });
+
+  it('keeps no data: URL, which can be megabytes', () => {
+    rememberShape('data:image/png;base64,AAAA', 1.5);
+    expect(knownShapes.size).toBe(0);
   });
 });
 
@@ -460,7 +507,16 @@ describe('SuperChat media view', () => {
         }}
       />
     );
-    expect(screen.getByRole('status')).toHaveTextContent('Sending… 45%');
+    // Said once: the percent beside it changes on every tick, so it is shown
+    // but kept out of the status.
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent(/^Sending…$/);
+    const line = document.querySelector(
+      '[data-slot="superchat-message-sending"]'
+    )!;
+    expect(line).not.toHaveAttribute('role');
+    expect(line).toHaveTextContent('Sending…45%');
+    expect(status.contains(screen.getByText('45%'))).toBe(false);
     expect(
       document.querySelector('[data-slot="superchat-message-attachment"]')
     ).toHaveClass('opacity-60');
@@ -598,6 +654,255 @@ describe('SuperChat media view', () => {
     );
   });
 
+  it('opens no media while a message is being edited, so its draft stays', async () => {
+    const user = userEvent.setup();
+    const opens: Record<string, unknown> = {};
+    const withClip: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          media: [
+            ...conversation.thread[0].media!,
+            { id: 'v1', kind: 'video', src: '/clip.webm', title: 'Clip' },
+          ],
+        },
+      ],
+    };
+    render(
+      <SuperChat
+        conversation={withClip}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+        renderMessageMedia={({ attachment, open }) => {
+          opens[attachment.id] = open;
+          return attachment.kind === 'video' ? (
+            <button type="button" onClick={() => open?.(true)}>
+              Host card
+            </button>
+          ) : null;
+        }}
+      />
+    );
+    expect(opens.v1).toBeTypeOf('function');
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    await user.type(editor, ' and more');
+    // The host's card gets no open, and the gallery's cells don't open.
+    expect(opens.v1).toBeUndefined();
+    const cell = within(
+      screen.getByRole('group', { name: 'Gallery, 2 items' })
+    ).getAllByRole('button')[0];
+    expect(cell).toBeDisabled();
+    await user.click(cell);
+    await user.click(screen.getByRole('button', { name: 'Host card' }));
+    expect(
+      screen.queryByRole('button', { name: 'Back to conversation' })
+    ).toBeNull();
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
+      'First caption and more'
+    );
+  });
+
+  it('keeps a lone tile in place, not opening, while its message is edited', async () => {
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              media: [conversation.thread[0].media![0]],
+            },
+          ],
+        }}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    const tile = screen.getByRole('button', {
+      name: 'Open in media feed, First image',
+    });
+    expect(tile).toBeDisabled();
+    await user.click(tile);
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toBeVisible();
+  });
+
+  it('offers Edit on a message that is only attachments', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [{ ...conversation.thread[0], text: '' }],
+        }}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+      />
+    );
+    expect(
+      container.querySelector('[data-slot="superchat-bubble"]')
+    ).toBeNull();
+    // Beside the attachments, as it would be beside a bubble. Nothing to
+    // copy, so Edit is its only action.
+    const slot = container.querySelector<HTMLElement>(
+      '[data-slot="superchat-message-attachments"] > [data-slot="superchat-message-actions-slot"]'
+    )!;
+    expect(slot).toBeTruthy();
+    expect(
+      within(slot).queryByRole('button', { name: 'Copy message' })
+    ).toBeNull();
+    await user.click(
+      within(slot).getByRole('button', { name: 'Edit message' })
+    );
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
+      ''
+    );
+  });
+
+  it('will not save an edit that takes off everything a message had', async () => {
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              text: '',
+              media: [conversation.thread[0].media![0]],
+            },
+          ],
+        }}
+        currentParticipantId="alex"
+        onMessageEdited={onMessageEdited}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Remove First image' })
+    );
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    // Writing something makes it a message again.
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    await user.type(editor, 'Gone');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    // Enter with nothing left closes the editor as Cancel would.
+    await user.clear(editor);
+    await user.type(editor, '{Enter}');
+    expect(onMessageEdited).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('button', { name: 'Open in media feed, First image' })
+    ).toBeEnabled();
+  });
+
+  it('takes the words on tiles, galleries and the editor from mediaLabels', async () => {
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              media: [
+                ...conversation.thread[0].media!,
+                { id: 'a3', kind: 'image', src: '/third.png' },
+                { id: 'a4', kind: 'image', src: '/fourth.png', title: 'Four' },
+                { id: 'a5', kind: 'image', src: '/fifth.png' },
+              ],
+            },
+            {
+              ...conversation.thread[0],
+              id: 'm2',
+              time: '2026-10-03T09:01:00Z',
+              media: [
+                { id: 'v1', kind: 'video', src: '/clip.webm', title: 'Clip' },
+              ],
+            },
+          ],
+        }}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+        mediaLabels={{
+          openMediaNamed: (name) => `«${name}» öffnen`,
+          playMediaNamed: (title) => `«${title}» abspielen`,
+          moreMedia: (count, name) => `${name} (+${count})`,
+          gallery: (count) => `Galerie mit ${count}`,
+          editAttachments: 'Anhänge',
+          removeAttachment: (name) => `«${name}» entfernen`,
+          attachmentName: (kind) => (kind === 'image' ? 'Foto' : kind),
+        }}
+      />
+    );
+    const gallery = screen.getByRole('group', { name: 'Galerie mit 5' });
+    const cells = within(gallery).getAllByRole('button');
+    expect(cells[0]).toHaveAccessibleName('«First image» öffnen');
+    expect(cells[3]).toHaveAccessibleName('«Four» öffnen (+1)');
+    expect(
+      screen.getByRole('button', { name: '«Clip» abspielen' })
+    ).toBeTruthy();
+    await user.click(
+      screen.getAllByRole('button', { name: 'Message actions' })[0]
+    );
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    const list = screen.getByRole('list', { name: 'Anhänge' });
+    expect(
+      within(list).getAllByRole('button', { name: '«Foto» entfernen' })
+    ).toHaveLength(2);
+  });
+
+  it('names an untitled attachment in the editor by its kind', async () => {
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              media: [{ id: 'v1', kind: 'video', src: '/clip.webm' }],
+            },
+          ],
+        }}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    expect(screen.getByRole('button', { name: 'Remove Video' })).toBeTruthy();
+  });
+
+  it('tries a still again once the host gives it a new source', () => {
+    const single = (src: string): SuperChatConversation => ({
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          media: [{ ...conversation.thread[0].media![0], src }],
+        },
+      ],
+    });
+    const { container, rerender } = render(
+      <SuperChat conversation={single('/broken.png')} />
+    );
+    const tile = () =>
+      container.querySelector<HTMLElement>(
+        '[data-slot="superchat-message-media"]'
+      )!;
+    fireEvent.error(tile().querySelector('img')!);
+    expect(tile()).toHaveTextContent("Couldn't load");
+    rerender(<SuperChat conversation={single('/fixed.png')} />);
+    expect(tile()).not.toHaveTextContent("Couldn't load");
+    expect(tile().querySelector('img')).toHaveAttribute('src', '/fixed.png');
+  });
+
   it('makes the links in a media item’s caption tappable', () => {
     const linked: SuperChatConversation = {
       ...conversation,
@@ -726,7 +1031,7 @@ describe('SuperChat media view', () => {
             <button
               type="button"
               data-media-launch-id={launchId}
-              onClick={() => open(true)}
+              onClick={() => open?.(true)}
             >
               {`Host card ${attachment.title}`}
             </button>
@@ -774,7 +1079,7 @@ describe('SuperChat media view', () => {
           <button
             type="button"
             data-media-launch-id={launchId}
-            onClick={() => open(true)}
+            onClick={() => open?.(true)}
           >
             {`Host card ${attachment.title}`}
           </button>
@@ -835,7 +1140,7 @@ describe('SuperChat media view', () => {
           <button
             type="button"
             data-media-launch-id={launchId}
-            onClick={() => open()}
+            onClick={() => open?.()}
           >
             {`Host card ${attachment.title}`}
           </button>

@@ -132,8 +132,12 @@ export interface SuperChatMediaItem {
 export interface SuperChatMessageMediaRenderProps {
   message: SuperChatMessage;
   attachment: SuperChatMediaAttachment;
-  /** Opens this attachment in the conversation's media view; `play` starts it there. */
-  open: (play?: boolean) => void;
+  /**
+   * Opens this attachment in the conversation's media view; `play` starts it
+   * there. Left out while the message is being edited, as leaving for the
+   * media view would lose the draft: draw the card's control disabled then.
+   */
+  open?: (play?: boolean) => void;
   /**
    * Set as `data-media-launch-id` on the control that calls `open`, so focus
    * returns to it when the viewer goes back to the conversation.
@@ -170,12 +174,30 @@ export interface SuperChatMediaLabels {
   backToConversation: string;
   openMedia: string;
   playMedia: string;
-  /** The last gallery cell's name for the attachments it hides, e.g. "3 more". */
-  moreMedia: (count: number) => string;
-  /** Under a `pending` message's attachments; `percent` when its `progress` is known. */
-  sending: (percent?: number) => string;
+  /** A picture's open control, naming it: "Open in media feed, Whiteboard". */
+  openMediaNamed: (name: string) => string;
+  /** A clip's play control, naming it: "Play Launch overview". */
+  playMediaNamed: (title: string) => string;
+  /**
+   * The last gallery cell's name: `name` is the cell's own (as
+   * `openMediaNamed` or `playMediaNamed` gives it) and `count` the
+   * attachments it hides, e.g. "Open in media feed, Photo 4, 3 more".
+   */
+  moreMedia: (count: number, name: string) => string;
+  /** A gallery's name, for the `count` pictures and clips in it. */
+  gallery: (count: number) => string;
+  /** Under a `pending` message's attachments, said once as it starts sending. */
+  sending: string;
+  /** Beside `sending` once the message's `progress` is known, e.g. "45%". */
+  sendingProgress: (percent: number) => string;
   /** A media tile whose picture or clip didn't load. */
   mediaUnavailable: string;
+  /** The list of a message's attachments in its editor. */
+  editAttachments: string;
+  /** The control taking one attachment off a message in its editor. */
+  removeAttachment: (name: string) => string;
+  /** An attachment's name in the editor when it has no title or alt text. */
+  attachmentName: (kind: SuperChatMediaAttachment['kind']) => string;
   /**
    * The conversation list's preview of a last message with no text: what it
    * carries, e.g. "Photo", "2 photos", "Video", "Q3 report.pdf".
@@ -200,7 +222,16 @@ export interface SuperChatMessageEdits {
 /** The media labels a thread's attachment tiles use. */
 export type SuperChatAttachmentLabels = Pick<
   SuperChatMediaLabels,
-  'moreMedia' | 'sending' | 'mediaUnavailable'
+  | 'openMediaNamed'
+  | 'playMediaNamed'
+  | 'moreMedia'
+  | 'gallery'
+  | 'sending'
+  | 'sendingProgress'
+  | 'mediaUnavailable'
+  | 'editAttachments'
+  | 'removeAttachment'
+  | 'attachmentName'
 >;
 
 /**
