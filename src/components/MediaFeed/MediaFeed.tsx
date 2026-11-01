@@ -55,6 +55,13 @@ const defaultLabels: MediaFeedLabels = {
 };
 
 /**
+ * The player's bar in the overlay layout: an even scrim, which the details'
+ * gradient continues upward from its top edge, rather than its own gradient.
+ */
+const OVERLAY_BAR_SCRIM =
+  '[&_[data-slot=media-controls-bar]]:bg-none [&_[data-slot=media-controls-bar]]:bg-black/55';
+
+/**
  * The height of the player's control bar in the item around `ref`, so the
  * details can sit just above it. The bar mounts with the active item and
  * wraps onto two rows in a narrow one, so it's watched for both.
@@ -155,17 +162,19 @@ function OverlayDetails({
       ref={rootRef}
       data-slot="details"
       data-expanded={expanded || undefined}
-      // Down to the item's foot, behind the bar, so its gradient runs into
-      // the bar's; its content sits just above the bar.
-      style={{ paddingBottom: barHeight + 12 }}
+      // On the bar's top edge, not over it (that would dim its controls): its
+      // gradient starts at the bar's own scrim (OVERLAY_BAR_SCRIM), so the
+      // two read as one.
+      style={{ bottom: barHeight }}
       className={cn(
-        'pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end gap-3 bg-gradient-to-t from-black/70 via-black/40 to-transparent ps-3 pe-2 pt-16 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]',
+        'pointer-events-none absolute inset-x-0 z-10 flex items-end justify-between gap-3 bg-gradient-to-t from-black/55 via-black/30 to-transparent ps-3 pe-2 pt-16 pb-3 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]',
         // A darker scrim behind the full text, which can run over a bright frame.
-        expanded && 'from-black/85 via-black/70',
+        expanded && 'via-black/55',
         classNames.details
       )}
     >
-      <div id={textId} className="min-w-0 flex-1 leading-5">
+      {/* A readable measure on a wide screen, as short-video apps keep. */}
+      <div id={textId} className="max-w-xl min-w-0 flex-1 leading-5">
         {author && (
           <div
             data-slot="author"
@@ -657,7 +666,10 @@ function MediaFeedInner<T>(
         tabIndex={id === activeId ? 0 : -1}
         className={cn(
           overlay
-            ? 'relative h-full min-h-0 w-full snap-start snap-always overflow-hidden bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white/70'
+            ? cn(
+                'relative h-full min-h-0 w-full snap-start snap-always overflow-hidden bg-black focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white/70',
+                OVERLAY_BAR_SCRIM
+              )
             : 'border-border bg-card text-card-foreground focus-visible:ring-ring flex min-h-0 w-full snap-start flex-col overflow-hidden border focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset',
           overlay
             ? immersive
