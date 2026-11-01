@@ -273,6 +273,25 @@ function hasOpenLayer(panel: HTMLElement): boolean {
   );
 }
 
+/**
+ * The last `value` while each of its keys holds the same thing as before, so
+ * an object a host writes inline (a new one every render) isn't a change.
+ */
+function useShallowStable<T extends object | undefined>(value: T): T {
+  const ref = React.useRef(value);
+  const last = ref.current;
+  const same =
+    last === value ||
+    (!!last &&
+      !!value &&
+      Object.keys(last).length === Object.keys(value).length &&
+      Object.entries(value).every(([key, item]) =>
+        Object.is(item, (last as Record<string, unknown>)[key])
+      ));
+  if (!same) ref.current = value;
+  return same ? last : value;
+}
+
 /** The header gives its room to the clip on the same screens. */
 const PHONE_HIDDEN =
   'max-sm:hidden [@media(max-height:30rem)_and_(orientation:landscape)]:hidden';
@@ -349,21 +368,26 @@ export function SuperChat({
     (internalView.conversationId === conversation.id
       ? internalView.view
       : 'thread');
-  const openMedia = mediaLabels?.openMedia ?? 'Open in media feed';
-  const playMedia = mediaLabels?.playMedia ?? 'Play';
-  const labels: SuperChatMediaLabels = {
-    backToConversation: 'Back to conversation',
-    ...DEFAULT_ATTACHMENT_LABELS,
-    // The named forms build on `openMedia` / `playMedia` unless given, so a
-    // host that translated those keeps its words on titled tiles.
-    openMediaNamed: (name) => `${openMedia}, ${name}`,
-    playMediaNamed: (title) => `${playMedia} ${title}`,
-    attachmentsPreview: previewOfAttachments,
-    unknownAuthor: 'Unknown',
-    ...mediaLabels,
-    openMedia,
-    playMedia,
-  };
+  // Every message row takes these, so they keep their identity while the
+  // host's words stay the same, even passed as a new object each render.
+  const hostLabels = useShallowStable(mediaLabels);
+  const labels = React.useMemo<SuperChatMediaLabels>(() => {
+    const openMedia = hostLabels?.openMedia ?? 'Open in media feed';
+    const playMedia = hostLabels?.playMedia ?? 'Play';
+    return {
+      backToConversation: 'Back to conversation',
+      ...DEFAULT_ATTACHMENT_LABELS,
+      // The named forms build on `openMedia` / `playMedia` unless given, so a
+      // host that translated those keeps its words on titled tiles.
+      openMediaNamed: (name) => `${openMedia}, ${name}`,
+      playMediaNamed: (title) => `${playMedia} ${title}`,
+      attachmentsPreview: previewOfAttachments,
+      unknownAuthor: 'Unknown',
+      ...hostLabels,
+      openMedia,
+      playMedia,
+    };
+  }, [hostLabels]);
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);
     return order === 'desc' ? items.reverse() : items;

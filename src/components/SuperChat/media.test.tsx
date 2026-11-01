@@ -910,6 +910,25 @@ describe('SuperChat media view', () => {
     ).toBeTruthy();
   });
 
+  it('leaves unchanged rows alone while typing, or given equal labels anew', async () => {
+    const user = userEvent.setup();
+    const renderMessageMedia = vi.fn(() => null);
+    const show = () => (
+      <SuperChat
+        conversation={conversation}
+        renderMessageMedia={renderMessageMedia}
+        // Inline, as hosts write it: a new object every render.
+        mediaLabels={{ openMedia: 'Abrir', playMedia: 'Reproducir' }}
+      />
+    );
+    const { rerender } = render(show());
+    const renders = renderMessageMedia.mock.calls.length;
+    expect(renders).toBeGreaterThan(0);
+    await user.type(screen.getByLabelText('Message'), 'Hi');
+    rerender(show());
+    expect(renderMessageMedia).toHaveBeenCalledTimes(renders);
+  });
+
   it('names an untitled attachment in the editor by its kind', async () => {
     const user = userEvent.setup();
     render(

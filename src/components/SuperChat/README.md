@@ -804,6 +804,8 @@ By default the thread renders **every** message in `thread`. Each row is wrapped
 in `React.memo`, so appending a message only renders the new row — existing rows
 are not re-rendered and their Markdown is not re-parsed, as long as you keep
 message objects referentially stable (don't recreate them on every render).
+`mediaLabels` can be written inline: a new object with the same values isn't a
+change. A function inside it is compared by identity, so define those once.
 
 For long histories (hundreds to thousands of messages), set **`virtualized`** to
 window the thread: only the rows near the viewport are mounted (with dynamic
