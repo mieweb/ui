@@ -17,6 +17,12 @@ export const PIP_EVENTS: readonly string[] = [
   'webkitpresentationmodechanged',
 ];
 
+/**
+ * How long to wait for Safari to say a video left picture in picture before
+ * carrying on: the event may never come.
+ */
+const PIP_EXIT_TIMEOUT_MS = 1000;
+
 /** Whether `video` is floating in picture in picture (either API). */
 export function isInPictureInPicture(
   video: HTMLMediaElement | null | undefined
@@ -39,12 +45,17 @@ export function exitPictureInPicture(
   if (document.pictureInPictureElement === video)
     return document.exitPictureInPicture().catch(() => {});
   return new Promise((resolve) => {
-    video.addEventListener('webkitpresentationmodechanged', () => resolve(), {
+    // Whichever comes first, the event or the timeout, cleans up the other.
+    const done = () => {
+      clearTimeout(timer);
+      video.removeEventListener('webkitpresentationmodechanged', done);
+      resolve();
+    };
+    const timer = setTimeout(done, PIP_EXIT_TIMEOUT_MS);
+    video.addEventListener('webkitpresentationmodechanged', done, {
       once: true,
     });
     (video as WebKitVideo).webkitSetPresentationMode?.('inline');
-    // Don't wait on an event that may never come.
-    setTimeout(resolve, 1000);
   });
 }
 
