@@ -156,7 +156,8 @@ opening in a new tab, and never in the media view.
 rejects, the text and the files go back into the composer to try again, as
 long as that conversation is still the one shown (SuperChatInbox reuses the
 panel), and the error is rethrown so `onComposerError` hears
-`reason: 'send-failed'`. `isSending` is kept per conversation. A
+`reason: 'send-failed'`. `isSending` is kept per conversation, as a set of
+the ones with a send pending, so sends in two conversations can overlap. A
 host that shows the message while it uploads gives it `status: 'pending'` and
 `progress` (0–1): its tiles dim and "Sending… 45%" shows under them
 (`mediaLabels.sending` and `sendingProgress(percent)`; only "Sending…" is a

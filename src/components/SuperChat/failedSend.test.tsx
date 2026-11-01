@@ -86,6 +86,32 @@ describe('a failed send', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps a conversation sending while another one sends too', async () => {
+    const settle: Array<() => void> = [];
+    const onMessageSent = vi.fn(
+      () => new Promise<void>((resolve) => settle.push(resolve))
+    );
+    const user = userEvent.setup();
+    const { show } = await sendWithFile({ onMessageSent });
+    show(second);
+    await user.type(screen.getByLabelText('Message'), 'Over here');
+    await user.click(screen.getByRole('button', { name: 'Send message' }));
+    await waitFor(() => expect(onMessageSent).toHaveBeenCalledTimes(2));
+    show(first);
+    expect(
+      screen.getByRole('button', { name: 'Sending message…' })
+    ).toBeInTheDocument();
+    // The second send settling leaves the first one still going.
+    await act(async () => settle[1]());
+    expect(
+      screen.getByRole('button', { name: 'Sending message…' })
+    ).toBeInTheDocument();
+    await act(async () => settle[0]());
+    expect(
+      screen.queryByRole('button', { name: 'Sending message…' })
+    ).toBeNull();
+  });
+
   it('is put back and reported to onComposerError', async () => {
     const { onMessageSent, fail } = pendingSend();
     const onComposerError = vi.fn();

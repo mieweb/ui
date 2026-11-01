@@ -1024,14 +1024,17 @@ export function SuperChat({
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
   const composerRef = React.useRef<ChatComposerHandle>(null);
-  // The conversation a send is pending in: SuperChatInbox reuses this panel
-  // (and its composer) for every conversation, and only that one is busy.
-  const [sendingIn, setSendingIn] = React.useState<string>();
+  // The conversations a send is pending in: SuperChatInbox reuses this panel
+  // (and its composer) for every conversation, and only those are busy. Each
+  // send takes its own off when it settles, so sends can overlap.
+  const [sendingIn, setSendingIn] = React.useState<ReadonlySet<string>>(
+    () => new Set()
+  );
   const handleComposerSend = React.useCallback(
     async (message: NewMessage) => {
       const epoch = draftEpochRef.current;
       const conversationId = conversation.id;
-      setSendingIn(conversationId);
+      setSendingIn((current) => new Set(current).add(conversationId));
       try {
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
@@ -1057,9 +1060,11 @@ export function SuperChat({
         // 'send-failed'); it has nothing of its own to restore.
         throw error;
       } finally {
-        setSendingIn((current) =>
-          current === conversationId ? undefined : current
-        );
+        setSendingIn((current) => {
+          const next = new Set(current);
+          next.delete(conversationId);
+          return next;
+        });
       }
     },
     [conversation, onMessageSent]
@@ -1343,7 +1348,7 @@ export function SuperChat({
       <ChatComposer
         ref={composerRef}
         value={draft}
-        isSending={sendingIn === conversation.id}
+        isSending={sendingIn.has(conversation.id)}
         onError={onComposerError}
         onValueChange={handleDraftChange}
         onSend={handleComposerSend}
