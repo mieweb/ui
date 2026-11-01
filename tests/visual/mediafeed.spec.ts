@@ -17,6 +17,16 @@ async function gotoStory(
   await expect(page.locator('#storybook-root')).not.toBeEmpty();
 }
 
+/**
+ * The close-up's Play in the thread. It shares its message with another clip,
+ * so it is a gallery cell: a still with no text, its title only in its name.
+ */
+function closeUpInThread(page: Page) {
+  return page
+    .getByRole('log', { name: 'Messages' })
+    .getByRole('button', { name: 'Play A closer look', exact: true });
+}
+
 async function playingCount(page: Page) {
   return page.evaluate(
     () =>
@@ -118,9 +128,7 @@ test.describe('MediaFeed - native playback and conversation integration', () => 
     await expect(
       page.getByRole('button', { name: 'Media', exact: true })
     ).toHaveCount(0);
-    const attachment = page
-      .locator('[data-slot="superchat-message-media"]')
-      .filter({ hasText: 'A closer look' });
+    const attachment = closeUpInThread(page);
     const threadVideo = attachment.locator('video');
     await expect(threadVideo).toHaveAttribute('src', /^blob:/);
     await expect.poll(() => playingCount(page)).toBe(0);
@@ -130,7 +138,7 @@ test.describe('MediaFeed - native playback and conversation integration', () => 
     });
     await composer.fill('Keep this reply while I browse the recording.');
 
-    await attachment.getByRole('button', { name: /Play/ }).click();
+    await attachment.click();
     await expect(feed).toBeVisible();
     const clip = feed.getByRole('article', {
       name: 'A closer look',
@@ -178,15 +186,13 @@ test.describe('MediaFeed - native playback and conversation integration', () => 
       .getByRole('button', { name: 'Back to conversation', exact: true })
       .click();
     await expect(messages).toBeVisible();
-    await expect(
-      attachment.getByRole('button', { name: /Play/ })
-    ).toBeFocused();
+    await expect(attachment).toBeFocused();
     await expect(feed).toHaveCount(0);
     await expect.poll(() => playingCount(page)).toBe(0);
     await expect(composer).toHaveValue(
       'Keep this reply while I browse the recording.'
     );
-    await attachment.getByRole('button', { name: /Play/ }).click();
+    await attachment.click();
     await expect(feed).toBeVisible();
     await expect.poll(() => playingCount(page)).toBe(1);
     await expect(composer).toHaveValue(
@@ -355,13 +361,11 @@ test.describe('SuperChat - overlay media view', () => {
     const teamUpdates = page.getByRole('button', { name: /Team updates/ });
     // A phone starts on the conversation list.
     if (await teamUpdates.isVisible()) await teamUpdates.click();
-    const attachment = page
-      .locator('[data-slot="superchat-message-media"]')
-      .filter({ hasText: 'A closer look' });
+    const attachment = closeUpInThread(page);
     await expect(attachment.locator('video')).toHaveAttribute('src', /^blob:/, {
       timeout: 15000,
     });
-    await attachment.getByRole('button', { name: /Play/ }).click();
+    await attachment.click();
     return attachment;
   }
 
@@ -382,9 +386,7 @@ test.describe('SuperChat - overlay media view', () => {
     ).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
-    await expect(
-      attachment.getByRole('button', { name: /Play/ })
-    ).toBeFocused();
+    await expect(attachment).toBeFocused();
   });
 
   test('keeps Tab and Shift+Tab inside the phone dialog, on shown controls', async ({
@@ -429,13 +431,11 @@ test.describe('SuperChat - overlay media view', () => {
     );
     const teamUpdates = page.getByRole('button', { name: /Team updates/ });
     if (await teamUpdates.isVisible()) await teamUpdates.click();
-    const attachment = page
-      .locator('[data-slot="superchat-message-media"]')
-      .filter({ hasText: 'A closer look' });
+    const attachment = closeUpInThread(page);
     await expect(attachment.locator('video')).toHaveAttribute('src', /^blob:/, {
       timeout: 15000,
     });
-    await attachment.getByRole('button', { name: /Play/ }).click();
+    await attachment.click();
     const back = page
       .getByRole('dialog')
       .getByRole('button', { name: 'Back to conversation', exact: true });

@@ -29,6 +29,8 @@ import type {
 
 /** What a remounted thread needs to come back on the same rows. */
 export interface VirtualThreadLayout {
+  /** Whose rows these are (see {@link VirtualThreadProps.layoutKey}). */
+  key?: string;
   measurements: VirtualItem[];
   offset: number;
 }
@@ -84,6 +86,12 @@ export interface VirtualThreadProps {
    * on the same rows instead of fresh estimates.
    */
   layoutRef?: React.RefObject<VirtualThreadLayout | undefined>;
+  /**
+   * Whose rows the thread shows (SuperChat: the conversation and its order).
+   * A stored layout under another key is someone else's rows, so it isn't
+   * reused.
+   */
+  layoutKey?: string;
   /** Props forwarded to the scroll container (role/aria/tabIndex/className). */
   containerProps: React.HTMLAttributes<HTMLDivElement> & {
     'data-slot'?: string;
@@ -111,9 +119,12 @@ export function VirtualThread({
   scrollRef,
   contentRef,
   layoutRef,
+  layoutKey,
   containerProps,
 }: VirtualThreadProps) {
-  const [initialLayout] = React.useState(() => layoutRef?.current);
+  const [initialLayout] = React.useState(() =>
+    layoutRef?.current?.key === layoutKey ? layoutRef?.current : undefined
+  );
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => scrollRef.current,
@@ -128,11 +139,12 @@ export function VirtualThread({
     () => () => {
       if (layoutRef)
         layoutRef.current = {
+          key: layoutKey,
           measurements: virtualizer.takeSnapshot(),
           offset: virtualizer.scrollOffset ?? 0,
         };
     },
-    [layoutRef, virtualizer]
+    [layoutRef, layoutKey, virtualizer]
   );
 
   const virtualItems = virtualizer.getVirtualItems();

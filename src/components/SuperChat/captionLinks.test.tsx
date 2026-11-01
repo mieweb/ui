@@ -36,4 +36,35 @@ describe('linkifyCaption', () => {
     );
     expect(screen.getAllByRole('link')).toHaveLength(1);
   });
+
+  const WIKI = 'https://en.wikipedia.org/wiki/Function_(mathematics)';
+
+  it('keeps balanced parentheses in a bare address, not the punctuation after', () => {
+    render(<p>{linkifyCaption(`Background: ${WIKI}.`)}</p>);
+    const link = screen.getByRole('link', { name: WIKI });
+    expect(link).toHaveAttribute('href', WIKI);
+    expect(link.parentElement).toHaveTextContent(`Background: ${WIKI}.`);
+  });
+
+  it('keeps balanced parentheses in a Markdown link, leaving no stray bracket', () => {
+    render(<p>{linkifyCaption(`Read [functions](${WIKI}) first`)}</p>);
+    expect(screen.getByRole('link', { name: 'functions' })).toHaveAttribute(
+      'href',
+      WIKI
+    );
+    expect(screen.getByText('functions').parentElement).toHaveTextContent(
+      /^Read functions first$/
+    );
+  });
+
+  it('leaves out the parenthesis that closes an aside around an address', () => {
+    render(<p>{linkifyCaption('Shipped (see https://x.dev) today')}</p>);
+    expect(screen.getByRole('link', { name: 'https://x.dev' })).toHaveAttribute(
+      'href',
+      'https://x.dev'
+    );
+    expect(screen.getByRole('link').parentElement).toHaveTextContent(
+      /^Shipped \(see https:\/\/x\.dev\) today$/
+    );
+  });
 });

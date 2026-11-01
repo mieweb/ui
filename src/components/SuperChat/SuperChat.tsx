@@ -15,7 +15,7 @@ import { cn } from '../../utils/cn';
 import { ArrowLeft } from 'lucide-react';
 import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { controlledElements, useFocusTrap } from '../../hooks/useFocusTrap';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import {
   useStickToBottom,
@@ -269,7 +269,7 @@ function hasOpenLayer(panel: HTMLElement): boolean {
   if (Array.from(panel.querySelectorAll('[role="dialog"]')).some(isShown))
     return true;
   return Array.from(panel.querySelectorAll(POPUP_TRIGGERS)).some((control) =>
-    isShown(document.getElementById(control.getAttribute('aria-controls')!))
+    controlledElements(control).some(isShown)
   );
 }
 
@@ -282,6 +282,17 @@ const PHONE_HIDDEN =
  * rows are measured (see the anchoring effect).
  */
 const SETTLE_MS = 1500;
+/**
+ * A jump up by more than this share of the viewport while settling is the
+ * reader's (to a linked post, say), not the virtualizer correcting its
+ * estimates, so it ends the settling.
+ */
+const READER_JUMP_SHARE = 0.5;
+/**
+ * How many frames Back looks for the launching tile in a virtualized thread,
+ * which mounts its rows a frame or two after the thread itself.
+ */
+const LAUNCHER_SEARCH_FRAMES = 10;
 
 /**
  * Single-conversation chat panel. See the module `MAINTAINERS.md` for the
@@ -391,7 +402,7 @@ export function SuperChat({
       !!view &&
       Array.from(view.querySelectorAll('video')).some(isInPictureInPicture);
     setFloating(floatingNow);
-  }, [mediaViewRef]);
+  }, []);
   React.useEffect(() => {
     if (typeof document === 'undefined') return;
     for (const name of PIP_EVENTS)
@@ -595,7 +606,7 @@ export function SuperChat({
     // A virtualized thread mounts its rows a frame or two after the thread
     // itself, so look again for a few frames before settling on the thread.
     let frame = 0;
-    let framesLeft = virtualized ? 10 : 0;
+    let framesLeft = virtualized ? LAUNCHER_SEARCH_FRAMES : 0;
     const focusLauncher = () => {
       const launcher = findLauncher();
       if (!launcher && framesLeft-- > 0) {
@@ -628,7 +639,8 @@ export function SuperChat({
       }
     | undefined
   >(undefined);
-  // The virtualized thread's rows, kept while the media view is open.
+  // The virtualized thread's rows, kept while the media view is open, under
+  // the conversation's key so another conversation doesn't open on them.
   const threadLayoutRef = React.useRef<VirtualThreadLayout | undefined>(
     undefined
   );
@@ -636,6 +648,14 @@ export function SuperChat({
   atBottomRef.current = isAtBottom;
   const pendingMediaOwnSendRef = React.useRef(false);
   const pendingMediaAppendRef = React.useRef(false);
+  const newestMessage = React.useMemo(
+    () => [...conversation.thread].sort(byTime).at(-1),
+    [conversation]
+  );
+  // Read by the settling observer below, which outlives the render it was
+  // set up in.
+  const newestStreamingRef = React.useRef(false);
+  newestStreamingRef.current = newestMessage?.status === 'streaming';
 
   // Anchor to the newest message on mount and when switching conversations:
   // bottom for ascending order, top for descending (feed-style) order.
@@ -658,7 +678,8 @@ export function SuperChat({
     // stop short of the end and read as the reader scrolling away. So for a
     // moment after opening it's kept at its end as it grows, until the reader
     // takes over (any input, or a jump up such as to a linked post) or it
-    // settles.
+    // settles. A streaming newest message ends it too: the new-message policy
+    // holds the thread there while it streams, and pinning would undo that.
     const content = threadContentRef.current;
     if (
       !virtualized ||
@@ -673,10 +694,11 @@ export function SuperChat({
     };
     let lastTop = el.scrollTop;
     const onScroll = () => {
-      if (lastTop - el.scrollTop > el.clientHeight / 2) stop();
+      if (lastTop - el.scrollTop > el.clientHeight * READER_JUMP_SHARE) stop();
       lastTop = el.scrollTop;
     };
     const observer = new globalThis.ResizeObserver(() => {
+      if (newestStreamingRef.current) stop();
       if (!settling) return;
       scrollToBottom('auto');
       lastTop = el.scrollTop;
@@ -890,10 +912,6 @@ export function SuperChat({
 
   // A reply that finishes streaming below the fold upgrades the jump button
   // to the "New messages" hint — the reader hasn't seen the end of it.
-  const newestMessage = React.useMemo(
-    () => [...conversation.thread].sort(byTime).at(-1),
-    [conversation]
-  );
   const raiseNewBelow = React.useCallback(() => {
     if (order !== 'desc') setHasNewBelow(true);
   }, [order]);
@@ -1006,11 +1024,14 @@ export function SuperChat({
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
   const composerRef = React.useRef<ChatComposerHandle>(null);
-  const [sending, setSending] = React.useState(false);
+  // The conversation a send is pending in: SuperChatInbox reuses this panel
+  // (and its composer) for every conversation, and only that one is busy.
+  const [sendingIn, setSendingIn] = React.useState<string>();
   const handleComposerSend = React.useCallback(
     async (message: NewMessage) => {
       const epoch = draftEpochRef.current;
-      setSending(true);
+      const conversationId = conversation.id;
+      setSendingIn(conversationId);
       try {
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
@@ -1023,16 +1044,22 @@ export function SuperChat({
         await Promise.resolve(
           onMessageSent?.(text, { conversation, mentions, attachments })
         );
-      } catch {
+      } catch (error) {
         // Put the message back to try again, text and files, when file
-        // conversion or the host callback fails — the text unless the user
-        // has typed a newer draft while this send was pending.
-        if (draftEpochRef.current === epoch) {
-          setDraft(message.content);
+        // conversion or the host callback fails — only while its conversation
+        // is still the one shown, and the text unless the user has typed a
+        // newer draft while this send was pending.
+        if (conversationRef.current.id === conversationId) {
+          if (draftEpochRef.current === epoch) setDraft(message.content);
+          composerRef.current?.addFiles(message.attachments ?? []);
         }
-        composerRef.current?.addFiles(message.attachments ?? []);
+        // Rethrown so the composer reports it (`onComposerError`, reason
+        // 'send-failed'); it has nothing of its own to restore.
+        throw error;
       } finally {
-        setSending(false);
+        setSendingIn((current) =>
+          current === conversationId ? undefined : current
+        );
       }
     },
     [conversation, onMessageSent]
@@ -1138,7 +1165,7 @@ export function SuperChat({
           )}
         >
           {!overlay && (
-            <div className="px-4 pt-2">
+            <div data-slot="superchat-media-back" className="px-4 pt-2">
               <ButtonGroup className="justify-start">
                 <Button
                   ref={backToConversationRef}
@@ -1249,6 +1276,7 @@ export function SuperChat({
               scrollRef={threadRef}
               contentRef={threadContentRef}
               layoutRef={threadLayoutRef}
+              layoutKey={JSON.stringify([conversation.id, order])}
               containerProps={{
                 'data-slot': 'superchat-thread',
                 role: 'log',
@@ -1315,7 +1343,7 @@ export function SuperChat({
       <ChatComposer
         ref={composerRef}
         value={draft}
-        isSending={sending}
+        isSending={sendingIn === conversation.id}
         onError={onComposerError}
         onValueChange={handleDraftChange}
         onSend={handleComposerSend}

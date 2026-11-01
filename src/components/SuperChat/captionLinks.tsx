@@ -1,13 +1,26 @@
 import * as React from 'react';
 
 /**
+ * One piece of a web address: a character, or a parenthesised group.
+ * Parentheses count only in balanced pairs, as in
+ * https://en.wikipedia.org/wiki/Function_(mathematics), so the one closing a
+ * Markdown link or an aside ("(see https://x.dev)") stays out of the address.
+ */
+const URL_PIECE = String.raw`[^\s()<]|\([^\s()<]*\)`;
+/** A bare address's last piece: not closing punctuation. */
+const URL_END = String.raw`[^\s()<.,;:!?\]'"]|\([^\s()<]*\)`;
+
+/**
  * A Markdown link (`[label](https://…)`) or a bare web address. Only http(s):
  * the caption is a message's raw text, so nothing else becomes a link. A bare
  * address stops before closing punctuation ("see https://x.dev." keeps the
  * full stop out).
  */
-const LINK =
-  /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]*[^\s<.,;:!?)\]'"])/g;
+const LINK = new RegExp(
+  String.raw`\[([^\]\n]+)\]\((https?:\/\/(?:${URL_PIECE})+)\)` +
+    String.raw`|(https?:\/\/(?:${URL_PIECE})*(?:${URL_END}))`,
+  'g'
+);
 
 /**
  * A media item's caption with its links tappable, as they are in the thread.

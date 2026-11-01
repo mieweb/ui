@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useFocusTrap } from './useFocusTrap';
+import { controlledElements, useFocusTrap } from './useFocusTrap';
 
 function Trap({
   initialFocus,
@@ -61,6 +61,32 @@ function WithPortaledMenu() {
           </button>
           <button type="button" role="menuitem">
             File
+          </button>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+/** A trigger naming several ids in aria-controls, its menu the last. */
+function WithSeveralControlled() {
+  const ref = useFocusTrap<HTMLDivElement>(true, { initialFocus: false });
+  return (
+    <div ref={ref}>
+      <span id="hint">Pick one</span>
+      <button
+        type="button"
+        aria-expanded="true"
+        aria-controls="hint  missing menu"
+      >
+        Attach
+      </button>
+      <button type="button">Send</button>
+      {createPortal(
+        <div id="menu" role="menu">
+          <button type="button" role="menuitem">
+            Photo
           </button>
         </div>,
         document.body
@@ -195,6 +221,18 @@ describe('useFocusTrap', () => {
     send.focus();
     fireEvent.keyDown(send, { key: 'Tab' });
     expect(attach).toHaveFocus();
+  });
+
+  it('finds the menu among several ids in aria-controls', () => {
+    render(<WithSeveralControlled />);
+    const attach = screen.getByRole('button', { name: 'Attach' });
+    expect(controlledElements(attach).map((element) => element.id)).toEqual([
+      'hint',
+      'menu',
+    ]);
+    attach.focus();
+    fireEvent.keyDown(attach, { key: 'Tab' });
+    expect(screen.getByRole('menuitem', { name: 'Photo' })).toHaveFocus();
   });
 
   it('follows the whole popup: a search field beside the menu, and a submenu', () => {

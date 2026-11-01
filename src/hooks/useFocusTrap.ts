@@ -34,6 +34,17 @@ function popupRoot(popup: HTMLElement): HTMLElement {
 }
 
 /**
+ * The elements a control's `aria-controls` names. The attribute is a list of
+ * ids, so a control can open more than one (a combobox's field and listbox).
+ */
+export function controlledElements(control: Element): HTMLElement[] {
+  const ids = control.getAttribute('aria-controls')?.split(/\s+/) ?? [];
+  return ids
+    .map((id) => (id ? document.getElementById(id) : null))
+    .filter((element): element is HTMLElement => !!element);
+}
+
+/**
  * The trap's stops in Tab order. A popup that a control inside opened
  * elsewhere on the page (a `Dropdown` portals its menu to the body) comes
  * right after that control, found through its `aria-expanded` and
@@ -45,16 +56,15 @@ function tabStops(container: HTMLElement): HTMLElement[] {
   const visit = (root: HTMLElement) => {
     for (const element of tabbablesIn(root)) {
       stops.add(element);
-      const popupId =
-        element.getAttribute('aria-expanded') === 'true' &&
-        element.getAttribute('aria-controls');
-      const popup = popupId ? document.getElementById(popupId) : null;
-      if (!popup || container.contains(popup)) continue;
-      const popupWrapper = popupRoot(popup);
-      if (visited.has(popupWrapper) || popupWrapper.contains(container))
-        continue;
-      visited.add(popupWrapper);
-      visit(popupWrapper);
+      if (element.getAttribute('aria-expanded') !== 'true') continue;
+      for (const popup of controlledElements(element)) {
+        if (container.contains(popup)) continue;
+        const popupWrapper = popupRoot(popup);
+        if (visited.has(popupWrapper) || popupWrapper.contains(container))
+          continue;
+        visited.add(popupWrapper);
+        visit(popupWrapper);
+      }
     }
   };
   visit(container);
