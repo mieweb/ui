@@ -55,9 +55,51 @@ const defaultLabels: MediaFeedLabels = {
 };
 
 /**
- * The `overlay` layout's details: who posted it, its title and caption, over
- * the top of the clip on a gradient. Only its own controls take a tap; the
- * rest of a tap reaches the player beneath (play/pause). An untitled item
+ * The height of the player's control bar in the item around `ref`, so the
+ * details can sit just above it. The bar mounts with the active item and
+ * wraps onto two rows in a narrow one, so it's watched for both.
+ */
+function useControlsBarHeight(ref: React.RefObject<HTMLElement | null>) {
+  const [height, setHeight] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const item = ref.current?.closest('[data-slot="item"]');
+    if (!item) return;
+    let bar: Element | null = null;
+    const resize =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() =>
+            setHeight(bar?.getBoundingClientRect().height ?? 0)
+          );
+    const attach = () => {
+      const next = item.querySelector('[data-slot="media-controls-bar"]');
+      if (next === bar) return;
+      if (bar) resize?.unobserve(bar);
+      bar = next;
+      if (bar) resize?.observe(bar);
+      setHeight(bar?.getBoundingClientRect().height ?? 0);
+    };
+    attach();
+    const mutations =
+      typeof MutationObserver === 'undefined'
+        ? null
+        : new MutationObserver(attach);
+    mutations?.observe(item, { childList: true, subtree: true });
+    return () => {
+      mutations?.disconnect();
+      resize?.disconnect();
+    };
+  }, [ref]);
+  return height;
+}
+
+/**
+ * The `overlay` layout's details, placed as short-video apps place them
+ * (TikTok, Instagram Reels): who posted it, its title and caption at the
+ * bottom start, just above the player's bar, on a gradient rising from the
+ * bottom; the host's actions in a column at the bottom end, beside them. The
+ * top is left to the host (a Back button). Only its own controls take a tap;
+ * the rest of a tap reaches the player beneath (play/pause). An untitled item
  * shows no title: the position counter already names it on screen, and the
  * item's `aria-label` names it for assistive tech.
  */
@@ -78,6 +120,8 @@ function OverlayDetails({
   labels: MediaFeedLabels;
   classNames: MediaFeedClassNames;
 }) {
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const barHeight = useControlsBarHeight(rootRef);
   // Only words that add something: not empty, not the title over again.
   const showCaption =
     caption != null &&
@@ -108,39 +152,45 @@ function OverlayDetails({
   }, [title, caption, expanded]);
   return (
     <div
+      ref={rootRef}
       data-slot="details"
       data-expanded={expanded || undefined}
+      // Down to the item's foot, behind the bar, so its gradient runs into
+      // the bar's; its content sits just above the bar.
+      style={{ paddingBottom: barHeight + 12 }}
       className={cn(
-        'pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start gap-2 bg-gradient-to-b from-black/80 via-black/60 to-transparent px-3 pt-2 pb-10 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]',
+        'pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end gap-3 bg-gradient-to-t from-black/70 via-black/40 to-transparent ps-3 pe-2 pt-16 text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]',
         // A darker scrim behind the full text, which can run over a bright frame.
-        expanded && 'via-black/75',
+        expanded && 'from-black/85 via-black/70',
         classNames.details
       )}
     >
-      {author && (
-        <Avatar
-          name={author.name}
-          src={author.avatar}
-          alt=""
-          size="xs"
-          className="mt-0.5 shrink-0"
-        />
-      )}
       <div id={textId} className="min-w-0 flex-1 leading-5">
         {author && (
-          <p
+          <div
             data-slot="author"
-            // Host text can be in any language: each line takes its own
-            // direction, so it truncates at its own end, and is only as wide
-            // as its text, so it still sits at the page's start edge.
-            dir="auto"
             className={cn(
-              'm-0 w-fit max-w-full truncate text-xs font-medium',
+              'mb-1 flex min-w-0 items-center gap-2',
               classNames.author
             )}
           >
-            {author.name}
-          </p>
+            <Avatar
+              name={author.name}
+              src={author.avatar}
+              alt=""
+              size="sm"
+              className="shrink-0 ring-1 ring-white/70"
+            />
+            {/* Host text can be in any language: each line takes its own
+                direction, so it truncates at its own end, and is only as wide
+                as its text, so it still sits at the page's start edge. */}
+            <p
+              dir="auto"
+              className="m-0 w-fit max-w-full truncate text-sm font-semibold"
+            >
+              {author.name}
+            </p>
+          </div>
         )}
         {title && (
           <h3
@@ -166,7 +216,7 @@ function OverlayDetails({
             data-slot="caption"
             dir="auto"
             className={cn(
-              'pointer-events-auto m-0 w-fit max-w-full text-xs break-words text-white/90',
+              'pointer-events-auto m-0 w-fit max-w-full text-sm break-words text-white/90',
               expanded
                 ? 'max-h-[40dvh] overflow-y-auto overscroll-contain'
                 : 'line-clamp-2',
@@ -183,19 +233,20 @@ function OverlayDetails({
             aria-expanded={expanded}
             aria-controls={textId}
             onClick={() => setExpanded((open) => !open)}
-            className="pointer-events-auto mt-0.5 rounded-sm text-xs font-semibold text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-white/70"
+            className="pointer-events-auto mt-0.5 rounded-sm text-sm font-semibold text-white/80 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-white/70"
           >
             {expanded ? labels.showLess : labels.showMore}
           </button>
         )}
       </div>
       {(actions || fullscreenButton) && (
-        <div className="pointer-events-auto -me-1 -mt-1 flex shrink-0 items-center gap-1">
+        // The action column, at the bottom end beside the text.
+        <div className="pointer-events-auto flex shrink-0 flex-col items-center gap-3">
           {actions && (
             <div
               data-slot="actions"
               className={cn(
-                'flex flex-wrap items-center justify-end gap-2',
+                'flex flex-col items-center gap-3',
                 classNames.actions
               )}
             >
@@ -621,7 +672,7 @@ function MediaFeedInner<T>(
         {overlay ? (
           <>
             {/* The details come first in the DOM so focus visits them before
-                the player's bar, matching what's on screen. */}
+                the player's bar, which sits under them on screen. */}
             <OverlayDetails
               author={author}
               title={ownTitle}
@@ -706,8 +757,8 @@ function MediaFeedInner<T>(
   };
 
   const controls = overlay ? (
-    // Over the feed's end edge, stacked the way the feed scrolls, clear of the
-    // details along the top and the player's bar along the bottom.
+    // Over the middle of the feed's end edge, stacked the way the feed
+    // scrolls, above the actions and the player's bar at the bottom.
     <div
       data-slot="controls"
       className={cn(
