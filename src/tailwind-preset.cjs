@@ -135,7 +135,6 @@ module.exports = {
     'max-sm:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))]',
     'max-sm:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))]',
     'max-sm:z-50',
-    'ps-14',
     'size-5',
     'top-2',
     '-me-1',

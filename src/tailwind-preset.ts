@@ -161,7 +161,6 @@ export const miewebUISafelist = [
   'max-sm:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))]',
   'max-sm:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))]',
   'max-sm:z-50',
-  'ps-14',
   'size-5',
   '-me-1',
   '@max-md:basis-full',
