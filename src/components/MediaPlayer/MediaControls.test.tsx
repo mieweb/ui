@@ -528,6 +528,72 @@ describe('MediaPlayer overlay controls', () => {
     expect(cues.map((cue) => cue.line)).toEqual([-6, 2]);
   });
 
+  /**
+   * A caption track whose cues the test sets, and a layout (jsdom has none)
+   * of a video `size.video` tall under a bar `size.bar` tall.
+   */
+  function captionsWithLayout(cues: { line: number | string }[]) {
+    let onCueChange: ((event: Event) => void) | undefined;
+    const track = {
+      kind: 'captions',
+      mode: 'showing',
+      cues,
+      activeCues: [],
+      removeCue: vi.fn(),
+      addCue: vi.fn(),
+      addEventListener: (name: string, fn: (event: Event) => void) => {
+        if (name === 'cuechange') onCueChange = fn;
+      },
+      removeEventListener: () => {},
+    };
+    vi.spyOn(HTMLMediaElement.prototype, 'textTracks', 'get').mockReturnValue(
+      Object.assign([track], {
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }) as unknown as globalThis.TextTrackList
+    );
+    const size = { video: 200, bar: 40 };
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const height =
+          this.tagName === 'VIDEO'
+            ? size.video
+            : this.getAttribute('data-slot') === 'media-controls-bar'
+              ? size.bar
+              : 0;
+        return { height } as globalThis.DOMRect;
+      }
+    );
+    const cueChange = () =>
+      act(() => onCueChange?.({ target: track } as unknown as Event));
+    return { size, cueChange };
+  }
+
+  it('gives lifted captions back when the controls go, and lifts them again when they return', () => {
+    const cues: { line: number | string }[] = [
+      { line: 'auto' },
+      { line: 'auto' },
+    ];
+    const { size, cueChange } = captionsWithLayout(cues);
+    const player = (controls: boolean) => (
+      <MediaPlayer src="clip.mp4" controlsStyle="overlay" controls={controls} />
+    );
+    const { rerender } = render(player(true));
+    // A line is 10px: 40px of bar takes 4 lines, so cues sit on the 5th.
+    cueChange();
+    expect(cues.map((cue) => cue.line)).toEqual([-5, -5]);
+    // The host places the second cue itself.
+    cues[1].line = 3;
+    rerender(player(false));
+    // No bar to clear: the lifted cue goes back to the default line, and the
+    // host's stays where the host put it.
+    expect(cues.map((cue) => cue.line)).toEqual(['auto', 3]);
+    rerender(player(true));
+    size.video = 400;
+    cueChange();
+    expect(cues.map((cue) => cue.line)).toEqual([-3, 3]);
+  });
+
   it('cycles the speeds a host chooses', () => {
     const { container } = render(
       <MediaPlayer

@@ -162,27 +162,35 @@ function useCaptionTracks(
     // host left on the default line to just above it. A fixed line count
     // isn't enough, since lines scale with the video and the bar doesn't (it
     // takes two rows in a small card). Cues load lazily, and the player can
-    // change size, so this runs again as cues become active.
-    const lifted = new WeakSet<globalThis.TextTrackCue>();
+    // change size, so this runs again as cues become active. `lifted` keeps
+    // the line each cue was lifted to: a cue still on it is ours to move, and
+    // goes back to the default line when these controls unmount (the video
+    // may stay, with no bar to clear). One the host has moved since is theirs.
+    const lifted = new Map<globalThis.VTTCue, number>();
+    const place = (
+      track: globalThis.TextTrack | null,
+      cue: globalThis.VTTCue,
+      line: number | 'auto'
+    ) => {
+      cue.line = line;
+      // A cue already on screen keeps its old place until it's re-added.
+      if (track && Array.from(track.activeCues ?? []).includes(cue)) {
+        track.removeCue(cue);
+        track.addCue(cue);
+      }
+    };
     const lift = (event: Event) => {
       const track = event.target as globalThis.TextTrack;
-      const active = new Set(Array.from(track.activeCues ?? []));
-      const redraw: globalThis.TextTrackCue[] = [];
       const line = video
         ? cueLineAboveBar(video, barRef.current)
         : DEFAULT_CUE_LINE;
-      for (const cue of Array.from(track.cues ?? [])) {
-        if (!('line' in cue)) continue;
-        if (cue.line !== 'auto' && !lifted.has(cue)) continue;
+      for (const each of Array.from(track.cues ?? [])) {
+        if (!('line' in each)) continue;
+        const cue = each as globalThis.VTTCue;
+        if (cue.line !== 'auto' && lifted.get(cue) !== cue.line) continue;
         if (cue.line === line) continue;
-        (cue as globalThis.VTTCue).line = line;
-        lifted.add(cue);
-        if (active.has(cue)) redraw.push(cue);
-      }
-      // A cue already on screen keeps its old place until it's re-added.
-      for (const cue of redraw) {
-        track.removeCue(cue);
-        track.addCue(cue);
+        lifted.set(cue, line);
+        place(track, cue, line);
       }
     };
     let watched: globalThis.TextTrack[] = [];
@@ -204,6 +212,8 @@ function useCaptionTracks(
       for (const name of events) list.removeEventListener?.(name, update);
       for (const track of watched)
         track.removeEventListener?.('cuechange', lift);
+      for (const [cue, line] of lifted)
+        if (cue.line === line) place(cue.track, cue, 'auto');
     };
   }, [video, barRef]);
   return { tracks, showing };

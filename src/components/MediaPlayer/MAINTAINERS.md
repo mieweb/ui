@@ -39,7 +39,11 @@
   they become active: `cueLineAboveBar` counts lines from the bar's measured
   height, since a cue line is about 5% of the video's height and the bar
   doesn't scale with it (a fixed line put captions under a small card's
-  two-row bar). Cues the host positioned keep their place. Several caption
+  two-row bar). Cues the host positioned keep their place. The controls
+  remember the line they gave each cue, so a cue the host moves afterwards
+  is the host's, and cues still on that line go back to the default when the
+  controls unmount (`MediaFeed` unmounts them on every inactive item while
+  the video stays). Several caption
   languages need `native`, which has a menu.
 - **The tap surface is `aria-hidden`.** It duplicates the bar's Play for
   pointers. Keyboard and screen-reader users use the bar; don't make the
