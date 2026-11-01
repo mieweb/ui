@@ -244,12 +244,13 @@ function NativeFeedMedia({
           if (next === 'playing') {
             ownershipPause.current = false;
             // Started by the viewer (the player's own controls, a tap on the
-            // picture), it resumes when they come back to it. Autoplay's own
-            // start leaves that to autoPlay. Either way the blocked-autoplay
-            // notice can go.
+            // picture, Play in the floating window), it resumes when they
+            // come back to it. Autoplay's own start leaves that to autoPlay.
+            // Either way the blocked-autoplay notice can go.
             setBlocked(false);
             if (
-              activeRef.current &&
+              (activeRef.current ||
+                isInPictureInPicture(mediaElementRef.current)) &&
               autoAttempt.current !== attemptId.current
             ) {
               wantsPlayback.current = true;

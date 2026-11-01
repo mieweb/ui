@@ -606,11 +606,16 @@ function MediaFeedInner<T>(
           };
           // A clip floating in picture in picture comes back first, so it
           // stops with the inline feed instead of playing alongside the viewer.
+          // If it's still floating after that (Safari can leave it there), it
+          // pauses there instead.
           const video = event.currentTarget
             .closest('[data-slot="item"]')
             ?.querySelector('video');
           if (isInPictureInPicture(video))
-            void exitPictureInPicture(video).then(open);
+            void exitPictureInPicture(video).then(() => {
+              if (isInPictureInPicture(video)) video?.pause();
+              open();
+            });
           else open();
         }}
       >

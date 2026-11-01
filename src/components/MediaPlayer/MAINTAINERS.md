@@ -36,10 +36,15 @@
   off, so a host that changes tracks itself stays in sync. Its label (Show
   captions / Hide captions) carries the state, so it has no `aria-pressed`.
   Cues left on the default line are lifted just above the bar's controls as
-  they become active: `cueLineAboveBar` counts lines from the bar's measured
-  height, since a cue line is about 5% of the video's height and the bar
-  doesn't scale with it (a fixed line put captions under a small card's
-  two-row bar). Cues the host positioned keep their place. Several caption
+  they become active, and again when the video or bar is resized (a
+  `ResizeObserver`; turning a phone brings no `cuechange`).
+  `cueLineAboveBar` counts lines from the bar's measured height, since a cue
+  line is about 5% of the video's height and the bar doesn't scale with it
+  (a fixed line put captions under a small card's two-row bar). Cues the host positioned keep their place. The controls
+  remember the line they gave each cue, so a cue the host moves afterwards
+  is the host's, and cues still on that line go back to the default when the
+  controls unmount (`MediaFeed` unmounts them on every inactive item while
+  the video stays). Several caption
   languages need `native`, which has a menu.
 - **The tap surface is `aria-hidden`.** It duplicates the bar's Play for
   pointers. Keyboard and screen-reader users use the bar; don't make the
@@ -48,6 +53,12 @@
   timeline follow the media, not the reading direction, so they don't mirror
   (Material's bidirectionality guidance). The labels inside still render in
   their own direction. Don't remove it to "fix" RTL.
+- **One video element across both styles.** A video always sits in the
+  same box; with `native` controls the box is `display: contents` (no
+  `data-slot` or theme), so the native layout is as if it weren't there.
+  Switching `controlsStyle` then keeps the element, so its time, playback
+  and any picture-in-picture window survive. Don't render the video in
+  different places per style.
 - **The box is a dark surface** (`data-theme="dark"`). The scrims are raw
   black on purpose: they sit over arbitrary video frames.
 - **Floating clips and their hosts.** A browser closes the picture-in-picture

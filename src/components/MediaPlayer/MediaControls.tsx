@@ -162,29 +162,39 @@ function useCaptionTracks(
     // host left on the default line to just above it. A fixed line count
     // isn't enough, since lines scale with the video and the bar doesn't (it
     // takes two rows in a small card). Cues load lazily, and the player can
-    // change size, so this runs again as cues become active.
-    const lifted = new WeakSet<globalThis.TextTrackCue>();
-    const lift = (event: Event) => {
-      const track = event.target as globalThis.TextTrack;
-      const active = new Set(Array.from(track.activeCues ?? []));
-      const redraw: globalThis.TextTrackCue[] = [];
-      const line = video
-        ? cueLineAboveBar(video, barRef.current)
-        : DEFAULT_CUE_LINE;
-      for (const cue of Array.from(track.cues ?? [])) {
-        if (!('line' in cue)) continue;
-        if (cue.line !== 'auto' && !lifted.has(cue)) continue;
-        if (cue.line === line) continue;
-        (cue as globalThis.VTTCue).line = line;
-        lifted.add(cue);
-        if (active.has(cue)) redraw.push(cue);
-      }
+    // change size, so this runs again as cues become active and as the video
+    // or bar is resized. `lifted` keeps
+    // the line each cue was lifted to: a cue still on it is ours to move, and
+    // goes back to the default line when these controls unmount (the video
+    // may stay, with no bar to clear). One the host has moved since is theirs.
+    const lifted = new Map<globalThis.VTTCue, number>();
+    const place = (
+      track: globalThis.TextTrack | null,
+      cue: globalThis.VTTCue,
+      line: number | 'auto'
+    ) => {
+      cue.line = line;
       // A cue already on screen keeps its old place until it's re-added.
-      for (const cue of redraw) {
+      if (track && Array.from(track.activeCues ?? []).includes(cue)) {
         track.removeCue(cue);
         track.addCue(cue);
       }
     };
+    const liftCues = (track: globalThis.TextTrack) => {
+      const line = video
+        ? cueLineAboveBar(video, barRef.current)
+        : DEFAULT_CUE_LINE;
+      for (const each of Array.from(track.cues ?? [])) {
+        if (!('line' in each)) continue;
+        const cue = each as globalThis.VTTCue;
+        if (cue.line !== 'auto' && lifted.get(cue) !== cue.line) continue;
+        if (cue.line === line) continue;
+        lifted.set(cue, line);
+        place(track, cue, line);
+      }
+    };
+    const lift = (event: Event) =>
+      liftCues(event.target as globalThis.TextTrack);
     let watched: globalThis.TextTrack[] = [];
     const update = () => {
       const captions = Array.from(list).filter(
@@ -200,10 +210,21 @@ function useCaptionTracks(
     update();
     const events = ['addtrack', 'removetrack', 'change'];
     for (const name of events) list.addEventListener?.(name, update);
+    // A new size (a phone turned, full screen left) needs a new line but
+    // brings no cuechange, so the cues move then too, paused or playing.
+    const resize =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => watched.forEach(liftCues));
+    for (const element of [video, barRef.current])
+      if (element) resize?.observe(element);
     return () => {
+      resize?.disconnect();
       for (const name of events) list.removeEventListener?.(name, update);
       for (const track of watched)
         track.removeEventListener?.('cuechange', lift);
+      for (const [cue, line] of lifted)
+        if (cue.line === line) place(cue.track, cue, 'auto');
     };
   }, [video, barRef]);
   return { tracks, showing };
@@ -249,8 +270,10 @@ function useIsFullscreen(
  * picture in picture and full screen where the browser supports them.
  *
  * `MediaPlayer` renders it for `controlsStyle="overlay"`. To use it directly,
- * render it in a positioned box with the video and attach
- * `transport.setMediaElement` to the video's `ref`.
+ * render it in a positioned box with the video, attach
+ * `transport.setMediaElement` to the video's `ref` and give the video
+ * `playsInline` (without it, an iPhone plays it in the system player, away
+ * from these controls).
  */
 export const MediaControls = React.forwardRef<
   HTMLDivElement,

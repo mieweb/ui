@@ -56,6 +56,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('MediaPlayer overlay controls', () => {
@@ -73,6 +74,30 @@ describe('MediaPlayer overlay controls', () => {
     rerender(<MediaPlayer src="song.mp3" controlsStyle="overlay" />);
     expect(container.querySelector('audio')?.controls).toBe(true);
     expect(container.querySelector('[data-slot="media-controls"]')).toBeNull();
+  });
+
+  it('keeps the same video, playing, when the controls style changes', () => {
+    const { container, rerender } = render(
+      <MediaPlayer src="clip.mp4" aria-label="Clip" />
+    );
+    const video = container.querySelector('video')!;
+    act(() => void video.play());
+    rerender(
+      <MediaPlayer src="clip.mp4" controlsStyle="overlay" aria-label="Clip" />
+    );
+    expect(container.querySelector('video')).toBe(video);
+    expect(video.paused).toBe(false);
+    expect(video.controls).toBe(false);
+    expect(
+      container.querySelector('[data-slot="media-controls"]')
+    ).not.toBeNull();
+    rerender(<MediaPlayer src="clip.mp4" aria-label="Clip" />);
+    expect(container.querySelector('video')).toBe(video);
+    expect(video.controls).toBe(true);
+    // The native layout has no box of its own around the video.
+    expect(
+      container.querySelector('[data-slot="media-player-box"]')
+    ).toBeNull();
   });
 
   it('plays and pauses from the bar or a tap on the picture', () => {
@@ -502,6 +527,100 @@ describe('MediaPlayer overlay controls', () => {
     videoHeight = 340;
     act(() => onCueChange?.({ target: track } as unknown as Event));
     expect(cues.map((cue) => cue.line)).toEqual([-6, 2]);
+  });
+
+  /**
+   * A caption track whose cues the test sets, and a layout (jsdom has none)
+   * of a video `size.video` tall under a bar `size.bar` tall.
+   */
+  function captionsWithLayout(cues: { line: number | string }[]) {
+    let onCueChange: ((event: Event) => void) | undefined;
+    const track = {
+      kind: 'captions',
+      mode: 'showing',
+      cues,
+      activeCues: [] as unknown[],
+      removeCue: vi.fn(),
+      addCue: vi.fn(),
+      addEventListener: (name: string, fn: (event: Event) => void) => {
+        if (name === 'cuechange') onCueChange = fn;
+      },
+      removeEventListener: () => {},
+    };
+    vi.spyOn(HTMLMediaElement.prototype, 'textTracks', 'get').mockReturnValue(
+      Object.assign([track], {
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }) as unknown as globalThis.TextTrackList
+    );
+    const size = { video: 200, bar: 40 };
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const height =
+          this.tagName === 'VIDEO'
+            ? size.video
+            : this.getAttribute('data-slot') === 'media-controls-bar'
+              ? size.bar
+              : 0;
+        return { height } as globalThis.DOMRect;
+      }
+    );
+    const cueChange = () =>
+      act(() => onCueChange?.({ target: track } as unknown as Event));
+    return { track, size, cueChange };
+  }
+
+  it('gives lifted captions back when the controls go, and lifts them again when they return', () => {
+    const cues: { line: number | string }[] = [
+      { line: 'auto' },
+      { line: 'auto' },
+    ];
+    const { size, cueChange } = captionsWithLayout(cues);
+    const player = (controls: boolean) => (
+      <MediaPlayer src="clip.mp4" controlsStyle="overlay" controls={controls} />
+    );
+    const { rerender } = render(player(true));
+    // A line is 10px: 40px of bar takes 4 lines, so cues sit on the 5th.
+    cueChange();
+    expect(cues.map((cue) => cue.line)).toEqual([-5, -5]);
+    // The host places the second cue itself.
+    cues[1].line = 3;
+    rerender(player(false));
+    // No bar to clear: the lifted cue goes back to the default line, and the
+    // host's stays where the host put it.
+    expect(cues.map((cue) => cue.line)).toEqual(['auto', 3]);
+    rerender(player(true));
+    size.video = 400;
+    cueChange();
+    expect(cues.map((cue) => cue.line)).toEqual([-3, 3]);
+  });
+
+  it('moves a caption on screen when the player changes size, even paused', () => {
+    // The test resizes the player: jsdom has no layout to observe.
+    const resized: (() => void)[] = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resized.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      }
+    );
+    const cues: { line: number | string }[] = [{ line: 'auto' }];
+    const { track, size, cueChange } = captionsWithLayout(cues);
+    render(<MediaPlayer src="clip.mp4" controlsStyle="overlay" />);
+    track.activeCues = [cues[0]];
+    cueChange();
+    expect(cues[0].line).toBe(-5);
+    track.removeCue.mockClear();
+    // The phone turns: the video is twice as tall, the bar isn't, and no
+    // other cue comes along to move this one.
+    size.video = 400;
+    act(() => resized.forEach((callback) => callback()));
+    expect(cues[0].line).toBe(-3);
+    expect(track.removeCue).toHaveBeenCalledWith(cues[0]);
   });
 
   it('cycles the speeds a host chooses', () => {
