@@ -10,6 +10,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Modal } from '../Modal';
 import { SuperChat } from './SuperChat';
 import { SuperChatInbox } from './SuperChatInbox';
 import {
@@ -569,6 +570,26 @@ describe('SuperChat media view', () => {
     ).toBeTruthy();
     await user.keyboard('{Escape}');
     expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
+  });
+
+  it('keeps a containing Modal open when Escape goes back', async () => {
+    mockNativePlayback();
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(
+      <Modal open onOpenChange={onOpenChange} aria-label="Chat">
+        <SuperChat conversation={conversation} />
+      </Modal>
+    );
+    await user.click(
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[0]
+    );
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    // Back on the thread, Escape is the Modal's again.
+    await user.keyboard('{Escape}');
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('starts a tile at the size the host gives, before its picture loads', () => {

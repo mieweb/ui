@@ -216,7 +216,10 @@ Opt-in; without it the media view is the stacked feed under a labelled Back.
   unless one of the panel's own layers is open: a visible dialog inside
   it (the feed's viewer) or a popup one of its controls opened. The
   library's overlays don't cancel Escape, so it checks for them instead;
-  widgets elsewhere on the page don't count.
+  widgets elsewhere on the page don't count. The panel hears the key on its
+  way out (React `onKeyDown`, after its own layers) and stops it there, since
+  a Modal or Sheet around the panel closes on any Escape that reaches the
+  document; with focus on the body, a document listener goes back instead.
   `position: fixed` inside a transformed ancestor (a Motion sheet) won't cover
   the screen; hosts that need that should render SuperChat outside it.
 - **Dark by scoping**, like MediaFeed's overlay: `data-theme="dark"`.

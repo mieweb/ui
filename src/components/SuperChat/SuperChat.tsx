@@ -518,17 +518,30 @@ export function SuperChat({
     setView('thread');
   }, [setView]);
   // While the media view is open, Escape goes back to the conversation
-  // unless another layer (the feed's viewer, a host menu) is open.
+  // unless another layer (the feed's viewer, a host menu) is open. A key from
+  // inside the panel is heard on its way out of it, after the panel's own
+  // layers, and goes no further: a Modal or Sheet around the panel would
+  // otherwise close too (they listen on the document).
   const mediaViewOpen = activeView === 'media';
+  const handlePanelKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    const panel = panelRef.current;
+    if (!mediaViewOpen || !panel || event.key !== 'Escape') return;
+    if (event.nativeEvent.defaultPrevented) return;
+    // Not a key from something portaled out of the panel, such as a dialog
+    // a host card opened: that one is its own.
+    if (!panel.contains(event.target as Node) || hasOpenLayer(panel)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    handleBackToConversation();
+  };
+  // With focus nowhere (on the body), the key never passes through the panel.
   React.useEffect(() => {
     const panel = panelRef.current;
     if (!mediaViewOpen || !panel) return;
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
-      const target = event.target as Node | null;
-      if (target !== document.body && !(target && panel.contains(target)))
-        return;
-      if (!hasOpenLayer(panel)) handleBackToConversation();
+      if (event.target !== document.body || hasOpenLayer(panel)) return;
+      handleBackToConversation();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -1101,8 +1114,10 @@ export function SuperChat({
   );
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Escape out of the media view, heard from the controls inside (the dialog pattern on a phone); the panel itself takes no focus
     <section
       ref={panelRef}
+      onKeyDown={handlePanelKeyDown}
       data-slot="superchat"
       role={covering ? 'dialog' : 'group'}
       aria-modal={covering || undefined}
