@@ -74,7 +74,9 @@ targets the original conversation message, rather than a second media store.
 uncontrolled panel in either `thread` or `media`. The media view composes
 `MediaFeed`; `mediaFeedProps` exposes its behavior, labels and render slots while
 reserving the conversation's items and accessors. `mediaLabels` localizes the
-return control and inline attachment actions. The media view takes the
+return control and inline attachment actions; the named forms
+(`openMediaNamed`, `playMediaNamed`) default to `openMedia` / `playMedia` plus
+the name, so a host that only translated those keeps them. The media view takes the
 thread's place in the panel (the thread unmounts). The header and composer
 remain mounted in both views, the composer below the media (the header hides
 on a phone in the overlay layout), and the composer keeps its existing

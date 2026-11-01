@@ -349,14 +349,20 @@ export function SuperChat({
     (internalView.conversationId === conversation.id
       ? internalView.view
       : 'thread');
+  const openMedia = mediaLabels?.openMedia ?? 'Open in media feed';
+  const playMedia = mediaLabels?.playMedia ?? 'Play';
   const labels: SuperChatMediaLabels = {
     backToConversation: 'Back to conversation',
-    openMedia: 'Open in media feed',
-    playMedia: 'Play',
     ...DEFAULT_ATTACHMENT_LABELS,
+    // The named forms build on `openMedia` / `playMedia` unless given, so a
+    // host that translated those keeps its words on titled tiles.
+    openMediaNamed: (name) => `${openMedia}, ${name}`,
+    playMediaNamed: (title) => `${playMedia} ${title}`,
     attachmentsPreview: previewOfAttachments,
     unknownAuthor: 'Unknown',
     ...mediaLabels,
+    openMedia,
+    playMedia,
   };
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);

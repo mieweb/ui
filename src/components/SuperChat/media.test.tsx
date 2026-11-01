@@ -895,6 +895,21 @@ describe('SuperChat media view', () => {
     ).toHaveLength(2);
   });
 
+  it('names titled tiles with the translated openMedia and playMedia', () => {
+    const labels = { openMedia: 'Abrir', playMedia: 'Reproducir' };
+    const { unmount } = render(
+      <SuperChat conversation={videoConversation} mediaLabels={labels} />
+    );
+    expect(
+      screen.getByRole('button', { name: 'Reproducir First clip' })
+    ).toBeTruthy();
+    unmount();
+    render(<SuperChat conversation={conversation} mediaLabels={labels} />);
+    expect(
+      screen.getByRole('button', { name: 'Abrir, First image' })
+    ).toBeTruthy();
+  });
+
   it('names an untitled attachment in the editor by its kind', async () => {
     const user = userEvent.setup();
     render(
