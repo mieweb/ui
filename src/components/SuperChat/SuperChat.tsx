@@ -621,6 +621,9 @@ export function SuperChat({
         frame = requestAnimationFrame(focusLauncher);
         return;
       }
+      // The tile or card it was opened from, in view if the restored
+      // position left it just outside.
+      launcher?.scrollIntoView?.({ block: 'nearest' });
       (launcher ?? threadRef.current)?.focus({ preventScroll: true });
     };
     focusLauncher();
@@ -784,10 +787,14 @@ export function SuperChat({
     } else if (ownSend && !virtualized) {
       // The turn layout effect below measures and anchors the newly mounted
       // thread. Do not clear the turn or override that position with bottom.
-    } else if (sameThread && !ownSend && (!snapshot.atBottom || !appended)) {
+    } else if (sameThread && !ownSend && !snapshot.atBottom) {
+      // A reader mid-thread comes back where they were.
       container.scrollTop = snapshot.scrollTop;
-      if (!snapshot.atBottom) stopFollowing();
+      stopFollowing();
     } else {
+      // At the bottom (or on a fresh thread) it's the bottom again, followed
+      // as rows mount: a virtualized thread measures them a frame or two
+      // after remounting, so the old pixel offset would land short of it.
       scrollToBottom('auto');
       if ([...conversation.thread].sort(byTime).at(-1)?.status === 'streaming')
         stopFollowing();
