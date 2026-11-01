@@ -598,6 +598,29 @@ describe('SuperChat media view', () => {
     );
   });
 
+  it('makes the links in a media item’s caption tappable', () => {
+    const linked: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          text: 'Notes at https://example.dev/notes and [the board](https://example.dev/board)',
+          media: [conversation.thread[0].media![0]],
+        },
+      ],
+    };
+    render(<SuperChat conversation={linked} view="media" />);
+    const view = document.querySelector<HTMLElement>(
+      '[data-slot="superchat-media-view"]'
+    )!;
+    expect(
+      within(view).getByRole('link', { name: 'https://example.dev/notes' })
+    ).toHaveAttribute('href', 'https://example.dev/notes');
+    expect(
+      within(view).getByRole('link', { name: 'the board' })
+    ).toHaveAttribute('href', 'https://example.dev/board');
+  });
+
   it('leaves a text-only conversation on its existing thread surface', () => {
     render(
       <SuperChat
