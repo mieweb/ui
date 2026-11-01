@@ -43,6 +43,7 @@ export type {
   SuperChatConversation,
   SuperChatMessage,
   SuperChatMediaAttachment,
+  SuperChatFileAttachment,
   SuperChatMediaItem,
   SuperChatMediaFeedProps,
   SuperChatMediaLabels,

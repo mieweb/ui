@@ -102,6 +102,22 @@ export interface SuperChatMediaAttachment extends MediaFeedMedia {
   caption?: string;
 }
 
+/**
+ * A document attached to a message (a PDF, a spreadsheet, any file that isn't
+ * a picture or a clip). Drawn in the thread as a row in the message's files
+ * tile, opened at `url`; never part of the media view.
+ */
+export interface SuperChatFileAttachment {
+  /** Stable id, unique within the message. */
+  id: string;
+  /** File name as shown, extension included (its type is read from it). */
+  name: string;
+  /** Where it opens (a new tab). */
+  url: string;
+  /** Size in bytes, shown beside its type when known. */
+  size?: number;
+}
+
 /** A conversation media item retains the original message and author identity. */
 export interface SuperChatMediaItem {
   /** Collision-safe identity derived from conversation, message and attachment ids. */
@@ -154,8 +170,30 @@ export interface SuperChatMediaLabels {
   backToConversation: string;
   openMedia: string;
   playMedia: string;
+  /** The last gallery cell's name for the attachments it hides, e.g. "3 more". */
+  moreMedia: (count: number) => string;
+  /** Under a `pending` message's attachments; `percent` when its `progress` is known. */
+  sending: (percent?: number) => string;
+  /** A media tile whose picture or clip didn't load. */
+  mediaUnavailable: string;
+  /**
+   * The conversation list's preview of a last message with no text: what it
+   * carries, e.g. "Photo", "2 photos", "Video", "Q3 report.pdf".
+   */
+  attachmentsPreview: (attachments: {
+    pictures: number;
+    videos: number;
+    audio: number;
+    files: string[];
+  }) => string;
   unknownAuthor: string;
 }
+
+/** The media labels a thread's attachment tiles use. */
+export type SuperChatAttachmentLabels = Pick<
+  SuperChatMediaLabels,
+  'moreMedia' | 'sending' | 'mediaUnavailable'
+>;
 
 /**
  * A single thread item. Preserves the `chat-component` thread-item shape
@@ -179,6 +217,8 @@ export interface SuperChatMessage {
   content?: AIMessageContent[];
   /** Explicit persisted image/video/audio/YouTube attachments for thread and feed views. */
   media?: SuperChatMediaAttachment[];
+  /** Documents attached to the message, shown after its media. */
+  files?: SuperChatFileAttachment[];
   /** Timestamp; the thread is append-only and ordered by `time`. */
   time: Date | string;
   /**
@@ -188,6 +228,11 @@ export interface SuperChatMessage {
   editedAt?: Date | string;
   /** Delivery/generation status. */
   status?: AIMessageStatus;
+  /**
+   * How far a `pending` message's attachments have uploaded, 0 to 1, shown
+   * under them while it sends. Leave it out when the host can't tell.
+   */
+  progress?: number;
   /** Channel the item belongs to. */
   channel?: SuperChatChannel;
   /** Reference payload when `type === 'ref'`. */
@@ -222,14 +267,16 @@ export interface ComposerAttachment {
 
 /**
  * Categories of files the composer can accept. Developers pick which kinds are
- * allowed via `acceptedFileTypes`; each maps to an `<input accept>` token and a
+ * allowed via `acceptedFileTypes`; each maps to `<input accept>` tokens and a
  * MIME matcher used to filter pastes and file-picker selections.
- * - `image` → `image/*`
+ * - `image` → JPEG, PNG, GIF, WebP, AVIF: what every browser shows. A HEIC
+ *   photo is refused, and an iPhone's picker converts it to JPEG first.
  * - `video` → `video/*`
  * - `audio` → `audio/*`
  * - `pdf` → `application/pdf`
+ * - `document` → Word, Excel, plain text and CSV files
  */
-export type AttachmentKind = 'image' | 'video' | 'audio' | 'pdf';
+export type AttachmentKind = 'image' | 'video' | 'audio' | 'pdf' | 'document';
 
 /** A conversation: participants + an ordered thread. */
 export interface SuperChatConversation {

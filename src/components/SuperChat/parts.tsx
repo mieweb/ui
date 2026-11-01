@@ -12,6 +12,7 @@ import {
   Check as CheckIcon,
   Clipboard as ClipboardIcon,
   Ellipsis as EllipsisIcon,
+  Loader2,
   Pencil as PencilIcon,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -21,7 +22,13 @@ import { Dropdown, DropdownItem, DropdownSubmenu } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
 import { SparklesIcon } from '../AI/icons';
-import { MessageMedia } from './MessageMedia';
+import { MessageFiles } from './MessageFiles';
+import {
+  MessageGallery,
+  MessageMedia,
+  isVisualMedia,
+  type MessageMediaEntry,
+} from './MessageMedia';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -31,6 +38,7 @@ import type {
   SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatMessage,
+  SuperChatAttachmentLabels,
   SuperChatRef,
   SuperChatRenderMessageMedia,
 } from './types';
@@ -237,17 +245,32 @@ export function ReferenceChip({
 // ============================================================================
 
 /**
- * Supported attachment categories: their `<input accept>` token and a MIME
- * matcher used to filter pastes and file-picker selections.
+ * Supported attachment categories: their `<input accept>` tokens, which the
+ * composer also checks pasted and dropped files against.
  */
-const ATTACHMENT_KIND_CONFIG: Record<
-  AttachmentKind,
-  { accept: string; match: (type: string) => boolean }
-> = {
-  image: { accept: 'image/*', match: (t) => t.startsWith('image/') },
-  video: { accept: 'video/*', match: (t) => t.startsWith('video/') },
-  audio: { accept: 'audio/*', match: (t) => t.startsWith('audio/') },
-  pdf: { accept: 'application/pdf', match: (t) => t === 'application/pdf' },
+const ATTACHMENT_KIND_ACCEPT: Record<AttachmentKind, string[]> = {
+  // Listed formats rather than image/*: a HEIC photo is refused instead of
+  // arriving where most browsers can't show it, and an iPhone's picker
+  // converts one to JPEG when HEIC isn't listed.
+  image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'],
+  video: ['video/*'],
+  audio: ['audio/*'],
+  pdf: ['application/pdf'],
+  // MIME types, and extensions for browsers that report none for a file.
+  document: [
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain',
+    'text/csv',
+    '.doc',
+    '.docx',
+    '.xls',
+    '.xlsx',
+    '.txt',
+    '.csv',
+  ],
 };
 
 const DEFAULT_ACCEPTED_FILE_TYPES: AttachmentKind[] = [
@@ -265,9 +288,7 @@ export function acceptTokensFor(
   kinds: AttachmentKind[] = DEFAULT_ACCEPTED_FILE_TYPES
 ): string[] {
   const source = kinds.length > 0 ? kinds : DEFAULT_ACCEPTED_FILE_TYPES;
-  return Array.from(
-    new Set(source.map((k) => ATTACHMENT_KIND_CONFIG[k].accept))
-  );
+  return Array.from(new Set(source.flatMap((k) => ATTACHMENT_KIND_ACCEPT[k])));
 }
 
 /**
@@ -522,8 +543,8 @@ function FooterActionButton({
 }
 
 /**
- * The hover-revealed action icon button in the avatar gutter, at the end of a
- * message. Rendered only when a message has a single action — multiple actions
+ * The hover-revealed action icon button beside a message's bubble, at its
+ * end. Rendered only when a message has a single action — multiple actions
  * collapse into the sticky overflow menu ({@link MessageOverflowMenu}), which
  * also hosts each action's explicit variants.
  */
@@ -575,7 +596,7 @@ function MessageOverflowMenu({
 
   return (
     <div
-      // Push to the bottom of the (possibly tall) avatar gutter and stick to
+      // Push to the bottom of the (possibly tall) bubble's side and stick to
       // the viewport bottom: on long messages the control follows the scroll
       // and settles at the message's end once it is fully in view. Raise the
       // whole (sticky) stacking context above the sibling bubble while open so
@@ -651,6 +672,8 @@ interface MessageRowProps {
   ) => void;
   openMediaLabel?: string;
   playMediaLabel?: string;
+  /** Words on attachment tiles: a gallery's "3 more", "Sending…", "Couldn't load". */
+  attachmentLabels?: SuperChatAttachmentLabels;
   /** Localized preview load-error text (falls back to the player default). */
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
@@ -659,6 +682,39 @@ interface MessageRowProps {
   renderMessageMedia?: SuperChatRenderMessageMedia;
   /** The box an attachment card fits in, a CSS length (SuperChat's `mediaMaxSize`). */
   mediaMaxSize?: string;
+}
+
+/** English defaults for {@link SuperChatAttachmentLabels}. */
+export const DEFAULT_ATTACHMENT_LABELS: SuperChatAttachmentLabels = {
+  moreMedia: (count) => `${count} more`,
+  sending: (percent) =>
+    percent === undefined ? 'Sending…' : `Sending… ${percent}%`,
+  mediaUnavailable: "Couldn't load",
+};
+
+/** One attachment tile beside a message: the bubble's cap and corners. */
+function AttachmentTile({
+  failed,
+  sending,
+  children,
+}: {
+  failed: boolean;
+  /** Still uploading: dimmed until it's sent. */
+  sending: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      data-slot="superchat-message-attachment"
+      className={cn(
+        'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
+        failed && 'border border-red-300 dark:border-red-700',
+        sending && 'opacity-60'
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 /**
@@ -683,6 +739,7 @@ export const MessageRow = React.memo(function MessageRow({
   onOpenMedia,
   openMediaLabel = 'Open in media feed',
   playMediaLabel = 'Play',
+  attachmentLabels = DEFAULT_ATTACHMENT_LABELS,
   mediaErrorLabel,
   mediaRetryLabel,
   renderMessageMedia,
@@ -690,8 +747,38 @@ export const MessageRow = React.memo(function MessageRow({
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasMedia = (message.media?.length ?? 0) > 0;
+  const hasFiles = (message.files?.length ?? 0) > 0;
   const hasBody =
-    !!message.text || (message.content?.length ?? 0) > 0 || hasMedia;
+    !!message.text ||
+    (message.content?.length ?? 0) > 0 ||
+    hasMedia ||
+    hasFiles;
+  const failed = message.status === 'error';
+  const sending = message.status === 'pending';
+  // Each attachment with its open action and the host's card for it, if the
+  // host draws one. Two or more pictures the host doesn't draw share one
+  // gallery (which opens the media view); anything else is its own tile, so
+  // a host's card keeps its own controls.
+  const entries = (message.media ?? []).map((attachment) => {
+    const launchId = JSON.stringify([message.id, attachment.id]);
+    const open = (play?: boolean) =>
+      onOpenMedia?.(message.id, attachment.id, play);
+    const card =
+      renderMessageMedia?.({
+        message,
+        attachment,
+        open,
+        launchId,
+        maxSize: mediaMaxSize,
+      }) ?? null;
+    return { attachment, launchId, open, card };
+  });
+  const pictures = onOpenMedia
+    ? entries.filter(
+        (entry) => entry.card === null && isVisualMedia(entry.attachment)
+      )
+    : [];
+  const gallery: MessageMediaEntry[] = pictures.length > 1 ? pictures : [];
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
   // The bubble holds the text; a message that is only attachments has none.
@@ -973,30 +1060,12 @@ export const MessageRow = React.memo(function MessageRow({
         isSelf ? 'flex-row-reverse' : 'flex-row'
       )}
     >
-      {/* Avatar gutter: the sticky overflow (⋯) and the end-of-message action
-          bar live under the avatar so the bubble aligns with the author name
-          instead of being indented by an action slot. */}
+      {/* The avatar's column; the message's actions sit beside its bubble. */}
       <div
         data-slot="superchat-message-gutter"
         className="flex shrink-0 flex-col items-center gap-1"
       >
         <ParticipantAvatar participant={participant} />
-        {hasActions && (
-          <>
-            <MessageOverflowMenu
-              isSelf={isSelf}
-              actions={actions}
-              footerVisible={collapseToMenu ? false : footerVisible}
-            />
-            {!collapseToMenu && (
-              <MessageActionsBar
-                ref={actionsBarRef}
-                actions={actions}
-                isSelf={isSelf}
-              />
-            )}
-          </>
-        )}
       </div>
       {/* flex-1 makes the column span the remaining row width so the bubble's
           max-w-[85%] resolves against the thread, not a shrink-wrapped column
@@ -1170,14 +1239,38 @@ export const MessageRow = React.memo(function MessageRow({
                 </>
               )}
             </ChatBubble>
+            {/* Edit and Copy belong to the text, so they sit beside its bubble
+                (on the inner side, toward the thread), revealed on hover or
+                focus; on a long message the ⋯ sticks to the bottom of the
+                view. */}
+            {hasActions && (
+              <div
+                data-slot="superchat-message-actions-slot"
+                className="flex shrink-0 flex-col items-center justify-end gap-0.5 self-stretch"
+              >
+                <MessageOverflowMenu
+                  isSelf={isSelf}
+                  actions={actions}
+                  footerVisible={collapseToMenu ? false : footerVisible}
+                />
+                {!collapseToMenu && (
+                  <MessageActionsBar
+                    ref={actionsBarRef}
+                    actions={actions}
+                    isSelf={isSelf}
+                  />
+                )}
+              </div>
+            )}
           </div>
         )}
 
         {/* Attachments follow the text, each its own tile on the author's
             side, as in a messaging app: a picture is never framed by the text
-            bubble, and the tile takes the bubble's corners whatever the host
-            draws in it. */}
-        {hasMedia && (
+            bubble, two or more pictures share one gallery, documents share
+            one list, and every tile takes the bubble's corners whatever the
+            host draws in it. */}
+        {(hasMedia || hasFiles) && (
           <div
             data-slot="superchat-message-attachments"
             className={cn(
@@ -1185,27 +1278,34 @@ export const MessageRow = React.memo(function MessageRow({
               isSelf ? 'items-end' : 'items-start'
             )}
           >
-            {message.media?.map((attachment) => {
-              const launchId = JSON.stringify([message.id, attachment.id]);
-              const open = (play?: boolean) =>
-                onOpenMedia?.(message.id, attachment.id, play);
+            {entries.map((entry) => {
+              if (gallery.includes(entry)) {
+                // The gallery stands where its first picture was.
+                return entry === gallery[0] ? (
+                  <AttachmentTile
+                    key="gallery"
+                    failed={failed}
+                    sending={sending}
+                  >
+                    <MessageGallery
+                      entries={gallery}
+                      maxSize={mediaMaxSize}
+                      openLabel={openMediaLabel}
+                      playLabel={playMediaLabel}
+                      moreLabel={attachmentLabels.moreMedia}
+                      unavailableLabel={attachmentLabels.mediaUnavailable}
+                    />
+                  </AttachmentTile>
+                ) : null;
+              }
+              const { attachment, launchId, open, card } = entry;
               return (
-                <div
+                <AttachmentTile
                   key={attachment.id}
-                  data-slot="superchat-message-attachment"
-                  className={cn(
-                    'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
-                    message.status === 'error' &&
-                      'border border-red-300 dark:border-red-700'
-                  )}
+                  failed={failed}
+                  sending={sending}
                 >
-                  {renderMessageMedia?.({
-                    message,
-                    attachment,
-                    open,
-                    launchId,
-                    maxSize: mediaMaxSize,
-                  }) ?? (
+                  {card ?? (
                     <MessageMedia
                       attachment={attachment}
                       maxSize={mediaMaxSize}
@@ -1213,13 +1313,35 @@ export const MessageRow = React.memo(function MessageRow({
                       playLabel={playMediaLabel}
                       errorLabel={mediaErrorLabel}
                       retryLabel={mediaRetryLabel}
+                      unavailableLabel={attachmentLabels.mediaUnavailable}
                       launchId={launchId}
                       onOpen={onOpenMedia ? open : undefined}
                     />
                   )}
-                </div>
+                </AttachmentTile>
               );
             })}
+            {hasFiles && (
+              <AttachmentTile failed={failed} sending={sending}>
+                <MessageFiles files={message.files!} maxSize={mediaMaxSize} />
+              </AttachmentTile>
+            )}
+            {sending && (
+              <p
+                data-slot="superchat-message-sending"
+                role="status"
+                className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
+              >
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                {attachmentLabels.sending(
+                  message.progress === undefined
+                    ? undefined
+                    : Math.round(
+                        Math.min(1, Math.max(0, message.progress)) * 100
+                      )
+                )}
+              </p>
+            )}
           </div>
         )}
       </div>
