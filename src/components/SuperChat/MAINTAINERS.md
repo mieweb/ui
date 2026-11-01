@@ -140,6 +140,14 @@ browser shows (JPEG, PNG, GIF, WebP, AVIF), so a HEIC photo is refused, and an
 iPhone's picker converts one to JPEG; `document` adds Word, Excel, text and
 CSV files.
 
+**Labels and edits.** `message.label` is the host's line about a message (a
+team, a plan, a ticket link), rendered small under it, after its attachments,
+through the same Markdown renderer; it never enters the edit draft, the copy
+text or the preview. Editing lists the message's attachments with remove
+buttons; removed ones leave the tiles while editing, Cancel restores them, and
+`onMessageEdited` gets `removedMedia` / `removedFiles` (Save is enabled by a
+removal alone).
+
 **Previews.** The conversation list previews the last message as plain text
 (markdown stripped) or, with no text, by what it carries
 (`mediaLabels.attachmentsPreview`: "Photo", "2 photos", a file's name).

@@ -102,11 +102,8 @@ export interface SuperChatInboxProps {
     }
   ) => void | Promise<void>;
   /** Fired when the local user saves an edit to one of their own messages. */
-  onMessageEdited?: (
-    messageId: string,
-    text: string,
-    meta: { conversation: SuperChatConversation }
-  ) => void;
+  /** See {@link SuperChatProps.onMessageEdited}: the new text, and attachments taken off. */
+  onMessageEdited?: SuperChatProps['onMessageEdited'];
   onConversationOpened?: (conversation: SuperChatConversation) => void;
   onConversationClosed?: (conversation: SuperChatConversation) => void;
   onNewConversation?: () => void;

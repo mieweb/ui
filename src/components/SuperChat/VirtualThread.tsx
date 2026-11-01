@@ -24,6 +24,7 @@ import type {
   SuperChatRef,
   SuperChatRenderMessageMedia,
   SuperChatAttachmentLabels,
+  SuperChatMessageEdits,
 } from './types';
 
 /** What a remounted thread needs to come back on the same rows. */
@@ -48,7 +49,11 @@ export interface VirtualThreadProps {
   /** Whether self-authored text messages expose an inline "Edit" affordance. */
   editable?: boolean;
   /** Save handler for an inline message edit (bound to the message's id). */
-  onMessageEdited?: (messageId: string, text: string) => void;
+  onMessageEdited?: (
+    messageId: string,
+    text: string,
+    edits: SuperChatMessageEdits
+  ) => void;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
   defaultCopyFormat?: SuperChatCopyFormat;
   onOpenMedia?: (

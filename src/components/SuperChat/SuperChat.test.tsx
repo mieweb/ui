@@ -758,8 +758,14 @@ describe('SuperChat', () => {
     const slot = container.querySelector(
       '[data-slot="superchat-message-actions-slot"]'
     )!;
+    const bubble = slot.parentElement?.querySelector(
+      '[data-slot="superchat-bubble"]'
+    );
+    expect(bubble).toBeTruthy();
+    // On the outer side, by the avatar: first in the row, which runs the
+    // author's way.
     expect(
-      slot.parentElement?.querySelector('[data-slot="superchat-bubble"]')
+      slot.compareDocumentPosition(bubble!) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
       within(slot as HTMLElement).getAllByRole('button').length
@@ -1024,6 +1030,8 @@ describe('SuperChat', () => {
 
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     expect(onMessageEdited).toHaveBeenCalledWith('m1', 'edited body', {
+      removedMedia: [],
+      removedFiles: [],
       conversation,
     });
   });

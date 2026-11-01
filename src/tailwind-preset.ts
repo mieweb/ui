@@ -172,6 +172,9 @@ export const miewebUISafelist = [
   'max-sm:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))]',
   'max-sm:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))]',
   'max-sm:z-50',
+  // A message's actions, in the avatar's column beside its bubble.
+  '-end-8',
+  '-start-8',
   'size-5',
   '-me-1',
   '@max-md:basis-full',
