@@ -1159,14 +1159,6 @@ export function SuperChat({
               // (the whole screen on a phone), and the player's own controls
               // go full screen: no viewer on top unless the host asks.
               allowFullscreen={mediaFeedProps?.allowFullscreen ?? !overlay}
-              classNames={{
-                ...mediaFeedProps?.classNames,
-                // Clear the Back button over the top corner.
-                details: cn(
-                  overlay && 'ps-14',
-                  mediaFeedProps?.classNames?.details
-                ),
-              }}
               ref={mediaFeedRef}
               key={conversation.id}
               items={mediaItems}

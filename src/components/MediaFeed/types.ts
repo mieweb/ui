@@ -109,9 +109,10 @@ export interface MediaFeedProps<T> extends Omit<
   /**
    * `stacked` (default): each item is a card, its details under the media.
    * `overlay`: the media fills each item edge to edge on a dark stage, with
-   * the details over its top, Previous/Next on the end edge, and the player's
-   * touch-first overlay controls. Suits a phone or a full-height pane, upright
-   * or sideways.
+   * the details at its foot as short-video apps place them (author, title and
+   * caption at the start, actions in a column at the end), Previous/Next on
+   * the end edge, and the player's touch-first overlay controls. Suits a phone
+   * or a full-height pane, upright or sideways.
    */
   layout?: 'stacked' | 'overlay';
   /**

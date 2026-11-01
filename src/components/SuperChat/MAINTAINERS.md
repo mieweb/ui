@@ -187,8 +187,8 @@ Opt-in; without it the media view is the stacked feed under a labelled Back.
   `position: fixed` inside a transformed ancestor (a Motion sheet) won't cover
   the screen; hosts that need that should render SuperChat outside it.
 - **Dark by scoping**, like MediaFeed's overlay: `data-theme="dark"`.
-- **Back sits over the clip's corner**, and the feed's details get `ps-14` to
-  clear it. The immersive viewer is off unless the host sets
+- **Back sits over the clip's top corner**, which the feed's overlay leaves
+  free (its details sit at the foot). The immersive viewer is off unless the host sets
   `allowFullscreen`; the player's own full screen covers that need.
 - **One tree for both layouts.** The feed sits in the same place whether or
   not the overlay is on, so a host that switches `layout` (by screen size, say)

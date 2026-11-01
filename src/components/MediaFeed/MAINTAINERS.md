@@ -58,9 +58,16 @@ change it for every consumer: its visual baselines are the regression check.
 - **Condensed mode leaves the overlay alone.** The root carries
   `data-layout`, and `condensed-view.css` scopes its padding, gap and radius
   rules to the stacked layout.
+- **Details sit where short-video apps put them** (TikTok, Instagram Reels):
+  author, title and caption at the bottom start, just above the player's bar,
+  on a gradient rising from the foot; the host's actions (and the viewer's
+  expand button) in a column at the bottom end. The top is left free for a
+  host's Back button, and Previous/Next stay mid-way down the end edge.
+  `useControlsBarHeight` measures the active item's bar (it wraps onto two
+  rows in a narrow player) so the text clears it.
 - **Details come before the media in the DOM.** Focus then visits the title,
-  caption and actions before the player's bar, matching the screen. The
-  absolute positioning, not the DOM order, places them.
+  caption and actions before the player's bar, which sits under them on
+  screen. The absolute positioning, not the DOM order, places them.
 - **Taps go through the details.** The details layer is `pointer-events-none`
   with its controls opted back in, so a tap on the picture still reaches the
   player's tap-to-play surface.
