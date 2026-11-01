@@ -249,8 +249,10 @@ function useIsFullscreen(
  * picture in picture and full screen where the browser supports them.
  *
  * `MediaPlayer` renders it for `controlsStyle="overlay"`. To use it directly,
- * render it in a positioned box with the video and attach
- * `transport.setMediaElement` to the video's `ref`.
+ * render it in a positioned box with the video, attach
+ * `transport.setMediaElement` to the video's `ref` and give the video
+ * `playsInline` (without it, an iPhone plays it in the system player, away
+ * from these controls).
  */
 export const MediaControls = React.forwardRef<
   HTMLDivElement,

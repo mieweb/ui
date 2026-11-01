@@ -77,13 +77,13 @@ The host owns the position as plain state; the player and the transcript never t
 - Overlay controls are a dark surface in every theme (\`data-theme="dark"\` on the box), so the controls read over any frame. The narrow- and small-player layouts use container queries, which need Tailwind 4.1 or the prebuilt \`styles.css\`.
 - Theming: \`card\` uses \`border-border bg-card\`; the error surface uses \`destructive\` tokens. Overlay controls use black scrims (\`bg-black/*\`) and white text over the picture, as \`VideoCard\` does, since they must read over any frame. Depends on \`Button\`, \`Slider\`, \`useMediaTransport\`, \`lucide-react\`, \`class-variance-authority\`, and \`AudioPlayer\`'s time formatter. Entry \`@mieweb/ui\`.
 
-\`MediaControls\` can also be used on its own, over a host's own \`<video>\`. Pass the box as \`fullscreenTarget\` so full screen takes the controls along:
+\`MediaControls\` can also be used on its own, over a host's own \`<video>\`. Pass the box as \`fullscreenTarget\` so full screen takes the controls along, and give the video \`playsInline\`, or an iPhone plays it in the system player instead of under the controls:
 
 \`\`\`tsx
 const transport = useMediaTransport();
 const boxRef = useRef<HTMLDivElement>(null);
 <div ref={boxRef} className="relative aspect-video bg-black" data-theme="dark">
-  <video ref={transport.setMediaElement} src={src} className="h-full w-full" />
+  <video ref={transport.setMediaElement} src={src} playsInline className="h-full w-full" />
   <MediaControls transport={transport} fullscreenTarget={boxRef} />
 </div>
 \`\`\``,
@@ -234,6 +234,8 @@ function HostVideoControls() {
       <video
         ref={transport.setMediaElement}
         src={src}
+        // Or an iPhone plays it in the system player, away from the controls.
+        playsInline
         aria-label="Sample recording"
         className="h-full w-full"
       />
