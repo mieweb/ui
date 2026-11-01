@@ -108,7 +108,9 @@ inactive or background feed must pause media, and opening fullscreen must stop
 the inline copy before the modal starts another player. One exception: a clip
 floating in picture in picture keeps playing when its item stops being active
 (`pauseForOwnership` checks `isInPictureInPicture`), and pauses when it comes
-back to an inactive item, which has no controls.
+back to an inactive item, which has no controls. A pause or Play in the
+floating window is the viewer's, as one on the active item is: the item
+stays paused, or plays again, when they come back to it.
 Native media position is retained per item ID and source URL, and restored when
 metadata is ready, so inline/fullscreen switches continue from the same time.
 Provider iframe playback has no time-capture API here and restarts when its
