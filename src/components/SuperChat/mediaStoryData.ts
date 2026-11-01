@@ -25,6 +25,9 @@ export function createMediaConversations(
               src: videoUrl,
               title: 'Launch overview',
               alt: 'A synthetic moving color band',
+              // Longer than the media view's two caption lines: Show more.
+              caption:
+                'The whole launch in two minutes: what ships on day one, who it is for and how the rollout runs, region by region, from the pilot teams to everyone. It ends with the questions we still have to answer before the public date, so watch to the end and reply here with anything we missed.',
             },
             {
               id: 'detail',
@@ -47,6 +50,10 @@ export function createMediaConversations(
               src: videoUrl,
               title: 'Follow-up recording',
               alt: 'A synthetic moving color band',
+              // A bare address, a Markdown link and an address with balanced
+              // parentheses: all three are tappable in the media view.
+              caption:
+                'Notes at https://example.org/launch and the [rollout plan](https://example.org/rollout). The codename: https://en.wikipedia.org/wiki/Mercury_(planet).',
             },
           ],
         },

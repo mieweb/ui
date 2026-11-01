@@ -735,7 +735,7 @@ export const MediaConversation: Story = {
     docs: {
       description: {
         story:
-          'Start in the conversation and press Play on a video to open that clip in an Instagram-style MediaFeed. Back to conversation restores the thread, its reading position and the draft. Both views use the same explicit message.media attachments, participants and source message ids. Reactions apply to the original message, and the shared composer still sends through host-owned conversation state. Videos are generated locally; select Planning to see a conversation without media.',
+          'Start in the conversation and press Play on a video to open that clip in an Instagram-style MediaFeed. Back to conversation restores the thread, its reading position and the draft. Both views use the same explicit message.media attachments, participants and source message ids. Reactions apply to the original message, and the shared composer still sends through host-owned conversation state. Captions come from `attachment.caption` (else the message text), with their links tappable: the one on the follow-up recording has a bare address, a Markdown link and a Wikipedia address with parentheses, and the one on Launch overview is long enough that the overlay layout cuts it at two lines with Show more. Videos are generated locally; select Planning to see a conversation without media.',
       },
     },
   },
