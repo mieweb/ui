@@ -799,6 +799,33 @@ describe('MediaFeed', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
+  it('pauses a clip that stays floating, rather than play it beside the viewer', async () => {
+    const { container } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const video = container.querySelector('video') as HTMLVideoElement & {
+      webkitPresentationMode?: string;
+      webkitSetPresentationMode?: (mode: string) => void;
+    };
+    await waitFor(() => expect(video.paused).toBe(false));
+    // Safari is asked to bring it back, and never does or says so.
+    video.webkitPresentationMode = 'picture-in-picture';
+    video.webkitSetPresentationMode = vi.fn();
+    vi.useFakeTimers();
+    try {
+      fireEvent.click(
+        within(screen.getByRole('article', { name: 'First update' })).getByRole(
+          'button',
+          { name: 'Open fullscreen' }
+        )
+      );
+      await act(() => vi.advanceTimersByTimeAsync(1000));
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(video.paused).toBe(true);
+  });
+
   it('can leave out the full-screen viewer', () => {
     renderFeed({ allowFullscreen: false });
     expect(
@@ -845,6 +872,51 @@ describe('MediaFeed', () => {
         ).toHaveAttribute('data-active', 'true')
       );
       expect(clips[0].paused).toBe(true);
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
+  });
+
+  it('remembers a Play made in the floating window after a pause there', async () => {
+    const { container } = renderFeed({ autoPlay: false });
+    visibility([0.9, 0.1, 0]);
+    const clips = [...container.querySelectorAll('video')];
+    fireEvent.click(
+      within(screen.getByRole('article', { name: 'First update' })).getByRole(
+        'button',
+        { name: 'Play' }
+      )
+    );
+    await waitFor(() => expect(clips[0].paused).toBe(false));
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: clips[0],
+    });
+    try {
+      // Scroll on with it floating; pause it and play it again from there.
+      visibility([0.1, 0.9, 0]);
+      await waitFor(() =>
+        expect(
+          screen.getByRole('article', { name: 'Second update' })
+        ).toHaveAttribute('data-active', 'true')
+      );
+      act(() => clips[0].pause());
+      await act(() => clips[0].play());
+      // Its window closes, which stops it in the feed (no controls there).
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+      act(() => {
+        clips[0].dispatchEvent(new Event('leavepictureinpicture'));
+      });
+      expect(clips[0].paused).toBe(true);
+      // Back to it: the viewer's last word was Play, so it plays on.
+      visibility([0.9, 0.1, 0]);
+      await waitFor(() => expect(clips[0].paused).toBe(false));
     } finally {
       Object.defineProperty(document, 'pictureInPictureElement', {
         configurable: true,

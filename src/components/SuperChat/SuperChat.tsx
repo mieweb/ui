@@ -296,6 +296,25 @@ function hasOpenLayer(panel: HTMLElement): boolean {
   );
 }
 
+/**
+ * The last `value` while each of its keys holds the same thing as before, so
+ * an object a host writes inline (a new one every render) isn't a change.
+ */
+function useShallowStable<T extends object | undefined>(value: T): T {
+  const ref = React.useRef(value);
+  const last = ref.current;
+  const same =
+    last === value ||
+    (!!last &&
+      !!value &&
+      Object.keys(last).length === Object.keys(value).length &&
+      Object.entries(value).every(([key, item]) =>
+        Object.is(item, (last as Record<string, unknown>)[key])
+      ));
+  if (!same) ref.current = value;
+  return same ? last : value;
+}
+
 /** The header gives its room to the clip on the same screens. */
 const PHONE_HIDDEN =
   'max-sm:hidden [@media(max-height:30rem)_and_(orientation:landscape)]:hidden';
@@ -374,15 +393,26 @@ export function SuperChat({
     (internalView.conversationId === conversation.id
       ? internalView.view
       : 'thread');
-  const labels: SuperChatMediaLabels = {
-    backToConversation: 'Back to conversation',
-    openMedia: 'Open in media feed',
-    playMedia: 'Play',
-    ...DEFAULT_ATTACHMENT_LABELS,
-    attachmentsPreview: previewOfAttachments,
-    unknownAuthor: 'Unknown',
-    ...mediaLabels,
-  };
+  // Every message row takes these, so they keep their identity while the
+  // host's words stay the same, even passed as a new object each render.
+  const hostLabels = useShallowStable(mediaLabels);
+  const labels = React.useMemo<SuperChatMediaLabels>(() => {
+    const openMedia = hostLabels?.openMedia ?? 'Open in media feed';
+    const playMedia = hostLabels?.playMedia ?? 'Play';
+    return {
+      backToConversation: 'Back to conversation',
+      ...DEFAULT_ATTACHMENT_LABELS,
+      // The named forms build on `openMedia` / `playMedia` unless given, so a
+      // host that translated those keeps its words on titled tiles.
+      openMediaNamed: (name) => `${openMedia}, ${name}`,
+      playMediaNamed: (title) => `${playMedia} ${title}`,
+      attachmentsPreview: previewOfAttachments,
+      unknownAuthor: 'Unknown',
+      ...hostLabels,
+      openMedia,
+      playMedia,
+    };
+  }, [hostLabels]);
   const scheduledLabel = messageLabels?.scheduled ?? 'Scheduled';
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);
@@ -514,17 +544,30 @@ export function SuperChat({
     setView('thread');
   }, [setView]);
   // While the media view is open, Escape goes back to the conversation
-  // unless another layer (the feed's viewer, a host menu) is open.
+  // unless another layer (the feed's viewer, a host menu) is open. A key from
+  // inside the panel is heard on its way out of it, after the panel's own
+  // layers, and goes no further: a Modal or Sheet around the panel would
+  // otherwise close too (they listen on the document).
   const mediaViewOpen = activeView === 'media';
+  const handlePanelKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    const panel = panelRef.current;
+    if (!mediaViewOpen || !panel || event.key !== 'Escape') return;
+    if (event.nativeEvent.defaultPrevented) return;
+    // Not a key from something portaled out of the panel, such as a dialog
+    // a host card opened: that one is its own.
+    if (!panel.contains(event.target as Node) || hasOpenLayer(panel)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    handleBackToConversation();
+  };
+  // With focus nowhere (on the body), the key never passes through the panel.
   React.useEffect(() => {
     const panel = panelRef.current;
     if (!mediaViewOpen || !panel) return;
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
-      const target = event.target as Node | null;
-      if (target !== document.body && !(target && panel.contains(target)))
-        return;
-      if (!hasOpenLayer(panel)) handleBackToConversation();
+      if (event.target !== document.body || hasOpenLayer(panel)) return;
+      handleBackToConversation();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -1051,14 +1094,17 @@ export function SuperChat({
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
   const composerRef = React.useRef<ChatComposerHandle>(null);
-  // The conversation a send is pending in: SuperChatInbox reuses this panel
-  // (and its composer) for every conversation, and only that one is busy.
-  const [sendingIn, setSendingIn] = React.useState<string>();
+  // The conversations a send is pending in: SuperChatInbox reuses this panel
+  // (and its composer) for every conversation, and only those are busy. Each
+  // send takes its own off when it settles, so sends can overlap.
+  const [sendingIn, setSendingIn] = React.useState<ReadonlySet<string>>(
+    () => new Set()
+  );
   const handleComposerSend = React.useCallback(
     async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
       const epoch = draftEpochRef.current;
       const conversationId = conversation.id;
-      setSendingIn(conversationId);
+      setSendingIn((current) => new Set(current).add(conversationId));
       try {
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
@@ -1091,17 +1137,21 @@ export function SuperChat({
         // 'send-failed'); it has nothing of its own to restore.
         throw error;
       } finally {
-        setSendingIn((current) =>
-          current === conversationId ? undefined : current
-        );
+        setSendingIn((current) => {
+          const next = new Set(current);
+          next.delete(conversationId);
+          return next;
+        });
       }
     },
     [conversation, onMessageSent]
   );
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Escape out of the media view, heard from the controls inside (the dialog pattern on a phone); the panel itself takes no focus
     <section
       ref={panelRef}
+      onKeyDown={handlePanelKeyDown}
       data-slot="superchat"
       role={covering ? 'dialog' : 'group'}
       aria-modal={covering || undefined}
@@ -1377,7 +1427,7 @@ export function SuperChat({
 
       <ChatComposer
         ref={composerRef}
-        isSending={sendingIn === conversation.id}
+        isSending={sendingIn.has(conversation.id)}
         onError={onComposerError}
         disabled={readOnly}
         placeholder={

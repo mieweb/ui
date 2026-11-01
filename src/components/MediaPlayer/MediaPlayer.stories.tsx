@@ -73,17 +73,17 @@ The host owns the position as plain state; the player and the transcript never t
 - Accessibility: with native \`controls\` the browser supplies labelled, keyboard-operable controls; the component adds the \`aria-label\` you pass (no default). Overlay controls are labelled icon buttons and a \`Slider\` whose \`aria-valuetext\` reads the time; the tap-to-play surface is a pointer convenience (\`aria-hidden\`), and the bar's Play is the keyboard path. Override their English labels, including the \`time\` and \`rate\` formatters, through \`labels\`. The speed button cycles 1×, 1.5×, 2×; pass \`playbackRates\` (a \`MediaPlayer\` and \`MediaControls\` prop) for another set. The captions toggle shows the first caption or subtitle track; its label (Show captions / Hide captions) says what a press does. \`controls={false}\` leaves **no visible or keyboard control** — supply controls through the ref, as \`MediaFeed\` does. The error panel is \`role="alert"\`; override its English defaults with \`labels={{ error, retry }}\`.
 - Caption tracks belong to the host’s media resource. Supply \`<track>\` elements through \`children\`; the component does not generate subtitles.
 - \`kind\` inference is by extension only — signed URLs without an extension fall back to audio; pass \`kind="video"\` explicitly. The transport reports \`durationMs\` as \`0\` until metadata is known or when it is non-finite (live streams).
-- Layout: \`<video>\` is \`object-contain\` inside a full-height flex box; \`<audio>\` is \`w-[90%] max-w-lg\` with \`my-4\`. The native container is symmetric, so RTL is unaffected; the browser's control bar follows the platform. The overlay bar stays left to right in RTL, as media timelines do (Play on the left, the seek fill growing to the right); its labels are still translated. Overlay controls fill the player's box: give it a height. A narrow player (under 28rem) puts the seek bar on its own row; under 20rem (a card in a chat) speed and picture in picture drop out, leaving play, time, seek, mute and full screen on two short rows. Picture in picture and full screen show only where the browser supports them; on an iPhone, full screen opens the system player. Audio always uses the browser's controls. Captions left on the default line are lifted above the bar; cues the host positions keep their place.
+- Layout: \`<video>\` is \`object-contain\` inside a full-height flex box; \`<audio>\` is \`w-[90%] max-w-lg\` with \`my-4\`. The native container is symmetric, so RTL is unaffected; the browser's control bar follows the platform. The overlay bar stays left to right in RTL, as media timelines do (Play on the left, the seek fill growing to the right); its labels are still translated. Overlay controls fill the player's box: give it a height. A narrow player (under 28rem) puts the seek bar on its own row; under 20rem (a card in a chat) speed and picture in picture drop out, leaving play, time, seek, mute and full screen on two short rows. Picture in picture and full screen show only where the browser supports them; on an iPhone, full screen opens the system player. Audio always uses the browser's controls. Captions left on the default line are lifted above the bar, and move when the player changes size; cues the host positions keep their place, and lifted cues go back to the default line when the overlay controls unmount. Switching \`controlsStyle\` keeps the same \`<video>\`, so playback carries on.
 - Overlay controls are a dark surface in every theme (\`data-theme="dark"\` on the box), so the controls read over any frame. The narrow- and small-player layouts use container queries, which need Tailwind 4.1 or the prebuilt \`styles.css\`.
 - Theming: \`card\` uses \`border-border bg-card\`; the error surface uses \`destructive\` tokens. Overlay controls use black scrims (\`bg-black/*\`) and white text over the picture, as \`VideoCard\` does, since they must read over any frame. Depends on \`Button\`, \`Slider\`, \`useMediaTransport\`, \`lucide-react\`, \`class-variance-authority\`, and \`AudioPlayer\`'s time formatter. Entry \`@mieweb/ui\`.
 
-\`MediaControls\` can also be used on its own, over a host's own \`<video>\`. Pass the box as \`fullscreenTarget\` so full screen takes the controls along:
+\`MediaControls\` can also be used on its own, over a host's own \`<video>\`. Pass the box as \`fullscreenTarget\` so full screen takes the controls along, and give the video \`playsInline\`, or an iPhone plays it in the system player instead of under the controls:
 
 \`\`\`tsx
 const transport = useMediaTransport();
 const boxRef = useRef<HTMLDivElement>(null);
 <div ref={boxRef} className="relative aspect-video bg-black" data-theme="dark">
-  <video ref={transport.setMediaElement} src={src} className="h-full w-full" />
+  <video ref={transport.setMediaElement} src={src} playsInline className="h-full w-full" />
   <MediaControls transport={transport} fullscreenTarget={boxRef} />
 </div>
 \`\`\``,
@@ -234,6 +234,8 @@ function HostVideoControls() {
       <video
         ref={transport.setMediaElement}
         src={src}
+        // Or an iPhone plays it in the system player, away from the controls.
+        playsInline
         aria-label="Sample recording"
         className="h-full w-full"
       />

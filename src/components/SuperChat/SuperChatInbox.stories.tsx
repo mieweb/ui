@@ -697,6 +697,9 @@ function MediaConversationDemo({
 
   return (
     <SuperChatInbox
+      // The canvas's width: in the media view the panel would otherwise
+      // shrink to the feed's.
+      className="w-full"
       conversations={conversations}
       renderMessageMedia={renderMessageMedia}
       currentParticipantId="me"
@@ -758,11 +761,18 @@ function MediaConversationDemo({
             item.message.id,
           ]);
           const liked = likedMessages.includes(messageKey);
+          // Over the video, the actions need the player's white, not the
+          // dark theme's muted ghost text, to read over a bright frame.
+          const actionClassName =
+            layout === 'overlay'
+              ? 'text-white dark:text-white hover:bg-white/15 dark:hover:bg-white/15'
+              : undefined;
           return (
             <ButtonGroup>
               <Button
                 variant="ghost"
                 size="sm"
+                className={actionClassName}
                 aria-pressed={liked}
                 leftIcon={<Heart className="size-4" aria-hidden="true" />}
                 onClick={() =>
@@ -778,6 +788,7 @@ function MediaConversationDemo({
               <Button
                 variant="ghost"
                 size="sm"
+                className={actionClassName}
                 leftIcon={<Reply className="size-4" aria-hidden="true" />}
                 onClick={() => setView('thread')}
               >

@@ -174,9 +174,15 @@ export interface SuperChatMediaLabels {
   backToConversation: string;
   openMedia: string;
   playMedia: string;
-  /** A picture's open control, naming it: "Open in media feed, Whiteboard". */
+  /**
+   * A picture's open control, naming it: "Open in media feed, Whiteboard".
+   * By default `openMedia`, a comma, then the name.
+   */
   openMediaNamed: (name: string) => string;
-  /** A clip's play control, naming it: "Play Launch overview". */
+  /**
+   * A clip's play control, naming it: "Play Launch overview". By default
+   * `playMedia`, then the title.
+   */
   playMediaNamed: (title: string) => string;
   /**
    * The last gallery cell's name: `name` is the cell's own (as

@@ -1008,21 +1008,17 @@ export const MessageRow = React.memo(function MessageRow({
   const cancelEdit = () => setIsEditing(false);
   const removedAny =
     removed.removedMedia.length > 0 || removed.removedFiles.length > 0;
-  const editChanged =
-    removedAny || (!!draft.trim() && draft.trim() !== message.text);
-  // Taking every attachment off a message with no text would leave nothing.
+  // What's saved is what the editor holds: clearing the text clears it.
+  const nextText = draft.trim();
+  const editChanged = removedAny || nextText !== (message.text ?? '');
+  // An edit has to leave some text or an attachment: clearing the text of a
+  // message that is only text, or taking every attachment off one with no
+  // text, would leave nothing.
   const leavesSomething =
-    !!(draft.trim() || message.text) ||
-    shownMedia.length + shownFiles.length > 0;
+    !!nextText || shownMedia.length + shownFiles.length > 0;
   const canSave = editChanged && leavesSomething;
   const saveEdit = () => {
-    if (canSave) {
-      onMessageEdited?.(
-        message.id,
-        draft.trim() || message.text || '',
-        removed
-      );
-    }
+    if (canSave) onMessageEdited?.(message.id, nextText, removed);
     setIsEditing(false);
   };
 

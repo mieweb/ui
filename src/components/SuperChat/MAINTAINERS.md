@@ -74,7 +74,9 @@ targets the original conversation message, rather than a second media store.
 uncontrolled panel in either `thread` or `media`. The media view composes
 `MediaFeed`; `mediaFeedProps` exposes its behavior, labels and render slots while
 reserving the conversation's items and accessors. `mediaLabels` localizes the
-return control and inline attachment actions. The media view takes the
+return control and inline attachment actions; the named forms
+(`openMediaNamed`, `playMediaNamed`) default to `openMedia` / `playMedia` plus
+the name, so a host that only translated those keeps them. The media view takes the
 thread's place in the panel (the thread unmounts). The header and composer
 remain mounted in both views, the composer below the media (the header hides
 on a phone in the overlay layout), and the composer keeps its existing
@@ -156,7 +158,8 @@ opening in a new tab, and never in the media view.
 rejects, the text and the files go back into the composer to try again, as
 long as that conversation is still the one shown (SuperChatInbox reuses the
 panel), and the error is rethrown so `onComposerError` hears
-`reason: 'send-failed'`. `isSending` is kept per conversation. A
+`reason: 'send-failed'`. `isSending` is kept per conversation, as a set of
+the ones with a send pending, so sends in two conversations can overlap. A
 host that shows the message while it uploads gives it `status: 'pending'` and
 `progress` (0–1): its tiles dim and "Sending… 45%" shows under them
 (`mediaLabels.sending` and `sendingProgress(percent)`; only "Sending…" is a
@@ -174,7 +177,9 @@ text or the preview. Editing lists the message's attachments
 (`superchat-message-editor-attachments`) with a Remove button each; removed
 ones leave the tiles while editing, Cancel restores them, and
 `onMessageEdited` gets `removedMedia` / `removedFiles` (Save is enabled by a
-removal alone). The host drops those ids from `media` / `files`.
+removal alone). The host drops those ids from `media` / `files`. The text
+saved is the trimmed draft, so clearing it is an edit while attachments stay;
+Save is disabled when the edit would leave neither text nor an attachment.
 
 **Previews.** The conversation list previews the last message as plain text
 (markdown stripped) or, with no text, by what it carries
@@ -211,7 +216,10 @@ Opt-in; without it the media view is the stacked feed under a labelled Back.
   unless one of the panel's own layers is open: a visible dialog inside
   it (the feed's viewer) or a popup one of its controls opened. The
   library's overlays don't cancel Escape, so it checks for them instead;
-  widgets elsewhere on the page don't count.
+  widgets elsewhere on the page don't count. The panel hears the key on its
+  way out (React `onKeyDown`, after its own layers) and stops it there, since
+  a Modal or Sheet around the panel closes on any Escape that reaches the
+  document; with focus on the body, a document listener goes back instead.
   `position: fixed` inside a transformed ancestor (a Motion sheet) won't cover
   the screen; hosts that need that should render SuperChat outside it.
 - **Dark by scoping**, like MediaFeed's overlay: `data-theme="dark"`.

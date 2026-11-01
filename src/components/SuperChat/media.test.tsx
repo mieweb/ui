@@ -10,6 +10,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Modal } from '../Modal';
 import { SuperChat } from './SuperChat';
 import { SuperChatInbox } from './SuperChatInbox';
 import {
@@ -571,6 +572,26 @@ describe('SuperChat media view', () => {
     expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
   });
 
+  it('keeps a containing Modal open when Escape goes back', async () => {
+    mockNativePlayback();
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(
+      <Modal open onOpenChange={onOpenChange} aria-label="Chat">
+        <SuperChat conversation={conversation} />
+      </Modal>
+    );
+    await user.click(
+      screen.getAllByRole('button', { name: /^Open in media feed/ })[0]
+    );
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    // Back on the thread, Escape is the Modal's again.
+    await user.keyboard('{Escape}');
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
   it('starts a tile at the size the host gives, before its picture loads', () => {
     const { container } = render(
       <SuperChat
@@ -776,6 +797,32 @@ describe('SuperChat media view', () => {
     }
   );
 
+  it('saves an edit that clears the text while attachments stay', async () => {
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="alex"
+        onMessageEdited={onMessageEdited}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    await user.clear(screen.getByRole('textbox', { name: 'Edit message' }));
+    // Clearing the text is a change: the pictures are still a message.
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    await user.click(
+      screen.getByRole('button', { name: 'Remove Second image' })
+    );
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onMessageEdited).toHaveBeenCalledWith(
+      'm1',
+      '',
+      expect.objectContaining({ removedMedia: ['a2'], removedFiles: [] })
+    );
+  });
+
   it('will not save an edit that takes off everything a message had', async () => {
     const user = userEvent.setup();
     const onMessageEdited = vi.fn();
@@ -867,6 +914,40 @@ describe('SuperChat media view', () => {
     expect(
       within(list).getAllByRole('button', { name: '«Foto» entfernen' })
     ).toHaveLength(2);
+  });
+
+  it('names titled tiles with the translated openMedia and playMedia', () => {
+    const labels = { openMedia: 'Abrir', playMedia: 'Reproducir' };
+    const { unmount } = render(
+      <SuperChat conversation={videoConversation} mediaLabels={labels} />
+    );
+    expect(
+      screen.getByRole('button', { name: 'Reproducir First clip' })
+    ).toBeTruthy();
+    unmount();
+    render(<SuperChat conversation={conversation} mediaLabels={labels} />);
+    expect(
+      screen.getByRole('button', { name: 'Abrir, First image' })
+    ).toBeTruthy();
+  });
+
+  it('leaves unchanged rows alone while typing, or given equal labels anew', async () => {
+    const user = userEvent.setup();
+    const renderMessageMedia = vi.fn(() => null);
+    const show = () => (
+      <SuperChat
+        conversation={conversation}
+        renderMessageMedia={renderMessageMedia}
+        // Inline, as hosts write it: a new object every render.
+        mediaLabels={{ openMedia: 'Abrir', playMedia: 'Reproducir' }}
+      />
+    );
+    const { rerender } = render(show());
+    const renders = renderMessageMedia.mock.calls.length;
+    expect(renders).toBeGreaterThan(0);
+    await user.type(screen.getByLabelText('Message'), 'Hi');
+    rerender(show());
+    expect(renderMessageMedia).toHaveBeenCalledTimes(renders);
   });
 
   it('names an untitled attachment in the editor by its kind', async () => {
