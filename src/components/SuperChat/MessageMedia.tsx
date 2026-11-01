@@ -195,7 +195,7 @@ const stillButton =
  * Two or more pictures in one message, as one tile (iMessage, WhatsApp,
  * Telegram): two side by side, three as one large and two small, four or more
  * in a 2×2 grid whose last cell says how many more. Each cell opens the media
- * view at its own attachment, where the rest are a swipe away.
+ * view at its own attachment, where the rest are a scroll away.
  */
 export function MessageGallery({
   entries,
