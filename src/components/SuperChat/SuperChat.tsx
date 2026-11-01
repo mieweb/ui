@@ -781,6 +781,7 @@ export function SuperChat({
     const appended = pendingMediaAppendRef.current;
     pendingMediaOwnSendRef.current = false;
     pendingMediaAppendRef.current = false;
+    let frame = 0;
 
     if (order === 'desc') {
       container.scrollTop = sameThread && !appended ? snapshot.scrollTop : 0;
@@ -788,9 +789,21 @@ export function SuperChat({
       // The turn layout effect below measures and anchors the newly mounted
       // thread. Do not clear the turn or override that position with bottom.
     } else if (sameThread && !ownSend && !snapshot.atBottom) {
-      // A reader mid-thread comes back where they were.
-      container.scrollTop = snapshot.scrollTop;
+      // A reader mid-thread comes back where they were. A virtualized thread
+      // mounts its rows a frame or two after itself, too short to scroll that
+      // far until then (it would stop at the top), so it's set again as they
+      // arrive, until it holds.
+      const target = snapshot.scrollTop;
+      container.scrollTop = target;
       stopFollowing();
+      let framesLeft = virtualized ? 20 : 0;
+      const settle = () => {
+        if (Math.abs(container.scrollTop - target) <= 1 || framesLeft-- <= 0)
+          return;
+        container.scrollTop = target;
+        frame = requestAnimationFrame(settle);
+      };
+      if (framesLeft > 0) frame = requestAnimationFrame(settle);
     } else {
       // At the bottom (or on a fresh thread) it's the bottom again, followed
       // as rows mount: a virtualized thread measures them a frame or two
@@ -801,6 +814,7 @@ export function SuperChat({
     }
 
     return () => {
+      cancelAnimationFrame(frame);
       threadSnapshotRef.current = {
         conversationId: conversation.id,
         order,
