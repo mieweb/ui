@@ -636,6 +636,9 @@ function MediaConversationDemo({
 
   return (
     <SuperChatInbox
+      // The canvas's width: in the media view the panel would otherwise
+      // shrink to the feed's.
+      className="w-full"
       conversations={conversations}
       renderMessageMedia={renderMessageMedia}
       currentParticipantId="me"
