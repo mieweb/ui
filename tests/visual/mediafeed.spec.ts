@@ -309,6 +309,11 @@ test.describe('MediaPlayer - overlay controls', () => {
       'media-mediaplayer--overlay-controls-with-captions',
       { width: 800, height: 600 },
     ],
+    [
+      'small',
+      'media-mediaplayer--overlay-controls-small',
+      { width: 400, height: 300 },
+    ],
   ] as const) {
     test(name, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -317,6 +322,13 @@ test.describe('MediaPlayer - overlay controls', () => {
       await expect(
         page.getByRole('slider', { name: 'Seek', exact: true })
       ).toBeVisible({ timeout: 15000 });
+      if (name === 'small') {
+        // Under 20rem the container query leaves speed to the larger view;
+        // the 5% screenshot tolerance could miss one small button.
+        const speed = page.locator('button[aria-label^="Playback speed"]');
+        await expect(speed).toHaveCount(1);
+        await expect(speed).toBeHidden();
+      }
       await page.evaluate(() => document.fonts.ready);
       // Video frames aren't deterministic; the controls around them are.
       await expect(page).toHaveScreenshot(`mediaplayer-overlay-${name}.png`, {
