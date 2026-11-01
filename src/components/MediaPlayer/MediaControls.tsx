@@ -87,7 +87,43 @@ const defaultPlaybackRates = [1, 1.5, 2] as const;
 /** Controls a small player (under 20rem wide) leaves out: speed and picture in picture. */
 const SMALL_PLAYER_HIDDEN = '@max-xs:hidden';
 
+/** Where a tap or drag on the seek bar lands: to the tenth of a second. */
+const SEEK_STEP_MS = 100;
+
+/**
+ * How far an arrow key seeks, as a share of the clip (2%): a few presses cross
+ * a short clip, and a long one isn't hundreds of presses long.
+ */
+const KEYBOARD_SEEK_FRACTION = 0.02;
+
+/**
+ * Browsers size caption text at about 5% of the video's height, and step a
+ * cue's `line` by its line box, so this approximates one line's height.
+ */
+const CUE_LINE_HEIGHT_FRACTION = 0.05;
+
+/** The line a cue is lifted to before the video has a size to measure. */
+const DEFAULT_CUE_LINE = -4;
+
 const formatMs = (ms: number) => formatTime(ms / 1000);
+
+/**
+ * The cue line just above the bar's controls. Lines count up from -1 (the
+ * bottom one), so a cue on line -(n + 1) clears n lines. The bar's top padding
+ * is the transparent start of its scrim, which captions may cover.
+ */
+function cueLineAboveBar(
+  video: HTMLVideoElement,
+  bar: HTMLElement | null
+): number {
+  const lineHeight =
+    video.getBoundingClientRect().height * CUE_LINE_HEIGHT_FRACTION;
+  if (!bar || lineHeight <= 0) return DEFAULT_CUE_LINE;
+  const controls =
+    bar.getBoundingClientRect().height -
+    (parseFloat(getComputedStyle(bar).paddingTop) || 0);
+  return -(Math.ceil(Math.max(controls, 0) / lineHeight) + 1);
+}
 
 /** Whether `video` is in picture in picture, following every change. */
 function useInPictureInPicture(video: HTMLVideoElement | null): boolean {
@@ -108,7 +144,10 @@ function useInPictureInPicture(video: HTMLVideoElement | null): boolean {
  * The video's caption and subtitle tracks, and whether one is showing,
  * following tracks the host adds, removes or switches itself.
  */
-function useCaptionTracks(video: HTMLVideoElement | null) {
+function useCaptionTracks(
+  video: HTMLVideoElement | null,
+  barRef: React.RefObject<HTMLElement | null>
+) {
   const [tracks, setTracks] = React.useState<globalThis.TextTrack[]>([]);
   const [showing, setShowing] = React.useState(false);
   React.useEffect(() => {
@@ -119,15 +158,24 @@ function useCaptionTracks(video: HTMLVideoElement | null) {
       return;
     }
     // Browsers draw cues at the very bottom, under the bar: lift any cue the
-    // host left on the default line a few lines up. Cues load lazily, so this
-    // runs again as they become active.
+    // host left on the default line to just above it. A fixed line count
+    // isn't enough, since lines scale with the video and the bar doesn't (it
+    // takes two rows in a small card). Cues load lazily, and the player can
+    // change size, so this runs again as cues become active.
+    const lifted = new WeakSet<globalThis.TextTrackCue>();
     const lift = (event: Event) => {
       const track = event.target as globalThis.TextTrack;
       const active = new Set(Array.from(track.activeCues ?? []));
       const redraw: globalThis.TextTrackCue[] = [];
+      const line = video
+        ? cueLineAboveBar(video, barRef.current)
+        : DEFAULT_CUE_LINE;
       for (const cue of Array.from(track.cues ?? [])) {
-        if (!('line' in cue) || cue.line !== 'auto') continue;
-        (cue as globalThis.VTTCue).line = -4;
+        if (!('line' in cue)) continue;
+        if (cue.line !== 'auto' && !lifted.has(cue)) continue;
+        if (cue.line === line) continue;
+        (cue as globalThis.VTTCue).line = line;
+        lifted.add(cue);
         if (active.has(cue)) redraw.push(cue);
       }
       // A cue already on screen keeps its old place until it's re-added.
@@ -156,7 +204,7 @@ function useCaptionTracks(video: HTMLVideoElement | null) {
       for (const track of watched)
         track.removeEventListener?.('cuechange', lift);
     };
-  }, [video]);
+  }, [video, barRef]);
   return { tracks, showing };
 }
 
@@ -195,7 +243,8 @@ function useIsFullscreen(
 /**
  * Touch-first controls laid over a `<video>`, in place of the browser's own.
  * A tap on the picture plays or pauses it, a round ▶ shows while it's paused,
- * and a bar along the bottom has play/pause, the time, a seek bar, mute, and
+ * and a bar along the bottom has play/pause, the time, a seek bar, playback
+ * speed, captions on/off when the video has a caption track, mute, and
  * picture in picture and full screen where the browser supports them.
  *
  * `MediaPlayer` renders it for `controlsStyle="overlay"`. To use it directly,
@@ -221,7 +270,8 @@ export const MediaControls = React.forwardRef<
   const muted = useMuted(video);
   const isFullscreen = useIsFullscreen(fullscreenTarget);
   const inPip = useInPictureInPicture(video);
-  const captions = useCaptionTracks(video);
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const captions = useCaptionTracks(video, barRef);
   // What this browser can do is read once mounted: the server can't know it,
   // and markup that differs from the server's breaks hydration. Safari only
   // says a video can float once its metadata is in, so read again then (and
@@ -291,7 +341,6 @@ export const MediaControls = React.forwardRef<
     label: string,
     onClick: () => void,
     icon: React.ReactElement,
-    pressed?: boolean,
     className?: string
   ) => (
     <Button
@@ -299,7 +348,6 @@ export const MediaControls = React.forwardRef<
       variant="ghost"
       size="icon"
       aria-label={label}
-      aria-pressed={pressed}
       title={label}
       onClick={onClick}
       className={cn(overlayButtonClass, 'shrink-0 bg-transparent', className)}
@@ -338,6 +386,7 @@ export const MediaControls = React.forwardRef<
           media, not the reading direction (Material: don't mirror playback
           controls or their progress bar). Labels keep their own direction. */}
       <div
+        ref={barRef}
         data-slot="media-controls-bar"
         dir="ltr"
         // A small player (a card in a chat, under 20rem wide) keeps play,
@@ -376,11 +425,11 @@ export const MediaControls = React.forwardRef<
           size="sm"
           min={0}
           max={durationMs > 0 ? durationMs : 1}
-          // A tap or drag lands where it's put (0.1s); an arrow key moves 2%
-          // of the clip, so a few presses cross a short one and a long one
-          // isn't hundreds of presses long.
-          step={100}
-          keyboardStep={Math.max(100, Math.round(durationMs / 50))}
+          step={SEEK_STEP_MS}
+          keyboardStep={Math.max(
+            SEEK_STEP_MS,
+            Math.round(durationMs * KEYBOARD_SEEK_FRACTION)
+          )}
           value={transport.currentTimeMs}
           onValueChange={transport.seekToMs}
           formatValue={formatMs}
@@ -394,9 +443,10 @@ export const MediaControls = React.forwardRef<
             <span className="text-xs font-semibold tabular-nums">
               {labels.rate(rate)}
             </span>,
-            undefined,
             SMALL_PLAYER_HIDDEN
           )}
+        {/* The label says what a press does, so it carries the state: no
+            aria-pressed as well, or it would read "Hide captions, pressed". */}
         {captions.tracks.length > 0 &&
           barButton(
             captions.showing ? labels.hideCaptions : labels.showCaptions,
@@ -404,8 +454,7 @@ export const MediaControls = React.forwardRef<
             <Captions
               className={cn('h-5 w-5', !captions.showing && 'opacity-70')}
               aria-hidden="true"
-            />,
-            captions.showing
+            />
           )}
         {barButton(
           muted ? labels.unmute : labels.mute,
@@ -421,7 +470,6 @@ export const MediaControls = React.forwardRef<
             inPip ? labels.exitPictureInPicture : labels.pictureInPicture,
             togglePictureInPicture,
             <PictureInPicture2 className="h-5 w-5" aria-hidden="true" />,
-            undefined,
             SMALL_PLAYER_HIDDEN
           )}
         {canFullscreen &&
