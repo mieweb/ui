@@ -36,6 +36,7 @@ import {
   PIP_EVENTS,
 } from '../MediaPlayer/pictureInPicture';
 import { getConversationMediaItems } from './media';
+import { linkifyCaption } from './captionLinks';
 import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
@@ -1163,9 +1164,11 @@ export function SuperChat({
               getId={(item) => item.id}
               getMedia={(item) => item.attachment}
               getTitle={(item) => item.attachment.title ?? ''}
-              getCaption={(item) =>
-                item.attachment.caption ?? item.message.text
-              }
+              // Its links tappable, as in the thread.
+              getCaption={(item) => {
+                const caption = item.attachment.caption ?? item.message.text;
+                return caption ? linkifyCaption(caption) : caption;
+              }}
               getAuthor={(item) => ({
                 name: item.participant?.name ?? labels.unknownAuthor,
                 avatar: item.participant?.avatar,
