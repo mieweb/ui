@@ -347,8 +347,9 @@ function NativeFeedMedia({
           className={cn(
             'm-0 text-center text-sm',
             overlay
-              ? // Above the player's bar, clear of the details along the top.
-                'pointer-events-none absolute inset-x-0 bottom-16 flex justify-center px-4'
+              ? // Along the top, clear of the details and actions at the foot
+                // and of a host's Back button in the top corner.
+                'pointer-events-none absolute inset-x-0 top-3 flex justify-center px-14'
               : 'text-muted-foreground'
           )}
         >

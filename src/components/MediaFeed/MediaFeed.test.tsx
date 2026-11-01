@@ -601,6 +601,25 @@ describe('MediaFeed', () => {
     expect(screen.getByRole('button', { name: 'Next item' })).toBeEnabled();
   });
 
+  it('places the overlay details as short-video apps do: at the foot, above the bar, actions in a column', () => {
+    renderFeed({
+      layout: 'overlay',
+      renderActions: () => <button type="button">Share</button>,
+    });
+    const first = screen.getByRole('article', { name: 'First update' });
+    const details = first.querySelector<HTMLElement>('[data-slot="details"]')!;
+    expect(details.className).toContain('bottom-0');
+    expect(details.className).not.toContain('top-0');
+    expect(details.className).toContain('bg-gradient-to-t');
+    // The active item's bar is under it: its content clears the bar.
+    expect(details.style.paddingBottom).toMatch(/px$/);
+    const actions = first.querySelector('[data-slot="actions"]')!;
+    expect(actions.className).toContain('flex-col');
+    expect(
+      within(actions as HTMLElement).getByRole('button', { name: 'Share' })
+    ).toBeInTheDocument();
+  });
+
   it('keeps the position counter in order in an RTL page', () => {
     renderFeed({ layout: 'overlay', dir: 'rtl' });
     // Isolated, so its numbers don't take the page's direction.

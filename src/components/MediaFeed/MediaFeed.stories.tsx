@@ -186,7 +186,7 @@ const meta: Meta<MediaFeedProps<Update>> = {
       description: {
         component: `### What it's for
 
-A vertical media feed for a collection owned by the host. \`MediaFeed<T>\` uses item accessors so a news post, an update, or a conversation attachment can share scrolling, active-item playback and an immersive viewer. Images and native audio/video work directly; provider media can use \`renderMedia\`. Two layouts: \`stacked\` cards (the default) and \`overlay\`, where the media fills each item edge to edge, upright or sideways, with the details over its top and touch-first player controls. No RSS, authentication, router, persistence or comment service is included.
+A vertical media feed for a collection owned by the host. \`MediaFeed<T>\` uses item accessors so a news post, an update, or a conversation attachment can share scrolling, active-item playback and an immersive viewer. Images and native audio/video work directly; provider media can use \`renderMedia\`. Two layouts: \`stacked\` cards (the default) and \`overlay\`, where the media fills each item edge to edge, upright or sideways, with the details at its foot as in short-video apps (author, title and caption at the bottom start, actions in a column at the bottom end) and touch-first player controls. No RSS, authentication, router, persistence or comment service is included.
 
 ### Use it when
 
