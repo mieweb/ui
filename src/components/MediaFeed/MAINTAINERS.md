@@ -54,7 +54,10 @@ change it for every consumer: its visual baselines are the regression check.
 - **The viewer is opt-in in the overlay.** `allowFullscreen` defaults to
   `layout !== 'overlay'`: the overlay already fills its space and the player
   has its own full screen. Opening the viewer brings a floating clip back
-  from picture in picture first, so the two never play at once.
+  from picture in picture first, so the two never play at once; if it's
+  still floating after that (Safari can fail to return it), it pauses there.
+  Only the item being opened is brought back: another item's floating clip
+  plays on, as it does when the feed scrolls on from it.
 - **Condensed mode leaves the overlay alone.** The root carries
   `data-layout`, and `condensed-view.css` scopes its padding, gap and radius
   rules to the stacked layout.

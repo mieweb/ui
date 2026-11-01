@@ -799,6 +799,33 @@ describe('MediaFeed', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
+  it('pauses a clip that stays floating, rather than play it beside the viewer', async () => {
+    const { container } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const video = container.querySelector('video') as HTMLVideoElement & {
+      webkitPresentationMode?: string;
+      webkitSetPresentationMode?: (mode: string) => void;
+    };
+    await waitFor(() => expect(video.paused).toBe(false));
+    // Safari is asked to bring it back, and never does or says so.
+    video.webkitPresentationMode = 'picture-in-picture';
+    video.webkitSetPresentationMode = vi.fn();
+    vi.useFakeTimers();
+    try {
+      fireEvent.click(
+        within(screen.getByRole('article', { name: 'First update' })).getByRole(
+          'button',
+          { name: 'Open fullscreen' }
+        )
+      );
+      await act(() => vi.advanceTimersByTimeAsync(1000));
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(video.paused).toBe(true);
+  });
+
   it('can leave out the full-screen viewer', () => {
     renderFeed({ allowFullscreen: false });
     expect(
