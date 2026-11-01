@@ -48,7 +48,7 @@ const [opacity, setOpacity] = useState(layer.opacity);
 
 ### Limitations
 
-- Accessibility: the focusable track wrapper carries \`role="slider"\`, \`tabIndex=0\`, \`aria-valuemin\` / \`aria-valuemax\` / \`aria-valuenow\`, \`aria-labelledby\` → the visible label (or \`aria-label\`, defaulting to the English string \`"Slider"\` when neither is given), \`aria-describedby\` → description, \`aria-disabled\`. Keyboard: ArrowRight/Up +step, ArrowLeft/Down −step in LTR (horizontal arrows invert in RTL), Home/End. With \`formatValue\`, the slider also gets \`aria-valuetext\`, so screen readers hear the formatted value (\`45%\`, \`1:23\`) instead of the raw number. The native range input is \`aria-hidden\` / \`tabIndex=-1\` and exists for form submission only; \`<label htmlFor>\` points at it, not at the slider role.
+- Accessibility: the focusable track wrapper carries \`role="slider"\`, \`tabIndex=0\`, \`aria-valuemin\` / \`aria-valuemax\` / \`aria-valuenow\`, \`aria-labelledby\` → the visible label (or \`aria-label\`, defaulting to the English string \`"Slider"\` when neither is given), \`aria-describedby\` → description, \`aria-disabled\`. Keyboard: ArrowRight/Up +\`keyboardStep\`, ArrowLeft/Down −\`keyboardStep\` (default \`step\`) in LTR (horizontal arrows invert in RTL), Home/End. With \`formatValue\`, the slider also gets \`aria-valuetext\`, so screen readers hear the formatted value (\`45%\`, \`1:23\`) instead of the raw number. The native range input is \`aria-hidden\` / \`tabIndex=-1\` and exists for form submission only; \`<label htmlFor>\` points at it, not at the slider role.
 - Single thumb only; no ticks, no tooltip, no \`error\` / \`required\` props.
 - RTL: direction-aware — fill and thumb anchor to the inline-start edge (\`start-0\`, \`insetInlineStart\`), pointer math measures from that edge, and horizontal arrows follow the visual direction (ArrowLeft increases in RTL; ArrowUp/Down are direction-independent). \`minLabel\`/\`maxLabel\` and the value label mirror with the layout.
 - Theming: track \`bg-neutral-200 dark:bg-neutral-700\`, fill \`bg-primary-800\` (\`default\`) or hard-coded \`green-500\` / \`yellow-500\` / \`red-500\` / \`neutral-500\`; thumb \`bg-white\` with a variant-coloured border. Focus ring via \`group-focus-visible:ring-ring\`.
@@ -90,6 +90,11 @@ const [opacity, setOpacity] = useState(layer.opacity);
     min: { control: 'number' },
     max: { control: 'number' },
     step: { control: 'number' },
+    keyboardStep: {
+      control: 'number',
+      description:
+        'How far an arrow key moves the value (default `step`): fine pointer steps, bigger keyboard steps, e.g. a seek bar.',
+    },
   },
   decorators: [
     (Story) => (
@@ -144,6 +149,33 @@ export const WithDescription: Story = {
     formatValue: (v: number) => `${v}px`,
     minLabel: 'Compact',
     maxLabel: 'Wide',
+  },
+};
+
+/** Elapsed milliseconds shown as m:ss, as a media seek bar does. */
+const formatClock = (ms: number) => {
+  const seconds = Math.floor(ms / 1000);
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+};
+
+export const KeyboardStep: Story = {
+  args: {
+    label: 'Seek',
+    min: 0,
+    max: 90000,
+    step: 100,
+    keyboardStep: 1800,
+    defaultValue: 30000,
+    showValue: true,
+    formatValue: formatClock,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A 1:30 clip: a drag lands to the tenth of a second (`step` 100 ms), and an arrow key moves 2% (`keyboardStep` 1800 ms). With `formatValue`, screen readers hear the formatted time (`0:30`), not the milliseconds.',
+      },
+    },
   },
 };
 

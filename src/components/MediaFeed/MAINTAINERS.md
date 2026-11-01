@@ -62,7 +62,9 @@ change it for every consumer: its visual baselines are the regression check.
   author, title and caption at the bottom start, just above the player's bar,
   on a gradient rising from the foot; the host's actions (and the viewer's
   expand button) in a column at the bottom end. The top is left free for a
-  host's Back button, and Previous/Next stay mid-way down the end edge.
+  host's Back button, and Previous/Next stay mid-way down the end edge. On
+  a screen under 30rem tall (a phone held sideways) the middle runs into the
+  actions column, so they move to the top end instead.
   `useControlsBarHeight` measures the active item's bar (it wraps onto two
   rows in a narrow player) so the text clears it.
 - **Details come before the media in the DOM.** Focus then visits the title,
@@ -74,8 +76,10 @@ change it for every consumer: its visual baselines are the regression check.
 - **Caption rules live in `OverlayDetails`:** empty or repeats-the-title
   captions are dropped. The title shows one line and the caption two; when
   either is cut off (measured, and re-measured on resize), a **Show more**
-  toggle (`labels.showMore`/`showLess`) opens both in full, the caption
-  scrolling within `40dvh`. The toggle is separate from the text, so rich
+  toggle (`labels.showMore`/`showLess`) opens both in full. The details are
+  capped at the item's height above the bar, and the opened text scrolls
+  within them, so a long title on a landscape phone can't push its start out
+  of the item. The toggle is separate from the text, so rich
   captions keep working links. `ClampedText` isn't used: it decides by
   character count, where this needs measured overflow over the video.
 - The overlay's icon buttons share `overlayButtonClass`

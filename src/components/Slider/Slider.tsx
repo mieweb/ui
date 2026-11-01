@@ -216,7 +216,8 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     latestValueRef.current = clampedValue;
 
     const safeStep = step > 0 ? step : 1;
-    const keyStep = keyboardStep && keyboardStep > 0 ? keyboardStep : safeStep;
+    const hasKeyboardStep = !!keyboardStep && keyboardStep > 0;
+    const keyStep = hasKeyboardStep ? keyboardStep : safeStep;
 
     const computeValueFromPointer = React.useCallback(
       (clientX: number) => {
@@ -448,7 +449,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           min={min}
           max={max}
           // A keyboard step off the step grid would be rounded on submit.
-          step={keyboardStep && keyboardStep > 0 ? 'any' : step}
+          step={hasKeyboardStep ? 'any' : step}
           value={clampedValue}
           onChange={handleChange}
           disabled={disabled}

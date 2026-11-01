@@ -1,6 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import { useMediaTransport } from '../../hooks/useMediaTransport';
+import { MediaControls } from './MediaControls';
 import { MediaPlayer, type MediaPlayerRef } from './MediaPlayer';
 import { getSampleAudio } from '../AudioPlayer/sampleAudio';
 import {
@@ -68,20 +70,21 @@ The host owns the position as plain state; the player and the transcript never t
 
 ### Limitations
 
-- Accessibility: with native \`controls\` the browser supplies labelled, keyboard-operable controls; the component adds the \`aria-label\` you pass (no default). Overlay controls are labelled icon buttons and a \`Slider\` whose \`aria-valuetext\` reads the time; the tap-to-play surface is a pointer convenience (\`aria-hidden\`), and the bar's Play is the keyboard path. Override their English labels, including the \`time\` and \`rate\` formatters, through \`labels\`. The speed button cycles \`playbackRates\` (default 1×, 1.5×, 2×); the captions toggle shows the first caption or subtitle track, and is a toggle button (\`aria-pressed\`). \`controls={false}\` leaves **no visible or keyboard control** — supply controls through the ref, as \`MediaFeed\` does. The error panel is \`role="alert"\`; override its English defaults with \`labels={{ error, retry }}\`.
+- Accessibility: with native \`controls\` the browser supplies labelled, keyboard-operable controls; the component adds the \`aria-label\` you pass (no default). Overlay controls are labelled icon buttons and a \`Slider\` whose \`aria-valuetext\` reads the time; the tap-to-play surface is a pointer convenience (\`aria-hidden\`), and the bar's Play is the keyboard path. Override their English labels, including the \`time\` and \`rate\` formatters, through \`labels\`. The speed button cycles 1×, 1.5×, 2×; pass \`playbackRates\` (a \`MediaPlayer\` and \`MediaControls\` prop) for another set. The captions toggle shows the first caption or subtitle track; its label (Show captions / Hide captions) says what a press does. \`controls={false}\` leaves **no visible or keyboard control** — supply controls through the ref, as \`MediaFeed\` does. The error panel is \`role="alert"\`; override its English defaults with \`labels={{ error, retry }}\`.
 - Caption tracks belong to the host’s media resource. Supply \`<track>\` elements through \`children\`; the component does not generate subtitles.
 - \`kind\` inference is by extension only — signed URLs without an extension fall back to audio; pass \`kind="video"\` explicitly. The transport reports \`durationMs\` as \`0\` until metadata is known or when it is non-finite (live streams).
-- Layout: \`<video>\` is \`object-contain\` inside a full-height flex box; \`<audio>\` is \`w-[90%] max-w-lg\` with \`my-4\`. The native container is symmetric, so RTL is unaffected; the browser's control bar follows the platform. The overlay bar stays left to right in RTL, as media timelines do (Play on the left, the seek fill growing to the right); its labels are still translated. Overlay controls fill the player's box: give it a height. A narrow player (under 28rem) puts the seek bar on its own row. Picture in picture and full screen show only where the browser supports them; on an iPhone, full screen opens the system player. Audio always uses the browser's controls. Captions left on the default line are lifted above the bar; cues the host positions keep their place.
-- Overlay controls are a dark surface in every theme (\`data-theme="dark"\` on the box), so the controls read over any frame. The narrow-player layout uses a container query, which needs Tailwind 4 or the prebuilt \`styles.css\`.
+- Layout: \`<video>\` is \`object-contain\` inside a full-height flex box; \`<audio>\` is \`w-[90%] max-w-lg\` with \`my-4\`. The native container is symmetric, so RTL is unaffected; the browser's control bar follows the platform. The overlay bar stays left to right in RTL, as media timelines do (Play on the left, the seek fill growing to the right); its labels are still translated. Overlay controls fill the player's box: give it a height. A narrow player (under 28rem) puts the seek bar on its own row; under 20rem (a card in a chat) speed and picture in picture drop out, leaving play, time, seek, mute and full screen on two short rows. Picture in picture and full screen show only where the browser supports them; on an iPhone, full screen opens the system player. Audio always uses the browser's controls. Captions left on the default line are lifted above the bar; cues the host positions keep their place.
+- Overlay controls are a dark surface in every theme (\`data-theme="dark"\` on the box), so the controls read over any frame. The narrow- and small-player layouts use container queries, which need Tailwind 4.1 or the prebuilt \`styles.css\`.
 - Theming: \`card\` uses \`border-border bg-card\`; the error surface uses \`destructive\` tokens. Overlay controls use black scrims (\`bg-black/*\`) and white text over the picture, as \`VideoCard\` does, since they must read over any frame. Depends on \`Button\`, \`Slider\`, \`useMediaTransport\`, \`lucide-react\`, \`class-variance-authority\`, and \`AudioPlayer\`'s time formatter. Entry \`@mieweb/ui\`.
 
-\`MediaControls\` can also be used on its own, over a host's own \`<video>\`:
+\`MediaControls\` can also be used on its own, over a host's own \`<video>\`. Pass the box as \`fullscreenTarget\` so full screen takes the controls along:
 
 \`\`\`tsx
 const transport = useMediaTransport();
-<div className="relative aspect-video" data-theme="dark">
+const boxRef = useRef<HTMLDivElement>(null);
+<div ref={boxRef} className="relative aspect-video bg-black" data-theme="dark">
   <video ref={transport.setMediaElement} src={src} className="h-full w-full" />
-  <MediaControls transport={transport} />
+  <MediaControls transport={transport} fullscreenTarget={boxRef} />
 </div>
 \`\`\``,
       },
@@ -134,13 +137,8 @@ const transport = useMediaTransport();
 export default meta;
 type Story = StoryObj<typeof MediaPlayer>;
 
-/** Resolves the async synthetic video sample before rendering. */
-function VideoSample({
-  shape = 'landscape',
-  ...props
-}: Omit<React.ComponentProps<typeof MediaPlayer>, 'src'> & {
-  shape?: SampleVideoShape;
-}) {
+/** The synthetic video sample's URL, once it has been generated. */
+function useSampleVideo(shape: SampleVideoShape) {
   const [src, setSrc] = React.useState<string | null>(null);
   React.useEffect(() => {
     let active = true;
@@ -151,10 +149,22 @@ function VideoSample({
       active = false;
     };
   }, [shape]);
-  if (!src)
-    return (
-      <p className="text-muted-foreground text-sm">Generating sample video…</p>
-    );
+  return src;
+}
+
+const generatingSample = (
+  <p className="text-muted-foreground text-sm">Generating sample video…</p>
+);
+
+/** Resolves the async synthetic video sample before rendering. */
+function VideoSample({
+  shape = 'landscape',
+  ...props
+}: Omit<React.ComponentProps<typeof MediaPlayer>, 'src'> & {
+  shape?: SampleVideoShape;
+}) {
+  const src = useSampleVideo(shape);
+  if (!src) return generatingSample;
   return <MediaPlayer {...props} src={src} />;
 }
 
@@ -187,6 +197,66 @@ export const OverlayControls: Story = {
       <VideoSample {...args} kind="video" aria-label="Sample recording" />
     </div>
   ),
+};
+
+export const OverlayControlsSmall: Story = {
+  name: 'Overlay controls, small',
+  args: { controlsStyle: 'overlay' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Under 20rem wide, as a card in a chat, the bar keeps play, time, seek, mute and full screen on two short rows. Speed and picture in picture are left to the larger view.',
+      },
+    },
+  },
+  render: (args) => (
+    <div className="aspect-video w-[18rem]">
+      <VideoSample {...args} kind="video" aria-label="Sample recording" />
+    </div>
+  ),
+};
+
+/** The host's own `<video>` under `MediaControls`, with its own speeds. */
+function HostVideoControls() {
+  const transport = useMediaTransport();
+  const boxRef = React.useRef<HTMLDivElement>(null);
+  const src = useSampleVideo('landscape');
+  if (!src) return generatingSample;
+  return (
+    <div
+      ref={boxRef}
+      data-theme="dark"
+      className="relative aspect-video w-[28rem] bg-black"
+    >
+      {/* The sample has no speech to caption. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <video
+        ref={transport.setMediaElement}
+        src={src}
+        aria-label="Sample recording"
+        className="h-full w-full"
+      />
+      <MediaControls
+        transport={transport}
+        playbackRates={[0.5, 1, 1.5, 2]}
+        fullscreenTarget={boxRef}
+      />
+    </div>
+  );
+}
+
+export const MediaControlsOnHostVideo: Story = {
+  name: 'MediaControls on a host video',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`MediaControls` over a `<video>` the host renders, driven by `useMediaTransport`. The box is the `fullscreenTarget`, so full screen takes the controls along, and `playbackRates` adds 0.5×.',
+      },
+    },
+  },
+  render: () => <HostVideoControls />,
 };
 
 const sampleCaptions = `WEBVTT
@@ -259,7 +329,7 @@ export const OverlayControlsWithCaptions: Story = {
     docs: {
       description: {
         story:
-          'The video has a captions track, so the bar shows a captions toggle; the speed button cycles 1×, 1.5× and 2×.',
+          'The video has a captions track, so the bar shows a captions toggle; the speed button cycles 1×, 1.5× and 2× (`playbackRates` changes the set).',
       },
     },
   },

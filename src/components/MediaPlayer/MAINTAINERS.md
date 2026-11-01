@@ -33,9 +33,13 @@
   `playbackRates` through the transport's `setPlaybackRate`. The captions
   toggle reads `video.textTracks` (captions and subtitles only), listens for
   `addtrack`/`removetrack`/`change`, and switches the first track on or all
-  off, so a host that changes tracks itself stays in sync. Cues left on the
-  default line are lifted to `line = -4`, above the bar, as they become
-  active; cues the host positioned keep their place. Several caption
+  off, so a host that changes tracks itself stays in sync. Its label (Show
+  captions / Hide captions) carries the state, so it has no `aria-pressed`.
+  Cues left on the default line are lifted just above the bar's controls as
+  they become active: `cueLineAboveBar` counts lines from the bar's measured
+  height, since a cue line is about 5% of the video's height and the bar
+  doesn't scale with it (a fixed line put captions under a small card's
+  two-row bar). Cues the host positioned keep their place. Several caption
   languages need `native`, which has a menu.
 - **The tap surface is `aria-hidden`.** It duplicates the bar's Play for
   pointers. Keyboard and screen-reader users use the bar; don't make the
