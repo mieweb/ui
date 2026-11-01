@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DateTime } from 'luxon';
 import { Heart, Play, Reply } from 'lucide-react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { SuperChatInbox, createMarkdownRenderer } from './index';
 import { fullHeightChat } from '../../../.storybook/full-height';
 import {
@@ -24,6 +25,7 @@ import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { createMediaConversations } from './mediaStoryData';
 import type {
   SuperChatMediaAttachment,
+  SuperChatMessageEdits,
   SuperChatMessageMediaRenderProps,
   SuperChatRenderMessageMedia,
   SuperChatView,
@@ -915,7 +917,7 @@ export const MediaConversationPhoneRTL: Story = {
   render: () => <MediaConversationDemo layout="overlay" />,
 };
 
-/** A sample photo for the gallery story: a colour field with its caption. */
+/** A sample photo for the attachment stories: a colour field with its name. */
 function samplePhoto(hue: number, label: string, upright = false) {
   const canvas = document.createElement('canvas');
   canvas.width = upright ? 480 : 640;
@@ -934,7 +936,114 @@ function samplePhoto(hue: number, label: string, upright = false) {
   return canvas.toDataURL('image/png');
 }
 
-function AttachmentGroupsDemo() {
+/**
+ * A photo attachment named `id`. `sized` gives it its pixel size, as a host
+ * that stored it would: the tile takes its shape before the picture loads.
+ */
+function photo(
+  id: string,
+  hue: number,
+  { upright = false, sized = false } = {}
+): SuperChatMediaAttachment {
+  return {
+    id,
+    kind: 'image',
+    src: samplePhoto(hue, id, upright),
+    title: id,
+    alt: `Sample photo ${id}`,
+    ...(sized && { width: upright ? 480 : 640, height: upright ? 640 : 480 }),
+  };
+}
+
+const offsiteParticipants: SuperChatConversation['participants'] = [
+  { id: 'me', kind: 'human', name: 'Maya Chen' },
+  { id: 'luis', kind: 'human', name: 'Luis Rivera' },
+];
+
+/** The props the attachment stories take as args. */
+type AttachmentStoryArgs = Pick<
+  React.ComponentProps<typeof SuperChatInbox>,
+  'mediaMaxSize' | 'onMessageEdited'
+>;
+
+/** A saved edit, as the host keeps it: the new text and what came off. */
+type SavedEdit = SuperChatMessageEdits & { text: string; editedAt: string };
+
+/** The thread with the host's saved edits applied. */
+function withEdits(
+  conversations: SuperChatConversation[],
+  edits: Record<string, SavedEdit>
+): SuperChatConversation[] {
+  return conversations.map((conversation) => ({
+    ...conversation,
+    thread: conversation.thread.map((message) => {
+      const edit = edits[message.id];
+      return edit
+        ? {
+            ...message,
+            text: edit.text,
+            editedAt: edit.editedAt,
+            media: message.media?.filter(
+              (item) => !edit.removedMedia.includes(item.id)
+            ),
+            files: message.files?.filter(
+              (file) => !edit.removedFiles.includes(file.id)
+            ),
+          }
+        : message;
+    }),
+  }));
+}
+
+/**
+ * The host's side of attachments: it owns the thread, so a saved edit
+ * applies the new text and drops the attachments the author removed. The
+ * story's `onMessageEdited` action logs each edit in the Actions panel.
+ */
+function AttachmentsInbox({
+  conversations,
+  mediaMaxSize,
+  onMessageEdited,
+}: AttachmentStoryArgs & { conversations: SuperChatConversation[] }) {
+  const [edits, setEdits] = React.useState<Record<string, SavedEdit>>({});
+  const edited = React.useMemo(
+    () => withEdits(conversations, edits),
+    [conversations, edits]
+  );
+  return (
+    <SuperChatInbox
+      conversations={edited}
+      className="w-full"
+      currentParticipantId="me"
+      mediaMaxSize={mediaMaxSize}
+      mediaFeedProps={{ layout: 'overlay' }}
+      onMessageEdited={(messageId, text, meta) => {
+        onMessageEdited?.(messageId, text, meta);
+        setEdits((all) => {
+          const before = all[messageId];
+          return {
+            ...all,
+            [messageId]: {
+              text,
+              editedAt: new Date().toISOString(),
+              removedMedia: [
+                ...(before?.removedMedia ?? []),
+                ...meta.removedMedia,
+              ],
+              removedFiles: [
+                ...(before?.removedFiles ?? []),
+                ...meta.removedFiles,
+              ],
+            },
+          };
+        });
+      }}
+    />
+  );
+}
+
+/** Every kind of attachment tile, in one conversation. */
+function AttachmentGroupsDemo(args: AttachmentStoryArgs) {
   const [videoUrl, setVideoUrl] = React.useState<string>();
   React.useEffect(() => {
     let mounted = true;
@@ -943,37 +1052,41 @@ function AttachmentGroupsDemo() {
       mounted = false;
     };
   }, []);
-  const conversations = React.useMemo<SuperChatConversation[]>(() => {
-    const photo = (id: string, hue: number, upright = false) => ({
-      id,
-      kind: 'image' as const,
-      src: samplePhoto(hue, id, upright),
-      title: id,
-      alt: `Sample photo ${id}`,
-    });
-    return [
+  const conversations = React.useMemo<SuperChatConversation[]>(
+    () => [
       {
         id: 'offsite',
         title: 'Offsite',
-        participants: [
-          { id: 'me', kind: 'human', name: 'Maya Chen' },
-          { id: 'luis', kind: 'human', name: 'Luis Rivera' },
-        ],
+        participants: offsiteParticipants,
         thread: [
           {
             id: 'five',
             participantId: 'luis',
             time: '2026-10-03T09:00:00Z',
             text: 'Photos from the offsite. Five of them, so the last cell says how many more.',
+            label:
+              'Team **Design** · [Offsite plan](https://example.org/offsite)',
             media: [10, 50, 130, 200, 280].map((hue, i) =>
-              photo(`Photo ${i + 1}`, hue, i === 1)
+              photo(`Photo ${i + 1}`, hue, { upright: i === 1 })
             ),
+          },
+          {
+            id: 'four',
+            participantId: 'me',
+            time: '2026-10-03T09:01:00Z',
+            text: 'Four of mine fill the grid exactly.',
+            media: [
+              photo('Lobby', 190),
+              photo('Lunch', 40),
+              photo('Panel', 260),
+              photo('Sunset', 15),
+            ],
           },
           {
             id: 'two',
             participantId: 'me',
             time: '2026-10-03T09:02:00Z',
-            text: 'Two from my side.',
+            text: 'Two side by side.',
             media: [photo('Left', 320), photo('Right', 170)],
           },
           {
@@ -996,13 +1109,39 @@ function AttachmentGroupsDemo() {
             id: 'one',
             participantId: 'me',
             time: '2026-10-03T09:05:00Z',
-            media: [photo('Group photo', 90, true)],
+            // Sized: the upright tile keeps its shape before the photo loads.
+            media: [photo('Group photo', 90, { upright: true, sized: true })],
+          },
+          {
+            id: 'unsized',
+            participantId: 'luis',
+            time: '2026-10-03T09:05:30Z',
+            // Not sized: the tile starts at 16:9 and takes the photo's shape
+            // once it loads.
+            media: [photo('Venue', 150)],
+          },
+          {
+            id: 'failed',
+            participantId: 'luis',
+            time: '2026-10-03T09:05:45Z',
+            text: 'This one never uploaded properly.',
+            media: [
+              {
+                id: 'broken',
+                kind: 'image',
+                // A source that can't be decoded: the tile says so.
+                src: 'data:image/png;base64,AAAA',
+                title: 'Whiteboard',
+                alt: 'The whiteboard after the planning session',
+              },
+            ],
           },
           {
             id: 'docs',
             participantId: 'me',
             time: '2026-10-03T09:06:00Z',
             text: 'The agenda and the budget, for review before Friday.',
+            label: 'Ticket [OPS-142](https://example.org/tickets/OPS-142)',
             files: [
               {
                 id: 'agenda',
@@ -1034,27 +1173,23 @@ function AttachmentGroupsDemo() {
           },
         ],
       },
-    ];
-  }, [videoUrl]);
-  return (
-    <SuperChatInbox
-      conversations={conversations}
-      currentParticipantId="me"
-      mediaFeedProps={{ layout: 'overlay' }}
-    />
+    ],
+    [videoUrl]
   );
+  return <AttachmentsInbox {...args} conversations={conversations} />;
 }
 
 export const AttachmentGroups: Story = {
   name: 'Attachment groups',
   decorators: [fullHeightChat],
+  args: { mediaMaxSize: '18rem', onMessageEdited: fn() },
   parameters: {
     docs: {
       description: {
         story:
-          "A message's attachments follow its text, on the author's side, as in iMessage, WhatsApp or Telegram. Two or more pictures (images, GIFs, video stills) share one gallery tile: two side by side, three as one large and two small, four or more in a 2×2 grid whose last cell says how many more. A cell opens the media view at its own picture. A lone picture is a tile in its own shape. Documents (`message.files`) share one list tile, each row with its type's icon, name, type and size, opening in a new tab; they never join the media view.",
+          "A message's attachments follow its text, on the author's side, as in iMessage, WhatsApp or Telegram. Two or more pictures (images, GIFs, video stills) share one gallery tile: two side by side, three as one large and two small, four in a 2×2 grid, five or more in the same grid with its last cell saying how many more. A cell opens the media view at its own picture. A lone picture is a tile in its own shape: one with `width` and `height` (Group photo) has that shape before it loads, one without (Venue) starts at 16:9 and takes its shape once loaded, and one that can't load (Whiteboard) says so. Documents (`message.files`) share one list tile, each row with its type's icon, name, type and size, opening in a new tab; they never join the media view. A message's `label` (Markdown) sits small under it. Change `mediaMaxSize` to resize every card, and edit one of Maya's messages to see `onMessageEdited` in the Actions panel, with the ids of any attachments removed.",
       },
     },
   },
-  render: () => <AttachmentGroupsDemo />,
+  render: (args) => <AttachmentGroupsDemo {...args} />,
 };
