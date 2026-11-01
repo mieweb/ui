@@ -257,6 +257,12 @@ const PHONE_HIDDEN =
   'max-sm:hidden [@media(max-height:30rem)_and_(orientation:landscape)]:hidden';
 
 /**
+ * How long a freshly opened virtualized thread is held at its end while its
+ * rows are measured (see the anchoring effect).
+ */
+const SETTLE_MS = 1500;
+
+/**
  * Single-conversation chat panel. See the module `MAINTAINERS.md` for the
  * participant model and render-plugin architecture.
  */
@@ -613,13 +619,55 @@ export function SuperChat({
     pendingMediaAppendRef.current = false;
     setTurnStartId(null);
     anchoredTurnRef.current = null;
-    if (order === 'desc') {
-      const el = threadRef.current;
-      if (el) el.scrollTop = 0;
-    } else {
-      scrollToBottom('auto');
-    }
     setHasNewBelow(false);
+    const el = threadRef.current;
+    if (order === 'desc') {
+      if (el) el.scrollTop = 0;
+      return;
+    }
+    scrollToBottom('auto');
+    // A virtualized thread opens on rows it has only estimated, and measures
+    // them over the next moments: a day of photos and videos comes out far
+    // taller than guessed, and the virtualizer's corrections on the way can
+    // stop short of the end and read as the reader scrolling away. So for a
+    // moment after opening it's kept at its end as it grows, until the reader
+    // takes over (any input, or a jump up such as to a linked post) or it
+    // settles.
+    const content = threadContentRef.current;
+    if (
+      !virtualized ||
+      !el ||
+      !content ||
+      typeof globalThis.ResizeObserver === 'undefined'
+    )
+      return;
+    let settling = true;
+    const stop = () => {
+      settling = false;
+    };
+    let lastTop = el.scrollTop;
+    const onScroll = () => {
+      if (lastTop - el.scrollTop > el.clientHeight / 2) stop();
+      lastTop = el.scrollTop;
+    };
+    const observer = new globalThis.ResizeObserver(() => {
+      if (!settling) return;
+      scrollToBottom('auto');
+      lastTop = el.scrollTop;
+    });
+    observer.observe(content);
+    const timer = setTimeout(stop, SETTLE_MS);
+    const inputs = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+    for (const type of inputs)
+      el.addEventListener(type, stop, { passive: true });
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      stop();
+      observer.disconnect();
+      clearTimeout(timer);
+      for (const type of inputs) el.removeEventListener(type, stop);
+      el.removeEventListener('scroll', onScroll);
+    };
     // `threadRef`/`scrollToBottom` are stable for the hook instance.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversation.id, order]);
