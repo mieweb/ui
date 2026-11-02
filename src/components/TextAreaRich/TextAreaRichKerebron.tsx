@@ -350,8 +350,11 @@ const TextAreaRichKerebron = React.forwardRef<
         if (inertRef.current) return; // went inert (or unmounted) waiting
         const liveView = currentView();
         if (!liveView) return;
-        if (onMacroInsertRef.current?.(macro) === true) return;
+        // Focus before composing: a pick must return the caret to the
+        // editable even when a host hook handles the insertion itself
+        // (mobile keyboards would otherwise dismiss between picks).
         liveView.focus();
+        if (onMacroInsertRef.current?.(macro) === true) return;
         insertPlainText(liveView, macro.content);
       };
       if (pending) void afterNextChange().then(invoke);
@@ -408,8 +411,12 @@ const TextAreaRichKerebron = React.forwardRef<
       editor.addEventListener('transaction', trackInsertionPoint);
       void afterNextChange().then(() => {
         editor.removeEventListener('transaction', trackInsertionPoint);
+        // The field may have gone disabled/readOnly (or remounted) while
+        // the token-removal publish was pending — `editable: false` does
+        // not block programmatic dispatch, so recheck before composing.
+        if (inertRef.current || editorRef.current !== editor) return;
         if (onMacroInsertRef.current?.(macro) === true) return;
-        if (editorRef.current !== editor || !targetValid) return;
+        if (!targetValid) return;
         const liveView = viewOf(editor);
         liveView.focus();
         const at = Math.min(insertAt, liveView.state.doc.content.size);
@@ -606,13 +613,20 @@ const TextAreaRichKerebron = React.forwardRef<
       };
 
       recognition.onend = () => {
+        // The listening refs are shared across sessions: a stop + restart
+        // inside this callback's window would read the NEW session's flags
+        // and resurrect this retired recognition beside it. Only the
+        // recognition still owning the session may restart — checked both
+        // here and again after the delay.
         if (
+          session === dictationSessionRef.current &&
           shouldRestartRef.current &&
           isListeningRef.current &&
           !inertRef.current
         ) {
           setTimeout(() => {
             if (
+              session === dictationSessionRef.current &&
               shouldRestartRef.current &&
               isListeningRef.current &&
               !inertRef.current
@@ -630,10 +644,11 @@ const TextAreaRichKerebron = React.forwardRef<
           }, 100);
         } else {
           // Ended for good — release the ref so the next toggle starts a
-          // fresh session instead of "stopping" a dead one.
+          // fresh session instead of "stopping" a dead one. A retired
+          // session must not touch the live one's listening state.
           if (recognitionRef.current === recognition)
             recognitionRef.current = null;
-          setIsListening(false);
+          if (session === dictationSessionRef.current) setIsListening(false);
         }
       };
 
@@ -671,10 +686,11 @@ const TextAreaRichKerebron = React.forwardRef<
     }, []);
 
     // Hiding the toolbar hides the Stop control; never leave an orphaned
-    // session running. Same when the editor turns disabled/readOnly.
+    // session running. Same when the editor turns disabled/readOnly or the
+    // dictation feature itself is switched off (which hides the button).
     React.useEffect(() => {
-      if (!toolbarVisible || inert) stopDictation();
-    }, [toolbarVisible, inert, stopDictation]);
+      if (!toolbarVisible || inert || !enableDictation) stopDictation();
+    }, [toolbarVisible, inert, enableDictation, stopDictation]);
 
     // End-of-life cleanup.
     React.useEffect(() => stopDictation, [stopDictation]);
@@ -760,40 +776,58 @@ const TextAreaRichKerebron = React.forwardRef<
 
     // The toolbar only repaints items on document/selection changes, so
     // React-side state (panel open, dictation) is synced into our injected
-    // buttons directly.
+    // buttons directly. Kerebron's overflow popup builds FRESH buttons each
+    // time it opens — construction-time labels and no aria-pressed — so a
+    // childList observer re-syncs every rendered copy on arrival.
     React.useEffect(() => {
       const root = wrapperRef.current;
       if (!root || !ready) return;
-      // Disabled/readOnly must neutralize the stock toolbar too — its
-      // buttons dispatch regardless of the view's `editable` prop. `inert`
-      // blocks both pointer and keyboard access.
-      for (const toolbar of root.querySelectorAll<HTMLElement>(
-        '.kb-custom-menu, .kb-custom-menu__overflow-menu'
-      )) {
-        toolbar.inert = inert;
-      }
-      const macrosButton = root.querySelector<HTMLElement>('.tar-menu-macros');
-      if (macrosButton) {
-        macrosButton.style.display = hasMacros ? '' : 'none';
-        macrosButton.classList.toggle('kb-menu__button--active', macrosOpen);
-        macrosButton.setAttribute('aria-pressed', String(macrosOpen));
-        const title = macrosOpen
-          ? (macroLabels?.hideMacros ?? 'Hide macros')
-          : (macroLabels?.showMacros ?? 'Show macros');
-        macrosButton.setAttribute('title', title);
-        macrosButton.setAttribute('aria-label', title);
-      }
-      const dictateButton =
-        root.querySelector<HTMLElement>('.tar-menu-dictate');
-      if (dictateButton) {
-        dictateButton.style.display =
-          enableDictation && speechSupported ? '' : 'none';
-        dictateButton.classList.toggle('kb-menu__button--active', isListening);
-        dictateButton.setAttribute('aria-pressed', String(isListening));
-        const title = isListening ? 'Stop dictation' : 'Start dictation';
-        dictateButton.setAttribute('title', title);
-        dictateButton.setAttribute('aria-label', title);
-      }
+      const sync = () => {
+        // Disabled/readOnly must neutralize the stock toolbar too — its
+        // buttons dispatch regardless of the view's `editable` prop. `inert`
+        // blocks both pointer and keyboard access.
+        for (const toolbar of root.querySelectorAll<HTMLElement>(
+          '.kb-custom-menu, .kb-custom-menu__overflow-menu'
+        )) {
+          toolbar.inert = inert;
+        }
+        for (const macrosButton of root.querySelectorAll<HTMLElement>(
+          '.tar-menu-macros'
+        )) {
+          macrosButton.style.display = hasMacros ? '' : 'none';
+          macrosButton.classList.toggle('kb-menu__button--active', macrosOpen);
+          macrosButton.setAttribute('aria-pressed', String(macrosOpen));
+          const title = macrosOpen
+            ? (macroLabels?.hideMacros ?? 'Hide macros')
+            : (macroLabels?.showMacros ?? 'Show macros');
+          macrosButton.setAttribute('title', title);
+          macrosButton.setAttribute('aria-label', title);
+        }
+        for (const dictateButton of root.querySelectorAll<HTMLElement>(
+          '.tar-menu-dictate'
+        )) {
+          dictateButton.style.display =
+            enableDictation && speechSupported ? '' : 'none';
+          dictateButton.classList.toggle(
+            'kb-menu__button--active',
+            isListening
+          );
+          dictateButton.setAttribute('aria-pressed', String(isListening));
+          const title = isListening ? 'Stop dictation' : 'Start dictation';
+          dictateButton.setAttribute('title', title);
+          dictateButton.setAttribute('aria-label', title);
+        }
+      };
+      sync();
+      // Attribute writes don't retrigger a childList-only observer, so the
+      // re-sync cannot loop.
+      const observer = new MutationObserver((mutations) => {
+        if (mutations.some((mutation) => mutation.addedNodes.length > 0)) {
+          sync();
+        }
+      });
+      observer.observe(root, { childList: true, subtree: true });
+      return () => observer.disconnect();
     }, [
       ready,
       inert,
@@ -869,29 +903,37 @@ const TextAreaRichKerebron = React.forwardRef<
     // enforced by RichEditor's own `readOnly` prop from creation (so the
     // surface is locked even while the initial document load is in flight).
 
-    const appliedEditorStyle = React.useRef<string[]>([]);
+    const appliedEditorStyle = React.useRef<
+      Array<[HTMLElement['style'], string]>
+    >([]);
     React.useEffect(() => {
       const view = currentView();
-      if (!view || !ready) return;
+      const wrapper = wrapperRef.current;
+      if (!view || !wrapper || !ready) return;
       // React style contract: camelCase keys, numbers in px (unless the
       // property is unitless), and removed keys actually un-apply.
-      const style = (view.dom as HTMLElement).style;
-      for (const property of appliedEditorStyle.current) {
+      const editableStyle = (view.dom as HTMLElement).style;
+      for (const [style, property] of appliedEditorStyle.current) {
         style.removeProperty(property);
       }
       appliedEditorStyle.current = [];
       if (!editorStyle) return;
       for (const [key, raw] of Object.entries(editorStyle)) {
         if (raw === null || raw === undefined) continue;
-        const property = key.startsWith('--')
+        const isCustomProperty = key.startsWith('--');
+        const property = isCustomProperty
           ? key
           : key.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
         const value =
           typeof raw === 'number' && !UNITLESS_STYLE_PROPS.has(key)
             ? `${raw}px`
             : String(raw);
+        // Custom properties land on the wrapper so they inherit to the
+        // editable (whose kerebron.css metrics read them) AND the overlaid
+        // placeholder; everything else styles the editable directly.
+        const style = isCustomProperty ? wrapper.style : editableStyle;
         style.setProperty(property, value);
-        appliedEditorStyle.current.push(property);
+        appliedEditorStyle.current.push([style, property]);
       }
     }, [ready, editorStyle]);
 
@@ -912,8 +954,20 @@ const TextAreaRichKerebron = React.forwardRef<
         );
         setEditorTop((current) => (current === top ? current : top));
         // A hovered block may have been deleted since; a detached node must
-        // not pin the gutter button to its old offset.
-        if (!hoverBlockRef.current?.isConnected) {
+        // not pin the gutter button to its old offset. A still-connected one
+        // moved with the toolbar's height change, so follow it — leaving the
+        // stale offset would park the + button under the new toolbar.
+        const hovered = hoverBlockRef.current;
+        if (hovered?.isConnected) {
+          const next = Math.max(
+            Math.round(
+              hovered.getBoundingClientRect().top -
+                wrapper.getBoundingClientRect().top
+            ),
+            top + 4
+          );
+          setGutterTop((current) => (current === next ? current : next));
+        } else {
           hoverBlockRef.current = null;
           setGutterTop(top + 4);
         }
@@ -1104,7 +1158,7 @@ const TextAreaRichKerebron = React.forwardRef<
                 aria-hidden="true"
                 className={cn(
                   'text-muted-foreground pointer-events-none absolute start-0 end-0 z-[1]',
-                  'truncate px-3 py-[7px] text-base',
+                  'truncate px-3 py-[7px]',
                   'transition-[padding] duration-200 motion-reduce:transition-none',
                   // Mirrors the editable's sliding gutter indent.
                   gutterActive &&
@@ -1113,7 +1167,14 @@ const TextAreaRichKerebron = React.forwardRef<
                   hasMacros && macrosOpen && 'md:me-72',
                   editorClassName
                 )}
-                style={{ top: editorTop }}
+                style={{
+                  top: editorTop,
+                  // Match the editable's metrics by construction: the same
+                  // variables (inherited from the wrapper) with the same
+                  // kerebron.css fallbacks that size the .kb-editor rule.
+                  fontSize: 'var(--textarea-rich-font-size, 1rem)',
+                  lineHeight: 'var(--textarea-rich-line-height, 1.5rem)',
+                }}
               >
                 {placeholder}
               </div>

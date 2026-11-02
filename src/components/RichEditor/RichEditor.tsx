@@ -246,6 +246,11 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     // buttons dispatch commands regardless of `editable`, so disabled and
     // readOnly must neutralize it with `inert` (blocks pointer and keyboard
     // access while the document's text stays selectable).
+    // ProseMirror drops natural tabbability once `editable` is false, so a
+    // read-only (not disabled) surface restores it with a direct tabindex —
+    // tracked by ownership so a host-supplied tabindex (the TextAreaRich
+    // adapter sets its own through `setProps`) is never touched.
+    const ownsTabindexRef = useRef(false);
     const syncReadState = useCallback(() => {
       const editor = editorInstance.current;
       if (editor) {
@@ -254,6 +259,17 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           editable: () => !disabledRef.current && !readOnlyRef.current,
           ...(attributes ? { attributes } : {}),
         });
+        const dom = editor.view.dom as HTMLElement;
+        if (readOnlyRef.current && !disabledRef.current) {
+          if (!dom.hasAttribute('tabindex')) {
+            dom.setAttribute('tabindex', '0');
+            ownsTabindexRef.current = true;
+          }
+        } else if (ownsTabindexRef.current) {
+          if (dom.getAttribute('tabindex') === '0')
+            dom.removeAttribute('tabindex');
+          ownsTabindexRef.current = false;
+        }
       }
       const inert = disabledRef.current || readOnlyRef.current;
       for (const toolbar of hostRef.current?.querySelectorAll<HTMLElement>(
@@ -295,10 +311,15 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         .catch(() => undefined)
         .then(async () => {
           if (editorInstance.current !== editor) return;
+          // Reloading the document must not cost the writer their caret: a
+          // host-composed update (macro pick, finding) lands mid-flow and
+          // the next keystroke should keep going into the editable.
+          const hadFocus = editor.view.hasFocus();
           await editor.loadDocumentText(valueTypeRef.current, value);
           if (editorInstance.current !== editor) return;
           loadedDocRef.current = editor.view.state.doc;
           lastSerializedDoc.current = editor.view.state.doc;
+          if (hadFocus) editor.view.focus();
           if (showPreviewRef.current) setMd(value);
         })
         .finally(() => {

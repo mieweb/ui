@@ -320,7 +320,14 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
           target.focus();
         }
       });
-      observer.observe(wrapper, { childList: true, subtree: true });
+      // `role="textbox"` arrives as an ATTRIBUTE write in the adapter's
+      // readiness effect, possibly after the node insertions — watch both.
+      observer.observe(wrapper, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['role'],
+      });
       pendingFocusRef.current = observer;
     }, []);
 

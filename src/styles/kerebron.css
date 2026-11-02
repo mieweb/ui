@@ -348,6 +348,20 @@
   }
 }
 
+/* Kerebron's stock mobile toolbar is fixed to the bottom of the viewport, so
+ * menu.css clears it with `padding-bottom: 60px !important` on every editable
+ * under 768px. TextAreaRich replaces that toolbar with its own top-anchored
+ * kb-custom-menu, so on phones the clearance is just a dead band under the
+ * text — restore the Textarea metrics (!important to beat the library's). */
+@media (max-width: 767px) {
+  [data-slot='textarea-rich'] .kb-component {
+    padding-bottom: 0 !important;
+  }
+  [data-slot='textarea-rich'] .kb-editor {
+    padding-bottom: 7px !important;
+  }
+}
+
 /* Indent past the block gutter's floating + trigger only while the writer
  * is engaged (hovering, focused, or using the + menu) — at rest the text
  * slides back flush with the Textarea padding. */

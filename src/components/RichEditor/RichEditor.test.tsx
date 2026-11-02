@@ -26,6 +26,8 @@ const editorMock = {
   run: { changeRoom },
   view: {
     setProps,
+    hasFocus: () => false,
+    focus: vi.fn(),
     get state() {
       return { doc: docMock.current };
     },
