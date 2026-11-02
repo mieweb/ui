@@ -102,6 +102,15 @@ serve `@kerebron/wasm`'s `assets/` directory at that path (or pass your own
 `<Textarea richText={false}>` or `TextAreaPlain` — but the peers must be
 installable for the package to resolve.
 
+Because every consumer now resolves Kerebron, the **`prosemirror-view`
+1.42.3 override and the Kerebron patches** described under
+[eSheet and EncounterVisit](#esheet-and-encountervisit) above also apply to
+every consumer — previously only EncounterVisit RichEdit hosts needed them.
+Note that package managers that auto-install peers (npm 7+, pnpm 8+ by
+default) will pull the `@kerebron/*` packages in on upgrade, but Yarn does
+not — and no package manager adds the CSS import, the wasm assets, or the
+version override for you.
+
 Related renames (also 0.12.0): **`RichTextArea` → `TextAreaRich`**
 (deprecated aliases `RichTextArea` / `RichTextAreaProps` still exported), and
 the previous native implementation is now **`TextAreaPlain`**
