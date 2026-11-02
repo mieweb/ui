@@ -319,7 +319,18 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           if (editorInstance.current !== editor) return;
           loadedDocRef.current = editor.view.state.doc;
           lastSerializedDoc.current = editor.view.state.doc;
-          if (hadFocus) editor.view.focus();
+          if (hadFocus) {
+            // The load can take long enough for the writer to move on —
+            // only reclaim the caret when no other control has taken it.
+            const active = document.activeElement;
+            if (
+              !active ||
+              active === document.body ||
+              (editor.view.dom as HTMLElement).contains(active)
+            ) {
+              editor.view.focus();
+            }
+          }
           if (showPreviewRef.current) setMd(value);
         })
         .finally(() => {

@@ -28,6 +28,7 @@ const editorMock = {
     setProps,
     hasFocus: () => false,
     focus: vi.fn(),
+    dom: document.createElement('div'),
     get state() {
       return { doc: docMock.current };
     },
@@ -129,6 +130,9 @@ describe('RichEditor', () => {
     vi.clearAllMocks();
     collabKitLoadError = null;
     docMock.current = { id: 'doc-0' };
+    // A fresh editable element per test: attribute writes (tabindex
+    // ownership) must not leak between cases.
+    editorMock.view.dom = document.createElement('div');
   });
 
   it('renders without throwing', async () => {
@@ -686,6 +690,7 @@ describe('RichEditor', () => {
       .filter(Boolean)
       .pop();
     expect(editable?.()).toBe(false);
+    expect(editorMock.view.dom.hasAttribute('tabindex')).toBe(false);
   });
 
   it('readOnly announces aria-readonly on the textbox surface, not the host', async () => {
@@ -714,6 +719,9 @@ describe('RichEditor', () => {
       .filter(Boolean)
       .pop();
     expect(editable?.()).toBe(false);
+    // Losing contenteditable costs keyboard focusability; the surface gets
+    // it back with an owned tabindex (disabled surfaces must not).
+    expect(editorMock.view.dom.getAttribute('tabindex')).toBe('0');
   });
 
   it('follows dark mode changes without remounting the editor', async () => {
