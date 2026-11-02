@@ -303,11 +303,18 @@ export function MessageMedia({
 }) {
   const playable = attachment.kind !== 'image';
   const actionLabel = playable ? playLabel : openLabel;
-  // Width ÷ height: the host's size or one seen before, then the still's own.
-  const [aspect, setAspect] = React.useState(() => shapeOf(attachment));
+  // Width ÷ height: the still's own once it loads, else the host's size or
+  // one seen before. Read on every render, and a learned shape kept with its
+  // still, so a host that swaps the source or sends a size later is followed.
+  const still = stillOf(attachment);
+  const [learned, setLearned] = React.useState<{
+    still: string;
+    shape: number;
+  }>();
+  const aspect = learned?.still === still ? learned.shape : shapeOf(attachment);
   const learnShape = (shape: number) => {
-    rememberShape(stillOf(attachment), shape);
-    setAspect(shape);
+    rememberShape(still, shape);
+    setLearned({ still, shape });
   };
   if (mediaView && isVisualMedia(attachment)) {
     // A picture alone: the still in its own shape inside the box (a wide one

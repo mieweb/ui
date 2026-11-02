@@ -640,6 +640,49 @@ describe('SuperChat media view', () => {
     ).toBe('0.75');
   });
 
+  it("takes a tile's shape from its current picture, not the one it mounted with", () => {
+    const withPicture = (
+      picture: Partial<
+        NonNullable<SuperChatConversation['thread'][0]['media']>[0]
+      >
+    ): SuperChatConversation => ({
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          media: [{ ...conversation.thread[0].media![0], ...picture }],
+        },
+      ],
+    });
+    const { container, rerender } = render(
+      <SuperChat conversation={withPicture({ src: '/upright.png' })} />
+    );
+    const tile = () =>
+      container.querySelector<HTMLElement>(
+        '[data-slot="superchat-message-media"]'
+      )!;
+    // The host's size, given later under the same id, applies at once.
+    rerender(
+      <SuperChat
+        conversation={withPicture({
+          src: '/upright.png',
+          width: 300,
+          height: 400,
+        })}
+      />
+    );
+    expect(tile().style.aspectRatio).toBe('0.75');
+    const img = tile().querySelector('img')!;
+    Object.defineProperty(img, 'naturalWidth', { value: 400 });
+    Object.defineProperty(img, 'naturalHeight', { value: 1000 });
+    fireEvent.load(img);
+    expect(tile().style.aspectRatio).toBe('0.6');
+    // A new picture with no size starts at 16:9 again, not the old shape.
+    rerender(<SuperChat conversation={withPicture({ src: '/wide.png' })} />);
+    expect(tile().style.aspectRatio).toBe(String(16 / 9));
+    knownShapes.clear();
+  });
+
   it("shows a message's label under it, out of its text, its editor and its preview", async () => {
     const user = userEvent.setup();
     const labelled: SuperChatConversation = {
