@@ -887,6 +887,29 @@ describe('SuperChat media view', () => {
     );
   });
 
+  it('keeps focus in the editor as Remove takes an attachment off', async () => {
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    // To the next Remove…
+    await user.click(
+      screen.getByRole('button', { name: 'Remove First image' })
+    );
+    expect(
+      screen.getByRole('button', { name: 'Remove Second image' })
+    ).toHaveFocus();
+    // …and with none left, the text.
+    await user.keyboard('{Enter}');
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveFocus();
+  });
+
   it('will not save an edit that takes off everything a message had', async () => {
     const user = userEvent.setup();
     const onMessageEdited = vi.fn();

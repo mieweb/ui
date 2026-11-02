@@ -1275,7 +1275,18 @@ export const MessageRow = React.memo(function MessageRow({
                             aria-label={attachmentLabels.removeAttachment(
                               item.name
                             )}
-                            onClick={item.remove}
+                            onClick={(event) => {
+                              // The button goes with its chip: focus moves on
+                              // to the next Remove (or the one before, or the
+                              // text) rather than falling to the page.
+                              const chip = event.currentTarget.closest('li');
+                              const neighbour = (
+                                chip?.nextElementSibling ??
+                                chip?.previousElementSibling
+                              )?.querySelector('button');
+                              (neighbour ?? editRef.current)?.focus();
+                              item.remove();
+                            }}
                             className="rounded-full p-0.5 hover:bg-white/20"
                           >
                             <XIcon size={12} aria-hidden="true" />
