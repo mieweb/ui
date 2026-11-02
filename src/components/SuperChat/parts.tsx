@@ -1452,7 +1452,8 @@ export const MessageRow = React.memo(function MessageRow({
             )}
             {sending && (
               // "Sending…" is announced once; the percent beside it changes
-              // with every tick, so it is shown but not announced.
+              // with every tick, so it is shown but not announced (it sits in
+              // the thread's polite log, hence its own aria-live="off").
               <p
                 data-slot="superchat-message-sending"
                 className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
@@ -1460,7 +1461,7 @@ export const MessageRow = React.memo(function MessageRow({
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                 <span role="status">{attachmentLabels.sending}</span>
                 {message.progress !== undefined && (
-                  <span>
+                  <span aria-live="off">
                     {attachmentLabels.sendingProgress(
                       Math.round(
                         Math.min(1, Math.max(0, message.progress)) * 100

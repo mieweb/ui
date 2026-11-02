@@ -550,6 +550,26 @@ describe('SuperChat media view', () => {
     expect(tile).not.toHaveClass('opacity-60');
   });
 
+  it("keeps the sending percent out of the thread's live log", () => {
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            { ...conversation.thread[0], status: 'pending', progress: 0.452 },
+          ],
+        }}
+      />
+    );
+    const log = screen.getByRole('log', { name: 'Messages' });
+    const percent = screen.getByText('45%');
+    // It sits in the polite log, so only its own aria-live keeps each tick
+    // from being read out.
+    expect(log).toHaveAttribute('aria-live', 'polite');
+    expect(log.contains(percent)).toBe(true);
+    expect(percent).toHaveAttribute('aria-live', 'off');
+  });
+
   it('previews a last message with no text by what it carries, and markdown as plain text', () => {
     render(
       <SuperChatInbox
