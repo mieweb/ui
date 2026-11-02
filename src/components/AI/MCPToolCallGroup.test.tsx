@@ -1,0 +1,205 @@
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderWithTheme } from '../../test/test-utils';
+import { MCPToolCallGroup } from './MCPToolCallGroup';
+import type { MCPToolCall, MCPToolStatus } from './types';
+
+function call(
+  id: string,
+  status: MCPToolStatus,
+  extra: Partial<MCPToolCall> = {}
+): MCPToolCall {
+  return {
+    id,
+    toolName: `tool_${id}`,
+    parameters: [{ name: 'path', type: 'string', value: '/' }],
+    status,
+    startedAt: new Date('2026-01-01T10:00:00Z'),
+    ...extra,
+  };
+}
+
+const header = () =>
+  screen.getByRole('button', { name: /^(Used|Running) \d+ tools?/ });
+const rows = () => screen.queryAllByRole('listitem');
+
+describe('MCPToolCallGroup', () => {
+  it('stays expanded while calls are running', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'running')]}
+      />
+    );
+
+    expect(header()).toHaveAccessibleName(/Running 2 tools/);
+    expect(header()).toHaveAttribute('aria-expanded', 'true');
+    expect(rows()).toHaveLength(2);
+  });
+
+  it('collapses to one line once every call has finished', async () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'running')]}
+      />
+    );
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'success')]}
+      />
+    );
+
+    expect(header()).toHaveAccessibleName(/Used 2 tools/);
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => expect(rows()).toHaveLength(0));
+  });
+
+  it('starts collapsed for a finished run loaded from history', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success'),
+          call('b', 'success'),
+          call('c', 'success'),
+        ]}
+      />
+    );
+
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+    expect(rows()).toHaveLength(0);
+  });
+
+  it('keeps failed calls and their error visible while collapsed', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success'),
+          call('b', 'error', { error: 'Permission denied' }),
+        ]}
+      />
+    );
+
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+    expect(header()).toHaveAccessibleName(/1 failed/);
+    const [row] = rows();
+    expect(rows()).toHaveLength(1);
+    expect(within(row).getByText('tool_b')).toBeInTheDocument();
+    expect(within(row).getByText('Permission denied')).toBeInTheDocument();
+  });
+
+  it('keeps approval controls visible when the user collapses the group', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'awaiting-approval')]}
+        onApprove={vi.fn()}
+        onDeny={vi.fn()}
+      />
+    );
+
+    fireEvent.click(header());
+
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByRole('button', { name: 'Allow once' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Deny' })).toBeInTheDocument();
+  });
+
+  it('hands the call to onApprove and onDeny', async () => {
+    const onApprove = vi.fn();
+    const onDeny = vi.fn();
+    const pending = call('a', 'awaiting-approval');
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[pending]}
+        onApprove={onApprove}
+        onDeny={onDeny}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Always allow' }));
+    expect(onApprove).toHaveBeenCalledWith(pending, { always: true });
+
+    // The row stays busy until the callback settles.
+    const deny = screen.getByRole('button', { name: 'Deny' });
+    await waitFor(() => expect(deny).toBeEnabled());
+    fireEvent.click(deny);
+    expect(onDeny).toHaveBeenCalledWith(pending);
+    await waitFor(() => expect(deny).toBeEnabled());
+  });
+
+  it('shows no approval controls without callbacks', () => {
+    renderWithTheme(
+      <MCPToolCallGroup toolCalls={[call('a', 'awaiting-approval')]} />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Allow once' })).toBeNull();
+  });
+
+  it('honours a manual expand until the group changes again', () => {
+    const settled = [call('a', 'success'), call('b', 'success')];
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup toolCalls={settled} />
+    );
+
+    fireEvent.click(header());
+    expect(header()).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(<MCPToolCallGroup toolCalls={[...settled]} />);
+    expect(header()).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(
+      <MCPToolCallGroup toolCalls={[...settled, call('c', 'running')]} />
+    );
+    rerender(
+      <MCPToolCallGroup toolCalls={[...settled, call('c', 'success')]} />
+    );
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('announces status changes in a live region', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'running'), call('b', 'awaiting-approval')]}
+      />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '1 tool call needs your approval'
+    );
+
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'error')]}
+      />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('1 tool call failed');
+  });
+
+  it('renders a lone call as a bare row with no header', () => {
+    renderWithTheme(<MCPToolCallGroup toolCalls={[call('a', 'success')]} />);
+
+    expect(
+      screen.queryByRole('button', { name: /^(Used|Running)/ })
+    ).toBeNull();
+    expect(rows()).toHaveLength(1);
+  });
+
+  it('uses label overrides, merging status labels per key', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'success')]}
+        labels={{
+          used: (count) => `${count} herramientas usadas`,
+          status: { success: 'Hecho' },
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole('button', { name: '2 herramientas usadas' })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('button', { name: '2 herramientas usadas' })
+    );
+    expect(screen.getAllByText('Hecho')).toHaveLength(2);
+  });
+});

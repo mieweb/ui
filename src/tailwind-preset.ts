@@ -1773,6 +1773,23 @@ export const miewebUISafelist = [
   '[&_blockquote]:border-border',
   '[&_blockquote]:ps-3',
   '[&_blockquote]:text-muted-foreground',
+  // MCPToolCallGroup rows and the awaiting-approval tool status
+  '[[data-state=open]_&]:rotate-180',
+  'hover:bg-neutral-100',
+  'dark:hover:bg-neutral-800',
+  'dark:hover:text-neutral-200',
+  'dark:bg-neutral-900',
+  'max-h-40',
+  'max-h-60',
+  'space-y-2',
+  'text-red-600',
+  'bg-amber-50',
+  'border-amber-200',
+  'text-amber-600',
+  'dark:bg-amber-900/20',
+  'dark:bg-amber-900/50',
+  'dark:border-amber-800',
+  'dark:text-amber-400',
 ];
 
 export interface MiewebUIPreset {
