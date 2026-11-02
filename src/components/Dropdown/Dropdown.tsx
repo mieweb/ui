@@ -70,6 +70,13 @@ const placementOffset = 8; // matches the previous mt-2/mb-2 gap
 const keyboardScrollWindow = 300;
 
 /**
+ * How long (ms) after opening a scroll is still the one that brought the
+ * trigger into view: a browser sends scroll events a frame late, so a scroll
+ * just before the tap (scrollIntoView, a fling the tap stopped) arrives after.
+ */
+const openingScrollWindow = 300;
+
+/**
  * Scale origin per resolved side, so the menu grows out of its trigger rather
  * than out of its own middle. Written as whole literal class names because
  * Tailwind's scanner only matches complete strings.
@@ -488,12 +495,14 @@ function Dropdown({
 
   // Scrolling what holds the trigger (a thread, a list) closes the menu: it's
   // fixed to the screen, so it would float on over whatever scrolled under.
-  // Scrolling inside the menu or a submenu leaves it open, as does the scroll
-  // iOS makes as the keyboard opens for the search field — told apart by the
+  // Scrolling inside the menu or a submenu leaves it open, as do the scroll
+  // that arrives just after opening (openingScrollWindow) and the one iOS
+  // makes as the keyboard opens for the search field — told apart by the
   // visual viewport resizing just before (a searchable menu focuses its field
   // on open, so focus alone can't tell it).
   React.useEffect(() => {
     if (!isOpen) return;
+    const openedAt = Date.now();
     const inMenu = (node: Node | null) =>
       !!node && outsideRefs.some((ref) => ref.current?.contains(node));
     let viewportResizedAt = -Infinity;
@@ -505,6 +514,7 @@ function Dropdown({
       const trigger = containerRef.current;
       if (!(target instanceof Element) || !trigger) return;
       if (!target.contains(trigger) || inMenu(target)) return;
+      if (Date.now() - openedAt < openingScrollWindow) return;
       if (Date.now() - viewportResizedAt < keyboardScrollWindow) return;
       handleClose();
     };
