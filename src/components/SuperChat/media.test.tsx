@@ -195,6 +195,27 @@ describe('messagePreview', () => {
       preview('**bold**, _italic_, *also*, __strong__, `code` and ~~gone~~')
     ).toBe('bold, italic, also, strong, code and gone');
   });
+
+  it('strips a link or image whose address holds parentheses', () => {
+    expect(
+      preview(
+        '[functions](https://en.wikipedia.org/wiki/Function_(mathematics))'
+      )
+    ).toBe('functions');
+    // Nothing left of the image, so the preview names what it carries.
+    expect(
+      messagePreview(
+        {
+          id: 'm',
+          participantId: 'alex',
+          time: '2026-10-03T09:00:00Z',
+          text: '![plot](https://x.dev/plot_(final).png)',
+          files: [{ id: 'f', name: 'data.csv', url: '/data.csv' }],
+        },
+        previewOfAttachments
+      )
+    ).toBe('data.csv');
+  });
 });
 
 describe('knownShapes', () => {

@@ -1,14 +1,17 @@
 import * as React from 'react';
 
 /**
- * One piece of a web address: a character, or a parenthesised group.
- * Parentheses count only in balanced pairs, as in
+ * A parenthesised group, none of `excluded` inside, as a RegExp source.
+ * Parentheses in an address count only in balanced pairs, as in
  * https://en.wikipedia.org/wiki/Function_(mathematics), so the one closing a
- * Markdown link or an aside ("(see https://x.dev)") stays out of the address.
+ * Markdown link or an aside ("(see https://x.dev)") stays out of it.
  */
-const URL_PIECE = String.raw`[^\s()<]|\([^\s()<]*\)`;
+export const parenGroup = (excluded = '') => String.raw`\([^()${excluded}]*\)`;
+
+/** One piece of a web address: a character, or a parenthesised group. */
+const URL_PIECE = String.raw`[^\s()<]|${parenGroup(String.raw`\s<`)}`;
 /** A bare address's last piece: not closing punctuation. */
-const URL_END = String.raw`[^\s()<.,;:!?\]'"]|\([^\s()<]*\)`;
+const URL_END = String.raw`[^\s()<.,;:!?\]'"]|${parenGroup(String.raw`\s<`)}`;
 
 /**
  * A Markdown link (`[label](https://…)`) or a bare web address. Only http(s):
