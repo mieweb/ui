@@ -19,6 +19,7 @@ import {
 } from '../Dropdown';
 import { MacroLibrary, type Macro } from '../MacroLibrary';
 import { Animated, AnimatedPresence } from '../../motion';
+import { useDirection } from '../../hooks/useDirection';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import {
@@ -266,6 +267,10 @@ const TextAreaRichKerebron = React.forwardRef<
 
     const macroSidePanel = useMediaQuery('(min-width: 768px)');
     const prefersReducedMotion = usePrefersReducedMotion();
+    // The field's inherited direction (not the document's): a local
+    // dir="rtl" subtree docks the panel at inline-end = left, so the motion
+    // preset must slide it in from the same side.
+    const direction = useDirection(wrapperRef);
 
     const hasMacros = Boolean(macros);
     const hasMacroEntries = Boolean(
@@ -378,11 +383,14 @@ const TextAreaRichKerebron = React.forwardRef<
       const { selection } = view.state;
       if (!selection.empty) return false;
       const { $from } = selection;
+      // Leaf nodes (hard breaks) read as a newline: still one character, so
+      // the position math below holds, and `\S+` cannot run across a soft
+      // line break — `.c` typed after Shift+Enter still expands.
       const textBefore = $from.parent.textBetween(
         0,
         $from.parentOffset,
         undefined,
-        '\uFFFC'
+        '\n'
       );
       const match = /(\S+)$/.exec(textBefore);
       if (!match) return false;
@@ -818,10 +826,16 @@ const TextAreaRichKerebron = React.forwardRef<
         )) {
           toolbar.inert = inert;
         }
+        // The menu plugin re-runs item `update` callbacks only on document/
+        // selection changes, so a button rendered while disabled/readOnly
+        // keeps its disabled state when the field becomes editable without a
+        // transaction — reconcile it here for every rendered copy.
         for (const macrosButton of root.querySelectorAll<HTMLElement>(
           '.tar-menu-macros'
         )) {
           macrosButton.style.display = hasMacros ? '' : 'none';
+          macrosButton.classList.toggle('kb-menu__button--disabled', inert);
+          macrosButton.setAttribute('aria-disabled', String(inert));
           macrosButton.classList.toggle('kb-menu__button--active', macrosOpen);
           macrosButton.setAttribute('aria-pressed', String(macrosOpen));
           const title = macrosOpen
@@ -835,6 +849,8 @@ const TextAreaRichKerebron = React.forwardRef<
         )) {
           dictateButton.style.display =
             enableDictation && speechSupported ? '' : 'none';
+          dictateButton.classList.toggle('kb-menu__button--disabled', inert);
+          dictateButton.setAttribute('aria-disabled', String(inert));
           dictateButton.classList.toggle(
             'kb-menu__button--active',
             isListening
@@ -941,7 +957,8 @@ const TextAreaRichKerebron = React.forwardRef<
       const wrapper = wrapperRef.current;
       if (!view || !wrapper || !ready) return;
       // React style contract: camelCase keys, numbers in px (unless the
-      // property is unitless), and removed keys actually un-apply.
+      // property is unitless — and custom properties pass through as
+      // authored, never gaining a unit), and removed keys actually un-apply.
       const editableStyle = (view.dom as HTMLElement).style;
       for (const [style, property] of appliedEditorStyle.current) {
         style.removeProperty(property);
@@ -955,7 +972,9 @@ const TextAreaRichKerebron = React.forwardRef<
           ? key
           : key.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
         const value =
-          typeof raw === 'number' && !UNITLESS_STYLE_PROPS.has(key)
+          typeof raw === 'number' &&
+          !isCustomProperty &&
+          !UNITLESS_STYLE_PROPS.has(key)
             ? `${raw}px`
             : String(raw);
         // Custom properties land on the wrapper so they inherit to the
@@ -1190,9 +1209,10 @@ const TextAreaRichKerebron = React.forwardRef<
                   'text-muted-foreground pointer-events-none absolute start-0 end-0 z-[1]',
                   'truncate px-3 py-[7px]',
                   'transition-[padding] duration-200 motion-reduce:transition-none',
-                  // Mirrors the editable's sliding gutter indent.
+                  // Mirrors the editable's sliding gutter indent (permanent
+                  // on touch devices, where the + trigger is always visible).
                   gutterActive &&
-                    'group-focus-within/tar-body:ps-10 group-hover/tar-body:ps-10',
+                    'group-focus-within/tar-body:ps-10 group-hover/tar-body:ps-10 [@media(hover:none)]:ps-10',
                   gutterActive && blockMenuOpen && 'ps-10',
                   hasMacros && macrosOpen && 'md:me-72',
                   editorClassName
@@ -1231,11 +1251,7 @@ const TextAreaRichKerebron = React.forwardRef<
                   preset={macroSidePanel ? 'menu' : 'collapse'}
                   enabled={macroSidePanel || !prefersReducedMotion}
                   mode="presence"
-                  custom={
-                    typeof document !== 'undefined' && document.dir === 'rtl'
-                      ? 'left'
-                      : 'right'
-                  }
+                  custom={direction === 'rtl' ? 'left' : 'right'}
                   fallbackClassName="animate-fade-in"
                   className="border-border flex max-h-72 flex-col overflow-hidden border-t md:absolute md:end-0 md:bottom-0 md:max-h-none md:w-72 md:overflow-visible md:border-s md:border-t-0"
                   // Docked below the toolbar (top only applies when the

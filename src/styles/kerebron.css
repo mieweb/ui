@@ -373,6 +373,15 @@
   padding-inline-start: 2.5rem;
 }
 
+/* On touch devices the + trigger is always visible (no hover to reveal it),
+ * so the indent must be permanent — otherwise an unfocused field starts its
+ * text under the trigger. */
+@media (hover: none) {
+  [data-slot='textarea-rich'][data-gutter] .kb-editor {
+    padding-inline-start: 2.5rem;
+  }
+}
+
 /* The toolbar stays mounted (its buttons carry live editor state) but is
  * chrome the field reveals on demand. Only the menu bar itself is hidden —
  * its wrapper also contains the editable surface. */

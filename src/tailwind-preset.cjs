@@ -1117,6 +1117,7 @@ module.exports = {
     'group-hover/tar-body:opacity-100',
     'group-hover/tar-body:ps-10',
     'group-focus-within/tar-body:ps-10',
+    '[@media(hover:none)]:ps-10',
     'transition-[padding]',
     'md:bottom-0',
     // RichTextEditor editable region — baseline block styles (preflight strips

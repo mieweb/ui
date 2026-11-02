@@ -337,6 +337,11 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
       const node = hiddenRef.current as HTMLTextAreaElement;
       node.focus = focusEditor;
       node.blur = () => {
+        // A focus request may still be waiting for the editable to mount;
+        // blur() must cancel it, or the editor grabs focus (and reopens the
+        // mobile keyboard) as soon as it appears.
+        pendingFocusRef.current?.disconnect();
+        pendingFocusRef.current = null;
         const editable =
           editorWrapperRef.current?.querySelector<HTMLElement>(
             '[role="textbox"]'
