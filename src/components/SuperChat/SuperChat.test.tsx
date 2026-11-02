@@ -1136,6 +1136,52 @@ describe('SuperChat', () => {
     expect(container.querySelector('code')).toHaveTextContent('const x = 1;');
   });
 
+  it('folds finished tool calls once the reply stops streaming', () => {
+    const toolMessage = (status: 'streaming' | 'complete') => ({
+      id: 'm-tool',
+      participantId: 'a1',
+      time: '2026-06-07T09:01:00Z',
+      status,
+      content: [
+        {
+          type: 'tool_use' as const,
+          toolCall: {
+            id: 't1',
+            toolName: 'list_issues',
+            parameters: [{ name: 'limit', type: 'number', value: 5 }],
+            status: 'success' as const,
+            startedAt: '2026-06-07T09:01:00Z',
+            duration: 800,
+          },
+        },
+      ],
+    });
+    const withTool = (
+      status: 'streaming' | 'complete'
+    ): SuperChatConversation => ({
+      ...conversation,
+      thread: [...conversation.thread, toolMessage(status)],
+    });
+    const pill = () =>
+      document.querySelector('[data-slot="ai-tool-call"] [aria-expanded]');
+
+    const { rerender } = render(
+      <SuperChat
+        conversation={withTool('streaming')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(
+      <SuperChat
+        conversation={withTool('complete')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toHaveAttribute('aria-expanded', 'false');
+  });
+
   describe('scroll anchoring', () => {
     // jsdom has no layout, so scroll metrics are mocked directly on the
     // thread element and position changes are driven with scroll events.

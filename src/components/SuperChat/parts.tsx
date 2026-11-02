@@ -1079,7 +1079,14 @@ export const MessageRow = React.memo(function MessageRow({
                 {message.content?.map((block, i) => {
                   if (block.type === 'tool_use' && block.toolCall) {
                     return (
-                      <MCPToolCallDisplay key={i} toolCall={block.toolCall} />
+                      <MCPToolCallDisplay
+                        key={i}
+                        toolCall={block.toolCall}
+                        // Once the answer is in, tool calls fold away; an explicit block.collapsed wins.
+                        defaultCollapsed={
+                          block.collapsed ?? (streaming ? undefined : true)
+                        }
+                      />
                     );
                   }
                   if (
