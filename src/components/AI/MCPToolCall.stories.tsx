@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useEffect, useState } from 'react';
+import { fn } from 'storybook/test';
 import { MCPToolCallDisplay, MCPToolCallGroup } from './index';
 import type { MCPToolCall } from './types';
 import { Button } from '../Button';
@@ -266,8 +267,8 @@ export const GroupNeedsAttention: Story = {
           result: undefined,
         }),
       ]}
-      onApprove={(tc, { always }) => console.log('approve', tc.id, { always })}
-      onDeny={(tc) => console.log('deny', tc.id)}
+      onApprove={fn()}
+      onDeny={fn()}
     />
   ),
 };
