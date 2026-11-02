@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
@@ -11,6 +11,12 @@ import {
   DropdownSeparator,
   DropdownSubmenu,
 } from './Dropdown';
+
+/** Moves the clock past the moment just after opening (openingScrollWindow). */
+function pastOpening() {
+  const now = Date.now();
+  vi.spyOn(Date, 'now').mockReturnValue(now + 1000);
+}
 
 /** A Dropdown inside a scroller, as in a thread or a list. */
 function renderInScroller(searchable = false) {
@@ -27,14 +33,27 @@ function renderInScroller(searchable = false) {
 }
 
 describe('Dropdown', () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it('closes when what holds its trigger scrolls, not for a scroll inside the menu', async () => {
     const user = userEvent.setup();
     const { thread, trigger } = renderInScroller();
     await user.click(trigger);
     fireEvent.scroll(screen.getByRole('menu'));
     expect(screen.getByRole('menu')).toBeInTheDocument();
+    pastOpening();
     fireEvent.scroll(thread);
     await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+
+  it('stays open for the scroll that arrives just after opening', async () => {
+    // A browser sends the scroll that brought the trigger into view (a tap
+    // ending a fling, a test scrolling to it) a frame after the tap.
+    const user = userEvent.setup();
+    const { thread, trigger } = renderInScroller();
+    await user.click(trigger);
+    fireEvent.scroll(thread);
+    expect(screen.getByRole('menu')).toBeInTheDocument();
   });
 
   it('closes on a scroll while the search field has focus', async () => {
@@ -45,6 +64,7 @@ describe('Dropdown', () => {
       name: 'Search dropdown items',
     });
     await waitFor(() => expect(search).toHaveFocus());
+    pastOpening();
     fireEvent.scroll(thread);
     await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
   });
@@ -62,6 +82,7 @@ describe('Dropdown', () => {
           screen.getByRole('searchbox', { name: 'Search dropdown items' })
         ).toHaveFocus()
       );
+      pastOpening();
       viewport.dispatchEvent(new Event('resize'));
       fireEvent.scroll(thread);
       expect(screen.getByRole('menu')).toBeInTheDocument();
