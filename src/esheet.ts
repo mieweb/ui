@@ -7,6 +7,10 @@
  *
  * This keeps @esheet/* packages out of the default
  * install/bundle so consumers who don't need the form builder aren't burdened.
+ *
+ * Narrative fields and EncounterVisit's RichEdit mode ride the Kerebron
+ * editor, so this entry also needs the `@kerebron/*` peers, `@mieweb/ui/kerebron.css`,
+ * and the WASM assets documented in src/kerebron.ts.
  */
 
 // Core types

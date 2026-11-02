@@ -138,6 +138,9 @@ importers:
       '@kerebron/extension-basic-editor':
         specifier: ^0.8.12
         version: 0.8.12
+      '@kerebron/extension-menu':
+        specifier: ^0.8.12
+        version: 0.8.12(patch_hash=8e736bf65a02aec9b8e9dfe83cdd2c850e7e89a42f64a0b648618dcead3a3260)
       '@kerebron/extension-yjs':
         specifier: ^0.8.12
         version: 0.8.12

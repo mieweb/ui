@@ -18,6 +18,13 @@ import {
 import { EncounterMessagesProvider } from './messages';
 import { getEncounterNarrativeFindings } from './narrativeFindings';
 
+// ProseMirror resists jsdom simulation; field logic runs on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
+
 function props(
   overrides: Partial<FieldComponentProps> = {}
 ): FieldComponentProps {
@@ -106,7 +113,8 @@ describe('EncounterNarrativeField', () => {
       'Back pain<br>&lt;unknown&gt; &amp; improving'
     );
     expect(editor.querySelector('unknown')).toBeNull();
-    expect(editor).toHaveAttribute('aria-readonly', 'false');
+    // Editable: aria-readonly is simply absent (the ARIA default).
+    expect(editor).not.toHaveAttribute('aria-readonly');
     expect(editor).toHaveAttribute('dir', 'auto');
   });
 

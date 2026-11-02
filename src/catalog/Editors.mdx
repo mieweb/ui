@@ -21,23 +21,26 @@ import { Meta } from '@storybook/addon-docs/blocks';
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | [RichEditor](?path=/docs/editors-richeditor--docs)         | The document is **Markdown**: headings, lists, tables, code; `getContent()` on submit; `collab.room` for Yjs co-editing; `CodeEditor` for source   | The stored format is HTML or you need merge variables/dictation — `RichTextEditor`; the host cannot add the Kerebron peers and WASM assets |
 | [RichTextEditor](?path=/docs/editors-richtexteditor--docs) | The document is **HTML**: bold/italic/underline, lists, alignment, opt-in markdown block shortcuts (H1–H3, lists, quote), `variableGroups` inserting `{{tokens}}`, Web Speech dictation; no peers | You need Markdown, real undo history, links/tables/code or collaboration — `RichEditor`; plain text — `Textarea`; a textarea-like surface with the toolbar hidden — `TextAreaRich`             |
-| [TextAreaRich](?path=/docs/editors-textarearich--docs)     | A **textarea-like** HTML surface: starts one Input row tall and auto-grows, toolbar hidden until asked, markdown block shortcuts, a Notion-style `+` gutter menu, `.shortcut` macros           | The value must be **plain text** (form posts, bindings) — `Textarea` (this surface with a plain-text contract); a full document with an always-on toolbar, variables or dictation — `RichTextEditor`                                     |
+| [TextAreaRich](?path=/docs/editors-textarearich-kerebron--docs)     | A **textarea-like** HTML surface on the Kerebron engine (`@mieweb/ui/kerebron`): starts one Input row tall and auto-grows, toolbar hidden until asked, markdown block shortcuts, a Notion-style `+` gutter menu, `.shortcut` macros           | The value must be **plain text** (form posts, bindings) — `Textarea` (this surface with a plain-text contract); a full document with an always-on toolbar, variables or dictation — `RichTextEditor`                                     |
 | [RichTextEsheet](?path=/docs/editors-richtextesheet--docs) | A **multi-section guided document** — referral letters, support tickets, incident write-ups — where an eSheet definition drives section prompts, memory-aid phrases and party macros; exports portable MDY | One free-form HTML letter with merge fields and dictation — `RichTextEditor`; a single rich input — `TextAreaRich`; arbitrary native `FormDefinition` forms — EsheetRenderer (Composite forms); coded clinical visits — EncounterVisit (Encounter & orders) |
 | [EmailEditor](?path=/docs/editors-emaileditor--docs)       | The document is an **email**: hero, columns, buttons, images, social, footer blocks on a drag-to-reorder canvas; `renderEmailMjml` serialises it   | A single formatted body — `RichTextEditor`; sending, recipients and templates are the host's                                               |
 | [Markdown](?path=/docs/editors-markdown--docs)             | **Displaying** Markdown: sanitised HTML, code highlighting, `mermaid` / `csv` / `survey` / `html` fences, `streaming` for token-by-token AI output | The user edits the text — `RichEditor` / `RichTextEditor`; the source is HTML                                                              |
 | [Q](?path=/docs/editors-q--docs)                           | Admins configure an **agent** (prompt, tools, telephony) through a schema-generated form and see the YAML/JSON; `onSubmit(yaml)`, `onConfigChange` | Free-form prose — `RichEditor`; general clinical/business forms — ESheet (Composite forms)                                                 |
+| [TextAreaRich (Legacy)](?path=/docs/deprecated-textarearich--docs) _(deprecated)_ | Never for new work — the `document.execCommand` engine; use [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) | — |
 
 ## Install / entry points
 
-| Entry                 | Exports                                                                                                     | Peers (all optional in `package.json`)                                                                                                                         | Styles                                                                       |
+| Entry                 | Exports                                                                                                     | Peers                                                                                                                                         | Styles                                                                       |
 | --------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `@mieweb/ui`          | `RichTextEditor`, `TextAreaRich`, `EmailEditor` + `renderEmailMjml`, `MarkdownRenderer` + blocks, `useMarkdown`, `Textarea` | `mermaid`, `papaparse`, `js-yaml` — only for the matching Markdown fence; `mjml` or `mjml-browser` to compile `renderEmailMjml` output (host-side, not a peer) | `@mieweb/ui/styles.css`, `@mieweb/ui/markdown.css`                           |
-| `@mieweb/ui/kerebron` | `RichEditor`, `CodeEditor`, `CollabConfig`                                                                  | `@kerebron/editor`, `@kerebron/editor-kits`, `@kerebron/wasm` (`>=0.8.12`); for `collab`: `@kerebron/extension-yjs`, `yjs`, `y-protocols`                      | `@mieweb/ui/kerebron.css`; serve `@kerebron/wasm/assets` at `/kerebron-wasm` |
+| `@mieweb/ui`          | `RichTextEditor`, `TextAreaRich` _(deprecated — use the Kerebron entry)_, `EmailEditor` + `renderEmailMjml`, `MarkdownRenderer` + blocks, `useMarkdown`, `Textarea` | **Required:** `@kerebron/editor`, `@kerebron/editor-kits`, `@kerebron/extension-basic-editor`, `@kerebron/extension-menu`, `@kerebron/wasm` (`>=0.8.12`) — `Textarea` rides the Kerebron engine since 0.12. Optional: `mermaid`, `papaparse`, `js-yaml` — only for the matching Markdown fence; `mjml` or `mjml-browser` to compile `renderEmailMjml` output (host-side, not a peer) | `@mieweb/ui/styles.css`, `@mieweb/ui/kerebron.css`, `@mieweb/ui/markdown.css` |
+| `@mieweb/ui/kerebron` | `RichEditor`, `CodeEditor`, `TextAreaRich`, `CollabConfig`                                                  | The same required `@kerebron/*` peers; for `collab` (optional): `@kerebron/extension-yjs`, `yjs`, `y-protocols`                      | `@mieweb/ui/kerebron.css`; serve `@kerebron/wasm/assets` at `/kerebron-wasm` |
 | `@mieweb/ui/q`        | `Q`, presets (`qAgentSchema`, `qTwilioAgentSchema`, …), `@mieweb/q` re-exports                              | `@mieweb/q` (`1.0.0`)                                                                                                                                          | `@mieweb/q/style.css`                                                        |
 | `@mieweb/ui/esheet`   | `RichTextEsheet`, shared narrative/section field registrations, eSheet re-exports                           | `@esheet/core`, `@esheet/fields`, `@esheet/renderer`, `@esheet/builder`                                                                                        | `@mieweb/ui/styles.css`                                                      |
 
-The main barrel deliberately excludes the Kerebron and Q entries so consumers who never render
-those editors do not pay for ProseMirror, WASM grammars or Q's form engine.
+The main barrel deliberately excludes the Q entry so consumers who never render that editor
+do not pay for Q's form engine. The Kerebron peers became **required** in 0.12 — the main
+barrel's `Textarea` renders the Kerebron engine — so only the Yjs collaboration peers remain
+optional.
 
 ## How they fit together
 
@@ -48,11 +51,12 @@ those editors do not pay for ProseMirror, WASM grammars or Q's form engine.
   undo, plus the two things `RichEditor` lacks — a searchable **Variables** `Dropdown` for
   `{{merge.fields}}` and a **Dictate** button on the Web Speech API. Pick by what you store and
   whether the note needs merge fields; they are declared `alternative to` each other.
-- **TextAreaRich is RichTextEditor in textarea clothing — the value contract decides.**
-  It composes `RichTextEditor` in chromeless mode (hidden toolbar, markdown shortcuts, the
-  block gutter menu, macros) inside `Textarea`-matched chrome. It still emits **HTML**:
-  if the consumer expects plain text, use `Textarea` — swapping one for the other silently
-  changes what `onChange` delivers.
+- **TextAreaRich is a rich editor in textarea clothing — the value contract decides.**
+  The Kerebron-engined surface (`@mieweb/ui/kerebron`) rides ProseMirror; the deprecated
+  legacy export composes `RichTextEditor` in chromeless mode (hidden toolbar, markdown
+  shortcuts, the block gutter menu, macros) inside `Textarea`-matched chrome. Either way it
+  emits **HTML**: if the consumer expects plain text, use `Textarea` — swapping one for the
+  other silently changes what `onChange` delivers.
 - **Markdown closes the loop with RichEditor.** `RichEditor` produces Markdown;
   `MarkdownRenderer` displays it read-only — in a record view, an AI reply
   (`AIMessageDisplay renderTextContent`), or a preview pane. `RichTextEditor`'s HTML output
