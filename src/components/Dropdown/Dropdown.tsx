@@ -486,16 +486,12 @@ function Dropdown({
   );
   useClickOutside(outsideRefs, handleClose, isOpen);
 
-  // A scroll that takes the trigger out of view closes the menu: kept open,
-  // the menu (fixed to the screen, clamped inside it) would float on with no
-  // trigger, over whatever scrolled under. While the trigger still shows, the
-  // menu follows it (useAnchoredPosition), so a nudge (reaching a lower item,
-  // a test scrolling one into view) leaves it open. Scrolling inside the menu
-  // or a submenu, and the scroll iOS makes as the keyboard opens for the
-  // search field, leave it open; so does scrolling the page itself. The
-  // keyboard is told apart by the visual viewport resizing just before, not
-  // by the search field having focus: a searchable menu focuses it on open,
-  // so that alone would keep every scroll from closing it.
+  // Scrolling what holds the trigger (a thread, a list) closes the menu: it's
+  // fixed to the screen, so it would float on over whatever scrolled under.
+  // Scrolling inside the menu or a submenu leaves it open, as does the scroll
+  // iOS makes as the keyboard opens for the search field — told apart by the
+  // visual viewport resizing just before (a searchable menu focuses its field
+  // on open, so focus alone can't tell it).
   React.useEffect(() => {
     if (!isOpen) return;
     const inMenu = (node: Node | null) =>
@@ -510,14 +506,7 @@ function Dropdown({
       if (!(target instanceof Element) || !trigger) return;
       if (!target.contains(trigger) || inMenu(target)) return;
       if (Date.now() - viewportResizedAt < keyboardScrollWindow) return;
-      const shown = trigger.getBoundingClientRect();
-      const area = target.getBoundingClientRect();
-      const outOfView =
-        shown.bottom <= area.top ||
-        shown.top >= area.bottom ||
-        shown.right <= area.left ||
-        shown.left >= area.right;
-      if (outOfView) handleClose();
+      handleClose();
     };
     const viewport = window.visualViewport;
     viewport?.addEventListener('resize', onViewportResize);

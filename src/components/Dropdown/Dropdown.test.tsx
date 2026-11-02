@@ -12,20 +12,7 @@ import {
   DropdownSubmenu,
 } from './Dropdown';
 
-const box = (top: number, bottom: number) =>
-  ({
-    top,
-    bottom,
-    left: 0,
-    right: 200,
-    width: 200,
-    height: bottom - top,
-  }) as ReturnType<HTMLElement['getBoundingClientRect']>;
-
-/**
- * A Dropdown inside a 100px scroller, with the trigger shown 10-42px down.
- * jsdom lays nothing out, so moving `at` is what "scrolling" the trigger does.
- */
+/** A Dropdown inside a scroller, as in a thread or a list. */
 function renderInScroller(searchable = false) {
   renderWithTheme(
     <div data-testid="thread" style={{ overflow: 'auto', height: 100 }}>
@@ -36,41 +23,28 @@ function renderInScroller(searchable = false) {
   );
   const thread = screen.getByTestId('thread');
   const trigger = screen.getByRole('button', { name: 'Open menu' });
-  // The Dropdown's own wrapper around the trigger is what it measures.
-  const anchor = trigger.parentElement!;
-  vi.spyOn(thread, 'getBoundingClientRect').mockReturnValue(box(0, 100));
-  const at = vi
-    .spyOn(anchor, 'getBoundingClientRect')
-    .mockReturnValue(box(10, 42));
-  return { thread, trigger, at };
+  return { thread, trigger };
 }
 
 describe('Dropdown', () => {
-  it('closes once a scroll takes its trigger out of view, not for a nudge or one inside the menu', async () => {
+  it('closes when what holds its trigger scrolls, not for a scroll inside the menu', async () => {
     const user = userEvent.setup();
-    const { thread, trigger, at } = renderInScroller();
+    const { thread, trigger } = renderInScroller();
     await user.click(trigger);
     fireEvent.scroll(screen.getByRole('menu'));
     expect(screen.getByRole('menu')).toBeInTheDocument();
-    // Moved, still showing: the menu follows it.
-    at.mockReturnValue(box(40, 72));
-    fireEvent.scroll(thread);
-    expect(screen.getByRole('menu')).toBeInTheDocument();
-    // Scrolled away: the menu goes too.
-    at.mockReturnValue(box(-60, -28));
     fireEvent.scroll(thread);
     await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
   });
 
-  it('closes on a scroll that hides the trigger while the search field has focus', async () => {
+  it('closes on a scroll while the search field has focus', async () => {
     const user = userEvent.setup();
-    const { thread, trigger, at } = renderInScroller(true);
+    const { thread, trigger } = renderInScroller(true);
     await user.click(trigger);
     const search = screen.getByRole('searchbox', {
       name: 'Search dropdown items',
     });
     await waitFor(() => expect(search).toHaveFocus());
-    at.mockReturnValue(box(-60, -28));
     fireEvent.scroll(thread);
     await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
   });
@@ -81,7 +55,7 @@ describe('Dropdown', () => {
     vi.stubGlobal('visualViewport', viewport);
     try {
       const user = userEvent.setup();
-      const { thread, trigger, at } = renderInScroller(true);
+      const { thread, trigger } = renderInScroller(true);
       await user.click(trigger);
       await waitFor(() =>
         expect(
@@ -89,7 +63,6 @@ describe('Dropdown', () => {
         ).toHaveFocus()
       );
       viewport.dispatchEvent(new Event('resize'));
-      at.mockReturnValue(box(-60, -28));
       fireEvent.scroll(thread);
       expect(screen.getByRole('menu')).toBeInTheDocument();
     } finally {
