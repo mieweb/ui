@@ -1080,7 +1080,8 @@ export const MessageRow = React.memo(function MessageRow({
                   if (block.type === 'tool_use' && block.toolCall) {
                     return (
                       <MCPToolCallDisplay
-                        key={i}
+                        // Remount when streaming ends so a card the user opened mid-stream also folds.
+                        key={`${i}-${streaming ? 'streaming' : 'done'}`}
                         toolCall={block.toolCall}
                         // Once the answer is in, tool calls fold away; an explicit block.collapsed wins.
                         defaultCollapsed={

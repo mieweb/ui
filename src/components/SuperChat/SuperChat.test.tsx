@@ -1182,6 +1182,60 @@ describe('SuperChat', () => {
     expect(pill()).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('folds a card the user opened while running when tool and reply finish together', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const withTool = (
+      messageStatus: 'streaming' | 'complete',
+      toolStatus: 'running' | 'success'
+    ): SuperChatConversation => ({
+      ...conversation,
+      thread: [
+        ...conversation.thread,
+        {
+          id: 'm-tool',
+          participantId: 'a1',
+          time: '2026-06-07T09:01:00Z',
+          status: messageStatus,
+          content: [
+            {
+              type: 'tool_use' as const,
+              toolCall: {
+                id: 't1',
+                toolName: 'list_issues',
+                parameters: [{ name: 'limit', type: 'number', value: 5 }],
+                status: toolStatus,
+                startedAt: '2026-06-07T09:01:00Z',
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const pill = () =>
+      document.querySelector('[data-slot="ai-tool-call"] [aria-expanded]')!;
+
+    const { rerender } = render(
+      <SuperChat
+        conversation={withTool('streaming', 'running')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(pill());
+    expect(pill()).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(
+      <SuperChat
+        conversation={withTool('complete', 'success')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(pill());
+    expect(pill()).toHaveAttribute('aria-expanded', 'true');
+  });
+
   describe('scroll anchoring', () => {
     // jsdom has no layout, so scroll metrics are mocked directly on the
     // thread element and position changes are driven with scroll events.
