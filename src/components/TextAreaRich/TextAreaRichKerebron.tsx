@@ -8,6 +8,7 @@ import { MenuItem } from '@kerebron/extension-menu';
 import { Plus } from 'lucide-react';
 
 import { cn } from '../../utils/cn';
+import { useMessages } from '../../utils/messages';
 import { Button } from '../Button';
 import {
   Dropdown,
@@ -132,16 +133,22 @@ function insertPlainText(
   from = view.state.selection.from,
   to = view.state.selection.to
 ) {
-  const { schema } = view.state;
+  const { schema, selection, storedMarks } = view.state;
+  // Typing at this caret would inherit the active marks (pending toggles
+  // or the formatting at the position); composed insertions — dictation,
+  // macros, shortcut phrases — must match instead of stripping them.
+  const marks =
+    (from === selection.from && to === selection.to ? storedMarks : null) ??
+    view.state.doc.resolve(from).marks();
   const br = schema.nodes.br ?? schema.nodes.hard_break;
   const lines = text.replace(/\r\n?/g, '\n').split('\n');
   const nodes: PMNode[] = [];
   lines.forEach((line, index) => {
     if (index > 0) {
-      if (br) nodes.push(br.create());
-      else if (line) nodes.push(schema.text(' '));
+      if (br) nodes.push(br.create(null, null, marks));
+      else if (line) nodes.push(schema.text(' ', marks));
     }
-    if (line) nodes.push(schema.text(line));
+    if (line) nodes.push(schema.text(line, marks));
   });
   let tr = view.state.tr.replaceWith(from, to, nodes);
   const end = Math.min(
@@ -288,6 +295,9 @@ const TextAreaRichKerebron = React.forwardRef<
     dictationAvailableRef.current = enableDictation && speechSupported;
     const onDictationErrorRef = React.useRef(onDictationError);
     onDictationErrorRef.current = onDictationError;
+    // Dictation labels have no prop route (macro labels do), so the host's
+    // MessagesProvider is the translation path — like RichTextEditor's.
+    const m = useMessages();
 
     const reportError = (message: string) => {
       if (onDictationErrorRef.current) onDictationErrorRef.current(message);
@@ -582,6 +592,15 @@ const TextAreaRichKerebron = React.forwardRef<
       };
 
       recognition.onresult = (event) => {
+        // Results landing after Stop retired this session (or after a
+        // restart swapped recognitions) must not focus the editor or
+        // insert text.
+        if (
+          session !== dictationSessionRef.current ||
+          recognitionRef.current !== recognition
+        ) {
+          return;
+        }
         if (inertRef.current) return;
         let finalTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -596,6 +615,14 @@ const TextAreaRichKerebron = React.forwardRef<
       };
 
       recognition.onerror = (event) => {
+        // A retired session's failures must not clear the live session's
+        // listening state.
+        if (
+          session !== dictationSessionRef.current ||
+          recognitionRef.current !== recognition
+        ) {
+          return;
+        }
         if (event.error === 'no-speech' || event.error === 'aborted') return;
         if (event.error === 'not-allowed') {
           reportError(
@@ -730,7 +757,7 @@ const TextAreaRichKerebron = React.forwardRef<
           // Material Symbols "mic" (Apache-2.0)
           path: 'M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z',
         },
-        title: 'Start dictation',
+        title: m('Start dictation'),
         class: 'tar-menu-dictate',
         select: () => dictationAvailableRef.current,
         enable: () => !inertRef.current,
@@ -813,7 +840,9 @@ const TextAreaRichKerebron = React.forwardRef<
             isListening
           );
           dictateButton.setAttribute('aria-pressed', String(isListening));
-          const title = isListening ? 'Stop dictation' : 'Start dictation';
+          const title = isListening
+            ? m('Stop dictation')
+            : m('Start dictation');
           dictateButton.setAttribute('title', title);
           dictateButton.setAttribute('aria-label', title);
         }
@@ -838,6 +867,7 @@ const TextAreaRichKerebron = React.forwardRef<
       speechSupported,
       isListening,
       toolbarVisible,
+      m,
     ]);
 
     // --- Editor wiring ---
