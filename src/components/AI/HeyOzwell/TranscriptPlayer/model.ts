@@ -47,7 +47,7 @@ const SPEAKER_COLORS = [
 
 export const UNKNOWN_SPEAKER_ID = '';
 /** Words further apart than this start a new utterance when the transcript has no segments. */
-const UTTERANCE_GAP_SECONDS = 1.5;
+export const UTTERANCE_GAP_SECONDS = 1.5;
 /** Narrowest zoom, so a lane bar is never wider than the screen for a word. */
 export const MIN_VIEW_SECONDS = 10;
 /** Initial window for long recordings; shorter ones fit entirely. */
