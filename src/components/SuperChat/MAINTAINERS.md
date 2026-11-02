@@ -163,7 +163,8 @@ the ones with a send pending, so sends in two conversations can overlap. A
 host that shows the message while it uploads gives it `status: 'pending'` and
 `progress` (0–1): its tiles dim and "Sending… 45%" shows under them
 (`mediaLabels.sending` and `sendingProgress(percent)`; only "Sending…" is a
-live region, so the percent doesn't re-announce on every step). The composer refuses a file over `maxFileSize`
+live region, and the percent is `aria-live="off"` inside the thread's polite
+log, so it doesn't re-announce on every step). The composer refuses a file over `maxFileSize`
 (25 MB by default), a type outside `acceptedFileTypes`, or an 11th file, and
 tells the host through `onComposerError`. `image` accepts the formats every
 browser shows (JPEG, PNG, GIF, WebP, AVIF), so a HEIC photo is refused, and an

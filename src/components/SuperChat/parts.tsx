@@ -1303,7 +1303,18 @@ export const MessageRow = React.memo(function MessageRow({
                             aria-label={attachmentLabels.removeAttachment(
                               item.name
                             )}
-                            onClick={item.remove}
+                            onClick={(event) => {
+                              // The button goes with its chip: focus moves on
+                              // to the next Remove (or the one before, or the
+                              // text) rather than falling to the page.
+                              const chip = event.currentTarget.closest('li');
+                              const neighbour = (
+                                chip?.nextElementSibling ??
+                                chip?.previousElementSibling
+                              )?.querySelector('button');
+                              (neighbour ?? editRef.current)?.focus();
+                              item.remove();
+                            }}
                             className="rounded-full p-0.5 hover:bg-white/20"
                           >
                             <XIcon size={12} aria-hidden="true" />
@@ -1469,7 +1480,8 @@ export const MessageRow = React.memo(function MessageRow({
             )}
             {sending && (
               // "Sending…" is announced once; the percent beside it changes
-              // with every tick, so it is shown but not announced.
+              // with every tick, so it is shown but not announced (it sits in
+              // the thread's polite log, hence its own aria-live="off").
               <p
                 data-slot="superchat-message-sending"
                 className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
@@ -1477,7 +1489,7 @@ export const MessageRow = React.memo(function MessageRow({
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                 <span role="status">{attachmentLabels.sending}</span>
                 {message.progress !== undefined && (
-                  <span>
+                  <span aria-live="off">
                     {attachmentLabels.sendingProgress(
                       Math.round(
                         Math.min(1, Math.max(0, message.progress)) * 100

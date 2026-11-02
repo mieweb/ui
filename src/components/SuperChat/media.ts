@@ -1,3 +1,4 @@
+import { parenGroup } from './captionLinks';
 import { byTime } from './parts';
 import type {
   SuperChatConversation,
@@ -57,14 +58,22 @@ export function previewOfAttachments(attachments: {
 }
 
 /**
+ * A link's or image's `(destination "title")`, parentheses inside it counted
+ * in balanced pairs as a caption's links count them.
+ */
+const DESTINATION = String.raw`\((?:[^()]|${parenGroup()})*\)`;
+const IMAGE = new RegExp(String.raw`!\[[^\]]*\]${DESTINATION}`, 'g');
+const LINK = new RegExp(String.raw`\[([^\]]*)\]${DESTINATION}`, 'g');
+
+/**
  * Markdown as one line of plain text: what a preview shows of a message.
  * Emphasis counts only between word boundaries, so the underscores in a file
  * name or a link (`file_name_v2.pdf`, `/a_b_c`) stay as they are.
  */
 function plainText(markdown: string): string {
   return markdown
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(IMAGE, '')
+    .replace(LINK, '$1')
     .replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+\.)\s+/gm, '')
     .replace(/(?<![\w*_])(\*\*|__|~~|\*|_|`)(\S(?:.*?\S)?)\1(?![\w*_])/g, '$2')
     .replace(/\s+/g, ' ')

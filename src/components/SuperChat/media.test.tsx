@@ -195,6 +195,27 @@ describe('messagePreview', () => {
       preview('**bold**, _italic_, *also*, __strong__, `code` and ~~gone~~')
     ).toBe('bold, italic, also, strong, code and gone');
   });
+
+  it('strips a link or image whose address holds parentheses', () => {
+    expect(
+      preview(
+        '[functions](https://en.wikipedia.org/wiki/Function_(mathematics))'
+      )
+    ).toBe('functions');
+    // Nothing left of the image, so the preview names what it carries.
+    expect(
+      messagePreview(
+        {
+          id: 'm',
+          participantId: 'alex',
+          time: '2026-10-03T09:00:00Z',
+          text: '![plot](https://x.dev/plot_(final).png)',
+          files: [{ id: 'f', name: 'data.csv', url: '/data.csv' }],
+        },
+        previewOfAttachments
+      )
+    ).toBe('data.csv');
+  });
 });
 
 describe('knownShapes', () => {
@@ -529,6 +550,26 @@ describe('SuperChat media view', () => {
     expect(tile).not.toHaveClass('opacity-60');
   });
 
+  it("keeps the sending percent out of the thread's live log", () => {
+    render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            { ...conversation.thread[0], status: 'pending', progress: 0.452 },
+          ],
+        }}
+      />
+    );
+    const log = screen.getByRole('log', { name: 'Messages' });
+    const percent = screen.getByText('45%');
+    // It sits in the polite log, so only its own aria-live keeps each tick
+    // from being read out.
+    expect(log).toHaveAttribute('aria-live', 'polite');
+    expect(log.contains(percent)).toBe(true);
+    expect(percent).toHaveAttribute('aria-live', 'off');
+  });
+
   it('previews a last message with no text by what it carries, and markdown as plain text', () => {
     render(
       <SuperChatInbox
@@ -617,6 +658,49 @@ describe('SuperChat media view', () => {
         '[data-slot="superchat-message-media"]'
       )?.style.aspectRatio
     ).toBe('0.75');
+  });
+
+  it("takes a tile's shape from its current picture, not the one it mounted with", () => {
+    const withPicture = (
+      picture: Partial<
+        NonNullable<SuperChatConversation['thread'][0]['media']>[0]
+      >
+    ): SuperChatConversation => ({
+      ...conversation,
+      thread: [
+        {
+          ...conversation.thread[0],
+          media: [{ ...conversation.thread[0].media![0], ...picture }],
+        },
+      ],
+    });
+    const { container, rerender } = render(
+      <SuperChat conversation={withPicture({ src: '/upright.png' })} />
+    );
+    const tile = () =>
+      container.querySelector<HTMLElement>(
+        '[data-slot="superchat-message-media"]'
+      )!;
+    // The host's size, given later under the same id, applies at once.
+    rerender(
+      <SuperChat
+        conversation={withPicture({
+          src: '/upright.png',
+          width: 300,
+          height: 400,
+        })}
+      />
+    );
+    expect(tile().style.aspectRatio).toBe('0.75');
+    const img = tile().querySelector('img')!;
+    Object.defineProperty(img, 'naturalWidth', { value: 400 });
+    Object.defineProperty(img, 'naturalHeight', { value: 1000 });
+    fireEvent.load(img);
+    expect(tile().style.aspectRatio).toBe('0.6');
+    // A new picture with no size starts at 16:9 again, not the old shape.
+    rerender(<SuperChat conversation={withPicture({ src: '/wide.png' })} />);
+    expect(tile().style.aspectRatio).toBe(String(16 / 9));
+    knownShapes.clear();
   });
 
   it("shows a message's label under it, out of its text, its editor and its preview", async () => {
@@ -821,6 +905,29 @@ describe('SuperChat media view', () => {
       '',
       expect.objectContaining({ removedMedia: ['a2'], removedFiles: [] })
     );
+  });
+
+  it('keeps focus in the editor as Remove takes an attachment off', async () => {
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="alex"
+        onMessageEdited={() => {}}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Message actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit message' }));
+    // To the next Remove…
+    await user.click(
+      screen.getByRole('button', { name: 'Remove First image' })
+    );
+    expect(
+      screen.getByRole('button', { name: 'Remove Second image' })
+    ).toHaveFocus();
+    // …and with none left, the text.
+    await user.keyboard('{Enter}');
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveFocus();
   });
 
   it('will not save an edit that takes off everything a message had', async () => {
