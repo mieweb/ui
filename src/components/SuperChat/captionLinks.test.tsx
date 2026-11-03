@@ -59,6 +59,43 @@ describe('linkifyCaption', () => {
     }
   );
 
+  it('links an autolink without its angle brackets, and never takes a ">" into an address', () => {
+    render(
+      <p>
+        {linkifyCaption(
+          'Launch: <https://example.org/launch> or https://example.org/b>c'
+        )}
+      </p>
+    );
+    const launch = screen.getByRole('link', {
+      name: 'https://example.org/launch',
+    });
+    expect(launch).toHaveAttribute('href', 'https://example.org/launch');
+    expect(launch.parentElement).toHaveTextContent(
+      /^Launch: https:\/\/example\.org\/launch or https:\/\/example\.org\/b>c$/
+    );
+    expect(
+      screen.getByRole('link', { name: 'https://example.org/b' })
+    ).toHaveAttribute('href', 'https://example.org/b');
+  });
+
+  it('links http(s) in any case', () => {
+    render(
+      <p>
+        {linkifyCaption(
+          'See [Plan](HTTPS://example.org/plan) and Http://example.org/notes'
+        )}
+      </p>
+    );
+    expect(screen.getByRole('link', { name: 'Plan' })).toHaveAttribute(
+      'href',
+      'HTTPS://example.org/plan'
+    );
+    expect(
+      screen.getByRole('link', { name: 'Http://example.org/notes' })
+    ).toHaveAttribute('href', 'Http://example.org/notes');
+  });
+
   const WIKI = 'https://en.wikipedia.org/wiki/Function_(mathematics)';
 
   it('keeps balanced parentheses in a bare address, not the punctuation after', () => {
