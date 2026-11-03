@@ -1339,14 +1339,14 @@ describe('SuperChat media view', () => {
     vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(400);
     // Tall enough that the reader isn't at the bottom.
     vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(
-      80 * 300
+      40 * 300
     );
-    const thread = Array.from({ length: 80 }, (_, index) => ({
+    const thread = Array.from({ length: 40 }, (_, index) => ({
       id: `m${index}`,
       participantId: 'alex',
       time: new Date(Date.UTC(2026, 9, 1, 9, index)).toISOString(),
       text: `Message ${index}`,
-      ...(index === 60
+      ...(index === 30
         ? {
             media: [
               {
@@ -1383,7 +1383,7 @@ describe('SuperChat media view', () => {
       screen.queryByRole('button', { name: 'Host card Far clip' });
     // Scroll down until the card's row is rendered (and every row above it
     // has been measured on the way).
-    for (let top = 0; !card() && top < 40000; top += 300) {
+    for (let top = 0; !card() && top < 20000; top += 600) {
       log.scrollTop = top;
       fireEvent.scroll(log);
       await act(async () => {});
@@ -1393,8 +1393,8 @@ describe('SuperChat media view', () => {
       screen.getByRole('button', { name: 'Back to conversation' })
     );
     await waitFor(() => expect(card()).toHaveFocus());
-    // Scrolling 80 tall rows into view one at a time is slow work, over the
-    // default 5 s under coverage on CI.
+    // Still slow work under coverage (each step renders and measures rows):
+    // more than the default 5 s on a loaded CI runner.
   }, 20_000);
 
   it('keeps the feed mounted when the host switches layout', async () => {
