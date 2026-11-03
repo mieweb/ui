@@ -306,16 +306,16 @@ module.exports = {
 
 ## Quick Troubleshooting
 
-| Symptom                                                     | Likely Cause                                                                                | Fix                                              |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Black/missing borders on @mieweb/ui components              | Tailwind tree-shaking                                                                       | Add `@source` directive                          |
-| Dark mode toggle does nothing                               | Missing `@custom-variant dark`                                                              | Add it to styles.css                             |
-| Dark mode toggles but sidebar stays light                   | Missing neutral color fallbacks                                                             | Add fallback values to `@theme inline`           |
-| Brand switch has no effect                                  | Wrong import path                                                                           | Use barrel: `from '@mieweb/ui/brands'`           |
-| TypeScript errors on brand imports                          | Subpath resolution                                                                          | Use barrel import, not individual subpaths       |
-| PostCSS does nothing                                        | Wrong plugin                                                                                | Use `@tailwindcss/postcss`, not `tailwindcss`    |
-| `var()` resolves to transparent                             | No CSS variable defined                                                                     | Add fallback value: `var(--token, #hex)`         |
-| `transition-*` utilities stop working after theme/brand CSS | Universal theme-transition rule resets `transition-property` app-wide (mieweb/ui#460, #682) | Scope theme transitions to color properties only |
+| Symptom                                                     | Likely Cause                                                                                                                   | Fix                                                                                            |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| Black/missing borders on @mieweb/ui components              | Tailwind tree-shaking                                                                                                          | Add `@source` directive                                                                        |
+| Dark mode toggle does nothing                               | Missing `@custom-variant dark`                                                                                                 | Add it to styles.css                                                                           |
+| Dark mode toggles but sidebar stays light                   | Missing neutral color fallbacks                                                                                                | Add fallback values to `@theme inline`                                                         |
+| Brand switch has no effect                                  | Wrong import path                                                                                                              | Use barrel: `from '@mieweb/ui/brands'`                                                         |
+| TypeScript errors on brand imports                          | Subpath resolution                                                                                                             | Use barrel import, not individual subpaths                                                     |
+| PostCSS does nothing                                        | Wrong plugin                                                                                                                   | Use `@tailwindcss/postcss`, not `tailwindcss`                                                  |
+| `var()` resolves to transparent                             | No CSS variable defined                                                                                                        | Add fallback value: `var(--token, #hex)`                                                       |
+| `transition-*` utilities stop working after theme/brand CSS | Unlayered `*` transition shorthand in brand CSS resets `transition-property` and beats layered utilities (mieweb/ui#460, #682) | Move the transition rule into `@layer base` (or remove/narrow it); keep brand tokens unlayered |
 
 ---
 

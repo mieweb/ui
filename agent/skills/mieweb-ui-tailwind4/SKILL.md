@@ -14,7 +14,7 @@ npm install @mieweb/ui react react-dom
 npm install -D tailwindcss@4 @tailwindcss/postcss autoprefixer
 ```
 
-`react` / `react-dom` (>=18) are the only **required** peers. Every other peer is **optional** and only needed when you import the entry that uses it (`/maps` → leaflet, `/globe` → react-globe.gl + three, `/kerebron` → @kerebron/\*, `/motion` → motion, `/q` → @mieweb/q, …) — see the catalog skill's entry-point table. A peer-dep warning for an entry you never import is noise, not a problem. Under pnpm's strict node_modules there is no hoisting: required peers must be in the app's own `package.json`; diagnose resolution with `pnpm why <pkg>`.
+`react` / `react-dom` (>=18) are **required** peers, and so are the five `@kerebron/*` runtime packages (`editor`, `editor-kits`, `extension-basic-editor`, `extension-menu`, `wasm`) — the main-barrel `Textarea` rides the Kerebron engine, and bundling it would duplicate `prosemirror-state` in consumer apps. Every other peer is **optional** and only needed when you import the entry that uses it (`/maps` → leaflet, `/globe` → react-globe.gl + three, collab → @kerebron/extension-yjs + yjs + y-protocols, `/motion` → motion, `/q` → @mieweb/q, …) — see the catalog skill's entry-point table. A peer-dep warning for an entry you never import is noise, not a problem. Under pnpm's strict node_modules there is no hoisting: required peers must be in the app's own `package.json`; diagnose resolution with `pnpm why <pkg>`.
 
 Install the **published package from the npm registry**. Installing from the git repo (`npm install github:mieweb/ui`) is unsupported — the source tree is a pnpm workspace with `link:` dependencies and submodules (mieweb/ui#489).
 
@@ -116,7 +116,7 @@ Filters/selection/pagination state is yours (usually the URL); `ViewSet` owns on
 | Peer-dep install errors | Required vs optional confusion | Only react/react-dom are required; match optional peers to imported entries |
 | Module shows failed action as success | `on*` promise swallowed | Return the real promise (`mutateAsync` / `callAsync`) |
 | Views regroup on every render | Unstable `accessors` | Module scope or `useMemo` |
-| `transition-*` utilities stop working after theme/brand CSS | A universal theme-transition rule (`* { transition: … }`) resets `transition-property` app-wide (mieweb/ui#460, #682) | Scope theme transitions to color properties only; never a `*` transition shorthand |
+| `transition-*` utilities stop working after theme/brand CSS | The brand CSS's unlayered `*` transition shorthand resets `transition-property` on every element and beats layered utilities, even though it lists only color properties (mieweb/ui#460, #682) | Move the transition rule into `@layer base` (or remove/narrow it) so component transitions win; keep brand token declarations unlayered |
 
 ## Verification checklist
 

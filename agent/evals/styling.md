@@ -35,12 +35,12 @@ format and scoring. (Pure foundation/setup breakage lives in
 
 - **Ask:** "My toggle sets a `.dark` class but `dark:` utilities don't apply
   in Tailwind 4."
-- **Expect:** Define `@custom-variant dark` in the CSS entry (e.g.
-  `(&:where([data-theme=dark], [data-theme=dark] *))`) and have the toggle set
-  **both** the `.dark` class and `data-theme="dark"` — the variant and the
-  toggle must agree.
+- **Expect:** Define `@custom-variant dark` in the CSS entry and make the
+  toggle set a hook the active variant actually matches — an attribute-only
+  variant ignores a class-only toggle. Setting both `.dark` and
+  `data-theme="dark"` is the compatibility-safe recommendation.
 - **Agent:** MIE UI Styling Agent
-- **Source:** lessons/tailwind4-integration.md — Lesson 5
+- **Source:** lessons/tailwind4-integration.md — Lesson 5; agent/skills/mieweb-ui-tailwind4/SKILL.md — Dark mode toggle
 
 ### STY-5 — Brand import path
 
@@ -56,11 +56,12 @@ format and scoring. (Pure foundation/setup breakage lives in
 
 - **Ask:** "My brand CSS is applied but `neutral-900` (and other scales) don't
   work. Why?"
-- **Expect:** `generateBrandCSS()` only emits the primary scale — neutral/
-  secondary/destructive/success/warning/info must come from the base
-  stylesheet. Load `@mieweb/ui/styles.css` (or `init.css`) first.
+- **Expect:** `generateBrandCSS()` emits every scale the brand **supplies**
+  (primary + any optional scales) — scales the brand omits must come from the
+  base stylesheet. Load `@mieweb/ui/styles.css` (or the init.css setup) first,
+  then check whether the brand actually defines the missing scale.
 - **Agent:** MIE UI Styling Agent
-- **Source:** lessons/recommended-changes.md — P0 Issue 2; agent/skills/mieweb-ui-brands/SKILL.md
+- **Source:** src/brands/types.ts — `generateBrandCSS`; agent/skills/mieweb-ui-brands/SKILL.md
 
 ### STY-7 — Layering brand CSS
 
@@ -114,32 +115,35 @@ format and scoring. (Pure foundation/setup breakage lives in
   setup?"
 - **Expect:** `@source` present, `@custom-variant dark` defined, every
   `var()` in `@theme` has a fallback (except primary), `@tailwindcss/postcss`
-  plugin in use, toggle sets both `.dark` and `data-theme`.
+  plugin in use, toggle sets a hook the active dark variant matches.
 - **Agent:** MIE UI Styling Agent
-- **Source:** lessons/adopting-mieweb-ui.md — Phase 1.5
+- **Source:** lessons/adopting-mieweb-ui.md — Phase 1.5; agent/skills/mieweb-ui-tailwind4/SKILL.md — Dark mode toggle
 
 ### STY-13 — Theme transition stomps utilities
 
 - **Ask:** "After adding brand CSS, my `transition-transform` animations
   stopped working — everything transitions colors instead."
-- **Expect:** A universal theme-transition rule in brand/global CSS resets
-  `transition-property` app-wide and overrides `transition-*` utilities
-  (open #460/#682). Theme transitions must be scoped (color properties
-  only), never a `*` shorthand.
+- **Expect:** The brand CSS's unlayered `*` transition shorthand resets
+  `transition-property` on every element and beats Tailwind's layered
+  `transition-*` utilities (open #460/#682) — even though it lists only color
+  properties. Fix by layering: move the transition rule into `@layer base`
+  (or remove/narrow it) so component transitions win; keep brand token
+  declarations unlayered.
 - **Agent:** MIE UI Styling Agent
-- **Source:** issues #460, #682 (open); agent/skills/mieweb-ui-tailwind4/SKILL.md — troubleshooting
+- **Source:** issues #460, #682 (open); src/brands/bluehive.css — Smooth Theme Transitions; agent/skills/mieweb-ui-tailwind4/SKILL.md — troubleshooting
 
 ### STY-14 — TW3 preset token gaps
 
 - **Ask:** "I'm on Tailwind 3 with `miewebUIPreset` and `info`/chart classes
   emit nothing."
-- **Expect:** First verify the TW3 trio (preset + `miewebUISafelist` +
-  `node_modules` content glob). If a documented scale still emits nothing
-  with those in place, the installed preset itself is stale/drifted (open
-  #628 — `.cjs` mirror missing `info`/`chart`): update or escalate, don't
-  hand-patch tokens.
+- **Expect:** Verify the TW3 trio (preset + `miewebUISafelist` +
+  `node_modules` content glob), then inspect the **resolved published
+  preset** in the app's `node_modules` (the dist CJS is compiled from
+  `tailwind-preset.ts` and includes `info` + `chart`). Published consumers
+  are unaffected by #628 — that drift is the repo's hand-maintained
+  `src/tailwind-preset.cjs`, an in-repo/Storybook concern only.
 - **Agent:** MIE UI Styling Agent
-- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — TW3 row; issue #628 (open)
+- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — TW3 row; issue #628 (open, in-repo scope)
 
 ### STY-15 — TW3 safelist
 
@@ -154,22 +158,24 @@ format and scoring. (Pure foundation/setup breakage lives in
 
 - **Ask:** "We can't adopt Tailwind. Can we still use @mieweb/ui styling?"
 - **Expect:** Yes — three supported modes: TW4 (`@source`), TW3
-  (`miewebUIPreset` + safelist), or precompiled (`styles.css`/`init.css`
-  only). For precompiled apps, never prescribe Tailwind tooling; tokens still
-  work via CSS variables.
+  (`miewebUIPreset` + safelist), or precompiled (`import
+'@mieweb/ui/styles.css'` + brand CSS; `init.css` is Tailwind input, not a
+  precompiled option). For precompiled apps, never prescribe Tailwind
+  tooling; tokens still work via CSS variables.
 - **Agent:** MIE UI Styling Agent
-- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — supported modes
+- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — supported modes; src/styles/init.css usage header
 
 ### STY-17 — Enter animations do nothing
 
 - **Ask:** "`animate-in` / `slide-in-from-*` classes are on the element but
   nothing animates."
-- **Expect:** Diagnose by class emission: if the utility emits no CSS, the
-  foundation is missing the library's animation utilities — verify the CSS
-  entry (base stylesheet / `@source` / preset) actually produces those
-  classes before touching the component.
+- **Expect:** Those are `tailwindcss-animate` plugin utilities — no
+  foundation setup (`@source`, preset, or base stylesheet) can emit them if
+  the plugin isn't configured (#469). Identify the unsupported utility names,
+  then switch to an animation the library actually emits, the motion layer,
+  or explicitly configure a compatible animation plugin.
 - **Agent:** MIE UI Styling Agent
-- **Source:** issue #469; lessons/tailwind4-integration.md — Lesson 1 (class-emission diagnosis)
+- **Source:** issue #469 (open)
 
 ### STY-18 — content array in TW4
 
@@ -199,11 +205,13 @@ format and scoring. (Pure foundation/setup breakage lives in
 - **Agent:** MIE UI Styling Agent
 - **Source:** lessons/migration-meteor-blaze-to-react.md — Lesson 4
 
-### STY-21 — Dark mode needs both signals
+### STY-21 — Dark mode signals
 
 - **Ask:** "Is setting `data-theme="dark"` alone enough for dark mode?"
-- **Expect:** No — set both the `.dark` class (Tailwind-config compat) and
-  the `data-theme` attribute, and make sure the active `@custom-variant dark`
-  matches what the toggle sets.
+- **Expect:** It depends on the active `@custom-variant dark`: `init.css` and
+  the manual attribute-based variant both accept `data-theme="dark"` alone,
+  so a single-hook toggle is a supported setup. Grade by whether the toggle
+  matches the configured selector; setting both `.dark` and `data-theme` is
+  the compatibility-safe recommendation for new code, not a requirement.
 - **Agent:** MIE UI Styling Agent
-- **Source:** lessons/tailwind4-integration.md — Lesson 5
+- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — Dark mode toggle

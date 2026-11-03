@@ -36,8 +36,9 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 - **Ask** — the question, phrased the way a consumer actually asks it.
 - **Expect** — the key points a correct answer must contain. Not a transcript:
   an answer passes if every Expect point is present and nothing contradicts
-  the corpus. An answer that invents APIs, prescribes forbidden tooling, or
-  omits an Expect point fails.
+  the corpus. Missing key points downgrade per the scoring procedure below
+  (PARTIAL, or FAIL when the answer is wrong overall); inventing APIs or
+  prescribing forbidden tooling is always FAIL.
 - **Agent** — the specialist that should end up answering. When the question
   is posed to the MIE UI Design Agent, correct routing to this agent (or a
   correct direct answer where the orchestrator owns the domain, e.g.

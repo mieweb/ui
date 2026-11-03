@@ -112,8 +112,9 @@ Primary agent: **MIE UI Design Agent** (owns selection via the
 - **Expect:** Pass both `onOpen` (client-side routing on left-click) and
   `getHref` (real anchors so middle-click/copy-link work); `onOpen` alone
   degrades links to buttons.
-- **Agent:** MIE UI Design Agent
-- **Source:** lessons/wiring-headless-modules.md
+- **Agent:** MIE UI Install Agent (posed to the orchestrator — correct
+  behavior is delegation via its headless-wiring routing row)
+- **Source:** lessons/wiring-headless-modules.md; agent/agents/mieweb-ui-design.agent.md — routing table
 
 ### SEL-13 — Danger styling
 

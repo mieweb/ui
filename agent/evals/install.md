@@ -6,27 +6,34 @@ format and scoring.
 ### INS-1 — Required dependencies
 
 - **Ask:** "What do I install to use @mieweb/ui in a React app?"
-- **Expect:** `@mieweb/ui react react-dom`, plus dev deps `tailwindcss@4
-@tailwindcss/postcss autoprefixer` for the Tailwind 4 path.
+- **Expect:** `@mieweb/ui react react-dom` plus the required `@kerebron/*`
+  runtime peers (`editor`, `editor-kits`, `extension-basic-editor`,
+  `extension-menu`, `wasm` — the main-barrel `Textarea` rides the Kerebron
+  engine), and dev deps `tailwindcss@4 @tailwindcss/postcss autoprefixer`
+  for the Tailwind 4 path.
 - **Agent:** MIE UI Install Agent
-- **Source:** lessons/adopting-mieweb-ui.md — Phase 1.1
+- **Source:** package.json — peerDependencies/peerDependenciesMeta; CONTRIBUTING.md — Optional peer dependencies
 
 ### INS-2 — Minimum CSS entry
 
 - **Ask:** "What's the minimum CSS entry point, and does order matter?"
-- **Expect:** Five pieces, in order: brand CSS import, `@import
-'tailwindcss'`, `@source` for `node_modules/@mieweb/ui/dist`,
-  `@custom-variant dark`, and `@theme` with color scales + fallbacks.
+- **Expect:** In order: base stylesheet (`@mieweb/ui/styles.css`) then brand
+  CSS (both unlayered), `@import 'tailwindcss'`, `@source` for
+  `node_modules/@mieweb/ui/dist`, `@custom-variant dark`, and `@theme` with
+  color scales + fallbacks.
 - **Agent:** MIE UI Install Agent
-- **Source:** lessons/tailwind4-integration.md — Complete CSS Setup
+- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — CSS entry, Option B
 
 ### INS-3 — Quick start
 
 - **Ask:** "Is there a one-import setup?"
-- **Expect:** Yes — `@import '@mieweb/ui/init.css'` (Option A) gives
-  everything; the manual five-piece entry (Option B) is for full control.
+- **Expect:** Almost — the TW4 quick start is **three** lines in your own CSS
+  entry: `@import 'tailwindcss'`, `@source "../node_modules/@mieweb/ui/dist"`,
+  then `@import '@mieweb/ui/init.css'` (dark variant + `@theme` fallbacks +
+  default brand + base styles). `init.css` is Tailwind input, not standalone;
+  for no-Tailwind apps the one-import answer is `styles.css`.
 - **Agent:** MIE UI Install Agent
-- **Source:** lessons/adopting-mieweb-ui.md — Phase 2.1
+- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — CSS entry, Option A; src/styles/init.css usage header
 
 ### INS-4 — PostCSS config
 
@@ -68,12 +75,14 @@ format and scoring.
 
 - **Ask:** "`pnpm install` warns about unmet peers like `leaflet` and
   `three`. Do I need them all?"
-- **Expect:** No — `react`/`react-dom` (≥18) are the required peers; heavy
-  integrations are optional peers needed only for the entry points you use
-  (e.g. maps → `leaflet`, globe → `three`/`react-globe.gl`, kerebron →
-  `@kerebron/*`). The catalog skill lists which entry needs which peer.
+- **Expect:** No — required peers are `react`/`react-dom` (≥18) **and** the
+  five `@kerebron/*` runtime packages (main-barrel `Textarea`; bundling them
+  would duplicate `prosemirror-state`). Everything else heavy is optional,
+  needed only for the entry points you use (maps → `leaflet`, globe →
+  `three`/`react-globe.gl`, collab → `@kerebron/extension-yjs`/`yjs`); a
+  warning for an entry you never import is noise.
 - **Agent:** MIE UI Install Agent
-- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — peer-dep model; agent/skills/mieweb-ui-catalog/SKILL.md — entry points
+- **Source:** package.json — peerDependenciesMeta; CONTRIBUTING.md — Optional peer dependencies; agent/skills/mieweb-ui-catalog/SKILL.md — entry points
 
 ### INS-9 — React 19
 
@@ -151,20 +160,25 @@ format and scoring.
 
 - **Ask:** "How do I connect `ViewSet` (or SuperChat-style modules) to my app
   data?"
-- **Expect:** Write an adapter in the app: fetch/subscribe there, pass
-  `items`/`loading`/`error` down, implement `on*` callbacks (return the
-  promise for built-in optimistic UI + revert), pass `onOpen` + `getHref`.
+- **Expect:** Write an adapter in the app — the module never fetches,
+  subscribes, or navigates. Two distinct contracts: **ViewSet** (collection
+  views) takes `items`/`loading`/`error`, accessor props, promise-returning
+  `on*` callbacks (built-in optimistic UI + revert), and `onOpen` + `getHref`;
+  **SuperChatInbox** has its own props (`conversations`, `onMessageSent`,
+  `onConversationOpened`) — never hand it collection-view props.
 - **Agent:** MIE UI Install Agent
-- **Source:** lessons/wiring-headless-modules.md
+- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — Wiring headless modules; lessons/wiring-headless-modules.md
 
 ### INS-18 — Dark-mode plumbing
 
 - **Ask:** "What plumbing does dark mode need after install?"
-- **Expect:** `useTheme` wired so the toggle sets both the `.dark` class and
-  `data-theme`, plus the `@custom-variant dark` in the CSS entry; without
-  either half, `dark:` utilities don't fire.
+- **Expect:** A toggle that matches the **active** `@custom-variant dark`
+  selector — `init.css` accepts either `.dark` or `data-theme="dark"`, so a
+  single-hook toggle can be valid; setting both via `useTheme` is the
+  compatibility-safe recommendation, not a hard requirement. Diagnose by
+  comparing the toggle to the variant in effect.
 - **Agent:** MIE UI Install Agent
-- **Source:** lessons/tailwind4-integration.md — Lesson 5; lessons/adopting-mieweb-ui.md — Phase 2.3
+- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — Dark mode toggle
 
 ### INS-19 — Brand loads but looks broken
 
