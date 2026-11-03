@@ -78,7 +78,7 @@ const [calls, setCalls] = useState<Record<string, MCPToolCall>>({});
 - \`ResourceLink\` is an \`<a href>\` — with \`onLinkClick\` it calls \`preventDefault\` and hands you the link; without it the browser navigates, and \`resources[]\` without \`uri\` produce \`href="#"\`. External links carry no \`rel\`.
 - **\`MCPToolCallDisplay\` is English only.** The friendly-name map, tense rewriting ("Creating" → "Created"), "Parameters", the \`ms\`/\`s\` duration format and "An error occurred" are hard-coded and assume English verb forms; \`toolName\` fallbacks are shown raw. \`MCPToolCallGroup\` takes every string through \`labels\`.
 - Parameter values render via \`JSON.stringify\` (no truncation); the box is \`max-w-md\` and \`max-h-[500px]\` scrolling. Nothing is sanitised — \`summary\`, \`error\` and parameter values are text nodes, so HTML is not interpreted, but very long strings are not wrapped by word.
-- Theming uses hard-coded \`neutral-*\`, \`primary-*\`, \`green-*\`, \`red-*\`, \`amber-*\` utilities; RTL is fine (flex, logical \`ms-*\`/\`border-s\`, no physical offsets). Depends on \`class-variance-authority\` and \`lucide-react\`. Entry \`@mieweb/ui\`.
+- Theming uses hard-coded \`neutral-*\`, \`primary-*\`, \`green-*\`, \`red-*\`, \`amber-*\` utilities; RTL is fine (flex, logical \`ms-*\`/\`border-s\`, no physical offsets); \`MCPToolCallGroup\` renders parameters as an LTR island (\`dir="ltr"\`, since they are JSON) and result and error text with \`dir="auto"\`. Depends on \`class-variance-authority\` and \`lucide-react\`. Entry \`@mieweb/ui\`.
 
 ### Motion
 

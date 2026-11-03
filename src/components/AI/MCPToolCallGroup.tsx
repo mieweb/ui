@@ -237,7 +237,10 @@ function OutputDisclosure({ label, text }: { label: string; text: string }) {
         {label}
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-1">
-        <pre className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900">
+        <pre
+          dir="auto"
+          className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900"
+        >
           {text}
         </pre>
       </CollapsibleContent>
@@ -346,7 +349,11 @@ function ToolCallRow({
               />
             )}
             {toolCall.parameters.length > 0 && (
-              <pre className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900">
+              // JSON keeps its left-to-right order in RTL documents.
+              <pre
+                dir="ltr"
+                className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900"
+              >
                 {formatParameters(toolCall)}
               </pre>
             )}

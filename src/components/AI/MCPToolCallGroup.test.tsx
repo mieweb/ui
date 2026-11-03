@@ -333,6 +333,21 @@ describe('MCPToolCallGroup', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps parameter JSON left-to-right and lets output pick its direction', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success', { result: { type: 'text', data: 'done' } }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Show result' }));
+    expect(screen.getByText(/"path": "\/"/)).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByText('done')).toHaveAttribute('dir', 'auto');
+  });
+
   it('renders a lone call as a bare row with no header', () => {
     renderWithTheme(<MCPToolCallGroup toolCalls={[call('a', 'success')]} />);
 
