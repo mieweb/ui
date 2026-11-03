@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MacroLibrary, type MacroGroup } from './MacroLibrary';
-import { RichTextEditor } from '../RichTextEditor';
+import { TextAreaRichKerebron as TextAreaRich } from '../TextAreaRich/TextAreaRichKerebron';
 
 const meta: Meta<typeof MacroLibrary> = {
   id: 'editors-macrolibrary',
@@ -232,7 +232,7 @@ function DockedExample() {
   const [value, setValue] = useState('<p>Patient presents for follow-up.</p>');
   return (
     <div className="max-w-4xl">
-      <RichTextEditor
+      <TextAreaRich
         value={value}
         onChange={setValue}
         aria-label="Encounter note"
@@ -247,7 +247,7 @@ function DockedExample() {
   );
 }
 
-export const DockedInRichTextEditor: Story = {
+export const DockedInEditor: Story = {
   render: () => <DockedExample />,
 };
 
@@ -256,14 +256,14 @@ function MultipleEditorsExample() {
   const [plan, setPlan] = useState('');
   return (
     <div className="flex max-w-4xl flex-col gap-6">
-      <RichTextEditor
+      <TextAreaRich
         value={subjective}
         onChange={setSubjective}
         aria-label="Subjective"
         placeholder="Subjective…"
         macros={encounterGroups}
       />
-      <RichTextEditor
+      <TextAreaRich
         value={plan}
         onChange={setPlan}
         aria-label="Plan"
