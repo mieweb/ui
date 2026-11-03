@@ -8,10 +8,14 @@ import * as React from 'react';
  */
 export const parenGroup = (excluded = '') => String.raw`\([^()${excluded}]*\)`;
 
-/** One piece of a web address: a character, or a parenthesised group. */
-const URL_PIECE = String.raw`[^\s()<]|${parenGroup(String.raw`\s<`)}`;
+/**
+ * One piece of a web address: a character, or a parenthesised group. Never an
+ * angle bracket, which delimits an address (`<https://…>`) rather than being
+ * part of it.
+ */
+const URL_PIECE = String.raw`[^\s()<>]|${parenGroup(String.raw`\s<>`)}`;
 /** A bare address's last piece: not closing punctuation. */
-const URL_END = String.raw`[^\s()<.,;:!?\]'"]|${parenGroup(String.raw`\s<`)}`;
+const URL_END = String.raw`[^\s()<>.,;:!?\]'"]|${parenGroup(String.raw`\s<>`)}`;
 
 /**
  * A Markdown link's optional title after its address (`"…"`, `'…'` or `(…)`,
@@ -21,15 +25,17 @@ const URL_END = String.raw`[^\s()<.,;:!?\]'"]|${parenGroup(String.raw`\s<`)}`;
 const LINK_TITLE = String.raw`(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?[ \t]*`;
 
 /**
- * A Markdown link (`[label](https://… "title")`) or a bare web address. Only
- * http(s): the caption is a message's raw text, so nothing else becomes a
- * link. A bare address stops before closing punctuation ("see https://x.dev."
- * keeps the full stop out).
+ * A Markdown link (`[label](https://… "title")`), a Markdown autolink
+ * (`<https://…>`, shown without its brackets) or a bare web address. Only
+ * http(s), in any case (`HTTPS://` too): the caption is a message's raw text,
+ * so nothing else becomes a link. A bare address stops before closing
+ * punctuation ("see https://x.dev." keeps the full stop out).
  */
 const LINK = new RegExp(
   String.raw`\[([^\]\n]+)\]\((https?:\/\/(?:${URL_PIECE})+)${LINK_TITLE}\)` +
+    String.raw`|<(https?:\/\/[^\s<>]+)>` +
     String.raw`|(https?:\/\/(?:${URL_PIECE})*(?:${URL_END}))`,
-  'g'
+  'gi'
 );
 
 /**
@@ -42,10 +48,10 @@ export function linkifyCaption(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
   let last = 0;
   for (const match of text.matchAll(LINK)) {
-    const [whole, label, labelled, bare] = match;
+    const [whole, label, labelled, autolink, bare] = match;
     const at = match.index ?? 0;
     if (at > last) parts.push(text.slice(last, at));
-    const href = labelled ?? bare;
+    const href = labelled ?? autolink ?? bare;
     parts.push(
       <a
         key={at}
@@ -54,7 +60,7 @@ export function linkifyCaption(text: string): React.ReactNode {
         rel="noopener noreferrer"
         className="underline underline-offset-2"
       >
-        {label ?? bare}
+        {label ?? href}
       </a>
     );
     last = at + whole.length;
