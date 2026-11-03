@@ -499,6 +499,25 @@ function ToolResultDisplay({
         </p>
       )}
 
+      <ToolResultLinks result={result} onLinkClick={onLinkClick} />
+    </div>
+  );
+}
+
+/** True when a result carries a `link` or `resources` to render. */
+export function hasToolResultLinks(result: MCPToolResult | undefined): boolean {
+  return Boolean(result?.link || result?.resources?.length);
+}
+
+interface ToolResultLinksProps {
+  result: MCPToolResult;
+  onLinkClick?: (link: MCPResourceLink) => void;
+}
+
+/** A result's `link` and `resources` as {@link ResourceLink}s. */
+export function ToolResultLinks({ result, onLinkClick }: ToolResultLinksProps) {
+  return (
+    <>
       {result.link && <ResourceLink link={result.link} onClick={onLinkClick} />}
 
       {result.resources && result.resources.length > 0 && (
@@ -516,7 +535,7 @@ function ToolResultDisplay({
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }
 

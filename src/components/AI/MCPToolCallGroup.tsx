@@ -19,7 +19,8 @@ import {
   CollapsibleTrigger,
 } from '../Collapsible';
 import { Spinner } from '../Spinner';
-import type { MCPToolCall, MCPToolStatus } from './types';
+import { hasToolResultLinks, ToolResultLinks } from './MCPToolCall';
+import type { MCPResourceLink, MCPToolCall, MCPToolStatus } from './types';
 
 // ============================================================================
 // Labels
@@ -223,6 +224,7 @@ interface ToolCallRowProps {
   labels: MCPToolCallGroupLabels;
   onApprove?: MCPToolCallGroupProps['onApprove'];
   onDeny?: MCPToolCallGroupProps['onDeny'];
+  onLinkClick?: MCPToolCallGroupProps['onLinkClick'];
 }
 
 /**
@@ -238,6 +240,7 @@ function ToolCallRow({
   labels,
   onApprove,
   onDeny,
+  onLinkClick,
 }: ToolCallRowProps) {
   // `collapse` animates height, which `MotionConfig reducedMotion="user"`
   // leaves running, so the row honours the preference itself.
@@ -245,7 +248,9 @@ function ToolCallRow({
   const [acting, setActing] = React.useState(false);
   const isAwaitingApproval = toolCall.status === 'awaiting-approval';
   const result = formatResult(toolCall);
-  const hasDetails = toolCall.parameters.length > 0 || Boolean(result);
+  const hasLinks = hasToolResultLinks(toolCall.result);
+  const hasDetails =
+    toolCall.parameters.length > 0 || Boolean(result) || hasLinks;
 
   const act = async (action: () => void | Promise<void>) => {
     setActing(true);
@@ -302,6 +307,12 @@ function ToolCallRow({
           </CollapsibleTrigger>
 
           <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
+            {toolCall.result && hasLinks && (
+              <ToolResultLinks
+                result={toolCall.result}
+                onLinkClick={onLinkClick}
+              />
+            )}
             {toolCall.parameters.length > 0 && (
               <pre className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900">
                 {formatParameters(toolCall)}
@@ -393,16 +404,21 @@ export interface MCPToolCallGroupProps {
   ) => void | Promise<void>;
   /** Deny a call that is `awaiting-approval`. */
   onDeny?: (toolCall: MCPToolCall) => void | Promise<void>;
+  /** Intercept clicks on a result's `link` and `resources`. */
+  onLinkClick?: (link: MCPResourceLink) => void;
   /** Overrides for the English default strings. */
   labels?: MCPToolCallGroupLabelOverrides;
   /** Additional class name */
   className?: string;
 }
 
-/** The parts of {@link MCPToolCallGroupProps} a chat passes to every group. */
+/**
+ * The parts of {@link MCPToolCallGroupProps} a chat passes to every group.
+ * `onLinkClick` comes from the chat's own prop of the same name.
+ */
 export type MCPToolCallGroupOptions = Omit<
   MCPToolCallGroupProps,
-  'toolCalls' | 'className'
+  'toolCalls' | 'className' | 'onLinkClick'
 >;
 
 /**
@@ -415,6 +431,7 @@ export function MCPToolCallGroup({
   toolCalls,
   onApprove,
   onDeny,
+  onLinkClick,
   labels: labelOverrides,
   className,
 }: MCPToolCallGroupProps) {
@@ -492,6 +509,7 @@ export function MCPToolCallGroup({
               labels={labels}
               onApprove={onApprove}
               onDeny={onDeny}
+              onLinkClick={onLinkClick}
             />
           ))}
         </AnimatedPresence>

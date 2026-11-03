@@ -174,6 +174,39 @@ describe('MCPToolCallGroup', () => {
     expect(screen.getByRole('status')).toHaveTextContent('1 tool call failed');
   });
 
+  it('renders result links in the row and hands clicks to onLinkClick', () => {
+    const onLinkClick = vi.fn();
+    const link = {
+      href: '/patients/42',
+      label: 'Jane Doe',
+      type: 'patient' as const,
+    };
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success', {
+            result: {
+              type: 'link',
+              data: null,
+              summary: 'Created patient',
+              link,
+              resources: [{ id: 'r1', type: 'document', name: 'Intake form' }],
+            },
+          }),
+        ]}
+        onLinkClick={onLinkClick}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    fireEvent.click(screen.getByRole('link', { name: /Jane Doe/ }));
+
+    expect(onLinkClick).toHaveBeenCalledWith(link);
+    expect(
+      screen.getByRole('link', { name: /Intake form/ })
+    ).toBeInTheDocument();
+  });
+
   it('renders a lone call as a bare row with no header', () => {
     renderWithTheme(<MCPToolCallGroup toolCalls={[call('a', 'success')]} />);
 

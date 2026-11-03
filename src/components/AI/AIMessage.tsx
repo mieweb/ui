@@ -559,6 +559,7 @@ function MessageContentBlocks({
       <MCPToolCallGroup
         key={`tool-call-group-${run[0].id}`}
         toolCalls={run}
+        onLinkClick={onLinkClick}
         {...toolCallGroup}
       />
     );
