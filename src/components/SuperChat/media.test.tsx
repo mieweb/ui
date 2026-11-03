@@ -196,6 +196,17 @@ describe('messagePreview', () => {
     ).toBe('bold, italic, also, strong, code and gone');
   });
 
+  it('previews a message as long as the composer allows without stalling', () => {
+    // Every unmatched "[" used to rescan the rest: seconds for this one.
+    const started = performance.now();
+    expect(preview('['.repeat(100_000))).toMatch(/^\[+$/);
+    expect(performance.now() - started).toBeLessThan(250);
+    // A long message still previews its start, Markdown stripped.
+    expect(preview(`Read **this** first. ${'x'.repeat(100_000)}`)).toMatch(
+      /^Read this first\. x+$/
+    );
+  });
+
   it('strips a link or image whose address holds parentheses', () => {
     expect(
       preview(
