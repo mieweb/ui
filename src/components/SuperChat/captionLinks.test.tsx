@@ -37,6 +37,28 @@ describe('linkifyCaption', () => {
     expect(screen.getAllByRole('link')).toHaveLength(1);
   });
 
+  it.each([
+    ['double quotes', '"Rollout plan"'],
+    ['single quotes', "'Rollout plan'"],
+    ['parentheses', '(Rollout plan)'],
+  ])(
+    'links a Markdown link with a title in %s by its label, the title out of the address',
+    (_, title) => {
+      render(
+        <p>
+          {linkifyCaption(
+            `Read [the rollout plan](https://example.org/rollout ${title}) today`
+          )}
+        </p>
+      );
+      const link = screen.getByRole('link', { name: 'the rollout plan' });
+      expect(link).toHaveAttribute('href', 'https://example.org/rollout');
+      expect(link.parentElement).toHaveTextContent(
+        /^Read the rollout plan today$/
+      );
+    }
+  );
+
   const WIKI = 'https://en.wikipedia.org/wiki/Function_(mathematics)';
 
   it('keeps balanced parentheses in a bare address, not the punctuation after', () => {
