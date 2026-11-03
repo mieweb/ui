@@ -32,9 +32,14 @@ const LINK_TITLE = String.raw`(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?[ \
  * http(s), in any case (`HTTPS://` too): the caption is a message's raw text,
  * so nothing else becomes a link. A bare address stops before closing
  * punctuation ("see https://x.dev." keeps the full stop out).
+ *
+ * A label holds no `[`, so a label search ends at the next one. Otherwise
+ * every unmatched `[` would search to the end of the line: 100,000 of them
+ * (the composer's limit) took 6 s. In `[a [b](…)`, as in CommonMark, only
+ * `b` is the link.
  */
 const LINK = new RegExp(
-  String.raw`\[([^\]\n]+)\]\((https?:\/\/(?:${URL_PIECE})+)${LINK_TITLE}\)` +
+  String.raw`\[([^[\]\n]+)\]\((https?:\/\/(?:${URL_PIECE})+)${LINK_TITLE}\)` +
     String.raw`|<(https?:\/\/[^\s<>]+)>` +
     String.raw`|(https?:\/\/(?:${URL_PIECE})*(?:${URL_END}))`,
   'gi'
