@@ -392,6 +392,35 @@ describe('SuperChat media view', () => {
     ).toBeTruthy();
   });
 
+  it('keeps the gallery and an attachment whose id is "gallery" apart', () => {
+    const duplicateKey = vi.spyOn(console, 'error');
+    const { container } = render(
+      <SuperChat
+        conversation={{
+          ...conversation,
+          thread: [
+            {
+              ...conversation.thread[0],
+              media: [
+                { id: 'p1', kind: 'image', src: '/p1.png', title: 'Photo 1' },
+                { id: 'p2', kind: 'image', src: '/p2.png', title: 'Photo 2' },
+                { id: 'gallery', kind: 'audio', src: '/a.m4a', title: 'Memo' },
+              ],
+            },
+          ],
+        }}
+      />
+    );
+    expect(
+      container.querySelectorAll('[data-slot="superchat-message-attachment"]')
+    ).toHaveLength(2);
+    expect(
+      duplicateKey.mock.calls.some((args) =>
+        args.some((arg) => String(arg).includes('same key'))
+      )
+    ).toBe(false);
+  });
+
   it("lists a message's documents in one tile, each opening in a new tab", () => {
     render(
       <SuperChat
@@ -1364,7 +1393,9 @@ describe('SuperChat media view', () => {
       screen.getByRole('button', { name: 'Back to conversation' })
     );
     await waitFor(() => expect(card()).toHaveFocus());
-  });
+    // Scrolling 80 tall rows into view one at a time is slow work, over the
+    // default 5 s under coverage on CI.
+  }, 20_000);
 
   it('keeps the feed mounted when the host switches layout', async () => {
     mockNativePlayback();

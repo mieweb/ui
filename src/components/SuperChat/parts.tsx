@@ -1424,7 +1424,8 @@ export const MessageRow = React.memo(function MessageRow({
               const { attachment, launchId, open, card } = entry;
               return (
                 <AttachmentTile
-                  key={attachment.id}
+                  // Namespaced: a host's attachment id can be "gallery" too.
+                  key={`media:${attachment.id}`}
                   failed={failed}
                   sending={sending}
                 >
