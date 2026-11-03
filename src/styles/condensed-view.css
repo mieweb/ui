@@ -6,20 +6,27 @@
    ============================================ */
 
 /* Badge — tighter padding, square corners, smaller text */
-/* MediaFeed keeps its media surface readable while tightening its chrome. */
+/* MediaFeed keeps its media surface readable while tightening its chrome.
+   The overlay layout is edge to edge by design, so its stage isn't padded. */
 body.condensed [data-component='media-feed'][data-slot='root'] {
   font-size: 0.75rem;
 }
 
-body.condensed [data-component='media-feed'] [data-slot='viewport'] {
+body.condensed
+  [data-component='media-feed']:not([data-layout='overlay'])
+  [data-slot='viewport'] {
   gap: 0.5rem;
 }
 
-body.condensed [data-component='media-feed'] [data-slot='item'] {
+body.condensed
+  [data-component='media-feed']:not([data-layout='overlay'])
+  [data-slot='item'] {
   border-radius: 0.5rem;
 }
 
-body.condensed [data-component='media-feed'] [data-slot='media'] {
+body.condensed
+  [data-component='media-feed']:not([data-layout='overlay'])
+  [data-slot='media'] {
   padding: 0.5rem;
 }
 
@@ -27,7 +34,9 @@ body.condensed [data-component='media-feed'][data-slot='fullscreen'] {
   padding-inline: 0.5rem;
 }
 
-body.condensed [data-component='media-feed'] [data-slot='details'] {
+body.condensed
+  [data-component='media-feed']:not([data-layout='overlay'])
+  [data-slot='details'] {
   padding: 0.5rem;
   gap: 0.25rem;
 }
