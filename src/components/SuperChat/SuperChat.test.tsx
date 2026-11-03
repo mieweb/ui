@@ -515,6 +515,23 @@ describe('SuperChat', () => {
     expect(screen.getByText('hi').tagName).toBe('STRONG');
   });
 
+  it("sets a message's text, author and time in their own direction, not the page's", () => {
+    const { container } = render(
+      <div dir="rtl">
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+    // "hi Alice." in an RTL page keeps its full stop at the end, and
+    // "9:00 AM" doesn't read "AM 9:00".
+    const text = screen.getByText('hi').closest('.prose');
+    expect(text).toHaveAttribute('dir', 'auto');
+    const meta = container.querySelector(
+      '[data-slot="superchat-message-meta"]'
+    )!;
+    for (const part of meta.querySelectorAll('span:not([data-slot])'))
+      expect(part).toHaveAttribute('dir', 'auto');
+  });
+
   it('fires onMessageSent with detected mentions', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
