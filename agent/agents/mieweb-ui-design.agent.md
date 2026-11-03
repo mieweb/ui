@@ -52,13 +52,14 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 
 ## Route to specialists
 
-| Question is about…                                  | Delegate to            |
-| --------------------------------------------------- | ---------------------- |
-| install / peer deps / preset / safelist / `@source` | MIE UI Install Agent   |
-| tokens, CSS vars, Tailwind classes, brands, dark    | MIE UI Styling Agent   |
-| ARIA, keyboard nav, screen readers, contrast        | MIE UI A11y Agent      |
-| translations, locale bundles, Intl formats, RTL     | MIE UI i18n Agent      |
-| migrating code to @mieweb/ui, raw-HTML compliance   | MIE UI Migration Agent |
+| Question is about…                                   | Delegate to            |
+| ---------------------------------------------------- | ---------------------- |
+| install / peer deps / preset / safelist / `@source`  | MIE UI Install Agent   |
+| wiring headless modules (ViewSet, SuperChat) to data | MIE UI Install Agent   |
+| tokens, CSS vars, Tailwind classes, brands, dark     | MIE UI Styling Agent   |
+| ARIA, keyboard nav, screen readers, contrast         | MIE UI A11y Agent      |
+| translations, locale bundles, Intl formats, RTL      | MIE UI i18n Agent      |
+| migrating code to @mieweb/ui, raw-HTML compliance    | MIE UI Migration Agent |
 
 More specialists (Grids, DataVis, Views,
 SuperChat, Rich Text) land in later phases; until one ships, answer its domain

@@ -86,14 +86,14 @@ The fallback (`#171717`) ensures colors work even when the brand CSS doesn't def
 
 **Fallback palette values (Tailwind defaults):**
 
-| Scale | 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950 |
-|-------|-----|------|------|------|------|------|------|------|------|------|------|
-| neutral | #fafafa | #f5f5f5 | #e5e5e5 | #d4d4d4 | #a3a3a3 | #737373 | #525252 | #404040 | #262626 | #171717 | #0a0a0a |
+| Scale              | 50      | 100     | 200     | 300     | 400     | 500     | 600     | 700     | 800     | 900     | 950     |
+| ------------------ | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- |
+| neutral            | #fafafa | #f5f5f5 | #e5e5e5 | #d4d4d4 | #a3a3a3 | #737373 | #525252 | #404040 | #262626 | #171717 | #0a0a0a |
 | secondary (Indigo) | #eef2ff | #e0e7ff | #c7d2fe | #a5b4fc | #818cf8 | #6366f1 | #4f46e5 | #4338ca | #3730a3 | #312e81 | #1e1b4b |
-| destructive | #fef2f2 | #fee2e2 | #fecaca | #fca5a5 | #f87171 | #ef4444 | #dc2626 | #b91c1c | #991b1b | #7f1d1d | #450a0a |
-| success | #f0fdf4 | #dcfce7 | #bbf7d0 | #86efac | #4ade80 | #22c55e | #16a34a | #15803d | #166534 | #14532d | #052e16 |
-| warning | #fffbeb | #fef3c7 | #fde68a | #fcd34d | #fbbf24 | #f59e0b | #d97706 | #b45309 | #92400e | #78350f | #451a03 |
-| info | #f0f9ff | #e0f2fe | #bae6fd | #7dd3fc | #38bdf8 | #0ea5e9 | #0284c7 | #0369a1 | #075985 | #0c4a6e | #082f49 |
+| destructive        | #fef2f2 | #fee2e2 | #fecaca | #fca5a5 | #f87171 | #ef4444 | #dc2626 | #b91c1c | #991b1b | #7f1d1d | #450a0a |
+| success            | #f0fdf4 | #dcfce7 | #bbf7d0 | #86efac | #4ade80 | #22c55e | #16a34a | #15803d | #166534 | #14532d | #052e16 |
+| warning            | #fffbeb | #fef3c7 | #fde68a | #fcd34d | #fbbf24 | #f59e0b | #d97706 | #b45309 | #92400e | #78350f | #451a03 |
+| info               | #f0f9ff | #e0f2fe | #bae6fd | #7dd3fc | #38bdf8 | #0ea5e9 | #0284c7 | #0369a1 | #075985 | #0c4a6e | #082f49 |
 
 ---
 
@@ -110,8 +110,8 @@ The fallback (`#171717`) ensures colors work even when the brand CSS doesn't def
 ```typescript
 function applyTheme(t: 'light' | 'dark') {
   const root = document.documentElement;
-  root.classList.toggle('dark', t === 'dark');       // for Tailwind config compat
-  root.setAttribute('data-theme', t);                // for @custom-variant
+  root.classList.toggle('dark', t === 'dark'); // for Tailwind config compat
+  root.setAttribute('data-theme', t); // for @custom-variant
 }
 ```
 
@@ -306,15 +306,16 @@ module.exports = {
 
 ## Quick Troubleshooting
 
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| Black/missing borders on @mieweb/ui components | Tailwind tree-shaking | Add `@source` directive |
-| Dark mode toggle does nothing | Missing `@custom-variant dark` | Add it to styles.css |
-| Dark mode toggles but sidebar stays light | Missing neutral color fallbacks | Add fallback values to `@theme inline` |
-| Brand switch has no effect | Wrong import path | Use barrel: `from '@mieweb/ui/brands'` |
-| TypeScript errors on brand imports | Subpath resolution | Use barrel import, not individual subpaths |
-| PostCSS does nothing | Wrong plugin | Use `@tailwindcss/postcss`, not `tailwindcss` |
-| `var()` resolves to transparent | No CSS variable defined | Add fallback value: `var(--token, #hex)` |
+| Symptom                                                     | Likely Cause                                                                                | Fix                                              |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Black/missing borders on @mieweb/ui components              | Tailwind tree-shaking                                                                       | Add `@source` directive                          |
+| Dark mode toggle does nothing                               | Missing `@custom-variant dark`                                                              | Add it to styles.css                             |
+| Dark mode toggles but sidebar stays light                   | Missing neutral color fallbacks                                                             | Add fallback values to `@theme inline`           |
+| Brand switch has no effect                                  | Wrong import path                                                                           | Use barrel: `from '@mieweb/ui/brands'`           |
+| TypeScript errors on brand imports                          | Subpath resolution                                                                          | Use barrel import, not individual subpaths       |
+| PostCSS does nothing                                        | Wrong plugin                                                                                | Use `@tailwindcss/postcss`, not `tailwindcss`    |
+| `var()` resolves to transparent                             | No CSS variable defined                                                                     | Add fallback value: `var(--token, #hex)`         |
+| `transition-*` utilities stop working after theme/brand CSS | Universal theme-transition rule resets `transition-property` app-wide (mieweb/ui#460, #682) | Scope theme transitions to color properties only |
 
 ---
 
