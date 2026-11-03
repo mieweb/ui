@@ -6,15 +6,12 @@
  * (mieweb/ui#692). This component will be removed in a future major release.
  */
 export { RichTextEditor } from './RichTextEditor';
-/**
- * @deprecated Props of the deprecated legacy `RichTextEditor`
- * (mieweb/ui#692) — see `RichEditorProps` (`@mieweb/ui/kerebron`) instead.
- */
-export type { RichTextEditorProps } from './RichTextEditor';
 // Shared contracts: these types and utilities are also used by the supported
 // Kerebron surfaces (`TextAreaRich` from `@mieweb/ui/kerebron`, `EmailEditor`)
-// and are not deprecated.
+// and are not deprecated. `RichTextEditorProps` is the base props contract
+// that `TextAreaRichProps` extends (mieweb/ui#692).
 export type {
+  RichTextEditorProps,
   RichTextEditorBlockMenuLabels,
   RichTextVariable,
   RichTextVariableGroup,

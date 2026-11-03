@@ -91,11 +91,6 @@ The host owns the HTML string and is responsible for sanitising it before storag
           why: 'TextAreaRich packages this editor chromeless — hidden toolbar, markdown shortcuts, block gutter menu — in Textarea-matched chrome for comment-sized fields; RichTextEditor for full documents with the toolbar on.',
         },
         {
-          type: 'alternative to',
-          target: 'editors-emaileditor',
-          why: 'RichTextEditor for a single formatted HTML body; EmailEditor when the message needs layout blocks and is sent as an email.',
-        },
-        {
           type: 'composes with',
           target: 'editors-macrolibrary',
           why: 'The macros prop docks a MacroLibrary panel inside the editor frame; the editor restores the saved caret and inserts the chosen macro through the native undo stack.',

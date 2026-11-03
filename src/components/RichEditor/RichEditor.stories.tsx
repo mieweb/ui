@@ -117,6 +117,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           target: 'editors-q',
           why: 'RichEditor edits free-form Markdown prose; Q edits a structured agent configuration through a generated form plus YAML/JSON view.',
         },
+        {
+          type: 'alternative to',
+          target: 'editors-emaileditor',
+          why: 'RichEditor edits a single formatted body; EmailEditor when the message needs layout blocks and is sent as an email.',
+        },
       ],
     },
   },

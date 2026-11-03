@@ -77,8 +77,8 @@ The host owns both values, saves them, and compiles the MJML when sending.
         },
         {
           type: 'alternative to',
-          target: 'deprecated-richtexteditor',
-          why: 'EmailEditor when the message needs layout blocks and is sent as an email; a single formatted body belongs in RichEditor (RichTextEditor is deprecated).',
+          target: 'editors-richeditor',
+          why: 'EmailEditor when the message needs layout blocks and is sent as an email; a single formatted body belongs in RichEditor.',
         },
       ],
     },
