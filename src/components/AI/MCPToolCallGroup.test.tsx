@@ -467,6 +467,33 @@ describe('MCPToolCallGroup', () => {
     expect(rows()).toHaveLength(1);
   });
 
+  it('shows the display name and keeps the tool id in the details', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success', { displayName: 'Read notes.md' })]}
+      />
+    );
+
+    const [row] = rows();
+    expect(within(row).getByRole('group')).toHaveAccessibleName(
+      'Tool call: Read notes.md'
+    );
+    expect(within(row).queryByText('tool_a')).toBeNull();
+
+    fireEvent.click(within(row).getByRole('button', { name: /Read notes.md/ }));
+    expect(within(row).getByText('Tool ID')).toBeInTheDocument();
+    expect(within(row).getByText('tool_a')).toBeInTheDocument();
+  });
+
+  it('shows the tool id in the row when there is no display name', () => {
+    renderWithTheme(<MCPToolCallGroup toolCalls={[call('a', 'success')]} />);
+
+    const [row] = rows();
+    expect(within(row).getByText('tool_a')).toBeInTheDocument();
+    fireEvent.click(within(row).getByRole('button', { name: /tool_a/ }));
+    expect(within(row).queryByText('Tool ID')).toBeNull();
+  });
+
   it('uses label overrides, merging status labels per key', () => {
     renderWithTheme(
       <MCPToolCallGroup

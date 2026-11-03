@@ -47,6 +47,12 @@ export interface MCPToolCall {
   /** Name of the tool being invoked */
   toolName: string;
   /**
+   * What the call did in the user's words, e.g. "Read notes.md". Shown in
+   * place of `toolName`, which then moves into the call's details. Omit it to
+   * show `toolName`.
+   */
+  displayName?: string;
+  /**
    * Who provides the tool — an MCP server's display name, for example. Shown
    * before the tool name; omit it for first-party tools.
    */

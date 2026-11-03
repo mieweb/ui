@@ -695,12 +695,14 @@ export function MCPToolCallDisplay({
     return `${(ms / 1000).toFixed(1)}s`;
   };
 
-  const friendlyName = getToolFriendlyName(toolCall.toolName, toolCall.status);
+  const friendlyName =
+    toolCall.displayName ??
+    getToolFriendlyName(toolCall.toolName, toolCall.status);
   const durationLabel = formatDuration(toolCall.duration);
-  const paramSummary = getParameterSummary(
-    toolCall.toolName,
-    toolCall.parameters
-  );
+  // A host-supplied display name already names what the call acted on.
+  const paramSummary = toolCall.displayName
+    ? null
+    : getParameterSummary(toolCall.toolName, toolCall.parameters);
 
   // While running, show the input summary in the pill (e.g. "Creating patient
   // · John Smith"). On success the name already appears as the result link, so

@@ -47,6 +47,8 @@ export interface MCPToolCallGroupLabels {
   status: Record<MCPToolStatus, string>;
   /** Accessible name for a call's row. */
   callLabel: (toolCall: MCPToolCall) => string;
+  /** Heads the raw `toolName` in a row's details when `displayName` is set. */
+  toolId: string;
   /** Disclosure for a successful call's output. */
   showResult: string;
   /** Disclosure for a failed call's full error. */
@@ -89,10 +91,13 @@ export const defaultMCPToolCallGroupLabels: MCPToolCallGroupLabels = {
     denied: 'Denied',
     expired: 'Expired',
   },
-  callLabel: (toolCall) =>
-    toolCall.serverName
-      ? `Tool call: ${toolCall.toolName} from ${toolCall.serverName}`
-      : `Tool call: ${toolCall.toolName}`,
+  callLabel: (toolCall) => {
+    const name = toolCall.displayName ?? toolCall.toolName;
+    return toolCall.serverName
+      ? `Tool call: ${name} from ${toolCall.serverName}`
+      : `Tool call: ${name}`;
+  },
+  toolId: 'Tool ID',
   showResult: 'Show result',
   showError: 'Show error',
   allowOnce: 'Allow once',
@@ -359,9 +364,13 @@ function ToolCallRow({
                 {toolCall.serverName}
               </span>
             )}
-            <code className="min-w-0 truncate font-mono text-xs">
-              {toolCall.toolName}
-            </code>
+            {toolCall.displayName ? (
+              <span className="min-w-0 truncate">{toolCall.displayName}</span>
+            ) : (
+              <code className="min-w-0 truncate font-mono text-xs">
+                {toolCall.toolName}
+              </code>
+            )}
             {toolCall.status === 'running' && (
               <span aria-hidden="true" className="shrink-0">
                 <Spinner size="xs" />
@@ -381,6 +390,15 @@ function ToolCallRow({
           </CollapsibleTrigger>
 
           <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
+            {toolCall.displayName && (
+              <p
+                data-slot="ai-tool-call-id"
+                className="text-xs text-neutral-600 dark:text-neutral-400"
+              >
+                <span className="font-medium">{labels.toolId}</span>{' '}
+                <code className="font-mono">{toolCall.toolName}</code>
+              </p>
+            )}
             {toolCall.result && hasLinks && (
               <ToolResultLinks
                 result={toolCall.result}
