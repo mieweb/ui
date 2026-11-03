@@ -106,6 +106,26 @@ describe('MCPToolCallGroup', () => {
     ).toBeInTheDocument();
   });
 
+  it('offers the full error alongside a partial result', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'error', {
+            result: { type: 'text', data: '3 of 10 rows written' },
+            error: 'Disk quota exceeded',
+          }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    expect(
+      screen.getByRole('button', { name: 'Show result' })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Show error' }));
+    expect(screen.getAllByText('Disk quota exceeded')).toHaveLength(2);
+  });
+
   it('keeps approval controls visible when the user collapses the group', () => {
     renderWithTheme(
       <MCPToolCallGroup

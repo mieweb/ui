@@ -219,6 +219,26 @@ function formatResult(toolCall: MCPToolCall): string | null {
     : JSON.stringify(result.data, null, 2);
 }
 
+/** A row's own collapsed block of output text, such as a result or error. */
+function OutputDisclosure({ label, text }: { label: string; text: string }) {
+  return (
+    <Collapsible>
+      <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
+        <ChevronDown
+          aria-hidden="true"
+          className="h-3 w-3 transition-transform motion-reduce:transition-none [[data-state=open]>&]:rotate-180"
+        />
+        {label}
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-1">
+        <pre className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900">
+          {text}
+        </pre>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 interface ToolCallRowProps {
   toolCall: MCPToolCall;
   labels: MCPToolCallGroupLabels;
@@ -322,21 +342,11 @@ function ToolCallRow({
                 {formatParameters(toolCall)}
               </pre>
             )}
-            {(result || errorText) && (
-              <Collapsible>
-                <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
-                  <ChevronDown
-                    aria-hidden="true"
-                    className="h-3 w-3 transition-transform motion-reduce:transition-none [[data-state=open]>&]:rotate-180"
-                  />
-                  {result ? labels.showResult : labels.showError}
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-1">
-                  <pre className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900">
-                    {result ?? errorText}
-                  </pre>
-                </CollapsibleContent>
-              </Collapsible>
+            {result && (
+              <OutputDisclosure label={labels.showResult} text={result} />
+            )}
+            {errorText && (
+              <OutputDisclosure label={labels.showError} text={errorText} />
             )}
           </CollapsibleContent>
         </Collapsible>
