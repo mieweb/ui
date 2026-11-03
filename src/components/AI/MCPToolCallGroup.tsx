@@ -280,6 +280,8 @@ function ToolCallRow({
     setActing(true);
     try {
       await action();
+    } catch {
+      // The host reports failures; the row only re-enables its controls.
     } finally {
       setActing(false);
     }

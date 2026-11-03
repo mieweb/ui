@@ -167,6 +167,21 @@ describe('MCPToolCallGroup', () => {
     await waitFor(() => expect(deny).toBeEnabled());
   });
 
+  it('re-enables the controls when a callback rejects', async () => {
+    const onDeny = vi.fn().mockRejectedValue(new Error('Network down'));
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'awaiting-approval')]}
+        onDeny={onDeny}
+      />
+    );
+
+    const deny = screen.getByRole('button', { name: 'Deny' });
+    fireEvent.click(deny);
+    await waitFor(() => expect(deny).toBeEnabled());
+    expect(onDeny).toHaveBeenCalledTimes(1);
+  });
+
   it('shows no approval controls without callbacks', () => {
     renderWithTheme(
       <MCPToolCallGroup toolCalls={[call('a', 'awaiting-approval')]} />
