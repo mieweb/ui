@@ -79,6 +79,17 @@ describe('linkifyCaption', () => {
     ).toHaveAttribute('href', 'https://example.org/b');
   });
 
+  it('keeps the backticks around an address set as code out of its link', () => {
+    render(<p>{linkifyCaption('Open `https://example.org/launch` today')}</p>);
+    const link = screen.getByRole('link', {
+      name: 'https://example.org/launch',
+    });
+    expect(link).toHaveAttribute('href', 'https://example.org/launch');
+    expect(link.parentElement).toHaveTextContent(
+      /^Open `https:\/\/example\.org\/launch` today$/
+    );
+  });
+
   it('links http(s) in any case', () => {
     render(
       <p>

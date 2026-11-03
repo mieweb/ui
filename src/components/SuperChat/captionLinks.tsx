@@ -9,13 +9,15 @@ import * as React from 'react';
 export const parenGroup = (excluded = '') => String.raw`\([^()${excluded}]*\)`;
 
 /**
- * One piece of a web address: a character, or a parenthesised group. Never an
- * angle bracket, which delimits an address (`<https://…>`) rather than being
- * part of it.
+ * What delimits an address rather than being part of it: an angle bracket
+ * (`<https://…>`) or a backtick (an address set as code). `\x60` is the
+ * backtick, which a raw template literal can't hold.
  */
-const URL_PIECE = String.raw`[^\s()<>]|${parenGroup(String.raw`\s<>`)}`;
+const DELIMITERS = String.raw`<>\x60`;
+/** One piece of a web address: a character, or a parenthesised group. */
+const URL_PIECE = String.raw`[^\s()${DELIMITERS}]|${parenGroup(String.raw`\s${DELIMITERS}`)}`;
 /** A bare address's last piece: not closing punctuation. */
-const URL_END = String.raw`[^\s()<>.,;:!?\]'"]|${parenGroup(String.raw`\s<>`)}`;
+const URL_END = String.raw`[^\s()${DELIMITERS}.,;:!?\]'"]|${parenGroup(String.raw`\s${DELIMITERS}`)}`;
 
 /**
  * A Markdown link's optional title after its address (`"…"`, `'…'` or `(…)`,
