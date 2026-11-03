@@ -281,6 +281,25 @@ describe('MCPToolCallGroup', () => {
     ]);
   });
 
+  it('re-announces a new approval request when the count is unchanged', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'awaiting-approval'), call('b', 'pending')]}
+      />
+    );
+    const [progress] = screen.getAllByRole('status');
+    const before = progress.firstElementChild;
+
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'running'), call('b', 'awaiting-approval')]}
+      />
+    );
+
+    expect(progress).toHaveTextContent('1 tool call needs your approval');
+    expect(progress.firstElementChild).not.toBe(before);
+  });
+
   it('renders result links in the row and hands clicks to onLinkClick', () => {
     const onLinkClick = vi.fn();
     const link = {

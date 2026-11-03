@@ -128,24 +128,27 @@ interface ToolGroupSummary {
   isActive: boolean;
   /** Changes whenever a call is added or changes status. */
   signature: string;
+  /** IDs of the calls awaiting approval; changes with each new request. */
+  approvalKey: string;
 }
 
 function summarize(toolCalls: MCPToolCall[]): ToolGroupSummary {
-  let awaitingApproval = 0;
   let failed = 0;
   let inFlight = 0;
+  const awaitingIds: string[] = [];
   for (const toolCall of toolCalls) {
-    if (toolCall.status === 'awaiting-approval') awaitingApproval += 1;
+    if (toolCall.status === 'awaiting-approval') awaitingIds.push(toolCall.id);
     else if (toolCall.status === 'error') failed += 1;
     else if (toolCall.status === 'running' || toolCall.status === 'pending')
       inFlight += 1;
   }
   return {
     total: toolCalls.length,
-    awaitingApproval,
+    awaitingApproval: awaitingIds.length,
     failed,
-    isActive: awaitingApproval + inFlight > 0,
+    isActive: awaitingIds.length + inFlight > 0,
     signature: toolCalls.map((call) => `${call.id}:${call.status}`).join('|'),
+    approvalKey: awaitingIds.join('|'),
   };
 }
 
@@ -541,10 +544,14 @@ export function MCPToolCallGroup({
           ))}
         </AnimatedPresence>
       </div>
-      {/* Failures get their own region so progress updates never mask them. */}
       <p role="status" className="sr-only">
-        {progressAnnouncement(summary, labels)}
+        {/* A new approval request replaces the node even when the text is
+            unchanged, so it is announced as an addition. */}
+        <span key={summary.approvalKey}>
+          {progressAnnouncement(summary, labels)}
+        </span>
       </p>
+      {/* Failures get their own region so progress updates never mask them. */}
       <p role="status" className="sr-only">
         {summary.failed > 0 ? labels.announceFailed(summary.failed) : ''}
       </p>
