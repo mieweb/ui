@@ -28,6 +28,8 @@ function call(
 const header = () =>
   screen.getByRole('button', { name: /^(Used|Running) \d+ tools?/ });
 const rows = () => screen.queryAllByRole('listitem');
+const announcements = () =>
+  screen.getAllByRole('status').map((region) => region.textContent);
 
 describe('MCPToolCallGroup', () => {
   it('stays expanded while calls are running', () => {
@@ -244,16 +246,39 @@ describe('MCPToolCallGroup', () => {
         toolCalls={[call('a', 'running'), call('b', 'awaiting-approval')]}
       />
     );
-    expect(screen.getByRole('status')).toHaveTextContent(
-      '1 tool call needs your approval'
-    );
+    expect(announcements()).toEqual(['1 tool call needs your approval', '']);
 
     rerender(
       <MCPToolCallGroup
         toolCalls={[call('a', 'success'), call('b', 'error')]}
       />
     );
-    expect(screen.getByRole('status')).toHaveTextContent('1 tool call failed');
+    expect(announcements()).toEqual(['Used 2 tools', '1 tool call failed']);
+  });
+
+  it('announces a failure while other calls are still active', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'running'), call('b', 'running')]}
+      />
+    );
+
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'error'), call('b', 'running')]}
+      />
+    );
+    expect(announcements()).toEqual(['Running 2 tools', '1 tool call failed']);
+
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'error'), call('b', 'awaiting-approval')]}
+      />
+    );
+    expect(announcements()).toEqual([
+      '1 tool call needs your approval',
+      '1 tool call failed',
+    ]);
   });
 
   it('renders result links in the row and hands clicks to onLinkClick', () => {

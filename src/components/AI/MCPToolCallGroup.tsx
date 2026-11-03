@@ -41,7 +41,7 @@ export interface MCPToolCallGroupLabels {
   failed: (count: number) => string;
   /** Live-region announcement when calls start awaiting approval. */
   announceApproval: (count: number) => string;
-  /** Live-region announcement when the run settles with failures. */
+  /** Live-region announcement when calls fail, sent as each failure lands. */
   announceFailed: (count: number) => string;
   /** Status badge text per status. */
   status: Record<MCPToolStatus, string>;
@@ -176,7 +176,7 @@ function useAutoCollapse(
   return [isStale ? automatic : state.expanded, setExpanded];
 }
 
-function announcementFor(
+function progressAnnouncement(
   summary: ToolGroupSummary,
   labels: MCPToolCallGroupLabels
 ): string {
@@ -184,7 +184,6 @@ function announcementFor(
     return labels.announceApproval(summary.awaitingApproval);
   }
   if (summary.isActive) return labels.running(summary.total);
-  if (summary.failed > 0) return labels.announceFailed(summary.failed);
   return labels.used(summary.total);
 }
 
@@ -542,8 +541,12 @@ export function MCPToolCallGroup({
           ))}
         </AnimatedPresence>
       </div>
+      {/* Failures get their own region so progress updates never mask them. */}
       <p role="status" className="sr-only">
-        {announcementFor(summary, labels)}
+        {progressAnnouncement(summary, labels)}
+      </p>
+      <p role="status" className="sr-only">
+        {summary.failed > 0 ? labels.announceFailed(summary.failed) : ''}
       </p>
     </div>
   );
