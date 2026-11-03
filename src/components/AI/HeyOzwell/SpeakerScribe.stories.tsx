@@ -60,6 +60,8 @@ Built on \`useNemotronDiarization\` (\`enroll\`, \`removeVoice\`, \`diarize\`, \
       },
     },
     catalog: {
+      // Documented in Storybook but not exported from the package yet.
+      unexported: true,
       relationships: [
         {
           type: 'alternative to',

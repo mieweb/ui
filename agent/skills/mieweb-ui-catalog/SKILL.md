@@ -7,7 +7,7 @@ description: Component inventory and selection guidance for the @mieweb/ui desig
 
 # @mieweb/ui component catalog
 
-272 cataloged components. Full docs: https://ui.mieweb.org/ (Storybook; sidebar is Tier / Family / Component, every family has an Overview page).
+274 cataloged components. Full docs: https://ui.mieweb.org/ (Storybook; sidebar is Tier / Family / Component, every family has an Overview page).
 
 For per-component "Which one?" comparison tables, read [selection-guidance.md](./selection-guidance.md) in this skill and jump to the family's section.
 
@@ -43,7 +43,7 @@ For per-component "Which one?" comparison tables, read [selection-guidance.md](.
 
 ## Inventory
 
-Components by tier and family. Annotations: maturity when not stable, and the import entry when it is not the root (e.g. _(`/datavis`)_).
+Components by tier and family. Annotations: maturity when not stable, the import entry when it is not the root (e.g. _(`/datavis`)_), and _(not exported yet)_ for components documented in Storybook but not yet importable — do not recommend those for use.
 
 ### Foundations
 
@@ -73,14 +73,14 @@ Components by tier and family. Annotations: maturity when not stable, and the im
 
 - **Chat:** AIChat, AIChat (Voice), AIMessage, ChatComposer _(beta)_, Composer Action Ribbon (POC) _(experimental)_, ComposerModelSelector, MCPToolCall, Messaging, OzwellChat, ReconciliationPanel
 - **Dashboards:** CustomizableDashboard, Dashboard (Demo) _(experimental)_, Dashboard Widgets (Demo) _(experimental)_, DashboardCustomizePanel, DashboardWidget, QuickLinksCard, ReportDashboard
-- **Editors:** EmailEditor _(experimental)_, MacroLibrary _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor, RichTextEsheet _(experimental, `/esheet`)_, TextAreaRich _(experimental)_
+- **Editors:** EmailEditor _(experimental)_, MacroLibrary _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor, RichTextEsheet _(experimental, `/esheet`)_, TextAreaRich (Kerebron) _(experimental, `/kerebron`)_
 - **Files:** DocumentScanner, DropzoneOverlay, FileManager
 - **Media:** AudioPlayer, AudioRecorder, DictationButton _(experimental)_, MediaEditor, MediaEditor Live Demo, MediaFeed _(experimental, `/components/MediaFeed`)_, MediaPlayer, RecordButton, TranscriptView, VideoCard _(experimental)_
 - **Presentations:** Deck _(experimental, `/deck`)_, PointMap _(experimental, `/maps`)_
 - **Records:** ActionPlan _(experimental)_, ActivityFeed _(experimental)_, AssociationList _(experimental)_, FieldHistory _(experimental)_, OrgChart _(experimental, `/org-chart`)_, RecordLayout _(experimental)_
 - **SuperChat:** Conversations (List) _(`/components/SuperChat`)_, Inbox _(`/components/SuperChat`)_, SuperChat (Panel) _(`/components/SuperChat`)_
 - **Views:** BoardView _(alpha)_, CalendarView _(alpha)_, GanttView _(alpha)_, ListView _(alpha)_, ViewSet _(alpha)_, ViewSwitcher _(alpha)_
-- **Voice:** Hands-Free Chat, Hey Ozwell Demo, Hey Ozwell Selector _(experimental)_, Speaker Verify _(experimental)_, Transcript Player _(experimental)_, Visit Scribe, Voice Manager, Voice Setup, Wake Word
+- **Voice:** Hands-Free Chat, Hey Ozwell Demo, Hey Ozwell Selector _(experimental)_, Speaker Scribe _(experimental, not exported yet)_, Speaker Verify _(experimental)_, Transcript Player _(experimental)_, Visit Scribe, Voice Manager, Voice Setup, Wake Word
 
 ### Templates
 
@@ -107,7 +107,7 @@ Components by tier and family. Annotations: maturity when not stable, and the im
 
 ### Deprecated
 
-- AGGrid _(deprecated, `/ag-grid`)_, AGGrid Enhanced _(deprecated, `/ag-grid`)_
+- AGGrid _(deprecated, `/ag-grid`)_, AGGrid Enhanced _(deprecated, `/ag-grid`)_, TextAreaRich (Legacy) _(deprecated)_
 
 ## Family policies
 
