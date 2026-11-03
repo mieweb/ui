@@ -182,6 +182,8 @@ export const miewebUISafelist = [
   // 'Couldn't load'), the documents list's type tints, the edit chips.
   'inset-y-0',
   'size-full',
+  // The 'Couldn't load' tile: light text on a dark tile in either theme.
+  'text-neutral-300',
   'object-cover',
   'size-8',
   'size-9',
