@@ -47,8 +47,8 @@ format and scoring.
 
 ### INS-5 — Unstyled after install
 
-- **Ask:** "Fresh install — components render but have black borders and no
-  backgrounds."
+- **Ask:** "Fresh install on Tailwind 4 — components render but have black
+  borders and no backgrounds."
 - **Expect:** Tailwind 4 tree-shakes `node_modules` by default; add
   `@source "../node_modules/@mieweb/ui/dist"` to the CSS entry.
 - **Agent:** MIE UI Install Agent

@@ -24,12 +24,13 @@ format and scoring. (Pure foundation/setup breakage lives in
 
 - **Ask:** "Dark mode toggles and `dark:` rules generate, but the sidebar
   stays white. Why?"
-- **Expect:** Missing CSS-variable fallbacks — brand CSS only defines primary
-  - semantic tokens, so `var(--mieweb-neutral-900)` without a fallback
-    resolves transparent. Add hex fallbacks in `@theme`
-    (`var(--mieweb-neutral-900, #171717)`) or load the base stylesheet.
+- **Expect:** Check whether the active brand defines the resolved variable —
+  brands emit only the scales they supply (some, like CCME, include a full
+  neutral scale). If the variable is genuinely undefined, `var()` without a
+  fallback resolves transparent: add hex fallbacks in `@theme`
+  (`var(--mieweb-neutral-900, #171717)`) or load the base stylesheet.
 - **Agent:** MIE UI Styling Agent
-- **Source:** lessons/tailwind4-integration.md — Lesson 4
+- **Source:** lessons/tailwind4-integration.md — Lesson 4; src/brands/ccme.css; src/brands/types.ts — `generateBrandCSS`
 
 ### STY-4 — dark: utilities not applying
 
@@ -103,16 +104,18 @@ format and scoring. (Pure foundation/setup breakage lives in
 ### STY-11 — Theme/brand hooks
 
 - **Ask:** "Do I need `useTheme` and `useBrand`, or is CSS enough?"
-- **Expect:** Both hooks: `useTheme` sets the `.dark` class **and**
-  `data-theme` for dark mode; `useBrand` injects CSS for runtime brand
-  switching.
+- **Expect:** Depends on what's dynamic: a static brand stylesheet import
+  needs no `useBrand` (that hook is for runtime brand switching), and dark
+  mode needs any toggle that sets a hook the active variant matches —
+  `useTheme` is the provided convenience, not a requirement. CSS alone is a
+  supported setup when nothing switches at runtime.
 - **Agent:** MIE UI Styling Agent
-- **Source:** lessons/adopting-mieweb-ui.md — Phase 2.3
+- **Source:** agent/skills/mieweb-ui-brands/SKILL.md — static vs runtime; agent/skills/mieweb-ui-tailwind4/SKILL.md — Dark mode toggle
 
 ### STY-12 — CSS theme audit
 
-- **Ask:** "Before I claim dark mode works, what should I audit in the CSS
-  setup?"
+- **Ask:** "Before I claim dark mode works in our Tailwind 4 + PostCSS app,
+  what should I audit in the CSS setup?"
 - **Expect:** `@source` present, `@custom-variant dark` defined, every
   `var()` in `@theme` has a fallback (except primary), `@tailwindcss/postcss`
   plugin in use, toggle sets a hook the active dark variant matches.

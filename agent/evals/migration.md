@@ -107,12 +107,13 @@ Meteor.userId()`/`Meteor.user()`, and use `*Async()` collection variants
 ### MIG-12 — Completion checklist
 
 - **Ask:** "How do I verify the migration is done?"
-- **Expect:** Final compliance checklist: CSS setup correct (`@source`,
-  `@custom-variant`, fallbacks), zero raw HTML, theming works (dark mode +
-  brands), accessibility (ARIA, keyboard), clean build
-  (`npx tsc --noEmit`, no console errors).
+- **Expect:** Final compliance checklist: CSS foundation correct **for the
+  app's mode** (TW4: `@source` + `@custom-variant` + fallbacks; TW3: preset +
+  safelist + content glob; precompiled: `styles.css` imported), zero raw HTML,
+  theming works (dark mode + brands), accessibility (ARIA, keyboard), clean
+  build (`npx tsc --noEmit`, no console errors).
 - **Agent:** MIE UI Migration Agent
-- **Source:** lessons/adopting-mieweb-ui.md — Phase 4
+- **Source:** lessons/adopting-mieweb-ui.md — Phase 4; agent/skills/mieweb-ui-tailwind4/SKILL.md — supported modes
 
 ### MIG-13 — @source vs safelist in audits
 

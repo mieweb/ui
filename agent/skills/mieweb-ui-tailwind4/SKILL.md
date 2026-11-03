@@ -113,7 +113,7 @@ Filters/selection/pagination state is yours (usually the URL); `ViewSet` owns on
 | Brand CSS loads but doesn't apply (TW4) | Brand import wrapped in `layer(theme)` | Keep base + brand imports plain/unlayered (brands skill) |
 | PostCSS does nothing | TW3 plugin configured | `@tailwindcss/postcss`, not `tailwindcss` |
 | `var()` renders transparent | Variable undefined | Fallback: `var(--token, #hex)` |
-| Peer-dep install errors | Required vs optional confusion | Only react/react-dom are required; match optional peers to imported entries |
+| Peer-dep install errors | Required vs optional confusion | react/react-dom + the five @kerebron/* runtime peers are required; match optional peers to imported entries |
 | Module shows failed action as success | `on*` promise swallowed | Return the real promise (`mutateAsync` / `callAsync`) |
 | Views regroup on every render | Unstable `accessors` | Module scope or `useMemo` |
 | `transition-*` utilities stop working after theme/brand CSS | The brand CSS's unlayered `*` transition shorthand resets `transition-property` on every element and beats layered utilities, even though it lists only color properties (mieweb/ui#460, #682) | Move the transition rule into `@layer base` (or remove/narrow it) so component transitions win; keep brand token declarations unlayered |
