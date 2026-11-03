@@ -1,0 +1,514 @@
+import * as React from 'react';
+import {
+  Captions,
+  CaptionsOff,
+  Maximize,
+  Minimize,
+  Pause,
+  PictureInPicture2,
+  Play,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+
+import { cn } from '../../utils/cn';
+import type { UseMediaTransportReturn } from '../../hooks/useMediaTransport';
+import { formatTime } from '../AudioPlayer/AudioPlayer';
+import { Button } from '../Button';
+import { Slider } from '../Slider';
+import {
+  overlayButtonClass,
+  playBadgeClass,
+  playBadgeIconClass,
+} from './overlayButton';
+import {
+  canPictureInPicture,
+  exitPictureInPicture,
+  isInPictureInPicture,
+  PIP_EVENTS,
+  type WebKitVideo,
+} from './pictureInPicture';
+
+/** Every string the controls show or announce, for the host to localize. */
+export interface MediaControlsLabels {
+  play: string;
+  pause: string;
+  mute: string;
+  unmute: string;
+  seek: string;
+  fullscreen: string;
+  exitFullscreen: string;
+  pictureInPicture: string;
+  exitPictureInPicture: string;
+  /** The elapsed and total time, already formatted (`1:05`, `4:30`). */
+  time: (current: string, duration: string) => string;
+  /** The speed button's text for a rate (`1.5×`). */
+  rate: (rate: number) => string;
+  /** The speed button's accessible name, given its text. */
+  speed: (rate: string) => string;
+  showCaptions: string;
+  hideCaptions: string;
+}
+
+/** The English defaults; MediaFeed reuses them for its player labels. */
+export const defaultMediaControlsLabels: MediaControlsLabels = {
+  play: 'Play',
+  pause: 'Pause',
+  mute: 'Mute',
+  unmute: 'Unmute',
+  seek: 'Seek',
+  fullscreen: 'Full screen',
+  exitFullscreen: 'Exit full screen',
+  pictureInPicture: 'Picture in picture',
+  exitPictureInPicture: 'Exit picture in picture',
+  time: (current, duration) => `${current} / ${duration}`,
+  rate: (rate) => `${rate}×`,
+  speed: (rate) => `Playback speed ${rate}`,
+  showCaptions: 'Show captions',
+  hideCaptions: 'Hide captions',
+};
+
+export interface MediaControlsProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** The transport attached to the `<video>` these controls drive. */
+  transport: UseMediaTransportReturn;
+  /**
+   * The box that goes full screen with the controls (the video and these
+   * controls' shared parent). Where the browser can't take an element full
+   * screen (an iPhone), the video opens in the system's own player instead.
+   */
+  fullscreenTarget?: React.RefObject<HTMLElement | null>;
+  /** Localized text for every control; English by default. */
+  labels?: Partial<MediaControlsLabels>;
+  /** The speeds the speed button cycles through (default `[1, 1.5, 2]`). */
+  playbackRates?: readonly number[];
+}
+
+const defaultPlaybackRates = [1, 1.5, 2] as const;
+
+/** Controls a small player (under 20rem wide) leaves out: speed and picture in picture. */
+const SMALL_PLAYER_HIDDEN = '@max-xs:hidden';
+
+/** Where a tap or drag on the seek bar lands: to the tenth of a second. */
+const SEEK_STEP_MS = 100;
+
+/**
+ * How far an arrow key seeks, as a share of the clip (2%): a few presses cross
+ * a short clip, and a long one isn't hundreds of presses long.
+ */
+const KEYBOARD_SEEK_FRACTION = 0.02;
+
+/**
+ * Browsers size caption text at about 5% of the video's height, and step a
+ * cue's `line` by its line box, so this approximates one line's height.
+ */
+const CUE_LINE_HEIGHT_FRACTION = 0.05;
+
+/** The line a cue is lifted to before the video has a size to measure. */
+const DEFAULT_CUE_LINE = -4;
+
+const formatMs = (ms: number) => formatTime(ms / 1000);
+
+/**
+ * The cue line just above the bar's controls. Lines count up from -1 (the
+ * bottom one), so a cue on line -(n + 1) clears n lines. The bar's top padding
+ * is the transparent start of its scrim, which captions may cover.
+ */
+function cueLineAboveBar(
+  video: HTMLVideoElement,
+  bar: HTMLElement | null
+): number {
+  const lineHeight =
+    video.getBoundingClientRect().height * CUE_LINE_HEIGHT_FRACTION;
+  if (!bar || lineHeight <= 0) return DEFAULT_CUE_LINE;
+  const controls =
+    bar.getBoundingClientRect().height -
+    (parseFloat(getComputedStyle(bar).paddingTop) || 0);
+  return -(Math.ceil(Math.max(controls, 0) / lineHeight) + 1);
+}
+
+/** Whether `video` is in picture in picture, following every change. */
+function useInPictureInPicture(video: HTMLVideoElement | null): boolean {
+  const [inPip, setInPip] = React.useState(false);
+  React.useEffect(() => {
+    if (!video) return;
+    const update = () => setInPip(isInPictureInPicture(video));
+    update();
+    for (const event of PIP_EVENTS) video.addEventListener(event, update);
+    return () => {
+      for (const event of PIP_EVENTS) video.removeEventListener(event, update);
+    };
+  }, [video]);
+  return inPip;
+}
+
+/**
+ * The video's caption and subtitle tracks, and whether one is showing,
+ * following tracks the host adds, removes or switches itself.
+ */
+function useCaptionTracks(
+  video: HTMLVideoElement | null,
+  barRef: React.RefObject<HTMLElement | null>
+) {
+  const [tracks, setTracks] = React.useState<globalThis.TextTrack[]>([]);
+  const [showing, setShowing] = React.useState(false);
+  React.useEffect(() => {
+    const list = video?.textTracks;
+    if (!list) {
+      setTracks([]);
+      setShowing(false);
+      return;
+    }
+    // Browsers draw cues at the very bottom, under the bar: lift any cue the
+    // host left on the default line to just above it. A fixed line count
+    // isn't enough, since lines scale with the video and the bar doesn't (it
+    // takes two rows in a small card). Cues load lazily, and the player can
+    // change size, so this runs again as cues become active and as the video
+    // or bar is resized. `lifted` keeps
+    // the line each cue was lifted to: a cue still on it is ours to move, and
+    // goes back to the default line when these controls unmount (the video
+    // may stay, with no bar to clear). One the host has moved since is theirs.
+    const lifted = new Map<globalThis.VTTCue, number>();
+    const place = (
+      track: globalThis.TextTrack | null,
+      cue: globalThis.VTTCue,
+      line: number | 'auto'
+    ) => {
+      cue.line = line;
+      // A cue already on screen keeps its old place until it's re-added.
+      if (track && Array.from(track.activeCues ?? []).includes(cue)) {
+        track.removeCue(cue);
+        track.addCue(cue);
+      }
+    };
+    const liftCues = (track: globalThis.TextTrack) => {
+      const line = video
+        ? cueLineAboveBar(video, barRef.current)
+        : DEFAULT_CUE_LINE;
+      for (const each of Array.from(track.cues ?? [])) {
+        if (!('line' in each)) continue;
+        const cue = each as globalThis.VTTCue;
+        if (cue.line !== 'auto' && lifted.get(cue) !== cue.line) continue;
+        if (cue.line === line) continue;
+        lifted.set(cue, line);
+        place(track, cue, line);
+      }
+    };
+    const lift = (event: Event) =>
+      liftCues(event.target as globalThis.TextTrack);
+    let watched: globalThis.TextTrack[] = [];
+    const update = () => {
+      const captions = Array.from(list).filter(
+        (track) => track.kind === 'captions' || track.kind === 'subtitles'
+      );
+      for (const track of watched)
+        track.removeEventListener?.('cuechange', lift);
+      for (const track of captions) track.addEventListener?.('cuechange', lift);
+      watched = captions;
+      setTracks(captions);
+      setShowing(captions.some((track) => track.mode === 'showing'));
+    };
+    update();
+    const events = ['addtrack', 'removetrack', 'change'];
+    for (const name of events) list.addEventListener?.(name, update);
+    // A new size (a phone turned, full screen left) needs a new line but
+    // brings no cuechange, so the cues move then too, paused or playing.
+    const resize =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => watched.forEach(liftCues));
+    for (const element of [video, barRef.current])
+      if (element) resize?.observe(element);
+    return () => {
+      resize?.disconnect();
+      for (const name of events) list.removeEventListener?.(name, update);
+      for (const track of watched)
+        track.removeEventListener?.('cuechange', lift);
+      for (const [cue, line] of lifted)
+        if (cue.line === line) place(cue.track, cue, 'auto');
+    };
+  }, [video, barRef]);
+  return { tracks, showing };
+}
+
+/** Whether `element`'s audio is muted, following every change to it. */
+function useMuted(element: HTMLMediaElement | null): boolean {
+  const [muted, setMuted] = React.useState(element?.muted ?? false);
+  React.useEffect(() => {
+    if (!element) return;
+    const update = () => setMuted(element.muted);
+    update();
+    element.addEventListener('volumechange', update);
+    return () => element.removeEventListener('volumechange', update);
+  }, [element]);
+  return muted;
+}
+
+/** Whether `target` is the page's full-screen element. */
+function useIsFullscreen(
+  target: React.RefObject<HTMLElement | null> | undefined
+): boolean {
+  const [fullscreen, setFullscreen] = React.useState(false);
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const update = () =>
+      setFullscreen(
+        !!target?.current && document.fullscreenElement === target.current
+      );
+    // Controls that mount while their box is already full screen say so.
+    update();
+    document.addEventListener('fullscreenchange', update);
+    return () => document.removeEventListener('fullscreenchange', update);
+  }, [target]);
+  return fullscreen;
+}
+
+/**
+ * Touch-first controls laid over a `<video>`, in place of the browser's own.
+ * A tap on the picture plays or pauses it, a round ▶ shows while it's paused,
+ * and a bar along the bottom has play/pause, the time, a seek bar, playback
+ * speed, captions on/off when the video has a caption track, mute, and
+ * picture in picture and full screen where the browser supports them.
+ *
+ * `MediaPlayer` renders it for `controlsStyle="overlay"`. To use it directly,
+ * render it in a positioned box with the video, attach
+ * `transport.setMediaElement` to the video's `ref` and give the video
+ * `playsInline` (without it, an iPhone plays it in the system player, away
+ * from these controls).
+ */
+export const MediaControls = React.forwardRef<
+  HTMLDivElement,
+  MediaControlsProps
+>(function MediaControls(
+  {
+    transport,
+    fullscreenTarget,
+    labels: labelOverrides,
+    playbackRates = defaultPlaybackRates,
+    className,
+    ...rest
+  },
+  ref
+) {
+  const labels = { ...defaultMediaControlsLabels, ...labelOverrides };
+  const video = transport.mediaElement as WebKitVideo | null;
+  const muted = useMuted(video);
+  const isFullscreen = useIsFullscreen(fullscreenTarget);
+  const inPip = useInPictureInPicture(video);
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const captions = useCaptionTracks(video, barRef);
+  // What this browser can do is read once mounted: the server can't know it,
+  // and markup that differs from the server's breaks hydration. Safari only
+  // says a video can float once its metadata is in, so read again then (and
+  // on each new source).
+  const [support, setSupport] = React.useState({ box: false, pip: false });
+  React.useEffect(() => {
+    const read = () =>
+      setSupport({
+        box: document.fullscreenEnabled && !!fullscreenTarget,
+        pip: canPictureInPicture(video),
+      });
+    read();
+    video?.addEventListener('loadedmetadata', read);
+    return () => video?.removeEventListener('loadedmetadata', read);
+  }, [video, fullscreenTarget]);
+  const playing = transport.isPlaying;
+  const durationMs = transport.durationMs;
+
+  const togglePlay = transport.togglePlay;
+  const toggleMuted = () => {
+    if (video) video.muted = !video.muted;
+  };
+  // The iPhone fallback only where it works: Chromium has the method too, but
+  // it does nothing in a frame that isn't allowed full screen.
+  const canFullscreen =
+    support.box ||
+    (!!video?.webkitEnterFullscreen && !!video.webkitSupportsFullscreen);
+  // Leaves only a full screen these controls entered: a page that is full
+  // screen itself (a kiosk, a presentation) stays that way.
+  const toggleFullscreen = () => {
+    if (isFullscreen) {
+      void document.exitFullscreen?.()?.catch(() => {});
+    } else if (support.box && fullscreenTarget?.current) {
+      void fullscreenTarget.current.requestFullscreen?.()?.catch(() => {});
+    } else {
+      video?.webkitEnterFullscreen?.();
+    }
+  };
+  // Each press moves to the next speed, and from the last back to the first.
+  const rate = transport.playbackRate;
+  const cycleSpeed = () => {
+    const index = playbackRates.indexOf(rate);
+    transport.setPlaybackRate(
+      playbackRates[(index + 1) % playbackRates.length] ?? 1
+    );
+  };
+  // Shows the first caption track, or hides whichever is showing.
+  const toggleCaptions = () => {
+    const [first] = captions.tracks;
+    for (const track of captions.tracks)
+      track.mode =
+        !captions.showing && track === first ? 'showing' : 'disabled';
+  };
+  // The standard API, else Safari's presentation mode on an iPhone.
+  const togglePictureInPicture = () => {
+    if (!video) return;
+    if (isInPictureInPicture(video)) {
+      void exitPictureInPicture(video);
+    } else if (document.pictureInPictureEnabled) {
+      void video.requestPictureInPicture().catch(() => {});
+    } else {
+      video.webkitSetPresentationMode?.('picture-in-picture');
+    }
+  };
+
+  const barButton = (
+    label: string,
+    onClick: () => void,
+    icon: React.ReactElement,
+    className?: string
+  ) => (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className={cn(overlayButtonClass, 'shrink-0 bg-transparent', className)}
+    >
+      {icon}
+    </Button>
+  );
+
+  return (
+    <div
+      ref={ref}
+      data-slot="media-controls"
+      className={cn(
+        // A container query: a narrow player (a portrait clip) gives the seek
+        // bar a row of its own, so it's always long enough to drag.
+        '@container pointer-events-none absolute inset-0 flex flex-col justify-end',
+        className
+      )}
+      {...rest}
+    >
+      {/* A pointer convenience over the picture, as in every video app. The
+          bar's Play is the keyboard and screen-reader control. */}
+      <div
+        data-slot="media-controls-surface"
+        aria-hidden="true"
+        className="pointer-events-auto absolute inset-0 flex cursor-pointer items-center justify-center"
+        onClick={togglePlay}
+      >
+        {!playing && (
+          <span className={playBadgeClass}>
+            <Play className={playBadgeIconClass} />
+          </span>
+        )}
+      </div>
+      {/* Left to right in every language: a media timeline follows the
+          media, not the reading direction (Material: don't mirror playback
+          controls or their progress bar). Labels keep their own direction. */}
+      <div
+        ref={barRef}
+        data-slot="media-controls-bar"
+        dir="ltr"
+        // A small player (a card in a chat, under 20rem wide) keeps play,
+        // time, seek, mute and full screen on two short rows and leaves speed
+        // and picture in picture to the larger view, as in-chat players do;
+        // its gradient starts lower so the picture stays visible.
+        className="pointer-events-auto relative flex flex-wrap items-center gap-x-1 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-1 pt-6 pb-1 text-white sm:px-2 @max-xs:pt-2"
+      >
+        {barButton(
+          playing ? labels.pause : labels.play,
+          togglePlay,
+          playing ? (
+            <Pause className="h-5 w-5 fill-current" aria-hidden="true" />
+          ) : (
+            <Play className="h-5 w-5 fill-current" aria-hidden="true" />
+          )
+        )}
+        <span
+          data-slot="media-controls-time"
+          className="shrink-0 px-1 text-xs whitespace-nowrap tabular-nums @max-md:me-auto"
+        >
+          {/* The label may be RTL text ("0:01 من 0:04"): isolate its
+              direction without turning the bar's layout around. */}
+          <bdi>
+            {labels.time(
+              formatMs(transport.currentTimeMs),
+              formatMs(durationMs)
+            )}
+          </bdi>
+        </span>
+        <Slider
+          // Taller to grab on a touch screen; the track itself stays thin.
+          className="mx-1 min-w-0 flex-1 @max-md:order-first @max-md:mx-2 @max-md:basis-full pointer-coarse:[&_[data-slot=slider-track-wrapper]]:py-4"
+          // dark: too, or the dark surface's own track colour wins.
+          trackClassName="bg-white/30 dark:bg-white/30"
+          size="sm"
+          min={0}
+          max={durationMs > 0 ? durationMs : 1}
+          step={SEEK_STEP_MS}
+          keyboardStep={Math.max(
+            SEEK_STEP_MS,
+            Math.round(durationMs * KEYBOARD_SEEK_FRACTION)
+          )}
+          value={transport.currentTimeMs}
+          onValueChange={transport.seekToMs}
+          formatValue={formatMs}
+          disabled={durationMs <= 0}
+          aria-label={labels.seek}
+        />
+        {playbackRates.length > 1 &&
+          barButton(
+            labels.speed(labels.rate(rate)),
+            cycleSpeed,
+            <span className="text-xs font-semibold tabular-nums">
+              {labels.rate(rate)}
+            </span>,
+            SMALL_PLAYER_HIDDEN
+          )}
+        {/* The label says what a press does, so it carries the state: no
+            aria-pressed as well, or it would read "Hide captions, pressed". */}
+        {captions.tracks.length > 0 &&
+          barButton(
+            captions.showing ? labels.hideCaptions : labels.showCaptions,
+            toggleCaptions,
+            // The icon shows the state, as mute's does.
+            captions.showing ? (
+              <Captions className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <CaptionsOff className="h-5 w-5" aria-hidden="true" />
+            )
+          )}
+        {barButton(
+          muted ? labels.unmute : labels.mute,
+          toggleMuted,
+          muted ? (
+            <VolumeX className="h-5 w-5" aria-hidden="true" />
+          ) : (
+            <Volume2 className="h-5 w-5" aria-hidden="true" />
+          )
+        )}
+        {support.pip &&
+          barButton(
+            inPip ? labels.exitPictureInPicture : labels.pictureInPicture,
+            togglePictureInPicture,
+            <PictureInPicture2 className="h-5 w-5" aria-hidden="true" />,
+            SMALL_PLAYER_HIDDEN
+          )}
+        {canFullscreen &&
+          barButton(
+            isFullscreen ? labels.exitFullscreen : labels.fullscreen,
+            toggleFullscreen,
+            isFullscreen ? (
+              <Minimize className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <Maximize className="h-5 w-5" aria-hidden="true" />
+            )
+          )}
+      </div>
+    </div>
+  );
+});
