@@ -1182,7 +1182,7 @@ describe('SuperChat', () => {
     expect(pill()).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('folds a card the user opened while running when tool and reply finish together', async () => {
+  it('keeps a card the user opened while running open and focused when tool and reply finish together', async () => {
     const { fireEvent } = await import('@testing-library/react');
     const withTool = (
       messageStatus: 'streaming' | 'complete',
@@ -1221,7 +1221,9 @@ describe('SuperChat', () => {
       />
     );
     expect(pill()).toHaveAttribute('aria-expanded', 'false');
-    fireEvent.click(pill());
+    const toggle = pill() as HTMLElement;
+    toggle.focus();
+    fireEvent.click(toggle);
     expect(pill()).toHaveAttribute('aria-expanded', 'true');
 
     rerender(
@@ -1230,10 +1232,9 @@ describe('SuperChat', () => {
         currentParticipantId="u1"
       />
     );
-    expect(pill()).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.click(pill());
+    expect(pill()).toBe(toggle);
     expect(pill()).toHaveAttribute('aria-expanded', 'true');
+    expect(document.activeElement).toBe(toggle);
   });
 
   describe('scroll anchoring', () => {
