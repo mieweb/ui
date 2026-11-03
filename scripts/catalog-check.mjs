@@ -392,9 +392,24 @@ for (const e of csfEntries) {
         );
     }
   }
+}
+
+// Entry / availability metadata — validated for every entry that declares
+// `parameters.catalog`, independently of whether it lists relationships.
+for (const e of csfEntries) {
+  if (!e.catalog) continue;
+  const loc = rel(e.file);
   if (e.catalog.entry && typeof e.catalog.entry !== 'string')
     errors.push(
       `${loc}: parameters.catalog.entry must be a string like "@mieweb/ui/datavis"`
+    );
+  if (e.catalog.unexported !== undefined && e.catalog.unexported !== true)
+    errors.push(
+      `${loc}: parameters.catalog.unexported must be true (omit it once the component is exported)`
+    );
+  if (e.catalog.unexported && e.catalog.entry)
+    errors.push(
+      `${loc}: parameters.catalog.unexported contradicts catalog.entry — an unexported component has no import entry`
     );
 }
 
