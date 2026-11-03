@@ -1179,18 +1179,27 @@ export const MessageRow = React.memo(function MessageRow({
           data-slot="superchat-message-meta"
           className="flex items-baseline gap-2"
         >
+          {/* Each in its own direction: "9:05 AM" must not read "AM 9:05" in
+              an RTL page, nor a Latin name take the page's. */}
           <span
+            dir="auto"
             className="text-xs font-medium"
             style={accentTextColor ? { color: accentTextColor } : undefined}
           >
             {authorName}
           </span>
           {participant?.role && (
-            <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+            <span
+              dir="auto"
+              className="text-[10px] text-neutral-500 dark:text-neutral-400"
+            >
               {participant.role}
             </span>
           )}
-          <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+          <span
+            dir="auto"
+            className="text-[10px] text-neutral-500 dark:text-neutral-400"
+          >
             {formatTime(message.time)}
           </span>
           {message.editedAt && (
@@ -1364,6 +1373,9 @@ export const MessageRow = React.memo(function MessageRow({
                       return (
                         <div
                           key={i}
+                          // The writer's own direction, not the page's: English
+                          // in an RTL page keeps its full stop at the end.
+                          dir="auto"
                           className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
                         >
                           {renderText(block.text, {
@@ -1400,7 +1412,10 @@ export const MessageRow = React.memo(function MessageRow({
 
                   {/* Plain `text` body (the common case). */}
                   {message.text && (
-                    <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
+                    <div
+                      dir="auto"
+                      className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                    >
                       {renderText(message.text, {
                         messageId: message.id,
                         streaming,
