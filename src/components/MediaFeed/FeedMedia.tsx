@@ -224,10 +224,28 @@ function NativeFeedMedia({
     }
   };
 
+  // Focus on an inactive item's ▶ (Tab or Shift+Tab into it) makes the item
+  // the active one, which swaps the ▶ for the player's controls. Hand focus to
+  // their Play so it isn't lost to the page with the ▶.
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  const badgeFocused = React.useRef(false);
+  React.useLayoutEffect(() => {
+    if (!active || !badgeFocused.current) return;
+    badgeFocused.current = false;
+    const stage = stageRef.current;
+    if (!stage || stage.contains(document.activeElement)) return;
+    if (document.activeElement && document.activeElement !== document.body)
+      return;
+    stage
+      .querySelector<HTMLElement>('[data-slot="media-controls-bar"] button')
+      ?.focus({ preventScroll: true });
+  }, [active]);
+
   // In the overlay layout the clip fills the stage at its own shape, upright
   // or sideways, under the player's own controls.
   return (
     <div
+      ref={stageRef}
       className={cn(
         'flex h-full min-h-0 w-full flex-col items-center justify-center',
         overlay ? 'relative' : 'gap-3'
@@ -324,6 +342,8 @@ function NativeFeedMedia({
                   playBadgeClass,
                   'pointer-events-auto pointer-fine:h-14 pointer-fine:w-14'
                 )}
+                onFocus={() => (badgeFocused.current = true)}
+                onBlur={() => (badgeFocused.current = false)}
                 onClick={togglePlayback}
               >
                 <Play className={playBadgeIconClass} aria-hidden="true" />
