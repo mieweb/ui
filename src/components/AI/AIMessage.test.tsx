@@ -14,6 +14,27 @@ function thinkingMessage(status: AIMessage['status']): AIMessage {
   };
 }
 
+describe('AIMessageDisplay tool message', () => {
+  const toolMessage: AIMessage = {
+    id: 'tool-1',
+    role: 'tool',
+    status: 'complete',
+    timestamp: new Date('2026-01-01T10:00:00Z'),
+    content: [{ type: 'text', text: 'Ran list_dir' }],
+  };
+
+  it('renders the content without an avatar, even when showAvatar is set', () => {
+    const { container } = renderWithTheme(
+      <AIMessageDisplay message={toolMessage} showAvatar />
+    );
+
+    expect(screen.getByText('Ran list_dir')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-slot="ai-message-avatar"]')
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('AIMessageDisplay thinking block', () => {
   it('auto-collapses the thinking block when streaming finishes', () => {
     const { rerender } = renderWithTheme(
