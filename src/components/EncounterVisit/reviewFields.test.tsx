@@ -13,6 +13,13 @@ import { EncounterVitalsField } from './EncounterVitalsField';
 import { EncounterNarrativeField } from './EncounterNarrativeField';
 import { EncounterMessagesProvider } from './messages';
 import { isEncounterDate } from './date';
+
+// ProseMirror resists jsdom simulation; narrative fields run on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
 import {
   createEncounterFormDefinition,
   validateEncounterDefinition,

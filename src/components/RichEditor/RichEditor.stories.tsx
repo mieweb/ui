@@ -89,6 +89,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
       relationships: [
         {
           type: 'composes with',
+          target: 'editors-textarearich-kerebron',
+          why: 'Same @mieweb/ui/kerebron entry, peers, CSS and WASM setup; RichEditor is the full Markdown document editor, TextAreaRich (Kerebron) is the comment-sized HTML surface.',
+        },
+        {
+          type: 'composes with',
           target: 'feedback-collabstatus',
           why: 'CollabStatus shows who else is editing and whether the Yjs document is in sync.',
         },

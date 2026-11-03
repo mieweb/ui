@@ -18,6 +18,13 @@ import {
 import { createEncounterSnapshot } from './model';
 import type { EncounterVisitDefinition } from './types';
 
+// ProseMirror resists jsdom simulation; narrative fields run on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
+
 // Browser tests exercise Kerebron itself. This stand-in can delay its change
 // callback, verifying that mode switches and Save flush the editor handle.
 vi.mock('./EncounterMdyEditor', async () => {
