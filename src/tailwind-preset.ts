@@ -1774,7 +1774,7 @@ export const miewebUISafelist = [
   '[&_blockquote]:ps-3',
   '[&_blockquote]:text-muted-foreground',
   // MCPToolCallGroup rows and the awaiting-approval tool status
-  '[[data-state=open]_&]:rotate-180',
+  '[[data-state=open]>&]:rotate-180',
   'hover:bg-neutral-100',
   'dark:hover:bg-neutral-800',
   'dark:hover:text-neutral-200',

@@ -1274,7 +1274,7 @@ module.exports = {
     'xl:grid-cols-[20rem_minmax(0,1fr)_20rem]',
     'xl:grid-cols-[minmax(0,1fr)_20rem]',
     // MCPToolCallGroup rows and the awaiting-approval tool status
-    '[[data-state=open]_&]:rotate-180',
+    '[[data-state=open]>&]:rotate-180',
     'hover:bg-neutral-100',
     'dark:hover:bg-neutral-800',
     'dark:hover:text-neutral-200',

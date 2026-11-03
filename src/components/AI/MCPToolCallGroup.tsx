@@ -297,7 +297,7 @@ function ToolCallRow({
             </Badge>
             <ChevronDown
               aria-hidden="true"
-              className="h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform motion-reduce:transition-none [[data-state=open]_&]:rotate-180"
+              className="h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform motion-reduce:transition-none [[data-state=open]>&]:rotate-180"
             />
           </CollapsibleTrigger>
 
@@ -312,7 +312,7 @@ function ToolCallRow({
                 <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
                   <ChevronDown
                     aria-hidden="true"
-                    className="h-3 w-3 transition-transform motion-reduce:transition-none [[data-state=open]_&]:rotate-180"
+                    className="h-3 w-3 transition-transform motion-reduce:transition-none [[data-state=open]>&]:rotate-180"
                   />
                   {result ? labels.showResult : labels.showError}
                 </CollapsibleTrigger>
