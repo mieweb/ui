@@ -127,6 +127,27 @@ describe('linkifyCaption', () => {
     );
   });
 
+  it('links only the inner label after an unmatched "[", as CommonMark does', () => {
+    render(<p>{linkifyCaption('Notes [draft [plan](https://x.dev/plan)')}</p>);
+    expect(screen.getByRole('link', { name: 'plan' })).toHaveAttribute(
+      'href',
+      'https://x.dev/plan'
+    );
+    expect(screen.getByRole('link').parentElement).toHaveTextContent(
+      /^Notes \[draft plan$/
+    );
+  });
+
+  it.each([
+    ['unmatched "["', '['.repeat(100_000)],
+    ['"[" before text', '[a'.repeat(50_000)],
+  ])('reads a composer-length caption of %s in linear time', (_, caption) => {
+    const start = performance.now();
+    expect(linkifyCaption(caption)).toBe(caption);
+    // Linear takes about 1 ms. Quadratic took 3–6 s.
+    expect(performance.now() - start).toBeLessThan(500);
+  });
+
   it('leaves out the parenthesis that closes an aside around an address', () => {
     render(<p>{linkifyCaption('Shipped (see https://x.dev) today')}</p>);
     expect(screen.getByRole('link', { name: 'https://x.dev' })).toHaveAttribute(
