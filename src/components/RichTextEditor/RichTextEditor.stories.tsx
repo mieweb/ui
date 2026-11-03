@@ -4,7 +4,7 @@ import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
 import { createDeprecationBanner } from '../TextAreaRich/DeprecationBanner';
 
 const DEPRECATION_NOTICE =
-  '> ⚠️ **Deprecated** — `RichTextEditor` is deprecated (mieweb/ui#692). Use [RichEditor](?path=/docs/editors-richeditor--docs) from `@mieweb/ui/kerebron` — the supported ProseMirror/Kerebron engine: install the `@kerebron/*` peers and import `@mieweb/ui/kerebron.css`. Mind the format difference — RichEditor stores **Markdown** (`getContent()`); hosts that persist **HTML** can use [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs), which keeps the HTML `value`/`onChange` contract. This legacy `document.execCommand` editor will be removed in a future major release.';
+  '> ⚠️ **Deprecated** — `RichTextEditor` is deprecated (mieweb/ui#692). Use [RichEditor](?path=/docs/editors-richeditor--docs) from `@mieweb/ui/kerebron` — the supported ProseMirror/Kerebron engine: install the `@kerebron/*` peers and import `@mieweb/ui/kerebron.css`. Mind the format difference — RichEditor stores **Markdown** (`getContent()`); hosts that persist **HTML** can use [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs), which keeps the HTML `value`/`onChange` contract **including `variableGroups`** (its toolbar carries the same searchable Variables menu) and dictation. This legacy `document.execCommand` editor will be removed in a future major release.';
 
 const meta: Meta<typeof RichTextEditor> = {
   id: 'deprecated-richtexteditor',

@@ -31,6 +31,7 @@ import {
 import {
   processDictation,
   type RichTextEditorBlockMenuLabels,
+  type RichTextVariable,
 } from '../RichTextEditor';
 import type { TextAreaRichProps } from './TextAreaRich';
 import { getSpeechRecognition, type SpeechRecognitionLike } from './speech';
@@ -206,6 +207,7 @@ const TextAreaRichKerebron = React.forwardRef<
       onMacroInsert,
       macroLabels,
       onCreateMacro,
+      variableGroups,
       toolbar,
       defaultToolbar = 'hidden',
       onToolbarChange,
@@ -254,6 +256,15 @@ const TextAreaRichKerebron = React.forwardRef<
     const [editorTop, setEditorTop] = React.useState(0);
     const [blockMenuOpen, setBlockMenuOpen] = React.useState(false);
     const [gutterTop, setGutterTop] = React.useState(4);
+    const [variablesOpen, setVariablesOpen] = React.useState(false);
+    // The toolbar's Variables button rect (relative to the gutter wrapper):
+    // the searchable Dropdown anchors a React trigger exactly over it.
+    const [variablesAnchor, setVariablesAnchor] = React.useState<{
+      top: number;
+      left: number;
+      width: number;
+      height: number;
+    } | null>(null);
 
     const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
     const isListeningRef = React.useRef(false);
@@ -276,6 +287,7 @@ const TextAreaRichKerebron = React.forwardRef<
     const hasMacroEntries = Boolean(
       macros?.some((group) => group.macros.length > 0)
     );
+    const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
     // The gutter `+` stays discoverable on hover even while a focus-docked
     // field rests as a one-line input.
     const gutterActive = !inert;
@@ -286,6 +298,10 @@ const TextAreaRichKerebron = React.forwardRef<
     macrosRef.current = macros;
     const hasMacrosRef = React.useRef(hasMacros);
     hasMacrosRef.current = hasMacros;
+    const hasVariablesRef = React.useRef(hasVariables);
+    hasVariablesRef.current = hasVariables;
+    const variablesOpenRef = React.useRef(variablesOpen);
+    variablesOpenRef.current = variablesOpen;
     const onMacroInsertRef = React.useRef(onMacroInsert);
     onMacroInsertRef.current = onMacroInsert;
     const onChangeRef = React.useRef(onChange);
@@ -441,6 +457,70 @@ const TextAreaRichKerebron = React.forwardRef<
         insertPlainText(liveView, macro.content, at, at);
       });
       return true;
+    };
+
+    // --- Variables menu ---
+
+    /**
+     * Insert the variable token at the caret as one ProseMirror transaction
+     * (native undo step). The view keeps its selection state while focus
+     * sits in the menu, so refocusing restores the caret by itself.
+     */
+    const insertVariable = (variable: RichTextVariable) => {
+      if (inertRef.current) return;
+      const view = currentView();
+      if (!view) return;
+      view.focus();
+      insertPlainText(view, variable.insertValue ?? variable.value);
+    };
+
+    /** Close path: hand focus back to the editor when it sits in the menu. */
+    const handleVariablesOpenChange = (open: boolean) => {
+      if (
+        !open &&
+        document.activeElement?.closest('[data-slot="dropdown-menu"]')
+      ) {
+        currentView()?.focus();
+      }
+      setVariablesOpen(open);
+    };
+
+    /** Anchor the menu at the (visible) toolbar Variables button and open. */
+    const openVariablesMenu = () => {
+      if (inertRef.current) return;
+      const root = wrapperRef.current;
+      const frame = gutterWrapperRef.current;
+      if (!root || !frame) return;
+      const visible = (candidate: HTMLElement) =>
+        candidate.getBoundingClientRect().width > 0;
+      // When the button sits in the overflow popup, the popup has already
+      // closed (0×0) by the time its forwarded mousedown lands here — fall
+      // back to the overflow toggle (where the user just clicked), then the
+      // toolbar itself (unmeasured, e.g. jsdom, included: `run` can only
+      // fire from a rendered toolbar).
+      const anchor =
+        Array.from(
+          root.querySelectorAll<HTMLElement>('.tar-menu-variables')
+        ).find(visible) ??
+        Array.from(
+          root.querySelectorAll<HTMLElement>('.kb-custom-menu__overflow-toggle')
+        ).find(visible) ??
+        root.querySelector<HTMLElement>('.kb-custom-menu');
+      if (!anchor) return;
+      const rect = anchor.getBoundingClientRect();
+      const frameRect = frame.getBoundingClientRect();
+      setVariablesAnchor({
+        top: rect.top - frameRect.top,
+        left: rect.left - frameRect.left,
+        width: rect.width,
+        height: rect.height,
+      });
+      setVariablesOpen(true);
+    };
+
+    const toggleVariablesMenu = () => {
+      if (variablesOpenRef.current) handleVariablesOpenChange(false);
+      else openVariablesMenu();
     };
 
     // --- Block gutter menu ---
@@ -727,6 +807,12 @@ const TextAreaRichKerebron = React.forwardRef<
       if (!toolbarVisible || inert || !enableDictation) stopDictation();
     }, [toolbarVisible, inert, enableDictation, stopDictation]);
 
+    // Hiding the toolbar hides the Variables anchor button; never leave the
+    // menu floating over nothing (same when disabled/readOnly).
+    React.useEffect(() => {
+      if (!toolbarVisible || inert) setVariablesOpen(false);
+    }, [toolbarVisible, inert]);
+
     // End-of-life cleanup.
     React.useEffect(() => stopDictation, [stopDictation]);
 
@@ -736,6 +822,8 @@ const TextAreaRichKerebron = React.forwardRef<
     openBlockMenuAtCaretRef.current = openBlockMenuAtCaret;
     const expandTypedShortcutRef = React.useRef(expandTypedShortcut);
     expandTypedShortcutRef.current = expandTypedShortcut;
+    const toggleVariablesMenuRef = React.useRef(toggleVariablesMenu);
+    toggleVariablesMenuRef.current = toggleVariablesMenu;
 
     const [menuAddon] = React.useState(() => {
       // Icon-only (filled Material-style paths, like Kerebron's stock
@@ -775,11 +863,28 @@ const TextAreaRichKerebron = React.forwardRef<
           return true;
         },
       });
+      const variablesItem = new MenuItem({
+        icon: {
+          width: 24,
+          height: 24,
+          // Material Symbols "data object" (Apache-2.0)
+          path: 'M4 7v2c0 .55-.45 1-1 1H2v4h1c.55 0 1 .45 1 1v2c0 1.65 1.35 3 3 3h3v-2H7c-.55 0-1-.45-1-1v-2c0-1.3-.84-2.42-2-2.83v-.34C5.16 11.42 6 10.3 6 9V7c0-.55.45-1 1-1h3V4H7C5.35 4 4 5.35 4 7zm17 3c-.55 0-1-.45-1-1V7c0-1.65-1.35-3-3-3h-3v2h3c.55 0 1 .45 1 1v2c0 1.3.84 2.42 2 2.83v.34c-1.16.41-2 1.53-2 2.83v2c0 .55-.45 1-1 1h-3v2h3c1.65 0 3-1.35 3-3v-2c0-.55.45-1 1-1h1v-4h-1z',
+        },
+        title: m('Insert variable'),
+        class: 'tar-menu-variables',
+        select: () => hasVariablesRef.current,
+        enable: () => !inertRef.current,
+        active: () => variablesOpenRef.current,
+        run: () => {
+          toggleVariablesMenuRef.current();
+          return true;
+        },
+      });
       const modifyMenu: ModifyMenu = (menus: MenuElement[][]) => [
         ...menus,
         // The patched MenuItem types `render().dom` as nullable, which no
         // longer satisfies MenuElement; our items always render a button.
-        [macrosItem, dictateItem] as unknown as MenuElement[],
+        [variablesItem, macrosItem, dictateItem] as unknown as MenuElement[],
       ];
       const kit: EditorKit = {
         getExtensions: () => [
@@ -862,6 +967,22 @@ const TextAreaRichKerebron = React.forwardRef<
           dictateButton.setAttribute('title', title);
           dictateButton.setAttribute('aria-label', title);
         }
+        for (const variablesButton of root.querySelectorAll<HTMLElement>(
+          '.tar-menu-variables'
+        )) {
+          variablesButton.style.display = hasVariables ? '' : 'none';
+          variablesButton.classList.toggle('kb-menu__button--disabled', inert);
+          variablesButton.setAttribute('aria-disabled', String(inert));
+          variablesButton.classList.toggle(
+            'kb-menu__button--active',
+            variablesOpen
+          );
+          variablesButton.setAttribute('aria-haspopup', 'menu');
+          variablesButton.setAttribute('aria-expanded', String(variablesOpen));
+          const title = m('Insert variable');
+          variablesButton.setAttribute('title', title);
+          variablesButton.setAttribute('aria-label', title);
+        }
       };
       sync();
       // Attribute writes don't retrigger a childList-only observer, so the
@@ -879,6 +1000,8 @@ const TextAreaRichKerebron = React.forwardRef<
       hasMacros,
       macrosOpen,
       macroLabels,
+      hasVariables,
+      variablesOpen,
       enableDictation,
       speechSupported,
       isListening,
@@ -1241,6 +1364,61 @@ const TextAreaRichKerebron = React.forwardRef<
               disabled={disabled}
               readOnly={readOnly}
             />
+            {hasVariables && variablesOpen && variablesAnchor && (
+              // Invisible React anchor laid exactly over the toolbar's
+              // Variables button: the Dropdown positions off it, and the
+              // trigger span swallows a toggle-off click before it can
+              // reach the Kerebron button (whose `run` would reopen).
+              // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mousedown here only guards editor focus (preventDefault); the a11y contract lives on the real toolbar button underneath.
+              <div
+                data-slot="textarea-rich-variables-anchor"
+                className="absolute z-10"
+                style={variablesAnchor}
+                // Keep the editor focused through menu interaction (see
+                // the block gutter above for the full iOS rationale).
+                onMouseDown={(event) => event.preventDefault()}
+              >
+                <Dropdown
+                  open={variablesOpen}
+                  onOpenChange={handleVariablesOpenChange}
+                  placement="bottom-start"
+                  width={240}
+                  searchable
+                  searchPlaceholder={m('Search variables…')}
+                  searchAriaLabel={m('Search template variables')}
+                  trigger={
+                    // Explicit size: the Dropdown's inline-flex anchor
+                    // container sizes to this span, matching the button.
+                    <span
+                      aria-hidden="true"
+                      className="block"
+                      style={{
+                        width: variablesAnchor.width,
+                        height: variablesAnchor.height,
+                      }}
+                    />
+                  }
+                >
+                  {variableGroups!.map((group, groupIndex) => (
+                    <React.Fragment key={group.label}>
+                      {groupIndex > 0 && <DropdownSeparator />}
+                      <DropdownLabel>{group.label}</DropdownLabel>
+                      {group.variables.map((variable) => (
+                        <DropdownItem
+                          key={variable.value}
+                          onClick={() => {
+                            handleVariablesOpenChange(false);
+                            insertVariable(variable);
+                          }}
+                        >
+                          {variable.label}
+                        </DropdownItem>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </Dropdown>
+              </div>
+            )}
           </div>
 
           {hasMacros && (
