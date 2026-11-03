@@ -808,10 +808,32 @@ const TextAreaRichKerebron = React.forwardRef<
     }, [toolbarVisible, inert, enableDictation, stopDictation]);
 
     // Hiding the toolbar hides the Variables anchor button; never leave the
-    // menu floating over nothing (same when disabled/readOnly).
+    // menu floating over nothing (same when disabled/readOnly, or when
+    // variableGroups empties — otherwise restoring the groups would reopen
+    // the menu at its stale anchor without user activation).
     React.useEffect(() => {
-      if (!toolbarVisible || inert) setVariablesOpen(false);
-    }, [toolbarVisible, inert]);
+      if (!toolbarVisible || inert || !hasVariables) setVariablesOpen(false);
+    }, [toolbarVisible, inert, hasVariables]);
+
+    // A resize can reflow the toolbar (buttons moving into or out of the
+    // overflow popup), leaving the overlay anchored to stale coordinates
+    // over some other control. The menu is transient — close it rather
+    // than track the moving button.
+    React.useEffect(() => {
+      if (!variablesOpen) return;
+      const root = wrapperRef.current;
+      if (!root || typeof ResizeObserver === 'undefined') return;
+      let initial = true; // observe() always fires once immediately
+      const observer = new ResizeObserver(() => {
+        if (initial) {
+          initial = false;
+          return;
+        }
+        setVariablesOpen(false);
+      });
+      observer.observe(root);
+      return () => observer.disconnect();
+    }, [variablesOpen]);
 
     // End-of-life cleanup.
     React.useEffect(() => stopDictation, [stopDictation]);
@@ -1374,9 +1396,16 @@ const TextAreaRichKerebron = React.forwardRef<
                 data-slot="textarea-rich-variables-anchor"
                 className="absolute z-10"
                 style={variablesAnchor}
-                // Keep the editor focused through menu interaction (see
-                // the block gutter above for the full iOS rationale).
-                onMouseDown={(event) => event.preventDefault()}
+                // Keep the editor focused when the anchor itself is pressed
+                // (see the block gutter above for the iOS rationale). The
+                // portaled menu's React events bubble through here too —
+                // those keep their defaults (caret placement and drag
+                // selection in the search input need them).
+                onMouseDown={(event) => {
+                  if (event.currentTarget.contains(event.target as Node)) {
+                    event.preventDefault();
+                  }
+                }}
               >
                 <Dropdown
                   open={variablesOpen}
@@ -1386,6 +1415,7 @@ const TextAreaRichKerebron = React.forwardRef<
                   searchable
                   searchPlaceholder={m('Search variables…')}
                   searchAriaLabel={m('Search template variables')}
+                  searchEmptyState={m('No matching variables')}
                   trigger={
                     // Explicit size: the Dropdown's inline-flex anchor
                     // container sizes to this span, matching the button.

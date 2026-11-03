@@ -55,7 +55,9 @@ function Harness(props: Partial<TextAreaRichProps>) {
         props.onChange?.(html);
       }}
       defaultToolbar="visible"
-      variableGroups={variableGroups}
+      variableGroups={
+        'variableGroups' in props ? props.variableGroups : variableGroups
+      }
       aria-label="Letter body"
     />
   );
@@ -163,5 +165,41 @@ describe('TextAreaRichKerebron variables menu', () => {
     // The open guard runs synchronously off the mousedown; nothing to await.
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('shows a translated empty state for unmatched searches', async () => {
+    const button = await renderEditor();
+    pressToolbarButton(button);
+    const search = await screen.findByLabelText('Search template variables');
+    fireEvent.change(search, { target: { value: 'zzz-no-such-variable' } });
+    expect(
+      await screen.findByText('No matching variables')
+    ).toBeInTheDocument();
+  });
+
+  it('closes when variableGroups empties and stays closed on restore', async () => {
+    const { rerender } = renderWithTheme(<Harness />);
+    await waitFor(() => {
+      expect(document.querySelector('.tar-menu-variables')).not.toBeNull();
+    });
+    const button = document.querySelector<HTMLButtonElement>(
+      '.tar-menu-variables'
+    )!;
+    pressToolbarButton(button);
+    await screen.findByRole('menu');
+
+    rerender(<Harness variableGroups={[]} />);
+    await waitFor(() => {
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
+    expect(button.style.display).toBe('none');
+
+    // Restoring the groups must not reopen the menu without user activation.
+    rerender(<Harness variableGroups={variableGroups} />);
+    await waitFor(() => {
+      expect(button.style.display).not.toBe('none');
+    });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(button).toHaveAttribute('aria-expanded', 'false');
   });
 });
