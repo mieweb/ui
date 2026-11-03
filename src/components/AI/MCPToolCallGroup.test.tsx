@@ -86,6 +86,26 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).getByText('Permission denied')).toBeInTheDocument();
   });
 
+  it('treats an error result as the failure text', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success'),
+          call('b', 'error', {
+            result: { type: 'error', data: 'Rate limit exceeded' },
+          }),
+        ]}
+      />
+    );
+
+    const [row] = rows();
+    expect(within(row).getByText('Rate limit exceeded')).toBeInTheDocument();
+    fireEvent.click(within(row).getByRole('button', { name: /tool_b/ }));
+    expect(
+      within(row).getByRole('button', { name: 'Show error' })
+    ).toBeInTheDocument();
+  });
+
   it('keeps approval controls visible when the user collapses the group', () => {
     renderWithTheme(
       <MCPToolCallGroup

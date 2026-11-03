@@ -247,7 +247,11 @@ function ToolCallRow({
   const prefersReducedMotion = usePrefersReducedMotion();
   const [acting, setActing] = React.useState(false);
   const isAwaitingApproval = toolCall.status === 'awaiting-approval';
-  const result = formatResult(toolCall);
+  // An `error` result is failure text, the same as `toolCall.error`.
+  const isErrorResult = toolCall.result?.type === 'error';
+  const formattedResult = formatResult(toolCall);
+  const result = isErrorResult ? null : formattedResult;
+  const errorText = toolCall.error || (isErrorResult ? formattedResult : null);
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasDetails =
     toolCall.parameters.length > 0 || Boolean(result) || hasLinks;
@@ -318,7 +322,7 @@ function ToolCallRow({
                 {formatParameters(toolCall)}
               </pre>
             )}
-            {(result || toolCall.error) && (
+            {(result || errorText) && (
               <Collapsible>
                 <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
                   <ChevronDown
@@ -329,7 +333,7 @@ function ToolCallRow({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-1">
                   <pre className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900">
-                    {result ?? toolCall.error}
+                    {result ?? errorText}
                   </pre>
                 </CollapsibleContent>
               </Collapsible>
@@ -337,9 +341,9 @@ function ToolCallRow({
           </CollapsibleContent>
         </Collapsible>
 
-        {toolCall.status === 'error' && toolCall.error && (
+        {toolCall.status === 'error' && errorText && (
           <p className="ms-6 line-clamp-2 text-xs text-red-600 dark:text-red-400">
-            {toolCall.error}
+            {errorText}
           </p>
         )}
 
