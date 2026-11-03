@@ -14,13 +14,20 @@ const URL_PIECE = String.raw`[^\s()<]|${parenGroup(String.raw`\s<`)}`;
 const URL_END = String.raw`[^\s()<.,;:!?\]'"]|${parenGroup(String.raw`\s<`)}`;
 
 /**
- * A Markdown link (`[label](https://…)`) or a bare web address. Only http(s):
- * the caption is a message's raw text, so nothing else becomes a link. A bare
- * address stops before closing punctuation ("see https://x.dev." keeps the
- * full stop out).
+ * A Markdown link's optional title after its address (`"…"`, `'…'` or `(…)`,
+ * as CommonMark allows). Matched so the link still is one; never shown, as the
+ * caption's links have no tooltips.
+ */
+const LINK_TITLE = String.raw`(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?[ \t]*`;
+
+/**
+ * A Markdown link (`[label](https://… "title")`) or a bare web address. Only
+ * http(s): the caption is a message's raw text, so nothing else becomes a
+ * link. A bare address stops before closing punctuation ("see https://x.dev."
+ * keeps the full stop out).
  */
 const LINK = new RegExp(
-  String.raw`\[([^\]\n]+)\]\((https?:\/\/(?:${URL_PIECE})+)\)` +
+  String.raw`\[([^\]\n]+)\]\((https?:\/\/(?:${URL_PIECE})+)${LINK_TITLE}\)` +
     String.raw`|(https?:\/\/(?:${URL_PIECE})*(?:${URL_END}))`,
   'g'
 );
