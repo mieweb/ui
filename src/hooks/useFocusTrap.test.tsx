@@ -254,6 +254,36 @@ describe('useFocusTrap', () => {
     expect(screen.getByRole('button', { name: 'Send' })).toHaveFocus();
   });
 
+  it('brings focus that fell to the page back in: Tab at the start, Shift+Tab at the end', () => {
+    render(<Trap initialFocus={false} />);
+    expect(document.body).toHaveFocus();
+    fireEvent.keyDown(document.body, { key: 'Tab' });
+    expect(screen.getByRole('button', { name: 'First' })).toHaveFocus();
+    (document.activeElement as HTMLElement).blur();
+    fireEvent.keyDown(document.body, { key: 'Tab', shiftKey: true });
+    expect(screen.getByRole('button', { name: 'Second' })).toHaveFocus();
+  });
+
+  it('leaves focus on a control outside the trap where it is', () => {
+    render(
+      <>
+        <button type="button">Elsewhere</button>
+        <Trap initialFocus={false} />
+      </>
+    );
+    const elsewhere = screen.getByRole('button', { name: 'Elsewhere' });
+    elsewhere.focus();
+    const event = fireEvent.keyDown(elsewhere, { key: 'Tab' });
+    expect(event).toBe(true);
+    expect(elsewhere).toHaveFocus();
+  });
+
+  it('lets the innermost trap take back focus that fell to the page', () => {
+    render(<NestedTraps />);
+    fireEvent.keyDown(document.body, { key: 'Tab' });
+    expect(screen.getByRole('button', { name: 'Dialog first' })).toHaveFocus();
+  });
+
   it('lets the innermost trap take a menu opened inside it', () => {
     render(<NestedTraps />);
     const option = screen.getByRole('menuitem', { name: 'Option' });
