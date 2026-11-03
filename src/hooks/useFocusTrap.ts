@@ -120,7 +120,16 @@ export function useFocusTrap<T extends HTMLElement>(
       const active = document.activeElement as HTMLElement | null;
       const stops = tabStops(container);
       const index = active ? stops.indexOf(active) : -1;
-      if (index === -1) return;
+      if (index === -1) {
+        // Focus fell to the page: what held it was hidden or removed (the
+        // control that opened a covering panel), or the key came before the
+        // caller's own first focus. Tab comes back in at the start, Shift+Tab
+        // at the end. Focus on anything else outside is left where it is.
+        if (stops.length === 0 || (active && active !== document.body)) return;
+        event.preventDefault();
+        stops[event.shiftKey ? stops.length - 1 : 0].focus();
+        return;
+      }
       const step = event.shiftKey ? -1 : 1;
       const wraps = index + step < 0 || index + step >= stops.length;
       const target = stops[(index + step + stops.length) % stops.length];
@@ -131,9 +140,10 @@ export function useFocusTrap<T extends HTMLElement>(
       event.preventDefault();
       target.focus();
     };
-    // Keys in a portaled popup don't pass through the container. When traps
-    // nest (a dialog inside the panel), the innermost one that owns the popup
-    // takes them, as it does for keys inside it.
+    // Keys in a portaled popup, or with focus fallen to the page, don't pass
+    // through the container. When traps nest (a dialog inside the panel), the
+    // innermost one that owns the popup takes them, as it does for keys
+    // inside it; with focus on the page, the innermost takes it back.
     const handleOutsideKeyDown = (event: globalThis.KeyboardEvent) => {
       if (container.contains(event.target as Node)) return;
       const active = document.activeElement as HTMLElement | null;
@@ -142,7 +152,7 @@ export function useFocusTrap<T extends HTMLElement>(
           inner !== container &&
           container.contains(inner) &&
           active &&
-          tabStops(inner).includes(active)
+          (active === document.body || tabStops(inner).includes(active))
         )
           return;
       handleKeyDown(event);
