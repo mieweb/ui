@@ -84,7 +84,7 @@ Ships from the optional **\`@mieweb/ui/q\`** entry: install the peer \`@mieweb/q
 
 ### Don't use it when
 
-- The user writes **prose** — \`RichEditor\` (Markdown) or \`RichTextEditor\` (HTML). Q is in this family because of its code editor pane, not because it edits documents.
+- The user writes **prose** — \`RichEditor\`. Q is in this family because of its code editor pane, not because it edits documents.
 - You need a general form builder/renderer for clinical or business forms — the ESheet components (Composite forms), which own their own schema and validation.
 - You cannot add the \`@mieweb/q\` peer or its stylesheet: the component is a thin wrapper and renders nothing without them.
 

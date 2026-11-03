@@ -352,12 +352,17 @@ function previousVisibleText(node: Node, root: HTMLElement): Text | null {
 }
 
 /**
- * A presentational rich-text editor with formatting, template-variable
- * insertion and optional speech-to-text dictation. Content is supplied and
- * surfaced via `value`/`onChange` so it can be wired to any store. The variable
- * menu is data-agnostic — pass `variableGroups` to populate it.
+ * The rich-text editor implementation. Exported for the library's own
+ * composites (`EmailEditor`, `TextAreaRichLegacy`) so their consumers do not
+ * trigger the public `RichTextEditor` deprecation warning — do not use in
+ * new code. Content is supplied and surfaced via `value`/`onChange` so it
+ * can be wired to any store. The variable menu is data-agnostic — pass
+ * `variableGroups` to populate it.
  */
-const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
+const RichTextEditorBase = React.forwardRef<
+  HTMLDivElement,
+  RichTextEditorProps
+>(
   (
     {
       value,
@@ -1785,6 +1790,42 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
   }
 );
 
+RichTextEditorBase.displayName = 'RichTextEditorBase';
+
+// Warn once per session (dev builds only) that the legacy RichTextEditor is
+// deprecated. Bundlers replace `process.env.NODE_ENV` at build time, so this
+// entire branch is dead-code-eliminated from production bundles.
+let didWarnDeprecated = false;
+function warnDeprecatedOnce() {
+  if (process.env.NODE_ENV === 'production' || didWarnDeprecated) return;
+  didWarnDeprecated = true;
+  console.warn(
+    '[@mieweb/ui] RichTextEditor is deprecated. Use RichEditor from @mieweb/ui/kerebron (ProseMirror engine) instead.'
+  );
+}
+
+/**
+ * A presentational rich-text editor with formatting, template-variable
+ * insertion and optional speech-to-text dictation. Content is supplied and
+ * surfaced via `value`/`onChange` so it can be wired to any store. The variable
+ * menu is data-agnostic — pass `variableGroups` to populate it.
+ *
+ * @deprecated Use `RichEditor` from `@mieweb/ui/kerebron` instead — the
+ * supported ProseMirror/Kerebron rich-text surface: install the `@kerebron/*`
+ * peers, import `@mieweb/ui/kerebron.css`, and switch the component. Note the
+ * format difference: `RichEditor` stores Markdown (`getContent()`), while this
+ * editor carries HTML through `value`/`onChange`. For a textarea-like HTML
+ * surface use `TextAreaRich` from `@mieweb/ui/kerebron`. This legacy
+ * `document.execCommand` editor will be removed in a future major release
+ * (mieweb/ui#692).
+ */
+const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
+  (props, ref) => {
+    warnDeprecatedOnce();
+    return <RichTextEditorBase ref={ref} {...props} />;
+  }
+);
+
 RichTextEditor.displayName = 'RichTextEditor';
 
-export { RichTextEditor };
+export { RichTextEditor, RichTextEditorBase };

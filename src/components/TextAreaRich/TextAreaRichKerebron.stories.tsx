@@ -36,7 +36,7 @@ Since 0.12 this engine also powers the main barrel's [Textarea](?path=/docs/text
 
 - **Strictly controlled**, like a native input: an edit that \`onChange\` does not echo back into \`value\` reverts. (The legacy engine only applied \`value\` when the prop changed.)
 - The block gutter \`+\` button rests beside the field and docks inward on hover/focus (the legacy engine reserves the start padding permanently).
-- \`sanitizeHtml\`, \`variableGroups\` and \`markdownShortcuts\` from \`RichTextEditorProps\` are not honored — pastes are filtered through the ProseMirror schema (instead of \`sanitizeHtml\`), markdown block shortcuts are always on, and \`{{variables}}\` need \`RichTextEditor\`.
+- \`sanitizeHtml\`, \`variableGroups\` and \`markdownShortcuts\` from \`RichTextEditorProps\` are not honored — pastes are filtered through the ProseMirror schema (instead of \`sanitizeHtml\`), markdown block shortcuts are always on, and \`{{variables}}\` need the deprecated \`RichTextEditor\`.
 - Output HTML is ProseMirror-normalized (e.g. no \`style\` attributes from \`execCommand\`).`,
       },
     },

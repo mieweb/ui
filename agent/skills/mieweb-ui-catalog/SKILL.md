@@ -73,7 +73,7 @@ Components by tier and family. Annotations: maturity when not stable, the import
 
 - **Chat:** AIChat, AIChat (Voice), AIMessage, ChatComposer _(beta)_, Composer Action Ribbon (POC) _(experimental)_, ComposerModelSelector, MCPToolCall, Messaging, OzwellChat, ReconciliationPanel
 - **Dashboards:** CustomizableDashboard, Dashboard (Demo) _(experimental)_, Dashboard Widgets (Demo) _(experimental)_, DashboardCustomizePanel, DashboardWidget, QuickLinksCard, ReportDashboard
-- **Editors:** EmailEditor _(experimental)_, MacroLibrary _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEditor, RichTextEsheet _(experimental, `/esheet`)_, TextAreaRich (Kerebron) _(experimental, `/kerebron`)_
+- **Editors:** EmailEditor _(experimental)_, MacroLibrary _(experimental)_, Markdown, Q _(`/q`)_, RichEditor _(`/kerebron`)_, RichTextEsheet _(experimental, `/esheet`)_, TextAreaRich (Kerebron) _(experimental, `/kerebron`)_
 - **Files:** DocumentScanner, DropzoneOverlay, FileManager
 - **Media:** AudioPlayer, AudioRecorder, DictationButton _(experimental)_, MediaEditor, MediaEditor Live Demo, MediaFeed _(experimental, `/components/MediaFeed`)_, MediaPlayer, RecordButton, TranscriptView, VideoCard _(experimental)_
 - **Presentations:** Deck _(experimental, `/deck`)_, PointMap _(experimental, `/maps`)_
@@ -107,7 +107,7 @@ Components by tier and family. Annotations: maturity when not stable, the import
 
 ### Deprecated
 
-- AGGrid _(deprecated, `/ag-grid`)_, AGGrid Enhanced _(deprecated, `/ag-grid`)_, TextAreaRich (Legacy) _(deprecated)_
+- AGGrid _(deprecated, `/ag-grid`)_, AGGrid Enhanced _(deprecated, `/ag-grid`)_, RichTextEditor (Legacy) _(deprecated)_, TextAreaRich (Legacy) _(deprecated)_
 
 ## Family policies
 
@@ -197,15 +197,15 @@ The one-line rule that governs each family. When a task touches a family, read i
 **Editors** (Modules):
 
 > **What is the stored format, and who edits it?** Markdown that people write (and maybe
-> co-write) → `RichEditor`. HTML for templated letters with merge fields and dictation →
-> `RichTextEditor`. A **multi-section guided document** — referral letters, support tickets —
-> where an eSheet definition supplies the sections and memory aids → `RichTextEsheet`.
-> HTML in a surface that should look like a plain textarea until asked →
-> `TextAreaRich`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
+> co-write) → `RichEditor`. HTML in a surface that should look like a plain textarea until
+> asked → `TextAreaRich`. A **multi-section guided document** — referral letters, support
+> tickets — where an eSheet definition supplies the sections and memory aids →
+> `RichTextEsheet`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
 > Markdown that is only **read** → `MarkdownRenderer`. A structured agent
 > configuration with a YAML/JSON pane → `Q`. Plain text storage with rich composing →
 > [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) (Text inputs) — it renders `TextAreaRich`
-> but keeps a plain-text `value`.
+> but keeps a plain-text `value`. The legacy `RichTextEditor` (HTML letters with merge
+> fields and dictation) is **deprecated** — no new usages (mieweb/ui#692).
 
 **Encounter & orders** (Healthcare):
 

@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import { RichTextEditor } from '../RichTextEditor';
+// The base import skips RichTextEditor's own deprecation warning — this
+// surface already warns once as TextAreaRich (legacy engine).
+import { RichTextEditorBase as RichTextEditor } from '../RichTextEditor/RichTextEditor';
 import type { TextAreaRichProps } from './TextAreaRich';
 
 /**
