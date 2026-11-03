@@ -3,7 +3,15 @@
  * its rows are measured ("settling"), until the reader takes over.
  */
 import * as React from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { act, fireEvent, render } from '@testing-library/react';
 import { SuperChat } from './SuperChat';
 import type { SuperChatConversation, SuperChatMessage } from './types';
@@ -35,6 +43,12 @@ class MockResizeObserver {
 const SETTLE_MS = 1500;
 /** The thread's viewport height in these tests. */
 const VIEWPORT = 400;
+/**
+ * The virtualizer's scroll-end debounce (@tanstack/virtual's default
+ * isScrollingResetDelay). A scroll event starts it and unmounting doesn't
+ * cancel it.
+ */
+const SCROLL_END_MS = 150;
 
 const message = (
   id: string,
@@ -118,6 +132,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
+
+// Let the last tests' scroll-end timers fire while the page is still here:
+// once the environment is torn down they throw "window is not defined".
+afterAll(() => new Promise((done) => setTimeout(done, SCROLL_END_MS * 2)));
 
 describe('settling a freshly opened virtualized thread', () => {
   it('keeps the thread at its end as its rows grow', () => {
