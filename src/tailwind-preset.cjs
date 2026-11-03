@@ -115,6 +115,8 @@ module.exports = {
     'dark:bg-white/30',
     // SuperChat's built-in attachment card: the player takes its box's height.
     'max-h-[inherit]',
+    // SuperChat's attachment tiles and message label: the bubble's width cap.
+    'max-w-[85%]',
     // SuperChat's attachment gallery (2, 3, 4+ cells) and documents list.
     'aspect-[4/3]',
     'grid-rows-2',
