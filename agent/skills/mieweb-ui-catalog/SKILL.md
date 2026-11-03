@@ -43,7 +43,7 @@ For per-component "Which one?" comparison tables, read [selection-guidance.md](.
 
 ## Inventory
 
-Components by tier and family. Annotations: maturity when not stable, and the import entry when it is not the root (e.g. _(`/datavis`)_).
+Components by tier and family. Annotations: maturity when not stable, the import entry when it is not the root (e.g. _(`/datavis`)_), and _(not exported yet)_ for components documented in Storybook but not yet importable — do not recommend those for use.
 
 ### Foundations
 
@@ -80,7 +80,7 @@ Components by tier and family. Annotations: maturity when not stable, and the im
 - **Records:** ActionPlan _(experimental)_, ActivityFeed _(experimental)_, AssociationList _(experimental)_, FieldHistory _(experimental)_, OrgChart _(experimental, `/org-chart`)_, RecordLayout _(experimental)_
 - **SuperChat:** Conversations (List) _(`/components/SuperChat`)_, Inbox _(`/components/SuperChat`)_, SuperChat (Panel) _(`/components/SuperChat`)_
 - **Views:** BoardView _(alpha)_, CalendarView _(alpha)_, GanttView _(alpha)_, ListView _(alpha)_, ViewSet _(alpha)_, ViewSwitcher _(alpha)_
-- **Voice:** Hands-Free Chat, Hey Ozwell Demo, Hey Ozwell Selector _(experimental)_, Speaker Scribe _(experimental)_, Speaker Verify _(experimental)_, Transcript Player _(experimental)_, Visit Scribe, Voice Manager, Voice Setup, Wake Word
+- **Voice:** Hands-Free Chat, Hey Ozwell Demo, Hey Ozwell Selector _(experimental)_, Speaker Scribe _(experimental, not exported yet)_, Speaker Verify _(experimental)_, Transcript Player _(experimental)_, Visit Scribe, Voice Manager, Voice Setup, Wake Word
 
 ### Templates
 

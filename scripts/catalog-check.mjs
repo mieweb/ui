@@ -396,6 +396,14 @@ for (const e of csfEntries) {
     errors.push(
       `${loc}: parameters.catalog.entry must be a string like "@mieweb/ui/datavis"`
     );
+  if (e.catalog.unexported !== undefined && e.catalog.unexported !== true)
+    errors.push(
+      `${loc}: parameters.catalog.unexported must be true (omit it once the component is exported)`
+    );
+  if (e.catalog.unexported && e.catalog.entry)
+    errors.push(
+      `${loc}: parameters.catalog.unexported contradicts catalog.entry — an unexported component has no import entry`
+    );
 }
 
 // Deep links. `?path=/docs/<id>--docs` is the documented way to link a page, so

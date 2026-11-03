@@ -60,11 +60,16 @@ imports the library:
    (`rounded…border…shadow`), modal/overlay divs (`fixed inset-0`), inline
    `<svg>` and icon-font classes, hand-rolled spinners/progress bars,
    custom tab/breadcrumb/pagination markup.
-4. **Check the CSS foundation** (project-level audits): `@source` directive
-   for `@mieweb/ui/dist`, `@custom-variant dark`, fallback values on
-   `var(--mieweb-*)` in `@theme`, `@tailwindcss/postcss` as the PostCSS
-   plugin, and a theme hook that sets **both** the `.dark` class and the
-   `data-theme` attribute. Details live in the `mieweb-ui-tailwind4` skill.
+4. **Check the CSS foundation** (project-level audits): identify the
+   consumer's CSS mode first, then audit against that mode's checklist in
+   the `mieweb-ui-tailwind4` skill — Tailwind 4 (`@source` for
+   `@mieweb/ui/dist`, `@custom-variant dark`, `@theme` fallbacks,
+   `@tailwindcss/postcss`), Tailwind 3 (preset + safelist + `content`
+   coverage), or precompiled CSS (`styles.css`/`init.css` import — never
+   prescribe Tailwind tooling to it). Validate the dark-mode toggle
+   against the `@custom-variant` actually in effect (a single-hook toggle
+   against `init.css` is valid); setting both `.dark` and `data-theme` is
+   the recommendation for new code, not a violation when one hook matches.
 5. **Build the resolution plan**, prioritized: layout shell (`AppHeader`,
    `Sidebar`, `SiteFooter`) → buttons → form elements → cards & modals →
    tables (NITRO) → feedback (`Badge`, `Toast`, `Spinner`) → navigation
@@ -131,7 +136,9 @@ variants. Verify each migrated feature before starting the next.
 3. Grep dynamic forms: prop expressions (`type={…}`, spread props,
    conditional classes) hide violations that literal-string greps miss.
 4. Never prescribe a component or prop you cannot verify in the catalog
-   skill; a gap honestly reported beats an invented replacement.
+   skill, the published component docs (https://ui.mieweb.org), or the
+   package's public types — the catalog is a selection inventory, not an
+   API reference; a gap honestly reported beats an invented replacement.
 5. Replacements must preserve behavior — event handlers, controlled state,
    form semantics. Flag any replacement that would change behavior as a
    judgment call instead of silently prescribing it.
