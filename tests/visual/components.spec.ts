@@ -2003,6 +2003,52 @@ test.describe('Visual Regression Tests - RichEditor (kerebron.css)', () => {
     await expect(page.locator('.kb-editor ul ul')).toHaveCount(0);
     await expect(page.locator('.kb-editor ol')).toHaveCount(1);
   });
+
+  test('RichEditor - dropdown opens below its trigger on a scrolled page', async ({
+    page,
+  }) => {
+    // Guards the renderPinnedDropdown scroll offset in the extension-menu
+    // patch (#690): the pinned dropdown is appended to document.body with
+    // position:absolute, so without adding window.scrollX/Y to the trigger's
+    // viewport rect it opened scrollY px above the trigger — off-screen on
+    // any scrolled page, making the toolbar dropdowns look dead. The other
+    // dropdown tests run at scrollY 0 and cannot catch this.
+    await gotoStory(page, formattedStory);
+    await waitForFormatted(page);
+    // Create document scroll above the story and bring the toolbar back
+    // into view, caret parked in a plain paragraph for the item dispatch.
+    await page.evaluate(() => {
+      document.body.style.paddingTop = '1200px';
+      window.scrollTo(0, 1200);
+    });
+    await page.locator('.kb-editor p', { hasText: 'inline code' }).click();
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    const trigger = page
+      .locator('.kb-dropdown__label', { hasText: 'Heading' })
+      .first();
+    await trigger.click();
+    const menu = page.locator('.kb-custom-menu__pinned-dropdown');
+    await menu.waitFor({ state: 'visible' });
+    // Geometry: the menu sits 4px below the trigger, aligned to its
+    // inline-start edge — both boxes measured in the same viewport space.
+    const triggerBox = await trigger.boundingBox();
+    const menuBox = await menu.boundingBox();
+    if (!triggerBox || !menuBox) throw new Error('menu not rendered');
+    expect(
+      Math.abs(menuBox.y - (triggerBox.y + triggerBox.height + 4))
+    ).toBeLessThanOrEqual(1.5);
+    expect(Math.abs(menuBox.x - triggerBox.x)).toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('richeditor-dropdown-scrolled.png', {
+      animations: 'disabled',
+    });
+    // End-to-end: selecting an item must still change the document.
+    await page
+      .locator('.kb-custom-menu__overflow-item', { hasText: 'Heading 2' })
+      .first()
+      .locator('.kb-custom-menu__overflow-item-label')
+      .click();
+    await expect(page.locator('.kb-editor h2')).toHaveCount(2);
+  });
 });
 
 test.describe('Visual Regression Tests - EmailEditor', () => {
