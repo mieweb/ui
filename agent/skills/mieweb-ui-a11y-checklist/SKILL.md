@@ -40,6 +40,8 @@ const [announcement, announce] = useLiveAnnouncement();
 
 **Scrollable region pattern:** a keyboard-scrollable overflow container is `tabIndex={0}` + `role="region"` + `aria-label`, and must be the *single* scroll container (no nested scrolling child).
 
+**Exit animations:** content animating out must be hidden from assistive tech (`aria-hidden` + `inert`) for the duration — screen readers otherwise read the leaving element. The motion layer's `AnimatedPresence` does **not** yet do this automatically (mieweb/ui#474); hand-rolled exits must handle it themselves.
+
 ## Known AA contrast traps (verified failures)
 
 Ratios below are for the **default (BlueHive) palette**. Brands may override entire scales — CCME's `neutral-400` on `neutral-800` is 4.31:1, not the default 6.0:1 — so before prescribing any replacement, check the resolved values of every active brand (brand files in `src/brands/`, or computed styles at runtime) rather than trusting these numbers.

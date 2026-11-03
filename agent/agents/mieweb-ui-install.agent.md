@@ -51,11 +51,13 @@ diagnose from evidence, then report a minimal fix — you do not edit files
 
 ## Peer-dependency triage
 
-`react`/`react-dom` are the only required peers. Everything else is optional
-and entry-scoped — before telling anyone to install a package, check whether
-they actually import the entry that needs it (catalog skill table). Under
-pnpm, remind consumers that peers are not hoisted; required peers belong in
-the app's own `package.json`.
+Required peers: `react`/`react-dom` (>=18) **and** the five `@kerebron/*`
+runtime packages (`editor`, `editor-kits`, `extension-basic-editor`,
+`extension-menu`, `wasm`) — the main-barrel `Textarea` rides the Kerebron
+engine. Everything else is optional and entry-scoped — before telling anyone
+to install a package, check whether they actually import the entry that needs
+it (catalog skill table). Under pnpm, remind consumers that peers are not
+hoisted; required peers belong in the app's own `package.json`.
 
 ## Redirects
 

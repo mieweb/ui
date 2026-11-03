@@ -494,7 +494,7 @@ export interface AIMessageDisplayProps {
   message: AIMessage;
   /** User name for user messages */
   userName?: string;
-  /** Whether to show the avatar */
+  /** Whether to show the avatar. `tool` messages never show one. */
   showAvatar?: boolean;
   /** Whether to show timestamp */
   showTimestamp?: boolean;
@@ -540,15 +540,16 @@ export function AIMessageDisplay({
     });
   };
 
-  // For tool messages, render just the tool call without bubble
+  // Tool messages render just the tool call: no bubble and no avatar. They sit
+  // between the assistant's own messages, so a per-call avatar only repeats
+  // who is speaking and pushes the conversation out of view.
   if (message.role === 'tool') {
     return (
       <div
         data-slot="ai-message"
         className={cn(messageVariants({ role: message.role }), className)}
       >
-        {showAvatar && <MessageAvatar role={message.role} />}
-        <div className="flex-1 space-y-2">
+        <div className="min-w-0 flex-1 space-y-2">
           {message.content.map((content, index) => (
             <ContentBlock
               key={index}
