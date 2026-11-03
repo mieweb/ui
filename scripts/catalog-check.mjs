@@ -392,6 +392,13 @@ for (const e of csfEntries) {
         );
     }
   }
+}
+
+// Entry / availability metadata — validated for every entry that declares
+// `parameters.catalog`, independently of whether it lists relationships.
+for (const e of csfEntries) {
+  if (!e.catalog) continue;
+  const loc = rel(e.file);
   if (e.catalog.entry && typeof e.catalog.entry !== 'string')
     errors.push(
       `${loc}: parameters.catalog.entry must be a string like "@mieweb/ui/datavis"`
