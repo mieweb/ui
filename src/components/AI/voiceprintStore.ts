@@ -170,6 +170,11 @@ export async function setVoiceprints(
   }
 }
 
+/** Like `setVoiceprints`, but rejects when the write fails, so a caller never reports a lost save. */
+export function putVoiceprints(key: string, value: unknown): Promise<void> {
+  return idbSet(key, value);
+}
+
 /** Remove a voiceprint record (and any stale localStorage copy). */
 export async function clearVoiceprints(key: string): Promise<void> {
   try {

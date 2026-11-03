@@ -264,10 +264,17 @@ export function useVoiceSetup(
       wakeRef.current.setVoiceprint(ph.key, merged);
     }
     void saveWhatPrints(whatRef.current, voiceprintNamespace);
-    // A new pass replaces this voice's Nemotron print (one lane per person).
+    // A new pass replaces this voice's Nemotron print (one lane per person). Cancel, unmount or a
+    // namespace switch during the analysis sets abortRef, so nothing is saved or reported.
     try {
-      await wakeVoices.enroll(enrollVoiceId, label ?? enrollVoiceId, allClips);
+      await wakeVoices.enroll(
+        enrollVoiceId,
+        label ?? enrollVoiceId,
+        allClips,
+        () => abortRef.current
+      );
     } catch (e) {
+      if (abortRef.current) return;
       console.error(
         '[voice-setup] could not save the doctor-check voiceprint',
         e
@@ -276,6 +283,7 @@ export function useVoiceSetup(
       setPhase('intro');
       return;
     }
+    if (abortRef.current) return;
     setAdding(false);
     setPhase('done');
   }, [

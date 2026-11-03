@@ -332,6 +332,11 @@ export function useHeyOzwell(
   });
   const wakeVoicesRef = React.useRef(wakeVoices);
   wakeVoicesRef.current = wakeVoices;
+  // Bumped when Ozwell turns off or the user changes, so a doctor check still running is ignored.
+  const wakeEpochRef = React.useRef(0);
+  React.useEffect(() => {
+    wakeEpochRef.current++;
+  }, [voiceprintNamespace]);
   const rollRef = React.useRef<RollingRecorder | null>(null);
 
   // Conversation mode: diarize the dictation clip on send. Loads the speaker runtime only when on
@@ -594,8 +599,14 @@ export function useHeyOzwell(
     onWake: (name) => {
       if (name === 'hey-ozwell' && phaseRef.current === 'listening') {
         // doctor-only gate (resolves at once when requireDoctor is off)
+        const epoch = wakeEpochRef.current;
         void verified('hey-ozwell').then((ok) => {
-          if (!ok || phaseRef.current !== 'listening') return;
+          if (
+            !ok ||
+            wakeEpochRef.current !== epoch ||
+            phaseRef.current !== 'listening'
+          )
+            return;
           // Always open the chat. Only DROP into dictation when auto-dictate is on; otherwise just
           // open and wait — the experiment surface for more specific wake-word directions.
           setChatOpen(true);
@@ -610,8 +621,10 @@ export function useHeyOzwell(
         // dictation. The WHAT phrase-print check in verified() is the false-stop guard.) `true` = trim the
         // phrase off the audio before transcribing, allowing for the time the check took.
         const heardAt = performance.now();
+        // Only the recording that heard the phrase may be stopped by it.
+        const rec = recRef.current;
         void verified("ozwell-i'm-done").then((ok) => {
-          if (ok && phaseRef.current === 'dictating')
+          if (ok && recRef.current === rec && phaseRef.current === 'dictating')
             stopDictation(true, (performance.now() - heardAt) / 1000);
         });
       }
@@ -728,6 +741,7 @@ export function useHeyOzwell(
     (next: boolean) => {
       setActive(next);
       if (!next) {
+        wakeEpochRef.current++;
         // Turning off: stop any dictation, abort an in-flight reply, close + reset.
         try {
           recRef.current?.stop();

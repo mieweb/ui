@@ -1,7 +1,7 @@
 /** Nemotron voiceprints in IndexedDB, isolated per `voiceprintNamespace` like the TitaNet ones. */
 import {
   getVoiceprints,
-  setVoiceprints,
+  putVoiceprints,
   voiceprintStorageKey,
 } from '../../voiceprintStore';
 import { MODEL_REVISION, type ModelVariant } from './modelConfig';
@@ -46,12 +46,13 @@ export async function loadNemotronVoiceprints(
   return Array.isArray(stored) ? stored.filter(isVoiceprint) : [];
 }
 
+/** Rejects when the write fails. */
 export function saveNemotronVoiceprints(
   voiceprints: NemotronVoiceprint[],
   namespace?: string,
   list: VoiceprintList = 'scribe'
 ): Promise<void> {
-  return setVoiceprints(
+  return putVoiceprints(
     voiceprintStorageKey(KEYS[list], namespace),
     voiceprints
   ).then(() => saved.forEach((listener) => listener()));

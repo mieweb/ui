@@ -56,6 +56,15 @@ export function VoiceManager({
   const sv = useSpeakerVerify({ voiceprintNamespace });
   // Removing a voice also revokes its doctor-check (Nemotron) voiceprint.
   const wakeVoices = useNemotronWakeVoices({ voiceprintNamespace });
+  // A failed revoke leaves that voice able to command Hey Ozwell, so it must be visible.
+  const [revokeFailed, setRevokeFailed] = React.useState(false);
+  const revoke = (change: Promise<void>) => {
+    setRevokeFailed(false);
+    change.catch((e: unknown) => {
+      console.error('[voice-manager] could not update the doctor check', e);
+      setRevokeFailed(true);
+    });
+  };
   const [inSetup, setInSetup] = React.useState<SetupTarget | null>(null);
   const [, setTick] = React.useState(0); // bump to force a re-read of the voice list after enroll/remove/clear
   const [addName, setAddName] = React.useState('');
@@ -97,7 +106,7 @@ export function VoiceManager({
   };
   const remove = (id: string) => {
     sv.removeVoice(id);
-    void wakeVoices.remove(id);
+    revoke(wakeVoices.remove(id));
     setTick((t) => t + 1);
   };
   const saveRename = (id: string) => {
@@ -108,7 +117,7 @@ export function VoiceManager({
   };
   const clearAll = () => {
     sv.clear();
-    void wakeVoices.clear();
+    revoke(wakeVoices.clear());
     void clearWhatPrints(voiceprintNamespace);
     setTick((t) => t + 1);
   };
@@ -136,6 +145,11 @@ export function VoiceManager({
       {sv.error && (
         <div className="text-destructive mt-4 text-[13px]">
           Couldn’t load the voice models — check the console.
+        </div>
+      )}
+      {revokeFailed && (
+        <div role="alert" className="text-destructive mt-4 text-[13px]">
+          Couldn’t remove the voice from Hey Ozwell’s doctor check. Try again.
         </div>
       )}
 

@@ -40,8 +40,13 @@ export interface NemotronWakeVoices {
   usable: number;
   /** Whether an allowed voice is the main speaker in `clip`. False when no voice is usable. */
   verify: (clip: WakeClip) => Promise<boolean>;
-  /** Stores (or replaces) `voiceId`'s voiceprint from its enrollment clips. */
-  enroll: (voiceId: string, name: string, clips: WakeClip[]) => Promise<void>;
+  /** Stores (or replaces) `voiceId`'s voiceprint from its enrollment clips; skips the save once `cancelled()`. */
+  enroll: (
+    voiceId: string,
+    name: string,
+    clips: WakeClip[],
+    cancelled?: () => boolean
+  ) => Promise<void>;
   remove: (voiceId: string) => Promise<void>;
   clear: () => Promise<void>;
 }
@@ -49,6 +54,14 @@ export interface NemotronWakeVoices {
 const load = (namespace?: string) => loadNemotronVoiceprints(namespace, 'wake');
 const save = (prints: NemotronVoiceprint[], namespace?: string) =>
   saveNemotronVoiceprints(prints, namespace, 'wake');
+
+// Every change reads the list, then writes it; one at a time so concurrent changes cannot undo each other.
+let writing: Promise<unknown> = Promise.resolve();
+function serialized<T>(change: () => Promise<T>): Promise<T> {
+  const run = writing.then(change, change);
+  writing = run.catch(() => {});
+  return run;
+}
 
 function concat(parts: Float32Array[]): Float32Array {
   const out = new Float32Array(parts.reduce((n, p) => n + p.length, 0));
@@ -107,54 +120,67 @@ export function useNemotronWakeVoices({
   );
 
   const enroll = React.useCallback(
-    async (voiceId: string, name: string, clips: WakeClip[]) => {
+    async (
+      voiceId: string,
+      name: string,
+      clips: WakeClip[],
+      cancelled: () => boolean = () => false
+    ) => {
       if (!model)
         throw new Error('The speaker model is still being chosen; try again');
       const embeds = await enrollNemotron(
         concat(clips.map((c) => resampleTo16kMono(c.samples, c.sampleRate))),
         { ...model, streamingMode: 'offline' }
       );
+      if (cancelled()) return;
       if (!embeds)
         throw new Error(
           'No clear voice in the recordings; set up the voice again'
         );
-      const others = (await load(voiceprintNamespace)).filter(
-        (p) => p.voiceId !== voiceId
-      );
-      if (
-        others.filter((p) => isUsableWith(p, model.variant)).length >=
-        MAX_VOICES
-      )
-        throw new Error(`At most ${MAX_VOICES} voices can be enrolled`);
-      await save(
-        [
-          ...others,
-          {
-            name,
-            voiceId,
-            modelRevision: MODEL_REVISION,
-            variant: model.variant,
-            embeds,
-            createdAt: Date.now(),
-          },
-        ],
-        voiceprintNamespace
-      );
+      await serialized(async () => {
+        if (cancelled()) return;
+        const others = (await load(voiceprintNamespace)).filter(
+          (p) => p.voiceId !== voiceId
+        );
+        if (
+          others.filter((p) => isUsableWith(p, model.variant)).length >=
+          MAX_VOICES
+        )
+          throw new Error(`At most ${MAX_VOICES} voices can be enrolled`);
+        await save(
+          [
+            ...others,
+            {
+              name,
+              voiceId,
+              modelRevision: MODEL_REVISION,
+              variant: model.variant,
+              embeds,
+              createdAt: Date.now(),
+            },
+          ],
+          voiceprintNamespace
+        );
+      });
     },
     [model, voiceprintNamespace]
   );
 
   const remove = React.useCallback(
-    async (voiceId: string) =>
-      save(
-        (await load(voiceprintNamespace)).filter((p) => p.voiceId !== voiceId),
-        voiceprintNamespace
+    (voiceId: string) =>
+      serialized(async () =>
+        save(
+          (await load(voiceprintNamespace)).filter(
+            (p) => p.voiceId !== voiceId
+          ),
+          voiceprintNamespace
+        )
       ),
     [voiceprintNamespace]
   );
 
   const clear = React.useCallback(
-    () => save([], voiceprintNamespace),
+    () => serialized(() => save([], voiceprintNamespace)),
     [voiceprintNamespace]
   );
 
