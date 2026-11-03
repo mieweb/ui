@@ -152,24 +152,28 @@ function summarize(toolCalls: MCPToolCall[]): ToolGroupSummary {
 /**
  * Open while any call is active, closed once every call has settled. A manual
  * toggle holds until the group's signature changes (a call arrives or changes
- * status), at which point the automatic state returns.
+ * status), at which point the automatic state returns. While `holdOpen` is set
+ * (focus is in the rows) an automatic change never closes the group, so the
+ * focused row is not removed from under the user.
  */
 function useAutoCollapse(
   isActive: boolean,
-  signature: string
+  signature: string,
+  holdOpen: boolean
 ): [boolean, (expanded: boolean) => void] {
   const [state, setState] = React.useState(() => ({
     signature,
     expanded: isActive,
   }));
   const isStale = state.signature !== signature;
-  if (isStale) setState({ signature, expanded: isActive });
+  const automatic = isActive || (holdOpen && state.expanded);
+  if (isStale) setState({ signature, expanded: automatic });
 
   const setExpanded = React.useCallback(
     (expanded: boolean) => setState((current) => ({ ...current, expanded })),
     []
   );
-  return [isStale ? isActive : state.expanded, setExpanded];
+  return [isStale ? automatic : state.expanded, setExpanded];
 }
 
 function announcementFor(
@@ -457,9 +461,11 @@ export function MCPToolCallGroup({
   );
   const listId = React.useId();
   const summary = summarize(toolCalls);
+  const [focusInRows, setFocusInRows] = React.useState(false);
   const [expanded, setExpanded] = useAutoCollapse(
     summary.isActive,
-    summary.signature
+    summary.signature,
+    focusInRows
   );
 
   // A lone call needs no header. The list keeps its place in the tree either
@@ -512,6 +518,12 @@ export function MCPToolCallGroup({
       <div
         role="list"
         id={listId}
+        onFocus={() => setFocusInRows(true)}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setFocusInRows(false);
+          }
+        }}
         className={cn(
           hasHeader &&
             'ms-3 border-s border-neutral-200 ps-2 dark:border-neutral-700'

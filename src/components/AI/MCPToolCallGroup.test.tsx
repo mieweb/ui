@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { MCPToolCallGroup } from './MCPToolCallGroup';
 import type { MCPToolCall, MCPToolStatus } from './types';
@@ -51,6 +57,27 @@ describe('MCPToolCallGroup', () => {
     expect(header()).toHaveAccessibleName(/Used 2 tools/);
     expect(header()).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() => expect(rows()).toHaveLength(0));
+  });
+
+  it('stays open while focus is in a row as the run settles', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'running')]}
+      />
+    );
+    const rowTrigger = screen.getByRole('button', { name: /tool_a/ });
+    act(() => rowTrigger.focus());
+
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'success')]}
+      />
+    );
+
+    expect(header()).toHaveAccessibleName(/Used 2 tools/);
+    expect(header()).toHaveAttribute('aria-expanded', 'true');
+    expect(rows()).toHaveLength(2);
+    expect(rowTrigger).toHaveFocus();
   });
 
   it('starts collapsed for a finished run loaded from history', () => {
