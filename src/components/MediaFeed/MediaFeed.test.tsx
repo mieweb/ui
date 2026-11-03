@@ -1256,4 +1256,44 @@ describe('MediaFeed', () => {
     await act(async () => attempts[1].start());
     expect(attempts[1].element.paused).toBe(false);
   });
+
+  it('lets a clip floated into picture in picture while it was starting play on after the feed moves', async () => {
+    const attempts: { element: HTMLMediaElement; start: () => void }[] = [];
+    play.mockImplementation(function (this: HTMLMediaElement) {
+      return new Promise<void>((resolve) => {
+        attempts.push({
+          element: this,
+          start: () => {
+            Object.defineProperty(this, 'paused', {
+              configurable: true,
+              value: false,
+            });
+            this.dispatchEvent(new Event('play'));
+            resolve();
+          },
+        });
+      });
+    });
+    renderFeed();
+    visibility([0.9, 0.1, 0]);
+    expect(attempts).toHaveLength(1);
+    // Still buffering, it's floated; then the viewer scrolls on.
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: attempts[0].element,
+    });
+    try {
+      visibility([0.1, 0.9, 0]);
+      expect(attempts).toHaveLength(2);
+      await act(async () => attempts[0].start());
+      expect(attempts[0].element.paused).toBe(false);
+      await act(async () => attempts[1].start());
+      expect(attempts[1].element.paused).toBe(false);
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
+  });
 });

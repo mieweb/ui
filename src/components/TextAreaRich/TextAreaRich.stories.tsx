@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TextAreaRich } from './TextAreaRich';
+import { withDeprecationBanner, DEPRECATION_NOTICE } from './DeprecationBanner';
 
 const meta: Meta<typeof TextAreaRich> = {
-  id: 'editors-textarearich',
-  title: 'Modules/Editors/TextAreaRich',
+  id: 'deprecated-textarearich',
+  title: 'Deprecated/TextAreaRich (Legacy)',
   component: TextAreaRich,
+  decorators: [withDeprecationBanner],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `### What it's for
+        component: `${DEPRECATION_NOTICE}
+
+### What it's for
 
 **A textarea-like rich text surface.** \`TextAreaRich\` looks like the auto-growing \`Textarea\` — bordered, one Input row tall, grows with content — but is \`RichTextEditor\` in chromeless mode underneath. The toolbar starts hidden; formatting is reached by typing (markdown block shortcuts are on by default: \`##\` + space → heading, \`-\` → bullet list, \`1.\` → numbered list, \`>\` → quote), from the Notion-style **block gutter menu** (hover a row for the \`+\` button, or Ctrl/Cmd+/), or by choosing "Show toolbar" from that menu. Pass \`macros\` and \`.shortcut\` + space expands dot phrases in place; the gutter menu gains an "Insert macro" flyout of every macro plus "Show macro library", docking the searchable \`MacroLibrary\` panel.
 
@@ -25,6 +29,7 @@ const meta: Meta<typeof TextAreaRich> = {
 
 - The consumer needs **plain text** — form posts, eSheet bindings, anything that treats the value as a string of words — use \`Textarea\`.
 - The writer works in a full document with an always-visible toolbar, merge variables or dictation — use \`RichTextEditor\`.
+- The field should ride the Kerebron (ProseMirror) engine instead of \`document.execCommand\` — same props contract from [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) (\`@mieweb/ui/kerebron\`).
 - An eSheet should guide a whole multi-section document with memory-aid macros — use [RichTextEsheet](?path=/docs/editors-richtextesheet--docs) (\`@mieweb/ui/esheet\`).
 - The stored format is **Markdown** or you need links/tables/code/collaboration — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
 
@@ -58,13 +63,13 @@ The host owns the HTML string and is responsible for sanitising it before storag
       relationships: [
         {
           type: 'alternative to',
-          target: 'text-inputs-textarea',
-          why: 'Textarea renders this same surface but flattens the value to plain text for forms and bindings; TextAreaRich hands the host the HTML to persist.',
-        },
-        {
-          type: 'alternative to',
           target: 'editors-richtexteditor',
           why: 'TextAreaRich is RichTextEditor in chromeless mode — blockMenu, markdownShortcuts, hidden-by-default toolbar — wrapped in Textarea-matched chrome for comment-sized fields; RichTextEditor for full documents with the toolbar on.',
+        },
+        {
+          type: 'superseded by',
+          target: 'editors-textarearich-kerebron',
+          why: 'Same TextAreaRichProps contract on the Kerebron (ProseMirror) engine from @mieweb/ui/kerebron — a real document model instead of document.execCommand; upgrading is an import-path change.',
         },
         {
           type: 'composes with',
@@ -74,7 +79,7 @@ The host owns the HTML string and is responsible for sanitising it before storag
       ],
     },
   },
-  tags: ['autodocs', 'scope:general-purpose', 'maturity:experimental'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:deprecated'],
 };
 
 export default meta;

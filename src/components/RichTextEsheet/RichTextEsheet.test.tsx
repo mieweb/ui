@@ -4,6 +4,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { RichTextEsheet, type RichTextEsheetHandle } from './RichTextEsheet';
 import type { RichTextEsheetDefinition } from './definition';
 
+// ProseMirror resists jsdom simulation; narrative fields run on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
+
 const definition: RichTextEsheetDefinition = {
   id: 'test-letter',
   title: 'Referral letter',
