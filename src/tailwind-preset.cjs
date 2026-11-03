@@ -1290,6 +1290,14 @@ module.exports = {
     'dark:bg-amber-900/50',
     'dark:border-amber-800',
     'dark:text-amber-400',
+    'bg-amber-100',
+    'text-amber-800',
+    'dark:text-amber-300',
+    'bg-neutral-100',
+    'text-neutral-400',
+    'text-neutral-500',
+    'dark:text-neutral-400',
+    'opacity-60',
   ],
   theme: {
     extend: {
