@@ -1,16 +1,30 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
+import { createDeprecationBanner } from '../TextAreaRich/DeprecationBanner';
+
+const DEPRECATION_NOTICE =
+  '> ⚠️ **Deprecated** — `RichTextEditor` is deprecated (mieweb/ui#692). Use [RichEditor](?path=/docs/editors-richeditor--docs) from `@mieweb/ui/kerebron` — the supported ProseMirror/Kerebron engine: install the `@kerebron/*` peers and import `@mieweb/ui/kerebron.css`. Mind the format difference — RichEditor stores **Markdown** (`getContent()`); hosts that persist **HTML** can use [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs), which keeps the HTML `value`/`onChange` contract. This legacy `document.execCommand` editor will be removed in a future major release.';
 
 const meta: Meta<typeof RichTextEditor> = {
-  id: 'editors-richtexteditor',
-  title: 'Modules/Editors/RichTextEditor',
+  id: 'deprecated-richtexteditor',
+  title: 'Deprecated/RichTextEditor (Legacy)',
   component: RichTextEditor,
+  decorators: [
+    createDeprecationBanner(
+      <>
+        RichTextEditor is deprecated. Use RichEditor from{' '}
+        <code>@mieweb/ui/kerebron</code> instead.
+      </>
+    ),
+  ],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `### What it's for
+        component: `${DEPRECATION_NOTICE}
+
+### What it's for
 
 **A lightweight HTML editor for templated notes and letters, with variable insertion, macros and dictation.** \`RichTextEditor\` is a \`contentEditable\` \`div\` (\`role="textbox" aria-multiline\`) that mirrors its \`innerHTML\` to \`value\` / \`onChange\` — the stored format is **HTML**. The toolbar uses \`document.execCommand\` for bold, italic, underline, bullet/numbered lists and left/center/right alignment. Pass \`variableGroups\` (\`{ label, variables: [{ label, value, insertValue? }] }\`) to get a searchable **Variables** \`Dropdown\` that inserts \`{{tokens}}\` at the caret, plus a **\`<< >>\` to \`{{ }}\`** converter (\`convertAngleBracketsToMustache\`). Pass \`macros\` (\`MacroGroup[]\`) to add a **Macros** toolbar toggle that docks a \`MacroLibrary\` panel inside the editor frame — searchable, grouped snippets inserted at the remembered caret through the native undo stack (\`defaultMacrosOpen\`, \`onCreateMacro\`); omit it and the editor is unchanged. \`enableDictation\` (default \`true\`) adds a **Dictate** button on the Web Speech API (\`SpeechRecognition\` / \`webkitSpeechRecognition\`) that runs spoken punctuation through \`processDictation\` ("period" → ".", "new paragraph", …). \`toolbar="hidden"\` removes the toolbar for chromeless surfaces (uncontrolled visibility starts from \`defaultToolbar\` and is reported through \`onToolbarChange\`), and \`markdownShortcuts\` expands block tokens typed at the start of a line (\`#\`/\`##\`/\`###\` + space → heading, \`-\`/\`*\` → bullet list, \`1.\` → numbered list, \`>\` → block quote) — pair them so formatting stays reachable without chrome. \`blockMenu\` adds a Notion-style \`+\` button in the start gutter of the hovered text row (keyboard: Ctrl/Cmd+/ on the caret's block) whose menu applies block formats, opens the macro panel and shows/hides the toolbar; its labels are overridable via \`blockMenuLabels\`. \`placeholder\`, \`disabled\`, \`aria-label\`, \`onDictationError\` complete the surface; the ref is the editable \`div\`. Everything ships on the main \`@mieweb/ui\` entry with no extra peers.
 
@@ -67,14 +81,9 @@ The host owns the HTML string and is responsible for sanitising it before storag
       entry: '@mieweb/ui',
       relationships: [
         {
-          type: 'alternative to',
+          type: 'superseded by',
           target: 'editors-richeditor',
-          why: 'RichEditor stores Markdown on ProseMirror via the @mieweb/ui/kerebron entry with Yjs collab; RichTextEditor stores HTML from a contentEditable div on the main barrel with variables and dictation.',
-        },
-        {
-          type: 'alternative to',
-          target: 'text-inputs-textarea',
-          why: 'RichTextEditor when the note needs bold/lists/alignment, merge variables or dictation; Textarea for plain multi-line text.',
+          why: 'RichEditor is the supported rich-text surface — Markdown on the ProseMirror/Kerebron engine from @mieweb/ui/kerebron with real undo history and Yjs collab; RichTextEditor\u2019s HTML/execCommand engine is deprecated (mieweb/ui#692).',
         },
         {
           type: 'alternative to',
@@ -99,7 +108,7 @@ The host owns the HTML string and is responsible for sanitising it before storag
       ],
     },
   },
-  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:deprecated'],
 };
 
 export default meta;

@@ -31,7 +31,7 @@ const meta: Meta<typeof EmailEditor> = {
 
 ### Don't use it when
 
-- The message is a single formatted body with merge fields (a letter, a note, a reply) — \`RichTextEditor\`.
+- The message is a single formatted body (a letter, a note, a reply) — \`RichEditor\` (\`@mieweb/ui/kerebron\`, Markdown) or \`TextAreaRich\` (same entry, HTML).
 - The content is Markdown, or several people edit it at once — \`RichEditor\`.
 - You need sending, recipients, scheduling, templates or analytics: those are the host's; this component edits a document.
 
@@ -72,13 +72,13 @@ The host owns both values, saves them, and compiles the MJML when sending.
       relationships: [
         {
           type: 'uses',
-          target: 'editors-richtexteditor',
-          why: 'Text blocks are edited with RichTextEditor; mergeTags become its variableGroups.',
+          target: 'deprecated-richtexteditor',
+          why: 'Text blocks are edited with RichTextEditor (via its non-warning internal base while EmailEditor remains on the legacy engine); mergeTags become its variableGroups.',
         },
         {
           type: 'alternative to',
-          target: 'editors-richtexteditor',
-          why: 'EmailEditor when the message needs layout blocks and is sent as an email; RichTextEditor for a single formatted HTML body.',
+          target: 'deprecated-richtexteditor',
+          why: 'EmailEditor when the message needs layout blocks and is sent as an email; a single formatted body belongs in RichEditor (RichTextEditor is deprecated).',
         },
       ],
     },

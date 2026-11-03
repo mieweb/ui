@@ -17,13 +17,13 @@ const meta: Meta<typeof MacroLibrary> = {
 
 ### Use it when
 
-- A \`RichTextEditor\` note benefits from one-click boilerplate — review-of-systems findings, exam normals, standard instructions — via its \`macros\` prop, which docks this panel inside the editor frame and also expands typed shortcuts in place (\`.b\` + space), panel open or not.
+- A rich note benefits from one-click boilerplate — review-of-systems findings, exam normals, standard instructions — via the \`macros\` prop of [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) (or the deprecated legacy \`RichTextEditor\`), which docks this panel inside the editor frame and also expands typed shortcuts in place (\`.b\` + space), panel open or not.
 - Users recall snippets by **shortcut identifiers** (\`.b\`) or free-text search, and snippets fall into categories (default library vs previous values, per-specialty sets).
 - You're building another editor surface that needs the same macro UX — pair it with your own \`onSelect\` insertion.
 
 ### Don't use it when
 
-- Inserting **merge-field tokens** (\`{{employee.name}}\`) — that's \`RichTextEditor\`'s built-in Variables \`Dropdown\`.
+- Inserting **merge-field tokens** (\`{{employee.name}}\`) — that's the Variables \`Dropdown\` built into the deprecated \`RichTextEditor\`.
 - You need a global command surface with actions, not text insertion — \`CommandPalette\`.
 - A simple single-pick from a flat list is enough — \`Dropdown\` or \`AutoComplete\`.
 - Content must be fetched per-keystroke from a server — the panel's search filters a provided in-memory list and its query is not exposed, so server-driven search needs its own search UI upstream.
@@ -47,8 +47,8 @@ const groups: MacroGroup[] = [
   },
 ];
 
-// Docked inside the editor (the common case):
-<RichTextEditor value={html} onChange={setHtml} aria-label="Assessment" macros={groups} />
+// Docked inside the editor (the common case — same prop on the deprecated RichTextEditor):
+<TextAreaRich value={html} onChange={setHtml} aria-label="Assessment" macros={groups} />
 
 // Or standalone against your own editor:
 <MacroLibrary groups={groups} targetLabel="Assessment" onSelect={(m) => insertAtCaret(m.content)} />
@@ -68,8 +68,8 @@ const groups: MacroGroup[] = [
       relationships: [
         {
           type: 'composes with',
-          target: 'editors-richtexteditor',
-          why: 'RichTextEditor docks MacroLibrary inside its frame via the macros prop and performs the undo-aware insertion at the saved caret.',
+          target: 'deprecated-richtexteditor',
+          why: 'The deprecated RichTextEditor docks MacroLibrary inside its frame via the macros prop and performs the undo-aware insertion at the saved caret; new hosts should dock it from the Kerebron TextAreaRich instead.',
         },
         {
           type: 'composes with',

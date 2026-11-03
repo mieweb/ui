@@ -2090,7 +2090,7 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
 });
 
 test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
-  const story = 'editors-richtexteditor--block-menu';
+  const story = 'deprecated-richtexteditor--block-menu';
   const editorSel = '[contenteditable="true"]';
   const gutterSel = '[data-slot="rich-text-editor-block-gutter"]';
 
