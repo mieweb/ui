@@ -66,12 +66,21 @@ const IMAGE = new RegExp(String.raw`!\[[^\]]*\]${DESTINATION}`, 'g');
 const LINK = new RegExp(String.raw`\[([^\]]*)\]${DESTINATION}`, 'g');
 
 /**
+ * How much of a message a preview reads. A preview shows one line of its start,
+ * and the patterns below retry from every unmatched `[`: bounding the input
+ * keeps a long message (the composer takes 100,000 characters) from stalling
+ * the conversation list, which previews on every render.
+ */
+const PREVIEW_SOURCE_LIMIT = 2000;
+
+/**
  * Markdown as one line of plain text: what a preview shows of a message.
  * Emphasis counts only between word boundaries, so the underscores in a file
  * name or a link (`file_name_v2.pdf`, `/a_b_c`) stay as they are.
  */
 function plainText(markdown: string): string {
   return markdown
+    .slice(0, PREVIEW_SOURCE_LIMIT)
     .replace(IMAGE, '')
     .replace(LINK, '$1')
     .replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+\.)\s+/gm, '')
