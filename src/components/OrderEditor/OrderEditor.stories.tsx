@@ -74,7 +74,7 @@ The host owns the orders array; the editor returns the complete \`AssessmentOrde
 - **Accessibility as implemented.** Built on \`Modal\` (\`size="lg"\`, focus trap, Esc, \`ModalClose\`); sections are \`<section aria-label>\` ("Order", "Scheduling", "Details"); fields use \`Label htmlFor\`, the priority radio is a labelled \`RadioGroup\`. The first \`<input>\` in the body is focused on open. Coding status ("Coded: FDB 244899" / "Uncoded free text") is a plain \`<p>\`, not a live region; a save closes silently. The Order label's \`htmlFor="ord-search"\` does not target the injected lookup's input (CodeLookup labels itself "Search medical codes").
 - **Clinical safety.** No validation beyond a non-empty name: no duplicate-order, indication-required, specimen or authorisation checks, no interaction / allergy / dose checking on medication orders, and \`priority\` / \`timing\` are advisory strings. Coded search is only as complete as the codify shards.
 - **Type is fixed per editor** — you cannot change an order from \`lab\` to \`imaging\` inside the dialog; close and reopen with a different \`defaultType\`.
-- **Medication path** loses fields \`AssessmentOrder\` has no home for (\`priority\`, \`timing\`, \`bodySite\`, \`referTo\` are preserved from \`base\`, but the NCPDP-only fields — strength, quantity, refills, DAW — exist only inside the editor session and are folded to \`display\` / \`detail\` / \`indication\` / \`notes\` on save).
+- **Medication path** loses fields \`AssessmentOrder\` has no home for (\`priority\`, \`timing\`, \`bodySite\`, \`referTo\` are preserved from \`base\`; \`uncodedType\` and \`compoundIngredients\` round-trip too, but the remaining NCPDP-only fields — prescriber, patient sig, quantity, days supply, refills, DAW — exist only inside the editor session and are folded to \`display\` / \`detail\` / \`indication\` / \`notes\` on save). \`collectCompoundIngredients\` passes straight through to the inner \`MedicationEditor\`; the rest of \`MedicationEditorOptions\` (sig presets, prescribers, sig terms) isn't exposed here yet.
 - **Responsive / RTL.** Single-column stack inside the modal; no breakpoint variants, no RTL handling beyond the inputs.
 - **Theming / i18n.** Semantic tokens; all nouns, section headings, placeholders ("Search labs — e.g. a1c"), radio labels and status copy are English constants with no \`labels\` prop.
 - **Dependencies / entry.** \`Modal\`, \`Input\`, \`Textarea\`, \`Label\`, \`RadioGroup\`, \`Button\`, \`MedicationList\` (\`MedicationEditor\`, \`parseSig\`, \`labelToMedicationFields\`), \`Assessment\` types; main \`@mieweb/ui\` entry, no peers. \`CodeLookup\` is not in the package build.`,
@@ -121,6 +121,27 @@ const sampleOrders: AssessmentOrder[] = [
     code: { fullid: 'FDB244899', codetype: 'FDB', fullcode: '244899' },
   },
   {
+    orderId: 'O-6',
+    type: 'medication',
+    display: 'hormone troche',
+    detail: '1 troche sublingually bid',
+    uncodedType: 'CP',
+    compoundIngredients: [
+      {
+        name: 'estradiol',
+        strength: '0.5 mg',
+        quantity: '1',
+        quantityUnit: 'gram',
+      },
+      {
+        name: 'progesterone',
+        strength: '100 mg',
+        quantity: '1',
+        quantityUnit: 'gram',
+      },
+    ],
+  },
+  {
     orderId: 'O-2',
     type: 'lab',
     display: 'Hemoglobin A1c',
@@ -148,7 +169,9 @@ const sampleOrders: AssessmentOrder[] = [
 
 /**
  * One button per order type — each opens the editor the wrapper morphs into.
- * Saves write back into the list below.
+ * Saves write back into the list below. "hormone troche" is a compound
+ * medication (`uncodedType: 'CP'`, `compoundIngredients` set) —
+ * `collectCompoundIngredients` shows its ingredients sub-form on Edit.
  */
 export const Interactive: Story = {
   render: function Render() {
@@ -191,6 +214,7 @@ export const Interactive: Story = {
             open
             order={editing}
             codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
+            collectCompoundIngredients
             onClose={() => setEditing(null)}
             onSave={(saved) =>
               setOrders((prev) =>

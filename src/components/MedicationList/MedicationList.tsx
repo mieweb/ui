@@ -53,6 +53,43 @@ export interface MedicationCode {
   display?: string;
 }
 
+/** Kind of an uncoded (free-text) medication: 'CP' compound, 'SP' supply. */
+export type UncodedMedicationType = 'CP' | 'SP';
+
+/**
+ * All {@link UncodedMedicationType} values, in display order. Used instead
+ * of `Object.keys(UNCODED_TYPE_LABELS)` to enumerate them — dev tooling
+ * (e.g. Storybook's docgen plugin) can attach extra enumerable properties
+ * (`displayName`, `__docgenInfo`) to an exported object, which would
+ * otherwise leak into that enumeration.
+ */
+export const UNCODED_MEDICATION_TYPES: readonly UncodedMedicationType[] = [
+  'CP',
+  'SP',
+];
+
+/** Display labels for {@link UncodedMedicationType}. */
+export const UNCODED_TYPE_LABELS: Record<UncodedMedicationType, string> = {
+  CP: 'Compound',
+  SP: 'Supply',
+};
+
+/** A single ingredient in a compound medication (`uncodedType === 'CP'`). */
+export interface CompoundIngredient {
+  /** Ingredient display name */
+  name: string;
+  /** Code reference, if coded via CodeLookup */
+  code?: MedicationCode;
+  /** Dose form, e.g. "powder" (DrugCoded/FormCode) */
+  doseForm?: string;
+  /** Strength, e.g. "50 mg" (Strength + StrengthUnitOfMeasure) */
+  strength?: string;
+  /** Quantity of this ingredient in the compound (Quantity/Value) */
+  quantity?: string;
+  /** Quantity unit of measure (Quantity/QuantityUnitOfMeasure) */
+  quantityUnit?: string;
+}
+
 /**
  * A single medication in the presenting-medications list.
  *
@@ -65,8 +102,10 @@ export interface Medication {
   id: string;
   /** Display name, e.g. "lisinopril 10 mg tablet" (NCPDP DrugDescription) */
   name: string;
-  /** Patient-friendly instructions (NCPDP Sig / Directions) */
+  /** Practitioner sig as written by the prescriber, e.g. "1 tab po bid" */
   sig?: string;
+  /** Patient-facing directions (NCPDP Sig/SigText), expanded from `sig` */
+  patientSig?: string;
   /** Current reconciliation status */
   status: MedicationStatus;
   /** Whether the medication's end date has passed */
@@ -81,6 +120,17 @@ export interface Medication {
   // —— Coding (NCPDP DrugCoded) ——
   /** Code reference (RxNorm / FDB / NDC) */
   code?: MedicationCode;
+  /**
+   * What an uncoded medication is — 'CP' compound or 'SP' supply. Required
+   * to e-transmit an uncoded prescription; cleared once the medication is
+   * coded.
+   */
+  uncodedType?: UncodedMedicationType;
+  /**
+   * Structured ingredients for a compound medication (`uncodedType ===
+   * 'CP'`), when the host collects them (`collectCompoundIngredients`).
+   */
+  compoundIngredients?: CompoundIngredient[];
 
   // —— NCPDP SCRIPT NewRx prescription fields ——
   /** Strength, e.g. "10 mg" (Strength + StrengthUnitOfMeasure) */
@@ -109,6 +159,8 @@ export interface Medication {
   endDate?: string;
   /** Indication / diagnosis the medication treats */
   indication?: string;
+  /** Prescriber — an option `value` from `prescribers`, or free text (Prescriber) */
+  prescriber?: string;
   /** Note to pharmacy (Note) */
   pharmacyNotes?: string;
 }
@@ -312,6 +364,11 @@ function MedicationRow({
         >
           {medication.code.system} {medication.code.code}
         </span>
+      )}
+      {medication.uncodedType && (
+        <Badge variant="secondary" size="sm">
+          {UNCODED_TYPE_LABELS[medication.uncodedType]}
+        </Badge>
       )}
       {medication.sig && (
         <span className="text-muted-foreground text-sm">{medication.sig}</span>

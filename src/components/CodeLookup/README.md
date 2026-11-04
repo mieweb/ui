@@ -16,19 +16,19 @@ engine/component live in this repo; the committed `.mcdx` shards under
 `packages/codify/` (see [§1](#1-build-pipeline-external-codify-repo)) to
 regenerate them — the links below only resolve once it is present.
 
-| File | Role |
-|---|---|
-| [`packages/codify/scripts/extract.mjs`](../../../packages/codify/scripts/extract.mjs) | MariaDB → `codify.tsv` dump |
-| [`packages/codify/scripts/build-index.mjs`](../../../packages/codify/scripts/build-index.mjs) | TSV → `.mcdx` v2 shards + `manifest.json` (per locale, with usage priors) |
-| [`packages/codify/scripts/build-all.mjs`](../../../packages/codify/scripts/build-all.mjs) | builds the `en` (full) + `es` (sample) shard sets |
-| [`packages/codify/scripts/build-sqlite.mjs`](../../../packages/codify/scripts/build-sqlite.mjs) | TSV → SQLite FTS5 db for the MCP server |
-| [`packages/codify/src/mcp-server.ts`](../../../packages/codify/src/mcp-server.ts) | MCP stdio server: `lookup_code`, `get_code`, `medication_forms` |
-| [`packages/codify/aliases.json`](../../../packages/codify/aliases.json) / [`aliases-es.json`](../../../packages/codify/aliases-es.json) | curated synonym groups per locale |
-| [`packages/codify/data-samples/usage-sample.tsv`](../../../packages/codify/data-samples/usage-sample.tsv) | simulated top-200 meds/diagnoses/procedures usage |
-| [`packages/codify/data-samples/labels-es.tsv`](../../../packages/codify/data-samples/labels-es.tsv) | curated Spanish sample translations |
-| [`engine.ts`](./engine.ts) | shard parsing + prefix/BM25 search + priors |
-| [`codify.worker.ts`](./codify.worker.ts) | Web Worker: fetch/OPFS-cache shards, answer queries |
-| [`CodeLookup.tsx`](./CodeLookup.tsx) | combobox UI component |
+| File                                                                                                                                    | Role                                                                      |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [`packages/codify/scripts/extract.mjs`](../../../packages/codify/scripts/extract.mjs)                                                   | MariaDB → `codify.tsv` dump                                               |
+| [`packages/codify/scripts/build-index.mjs`](../../../packages/codify/scripts/build-index.mjs)                                           | TSV → `.mcdx` v2 shards + `manifest.json` (per locale, with usage priors) |
+| [`packages/codify/scripts/build-all.mjs`](../../../packages/codify/scripts/build-all.mjs)                                               | builds the `en` (full) + `es` (sample) shard sets                         |
+| [`packages/codify/scripts/build-sqlite.mjs`](../../../packages/codify/scripts/build-sqlite.mjs)                                         | TSV → SQLite FTS5 db for the MCP server                                   |
+| [`packages/codify/src/mcp-server.ts`](../../../packages/codify/src/mcp-server.ts)                                                       | MCP stdio server: `lookup_code`, `get_code`, `medication_forms`           |
+| [`packages/codify/aliases.json`](../../../packages/codify/aliases.json) / [`aliases-es.json`](../../../packages/codify/aliases-es.json) | curated synonym groups per locale                                         |
+| [`packages/codify/data-samples/usage-sample.tsv`](../../../packages/codify/data-samples/usage-sample.tsv)                               | simulated top-200 meds/diagnoses/procedures usage                         |
+| [`packages/codify/data-samples/labels-es.tsv`](../../../packages/codify/data-samples/labels-es.tsv)                                     | curated Spanish sample translations                                       |
+| [`engine.ts`](./engine.ts)                                                                                                              | shard parsing + prefix/BM25 search + priors                               |
+| [`codify.worker.ts`](./codify.worker.ts)                                                                                                | Web Worker: fetch/OPFS-cache shards, answer queries                       |
+| [`CodeLookup.tsx`](./CodeLookup.tsx)                                                                                                    | combobox UI component                                                     |
 
 ```
         build time (Node, packages/codify)         run time (browser)
@@ -82,27 +82,30 @@ shards **are committed to this repo via git-lfs** and ship with Storybook
 > on-disk size. No manual step — just rebuild and commit.
 
 ### extract.mjs
+
 Dumps `fullid, codetype, fullcode, label` for 12 codetypes via
 `docker exec … mysql --batch`. Tabs/newlines are stripped from labels so the TSV
 stays rectangular (~57 MB).
 
 ### build-index.mjs
+
 Groups rows into **five domain shards** so consumers can load only what they
 need (a condition picker doesn't pay for 80K ICD-10-PCS rows):
 
-| Shard | Codetypes | Docs | Size |
-|---|---|---|---|
-| `condition.mcdx` | ICD10, SNOMED US | 103K | 14 MB |
-| `med.mcdx` | RxNORM, FDB, FDB MEDNAME | 382K | 34 MB |
-| `lab.mcdx` | LOINC, LOINC Hierarchy, Quest Order, LabCorp Order | 185K | 21 MB |
-| `procedure.mcdx` | ICD10PCS, HCPCS | 100K | 13 MB |
-| `vaccine.mcdx` | CVX | 608 | 64 KB |
+| Shard            | Codetypes                                          | Docs | Size  |
+| ---------------- | -------------------------------------------------- | ---- | ----- |
+| `condition.mcdx` | ICD10, SNOMED US                                   | 103K | 14 MB |
+| `med.mcdx`       | RxNORM, FDB, FDB MEDNAME                           | 382K | 34 MB |
+| `lab.mcdx`       | LOINC, LOINC Hierarchy, Quest Order, LabCorp Order | 185K | 21 MB |
+| `procedure.mcdx` | ICD10PCS, HCPCS                                    | 100K | 13 MB |
+| `vaccine.mcdx`   | CVX                                                | 608  | 64 KB |
 
 Labels are **normalized** (lowercase → NFD diacritic strip → non-alphanumerics
 to spaces) and tokenized. The same `normalize()` lives in `engine.ts` — the two
 must stay in sync or lookups miss.
 
 ### Usage priors (`data-samples/usage-sample.tsv`)
+
 Each doc gets a **u8 usage prior** (`docPrior` section): rows are matched by
 exact code (`domain \t code \t CODETYPE|FULLCODE \t rank`) or by contained
 phrase (`\t phrase \t <name> \t rank`), counts are simulated Zipf
@@ -112,6 +115,7 @@ top-200 SNOMED procedures, then log-quantized:
 real production usage export (same format) and rebuild — nothing else changes.
 
 ### Locales (`--locale`, `--labels`)
+
 One shard set is built **per locale** into `<out>/<locale>/`. `en` indexes the
 full TSV; other locales index **only rows present in the translation file**
 (`data-samples/labels-es.tsv`: full-label replacement by `code` key, or
@@ -120,10 +124,11 @@ sets (`aliases-es.json`: `hta`, `dm2`, `ic`…). The Spanish set is a curated
 ~500-row sample demonstrating the pipeline.
 
 ### Aliases (`aliases.json`)
+
 Curated groups, e.g. `["chf", "congestive heart failure"]`,
 `["lasix", "furosemide"]`, `["a1c", "hba1c", "hemoglobin a1c", …]`. At build
 time, any document whose normalized label contains **any phrase** in a group
-gets every **single-word member** of the group indexed as an *alias token*
+gets every **single-word member** of the group indexed as an _alias token_
 (flagged in the postings, scored slightly lower than a label hit). This is what
 makes the mapping symmetric: searching `lasix` finds furosemide products and
 vice versa, `chf` finds Congestive heart failure, and typing the full name still
@@ -141,15 +146,15 @@ The section offsets depend on the meta's own length, so the builder iterates the
 layout until it is stable. The engine also reads v1 shards (no `locale`, no
 `docPrior` — priors treated as 0).
 
-| Section | Type | Purpose |
-|---|---|---|
-| `tokenBlob` / `tokenOffsets` | utf8 + `u32[t+1]` | sorted token dictionary; a *prefix* resolves to a contiguous token-id range via binary search |
-| `postStart` | `u32[t+1]` | posting-list start per token (df = `postStart[t+1] − postStart[t]`) |
-| `postings` | `u32[p]` | `docId << 1 \| aliasFlag`, deduped per doc |
-| `labelBlob/Offsets`, `codeBlob/Offsets`, `fullidBlob/Offsets` | utf8 + `u32[d+1]` | O(1) random access to result payloads — only the top-k get decoded |
-| `docCodetype` | `u8[d]` | index into `meta.codetypes` |
-| `docLen` | `u8[d]` | token count, for BM25 length normalization |
-| `docPrior` | `u8[d]` | log-quantized usage prior (v2) |
+| Section                                                       | Type              | Purpose                                                                                       |
+| ------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------- |
+| `tokenBlob` / `tokenOffsets`                                  | utf8 + `u32[t+1]` | sorted token dictionary; a _prefix_ resolves to a contiguous token-id range via binary search |
+| `postStart`                                                   | `u32[t+1]`        | posting-list start per token (df = `postStart[t+1] − postStart[t]`)                           |
+| `postings`                                                    | `u32[p]`          | `docId << 1 \| aliasFlag`, deduped per doc                                                    |
+| `labelBlob/Offsets`, `codeBlob/Offsets`, `fullidBlob/Offsets` | utf8 + `u32[d+1]` | O(1) random access to result payloads — only the top-k get decoded                            |
+| `docCodetype`                                                 | `u8[d]`           | index into `meta.codetypes`                                                                   |
+| `docLen`                                                      | `u8[d]`           | token count, for BM25 length normalization                                                    |
+| `docPrior`                                                    | `u8[d]`           | log-quantized usage prior (v2)                                                                |
 
 Everything is consumed zero-copy: `parseShard()` wraps the fetched
 `ArrayBuffer` in typed-array views; nothing is deserialized row by row.
@@ -159,7 +164,7 @@ Everything is consumed zero-copy: `parseShard()` wraps the fetched
 Per keystroke, in the worker:
 
 1. **Normalize** the query and split into tokens (max 8). **Every token is a
-   word prefix** — `con hea fa` matches *CONgestive HEArt FAilure*.
+   word prefix** — `con hea fa` matches _CONgestive HEArt FAilure_.
 2. For each token, binary-search the dictionary for the prefix's token-id range
    and take up to 128 expansions.
 3. **Score** each expansion's postings into a reusable `Float32Array` keyed by
@@ -178,7 +183,7 @@ Per keystroke, in the worker:
    `metfromin` → `metformin`), scored ×0.6.
 5. Final score is length-normalized (`docLen`) so short canonical labels beat
    verbose ones, then boosted by the usage prior:
-   `score ×= (1 + 0.5·prior/255)` — *Essential (primary) hypertension* (top-3
+   `score ×= (1 + 0.5·prior/255)` — _Essential (primary) hypertension_ (top-3
    diagnosis) outranks rarer hypertension variants with equal text relevance.
    Top-k selected with a bounded array; only winners' labels are decoded from
    the blobs.
@@ -214,18 +219,22 @@ Combobox-pattern autocomplete (`role="combobox"` + floating `role="listbox"`):
 - **→ on a medication row** (or the chevron) drills into **forms & strengths**:
   the worker re-searches the med shard by the row's name and the results are
   filtered to dosed FDB/RxNORM entries and alphabetized. Aliases apply here
-  too — drilling *Lasix* lists all furosemide forms. **←** goes back.
-- Rows render *label first*, then `codetype code` right-aligned in small,
+  too — drilling _Lasix_ lists all furosemide forms. **←** goes back.
+- Rows render _label first_, then `codetype code` right-aligned in small,
   domain-tinted text.
+- `onSelectFamily(members, picked)` (optional) reports a pick's family —
+  the same list the drill-down shows — shortly after `onSelect`, so a form
+  can offer a drug-level pick's products without the user drilling in
+  (`MedicationEditor` uses it to turn Strength / Dose form into pickers).
 - `onSelect` receives `{ fullid, label, codetype, fullcode, domain, score }` —
   `fullid` is the `MedicalCodify_search` primary key, ready to persist (e.g. as
   a `ConditionCoding` on a `ConditionAssertion`, or an `IndicationLink`).
 
 ```tsx
 <CodeLookup
-  indexUrl="/codify"            // per-locale dirs: {indexUrl}/{locale}/manifest.json
-  locale="en"                   // 'es' loads the sample Spanish shard set
-  domains={['condition']}       // optional; default = all shards in manifest
+  indexUrl="/codify" // per-locale dirs: {indexUrl}/{locale}/manifest.json
+  locale="en" // 'es' loads the sample Spanish shard set
+  domains={['condition']} // optional; default = all shards in manifest
   onSelect={(r) => attachCoding(r)}
 />
 ```
@@ -274,26 +283,27 @@ tunes that default — or turns one box off:
 - **Scope = (userId, context)** — buckets never mix across users sharing a
   browser or across contexts (`med-orders` vs `presenting-meds`). Rows carry
   `viaMemory: true`.
-- **Two gates, both fail closed.** Nothing is remembered unless *both* open:
+- **Two gates, both fail closed.** Nothing is remembered unless _both_ open:
   1. **A signed-in user.** Placeholder ids (`anonymous`, `guest`, `kiosk`,
      `unknown`, empty) are rejected rather than pooled into one shared bucket,
      so forgetting to wire auth disables the feature instead of showing the
      last kiosk visitor's codes to the next one.
   2. **A storage mode** (below) that permits it.
-- **Storage — a property of the *machine*, never guessed.** No browser signal
+- **Storage — a property of the _machine_, never guessed.** No browser signal
   distinguishes a kiosk from a workstation, so the app declares it once on the
   provider and the library defaults to the safe answer:
 
-  | `memory.storage` | cache | for |
-  | --- | --- | --- |
-  | `'session'` *(default)* | RAM, dies with the tab | public/shared kiosks |
-  | `'local'` | IndexedDB (`mieweb-codelookup-memory` / `usage`), keyed `userId\|context\|fullid` | a per-user machine secured by a browser login |
-  | `'none'` | nothing | opted out |
+  | `memory.storage`        | cache                                                                             | for                                           |
+  | ----------------------- | --------------------------------------------------------------------------------- | --------------------------------------------- |
+  | `'session'` _(default)_ | RAM, dies with the tab                                                            | public/shared kiosks                          |
+  | `'local'`               | IndexedDB (`mieweb-codelookup-memory` / `usage`), keyed `userId\|context\|fullid` | a per-user machine secured by a browser login |
+  | `'none'`                | nothing                                                                           | opted out                                     |
 
-  Writing to *this* disk therefore needs an affirmative `storage: 'local'` in
+  Writing to _this_ disk therefore needs an affirmative `storage: 'local'` in
   the app source — greppable at review time, and forgetting it costs a
   round-trip rather than a disclosure. `'local'` without IndexedDB (SSR)
   degrades to no-ops.
+
 - **The server is the source of truth**; the local store is its cache. With
   `serverUrl`:
   - revalidate per scope, at most once a minute:
@@ -311,7 +321,7 @@ tunes that default — or turns one box off:
     drop a pick that hasn't landed yet.
   - **The server must take identity from the session** (cookie/bearer), not
     from the `user` parameter — otherwise any user reads any other's list by
-    editing a query string. Treat `user` as a value to *validate* against the
+    editing a query string. Treat `user` as a value to _validate_ against the
     session and reject on mismatch. Requests are sent with
     `credentials: 'include'`.
 - **Provider defaults** — `CodeLookupProvider` accepts
@@ -325,7 +335,7 @@ tunes that default — or turns one box off:
   logout, kiosk session reset, or a device downgraded from trusted to public.
 - **While typing** — remembered codes matching the query (same word-prefix
   rule as the index) are pinned above the index hits and marked with a ☆ and
-  their pick count, so typing `f` keeps *Flonase* on top instead of dropping
+  their pick count, so typing `f` keeps _Flonase_ on top instead of dropping
   it for the generic matches.
 
 Storybook's **Signed in as** / **Device** toolbar globals feed exactly these
@@ -342,9 +352,9 @@ machines, or ship a curated starter set for a context:
 import { exportMemoryYaml, importMemoryYaml } from '…/CodeLookup';
 
 const yaml = await exportMemoryYaml({ userId: 'alice', context: 'med-orders' });
-await exportMemoryYaml();                       // every bucket in this browser
-await importMemoryYaml(yaml);                   // into the buckets it names
-await importMemoryYaml(yaml, { scope });        // …or all into one bucket
+await exportMemoryYaml(); // every bucket in this browser
+await importMemoryYaml(yaml); // into the buckets it names
+await importMemoryYaml(yaml, { scope }); // …or all into one bucket
 ```
 
 ```yaml
@@ -375,25 +385,27 @@ buckets:
 ## 6. Health surveillance — programs.json
 
 The **occupational** (OSHA/FMCSA/NFPA/FAA/OPM/USCG/MSHA/NIOSH/NRC/DOE/USCIS/
-DOD programs) and **quality** (CMS eCQM) domains form the *health
-surveillance* umbrella. Their shared metadata ships as a `programs.json`
+DOD programs) and **quality** (CMS eCQM) domains form the _health
+surveillance_ umbrella. Their shared metadata ships as a `programs.json`
 sidecar next to the shards (copied per locale by `build-index.mjs`):
 
 ```jsonc
 {
   "programs": {
     "OSHA|1910.95": {
-      "kind": "surveillance",        // surveillance | fitness | credential | quality
-      "periodicityMonths": 12,        // omitted = one-time / event-driven
-      "orders": ["HCPCS|92551", "…"]  // CODETYPE|FULLCODE refs into the shards
+      "kind": "surveillance", // surveillance | fitness | credential | quality
+      "periodicityMonths": 12, // omitted = one-time / event-driven
+      "orders": ["HCPCS|92551", "…"], // CODETYPE|FULLCODE refs into the shards
     },
     "eCQM|CMS125": {
       "kind": "quality",
       "periodicityMonths": 24,
-      "sex": "F", "ageMin": 40, "ageMax": 74,
-      "orders": ["HCPCS|77057"]
-    }
-  }
+      "sex": "F",
+      "ageMin": 40,
+      "ageMax": 74,
+      "orders": ["HCPCS|77057"],
+    },
+  },
 }
 ```
 
