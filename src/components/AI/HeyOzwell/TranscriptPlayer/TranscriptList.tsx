@@ -142,8 +142,8 @@ export interface TranscriptListProps {
 }
 
 /**
- * Fixed-height transcript that follows playback until the reader scrolls it themselves; then a
- * "Back to current" button re-attaches it.
+ * Transcript that grows with its lines up to a fixed height, then scrolls and follows playback until
+ * the reader scrolls it themselves; then a "Back to current" button re-attaches it.
  */
 export function TranscriptList({
   utterances,
@@ -238,7 +238,7 @@ export function TranscriptList({
     return (
       <p
         role="status"
-        className="text-muted-foreground flex h-80 items-center justify-center p-6 text-center text-sm"
+        className="text-muted-foreground flex items-center justify-center p-6 text-center text-sm"
       >
         {emptyMessage}
       </p>
@@ -260,7 +260,7 @@ export function TranscriptList({
           if (e.target === e.currentTarget && USER_SCROLL_KEYS.has(e.key))
             setDetached(true);
         }}
-        className="focus-visible:ring-ring h-80 overflow-y-auto rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+        className="focus-visible:ring-ring max-h-80 overflow-y-auto rounded-lg focus-visible:ring-2 focus-visible:outline-none"
       >
         {virtualize ? (
           <div
