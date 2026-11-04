@@ -23,7 +23,7 @@ const meta: Meta<typeof MacroLibrary> = {
 
 ### Don't use it when
 
-- Inserting **merge-field tokens** (\`{{employee.name}}\`) — that's the Variables \`Dropdown\` built into the deprecated \`RichTextEditor\`.
+- Inserting **merge-field tokens** (\`{{employee.name}}\`) — that's the searchable Variables \`Dropdown\` built into [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) via \`variableGroups\` (and the deprecated legacy \`RichTextEditor\`).
 - You need a global command surface with actions, not text insertion — \`CommandPalette\`.
 - A simple single-pick from a flat list is enough — \`Dropdown\` or \`AutoComplete\`.
 - Content must be fetched per-keystroke from a server — the panel's search filters a provided in-memory list and its query is not exposed, so server-driven search needs its own search UI upstream.

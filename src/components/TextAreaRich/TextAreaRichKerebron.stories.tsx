@@ -36,7 +36,7 @@ Since 0.12 this engine also powers the main barrel's [Textarea](?path=/docs/text
 
 - **Strictly controlled**, like a native input: an edit that \`onChange\` does not echo back into \`value\` reverts. (The legacy engine only applied \`value\` when the prop changed.)
 - The block gutter \`+\` button rests beside the field and docks inward on hover/focus (the legacy engine reserves the start padding permanently).
-- \`sanitizeHtml\`, \`variableGroups\` and \`markdownShortcuts\` from \`RichTextEditorProps\` are not honored — pastes are filtered through the ProseMirror schema (instead of \`sanitizeHtml\`), markdown block shortcuts are always on, and \`{{variables}}\` need the deprecated \`RichTextEditor\`.
+- \`sanitizeHtml\` and \`markdownShortcuts\` from \`RichTextEditorProps\` are not honored — pastes are filtered through the ProseMirror schema (instead of \`sanitizeHtml\`) and markdown block shortcuts are always on. \`variableGroups\` **is** honored: the toolbar gains a searchable **Variables** menu that inserts \`{{variable}}\` tokens at the caret through a ProseMirror transaction (native undo). The legacy \`<< >>\` → \`{{ }}\` converter button is not ported.
 - Output HTML is ProseMirror-normalized (e.g. no \`style\` attributes from \`execCommand\`).`,
       },
     },
@@ -142,6 +142,58 @@ export const WithMacros: Story = {
       description: {
         story:
           'With `macros`, typing a `.shortcut` + space expands it in place, and the gutter menu gains an “Insert macro” flyout plus “Show macro library”, docking the searchable MacroLibrary panel.',
+      },
+    },
+  },
+};
+
+function WithVariablesExample() {
+  const [value, setValue] = useState('<p>Dear {{employee.name}},</p>');
+  return (
+    <div className="max-w-2xl">
+      <TextAreaRich
+        value={value}
+        onChange={setValue}
+        defaultToolbar="visible"
+        variableGroups={[
+          {
+            label: 'Employee',
+            variables: [
+              { label: 'First Name', value: '{{employee.firstName}}' },
+              { label: 'Last Name', value: '{{employee.lastName}}' },
+              { label: 'Full Name', value: '{{employee.name}}' },
+              { label: 'Email', value: '{{employee.email}}' },
+            ],
+          },
+          {
+            label: 'Case',
+            variables: [
+              { label: 'Case Number', value: '{{case.caseNumber}}' },
+              { label: 'Case Status', value: '{{case.status}}' },
+              {
+                label: 'Case Adjuster',
+                value: '{{case.adjuster}}',
+                insertValue:
+                  '{{case.adjuster}}, {{case.adjusterPhone}}, {{case.adjusterEmail}}',
+              },
+            ],
+          },
+        ]}
+        placeholder="Compose a letter…"
+        aria-label="Letter body"
+      />
+    </div>
+  );
+}
+
+export const WithVariables: Story = {
+  name: 'With variables',
+  render: () => <WithVariablesExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `variableGroups`, the toolbar gains a searchable **Variables** menu (the `{ }` button — same `Dropdown` groups as the deprecated `RichTextEditor`). Picking an entry inserts its `{{variable}}` token at the caret as one ProseMirror transaction, so a single undo removes it. The toolbar starts visible here via `defaultToolbar="visible"`; with the default hidden toolbar, reveal it from the block gutter menu first.',
       },
     },
   },

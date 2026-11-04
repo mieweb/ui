@@ -2352,3 +2352,88 @@ test.describe('Visual Regression Tests - TextAreaRich', () => {
     await expect(page).toHaveScreenshot('textarearich-condensed-macros.png');
   });
 });
+
+test.describe('Visual Regression Tests - TextAreaRich (Kerebron) variables', () => {
+  const story = 'editors-textarearich-kerebron--with-variables';
+
+  test('TextAreaRich (Kerebron) - Variables menu opens from the toolbar and inserts', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    // The Kerebron editor mounts asynchronously.
+    await page
+      .locator('.kb-editor p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    // The appended menu group may sit behind the “More tools” overflow at
+    // this width — reach the Variables button either way.
+    const directButton = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await directButton.isVisible()) {
+      await directButton.click();
+    } else {
+      await page.locator('.kb-custom-menu__overflow-toggle').click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(
+      menu.getByRole('menuitem', { name: 'Full Name' })
+    ).toBeVisible();
+    await expect(
+      menu.getByPlaceholder('Search variables…')
+    ).toBeFocused();
+    await expect(page).toHaveScreenshot(
+      'textarearich-kerebron-variables-menu.png',
+      { animations: 'disabled' }
+    );
+    // Picking an entry closes the menu and inserts the token at the caret.
+    await menu.getByRole('menuitem', { name: 'Case Number' }).click();
+    await expect(menu).toBeHidden();
+    await expect(page.locator('.kb-editor p').first()).toContainText(
+      'case.caseNumber'
+    );
+  });
+
+  test('TextAreaRich (Kerebron) - Variables menu survives editable growth but closes on toolbar reflow', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    await page
+      .locator('.kb-editor p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    const directButton = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await directButton.isVisible()) {
+      await directButton.click();
+    } else {
+      await page.locator('.kb-custom-menu__overflow-toggle').click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu.getByPlaceholder('Search variables…')).toBeFocused();
+
+    // Editable-height churn must NOT dismiss the menu: moving focus into
+    // the portaled panel drops the field's :hover/:focus-within gutter
+    // padding, which can rewrap text and resize the field mid-pick.
+    await page.evaluate(() => {
+      const editor = document.querySelector<HTMLElement>('.kb-editor');
+      if (editor) editor.style.minHeight = '400px';
+    });
+    await page.waitForTimeout(400);
+    await expect(menu).toBeVisible();
+
+    // A genuine toolbar reflow (container resize) closes the menu and hands
+    // focus back to the editor instead of dropping it on <body>.
+    await page.evaluate(() => {
+      const root = document.getElementById('storybook-root');
+      if (root) root.style.width = '420px';
+    });
+    await expect(menu).toBeHidden();
+    await expect(page.locator('[aria-label="Letter body"]')).toBeFocused();
+  });
+});

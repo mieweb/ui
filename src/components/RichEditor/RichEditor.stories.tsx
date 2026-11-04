@@ -25,7 +25,7 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 
 ### Don't use it when
 
-- The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`). The legacy \`RichTextEditor\` (template variables and dictation from a toolbar) is deprecated — no new usages (mieweb/ui#692).
+- The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`, with \`variableGroups\` merge fields and dictation). The legacy \`RichTextEditor\` is deprecated — no new usages (mieweb/ui#692).
 - Plain multi-line text is enough — \`Textarea\`.
 - You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
 - The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
