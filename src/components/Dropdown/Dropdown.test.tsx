@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Button } from '../Button';
@@ -388,6 +388,80 @@ describe('Dropdown', () => {
     // ArrowRight closes it again, dispatched on the focused submenu item.
     fireEvent.keyDown(submenuItem, { key: 'ArrowRight' });
     expect(screen.queryByRole('menuitem', { name: 'Beta' })).toBeNull();
+  });
+
+  it('carries a local dir island onto the portaled menu', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Dropdown trigger={<Button>Open menu</Button>}>
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Open menu' });
+    // jsdom does not cascade dir → direction (nor inherit it in computed
+    // styles); set both directly on the trigger element — the node the
+    // Dropdown resolves its direction from. This also covers a `dir` set on
+    // the trigger itself rather than an ancestor island.
+    act(() => {
+      trigger.setAttribute('dir', 'rtl');
+      trigger.style.direction = 'rtl';
+    });
+
+    await user.click(trigger);
+    const menu = await screen.findByRole('menu');
+    // `dir` lives on the portaled panel (the scroll container's wrapper),
+    // outside the island — the component must carry the direction along.
+    const panel = menu.closest('[data-slot="dropdown-menu"]');
+    expect(panel).toHaveAttribute('dir', 'rtl');
+
+    // Reactive, not sampled at open: a live dir flip updates the open menu.
+    // The hook hears about it via MutationObserver, which delivers async.
+    act(() => {
+      trigger.setAttribute('dir', 'ltr');
+      trigger.style.direction = 'ltr';
+    });
+    await waitFor(() => expect(panel).toHaveAttribute('dir', 'ltr'));
+  });
+
+  it('re-resolves direction when the trigger node is replaced while open', async () => {
+    const user = userEvent.setup();
+
+    // jsdom does not cascade dir → direction; pass the inline style too.
+    const { rerender } = renderWithTheme(
+      <Dropdown trigger={<Button key="ltr">Open menu</Button>}>
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    const menu = await screen.findByRole('menu');
+    const panel = menu.closest('[data-slot="dropdown-menu"]');
+    expect(panel).toHaveAttribute('dir', 'ltr');
+    const originalTrigger = screen.getByRole('button', { name: 'Open menu' });
+
+    // Keyed replacement: the new trigger node is inserted with `dir` already
+    // set, so no attribute mutation ever fires — only the post-commit node
+    // identity check can catch it.
+    rerender(
+      <Dropdown
+        trigger={
+          <Button key="rtl" dir="rtl" style={{ direction: 'rtl' }}>
+            Open menu
+          </Button>
+        }
+      >
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    // Confirm this really was a replacement, not an in-place mutation —
+    // otherwise the MutationObserver would mask a stale node.
+    const newTrigger = screen.getByRole('button', { name: 'Open menu' });
+    expect(newTrigger).not.toBe(originalTrigger);
+
+    await waitFor(() => expect(panel).toHaveAttribute('dir', 'rtl'));
   });
 
   it('shows an indeterminate select-all state when some visible items are selected', async () => {
