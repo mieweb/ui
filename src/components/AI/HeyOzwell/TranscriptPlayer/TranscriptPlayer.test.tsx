@@ -564,4 +564,41 @@ describe('TranscriptPlayer', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('No speaker activity.')).toBeInTheDocument();
   });
+
+  it('keeps the lanes and overview behind Show speakers with collapsibleLanes', async () => {
+    renderPlayer({ collapsibleLanes: true });
+    const toggle = screen.getByRole('button', { name: 'Show speakers' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.queryByRole('group', { name: 'Patient speaking turns' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('slider', { name: 'Visible part of the recording' })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Seek' })).toBeInTheDocument();
+    expect(screen.getByText('Better but sore.')).toBeInTheDocument();
+
+    await userEvent.click(toggle);
+    expect(
+      screen.getByRole('button', { name: 'Hide speakers' })
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(lane('Patient')).toBeInTheDocument();
+  });
+
+  it('has no Show speakers button by default', () => {
+    renderPlayer();
+    expect(
+      screen.queryByRole('button', { name: 'Show speakers' })
+    ).not.toBeInTheDocument();
+    expect(lane('Patient')).toBeInTheDocument();
+  });
+
+  it('drops the speakers panel and hint when showSpeakerPanel is false', () => {
+    renderPlayer({ showSpeakerPanel: false });
+    expect(
+      screen.queryByRole('heading', { name: 'Speakers' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Hover a coloured segment/)).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Transcript' })).toBeVisible();
+  });
 });

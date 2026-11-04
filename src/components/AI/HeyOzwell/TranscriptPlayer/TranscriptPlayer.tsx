@@ -11,6 +11,7 @@ import {
   Pause,
   Play,
   Search,
+  Users,
   Volume2,
   VolumeX,
   ZoomIn,
@@ -76,6 +77,13 @@ export interface TranscriptPlayerProps {
   peaks?: WaveformPeaks;
   /** Replaces any of the English UI strings, for translation. */
   labels?: Partial<TranscriptPlayerLabels>;
+  /**
+   * Puts the speaker lanes and the overview behind a "Show speakers" button, closed at first, for
+   * hosts that want a compact player above the transcript.
+   */
+  collapsibleLanes?: boolean;
+  /** Set false to drop the speakers panel and hint beside the transcript. Default true. */
+  showSpeakerPanel?: boolean;
   className?: string;
 }
 
@@ -114,11 +122,16 @@ export function TranscriptPlayer({
   speakerLabels,
   peaks: providedPeaks,
   labels: labelOverrides,
+  collapsibleLanes = false,
+  showSpeakerPanel = true,
   className,
 }: TranscriptPlayerProps) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const fullscreenButtonRef = React.useRef<HTMLButtonElement>(null);
   const transcriptHeadingId = React.useId();
+  const lanesId = React.useId();
+  const [lanesOpen, setLanesOpen] = React.useState(!collapsibleLanes);
+  const showLanes = !collapsibleLanes || lanesOpen;
   const labels = React.useMemo(
     () => ({ ...DEFAULT_TRANSCRIPT_PLAYER_LABELS, ...labelOverrides }),
     [labelOverrides]
@@ -395,6 +408,19 @@ export function TranscriptPlayer({
             </span>
           )}
           <div className="ms-auto flex items-center gap-2">
+            {collapsibleLanes && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-expanded={lanesOpen}
+                aria-controls={lanesId}
+                onClick={() => setLanesOpen((open) => !open)}
+              >
+                <Users aria-hidden="true" className="me-1.5 h-4 w-4" />
+                {lanesOpen ? labels.hideSpeakerLanes : labels.showSpeakerLanes}
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -455,7 +481,7 @@ export function TranscriptPlayer({
         </div>
 
         {/* Time runs left to right in every locale, as in other audio tools. */}
-        <div dir="ltr" className="relative space-y-1.5">
+        <div id={lanesId} dir="ltr" className="relative space-y-1.5">
           <div className={ROW_GRID}>
             <span />
             <div
@@ -479,7 +505,7 @@ export function TranscriptPlayer({
             </div>
           </div>
 
-          {visibleSpeakers.length > 0 ? (
+          {!showLanes ? null : visibleSpeakers.length > 0 ? (
             <SpeakerLanes
               key={src ?? ''}
               speakers={visibleSpeakers}
@@ -532,53 +558,60 @@ export function TranscriptPlayer({
           )}
         </div>
 
-        <div dir="ltr" className={cn(ROW_GRID, 'mt-3 items-start')}>
-          <div className="flex items-center">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={labels.zoomOut}
-              disabled={view.span >= duration}
-              onClick={() => zoom(2)}
-            >
-              <ZoomOut aria-hidden="true" className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={labels.zoomIn}
-              disabled={view.span <= Math.min(MIN_VIEW_SECONDS, duration)}
-              onClick={() => zoom(0.5)}
-            >
-              <ZoomIn aria-hidden="true" className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className={pressedButton}
-              aria-label={labels.followPlayback}
-              aria-pressed={follow}
-              onClick={() => setFollow((f) => !f)}
-            >
-              <LocateFixed aria-hidden="true" className="h-4 w-4" />
-            </Button>
+        {showLanes && (
+          <div dir="ltr" className={cn(ROW_GRID, 'mt-3 items-start')}>
+            <div className="flex items-center">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={labels.zoomOut}
+                disabled={view.span >= duration}
+                onClick={() => zoom(2)}
+              >
+                <ZoomOut aria-hidden="true" className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={labels.zoomIn}
+                disabled={view.span <= Math.min(MIN_VIEW_SECONDS, duration)}
+                onClick={() => zoom(0.5)}
+              >
+                <ZoomIn aria-hidden="true" className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className={pressedButton}
+                aria-label={labels.followPlayback}
+                aria-pressed={follow}
+                onClick={() => setFollow((f) => !f)}
+              >
+                <LocateFixed aria-hidden="true" className="h-4 w-4" />
+              </Button>
+            </div>
+            <TimelineOverview
+              speakers={visibleSpeakers}
+              segments={visibleSegments}
+              duration={duration}
+              view={view}
+              currentTime={currentTime}
+              onViewChange={navigate}
+              labels={labels}
+            />
           </div>
-          <TimelineOverview
-            speakers={visibleSpeakers}
-            segments={visibleSegments}
-            duration={duration}
-            view={view}
-            currentTime={currentTime}
-            onViewChange={navigate}
-            labels={labels}
-          />
-        </div>
+        )}
       </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div
+        className={cn(
+          'grid grid-cols-1 gap-4',
+          showSpeakerPanel && 'lg:grid-cols-[minmax(0,1fr)_18rem]'
+        )}
+      >
         <section
           aria-labelledby={transcriptHeadingId}
           className="border-border bg-card text-card-foreground rounded-xl border p-4"
@@ -653,20 +686,22 @@ export function TranscriptPlayer({
           />
         </section>
 
-        <div className="space-y-4">
-          <SpeakerPanel
-            speakers={speakers}
-            talkTime={talk}
-            duration={duration}
-            hidden={hidden}
-            onToggle={toggleSpeaker}
-            overlapping={overlapping}
-            labels={labels}
-          />
-          <p className="text-muted-foreground bg-muted/50 rounded-xl p-4 text-xs">
-            {labels.hint}
-          </p>
-        </div>
+        {showSpeakerPanel && (
+          <div className="space-y-4">
+            <SpeakerPanel
+              speakers={speakers}
+              talkTime={talk}
+              duration={duration}
+              hidden={hidden}
+              onToggle={toggleSpeaker}
+              overlapping={overlapping}
+              labels={labels}
+            />
+            <p className="text-muted-foreground bg-muted/50 rounded-xl p-4 text-xs">
+              {labels.hint}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

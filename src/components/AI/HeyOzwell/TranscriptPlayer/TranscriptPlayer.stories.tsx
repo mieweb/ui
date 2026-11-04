@@ -98,7 +98,13 @@ export default meta;
 type Story = StoryObj<typeof TranscriptPlayer>;
 
 /** Builds a demo recording once per mount and frees its audio URL on unmount. */
-function Demo({ make }: { make: () => DemoRecording }) {
+function Demo({
+  make,
+  ...props
+}: { make: () => DemoRecording } & Pick<
+  React.ComponentProps<typeof TranscriptPlayer>,
+  'collapsibleLanes' | 'showSpeakerPanel'
+>) {
   const recording = React.useMemo(make, [make]);
   React.useEffect(() => () => URL.revokeObjectURL(recording.src), [recording]);
   return (
@@ -107,6 +113,7 @@ function Demo({ make }: { make: () => DemoRecording }) {
         src={recording.src}
         transcript={recording.transcript}
         peaks={recording.peaks}
+        {...props}
       />
     </div>
   );
@@ -143,6 +150,16 @@ export const ShortVisit: Story = {
 /** Five minutes, three speakers; the timeline opens on the whole recording. */
 export const FiveMinutes: Story = {
   render: () => <Demo make={medium} />,
+};
+
+/**
+ * Compact, for a chat message: `collapsibleLanes` keeps the lanes and overview behind "Show
+ * speakers" and `showSpeakerPanel={false}` leaves the transcript full width.
+ */
+export const Compact: Story = {
+  render: () => (
+    <Demo make={medium} collapsibleLanes showSpeakerPanel={false} />
+  ),
 };
 
 /** 45 minutes: the lanes show a 5-minute window; drag the overview box or zoom to move. */
