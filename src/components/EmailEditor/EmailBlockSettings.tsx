@@ -215,6 +215,24 @@ export function EmailBlockSettings({
   // again would normalise it, and the strictly controlled editor would rewrite
   // its content to match (losing the caret).
   const emitted = React.useRef<string | null>(null);
+  // The editor captures `mediaUpload` once, when it mounts; reading the latest
+  // `onUploadImage` through a ref keeps paste uploads in sync with the host's
+  // current callback (added, swapped, or removed after mount) without
+  // rebuilding the editor and losing the user's editing state.
+  const onUploadImageRef = React.useRef(onUploadImage);
+  onUploadImageRef.current = onUploadImage;
+  const uploadPastedImage = React.useCallback(async (file: File) => {
+    const upload = onUploadImageRef.current;
+    if (!upload) {
+      // The media extension catches rejections and inserts nothing — parity
+      // with the legacy editor, where pasted image files never survived the
+      // sanitiser — but leaves a console trace for debuggability.
+      throw new Error(
+        'EmailEditor: pasted file skipped — no onUploadImage handler'
+      );
+    }
+    return upload(file);
+  }, []);
 
   switch (block.type) {
     case 'heading':
@@ -264,14 +282,11 @@ export function EmailBlockSettings({
             sanitizeHtml={(html) => sanitizeEmailHtml(html) ?? ''}
             // A pasted image file must not become a base64 `data:` URL — the
             // email URL policy (`isSafeUrl`) strips those on render, leaving a
-            // broken image. Route files through the host's uploader when there
-            // is one; otherwise skip them (parity: pasted image files never
-            // survived the legacy editor's sanitiser either). No videos in
-            // email text blocks.
+            // broken image. The always-present stable handler routes files
+            // through the host's current uploader, or rejects (= skips the
+            // file) without one. No videos in email text blocks.
             mediaUpload={{
-              ...(onUploadImage
-                ? { uploadHandler: onUploadImage }
-                : { allowedImageTypes: [] }),
+              uploadHandler: uploadPastedImage,
               allowedVideoTypes: [],
             }}
             variableGroups={variableGroups}

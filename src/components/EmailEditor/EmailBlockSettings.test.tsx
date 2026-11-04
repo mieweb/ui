@@ -59,30 +59,40 @@ describe('EmailEditor text blocks on the Kerebron engine', () => {
     expect(props.sanitizeHtml!('<b>ok</b><script>x</script>')).toBe(
       '<b>ok</b>'
     );
-    // Without a host uploader, pasted/dropped media files are skipped — the
-    // stock pipeline would embed them as `data:` URLs, which the email URL
-    // policy strips on render, leaving broken images.
+    // Pasted/dropped media files must never take the stock pipeline, which
+    // would embed them as `data:` URLs — the email URL policy strips those on
+    // render, leaving broken images. A handler is always present (videos
+    // never are), so that path is unreachable.
     expect(props.mediaUpload).toEqual({
-      allowedImageTypes: [],
+      uploadHandler: expect.any(Function),
       allowedVideoTypes: [],
     });
   });
 
-  it('routes pasted image files through onUploadImage when provided', () => {
+  it('routes pasted image files through the latest onUploadImage', async () => {
+    const { rerender } = renderWithTheme(
+      <EmailEditor value={doc} onChange={vi.fn()} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
+
+    const handler = received.at(-1)!.mediaUpload!.uploadHandler!;
+    const file = new File(['x'], 'x.png', { type: 'image/png' });
+    // No host uploader: the handler rejects, which the media extension
+    // catches — the file is skipped instead of embedded.
+    await expect(handler(file)).rejects.toThrow('pasted file skipped');
+
+    // The host supplies a callback after the editor mounted (the editor
+    // captures `mediaUpload` once): the same stable handler delegates to the
+    // latest prop — no editor rebuild, no lost editing state.
     const onUploadImage = vi.fn(async () => 'https://cdn.example/x.png');
-    renderWithTheme(
+    rerender(
       <EmailEditor
         value={doc}
         onChange={vi.fn()}
         onUploadImage={onUploadImage}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
-
-    const props = received.at(-1)!;
-    expect(props.mediaUpload).toEqual({
-      uploadHandler: onUploadImage,
-      allowedVideoTypes: [],
-    });
+    await expect(handler(file)).resolves.toBe('https://cdn.example/x.png');
+    expect(onUploadImage).toHaveBeenCalledWith(file);
   });
 });
