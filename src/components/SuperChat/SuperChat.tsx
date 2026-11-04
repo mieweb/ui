@@ -25,6 +25,10 @@ import type { ChatComposerAgentOption } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
+import {
+  DictationButton,
+  type DictationButtonProps,
+} from '../DictationButton';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { MediaFeed } from '../MediaFeed';
@@ -137,6 +141,12 @@ export interface SuperChatProps {
   onStop?: () => void;
   /** Localized accessible label for the icon-only stop button. */
   stopLabel?: string;
+  /**
+   * Show a dictation (voice typing) button in the composer. The transcript is
+   * appended to the editable draft and never sent automatically. Pass props
+   * (e.g. a server `transcribe`) to customise it.
+   */
+  dictation?: boolean | Omit<DictationButtonProps, 'onText'>;
 
   // --- callbacks (chat-component-compatible) ---
   /**
@@ -206,6 +216,7 @@ export function SuperChat({
   isStreaming,
   onStop,
   stopLabel,
+  dictation,
   onMessageSent,
   onMessageEdited,
   onConversationClosed,
@@ -738,6 +749,11 @@ export function SuperChat({
     draftEpochRef.current += 1;
     setDraft(value);
   }, []);
+  const appendDictation = React.useCallback((text: string) => {
+    draftEpochRef.current += 1;
+    setDraft((current) => (current.trim() ? `${current.trimEnd()} ${text}` : text));
+  }, []);
+  const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
@@ -1013,6 +1029,16 @@ export function SuperChat({
         isStreaming={isStreaming}
         onStop={onStop}
         stopLabel={stopLabel}
+        micSlot={
+          dictation && !readOnly ? (
+            // Keyed by conversation so switching drops any in-flight take.
+            <DictationButton
+              key={conversation.id}
+              {...dictationProps}
+              onText={appendDictation}
+            />
+          ) : undefined
+        }
       />
     </section>
   );
