@@ -79,11 +79,11 @@ export function useDirection(
   // ref target whose `dir` was already set before insertion would otherwise
   // go stale. No dependency array — ref targets are swapped during commit,
   // *after* render captured any snapshot, so the check must run after every
-  // commit. The identity guard keeps it to one comparison per render.
+  // commit (ref targets change without this hook's deps re-rendering). The
+  // identity guard keeps it to one comparison per render and prevents
+  // update loops.
   const lastElement = useRef<Element | null>(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- must run after
-  // every commit (ref targets change without re-rendering this hook's deps);
-  // the identity guard below prevents update loops.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const element = elementRef?.current ?? null;
     if (element !== lastElement.current) {

@@ -902,6 +902,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'choice-inputs-dropdown--direction-islands', {
       globals: 'direction:rtl',
     });
+    // Guard the premise: the island sets dir="ltr" itself, so every assertion
+    // below would also pass on an LTR page if the global stopped applying.
+    await expectDocumentDirection(page, 'rtl');
     const trigger = page
       .locator('[data-testid="ltr-island"]')
       .getByRole('button');
