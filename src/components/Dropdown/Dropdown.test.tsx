@@ -425,6 +425,45 @@ describe('Dropdown', () => {
     await waitFor(() => expect(panel).toHaveAttribute('dir', 'ltr'));
   });
 
+  it('re-resolves direction when the trigger node is replaced while open', async () => {
+    const user = userEvent.setup();
+
+    // jsdom does not cascade dir → direction; pass the inline style too.
+    const { rerender } = renderWithTheme(
+      <Dropdown trigger={<Button key="ltr">Open menu</Button>}>
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    const menu = await screen.findByRole('menu');
+    const panel = menu.closest('[data-slot="dropdown-menu"]');
+    expect(panel).toHaveAttribute('dir', 'ltr');
+    const originalTrigger = screen.getByRole('button', { name: 'Open menu' });
+
+    // Keyed replacement: the new trigger node is inserted with `dir` already
+    // set, so no attribute mutation ever fires — only the post-commit node
+    // identity check can catch it.
+    rerender(
+      <Dropdown
+        trigger={
+          <Button key="rtl" dir="rtl" style={{ direction: 'rtl' }}>
+            Open menu
+          </Button>
+        }
+      >
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    // Confirm this really was a replacement, not an in-place mutation —
+    // otherwise the MutationObserver would mask a stale node.
+    const newTrigger = screen.getByRole('button', { name: 'Open menu' });
+    expect(newTrigger).not.toBe(originalTrigger);
+
+    await waitFor(() => expect(panel).toHaveAttribute('dir', 'rtl'));
+  });
+
   it('shows an indeterminate select-all state when some visible items are selected', async () => {
     const user = userEvent.setup();
 

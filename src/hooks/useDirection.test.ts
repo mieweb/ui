@@ -1,6 +1,6 @@
-import { act, cleanup, renderHook } from '@testing-library/react';
+import { act, cleanup, render, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createRef } from 'react';
+import { createElement, createRef, useMemo, useRef } from 'react';
 
 import { isRtl, isRtlLocale, useDirection } from './useDirection';
 
@@ -151,5 +151,46 @@ describe('useDirection', () => {
 
     ltrEl.remove();
     rtlEl.remove();
+  });
+
+  it('re-syncs when the ref target is swapped during commit', () => {
+    // Mirrors the Dropdown trigger pattern: a lazy getter over
+    // `firstElementChild`. A keyed child replacement swaps the node during
+    // React's commit — AFTER render read the ref — and the replacement is
+    // inserted with `dir` already set, so no attribute mutation ever fires.
+    // Only a post-commit identity check catches this.
+    function Harness({ which }: { which: 'ltr' | 'rtl' }) {
+      const containerRef = useRef<HTMLDivElement | null>(null);
+      const childRef = useMemo(
+        () => ({
+          get current() {
+            return (containerRef.current?.firstElementChild ??
+              null) as HTMLElement | null;
+          },
+        }),
+        []
+      );
+      const direction = useDirection(childRef);
+      return createElement(
+        'div',
+        { ref: containerRef, 'data-direction': direction },
+        which === 'ltr'
+          ? createElement('span', { key: 'ltr' })
+          : createElement('span', {
+              key: 'rtl',
+              dir: 'rtl',
+              style: { direction: 'rtl' },
+            })
+      );
+    }
+
+    const { container, rerender } = render(
+      createElement(Harness, { which: 'ltr' })
+    );
+    const host = container.firstElementChild as HTMLElement;
+    expect(host).toHaveAttribute('data-direction', 'ltr');
+
+    rerender(createElement(Harness, { which: 'rtl' }));
+    expect(host).toHaveAttribute('data-direction', 'rtl');
   });
 });
