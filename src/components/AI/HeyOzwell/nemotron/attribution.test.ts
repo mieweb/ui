@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { dominantLane, laneNames, transcriptFromFrames } from './attribution';
+import {
+  dominantLane,
+  laneNames,
+  timelineFromFrames,
+  transcriptFromActivity,
+  transcriptFromFrames,
+} from './attribution';
 
 /** Builds `numFrames x 3` frames of 0.1 s where `active(frame)` lists the lit lanes. */
 function frames(numFrames: number, active: (frame: number) => number[]) {
@@ -145,5 +151,66 @@ describe('transcriptFromFrames', () => {
       ['f', undefined],
       ['g', undefined],
     ]);
+  });
+});
+
+describe('transcriptFromActivity', () => {
+  const names = ['Dr. Smith', 'Mom', 'Speaker 1'];
+  const word = (text: string, start: number, end: number) => ({
+    text,
+    start,
+    end,
+  });
+  const words = [
+    word('how', 0.1, 0.4),
+    word('are', 0.5, 0.8),
+    word('fine', 1.2, 1.5),
+    word('both', 2.2, 2.6),
+  ];
+
+  it('keeps only heard speakers in the timeline', () => {
+    expect(timelineFromFrames(conversation, names, 3)).toEqual({
+      durationMs: 3000,
+      speakers: [
+        { id: 'lane-0', name: 'Dr. Smith' },
+        { id: 'lane-1', name: 'Mom' },
+      ],
+      speakerActivity: [
+        { speakerId: 'lane-0', startMs: 0, endMs: 1000 },
+        { speakerId: 'lane-1', startMs: 1000, endMs: 3000 },
+        { speakerId: 'lane-0', startMs: 2000, endMs: 3000 },
+      ],
+    });
+  });
+
+  it('matches the frame-based result for the same speech', () => {
+    const timeline = timelineFromFrames(conversation, names, 3);
+    expect(transcriptFromActivity(words, timeline)).toEqual(
+      transcriptFromFrames(words, conversation, names, 3)
+    );
+  });
+
+  it('gives a word in silence to the nearest speaker and survives an empty timeline', () => {
+    const timeline = {
+      durationMs: 5000,
+      speakers: [
+        { id: 'lane-0', name: 'Dr. Smith' },
+        { id: 'lane-1', name: 'Mom' },
+      ],
+      speakerActivity: [
+        { speakerId: 'lane-0', startMs: 0, endMs: 1000 },
+        { speakerId: 'lane-1', startMs: 4000, endMs: 5000 },
+      ],
+    };
+    expect(
+      transcriptFromActivity([word('hm', 3.5, 3.7)], timeline).segments
+    ).toMatchObject([{ text: 'hm', speakerId: 'lane-1' }]);
+    expect(
+      transcriptFromActivity([word('hm', 0, 0.3)], {
+        durationMs: 0,
+        speakers: [],
+        speakerActivity: [],
+      }).segments
+    ).toMatchObject([{ speakerId: 'lane-0' }]);
   });
 });

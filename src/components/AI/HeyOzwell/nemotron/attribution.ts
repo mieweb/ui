@@ -1,5 +1,6 @@
 /** Turns Nemotron's per-frame lane probabilities into a diarized `Transcript`. */
 import type {
+  Speaker,
   SpeakerActivity,
   Transcript,
   TranscriptSegment as TranscriptSegmentMs,
@@ -13,6 +14,14 @@ export interface LaneFrames {
   probabilities: Float32Array;
   numSpeakers: number;
   frameDurationSeconds: number;
+}
+
+/** Who spoke when, without words, so a host can attribute words from its own transcription. */
+export interface SpeakerTimeline {
+  durationMs: number;
+  /** Speakers heard, as `lane-N` ids with their display names. */
+  speakers: Speaker[];
+  speakerActivity: SpeakerActivity[];
 }
 
 const ACTIVE = 0.5;
@@ -137,31 +146,24 @@ function overlappingLanes(
   return lanes;
 }
 
+/** The speaker of one word and the other speakers heard with it. */
+interface Attribution {
+  speakerId: string;
+  others: string[];
+}
+
 /**
- * Builds a `Transcript` from Whisper words and Nemotron lanes. Each lane is a speaker (`lane-N`).
- * Every word goes to its most active lane (by mean probability); consecutive words on the same lane
- * form a segment, split at pauses longer than the player's utterance gap and wherever the set of
- * other lanes heard (`overlapSpeakerIds`) changes. Another lane overlaps a word when both are active
- * in at least one of its frames. Words no lane claims still go to the most active lane.
- * `speakerActivity` is the raw lane activity, so overlap and wordless speech ("mm-hm") stay visible.
+ * Groups attributed words into segments: consecutive words of one speaker form a segment, split at
+ * pauses longer than the player's utterance gap and wherever the other speakers heard change.
  */
-export function transcriptFromFrames(
+function buildTranscript(
   words: readonly TranscriptSegment[],
-  frames: LaneFrames,
-  names: readonly string[],
-  durationSeconds: number
+  attribute: (word: TranscriptSegment) => Attribution,
+  { durationMs, speakers, speakerActivity }: SpeakerTimeline
 ): Transcript {
-  const ids = names.map((_, lane) => `lane-${lane}`);
   const segments: TranscriptSegmentMs[] = [];
   for (const word of words) {
-    const range = wordFrameRange(frames, word);
-    const means = laneMeans(frames, range);
-    let lane = 0;
-    for (let l = 1; l < means.length; l++) if (means[l] > means[lane]) lane = l;
-    const speakerId = ids[lane] ?? `lane-${lane}`;
-    const others = overlappingLanes(frames, range, lane).map(
-      (l) => ids[l] ?? `lane-${l}`
-    );
+    const { speakerId, others } = attribute(word);
     const spoken: TranscriptWord = {
       text: word.text.trim(),
       startMs: ms(word.start),
@@ -193,18 +195,136 @@ export function transcriptFromFrames(
     });
   }
 
-  const speakerActivity = laneActivity(frames);
   const heard = new Set([
     ...segments.map((s) => s.speakerId),
     ...speakerActivity.map((a) => a.speakerId),
   ]);
   return {
-    durationMs: ms(durationSeconds),
-    speakers: names
-      .map((name, lane) => ({ id: ids[lane], name }))
-      .filter((s) => heard.has(s.id)),
+    durationMs,
+    speakers: speakers.filter((s) => heard.has(s.id)),
     segments,
     words: segments.flatMap((s) => s.words),
     speakerActivity,
   };
+}
+
+const laneSpeakers = (names: readonly string[]): Speaker[] =>
+  names.map((name, lane) => ({ id: `lane-${lane}`, name }));
+
+/** The lanes heard, with their names, and the raw lane activity (overlap and wordless "mm-hm" included). */
+export function timelineFromFrames(
+  frames: LaneFrames,
+  names: readonly string[],
+  durationSeconds: number
+): SpeakerTimeline {
+  const speakerActivity = laneActivity(frames);
+  const heard = new Set(speakerActivity.map((a) => a.speakerId));
+  return {
+    durationMs: ms(durationSeconds),
+    speakers: laneSpeakers(names).filter((s) => heard.has(s.id)),
+    speakerActivity,
+  };
+}
+
+/**
+ * Builds a `Transcript` from Whisper words and Nemotron lanes. Each lane is a speaker (`lane-N`).
+ * Every word goes to its most active lane (by mean probability). Another lane overlaps a word when
+ * both are active in at least one of its frames. Words no lane claims still go to the most active lane.
+ */
+export function transcriptFromFrames(
+  words: readonly TranscriptSegment[],
+  frames: LaneFrames,
+  names: readonly string[],
+  durationSeconds: number
+): Transcript {
+  const id = (lane: number) => `lane-${lane}`;
+  return buildTranscript(
+    words,
+    (word) => {
+      const range = wordFrameRange(frames, word);
+      const means = laneMeans(frames, range);
+      let lane = 0;
+      for (let l = 1; l < means.length; l++)
+        if (means[l] > means[lane]) lane = l;
+      return {
+        speakerId: id(lane),
+        others: overlappingLanes(frames, range, lane).map(id),
+      };
+    },
+    // Every named lane: a word can land on a lane with no activity of its own.
+    {
+      ...timelineFromFrames(frames, names, durationSeconds),
+      speakers: laneSpeakers(names),
+    }
+  );
+}
+
+/**
+ * Builds a `Transcript` from a host's own word timestamps (seconds from the start of the recording,
+ * e.g. from a server transcription) and a `SpeakerTimeline`. Every word goes to the speaker active for
+ * most of it, else the nearest one in time; other speakers active together with it are its overlap.
+ * Pure (no browser APIs).
+ */
+export function transcriptFromActivity(
+  words: readonly TranscriptSegment[],
+  timeline: SpeakerTimeline
+): Transcript {
+  const spans = timeline.speakerActivity;
+  const fallback = timeline.speakers[0]?.id ?? 'lane-0';
+
+  return buildTranscript(
+    words,
+    (word) => {
+      const from = ms(word.start);
+      const to = Math.max(ms(word.end), from + 1);
+      const heard = spans.filter((s) => s.startMs < to && s.endMs > from);
+      if (heard.length === 0) {
+        const gap = (s: SpeakerActivity) =>
+          Math.max(s.startMs - to, from - s.endMs);
+        const nearest = spans.reduce<SpeakerActivity | undefined>(
+          (best, s) => (!best || gap(s) < gap(best) ? s : best),
+          undefined
+        );
+        return { speakerId: nearest?.speakerId ?? fallback, others: [] };
+      }
+
+      const within = (s: SpeakerActivity): [number, number] => [
+        Math.max(from, s.startMs),
+        Math.min(to, s.endMs),
+      ];
+      const totals = new Map<string, number>();
+      for (const s of heard) {
+        const [start, end] = within(s);
+        totals.set(s.speakerId, (totals.get(s.speakerId) ?? 0) + end - start);
+      }
+      // Ties go to the speaker listed first (lower lanes, which hold the enrolled voices).
+      const rank = (id: string) => {
+        const i = timeline.speakers.findIndex((s) => s.id === id);
+        return i < 0 ? Infinity : i;
+      };
+      let speakerId = heard[0].speakerId;
+      for (const [id, total] of totals) {
+        const best = totals.get(speakerId) ?? 0;
+        if (total > best || (total === best && rank(id) < rank(speakerId)))
+          speakerId = id;
+      }
+
+      const mine = heard.filter((s) => s.speakerId === speakerId);
+      const together = (s: SpeakerActivity) => {
+        const [start, end] = within(s);
+        return mine.some(
+          (m) => Math.min(end, m.endMs) > Math.max(start, m.startMs)
+        );
+      };
+      const others = [
+        ...new Set(
+          heard
+            .filter((s) => s.speakerId !== speakerId && together(s))
+            .map((s) => s.speakerId)
+        ),
+      ];
+      return { speakerId, others };
+    },
+    timeline
+  );
 }

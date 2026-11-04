@@ -15,8 +15,10 @@ import {
 } from '../whisperTranscribe';
 import {
   laneNames,
+  timelineFromFrames,
   transcriptFromFrames,
   type LaneFrames,
+  type SpeakerTimeline,
 } from './nemotron/attribution';
 import { MODEL_REVISION } from './nemotron/modelConfig';
 import {
@@ -65,6 +67,9 @@ export interface NemotronDiarization {
 export interface LiveDiarization {
   /** Stops listening without using the result, e.g. when the recording is abandoned. */
   cancel: () => void;
+  /** Call with the recorder's pause and resume, so the labels' times match the recorded audio. */
+  pause: () => void;
+  resume: () => void;
 }
 
 interface LiveSession extends LiveDiarization {
@@ -91,6 +96,11 @@ export interface UseNemotronDiarizationResult {
   listen: (stream: MediaStream) => LiveDiarization;
   /** Labels `blob`. With `live` from `listen` on the same recording, its finished labels are used. */
   diarize: (blob: Blob, live?: LiveDiarization) => Promise<NemotronDiarization>;
+  /**
+   * Stops `live` and returns who spoke when, without transcribing, for a host that has its own word
+   * timestamps; pair with `transcriptFromActivity`.
+   */
+  finish: (live: LiveDiarization) => Promise<SpeakerTimeline>;
 }
 
 const messageOf = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -276,6 +286,8 @@ export function useNemotronDiarization({
         namespace: nsRef.current,
         hydrated: hydratedRef.current,
         cancel: listener.cancel,
+        pause: listener.pause,
+        resume: listener.resume,
       };
       return session;
     },
@@ -332,6 +344,25 @@ export function useNemotronDiarization({
     [track, labelSpeakers]
   );
 
+  const finish = React.useCallback(
+    (live: LiveDiarization) =>
+      track(async (assertNamespace) => {
+        const session = live as LiveSession;
+        if (session.namespace !== nsRef.current) {
+          session.cancel();
+          throw new Error('Voiceprint namespace changed during processing');
+        }
+        const frames = await session.listener.stop();
+        assertNamespace();
+        return timelineFromFrames(
+          frames,
+          laneNames(frames, session.names),
+          frames.numFrames * frames.frameDurationSeconds
+        );
+      }),
+    [track]
+  );
+
   const voices = React.useMemo(
     () =>
       prints.map((p) => ({
@@ -352,5 +383,6 @@ export function useNemotronDiarization({
     removeVoice,
     listen,
     diarize,
+    finish,
   };
 }

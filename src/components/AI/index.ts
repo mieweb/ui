@@ -204,6 +204,10 @@ export {
   type LiveDiarization,
 } from './HeyOzwell/useNemotronDiarization';
 export {
+  transcriptFromActivity,
+  type SpeakerTimeline,
+} from './HeyOzwell/nemotron/attribution';
+export {
   useNemotronWakeVoices,
   type UseNemotronWakeVoicesOptions,
   type NemotronWakeVoices,

@@ -44,6 +44,11 @@ sequenceDiagram
 - **ONNX Runtime is single-threaded inside the worker** (`numThreads = 1`):
   nested pthread workers deadlock. A failed ORT import clears its cached
   promise so the next request retries.
+- **Hosts with their own transcription** call `listen(stream)`, mirror the
+  recorder's pause and resume on the returned session, then `finish(live)` for a
+  `SpeakerTimeline` and `transcriptFromActivity(words, timeline)` for the
+  transcript. It shares segment grouping with `transcriptFromFrames`
+  (`buildTranscript`), so both paths split and name speakers the same way.
 
 ## Coupling between preprocessing, the speaker cache and voiceprints
 
