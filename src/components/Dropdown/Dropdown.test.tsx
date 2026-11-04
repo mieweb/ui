@@ -400,12 +400,13 @@ describe('Dropdown', () => {
     );
 
     const trigger = screen.getByRole('button', { name: 'Open menu' });
-    const container = trigger.parentElement as HTMLElement;
-    // jsdom does not cascade dir → direction; set both on the element the
-    // Dropdown resolves its direction from (its own container).
+    // jsdom does not cascade dir → direction (nor inherit it in computed
+    // styles); set both directly on the trigger element — the node the
+    // Dropdown resolves its direction from. This also covers a `dir` set on
+    // the trigger itself rather than an ancestor island.
     act(() => {
-      container.setAttribute('dir', 'rtl');
-      container.style.direction = 'rtl';
+      trigger.setAttribute('dir', 'rtl');
+      trigger.style.direction = 'rtl';
     });
 
     await user.click(trigger);
@@ -418,8 +419,8 @@ describe('Dropdown', () => {
     // Reactive, not sampled at open: a live dir flip updates the open menu.
     // The hook hears about it via MutationObserver, which delivers async.
     act(() => {
-      container.setAttribute('dir', 'ltr');
-      container.style.direction = 'ltr';
+      trigger.setAttribute('dir', 'ltr');
+      trigger.style.direction = 'ltr';
     });
     await waitFor(() => expect(panel).toHaveAttribute('dir', 'ltr'));
   });

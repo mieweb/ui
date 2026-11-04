@@ -469,8 +469,22 @@ function Dropdown({
 
   // The trigger's computed direction, not the document's: a dropdown inside
   // a local `dir` island must position and render to the island's direction.
-  // Reactive (not sampled at open) so an open menu tracks live dir flips.
-  const direction = useDirection(containerRef);
+  // Resolved from the trigger's own DOM node (the wrapper's only rendered
+  // child), not the wrapper, so a `dir` set directly on the trigger element
+  // is honored too. Lazy getter so a re-rendered trigger node never goes
+  // stale. Reactive (not sampled at open) so an open menu tracks live flips.
+  const triggerDomRef = React.useMemo(
+    () => ({
+      get current() {
+        return (
+          (containerRef.current?.firstElementChild as HTMLElement | null) ??
+          containerRef.current
+        );
+      },
+    }),
+    []
+  );
+  const direction = useDirection(triggerDomRef);
 
   // `-start`/`-end` on the vertical placements are logical. The positioning
   // hook is deliberately physical (`-start` = left edge), so map here using
@@ -495,15 +509,23 @@ function Dropdown({
   }, [direction, placement]);
 
   // Portal + fixed positioning so the menu escapes overflow-hidden ancestors.
-  const { anchorRef, floatingRef, style, actualSide } = useAnchoredPosition<
-    HTMLDivElement,
-    HTMLDivElement
-  >({
-    open: isOpen,
-    placement: resolvedPlacement,
-    offset: placementOffset,
-    matchMinWidth: width === 'trigger',
-  });
+  const { anchorRef, floatingRef, style, actualSide, update } =
+    useAnchoredPosition<HTMLDivElement, HTMLDivElement>({
+      open: isOpen,
+      placement: resolvedPlacement,
+      offset: placementOffset,
+      matchMinWidth: width === 'trigger',
+    });
+
+  // A live dir flip mirrors the page layout, which can move the trigger
+  // without resizing it — invisible to the hook's scroll/resize/
+  // ResizeObserver reposition triggers, and to its placement dependency when
+  // the resolved placement is unchanged (`bottom`, `top`, `left*`, `right*`).
+  // Reposition explicitly. Redundant with the placement-change reposition on
+  // `-start`/`-end` swaps, but update() is idempotent.
+  React.useEffect(() => {
+    if (isOpen) update();
+  }, [direction, isOpen, update]);
 
   const outsideRefs = React.useMemo(
     () => [containerRef, floatingRef, ...extraOutsideRefs],
