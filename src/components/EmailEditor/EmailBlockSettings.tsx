@@ -3,7 +3,13 @@ import { Plus, Trash2, Upload } from 'lucide-react';
 
 import { Button as BaseButton, type ButtonProps } from '../Button';
 import { Input } from '../Input';
-import { RichTextEditor, type RichTextVariableGroup } from '../RichTextEditor';
+// The base import keeps EmailEditor off the public RichTextEditor wrapper,
+// whose one-time deprecation warning would otherwise mislead EmailEditor
+// consumers (mieweb/ui#692).
+import {
+  RichTextEditorBase as RichTextEditor,
+  type RichTextVariableGroup,
+} from '../RichTextEditor/RichTextEditor';
 import { Select } from '../Select';
 import { Switch } from '../Switch';
 import { Textarea } from '../Textarea';

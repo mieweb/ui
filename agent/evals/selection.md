@@ -178,9 +178,9 @@ Primary agent: **MIE UI Design Agent** (owns selection via the
   which components?"
 - **Expect:** `Textarea` when the value must be plain text; `TextAreaRich`
   for a textarea-like HTML surface (toolbar hidden until asked, auto-grow);
-  `RichTextEditor` for an HTML document with an always-on toolbar, variables,
-  or dictation; `RichEditor` when you need Markdown, links/tables/code, or
-  collaboration.
+  `RichEditor` for a full document — Markdown, links/tables/code, or
+  collaboration. `RichTextEditor` (HTML document with an always-on toolbar,
+  variables, dictation) is deprecated — no new usages (mieweb/ui#692).
 - **Agent:** MIE UI Design Agent
 - **Source:** agent/skills/mieweb-ui-catalog/selection-guidance.md — Editors
 
