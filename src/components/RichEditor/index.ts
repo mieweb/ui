@@ -3,6 +3,7 @@ export {
   type RichEditorProps,
   type RichEditorHandle,
   type CollabConfig,
+  type MediaUploadOptions,
   type MenuElement,
   type ModifyMenu,
 } from './RichEditor';

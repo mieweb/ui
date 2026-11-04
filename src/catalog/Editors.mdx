@@ -69,11 +69,10 @@ optional.
   relay the host runs (`wsUrl` defaults to `/yjs` on the current host); pair it with
   [CollabStatus](?path=/docs/feedback-collabstatus--docs) (Feedback) for presence and sync
   state. The Yjs kit is lazy-loaded so plain-mode consumers never download it.
-- **EmailEditor is a layout editor that contains RichTextEditor.** Its document is JSON blocks,
-  not HTML; each `text` block is edited with `RichTextEditor` (via its internal non-warning
-  base while EmailEditor remains on the legacy engine), and `mergeTags` become that
-  editor's `variableGroups`. The canvas is a preview — `renderEmailMjml` produces the MJML
-  the host compiles and sends.
+- **EmailEditor is a layout editor that contains TextAreaRich.** Its document is JSON blocks,
+  not HTML; each `text` block is edited with the Kerebron `TextAreaRich` surface
+  (mieweb/ui#695), and `mergeTags` become that editor's `variableGroups`. The canvas is a
+  preview — `renderEmailMjml` produces the MJML the host compiles and sends.
 - **Q is an editor of configuration.** It sits here for its YAML/JSON `ConfigEditor` pane, but
   its real job is generating a form from a `mieforms-v1.0` schema; the component is a thin
   wrapper around `@mieweb/q`'s `AgentConfigGenerator`.
