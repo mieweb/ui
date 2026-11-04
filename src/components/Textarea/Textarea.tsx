@@ -501,6 +501,13 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
           } as React.CSSProperties)
         : undefined;
 
+    // How tall the editor is with no text: its rows, or one line and its
+    // 7px block padding, and never under the 38px min-height kerebron.css
+    // gives it (one Input row inside the frame's borders).
+    const emptyEditorHeight = rows
+      ? rows * lineHeightPx + 14
+      : Math.max(38, lineHeightPx + 14);
+
     // The surface's frame, shared with the stand-in drawn while it loads.
     const frameClassName = cn(
       size === 'sm' && 'text-sm',
@@ -562,18 +569,16 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
         >
           <React.Suspense
             fallback={
-              // The empty frame the surface shows until its editor is ready,
-              // at the height the editor will take.
+              // The surface's frame, as tall as its empty editor will be, so
+              // nothing below the field moves when the editor arrives. The
+              // height sits inside the frame, its borders outside it.
               <div
                 data-slot="textarea-rich-loading"
                 aria-hidden="true"
                 className={cn('border-input rounded-lg border', frameClassName)}
-                style={
-                  editorStyle?.minHeight !== undefined
-                    ? { minHeight: editorStyle.minHeight }
-                    : undefined
-                }
-              />
+              >
+                <div style={{ minHeight: emptyEditorHeight }} />
+              </div>
             }
           >
             <TextAreaRichKerebron
