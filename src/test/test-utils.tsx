@@ -1,4 +1,4 @@
-import { render, RenderResult } from '@testing-library/react';
+import { render, RenderResult, waitFor } from '@testing-library/react';
 import { ReactElement } from 'react';
 import { ThemeProvider } from '../components/ThemeProvider';
 
@@ -29,3 +29,21 @@ export const renderWithDarkTheme = (
 
   return render(ui, { wrapper: Wrapper, ...options });
 };
+
+/**
+ * Loads the rich `Textarea`'s surface, which `Textarea` imports lazily (it
+ * brings the Kerebron editor). React keeps a lazy component once it has
+ * loaded, so after this every rich `Textarea` in the file renders its surface
+ * synchronously. Call it from `beforeAll` in suites that query the field
+ * right after rendering.
+ */
+export async function loadTextareaSurface(): Promise<void> {
+  const { Textarea } = await import('../components/Textarea');
+  const { container, unmount } = render(<Textarea aria-label="Preload" />);
+  await waitFor(() => {
+    if (container.querySelector('[data-slot="textarea-rich-loading"]')) {
+      throw new Error('The Textarea surface has not loaded yet');
+    }
+  });
+  unmount();
+}

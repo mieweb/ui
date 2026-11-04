@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { act, fireEvent, screen, within } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   createFormStore,
   createUIStore,
@@ -8,7 +8,7 @@ import {
   type FieldDefinition,
   type FieldResponse,
 } from '@esheet/core';
-import { renderWithTheme } from '../../test/test-utils';
+import { loadTextareaSurface, renderWithTheme } from '../../test/test-utils';
 import { CodeLookupProvider } from '../CodeLookup/context';
 import type { CodeLookupProps } from '../CodeLookup/CodeLookup';
 import type { CodifyResult } from '../CodeLookup/engine';
@@ -123,6 +123,9 @@ function renderField(
     JSON.parse(onResponse.mock.calls.at(-1)![0].answer);
   return { ...rendered, onResponse, latest };
 }
+
+// Its medication editor's Sig field is a rich Textarea.
+beforeAll(loadTextareaSurface);
 
 describe('Encounter coded clinical fields', () => {
   it('adds coded medications through the inline catalog search and retains the selected code and native metadata', () => {
