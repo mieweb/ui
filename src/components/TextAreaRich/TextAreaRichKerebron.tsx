@@ -818,20 +818,26 @@ const TextAreaRichKerebron = React.forwardRef<
     // A resize can reflow the toolbar (buttons moving into or out of the
     // overflow popup), leaving the overlay anchored to stale coordinates
     // over some other control. The menu is transient — close it rather
-    // than track the moving button.
+    // than track the moving button. Observe the TOOLBAR, not the whole
+    // field: opening the menu moves focus into the portaled panel, which
+    // drops the field's :hover/:focus-within gutter padding and can rewrap
+    // the text — editable-height churn must not dismiss the menu. Close
+    // through the open-change handler so focus returns to the editor when
+    // it was sitting inside the menu.
     React.useEffect(() => {
       if (!variablesOpen) return;
-      const root = wrapperRef.current;
-      if (!root || typeof ResizeObserver === 'undefined') return;
+      const toolbar =
+        wrapperRef.current?.querySelector<HTMLElement>('.kb-custom-menu');
+      if (!toolbar || typeof ResizeObserver === 'undefined') return;
       let initial = true; // observe() always fires once immediately
       const observer = new ResizeObserver(() => {
         if (initial) {
           initial = false;
           return;
         }
-        setVariablesOpen(false);
+        handleVariablesOpenChangeRef.current(false);
       });
-      observer.observe(root);
+      observer.observe(toolbar);
       return () => observer.disconnect();
     }, [variablesOpen]);
 
@@ -846,6 +852,10 @@ const TextAreaRichKerebron = React.forwardRef<
     expandTypedShortcutRef.current = expandTypedShortcut;
     const toggleVariablesMenuRef = React.useRef(toggleVariablesMenu);
     toggleVariablesMenuRef.current = toggleVariablesMenu;
+    const handleVariablesOpenChangeRef = React.useRef(
+      handleVariablesOpenChange
+    );
+    handleVariablesOpenChangeRef.current = handleVariablesOpenChange;
 
     const [menuAddon] = React.useState(() => {
       // Icon-only (filled Material-style paths, like Kerebron's stock
