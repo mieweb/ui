@@ -22,6 +22,24 @@ describe('Textarea loads its Kerebron surface lazily', () => {
     expect(surface.loads).toBe(0);
   });
 
+  it.each([
+    ['md', '38px'],
+    ['sm', '38px'],
+    ['lg', '42px'],
+  ] as const)(
+    'with no rows, holds a %s field at its empty editor’s height (%s)',
+    (size, height) => {
+      const { container } = renderWithTheme(
+        <Textarea label="Notes" size={size} />
+      );
+      const frame = container.querySelector<HTMLElement>(
+        '[data-slot="textarea-rich-loading"]'
+      );
+      // One line and its padding, never under the editor's 38px minimum.
+      expect(frame?.firstElementChild).toHaveStyle({ minHeight: height });
+    }
+  );
+
   it('draws an empty frame at the field’s height until the surface loads', async () => {
     const { container } = renderWithTheme(
       <Textarea label="Notes" rows={3} size="sm" />
@@ -31,8 +49,9 @@ describe('Textarea loads its Kerebron surface lazily', () => {
     );
     expect(frame).not.toBeNull();
     expect(frame).toHaveAttribute('aria-hidden', 'true');
-    // Three 20px rows plus the editable's 7px block padding on each side.
-    expect(frame?.style.minHeight).toBe('74px');
+    // Three 20px rows plus the editable's 7px block padding on each side,
+    // inside the frame's borders.
+    expect(frame?.firstElementChild).toHaveStyle({ minHeight: '74px' });
 
     await waitFor(() =>
       expect(
