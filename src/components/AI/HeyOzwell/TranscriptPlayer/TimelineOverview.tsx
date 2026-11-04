@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
+import { cn } from '../../../../utils/cn';
 import { Button } from '../../../Button';
 import type { TranscriptPlayerLabels } from './labels';
 import {
@@ -189,10 +190,14 @@ export function TimelineOverview({
         aria-hidden="true"
         className="text-muted-foreground relative mx-9 mt-1 h-4 text-[11px] tabular-nums"
       >
-        {ticksFor(whole).map((t) => (
+        {ticksFor(whole).map((t, i) => (
           <span
             key={t}
-            className="absolute -translate-x-1/2"
+            // Every other tick in narrow hosts, so the labels do not overlap.
+            className={cn(
+              'absolute -translate-x-1/2',
+              i % 2 === 1 && 'hidden @md:inline'
+            )}
             style={{
               // rtl-ignore -- time axis inside the player's dir="ltr" timeline
               left: `${viewFraction(t, whole) * 100}%`,

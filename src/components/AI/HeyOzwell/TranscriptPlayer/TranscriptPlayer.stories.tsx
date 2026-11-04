@@ -103,7 +103,7 @@ function Demo({
   ...props
 }: { make: () => DemoRecording } & Pick<
   React.ComponentProps<typeof TranscriptPlayer>,
-  'collapsibleLanes' | 'showSpeakerPanel'
+  'collapsibleLanes' | 'showSpeakerPanel' | 'sticky'
 >) {
   const recording = React.useMemo(make, [make]);
   React.useEffect(() => () => URL.revokeObjectURL(recording.src), [recording]);
@@ -154,11 +154,17 @@ export const FiveMinutes: Story = {
 
 /**
  * Compact, for a chat message: `collapsibleLanes` keeps the lanes and overview behind "Show
- * speakers" and `showSpeakerPanel={false}` leaves the transcript full width.
+ * speakers", `showSpeakerPanel={false}` leaves the transcript full width and `sticky={false}` lets
+ * the player scroll with the feed. Narrow the canvas to see the small-container layout.
  */
 export const Compact: Story = {
   render: () => (
-    <Demo make={medium} collapsibleLanes showSpeakerPanel={false} />
+    <Demo
+      make={medium}
+      collapsibleLanes
+      showSpeakerPanel={false}
+      sticky={false}
+    />
   ),
 };
 

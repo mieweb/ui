@@ -593,6 +593,18 @@ describe('TranscriptPlayer', () => {
     expect(lane('Patient')).toBeInTheDocument();
   });
 
+  it('pins the player while scrolling unless sticky is false', () => {
+    const { unmount } = renderPlayer();
+    expect(screen.getByRole('region', { name: 'Recording' })).toHaveClass(
+      'sticky'
+    );
+    unmount();
+    renderPlayer({ sticky: false });
+    expect(screen.getByRole('region', { name: 'Recording' })).not.toHaveClass(
+      'sticky'
+    );
+  });
+
   it('drops the speakers panel and hint when showSpeakerPanel is false', () => {
     renderPlayer({ showSpeakerPanel: false });
     expect(

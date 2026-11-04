@@ -73,7 +73,8 @@ const Row = React.memo(function Row({
       aria-posinset={posInSet}
       onClick={() => onPlay(utterance)}
       className={cn(
-        'flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm',
+        // Narrow hosts put the text on its own line under the time and speaker.
+        'flex cursor-pointer flex-wrap items-start gap-x-3 gap-y-1 rounded-lg px-2 py-2 text-sm @md:flex-nowrap',
         active ? 'bg-primary-50 dark:bg-primary-950/40' : 'hover:bg-muted/60'
       )}
     >
@@ -112,7 +113,7 @@ const Row = React.memo(function Row({
         />
         <span className="truncate">{name}</span>
       </span>
-      <span className="min-w-0 flex-1">
+      <span className="min-w-0 grow basis-full ps-9 @md:basis-0 @md:ps-0">
         {utterance.text ? (
           highlight(utterance.text, query)
         ) : (
