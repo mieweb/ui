@@ -501,12 +501,14 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
           } as React.CSSProperties)
         : undefined;
 
-    // How tall the editor is with no text: its rows, or one line and its
-    // 7px block padding, and never under the 38px min-height kerebron.css
-    // gives it (one Input row inside the frame's borders).
-    const emptyEditorHeight = rows
-      ? rows * lineHeightPx + 14
-      : Math.max(38, lineHeightPx + 14);
+    // How tall the editor is with no text, in the units kerebron.css sizes it
+    // in: one line (rem, so it follows the root font size) and its 7px block
+    // padding, never under the 38px min-height (one Input row inside the
+    // frame's borders) nor, with `rows`, under their floor.
+    const lineHeightRem = size === 'sm' ? 1.25 : size === 'lg' ? 1.75 : 1.5;
+    const emptyEditorHeight = `max(38px, ${
+      rows ? `${rows * lineHeightPx + 14}px, ` : ''
+    }calc(${lineHeightRem}rem + 14px))`;
 
     // The surface's frame, shared with the stand-in drawn while it loads.
     const frameClassName = cn(
