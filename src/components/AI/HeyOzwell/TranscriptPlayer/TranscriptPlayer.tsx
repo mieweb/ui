@@ -379,7 +379,8 @@ export function TranscriptPlayer({
           sticky && 'sticky top-0 z-10'
         )}
       >
-        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+        {/* mb-6 leaves room for the playhead's time badge, which sits above the waveform. */}
+        <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
           <Button
             type="button"
             variant="primary"
