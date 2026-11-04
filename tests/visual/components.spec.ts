@@ -2157,6 +2157,64 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
     await gotoEditor(page);
     await expect(page).toHaveScreenshot('emaileditor-mobile.png');
   });
+
+  test('EmailEditor - Text block rides Kerebron and round-trips merge tags', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    // The Kerebron editor mounts asynchronously.
+    const editor = page.locator('.kb-editor');
+    await editor.locator('p').first().waitFor({ state: 'visible', timeout: 30000 });
+    // Merge tags render as atomic chips that keep their braces.
+    await expect(editor).toContainText('{{first_name}}');
+    await expect(page).toHaveScreenshot('emaileditor-text-block-kerebron.png');
+    // Typing round-trips through onChange onto the canvas with tags intact.
+    // Click past the end of the last line — a centred click would land on the
+    // atomic merge-tag chip and select it instead of placing the caret.
+    const lastPara = editor.locator('p').last();
+    const paraBox = (await lastPara.boundingBox())!;
+    await lastPara.click({
+      position: { x: paraBox.width - 2, y: paraBox.height / 2 },
+    });
+    await page.keyboard.press('End');
+    await page.keyboard.type(' Cheers!');
+    const canvas = page.getByRole('region', { name: 'Email canvas' });
+    await expect(canvas).toContainText('in October. Cheers!');
+    await expect(canvas).toContainText('{{company_name}}');
+    // In-editor undo reverts the typing and echoes back out.
+    await page.keyboard.press('ControlOrMeta+z');
+    await expect(canvas).not.toContainText('Cheers!');
+  });
+
+  test('EmailEditor - Variables menu inserts a merge tag', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor.locator('p').first().waitFor({ state: 'visible', timeout: 30000 });
+    await editor.click();
+    const direct = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await direct.count()) {
+      await direct.first().click();
+    } else {
+      await page
+        .locator('.kb-custom-menu button[aria-label="More tools"]')
+        .click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    await page
+      .locator('[data-slot="dropdown-menu"]')
+      .getByRole('menuitem', { name: 'Sender' })
+      .click();
+    await expect(editor).toContainText('{{sender_name}}');
+    await expect(
+      page.getByRole('region', { name: 'Email canvas' })
+    ).toContainText('{{sender_name}}');
+  });
 });
 
 test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {

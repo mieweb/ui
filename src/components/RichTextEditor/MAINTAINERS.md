@@ -33,14 +33,15 @@ engine already deprecated for the legacy `TextAreaRich` (mieweb/ui#677).
 ## Internal consumers (intentional, non-warning)
 
 `RichTextEditorBase` is the implementation; the exported `RichTextEditor` is
-a thin wrapper that adds the one-time deprecation warning. Two library
-composites render the base directly so **their** consumers are not warned
+a thin wrapper that adds the one-time deprecation warning. One library
+composite renders the base directly so **its** consumers are not warned
 about a choice they never made:
 
-- `EmailEditor` (text-block editing in `EmailBlockSettings.tsx`) — not
-  deprecated; migrating it off this engine is tracked separately.
 - `TextAreaRichLegacy` — already warns once as the deprecated legacy
   `TextAreaRich` (mieweb/ui#677).
+
+(`EmailEditor`'s text blocks moved to the Kerebron `TextAreaRich` surface in
+mieweb/ui#695 and no longer touch this engine.)
 
 Do not export `RichTextEditorBase` from the barrel.
 

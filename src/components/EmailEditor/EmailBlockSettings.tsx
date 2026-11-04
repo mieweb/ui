@@ -3,16 +3,13 @@ import { Plus, Trash2, Upload } from 'lucide-react';
 
 import { Button as BaseButton, type ButtonProps } from '../Button';
 import { Input } from '../Input';
-// The base import keeps EmailEditor off the public RichTextEditor wrapper,
-// whose one-time deprecation warning would otherwise mislead EmailEditor
-// consumers (mieweb/ui#692).
-import {
-  RichTextEditorBase as RichTextEditor,
-  type RichTextVariableGroup,
-} from '../RichTextEditor/RichTextEditor';
+import type { RichTextVariableGroup } from '../RichTextEditor/RichTextEditor';
 import { Select } from '../Select';
 import { Switch } from '../Switch';
 import { Textarea } from '../Textarea';
+// Text blocks ride the Kerebron (ProseMirror) engine (mieweb/ui#695) — the
+// same surface behind the main bundle's Textarea, so this adds no new peers.
+import { TextAreaRichKerebron } from '../TextAreaRich/TextAreaRichKerebron';
 import type { EmailEditorLabels } from './labels';
 import { sanitizeEmailHtml } from './renderEmailMjml';
 import {
@@ -214,8 +211,9 @@ export function EmailBlockSettings({
   const uploadRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
   const [uploadFailed, setUploadFailed] = React.useState(false);
-  // HTML the editor just emitted is already live in its DOM; sanitising it again
-  // would normalise it and make RichTextEditor rewrite innerHTML (losing the caret).
+  // HTML the editor just emitted is already live in its document; sanitising it
+  // again would normalise it, and the strictly controlled editor would rewrite
+  // its content to match (losing the caret).
   const emitted = React.useRef<string | null>(null);
 
   switch (block.type) {
@@ -248,7 +246,7 @@ export function EmailBlockSettings({
     case 'text':
       return (
         <>
-          <RichTextEditor
+          <TextAreaRichKerebron
             aria-label={f.content}
             value={
               block.content === emitted.current
@@ -259,11 +257,14 @@ export function EmailBlockSettings({
               emitted.current = content;
               set({ content });
             }}
-            // Pasted markup must pass the same policy as stored content; the
-            // `emitted` bypass above is only safe because of this.
+            // Declares the policy pasted markup must pass. The Kerebron
+            // surface filters pastes through the ProseMirror schema (a
+            // stricter subset); stored content is still sanitised on every
+            // exit (canvas preview and MJML render).
             sanitizeHtml={(html) => sanitizeEmailHtml(html) ?? ''}
             variableGroups={variableGroups}
             enableDictation={false}
+            defaultToolbar="visible"
           />
           {alignment(block.alignment, 'left')}
           <ColorField

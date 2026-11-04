@@ -1,0 +1,32 @@
+diff --git a/esm/NodeInlineShortCode.js b/esm/NodeInlineShortCode.js
+index 853fee0804e89e88967d5456f86024dd60d3f307..6cfc0dfbad111d39f8b15625dd65fc92b46c25bc 100644
+--- a/esm/NodeInlineShortCode.js
++++ b/esm/NodeInlineShortCode.js
+@@ -49,13 +49,25 @@ export class NodeInlineShortCode extends Node {
+             },
+             parseDOM: [{
+                     tag: 'span.kb-shortcode-inline',
+-                    getAttrs: (dom) => ({ content: dom.textContent || null }),
++                    getAttrs: (dom) => {
++                        // mieweb/ui patch: the serialized text includes the
++                        // {{...}} braces (see toDOM below); strip them so the
++                        // content attr stays brace-less, matching the input
++                        // rule and the markdown serializer.
++                        const text = dom.textContent || '';
++                        const match = /^\{\{([^}]+)\}\}$/.exec(text);
++                        return { content: match ? match[1] : text || null };
++                    },
+                 }],
+             toDOM(node) {
++                // mieweb/ui patch: serialize the shortcode with its {{...}}
++                // braces so getting the document as HTML/text round-trips the
++                // original token instead of silently dropping the braces.
++                const content = node.attrs.content || '';
+                 return [
+                     'span',
+                     { class: 'kb-shortcode-inline' },
+-                    node.attrs.content || '',
++                    content ? `{{${content}}}` : '',
+                 ];
+             },
+         };

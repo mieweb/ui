@@ -16,9 +16,15 @@
   `mj-table`).
 - **Sanitising happens on output, through one policy.** Stored `text`/`html` content is
   not normalised in place; the editing surface, canvas preview and `renderEmailMjml` each
-  sanitise it with `sanitizeEmailHtml` on the way out, and HTML pasted or dropped into
-  `RichTextEditor` passes the same policy before it is stored. Every interpolated colour,
+  sanitise it with `sanitizeEmailHtml` on the way out. Text blocks are edited with the
+  Kerebron `TextAreaRich` surface (mieweb/ui#695), which filters pasted or dropped markup
+  through its ProseMirror schema — a stricter subset of the same policy. Every
+  interpolated colour,
   URL and gradient goes through `safeColor` / `safeUrl` / `safeGradient`, and the policy
   applies `isSafeUrl` to URL attributes inside the markup.
+- **Merge tags must survive the editor verbatim.** Kerebron renders `{{token}}` as an
+  atomic `shortcode_inline` chip whose stock serializer drops the braces — corrupting
+  every merge tag on save. `patches/@kerebron__extension-basic-editor@0.8.12.patch`
+  serialises the braces and strips them again on parse; keep it until fixed upstream.
 - **Drag is pointer-only by design**, matching `BoardView`: keyboard reordering is the
   Move up/down buttons, announced through `useLiveAnnouncement`.

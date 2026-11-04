@@ -353,10 +353,10 @@ function previousVisibleText(node: Node, root: HTMLElement): Text | null {
 
 /**
  * The rich-text editor implementation. Exported for the library's own
- * composites (`EmailEditor`, `TextAreaRichLegacy`) so their consumers do not
- * trigger the public `RichTextEditor` deprecation warning — do not use in
- * new code. Content is supplied and surfaced via `value`/`onChange` so it
- * can be wired to any store. The variable menu is data-agnostic — pass
+ * composite (`TextAreaRichLegacy`) so its consumers do not trigger the
+ * public `RichTextEditor` deprecation warning — do not use in new code.
+ * Content is supplied and surfaced via `value`/`onChange` so it can be
+ * wired to any store. The variable menu is data-agnostic — pass
  * `variableGroups` to populate it.
  */
 const RichTextEditorBase = React.forwardRef<
