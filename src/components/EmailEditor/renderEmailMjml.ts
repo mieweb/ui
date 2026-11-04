@@ -479,7 +479,7 @@ export function renderEmailMjml(
     </mj-attributes>
     <mj-style>
       a { color: ${design.linkColor}; }
-      h1, h2, h3, h4 { color: inherit; margin: 0; }
+      h1, h2, h3, h4, h5, h6 { color: inherit; margin: 0; }
       ${gradients}
     </mj-style>
     <mj-style inline="inline">

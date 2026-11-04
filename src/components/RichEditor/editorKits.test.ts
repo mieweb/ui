@@ -67,3 +67,41 @@ describe('fixShortcodeRoundTrip', () => {
     expect(rule.getAttrs(span)).toEqual({ content: 'first_name' });
   });
 });
+
+describe('omitExtensions', () => {
+  /** Collect every extension name, descending `requires` like the kit does. */
+  function collectNames(
+    extensions: unknown[],
+    names: Set<string>
+  ): Set<string> {
+    for (const item of extensions) {
+      if (!item || typeof item !== 'object') continue;
+      const extension = item as { name?: unknown; requires?: unknown };
+      if (typeof extension.name === 'string') names.add(extension.name);
+      if (Array.isArray(extension.requires)) {
+        collectNames(extension.requires, names);
+      }
+    }
+    return names;
+  }
+
+  it('removes nested schema extensions by name', async () => {
+    const { kits } = await createEditorKits(undefined, undefined, undefined, [
+      'task_list',
+      'task_item',
+    ]);
+    const names = collectNames(kits[0].getExtensions(), new Set());
+    // The task nodes nest in ExtensionBasicEditor.requires; their neighbours
+    // must survive the walk.
+    expect(names.has('task_list')).toBe(false);
+    expect(names.has('task_item')).toBe(false);
+    expect(names.has('bullet_list')).toBe(true);
+    expect(names.has('ordered_list')).toBe(true);
+
+    const stock = collectNames(
+      (await createEditorKits()).kits[0].getExtensions(),
+      new Set()
+    );
+    expect(stock.has('task_list')).toBe(true);
+  });
+});

@@ -160,6 +160,36 @@ function fixShortcodeRoundTrip(extensions: unknown[]): void {
 }
 
 /**
+ * Remove extensions by name, wherever they sit: extensions nest (e.g.
+ * `ExtensionBasicEditor.requires` carries the BasicEditorKit node instances),
+ * so the walk descends `requires` arrays and filters each level in place.
+ * Name-only (string) requires entries are left alone — they declare ordering,
+ * not instances.
+ */
+function dropNamedExtensions(
+  extensions: unknown[],
+  names: readonly string[]
+): unknown[] {
+  const kept = extensions.filter(
+    (item) =>
+      !(
+        item &&
+        typeof item === 'object' &&
+        'name' in item &&
+        names.includes((item as { name: string }).name)
+      )
+  );
+  for (const item of kept) {
+    if (!item || typeof item !== 'object') continue;
+    const extension = item as { requires?: unknown };
+    if (Array.isArray(extension.requires)) {
+      extension.requires = dropNamedExtensions(extension.requires, names);
+    }
+  }
+  return kept;
+}
+
+/**
  * {@link AdvancedEditorKit} minus {@link unsafeExtensions} (and, for collab
  * mode, minus `history`), with `mediaUpload` reconfigured when the host asks.
  *
@@ -174,7 +204,8 @@ class SafeAdvancedEditorKit implements EditorKit {
   constructor(
     private readonly forCollab: boolean,
     private readonly mediaUpload?: MediaUploadOptions,
-    private readonly modifyMenu?: ModifyMenu
+    private readonly modifyMenu?: ModifyMenu,
+    private readonly omitExtensions?: readonly string[]
   ) {}
 
   getExtensions() {
@@ -183,13 +214,19 @@ class SafeAdvancedEditorKit implements EditorKit {
     if (this.mediaUpload) dropped.push('mediaUpload');
     if (this.modifyMenu) dropped.push('customMenu');
 
-    const extensions = new AdvancedEditorKit()
+    let extensions = new AdvancedEditorKit()
       .getExtensions()
       .filter(
         (extension) =>
           !('name' in extension && dropped.includes(extension.name))
       );
 
+    if (this.omitExtensions?.length) {
+      extensions = dropNamedExtensions(
+        extensions,
+        this.omitExtensions
+      ) as typeof extensions;
+    }
     if (this.modifyMenu) {
       extensions.push(new ExtensionCustomMenu({ modifyMenu: this.modifyMenu }));
     }
@@ -208,6 +245,9 @@ class SafeAdvancedEditorKit implements EditorKit {
  * room; omit it for a plain local editor. Pass `mediaUpload` to configure how
  * pasted/dropped files are handled — most importantly `uploadHandler`, without
  * which every image is embedded in the document as a base64 `data:` URL.
+ * Pass `omitExtensions` to remove schema extensions by name — the toolbar is
+ * schema-driven, so dropping a node removes its menu items, input rules and
+ * paste handling in one move (e.g. the email surface drops `task_list`).
  *
  * Async because collaborative mode lazy-loads the Yjs kit (and its optional
  * peer deps) on first use; plain mode resolves immediately.
@@ -224,11 +264,19 @@ class SafeAdvancedEditorKit implements EditorKit {
 export async function createEditorKits(
   config?: CollabConfig,
   mediaUpload?: MediaUploadOptions,
-  modifyMenu?: ModifyMenu
+  modifyMenu?: ModifyMenu,
+  omitExtensions?: readonly string[]
 ): Promise<EditorKits> {
   if (!config) {
     return {
-      kits: [new SafeAdvancedEditorKit(false, mediaUpload, modifyMenu)],
+      kits: [
+        new SafeAdvancedEditorKit(
+          false,
+          mediaUpload,
+          modifyMenu,
+          omitExtensions
+        ),
+      ],
       collaborative: false,
     };
   }
@@ -238,7 +286,12 @@ export async function createEditorKits(
     const url = config.wsUrl ?? defaultWsUrl();
     return {
       kits: [
-        new SafeAdvancedEditorKit(true, mediaUpload, modifyMenu),
+        new SafeAdvancedEditorKit(
+          true,
+          mediaUpload,
+          modifyMenu,
+          omitExtensions
+        ),
         new HuddleYjsKit(
           url,
           config.params ?? {},
@@ -257,7 +310,14 @@ export async function createEditorKits(
     // Degrading to a local editor must not also drop `mediaUpload`: without it
     // the stock extension comes back and pasted files are embedded as base64.
     return {
-      kits: [new SafeAdvancedEditorKit(false, mediaUpload, modifyMenu)],
+      kits: [
+        new SafeAdvancedEditorKit(
+          false,
+          mediaUpload,
+          modifyMenu,
+          omitExtensions
+        ),
+      ],
       collaborative: false,
     };
   }

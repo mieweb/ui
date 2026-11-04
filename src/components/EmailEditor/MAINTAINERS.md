@@ -32,5 +32,13 @@
   `data:`, so an embedded image would render broken in the canvas and MJML. Text blocks
   pass `mediaUpload` to the editor: files go through the host's `onUploadImage` when
   provided, and are skipped otherwise.
+- **Every toolbar control must round-trip to the mail client.** The editor's toolbar is
+  schema-driven, so the contract is tested in `renderEmailMjml.test.ts` (one sample per
+  control through `sanitizeEmailHtml`) and the canvas preview restores the reset UA
+  styles for everything the toolbar can produce (headings H1–H6, blockquote, lists).
+  Task lists are the exception — their checkbox `<input>`s are forbidden by the
+  sanitiser and inert in mail — so text blocks drop the `task_list`/`task_item` nodes
+  via `omitExtensions`, which removes the menu item, input rule and paste handling
+  together.
 - **Drag is pointer-only by design**, matching `BoardView`: keyboard reordering is the
   Move up/down buttons, announced through `useLiveAnnouncement`.

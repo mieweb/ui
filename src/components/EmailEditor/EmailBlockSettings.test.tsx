@@ -67,6 +67,9 @@ describe('EmailEditor text blocks on the Kerebron engine', () => {
       uploadHandler: expect.any(Function),
       allowedVideoTypes: [],
     });
+    // Task lists would serialize checkbox <input>s — forbidden by the
+    // sanitiser and inert in mail clients — so the nodes are dropped.
+    expect(props.omitExtensions).toEqual(['task_list', 'task_item']);
   });
 
   it('routes pasted image files through the latest onUploadImage', async () => {

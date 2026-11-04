@@ -46,12 +46,13 @@ function SafeHtml({
   const [clean, setClean] = React.useState('');
   React.useEffect(() => setClean(sanitizeEmailHtml(html) ?? ''), [html]);
   // Undo the CSS reset so the content looks as it will in a mail client:
-  // paragraphs and lists space out, headings are bold at UA sizes (the MJML
-  // styles zero their margins), blockquotes get the UA indent.
+  // paragraphs and lists space out, headings (the editor offers H1–H6) are
+  // bold at UA sizes (the MJML styles zero their margins), blockquotes get
+  // the UA indent.
   return (
     <div
       style={style}
-      className="[&_a]:underline [&_blockquote]:mx-10 [&_blockquote]:my-4 [&_h1]:text-[2em] [&_h1]:font-bold [&_h2]:text-[1.5em] [&_h2]:font-bold [&_h3]:text-[1.17em] [&_h3]:font-bold [&_h4]:text-[1em] [&_h4]:font-bold [&_ol]:list-decimal [&_ol]:ps-6 [&_p]:my-3 [&_ul]:list-disc [&_ul]:ps-6"
+      className="[&_a]:underline [&_blockquote]:mx-10 [&_blockquote]:my-4 [&_h1]:text-[2em] [&_h1]:font-bold [&_h2]:text-[1.5em] [&_h2]:font-bold [&_h3]:text-[1.17em] [&_h3]:font-bold [&_h4]:text-[1em] [&_h4]:font-bold [&_h5]:text-[0.83em] [&_h5]:font-bold [&_h6]:text-[0.67em] [&_h6]:font-bold [&_ol]:list-decimal [&_ol]:ps-6 [&_p]:my-3 [&_ul]:list-disc [&_ul]:ps-6"
       dangerouslySetInnerHTML={{ __html: clean }}
     />
   );

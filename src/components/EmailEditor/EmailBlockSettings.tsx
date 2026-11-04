@@ -25,6 +25,11 @@ import {
 
 type Patch<B> = (patch: Partial<B>) => void;
 
+// Task lists have no place in an email: their checkbox <input>s are forbidden
+// by the sanitiser and inert in every mail client. Module-level so the editor
+// sees one stable identity.
+const EMAIL_OMITTED_EXTENSIONS = ['task_list', 'task_item'] as const;
+
 /** Editor actions must never submit a host form. */
 export function Button(props: ButtonProps) {
   return <BaseButton type="button" {...props} />;
@@ -289,6 +294,10 @@ export function EmailBlockSettings({
               uploadHandler: uploadPastedImage,
               allowedVideoTypes: [],
             }}
+            // Task lists serialize checkbox <input>s, which the sanitiser
+            // forbids and no mail client would honour — dropping the nodes
+            // removes the menu item, input rule and paste handling together.
+            omitExtensions={EMAIL_OMITTED_EXTENSIONS}
             variableGroups={variableGroups}
             enableDictation={false}
             defaultToolbar="visible"

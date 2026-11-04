@@ -196,6 +196,13 @@ export interface TextAreaRichKerebronProps extends TextAreaRichProps {
    * media pipeline. See {@link RichEditorProps.mediaUpload}.
    */
   mediaUpload?: MediaUploadOptions;
+  /**
+   * Schema extensions to remove by name. The toolbar, input rules and paste
+   * handling are schema-driven, so dropping a node removes the whole feature
+   * in one move. Kerebron surface only. See
+   * {@link RichEditorProps.omitExtensions}.
+   */
+  omitExtensions?: readonly string[];
 }
 
 const TextAreaRichKerebron = React.forwardRef<
@@ -228,6 +235,7 @@ const TextAreaRichKerebron = React.forwardRef<
       editorClassName,
       editorStyle,
       mediaUpload,
+      omitExtensions,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       'aria-describedby': ariaDescribedBy,
@@ -1405,6 +1413,7 @@ const TextAreaRichKerebron = React.forwardRef<
               modifyMenu={menuAddon.modifyMenu}
               editorKits={menuAddon.kits}
               mediaUpload={mediaUpload}
+              omitExtensions={omitExtensions}
               onReady={handleReady}
               disabled={disabled}
               readOnly={readOnly}
