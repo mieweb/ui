@@ -102,6 +102,14 @@ serve `@kerebron/wasm`'s `assets/` directory at that path (or pass your own
 `<Textarea richText={false}>` or `TextAreaPlain` — but the peers must be
 installable for the package to resolve.
 
+`Textarea` loads the Kerebron surface the first time a rich field renders,
+not when you import `@mieweb/ui`: the editor stays out of an app's startup
+code, and plain fields never load it. Until it has loaded, a rich field shows
+its empty frame, as tall as its empty editor will be. Unit tests that query a rich
+field right after rendering can load it once up front: render one rich
+`Textarea`, then wait until its `[data-slot="textarea-rich-loading"]` frame
+is gone.
+
 Because every consumer now resolves Kerebron, the **`prosemirror-view`
 1.42.3 override and the Kerebron patches** described under
 [eSheet and EncounterVisit](#esheet-and-encountervisit) above also apply to

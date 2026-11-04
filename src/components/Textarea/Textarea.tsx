@@ -1,9 +1,20 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { RequiredMark } from '../Input';
-import { TextAreaRichKerebron } from '../TextAreaRich/TextAreaRichKerebron';
 import { TextAreaPlain } from '../TextAreaPlain';
 import type { TextAreaPlainProps } from '../TextAreaPlain';
+
+/**
+ * The Kerebron surface, loaded the first time a rich `Textarea` renders. It
+ * brings the editor (ProseMirror, the Kerebron kits): imported statically, it
+ * would ride into every app bundle that imports anything from `@mieweb/ui`,
+ * including apps that only ever render `richText={false}` or no Textarea.
+ */
+const TextAreaRichKerebron = React.lazy(() =>
+  import('../TextAreaRich/TextAreaRichKerebron').then((module) => ({
+    default: module.TextAreaRichKerebron,
+  }))
+);
 
 /**
  * `Textarea` keeps `TextAreaPlain`'s prop surface so existing call sites
@@ -490,6 +501,25 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
           } as React.CSSProperties)
         : undefined;
 
+    // How tall the editor is with no text, in the units kerebron.css sizes it
+    // in: one line (rem, so it follows the root font size) and its 7px block
+    // padding, never under the 38px min-height (one Input row inside the
+    // frame's borders) nor, with `rows`, under their floor.
+    const lineHeightRem = size === 'sm' ? 1.25 : size === 'lg' ? 1.75 : 1.5;
+    const emptyEditorHeight = `max(38px, ${
+      rows ? `${rows * lineHeightPx + 14}px, ` : ''
+    }calc(${lineHeightRem}rem + 14px))`;
+
+    // The surface's frame, shared with the stand-in drawn while it loads.
+    const frameClassName = cn(
+      size === 'sm' && 'text-sm',
+      size === 'lg' && 'text-lg',
+      invalid &&
+        'border-destructive focus-within:ring-destructive focus-within:border-destructive',
+      disabled && 'cursor-not-allowed opacity-50',
+      className
+    );
+
     return (
       <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
         {label && (
@@ -539,40 +569,48 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
               onKeyUp(retargetEvent(event) as unknown as MirrorKeyboardEvent))
           }
         >
-          <TextAreaRichKerebron
-            value={state.html}
-            onChange={handleHtmlChange}
-            placeholder={placeholder}
-            disabled={disabled}
-            readOnly={readOnly}
-            id={id}
-            // Paste flattening: honored by the legacy engine (which the unit
-            // tests stub in — see src/test/textAreaRichKerebronStub); the
-            // Kerebron engine instead filters pastes through its ProseMirror
-            // schema, so markup never reaches the live document raw.
-            sanitizeHtml={sanitizePastedHtml}
-            aria-label={ariaLabel ?? label}
-            aria-labelledby={ariaLabelledBy ?? externalLabelId}
-            aria-describedby={describedByIds}
-            aria-invalid={invalid || undefined}
-            aria-required={required || undefined}
-            editorClassName={cn(
-              // A native textarea renders repeated spaces and tabs
-              // faithfully; normal HTML layout would collapse them.
-              // (Font metrics ride editorStyle's CSS variables — text-sm/
-              // text-lg utilities lose to unlayered package CSS here.)
-              'whitespace-pre-wrap'
-            )}
-            editorStyle={editorStyle}
-            className={cn(
-              size === 'sm' && 'text-sm',
-              size === 'lg' && 'text-lg',
-              invalid &&
-                'border-destructive focus-within:ring-destructive focus-within:border-destructive',
-              disabled && 'cursor-not-allowed opacity-50',
-              className
-            )}
-          />
+          <React.Suspense
+            fallback={
+              // The surface's frame, as tall as its empty editor will be, so
+              // nothing below the field moves when the editor arrives. The
+              // height sits inside the frame, its borders outside it.
+              <div
+                data-slot="textarea-rich-loading"
+                aria-hidden="true"
+                className={cn('border-input rounded-lg border', frameClassName)}
+              >
+                <div style={{ minHeight: emptyEditorHeight }} />
+              </div>
+            }
+          >
+            <TextAreaRichKerebron
+              value={state.html}
+              onChange={handleHtmlChange}
+              placeholder={placeholder}
+              disabled={disabled}
+              readOnly={readOnly}
+              id={id}
+              // Paste flattening: honored by the legacy engine (which the unit
+              // tests stub in — see src/test/textAreaRichKerebronStub); the
+              // Kerebron engine instead filters pastes through its ProseMirror
+              // schema, so markup never reaches the live document raw.
+              sanitizeHtml={sanitizePastedHtml}
+              aria-label={ariaLabel ?? label}
+              aria-labelledby={ariaLabelledBy ?? externalLabelId}
+              aria-describedby={describedByIds}
+              aria-invalid={invalid || undefined}
+              aria-required={required || undefined}
+              editorClassName={cn(
+                // A native textarea renders repeated spaces and tabs
+                // faithfully; normal HTML layout would collapse them.
+                // (Font metrics ride editorStyle's CSS variables — text-sm/
+                // text-lg utilities lose to unlayered package CSS here.)
+                'whitespace-pre-wrap'
+              )}
+              editorStyle={editorStyle}
+              className={frameClassName}
+            />
+          </React.Suspense>
         </div>
         {/* Mirrors the plain value for form posts and the forwarded ref. */}
         <textarea
