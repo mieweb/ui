@@ -11,6 +11,7 @@
  * peers — plain-mode consumers never load them.
  */
 import type { EditorKit } from '@kerebron/editor';
+import type { NodeSpec } from 'prosemirror-model';
 import { AdvancedEditorKit } from '@kerebron/editor-kits/AdvancedEditorKit';
 import {
   ExtensionMediaUpload,
@@ -102,6 +103,63 @@ export interface EditorKits {
 const unsafeExtensions = ['autocomplete', 'hover'] as const;
 
 /**
+ * Fix the `shortcode_inline` node's DOM round-trip (mieweb/ui#695).
+ *
+ * The stock node chips `{{merge_tokens}}` into atomic spans but its `toDOM`
+ * drops the braces, so serializing a document back to HTML/text silently
+ * corrupts every merge token. Patch the spec on the kit's own instance:
+ * serialize the braces, strip them again on parse — the `content` attr stays
+ * brace-less, which the input rule and the markdown serializer both rely on.
+ *
+ * Done here, in the kit we ship, so npm consumers on stock
+ * `@kerebron/extension-basic-editor` get the fix too — `@kerebron/*` is
+ * externalized (`tsup.config.ts`), so a workspace-level package patch would
+ * never reach them. Drop once fixed upstream.
+ *
+ * The node is nested: `AdvancedEditorKit` → `ExtensionBasicEditor`, whose
+ * `requires` carries the `BasicEditorKit` extension *instances* (names and
+ * instances mix in `requires`), hence the recursive walk.
+ */
+function fixShortcodeRoundTrip(extensions: unknown[]): void {
+  for (const item of extensions) {
+    if (!item || typeof item !== 'object') continue; // name-only requires
+    const extension = item as {
+      name?: unknown;
+      requires?: unknown;
+      getNodeSpec?: () => NodeSpec;
+    };
+    if (
+      extension.name === 'shortcode_inline' &&
+      typeof extension.getNodeSpec === 'function'
+    ) {
+      const stockSpec = extension.getNodeSpec.bind(extension);
+      extension.getNodeSpec = (): NodeSpec => ({
+        ...stockSpec(),
+        parseDOM: [
+          {
+            tag: 'span.kb-shortcode-inline',
+            getAttrs: (dom) => {
+              const text = dom.textContent ?? '';
+              const match = /^\{\{([^}]+)\}\}$/.exec(text);
+              return { content: match ? match[1] : text || null };
+            },
+          },
+        ],
+        toDOM: (node) => [
+          'span',
+          { class: 'kb-shortcode-inline' },
+          node.attrs.content ? `{{${String(node.attrs.content)}}}` : '',
+        ],
+      });
+      return;
+    }
+    if (Array.isArray(extension.requires)) {
+      fixShortcodeRoundTrip(extension.requires);
+    }
+  }
+}
+
+/**
  * {@link AdvancedEditorKit} minus {@link unsafeExtensions} (and, for collab
  * mode, minus `history`), with `mediaUpload` reconfigured when the host asks.
  *
@@ -138,6 +196,7 @@ class SafeAdvancedEditorKit implements EditorKit {
     if (this.mediaUpload) {
       extensions.push(new ExtensionMediaUpload(this.mediaUpload));
     }
+    fixShortcodeRoundTrip(extensions);
     return extensions;
   }
 }

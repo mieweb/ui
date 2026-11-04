@@ -24,7 +24,13 @@
   applies `isSafeUrl` to URL attributes inside the markup.
 - **Merge tags must survive the editor verbatim.** Kerebron renders `{{token}}` as an
   atomic `shortcode_inline` chip whose stock serializer drops the braces — corrupting
-  every merge tag on save. `patches/@kerebron__extension-basic-editor@0.8.12.patch`
-  serialises the braces and strips them again on parse; keep it until fixed upstream.
+  every merge tag on save. `fixShortcodeRoundTrip` in `RichEditor/editorKits.ts`
+  patches the node spec in the kit we ship (so npm consumers are covered — `@kerebron/*`
+  is externalized, a workspace package patch would not reach them); keep it until fixed
+  upstream.
+- **Pasted image files must not become `data:` URLs.** The email URL policy rejects
+  `data:`, so an embedded image would render broken in the canvas and MJML. Text blocks
+  pass `mediaUpload` to the editor: files go through the host's `onUploadImage` when
+  provided, and are skipped otherwise.
 - **Drag is pointer-only by design**, matching `BoardView`: keyboard reordering is the
   Move up/down buttons, announced through `useLiveAnnouncement`.

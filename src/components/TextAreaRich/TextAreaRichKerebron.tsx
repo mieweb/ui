@@ -25,6 +25,7 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import {
   RichEditor,
   type RichEditorHandle,
+  type MediaUploadOptions,
   type MenuElement,
   type ModifyMenu,
 } from '../RichEditor';
@@ -187,9 +188,19 @@ const BLOCK_FORMAT_ITEMS: Array<{
   { key: 'quote', label: 'Quote', command: 'toggleBlockquote' },
 ];
 
+export interface TextAreaRichKerebronProps extends TextAreaRichProps {
+  /**
+   * How pasted/dropped media files are handled — most importantly
+   * `uploadHandler`, without which every image is embedded in the document
+   * as a base64 `data:` URL. Kerebron surface only; the legacy engine has no
+   * media pipeline. See {@link RichEditorProps.mediaUpload}.
+   */
+  mediaUpload?: MediaUploadOptions;
+}
+
 const TextAreaRichKerebron = React.forwardRef<
   HTMLDivElement,
-  TextAreaRichProps
+  TextAreaRichKerebronProps
 >(
   (
     {
@@ -216,6 +227,7 @@ const TextAreaRichKerebron = React.forwardRef<
       readOnly = false,
       editorClassName,
       editorStyle,
+      mediaUpload,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       'aria-describedby': ariaDescribedBy,
@@ -1392,6 +1404,7 @@ const TextAreaRichKerebron = React.forwardRef<
               strictValue
               modifyMenu={menuAddon.modifyMenu}
               editorKits={menuAddon.kits}
+              mediaUpload={mediaUpload}
               onReady={handleReady}
               disabled={disabled}
               readOnly={readOnly}

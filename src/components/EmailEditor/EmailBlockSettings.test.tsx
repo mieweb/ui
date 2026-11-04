@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 
 import { renderWithTheme } from '../../test/test-utils';
-import type { TextAreaRichProps } from '../TextAreaRich/TextAreaRich';
+import type { TextAreaRichKerebronProps } from '../TextAreaRich/TextAreaRichKerebron';
 
 // Sentinel in place of the global legacy-backed stub: captures the props the
 // text-block case hands the Kerebron surface, which the stub would swallow.
-const received: TextAreaRichProps[] = [];
+const received: TextAreaRichKerebronProps[] = [];
 vi.mock('../TextAreaRich/TextAreaRichKerebron', () => ({
-  TextAreaRichKerebron: (props: TextAreaRichProps) => {
+  TextAreaRichKerebron: (props: TextAreaRichKerebronProps) => {
     received.push(props);
     return <div data-testid="kerebron-sentinel" />;
   },
@@ -59,5 +59,30 @@ describe('EmailEditor text blocks on the Kerebron engine', () => {
     expect(props.sanitizeHtml!('<b>ok</b><script>x</script>')).toBe(
       '<b>ok</b>'
     );
+    // Without a host uploader, pasted/dropped media files are skipped — the
+    // stock pipeline would embed them as `data:` URLs, which the email URL
+    // policy strips on render, leaving broken images.
+    expect(props.mediaUpload).toEqual({
+      allowedImageTypes: [],
+      allowedVideoTypes: [],
+    });
+  });
+
+  it('routes pasted image files through onUploadImage when provided', () => {
+    const onUploadImage = vi.fn(async () => 'https://cdn.example/x.png');
+    renderWithTheme(
+      <EmailEditor
+        value={doc}
+        onChange={vi.fn()}
+        onUploadImage={onUploadImage}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
+
+    const props = received.at(-1)!;
+    expect(props.mediaUpload).toEqual({
+      uploadHandler: onUploadImage,
+      allowedVideoTypes: [],
+    });
   });
 });

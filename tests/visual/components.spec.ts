@@ -2215,6 +2215,45 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
       page.getByRole('region', { name: 'Email canvas' })
     ).toContainText('{{sender_name}}');
   });
+
+  test('EmailEditor - Pasted image files route through the host uploader', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    await editor.locator('p').first().click();
+    // Paste a real image file. The story's onUploadImage returns an object
+    // URL, so the inserted <img> must be blob: — never the stock pipeline's
+    // base64 data: URL, which the email policy would strip on render.
+    await page.evaluate(() => {
+      const bytes = Uint8Array.from(
+        atob(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+        ),
+        (c) => c.charCodeAt(0)
+      );
+      const data = new DataTransfer();
+      data.items.add(new File([bytes], 'pixel.png', { type: 'image/png' }));
+      // `.kb-editor` IS the ProseMirror editable (createView's attributes).
+      document.querySelector('.kb-editor')!.dispatchEvent(
+        new ClipboardEvent('paste', {
+          clipboardData: data,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    await expect(editor.getByRole('img', { name: 'pixel.png' })).toHaveAttribute(
+      'src',
+      /^blob:/
+    );
+  });
 });
 
 test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {

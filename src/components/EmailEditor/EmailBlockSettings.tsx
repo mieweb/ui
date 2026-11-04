@@ -262,6 +262,18 @@ export function EmailBlockSettings({
             // stricter subset); stored content is still sanitised on every
             // exit (canvas preview and MJML render).
             sanitizeHtml={(html) => sanitizeEmailHtml(html) ?? ''}
+            // A pasted image file must not become a base64 `data:` URL — the
+            // email URL policy (`isSafeUrl`) strips those on render, leaving a
+            // broken image. Route files through the host's uploader when there
+            // is one; otherwise skip them (parity: pasted image files never
+            // survived the legacy editor's sanitiser either). No videos in
+            // email text blocks.
+            mediaUpload={{
+              ...(onUploadImage
+                ? { uploadHandler: onUploadImage }
+                : { allowedImageTypes: [] }),
+              allowedVideoTypes: [],
+            }}
             variableGroups={variableGroups}
             enableDictation={false}
             defaultToolbar="visible"
