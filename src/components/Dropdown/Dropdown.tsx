@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
-import { isRtl } from '../../hooks/useDirection';
+import { isRtl, useDirection } from '../../hooks/useDirection';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import {
   useAnchoredPosition,
@@ -30,7 +30,12 @@ export interface DropdownProps {
   open?: boolean;
   /** Callback when open state changes */
   onOpenChange?: (open: boolean) => void;
-  /** Placement of the dropdown */
+  /**
+   * Placement of the dropdown. On the vertical placements, `-start`/`-end`
+   * are logical: they resolve against the trigger's computed direction, so
+   * `bottom-start` aligns to the right edge inside a `dir="rtl"` subtree.
+   * `left*`/`right*` are physical sides.
+   */
   placement?: DropdownPlacement;
   /** Additional class name for the dropdown menu */
   className?: string;
@@ -462,13 +467,40 @@ function Dropdown({
 
   useEscapeKey(handleClose, isOpen);
 
+  // The trigger's computed direction, not the document's: a dropdown inside
+  // a local `dir` island must position and render to the island's direction.
+  // Reactive (not sampled at open) so an open menu tracks live dir flips.
+  const direction = useDirection(containerRef);
+
+  // `-start`/`-end` on the vertical placements are logical. The positioning
+  // hook is deliberately physical (`-start` = left edge), so map here using
+  // the resolved direction. Horizontal (`left*`/`right*`) placements keep
+  // their suffix: there it means top/bottom alignment, which direction
+  // never flips.
+  const resolvedPlacement = React.useMemo<DropdownPlacement>(() => {
+    if (
+      direction !== 'rtl' ||
+      placement.startsWith('left') ||
+      placement.startsWith('right')
+    ) {
+      return placement;
+    }
+    if (placement.endsWith('-start')) {
+      return placement.replace('-start', '-end') as DropdownPlacement;
+    }
+    if (placement.endsWith('-end')) {
+      return placement.replace('-end', '-start') as DropdownPlacement;
+    }
+    return placement;
+  }, [direction, placement]);
+
   // Portal + fixed positioning so the menu escapes overflow-hidden ancestors.
   const { anchorRef, floatingRef, style, actualSide } = useAnchoredPosition<
     HTMLDivElement,
     HTMLDivElement
   >({
     open: isOpen,
-    placement,
+    placement: resolvedPlacement,
     offset: placementOffset,
     matchMinWidth: width === 'trigger',
   });
@@ -564,6 +596,9 @@ function Dropdown({
                   // actually landed.
                   custom={actualSide}
                   style={{ ...style, ...widthStyle }}
+                  // The panel portals to <body>, escaping any local `dir`
+                  // island around the trigger — carry the direction along.
+                  dir={direction}
                   data-slot="dropdown-menu"
                   className={cn(
                     'flex min-w-[12rem] flex-col overflow-hidden',
@@ -977,8 +1012,12 @@ function DropdownSubmenu({
 }: DropdownSubmenuProps) {
   const [open, setOpen] = React.useState(false);
   // The flyout opens toward the inline-end — physical left under RTL — so
-  // the panel side matches the open key and the flipped chevron.
-  const [rtl, setRtl] = React.useState(false);
+  // the panel side matches the open key and the flipped chevron. Resolved
+  // from the trigger (not the document) so local `dir` islands are honored,
+  // and reactive so an open flyout tracks live dir flips.
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+  const direction = useDirection(triggerRef);
+  const rtl = direction === 'rtl';
   const menuId = React.useId();
   const dropdownContext = React.useContext(DropdownContext);
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -989,12 +1028,6 @@ function DropdownSubmenu({
     HTMLButtonElement,
     HTMLDivElement
   >({ open, placement: rtl ? 'left-start' : 'right-start', offset: 4 });
-
-  // Sample direction when opening; layout effect so the reposition with the
-  // corrected placement happens before paint (no wrong-side flash).
-  React.useLayoutEffect(() => {
-    if (open) setRtl(isRtl(anchorRef.current));
-  }, [open, anchorRef]);
 
   // Let the root dropdown treat clicks inside the portaled flyout as "inside"
   // so they don't dismiss the whole menu. Layout effect so the registration
@@ -1037,7 +1070,10 @@ function DropdownSubmenu({
   return (
     <>
       <button
-        ref={anchorRef}
+        ref={(node) => {
+          anchorRef.current = node;
+          triggerRef.current = node;
+        }}
         type="button"
         role="menuitem"
         disabled={disabled}
@@ -1119,6 +1155,9 @@ function DropdownSubmenu({
                 // room, so it has to animate from the side it actually landed
                 // on — same contract as the root menu.
                 custom={actualSide}
+                // Portaled to <body>, so the trigger's local direction does
+                // not inherit — carry it along (same as the root menu).
+                dir={direction}
                 id={menuId}
                 role="menu"
                 // Programmatically focusable (a11y: interactive role); focus

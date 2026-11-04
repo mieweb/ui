@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Button } from '../Button';
@@ -388,6 +388,40 @@ describe('Dropdown', () => {
     // ArrowRight closes it again, dispatched on the focused submenu item.
     fireEvent.keyDown(submenuItem, { key: 'ArrowRight' });
     expect(screen.queryByRole('menuitem', { name: 'Beta' })).toBeNull();
+  });
+
+  it('carries a local dir island onto the portaled menu', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Dropdown trigger={<Button>Open menu</Button>}>
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Open menu' });
+    const container = trigger.parentElement as HTMLElement;
+    // jsdom does not cascade dir → direction; set both on the element the
+    // Dropdown resolves its direction from (its own container).
+    act(() => {
+      container.setAttribute('dir', 'rtl');
+      container.style.direction = 'rtl';
+    });
+
+    await user.click(trigger);
+    const menu = await screen.findByRole('menu');
+    // `dir` lives on the portaled panel (the scroll container's wrapper),
+    // outside the island — the component must carry the direction along.
+    const panel = menu.closest('[data-slot="dropdown-menu"]');
+    expect(panel).toHaveAttribute('dir', 'rtl');
+
+    // Reactive, not sampled at open: a live dir flip updates the open menu.
+    // The hook hears about it via MutationObserver, which delivers async.
+    act(() => {
+      container.setAttribute('dir', 'ltr');
+      container.style.direction = 'ltr';
+    });
+    await waitFor(() => expect(panel).toHaveAttribute('dir', 'ltr'));
   });
 
   it('shows an indeterminate select-all state when some visible items are selected', async () => {

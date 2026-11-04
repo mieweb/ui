@@ -859,6 +859,73 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   });
 
+  test('Dropdown - RTL island on an LTR page keeps its direction', async ({
+    page,
+  }) => {
+    // The panel portals to <body>, so without the carried `dir` it would
+    // inherit the LTR document direction and `bottom-start` would anchor to
+    // the physical left. Inside a local dir="rtl" island both must follow
+    // the trigger: panel direction rtl, start edge = right.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands');
+    const trigger = page
+      .locator('[data-testid="rtl-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'rtl');
+    await expect(menu).toHaveCSS('direction', 'rtl');
+    // Closeness, not one-sided: `right <= trigger.right` would also pass for
+    // a left-anchored panel. Poll so the open animation settles first.
+    const triggerRight = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().right
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) =>
+            Math.abs(el.getBoundingClientRect().right - expected),
+          triggerRight
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Dropdown - LTR island on an RTL page keeps its direction', async ({
+    page,
+  }) => {
+    // The inverse island: on a dir="rtl" document the LTR island's menu must
+    // stay LTR and `bottom-start` must anchor to the physical left.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands', {
+      globals: 'direction:rtl',
+    });
+    const trigger = page
+      .locator('[data-testid="ltr-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'ltr');
+    await expect(menu).toHaveCSS('direction', 'ltr');
+    const triggerLeft = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().left
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) => Math.abs(el.getBoundingClientRect().left - expected),
+          triggerLeft
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-ltr.png', {
+      animations: 'disabled',
+    });
+  });
+
   test('CountBadge - Row action menu anchors inline-end (RTL)', async ({
     page,
   }) => {
