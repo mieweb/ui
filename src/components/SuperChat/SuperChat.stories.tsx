@@ -886,3 +886,31 @@ function ComposerSelectorsPanel() {
 export const ComposerSelectors: Story = {
   render: () => <ComposerSelectorsPanel />,
 };
+
+const mockTranscribe = (_audio: Blob, signal: AbortSignal) =>
+  new Promise<string>((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => resolve('Please summarize my last visit.'),
+      800
+    );
+    signal.addEventListener('abort', () => {
+      window.clearTimeout(timer);
+      reject(new Error('Dictation cancelled'));
+    });
+  });
+
+export const Dictation: Story = {
+  args: {
+    conversation,
+    currentParticipantId: 'u1',
+    dictation: { transcribe: mockTranscribe },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Voice typing in the composer. Click the mic, speak, then click again: the transcript is appended to the draft for review and is never sent automatically. Escape discards the take. This story uses a mock `transcribe`; in an app pass a server provider (e.g. an OpenAI-compatible `/v1/audio/transcriptions` call). `dictation={true}` instead uses on-device, English-only Whisper with a large first-use model download. The browser asks for microphone permission; inside an iframe the host must also grant `allow="microphone"`. Denied permission and failures show a status message and leave the draft intact. See [DictationButton](?path=/docs/media-dictationbutton--docs).',
+      },
+    },
+  },
+};

@@ -25,10 +25,7 @@ import type { ChatComposerAgentOption } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
-import {
-  DictationButton,
-  type DictationButtonProps,
-} from '../DictationButton';
+import { DictationButton, type DictationButtonProps } from '../DictationButton';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { MediaFeed } from '../MediaFeed';
@@ -143,8 +140,9 @@ export interface SuperChatProps {
   stopLabel?: string;
   /**
    * Show a dictation (voice typing) button in the composer. The transcript is
-   * appended to the editable draft and never sent automatically. Pass props
-   * (e.g. a server `transcribe`) to customise it.
+   * appended to the editable draft and never sent automatically. `true` uses
+   * on-device Whisper (large first-use download); pass `{ transcribe }` to use
+   * a server provider. See the `Dictation` story and `DictationButton`.
    */
   dictation?: boolean | Omit<DictationButtonProps, 'onText'>;
 
@@ -751,7 +749,9 @@ export function SuperChat({
   }, []);
   const appendDictation = React.useCallback((text: string) => {
     draftEpochRef.current += 1;
-    setDraft((current) => (current.trim() ? `${current.trimEnd()} ${text}` : text));
+    setDraft((current) =>
+      !current || /\s$/.test(current) ? current + text : `${current} ${text}`
+    );
   }, []);
   const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
@@ -1034,6 +1034,7 @@ export function SuperChat({
             // Keyed by conversation so switching drops any in-flight take.
             <DictationButton
               key={conversation.id}
+              showStatus
               {...dictationProps}
               onText={appendDictation}
             />
