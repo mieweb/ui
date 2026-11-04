@@ -337,6 +337,7 @@ uncontrolled).
 | `trustedContent`              | `boolean`                                     | `false`            | Skip sanitization — **only** for host-authored content.                                             |
 | `readOnly`                    | `boolean`                                     | `false`            | Disable the composer.                                                                               |
 | `attachmentDataUrls`          | `boolean`                                     | `true`             | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.               |
+| `maxFileSize`                 | `number \| (file) => number \| undefined`     | 25 MB              | Largest file the composer takes; a function sets it per file.                                       |
 | `order`                       | `'asc' \| 'desc'`                             | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).      |
 | `virtualized`                 | `boolean`                                     | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.           |
 | `showSidebar`                 | `boolean`                                     | `true`             | Show the conversation list.                                                                         |
@@ -362,6 +363,7 @@ Renders exactly one conversation.
 | `trustedContent`       | `boolean`                                     | `false`             | Skip sanitization — **only** for host-authored content.                                                                                |
 | `readOnly`             | `boolean`                                     | `false`             | Disable the composer.                                                                                                                  |
 | `attachmentDataUrls`   | `boolean`                                     | `true`              | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                  |
+| `maxFileSize`          | `number \| (file) => number \| undefined`     | 25 MB               | Largest file the composer takes; a function sets it per file.                                                                          |
 | `order`                | `'asc' \| 'desc'`                             | `'asc'`             | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                         |
 | `virtualized`          | `boolean`                                     | `false`             | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                              |
 | `linkBuilder`          | `SuperChatLinkBuilder`                        | —                   | Build hrefs for `ref` thread items.                                                                                                    |
@@ -534,7 +536,8 @@ To upload, send each attachment's `file` — the `File` as picked — rather tha
 decoding `dataUrl`. A host that only uploads can set `attachmentDataUrls={false}`
 to skip the base64 read altogether (`dataUrl` is then empty): base64 makes a file a
 third larger again in memory, and past a few hundred MB it is more than a browser
-string can hold, so large videos need it off.
+string can hold, so large videos need it off. Raise the cap with `maxFileSize`, which also takes a function, e.g.
+`(file) => (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024`.
 
 ### Rendering video / audio / PDF inline
 

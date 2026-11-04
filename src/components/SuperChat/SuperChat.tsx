@@ -21,7 +21,10 @@ import {
 } from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
 import { ChatComposer } from '../ChatComposer/ChatComposer';
-import type { ChatComposerAgentOption } from '../ChatComposer/ChatComposer';
+import type {
+  ChatComposerAgentOption,
+  ChatComposerProps,
+} from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
@@ -101,6 +104,13 @@ export interface SuperChatProps {
    * @default true
    */
   attachmentDataUrls?: boolean;
+  /**
+   * Largest file the composer takes, in bytes; a larger one is refused. A
+   * function sets the cap per file, e.g. a higher one for videos than photos
+   * (with `attachmentDataUrls={false}`, so a large file isn't read as base64).
+   * @default 26214400 (25 MB)
+   */
+  maxFileSize?: ChatComposerProps['maxFileSize'];
   /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
@@ -199,6 +209,7 @@ export function SuperChat({
   readOnly,
   acceptedFileTypes,
   attachmentDataUrls = true,
+  maxFileSize = 25 * 1024 * 1024,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -1011,7 +1022,7 @@ export function SuperChat({
         allowAttachments={!readOnly && (allowAttachments ?? true)}
         acceptedFileTypes={composerAccept}
         // Same cap MessageComposer applied by default.
-        maxFileSize={25 * 1024 * 1024}
+        maxFileSize={maxFileSize}
         maxLength={100000}
         inputLabel="Message"
         showAgentSelector={!!agents?.length}
