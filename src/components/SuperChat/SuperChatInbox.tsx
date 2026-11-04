@@ -38,8 +38,16 @@ export interface SuperChatInboxProps {
   defaultView?: SuperChatProps['defaultView'];
   /** Fired with the active conversation when its view is changed. */
   onViewChange?: SuperChatProps['onViewChange'];
-  /** MediaFeed behavior and slots; items remain scoped to the active conversation. */
+  /**
+   * MediaFeed behavior and slots; items remain scoped to the active
+   * conversation. With `layout: 'overlay'`, mount `useKeyboardInset()` in the
+   * app shell (see SuperChat's `mediaFeedProps`).
+   */
   mediaFeedProps?: SuperChatProps['mediaFeedProps'];
+  /** The host's card for a thread attachment (see {@link SuperChatProps.renderMessageMedia}). */
+  renderMessageMedia?: SuperChatProps['renderMessageMedia'];
+  /** The box an attachment card fits in (see {@link SuperChatProps.mediaMaxSize}). */
+  mediaMaxSize?: SuperChatProps['mediaMaxSize'];
   /** Labels for the view switch and attachment previews. */
   mediaLabels?: SuperChatProps['mediaLabels'];
   /** Controlled active conversation id. */
@@ -62,6 +70,10 @@ export interface SuperChatInboxProps {
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
+  /** See {@link SuperChatProps.maxFileSize}. */
+  maxFileSize?: SuperChatProps['maxFileSize'];
+  /** See {@link SuperChatProps.onComposerError}. */
+  onComposerError?: SuperChatProps['onComposerError'];
   /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
   order?: 'asc' | 'desc';
   /** Virtualize the message thread (windowed rendering) for long histories. */
@@ -90,11 +102,8 @@ export interface SuperChatInboxProps {
     }
   ) => void | Promise<void>;
   /** Fired when the local user saves an edit to one of their own messages. */
-  onMessageEdited?: (
-    messageId: string,
-    text: string,
-    meta: { conversation: SuperChatConversation }
-  ) => void;
+  /** See {@link SuperChatProps.onMessageEdited}: the new text, and attachments taken off. */
+  onMessageEdited?: SuperChatProps['onMessageEdited'];
   onConversationOpened?: (conversation: SuperChatConversation) => void;
   onConversationClosed?: (conversation: SuperChatConversation) => void;
   onNewConversation?: () => void;
@@ -112,6 +121,8 @@ export function SuperChatInbox({
   defaultView,
   onViewChange,
   mediaFeedProps,
+  renderMessageMedia,
+  mediaMaxSize,
   mediaLabels,
   activeConversationId,
   defaultActiveConversationId,
@@ -121,6 +132,8 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   acceptedFileTypes,
+  maxFileSize,
+  onComposerError,
   order,
   virtualized,
   showSidebar = true,
@@ -171,6 +184,7 @@ export function SuperChatInbox({
           activeConversationId={activeId}
           onConversationOpened={handleOpen}
           onNewConversation={onNewConversation}
+          mediaLabels={mediaLabels}
           className={cn(
             'w-full sm:w-64',
             mobileView === 'chat' && 'hidden sm:flex'
@@ -185,6 +199,8 @@ export function SuperChatInbox({
           defaultView={defaultView}
           onViewChange={onViewChange}
           mediaFeedProps={mediaFeedProps}
+          renderMessageMedia={renderMessageMedia}
+          mediaMaxSize={mediaMaxSize}
           mediaLabels={mediaLabels}
           currentParticipantId={currentParticipantId}
           renderPlugins={renderPlugins}
@@ -192,6 +208,8 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           acceptedFileTypes={acceptedFileTypes}
+          maxFileSize={maxFileSize}
+          onComposerError={onComposerError}
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}

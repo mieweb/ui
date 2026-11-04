@@ -12,7 +12,9 @@ import {
   Check as CheckIcon,
   Clipboard as ClipboardIcon,
   Ellipsis as EllipsisIcon,
+  Loader2,
   Pencil as PencilIcon,
+  X as XIcon,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Avatar } from '../Avatar';
@@ -21,7 +23,13 @@ import { Dropdown, DropdownItem, DropdownSubmenu } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
 import { SparklesIcon } from '../AI/icons';
-import { MessageMedia } from './MessageMedia';
+import { MessageFiles } from './MessageFiles';
+import {
+  MessageGallery,
+  MessageMedia,
+  isVisualMedia,
+  type MessageMediaEntry,
+} from './MessageMedia';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -31,7 +39,10 @@ import type {
   SuperChatCopyFormat,
   SuperChatLinkBuilder,
   SuperChatMessage,
+  SuperChatAttachmentLabels,
+  SuperChatMessageEdits,
   SuperChatRef,
+  SuperChatRenderMessageMedia,
 } from './types';
 
 // ============================================================================
@@ -236,17 +247,32 @@ export function ReferenceChip({
 // ============================================================================
 
 /**
- * Supported attachment categories: their `<input accept>` token and a MIME
- * matcher used to filter pastes and file-picker selections.
+ * Supported attachment categories: their `<input accept>` tokens, which the
+ * composer also checks pasted and dropped files against.
  */
-const ATTACHMENT_KIND_CONFIG: Record<
-  AttachmentKind,
-  { accept: string; match: (type: string) => boolean }
-> = {
-  image: { accept: 'image/*', match: (t) => t.startsWith('image/') },
-  video: { accept: 'video/*', match: (t) => t.startsWith('video/') },
-  audio: { accept: 'audio/*', match: (t) => t.startsWith('audio/') },
-  pdf: { accept: 'application/pdf', match: (t) => t === 'application/pdf' },
+const ATTACHMENT_KIND_ACCEPT: Record<AttachmentKind, string[]> = {
+  // Listed formats rather than image/*: a HEIC photo is refused instead of
+  // arriving where most browsers can't show it, and an iPhone's picker
+  // converts one to JPEG when HEIC isn't listed.
+  image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'],
+  video: ['video/*'],
+  audio: ['audio/*'],
+  pdf: ['application/pdf'],
+  // MIME types, and extensions for browsers that report none for a file.
+  document: [
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain',
+    'text/csv',
+    '.doc',
+    '.docx',
+    '.xls',
+    '.xlsx',
+    '.txt',
+    '.csv',
+  ],
 };
 
 const DEFAULT_ACCEPTED_FILE_TYPES: AttachmentKind[] = [
@@ -264,9 +290,7 @@ export function acceptTokensFor(
   kinds: AttachmentKind[] = DEFAULT_ACCEPTED_FILE_TYPES
 ): string[] {
   const source = kinds.length > 0 ? kinds : DEFAULT_ACCEPTED_FILE_TYPES;
-  return Array.from(
-    new Set(source.map((k) => ATTACHMENT_KIND_CONFIG[k].accept))
-  );
+  return Array.from(new Set(source.flatMap((k) => ATTACHMENT_KIND_ACCEPT[k])));
 }
 
 /**
@@ -521,8 +545,8 @@ function FooterActionButton({
 }
 
 /**
- * The hover-revealed action icon button in the avatar gutter, at the end of a
- * message. Rendered only when a message has a single action — multiple actions
+ * The hover-revealed action icon button beside a message's bubble, at its
+ * end. Rendered only when a message has a single action — multiple actions
  * collapse into the sticky overflow menu ({@link MessageOverflowMenu}), which
  * also hosts each action's explicit variants.
  */
@@ -574,7 +598,7 @@ function MessageOverflowMenu({
 
   return (
     <div
-      // Push to the bottom of the (possibly tall) avatar gutter and stick to
+      // Push to the bottom of the (possibly tall) bubble's side and stick to
       // the viewport bottom: on long messages the control follows the scroll
       // and settles at the message's end once it is fully in view. Raise the
       // whole (sticky) stacking context above the sibling bubble while open so
@@ -638,7 +662,11 @@ interface MessageRowProps {
   /** Whether self-authored text messages expose an inline "Edit" affordance. */
   editable?: boolean;
   /** Save handler for an inline message edit (bound to this message's id). */
-  onMessageEdited?: (messageId: string, text: string) => void;
+  onMessageEdited?: (
+    messageId: string,
+    text: string,
+    edits: SuperChatMessageEdits
+  ) => void;
   /** Format for the default copy action — Ctrl/Cmd-click on the footer copy
    * button (defaults to `'rich'`). */
   defaultCopyFormat?: SuperChatCopyFormat;
@@ -650,10 +678,62 @@ interface MessageRowProps {
   ) => void;
   openMediaLabel?: string;
   playMediaLabel?: string;
+  /**
+   * Words on attachment tiles and in the editor: a gallery's "3 more",
+   * "Sending…", "Couldn't load", "Remove Whiteboard".
+   */
+  attachmentLabels?: SuperChatAttachmentLabels;
   /** Localized preview load-error text (falls back to the player default). */
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
   mediaRetryLabel?: string;
+  /** The host's card for an attachment, in place of the built-in one. */
+  renderMessageMedia?: SuperChatRenderMessageMedia;
+  /** The box an attachment card fits in, a CSS length (SuperChat's `mediaMaxSize`). */
+  mediaMaxSize?: string;
+}
+
+/** English defaults for {@link SuperChatAttachmentLabels}. */
+export const DEFAULT_ATTACHMENT_LABELS: SuperChatAttachmentLabels = {
+  openMediaNamed: (name) => `Open in media feed, ${name}`,
+  playMediaNamed: (title) => `Play ${title}`,
+  moreMedia: (count, name) => `${name}, ${count} more`,
+  gallery: (count) => `Gallery, ${count} items`,
+  sending: 'Sending…',
+  sendingProgress: (percent) => `${percent}%`,
+  mediaUnavailable: "Couldn't load",
+  editAttachments: 'Attachments',
+  removeAttachment: (name) => `Remove ${name}`,
+  attachmentName: (kind) =>
+    ({ image: 'Photo', video: 'Video', audio: 'Audio', youtube: 'Video' })[
+      kind
+    ],
+};
+
+/** One attachment tile beside a message: the bubble's cap and corners. */
+function AttachmentTile({
+  failed,
+  sending,
+  children,
+}: {
+  failed: boolean;
+  /** Still uploading: its pictures dimmed until it's sent (not its text,
+   * which has to stay readable). */
+  sending: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      data-slot="superchat-message-attachment"
+      className={cn(
+        'max-w-[85%] min-w-0 overflow-hidden rounded-2xl',
+        failed && 'border border-red-300 dark:border-red-700',
+        sending && '[&_img]:opacity-60 [&_video]:opacity-60'
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 /**
@@ -678,21 +758,90 @@ export const MessageRow = React.memo(function MessageRow({
   onOpenMedia,
   openMediaLabel = 'Open in media feed',
   playMediaLabel = 'Play',
+  attachmentLabels = DEFAULT_ATTACHMENT_LABELS,
   mediaErrorLabel,
   mediaRetryLabel,
+  renderMessageMedia,
+  mediaMaxSize = '18rem',
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
+  const hasMedia = (message.media?.length ?? 0) > 0;
+  const hasFiles = (message.files?.length ?? 0) > 0;
   const hasBody =
     !!message.text ||
     (message.content?.length ?? 0) > 0 ||
-    (message.media?.length ?? 0) > 0;
+    hasMedia ||
+    hasFiles;
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
+  // Attachments the author takes off while editing (media and file ids).
+  const [removed, setRemoved] = React.useState<SuperChatMessageEdits>({
+    removedMedia: [],
+    removedFiles: [],
+  });
+  // While editing, what the author has taken off is gone from the message.
+  const shownMedia = isEditing
+    ? (message.media ?? []).filter(
+        (attachment) => !removed.removedMedia.includes(attachment.id)
+      )
+    : (message.media ?? []);
+  const shownFiles = isEditing
+    ? (message.files ?? []).filter(
+        (file) => !removed.removedFiles.includes(file.id)
+      )
+    : (message.files ?? []);
+  const failed = message.status === 'error';
+  const sending = message.status === 'pending';
+  // Each attachment with its open action and the host's card for it, if the
+  // host draws one. Two or more pictures the host doesn't draw share one
+  // gallery (which opens the media view); anything else is its own tile, so
+  // a host's card keeps its own controls. None opens while the message is
+  // being edited: the media view would unmount this row and its draft.
+  const entries = shownMedia.map((attachment) => {
+    const launchId = JSON.stringify([message.id, attachment.id]);
+    const open =
+      onOpenMedia && !isEditing
+        ? (play?: boolean) => onOpenMedia(message.id, attachment.id, play)
+        : undefined;
+    const card =
+      renderMessageMedia?.({
+        message,
+        attachment,
+        open,
+        launchId,
+        maxSize: mediaMaxSize,
+      }) ?? null;
+    return { attachment, launchId, open, card };
+  });
+  const pictures = onOpenMedia
+    ? entries.filter(
+        (entry) => entry.card === null && isVisualMedia(entry.attachment)
+      )
+    : [];
+  const gallery: MessageMediaEntry[] = pictures.length > 1 ? pictures : [];
+  // The bubble holds the text; a message that is only attachments has none.
+  const showBubble =
+    isEditing ||
+    !!message.text ||
+    (message.content?.length ?? 0) > 0 ||
+    (streaming && !hasBody);
   // Keeps the bubble from shrinking when it flips into edit mode: the rendered
   // content width, captured on edit start, becomes the editor's min-width
   // (w-80 stays the floor for short messages, max-w-full the cap).
   const [editMinWidth, setEditMinWidth] = React.useState<number>();
   const editRef = React.useRef<HTMLTextAreaElement>(null);
+  // The width was measured with the content's own padding, which a host can
+  // change once the editor shows (Huddle's thinner frame around a video
+  // card). A min-width beats max-w-full, so before the editor paints, keep it
+  // to the room the bubble has now, or the field and Cancel / Save overflow it.
+  React.useLayoutEffect(() => {
+    const el = bubbleRef.current;
+    if (!isEditing || !el || !editMinWidth) return;
+    const cs = getComputedStyle(el);
+    const room =
+      el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (room > 0 && editMinWidth > room) setEditMinWidth(room);
+  }, [isEditing, editMinWidth]);
   // The rendered bubble content, read at copy time for the rich-text payload.
   const bubbleRef = React.useRef<HTMLDivElement>(null);
   // Grow the editor to fit its content (accounts for wrapped lines, not just
@@ -718,12 +867,15 @@ export const MessageRow = React.memo(function MessageRow({
   // (system/ref rows simply never render the action surfaces).
 
   // Inline editing applies only to the local user's own plain-text messages
-  // (rich content blocks / streaming messages are not inline-editable).
+  // (rich content blocks / streaming messages are not inline-editable), and
+  // to one that is only attachments, with or without an empty `text`, so its
+  // attachments can be taken off.
   const canEdit =
     !!editable &&
     isSelf &&
     !streaming &&
-    typeof message.text === 'string' &&
+    (typeof message.text === 'string' ||
+      (message.text === undefined && (hasMedia || hasFiles))) &&
     !message.content?.length;
 
   // The Markdown source for copying: prefer the raw `text`, otherwise assemble
@@ -832,12 +984,23 @@ export const MessageRow = React.memo(function MessageRow({
       setEditMinWidth(contentWidth > 0 ? contentWidth : undefined);
     }
     setDraft(message.text ?? '');
+    setRemoved({ removedMedia: [], removedFiles: [] });
     setIsEditing(true);
   };
   const cancelEdit = () => setIsEditing(false);
+  const removedAny =
+    removed.removedMedia.length > 0 || removed.removedFiles.length > 0;
+  // What's saved is what the editor holds: clearing the text clears it.
+  const nextText = draft.trim();
+  const editChanged = removedAny || nextText !== (message.text ?? '');
+  // An edit has to leave some text or an attachment: clearing the text of a
+  // message that is only text, or taking every attachment off one with no
+  // text, would leave nothing.
+  const leavesSomething =
+    !!nextText || shownMedia.length + shownFiles.length > 0;
+  const canSave = editChanged && leavesSomething;
   const saveEdit = () => {
-    const next = draft.trim();
-    if (next && next !== message.text) onMessageEdited?.(message.id, next);
+    if (canSave) onMessageEdited?.(message.id, nextText, removed);
     setIsEditing(false);
   };
 
@@ -939,6 +1102,35 @@ export const MessageRow = React.memo(function MessageRow({
       : []),
   ];
 
+  // Edit and Copy sit beside the message's bubble, in the avatar's column on
+  // the outer side, level with the bubble and out of the row's flow, so the
+  // bubble keeps its edge in line with the attachments under it. A message
+  // that is only attachments has no bubble: they sit beside those instead,
+  // so it can still be edited. Revealed on hover or focus; on a long message
+  // the ⋯ sticks to the bottom of the view.
+  const actionsSlot = hasActions && (
+    <div
+      data-slot="superchat-message-actions-slot"
+      className={cn(
+        'absolute inset-y-0 flex w-6 flex-col items-center justify-end gap-0.5',
+        isSelf ? '-end-8' : '-start-8'
+      )}
+    >
+      <MessageOverflowMenu
+        isSelf={isSelf}
+        actions={actions}
+        footerVisible={collapseToMenu ? false : footerVisible}
+      />
+      {!collapseToMenu && (
+        <MessageActionsBar
+          ref={actionsBarRef}
+          actions={actions}
+          isSelf={isSelf}
+        />
+      )}
+    </div>
+  );
+
   return (
     <div
       data-slot="superchat-message"
@@ -949,30 +1141,12 @@ export const MessageRow = React.memo(function MessageRow({
         isSelf ? 'flex-row-reverse' : 'flex-row'
       )}
     >
-      {/* Avatar gutter: the sticky overflow (⋯) and the end-of-message action
-          bar live under the avatar so the bubble aligns with the author name
-          instead of being indented by an action slot. */}
+      {/* The avatar's column; the message's actions sit beside its bubble. */}
       <div
         data-slot="superchat-message-gutter"
         className="flex shrink-0 flex-col items-center gap-1"
       >
         <ParticipantAvatar participant={participant} />
-        {hasActions && (
-          <>
-            <MessageOverflowMenu
-              isSelf={isSelf}
-              actions={actions}
-              footerVisible={collapseToMenu ? false : footerVisible}
-            />
-            {!collapseToMenu && (
-              <MessageActionsBar
-                ref={actionsBarRef}
-                actions={actions}
-                isSelf={isSelf}
-              />
-            )}
-          </>
-        )}
       </div>
       {/* flex-1 makes the column span the remaining row width so the bubble's
           max-w-[85%] resolves against the thread, not a shrink-wrapped column
@@ -987,18 +1161,27 @@ export const MessageRow = React.memo(function MessageRow({
           data-slot="superchat-message-meta"
           className="flex items-baseline gap-2"
         >
+          {/* Each in its own direction: "9:05 AM" must not read "AM 9:05" in
+              an RTL page, nor a Latin name take the page's. */}
           <span
+            dir="auto"
             className="text-xs font-medium"
             style={accentTextColor ? { color: accentTextColor } : undefined}
           >
             {authorName}
           </span>
           {participant?.role && (
-            <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+            <span
+              dir="auto"
+              className="text-[10px] text-neutral-500 dark:text-neutral-400"
+            >
               {participant.role}
             </span>
           )}
-          <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+          <span
+            dir="auto"
+            className="text-[10px] text-neutral-500 dark:text-neutral-400"
+          >
             {formatTime(message.time)}
           </span>
           {message.editedAt && (
@@ -1015,161 +1198,318 @@ export const MessageRow = React.memo(function MessageRow({
         {/* w-full keeps this row at thread width even under the column's
             items-end (self messages), preserving the 85% cap's meaning; the
             row direction places the bubble on the correct side. */}
-        <div
-          className={cn(
-            'flex w-full items-center gap-1',
-            isSelf ? 'flex-row-reverse' : 'flex-row'
-          )}
-        >
-          <ChatBubble
-            ref={bubbleRef}
-            data-slot="superchat-bubble"
-            variant={isSelf ? 'user' : 'assistant'}
-            hasError={message.status === 'error'}
-            className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
-          >
-            {isEditing ? (
-              <div
-                data-slot="superchat-message-editor"
-                className="flex w-80 max-w-full flex-col gap-2"
-                style={editMinWidth ? { minWidth: editMinWidth } : undefined}
-              >
-                <textarea
-                  value={draft}
-                  ref={editRef}
-                  rows={2}
-                  onChange={(e) => {
-                    setDraft(e.target.value);
-                    autosize();
-                  }}
-                  onPaste={handleEditPaste}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      saveEdit();
-                    } else if (e.key === 'Escape') {
-                      e.preventDefault();
-                      cancelEdit();
-                    }
-                  }}
-                  aria-label="Edit message"
-                  className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={saveEdit}
-                    disabled={!draft.trim() || draft.trim() === message.text}
-                    className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
-                {message.content?.map((block, i) => {
-                  if (block.type === 'tool_use' && block.toolCall) {
-                    return (
-                      <MCPToolCallDisplay
-                        key={i}
-                        toolCall={block.toolCall}
-                        // Once the answer is in, tool calls fold away; an explicit block.collapsed wins.
-                        defaultCollapsed={
-                          block.collapsed ?? (streaming ? undefined : true)
-                        }
-                      />
-                    );
-                  }
-                  if (
-                    (block.type === 'text' || block.type === 'thinking') &&
-                    block.text
-                  ) {
-                    return (
-                      <div
-                        key={i}
-                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                      >
-                        {renderText(block.text, {
-                          messageId: message.id,
-                          streaming,
-                          role:
-                            participant?.kind === 'human'
-                              ? 'user'
-                              : 'assistant',
-                        })}
-                      </div>
-                    );
-                  }
-                  if (block.type === 'code' && block.text) {
-                    const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
-                    return (
-                      <div
-                        key={i}
-                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                      >
-                        {renderText(fenced, {
-                          messageId: message.id,
-                          streaming,
-                          role:
-                            participant?.kind === 'human'
-                              ? 'user'
-                              : 'assistant',
-                        })}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-
-                {/* Plain `text` body (the common case). */}
-                {message.text && (
-                  <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
-                    {renderText(message.text, {
-                      messageId: message.id,
-                      streaming,
-                      role:
-                        participant?.kind === 'human' ? 'user' : 'assistant',
-                    })}
-                  </div>
-                )}
-
-                {message.media?.map((attachment) => (
-                  <MessageMedia
-                    key={attachment.id}
-                    attachment={attachment}
-                    openLabel={openMediaLabel}
-                    playLabel={playMediaLabel}
-                    errorLabel={mediaErrorLabel}
-                    retryLabel={mediaRetryLabel}
-                    launchId={JSON.stringify([message.id, attachment.id])}
-                    onOpen={
-                      onOpenMedia
-                        ? (play) => onOpenMedia(message.id, attachment.id, play)
-                        : undefined
-                    }
-                  />
-                ))}
-
-                {/* Animated typing indicator while a reply streams in with no
-                    body yet — matches the AI chat's streaming affordance. */}
-                {streaming && !hasBody && (
-                  <div className="flex items-center justify-center">
-                    <AITypingIndicator />
-                  </div>
-                )}
-              </>
+        {showBubble && (
+          <div
+            className={cn(
+              'relative flex w-full items-center gap-1',
+              isSelf ? 'flex-row-reverse' : 'flex-row'
             )}
-          </ChatBubble>
-        </div>
+          >
+            {showBubble && actionsSlot}
+            <ChatBubble
+              ref={bubbleRef}
+              data-slot="superchat-bubble"
+              variant={isSelf ? 'user' : 'assistant'}
+              hasError={message.status === 'error'}
+              className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
+            >
+              {isEditing ? (
+                <div
+                  data-slot="superchat-message-editor"
+                  className="flex w-80 max-w-full flex-col gap-2"
+                  style={editMinWidth ? { minWidth: editMinWidth } : undefined}
+                >
+                  <textarea
+                    value={draft}
+                    ref={editRef}
+                    rows={2}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      autosize();
+                    }}
+                    onPaste={handleEditPaste}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        saveEdit();
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelEdit();
+                      }
+                    }}
+                    aria-label="Edit message"
+                    className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+                  />
+                  {shownMedia.length + shownFiles.length > 0 && (
+                    // The message's attachments, each one the author can take
+                    // off; Cancel puts them all back.
+                    <ul
+                      data-slot="superchat-message-editor-attachments"
+                      aria-label={attachmentLabels.editAttachments}
+                      className="flex flex-wrap gap-1.5"
+                    >
+                      {[
+                        ...shownMedia.map((attachment) => ({
+                          id: attachment.id,
+                          name:
+                            attachment.title ??
+                            attachment.alt ??
+                            attachmentLabels.attachmentName(attachment.kind),
+                          remove: () =>
+                            setRemoved((was) => ({
+                              ...was,
+                              removedMedia: [
+                                ...was.removedMedia,
+                                attachment.id,
+                              ],
+                            })),
+                        })),
+                        ...shownFiles.map((file) => ({
+                          id: file.id,
+                          name: file.name,
+                          remove: () =>
+                            setRemoved((was) => ({
+                              ...was,
+                              removedFiles: [...was.removedFiles, file.id],
+                            })),
+                        })),
+                      ].map((item) => (
+                        <li
+                          key={item.id}
+                          className="flex max-w-full items-center gap-1 rounded-full bg-white/15 py-0.5 ps-2.5 pe-1 text-xs"
+                        >
+                          <span className="truncate">{item.name}</span>
+                          <button
+                            type="button"
+                            aria-label={attachmentLabels.removeAttachment(
+                              item.name
+                            )}
+                            onClick={(event) => {
+                              // The button goes with its chip: focus moves on
+                              // to the next Remove (or the one before, or the
+                              // text) rather than falling to the page.
+                              const chip = event.currentTarget.closest('li');
+                              const neighbour = (
+                                chip?.nextElementSibling ??
+                                chip?.previousElementSibling
+                              )?.querySelector('button');
+                              (neighbour ?? editRef.current)?.focus();
+                              item.remove();
+                            }}
+                            className="rounded-full p-0.5 hover:bg-white/20"
+                          >
+                            <XIcon size={12} aria-hidden="true" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={saveEdit}
+                      disabled={!canSave}
+                      className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
+                  {message.content?.map((block, i) => {
+                    if (block.type === 'tool_use' && block.toolCall) {
+                      return (
+                        <MCPToolCallDisplay
+                          key={i}
+                          toolCall={block.toolCall}
+                          // Once the answer is in, tool calls fold away; an explicit block.collapsed wins.
+                          defaultCollapsed={
+                            block.collapsed ?? (streaming ? undefined : true)
+                          }
+                        />
+                      );
+                    }
+                    if (
+                      (block.type === 'text' || block.type === 'thinking') &&
+                      block.text
+                    ) {
+                      return (
+                        <div
+                          key={i}
+                          // The writer's own direction, not the page's: English
+                          // in an RTL page keeps its full stop at the end.
+                          dir="auto"
+                          className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                        >
+                          {renderText(block.text, {
+                            messageId: message.id,
+                            streaming,
+                            role:
+                              participant?.kind === 'human'
+                                ? 'user'
+                                : 'assistant',
+                          })}
+                        </div>
+                      );
+                    }
+                    if (block.type === 'code' && block.text) {
+                      const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+                      return (
+                        <div
+                          key={i}
+                          className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                        >
+                          {renderText(fenced, {
+                            messageId: message.id,
+                            streaming,
+                            role:
+                              participant?.kind === 'human'
+                                ? 'user'
+                                : 'assistant',
+                          })}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  {/* Plain `text` body (the common case). */}
+                  {message.text && (
+                    <div
+                      dir="auto"
+                      className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                    >
+                      {renderText(message.text, {
+                        messageId: message.id,
+                        streaming,
+                        role:
+                          participant?.kind === 'human' ? 'user' : 'assistant',
+                      })}
+                    </div>
+                  )}
+
+                  {/* Animated typing indicator while a reply streams in with no
+                    body yet — matches the AI chat's streaming affordance. */}
+                  {streaming && !hasBody && (
+                    <div className="flex items-center justify-center">
+                      <AITypingIndicator />
+                    </div>
+                  )}
+                </>
+              )}
+            </ChatBubble>
+          </div>
+        )}
+
+        {/* Attachments follow the text, each its own tile on the author's
+            side, as in a messaging app: a picture is never framed by the text
+            bubble, two or more pictures share one gallery, documents share
+            one list, and every tile takes the bubble's corners whatever the
+            host draws in it. */}
+        {(shownMedia.length > 0 || shownFiles.length > 0) && (
+          <div
+            data-slot="superchat-message-attachments"
+            className={cn(
+              'relative flex w-full flex-col gap-1',
+              isSelf ? 'items-end' : 'items-start'
+            )}
+          >
+            {!showBubble && actionsSlot}
+            {entries.map((entry) => {
+              if (gallery.includes(entry)) {
+                // The gallery stands where its first picture was.
+                return entry === gallery[0] ? (
+                  <AttachmentTile
+                    key="gallery"
+                    failed={failed}
+                    sending={sending}
+                  >
+                    <MessageGallery
+                      entries={gallery}
+                      maxSize={mediaMaxSize}
+                      openLabel={openMediaLabel}
+                      playLabel={playMediaLabel}
+                      labels={attachmentLabels}
+                    />
+                  </AttachmentTile>
+                ) : null;
+              }
+              const { attachment, launchId, open, card } = entry;
+              return (
+                <AttachmentTile
+                  // Namespaced: a host's attachment id can be "gallery" too.
+                  key={`media:${attachment.id}`}
+                  failed={failed}
+                  sending={sending}
+                >
+                  {card ?? (
+                    <MessageMedia
+                      attachment={attachment}
+                      maxSize={mediaMaxSize}
+                      openLabel={openMediaLabel}
+                      playLabel={playMediaLabel}
+                      labels={attachmentLabels}
+                      errorLabel={mediaErrorLabel}
+                      retryLabel={mediaRetryLabel}
+                      launchId={launchId}
+                      mediaView={!!onOpenMedia}
+                      onOpen={open}
+                    />
+                  )}
+                </AttachmentTile>
+              );
+            })}
+            {shownFiles.length > 0 && (
+              <AttachmentTile failed={failed} sending={sending}>
+                <MessageFiles files={shownFiles} maxSize={mediaMaxSize} />
+              </AttachmentTile>
+            )}
+            {sending && (
+              // "Sending…" is announced once; the percent beside it changes
+              // with every tick, so it is shown but not announced (it sits in
+              // the thread's polite log, hence its own aria-live="off").
+              <p
+                data-slot="superchat-message-sending"
+                className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
+              >
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                <span role="status">{attachmentLabels.sending}</span>
+                {message.progress !== undefined && (
+                  <span aria-live="off">
+                    {attachmentLabels.sendingProgress(
+                      Math.round(
+                        Math.min(1, Math.max(0, message.progress)) * 100
+                      )
+                    )}
+                  </span>
+                )}
+              </p>
+            )}
+          </div>
+        )}
+        {/* What the host says about the message (its team, a plan), small
+            under it: not its text, so not edited, copied or previewed. */}
+        {message.label && (
+          <div
+            data-slot="superchat-message-label"
+            className="max-w-[85%] text-xs text-neutral-500 dark:text-neutral-400 [&_a]:underline [&_p]:m-0"
+          >
+            {renderText(message.label, {
+              messageId: `${message.id}:label`,
+              streaming: false,
+              role: participant?.kind === 'human' ? 'user' : 'assistant',
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

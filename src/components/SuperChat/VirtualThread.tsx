@@ -13,7 +13,7 @@
  */
 
 import * as React from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import { MessageRow } from './parts';
 import type {
   AIRenderTextContent,
@@ -22,7 +22,18 @@ import type {
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
+  SuperChatRenderMessageMedia,
+  SuperChatAttachmentLabels,
+  SuperChatMessageEdits,
 } from './types';
+
+/** What a remounted thread needs to come back on the same rows. */
+export interface VirtualThreadLayout {
+  /** Whose rows these are (see {@link VirtualThreadProps.layoutKey}). */
+  key?: string;
+  measurements: VirtualItem[];
+  offset: number;
+}
 
 export interface VirtualThreadProps {
   /** The messages to render, already sorted in display order. */
@@ -40,7 +51,11 @@ export interface VirtualThreadProps {
   /** Whether self-authored text messages expose an inline "Edit" affordance. */
   editable?: boolean;
   /** Save handler for an inline message edit (bound to the message's id). */
-  onMessageEdited?: (messageId: string, text: string) => void;
+  onMessageEdited?: (
+    messageId: string,
+    text: string,
+    edits: SuperChatMessageEdits
+  ) => void;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
   defaultCopyFormat?: SuperChatCopyFormat;
   onOpenMedia?: (
@@ -50,9 +65,14 @@ export interface VirtualThreadProps {
   ) => void;
   openMediaLabel?: string;
   playMediaLabel?: string;
+  attachmentLabels?: SuperChatAttachmentLabels;
   /** Localized preview load-error/retry text, forwarded to each row. */
   mediaErrorLabel?: string;
   mediaRetryLabel?: string;
+  /** The host's card for an attachment, forwarded to each row. */
+  renderMessageMedia?: SuperChatRenderMessageMedia;
+  /** The attachment cards' box, a CSS length, forwarded to each row. */
+  mediaMaxSize?: string;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -60,6 +80,18 @@ export interface VirtualThreadProps {
   scrollRef: React.RefObject<HTMLDivElement | null>;
   /** Host-owned ref for the inner sizer — its growth re-pins the scroll. */
   contentRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Host-owned store for the measured rows and scroll offset, kept across
+   * remounts (the media view unmounts the thread) so the thread comes back
+   * on the same rows instead of fresh estimates.
+   */
+  layoutRef?: React.RefObject<VirtualThreadLayout | undefined>;
+  /**
+   * Whose rows the thread shows (SuperChat: the conversation and its order).
+   * A stored layout under another key is someone else's rows, so it isn't
+   * reused.
+   */
+  layoutKey?: string;
   /** Props forwarded to the scroll container (role/aria/tabIndex/className). */
   containerProps: React.HTMLAttributes<HTMLDivElement> & {
     'data-slot'?: string;
@@ -79,12 +111,20 @@ export function VirtualThread({
   onOpenMedia,
   openMediaLabel,
   playMediaLabel,
+  attachmentLabels,
   mediaErrorLabel,
   mediaRetryLabel,
+  renderMessageMedia,
+  mediaMaxSize,
   scrollRef,
   contentRef,
+  layoutRef,
+  layoutKey,
   containerProps,
 }: VirtualThreadProps) {
+  const [initialLayout] = React.useState(() =>
+    layoutRef?.current?.key === layoutKey ? layoutRef?.current : undefined
+  );
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => scrollRef.current,
@@ -92,7 +132,20 @@ export function VirtualThread({
     estimateSize: () => 88,
     overscan: 10,
     getItemKey: (index) => items[index]?.id ?? index,
+    initialMeasurementsCache: initialLayout?.measurements,
+    initialOffset: initialLayout?.offset,
   });
+  React.useEffect(
+    () => () => {
+      if (layoutRef)
+        layoutRef.current = {
+          key: layoutKey,
+          measurements: virtualizer.takeSnapshot(),
+          offset: virtualizer.scrollOffset ?? 0,
+        };
+    },
+    [layoutRef, layoutKey, virtualizer]
+  );
 
   const virtualItems = virtualizer.getVirtualItems();
 
@@ -141,8 +194,11 @@ export function VirtualThread({
                   onOpenMedia={onOpenMedia}
                   openMediaLabel={openMediaLabel}
                   playMediaLabel={playMediaLabel}
+                  attachmentLabels={attachmentLabels}
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
+                  renderMessageMedia={renderMessageMedia}
+                  mediaMaxSize={mediaMaxSize}
                 />
               </div>
             </div>

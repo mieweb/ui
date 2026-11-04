@@ -63,6 +63,20 @@ export interface DropdownProps {
 const placementOffset = 8; // matches the previous mt-2/mb-2 gap
 
 /**
+ * How long (ms) after the visual viewport resizes a scroll still counts as the
+ * on-screen keyboard's: iOS scrolls to keep the focused search field in view
+ * as the keyboard opens, and that must not close the menu.
+ */
+const keyboardScrollWindow = 300;
+
+/**
+ * How long (ms) after opening a scroll is still the one that brought the
+ * trigger into view: a browser sends scroll events a frame late, so a scroll
+ * just before the tap (scrollIntoView, a fling the tap stopped) arrives after.
+ */
+const openingScrollWindow = 300;
+
+/**
  * Scale origin per resolved side, so the menu grows out of its trigger rather
  * than out of its own middle. Written as whole literal class names because
  * Tailwind's scanner only matches complete strings.
@@ -478,6 +492,40 @@ function Dropdown({
     [floatingRef, extraOutsideRefs]
   );
   useClickOutside(outsideRefs, handleClose, isOpen);
+
+  // Scrolling what holds the trigger (a thread, a list) closes the menu: it's
+  // fixed to the screen, so it would float on over whatever scrolled under.
+  // Scrolling inside the menu or a submenu leaves it open, as do the scroll
+  // that arrives just after opening (openingScrollWindow) and the one iOS
+  // makes as the keyboard opens for the search field — told apart by the
+  // visual viewport resizing just before (a searchable menu focuses its field
+  // on open, so focus alone can't tell it).
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const openedAt = Date.now();
+    const inMenu = (node: Node | null) =>
+      !!node && outsideRefs.some((ref) => ref.current?.contains(node));
+    let viewportResizedAt = -Infinity;
+    const onViewportResize = () => {
+      viewportResizedAt = Date.now();
+    };
+    const onScroll = (event: Event) => {
+      const target = event.target;
+      const trigger = containerRef.current;
+      if (!(target instanceof Element) || !trigger) return;
+      if (!target.contains(trigger) || inMenu(target)) return;
+      if (Date.now() - openedAt < openingScrollWindow) return;
+      if (Date.now() - viewportResizedAt < keyboardScrollWindow) return;
+      handleClose();
+    };
+    const viewport = window.visualViewport;
+    viewport?.addEventListener('resize', onViewportResize);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      viewport?.removeEventListener('resize', onViewportResize);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [isOpen, outsideRefs, handleClose]);
 
   React.useEffect(() => {
     if (!isOpen) {

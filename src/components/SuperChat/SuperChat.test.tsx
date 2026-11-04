@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -514,6 +515,23 @@ describe('SuperChat', () => {
     expect(screen.getByText('hi').tagName).toBe('STRONG');
   });
 
+  it("sets a message's text, author and time in their own direction, not the page's", () => {
+    const { container } = render(
+      <div dir="rtl">
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+    // "hi Alice." in an RTL page keeps its full stop at the end, and
+    // "9:00 AM" doesn't read "AM 9:00".
+    const text = screen.getByText('hi').closest('.prose');
+    expect(text).toHaveAttribute('dir', 'auto');
+    const meta = container.querySelector(
+      '[data-slot="superchat-message-meta"]'
+    )!;
+    for (const part of meta.querySelectorAll('span:not([data-slot])'))
+      expect(part).toHaveAttribute('dir', 'auto');
+  });
+
   it('fires onMessageSent with detected mentions', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -742,6 +760,35 @@ describe('SuperChat', () => {
     );
   });
 
+  it("puts a message's actions beside its bubble, not under the avatar", () => {
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageEdited={() => {}}
+      />
+    );
+    const gutter = container.querySelector(
+      '[data-slot="superchat-message-gutter"]'
+    )!;
+    expect(gutter.querySelector('button')).toBeNull();
+    const slot = container.querySelector(
+      '[data-slot="superchat-message-actions-slot"]'
+    )!;
+    const bubble = slot.parentElement?.querySelector(
+      '[data-slot="superchat-bubble"]'
+    );
+    expect(bubble).toBeTruthy();
+    // On the outer side, by the avatar: first in the row, which runs the
+    // author's way.
+    expect(
+      slot.compareDocumentPosition(bubble!) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      within(slot as HTMLElement).getAllByRole('button').length
+    ).toBeGreaterThan(0);
+  });
+
   it('restricts the file picker to acceptedFileTypes', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -757,11 +804,82 @@ describe('SuperChat', () => {
     const fileInput = container.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
-    expect(fileInput.accept).toBe('image/*');
+    expect(fileInput.accept).toBe(
+      'image/jpeg,image/png,image/gif,image/webp,image/avif'
+    );
     // A disallowed type (audio) is ignored — no preview chip appears.
     const file = new File(['id3'], 'song.mp3', { type: 'audio/mpeg' });
     await user.upload(fileInput, file);
     expect(screen.queryByLabelText('Remove song.mp3')).toBeNull();
+  });
+
+  it('refuses a HEIC photo and a file over maxFileSize, and says why', async () => {
+    const onComposerError = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    // Past the picker's own filter, as a drop or a paste would be.
+    const user = userEvent.setup({ applyAccept: false });
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        acceptedFileTypes={['image', 'document']}
+        maxFileSize={1000}
+        onComposerError={onComposerError}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    expect(fileInput.accept).toContain('.docx');
+    await user.upload(fileInput, [
+      new File(['x'], 'IMG_0001.HEIC', { type: 'image/heic' }),
+      new File(['x'.repeat(2000)], 'big.png', { type: 'image/png' }),
+      new File(['x'], 'notes.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+    ]);
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('IMG_0001.HEIC'),
+      expect.objectContaining({ reason: 'file-type' })
+    );
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('big.png'),
+      expect.objectContaining({ reason: 'file-size' })
+    );
+    expect(screen.getByLabelText('Remove notes.docx')).toBeTruthy();
+  });
+
+  it('shows the send in progress, and a failed send puts the files back', async () => {
+    let fail: (error: Error) => void = () => {};
+    const onMessageSent = vi.fn(
+      () => new Promise<void>((_, reject) => (fail = reject))
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File(['png'], 'shot.png', { type: 'image/png' })
+    );
+    await user.type(screen.getByLabelText('Message'), 'See this');
+    await user.click(screen.getByRole('button', { name: 'Send message' }));
+    await waitFor(() => expect(onMessageSent).toHaveBeenCalled());
+    expect(
+      screen.getByRole('button', { name: 'Sending message…' })
+    ).toBeTruthy();
+    expect(screen.queryByLabelText('Remove shot.png')).toBeNull();
+    await act(async () => fail(new Error('offline')));
+    expect(await screen.findByLabelText('Remove shot.png')).toBeTruthy();
+    expect(screen.getByLabelText('Message')).toHaveValue('See this');
   });
 
   it('does not detect mentions for system participants', async () => {
@@ -929,6 +1047,8 @@ describe('SuperChat', () => {
 
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     expect(onMessageEdited).toHaveBeenCalledWith('m1', 'edited body', {
+      removedMedia: [],
+      removedFiles: [],
       conversation,
     });
   });
@@ -964,6 +1084,46 @@ describe('SuperChat', () => {
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     const [, savedText] = onMessageEdited.mock.calls[0];
     expect(savedText).toMatch(/!\[edited\.png\]\(data:image\/png/);
+  });
+
+  it('keeps the editor inside its bubble, however wide its content was', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    // The message measured wider than the bubble will have room for once it
+    // edits (a host card on thinner padding, say).
+    // At its widest (997px), on a host's thinner frame (6px) until the
+    // editor shows, then the usual 16px.
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(997);
+    const computed = window.getComputedStyle;
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((el, pseudo) => {
+      const style = computed(el, pseudo);
+      const bubble = el as HTMLElement;
+      if (bubble.dataset?.slot === 'superchat-bubble') {
+        const pad = bubble.querySelector(
+          '[data-slot="superchat-message-editor"]'
+        )
+          ? '16px'
+          : '6px';
+        Object.defineProperty(style, 'paddingLeft', { value: pad });
+        Object.defineProperty(style, 'paddingRight', { value: pad });
+      }
+      return style;
+    });
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={() => {}}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen
+      .getByRole('textbox', { name: 'Edit message' })
+      .closest<HTMLElement>('[data-slot="superchat-message-editor"]')!;
+    // Measured at 985px (997 - 2 × 6), kept to the 965px it has room for now.
+    expect(editor.style.minWidth).toBe('965px');
   });
 
   it('cancels an edit without firing onMessageEdited', async () => {

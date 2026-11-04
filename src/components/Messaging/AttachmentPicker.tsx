@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import type { AttachmentType, AttachmentState } from './types';
+import { formatFileSize } from '../../utils/fileSize';
 
 // ============================================================================
 // Utility Functions
@@ -21,15 +22,6 @@ function getFileType(mimeType: string): AttachmentType {
     return 'document';
   }
   return 'file';
-}
-
-/**
- * Format file size in human-readable format.
- */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 /**

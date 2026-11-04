@@ -24,6 +24,12 @@ const meta: Meta<typeof SuperChatConversations> = {
       description: 'Uncontrolled initial active conversation id.',
       table: { category: 'Selection' },
     },
+    mediaLabels: {
+      control: false,
+      description:
+        'Only `attachmentsPreview` is read here: it words the preview of a last message with no text from what it carries (`{ pictures, videos, audio, files }` → "Photo", "2 photos", "Q3 report.pdf"). English by default; `SuperChatInbox` passes its own `mediaLabels` through.',
+      table: { category: 'Rendering' },
+    },
     // Complex/object + callback props are wired in code, not via controls.
     conversations: { control: false, table: { category: 'Data' } },
     activeConversationId: { control: false, table: { category: 'Selection' } },
@@ -76,7 +82,7 @@ const active = conversations.find((c) => c.id === activeId);
 - **Accessibility as implemented:** landmark is \`aside\` (complementary) named "Conversations"; items are plain \`<button>\`s inside \`role="listitem"\` — no arrow-key navigation (Tab moves between items) and no \`aria-selected\`; \`aria-current\` marks the active item. Unread badges are announced via \`sr-only\` text; the preview line is truncated visually only. The "+" button is \`aria-label="New conversation"\` with a literal \`+\` glyph.
 - **Uncontrolled selection is one-way.** Changing \`defaultActiveConversationId\` after mount has no effect; use \`activeConversationId\` to drive selection from the host (the inbox does).
 - The **unread count is never cleared** by the component — \`onConversationOpened\` is your hook to update \`unread\` in host state. \`lastActivity\` missing on every conversation means sort order is derived from thread times only.
-- Layout: \`w-64\`, \`shrink-0\`, \`border-e\` (logical; in RTL the divider flips to the inline-end side); intended for a flex row with a bounded height. "Conversations" heading and labels are English; the preview shows raw \`text\` (Markdown source, unrendered).
+- Layout: \`w-64\`, \`shrink-0\`, \`border-e\` (logical; in RTL the divider flips to the inline-end side); intended for a flex row with a bounded height. "Conversations" heading and labels are English; the preview is the last message's \`text\` as one line of plain text (Markdown stripped), or with no text what it carries (\`mediaLabels.attachmentsPreview\`: "Photo", "2 photos", a file's name); a message's \`label\` is never previewed.
 - Theming: hard-coded \`neutral-*\`, \`primary-600\`, \`text-white\`. Import from \`@mieweb/ui/components/SuperChat\` (not in the main barrel).
 
 ### Motion

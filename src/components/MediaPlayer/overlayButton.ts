@@ -2,7 +2,7 @@
 
 /**
  * The round, translucent icon button over a video (the feed's Previous/Next,
- * its inactive item's Play). Pass it to `<Button variant="ghost" size="icon">`;
+ * its inactive item's Play, SuperChat's Back). Pass it to `<Button variant="ghost" size="icon">`;
  * it sets the `dark:` colours too, because these buttons sit inside a
  * `data-theme="dark"` surface. Add `bg-transparent` where the button sits on a
  * scrim already, as the player's bar does. The scrim is black on purpose: it

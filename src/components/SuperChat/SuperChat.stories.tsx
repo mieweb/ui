@@ -32,6 +32,67 @@ const meta: Meta<typeof SuperChat> = {
   // Every story is a page-level panel: fill the canvas height (#504).
   decorators: [fullHeightChat],
   argTypes: {
+    view: {
+      control: 'inline-radio',
+      options: ['thread', 'media'],
+      description:
+        "Controlled view: the message thread, or the conversation's media (every picture and clip in time order). Omit to let an attachment open the media view and Back return to the thread.",
+      table: { category: 'Behavior' },
+    },
+    defaultView: {
+      control: 'inline-radio',
+      options: ['thread', 'media'],
+      description: "Uncontrolled initial view (default `'thread'`).",
+      table: { category: 'Behavior' },
+    },
+    onViewChange: {
+      control: false,
+      description:
+        'Fired with `(view, { conversation })` when the reader opens the media view or goes back.',
+      table: { category: 'Callbacks' },
+    },
+    mediaFeedProps: {
+      control: false,
+      description:
+        "The media view's MediaFeed behaviour, labels and action slots; the conversation supplies its items. `layout: 'overlay'` makes it mobile-first (full screen on a phone, as a dialog) and needs `useKeyboardInset()` mounted in the app shell.",
+      table: { category: 'Slots' },
+    },
+    mediaLabels: {
+      control: false,
+      description:
+        'Localized media wording: Back, open/play and their named forms (`openMediaNamed`, `playMediaNamed`), the gallery and its "+N" cell (`gallery`, `moreMedia`), "Sending…" (`sending`, `sendingProgress`), a tile that didn\'t load (`mediaUnavailable`), the editor\'s attachments (`editAttachments`, `removeAttachment`, `attachmentName`) and `unknownAuthor`. English by default.',
+      table: { category: 'Rendering' },
+    },
+    mediaMaxSize: {
+      control: 'text',
+      description:
+        "The box an attachment card in the thread fits in, both ways: a pixel number or any CSS length (default `'18rem'`). The built-in card is this wide; a host card gets it as `maxSize`. Cards shrink to fit a narrower message.",
+      table: { category: 'Appearance' },
+    },
+    renderMessageMedia: {
+      control: false,
+      description:
+        "The host's card for an attachment in the thread, in place of the built-in one. Receives `{ message, attachment, open, launchId, maxSize }`; put `launchId` on the card's control as `data-media-launch-id`, and draw it disabled while `open` is undefined (the message is being edited). Return `null` to keep the built-in card.",
+      table: { category: 'Slots' },
+    },
+    acceptedFileTypes: {
+      control: false,
+      description:
+        "Kinds of file the composer takes (`image`, `video`, `audio`, `pdf`, `document`); default `['image', 'video', 'audio', 'pdf']`.",
+      table: { category: 'Behavior' },
+    },
+    maxFileSize: {
+      control: 'number',
+      description:
+        'Largest file the composer takes, in bytes (default 25 MB); a larger one is refused through `onComposerError`.',
+      table: { category: 'Behavior' },
+    },
+    onComposerError: {
+      control: false,
+      description:
+        "Fired with `(message, context?)` when the composer refuses a file (too large, a type not accepted, over the attachment limit) or a send fails. `message` is English; word it yourself from `context.reason` (e.g. `'send-failed'`).",
+      table: { category: 'Callbacks' },
+    },
     readOnly: {
       control: 'boolean',
       description: 'Disable the composer.',
@@ -67,8 +128,18 @@ const meta: Meta<typeof SuperChat> = {
     renderTextContent: { control: false, table: { category: 'Rendering' } },
     linkBuilder: { control: false, table: { category: 'Rendering' } },
     className: { control: false },
-    onMessageSent: { control: false, table: { category: 'Callbacks' } },
-    onMessageEdited: { control: false, table: { category: 'Callbacks' } },
+    onMessageSent: {
+      control: false,
+      description:
+        "Fired with `(text, { conversation, mentions, attachments })` on send. Return a promise to keep the send button busy (`isSending`, per conversation) until it settles; if it rejects, the text and files go back into the composer and `onComposerError` hears `'send-failed'`.",
+      table: { category: 'Callbacks' },
+    },
+    onMessageEdited: {
+      control: false,
+      description:
+        'Enables Edit on your own text messages. Fired with `(messageId, text, { conversation, removedMedia, removedFiles })`: the new text and the ids of the attachments the author removed in the editor.',
+      table: { category: 'Callbacks' },
+    },
     onConversationClosed: { control: false, table: { category: 'Callbacks' } },
     onReferenceClick: { control: false, table: { category: 'Callbacks' } },
   },
@@ -79,7 +150,7 @@ const meta: Meta<typeof SuperChat> = {
       description: {
         component: `### What it's for
 
-**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments })\`, \`onMessageEdited(messageId, text, { conversation })\` (enables inline Edit on your own text messages), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\`.
+**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments })\`, \`onMessageEdited(messageId, text, { conversation, removedMedia, removedFiles })\` (enables inline Edit on your own text messages; the editor can also take attachments off), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. A message's \`media\` (pictures, clips, recordings) and \`files\` (documents) follow its text as tiles on the author's side, each fitting \`mediaMaxSize\` (\`renderMessageMedia\` draws your own card); opening one switches to the media view (\`view\`, \`defaultView\`, \`onViewChange\`, \`mediaFeedProps\`, \`mediaLabels\`). See the Inbox [Attachment groups](?path=/story/superchat-inbox--attachment-groups), [Attachments sending](?path=/story/superchat-inbox--attachments-sending) and [Editing attachments](?path=/story/superchat-inbox--editing-attachments) stories. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\`.
 
 ### Use it when
 
@@ -128,6 +199,7 @@ const append = (m: SuperChatMessage) =>
 - **Accessibility as implemented:** panel is a \`section role="group"\` labelled by its \`<h2>\`; the thread is \`role="log" aria-label="Messages" aria-live="polite"\` and focusable; each message is \`role="article"\` named "author, time"; system messages are \`role="status"\`. The composer is the shared \`ChatComposer\` (textarea "Message", mention listbox "Mention", Enter sends; attachments live behind the \`+\` menu "Add to message" → "Attach files"; internals expose \`chat-composer-*\` data-slots). Copy / Edit / Close / Back are icon buttons with English \`aria-label\`s; the Copy menu appears on hover **or** focus. Nothing moves focus after send.
 - **Security is shared.** Default rendering sanitises with \`rehype-sanitize\`; \`trustedContent\`, a custom \`renderTextContent\`, the Mermaid plugin (\`dangerouslySetInnerHTML\` under \`securityLevel: 'strict'\`) and any plugin's \`sanitizeSchema\` widen the trust boundary — you own it. GenUI widgets render only host-registered, schema-validated components.
 - Copy uses \`navigator.clipboard.write\` (secure context; plain-text fallback). Attachments are delivered to the host as base64 \`dataUrl\`s — upload and swap URLs yourself; \`attachmentCache\` (IndexedDB) is opt-in.
+- **Overlay media view** (\`mediaFeedProps.layout: 'overlay'\`): on a screen under 40rem wide, or under 30rem tall and sideways, the whole panel is \`position: fixed\` over the screen, inside the safe areas (\`--mieweb-safe-area-top/right/bottom/left\` override \`env()\` for native shells): the header hides, the media fills the space and the message box stays at the bottom. There it is a \`role="dialog"\` with \`aria-modal\`, labelled by the conversation title; Tab stays inside, and Escape goes back unless another dialog or menu is open. The media view is dark in every theme (\`data-theme="dark"\`), so host actions should use library components or theme tokens. Inside a transformed ancestor (a Motion sheet) \`fixed\` can't cover the screen; render SuperChat outside it. In both layouts, a clip floating in picture in picture keeps the media view mounted but hidden after Back, until its window closes. For the layouts themselves (\`stacked\` cards or \`overlay\` edge to edge) and their controls, see [MediaFeed](?path=/docs/media-mediafeed--docs). For a thread card of your own, with \`launchId\` returning focus on Back, see the Inbox [Host media card](?path=/story/superchat-inbox--host-media-card) story.
 - **Layout.** Fills its flex parent (\`h-full\`); you must give it a bounded height. Non-virtualised threads render every row (rows are \`React.memo\`; keep message objects referentially stable). \`order="desc"\` anchors to the top.
 - i18n: "Messages", "Participants", "Send message", "Copy message", "Edit message", "(edited)" and time via \`toLocaleTimeString\` are English/locale-default. RTL: alignment is flex-based, the speaker accent is a logical \`borderInlineStart\`, and the Copy control follows the author's side via flex order and logical Dropdown placements — all flip with \`dir\`.
 - Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core); \`rehype-highlight\`, \`remark-math\` + \`rehype-katex\` + \`katex\`, \`mermaid\`, \`@mieweb/datavis\` per plugin — all optional in \`package.json\`. Not in the main barrel: import from \`@mieweb/ui/components/SuperChat\`.

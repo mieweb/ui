@@ -13,7 +13,8 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Animated, AnimatedPresence } from '../../motion';
 import { sidebarItem, lastActivityOf, lastMessageByTime } from './parts';
-import type { SuperChatConversation } from './types';
+import { messagePreview, previewOfAttachments } from './media';
+import type { SuperChatConversation, SuperChatMediaLabels } from './types';
 
 // ============================================================================
 // SuperChatConversations (conversation list)
@@ -28,6 +29,8 @@ export interface SuperChatConversationsProps {
   defaultActiveConversationId?: string;
   /** Additional class name. */
   className?: string;
+  /** `attachmentsPreview` words a preview of a last message with no text. */
+  mediaLabels?: Partial<SuperChatMediaLabels>;
 
   // --- callbacks ---
   onConversationOpened?: (conversation: SuperChatConversation) => void;
@@ -42,6 +45,7 @@ export function SuperChatConversations({
   activeConversationId,
   defaultActiveConversationId,
   className,
+  mediaLabels,
   onConversationOpened,
   onNewConversation,
 }: SuperChatConversationsProps) {
@@ -101,6 +105,12 @@ export function SuperChatConversations({
       >
         {sortedConversations.map((c) => {
           const last = lastMessageByTime(c.thread);
+          const preview = last
+            ? messagePreview(
+                last,
+                mediaLabels?.attachmentsPreview ?? previewOfAttachments
+              )
+            : '';
           const isActive = c.id === activeId;
           return (
             <div key={c.id} role="listitem">
@@ -112,9 +122,9 @@ export function SuperChatConversations({
               >
                 <span className="flex-1 truncate">
                   <span className="block truncate font-medium">{c.title}</span>
-                  {last?.text && (
+                  {preview && (
                     <span className="block truncate text-xs text-neutral-600 dark:text-neutral-400">
-                      {last.text}
+                      {preview}
                     </span>
                   )}
                 </span>
