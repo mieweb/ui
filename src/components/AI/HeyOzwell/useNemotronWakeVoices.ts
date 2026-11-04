@@ -38,6 +38,8 @@ export interface NemotronWakeVoices {
   count: number;
   /** Voices this device's model can check; fewer than `count` means some must be enrolled again. */
   usable: number;
+  /** Set when the stored voices could not be read; `ready` stays false so the doctor check stays closed. */
+  error: string | null;
   /** Whether an allowed voice is the main speaker in `clip`. False when no voice is usable. */
   verify: (clip: WakeClip) => Promise<boolean>;
   /** Stores (or replaces) `voiceId`'s voiceprint from its enrollment clips; skips the save once `cancelled()`. */
@@ -79,16 +81,29 @@ export function useNemotronWakeVoices({
 }: UseNemotronWakeVoicesOptions = {}): NemotronWakeVoices {
   const model = useNemotronModel();
   const [prints, setPrints] = React.useState<NemotronVoiceprint[] | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
   // Reload after any save, including one made by another surface (Voice Setup, Voice Manager).
   React.useEffect(() => {
     setPrints(null);
+    setError(null);
     if (!enabled) return;
     let cancelled = false;
+    // A failed read leaves `prints` null (not ready), so the doctor check stays closed.
     const reload = () =>
-      void load(voiceprintNamespace).then((loaded) => {
-        if (!cancelled) setPrints(loaded);
-      });
+      void load(voiceprintNamespace).then(
+        (loaded) => {
+          if (cancelled) return;
+          setPrints(loaded);
+          setError(null);
+        },
+        (e: unknown) => {
+          console.error('[nemotron] could not load the doctor-check voices', e);
+          if (cancelled) return;
+          setPrints(null);
+          setError('Couldn’t load the enrolled voices; reload to try again');
+        }
+      );
     reload();
     const unsubscribe = onNemotronVoiceprintsSaved(reload);
     return () => {
@@ -188,6 +203,7 @@ export function useNemotronWakeVoices({
     ready: prints !== null && model !== null,
     count: prints?.length ?? 0,
     usable: usablePrints.length,
+    error,
     verify,
     enroll,
     remove,

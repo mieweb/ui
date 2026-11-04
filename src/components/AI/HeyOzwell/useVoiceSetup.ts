@@ -312,7 +312,7 @@ export function useVoiceSetup(
 
   return {
     ready: bothReady,
-    error: sv.error || wake.error || saveError,
+    error: sv.error || wake.error || wakeVoices.error || saveError,
     phase,
     phrase,
     step,

@@ -170,6 +170,12 @@ export async function setVoiceprints(
   }
 }
 
+/** Like `getVoiceprints` (without legacy migration), but rejects when the read fails, so a failed read
+ *  is never mistaken for an empty store. */
+export function readVoiceprints<T>(key: string): Promise<T | undefined> {
+  return idbGet<T>(key);
+}
+
 /** Like `setVoiceprints`, but rejects when the write fails, so a caller never reports a lost save. */
 export function putVoiceprints(key: string, value: unknown): Promise<void> {
   return idbSet(key, value);

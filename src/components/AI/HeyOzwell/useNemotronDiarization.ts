@@ -71,6 +71,8 @@ interface LiveSession extends LiveDiarization {
   listener: NemotronListener;
   names: string[];
   namespace: string | undefined;
+  /** The stored voices had loaded when listening began, so `names` is the full enrolled list. */
+  hydrated: boolean;
 }
 
 export interface UseNemotronDiarizationResult {
@@ -138,16 +140,19 @@ export function useNemotronDiarization({
   nsRef.current = voiceprintNamespace;
   /** The current namespace's stored voices; every task waits for it before reading `printsRef`. */
   const loadRef = React.useRef<Promise<void> | null>(null);
+  const hydratedRef = React.useRef(false);
 
   // Another user's voices and transcript must not linger after a namespace switch.
   React.useEffect(() => {
     let cancelled = false;
     printsRef.current = [];
+    hydratedRef.current = false;
     setPrints([]);
     setResult(null);
     const load = loadNemotronVoiceprints(voiceprintNamespace).then((loaded) => {
       if (cancelled) return;
       printsRef.current = loaded;
+      hydratedRef.current = true;
       setPrints(loaded);
     });
     loadRef.current = load;
@@ -269,6 +274,7 @@ export function useNemotronDiarization({
         listener,
         names,
         namespace: nsRef.current,
+        hydrated: hydratedRef.current,
         cancel: listener.cancel,
       };
       return session;
@@ -276,14 +282,15 @@ export function useNemotronDiarization({
     [nemotronOptions]
   );
 
-  /** The live labels when they belong to this user and finished, else a fresh pass over `samples`. */
+  /** The live labels when they belong to this user, used every enrolled voice and finished, else a
+   *  fresh pass over `samples` (run after the stored voices load). */
   const labelSpeakers = React.useCallback(
     async (
       samples: Float32Array,
       live: LiveDiarization | undefined
     ): Promise<{ frames: LaneFrames; names: string[] }> => {
       const session = live as LiveSession | undefined;
-      if (session && session.namespace === nsRef.current) {
+      if (session && session.hydrated && session.namespace === nsRef.current) {
         const frames = await session.listener.stop().catch(() => null);
         if (frames) return { frames, names: session.names };
       } else {

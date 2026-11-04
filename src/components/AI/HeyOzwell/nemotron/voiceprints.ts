@@ -2,6 +2,7 @@
 import {
   getVoiceprints,
   putVoiceprints,
+  readVoiceprints,
   voiceprintStorageKey,
 } from '../../voiceprintStore';
 import { MODEL_REVISION, type ModelVariant } from './modelConfig';
@@ -36,11 +37,13 @@ const isVoiceprint = (value: unknown): value is NemotronVoiceprint => {
   );
 };
 
+/** The wake list rejects when the read fails: an empty list would open the doctor check. */
 export async function loadNemotronVoiceprints(
   namespace?: string,
   list: VoiceprintList = 'scribe'
 ): Promise<NemotronVoiceprint[]> {
-  const stored = await getVoiceprints<unknown>(
+  const read = list === 'wake' ? readVoiceprints : getVoiceprints;
+  const stored = await read<unknown>(
     voiceprintStorageKey(KEYS[list], namespace)
   );
   return Array.isArray(stored) ? stored.filter(isVoiceprint) : [];

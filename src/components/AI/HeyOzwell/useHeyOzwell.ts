@@ -515,7 +515,7 @@ export function useHeyOzwell(
   // `viaPhrase` = stopped by the spoken "ozwell i'm done" wake (vs the mic button). Only then do we cut the
   // phrase off the AUDIO before transcribing — Whisper mishears it differently every time, so text-stripping
   // alone leaks it; a button stop has no phrase, so trimming would clip real speech. `lateSeconds` is how
-  // long after the phrase the stop came (the doctor check), so the cut still lands on the phrase.
+  // long after the phrase the stop came (the doctor check); that audio is dropped before the phrase cut.
   const stopDictation = React.useCallback(
     (viaPhrase = false, lateSeconds = 0) => {
       const rec = recRef.current;
@@ -534,9 +534,9 @@ export function useHeyOzwell(
           // original clip on failure.
           if (viaPhrase) {
             const dur = wakeRef.current?.getLastWakeDuration() ?? 0;
-            const hint = dur > 0 ? dur + stopTrimLeadIn() + lateSeconds : 0;
+            const hint = dur > 0 ? dur + stopTrimLeadIn() : 0;
             try {
-              blob = await trimTrailingStopPhrase(blob, hint);
+              blob = await trimTrailingStopPhrase(blob, hint, lateSeconds);
             } catch {
               /* keep original */
             }

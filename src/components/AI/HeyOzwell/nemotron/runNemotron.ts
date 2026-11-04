@@ -241,8 +241,12 @@ export function listenNemotron(
     },
     cancel: () => {
       close();
-      // Ends the worker's stream so it does not linger.
-      nemotron.finish().catch(() => {});
+      // Ends the worker's stream so it does not linger, after any queued push (a push sent after
+      // `finish` would target a deleted stream and never settle).
+      void pushed
+        .catch(() => {})
+        .then(() => nemotron.finish())
+        .catch(() => {});
     },
   };
 }
