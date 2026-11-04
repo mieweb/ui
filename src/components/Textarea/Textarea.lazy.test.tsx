@@ -4,10 +4,20 @@ import { screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 
 // Counts loads of the Kerebron surface (the suite's stand-in for it, as in
-// every suite): Textarea must import it only when a rich field renders.
-const surface = vi.hoisted(() => ({ loads: 0 }));
+// every suite): Textarea must import it only when a rich field renders. The
+// load is held until the last test lets it through: every rich field here
+// shares one cached lazy import, so each assertion on the loading frame needs
+// it still pending, however fast modules load.
+const surface = vi.hoisted(() => {
+  let release = () => {};
+  const released = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return { loads: 0, released, release };
+});
 vi.mock('../TextAreaRich/TextAreaRichKerebron', async (importOriginal) => {
   surface.loads += 1;
+  await surface.released;
   return importOriginal();
 });
 
@@ -23,11 +33,11 @@ describe('Textarea loads its Kerebron surface lazily', () => {
   });
 
   it.each([
-    ['md', '38px'],
-    ['sm', '38px'],
-    ['lg', '42px'],
+    ['md', 'max(38px, calc(1.5rem + 14px))'],
+    ['sm', 'max(38px, calc(1.25rem + 14px))'],
+    ['lg', 'max(38px, calc(1.75rem + 14px))'],
   ] as const)(
-    'with no rows, holds a %s field at its empty editor’s height (%s)',
+    'with no rows, holds a %s field at its empty editor’s height',
     (size, height) => {
       const { container } = renderWithTheme(
         <Textarea label="Notes" size={size} />
@@ -35,7 +45,8 @@ describe('Textarea loads its Kerebron surface lazily', () => {
       const frame = container.querySelector<HTMLElement>(
         '[data-slot="textarea-rich-loading"]'
       );
-      // One line and its padding, never under the editor's 38px minimum.
+      // One line in rem, as kerebron.css sizes it (so it follows the root
+      // font size), and its padding, never under the editor's 38px minimum.
       expect(frame?.firstElementChild).toHaveStyle({ minHeight: height });
     }
   );
@@ -50,9 +61,12 @@ describe('Textarea loads its Kerebron surface lazily', () => {
     expect(frame).not.toBeNull();
     expect(frame).toHaveAttribute('aria-hidden', 'true');
     // Three 20px rows plus the editable's 7px block padding on each side,
-    // inside the frame's borders.
-    expect(frame?.firstElementChild).toHaveStyle({ minHeight: '74px' });
+    // inside the frame's borders, or one line if the root font makes that taller.
+    expect(frame?.firstElementChild).toHaveStyle({
+      minHeight: 'max(38px, 74px, calc(1.25rem + 14px))',
+    });
 
+    surface.release();
     await waitFor(() =>
       expect(
         container.querySelector('[data-slot="textarea-rich-loading"]')
