@@ -62,6 +62,8 @@ export interface SuperChatInboxProps {
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
+  /** See {@link SuperChatProps.attachmentDataUrls}. @default true */
+  attachmentDataUrls?: boolean;
   /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
   order?: 'asc' | 'desc';
   /** Virtualize the message thread (windowed rendering) for long histories. */
@@ -121,6 +123,7 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   acceptedFileTypes,
+  attachmentDataUrls,
   order,
   virtualized,
   showSidebar = true,
@@ -192,6 +195,7 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           acceptedFileTypes={acceptedFileTypes}
+          attachmentDataUrls={attachmentDataUrls}
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}

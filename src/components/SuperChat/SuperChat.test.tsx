@@ -696,11 +696,55 @@ describe('SuperChat', () => {
               name: 'picked.png',
               type: 'image/png',
               dataUrl: expect.stringMatching(/^data:image\/png/),
+              file,
             }),
           ],
         })
       )
     );
+  });
+
+  it('hands over only the file when attachmentDataUrls is off', async () => {
+    const onMessageSent = vi.fn();
+    const readAsDataURL = vi.spyOn(
+      window.FileReader.prototype,
+      'readAsDataURL'
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        attachmentDataUrls={false}
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['fake-bytes'], 'clip.mp4', { type: 'video/mp4' });
+    await user.upload(fileInput, file);
+    await screen.findByLabelText('Remove clip.mp4');
+    await user.click(screen.getByLabelText('Send message'));
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({
+              name: 'clip.mp4',
+              type: 'video/mp4',
+              dataUrl: '',
+              file,
+            }),
+          ],
+        })
+      )
+    );
+    // Never read into memory as base64.
+    expect(readAsDataURL).not.toHaveBeenCalled();
+    readAsDataURL.mockRestore();
   });
 
   it('attaches a non-image file (pdf) with an icon preview', async () => {
